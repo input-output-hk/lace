@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
+/* eslint-disable unicorn/no-null */
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ADDRESS_CARD_QR_CODE_SIZE, AddressCard, HandleAddressCard } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
 import { useWalletStore } from '@src/stores';
@@ -6,41 +7,51 @@ import styles from './QRInfoWalletDrawer.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
-import { useKeyboardShortcut } from '@lace/common';
-import { useGetHandles } from '@hooks/useGetHandles';
+import { Banner, useKeyboardShortcut, useObservable } from '@lace/common';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
-import { PlusOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { useLocalStorage, useNextUnusedAddress } from '@hooks';
+import { Divider } from 'antd';
+import { Wallet } from '@lace/cardano';
+import { getTransactionTotalOutputByAddress } from '@src/utils/get-transaction-total-output';
+import { getTotalAssetsByAddress } from '@src/utils/assets-transformers';
+import { formatBalance } from '@src/utils/format-number';
 import { isUsedAddress } from '@src/utils/is-used-addresses';
-import { useNextUnusedAddress } from '@hooks';
+
+type WalletData = {
+  address: Wallet.Cardano.PaymentAddress;
+  handles?: string[];
+  stakePool?: string;
+  balance?: string;
+  tokens?: {
+    amount: number;
+    nfts?: number;
+  };
+};
 
 const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
 
 const useWalletInformation = () =>
   useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    addresses: state?.walletInfo?.addresses
+    addresses: state?.walletInfo?.addresses,
+    handles: state?.walletState?.handles,
+    utxos: state?.walletState?.utxo.total,
+    rewardAccounts: state?.walletState?.delegation.rewardAccounts
   }));
-
-const useTransactionHistory = () =>
-  useWalletStore((state) => ({
-    transactionHistory: state?.walletState?.transactions.history
-  }));
-
-const addressCopiedTranslation = 'core.infoWallet.addressCopied';
 
 export const QRInfoWalletDrawer = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { name, addresses } = useWalletInformation();
-
-  const { transactionHistory } = useTransactionHistory();
+  const { name, addresses, handles, utxos, rewardAccounts } = useWalletInformation();
+  const [usedAddresses, setUsedAddresses] = useState<WalletData[]>();
   const [, closeDrawer] = useDrawer();
-  const handles = useGetHandles();
   const nextUnusedAddress = useNextUnusedAddress();
+  const [isReceiveInAdvancedMode] = useLocalStorage('isReceiveInAdvancedMode', false);
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
 
@@ -52,66 +63,152 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.ReceiveCopyAddressIconClick);
   };
 
-  const userAddresses = useMemo(
-    () => addresses?.sort((a, b) => a.index - b.index).map((value) => value.address.toString()),
-    [addresses]
-  );
-
-  const usedAddresses = useMemo(
-    () =>
-      addresses?.sort((a, b) => a.index - b.index).filter((addr) => isUsedAddress(addr.address, transactionHistory)),
-    [addresses, transactionHistory]
-  );
-
   const getQRCodeOpts = useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE), [theme]);
+
+  const translations = {
+    additionalAddressesTitle: t('qrInfo.advancedMode.additionalAddresses.title'),
+    addNewAddressBtn: t('qrInfo.advancedMode.newAddress.button'),
+    mainAddressTag: t('qrInfo.advancedMode.tags.main'),
+    newAddressDescriptionTop: t('qrInfo.advancedMode.newAddress.description.top'),
+    newAddressDescriptionBottom: t('qrInfo.advancedMode.newAddress.description.bottom'),
+    newAddressTag: t('qrInfo.advancedMode.tags.unused'),
+    newAddressBannerText: t('qrInfo.advancedMode.newAddress.warning')
+  };
+
+  const isAdvancedModeEnabled = useAdvancedReceived && isReceiveInAdvancedMode;
+
+  const { inMemoryWallet } = useWalletStore();
+  const assets = useObservable(inMemoryWallet.assetInfo$);
+
+  const { addressesWithUtxo, outputs } = useMemo(() => {
+    const _addressesWithUtxo = utxos.map((utxo) => utxo[0]);
+    const _outputs = utxos.map((utxo) => utxo[1]);
+
+    return { addressesWithUtxo: _addressesWithUtxo, outputs: _outputs };
+  }, [utxos]);
+
+  useEffect(() => {
+    const _usedAddresses = addresses
+      .filter(({ address }) => isUsedAddress(address, addressesWithUtxo))
+      .map(({ address }) => {
+        const assetsInAddress = assets && getTotalAssetsByAddress(outputs, assets, address);
+
+        const totalLovelace = getTransactionTotalOutputByAddress(outputs, address);
+        const totalAda = Wallet.util.lovelacesToAdaString(totalLovelace.toString());
+        const balance = formatBalance(Number.parseFloat(totalAda));
+
+        return {
+          address,
+          handles: handles.filter((handle) => handle.cardanoAddress === address).map(({ handle }) => handle),
+          stakePool: rewardAccounts[0].delegatee.currentEpoch.metadata.ticker,
+          balance,
+          tokens: {
+            amount: assetsInAddress?.assets,
+            nfts: assetsInAddress?.nfts
+          }
+        };
+      });
+
+    setUsedAddresses(_usedAddresses);
+  }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos]);
+
+  if (!usedAddresses) {
+    return null;
+  }
 
   return (
     <Flex flexDirection="column" justifyContent="space-between" alignItems="center">
       <div className={styles.infoContainer}>
-        {!useAdvancedReceived ? (
-          <AddressCard
-            name={name}
-            address={userAddresses?.[0]}
-            getQRCodeOptions={getQRCodeOpts}
-            copiedMessage={t(addressCopiedTranslation)}
-            onCopyClick={handleCopyAddress}
-          />
+        {!isAdvancedModeEnabled ? (
+          <Flex flexDirection="column" gap="$16">
+            <AddressCard
+              name={name}
+              address={usedAddresses[0].address}
+              getQRCodeOptions={getQRCodeOpts}
+              onCopyClick={handleCopyAddress}
+            />
+            {handles?.map(({ nftMetadata, image }) => (
+              <HandleAddressCard
+                key={nftMetadata.name}
+                name={nftMetadata.name}
+                image={getAssetImageUrl(image || nftMetadata.image)}
+                copiedMessage={t('core.infoWallet.handleCopied')}
+                onCopyClick={handleCopyAdaHandle}
+              />
+            ))}
+          </Flex>
         ) : (
           <>
-            {usedAddresses?.map((addr, i) => (
+            <AddressCard
+              address={usedAddresses[0].address}
+              getQRCodeOptions={getQRCodeOpts}
+              onCopyClick={handleCopyAddress}
+              tagWith={{ label: translations.mainAddressTag }}
+              metadata={{
+                handles: usedAddresses[0].handles,
+                balance: usedAddresses[0].balance,
+                tokens: {
+                  amount: usedAddresses[0].tokens.amount,
+                  nfts: usedAddresses[0].tokens.nfts
+                },
+                stakePool: usedAddresses[0].stakePool
+              }}
+            />
+            <Divider orientation="center">{translations.additionalAddressesTitle}</Divider>
+            {usedAddresses.slice(1).map(({ address, handles: adaHandles, balance, tokens, stakePool }) => (
               <AddressCard
-                key={addr.accountIndex}
-                name={i === 0 ? name : `Index ${i}`}
-                address={addr.address}
+                key={address}
+                address={address}
                 getQRCodeOptions={getQRCodeOpts}
-                copiedMessage={t(addressCopiedTranslation)}
                 onCopyClick={handleCopyAddress}
+                metadata={{
+                  handles: adaHandles,
+                  balance,
+                  tokens,
+                  stakePool
+                }}
               />
             ))}
             {nextUnusedAddress && (
               <AddressCard
-                name={'Next Unused Address'}
                 address={nextUnusedAddress}
                 getQRCodeOptions={getQRCodeOpts}
-                copiedMessage={t(addressCopiedTranslation)}
                 onCopyClick={handleCopyAddress}
+                highlighted
+                isUnused
+                tagWith={{
+                  label: translations.newAddressTag,
+                  tooltip: (
+                    <>
+                      <p>{translations.newAddressDescriptionTop}</p>
+                      <p>{translations.newAddressDescriptionBottom}</p>
+                    </>
+                  )
+                }}
               />
             )}
           </>
         )}
-        {handles?.map(({ nftMetadata, image }) => (
-          <HandleAddressCard
-            key={nftMetadata.name}
-            name={nftMetadata.name}
-            image={getAssetImageUrl(image || nftMetadata.image)}
-            copiedMessage={t('core.infoWallet.handleCopied')}
-            onCopyClick={handleCopyAdaHandle}
-          />
-        ))}
       </div>
-      {/* TODO: onClick to generate visible unused address, translation */}
-      {useAdvancedReceived && (
-        <Button.Secondary icon={<PlusOutlined />} onClick={() => void 0} label="Create new address" />
+      {isAdvancedModeEnabled && (
+        <Flex w="$fill" mb="$16" gap="$16" flexDirection="column" className={styles.addNewAddressContainer}>
+          {nextUnusedAddress && (
+            <Banner
+              message={translations.newAddressBannerText}
+              customIcon={<ExclamationCircleOutlined className={styles.addNewAddressBannerIcon} />}
+              withIcon
+              className={styles.addNewAddressBanner}
+            />
+          )}
+          {/* TODO: onClick to generate visible unused address */}
+          <Button.Secondary
+            disabled={!!nextUnusedAddress}
+            w="$fill"
+            icon={<PlusCircleOutlined />}
+            onClick={() => void 0}
+            label={translations.addNewAddressBtn}
+          />
+        </Flex>
       )}
     </Flex>
   );

@@ -9,11 +9,12 @@ import CardanoLogo from '../assets/icons/browser-view/cardano-logo.svg';
 import { AssetSortBy, IAssetDetails } from '@views/browser/features/assets/types';
 import { compactNumberWithUnit, formatLocaleNumber, isNumeric } from '@src/utils/format-number';
 import isNumber from 'lodash/isNumber';
-import { CurrencyInfo } from '@src/types';
+import { CardanoTxOut, CurrencyInfo } from '@src/types';
 import { TokenPrice } from '@lib/scripts/types';
 import { PriceResult } from '@hooks';
 import { getTokenDisplayMetadata } from '@utils/get-token-list';
 import { getRandomIcon } from '@lace/common';
+import { isNFT } from './is-nft';
 
 export const variationParser = (variation: number): string =>
   `${variation > 0 ? '+' : ''}${formatLocaleNumber(variation.toString())}`;
@@ -117,3 +118,33 @@ export const assetTransformer = (params: {
 
 export const getTokenAmountInFiat = (amount: string, priceInADA: number, fiat: number): string =>
   new BigNumber(amount).multipliedBy(priceInADA).multipliedBy(fiat).toString(); // first get the price of the amount in ADA and then converted to fiat
+
+export const getTotalAssetsByAddress = (
+  outputs: CardanoTxOut[],
+  assets: Wallet.Assets,
+  targetAddress: string
+): { assets: number; nfts: number } => {
+  const countedAssets = outputs
+    .filter((output) => output.address === targetAddress && !!output.value.assets)
+    .reduce((allAssets, output) => {
+      const assetsInOutput = output.value.assets;
+
+      for (const key of assetsInOutput.keys()) {
+        if (!allAssets.has(key)) {
+          allAssets.add(key);
+        }
+      }
+
+      return allAssets;
+    }, new Set<Wallet.Cardano.AssetId>());
+
+  const nftsInAssets = new Set<string>();
+
+  for (const key of countedAssets.keys()) {
+    if (!nftsInAssets.has(key) && assets.has(key) && isNFT(assets.get(key))) {
+      nftsInAssets.add(key);
+    }
+  }
+
+  return { assets: countedAssets.size, nfts: nftsInAssets.size };
+};

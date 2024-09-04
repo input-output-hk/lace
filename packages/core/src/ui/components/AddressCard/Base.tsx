@@ -3,6 +3,7 @@ import { toast } from '@lace/common';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { ReactComponent as CopyIcon } from '../../assets/icons/copy-icon.svg';
 import styles from './Base.module.scss';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 
 const TOAST_DEFAULT_DURATION = 3;
 
@@ -24,13 +25,15 @@ export const Base = ({ copyText, children, copiedMessage, onCopyClick }: Readonl
   };
 
   return (
-    <div className={styles.root} data-testid="address-card">
+    <Box className={styles.root} data-testid="address-card" w="$fill">
       {children}
-      <div className={styles.copyButtonContainer}>
-        <CopyToClipboard text={copyText}>
-          <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" onClick={doToast} />
-        </CopyToClipboard>
-      </div>
-    </div>
+      {onCopyClick && (
+        <div className={styles.copyButtonContainer}>
+          <CopyToClipboard text={copyText}>
+            <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" onClick={doToast} />
+          </CopyToClipboard>
+        </div>
+      )}
+    </Box>
   );
 };

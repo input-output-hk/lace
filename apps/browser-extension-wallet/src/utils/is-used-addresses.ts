@@ -1,6 +1,4 @@
 import { Cardano } from '@cardano-sdk/core';
 
-export const isUsedAddress = (
-  address: Cardano.PaymentAddress,
-  transactionHistory: Cardano.HydratedTx[]
-): Cardano.HydratedTx => transactionHistory.find((tx) => tx.body.outputs.find((output) => output.address === address));
+export const isUsedAddress = (address: Cardano.PaymentAddress, addressesWithUtxos: Cardano.HydratedTxIn[]): boolean =>
+  addressesWithUtxos.some((addr) => addr.address === address);

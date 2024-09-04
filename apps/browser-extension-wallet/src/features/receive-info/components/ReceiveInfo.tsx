@@ -48,7 +48,6 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
           isPopupView
           address={address?.toString()}
           getQRCodeOptions={useCallback(() => getQRCodeOptions(theme, ADDRESS_CARD_QR_CODE_SIZE_POPUP), [theme])}
-          copiedMessage={t('core.infoWallet.addressCopied')}
           onCopyClick={handleCopyAddress}
         />
         {handles?.map(({ nftMetadata, image }) => (
