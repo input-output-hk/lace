@@ -1,4 +1,4 @@
-@DAppConnectorLowFunds @Testnet
+@DAppConnector @DAppConnectorLowFunds @Testnet
 Feature: DAppConnector - Low Funds
 
   Background:
