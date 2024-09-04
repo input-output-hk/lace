@@ -485,10 +485,6 @@ Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, 
   }
 });
 
-Then(/^the NFT displays ([^"]*) in the value field$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
-});
-
 Then(
   /^send drawer is displayed with all its components in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
@@ -531,10 +527,6 @@ Then(
 
 Then(/^I see ([^"]*) as displayed value$/, async (expectedValue: string) => {
   await drawerSendExtendedAssert.assertEnteredValue(expectedValue);
-});
-
-Then(/^the displayed value switches to: ([^"]*)$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
 });
 
 Then(

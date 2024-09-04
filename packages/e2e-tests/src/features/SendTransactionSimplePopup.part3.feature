@@ -204,5 +204,5 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
-    Then the NFT displays 1.00 in the value field
+    Then I see 1.00 as displayed value
     And "Review transaction" button is enabled on "Send" page

@@ -27,7 +27,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I enter a value of: <value_to_enter> to the "tADA" asset in bundle 1 without clearing input
     Then I see <displayed_value> as displayed value
     And I press keyboard Enter button
-    Then the displayed value switches to: <conv_value>
+    Then I see <conv_value> as displayed value
     When I click on transaction drawer background to lose focus
     When I hover over the value for "tADA" asset in bundle 1
     Then I <should_see_tooltip> a tooltip showing full value: "<displayed_value>" for Tokens

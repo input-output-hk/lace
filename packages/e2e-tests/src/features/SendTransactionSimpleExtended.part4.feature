@@ -12,7 +12,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I enter a value of: <value_to_enter> to the "tHOSKY" asset in bundle 1 without clearing input
     Then I see <displayed_value> as displayed value
     And <action>
-    Then the displayed value switches to: <conv_value>
+    Then I see <conv_value> as displayed value
     When I hover over the value for "tHOSKY" asset in bundle 1
     Then I <should_see_tooltip> a tooltip showing full value: "<displayed_value>" for Tokens
     Examples:
@@ -41,7 +41,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     When I click on NFT with name: "Ibilecoin" in asset selector
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
-    Then the NFT displays 1.00 in the value field
+    Then I see 1.00 as displayed value
     And "Review transaction" button is enabled on "Send" page
 
   @LW-2374 @Testnet

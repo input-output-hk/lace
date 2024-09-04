@@ -202,4 +202,4 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
     When I click on NFT with name: "Ibilecoin" in asset selector
-    Then the NFT displays 1 in the value field
+    Then I see 1 as displayed value
