@@ -50,7 +50,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const { name, addresses, handles, utxos, rewardAccounts } = useWalletInformation();
   const [usedAddresses, setUsedAddresses] = useState<WalletData[]>();
   const [, closeDrawer] = useDrawer();
-  const nextUnusedAddress = useNextUnusedAddress();
+  const { nextUnusedAddress, generateUnusedAddress, clearUnusedAddress } = useNextUnusedAddress();
   const [isReceiveInAdvancedMode] = useLocalStorage('isReceiveInAdvancedMode', false);
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
@@ -111,6 +111,12 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
 
     setUsedAddresses(_usedAddresses);
   }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos]);
+
+  useEffect(() => {
+    if (isUsedAddress(nextUnusedAddress, addressesWithUtxo)) {
+      clearUnusedAddress();
+    }
+  }, [addressesWithUtxo, nextUnusedAddress, clearUnusedAddress]);
 
   if (!usedAddresses) {
     return null;
@@ -205,7 +211,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
             disabled={!!nextUnusedAddress}
             w="$fill"
             icon={<PlusCircleOutlined />}
-            onClick={() => void 0}
+            onClick={generateUnusedAddress}
             label={translations.addNewAddressBtn}
           />
         </Flex>

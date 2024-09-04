@@ -1,23 +1,29 @@
+/* eslint-disable unicorn/no-useless-undefined */
 import { Cardano } from '@cardano-sdk/core';
 import { useWalletStore } from '@src/stores';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-export const useNextUnusedAddress = (): Cardano.PaymentAddress => {
+type UnusedAddressParams = {
+  nextUnusedAddress: Cardano.PaymentAddress;
+  generateUnusedAddress: () => Promise<void>;
+  clearUnusedAddress: () => void;
+};
+
+export const useNextUnusedAddress = (): UnusedAddressParams => {
   const [nextUnusedAddress, setNextUnusedAddress] = useState<Cardano.PaymentAddress>();
+
   const { inMemoryWallet } = useWalletStore();
 
-  useEffect(() => {
+  const generateUnusedAddress = async () => {
     if (!inMemoryWallet) {
       return;
     }
 
-    const getNextUnusedAddress = async () => {
-      const _nextUnusedAddress = await inMemoryWallet.getNextUnusedAddress();
-      setNextUnusedAddress(_nextUnusedAddress?.[0].address);
-    };
+    const _nextUnusedAddress = await inMemoryWallet.getNextUnusedAddress();
+    setNextUnusedAddress(_nextUnusedAddress?.[0].address);
+  };
 
-    getNextUnusedAddress();
-  }, [inMemoryWallet]);
+  const clearUnusedAddress = () => setNextUnusedAddress(undefined);
 
-  return nextUnusedAddress;
+  return { nextUnusedAddress, generateUnusedAddress, clearUnusedAddress };
 };
