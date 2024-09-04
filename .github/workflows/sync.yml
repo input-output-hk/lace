@@ -60,7 +60,7 @@ jobs:
 
       - name: Create Pull Request if conflicts exist
         if: env.conflict == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'Resolve rebase conflicts with upstream'
