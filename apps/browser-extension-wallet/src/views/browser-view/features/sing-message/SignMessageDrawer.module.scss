@@ -39,22 +39,6 @@
   }
 }
 
-.textAreaWrapper {
-  width: 100%;
-  margin-bottom: size_unit(2);
-
-  :global(.ant-input) {
-    min-height: size_unit(20);
-    padding-top: size_unit(10);
-    resize: vertical;
-
-    &::placeholder {
-      text-align: center;
-      line-height: size_unit(14); // Adjust line height for vertical centering
-    }
-  }
-}
-
 .buttonContainer {
   display: flex;
   flex-direction: column;
@@ -62,37 +46,12 @@
   margin-top: size_unit(3);
 }
 
-.signatureWrapper {
-  resize: none;
-  overflow-y: auto;
-  cursor: default;
-  max-height: none;
-  opacity: 0.7;
-  user-select: none;
-}
-
-.signatureContent {
-  @extend .customTextArea;
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: var(--text-color-primary);
-}
-
-.signatureContent {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-family: monospace;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--text-color-primary);
-}
-
 .errorMessage {
   color: var(--text-color-error);
   margin-top: size_unit(1);
+}
+
+.passwordWrapper {
+  width: 100%;
+  margin-bottom: 24px;
 }

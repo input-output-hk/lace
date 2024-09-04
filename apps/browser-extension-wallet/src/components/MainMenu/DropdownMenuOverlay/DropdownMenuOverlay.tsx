@@ -54,6 +54,13 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
 
+  const getSignMessageLink = () => (
+    <>
+      <SignMessageLink />
+      <Separator />
+    </>
+  );
+
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
@@ -72,8 +79,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <AddressBookLink />
             <SettingsLink />
             <Separator />
-            <SignMessageLink />
-            <Separator />
+            {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' && !isPopup && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (
