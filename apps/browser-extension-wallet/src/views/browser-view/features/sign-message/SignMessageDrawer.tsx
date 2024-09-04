@@ -1,13 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
-import { SignMessageResult } from './SignMessageResult';
 import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets } from '@lace/core';
-import { TextArea, PostHogAction } from '@lace/common';
+import { TextArea, PostHogAction, toast } from '@lace/common';
 import { Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import styles from './SignMessageDrawer.module.scss';
+import { MainLoader } from '@components/MainLoader';
+import { ResultMessage } from '@components/ResultMessage';
+import CheckSuccessImg from '@assets/icons/circle-check-gradient.svg';
 
 export const SignMessageDrawer: React.FC = () => {
   const { t } = useTranslation();
@@ -23,9 +25,15 @@ export const SignMessageDrawer: React.FC = () => {
   } = useSignMessageState();
   const { password, setPassword, clearSecrets } = useSecrets();
 
-  const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
-  const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState<boolean>(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [message, setMessage] = useState('');
+  const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      setShouldShowPasswordPrompt(true);
+    }
+  }, [error]);
 
   const handleSign = useCallback(() => {
     if (!isHardwareWallet && !password.value) {
@@ -37,22 +45,28 @@ export const SignMessageDrawer: React.FC = () => {
     }
   }, [isHardwareWallet, password, analytics, performSigning, selectedAddress, message]);
 
+  const handleCopy = useCallback(() => {
+    toast.notify({
+      text: t('general.clipboard.copiedToClipboard'),
+      withProgressBar: true
+    });
+    analytics.sendEventToPostHog(PostHogAction.SignMessageCopySignatureClick);
+  }, [analytics, t]);
+
   useDrawerConfiguration({
     selectedAddress,
     message,
-    password,
     isSigningInProgress,
     isHardwareWallet,
+    error,
     handleSign,
-    clearSecrets
+    handleCopy,
+    clearSecrets,
+    signatureObject
   });
 
-  if (signatureObject?.signature) {
-    return <SignMessageResult signature={signatureObject.signature} />;
-  }
-
-  return (
-    <div data-testid="sign-message" className={styles.container}>
+  const renderInitialState = () => (
+    <>
       <Text.Body.Large weight="$bold">{t('core.signMessage.instructions')}</Text.Body.Large>
       <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.subtitle')}</Text.Body.Normal>
       {isHardwareWallet && hardwareWalletError && (
@@ -78,22 +92,56 @@ export const SignMessageDrawer: React.FC = () => {
           rows={4}
           className={styles.customTextArea}
         />
-        {shouldShowPasswordPrompt && !isHardwareWallet && (
-          <PasswordInput
-            onChange={setPassword}
-            label={t('core.signMessage.passwordLabel')}
-            dataTestId="sign-message-password-input"
-            error={!!error}
-            errorMessage={error}
-            wrapperClassName={styles.passwordWrapper}
-          />
-        )}
       </div>
-      {error && (
-        <div className={styles.errorMessage}>
-          <Text.Body.Normal color="error">{error}</Text.Body.Normal>
-        </div>
-      )}
+    </>
+  );
+
+  const renderPasswordPrompt = () => (
+    <PasswordInput
+      onChange={setPassword}
+      label={t('core.signMessage.passwordLabel')}
+      dataTestId="sign-message-password-input"
+      error={!!error}
+      errorMessage={error}
+      wrapperClassName={styles.passwordWrapper}
+    />
+  );
+
+  const renderSignature = () => (
+    <div className={styles.inputGroup}>
+      <ResultMessage
+        customBgImg={CheckSuccessImg}
+        title={t('core.signMessage.successTitle')}
+        description={t('core.signMessage.successDescription')}
+      />
+      <TextArea
+        value={signatureObject.signature}
+        dataTestId="sign-message-signature"
+        rows={4}
+        className={styles.customTextArea}
+      />
+    </div>
+  );
+
+  const renderContent = () => {
+    if (isSigningInProgress) {
+      return <MainLoader />;
+    }
+
+    if (signatureObject) {
+      return renderSignature();
+    }
+
+    if (shouldShowPasswordPrompt) {
+      return renderPasswordPrompt();
+    }
+
+    return renderInitialState();
+  };
+
+  return (
+    <div data-testid="sign-message" className={styles.container}>
+      {renderContent()}
     </div>
   );
 };

@@ -31,12 +31,6 @@
     text-align: left;
     line-height: 2;
   }
-
-  // Focus styles
-  &:focus {
-    border-color: var(--text-color-primary) !important;
-    box-shadow: var(--text-color-secondary) !important;
-  }
 }
 
 .buttonContainer {

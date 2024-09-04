@@ -3,27 +3,33 @@ import { useDrawer } from '@views/browser/stores';
 import { useTranslation } from 'react-i18next';
 import { DrawerContent } from '@views/browser/components/Drawer';
 import { DrawerNavigation, Button } from '@lace/common';
+import CopyToClipboard from 'react-copy-to-clipboard';
 import styles from './SignMessageDrawer.module.scss';
-import { Password } from '@input-output-hk/lace-ui-toolkit';
+import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
+import CopyToClipboardImg from '@assets/icons/copy.component.svg';
 
 interface UseDrawerConfigurationProps {
   selectedAddress: string;
   message: string;
-  password: Partial<Password>;
   isSigningInProgress: boolean;
   isHardwareWallet: boolean;
+  error: string;
   handleSign: () => void;
+  handleCopy: () => void;
   clearSecrets: () => void;
+  signatureObject: Cip30DataSignature | undefined;
 }
 
 export const useDrawerConfiguration = ({
   selectedAddress,
   message,
-  password,
   isSigningInProgress,
   isHardwareWallet,
   handleSign,
-  clearSecrets
+  handleCopy,
+  error,
+  clearSecrets,
+  signatureObject
 }: UseDrawerConfigurationProps): void => {
   const { t } = useTranslation();
   const [, setDrawerConfig] = useDrawer();
@@ -37,17 +43,38 @@ export const useDrawerConfiguration = ({
     return t('core.signMessage.signButton');
   }, [isSigningInProgress, isHardwareWallet, t]);
 
+  const getActionButton = useCallback(() => {
+    if (signatureObject?.signature && !error) {
+      return (
+        <CopyToClipboard text={signatureObject.signature}>
+          <Button onClick={handleCopy}>
+            {t('core.signMessage.copyToClipboard')}
+            <CopyToClipboardImg className={styles.newFolderIcon} />
+          </Button>
+        </CopyToClipboard>
+      );
+    }
+    return (
+      <Button onClick={handleSign} disabled={!selectedAddress || !message || isSigningInProgress}>
+        {getActionButtonLabel()}
+      </Button>
+    );
+  }, [
+    signatureObject,
+    handleCopy,
+    handleSign,
+    selectedAddress,
+    message,
+    error,
+    isSigningInProgress,
+    getActionButtonLabel,
+    t
+  ]);
+
   const renderFooter = useCallback(
     () => (
       <div className={styles.buttonContainer}>
-        <Button
-          onClick={() => {
-            handleSign();
-          }}
-          disabled={!selectedAddress || !message || isSigningInProgress || (!password.value && !isHardwareWallet)}
-        >
-          {getActionButtonLabel()}
-        </Button>
+        {getActionButton()}
         <Button
           color="secondary"
           onClick={() => {
@@ -59,18 +86,7 @@ export const useDrawerConfiguration = ({
         </Button>
       </div>
     ),
-    [
-      selectedAddress,
-      message,
-      isSigningInProgress,
-      password,
-      isHardwareWallet,
-      handleSign,
-      getActionButtonLabel,
-      closeDrawer,
-      clearSecrets,
-      t
-    ]
+    [getActionButton, closeDrawer, clearSecrets, t]
   );
 
   useEffect(() => {
