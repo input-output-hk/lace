@@ -14,8 +14,8 @@ import {
   WalletType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { firstValueFrom, from, of, Subject } from 'rxjs';
-import { mergeMap, map, finalize, takeUntil } from 'rxjs/operators';
+import { firstValueFrom, from, of } from 'rxjs';
+import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 import { Password } from '@input-output-hk/lace-ui-toolkit';
 
@@ -118,7 +118,6 @@ export const withSignDataConfirmation = async <T>(
   password: Partial<Password>,
   clearSecrets: () => void
 ): Promise<T> => {
-  const cleanup$ = new Subject<void>();
   const subscription = signingCoordinator.signDataRequest$
     .pipe(
       mergeMap((req) =>
@@ -134,8 +133,7 @@ export const withSignDataConfirmation = async <T>(
               )
             )
           : from(req.sign())
-      ),
-      takeUntil(cleanup$)
+      )
     )
     .subscribe();
 
@@ -143,8 +141,6 @@ export const withSignDataConfirmation = async <T>(
     return await action();
   } finally {
     subscription.unsubscribe();
-    cleanup$.next();
-    cleanup$.complete();
     clearSecrets();
   }
 };
