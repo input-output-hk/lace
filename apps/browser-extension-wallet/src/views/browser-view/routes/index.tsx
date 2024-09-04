@@ -29,7 +29,7 @@ import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
-import { SignMessageDrawer } from '@views/browser/features/sing-message/SignMessageDrawer';
+import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 
 export const defaultRoutes: RouteMap = [
   {

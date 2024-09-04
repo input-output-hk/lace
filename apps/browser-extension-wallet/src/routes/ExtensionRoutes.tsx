@@ -10,7 +10,7 @@ import { DelegationContainer } from '../features/delegation';
 import { StakingWarningModals } from '@views/browser/features/staking/components/StakingModals';
 import { AddressBook } from '../features/address-book';
 import { Settings } from '../features/settings';
-import { SignMessageDrawer } from '@views/browser/features/sing-message/SignMessageDrawer';
+import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { NftDetail, Nfts } from '@src/features/nfts';
 
 export const ExtensionRoutes = (): React.ReactElement => (

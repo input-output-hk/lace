@@ -4,7 +4,7 @@ import { Transaction } from '../../features/send-transaction';
 import { useDrawer } from '../../stores';
 import { Drawer } from '@lace/common';
 import { QRInfoWalletDrawer } from '../QRInfoWalletDrawer';
-import { SignMessageDrawer } from '../../features/sing-message/SignMessageDrawer';
+import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { WalletUsedAddressesDrawer } from '../WalletUsedAddressesDrawer';
 import { Skeleton } from 'antd';
 
