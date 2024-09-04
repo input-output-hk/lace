@@ -65,6 +65,18 @@ export const SignTransaction = (): React.ReactElement => {
     setPreviousView();
   };
 
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!confirmIsDisabled) {
+        onConfirm();
+      }
+    },
+    [onConfirm, confirmIsDisabled]
+  );
+
   return (
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
@@ -74,6 +86,7 @@ export const SignTransaction = (): React.ReactElement => {
           </h5>
           <Password
             onChange={handleChange}
+            onSubmit={handleSubmit}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             autoFocus

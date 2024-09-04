@@ -843,6 +843,7 @@
   "pgp.error.misformedArmoredText": "Malformed PGP key block.",
   "pgp.error.privateKeySuppliedInsteadOfPublic": "Please use your public PGP key.",
   "pgp.error.noValidEncryptionKeyPacket": "Could not find valid encryption key packet in key.",
+  "pgp.error.rsaKeyTooWeak": "RSA keys shorter than 2047 bits are considered too weak.",
   "paperWallet.enterPgpPrivateKey.title": "Enter your private PGP key",
   "paperWallet.enterPgpPrivateKey.description": "To decrypt your wallet's recovery details, provide the private key for the PGP keys used during paper wallet creation.",
   "paperWallet.enterPgpPrivateKey.toggleOption.fileUpload": "File upload",

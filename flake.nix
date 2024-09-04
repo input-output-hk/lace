@@ -81,7 +81,9 @@
         aarch64-darwin  = inputs.self.packages.aarch64-darwin.lace-blockchain-services-installer;
         x86_64-windows = inputs.self.packages.x86_64-linux.lace-blockchain-services-installer-x86_64-windows;
       };
-
+      devShells = lib.genAttrs supportedSystem (system: {
+        default = inputs.self.devShells.${system}.default;
+      });
       required = inputs.nixpkgs.legacyPackages.x86_64-linux.releaseTools.aggregate {
         name = "github-required";
         meta.description = "All jobs required to pass CI";
