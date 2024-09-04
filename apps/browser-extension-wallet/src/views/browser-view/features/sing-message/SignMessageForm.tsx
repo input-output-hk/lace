@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { WalletOwnAddressDropdown, Password } from '@lace/core';
+import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets } from '@lace/core';
 import { TextArea, Button, PostHogAction } from '@lace/common';
-import { Text } from '@input-output-hk/lace-ui-toolkit';
+import { Password, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import styles from './SignMessageDrawer.module.scss';
@@ -12,13 +12,13 @@ export const SignMessageForm: React.FC<{
   error: string;
   hardwareWalletError: string;
   isHardwareWallet: boolean;
-  performSigning: (address: string, message: string, password: string) => void;
+  performSigning: (address: string, message: string, password: Partial<Password>) => void;
 }> = ({ usedAddresses, isSigningInProgress, error, hardwareWalletError, isHardwareWallet, performSigning }) => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const { password, setPassword } = useSecrets();
   const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState<boolean>(false);
 
   const handleSign = useCallback(() => {
@@ -67,8 +67,8 @@ export const SignMessageForm: React.FC<{
           className={styles.customTextArea}
         />
         {shouldShowPasswordPrompt && !isHardwareWallet && (
-          <Password
-            onChange={(event) => setPassword(event.value)}
+          <PasswordInput
+            onChange={(event) => setPassword(event)}
             label={t('core.signMessage.passwordLabel')}
             dataTestId="sign-message-password-input"
             error={!!error}

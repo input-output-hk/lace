@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import { withSignDataConfirmation } from '@lib/wallet-api-ui';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { HexBlob } from '@cardano-sdk/util';
-// import { useAnalyticsContext } from '@providers';
+import { Password } from '@input-output-hk/lace-ui-toolkit';
+import { useAnalyticsContext } from '@providers';
+import { useSecrets } from '@lace/core';
 
 interface SignMessageState {
   usedAddresses: { address: string; id: number }[];
@@ -15,12 +17,13 @@ interface SignMessageState {
   error: string;
   hardwareWalletError: string;
   isHardwareWallet: boolean;
-  performSigning: (address: string, message: string, password: string) => void;
+  performSigning: (address: string, message: string, password: Partial<Password>) => void;
 }
 
 export const useSignMessageState = (): SignMessageState => {
   const { t } = useTranslation();
-  // const analytics = useAnalyticsContext();
+  const analytics = useAnalyticsContext();
+  const { clearSecrets } = useSecrets();
 
   const { inMemoryWallet, isHardwareWallet } = useWalletStore();
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
@@ -31,20 +34,23 @@ export const useSignMessageState = (): SignMessageState => {
   const addresses = useObservable(inMemoryWallet?.addresses$);
 
   const performSigning = useCallback(
-    async (address: string, message: string, password: string) => {
+    async (address: string, message: string, password: Partial<Password>) => {
       setIsSigningInProgress(true);
       setError('');
       setHardwareWalletError('');
       try {
         const payload = HexBlob.fromBytes(new TextEncoder().encode(message));
-
+        isHardwareWallet
+          ? analytics.sendEventToPostHog(PostHogAction.SignMessageAskingHardwareWalletInteraction)
+          : analytics.sendEventToPostHog(PostHogAction.SignMessageAskingForPassword);
         const signatureGenerated = await withSignDataConfirmation(
           async () =>
             await inMemoryWallet.signData({
               signWith: address as Wallet.Cardano.PaymentAddress,
               payload
             }),
-          isHardwareWallet ? '' : password
+          !isHardwareWallet ? password : {},
+          clearSecrets
         );
 
         setSignature(signatureGenerated);
@@ -68,52 +74,14 @@ export const useSignMessageState = (): SignMessageState => {
         setIsSigningInProgress(false);
       }
     },
-    [inMemoryWallet, isHardwareWallet, t]
+    [inMemoryWallet, isHardwareWallet, t, analytics, clearSecrets]
   );
-
-  // const closeDrawer = useCallback(() => {
-  //   analytics.sendEventToPostHog(PostHogAction.SignMessageCloseDrawer);
-  //   setDrawerConfig();
-  // }, [setDrawerConfig, analytics]);
 
   const usedAddresses =
     addresses?.map((address, index) => ({
       address: address.address.toString(),
       id: index
     })) || [];
-
-  // return useCallback(() => {
-  //   setDrawerConfig({
-  //     renderHeader: () => <HeaderNavigation isPopupView={isPopupView} flow={content} />,
-  //     renderTitle: () => <HeaderTitle popup={isPopupView} />,
-  //     ...(shouldRenderFooter
-  //       ? {
-  //           renderFooter: () => (
-  //             <Footer
-  //               key={currentSection}
-  //               isPopupView={isPopupView}
-  //               onHandleChangeConfirm={(action) => {
-  //                 action === 'DELETE' && setAddressValue(row, '');
-  //                 setSection({ currentSection: Sections.FORM, nextSection: Sections.SUMMARY });
-  //               }}
-  //             />
-  //           )
-  //         }
-  //       : {}),
-  //     ...config
-  //   });
-  // }, [
-  //   config,
-  //   content,
-  //   currentSection,
-  //   isPopupView,
-  //   onClose,
-  //   row,
-  //   setAddressValue,
-  //   setDrawerConfig,
-  //   setSection,
-  //   shouldRenderFooter
-  // ]);
 
   return {
     usedAddresses,
