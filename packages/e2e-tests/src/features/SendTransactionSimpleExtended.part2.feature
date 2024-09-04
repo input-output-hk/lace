@@ -201,5 +201,5 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin" in asset selector
+    When I click on NFT with name: "Ibilecoin"
     Then I see 1 as displayed value

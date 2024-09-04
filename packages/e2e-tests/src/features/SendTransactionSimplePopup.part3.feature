@@ -59,11 +59,11 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the maximum available amount is displayed in bundle: 1 for "LaceCoin2" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin" in asset selector
+    And I click on NFT with name: "Ibilecoin"
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin" in asset selector
+    And I click on NFT with name: "Bison Coin"
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 
@@ -82,11 +82,11 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then the maximum available amount is displayed in bundle: 1 for "SUNDAE" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin" in asset selector
+    And I click on NFT with name: "Ibilecoin"
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin" in asset selector
+    And I click on NFT with name: "Bison Coin"
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 
@@ -201,7 +201,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin" in asset selector
+    When I click on NFT with name: "Ibilecoin"
     Then the "Ibilecoin" asset is displayed in bundle 1
     When I enter a value of: 1 to the "Ibilecoin" asset in bundle 1
     Then I see 1.00 as displayed value

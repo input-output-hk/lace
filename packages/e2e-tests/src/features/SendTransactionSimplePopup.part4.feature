@@ -10,7 +10,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
     When I save ticker for the NFT with name: <nft>
-    And I click on NFT with name: "<nft>" in asset selector
+    And I click on NFT with name: "<nft>"
     Then the displayed ticker for NFTs has the correct amount of characters
     When I hover over the ticker for "<nft>" asset in bundle 1
     Then I see a tooltip showing full name: "<nft>" for NFTs

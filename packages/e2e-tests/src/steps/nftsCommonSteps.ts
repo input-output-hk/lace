@@ -29,7 +29,7 @@ When(
   }
 );
 
-When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: string) => {
+When(/^I click on NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await TokenSelectionPage.clickNftItemInAssetSelector(nftName);
 });
 
