@@ -97,14 +97,18 @@ export const SignMessageDrawer: React.FC = () => {
   );
 
   const renderPasswordPrompt = () => (
-    <PasswordInput
-      onChange={setPassword}
-      label={t('core.signMessage.passwordLabel')}
-      dataTestId="sign-message-password-input"
-      error={!!error}
-      errorMessage={error}
-      wrapperClassName={styles.passwordWrapper}
-    />
+    <>
+      <Text.Body.Large weight="$bold">{t('core.signMessage.passwordTitle')}</Text.Body.Large>
+      <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.passwordSubtitle')}</Text.Body.Normal>
+      <PasswordInput
+        onChange={setPassword}
+        label={t('core.signMessage.passwordLabel')}
+        dataTestId="sign-message-password-input"
+        error={!!error}
+        errorMessage={error}
+        wrapperClassName={styles.passwordWrapper}
+      />
+    </>
   );
 
   const renderSignature = () => (
