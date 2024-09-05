@@ -16,7 +16,7 @@
       in {
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            nodejs_22
+            nodejs_20
             yarn
             python311
             python311Packages.setuptools
