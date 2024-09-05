@@ -39,10 +39,6 @@
       }
     );
 
-    hydraJobs = {
-      devShells = forAllSystems (system: {
-        default = inputs.self.devShells.${system}.default;
-      });
-    };
+    hydraJobs.devShells = inputs.self.devShells;
   };
 }
