@@ -1,0 +1,93 @@
+@import '../../../styles/colors.scss';
+
+.iog-button-icon {
+  border: none;
+  appearance: none;
+  cursor: pointer;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.iog-button-icon--circle {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.iog-button-icon--primary {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background-image: linear-gradient(219.29deg, $color-white 14.05%, rgba(255, 255, 255, 0) 48.55%, $color-white 84.52%);
+
+  &:before {
+    content: '';
+    background: #5750ca;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+
+  svg {
+    z-index: 1;
+  }
+}
+.iog-button-icon--secondary {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  background-image: linear-gradient(
+    180deg,
+    $color-heliotrope 0%,
+    rgba(59, 70, 174, 0.56) 49.55%,
+    $color-heliotrope 100%
+  );
+
+  &:before {
+    content: '';
+    background: $color-black-rock;
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+
+  svg {
+    z-index: 1;
+  }
+}
+
+.iog-button-icon--standard {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 1px solid $color-border-medium;
+
+  svg {
+    z-index: 1;
+  }
+}
+
+.iog-button-icon--alternative {
+  background-color: $color-background-dark;
+  border: 2px solid $color-border-primary;
+  width: 40px;
+  height: 40px;
+}
+
+.iog-button-icon--solid {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: $color-background-light;
+
+  svg {
+    z-index: 1;
+  }
+}
