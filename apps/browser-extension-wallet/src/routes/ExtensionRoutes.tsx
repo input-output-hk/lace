@@ -10,6 +10,7 @@ import { DelegationContainer } from '../features/delegation';
 import { StakingWarningModals } from '@views/browser/features/staking/components/StakingModals';
 import { AddressBook } from '../features/address-book';
 import { Settings } from '../features/settings';
+import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { NftDetail, Nfts } from '@src/features/nfts';
 
 export const ExtensionRoutes = (): React.ReactElement => (
@@ -23,6 +24,7 @@ export const ExtensionRoutes = (): React.ReactElement => (
       <Route exact path={walletRoutePaths.earn} component={DelegationContainer} />
       <Route exact path={walletRoutePaths.addressBook} component={AddressBook} />
       <Route exact path={walletRoutePaths.settings} component={Settings} />
+      <Route exact path={walletRoutePaths.signMessage} component={SignMessageDrawer} />
       <Route exact path={walletRoutePaths.nfts} component={Nfts} />
       <Route path="*" render={() => <Redirect to={walletRoutePaths.assets} />} />
     </Switch>

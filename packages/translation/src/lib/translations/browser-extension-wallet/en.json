@@ -440,6 +440,7 @@
   "browserView.topNavigationBar.links.lockWallet": "Lock wallet",
   "browserView.topNavigationBar.links.network": "Network",
   "browserView.topNavigationBar.links.settings": "Settings",
+  "browserView.topNavigationBar.links.signMessage": "Sign message",
   "browserView.topNavigationBar.walletStatus.notSyncedToTheBlockchain": "Not synced to the blockchain",
   "browserView.topNavigationBar.walletStatus.walletSynced": "Wallet synced",
   "browserView.topNavigationBar.walletStatus.walletSyncing": "Wallet syncing",

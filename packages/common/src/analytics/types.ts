@@ -66,6 +66,11 @@ export enum PostHogAction {
   MultiWalletHWSetupWalletAccountNoClick = "multiwallet | hardware wallet revamp | let's set up your wallet | Account No | click",
   MultiWalletHWEnterWalletClick = "multiwallet | hardware wallet revamp | let's set up your wallet | enter wallet | click",
   MultiWalletHWAdded = 'multiwallet | hardware wallet revamp | added',
+  // SignMessage
+  SignMessageCopySignatureClick = 'sign message | copy signature | click',
+  SignMessageAskingForPassword = 'sign message | asking for password',
+  SignMessageAskingHardwareWalletInteraction = 'sign message | asking hardware wallet interaction',
+  SignMessageCloseDrawer = 'sign message | close drawer',
   // Staking
   StakingClick = 'staking | staking | click',
   StakingStakePoolClick = 'staking | staking | stake pool | click',
