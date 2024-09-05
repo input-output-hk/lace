@@ -44,7 +44,7 @@ export const TransactionCTAsBox = (): React.ReactElement => {
     setDrawerConfig({
       content: DrawerContent.RECEIVE_TRANSACTION,
       renderTitle: () => (
-        <Flex justifyContent="space-between" alignItems="center">
+        <Flex justifyContent="space-between" alignItems="center" className={styles.title}>
           <Box>
             <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />
           </Box>

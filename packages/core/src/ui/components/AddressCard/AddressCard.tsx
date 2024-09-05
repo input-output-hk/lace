@@ -176,7 +176,7 @@ export const AddressCard = ({
     const customDropdownRender = (menu: React.ReactElement) => (
       <Box className={styles.customRender}>
         <Box py="$4">{t('core.addressCard.nativeTokens.label')}</Box>
-        <Divider h="$1" />
+        <Divider h="$1" className={styles.divider} />
         {React.cloneElement(menu)}
       </Box>
     );

@@ -82,11 +82,11 @@
     font-weight: $font-weight-semi-bold;
     line-height: size_unit(3);
     line-break: anywhere;
-    color: var(--light-mode-dark-grey, --text-color-primary);
+    color: var(--light-mode-dark-grey, var(--text-color-primary));
   }
 
   .tag {
-    background-color: var(--color-white);
+    background-color: var(--dark-mode-grey, var(--color-white));
     border-radius: size_unit(3);
     font-size: 14px;
     width: fit-content;
@@ -110,9 +110,14 @@
 .customRender {
   text-align: center;
   padding: size_unit(1);
-  background-color: #ffffff;
+  background-color: var(--dark-mode-mid-black, var(--color-white)) !important;
   border-radius: size_unit(1);
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  color: var(--text-color-primary);
+
+  .divider {
+    background-color: 1px solid var(--dark-mode-mid-grey, var(--light-mode-light-grey-plus));
+  }
 
   :global(.ant-dropdown-menu) {
     background-color: none !important;
