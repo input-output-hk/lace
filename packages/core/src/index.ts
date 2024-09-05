@@ -1,5 +1,4 @@
 export * from '@ui/hooks';
-export * from '@ui/lib';
 export * from '@ui/utils';
 export * from './shared-wallets';
 

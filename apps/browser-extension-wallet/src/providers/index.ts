@@ -1,5 +1,4 @@
 export * from './AppSettings';
-export * from './AxiosProvider';
 export * from './currency';
 export * from './DatabaseProvider';
 export * from './ExternalLinkOpenerProvider';
