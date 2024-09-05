@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { useDrawer } from '@views/browser/stores';
 import { useTranslation } from 'react-i18next';
 import { DrawerContent } from '@views/browser/components/Drawer';
-import { DrawerNavigation, Button } from '@lace/common';
+import { DrawerNavigation, Button, useKeyboardShortcut } from '@lace/common';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styles from './SignMessageDrawer.module.scss';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
@@ -70,6 +70,9 @@ export const useDrawerConfiguration = ({
     getActionButtonLabel,
     t
   ]);
+
+  useKeyboardShortcut(['Escape'], () => closeDrawer());
+  useKeyboardShortcut(['Enter'], () => handleSign());
 
   const renderFooter = useCallback(
     () => (
