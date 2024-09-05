@@ -37,7 +37,7 @@ export const AddressDisplayItem = ({
     }
 
     if (action === 'copy') {
-      <CopyToClipboard text={`${label}`}>{actionIconMap[action]}</CopyToClipboard>;
+      return <CopyToClipboard text={`${label}`}>{actionIconMap[action]}</CopyToClipboard>;
     }
 
     return actionIconMap[action];
