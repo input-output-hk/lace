@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, AxiosResponseHeaders } from 'axios';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useFetchApi } from '../useFetchApi';
 
@@ -12,7 +12,9 @@ describe('Testing useFetchApi hook', () => {
     data: { test: 'test' },
     status: 200,
     statusText: 'OK',
-    config: {},
+    config: {
+      headers: {} as AxiosResponseHeaders
+    },
     headers: {}
   };
   test('should fetch the data from the api and set the status to idle, fetching and fetched in order', async () => {

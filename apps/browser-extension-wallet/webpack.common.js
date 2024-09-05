@@ -56,6 +56,7 @@ module.exports = () => {
         zlib: require.resolve('browserify-zlib'),
         dns: false,
         tls: false,
+        process: false,
         child_process: false
       },
       plugins: [new TsconfigPathsPlugin({ configFile: 'src/tsconfig.json' })]
