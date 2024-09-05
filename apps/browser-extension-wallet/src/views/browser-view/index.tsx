@@ -5,7 +5,6 @@ import { BrowserViewRoutes } from '@views/browser/routes';
 import {
   CurrencyStoreProvider,
   DatabaseProvider,
-  AxiosClientProvider,
   AppSettingsProvider,
   ThemeProvider,
   AnalyticsProvider,
@@ -35,33 +34,31 @@ const App = (): React.ReactElement => (
     <AppSettingsProvider>
       <DatabaseProvider>
         <StoreProvider appMode={APP_MODE_BROWSER}>
-          <AxiosClientProvider>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <BackgroundPageProvider>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <UIThemeProvider>
-                            <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <BrowserViewRoutes />
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
-                            </ExternalLinkOpenerProvider>
-                          </UIThemeProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </BackgroundPageProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </AxiosClientProvider>
+          <CurrencyStoreProvider>
+            <HashRouter>
+              <BackgroundPageProvider>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <UIThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_BROWSER}>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <AddressesDiscoveryOverlay>
+                                  <BrowserViewRoutes />
+                                </AddressesDiscoveryOverlay>
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </UIThemeProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </BackgroundPageProvider>
+            </HashRouter>
+          </CurrencyStoreProvider>
         </StoreProvider>
       </DatabaseProvider>
     </AppSettingsProvider>
