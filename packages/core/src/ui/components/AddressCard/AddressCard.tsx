@@ -96,7 +96,7 @@ export const AddressCard = ({
   }, [metadata]);
 
   const renderHandleData = useMemo(() => {
-    if (!metadata || !metadata.handles) {
+    if (!metadata?.handles) {
       return;
     }
 
@@ -141,7 +141,7 @@ export const AddressCard = ({
   }, [metadata, doToast, t]);
 
   const renderBalanceData = useMemo(() => {
-    if (!metadata || !metadata.balance) {
+    if (!metadata?.balance) {
       return;
     }
 
@@ -167,7 +167,7 @@ export const AddressCard = ({
   );
 
   const renderTokenData = useMemo(() => {
-    if (!metadata || !metadata.tokens || metadata.tokens.amount === 0 || isMetadataGrouped) {
+    if (!metadata?.tokens || metadata.tokens.amount === 0 || isMetadataGrouped) {
       return;
     }
 
