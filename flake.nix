@@ -25,8 +25,10 @@
             openssl
             gcc
             gnumake
+          ] ++ lib.optionals stdenv.isLinux [
+            autoreconfHook
             libudev-zero
-          ] ++ lib.optionals stdenv.isLinux [ autoreconfHook ];
+          ];
 
           shellHook = ''
             export PATH=$PWD/node_modules/.bin:$PATH
