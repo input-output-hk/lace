@@ -81,13 +81,14 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const assets = useObservable(inMemoryWallet.assetInfo$);
 
   const { addressesWithUtxo, outputs } = useMemo(() => {
-    const _addressesWithUtxo = utxos.map((utxo) => utxo[0]);
-    const _outputs = utxos.map((utxo) => utxo[1]);
+    const _addressesWithUtxo = utxos?.map((utxo) => utxo[0]);
+    const _outputs = utxos?.map((utxo) => utxo[1]);
 
     return { addressesWithUtxo: _addressesWithUtxo, outputs: _outputs };
   }, [utxos]);
 
   useEffect(() => {
+    if (!addresses) return;
     const _usedAddresses = addresses
       .filter(({ address }) => isUsedAddress(address, addressesWithUtxo))
       .map(({ address }) => {
@@ -113,7 +114,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos]);
 
   useEffect(() => {
-    if (isUsedAddress(nextUnusedAddress, addressesWithUtxo)) {
+    if (addressesWithUtxo && isUsedAddress(nextUnusedAddress, addressesWithUtxo)) {
       clearUnusedAddress();
     }
   }, [addressesWithUtxo, nextUnusedAddress, clearUnusedAddress]);
@@ -206,7 +207,6 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
               className={styles.addNewAddressBanner}
             />
           )}
-          {/* TODO: onClick to generate visible unused address */}
           <Button.Secondary
             disabled={!!nextUnusedAddress}
             w="$fill"
