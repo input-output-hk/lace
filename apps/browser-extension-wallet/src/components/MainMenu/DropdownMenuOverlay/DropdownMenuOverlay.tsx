@@ -30,6 +30,7 @@ interface Props extends MenuProps {
   sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
+// eslint-disable-next-line complexity
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
@@ -79,7 +80,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <AddressBookLink />
             <SettingsLink />
             <Separator />
-            {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' && !isPopup && getSignMessageLink()}
+            {process.env.USE_MESSAGE_SIGNING === 'true' && !isPopup && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (
