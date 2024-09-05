@@ -9,6 +9,7 @@ import { HandleInfo } from '@cardano-sdk/wallet';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export interface ReceiveInfoProps {
   name: string;
@@ -42,7 +43,7 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
       navigation={<DrawerNavigation onCloseIconClick={handleOnClose} />}
       popupView
     >
-      <div className={styles.container} data-testid="receive-address-qr">
+      <Flex className={styles.container} data-testid="receive-address-qr" flexDirection="column" gap="$16">
         <AddressCard
           name={name}
           isPopupView
@@ -59,7 +60,7 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
             onCopyClick={handleCopyAdaHandle}
           />
         ))}
-      </div>
+      </Flex>
     </Drawer>
   );
 };

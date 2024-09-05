@@ -222,7 +222,7 @@ export const AddressCard = ({
   }, [metadata, getTokenMenuItems, t]);
 
   return (
-    <Flex className={classnames(styles.root, highlighted && styles.highlighted)}>
+    <Flex className={classnames(styles.root, highlighted && styles.highlighted)} w="$fill">
       <div className={styles.qrCodeContainer} data-testid="address-card-qr-code-container">
         <QRCode data={address} options={useMemo(() => getQRCodeOptions?.(), [getQRCodeOptions])} />
       </div>

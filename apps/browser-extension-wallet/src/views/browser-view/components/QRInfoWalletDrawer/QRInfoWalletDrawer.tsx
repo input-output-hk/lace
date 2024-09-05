@@ -4,7 +4,7 @@ import { ADDRESS_CARD_QR_CODE_SIZE, AddressCard, HandleAddressCard } from '@lace
 import { useTheme } from '@providers/ThemeProvider';
 import { useWalletStore } from '@src/stores';
 import styles from './QRInfoWalletDrawer.module.scss';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { Banner, useKeyboardShortcut, useObservable } from '@lace/common';
@@ -69,8 +69,6 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     additionalAddressesTitle: t('qrInfo.advancedMode.additionalAddresses.title'),
     addNewAddressBtn: t('qrInfo.advancedMode.newAddress.button'),
     mainAddressTag: t('qrInfo.advancedMode.tags.main'),
-    newAddressDescriptionTop: t('qrInfo.advancedMode.newAddress.description.top'),
-    newAddressDescriptionBottom: t('qrInfo.advancedMode.newAddress.description.bottom'),
     newAddressTag: t('qrInfo.advancedMode.tags.unused'),
     newAddressBannerText: t('qrInfo.advancedMode.newAddress.warning')
   };
@@ -186,10 +184,13 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
                 tagWith={{
                   label: translations.newAddressTag,
                   tooltip: (
-                    <>
-                      <p>{translations.newAddressDescriptionTop}</p>
-                      <p>{translations.newAddressDescriptionBottom}</p>
-                    </>
+                    <Trans
+                      i18nKey="qrInfo.advancedMode.newAddress.description"
+                      components={{
+                        pt: <p />,
+                        pb: <p />
+                      }}
+                    />
                   )
                 }}
               />

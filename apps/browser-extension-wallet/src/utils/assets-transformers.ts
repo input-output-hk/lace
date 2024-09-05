@@ -126,25 +126,12 @@ export const getTotalAssetsByAddress = (
 ): { assets: number; nfts: number } => {
   const countedAssets = outputs
     .filter((output) => output.address === targetAddress && !!output.value.assets)
-    .reduce((allAssets, output) => {
-      const assetsInOutput = output.value.assets;
+    .flatMap((output) => [...output.value.assets.keys()])
+    .reduce((allAssets, key) => allAssets.add(key), new Set<string>());
 
-      for (const key of assetsInOutput.keys()) {
-        if (!allAssets.has(key)) {
-          allAssets.add(key);
-        }
-      }
-
-      return allAssets;
-    }, new Set<Wallet.Cardano.AssetId>());
-
-  const nftsInAssets = new Set<string>();
-
-  for (const key of countedAssets.keys()) {
-    if (!nftsInAssets.has(key) && assets.has(key) && isNFT(assets.get(key))) {
-      nftsInAssets.add(key);
-    }
-  }
+  const nftsInAssets = [...countedAssets]
+    .filter((key: Wallet.Cardano.AssetId) => assets.has(key) && isNFT(assets.get(key)))
+    .reduce((nfts, key) => nfts.add(key), new Set<string>());
 
   return { assets: countedAssets.size, nfts: nftsInAssets.size };
 };
