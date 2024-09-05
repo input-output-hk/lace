@@ -111,13 +111,13 @@ export const ChooseRestoreMethod: VFC = () => {
                           {optionElement}
                         </Flex>
                         <Box pl="$40">
-                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="mpaper-wallet-description">
+                          <Text.Body.Normal weight="$medium" color="secondary" data-testid="paper-wallet-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.paperWallet.description')}
                           </Text.Body.Normal>
                         </Box>
                       </Flex>
                       <Flex>
-                        <PaperWalletIcon className={styles.restoreIcon} data-testid="mpaper-wallet-icon" />
+                        <PaperWalletIcon className={styles.restoreIcon} data-testid="paper-wallet-icon" />
                       </Flex>
                     </Flex>
                   </Card.Outlined>

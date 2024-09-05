@@ -23,7 +23,7 @@ Feature: Add new wallet - Create wallet
     When I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
-    And "Recovery details" step is marked as active on progress timeline
+    And "Recovery setup" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process
 
   @LW-9344
@@ -40,7 +40,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then "Choose a recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal
 
   @LW-9348
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Back button click
@@ -85,7 +85,7 @@ Feature: Add new wallet - Create wallet
     When I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
-    And "Recovery details" step is marked as active on progress timeline
+    And "Recovery setup" step is marked as active on progress timeline
     And "Next" button is disabled during onboarding process
 
   @LW-9353

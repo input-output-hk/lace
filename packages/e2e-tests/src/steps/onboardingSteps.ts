@@ -29,6 +29,11 @@ import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDeviceP
 import ModalAssert from '../assert/modalAssert';
 import clipboard from 'clipboardy';
 import ChooseRecoveryMethodPageAssert from '../assert/onboarding/ChooseRecoveryMethodPageAssert';
+import ChooseRecoveryMethodPage from '../elements/onboarding/ChooseRecoveryMethodPage';
+import SecureYourPaperWalletPageAssert from '../assert/onboarding/SecureYourPaperWalletPageAssert';
+import SecureYourPaperWalletPage from '../elements/onboarding/SecureYourPaperWalletPage';
+import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWalletPageAssert';
+import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -290,7 +295,8 @@ Given(
   }
 );
 
-Given(/^I click "Enter wallet" button$/, async () => {
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+Given(/^I click "(Enter wallet|Generate paper wallet)" button$/, async (_ignored: string) => {
   await OnboardingWalletSetupPage.clickEnterWalletButton();
 });
 
@@ -380,7 +386,8 @@ Then(/^"Mnemonic writedown" page is displayed with (12|15|24) words$/, async (mn
   await onboardingRecoveryPhrasePageAssert.assertSeeMnemonicWritedownPage(mnemonicWordsLength);
 });
 
-Then(/^"Enter wallet" button is enabled$/, async () => {
+// eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+Then(/^"(Enter wallet|Generate paper wallet)" button is enabled$/, async (_ignored: string) => {
   await OnboardingWalletSetupPageAssert.assertEnterWalletButtonIsEnabled();
 });
 
@@ -419,16 +426,8 @@ When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order
 });
 
 Then(
-  /^"(Recovery phrase|Wallet setup|Enter wallet|Connect device|Recovery details|Recovery method)" step is marked as active on progress timeline$/,
-  async (
-    step:
-      | 'Recovery phrase'
-      | 'Wallet setup'
-      | 'Enter wallet'
-      | 'Connect device'
-      | 'Recovery details'
-      | 'Recovery method'
-  ) => {
+  /^"(Wallet setup|Enter wallet|Connect device|Recovery setup|Recovery method)" step is marked as active on progress timeline$/,
+  async (step: 'Wallet setup' | 'Enter wallet' | 'Connect device' | 'Recovery setup' | 'Recovery method') => {
     await new OnboardingCommonAssert().assertSeeActiveStepOnProgressTimeline(step);
   }
 );
@@ -454,6 +453,89 @@ When(/^I saved test mnemonic for "([^"]*)" to clipboard$/, async (walletName: st
   await clipboard.write(mnemonic);
 });
 
-Then(/^"Choose a recovery method" page is displayed$/, async () => {
-  await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage();
+Then(/^"Choose recovery method" page is displayed on "(Create|Restore)" flow$/, async (flow: 'Create' | 'Restore') => {
+  await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage(flow);
 });
+
+When(
+  /^I select "(Recovery phrase|Paper wallet)" as a recovery method$/,
+  async (method: 'Recovery phrase' | 'Paper wallet') => {
+    await ChooseRecoveryMethodPage.selectRecoveryMethod(method);
+  }
+);
+
+Then(
+  /^"(Recovery phrase|Paper wallet)" is selected as a recovery method$/,
+  async (method: 'Recovery phrase' | 'Paper wallet') => {
+    await ChooseRecoveryMethodPageAssert.assertRecoveryMethodIsSelected(method);
+  }
+);
+
+When(/^I click "Learn more" link on "Choose recovery method" page$/, async () => {
+  await ChooseRecoveryMethodPage.clickOnLearnMoreLink();
+});
+
+Then(/^"Secure your paper wallet" page is displayed$/, async () => {
+  await SecureYourPaperWalletPageAssert.assertSeeSecureYourPaperWalletPage();
+});
+
+When(/^I enter "([^"]*)" into "PGP key name" input$/, async (name: string) => {
+  await SecureYourPaperWalletPage.enterPgpKeyName(name);
+  testContext.save('pgpKeyName', name);
+});
+
+Then(/^public PGP key fingerprint is displayed: "([^"]*)"$/, async (fingerprint: string) => {
+  await SecureYourPaperWalletPageAssert.assertSeeFingerprint(fingerprint);
+});
+
+When(
+  /^I enter (malformed|private|too weak|valid) key into "Your PUBLIC PGP key block" input$/,
+  async (keyType: 'malformed' | 'private' | 'too weak' | 'valid') => {
+    await SecureYourPaperWalletPage.enterPublicPgpKey(keyType);
+  }
+);
+
+Then(
+  /^error message is displayed for public PGP key input with (malformed|private|too weak) key$/,
+  async (keyType: 'malformed' | 'private' | 'too weak') => {
+    await SecureYourPaperWalletPageAssert.assertSeeErrorMessage(keyType);
+  }
+);
+
+Then(/^"Let's set up your new wallet" page is displayed while creating paper wallet$/, async () => {
+  await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage(true);
+});
+
+Then(
+  /^"Save your paper wallet" page is displayed with "([^"]*)" file name$/,
+  async (expectedPaperWalletName: string) => {
+    await SaveYourPaperWalletPageAssert.assertSeeSaveYourPaperWalletPage(expectedPaperWalletName);
+  }
+);
+
+Then(
+  /^"(Your PUBLIC PGP key block|PGP key name)" input contains previously entered value$/,
+  async (input: 'Your PUBLIC PGP key block' | 'PGP key name') => {
+    if (input === 'PGP key name') {
+      const name = String(testContext.load('pgpKeyName'));
+      await SecureYourPaperWalletPageAssert.assertPgpKeyName(name);
+    } else {
+      const key = String(testContext.load('publicPgpKey'));
+      await SecureYourPaperWalletPageAssert.assertPublicPgpKey(key);
+    }
+  }
+);
+
+Then(
+  /^"Open wallet" button is (enabled|disabled) on "Save your paper wallet" page$/,
+  async (shouldBeEnabled: 'enabled' | 'disabled') => {
+    await SaveYourPaperWalletPageAssert.assertOpenWalletButtonEnabled(shouldBeEnabled === 'enabled');
+  }
+);
+
+When(
+  /^I click on "(Download|Print|Open wallet)" button on "Save your paper wallet" page$/,
+  async (button: 'Download' | 'Print' | 'Open wallet') => {
+    await SaveYourPaperWalletPage.clickOnButton(button);
+  }
+);
