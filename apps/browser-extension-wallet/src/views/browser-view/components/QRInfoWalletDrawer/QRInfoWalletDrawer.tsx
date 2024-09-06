@@ -87,6 +87,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
 
   useEffect(() => {
     if (!addresses) return;
+
     const _usedAddresses = addresses
       .filter(({ address }) => isUsedAddress(address, addressesWithUtxo))
       .map(({ address }) => {
@@ -99,7 +100,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         return {
           address,
           handles: handles.filter((handle) => handle.cardanoAddress === address).map(({ handle }) => handle),
-          stakePool: rewardAccounts[0].delegatee.currentEpoch.metadata?.ticker,
+          stakePool: rewardAccounts[0].delegatee?.currentEpoch?.metadata?.ticker,
           balance,
           tokens: {
             amount: assetsInAddress?.assets,
