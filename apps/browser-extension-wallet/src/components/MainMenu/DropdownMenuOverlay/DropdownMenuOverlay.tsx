@@ -8,6 +8,7 @@ import {
   NetworkChoise,
   Separator,
   SettingsLink,
+  SignMessageLink,
   ThemeSwitcher,
   UserInfo
 } from './components';
@@ -29,6 +30,7 @@ interface Props extends MenuProps {
   sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
+// eslint-disable-next-line complexity
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
@@ -53,6 +55,13 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
 
+  const getSignMessageLink = () => (
+    <>
+      <SignMessageLink />
+      <Separator />
+    </>
+  );
+
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
@@ -71,6 +80,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <AddressBookLink />
             <SettingsLink />
             <Separator />
+            {process.env.USE_MESSAGE_SIGNING === 'true' && !isPopup && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (

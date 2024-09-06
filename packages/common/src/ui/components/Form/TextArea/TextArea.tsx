@@ -19,6 +19,7 @@ export type textAreaProps = {
   placeholder?: string;
   value?: string;
   label?: string;
+  rows?: number;
 };
 
 export const TextArea = ({
@@ -74,6 +75,7 @@ export const TextArea = ({
         data-testid={dataTestId}
         value={localVal}
         autoSize
+        rows={props.rows || 1}
         className={cn(styles.textArea, {
           [className]: className,
           [styles.isResizable]: isResizable,

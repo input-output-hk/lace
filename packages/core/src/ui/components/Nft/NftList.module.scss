@@ -2,17 +2,17 @@
 
 .nftList {
   display: grid;
-  &.2-rows {
+  &.two-rows {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  &.3-rows {
+  &.three-rows {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  &.4-rows {
+  &.four-rows {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     column-gap: 4px;
   }
-  &.5-rows {
+  &.five-rows {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
   @media (max-width: $breakpoint-popup) {
