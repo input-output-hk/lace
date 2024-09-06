@@ -3,7 +3,6 @@ import { ChainablePromiseElement } from 'webdriverio';
 
 class CommonDappPageElements {
   private HEADER_LOGO = '[data-testid="header-logo"]';
-  private BETA_PILL = '[data-testid="beta-pill"]';
   private PAGE_TITLE = '[data-testid="layout-title"]';
   private DAPP_LOGO = '[data-testid="dapp-info-logo"]';
   private DAPP_NAME = '[data-testid="dapp-info-name"]';
@@ -11,10 +10,6 @@ class CommonDappPageElements {
 
   get headerLogo(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HEADER_LOGO);
-  }
-
-  get betaPill(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.BETA_PILL);
   }
 
   get pageTitle(): ChainablePromiseElement<WebdriverIO.Element> {
