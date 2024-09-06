@@ -299,9 +299,18 @@ Then(/^I enter a value of: ([^"]*) to the "([^"]*)" asset$/, async (valueToEnter
 Then(
   /^I enter a value of: ([^"]*) to the "([^"]*)" asset in bundle (\d) without clearing input$/,
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueWithoutClearingField(
       Number.parseFloat(valueToEnter)
     );
+  }
+);
+
+Then(
+  /^I enter an exact value of: ([^"]*) to the "([^"]*)" asset in bundle (\d)$/,
+  async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(valueToEnter, false);
   }
 );
 
