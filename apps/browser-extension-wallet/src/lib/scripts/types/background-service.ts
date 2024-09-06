@@ -31,6 +31,7 @@ export enum BrowserViewSections {
   ADDRESS_BOOK = 'address-book',
   SETTINGS = 'settings',
   HOME = 'home',
+  SIGN_MESSAGE = 'sign-message',
   COLLATERAL_SETTINGS = 'collateral-settings',
   FORGOT_PASSWORD = 'forgot_password',
   NEW_WALLET = 'new_wallet',

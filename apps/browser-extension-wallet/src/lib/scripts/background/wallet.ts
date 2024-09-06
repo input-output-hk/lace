@@ -28,7 +28,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';

@@ -2,7 +2,7 @@ import { getBaseUrlForChain } from '@src/utils/chain';
 import { useMemo } from 'react';
 import { chainHistoryHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { logger } from '@lib/wallet-api-ui';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 
 export type NetworkType = 'Mainnet' | 'Preprod' | 'Preview' | 'Sanchonet';
 

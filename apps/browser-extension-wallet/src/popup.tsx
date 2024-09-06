@@ -4,13 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { PopupView } from '@routes';
 import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
-import {
-  AppSettingsProvider,
-  AxiosClientProvider,
-  DatabaseProvider,
-  ThemeProvider,
-  AnalyticsProvider
-} from '@providers';
+import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import './styles/index.scss';
@@ -47,31 +41,29 @@ const App = (): React.ReactElement => {
       <AppSettingsProvider>
         <DatabaseProvider>
           <StoreProvider appMode={APP_MODE_POPUP}>
-            <AxiosClientProvider>
-              <CurrencyStoreProvider>
-                <HashRouter>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <ExternalLinkOpenerProvider>
-                            <MigrationContainer appMode={APP_MODE_POPUP}>
-                              <DataCheckContainer appMode={APP_MODE_POPUP}>
-                                <AddressesDiscoveryOverlay>
-                                  <BackgroundPageProvider>
-                                    {mode === 'nami' ? <NamiPopup /> : <PopupView />}
-                                  </BackgroundPageProvider>
-                                </AddressesDiscoveryOverlay>
-                              </DataCheckContainer>
-                            </MigrationContainer>
-                          </ExternalLinkOpenerProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </HashRouter>
-              </CurrencyStoreProvider>
-            </AxiosClientProvider>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_POPUP}>
+                            <DataCheckContainer appMode={APP_MODE_POPUP}>
+                              <AddressesDiscoveryOverlay>
+                                <BackgroundPageProvider>
+                                  {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                </BackgroundPageProvider>
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
           </StoreProvider>
         </DatabaseProvider>
       </AppSettingsProvider>
