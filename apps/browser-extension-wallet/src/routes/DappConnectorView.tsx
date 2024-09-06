@@ -64,7 +64,7 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (hasNoAvailableWallet) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
         <DappError
           title={t('dapp.noWallet.heading')}
           description={t('dapp.noWallet.description')}
@@ -80,7 +80,7 @@ export const DappConnectorView = (): React.ReactElement => {
     );
   } else if (isSharedWallet) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
         <DappError
           title={t('dapp.sharedWallet.heading')}
           description={t('dapp.sharedWallet.description')}
@@ -110,7 +110,7 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
         <Switch>
           <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
           <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />

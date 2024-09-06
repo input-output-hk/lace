@@ -224,7 +224,6 @@ export enum PostHogAction {
   // Dapp Connector
   DappConnectorAuthorizeDappAuthorizeClick = 'dapp connector | authorize dapp | authorize | click',
   DappConnectorAuthorizeDappCancelClick = 'dapp connector | authorize dapp | cancel | click',
-  DappConnectorAuthorizeDappDappConnectorBetaClick = 'dapp connector | authorize dapp | dapp connector beta | click',
   DappConnectorAuthorizeDappConnectionAlwaysClick = 'dapp connector | authorize dapp | dapp connection | always | click',
   DappConnectorAuthorizeDappConnectionOnlyOnceClick = 'dapp connector | authorize dapp | dapp connection | only once | click',
   // User
