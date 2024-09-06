@@ -232,6 +232,7 @@ When(/^I click "Help and support" button during wallet setup$/, async () => {
 });
 
 Given(/^I restore a wallet$/, async () => {
+  await OnboardingMainPage.restoreWalletButton.waitForClickable();
   await OnboardingMainPage.restoreWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage(
     'Restore',
