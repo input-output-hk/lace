@@ -64,8 +64,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet || !isSharedWallet);
-  }, [isInMemoryWallet, isWalletLocked, isSharedWallet]);
+    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
+  }, [isInMemoryWallet, isWalletLocked]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
