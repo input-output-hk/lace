@@ -67,6 +67,9 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
 
     const baseUrl = getBaseUrlForChain(chainName);
 
+    // Sanchonet does not have a handle provider
+    const supportsHandleResolver = chainName !== 'Sanchonet';
+
     // This is used in place of the handle provider for environments where the handle provider is not available
     const noopHandleResolver: HandleProvider = {
       resolveHandles: async () => [],
@@ -85,7 +88,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           logger,
           paymentScript,
           stakingScript,
-          handleProvider: baseUrl
+          handleProvider: supportsHandleResolver
             ? handleHttpProvider({
                 adapter: axiosFetchAdapter,
                 baseUrl,
@@ -114,7 +117,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         logger,
         ...providers,
         stores,
-        handleProvider: baseUrl
+        handleProvider: supportsHandleResolver
           ? handleHttpProvider({
               adapter: axiosFetchAdapter,
               baseUrl,
