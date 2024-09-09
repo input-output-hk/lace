@@ -227,7 +227,6 @@
   "core.coinInputSelection.tokens": "Tokens",
   "core.confirmationBanner.agree": "Agree",
   "core.confirmationBanner.reject": "Reject",
-  "core.dapp.beta": "DApp connector Beta",
   "core.dappTransaction.adaTooltip": "Ada is Cardano's native token and does not have an asset and policy ID.",
   "core.dappTransaction.address": "Address",
   "core.dappTransaction.additionalInformation": "Additional information",

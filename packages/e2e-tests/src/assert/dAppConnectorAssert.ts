@@ -38,8 +38,6 @@ class DAppConnectorAssert {
   async assertSeeHeader() {
     const commonDappPageElements = new CommonDappPageElements();
     await commonDappPageElements.headerLogo.waitForDisplayed();
-    await commonDappPageElements.betaPill.waitForDisplayed();
-    expect(await commonDappPageElements.betaPill.getText()).to.equal(await t('core.dapp.beta'));
   }
 
   async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
