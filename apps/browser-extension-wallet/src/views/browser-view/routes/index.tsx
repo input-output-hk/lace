@@ -30,6 +30,11 @@ import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
+import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
+import { useBackgroundServiceAPIContext } from '@providers';
+import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { useTranslation } from 'react-i18next';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -109,8 +114,32 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { areExperimentsLoading } = useExperimentsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
+  const { t } = useTranslation();
 
   const location = useLocation<{ background?: Location<unknown> }>();
+
+  const backgroundServices = useBackgroundServiceAPIContext();
+  const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
+
+  useEffect(() => {
+    getBackgroundStorage()
+      .then((storage) => setNamiMigration(storage.namiMigration))
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
+      if (type === MessageTypes.CHANGE_MODE && data.mode !== namiMigration?.mode) {
+        const migration: BackgroundStorage['namiMigration'] = {
+          ...namiMigration,
+          mode: data.mode
+        };
+
+        setNamiMigration(migration);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [backgroundServices, namiMigration]);
 
   useEffect(() => {
     const isCreatingWallet = [routes.newWallet.root, routes.sharedWallet.root].some((path) =>
@@ -161,6 +190,16 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
       }
     };
   });
+
+  if (namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet) {
+    return (
+      <Lock
+        message={t('general.lock.namiMode.message')}
+        description={t('general.lock.namiMode.description')}
+        icon={warningIcon}
+      />
+    );
+  }
 
   if (isWalletLocked()) {
     return (

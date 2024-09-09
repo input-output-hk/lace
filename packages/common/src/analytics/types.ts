@@ -221,6 +221,7 @@ export enum PostHogAction {
   SettingsPaperWalletPasswordNextClick = 'settings | paper wallet - generate pdf | password | click',
   SettingsPaperWalletDownloadClick = 'settings | paper wallet - generate pdf | download | click',
   SettingsPaperWalletPrintClick = 'settings | paper wallet - generate pdf | print | click',
+  SettingsSwitchToNamiClick = 'nami mode | switch to nami mode | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

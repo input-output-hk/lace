@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+
 import './app/components/styles.css';
 import '@fontsource/ubuntu/latin.css';
 
@@ -73,8 +74,7 @@ export const theme = extendTheme({
     Switch,
   },
   config: {
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    useSystemColorMode: colorMode ? false : true,
+    initialColorMode: colorMode,
   },
   styles: {
     global: {
