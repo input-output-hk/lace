@@ -19,7 +19,6 @@ import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutputByAddress } from '@src/utils/get-transaction-total-output';
 import { getTotalAssetsByAddress } from '@src/utils/assets-transformers';
 import { formatBalance } from '@src/utils/format-number';
-import { isUsedAddress } from '@src/utils/is-used-addresses';
 
 type WalletData = {
   address: Wallet.Cardano.PaymentAddress;
@@ -37,7 +36,6 @@ const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
 const useWalletInformation = () =>
   useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    addresses: state?.walletInfo?.addresses,
     handles: state?.walletState?.handles,
     utxos: state?.walletState?.utxo.total,
     rewardAccounts: state?.walletState?.delegation.rewardAccounts
@@ -47,10 +45,10 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { name, addresses, handles, utxos, rewardAccounts } = useWalletInformation();
+  const { name, handles, utxos, rewardAccounts } = useWalletInformation();
   const [usedAddresses, setUsedAddresses] = useState<WalletData[]>();
   const [, closeDrawer] = useDrawer();
-  const { nextUnusedAddress, generateUnusedAddress, clearUnusedAddress } = useNextUnusedAddress();
+  const { unusedAddresses, currentUnusedAddress, generateUnusedAddress, clearUnusedAddress } = useNextUnusedAddress();
   const [isReceiveInAdvancedMode] = useLocalStorage('isReceiveInAdvancedMode', false);
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
@@ -76,6 +74,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const isAdvancedModeEnabled = useAdvancedReceived && isReceiveInAdvancedMode;
 
   const { inMemoryWallet } = useWalletStore();
+  const addresses = useObservable(inMemoryWallet.addresses$);
   const assets = useObservable(inMemoryWallet.assetInfo$);
 
   const { addressesWithUtxo, outputs } = useMemo(() => {
@@ -85,11 +84,16 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     return { addressesWithUtxo: _addressesWithUtxo, outputs: _outputs };
   }, [utxos]);
 
+  const isUnusedAddress = useCallback(
+    (address: Wallet.Cardano.PaymentAddress) => address === unusedAddresses?.[0].address,
+    [unusedAddresses]
+  );
+
   useEffect(() => {
     if (!addresses) return;
 
     const _usedAddresses = addresses
-      .filter(({ address }) => isUsedAddress(address, addressesWithUtxo))
+      .filter(({ address }) => !isUnusedAddress(address))
       .map(({ address }) => {
         const assetsInAddress = assets && getTotalAssetsByAddress(outputs, assets, address);
 
@@ -110,26 +114,33 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
       });
 
     setUsedAddresses(_usedAddresses);
-  }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos]);
+  }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos, unusedAddresses, isUnusedAddress]);
 
   useEffect(() => {
-    if (addressesWithUtxo && isUsedAddress(nextUnusedAddress, addressesWithUtxo)) {
+    if (isAdvancedModeEnabled && usedAddresses?.length === 0) {
+      generateUnusedAddress();
+    }
+  }, [isAdvancedModeEnabled, usedAddresses, generateUnusedAddress]);
+
+  useEffect(() => {
+    if (!isUnusedAddress(currentUnusedAddress) && usedAddresses?.length > 0) {
       clearUnusedAddress();
     }
-  }, [addressesWithUtxo, nextUnusedAddress, clearUnusedAddress]);
+  }, [currentUnusedAddress, clearUnusedAddress, isUnusedAddress, usedAddresses]);
 
-  if (!usedAddresses) {
-    return null;
-  }
+  const isAdditionalAddressesVisible = useMemo(
+    () => usedAddresses?.length > 1 || (usedAddresses?.length > 0 && currentUnusedAddress),
+    [currentUnusedAddress, usedAddresses]
+  );
 
   return (
     <Flex flexDirection="column" justifyContent="space-between" alignItems="center">
       <div className={styles.infoContainer}>
-        {!isAdvancedModeEnabled ? (
+        {!isAdvancedModeEnabled && addresses && (
           <Flex flexDirection="column" gap="$16">
             <AddressCard
               name={name}
-              address={usedAddresses[0].address}
+              address={addresses[0].address}
               getQRCodeOptions={getQRCodeOpts}
               onCopyClick={handleCopyAddress}
             />
@@ -143,41 +154,50 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
               />
             ))}
           </Flex>
-        ) : (
+        )}
+        {isAdvancedModeEnabled && (
           <>
-            <AddressCard
-              address={usedAddresses[0].address}
-              getQRCodeOptions={getQRCodeOpts}
-              onCopyClick={handleCopyAddress}
-              tagWith={{ label: translations.mainAddressTag }}
-              metadata={{
-                handles: usedAddresses[0].handles,
-                balance: usedAddresses[0].balance,
-                tokens: {
-                  amount: usedAddresses[0].tokens.amount,
-                  nfts: usedAddresses[0].tokens.nfts
-                },
-                stakePool: usedAddresses[0].stakePool
-              }}
-            />
-            <Divider orientation="center">{translations.additionalAddressesTitle}</Divider>
-            {usedAddresses.slice(1).map(({ address, handles: adaHandles, balance, tokens, stakePool }) => (
+            {usedAddresses?.length > 0 && (
               <AddressCard
-                key={address}
-                address={address}
+                address={usedAddresses[0].address}
                 getQRCodeOptions={getQRCodeOpts}
                 onCopyClick={handleCopyAddress}
+                tagWith={{ label: translations.mainAddressTag }}
                 metadata={{
-                  handles: adaHandles,
-                  balance,
-                  tokens,
-                  stakePool
+                  handles: usedAddresses[0].handles,
+                  balance: usedAddresses[0].balance,
+                  tokens: {
+                    amount: usedAddresses[0].tokens.amount,
+                    nfts: usedAddresses[0].tokens.nfts
+                  },
+                  stakePool: usedAddresses[0].stakePool
                 }}
               />
-            ))}
-            {nextUnusedAddress && (
+            )}
+            {isAdditionalAddressesVisible && (
+              <Divider orientation="center">{translations.additionalAddressesTitle}</Divider>
+            )}
+            {usedAddresses?.length > 1 && (
+              <>
+                {usedAddresses.slice(1).map(({ address, handles: adaHandles, balance, tokens, stakePool }) => (
+                  <AddressCard
+                    key={address}
+                    address={address}
+                    getQRCodeOptions={getQRCodeOpts}
+                    onCopyClick={handleCopyAddress}
+                    metadata={{
+                      handles: adaHandles,
+                      balance,
+                      tokens,
+                      stakePool
+                    }}
+                  />
+                ))}
+              </>
+            )}
+            {currentUnusedAddress && (
               <AddressCard
-                address={nextUnusedAddress}
+                address={currentUnusedAddress}
                 getQRCodeOptions={getQRCodeOpts}
                 onCopyClick={handleCopyAddress}
                 highlighted
@@ -201,7 +221,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
       </div>
       {isAdvancedModeEnabled && (
         <Flex w="$fill" mb="$16" gap="$16" flexDirection="column" className={styles.addNewAddressContainer}>
-          {nextUnusedAddress && (
+          {currentUnusedAddress && (
             <Banner
               message={translations.newAddressBannerText}
               customIcon={<ExclamationCircleOutlined className={styles.addNewAddressBannerIcon} />}
@@ -210,7 +230,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
             />
           )}
           <Button.Secondary
-            disabled={!!nextUnusedAddress}
+            disabled={!!currentUnusedAddress}
             w="$fill"
             icon={<PlusCircleOutlined />}
             onClick={generateUnusedAddress}
