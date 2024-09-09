@@ -43,6 +43,8 @@ export const ThemeProvider = ({ children, customTheme, defaultThemeName }: Theme
       setTheme(themes[name]);
       // save on local storage
       localStorage.setItem('mode', name);
+      // chakra-ui related theme settings
+      localStorage.setItem('chakra-ui-color-mode', name);
       // set css values for chosen theme
       document.documentElement.dataset.theme = name;
     },

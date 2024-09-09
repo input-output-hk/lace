@@ -13,7 +13,9 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
     tokenPrices$: RemoteApiPropertyType.HotObservable
   },
   handleOpenBrowser: RemoteApiPropertyType.MethodReturningPromise,
+  handleOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeTheme: RemoteApiPropertyType.MethodReturningPromise,
+  handleChangeMode: RemoteApiPropertyType.MethodReturningPromise,
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,

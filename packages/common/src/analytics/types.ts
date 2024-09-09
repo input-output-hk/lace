@@ -211,6 +211,7 @@ export enum PostHogAction {
   SettingsCustomSubmitApiClick = 'settings | custom submit api | click',
   SettingsCustomSubmitApiXClick = 'settings | custom submit api | x | click',
   SettingsCustomSubmitApiEnableClick = 'settings | custom submit api | enable | click',
+  SettingsSwitchToNamiClick = 'nami mode | switch to nami mode | click',
   // Recieve section
   ReceiveClick = 'receive | receive | click',
   ReceiveCopyAddressIconClick = 'receive | receive | copy address icon | click',

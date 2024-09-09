@@ -121,6 +121,14 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
+export const closeAllLaceWindows = async (): Promise<void> => {
+  const openTabs = await tabs.query({ title: 'Lace' });
+  // Close all previously opened lace windows
+  for (const tab of openTabs) {
+    await tabs.remove(tab.id);
+  }
+};
+
 export const ensureUiIsOpenAndLoaded = async (
   services: WalletManagementServices,
   url?: string,
@@ -135,11 +143,7 @@ export const ensureUiIsOpenAndLoaded = async (
 
   const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
   if (isHardwareWallet) {
-    const openTabs = await tabs.query({ title: 'Lace' });
-    // Close all previously opened lace windows
-    for (const tab of openTabs) {
-      tabs.remove(tab.id);
-    }
+    await closeAllLaceWindows();
   }
 
   const tab = await launchCip30Popup(url, windowType);

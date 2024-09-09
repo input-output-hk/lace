@@ -16,11 +16,17 @@ export interface ChangeThemeData {
   theme: themes;
 }
 
+export interface ChangeModeData {
+  mode: 'lace' | 'nami';
+  completed?: boolean;
+}
+
 export enum MessageTypes {
   OPEN_BROWSER_VIEW = 'open-browser-view',
   CHANGE_THEME = 'change-theme',
   HTTP_CONNECTION = 'http-connnection',
-  OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings'
+  OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings',
+  CHANGE_MODE = 'change-mode'
 }
 
 export enum BrowserViewSections {
@@ -55,14 +61,21 @@ interface OpenBrowserMessage {
   type: MessageTypes.OPEN_BROWSER_VIEW | MessageTypes.OPEN_COLLATERAL_SETTINGS;
   data: OpenBrowserData;
 }
-export type Message = ChangeThemeMessage | HTTPConnectionMessage | OpenBrowserMessage;
+
+interface ChangeMode {
+  type: MessageTypes.CHANGE_MODE;
+  data: ChangeModeData;
+}
+export type Message = ChangeThemeMessage | HTTPConnectionMessage | OpenBrowserMessage | ChangeMode;
 
 export type BackgroundService = {
   handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
+  handleOpenPopup: () => Promise<void>;
   requestMessage$: Subject<Message>;
   migrationState$: BehaviorSubject<MigrationState | undefined>;
   coinPrices: CoinPrices;
   handleChangeTheme: (data: ChangeThemeData) => void;
+  handleChangeMode: (data: ChangeModeData) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;
