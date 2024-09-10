@@ -1,12 +1,9 @@
 name: Sync main with Upstream
 
 on:
-  schedule:
-    - cron: '0 23 * * *'
   workflow_dispatch:
 
 jobs:
-
   sync:
     runs-on: ubuntu-latest
     permissions:
@@ -40,24 +37,7 @@ jobs:
             git checkout --track origin/main
           fi
 
-      - name: Try to merge upstream/main into main
-        id: rebase
-        run: |
-          if git merge upstream/main ; then
-            echo "conflict=false" >> $GITHUB_ENV
-          else
-            echo "conflict=true" >> $GITHUB_ENV
-          fi
-
-      - name: Push changes if no conflicts
-        if: env.conflict == 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.UPSTREAM_SYNC_PAT }}
-        run: |
-          git push -u origin main:main
-
-      - name: Create a branch and push if conflicts exist
-        if: env.conflict == 'true'
+      - name: Create a branch and push
         env:
           GITHUB_TOKEN: ${{ secrets.UPSTREAM_SYNC_PAT }}
         run: |
@@ -67,8 +47,7 @@ jobs:
           git reset --hard upstream/main
           git push -u origin conflict-branch:conflict-branch --force
 
-      - name: Create Pull Request if conflicts exist, and the previous PR is already closed
-        if: env.conflict == 'true'
+      - name: Create Pull Request from conflict-branch if the previous PR is already closed
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
