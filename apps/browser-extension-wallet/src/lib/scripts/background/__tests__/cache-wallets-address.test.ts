@@ -34,7 +34,10 @@ describe('cacheActivatedWalletAddressSubscription', () => {
 
   it('should subscribe and update metadata', () => {
     const mockWalletManager = {
-      activeWallet$: of({ addresses$: of([{ address: 'address1' }]) }),
+      activeWallet$: of({
+        observableWallet: { addresses$: of([{ address: 'address1' }]) },
+        props: { walletId: 'walletId' }
+      }),
       activeWalletId$: of({ walletId: 'walletId' })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
@@ -66,8 +69,18 @@ describe('cacheActivatedWalletAddressSubscription', () => {
           f: { walletId: 'walletId2' }
         }),
         activeWallet$: eachSubscription(
-          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address1' }] }) } }),
-          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address2' }] }) } })
+          cold('a', {
+            a: {
+              observableWallet: { addresses$: cold('a', { a: [{ address: 'address1' }] }) },
+              props: { walletId: 'walletId1' }
+            }
+          }),
+          cold('a', {
+            a: {
+              observableWallet: { addresses$: cold('a', { a: [{ address: 'address2' }] }) },
+              props: { walletId: 'walletId2' }
+            }
+          })
         )
       } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
       const mockWalletRepository = {

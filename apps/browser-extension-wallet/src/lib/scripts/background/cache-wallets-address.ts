@@ -14,7 +14,7 @@ export const walletMetadataWithAddresses = (
       activeWallet
         ? walletManager.activeWallet$.pipe(
             filter(isNotNil),
-            switchMap((observableWallet) => observableWallet.addresses$),
+            switchMap(({ observableWallet }) => observableWallet.addresses$),
             map((addresses) => addresses.map(({ address }) => address)),
             blockingWithLatestFrom(
               walletRepository.wallets$.pipe(
