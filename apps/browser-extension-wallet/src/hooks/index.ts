@@ -26,4 +26,3 @@ export * from './useWalletAvatar';
 export * from './useActionExecution';
 export * from './useCustomSubmitApi';
 export * from './useSharedWalletData';
-export * from './useNextUnusedAddress';

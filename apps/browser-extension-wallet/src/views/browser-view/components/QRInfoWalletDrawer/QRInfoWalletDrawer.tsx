@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/no-null */
+/* eslint-disable unicorn/no-null, consistent-return */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ADDRESS_CARD_QR_CODE_SIZE, AddressCard, HandleAddressCard } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
@@ -9,11 +9,11 @@ import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { Banner, useKeyboardShortcut, useObservable } from '@lace/common';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ExclamationCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { useLocalStorage, useNextUnusedAddress } from '@hooks';
+import { useChainHistoryProvider, useLocalStorage } from '@hooks';
 import { Divider } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutputByAddress } from '@src/utils/get-transaction-total-output';
@@ -33,6 +33,54 @@ type WalletData = {
 
 const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
 
+/**
+ * Gets whether the given address has a transaction history.
+ *
+ * @param address The address to query.
+ * @param chainHistoryProvider The chain history provider where to fetch the history from.
+ */
+const addressHasTx = async (
+  address: Wallet.Cardano.PaymentAddress,
+  chainHistoryProvider: Wallet.ChainHistoryProvider
+): Promise<boolean> => {
+  const txs = await chainHistoryProvider.transactionsByAddresses({
+    addresses: [address],
+    pagination: {
+      limit: 1,
+      startAt: 0
+    }
+  });
+
+  return txs.totalResultCount > 0;
+};
+
+/**
+ * Gets the last known unused address from the tracked addresses.
+ *
+ * @param knownAddresses The known addresses.
+ * @param chainHistoryProvider The chain history provider where to fetch the history from.
+ */
+const getCurrentUnusedAddress = async (
+  knownAddresses: Wallet.WalletAddress[],
+  chainHistoryProvider: Wallet.ChainHistoryProvider
+): Promise<Wallet.WalletAddress | undefined> => {
+  if (!knownAddresses || knownAddresses.length === 0) return undefined;
+
+  if (Wallet.isScriptAddress(knownAddresses[0])) return undefined;
+
+  const sortedAddresses: Wallet.KeyManagement.GroupedAddress[] = [...knownAddresses]
+    .filter((addr): addr is Wallet.KeyManagement.GroupedAddress => Wallet.isKeyHashAddress(addr))
+    .sort((a, b) => b.index - a.index);
+
+  const latestAddress = sortedAddresses[0];
+
+  const isEmpty = !(await addressHasTx(latestAddress.address, chainHistoryProvider));
+
+  if (isEmpty) return latestAddress;
+
+  return undefined;
+};
+
 const useWalletInformation = () =>
   useWalletStore((state) => ({
     name: state?.walletInfo?.name,
@@ -47,9 +95,12 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const { theme } = useTheme();
   const { name, handles, utxos, rewardAccounts } = useWalletInformation();
   const [usedAddresses, setUsedAddresses] = useState<WalletData[]>();
+  const [unusedAddress, setUnusedAddress] = useState<Wallet.Cardano.PaymentAddress | undefined>();
+  const [currentUnusedAddress, setCurrentUnusedAddress] = useState<Wallet.Cardano.PaymentAddress | undefined>();
   const [, closeDrawer] = useDrawer();
-  const { unusedAddresses, currentUnusedAddress, generateUnusedAddress, clearUnusedAddress } = useNextUnusedAddress();
   const [isReceiveInAdvancedMode] = useLocalStorage('isReceiveInAdvancedMode', false);
+  const [{ chainName }] = useAppSettingsContext();
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
 
@@ -84,16 +135,25 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     return { addressesWithUtxo: _addressesWithUtxo, outputs: _outputs };
   }, [utxos]);
 
-  const isUnusedAddress = useCallback(
-    (address: Wallet.Cardano.PaymentAddress) => address === unusedAddresses?.[0].address,
-    [unusedAddresses]
-  );
+  const generateUnusedAddress = useCallback(async () => {
+    const unused = await inMemoryWallet.getNextUnusedAddress();
+    setUnusedAddress(unused[0].address);
+  }, [inMemoryWallet, setUnusedAddress]);
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      const address = await getCurrentUnusedAddress(addresses, chainHistoryProvider);
+      setCurrentUnusedAddress(address?.address);
+    };
+
+    fetchAddress();
+  }, [addresses, chainHistoryProvider, utxos]);
 
   useEffect(() => {
     if (!addresses) return;
 
     const _usedAddresses = addresses
-      .filter(({ address }) => !isUnusedAddress(address))
+      .filter(({ address }) => address !== currentUnusedAddress)
       .map(({ address }) => {
         const assetsInAddress = assets && getTotalAssetsByAddress(outputs, assets, address);
 
@@ -114,19 +174,25 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
       });
 
     setUsedAddresses(_usedAddresses);
-  }, [addresses, addressesWithUtxo, assets, handles, outputs, rewardAccounts, utxos, unusedAddresses, isUnusedAddress]);
+    setUnusedAddress(currentUnusedAddress);
+  }, [
+    addresses,
+    addressesWithUtxo,
+    assets,
+    handles,
+    outputs,
+    rewardAccounts,
+    utxos,
+    unusedAddress,
+    setUnusedAddress,
+    currentUnusedAddress
+  ]);
 
   useEffect(() => {
     if (isAdvancedModeEnabled && usedAddresses?.length === 0) {
       generateUnusedAddress();
     }
   }, [isAdvancedModeEnabled, usedAddresses, generateUnusedAddress]);
-
-  useEffect(() => {
-    if (!isUnusedAddress(currentUnusedAddress) && usedAddresses?.length > 0) {
-      clearUnusedAddress();
-    }
-  }, [currentUnusedAddress, clearUnusedAddress, isUnusedAddress, usedAddresses]);
 
   const isAdditionalAddressesVisible = useMemo(
     () => usedAddresses?.length > 1 || (usedAddresses?.length > 0 && currentUnusedAddress),
@@ -195,9 +261,9 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
                 ))}
               </>
             )}
-            {currentUnusedAddress && (
+            {unusedAddress && (
               <AddressCard
-                address={currentUnusedAddress}
+                address={unusedAddress}
                 getQRCodeOptions={getQRCodeOpts}
                 onCopyClick={handleCopyAddress}
                 highlighted
@@ -221,7 +287,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
       </div>
       {isAdvancedModeEnabled && (
         <Flex w="$fill" mb="$16" gap="$16" flexDirection="column" className={styles.addNewAddressContainer}>
-          {currentUnusedAddress && (
+          {unusedAddress && (
             <Banner
               message={translations.newAddressBannerText}
               customIcon={<ExclamationCircleOutlined className={styles.addNewAddressBannerIcon} />}
@@ -230,7 +296,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
             />
           )}
           <Button.Secondary
-            disabled={!!currentUnusedAddress}
+            disabled={!!unusedAddress}
             w="$fill"
             icon={<PlusCircleOutlined />}
             onClick={generateUnusedAddress}
