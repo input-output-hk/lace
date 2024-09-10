@@ -14,6 +14,7 @@ import {
 import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
+const DAPP_CONNECTOR_REGEX = new RegExp(/dappconnector/i);
 
 type WindowPosition = {
   top: number;
@@ -134,12 +135,10 @@ export const ensureUiIsOpenAndLoaded = async (
     : undefined;
 
   const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
-  if (isHardwareWallet) {
-    const openTabs = await tabs.query({ title: 'Lace' });
-    // Close all previously opened lace windows
-    for (const tab of openTabs) {
-      tabs.remove(tab.id);
-    }
+  const openTabs = await tabs.query({ title: 'Lace' });
+  // Close all previously opened lace dapp connector windows
+  for (const tab of openTabs) {
+    if (DAPP_CONNECTOR_REGEX.test(tab.url)) tabs.remove(tab.id);
   }
 
   const tab = await launchCip30Popup(url, windowType);
