@@ -154,17 +154,22 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
 
     const _usedAddresses = addresses
       .filter(({ address }) => address !== currentUnusedAddress)
-      .map(({ address }) => {
+      .map(({ address, rewardAccount }) => {
         const assetsInAddress = assets && getTotalAssetsByAddress(outputs, assets, address);
 
         const totalLovelace = getTransactionTotalOutputByAddress(outputs, address);
         const totalAda = Wallet.util.lovelacesToAdaString(totalLovelace.toString());
         const balance = formatBalance(Number.parseFloat(totalAda));
+        const addressRewardAccount = rewardAccounts.find((acct) => acct.address === rewardAccount);
+        const mostRecentMetadata =
+          addressRewardAccount?.delegatee?.nextNextEpoch ||
+          addressRewardAccount?.delegatee?.nextEpoch ||
+          addressRewardAccount?.delegatee?.currentEpoch;
 
         return {
           address,
           handles: handles.filter((handle) => handle.cardanoAddress === address).map(({ handle }) => handle),
-          stakePool: rewardAccounts[0].delegatee?.currentEpoch?.metadata?.ticker,
+          stakePool: mostRecentMetadata?.metadata?.ticker,
           balance,
           tokens: {
             amount: assetsInAddress?.assets,
