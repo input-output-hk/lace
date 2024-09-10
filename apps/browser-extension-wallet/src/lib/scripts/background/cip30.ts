@@ -57,7 +57,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   signData: pDebounce(async () => {
     try {
       const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
-      const ready = userPromptService.readyToSignData();
+      const ready = await userPromptService.readyToSignData();
       if (!ready) return false;
       return cancelOnTabClose(tab);
     } catch (error) {
