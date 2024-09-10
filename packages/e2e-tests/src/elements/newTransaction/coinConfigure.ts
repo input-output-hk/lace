@@ -68,10 +68,10 @@ export class CoinConfigure {
     return Number(value);
   };
 
-  fillTokenValue = async (valueToEnter: number): Promise<void> => {
+  fillTokenValue = async (valueToEnter: number | string, loseFocus = true): Promise<void> => {
     await this.input.waitForClickable();
     await setInputFieldValue(await this.input, String(valueToEnter));
-    await this.clickToLoseFocus();
+    if (loseFocus) await this.clickToLoseFocus();
   };
 
   fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {

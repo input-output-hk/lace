@@ -114,7 +114,7 @@ Feature: ADA handle - popup view
     And click on the NFTs button in the coin selector dropdown
     Then NFT with name: "$test_handle_1" is displayed in coin selector
     And I see ADA handle NFT with custom image on the Coin selector page
-    When I click on NFT with name: "$test_handle_1" in asset selector
+    When I click on NFT with name: "$test_handle_1"
     Then the "$test_hand..." asset is displayed in bundle 1
 
   @LW-7434

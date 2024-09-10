@@ -212,8 +212,8 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And I enter a valid "shelley" address in the bundle 1 recipient's address
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin" in asset selector
-    Then the NFT displays 1 in the value field
+    When I click on NFT with name: "Ibilecoin"
+    Then I see 1 as displayed value
 
   @LW-3559 @Testnet @Mainnet
   Scenario Outline: Popup View - Single <value> validation
