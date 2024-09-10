@@ -161,10 +161,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
         const totalAda = Wallet.util.lovelacesToAdaString(totalLovelace.toString());
         const balance = formatBalance(Number.parseFloat(totalAda));
         const addressRewardAccount = rewardAccounts.find((acct) => acct.address === rewardAccount);
-        const mostRecentMetadata =
-          addressRewardAccount?.delegatee?.nextNextEpoch ||
-          addressRewardAccount?.delegatee?.nextEpoch ||
-          addressRewardAccount?.delegatee?.currentEpoch;
+        const mostRecentMetadata = addressRewardAccount?.delegatee?.nextNextEpoch;
 
         return {
           address,
