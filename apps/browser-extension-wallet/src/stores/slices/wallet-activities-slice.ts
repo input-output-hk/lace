@@ -335,6 +335,10 @@ const mapWalletActivities = memoize(
         )
           return 1;
 
+        // ensure pending tx's always appear on top, separated from the condition above for readability
+        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return -1;
+        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return 1;
+
         // otherwise sort by date
         return (secondTx.date?.getTime() || 0) - (firstTx.date?.getTime() || 0);
       }),
