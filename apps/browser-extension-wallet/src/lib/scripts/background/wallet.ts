@@ -1,7 +1,13 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY } from 'rxjs';
 import { getProviders } from './config';
-import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery, createPersonalWallet, storage } from '@cardano-sdk/wallet';
+import {
+  DEFAULT_LOOK_AHEAD_SEARCH,
+  HDSequentialDiscovery,
+  createPersonalWallet,
+  storage,
+  createSharedWallet
+} from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import {
   AnyWallet,
@@ -20,10 +26,11 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
-import { Cardano, HandleProvider, NotImplementedError } from '@cardano-sdk/core';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
+import { SharedWalletScriptKind } from '@lace/core';
+import { getBaseUrlForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 
 const logger = console;
@@ -58,9 +65,43 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
     const providers = await getProviders(chainName);
-    if (wallet.type === WalletType.Script || typeof accountIndex !== 'number') {
-      throw new NotImplementedError('Script wallet support is not implemented');
+
+    const baseUrl = getBaseUrlForChain(chainName);
+
+    // Sanchonet does not have a handle provider
+    const supportsHandleResolver = chainName !== 'Sanchonet';
+
+    // This is used in place of the handle provider for environments where the handle provider is not available
+    const noopHandleResolver: HandleProvider = {
+      resolveHandles: async () => [],
+      healthCheck: async () => ({ ok: true }),
+      getPolicyIds: async () => []
+    };
+
+    if (wallet.type === WalletType.Script) {
+      const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
+      const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
+
+      return createSharedWallet(
+        { name: wallet.metadata.name },
+        {
+          ...providers,
+          logger,
+          paymentScript,
+          stakingScript,
+          handleProvider: supportsHandleResolver
+            ? handleHttpProvider({
+                adapter: axiosFetchAdapter,
+                baseUrl,
+                logger
+              })
+            : noopHandleResolver,
+          stores,
+          witnesser
+        }
+      );
     }
+
     const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
     if (!walletAccount) {
       throw new Error('Wallet account not found');
@@ -71,27 +112,19 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
-    const mockHandleResolver: HandleProvider = {
-      resolveHandles: async () => [],
-      healthCheck: async () => ({ ok: true }),
-      getPolicyIds: async () => []
-    };
-
-    const baseUrl = HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic];
-
     return createPersonalWallet(
       { name: walletAccount.metadata.name },
       {
         logger,
         ...providers,
         stores,
-        handleProvider: baseUrl
+        handleProvider: supportsHandleResolver
           ? handleHttpProvider({
               adapter: axiosFetchAdapter,
-              baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+              baseUrl,
               logger
             })
-          : mockHandleResolver,
+          : noopHandleResolver,
         addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
         bip32Account

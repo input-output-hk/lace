@@ -23,7 +23,7 @@ describe('Testing UnlockWallet component', () => {
   window.ResizeObserver = ResizeObserver;
   const props: UnlockWalletProps = {
     onUnlock: jest.fn(),
-    passwordInput: { value: '', handleChange: jest.fn() }
+    passwordInput: { handleChange: jest.fn() }
   };
 
   const WrappedUnlockWallet = (unlockProps: UnlockWalletProps) => (
@@ -56,14 +56,6 @@ describe('Testing UnlockWallet component', () => {
     expect(input).toBeVisible();
     expect(input).toBeEnabled();
     expect(input).toHaveAttribute('type', 'password');
-  });
-
-  test('should have the password value in the input', async () => {
-    const { findByTestId } = render(<WrappedUnlockWallet {...props} passwordInput={{ value: 'testpass' }} />);
-
-    const input = await findByTestId(passwordInputTestId);
-    expect(input).toBeVisible();
-    expect(input).toHaveValue('testpass');
   });
 
   test('should display an error message if the password is invalid', async () => {

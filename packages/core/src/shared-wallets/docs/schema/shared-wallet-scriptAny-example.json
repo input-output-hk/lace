@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "sharedWalletName": "MySharedWallet",
+    "coSigners": [
+      {
+        "name": "Alice",
+        "sharedWalletKey": "e0a8a80a28f205b69029ac8448265da2cef6e2c70d6a91fcd699ea859df45860f6788ff36f7ed44ccf564974ad2c033e640a5f25b943308935d7103612ef2c1f"
+      },
+      {
+        "name": "Bob",
+        "sharedWalletKey": "979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d"
+      }
+    ]
+  },
+  "nativeScript": {
+    "tag": "any",
+    "scripts": [
+      {
+        "tag": "pubkey",
+        "pubkey": "8abf8e53f1532d344cbeae9be1ce14b6e9b70c22db91e6deab81b90b2f3a5904"
+      },
+      {
+        "tag": "pubkey",
+        "pubkey": "21a6fc6f0463e07aa9b28bd81eb7fe2e6fec81050d7dae586381e4356a5fe9d0"
+      }
+    ]
+  }
+}

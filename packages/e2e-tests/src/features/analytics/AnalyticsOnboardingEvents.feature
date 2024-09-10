@@ -12,16 +12,18 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate that <number_of_events> analytics event(s) have been sent
     Examples:
       | enable_analytics | number_of_events |
-      | accept           | 6                |
+      | accept           | 7                |
       | reject           | 1                |
 
   @LW-7363
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
+    Then I validate latest analytics single event "onboarding | restore wallet revamp paper wallet | choose mode | next | click"
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | restore wallet revamp |  enter your recovery phrase  | next | click"
     When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -32,7 +34,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | $create_alias                                                                                |
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
-  @LW-7365
+  @LW-7365 @Pending @issue=LW-11298
   Scenario: Analytics - Onboarding new wallet events
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner
@@ -41,6 +43,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
     When I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
+    When I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click"
     When I click "Next" button during wallet setup
@@ -56,7 +59,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | onboarding \| new wallet revamp \| added                                                 |
       | $create_alias                                                                            |
-    And I validate that 9 analytics event(s) have been sent
+    And I validate that 10 analytics event(s) have been sent
 
   @LW-7364 @Pending
     # Disabled as user is opted out until he decision about tracking.

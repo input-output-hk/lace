@@ -1,4 +1,4 @@
-@DAppConnector
+@DAppConnector @Testnet
 Feature: DAppConnector - Common
 
   Background:
@@ -6,19 +6,19 @@ Feature: DAppConnector - Common
     And I de-authorize all DApps in extended mode
     And I reclaim collateral (if active) in extended mode
 
-  @LW-3760 @Testnet @Mainnet
+  @LW-3760 @Mainnet
   Scenario: Limited wallet information when wallet is not connected
     When I open test DApp
     Then I see Lace wallet info in DApp when not connected
 
-  @LW-6660 @Testnet @Mainnet
+  @LW-6660 @Mainnet
   Scenario: DApp connection modal displayed after clicking "Authorize"
     When I open test DApp
     Then I see DApp authorization window
     When I click "Authorize" button in DApp authorization window
     Then I see DApp connection modal
 
-  @LW-3756 @Testnet @Mainnet
+  @LW-3756 @Mainnet
   Scenario: Canceling DApp connection
     When I open test DApp
     Then I see DApp authorization window
@@ -30,7 +30,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window
 
-  @LW-4062 @LW-3753 @LW-9080 @Testnet @Mainnet
+  @LW-4062 @LW-3753 @LW-9080 @Mainnet
   Scenario: Authorize app functions as expected when the user chooses 'Only once'
     Given I am on Tokens extended page
     And I save token: "Cardano" balance
@@ -45,7 +45,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window
 
-  @LW-3754 @LW-4064 @LW-3753 @Smoke @Testnet @Mainnet
+  @LW-3754 @LW-4064 @LW-3753 @Smoke @Mainnet
   Scenario: Authorize app functions as expected when the user chooses 'Always'
     When I open test DApp
     And I see DApp authorization window
@@ -59,7 +59,7 @@ Feature: DAppConnector - Common
     Then I see Lace wallet info in DApp when connected
     And I don't see DApp window
 
-  @LW-3807 @Testnet @Mainnet
+  @LW-3807 @Mainnet
   Scenario: "No wallet" modal displayed after trying to connect Dapp when there is no wallet
     Given I remove wallet
     And I accept analytics banner on "Get started" page
@@ -70,7 +70,7 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     Then "Get started" page is displayed
 
-  @LW-3758 @Testnet @Mainnet @Pending
+  @LW-3758 @Mainnet @Pending
   Scenario: Unlock Dapp page is displayed when wallet is locked, wallet can be unlocked
     Given I lock my wallet
     When I open test DApp
@@ -79,7 +79,7 @@ Feature: DAppConnector - Common
     And I click "Unlock" button on unlock screen
     Then I see DApp authorization window
 
-  @LW-7082 @Testnet @Mainnet @Pending
+  @LW-7082 @Mainnet @Pending
   Scenario: "Forgot password" click and cancel on DApp wallet unlock page
     Given I lock my wallet
     When I open test DApp
@@ -89,7 +89,7 @@ Feature: DAppConnector - Common
     And I click on "Cancel" button on "Forgot password?" modal
     Then I see DApp unlock page
 
-  @LW-7083 @Testnet @Mainnet @Pending
+  @LW-7083 @Mainnet @Pending
   Scenario: "Forgot password" click and proceed on DApp wallet unlock page
     Given I lock my wallet
     When I open test DApp
@@ -101,7 +101,7 @@ Feature: DAppConnector - Common
     When I switch to tab with restore wallet process
     Then "Wallet setup" page is displayed
 
-  @LW-4060 @Testnet
+  @LW-4060
   Scenario Outline: DApp connector window displayed in <theme> mode
     Given I click the menu button
     And I set theme switcher to <theme> mode
@@ -121,7 +121,7 @@ Feature: DAppConnector - Common
       | light |
       | dark  |
 
-  @LW-7743 @Testnet
+  @LW-7743
   Scenario: DApp connector window theme updated from light to dark while using DApp
     Given I click the menu button
     And I set theme switcher to light mode
@@ -141,7 +141,7 @@ Feature: DAppConnector - Common
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in dark mode
 
-  @LW-4071 @Testnet
+  @LW-4071
   Scenario: DApp remains authorised after choosing "Always" and removing & restoring a wallet
     Given I open and authorize test DApp with "Always" setting
     And I switch to window with Lace
@@ -149,8 +149,8 @@ Feature: DAppConnector - Common
     And I remove wallet
     Then I accept analytics banner on "Get started" page
     And I restore a wallet
+    And I disable showing multi-address discovery modal
     And Wallet is synced
-    When I confirm multi-address discovery modal
     And I switch network to: "Preprod" in extended mode
     And Wallet is synced
     And I open settings from header menu
@@ -159,7 +159,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I don't see DApp window
 
-  @LW-4070 @Testnet
+  @LW-4070
   Scenario: Authorize Dapp with 'Only once' and leaving/closing DApp
     Given I open and authorize test DApp with "Only once" setting
     And I switch to window with DApp
@@ -175,7 +175,7 @@ Feature: DAppConnector - Common
     When I open test DApp
     Then I see DApp authorization window
 
-  @LW-9481 @Testnet @Mainnet
+  @LW-9481 @Mainnet
   Scenario: Signing data / no errors in console
     Given I am on Tokens extended page
     And I save token: "Cardano" balance
@@ -187,11 +187,11 @@ Feature: DAppConnector - Common
     And I see DApp connector "Sign transaction" page
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
-    And I see DApp connector "All done" page
+    And I see DApp connector "All done" page from "data sign"
     And I verify there are no errors in console logs
     And I see Lace wallet info in DApp when connected
 
-  @LW-8403 @LW-8406 @Testnet
+  @LW-8403 @LW-8406
   Scenario: Automatically trigger collateral setup - happy path
     Given I am on Settings extended page
     And I see collateral as: "Inactive" in settings
@@ -211,7 +211,7 @@ Feature: DAppConnector - Common
     And I click "Set Collateral" button in test DApp
     Then I see DApp collateral window
 
-  @LW-8404 @Testnet
+  @LW-8404
   Scenario: Automatically trigger collateral setup - click cancel on Collateral modal
     Given I open and authorize test DApp with "Only once" setting
     And I click "Set Collateral" button in test DApp
@@ -221,7 +221,7 @@ Feature: DAppConnector - Common
     And I click "Set Collateral" button in test DApp
     And I see DApp collateral window
 
-  @LW-8405 @Testnet
+  @LW-8405
   Scenario: Automatically trigger collateral setup - Do not show automatic collateral window if it has been set manually
     Given I am on Settings extended page
     And I click on "Collateral" setting
@@ -231,7 +231,7 @@ Feature: DAppConnector - Common
     When I click "Set Collateral" button in test DApp
     Then I don't see DApp window
 
-  @LW-8410 @Testnet
+  @LW-8410
   Scenario: Automatically trigger collateral setup - network change
     Given I am on Settings extended page
     And I see collateral as: "Inactive" in settings
@@ -256,3 +256,11 @@ Feature: DAppConnector - Common
     And I open and authorize test DApp with "Only once" setting
     When I click "Set Collateral" button in test DApp
     Then I see DApp collateral window
+
+  @LW-11372
+  Scenario: Test for bug LW-7832 - Wrong url displayed in DApp transaction confirmation screen
+    When I open and authorize test DApp with "Only once" setting
+    And I click "Send ADA" "Run" button in test DApp
+    And I switch to window with Lace
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
+      | -3.00 tADA - FEE |

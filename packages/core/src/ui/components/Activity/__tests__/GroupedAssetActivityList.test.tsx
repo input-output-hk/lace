@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { GroupedAssetActivityList, GroupedAssetActivityListProps } from '../GroupedAssetActivityList';
 import { AssetActivityItemProps } from '../AssetActivityItem';
-import { TransactionActivityType } from '../../ActivityDetail';
+import { TransactionActivityType } from '../../Transaction';
 
 const activityItem: AssetActivityItemProps = {
   type: TransactionActivityType.outgoing,

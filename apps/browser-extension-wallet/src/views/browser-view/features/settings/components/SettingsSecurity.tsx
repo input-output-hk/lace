@@ -1,5 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { SettingsCard, SettingsLink, PassphraseSettingsDrawer, ShowPassphraseDrawer } from './';
+import {
+  SettingsCard,
+  SettingsLink,
+  PassphraseSettingsDrawer,
+  ShowPassphraseDrawer,
+  PaperWalletSettingsDrawer
+} from './';
 import { Switch } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
@@ -10,6 +16,7 @@ import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
@@ -23,11 +30,14 @@ export const SettingsSecurity = ({
   defaultPassphraseVisible,
   defaultMnemonic
 }: SettingsSecurityProps): React.ReactElement | null => {
+  const posthog = usePostHogClientContext();
+  const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
   const [isPassphraseSettingsDrawerOpen, setIsPassphraseSettingsDrawerOpen] = useState(false);
   const [isShowPassphraseDrawerOpen, setIsShowPassphraseDrawerOpen] = useState(false);
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
+  const [isPaperWalletSettingsDrawerOpen, setIsPaperWalletSettingsDrawerOpen] = useState(false);
   const { t } = useTranslation();
-  const { isWalletLocked, isInMemoryWallet, hasKeyMaterial } = useWalletStore();
+  const { isWalletLocked, isInMemoryWallet, isSharedWallet } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -54,8 +64,8 @@ export const SettingsSecurity = ({
   };
 
   const isMnemonicAvailable = useCallback(async () => {
-    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet || !hasKeyMaterial);
-  }, [isInMemoryWallet, isWalletLocked, hasKeyMaterial]);
+    setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
+  }, [isInMemoryWallet, isWalletLocked]);
 
   const handleCloseShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(false);
@@ -65,6 +75,11 @@ export const SettingsSecurity = ({
   const handleOpenShowPassphraseDrawer = () => {
     setIsShowPassphraseDrawerOpen(true);
     analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseClick);
+  };
+
+  const handleOpenShowPaperWalletDrawer = () => {
+    setIsPaperWalletSettingsDrawerOpen(true);
+    analytics.sendEventToPostHog(PostHogAction.SettingsOpenGeneratePaperWalletDrawer);
   };
 
   useEffect(() => {
@@ -86,11 +101,18 @@ export const SettingsSecurity = ({
         defaultMnemonic={defaultMnemonic}
         sendAnalyticsEvent={(event: PostHogAction) => analytics.sendEventToPostHog(event)}
       />
+      {isInMemoryWallet && paperWalletEnabled && (
+        <PaperWalletSettingsDrawer
+          isOpen={isPaperWalletSettingsDrawerOpen}
+          onClose={() => setIsPaperWalletSettingsDrawerOpen(false)}
+          popupView={popupView}
+        />
+      )}
       <SettingsCard>
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
           {t('browserView.settings.security.title')}
         </Title>
-        {!hideShowPassphraseSetting && (
+        {!hideShowPassphraseSetting && !isSharedWallet && (
           <>
             <SettingsLink
               onClick={handleOpenShowPassphraseDrawer}
@@ -100,6 +122,15 @@ export const SettingsSecurity = ({
               {t('browserView.settings.security.showPassphrase.title')}
             </SettingsLink>
           </>
+        )}
+        {isInMemoryWallet && paperWalletEnabled && !popupView && (
+          <SettingsLink
+            description={t('browserView.settings.generatePaperWallet.description')}
+            onClick={handleOpenShowPaperWalletDrawer}
+            data-testid="settings-generate-paperwallet-link"
+          >
+            {t('browserView.settings.generatePaperWallet.title')}
+          </SettingsLink>
         )}
         {showPassphraseVerification && isInMemoryWallet && (
           <SettingsLink

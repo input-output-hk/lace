@@ -4,6 +4,8 @@
 .lh
 *.crx
 *.d.ts
+*.ts.map
+*.tsbuildinfo
 !declaration.d.ts
 *dist/
 *demo/
@@ -16,6 +18,7 @@ coverage
 .rollup.cache
 .tool-versions
 .vscode
+yalc.lock
 
 # PRJ Spec
 /.cache
@@ -25,7 +28,7 @@ result
 
 .yarn/*
 .pnp.*
-.yarn/*
+.yalc/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases

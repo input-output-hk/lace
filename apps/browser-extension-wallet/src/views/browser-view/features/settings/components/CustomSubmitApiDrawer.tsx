@@ -91,13 +91,18 @@ export const CustomSubmitApiDrawer = ({
       popupView={popupView}
     >
       <div className={popupView ? styles.popupContainer : undefined}>
-        <Text className={styles.drawerDescription}>
+        <Text className={styles.drawerDescription} data-testid="custom-submit-api-description">
           {t('browserView.settings.wallet.customSubmitApi.description')}{' '}
-          <a href={LEARN_SUBMIT_API_URL} target="_blank" rel="noopener noreferrer">
+          <a
+            href={LEARN_SUBMIT_API_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="custom-submit-api-learn-more-url"
+          >
             {t('browserView.settings.wallet.customSubmitApi.descriptionLink')}
           </a>
         </Text>
-        <Text className={styles.drawerText}>
+        <Text className={styles.drawerText} data-testid="custom-submit-api-default-address">
           {t('browserView.settings.wallet.customSubmitApi.defaultAddress', { url: DEFAULT_SUBMIT_API })}
         </Text>
         <div className={styles.customApiContainer}>
@@ -107,6 +112,7 @@ export const CustomSubmitApiDrawer = ({
             value={customSubmitTxUrl}
             onChange={(event) => setCustomSubmitTxUrl(event.target.value)}
             disabled={isCustomApiEnabledForCurrentNetwork}
+            data-testid="custom-submit-api-url-input"
           />
           <Button.Primary
             label={
@@ -116,10 +122,11 @@ export const CustomSubmitApiDrawer = ({
             }
             icon={isCustomApiEnabledForCurrentNetwork ? <PauseIcon /> : <PlayIcon />}
             onClick={() => handleCustomTxSubmitEndpoint(!isCustomApiEnabledForCurrentNetwork)}
+            data-testid={`custom-submit-button-${isCustomApiEnabledForCurrentNetwork ? 'disable' : 'enable'}`}
           />
         </div>
         {isValidationError && (
-          <Text className={styles.validationError}>
+          <Text className={styles.validationError} data-testid="custom-submit-api-validation-error">
             {t('browserView.settings.wallet.customSubmitApi.validationError')}
           </Text>
         )}

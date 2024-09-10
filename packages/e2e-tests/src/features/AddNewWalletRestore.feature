@@ -7,20 +7,22 @@ Feature: Add new wallet - Restore wallet
   @LW-9368
   Scenario: Extended-view - Multi-wallet - Restore - Restore button click
     When I opened "Restore" flow via "Add new wallet" feature
-    Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
-    And "Recovery phrase" step is marked as active on progress timeline
-    And "Next" button is disabled during onboarding process
+    Then "Choose a recovery method" page is displayed in modal
+    And "Recovery method" step is marked as active on progress timeline
+    And "Next" button is enabled during onboarding process
 
   @LW-9381
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Back button click
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then "Choose a recovery method" page is displayed in modal
 
   @LW-9383
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Mnemonic fill - paste from clipboard
     Given I saved test mnemonic for "AddNewWallet" to clipboard
     And I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I click on "Paste from clipboard" button
     Then I do not see incorrect passphrase error displayed
     And "Next" button is enabled during onboarding process
@@ -28,6 +30,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9384
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid word
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
     And I change one random field
@@ -42,6 +45,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9385
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid all words
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
     Then I see incorrect passphrase error displayed
@@ -111,6 +115,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9386 @LW-9375
   Scenario Outline: Extended-view - Multi-wallet - Restore - <mnemonicLength>-word mnemonic - happy path
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
     When I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
@@ -127,3 +132,54 @@ Feature: Add new wallet - Restore wallet
       | 12             |
       | 15             |
       | 24             |
+
+  @LW-9245
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page without any user input interaction - <action>
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and not fill values
+    And <action>
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And "Add new wallet" modal is not displayed
+    Examples:
+      | page                  | action                                       |
+      | Mnemonic verification | I click "X" button on "Add new wallet" modal |
+#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+
+  @LW-9246
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page with any user input interaction - <action>
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And <action>
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is displayed
+    Examples:
+      | page                  | action                                       |
+      | Mnemonic verification | I click "X" button on "Add new wallet" modal |
+#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+      | Wallet setup          | I click "X" button on "Add new wallet" modal |
+#      | Wallet setup          | I click outside "Add new wallet" modal       | BUG: LW-10975
+
+  @LW-9247
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - go back
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And I click "X" button on "Add new wallet" modal
+    And I click "Go back" button on "Are you sure you want to cancel adding a new wallet?" dialog
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And <step>
+    Examples:
+      | page                  | step                                                                               |
+      | Mnemonic verification | "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words |
+      | Wallet setup          | "Wallet setup" page is displayed in modal                                          |
+
+  @LW-9248
+  Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - proceed
+    Given I opened "Restore" flow via "Add new wallet" feature
+    When I go to "<page>" page from "Restore" wallet flow and fill values
+    And I click "X" button on "Add new wallet" modal
+    And I click "Proceed" button on "Are you sure you want to cancel adding a new wallet?" dialog
+    Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
+    And "Add new wallet" modal is not displayed
+    Examples:
+      | page                  |
+      | Mnemonic verification |
+      | Wallet setup          |

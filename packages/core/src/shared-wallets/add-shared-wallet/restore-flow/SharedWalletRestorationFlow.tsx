@@ -2,21 +2,29 @@
 import { Dialog, FileUpload, Text } from '@input-output-hk/lace-ui-toolkit';
 import React, { VFC, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { FileErrorMessage, FileValidationError } from '../../../shared-wallets/types';
 import { SharedWalletLayout } from '../SharedWalletLayout';
 import { restorationTimelineSteps } from './timelineSteps';
-import { FileErrorMessage, FileValidationError, SharedWalletRestorationStep } from './types';
+import { CreateWalletParams, SharedWalletRestorationStep } from './types';
 import { validateJson } from './validateJson';
 
 type SharedWalletRestorationProps = {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
+  onRestoreSharedWallet: (data: CreateWalletParams) => void;
+  sharedKeys: string;
 };
 
 const UPLOAD_JSON_ID = 'upload-json';
 
-export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({ exitTheFlow, navigateToAppHome }) => {
+export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
+  sharedKeys,
+  exitTheFlow,
+  navigateToAppHome,
+  onRestoreSharedWallet,
+}) => {
   const [file, setFile] = useState<File | undefined>();
-  const [isFileValid, setIsFileValid] = useState(false);
+  const [cosignerData, setCosignerData] = useState<CreateWalletParams | undefined>(undefined);
   const [error, setError] = useState<FileValidationError | undefined>();
 
   const { t } = useTranslation();
@@ -53,12 +61,24 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
     setFile(event.target.files?.[0]);
   };
 
+  const onContinue = () => {
+    try {
+      onRestoreSharedWallet(cosignerData);
+      navigateToAppHome();
+    } catch (error_) {
+      console.error(error_);
+    }
+  };
+
   useEffect(() => {
     setError(undefined);
     const validate = async (importedFile: File) => {
       try {
-        const result = await validateJson(importedFile);
-        setIsFileValid(result.isFileValid);
+        const result = await validateJson(importedFile, sharedKeys);
+        // TODO: LW-11018 wallet already exist should be blocked before this line executes (it must have an error registered)
+        if (result.data) {
+          setCosignerData(result.data);
+        }
       } catch (error_: unknown) {
         setError(error_ as FileValidationError);
       }
@@ -67,7 +87,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
     if (file) {
       validate(file);
     }
-  }, [file]);
+  }, [file, sharedKeys]);
 
   return (
     <>
@@ -75,8 +95,8 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
         title={translations.title}
         description={translations.subtitle}
         onBack={exitTheFlow}
-        onNext={navigateToAppHome}
-        isNextEnabled={!!file && isFileValid}
+        onNext={onContinue}
+        isNextEnabled={!!file && !!cosignerData}
         customNextLabel={translations.next}
         timelineSteps={restorationTimelineSteps}
         timelineCurrentStep={SharedWalletRestorationStep.Import}
@@ -111,7 +131,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           />
         </Dialog.Actions>
       </Dialog.Root>
-      <Dialog.Root open={error?.message === FileErrorMessage.INVALID_KEYS} zIndex={1000} setOpen={() => void 0}>
+      <Dialog.Root open={error?.message === FileErrorMessage.INVALID_KEY} zIndex={1000} setOpen={() => void 0}>
         <Dialog.Title>{translations.incorrectWalletError.title}</Dialog.Title>
         <Dialog.Description>{translations.incorrectWalletError.description}</Dialog.Description>
         <Dialog.Actions>
@@ -119,7 +139,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
             autoFocus
             label={translations.incorrectWalletError.exit}
             onClick={navigateToAppHome}
-            testId="error-invalid-keys-exit-btn"
+            testId="error-invalid-shared-wallet-key-exit-btn"
           />
         </Dialog.Actions>
       </Dialog.Root>

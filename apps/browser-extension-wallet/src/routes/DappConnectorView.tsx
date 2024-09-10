@@ -24,6 +24,8 @@ import duration from 'dayjs/plugin/duration';
 import { DappError } from '@src/features/dapp/components/DappError';
 import { tabs } from 'webextension-polyfill';
 import { useTranslation } from 'react-i18next';
+import { DappSignDataSuccess } from '@src/features/dapp/components/DappSignDataSuccess';
+import { DappSignDataFail } from '@src/features/dapp/components/DappSignDataFail';
 
 dayjs.extend(duration);
 
@@ -39,6 +41,8 @@ export const DappConnectorView = (): React.ReactElement => {
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const { inMemoryWallet, cardanoWallet, walletInfo, initialHdDiscoveryCompleted } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
+  const isSharedWallet = useWalletStore((state) => state.isSharedWallet);
+
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
   useAppInit();
 
@@ -60,11 +64,27 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (hasNoAvailableWallet) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
         <DappError
           title={t('dapp.noWallet.heading')}
           description={t('dapp.noWallet.description')}
           closeButtonLabel={t('dapp.noWallet.closeButton')}
+          onCloseClick={onCloseClick}
+          containerTestId="no-wallet-container"
+          imageTestId="no-wallet-image"
+          titleTestId="no-wallet-heading"
+          descriptionTestId="no-wallet-description"
+          closeButtonTestId="create-or-restore-wallet-btn"
+        />
+      </MainLayout>
+    );
+  } else if (isSharedWallet) {
+    return (
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
+        <DappError
+          title={t('dapp.sharedWallet.heading')}
+          description={t('dapp.sharedWallet.description')}
+          closeButtonLabel={t('dapp.sharedWallet.closeButton')}
           onCloseClick={onCloseClick}
           containerTestId="no-wallet-container"
           imageTestId="no-wallet-image"
@@ -90,13 +110,15 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false} showBetaPill>
+      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
         <Switch>
           <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
           <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
           <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
           <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
           <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+          <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+          <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
           <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
         </Switch>
       </MainLayout>

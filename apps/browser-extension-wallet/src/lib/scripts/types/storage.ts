@@ -1,6 +1,7 @@
 import { AuthorizedDappStorage } from '@src/types/dappConnector';
 import type { Message } from './background-service';
 import { ADAPrices } from './prices';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
 
 export interface PendingMigrationState {
   from: string;
@@ -28,7 +29,7 @@ export interface BackgroundStorage {
   fiatPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;
-  experimentsConfiguration?: Record<string, string | boolean>;
+  experimentsConfiguration?: Record<ExperimentName, string | boolean>;
   customSubmitTxUrl?: string;
   namiMigration?: {
     completed: boolean;

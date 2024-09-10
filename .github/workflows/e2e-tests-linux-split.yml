@@ -1,6 +1,8 @@
 name: E2E Tests Linux split
 
 on:
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches:
       - 'release/**'
@@ -15,8 +17,10 @@ on:
           - chrome
           - edge
       network:
+        description: 'network to use'
+        required: true
+        default: 'preprod'
         type: choice
-        description: network to use
         options:
           - preprod
           - mainnet
@@ -30,8 +34,76 @@ on:
           - ubuntu-22.04
           - ubuntu-20.04
           - ubuntu-latest
+      smoke_only:
+        type: boolean
+        description: 'Run only smoke tests'
+        required: true
+        default: false
+      tags:
+        type: string
+        description: 'Tags(optional)'
+        required: false
+        default: ''
+      cardano_mainnet_url:
+        type: choice
+        required: true
+        default: dev-mainnet.lw.iog.io
+        description: 'cardano mainnet url to use'
+        options:
+          - dev-mainnet.lw.iog.io
+          - dev-mainnet.eu-central-1.lw.iog.io
+          - dev-mainnet.eu-west-1.lw.iog.io
+          - dev-mainnet.us-east-1.lw.iog.io
+          - dev-mainnet.us-east-2.lw.iog.io
+          - live-mainnet.lw.iog.io
+          - live-mainnet.eu-central-1.lw.iog.io
+          - live-mainnet.eu-west-1.lw.iog.io
+          - live-mainnet.us-east-1.lw.iog.io
+          - live-mainnet.us-east-2.lw.iog.io
+          - staging-mainnet.lw.iog.io
+          - staging-mainnet.eu-central-1.lw.iog.io
+          - staging-mainnet.eu-west-1.lw.iog.io
+          - staging-mainnet.us-east-1.lw.iog.io
+          - staging-mainnet.us-east-2.lw.iog.io
+      cardano_preprod_url:
+        type: choice
+        required: true
+        default: dev-preprod.lw.iog.io
+        description: 'cardano preprod url to use'
+        options:
+          - dev-preprod.lw.iog.io
+          - dev-preprod.eu-central-1.lw.iog.io
+          - dev-preprod.eu-west-1.lw.iog.io
+          - dev-preprod.us-east-1.lw.iog.io
+          - dev-preprod.us-east-2.lw.iog.io
+          - live-preprod.lw.iog.io
+          - live-preprod.eu-central-1.lw.iog.io
+          - live-preprod.eu-west-1.lw.iog.io
+          - live-preprod.us-east-1.lw.iog.io
+          - live-preprod.us-east-2.lw.iog.io
+          - staging-preprod.lw.iog.io
+          - staging-preprod.eu-central-1.lw.iog.io
+          - staging-preprod.eu-west-1.lw.iog.io
+          - staging-preprod.us-east-1.lw.iog.io
+          - staging-preprod.us-east-2.lw.iog.io
+      cardano_preview_url:
+        type: choice
+        required: true
+        default: dev-preview.lw.iog.io
+        description: 'cardano preview url to use'
+        options:
+          - dev-preview.lw.iog.io
+          - dev-preview.eu-central-1.lw.iog.io
+          - dev-preview.eu-west-1.lw.iog.io
+          - dev-preview.us-east-1.lw.iog.io
+          - dev-preview.us-east-2.lw.iog.io
+          - live-preview.lw.iog.io
+          - live-preview.eu-central-1.lw.iog.io
+          - live-preview.eu-west-1.lw.iog.io
+          - live-preview.us-east-1.lw.iog.io
+          - live-preview.us-east-2.lw.iog.io
 
-run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network }} | #${{ github.run_number }}"
+run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | tags: ${{ github.event.inputs.tags || '' }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
 env:
   BROWSER: ${{ github.event.inputs.browser || 'chrome' }}
@@ -40,65 +112,121 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
+  CARDANO_MAINNET_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-mainnet.lw.iog.io' || (github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io') }}
+  CARDANO_PREPROD_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}
+  CARDANO_PREVIEW_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preview.lw.iog.io' || (github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io') }}
+  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}
 
 jobs:
-  prereq:
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Provision step
         run: |
           echo "Provisioning ${{ github.event.inputs.runner }}"
-    outputs:
-      runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
 
-  build-dist-version:
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: prereq
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Check if build exists already
+      - name: Check if build exists
         shell: bash
         id: check-build-exists
         run: |
-          ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-          if [ "$ART_ID" == "null" ]; then
-            echo "No Lace build artifact found, will build it now"
-            exit 0
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+
+          if ([ "$ART_ID" == "null" ]) then
+            echo "Lace build artifact not found"
+            echo "build_exists=false" >> $GITHUB_OUTPUT
           else
-            echo "Lace build artifact found no need to build again"
-            exit 1
+            echo "Build artifact found"
+            echo "build_exists=true" >> $GITHUB_OUTPUT
           fi
-      - name: Build dist version of Lace
-        if: success()
+
+      - name: Print run parameters
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Browser: ${{ github.event.inputs.browser || 'chrome' }}"
+          echo "Network: ${{ github.event.inputs.network || 'preprod' }}"
+          echo "Runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}"
+          echo "Smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
+          echo "Tags(optional): ${{ github.event.inputs.tags || '' }}"
+          echo "Cardano mainnet url: ${{ env.CARDANO_MAINNET_URL }}"
+          echo "Cardano preprod url: ${{ env.CARDANO_PREPROD_URL }}"
+          echo "Cardano preview url: ${{ env.CARDANO_PREVIEW_URL }}"
+          echo "Build artifact name: ${{ env.BUILD_ARTIFACT_NAME }}"
+    outputs:
+      runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
+      smoke_only: ${{ github.event.inputs.smoke_only || false }}
+      tags: ${{ github.event.inputs.tags || '' }}
+      build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
+
+  build:
+    name: Build Lace
+    runs-on: ${{ needs.setup.outputs.runner }}
+    needs: setup
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Lace artifact
+        if: needs.setup.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_MAINNET_URL }}'
+          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_PREPROD_URL }}'
+          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_PREVIEW_URL }}'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
-  tests-run-split:
-    if: always()
+      - name: Upload build artifact
+        if: needs.setup.outputs.build_exists == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+  tests:
+    name: E2E tests
     strategy:
       fail-fast: false
       matrix:
         batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    needs: [prereq, build-dist-version]
+    runs-on: ${{ needs.setup.outputs.runner }}
+    needs: [setup, build]
+    permissions:
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace build artifact
+        shell: bash
+        id: download-lace-build-artifact
+        run: |
+          ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
+          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
+          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
+          echo "Build artifact found and downloaded"
+
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
+          TAGS: ${{ needs.setup.outputs.tags }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
-  results-processing:
-    needs: [prereq, tests-run-split]
-    runs-on: ${{ needs.prereq.outputs.runner }}
-    if: always()
+  processReports:
+    name: Process e2e test reports
+    needs: [setup, tests]
+    runs-on: ${{ needs.setup.outputs.runner }}
+#    when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
+    if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -106,8 +234,8 @@ jobs:
           path: ./artifacts
           pattern: 'runner-artifacts-*'
           merge-multiple: true
+
       - name: Create allure properties
-        if: success()
         working-directory: './artifacts/reports/allure/results'
         run: |
           echo "
@@ -115,7 +243,13 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
+          smoke_only=${{ needs.setup.outputs.smoke_only }}
+          tags=${{ needs.setup.outputs.tags }}
+          cardano_mainnet_url=${CARDANO_MAINNET_URL}
+          cardano_preprod_url=${CARDANO_PREPROD_URL}
+          cardano_preview_url=${CARDANO_PREVIEW_URL}
           " > environment.properties
+
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.6.0
         env:
@@ -130,26 +264,29 @@ jobs:
           copyLatest: true
           ignoreMissingResults: true
           baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:"
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | tags: ${{ needs.setup.outputs.tags }} | smoke only: ${{ needs.setup.outputs.smoke_only }}" >> $GITHUB_STEP_SUMMARY
+
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.0
-        if: always()
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/all/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux  | tags: ${{ needs.setup.outputs.tags }} | smoke only: ${{ needs.setup.outputs.smoke_only }}'
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
       - name: Deleting chrome tmp files
         id: clean-chrome-tmp-files
-        if: ${{ needs.prereq.outputs.runner == 'self-hosted' }}
+        if: ${{ needs.setup.outputs.runner == 'self-hosted' }}
         run: |
           runCommand="rm -rf /tmp/.org.chromium.*"
           eval "$runCommand";
+
       - name: Upload allure tests results
         uses: actions/upload-artifact@v4
         with:

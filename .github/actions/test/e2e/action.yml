@@ -8,9 +8,6 @@ inputs:
   TEST_DAPP_URL:
     description: 'Test DApp Url'
     required: true
-  GITHUB_TOKEN:
-    description: 'Github token'
-    required: true
   BROWSER:
     description: 'browser'
     required: false
@@ -23,48 +20,26 @@ inputs:
     description: 'Tests batch'
     required: true
     default: '1'
+  SMOKE_ONLY:
+    description: 'Run only smoke tests'
+    required: true
+    default: 'false'
+  TAGS:
+    description: 'Tags'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
 
   steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'yarn'
-    - name: Node modules cache
-      uses: actions/cache@v4
-      with:
-        path: |
-          node_modules
-          **/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
     - name: Start XVFB
       shell: bash
       env:
         DISPLAY: ${{ inputs.DISPLAY }}
       run: |
         Xvfb :99 &
-    - name: Check if build exists already then download it
-      shell: bash
-      id: download-build-if-exists
-      run: |
-        ART_ID=$(curl https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=lace-build-${{ github.sha }} | jq -r .artifacts[0].id)
-        if [ "$ART_ID" != "null" ]; then
-          curl -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ inputs.GITHUB_TOKEN }}"
-          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
-          echo "Build artifact found and downloaded"
-        else
-          echo "No build artifact found"
-        fi
-    - name: Decrypt test data
-      if: success()
-      working-directory: ./packages/e2e-tests
-      run: ./decrypt_secret.sh
-      shell: bash
-      env:
-        WALLET_1_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+
     - name: Execute E2E tests
       if: success()
       shell: bash
@@ -77,14 +52,25 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
       run: |
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags='@Testnet and not @Pending'"
+        commonTags="@Testnet and not @Pending"
+        tagsToRun="'${commonTags}'"
+        if [ "${{ inputs.SMOKE_ONLY }}" == "true" ]; then
+          tagsToRun="'@Smoke and ${tagsToRun}'"
+        fi
+        if [ "${{ inputs.TAGS }}" != "" ]; then
+          tagsToRun="'${{ inputs.TAGS }} and ${tagsToRun}'"
+        fi
+        echo "Running tests with tags: ${tagsToRun}"
+        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
         eval "$runCommand";
+
     - name: Save dmesg logs
       shell: bash
       if: always()
       working-directory: ./packages/e2e-tests
       run: |
         sudo dmesg > ./dmesg.log
+
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4

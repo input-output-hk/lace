@@ -33,7 +33,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': ['error'],
     'no-console': ['error', { allow: ['warn', 'error', 'info', 'debug'] }],
     'lodash/import-scope': ['error', 'method'],
-    'promise/avoid-new': 'off',
+    'promise/avoid-new': 'off'
   },
   overrides: [
     {

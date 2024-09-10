@@ -43,14 +43,14 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cardano-sdk/web-extension": "0.29.3",
-    "@input-output-hk/lace-ui-toolkit": "1.9.0",
+    "@cardano-sdk/wallet": "0.43.0",
+    "@cardano-sdk/web-extension": "0.32.0",
+    "@input-output-hk/lace-ui-toolkit": "1.15.1",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/translation": "0.1.0",
+    "ajv": "^8.16.0",
     "antd": "^4.24.10",
-    "axios": "0.28.0",
-    "axios-cache-adapter": "2.7.3",
     "classnames": "^2.3.1",
     "debounce-promise": "^3.1.2",
     "i18next": "^22.5.1",
@@ -61,7 +61,9 @@
     "react-dom": "17.0.2",
     "react-i18next": "^12.3.1",
     "react-infinite-scroll-component": "^6.1.0",
+    "rxjs": "7.4.0",
     "uuid": "^8.3.2",
+    "zod": "^3.23.8",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

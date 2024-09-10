@@ -1,0 +1,51 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(3);
+  padding: size_unit(3) size_unit(2);
+}
+
+.subtitle {
+  color: var(--text-color-secondary);
+  margin-top: -#{size_unit(2)};
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(1);
+}
+
+.customTextArea {
+  width: 100%;
+  min-height: 100px !important;
+  padding: 16px !important;
+  resize: vertical;
+  margin-bottom: 16px;
+  line-height: 1.5;
+  font-size: 14px;
+
+  &::placeholder {
+    text-align: left;
+    line-height: 2;
+  }
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+  margin-top: size_unit(3);
+}
+
+.errorMessage {
+  color: var(--text-color-error);
+  margin-top: size_unit(1);
+}
+
+.passwordWrapper {
+  width: 100%;
+  margin-bottom: 24px;
+}

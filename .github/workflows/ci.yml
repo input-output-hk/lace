@@ -17,6 +17,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  BUILD_ARTIFACT_NAME: 'lace-dev-${{ github.sha }}'
+
 jobs:
   prepare:
     name: Prepare
@@ -135,8 +138,8 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
-  smokeTests:
-    name: Smoke tests
+  release-pkg:
+    name: Release package
     runs-on: ubuntu-20.04
     needs: prepare
 
@@ -184,7 +187,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: packages-nami
-          path: packages/nami/dist     
+          path: packages/nami/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -203,19 +206,97 @@ jobs:
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
           BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
 
-      - name: Execute smoke tests
-        uses: ./.github/actions/test/smoke
+  smokeTests:
+    name: Smoke e2e tests
+    runs-on: ubuntu-22.04
+    needs: release-pkg
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
         with:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
-          E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
-          E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
-          E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
-          RUN: ${{ github.run_number }}
-          BRANCH: ${{ github.ref_name }}
+
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: 'lace-browser-extension'
+          path: ./apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
+        uses: ./.github/actions/test/e2e
+        with:
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+  processReports:
+    name: Process smoke e2e test reports
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+    steps:
+      - name: Download all smoke tests artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        shell: bash
+        if: always()
+        working-directory: ./reports/allure/results
+        run: |
+          echo "
+          branch=${{ github.ref_name }}
+          browser= 'Chrome'
+          tags= '@Smoke'
+          platform=Linux
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.6.0
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'smoke/linux/chrome/${{ github.run_number }}'
+          copyLatest: true
+          ignoreMissingResults: true
+          updatePr: comment
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            ./packages/e2e-tests/screenshots
+            ./packages/e2e-tests/logs
+            ./packages/e2e-tests/reports
+          retention-days: 5
+
+      - run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
 
   if-core-changed:
     name: When core changed

@@ -1,5 +1,7 @@
 import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Activity } from 'features/activity';
+import { useOutsideHandles } from 'features/outside-handles-provider';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowsePools } from '../BrowsePools';
 import { Drawer } from '../Drawer';
@@ -10,10 +12,16 @@ import { Navigation } from './Navigation';
 import { OneTimeModals } from './OneTimeModals';
 import { StakingPage } from './types';
 
-const stepsWithBackBtn = new Set<DrawerStep>([DrawerManagementStep.Confirmation, DrawerManagementStep.Sign]);
-
 export const StakingView = () => {
   const { t } = useTranslation();
+  const { isSharedWallet } = useOutsideHandles();
+
+  const stepsWithBackBtn = useMemo(() => {
+    const steps = [!isSharedWallet && DrawerManagementStep.Confirmation, DrawerManagementStep.Sign].filter(
+      (el): el is DrawerManagementStep => typeof el === 'string'
+    );
+    return new Set<DrawerStep>(steps);
+  }, [isSharedWallet]);
 
   return (
     <>
@@ -43,7 +51,7 @@ export const StakingView = () => {
       </Navigation>
       <Drawer showCloseIcon showBackIcon={(step: DrawerStep): boolean => stepsWithBackBtn.has(step)} />
       <ChangingPreferencesModal />
-      <OneTimeModals />
+      {!isSharedWallet && <OneTimeModals />}
     </>
   );
 };

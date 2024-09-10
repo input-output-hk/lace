@@ -65,6 +65,6 @@ Feature: Transactions - Extended view
       | Received                  |
       | Self Transaction          |
       | Rewards                   |
-# TODO     | Delegation                |
-# TODO     | Stake Key De-Registration |
-# TODO     | Stake Key Registration    |
+      | Delegation                |
+      | Stake Key De-Registration |
+      | Stake Key Registration    |

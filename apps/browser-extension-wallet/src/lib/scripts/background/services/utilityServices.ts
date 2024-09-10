@@ -67,6 +67,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.SETTINGS:
       path = walletRoutePaths.settings;
       break;
+    case BrowserViewSections.SIGN_MESSAGE:
+      path = walletRoutePaths.signMessage;
+      break;
     case BrowserViewSections.COLLATERAL_SETTINGS:
       path = walletRoutePaths.settings;
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_COLLATERAL_SETTINGS, data } });

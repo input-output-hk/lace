@@ -60,7 +60,7 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
     [t]
   );
 
-  const { analytics } = useOutsideHandles();
+  const { analytics, isSharedWallet } = useOutsideHandles();
   const headers: TableHeaders[] = config.columns.map((column) => ({
     ...tableHeaderTranslations[column],
     value: column,
@@ -83,7 +83,7 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
       isActiveSortItem={isActiveSortItem}
       onSortChange={onSortChange}
       order={activeSort?.order}
-      withSelection
+      withSelection={!isSharedWallet}
     />
   );
 };

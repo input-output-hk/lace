@@ -31,6 +31,18 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
+  CARDANO_SERVICES_URL_MAINNET:
+      description: 'Url for mainnet env'
+      required: false
+      default: 'https://dev-mainnet.lw.iog.io'
+  CARDANO_SERVICES_URL_PREPROD:
+    description: 'Url for preprod env'
+    required: false
+    default: 'https://dev-preprod.lw.iog.io'
+  CARDANO_SERVICES_URL_PREVIEW:
+    description: 'Url for preview env'
+    required: false
+    default: 'https://dev-preview.lw.iog.io'
 runs:
   using: 'composite'
   steps:
@@ -39,6 +51,7 @@ runs:
       with:
         node-version-file: '.nvmrc'
         cache: 'yarn'
+
     - name: Node modules cache
       uses: actions/cache@v4
       with:
@@ -46,6 +59,7 @@ runs:
           node_modules
           **/node_modules
         key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+
     - name: Configure Yarn to use GitHub Packages
       run: |
         SCOPE="input-output-hk"
@@ -66,11 +80,12 @@ runs:
           echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
           echo "Added npmScopes and $SCOPE to $FILE"
         fi
-
       shell: bash
+
     - name: Install dependencies
       shell: bash
       run: yarn install --immutable --inline-builds
+
     - name: Build dist version
       shell: bash
       env:
@@ -82,10 +97,7 @@ runs:
         POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+        CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
+        CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
+        CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
       run: yarn browser build
-    - name: Upload artifact
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: lace-build-${{ github.sha }}
-        path: ./apps/browser-extension-wallet/dist

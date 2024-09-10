@@ -148,14 +148,79 @@ export class MenuHeader {
   }
 
   async openUserMenu(): Promise<void> {
-    await this.menuButton.waitForClickable({ timeout: 15_000 });
-    await this.menuButton.click();
+    await this.clickMenuButton();
     await this.menuContainer.waitForStable();
+  }
+
+  async closeUserMenu(): Promise<void> {
+    const isMenuOpened = await this.menuContainer.isDisplayed();
+    if (isMenuOpened) {
+      await this.clickMenuButton();
+    }
   }
 
   async clickOnAddNewWalletOption(): Promise<void> {
     await this.menuAddNewWalletButton.waitForClickable();
     await this.menuAddNewWalletButton.click();
+  }
+
+  async clickMenuButton(): Promise<void> {
+    await this.menuButton.waitForClickable({ timeout: 15_000 });
+    await this.menuButton.click();
+  }
+
+  async openAddressBook(): Promise<void> {
+    await this.openUserMenu();
+    await this.menuAddressBookButton.click();
+  }
+
+  async clickLogo(): Promise<void> {
+    await this.logo.click();
+  }
+
+  async openSettings(): Promise<void> {
+    await this.openUserMenu();
+    await this.menuSettingsButton.waitForClickable();
+    await this.menuSettingsButton.click();
+  }
+
+  async clickUserDetailsButton(): Promise<void> {
+    await this.menuUserDetailsButton.click();
+  }
+
+  async clickNetworkOption(): Promise<void> {
+    await this.menuNetworkLabel.waitForStable();
+    await this.menuNetworkLabel.click();
+  }
+
+  async clickSettingsOption(): Promise<void> {
+    await this.menuSettingsButton.waitForStable();
+    await this.menuSettingsButton.click();
+  }
+
+  async clickAddressBookOption(): Promise<void> {
+    await this.menuAddressBookButton.click();
+  }
+
+  async clickLockWalletOption(): Promise<void> {
+    await this.menuLockButton.scrollIntoView();
+    await this.menuLockButton.click();
+  }
+
+  async lockWallet(): Promise<void> {
+    await this.openUserMenu();
+    await this.clickLockWalletOption();
+  }
+
+  async setExtensionTheme(mode: 'light' | 'dark'): Promise<void> {
+    if (mode !== ((await this.menuThemeSwitcher.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await this.menuThemeSwitcher.waitForClickable();
+      await this.menuThemeSwitcher.click();
+    }
+  }
+
+  async clickRightSidePanelButton(): Promise<void> {
+    await this.rightSidePanelButton.click();
   }
 }
 

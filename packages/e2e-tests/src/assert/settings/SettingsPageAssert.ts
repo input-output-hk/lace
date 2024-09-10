@@ -201,6 +201,18 @@ class SettingsPageAssert {
       }
     );
   }
+
+  async assertCustomSubmitApiEnabled(isEnabled: boolean) {
+    const expectedValue = isEnabled
+      ? await t('browserView.settings.wallet.customSubmitApi.enabled')
+      : await t('browserView.settings.wallet.customSubmitApi.disabled');
+
+    await browser.waitUntil(async () => (await SettingsPage.customSubmitAPILink.addon.getText()) === expectedValue, {
+      timeout: 3000,
+      interval: 1000,
+      timeoutMsg: `Failed while waiting for Custom Submit API with "${expectedValue}" state`
+    });
+  }
 }
 
 export default new SettingsPageAssert();

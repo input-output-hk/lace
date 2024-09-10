@@ -1,4 +1,4 @@
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { getBaseUrlForChain } from '@src/utils/chain';

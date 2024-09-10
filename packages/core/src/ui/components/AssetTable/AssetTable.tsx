@@ -2,13 +2,15 @@
 import classnames from 'classnames';
 import { InfiniteScrollableTable, useHasScrollBar } from '@lace/common';
 import { ColumnsType } from 'antd/lib/table';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './AssetTable.module.scss';
 import { useTranslation } from 'react-i18next';
+import { ImageWithFallback } from '../ImageWithFallback';
 
 export interface IRow {
   id: string;
   logo: string;
+  defaultLogo: string;
   name: string;
   ticker: string;
   price: string;
@@ -27,16 +29,32 @@ interface IAssetColumn {
 const renderCell = (
   {
     src,
+    defaultSrc,
     title,
     subtitle,
     testIdForTitle,
     testIdForSubtitle
-  }: { src?: string; title: string; subtitle: string; testIdForTitle?: string; testIdForSubtitle?: string },
+  }: {
+    src?: string;
+    defaultSrc?: string;
+    title: string;
+    subtitle: string;
+    testIdForTitle?: string;
+    testIdForSubtitle?: string;
+  },
   subtitleColor?: 'red' | 'green' | 'neutral',
   popupView?: boolean
 ) => (
   <div data-testid="asset-table-cell" className={styles.cellContainer}>
-    {src && <img data-testid="asset-table-cell-logo" src={src} alt="" className={styles.image} />}
+    {src && (
+      <ImageWithFallback
+        data-testid="asset-table-cell-logo"
+        src={src}
+        fallbackSrc={defaultSrc}
+        alt=""
+        className={styles.image}
+      />
+    )}
     <div>
       <p
         data-testid={testIdForTitle ? `token-table-cell-${testIdForTitle}` : 'asset-table-cell-title'}
@@ -68,6 +86,7 @@ const renderRows = (rows: IRow[], popupView: boolean): IAssetColumn[] =>
     token: renderCell(
       {
         src: row.logo,
+        defaultSrc: row.defaultLogo,
         title: row.name,
         subtitle: row.ticker || '-',
         testIdForTitle: 'name',
@@ -120,33 +139,39 @@ export const AssetTable = ({
   });
   const { t } = useTranslation();
 
-  const columns: ColumnsType<IAssetColumn> = [
-    {
-      title: popupView ? '' : t('core.assetTable.columns.token'),
-      dataIndex: 'token',
-      key: 'token',
-      width: '45%'
-    },
-    { title: popupView ? '' : t('core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
-  ];
+  const columns: ColumnsType<IAssetColumn> = useMemo(() => {
+    const result = [
+      {
+        title: popupView ? '' : t('core.assetTable.columns.token'),
+        dataIndex: 'token',
+        key: 'token',
+        width: '45%'
+      },
+      { title: popupView ? '' : t('core.assetTable.columns.balance'), dataIndex: 'balance', key: 'balance' }
+    ];
 
-  if (!popupView)
-    columns.splice(1, 0, {
-      title: t('core.assetTable.columns.price'),
-      dataIndex: 'price',
-      key: 'price'
-    });
+    if (!popupView)
+      result.splice(1, 0, {
+        title: t('core.assetTable.columns.price'),
+        dataIndex: 'price',
+        key: 'price'
+      });
+
+    return result;
+  }, [popupView, t]);
 
   const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
   useHasScrollBar({ current: document.querySelector(`#${scrollableTargetId}`) }, (withScroll) =>
     setHasScrollBar(withScroll && popupView)
   );
 
+  const dataSource = useMemo(() => renderRows(rows, popupView), [rows, popupView]);
+
   return (
     <InfiniteScrollableTable
       data-testid="asset-table"
       columns={columns}
-      dataSource={renderRows(rows, popupView)}
+      dataSource={dataSource}
       onRow={onRowClick ? handleRowClick : undefined}
       infiniteScrollContainerClass={hasScrollBar && styles.scrollContainer}
       infiniteScrollProps={{

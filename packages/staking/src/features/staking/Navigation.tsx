@@ -16,7 +16,7 @@ const isValueAValidSubPage = (value: string): value is StakingPage =>
   Object.values<string>(StakingPage).includes(value);
 
 export const Navigation = ({ children }: NavigationProps) => {
-  const { analytics } = useOutsideHandles();
+  const { analytics, isSharedWallet } = useOutsideHandles();
   const { activePage, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     activePage: activePageSelector(store),
     portfolioMutators: store.mutators,
@@ -35,6 +35,7 @@ export const Navigation = ({ children }: NavigationProps) => {
       type: command,
     });
   };
+  const showStakingActivity = USE_MULTI_DELEGATION_STAKING_ACTIVITY && !isSharedWallet;
 
   return (
     <>
@@ -59,7 +60,7 @@ export const Navigation = ({ children }: NavigationProps) => {
           tabIndex={0}
           highlightWidth="half"
         />
-        {USE_MULTI_DELEGATION_STAKING_ACTIVITY ? (
+        {showStakingActivity ? (
           <SubNavigation.Item
             name={t('root.nav.activityTitle')}
             value={StakingPage.activity}

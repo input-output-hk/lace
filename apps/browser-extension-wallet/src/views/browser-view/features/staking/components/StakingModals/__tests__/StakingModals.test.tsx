@@ -25,8 +25,10 @@ jest.mock('../../../store', () => ({
 const handles$ = new BehaviorSubject([]);
 
 const inMemoryWallet = {
-  handles$
+  handles$,
+  getNextUnusedAddress: jest.fn()
 };
+
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore

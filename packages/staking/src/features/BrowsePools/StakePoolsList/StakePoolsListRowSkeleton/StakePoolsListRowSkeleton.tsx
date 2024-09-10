@@ -6,8 +6,8 @@ import * as styles from './StakePoolsListRowSkeleton.css';
 export type StakePoolsListRowSkeletonProps<E extends string> = {
   index: number;
   columns: E[];
-  withSelection?: boolean;
   dataTestId?: string;
+  withSelection?: boolean;
 };
 
 export const StakePoolsListRowSkeleton = <E extends string>({

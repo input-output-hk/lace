@@ -1,13 +1,12 @@
-export enum FileErrorMessage {
-  INVALID_KEYS = 'Invalid keys',
-  UNRECOGNIZED = 'File is unrecognized',
-}
-
-export interface FileValidationError extends Error {
-  message: FileErrorMessage;
-}
+import { CoSigner, QuorumOptionValue } from '../creation-flow';
 
 export enum SharedWalletRestorationStep {
   Done = 'Done',
   Import = 'Import',
 }
+
+export type CreateWalletParams = {
+  coSigners: CoSigner[];
+  name: string;
+  quorumRules: QuorumOptionValue;
+};

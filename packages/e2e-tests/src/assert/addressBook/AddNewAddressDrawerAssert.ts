@@ -18,7 +18,9 @@ class AddNewAddressDrawerAssert {
     });
     await AddNewAddressDrawer.drawerNavigationTitle.waitForDisplayed({ reverse: mode === 'popup' });
     if (mode === 'extended') {
-      const expectedTitle = isSendFlow ? await t('core.sendReceive.send') : await t('browserView.addressBook.title');
+      const expectedTitle = isSendFlow
+        ? await t('core.transactionCtas.send')
+        : await t('browserView.addressBook.title');
       expect(await AddNewAddressDrawer.drawerNavigationTitle.getText()).to.equal(expectedTitle);
     }
 

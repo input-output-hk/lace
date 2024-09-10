@@ -146,7 +146,9 @@ Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: strin
     'Switched network': 'browserView.settings.wallet.network.networkSwitched',
     'Network Error': 'general.errors.networkError',
     'Copied to clipboard': 'general.clipboard.copiedToClipboard',
-    'Collateral added': 'browserView.settings.wallet.collateral.toast.add'
+    'Collateral added': 'browserView.settings.wallet.collateral.toast.add',
+    'Your custom submit API is enabled...': 'browserView.settings.wallet.customSubmitApi.usingCustomTxSubmitEndpoint',
+    'Your custom submit API is disabled...': 'browserView.settings.wallet.customSubmitApi.usingStandardTxSubmitEndpoint'
   };
 
   const translationKey = toastTextToTranslationKeyMap[toastText];
@@ -321,6 +323,10 @@ Given(/^I disable showing Multidelegation persistence banner$/, async () => {
 
 Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Given(/^I disable showing multi-address discovery modal$/, async () => {
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Then(/^I wait until modal disappears$/, async () => {

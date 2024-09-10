@@ -1,33 +1,48 @@
-import { CoSigner } from '../creation-flow/AddCoSigners';
-import { FileErrorMessage, FileValidationError } from './types';
+/* eslint-disable unicorn/consistent-destructuring */
+import { v1 as uuid } from 'uuid';
+import { z } from 'zod';
+import { FileErrorMessage, FileValidationError, PubkeyScript } from '../../../shared-wallets/types';
+import { paymentScriptKeyPath, schemaValidator } from '../../../shared-wallets/utils';
+import { CoSigner } from '../creation-flow';
+import { CreateWalletParams } from './types';
+import { getHashFromPublicKey, getQuorumRulesByTag } from './utils';
 
-// TODO: remove it when we have generation of keys
-const sharedKeys = 'addr_shared_vksdhgfsft578s6tf68tdsf,stake_shared_vkgyufieus65cuv76s5vrs7';
 export const validateJson = (
   file: File,
-): Promise<{ isFileValid: true } | { error: FileValidationError; isFileValid: false }> =>
+  sharedKey: string,
+): Promise<{ data: CreateWalletParams; error?: FileValidationError }> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.addEventListener('load', (event) => {
+    reader.addEventListener('load', async (event) => {
       try {
-        const json = JSON.parse(event.target?.result as string);
-        const isFileRecognized = 'cosigners' in json;
+        const parsedResult = schemaValidator.safeParse(JSON.parse(event.target?.result as string));
 
-        if (!isFileRecognized) {
+        if (parsedResult.error) {
           reject({ message: FileErrorMessage.UNRECOGNIZED });
         }
 
-        // change json file in this directory to test happy path or mismatch error modal
-        const isAddrMatch = json.cosigners.findIndex((item: CoSigner) => item.keys === sharedKeys);
+        const { metadata, nativeScript } = parsedResult.data;
+        const { coSigners, sharedWalletName } = metadata;
+        const { scripts } = nativeScript;
 
-        if (isAddrMatch === -1) {
-          reject({ message: FileErrorMessage.INVALID_KEYS });
+        const ownHash = await getHashFromPublicKey(sharedKey, paymentScriptKeyPath);
+
+        const matchedCosigner = scripts.find((script: PubkeyScript) => script.pubkey === ownHash);
+
+        if (!matchedCosigner) {
+          reject({ message: FileErrorMessage.INVALID_KEY });
         }
 
-        resolve({ isFileValid: true });
+        resolve({
+          data: {
+            coSigners: coSigners.map((cosigner: CoSigner) => ({ ...cosigner, id: uuid() })),
+            name: sharedWalletName,
+            quorumRules: getQuorumRulesByTag(nativeScript.tag, nativeScript.tag === 'n_of_k' && nativeScript.n),
+          },
+        });
       } catch (error) {
-        reject(error);
+        reject({ message: (error as z.ZodError).issues[0].message });
       }
     });
 

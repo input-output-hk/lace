@@ -6,18 +6,15 @@ import { useTranslation } from 'react-i18next';
 import styles from './QRPublicKeyDrawer.module.scss';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { WalletType } from '@cardano-sdk/web-extension';
+import { useSharedWalletData } from '@hooks';
 
-const useWalletInformation = () =>
-  useWalletStore((state) => ({
+const useWalletInformation = () => {
+  const { sharedWalletKey } = useSharedWalletData();
+  return useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    publicKey:
-      state?.cardanoWallet.source.wallet.type === WalletType.Script
-        ? (() => {
-            throw new Error('Script wallet support is not implemented');
-          })()
-        : state?.cardanoWallet.source.account.extendedAccountPublicKey
+    publicKey: state?.isSharedWallet ? sharedWalletKey : state?.cardanoWallet.source.account.extendedAccountPublicKey
   }));
+};
 
 export const QRPublicKeyDrawer = ({
   isPopup,
@@ -42,7 +39,7 @@ export const QRPublicKeyDrawer = ({
         // eslint-disable-next-line no-magic-numbers
         getQRCodeOptions={() => getQRCodeOptions(theme, isPopup && 168)}
         isPopupView={isPopup}
-        walletInfo={{ name, qrData: publicKey.toString() }}
+        walletInfo={{ name, qrData: publicKey?.toString() }}
         translations={infoWalletTranslations}
       />
     </div>

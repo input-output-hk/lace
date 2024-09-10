@@ -2,6 +2,7 @@ export * from './Links';
 export * from './Separator';
 export * from './AddressBookLink';
 export * from './SettingsLink';
+export * from './SignMessageLink';
 export * from './ThemeSwitcher';
 export * from './LockWallet';
 export * from './UserInfo';

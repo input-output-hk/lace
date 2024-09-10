@@ -33,7 +33,7 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
     And I input "<stake_pool_search_term>" into stake pool search bar
-    Then there are <number_of_results> stake pools returned
+    Then there are <number_of_results> stake pools returned for list view
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_ticker |
@@ -42,7 +42,7 @@ Feature: Staking Page - Extended View
       | ABC#                   | 0                 |                   |
       | HUA                    | 1                 | HUADA             |
       | 123456                 | 0                 |                   |
-      | ZZZ                    | 2                 | ZZZZX             |
+      | ZZZ                    | 3                 | ZZZZX             |
       | £££                    | 0                 |                   |
       | Abcde                  | 0                 |                   |
 
@@ -52,7 +52,7 @@ Feature: Staking Page - Extended View
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
     And I input "<stake_pool_search_term>" into stake pool search bar
-    Then there are <number_of_results> stake pools returned
+    Then there are <number_of_results> stake pools returned for list view
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_ticker |

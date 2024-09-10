@@ -7,7 +7,7 @@ import groupBy from 'lodash/groupBy';
 import flatten from 'lodash/flatten';
 import memoize from 'lodash/memoize';
 import { Wallet } from '@lace/cardano';
-import { Reward, TxCBOR, epochSlotsCalc } from '@cardano-sdk/core';
+import { Reward, Serialization, epochSlotsCalc } from '@cardano-sdk/core';
 import {
   pendingTxTransformer,
   txHistoryTransformer,
@@ -131,11 +131,13 @@ const mapWalletActivities = memoize(
       assetProvider,
       cardanoCoin,
       setRewardsActivityDetail,
-      setTransactionActivityDetail
+      setTransactionActivityDetail,
+      isSharedWallet
     }: Pick<UISlice['walletUI'], 'cardanoCoin'> &
       Pick<ActivityDetailSlice, 'setRewardsActivityDetail' | 'setTransactionActivityDetail'> &
       Pick<AssetDetailsSlice, 'assetDetails'> &
-      Pick<IBlockchainProvider, 'assetProvider'>
+      Pick<IBlockchainProvider, 'assetProvider'> &
+      Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
       const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
@@ -189,7 +191,8 @@ const mapWalletActivities = memoize(
         date,
         protocolParameters,
         cardanoCoin,
-        resolveInput
+        resolveInput,
+        isSharedWallet
       });
 
       const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
@@ -208,13 +211,18 @@ const mapWalletActivities = memoize(
       return transformedTransaction.map((tt) => extendWithClickHandler(tt));
     };
 
-    const pendingTransactionMapper = async (tx: Wallet.TxInFlight): Promise<ExtendedActivityProps[]> => {
+    const pendingTransactionMapper = async (
+      tx: Wallet.TxInFlight | Wallet.KeyManagement.WitnessedTx,
+      status?: Wallet.TransactionStatus
+    ): Promise<ExtendedActivityProps[]> => {
       let date;
-      try {
-        const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
-        date = slotTimeCalc(tx.submittedAt);
-      } catch {
-        date = new Date();
+      if ('submittedAt' in tx) {
+        try {
+          const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
+          date = slotTimeCalc(tx.submittedAt);
+        } catch {
+          date = new Date();
+        }
       }
       const transformedTransaction = await pendingTxTransformer({
         tx,
@@ -224,14 +232,16 @@ const mapWalletActivities = memoize(
         protocolParameters,
         cardanoCoin,
         date,
-        resolveInput
+        resolveInput,
+        status,
+        isSharedWallet
       });
 
       const extendWithClickHandler = (transformedTx: TransformedTransactionActivity) => ({
         ...transformedTx,
         onClick: () => {
           if (sendAnalytics) sendAnalytics();
-          const deserializedTx: Wallet.Cardano.Tx = TxCBOR.deserialize(tx.cbor);
+          const deserializedTx: Wallet.Cardano.Tx = Serialization.TxCBOR.deserialize(tx.cbor);
           setTransactionActivityDetail({
             activity: deserializedTx,
             direction: TxDirections.Outgoing,
@@ -247,7 +257,7 @@ const mapWalletActivities = memoize(
     const filterTransactionByAssetId = async (txs: Wallet.Cardano.HydratedTx[]) => {
       const txsWithType = await Promise.all(
         txs.map(async (tx) => {
-          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver });
+          const type = await inspectTxType({ walletAddresses: keyHashAddresses, tx, inputResolver, isSharedWallet });
           return { tx, type };
         })
       );
@@ -275,7 +285,16 @@ const mapWalletActivities = memoize(
      * Sanitizes pending transactions data
      */
     const getPendingTransactions = async (): Promise<ExtendedActivityProps[]> =>
-      flatten(await Promise.all(transactions.outgoing.inFlight.map((tx) => pendingTransactionMapper(tx))));
+      flatten([
+        ...(await Promise.all(transactions.outgoing.inFlight.map((tx) => pendingTransactionMapper(tx)))),
+        ...(isSharedWallet
+          ? await Promise.all(
+              transactions.outgoing.signed.map((tx) =>
+                pendingTransactionMapper(tx, Wallet.TransactionStatus.AWAITING_COSIGNATURES)
+              )
+            )
+          : [])
+      ]);
 
     /**
      * Sanitizes historical rewards data
@@ -304,11 +323,20 @@ const mapWalletActivities = memoize(
     );
     const allTransactions = groupBy(
       [...filteredPendingTxs, ...confirmedTxs, ...rewards].sort((firstTx, secondTx) => {
-        // ensure pending txs are always first
-        if (firstTx.status === ActivityStatus.PENDING && secondTx.status !== ActivityStatus.PENDING) return -1;
-        if (secondTx.status === ActivityStatus.PENDING && firstTx.status !== ActivityStatus.PENDING) return 1;
+        // ensure txs that are awaiting cosignatures always come first
+        if (
+          firstTx.status === ActivityStatus.AWAITING_COSIGNATURES &&
+          secondTx.status !== ActivityStatus.AWAITING_COSIGNATURES
+        )
+          return -1;
+        if (
+          secondTx.status === ActivityStatus.AWAITING_COSIGNATURES &&
+          firstTx.status !== ActivityStatus.AWAITING_COSIGNATURES
+        )
+          return 1;
+
         // otherwise sort by date
-        return secondTx.date.getTime() - firstTx.date.getTime();
+        return (secondTx.date?.getTime() || 0) - (firstTx.date?.getTime() || 0);
       }),
       'formattedDate'
     );
@@ -375,13 +403,15 @@ const mapWalletActivities = memoize(
   (
     { addresses, transactions, assetInfo, delegation: { rewardsHistory } },
     { cardanoFiatPrice, fiatCurrency, assetId },
-    { cardanoCoin, assetDetails }
+    { cardanoCoin, assetDetails, isSharedWallet }
   ) =>
-    `${transactions.history.length}_${transactions.outgoing.inFlight.map(({ id }) => id).join('')}_${assetInfo.size}_${
+    `${transactions.history.length}_${transactions.outgoing.inFlight
+      .map(({ id }) => id)
+      .join('')}_${transactions.outgoing.signed?.map(({ tx: { id } }) => id).join('')}_${assetInfo.size}_${
       rewardsHistory.all.length
     }_${cardanoFiatPrice}_${fiatCurrency.code}_${assetId || ''}_${cardanoCoin?.id}_${assetDetails?.id}_${
       addresses[0]?.address
-    }`
+    }_${isSharedWallet}`
 );
 
 const getWalletActivities = async ({
@@ -396,7 +426,8 @@ const getWalletActivities = async ({
     setTransactionActivityDetail,
     setRewardsActivityDetail,
     assetDetails,
-    blockchainProvider: { assetProvider }
+    blockchainProvider: { assetProvider },
+    isSharedWallet
   } = get();
   if (!walletState) {
     set(initialState);
@@ -411,7 +442,8 @@ const getWalletActivities = async ({
       cardanoCoin,
       setRewardsActivityDetail,
       setTransactionActivityDetail,
-      assetDetails
+      assetDetails,
+      isSharedWallet
     }
   );
 

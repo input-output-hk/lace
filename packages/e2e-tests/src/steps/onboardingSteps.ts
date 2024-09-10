@@ -28,6 +28,7 @@ import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 import ModalAssert from '../assert/modalAssert';
 import clipboard from 'clipboardy';
+import ChooseRecoveryMethodPageAssert from '../assert/onboarding/ChooseRecoveryMethodPageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -188,6 +189,8 @@ Then(/^I do not see autocomplete options list$/, async () => {
 });
 
 Given(/^I create new wallet and save wallet information$/, async () => {
+  // issue LW-11288 - please remove when it will be fixed / check on CI is needed
+  await browser.pause(1000);
   await OnboardingMainPage.createWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
@@ -416,8 +419,16 @@ When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order
 });
 
 Then(
-  /^"(Recovery phrase|Wallet setup|Enter wallet)" step is marked as active on progress timeline$/,
-  async (step: 'Recovery phrase' | 'Wallet setup' | 'Enter wallet') => {
+  /^"(Recovery phrase|Wallet setup|Enter wallet|Connect device|Recovery details|Recovery method)" step is marked as active on progress timeline$/,
+  async (
+    step:
+      | 'Recovery phrase'
+      | 'Wallet setup'
+      | 'Enter wallet'
+      | 'Connect device'
+      | 'Recovery details'
+      | 'Recovery method'
+  ) => {
     await new OnboardingCommonAssert().assertSeeActiveStepOnProgressTimeline(step);
   }
 );
@@ -441,4 +452,8 @@ Then(
 When(/^I saved test mnemonic for "([^"]*)" to clipboard$/, async (walletName: string) => {
   const mnemonic = String(getTestWallet(walletName)?.mnemonic);
   await clipboard.write(mnemonic);
+});
+
+Then(/^"Choose a recovery method" page is displayed$/, async () => {
+  await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage();
 });

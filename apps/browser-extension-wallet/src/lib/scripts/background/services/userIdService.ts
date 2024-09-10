@@ -69,9 +69,7 @@ export class UserIdService implements UserIdServiceInterface {
       walletRepository: this.walletRepository
     });
     if (!active) return;
-    if (active.wallet.type === WalletType.Script || !active.account) {
-      throw new Error('Script wallet support not implemented');
-    }
+
     const { usePersistentUserId } = await this.storage.get();
 
     if (!usePersistentUserId) {
@@ -79,7 +77,11 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     if (!this.walletBasedUserId) {
-      this.walletBasedUserId = this.generateWalletBasedUserId(active.account.extendedAccountPublicKey);
+      const extendedAccountPublicKey =
+        active.wallet.type === WalletType.Script
+          ? active.wallet.metadata.multiSigExtendedPublicKey
+          : active.account.extendedAccountPublicKey;
+      this.walletBasedUserId = this.generateWalletBasedUserId(extendedAccountPublicKey);
 
       if (this.userTrackingType$.value !== UserTrackingType.Enhanced) {
         this.userTrackingType$.next(UserTrackingType.Enhanced);

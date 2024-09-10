@@ -28,13 +28,21 @@ import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
 import ChangingStakingPreferencesModalAssert from '../assert/multidelegation/ChangingStakingPreferencesModalAssert';
 import { StakePoolListColumnName, StakePoolSortingOptionType } from '../types/staking';
-import SwitchingStakePoolModal from '../elements/staking/SwitchingStakePoolModal';
+import SwitchingStakePoolModal from '../elements/multidelegation/SwitchingStakePoolModal';
 import MoreOptionsComponentAssert from '../assert/multidelegation/MoreOptionsComponentAssert';
 import { mapColumnNameStringToEnum, mapSortingOptionNameStringToEnum } from '../utils/stakePoolListContent';
 import { browser } from '@wdio/globals';
 import { StakePoolSortingOption } from '../enums/StakePoolSortingOption';
-import MultidelegationDAppIssueModal from '../elements/staking/MultidelegationDAppIssueModal';
+import MultidelegationDAppIssueModal from '../elements/multidelegation/MultidelegationDAppIssueModal';
 import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
+import StakingExitModal from '../elements/multidelegation/StakingExitModal';
+import StakingExitModalAssert from '../assert/multidelegation/StakingExitModalAssert';
+import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDrawerAssert';
+import MultidelegationDAppIssueModalAssert from '../assert/multidelegation/MultidelegationDAppIssueModalAssert';
+import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
+import SwitchingPoolsModalAssert from '../assert/multidelegation/SwitchingPoolsModalAssert';
+import { clearInputFieldValue } from '../utils/inputFieldUtils';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -111,6 +119,7 @@ When(/^I save identifiers of stake pools currently in use$/, async () => {
 
 When(/^I input "([^"]*)" into stake pool search bar$/, async (term: string) => {
   const searchTerm = await parseSearchTerm(term);
+  await clearInputFieldValue(await MultidelegationPage.stakingPageSearchInput);
   await MultidelegationPage.fillSearch(searchTerm);
   await MultidelegationPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
@@ -237,9 +246,12 @@ Then(/^I see the stake pool search control with appropriate content$/, async () 
   await MultidelegationPageAssert.assertSeeSearchComponent();
 });
 
-Then(/^there are (\d+) stake pools returned$/, async (resultsCount: number) => {
-  await MultidelegationPageAssert.assertSeeSearchResults(resultsCount);
-});
+Then(
+  /^there are (\d+) stake pools returned for (grid|list) view$/,
+  async (resultsCount: number, viewType: 'grid' | 'list') => {
+    await MultidelegationPageAssert.assertSeeSearchResults(resultsCount, viewType);
+  }
+);
 
 Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, async (expectedTicker: string) => {
   if ((await MultidelegationPage.displayedPools.length) > 0) {
@@ -596,10 +608,30 @@ Then(
   }
 );
 
-When(/^I close the modal about issues with multidelegation and DApps$/, async () => {
-  if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
-    await MultidelegationDAppIssueModal.gotItButton.click();
+When(/^I click on "Got it" button inside the modal about issues with multi-delegation and DApps$/, async () => {
+  await MultidelegationDAppIssueModal.clickOnGotItButton();
+});
+
+When(/^I click on a random stake pool from the (grid|list)$/, async (mode: 'grid' | 'list') => {
+  if (mode === 'grid') {
+    const randomCardIndex = await MultidelegationPage.getRandomStakePooGridCardIndex();
+    await new StakePoolGridCard(randomCardIndex).container.click();
+  } else {
+    const randomItemIndex = await MultidelegationPage.getRandomStakePoolListItemIndex();
+    await new StakePoolListItem(randomItemIndex).container.click();
   }
+});
+
+Then(
+  /^I (see|do not see) the modal about issues with multi-delegation and DApps$/,
+  async (status: 'see' | 'do not see') => {
+    await MultidelegationDAppIssueModalAssert.assertSeeModal(status === 'see');
+  }
+);
+
+When(/^I reset default behaviour for modal about issues with multi-delegation and DApps$/, async () => {
+  await localStorageInitializer.removeConfigurationForShowingMultidelegationDAppsIssueModal();
+  await browser.refresh();
 });
 
 Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {
@@ -615,4 +647,51 @@ Then(/^I see currently staking component for stake pool:$/, async (stakePools: D
 
 When(/^I click on pool name in the first currently staking component$/, async () => {
   await new StakingInfoCard(1).clickOnPoolName();
+});
+
+Then(
+  /^I click "(Cancel|Exit)" button for staking "You'll have to start again" modal$/,
+  async (button: 'Cancel' | 'Exit') => {
+    switch (button) {
+      case 'Cancel':
+        await StakingExitModal.cancelButton.waitForClickable();
+        await StakingExitModal.cancelButton.click();
+        break;
+      case 'Exit':
+        await StakingExitModal.exitButton.waitForClickable();
+        await StakingExitModal.exitButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
+
+Then(/^Staking exit modal (is|is not) displayed$/, async (shouldBeDisplayed: 'is' | 'is not') => {
+  shouldBeDisplayed === 'is'
+    ? await StakingExitModalAssert.assertSeeStakingExitModal()
+    : await StakingExitModalAssert.assertDontSeeStakingExitModal();
+});
+
+When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async (button: 'Cancel' | 'Fine by me') => {
+  switch (button) {
+    case 'Cancel':
+      await SwitchingStakePoolModal.cancelButton.waitForClickable();
+      await SwitchingStakePoolModal.cancelButton.click();
+      break;
+    case 'Fine by me':
+      await SwitchingStakePoolModal.fineByMeButton.waitForClickable();
+      await SwitchingStakePoolModal.fineByMeButton.click();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});
+
+Then(/^the staking error screen is displayed$/, async () => {
+  await StakingErrorDrawerAssert.assertSeeStakingError();
+});
+
+Then(/^I see "Switching to less pools" modal$/, async () => {
+  await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
 });

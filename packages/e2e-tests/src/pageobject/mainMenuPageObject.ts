@@ -1,6 +1,6 @@
 import MenuMainPopup from '../elements/menuMainPopup';
 import MenuMainExtended from '../elements/menuMainExtended';
-import menuHeaderPageObject from './menuHeaderPageObject';
+import MenuHeader from '../elements/menuHeader';
 
 class MainMenuPageObject {
   tokens = async (mode: 'extended' | 'popup') =>
@@ -27,10 +27,10 @@ class MainMenuPageObject {
         await this.staking(mode);
         break;
       case 'Address Book':
-        await menuHeaderPageObject.openAddressBook();
+        await MenuHeader.openAddressBook();
         break;
       case 'Settings':
-        await menuHeaderPageObject.openSettings();
+        await MenuHeader.openSettings();
         break;
       default:
         throw new Error(`Unsupported targetPage: ${targetPage}`);

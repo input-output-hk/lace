@@ -11,10 +11,13 @@ import {
   Subject,
   switchMap,
   distinctUntilChanged,
-  concat
+  concat,
+  delay
 } from 'rxjs';
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
+
+const DEBOUNCE_TIME = 2000;
 
 type RemoveObservableNameSuffix<T> = T extends `${infer S}$` ? S : T;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -31,10 +34,48 @@ export type ObservableWalletState = FlattenObservableProperties<
   Omit<ObservableWallet, 'fatalError$' | 'transactions'> & {
     transactions: {
       history$: ObservableWallet['transactions']['history$'];
-      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$'>;
+      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$' | 'signed$'>;
     };
   }
 >;
+
+/**
+ * Creates a debounced Observable based on the given predicate and debounce delay.
+ *
+ * This function applies a conditional delay to values emitted by an Observable.
+ * If the predicate returns true for a value, it is emitted immediately. If the predicate
+ * returns false, the emission is delayed by the specified debounce delay. This is useful
+ * for filtering rapid or transient changes in the observable stream that are considered
+ * insignificant, while allowing immediate handling of significant changes.
+ *
+ * @param skipDebounce A function that accepts a boolean value and returns a boolean.
+ *                     If it returns true, the value is emitted immediately. If false,
+ *                     the value is delayed by `debounceDelay`.
+ * @param debounceDelay The time, in milliseconds, to delay the emission of the value
+ *                      if the predicate returns false.
+ * @returns A function that takes an Observable of boolean values and returns a new
+ *          Observable that applies the conditional debouncing logic.
+ *
+ * @example
+ * // Observable that emits online status (true for online, false for offline)
+ * const isOnline$ = fromEvent(window, 'online').pipe(
+ *   map(event => navigator.onLine)
+ * );
+ *
+ * const debouncedIsOnline$ = debounceIf(
+ *   isSettled => isSettled, // Apply debouncing only when the value is 'false'
+ *   1000                    // Debounce 'false' values by 1000 milliseconds
+ * )(isOnline$);
+ *
+ * debouncedIsOnline$.subscribe(isOnline => {
+ *   console.log(`Online status is: ${isOnline}`);
+ * });
+ */
+const debounceIf = (skipDebounce: (val: boolean) => boolean, debounceDelay: number) => (obs$: Observable<boolean>) =>
+  obs$.pipe(
+    switchMap((isSettled) => (skipDebounce(isSettled) ? of(isSettled) : of(isSettled).pipe(delay(debounceDelay)))),
+    distinctUntilChanged()
+  );
 
 const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<ObservableWalletState> =>
   combineLatest([
@@ -56,12 +97,15 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
     wallet.handles$,
     wallet.protocolParameters$,
     wallet.publicStakeKeys$,
-    wallet.syncStatus.isAnyRequestPending$,
-    wallet.syncStatus.isSettled$,
-    wallet.syncStatus.isUpToDate$,
+    wallet.syncStatus.isAnyRequestPending$.pipe(
+      debounceIf((isAnyRequestPending) => !isAnyRequestPending, DEBOUNCE_TIME)
+    ),
+    wallet.syncStatus.isSettled$.pipe(debounceIf((isSettled) => isSettled, DEBOUNCE_TIME)),
+    wallet.syncStatus.isUpToDate$.pipe(debounceIf((isUpToDate) => isUpToDate, DEBOUNCE_TIME)),
     wallet.tip$,
     wallet.transactions.history$,
     wallet.transactions.outgoing.inFlight$,
+    wallet.transactions.outgoing.signed$,
     wallet.utxo.available$,
     wallet.utxo.total$,
     wallet.utxo.unspendable$
@@ -93,7 +137,9 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         tip,
         transactionsHistory,
         transactionsHistoryOutgoingInFlight,
+        transactionsHistoryOutgoingSigned,
         utxoAvailable,
+
         utxoTotal,
         utxoUnspendable
       ]): ObservableWalletState => ({
@@ -134,7 +180,8 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         transactions: {
           history: transactionsHistory,
           outgoing: {
-            inFlight: transactionsHistoryOutgoingInFlight
+            inFlight: transactionsHistoryOutgoingInFlight,
+            signed: transactionsHistoryOutgoingSigned
           }
         },
         utxo: {

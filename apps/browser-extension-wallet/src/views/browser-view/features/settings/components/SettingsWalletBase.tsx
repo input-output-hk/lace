@@ -62,7 +62,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const closeDrawer = useRedirection(walletRoutePaths.settings);
 
   const { t } = useTranslation();
-  const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus } = useWalletStore();
+  const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus, isSharedWallet } = useWalletStore();
   const { AVAILABLE_CHAINS } = config();
 
   const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
@@ -73,7 +73,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
-  const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true';
+  const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
 
   useEffect(() => {
     const openCollateralDrawer = async () => {
@@ -171,7 +171,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
-        {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+        {process.env.USE_MESSAGE_SIGNING === 'true' ? (
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"
@@ -245,33 +245,38 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           {t('browserView.settings.wallet.general.title')}
         </SettingsLink>
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
-        <SettingsLink
-          onClick={handleOpenCollateralDrawer}
-          description={t('browserView.settings.wallet.collateral.description')}
-          data-testid="settings-wallet-collateral-link"
-          addon={
-            hasCollateral
-              ? t('browserView.settings.wallet.collateral.active')
-              : t('browserView.settings.wallet.collateral.inactive')
-          }
-        >
-          {t('browserView.settings.wallet.collateral.title')}
-        </SettingsLink>
-        <Collateral.CollateralDrawer
-          visible={activeDrawer === SettingsDrawer.collateral}
-          onClose={closeDrawer}
-          hasCollateral={hasCollateral}
-          unspendableLoaded={unspendable?.coins !== undefined}
-          sendAnalyticsEvent={handleSendAnalyticsEvent}
-        />
-        <SettingsLink
-          description={t('browserView.settings.wallet.walletSync.description')}
-          data-testid="settings-wallet-wallet-sync"
-          addon={!popupView && syncButton}
-        >
-          {t('browserView.settings.wallet.walletSync.title')}
-        </SettingsLink>
-        {popupView && syncButton}
+        {!isSharedWallet && (
+          <>
+            <SettingsLink
+              onClick={handleOpenCollateralDrawer}
+              description={t('browserView.settings.wallet.collateral.description')}
+              data-testid="settings-wallet-collateral-link"
+              addon={
+                hasCollateral
+                  ? t('browserView.settings.wallet.collateral.active')
+                  : t('browserView.settings.wallet.collateral.inactive')
+              }
+            >
+              {t('browserView.settings.wallet.collateral.title')}
+            </SettingsLink>
+            <Collateral.CollateralDrawer
+              visible={activeDrawer === SettingsDrawer.collateral}
+              onClose={closeDrawer}
+              hasCollateral={hasCollateral}
+              unspendableLoaded={unspendable?.coins !== undefined}
+              sendAnalyticsEvent={handleSendAnalyticsEvent}
+            />
+
+            <SettingsLink
+              description={t('browserView.settings.wallet.walletSync.description')}
+              data-testid="settings-wallet-wallet-sync"
+              addon={!popupView && syncButton}
+            >
+              {t('browserView.settings.wallet.walletSync.title')}
+            </SettingsLink>
+            {popupView && syncButton}
+          </>
+        )}
       </SettingsCard>
     </>
   );

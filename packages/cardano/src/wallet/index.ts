@@ -19,7 +19,8 @@ export {
   SortField,
   EraSummary,
   HandleResolution,
-  TxSubmissionError
+  TxSubmissionError,
+  Serialization
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';
@@ -37,7 +38,8 @@ export {
   createWalletUtil,
   Assets,
   TxInFlight,
-  WalletAddress
+  WalletAddress,
+  isValidSharedWalletScript
 } from '@cardano-sdk/wallet';
 
 export {

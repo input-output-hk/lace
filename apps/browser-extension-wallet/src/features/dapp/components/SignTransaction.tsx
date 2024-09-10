@@ -2,7 +2,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, inputProps, Password, PostHogAction } from '@lace/common';
+import { Button, PostHogAction } from '@lace/common';
+import { OnPasswordChange, Password } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
@@ -50,7 +51,7 @@ export const SignTransaction = (): React.ReactElement => {
     }
   }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request]);
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
@@ -64,6 +65,18 @@ export const SignTransaction = (): React.ReactElement => {
     setPreviousView();
   };
 
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!confirmIsDisabled) {
+        onConfirm();
+      }
+    },
+    [onConfirm, confirmIsDisabled]
+  );
+
   return (
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
@@ -73,7 +86,7 @@ export const SignTransaction = (): React.ReactElement => {
           </h5>
           <Password
             onChange={handleChange}
-            value={password}
+            onSubmit={handleSubmit}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             autoFocus

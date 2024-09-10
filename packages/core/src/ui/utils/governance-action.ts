@@ -58,7 +58,7 @@ export const getParameterChangeActionViewData = ({
       dRepVotingThresholds: {
         motionNoConfidence,
         committeeNormal,
-        commiteeNoConfidence,
+        committeeNoConfidence,
         updateConstitution,
         hardForkInitiation,
         ppNetworkGroup,
@@ -139,7 +139,7 @@ export const getParameterChangeActionViewData = ({
         dRepVotingThresholds: {
           motionNoConfidence: formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator),
           committeeNormal: formatPercentages(committeeNormal.numerator / committeeNormal.denominator),
-          committeeNoConfidence: formatPercentages(commiteeNoConfidence.numerator / commiteeNoConfidence.denominator),
+          committeeNoConfidence: formatPercentages(committeeNoConfidence.numerator / committeeNoConfidence.denominator),
           updateToConstitution: formatPercentages(updateConstitution.numerator / updateConstitution.denominator),
           hardForkInitiation: formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator),
           ppNetworkGroup: formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator),
@@ -196,12 +196,24 @@ export const getHardForkInitiationActionViewData = ({
 
 export const getInfoActionViewData = ({
   anchor,
-  explorerBaseUrl
+  explorerBaseUrl,
+  deposit,
+  rewardAccount,
+  cardanoCoin
 }: {
   anchor: Cardano.ProposalProcedure['anchor'];
   explorerBaseUrl: string;
+  deposit: Cardano.ProposalProcedure['deposit'];
+  rewardAccount: Cardano.ProposalProcedure['rewardAccount'];
+  cardanoCoin: Wallet.CoinId;
 }): Parameters<typeof InfoAction>[0]['data'] => ({
-  txDetails: {},
+  txDetails: {
+    deposit: Wallet.util.getFormattedAmount({
+      amount: deposit.toString(),
+      cardanoCoin
+    }),
+    rewardAccount
+  },
   procedure: {
     anchor: {
       url: anchor.url,

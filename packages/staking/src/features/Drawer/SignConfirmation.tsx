@@ -1,8 +1,10 @@
 /* eslint-disable react/no-multi-comp */
-import { Button, Password, PostHogAction, inputProps } from '@lace/common';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Button, PostHogAction } from '@lace/common';
+import { Password } from '@lace/core';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
@@ -14,21 +16,38 @@ interface SignConfirmationProps {
 export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    password: { password, setPassword },
+    password: { setPassword },
     submittingState: { isPasswordValid },
+    signPolicy,
+    isSharedWallet,
+    walletName,
   } = useOutsideHandles();
-
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
 
   return (
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
       <div className={cn(styles.header, { [styles.popupView!]: popupView })}>
-        <div className={styles.title} data-testid="staking-confirmation-title">
+        <Flex gap="$8" alignItems="flex-end" className={styles.title} data-testid="staking-confirmation-title">
           {t('drawer.sign.confirmation.title')}
-        </div>
+          {isSharedWallet && (
+            <Text.Body.Normal color="secondary" weight="$bold">
+              {t('drawer.sign.confirmation.titleSuffix', { num: 1, total: signPolicy.signers.length })}
+            </Text.Body.Normal>
+          )}
+        </Flex>
         <div className={styles.subTitle} data-testid="staking-confirmation-subtitle">
-          {t('drawer.sign.enterWalletPasswordToConfirmTransaction')}
+          {!isSharedWallet ? (
+            t('drawer.sign.enterWalletPasswordToConfirmTransaction')
+          ) : (
+            <Trans
+              i18nKey="drawer.sign.signSharedTx"
+              t={t}
+              values={{ name: walletName }}
+              components={{
+                b: <Text.Body.Normal weight="$bold" />,
+              }}
+            />
+          )}
         </div>
       </div>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
@@ -36,9 +55,9 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
         <div className={styles.password}>
           <Password
             className={styles.passwordInput}
-            onChange={handleChange}
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            value={password!}
+            onChange={(pw) => {
+              setPassword(pw);
+            }}
             error={isPasswordValid === false}
             errorMessage={t('drawer.sign.error.invalidPassword')}
             label={t('drawer.sign.passwordPlaceholder')}
@@ -53,10 +72,13 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
 export const SignConfirmationFooter = (): ReactElement => {
   const {
     walletStoreInMemoryWallet: inMemoryWallet,
-    password: { password, removePassword },
+    password: { password, clearSecrets: removePassword },
     submittingState: { setSubmitingTxState, isSubmitingTx, setIsRestaking },
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     walletManagerExecuteWithPassword: executeWithPassword,
+    isSharedWallet,
+    sharedWalletKey,
+    signPolicy,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
@@ -74,9 +96,20 @@ export const SignConfirmationFooter = (): ReactElement => {
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
-    const signedTx = await delegationTxBuilder.build().sign();
-    await inMemoryWallet.submitTx(signedTx);
-  }, [delegationTxBuilder, inMemoryWallet]);
+
+    if (isSharedWallet && sharedWalletKey) {
+      // TODO: integrate with tx summary drawer LW-10970
+      const tx = await delegationTxBuilder.build().inspect();
+
+      const signedTx = await inMemoryWallet.finalizeTx({ tx });
+      if (signPolicy.requiredCosigners === 1) {
+        await inMemoryWallet.submitTx(signedTx);
+      }
+    } else {
+      const signedTx = await delegationTxBuilder.build().sign();
+      await inMemoryWallet.submitTx(signedTx);
+    }
+  }, [delegationTxBuilder, inMemoryWallet, isSharedWallet, signPolicy?.requiredCosigners, sharedWalletKey]);
 
   const handleVerifyPass = useCallback(async () => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
@@ -112,7 +145,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        onClick={() => executeWithPassword(handleVerifyPass, password)}
+        onClick={() => executeWithPassword(handleVerifyPass, password?.value)}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}

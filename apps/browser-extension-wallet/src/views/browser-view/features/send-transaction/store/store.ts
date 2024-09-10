@@ -417,7 +417,7 @@ const isValidDestination = (address: string) =>
   isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
 export const useTransactionProps = (): {
-  outputMap: OutputsMap;
+  outputsMap: OutputsMap;
   hasInvalidOutputs: boolean;
   hasOutput: boolean;
 } => {
@@ -471,7 +471,7 @@ export const useTransactionProps = (): {
     [addressValueObj]
   );
 
-  const outputMap = useMemo(
+  const outputsMap = useMemo(
     () =>
       new Map(
         addressValueObj.filter(([, { value }]) => (value.coins && Number(value.coins)) || value.assets?.size > 0)
@@ -479,7 +479,7 @@ export const useTransactionProps = (): {
     [addressValueObj]
   );
 
-  return { hasInvalidOutputs: hasInvalidOutputs || outputMap.size === 0, outputMap, hasOutput };
+  return { hasInvalidOutputs: hasInvalidOutputs || outputsMap.size === 0, outputsMap, hasOutput };
 };
 
 export const useOutputInitialState = (): Store['setInitialOutputState'] =>
@@ -512,17 +512,6 @@ export const useSubmitingState = (): {
     setSubmitingTxState,
     isSubmitingTx,
     isPasswordValid
-  }));
-
-export const usePassword = (): {
-  password: Store['password'];
-  setPassword: Store['setPassword'];
-  removePassword: Store['removePassword'];
-} =>
-  useStore((state) => ({
-    password: state.password,
-    setPassword: state.setPassword,
-    removePassword: state.removePassword
   }));
 
 export const useCurrentCoinIdToChange = (): Store['currentCoinToChange'] =>

@@ -15,6 +15,7 @@ export const walletRoutePaths = {
   staking: '/staking',
   dapps: '/dapps',
   voting: '/voting',
+  signMessage: '/sign-message',
   setup: {
     home: '/setup',
     create: '/setup/create',
@@ -29,7 +30,7 @@ export const walletRoutePaths = {
   },
   sharedWallet: {
     root: '/shared-wallet',
-    generateKeys: '/shared-wallet/generate-keys',
+    generateKeys: '/shared-wallet/generate-key',
     create: '/shared-wallet/create',
     import: '/shared-wallet/import'
   },
@@ -47,6 +48,8 @@ export const dAppRoutePaths = {
   dappConnect: '/dapp/connect',
   dappTxSignFailure: '/dapp/transaction/failure',
   dappTxSignSuccess: '/dapp/transaction/success',
+  dappDataSignFailure: '/dapp/data/failure',
+  dappDataSignSuccess: '/dapp/data/success',
   dappSignTx: '/dapp/sign-tx',
   dappSubmitTx: '/dapp/submit-tx',
   dappSignData: '/dapp/sign-data',

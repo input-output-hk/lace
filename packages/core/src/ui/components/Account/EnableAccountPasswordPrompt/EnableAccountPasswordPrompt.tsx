@@ -61,9 +61,11 @@ export const EnableAccountPasswordPrompt = ({
       }
     >
       <Flex h="$fill" flexDirection="column" data-testid="enable-account-password">
-        <Text.SubHeading weight="$bold">{translations.headline}</Text.SubHeading>
+        <Text.SubHeading weight="$bold" data-testid="enable-account-headline">
+          {translations.headline}
+        </Text.SubHeading>
         <Box mt="$8">
-          <Text.Body.Normal weight="$medium" className={styles.description}>
+          <Text.Body.Normal weight="$medium" className={styles.description} data-testid="enable-account-description">
             {translations.description}
           </Text.Body.Normal>
         </Box>

@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
@@ -315,7 +316,7 @@ const makeActionButtons = (
 export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps): React.ReactElement => {
   const { t } = useTranslation();
   const { analytics, multidelegationDAppCompatibility, triggerMultidelegationDAppCompatibility } = useOutsideHandles();
-  const { walletStoreWalletType } = useOutsideHandles();
+  const { walletStoreWalletType, isSharedWallet } = useOutsideHandles();
   const [showDAppCompatibilityModal, setShowDAppCompatibilityModal] = useState(false);
   const { openPoolDetails, portfolioMutators, viewedStakePool } = useDelegationPortfolioStore((store) => ({
     openPoolDetails: stakePoolDetailsSelector(store),
@@ -335,8 +336,8 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
 
   const onStakeOnThisPool = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.StakingBrowsePoolsStakePoolDetailStakeAllOnThisPoolClick);
-    portfolioMutators.executeCommand({ type: 'BeginSingleStaking' });
-  }, [analytics, portfolioMutators]);
+    portfolioMutators.executeCommand({ data: { isSharedWallet }, type: 'BeginSingleStaking' });
+  }, [analytics, portfolioMutators, isSharedWallet]);
 
   const selectPoolFromDetails = useCallback(() => {
     if (!viewedStakePool) return;
@@ -348,12 +349,12 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   }, [viewedStakePool, portfolioMutators, analytics]);
 
   const onSelectClick = useCallback(() => {
-    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility) {
+    if (!userAlreadyMultidelegated && multidelegationDAppCompatibility && !isSharedWallet) {
       setShowDAppCompatibilityModal(true);
     } else {
       selectPoolFromDetails();
     }
-  }, [multidelegationDAppCompatibility, selectPoolFromDetails, userAlreadyMultidelegated]);
+  }, [multidelegationDAppCompatibility, selectPoolFromDetails, userAlreadyMultidelegated, isSharedWallet]);
 
   const onDAppCompatibilityConfirm = useCallback(() => {
     triggerMultidelegationDAppCompatibility();
@@ -388,19 +389,20 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
   const actionButtons = useMemo(
     () =>
       makeActionButtons(t, {
-        addStakingPool: ableToSelect && !selectionsEmpty && { callback: onSelectClick },
-        manageDelegation: poolInCurrentPortfolio && { callback: onManageDelegationClick },
-        selectForMultiStaking: ableToSelect && selectionsEmpty && { callback: onSelectClick },
+        addStakingPool: !isSharedWallet && ableToSelect && !selectionsEmpty && { callback: onSelectClick },
+        manageDelegation: !isSharedWallet && poolInCurrentPortfolio && { callback: onManageDelegationClick },
+        selectForMultiStaking: !isSharedWallet && ableToSelect && selectionsEmpty && { callback: onSelectClick },
         stakeOnThisPool: selectionsEmpty && ableToStakeOnlyOnThisPool && { callback: onStakeOnThisPool },
-        unselectPool: poolSelected && { callback: onUnselectClick },
+        unselectPool: !isSharedWallet && poolSelected && { callback: onUnselectClick },
       }),
     [
+      isSharedWallet,
       t,
       ableToSelect,
       selectionsEmpty,
-      onManageDelegationClick,
       onSelectClick,
       poolInCurrentPortfolio,
+      onManageDelegationClick,
       ableToStakeOnlyOnThisPool,
       onStakeOnThisPool,
       poolSelected,
@@ -427,7 +429,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
           <Button.Secondary key={dataTestId} onClick={callback} data-testid={dataTestId} label={label} w="$fill" />
         ))}
       </Flex>
-      {showDAppCompatibilityModal && (
+      {showDAppCompatibilityModal && !isSharedWallet && (
         <MultidelegationDAppCompatibilityModal
           visible={multidelegationDAppCompatibility}
           onConfirm={onDAppCompatibilityConfirm}

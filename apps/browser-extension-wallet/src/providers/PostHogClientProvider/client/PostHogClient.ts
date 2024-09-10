@@ -14,7 +14,7 @@ import {
   PRODUCTION_NETWORK_ID_TO_POSTHOG_PROJECT_ID_MAP,
   PRODUCTION_NETWORK_ID_TO_POSTHOG_TOKEN_MAP,
   PRODUCTION_TRACKING_MODE_ENABLED,
-  PUBLIC_POSTHOG_HOST,
+  POSTHOG_HOST,
   POSTHOG_ENABLED
 } from './config';
 import { BackgroundService, UserIdService } from '@lib/scripts/types';
@@ -22,6 +22,8 @@ import { experiments, fallbackConfiguration } from '@providers/ExperimentsProvid
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { Subscription, BehaviorSubject } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
+
+type FeatureFlags = 'create-paper-wallet' | 'restore-paper-wallet';
 
 /**
  * PostHog API reference:
@@ -34,15 +36,17 @@ export class PostHogClient<Action extends string = string> {
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
   private subscription: Subscription;
   private initSuccess: Promise<boolean>;
-
+  featureFlags: {
+    [key in FeatureFlags]: string | boolean;
+  };
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
     private backgroundServiceUtils: Pick<BackgroundService, 'getBackgroundStorage' | 'setBackgroundStorage'>,
     private view: ExtensionViews = ExtensionViews.Extended,
-    private publicPostHogHost: string = PUBLIC_POSTHOG_HOST
+    private postHogHost: string = POSTHOG_HOST
   ) {
-    if (!this.publicPostHogHost) throw new Error('PUBLIC_POSTHOG_HOST url has not been provided');
+    if (!this.postHogHost) throw new Error('POSTHOG_HOST url has not been provided');
     const token = this.getApiToken(this.chain);
     if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
@@ -52,7 +56,7 @@ export class PostHogClient<Action extends string = string> {
       .then((id) => {
         posthog.init(token, {
           request_batching: false,
-          api_host: this.publicPostHogHost,
+          api_host: this.postHogHost,
           autocapture: false,
           disable_session_recording: true,
           capture_pageview: false,
@@ -82,6 +86,7 @@ export class PostHogClient<Action extends string = string> {
       });
 
     this.subscribeToDistinctIdUpdate();
+    this.loadExperiments();
   }
 
   static getInstance(
@@ -118,10 +123,6 @@ export class PostHogClient<Action extends string = string> {
         posthog.register({
           distinct_id: id
         });
-
-        if (type === UserTrackingType.Enhanced && !this.hasPostHogInitialized$.value) {
-          this.loadExperiments();
-        }
       }
     });
   }
@@ -194,27 +195,38 @@ export class PostHogClient<Action extends string = string> {
     posthog.featureFlags.override(flags);
   }
 
-  async getExperimentVariant(key: ExperimentName): Promise<string> {
+  async getExperimentVariant(key: ExperimentName): Promise<string | boolean> {
     const variant = posthog?.getFeatureFlag(key, {
       send_event: false
     });
     // if we get a type of boolean means that the experiment is not running, so we return the fallback variant
     if (typeof variant === 'boolean') {
-      return experiments[key].defaultVariant;
+      return experiments[key].default;
     }
 
     // if the variant does not exist, we need to check for out cache
     if (!variant) {
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-      return (backgroundStorage?.experimentsConfiguration?.[key] as string) || experiments[key].defaultVariant;
+      return (backgroundStorage?.experimentsConfiguration?.[key] as string) || experiments[key].default;
     }
 
     return variant;
   }
 
+  isFeatureEnabled(key: ExperimentName | string): boolean {
+    try {
+      const isEnabled = posthog.isFeatureEnabled(key);
+      return isEnabled || false;
+    } catch {
+      return false;
+    }
+  }
+
   protected loadExperiments(): void {
     posthog.onFeatureFlags(async () => {
-      const postHogExperimentConfiguration = posthog.featureFlags.getFlagVariants();
+      const postHogExperimentConfiguration: Record<ExperimentName, string | boolean> =
+        posthog.featureFlags.getFlagVariants();
+      this.featureFlags = postHogExperimentConfiguration;
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
       if (!backgroundStorage?.experimentsConfiguration && postHogExperimentConfiguration) {
         // save current posthog config in background storage

@@ -4,20 +4,15 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReactComponent as StakeRegistrationDelegationIcon } from '../../ui/assets/icons/badge-check-outline-green.component.svg';
 import styles from './CosignersList.module.scss';
+import { CoSignersListItem } from './types';
 
-export interface CosignersListItem {
-  key: Wallet.Crypto.Ed25519KeyHashHex;
-  name: string;
-  signed: boolean;
-}
-
-export interface CosignerItemProps {
-  list: CosignersListItem[];
-  ownSharedKey: Wallet.Crypto.Ed25519KeyHashHex;
+interface CoSignerItemProps {
+  list: CoSignersListItem[];
+  ownSharedKey?: Wallet.Crypto.Bip32PublicKeyHex;
   title: string;
 }
 
-export const CosignersList = ({ list, title, ownSharedKey }: CosignerItemProps) => {
+export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) => {
   const { t } = useTranslation();
 
   return (
@@ -26,21 +21,21 @@ export const CosignersList = ({ list, title, ownSharedKey }: CosignerItemProps) 
         <div data-testid="cosigner-list-header" className={styles.cosignersListHeader}>
           {title}
         </div>
-        {list.map(({ key, name: cosignerName, signed }) => (
+        {list.map(({ sharedWalletKey, name: cosignerName, signed }) => (
           <Flex
             py="$0"
             px="$24"
             mt="$8"
             h="$80"
             data-testid="cosigner-list-item"
-            key={key}
+            key={sharedWalletKey}
             className={styles.cosignersListItem}
           >
             <Flex h="$fill" gap="$16" alignItems="center" className={styles.cosignersListItemContainer}>
               <div className={styles.cosignersListItemAvatar}>
                 <ProfilePicture.UserProfile
                   imageSrc=""
-                  fallbackText={cosignerName.slice(0, 1)}
+                  fallbackText={cosignerName.slice(0, 1).toUpperCase()}
                   delayMs={0}
                   data-testid="cosigner-list-item-profile-icon"
                   testId="cosigner-list-item-profile-icon"
@@ -48,10 +43,12 @@ export const CosignersList = ({ list, title, ownSharedKey }: CosignerItemProps) 
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {key === ownSharedKey ? t('sharedWallets.transaction.cosignerList.you') : cosignerName}
+                  {sharedWalletKey === ownSharedKey
+                    ? t('sharedWallets.transaction.cosignerList.you')
+                    : cosignerName || '...'}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
-                  {key}
+                  {sharedWalletKey}
                 </Box>
               </div>
               {signed && (
