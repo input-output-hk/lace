@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@input-output-hk/lace-ui-toolkit": "1.18.1",
+    "@input-output-hk/lace-ui-toolkit": "1.18.2",
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",
