@@ -66,7 +66,7 @@ const About = React.forwardRef((props, ref) => {
               src={Logo}
             />
             <Box height="4" />
-            <Text fontSize="sm">{process.env.npm_package_version}</Text>
+            <Text fontSize="sm">Nami mode: {process.env.APP_VERSION}</Text>
             <Box height="6" />
             <Box
               display="flex"
@@ -100,6 +100,7 @@ const About = React.forwardRef((props, ref) => {
                   termsRef.current.openModal();
                 }}
                 color="GrayText"
+                _hover={{ color: 'GrayText', textDecoration: 'underline' }}
               >
                 Terms of use
               </Link>
@@ -107,6 +108,7 @@ const About = React.forwardRef((props, ref) => {
               <Link
                 onClick={() => privacyPolRef.current.openModal()}
                 color="GrayText"
+                _hover={{ color: 'GrayText', textDecoration: 'underline' }}
               >
                 Privacy Policy
               </Link>

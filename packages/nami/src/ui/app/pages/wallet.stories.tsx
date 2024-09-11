@@ -61,6 +61,8 @@ const cardanoCoin = {
   symbol: 't₳',
 };
 
+process.env.APP_VERSION = '0.1.0';
+
 const WalletStory = ({
   colorMode,
   assets,
