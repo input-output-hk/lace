@@ -34,25 +34,25 @@ Lace depends on `@input-output-hk/lace-ui-toolkit` package, which is published f
 2. Select at least `read:packages` permissions to be able to download packages from GitHub Package Registry
 3. Create `~/.yarnrc.yml` file in your home directory and insert:
 
-```
+```yaml
 npmScopes:
   input-output-hk:
     npmAlwaysAuth: true
     npmAuthToken: YOUR_GITHUB_PAT
-    npmRegistryServer: "https://npm.pkg.github.com"
+    npmRegistryServer: 'https://npm.pkg.github.com'
 ```
 
 For more details check GitHub's guide: [Authenticating with personal access token](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token)
 
 ### Install dependencies
 
-```
+```sh
 yarn install
 ```
 
 ### Setup environment variables
 
-```
+```sh
 cp ./apps/.env.defaults ./apps/.env
 ```
 
@@ -60,7 +60,7 @@ Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION
 
 ### Build packages and extension
 
-```
+```sh
 yarn build
 ```
 
@@ -73,7 +73,7 @@ yarn build
 
 ## Dev commands
 
-```console
+```sh
 yarn [app] [command]
 ```
 
