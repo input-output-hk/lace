@@ -28,11 +28,8 @@ jobs:
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues
         run: yarn lint
-      - name: Run unit tests
-        env:
-          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
-          DEFAULT_CHAIN: 'Preprod'
-        run: yarn test --maxWorkers=2 --silent
+      - name: Execute unit tests
+        uses: ./.github/actions/test/unit
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:
