@@ -25,7 +25,7 @@ export const Base = ({ copyText, children, copiedMessage, onCopyClick }: Readonl
   };
 
   return (
-    <Box className={styles.root} data-testid="address-card" w="$fill">
+    <Box className={styles.root} testId="address-card" w="$fill">
       {children}
       {onCopyClick && (
         <div className={styles.copyButtonContainer}>
