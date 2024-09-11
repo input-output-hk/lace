@@ -61,9 +61,6 @@ class OnboardingCommonAssert {
     await this.commonOnboardingElements.activeStepIndicator.waitForDisplayed();
     let expectedStepTitle;
     switch (step) {
-      case 'Recovery phrase':
-        expectedStepTitle = await t('core.walletSetupStep.recoveryPhrase');
-        break;
       case 'Wallet setup':
         expectedStepTitle = await t('core.walletSetupStep.walletSetup');
         break;
@@ -73,11 +70,11 @@ class OnboardingCommonAssert {
       case 'Connect device':
         expectedStepTitle = await t('core.walletSetupStep.connectWallet');
         break;
-      case 'Recovery details':
-        expectedStepTitle = await t('core.walletSetup.recoveryDetails');
-        break;
       case 'Recovery method':
         expectedStepTitle = await t('core.walletSetup.recoveryMethod');
+        break;
+      case 'Recovery setup':
+        expectedStepTitle = await t('core.walletSetup.recoveryDetails');
         break;
       default:
         throw new Error(`Unsupported step: ${step}`);
