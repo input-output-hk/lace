@@ -25,6 +25,7 @@ jobs:
           BUILD_DEV_PREVIEW: 'true'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
+          CARDANO_SERVICES_URL_SANCHONET: 'https://live-sanchonet.lw.iog.io'
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues
         run: yarn lint
