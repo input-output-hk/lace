@@ -60,7 +60,7 @@ export const EnableAccountPasswordPrompt = ({
         </Flex>
       }
     >
-      <Flex h="$fill" flexDirection="column" data-testid="enable-account-password">
+      <Flex h="$fill" flexDirection="column" testId="enable-account-password">
         <Text.SubHeading weight="$bold" data-testid="enable-account-headline">
           {translations.headline}
         </Text.SubHeading>

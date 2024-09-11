@@ -113,7 +113,7 @@ export const OverviewPopup = () => {
       </Flex>
       <Box mb="$32">
         {displayData.map((item) => (
-          <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
+          <Box key={item.id} mb="$24" testId="delegated-pool-item">
             <StakingInfoCard
               {...item}
               popupView

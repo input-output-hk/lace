@@ -43,7 +43,7 @@ export const ReceiveInfo = ({ name, address, handles, goBack }: ReceiveInfoProps
       navigation={<DrawerNavigation onCloseIconClick={handleOnClose} />}
       popupView
     >
-      <Flex className={styles.container} data-testid="receive-address-qr" flexDirection="column" gap="$16">
+      <Flex className={styles.container} testId="receive-address-qr" flexDirection="column" gap="$16">
         <AddressCard
           name={name}
           isPopupView
