@@ -8007,11 +8007,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/cardano-services-client@npm:0.20.6":
-  version: 0.20.6
-  resolution: "@cardano-sdk/cardano-services-client@npm:0.20.6"
+"@cardano-sdk/cardano-services-client@npm:0.20.7":
+  version: 0.20.7
+  resolution: "@cardano-sdk/cardano-services-client@npm:0.20.7"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/util": ~0.15.5
     axios: ^1.7.4
     class-validator: ^0.14.0
@@ -8019,13 +8019,13 @@ __metadata:
     json-bigint: ~1.0.0
     ts-log: ^2.2.4
     ws: ^8.17.1
-  checksum: 67be59631bd1a8f8e787068e867dc24d697734e03d88f95c1c329c61444693c399827813c16fc9dba9c13ff8c186a558c2afb6526308691ce5f9316265b97ee6
+  checksum: ca81d8d7431a2a42aa01406ff1d7c2b00f3f869ebb2adf7b798b59589bc4247905e42b2a8ef2761870c5bf7ed584d870076b3dcc5381d0b31b605c368d81c855
   languageName: node
   linkType: hard
 
-"@cardano-sdk/core@npm:0.39.2, @cardano-sdk/core@npm:~0.39.2":
-  version: 0.39.2
-  resolution: "@cardano-sdk/core@npm:0.39.2"
+"@cardano-sdk/core@npm:0.39.3, @cardano-sdk/core@npm:~0.39.3":
+  version: 0.39.3
+  resolution: "@cardano-sdk/core@npm:0.39.3"
   dependencies:
     "@biglup/is-cid": ^1.0.3
     "@cardano-ogmios/client": 6.5.0
@@ -8045,7 +8045,7 @@ __metadata:
   peerDependenciesMeta:
     rxjs:
       optional: true
-  checksum: 354ec72519f45d482e1c545feb0359a59fd00d53633d7f9bd351bcb0d12027d0dc9208de2fb45c6ba4b911d326b872d2071e7f599a8dcf848ad981335d536450
+  checksum: 3b34ad8b97a6fdffadd2ed3c5ace346563ff7feef1d1940444ce6fac3d8fec65c2f1366026757e984bca445b7860e797741e3aad40096df27880a4170feff1d0
   languageName: node
   linkType: hard
 
@@ -8077,30 +8077,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/dapp-connector@npm:0.12.35, @cardano-sdk/dapp-connector@npm:~0.12.35":
-  version: 0.12.35
-  resolution: "@cardano-sdk/dapp-connector@npm:0.12.35"
+"@cardano-sdk/dapp-connector@npm:0.12.36, @cardano-sdk/dapp-connector@npm:~0.12.36":
+  version: 0.12.36
+  resolution: "@cardano-sdk/dapp-connector@npm:0.12.36"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
     "@cardano-sdk/util": ~0.15.5
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
     webextension-polyfill: ^0.8.0
-  checksum: 059cd214dc6dad0bba1b587f1d5bef959a18c95e7ce7ee14e22e43118c65d6d3dd9ccaa25d5999a8b43570a35eb8a8ab9c856659662a24e11df2ddc617ba5e6c
+  checksum: 6bb99e56de6fc3ebf3c14579fb039cd5c0c08a438ab5340da111f29d397b06839d17ad55e158704e275da4196dc80dd26c8e55ebb889ec0a4d955760e42e374b
   languageName: node
   linkType: hard
 
-"@cardano-sdk/hardware-ledger@npm:0.12.1, @cardano-sdk/hardware-ledger@npm:~0.12.1":
-  version: 0.12.1
-  resolution: "@cardano-sdk/hardware-ledger@npm:0.12.1"
+"@cardano-sdk/hardware-ledger@npm:0.12.2, @cardano-sdk/hardware-ledger@npm:~0.12.2":
+  version: 0.12.2
+  resolution: "@cardano-sdk/hardware-ledger@npm:0.12.2"
   dependencies:
     "@cardano-foundation/ledgerjs-hw-app-cardano": ^7.1.2
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/dapp-connector": ~0.12.35
-    "@cardano-sdk/key-management": ~0.24.1
-    "@cardano-sdk/tx-construction": ~0.21.2
+    "@cardano-sdk/dapp-connector": ~0.12.36
+    "@cardano-sdk/key-management": ~0.24.2
+    "@cardano-sdk/tx-construction": ~0.21.3
     "@cardano-sdk/util": ~0.15.5
     "@emurgo/cardano-message-signing-nodejs": ^1.0.1
     "@ledgerhq/hw-transport": ^6.28.1
@@ -8109,50 +8109,50 @@ __metadata:
     node-hid: ^2.1.2
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: 82ab4a7898d939f79b21e14cf9eabbb568d4116ded18346919b00c616599af61ff63444d3ad6a5dd569c690c7ef132d41da1ef7504acd4b9fa1ffb3b67117ffa
+  checksum: 14c7eccd4fc36e375baf1b6dd1a968a4ca14d88bd0da5c70561accf8c79c70293f84e9a8e1513d2842bfa74047277b3934b96c61be24a83e62177704fd70a6a7
   languageName: node
   linkType: hard
 
-"@cardano-sdk/hardware-trezor@npm:0.6.1, @cardano-sdk/hardware-trezor@npm:~0.6.1":
-  version: 0.6.1
-  resolution: "@cardano-sdk/hardware-trezor@npm:0.6.1"
+"@cardano-sdk/hardware-trezor@npm:0.6.2, @cardano-sdk/hardware-trezor@npm:~0.6.2":
+  version: 0.6.2
+  resolution: "@cardano-sdk/hardware-trezor@npm:0.6.2"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/dapp-connector": ~0.12.35
-    "@cardano-sdk/key-management": ~0.24.1
-    "@cardano-sdk/tx-construction": ~0.21.2
+    "@cardano-sdk/dapp-connector": ~0.12.36
+    "@cardano-sdk/key-management": ~0.24.2
+    "@cardano-sdk/tx-construction": ~0.21.3
     "@cardano-sdk/util": ~0.15.5
     "@trezor/connect": 9.4.0
     "@trezor/connect-web": 9.4.0
     lodash: ^4.17.21
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: df0e6cfd5b180f52c8baabcffb3674e5730f2072112ab67dc2887754dca80cc8254113e29721c58c71e5fffcb6696df2398b67331f8a6922209bfdba429d9ab5
+  checksum: 2a5c80164fcaac25e061b31b259207e9f94513be17e8869550ae8e7d94ca618c5d23ac5edda275e5bc266198105d2febd2faa7590d4a6677eb4e6101d8957627
   languageName: node
   linkType: hard
 
-"@cardano-sdk/input-selection@npm:0.13.17, @cardano-sdk/input-selection@npm:~0.13.17":
-  version: 0.13.17
-  resolution: "@cardano-sdk/input-selection@npm:0.13.17"
+"@cardano-sdk/input-selection@npm:0.13.18, @cardano-sdk/input-selection@npm:~0.13.18":
+  version: 0.13.18
+  resolution: "@cardano-sdk/input-selection@npm:0.13.18"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
-    "@cardano-sdk/key-management": ~0.24.1
+    "@cardano-sdk/core": ~0.39.3
+    "@cardano-sdk/key-management": ~0.24.2
     "@cardano-sdk/util": ~0.15.5
     bignumber.js: ^9.1.1
     lodash: ^4.17.21
     ts-custom-error: ^3.2.0
-  checksum: 8b20a23c8b98920a10034b7d33f190fd02b2e08bfe16b90eb8004d4c640dec725f54e8270840fa1deeb923fe59197dd1e6aaf4eb8b23e557f9b2be4cb77e2a73
+  checksum: 086545ef2b20266484fa1aa35ffd4adefb4e46580fd0f80a08944761e80ebee533bd43464eb834b7b3d610f2919c0afa9a0659f5108fb0b937e98e21fd864d62
   languageName: node
   linkType: hard
 
-"@cardano-sdk/key-management@npm:0.24.1, @cardano-sdk/key-management@npm:~0.24.1":
-  version: 0.24.1
-  resolution: "@cardano-sdk/key-management@npm:0.24.1"
+"@cardano-sdk/key-management@npm:0.24.2, @cardano-sdk/key-management@npm:~0.24.2":
+  version: 0.24.2
+  resolution: "@cardano-sdk/key-management@npm:0.24.2"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/dapp-connector": ~0.12.35
+    "@cardano-sdk/dapp-connector": ~0.12.36
     "@cardano-sdk/util": ~0.15.5
     "@emurgo/cardano-message-signing-nodejs": ^1.0.1
     bip39: ^3.0.4
@@ -8163,36 +8163,36 @@ __metadata:
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: 5fa82c3f8458930b42e0fbcd044f287f925e3eb66af179eb92021f7f01163164f1937e569f7ecd108515144ec360579aa157590a070d2ab2430c7a828c106240
+  checksum: 35fd6d735b7bd8913b9ae400616930e96c5f9b248d9e12ec32c8aa73e279b56be99b9cfafb924910a2371c75dabf6f7af6ebeee82d4dc92c87712b4c835f6e69
   languageName: node
   linkType: hard
 
-"@cardano-sdk/tx-construction@npm:0.21.2, @cardano-sdk/tx-construction@npm:~0.21.2":
-  version: 0.21.2
-  resolution: "@cardano-sdk/tx-construction@npm:0.21.2"
+"@cardano-sdk/tx-construction@npm:0.21.3, @cardano-sdk/tx-construction@npm:~0.21.3":
+  version: 0.21.3
+  resolution: "@cardano-sdk/tx-construction@npm:0.21.3"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/input-selection": ~0.13.17
-    "@cardano-sdk/key-management": ~0.24.1
+    "@cardano-sdk/input-selection": ~0.13.18
+    "@cardano-sdk/key-management": ~0.24.2
     "@cardano-sdk/util": ~0.15.5
-    "@cardano-sdk/util-rxjs": ~0.7.30
+    "@cardano-sdk/util-rxjs": ~0.7.31
     lodash: ^4.17.21
     npm: ^9.3.0
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
-  checksum: fcae5b00f771d3ad3405df718f50b3b9d825696e3abc470cea4b4217fa4d4972c32736124f13329736f2b090e9d162fa59fdc3d143e6313021e2f4e9fbd667a4
+  checksum: cfe18c3ad172b5a4602a3fb85f3cb0553b6ef3a2214ff3680880164d66662c88d1f9e2e74f4d5f48af40ce51dc04bdf40d16c6bff911b789fdbc1abd872885ff
   languageName: node
   linkType: hard
 
-"@cardano-sdk/util-dev@npm:0.22.8":
-  version: 0.22.8
-  resolution: "@cardano-sdk/util-dev@npm:0.22.8"
+"@cardano-sdk/util-dev@npm:0.22.9":
+  version: 0.22.9
+  resolution: "@cardano-sdk/util-dev@npm:0.22.9"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/key-management": ~0.24.1
+    "@cardano-sdk/key-management": ~0.24.2
     "@cardano-sdk/util": ~0.15.5
     "@types/dockerode": ^3.3.8
     axios: ^1.7.4
@@ -8206,18 +8206,18 @@ __metadata:
     lodash: ^4.17.21
     rxjs: ^7.4.0
     ts-log: ^2.2.4
-  checksum: ceae8928fbe54b889cf2c192916a3939b01c0fe638b7d1072665a364defe702216851c474bc26cc457b93008bb391e788187728083e36012ac5c83d4ff54b811
+  checksum: d0eafee4618fa4ac1050ce6922da3168fad428610c5f46b4ca4e0dc439dd40d3559940d4ed40c72a3d9473bdd249ad59f3844865954a689db8e23a92959a7572
   languageName: node
   linkType: hard
 
-"@cardano-sdk/util-rxjs@npm:~0.7.30":
-  version: 0.7.30
-  resolution: "@cardano-sdk/util-rxjs@npm:0.7.30"
+"@cardano-sdk/util-rxjs@npm:~0.7.31":
+  version: 0.7.31
+  resolution: "@cardano-sdk/util-rxjs@npm:0.7.31"
   dependencies:
     "@cardano-sdk/util": ~0.15.5
     backoff-rxjs: ^7.0.0
     rxjs: ^7.4.0
-  checksum: f2f674774c9c67d1b7cc879b691d21e836c3d6aae606fe19a31d8f86e71c339b05729cd35bec59427a367f4afe277f26026944443b38b5ed740e9f2c10cdcf9a
+  checksum: 763ffd97d4b759dae62c7587dfc85ccc95b1720429f2f0fe5bb3f794e7f07e0462927521f658f46b54248da8f9c39ebce1111b7d2f9e520ef849c58d1e3d1772
   languageName: node
   linkType: hard
 
@@ -8235,20 +8235,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/wallet@npm:0.44.0, @cardano-sdk/wallet@npm:~0.44.0":
-  version: 0.44.0
-  resolution: "@cardano-sdk/wallet@npm:0.44.0"
+"@cardano-sdk/wallet@npm:0.44.1, @cardano-sdk/wallet@npm:~0.44.1":
+  version: 0.44.1
+  resolution: "@cardano-sdk/wallet@npm:0.44.1"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/dapp-connector": ~0.12.35
-    "@cardano-sdk/hardware-ledger": ~0.12.1
-    "@cardano-sdk/hardware-trezor": ~0.6.1
-    "@cardano-sdk/input-selection": ~0.13.17
-    "@cardano-sdk/key-management": ~0.24.1
-    "@cardano-sdk/tx-construction": ~0.21.2
+    "@cardano-sdk/dapp-connector": ~0.12.36
+    "@cardano-sdk/hardware-ledger": ~0.12.2
+    "@cardano-sdk/hardware-trezor": ~0.6.2
+    "@cardano-sdk/input-selection": ~0.13.18
+    "@cardano-sdk/key-management": ~0.24.2
+    "@cardano-sdk/tx-construction": ~0.21.3
     "@cardano-sdk/util": ~0.15.5
-    "@cardano-sdk/util-rxjs": ~0.7.30
+    "@cardano-sdk/util-rxjs": ~0.7.31
     backoff-rxjs: ^7.0.0
     bignumber.js: ^9.1.1
     delay: ^5.0.0
@@ -8258,24 +8258,24 @@ __metadata:
     rxjs: ^7.4.0
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.3
-  checksum: eccb260fc195b19716f4b9a032dafc90ae73e38112b4e26bac3e2e1264626740c68cbfda6ce9404a164fe540ed43c2e3f035883932b7e7ba92e2c6b281829969
+  checksum: 3b9ff92b553853d01f99f197c6442c536093d3d65f9ec2b63e282f578a66eb42bfd2d97fe69e5299d853112791a21c137ed78dd182940fba1e05aaa60e9d0d8a
   languageName: node
   linkType: hard
 
-"@cardano-sdk/web-extension@npm:0.33.0":
-  version: 0.33.0
-  resolution: "@cardano-sdk/web-extension@npm:0.33.0"
+"@cardano-sdk/web-extension@npm:0.34.0":
+  version: 0.34.0
+  resolution: "@cardano-sdk/web-extension@npm:0.34.0"
   dependencies:
-    "@cardano-sdk/core": ~0.39.2
+    "@cardano-sdk/core": ~0.39.3
     "@cardano-sdk/crypto": ~0.1.30
-    "@cardano-sdk/dapp-connector": ~0.12.35
-    "@cardano-sdk/hardware-ledger": ~0.12.1
-    "@cardano-sdk/hardware-trezor": ~0.6.1
-    "@cardano-sdk/key-management": ~0.24.1
-    "@cardano-sdk/tx-construction": ~0.21.2
+    "@cardano-sdk/dapp-connector": ~0.12.36
+    "@cardano-sdk/hardware-ledger": ~0.12.2
+    "@cardano-sdk/hardware-trezor": ~0.6.2
+    "@cardano-sdk/key-management": ~0.24.2
+    "@cardano-sdk/tx-construction": ~0.21.3
     "@cardano-sdk/util": ~0.15.5
-    "@cardano-sdk/util-rxjs": ~0.7.30
-    "@cardano-sdk/wallet": ~0.44.0
+    "@cardano-sdk/util-rxjs": ~0.7.31
+    "@cardano-sdk/wallet": ~0.44.1
     backoff-rxjs: ^7.0.0
     lodash: ^4.17.21
     rxjs: ^7.4.0
@@ -8283,7 +8283,7 @@ __metadata:
     ts-log: ^2.2.3
     uuid: ^8.3.2
     webextension-polyfill: ^0.8.0
-  checksum: 17e8570d51c71cff44741e1282040b16f3340dd248341665e57c4c5aec8cfeeedccd99eab362c8b1621bd1dead4fa43c067a48f8758d768c62061e1238c30f02
+  checksum: 7da00a659ec131bd045ca1c07ac14b6831355c15a3343dfc562cf67bb9d2c395007a4fb9de44ffd3307d911b2c1ec3e294437ec3b875fd5f6e639dc7bb793eef
   languageName: node
   linkType: hard
 
@@ -11299,15 +11299,15 @@ __metadata:
   resolution: "@lace/browser-extension-wallet@workspace:apps/browser-extension-wallet"
   dependencies:
     "@ant-design/icons": ^4.7.0
-    "@cardano-sdk/cardano-services-client": 0.20.6
-    "@cardano-sdk/core": 0.39.2
-    "@cardano-sdk/dapp-connector": 0.12.35
-    "@cardano-sdk/hardware-ledger": 0.12.1
-    "@cardano-sdk/input-selection": 0.13.17
-    "@cardano-sdk/tx-construction": 0.21.2
+    "@cardano-sdk/cardano-services-client": 0.20.7
+    "@cardano-sdk/core": 0.39.3
+    "@cardano-sdk/dapp-connector": 0.12.36
+    "@cardano-sdk/hardware-ledger": 0.12.2
+    "@cardano-sdk/input-selection": 0.13.18
+    "@cardano-sdk/tx-construction": 0.21.3
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/wallet": 0.44.0
-    "@cardano-sdk/web-extension": 0.33.0
+    "@cardano-sdk/wallet": 0.44.1
+    "@cardano-sdk/web-extension": 0.34.0
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
     "@input-output-hk/lace-ui-toolkit": 1.15.1
@@ -11379,17 +11379,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/cardano@workspace:packages/cardano"
   dependencies:
-    "@cardano-sdk/cardano-services-client": 0.20.6
-    "@cardano-sdk/core": 0.39.2
+    "@cardano-sdk/cardano-services-client": 0.20.7
+    "@cardano-sdk/core": 0.39.3
     "@cardano-sdk/crypto": 0.1.30
-    "@cardano-sdk/hardware-ledger": 0.12.1
-    "@cardano-sdk/hardware-trezor": 0.6.1
-    "@cardano-sdk/key-management": 0.24.1
-    "@cardano-sdk/tx-construction": 0.21.2
+    "@cardano-sdk/hardware-ledger": 0.12.2
+    "@cardano-sdk/hardware-trezor": 0.6.2
+    "@cardano-sdk/key-management": 0.24.2
+    "@cardano-sdk/tx-construction": 0.21.3
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/util-dev": 0.22.8
-    "@cardano-sdk/wallet": 0.44.0
-    "@cardano-sdk/web-extension": 0.33.0
+    "@cardano-sdk/util-dev": 0.22.9
+    "@cardano-sdk/wallet": 0.44.1
+    "@cardano-sdk/web-extension": 0.34.0
     "@emurgo/cardano-message-signing-browser": 1.0.1
     "@lace/common": 0.1.0
     "@ledgerhq/devices": ^8.2.1
@@ -11449,8 +11449,8 @@ __metadata:
     "@babel/preset-env": ^7.22.20
     "@babel/preset-react": ^7.22.15
     "@babel/preset-typescript": ^7.22.15
-    "@cardano-sdk/wallet": 0.44.0
-    "@cardano-sdk/web-extension": 0.33.0
+    "@cardano-sdk/wallet": 0.44.1
+    "@cardano-sdk/web-extension": 0.34.0
     "@input-output-hk/lace-ui-toolkit": 1.15.1
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
@@ -11545,12 +11545,12 @@ __metadata:
   dependencies:
     "@ant-design/icons": ^4.7.0
     "@babel/core": ^7.21.0
-    "@cardano-sdk/core": 0.39.2
-    "@cardano-sdk/input-selection": 0.13.17
-    "@cardano-sdk/tx-construction": 0.21.2
+    "@cardano-sdk/core": 0.39.3
+    "@cardano-sdk/input-selection": 0.13.18
+    "@cardano-sdk/tx-construction": 0.21.3
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/wallet": 0.44.0
-    "@cardano-sdk/web-extension": 0.33.0
+    "@cardano-sdk/wallet": 0.44.1
+    "@cardano-sdk/web-extension": 0.34.0
     "@input-output-hk/lace-ui-toolkit": 1.15.1
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
@@ -11615,11 +11615,11 @@ __metadata:
     wait-on: ^7.0.1
     zustand: ^4.4.1
   peerDependencies:
-    "@cardano-sdk/input-selection": 0.13.17
-    "@cardano-sdk/tx-construction": 0.21.2
+    "@cardano-sdk/input-selection": 0.13.18
+    "@cardano-sdk/tx-construction": 0.21.3
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/wallet": 0.44.0
-    "@cardano-sdk/web-extension": 0.33.0
+    "@cardano-sdk/wallet": 0.44.1
+    "@cardano-sdk/web-extension": 0.34.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
