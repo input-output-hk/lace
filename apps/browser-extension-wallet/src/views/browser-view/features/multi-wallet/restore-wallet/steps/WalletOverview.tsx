@@ -215,7 +215,7 @@ export const WalletOverview = (): JSX.Element => {
             <TextLink
               label={i18n.t('general.credit.coinGecko')}
               onClick={handleOpenCoingeckoLink}
-              data-testid="coingecko-link"
+              testId="coingecko-link"
             />
           </Flex>
         )}
