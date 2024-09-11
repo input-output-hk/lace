@@ -9,21 +9,19 @@ export const walletMetadataWithAddresses = (
   walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   walletRepository: WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>
 ): Observable<UpdateWalletMetadataProps<Wallet.WalletMetadata>> =>
-  walletManager.activeWalletId$.pipe(
+  walletManager.activeWallet$.pipe(
     switchMap((activeWallet) =>
       activeWallet
-        ? walletManager.activeWallet$.pipe(
-            filter(isNotNil),
-            switchMap(({ observableWallet }) => observableWallet.addresses$),
+        ? activeWallet.observableWallet.addresses$.pipe(
             map((addresses) => addresses.map(({ address }) => address)),
             blockingWithLatestFrom(
               walletRepository.wallets$.pipe(
-                map((wallets) => wallets.find(({ walletId }) => walletId === activeWallet.walletId)),
+                map((wallets) => wallets.find(({ walletId }) => walletId === activeWallet.props.walletId)),
                 filter(isNotNil)
               )
             ),
             map(([walletAddresses, walletEntity]) => ({
-              walletId: activeWallet.walletId,
+              walletId: activeWallet.props.walletId,
               metadata: {
                 ...walletEntity.metadata,
                 walletAddresses: uniq([...(walletEntity?.metadata?.walletAddresses || []), ...walletAddresses])
