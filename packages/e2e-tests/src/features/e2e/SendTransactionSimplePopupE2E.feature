@@ -34,7 +34,7 @@ Feature: Send Simple Transactions - Popup view - E2E
   Scenario: Popup-view - Self Transaction E2E
     And I click "Receive" button on Tokens page in popup mode
     And I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with text: "Address copied"
+    Then I see a toast with text: "Copied to clipboard"
     And I close the drawer by clicking close button
     And I click "Send" button on Tokens page in popup mode
     And I fill bundle with copied address and 5 ADA
