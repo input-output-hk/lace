@@ -224,7 +224,7 @@ walletManager
 
     exposeApi(
       {
-        api$: walletManager.activeWallet$.asObservable(),
+        api$: walletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
         baseChannel: walletChannel(process.env.WALLET_NAME),
         properties: observableWalletProperties
       },
