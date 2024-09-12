@@ -78,7 +78,7 @@ Feature: ADA handle - extended view
     And I click "Receive" button on page header
     And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with text: "Address copied"
+    Then I see a toast with text: "Copied to clipboard"
     And I close a toast message
     And Clipboard contains address of wallet: "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for handle: "$cde"

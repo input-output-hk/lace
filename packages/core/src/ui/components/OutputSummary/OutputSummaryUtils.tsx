@@ -18,7 +18,7 @@ export const renderAmountInfo = (amount: string, fiat: string, key?: string): JS
     w="$fill"
     flexDirection="column"
     alignItems="flex-end"
-    data-testid="asset-info"
+    testId="asset-info"
   >
     <Text.Body.Normal weight="$medium" data-testid="asset-info-amount">
       {amount}
