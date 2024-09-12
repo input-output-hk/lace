@@ -29,7 +29,7 @@
       "all_frames": true
     },
     {
-      "matches": ["*://connect.trezor.io/*/popup.html"],
+      "matches": ["*://connect.trezor.io/*/popup.html*"],
       "js": ["js/trezor-content-script.js"],
       "all_frames": true
     }
