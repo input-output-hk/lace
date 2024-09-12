@@ -138,7 +138,7 @@ export const ensureUiIsOpenAndLoaded = async (
   const openTabs = await tabs.query({ title: 'Lace' });
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
-    if (DAPP_CONNECTOR_REGEX.test(tab.url)) tabs.remove(tab.id);
+    if (DAPP_CONNECTOR_REGEX.test(tab.url)) await tabs.remove(tab.id);
   }
 
   const tab = await launchCip30Popup(url, windowType);
