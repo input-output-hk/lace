@@ -139,7 +139,6 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         transactionsHistoryOutgoingInFlight,
         transactionsHistoryOutgoingSigned,
         utxoAvailable,
-
         utxoTotal,
         utxoUnspendable
       ]): ObservableWalletState => ({

@@ -155,7 +155,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
             data-testid="manage-delegation-add-pools-btn"
           />
         </Flex>
-        <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" data-testid="selected-pools-container">
+        <Flex flexDirection="column" gap="$16" pb="$32" alignItems="stretch" testId="selected-pools-container">
           {displayData.length === 0 && (
             <Box pt="$20">
               <NoPoolsSelected onBrowsePoolsButtonClick={onAddPoolButtonClick} />

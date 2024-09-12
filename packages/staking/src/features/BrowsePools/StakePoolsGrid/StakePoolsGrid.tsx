@@ -120,7 +120,7 @@ export const StakePoolsGrid = ({
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
             {t('browsePools.stakePoolGrid.selected')}
           </Text.Body.Normal>
-          <Box w="$fill" mt="$16" className={styles.grid} data-testid="selected-pools-list">
+          <Box w="$fill" mt="$16" className={styles.grid} testId="selected-pools-list">
             {selectedPools.map((pool) => (
               <StakePoolsGridItem key={pool.id} sortField={sortField} {...pool} />
             ))}

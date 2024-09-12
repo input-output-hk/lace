@@ -66,4 +66,5 @@ export interface ILocalStorage {
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
+  isReceiveInAdvancedMode?: boolean;
 }

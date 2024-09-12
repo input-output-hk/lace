@@ -77,7 +77,7 @@ export const StakePoolsList = ({
   );
 
   return (
-    <Box className={styles.box} w="$fill" data-testid="stake-pools-list-container">
+    <Box className={styles.box} w="$fill" testId="stake-pools-list-container">
       {selectedPools?.length > 0 && (
         <Box w="$fill" pb="$6">
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">
