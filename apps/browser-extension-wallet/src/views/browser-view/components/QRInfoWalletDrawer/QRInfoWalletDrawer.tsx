@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/no-null, consistent-return */
+/* eslint-disable unicorn/no-null, consistent-return, sonarjs/cognitive-complexity */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ADDRESS_CARD_QR_CODE_SIZE, AddressCard, HandleAddressCard } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
@@ -125,7 +125,42 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const isAdvancedModeEnabled = useAdvancedReceived && isReceiveInAdvancedMode;
 
   const { inMemoryWallet } = useWalletStore();
+
   const addresses = useObservable(inMemoryWallet.addresses$);
+  const sortedAddresses = useMemo(() => {
+    if (!addresses) return;
+
+    const isScriptWallet = addresses.some((addr) => Wallet.isScriptAddress(addr));
+
+    if (!isScriptWallet) {
+      return [...addresses].sort((a, b) => {
+        if (Wallet.isKeyHashAddress(a) && Wallet.isKeyHashAddress(b)) {
+          if (a.index !== b.index) {
+            return a.index - b.index;
+          }
+
+          if (a.stakeKeyDerivationPath && b.stakeKeyDerivationPath) {
+            return a.stakeKeyDerivationPath.index - b.stakeKeyDerivationPath.index;
+          }
+
+          if (a.stakeKeyDerivationPath && !b.stakeKeyDerivationPath) {
+            return -1;
+          }
+
+          if (!a.stakeKeyDerivationPath && b.stakeKeyDerivationPath) {
+            return 1;
+          }
+
+          return 0;
+        }
+
+        return 0;
+      });
+    }
+
+    return [...addresses];
+  }, [addresses]);
+
   const assets = useObservable(inMemoryWallet.assetInfo$);
 
   const { addressesWithUtxo, outputs } = useMemo(() => {
@@ -142,17 +177,17 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
 
   useEffect(() => {
     const fetchAddress = async () => {
-      const address = await getCurrentUnusedAddress(addresses, chainHistoryProvider);
+      const address = await getCurrentUnusedAddress(sortedAddresses, chainHistoryProvider);
       setCurrentUnusedAddress(address?.address);
     };
 
     fetchAddress();
-  }, [addresses, chainHistoryProvider, utxos]);
+  }, [sortedAddresses, chainHistoryProvider, utxos]);
 
   useEffect(() => {
-    if (!addresses) return;
+    if (!sortedAddresses) return;
 
-    const _usedAddresses = addresses
+    const _usedAddresses = sortedAddresses
       .filter(({ address }) => address !== currentUnusedAddress)
       .map(({ address, rewardAccount }) => {
         const assetsInAddress = assets && getTotalAssetsByAddress(outputs, assets, address);
@@ -178,7 +213,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
     setUsedAddresses(_usedAddresses);
     setUnusedAddress(currentUnusedAddress);
   }, [
-    addresses,
+    sortedAddresses,
     addressesWithUtxo,
     assets,
     handles,
@@ -204,11 +239,11 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   return (
     <Flex flexDirection="column" justifyContent="space-between" alignItems="center">
       <div className={styles.infoContainer}>
-        {!isAdvancedModeEnabled && addresses && (
+        {!isAdvancedModeEnabled && sortedAddresses && (
           <Flex flexDirection="column" gap="$16">
             <AddressCard
               name={name}
-              address={addresses[0].address}
+              address={sortedAddresses[0].address}
               getQRCodeOptions={getQRCodeOpts}
               onCopyClick={handleCopyAddress}
             />
