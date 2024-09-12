@@ -34,7 +34,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
       | $create_alias                                                                                |
     And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
-  @LW-7365 @Pending @issue=LW-11298
+  @LW-7365
   Scenario: Analytics - Onboarding new wallet events
     Given "Get started" page is displayed
     When I enable showing Analytics consent banner
