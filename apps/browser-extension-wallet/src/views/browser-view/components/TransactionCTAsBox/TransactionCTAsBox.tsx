@@ -19,7 +19,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { useLocalStorage } from '@hooks';
 import { Tooltip } from 'antd';
 
-const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
+const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
 
 export const TransactionCTAsBox = (): React.ReactElement => {
   const { isSharedWallet } = useWalletStore();

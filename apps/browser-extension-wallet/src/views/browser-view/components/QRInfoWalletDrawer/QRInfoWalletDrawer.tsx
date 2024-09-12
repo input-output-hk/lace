@@ -31,7 +31,7 @@ type WalletData = {
   };
 };
 
-const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVED === 'true';
+const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
 
 /**
  * Gets whether the given address has a transaction history.
