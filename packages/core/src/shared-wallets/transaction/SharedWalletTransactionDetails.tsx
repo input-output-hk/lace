@@ -92,7 +92,7 @@ export const SharedWalletTransactionDetails = ({
             data-testid="validity-period"
             className={styles.validityPeriod}
           />
-          <Box mb="$32" data-testid="tx-fee">
+          <Box mb="$32" testId="tx-fee">
             <TransactionFee
               tooltipInfo={t('core.activityDetails.transactionFeeInfo')}
               fee={fee}

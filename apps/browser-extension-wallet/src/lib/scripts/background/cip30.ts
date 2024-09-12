@@ -3,11 +3,11 @@ import { ensureUiIsOpenAndLoaded } from './util';
 import { userPromptService } from './services/dappService';
 import { authenticator } from './authenticator';
 import { wallet$, walletManager, walletRepository } from './wallet';
-import { runtime } from 'webextension-polyfill';
+import { runtime, Tabs, tabs } from 'webextension-polyfill';
 import { exposeApi, RemoteApiPropertyType, cip30 } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, map, Observable, of } from 'rxjs';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import pDebounce from 'p-debounce';
@@ -21,6 +21,21 @@ const dappSetCollateral$ = new BehaviorSubject<{
   collateralRequest: walletCip30.GetCollateralCallbackParams['data'];
 }>(undefined);
 
+const cancelOnTabClose = (tab: Tabs.Tab) => ({
+  cancel$: new Observable<void>((subscriber) => {
+    const listener = (tabId: number) => {
+      if (tabId === tab.id) {
+        subscriber.next();
+        subscriber.complete();
+      }
+    };
+    tabs.onRemoved.addListener(listener);
+    return () => {
+      tabs.onRemoved.removeListener(listener);
+    };
+  })
+});
+
 export const confirmationCallback: walletCip30.CallbackConfirmation = {
   submitTx: async () =>
     // We don't need another callback for this callback, so long as we ensure callbacks for signing tx's
@@ -30,9 +45,10 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     Promise.resolve(true),
   signTx: pDebounce(async () => {
     try {
-      await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
-
-      return userPromptService.readyToSignTx();
+      const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
+      const ready = await userPromptService.readyToSignTx();
+      if (!ready) return false;
+      return cancelOnTabClose(tab);
     } catch (error) {
       console.error(error);
       return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
@@ -40,9 +56,10 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   }, DEBOUNCE_THROTTLE),
   signData: pDebounce(async () => {
     try {
-      await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
-
-      return userPromptService.readyToSignData();
+      const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
+      const ready = await userPromptService.readyToSignData();
+      if (!ready) return false;
+      return cancelOnTabClose(tab);
     } catch (error) {
       console.error(error);
       // eslint-disable-next-line unicorn/no-useless-undefined
@@ -64,7 +81,11 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   }, DEBOUNCE_THROTTLE)
 };
 
-const walletApi = walletCip30.createWalletApi(wallet$, confirmationCallback, { logger: console });
+const walletApi = walletCip30.createWalletApi(
+  wallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
+  confirmationCallback,
+  { logger: console }
+);
 
 cip30.initializeBackgroundScript(
   { walletName: process.env.WALLET_NAME },

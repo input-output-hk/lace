@@ -1,5 +1,23 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
 .btn {
   padding: 0 !important;
   --btn-medium-min-width: 116px;
   max-width: 116px;
+}
+
+.title {
+  button {
+    &:focus:not(:active) {
+      outline-color: unset;
+      outline-width: 0;
+      outline-style: none;
+    }
+
+    background-color: var(--dark-mode-light-grey, #c0c0c0);
+
+    &[data-state="checked"]:not(:disabled) {
+      background: var(--lace-gradient);
+    }
+  }
 }

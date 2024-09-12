@@ -125,6 +125,7 @@ export const SavePaperWallet: VFC = () => {
                   w="$fill"
                   label={i18n.t('paperWallet.savePaperWallet.downloadBtnLabel')}
                   icon={<DownloadIcon />}
+                  data-testid="download-button"
                 />
               </a>
               <Button.Secondary
@@ -138,11 +139,16 @@ export const SavePaperWallet: VFC = () => {
                 disabled={pdfInstance.loading || !!pdfInstance.error}
                 icon={<PrinterIcon />}
                 label={i18n.t('paperWallet.savePaperWallet.printBtnLabel')}
+                data-testid="print-button"
               />
             </Flex>
             <Flex flexDirection="column" w="$fill" gap="$8">
               {!hasStoredPaperWallet && (
-                <Text.Label color="secondary" className={styles.centerAlign}>
+                <Text.Label
+                  color="secondary"
+                  className={styles.centerAlign}
+                  data-testid="paper-wallet-save-or-print-label"
+                >
                   {i18n.t('paperWallet.savePaperWallet.pleaseSaveOrPrintLabel')}
                 </Text.Label>
               )}
@@ -151,6 +157,7 @@ export const SavePaperWallet: VFC = () => {
                 disabled={!hasStoredPaperWallet}
                 w="$fill"
                 label={i18n.t('core.walletSetupStep.enterWallet')}
+                data-testid="open-wallet-button"
               />
             </Flex>
           </Flex>

@@ -1,0 +1,55 @@
+@import '../../../../../common/src/ui/styles/theme.scss';
+
+.item {
+  border-radius: size_unit(3);
+  padding: size_unit(0.75);
+  color: var(--text-color-primary);
+
+  &:global(.ant-dropdown-trigger) {
+    svg:last-of-type {
+      color: var(--light-mode-dark-grey, var(--color-white)) !important;
+      transition: transform 0.5s ease-in-out;
+    }
+  
+    &:hover {
+      svg:last-of-type {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  svg {
+    color: var(--text-color-secondary);
+  }
+
+  &:hover {
+    background-color: var(--dark-mode-grey, var(--color-white));
+  }
+}
+
+:global {
+  .ant-dropdown-menu {
+    border-radius: size_unit(1) !important;
+    padding: size_unit(1) size_unit(2) !important;
+    background-color: var(--dark-mode-mid-black, var(--color-white)) !important;
+  }
+
+  .ant-dropdown-menu-item {
+    padding: size_unit(1.5) 0 !important;
+    color: var(--text-color-primary) !important;
+
+    &:hover {
+      background-color: inherit !important;
+    }
+  }
+
+  .ant-dropdown-menu-item:not(:last-child) {
+    border-bottom: 1px solid var(--dark-mode-mid-grey, var(--light-mode-light-grey-plus));
+  }
+  
+  .ant-dropdown-menu-title-content {
+    svg {
+      color: var(--text-color-secondary);
+    }
+  }
+}

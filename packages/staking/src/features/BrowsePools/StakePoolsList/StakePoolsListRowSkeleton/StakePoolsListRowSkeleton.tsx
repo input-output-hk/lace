@@ -24,7 +24,7 @@ export const StakePoolsListRowSkeleton = <E extends string>({
   >
     {withSelection && <Box />}
     {columns.map((cell, cellIndex) => (
-      <Flex key={cell} className={styles.cell} data-testid={`${dataTestId}-placeholder-list-${cell}`}>
+      <Flex key={cell} className={styles.cell} testId={`${dataTestId}-placeholder-list-${cell}`}>
         {stakePoolCellPlaceholderRenderer(index + cellIndex)}
       </Flex>
     ))}

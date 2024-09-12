@@ -14,6 +14,12 @@ import {
   useOpenTransactionDrawer
 } from '../../features/send-transaction';
 import { useWalletStore } from '@stores';
+import { Box, Flex, ToggleSwitch } from '@input-output-hk/lace-ui-toolkit';
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { useLocalStorage } from '@hooks';
+import { Tooltip } from 'antd';
+
+const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
 
 export const TransactionCTAsBox = (): React.ReactElement => {
   const { isSharedWallet } = useWalletStore();
@@ -23,6 +29,10 @@ export const TransactionCTAsBox = (): React.ReactElement => {
   const openCoSignTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.CO_SIGN_TRANSACTION });
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const { t } = useTranslation();
+  const [isReceiveInAdvancedMode, { updateLocalStorage: setIsReceiveInAdvancedMode }] = useLocalStorage(
+    'isReceiveInAdvancedMode',
+    false
+  );
 
   const handleReceiveCloseIconClick = () => {
     const onClose = config?.onClose || (() => setDrawerConfig());
@@ -33,7 +43,25 @@ export const TransactionCTAsBox = (): React.ReactElement => {
   const openReceive = () => {
     setDrawerConfig({
       content: DrawerContent.RECEIVE_TRANSACTION,
-      renderTitle: () => <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />,
+      renderTitle: () => (
+        <Flex justifyContent="space-between" alignItems="center" className={styles.title}>
+          <Box>
+            <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />
+          </Box>
+          {useAdvancedReceived && (
+            <ToggleSwitch
+              icon={
+                <Tooltip title={t('qrInfo.advancedMode.toggle.description')}>
+                  <InfoCircleOutlined />
+                </Tooltip>
+              }
+              defaultChecked={isReceiveInAdvancedMode}
+              label={t('qrInfo.advancedMode.toggle.label')}
+              onCheckedChange={(isChecked) => setIsReceiveInAdvancedMode(isChecked)}
+            />
+          )}
+        </Flex>
+      ),
       renderHeader: () => (
         <DrawerNavigation
           title={<div>{t('browserView.receiveDrawer.title')}</div>}

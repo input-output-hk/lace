@@ -32,9 +32,9 @@ inputs:
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
   CARDANO_SERVICES_URL_MAINNET:
-      description: 'Url for mainnet env'
-      required: false
-      default: 'https://dev-mainnet.lw.iog.io'
+    description: 'Url for mainnet env'
+    required: false
+    default: 'https://dev-mainnet.lw.iog.io'
   CARDANO_SERVICES_URL_PREPROD:
     description: 'Url for preprod env'
     required: false
@@ -43,6 +43,10 @@ inputs:
     description: 'Url for preview env'
     required: false
     default: 'https://dev-preview.lw.iog.io'
+  CARDANO_SERVICES_URL_SANCHONET:
+    description: 'Url for sanchonet env'
+    required: false
+    default: 'https://dev-sanchonet.lw.iog.io'
 runs:
   using: 'composite'
   steps:
@@ -100,4 +104,5 @@ runs:
         CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
         CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
+        CARDANO_SERVICES_URL_SANCHONET: ${{ inputs.CARDANO_SERVICES_URL_SANCHONET }}
       run: yarn browser build
