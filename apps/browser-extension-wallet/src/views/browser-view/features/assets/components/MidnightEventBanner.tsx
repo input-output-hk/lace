@@ -43,7 +43,7 @@ export const MidnightEventBanner = (): JSX.Element => {
   }, []);
 
   const shouldHide = () => {
-    if (process.env.USE_MESSAGE_SIGNING !== 'true') {
+    if (process.env.USE_GLACIER_DROP !== 'true') {
       return true;
     }
 
