@@ -87,7 +87,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const { analytics } = useOutsideHandles();
   const { t } = useTranslation();
 
-  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
+  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password?.value, [isSubmitingTx, password?.value]);
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();
