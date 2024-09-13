@@ -38,8 +38,6 @@ class DAppConnectorAssert {
   async assertSeeHeader() {
     const commonDappPageElements = new CommonDappPageElements();
     await commonDappPageElements.headerLogo.waitForDisplayed();
-    await commonDappPageElements.betaPill.waitForDisplayed();
-    expect(await commonDappPageElements.betaPill.getText()).to.equal(await t('core.dapp.beta'));
   }
 
   async assertSeeTitleAndDappDetails(expectedTitleKey: string, expectedDappDetails: ExpectedDAppDetails) {
@@ -199,7 +197,7 @@ class DAppConnectorAssert {
   }
 
   async waitUntilBalanceNotEmpty() {
-    await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletBalance.getText()) !== '', {
       timeout: 6000,
       timeoutMsg: 'failed while waiting for DApp connection data'
     });

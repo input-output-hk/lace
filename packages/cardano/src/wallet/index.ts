@@ -39,7 +39,9 @@ export {
   Assets,
   TxInFlight,
   WalletAddress,
-  isValidSharedWalletScript
+  isValidSharedWalletScript,
+  isScriptAddress,
+  isKeyHashAddress
 } from '@cardano-sdk/wallet';
 
 export {

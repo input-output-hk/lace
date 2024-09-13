@@ -26,7 +26,7 @@ export const validateEventProperty = async (event: string, property: string, pro
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
   await browser.setupInterceptor();
-  await browser.excludeUrls([new RegExp('^(?!https://eu.posthog.com/e).*')]);
+  await browser.excludeUrls([new RegExp('^(?!https://e.lw.iog.io/e).*')]);
 });
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {

@@ -9,7 +9,7 @@ Feature: Delegating funds to new pool E2E
     Then I don't see any toast message
     And I click "Receive" button on page header
     When I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with text: "Address copied"
+    Then I see a toast with text: "Copied to clipboard"
     When I open wallet: "WalletSendingAdaToStakingE2E" in: extended mode
     And Wallet is synced
     And I click "Send" button on page header

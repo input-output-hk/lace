@@ -45,6 +45,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I click "Fine by me" button on "Changing staking preferences?" modal
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
+    And (if applicable) I close "Switching pools?" modal
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer

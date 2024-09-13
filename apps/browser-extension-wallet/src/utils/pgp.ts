@@ -2,7 +2,7 @@
 import { createMessage, decrypt, encrypt, readKey, readMessage, readPrivateKey, decryptKey } from 'openpgp';
 import type { Key, MaybeArray, Message, PartialConfig, PrivateKey, PublicKey } from 'openpgp';
 import { i18n } from '@lace/translation';
-import { PublicPgpKeyData } from '@src/types';
+import type { PublicPgpKeyData } from '@src/types';
 
 export const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
 export const NO_ENCRYPTION_PACKET_REGEX = new RegExp(/Could not find valid encryption key packet in key/);
@@ -156,7 +156,7 @@ export const decryptMessageWithPgp = async ({
     decryptionKeys: privateKey
   });
 
-  if (checkSignatures) {
+  if (checkSignatures && signatures?.length > 0) {
     signatures.map((signature) => {
       if (!signature.verified) throw new Error(`signature ${signature.keyID} not verified`);
     });
@@ -191,13 +191,13 @@ export const pgpPublicKeyVerification =
           .join(' ')
       });
     } catch (error) {
-      if (
+      if (WEAK_KEY_REGEX.test(error.message)) {
+        setPgpValidation({ error: i18n.t('pgp.error.rsaKeyTooWeak') });
+      } else if (
         error.message === 'no valid encryption key packet in key.' ||
         NO_ENCRYPTION_PACKET_REGEX.test(error.message)
       ) {
         setPgpValidation({ error: i18n.t('pgp.error.noValidEncryptionKeyPacket') });
-      } else if (WEAK_KEY_REGEX.test(error.message)) {
-        setPgpValidation({ error: error.message });
       } else if (error.message === 'PGP key is not public') {
         setPgpValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
       } else {

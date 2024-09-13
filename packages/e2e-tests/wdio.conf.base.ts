@@ -1,12 +1,19 @@
 /* eslint-disable no-undef */
 
 import extensionUtils from './src/utils/utils';
+import fs from 'fs';
+import { Logger } from './src/support/logger';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
   specs: ['./src/features/**/*.feature'],
   suites: {
-    batch1: ['./src/features/Onboarding*.feature', './src/features/SettingsPageExtended*.feature'],
+    batch1: [
+      './src/features/Onboarding*.feature',
+      './src/features/SettingsPageExtended*.feature',
+      './src/features/SendTransactionMetadata*.feature',
+      './src/features/SendTransactionMultipleSelection*.feature'
+    ],
     batch2: [
       './src/features/SendTransactionSimpleExtended.part2.feature',
       './src/features/SendTransactionSimpleExtended.part3.feature',
@@ -20,15 +27,14 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
-      './src/features/e2e/SendNft*.feature'
+      './src/features/e2e/SendNft*.feature',
+      './src/features/TokensPage*.feature'
     ],
-    batch5: ['./src/features/AddressBook*.feature'],
+    batch5: ['./src/features/AddressBook*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
     batch6: [
       './src/features/Collateral*.feature',
       './src/features/NavigationTop*.feature',
@@ -78,9 +84,9 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/StakingSwitchingPools*.feature',
       './src/features/SettingsPagePopup*.feature'
     ],
-    batch14: ['./src/features/Transactions*.feature', './src/features/MultidelegationDelegatedFundsSingle*.feature'],
+    batch14: ['./src/features/Transactions*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
-    batch16: ['./src/features/TokensPage*.feature', './src/features/SendTransactionBundlesExtended*.feature']
+    batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
@@ -136,5 +142,12 @@ export const config: WebdriverIO.Config = {
     timeout: 200_000,
     retry: 1,
     noStrictFlaky: true
-  } as WebdriverIO.CucumberOpts
+  } as WebdriverIO.CucumberOpts,
+  async onPrepare() {
+    if (!fs.existsSync('./src/support/walletConfiguration.ts')) {
+      Logger.log('walletConfiguration.ts is missing, decrypt the file first!');
+      // eslint-disable-next-line unicorn/no-process-exit
+      process.exit(1);
+    }
+  }
 };

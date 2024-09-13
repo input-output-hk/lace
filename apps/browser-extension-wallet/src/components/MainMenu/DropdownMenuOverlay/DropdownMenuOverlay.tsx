@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useState, VFC } from 'react';
+import React, { ReactNode, useCallback, useState, VFC, useMemo } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
@@ -8,6 +8,7 @@ import {
   NetworkChoise,
   Separator,
   SettingsLink,
+  SignMessageLink,
   ThemeSwitcher,
   UserInfo
 } from './components';
@@ -19,7 +20,8 @@ import { WalletAccounts } from './components/WalletAccounts';
 import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
 import { useWalletStore } from '@stores';
 import classNames from 'classnames';
-import { AnyBip32Wallet } from '@cardano-sdk/web-extension';
+import type { AnyBip32Wallet } from '@cardano-sdk/web-extension';
+import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
 interface Props extends MenuProps {
@@ -29,6 +31,7 @@ interface Props extends MenuProps {
   sendAnalyticsEvent?: (event: PostHogAction) => void;
 }
 
+// eslint-disable-next-line complexity
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
@@ -37,7 +40,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType } = useWalletStore();
 
   const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
     setManageAccountsWallet(wallet);
@@ -52,6 +55,21 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
 
   topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
+
+  const getSignMessageLink = () => (
+    <>
+      <SignMessageLink />
+      <Separator />
+    </>
+  );
+
+  const shouldShowSignMessage = useMemo(
+    () =>
+      process.env.USE_MESSAGE_SIGNING === 'true' &&
+      !isPopup &&
+      [WalletType.InMemory, WalletType.Ledger].includes(walletType),
+    [isPopup, walletType]
+  );
 
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
@@ -71,6 +89,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             <AddressBookLink />
             <SettingsLink />
             <Separator />
+            {shouldShowSignMessage && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (

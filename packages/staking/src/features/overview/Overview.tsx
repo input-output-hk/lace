@@ -146,7 +146,7 @@ export const Overview = () => {
         )}
       </Flex>
       {displayData.map((item) => (
-        <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
+        <Box key={item.id} mb="$24" testId="delegated-pool-item">
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}

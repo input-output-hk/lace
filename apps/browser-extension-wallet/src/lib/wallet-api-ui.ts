@@ -2,7 +2,6 @@ import {
   SigningCoordinator,
   WalletConflictError,
   WalletRepositoryApi,
-  WalletType,
   consumeRemoteApi,
   createKeyAgentFactory,
   exposeSigningCoordinatorApi,
@@ -11,11 +10,14 @@ import {
   walletChannel,
   walletManagerChannel,
   walletManagerProperties,
-  walletRepositoryProperties
+  walletRepositoryProperties,
+  WalletType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, from, of } from 'rxjs';
+import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
+import { Password } from '@input-output-hk/lace-ui-toolkit';
 
 export const logger = console;
 
@@ -83,6 +85,63 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
   } finally {
     subscription.unsubscribe();
     password = '';
+  }
+};
+
+/**
+ * Creates a Buffer containing the UTF-8 encoded representation of the provided password.
+ *
+ * @param {Partial<Password>} password The password object to be encoded.
+ * @returns {Buffer} A Buffer containing the UTF-8 encoded password.
+ */
+const createPassphrase = (password: Partial<Password>): Buffer => Buffer.from(password.value || '', 'utf8');
+
+/**
+ * Handles the process of signing data with confirmation, supporting both in-memory and hardware wallets.
+ * This function manages the signing request, password handling (for in-memory wallets), and secure password erasure.
+ *
+ * @template T The type of the value returned by the action.
+ * @param {() => Promise<T>} action A function that performs the action requiring data signing.
+ * @param {Partial<Password>} password The password object for in-memory wallets.
+ * @param {() => void} clearSecrets Function to clear secrets after use.
+ * @returns {Promise<T>} A promise that resolves with the result of the action.
+ *
+ * @throws Will throw an error if the signing process or the action fails.
+ *
+ * @security This function handles passwords securely:
+ * - For in-memory wallets, it uses clearSecrets to securely erase the password after use.
+ * - The password is never logged or stored in plain text.
+ * - For hardware wallets, no password is required or handled.
+ */
+export const withSignDataConfirmation = async <T>(
+  action: () => Promise<T>,
+  password: Partial<Password>,
+  clearSecrets: () => void
+): Promise<T> => {
+  const subscription = signingCoordinator.signDataRequest$
+    .pipe(
+      mergeMap((req) =>
+        req.walletType === WalletType.InMemory
+          ? of(password).pipe(
+              map(createPassphrase),
+              mergeMap((passphrase) =>
+                from(req.sign(passphrase)).pipe(
+                  finalize(() => {
+                    passphrase.fill(0);
+                  })
+                )
+              )
+            )
+          : from(req.sign())
+      )
+    )
+    .subscribe();
+
+  try {
+    return await action();
+  } finally {
+    subscription.unsubscribe();
+    clearSecrets();
   }
 };
 

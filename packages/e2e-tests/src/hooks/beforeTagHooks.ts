@@ -38,7 +38,7 @@ Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
 Before(
   {
-    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding'
+    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet'
   },
   async () => {
     await extendedView.visit();
@@ -161,7 +161,10 @@ Before(
 
 Before(
   { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended or @DAppConnectorLowFunds' },
-  async () => await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds)
+  async () => {
+    await extendedViewWalletInitialization(TestWalletName.TAWalletDelegatedFunds);
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+  }
 );
 
 Before({ tags: '@Staking-NonDelegatedFunds-Extended or @CIP-95-Extended' }, async () => {

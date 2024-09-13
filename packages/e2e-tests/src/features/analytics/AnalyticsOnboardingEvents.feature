@@ -19,10 +19,11 @@ Feature: Analytics - Posthog - Onboarding - Extended View
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
     Given I set up request interception for posthog analytics request(s)
     When I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
+    Then I validate latest analytics single event "onboarding | restore wallet revamp paper wallet | choose mode | next | click"
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | restore wallet revamp |  enter your recovery phrase  | next | click"
     When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"

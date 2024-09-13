@@ -5,32 +5,32 @@ on:
 jobs:
   build:
     name: Build + test
-    runs-on: self-hosted
+    runs-on: ubuntu-20.04
     concurrency:
       group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Decrypt test data
-        working-directory: ./packages/e2e-tests
-        run: ./decrypt_secret.sh
-        env:
-          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-      - name: Build chrome stable version of Lace
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build dev preview version of Lace
         uses: ./.github/shared/build
         with:
           BUILD_DEV_PREVIEW: 'true'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
+          CARDANO_SERVICES_URL_SANCHONET: 'https://live-sanchonet.lw.iog.io'
           PRODUCTION_MODE_TRACKING: 'false'
       - name: Check for linter issues
         run: yarn lint
-      - name: Run unit tests
-        env:
-          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
-          DEFAULT_CHAIN: 'Preprod'
-        run: yarn test --maxWorkers=2 --silent
+      - name: Execute unit tests
+        uses: ./.github/actions/test/unit
       - name: Upload build
         uses: actions/upload-artifact@v4
         with:

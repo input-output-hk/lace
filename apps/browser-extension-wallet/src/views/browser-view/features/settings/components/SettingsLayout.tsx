@@ -21,7 +21,7 @@ export const SettingsLayout = ({
 
   const sidePanelContent = (
     <div>
-      {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+      {process.env.USE_MESSAGE_SIGNING === 'true' ? (
         <Box mb="$32">
           <MidnightPreLaunchSettingsBanner bannerImageUrl={MidnightPreLaunchBannerImage} />
         </Box>

@@ -47,7 +47,7 @@ Feature: Onboarding - Restore wallet
     And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
-    Then "Choose a recovery method" page is displayed
+    Then "Choose recovery method" page is displayed on "Restore" flow
 
   @LW-6080 @LW-5839 @LW-5838
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path

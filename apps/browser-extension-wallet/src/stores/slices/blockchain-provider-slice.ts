@@ -1,7 +1,7 @@
 import { BlockchainProviderSlice, SliceCreator } from '../types';
 import { Wallet } from '@lace/cardano';
 import { getBaseUrlForChain } from '@src/utils/chain';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { config } from '@src/config';
 
 const { CHAIN } = config();

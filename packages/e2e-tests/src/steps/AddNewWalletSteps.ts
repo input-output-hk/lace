@@ -62,6 +62,6 @@ When(
   }
 );
 
-Then(/^"Choose a recovery method" page is displayed in modal$/, async () => {
+Then(/^"Choose recovery method" page is displayed in modal$/, async () => {
   await AddNewWalletAssert.assertSeeChooseRecoveryMethodPageInModal();
 });
