@@ -70,7 +70,11 @@ export const ChooseRecoveryMethod: VFC = () => {
                   >
                     <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
                       <Flex flexDirection="column">
-                        <Flex mb="$8">{optionElement}</Flex>
+                        <Flex mb="$8">
+                          <Text.Body.Normal weight="$medium" color="primary" data-testid="mnemonic-words-label">
+                            {optionElement}
+                          </Text.Body.Normal>
+                        </Flex>
                         <Box pl="$40">
                           <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-words-description">
                             {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
@@ -101,7 +105,11 @@ export const ChooseRecoveryMethod: VFC = () => {
                     <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
                       <Flex flexDirection="column">
                         <Flex mb="$8" gap="$8" alignItems="center">
-                          <Flex>{optionElement}</Flex>
+                          <Flex>
+                            <Text.Body.Normal weight="$medium" color="primary" data-testid="paper-wallet-label">
+                              {optionElement}
+                            </Text.Body.Normal>
+                          </Flex>
                           <Text.Body.Small className={styles.advancedBadge} data-testid="paper-wallet-advanced-badge">
                             {i18n.t('paperWallet.chooseRecoveryMethod.advanced')}
                           </Text.Body.Small>
