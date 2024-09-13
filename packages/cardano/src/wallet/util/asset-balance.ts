@@ -26,5 +26,5 @@ export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo: Ass
 
   if (!decimals) return BigInt(balanceWithDecimals);
 
-  return BigInt(new BigNumber(balanceWithDecimals).times(new BigNumber(BASE).pow(decimals)).toString());
+  return BigInt(new BigNumber(balanceWithDecimals).times(new BigNumber(BASE).pow(decimals)).toFixed(0).toString());
 };
