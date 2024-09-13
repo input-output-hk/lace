@@ -237,6 +237,8 @@ When(/^I click "Help and support" button during wallet setup$/, async () => {
 });
 
 Given(/^I restore a wallet$/, async () => {
+  // issue LW-11288 - please remove when it will be fixed / check on CI is needed
+  await browser.pause(1000);
   await OnboardingMainPage.restoreWalletButton.click();
   await OnboardingWalletSetupPage.goToWalletSetupPage(
     'Restore',
