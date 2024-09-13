@@ -23,7 +23,7 @@ runs:
 
     - name: Publish to Chromatic
       if: github.ref != 'refs/heads/main'
-      uses: chromaui/action@v1
+      uses: chromaui/action@v10
       with:
         projectToken: ${{ inputs.TOKEN }}
         workingDir: ./${{ inputs.DIR }}
@@ -33,7 +33,7 @@ runs:
 
     - name: Publish to Chromatic and auto accept changes
       if: github.ref == 'refs/heads/main'
-      uses: chromaui/action@v1
+      uses: chromaui/action@v10
       with:
         projectToken: ${{ inputs.TOKEN }}
         autoAcceptChanges: true
