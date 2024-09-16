@@ -1,6 +1,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNil from 'lodash/isNil';
+import { Wallet } from '@lace/cardano';
 import { AssetTableProps } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
@@ -12,7 +13,7 @@ import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { walletRoutePaths } from '@routes';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
-import { useAnalyticsContext, useAppSettingsContext } from '@providers';
+import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
 import {
@@ -56,15 +57,15 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     activityDetail,
     resetActivityState,
     blockchainProvider,
-    environmentName
+    environmentName,
+    currentChain
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
-  const [{ chainName }] = useAppSettingsContext();
-  const isMainnet = chainName === 'Mainnet';
+  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
