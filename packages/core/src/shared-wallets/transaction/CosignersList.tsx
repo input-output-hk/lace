@@ -16,7 +16,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
   const { t } = useTranslation();
 
   return (
-    <Box data-testid="cosigner-list" mt="$24">
+    <Box testId="cosigner-list" mt="$24">
       <div>
         <div data-testid="cosigner-list-header" className={styles.cosignersListHeader}>
           {title}

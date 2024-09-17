@@ -97,7 +97,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
         ))}
       </Timeline>
       <Flex h="$fill" w="$fill" flexDirection="column" p="$40">
-        <Flex data-testid="shared-wallet-step-header" flexDirection="column" justifyContent="center" gap="$32" mb="$32">
+        <Flex testId="shared-wallet-step-header" flexDirection="column" justifyContent="center" gap="$32" mb="$32">
           <Text.Heading data-testid="shared-wallet-step-title">{title}</Text.Heading>
           {description && (
             <Text.Body.Normal weight="$semibold" data-testid="shared-wallet-step-subtitle">
@@ -118,7 +118,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
         </ScrollArea>
 
         <Flex
-          data-testid="shared-wallet-step-footer"
+          testId="shared-wallet-step-footer"
           justifyContent={leftButton ? 'space-between' : 'flex-end'}
           w="$fill"
           alignItems="center"

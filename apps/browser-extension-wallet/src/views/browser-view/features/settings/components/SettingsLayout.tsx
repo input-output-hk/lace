@@ -22,7 +22,7 @@ export const SettingsLayout = ({
 
   const sidePanelContent = (
     <div>
-      {process.env.USE_MESSAGE_SIGNING === 'true' ? (
+      {process.env.USE_GLACIER_DROP === 'true' ? (
         <Box mb="$32">
           <MidnightPreLaunchSettingsBanner bannerImageUrl={MidnightPreLaunchBannerImage} />
         </Box>

@@ -7,7 +7,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9368
   Scenario: Extended-view - Multi-wallet - Restore - Restore button click
     When I opened "Restore" flow via "Add new wallet" feature
-    Then "Choose a recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal
     And "Recovery method" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process
 
@@ -16,7 +16,7 @@ Feature: Add new wallet - Restore wallet
     Given I opened "Restore" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then "Choose a recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal
 
   @LW-9383
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Mnemonic fill - paste from clipboard

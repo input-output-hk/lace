@@ -45,11 +45,17 @@ export const PgpPublicKeyEntry = ({
     <Flex className={styles.validation}>
       {validation.success && (
         <Flex gap="$4">
-          <CheckIcon className={styles.success} />
-          <Text.Label color="secondary">{validation.success}</Text.Label>
+          <CheckIcon className={styles.success} data-testid={'fingerprint-icon'} />
+          <Text.Label color="secondary" data-testid={'fingerprint-text'}>
+            {validation.success}
+          </Text.Label>
         </Flex>
       )}
-      {validation.error && <Text.Label color="error">{validation.error}</Text.Label>}
+      {validation.error && (
+        <Text.Label color="error" data-testid={'validation-error'}>
+          {validation.error}
+        </Text.Label>
+      )}
     </Flex>
   </Flex>
 );

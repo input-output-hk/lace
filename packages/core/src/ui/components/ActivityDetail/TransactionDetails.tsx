@@ -137,7 +137,7 @@ export const TransactionDetails = ({
           />
           <Transaction.Timestamp includedDate={includedDate} includedTime={includedTime} />
           {collateral && (
-            <Box mb="$32" data-testid="tx-collateral">
+            <Box mb="$32" testId="tx-collateral">
               <Collateral
                 collateral={collateral}
                 amountTransformer={amountTransformer}
@@ -147,7 +147,7 @@ export const TransactionDetails = ({
             </Box>
           )}
           {fee && fee !== '-' && (
-            <Box mb="$32" data-testid="tx-fee">
+            <Box mb="$32" testId="tx-fee">
               <TransactionFee
                 tooltipInfo={t('core.activityDetails.transactionFeeInfo')}
                 fee={fee}

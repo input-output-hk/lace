@@ -299,9 +299,18 @@ Then(/^I enter a value of: ([^"]*) to the "([^"]*)" asset$/, async (valueToEnter
 Then(
   /^I enter a value of: ([^"]*) to the "([^"]*)" asset in bundle (\d) without clearing input$/,
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueWithoutClearingField(
       Number.parseFloat(valueToEnter)
     );
+  }
+);
+
+Then(
+  /^I enter an exact value of: ([^"]*) to the "([^"]*)" asset in bundle (\d)$/,
+  async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(valueToEnter, false);
   }
 );
 
@@ -485,10 +494,6 @@ Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, 
   }
 });
 
-Then(/^the NFT displays ([^"]*) in the value field$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
-});
-
 Then(
   /^send drawer is displayed with all its components in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
@@ -531,10 +536,6 @@ Then(
 
 Then(/^I see ([^"]*) as displayed value$/, async (expectedValue: string) => {
   await drawerSendExtendedAssert.assertEnteredValue(expectedValue);
-});
-
-Then(/^the displayed value switches to: ([^"]*)$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
 });
 
 Then(

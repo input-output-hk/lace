@@ -100,7 +100,7 @@ export const TransactionInputOutput = ({
                     )}
                     <Box
                       mb={addressName ? '$4' : '$12'}
-                      data-testid="tx-address"
+                      testId="tx-address"
                       className={cn([styles.rightAlign, styles.addressTextContainer])}
                     >
                       <Tooltip title={inputAddress}>

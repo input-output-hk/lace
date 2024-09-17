@@ -18,8 +18,7 @@ describe('cacheActivatedWalletAddressSubscription', () => {
 
   it('should not trigger subscription for no active wallet', () => {
     const mockWalletManager = {
-      activeWallet$: of(undefined),
-      activeWalletId$: of(undefined)
+      activeWallet$: of(undefined)
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     const mockWalletRepository = {
@@ -34,8 +33,10 @@ describe('cacheActivatedWalletAddressSubscription', () => {
 
   it('should subscribe and update metadata', () => {
     const mockWalletManager = {
-      activeWallet$: of({ addresses$: of([{ address: 'address1' }]) }),
-      activeWalletId$: of({ walletId: 'walletId' })
+      activeWallet$: of({
+        observableWallet: { addresses$: of([{ address: 'address1' }]) },
+        props: { walletId: 'walletId' }
+      })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     const mockWalletRepository = {
@@ -61,14 +62,16 @@ describe('cacheActivatedWalletAddressSubscription', () => {
   it('should update metadata when a new wallet is added and activated', () => {
     createTestScheduler().run(({ cold, expectObservable }) => {
       const mockWalletManager = {
-        activeWalletId$: cold('a----f', {
-          a: { walletId: 'walletId1' },
-          f: { walletId: 'walletId2' }
-        }),
-        activeWallet$: eachSubscription(
-          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address1' }] }) } }),
-          cold('a', { a: { addresses$: cold('a', { a: [{ address: 'address2' }] }) } })
-        )
+        activeWallet$: cold('a----f', {
+          a: {
+            observableWallet: { addresses$: cold('a', { a: [{ address: 'address1' }] }) },
+            props: { walletId: 'walletId1' }
+          },
+          f: {
+            observableWallet: { addresses$: cold('a', { a: [{ address: 'address2' }] }) },
+            props: { walletId: 'walletId2' }
+          }
+        })
       } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
       const mockWalletRepository = {
         wallets$: eachSubscription(

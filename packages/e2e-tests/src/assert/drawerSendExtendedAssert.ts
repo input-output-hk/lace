@@ -186,12 +186,6 @@ class DrawerSendExtendedAssert {
       : expect(colorProperty.parsed.hex).to.not.equal('#ff5470');
   }
 
-  async assertTokensValueAmount(expectedValue: string) {
-    const coinConfigure = new CoinConfigure();
-    const tokenAmount = await coinConfigure.input.getValue();
-    expect(tokenAmount).to.equal(expectedValue);
-  }
-
   async assertSeeCancelTransactionModal(shouldSee: boolean) {
     await ModalAssert.assertSeeModalContainer(shouldSee);
     if (shouldSee) {

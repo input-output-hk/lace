@@ -171,7 +171,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
-        {process.env.USE_MESSAGE_SIGNING === 'true' ? (
+        {process.env.USE_GLACIER_DROP === 'true' ? (
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"

@@ -27,7 +27,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
     <>
       {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
       <div className={cn(styles.header, { [styles.popupView!]: popupView })}>
-        <Flex gap="$8" alignItems="flex-end" className={styles.title} data-testid="staking-confirmation-title">
+        <Flex gap="$8" alignItems="flex-end" className={styles.title} testId="staking-confirmation-title">
           {t('drawer.sign.confirmation.title')}
           {isSharedWallet && (
             <Text.Body.Normal color="secondary" weight="$bold">
@@ -87,7 +87,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const { analytics } = useOutsideHandles();
   const { t } = useTranslation();
 
-  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
+  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password?.value, [isSubmitingTx, password?.value]);
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();
