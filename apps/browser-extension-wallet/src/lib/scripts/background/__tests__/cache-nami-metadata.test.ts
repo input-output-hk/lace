@@ -29,20 +29,22 @@ describe('cacheNamiMetadataSubscription', () => {
   it('should return early if there is no accounts', () => {
     const mockWalletManager = {
       activeWallet$: of({
-        addresses$: of(),
-        protocolParameters$: of(),
-        balance: {
-          rewardAccounts: {
-            rewards$: of()
-          },
-          utxo: {
-            total$: of(),
-            unspendable$: of()
+        observableWallet: {
+          addresses$: of(),
+          protocolParameters$: of(),
+          balance: {
+            rewardAccounts: {
+              rewards$: of()
+            },
+            utxo: {
+              total$: of(),
+              unspendable$: of()
+            }
           }
+        },
+        props: {
+          walletId: 'walletId'
         }
-      }),
-      activeWalletId$: of({
-        walletId: 'walletId'
       })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
@@ -65,24 +67,26 @@ describe('cacheNamiMetadataSubscription', () => {
   it('should subscribe and update account metadata for index 0', () => {
     const mockWalletManager = {
       activeWallet$: of({
-        addresses$: of([{ address: 'address1' }]),
-        protocolParameters$: of({ coinsPerUtxoByte: BigInt(100) }),
-        balance: {
-          rewardAccounts: {
-            rewards$: of(BigInt(2000))
-          },
-          utxo: {
-            total$: of({
-              coins: BigInt(5000),
-              assets: undefined
-            }),
-            unspendable$: of({
-              coins: BigInt(1000)
-            })
+        observableWallet: {
+          addresses$: of([{ address: 'address1' }]),
+          protocolParameters$: of({ coinsPerUtxoByte: BigInt(100) }),
+          balance: {
+            rewardAccounts: {
+              rewards$: of(BigInt(2000))
+            },
+            utxo: {
+              total$: of({
+                coins: BigInt(5000),
+                assets: undefined
+              }),
+              unspendable$: of({
+                coins: BigInt(1000)
+              })
+            }
           }
-        }
-      }),
-      activeWalletId$: of({ walletId: 'walletId', accountIndex: 0 })
+        },
+        props: { walletId: 'walletId', accountIndex: 0 }
+      })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     const mockWalletRepository = {
@@ -133,24 +137,26 @@ describe('cacheNamiMetadataSubscription', () => {
   it('should subscribe and update wallet metadata and account metadata for index 1', () => {
     const mockWalletManager = {
       activeWallet$: of({
-        addresses$: of([{ address: 'address2' }]),
-        protocolParameters$: of({ coinsPerUtxoByte: BigInt(100) }),
-        balance: {
-          rewardAccounts: {
-            rewards$: of(BigInt(2000))
-          },
-          utxo: {
-            total$: of({
-              coins: BigInt(5000),
-              assets: undefined
-            }),
-            unspendable$: of({
-              coins: BigInt(1000)
-            })
+        observableWallet: {
+          addresses$: of([{ address: 'address2' }]),
+          protocolParameters$: of({ coinsPerUtxoByte: BigInt(100) }),
+          balance: {
+            rewardAccounts: {
+              rewards$: of(BigInt(2000))
+            },
+            utxo: {
+              total$: of({
+                coins: BigInt(5000),
+                assets: undefined
+              }),
+              unspendable$: of({
+                coins: BigInt(1000)
+              })
+            }
           }
-        }
-      }),
-      activeWalletId$: of({ walletId: 'walletId', accountIndex: 1 })
+        },
+        props: { walletId: 'walletId', accountIndex: 1 }
+      })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
     const mockWalletRepository = {
