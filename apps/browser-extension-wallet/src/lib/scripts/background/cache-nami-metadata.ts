@@ -1,4 +1,4 @@
-import { filter, switchMap, zip } from 'rxjs';
+import { filter, of, switchMap, zip } from 'rxjs';
 import merge from 'lodash/merge';
 import { Wallet } from '@lace/cardano';
 // eslint does not support exports property in package.json yet
@@ -6,6 +6,7 @@ import { Wallet } from '@lace/cardano';
 import { getBalance as getBalanceFn } from '@lace/nami/adapters';
 import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
+import { isNotNil } from '@cardano-sdk/util';
 
 export const cacheNamiMetadataSubscription = ({
   getBalance = getBalanceFn,
@@ -16,61 +17,66 @@ export const cacheNamiMetadataSubscription = ({
   walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   walletRepository: WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 }): void => {
-  zip([
-    walletManager.activeWalletId$.pipe(filter((activeWalletId) => Boolean(activeWalletId))),
-    walletManager.activeWallet$.pipe(
-      filter((wallet) => Boolean(wallet)),
+  walletManager.activeWallet$
+    .pipe(
+      filter(isNotNil),
       switchMap((wallet) =>
         zip([
-          wallet.addresses$,
-          wallet.balance.utxo.total$,
-          wallet.balance.utxo.unspendable$,
-          wallet.balance.rewardAccounts.rewards$,
-          wallet.protocolParameters$
+          of(wallet.props.walletId),
+          of(wallet.props.accountIndex),
+          wallet.observableWallet.addresses$,
+          wallet.observableWallet.balance.utxo.total$,
+          wallet.observableWallet.balance.utxo.unspendable$,
+          wallet.observableWallet.balance.rewardAccounts.rewards$,
+          wallet.observableWallet.protocolParameters$
         ])
-      )
+      ),
+      blockingWithLatestFrom(walletRepository.wallets$)
     )
-  ])
-    .pipe(blockingWithLatestFrom(walletRepository.wallets$))
-    .subscribe(([[activeWallet, [addresses, total, unspendable, rewards, protocolParameters]], wallets]) => {
-      const address = addresses[0].address;
-      const wallet = wallets.find(({ walletId }) => walletId === activeWallet.walletId);
+    .subscribe(
+      ([
+        [activeWalletId, activeWalletAccountIndex, addresses, total, unspendable, rewards, protocolParameters],
+        wallets
+      ]) => {
+        const address = addresses[0].address;
+        const wallet = wallets.find(({ walletId }) => walletId === activeWalletId);
 
-      if (!('accounts' in wallet)) {
-        return;
-      }
-      const account = wallet.accounts.find(({ accountIndex }) => accountIndex === activeWallet.accountIndex);
-      if (!account) {
-        return;
-      }
-
-      const { metadata } = account;
-      const hasAvatar = Boolean(metadata.namiMode?.avatar);
-      const hasAddress = Boolean(metadata.namiMode?.address);
-      const balance = getBalance({
-        address: wallet.metadata?.walletAddresses?.[0] || addresses[0].address,
-        total,
-        unspendable,
-        rewards,
-        protocolParameters
-      });
-      const avatar = Math.random().toString();
-
-      const updatedMetadata = merge(
-        { ...metadata },
-        {
-          namiMode: {
-            ...(!hasAvatar && { avatar }),
-            ...(!hasAddress && { address }),
-            balance: (balance.totalCoins - balance.lockedCoins - balance.unspendableCoins).toString()
-          }
+        if (!('accounts' in wallet)) {
+          return;
         }
-      );
+        const account = wallet.accounts.find(({ accountIndex }) => accountIndex === activeWalletAccountIndex);
+        if (!account) {
+          return;
+        }
 
-      walletRepository.updateAccountMetadata({
-        walletId: activeWallet.walletId,
-        accountIndex: activeWallet.accountIndex,
-        metadata: updatedMetadata
-      });
-    });
+        const { metadata } = account;
+        const hasAvatar = Boolean(metadata.namiMode?.avatar);
+        const hasAddress = Boolean(metadata.namiMode?.address);
+        const balance = getBalance({
+          address: wallet.metadata?.walletAddresses?.[0] || addresses[0].address,
+          total,
+          unspendable,
+          rewards,
+          protocolParameters
+        });
+        const avatar = Math.random().toString();
+
+        const updatedMetadata = merge(
+          { ...metadata },
+          {
+            namiMode: {
+              ...(!hasAvatar && { avatar }),
+              ...(!hasAddress && { address }),
+              balance: (balance.totalCoins - balance.lockedCoins - balance.unspendableCoins).toString()
+            }
+          }
+        );
+
+        walletRepository.updateAccountMetadata({
+          walletId: activeWalletId,
+          accountIndex: activeWalletAccountIndex,
+          metadata: updatedMetadata
+        });
+      }
+    );
 };
