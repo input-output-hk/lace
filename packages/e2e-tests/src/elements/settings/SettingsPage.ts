@@ -26,6 +26,7 @@ class SettingsPage extends CommonDrawerElements {
   private readonly CUSTOM_SUBMIT_API_LINK_TEST_ID = 'settings-wallet-custom-submit-api-link';
   private readonly THEME_SWITCH_TEST_ID = '[data-testid="switch"]';
   private readonly SHOW_RECOVERY_PHRASE_LINK_TEST_ID = 'settings-show-recovery-phrase-link';
+  private readonly GENERATE_PAPER_WALLET_LINK_TEST_ID = 'settings-generate-paperwallet-link';
   private readonly PASSPHRASE_VERIFICATION_LINK_TEST_ID = 'settings-passphrase-verification-link';
   private readonly ANALYTICS_LINK_TEST_ID = 'settings-analytics-section';
   private readonly FAQS_LINK_TEST_ID = 'settings-support-faqs-link';
@@ -101,6 +102,10 @@ class SettingsPage extends CommonDrawerElements {
 
   get showRecoveryPhraseLink() {
     return new SettingsLink(this.SHOW_RECOVERY_PHRASE_LINK_TEST_ID);
+  }
+
+  get generatePaperWallet() {
+    return new SettingsLink(this.GENERATE_PAPER_WALLET_LINK_TEST_ID);
   }
 
   get analyticsLink() {

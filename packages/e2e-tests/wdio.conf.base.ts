@@ -27,7 +27,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature',
+      './src/features/SettingsGeneratePaperWallet.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',

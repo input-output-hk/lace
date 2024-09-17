@@ -141,6 +141,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               setStage('passphrase');
             }}
             w="$fill"
+            data-testid="next-button"
           />
         );
       }
@@ -151,6 +152,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
             disabled={!password}
             label={i18n.t('browserView.settings.generatePaperWallet.title')}
             onClick={handleVerifyPass}
+            data-testid="generate-paper-wallet-button"
           />
         );
       }
@@ -172,6 +174,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
                 w="$fill"
                 label={i18n.t('paperWallet.savePaperWallet.downloadBtnLabel')}
                 icon={<DownloadIcon />}
+                data-testid="download-button"
               />
             </a>
             <Button.Secondary
@@ -184,6 +187,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
               disabled={pdfInstance.loading || !!pdfInstance.error}
               icon={<PrinterIcon />}
               label={i18n.t('paperWallet.savePaperWallet.printBtnLabel')}
+              data-testid="print-button"
             />
           </Flex>
         );
