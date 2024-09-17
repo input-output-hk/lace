@@ -1,7 +1,8 @@
-import { ExternalLinkIcon } from '@chakra-ui/icons';
+/* eslint-disable react/no-multi-comp */
+/* eslint-disable unicorn/no-null */
 import React from 'react';
-import { updateTxInfo } from '../../../api/extension';
-import UnitDisplay from './unitDisplay';
+
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
   Box,
   Link,
@@ -15,16 +16,11 @@ import {
   useColorModeValue,
   Skeleton,
 } from '@chakra-ui/react';
-import { compileOutputs } from '../../../api/util';
+import { Button } from '@chakra-ui/react';
+import { useTxInfo } from 'adapters/transactions';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
-import ReactTimeAgo from 'react-time-ago';
-import { Button } from '@chakra-ui/react';
 import ReactDOMServer from 'react-dom/server';
-import AssetsPopover from './assetPopoverDiff';
-import AssetFingerprint from '@emurgo/cip14-js';
-import { hexToAscii } from '../../../api/util';
-import { NETWORK_ID } from '../../../config/config';
 import {
   FaCoins,
   FaPiggyBank,
@@ -34,6 +30,7 @@ import {
   FaUsers,
   FaRegFileCode,
 } from 'react-icons/fa';
+import { GiAnvilImpact } from 'react-icons/gi';
 import { IoRemoveCircleSharp } from 'react-icons/io5';
 import {
   TiArrowForward,
@@ -41,10 +38,18 @@ import {
   TiArrowShuffle,
   TiArrowLoop,
 } from 'react-icons/ti';
-import { GiAnvilImpact } from 'react-icons/gi';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
+import ReactTimeAgo from 'react-time-ago';
+
 import { Events } from '../../../features/analytics/events';
-import { useStoreState } from '../../store';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+
+import AssetsPopover from './assetPopoverDiff';
+import UnitDisplay from './unitDisplay';
+
+import type { Wallet } from '@lace/cardano';
+import type { Extra, TxInfo, Type } from 'adapters/transactions';
+import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
+import type { TransactionDetail } from 'types';
 
 TimeAgo.addDefaultLocale(en);
 
@@ -77,48 +82,24 @@ const txTypeLabel = {
   contract: 'Contract',
 };
 
-const useIsMounted = () => {
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => (isMounted.current = false);
-  }, []);
-  return isMounted;
-};
+interface TransactionProps {
+  tx: Wallet.Cardano.HydratedTx;
+  network: OutsideHandlesContextValue['environmentName'];
+  cardanoCoin: OutsideHandlesContextValue['cardanoCoin'];
+}
 
 const Transaction = ({
-  txHash,
-  detail,
-  currentAddr,
-  addresses,
+  tx,
   network,
-  onLoad,
-  cardanoCoin
-}) => {
-  const isMounted = useIsMounted();
-  const [displayInfo, setDisplayInfo] = React.useState(
-    genDisplayInfo(txHash, detail, currentAddr, addresses),
-  );
-
+  cardanoCoin,
+}: Readonly<TransactionProps>) => {
+  const displayInfo = useTxInfo(tx);
   const colorMode = {
     iconBg: useColorModeValue('white', 'gray.800'),
     txBg: useColorModeValue('teal.50', 'gray.700'),
     txBgHover: useColorModeValue('teal.100', 'gray.600'),
     assetsBtnHover: useColorModeValue('teal.200', 'gray.700'),
   };
-
-  const getTxDetail = async () => {
-    if (!displayInfo) {
-      let txDetail = await updateTxInfo(txHash);
-      onLoad(txHash, txDetail);
-      if (!isMounted.current) return;
-      setDisplayInfo(genDisplayInfo(txHash, txDetail, currentAddr, addresses));
-    }
-  };
-
-  React.useEffect(() => {
-    getTxDetail();
-  });
 
   return (
     <AccordionItem borderTop="none" _last={{ borderBottom: 'none' }}>
@@ -178,44 +159,47 @@ const Transaction = ({
                   decimals={6}
                   symbol={cardanoCoin.symbol}
                 />
-              ) : displayInfo.extra.length ? (
+              ) : displayInfo.extra.length > 0 ? (
                 <Text fontSize={12} fontWeight="semibold" color="teal.500">
                   {getTxExtra(displayInfo.extra)}
                 </Text>
               ) : (
                 ''
               )}
-              {!['internalIn', 'externalIn'].includes(displayInfo.type) ? (
+              {['internalIn', 'externalIn'].includes(displayInfo.type) ? (
+                ''
+              ) : (
                 <Box flexDirection="row" fontSize={12}>
                   Fee:{' '}
                   <UnitDisplay
                     display="inline-block"
-                    quantity={displayInfo.detail.info.fees}
+                    quantity={displayInfo.fees}
                     decimals={6}
                     symbol={cardanoCoin.symbol}
                   />
-                  {parseInt(displayInfo.detail.info.deposit) ? (
+                  {!!Number.parseInt(displayInfo.deposit) && (
                     <>
-                      {parseInt(displayInfo.detail.info.deposit) > 0
-                        ? ' & Deposit: '
-                        : ' & Refund: '}
+                      {' & Deposit: '}
                       <UnitDisplay
                         display="inline-block"
-                        quantity={
-                          parseInt(displayInfo.detail.info.deposit) > 0
-                            ? displayInfo.detail.info.deposit
-                            : parseInt(displayInfo.detail.info.deposit) * -1
-                        }
+                        quantity={displayInfo.deposit}
                         decimals={6}
                         symbol={cardanoCoin.symbol}
                       />
                     </>
-                  ) : (
-                    ''
+                  )}
+                  {!!Number.parseInt(displayInfo.refund) && (
+                    <>
+                      {' & Refund: '}
+                      <UnitDisplay
+                        display="inline-block"
+                        quantity={displayInfo.refund}
+                        decimals={6}
+                        symbol={cardanoCoin.symbol}
+                      />
+                    </>
                   )}
                 </Box>
-              ) : (
-                ''
               )}
 
               {displayInfo.assets.length > 0 ? (
@@ -266,7 +250,10 @@ const Transaction = ({
   );
 };
 
-const TxIcon = ({ txType, extra }) => {
+const TxIcon = ({
+  txType,
+  extra,
+}: Readonly<{ txType: Type; extra: Extra[] }>) => {
   const icons = {
     self: TiArrowLoop,
     internalIn: TiArrowShuffle,
@@ -284,32 +271,40 @@ const TxIcon = ({ txType, extra }) => {
     contract: FaRegFileCode,
   };
 
-  if (extra.length) txType = extra[0];
+  const type = extra.length > 0 ? extra[0] : txType;
 
   let style;
-  switch (txType) {
-    case 'externalIn':
+  switch (type) {
+    case 'externalIn': {
       style = { transform: 'rotate(90deg)' };
       break;
-    case 'internalOut':
+    }
+    case 'internalOut': {
       style = { transform: 'rotate(180deg)' };
       break;
-    default:
+    }
+    default: {
       style = {};
+    }
   }
 
   return (
     <Icon
-      as={icons[txType]}
+      as={icons[type]}
       style={style}
       w={8}
       h={8}
-      color={txTypeColor[txType]}
+      color={txTypeColor[type]}
     />
   );
 };
 
-const TxDetail = ({ displayInfo, network }) => {
+interface TxDetailProps {
+  displayInfo: TxInfo;
+  network: OutsideHandlesContextValue['environmentName'];
+}
+
+const TxDetail = ({ displayInfo, network }: Readonly<TxDetailProps>) => {
   const capture = useCaptureEvent();
   const colorMode = {
     extraDetail: useColorModeValue('black', 'white'),
@@ -317,11 +312,11 @@ const TxDetail = ({ displayInfo, network }) => {
 
   return (
     <>
-      <Box display="flex" flexDirection="horizontal">
+      <Box display="flex" flexDirection="row">
         <Box>
           <Box
             display="flex"
-            flexDirection="vertical"
+            flexDirection="column"
             color="gray.600"
             fontSize="sm"
             fontWeight="bold"
@@ -333,26 +328,31 @@ const TxDetail = ({ displayInfo, network }) => {
               color="teal"
               href={
                 (() => {
-                  switch (network.id) {
-                    case NETWORK_ID.mainnet:
+                  switch (network) {
+                    case 'Mainnet': {
                       return 'https://cardanoscan.io/transaction/';
-                    case NETWORK_ID.preprod:
+                    }
+                    case 'Preprod': {
                       return 'https://testnet.cardanoscan.io/transaction/';
-                    case NETWORK_ID.preview:
+                    }
+                    case 'Preview': {
                       return 'https://preview.cexplorer.io/tx/';
-                    case NETWORK_ID.testnet:
-                      return 'https://testnet.cexplorer.io/tx/';
+                    }
+                    case 'Sanchonet': {
+                      // eslint-disable-next-line functional/no-throw-statements
+                      throw new Error('Not implemented yet: "Sanchonet" case');
+                    }
                   }
                 })() + displayInfo.txHash
               }
               isExternal
               onClick={() => {
-                capture(Events.ActivityActivityDetailTransactionHashClick);
+                void capture(Events.ActivityActivityDetailTransactionHashClick);
               }}
             >
               {displayInfo.txHash} <ExternalLinkIcon mx="2px" />
             </Link>
-            {displayInfo.detail.metadata.length > 0 ? (
+            {displayInfo.metadata.length > 0 ? (
               <Button
                 display="inline-block"
                 colorScheme="orange"
@@ -361,7 +361,9 @@ const TxDetail = ({ displayInfo, network }) => {
                 p="2px 4px"
                 height="revert"
                 m="0 5px"
-                onClick={() => viewMetadata(displayInfo.detail.metadata)}
+                onClick={() => {
+                  viewMetadata(displayInfo.metadata);
+                }}
               >
                 See Metadata
               </Button>
@@ -373,7 +375,7 @@ const TxDetail = ({ displayInfo, network }) => {
         <Box>
           <Box
             display="flex"
-            flexDirection="vertical"
+            flexDirection="column"
             textAlign="right"
             pl="10px"
             color="gray.500"
@@ -386,7 +388,7 @@ const TxDetail = ({ displayInfo, network }) => {
         </Box>
       </Box>
       {displayInfo.extra.length > 0 ? (
-        <Box display="flex" flexDirection="vertical" mt="10px">
+        <Box display="flex" flexDirection="column" mt="10px">
           <Box>
             <Box color="gray.600" fontSize="sm" fontWeight="bold">
               Transaction Extra
@@ -409,153 +411,9 @@ const TxDetail = ({ displayInfo, network }) => {
   );
 };
 
-const genDisplayInfo = (txHash, detail, currentAddr, addresses) => {
-  if (!detail || !detail.info || !detail.utxos || !detail.block) {
-    return null;
-  }
-
-  const type = getTxType(currentAddr, addresses, detail.utxos);
-  const date = dateFromUnix(detail.block.time);
-  const amounts = calculateAmount(
-    currentAddr,
-    detail.utxos,
-    detail.info.valid_contract,
-  );
-  const assets = amounts.filter(amount => amount.unit !== 'lovelace');
-  const lovelace = BigInt(
-    amounts.find(amount => amount.unit === 'lovelace').quantity,
-  );
-
-  return {
-    txHash: txHash,
-    detail: detail,
-    date: date,
-    timestamp: getTimestamp(date),
-    type: type,
-    extra: getExtra(detail.info, type),
-    amounts: amounts,
-    lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
-      ? lovelace
-      : lovelace +
-        BigInt(detail.info.fees) +
-        (parseInt(detail.info.deposit) > 0
-          ? BigInt(detail.info.deposit)
-          : BigInt(0)),
-    assets: assets.map(asset => {
-      const _policy = asset.unit.slice(0, 56);
-      const _name = asset.unit.slice(56);
-      const fingerprint = new AssetFingerprint(
-        Buffer.from(_policy, 'hex'),
-        Buffer.from(_name, 'hex'),
-      ).fingerprint();
-
-      return {
-        unit: asset.unit,
-        quantity: asset.quantity,
-        policy: _policy,
-        name: hexToAscii(_name),
-        fingerprint,
-      };
-    }),
-  };
-};
-
-const getTxType = (currentAddr, addresses, uTxOList) => {
-  let inputsAddr = uTxOList.inputs.map(utxo => utxo.address);
-  let outputsAddr = uTxOList.outputs.map(utxo => utxo.address);
-
-  if (inputsAddr.every(addr => addr === currentAddr)) {
-    // sender
-    return outputsAddr.every(addr => addr === currentAddr)
-      ? 'self'
-      : outputsAddr.some(
-            addr => addresses.includes(addr) && addr !== currentAddr,
-          )
-        ? 'internalOut'
-        : 'externalOut';
-  } else if (inputsAddr.every(addr => addr !== currentAddr)) {
-    // receiver
-    return inputsAddr.some(addr => addresses.includes(addr))
-      ? 'internalIn'
-      : 'externalIn';
-  }
-  // multisig
-  return 'multisig';
-};
-
-const dateFromUnix = unixTimestamp => {
-  return new Date(unixTimestamp * 1000);
-};
-
-const getTimestamp = date => {
-  const zeroLead = str => ('0' + str).slice(-2);
-
-  return `${date.getFullYear()}-${zeroLead(date.getMonth() + 1)}-${zeroLead(
-    date.getDate(),
-  )} ${zeroLead(date.getHours())}:${zeroLead(date.getMinutes())}:${zeroLead(
-    date.getSeconds(),
-  )}`;
-};
-
-const calculateAmount = (currentAddr, uTxOList, validContract = true) => {
-  let inputs = compileOutputs(
-    uTxOList.inputs.filter(
-      input =>
-        input.address === currentAddr && !(input.collateral && validContract),
-    ),
-  );
-  let outputs = compileOutputs(
-    uTxOList.outputs.filter(
-      output =>
-        output.address === currentAddr && !(output.collateral && validContract),
-    ),
-  );
-  let amounts = [];
-
-  while (inputs.length) {
-    let input = inputs.pop();
-    let outputIndex = outputs.findIndex(amount => amount.unit === input.unit);
-    let qty;
-
-    if (outputIndex > -1) {
-      qty =
-        (BigInt(input.quantity) - BigInt(outputs[outputIndex].quantity)) *
-        BigInt(-1);
-      outputs.splice(outputIndex, 1);
-    } else {
-      qty = BigInt(input.quantity) * BigInt(-1);
-    }
-
-    if (qty !== BigInt(0) || input.unit === 'lovelace')
-      amounts.push({
-        unit: input.unit,
-        quantity: qty,
-      });
-  }
-
-  return amounts.concat(outputs);
-};
-
-const getExtra = (info, txType) => {
-  let extra = [];
-  if (info.redeemer_count) {
-    extra.push('contract');
-  } else if (txType === 'multisig') {
-    extra.push('multisig');
-  }
-  if (info.withdrawal_count && txType === 'self') extra.push('withdrawal');
-  if (info.delegation_count) extra.push('delegation');
-  if (info.asset_mint_or_burn_count) extra.push('mint');
-  if (info.stake_cert_count && parseInt(info.deposit) >= 0) extra.push('stake');
-  if (info.stake_cert_count && parseInt(info.deposit) < 0)
-    extra.push('unstake');
-  if (info.pool_retire_count) extra.push('poolRetire');
-  if (info.pool_update_count) extra.push('poolUpdate');
-
-  return extra;
-};
-
-const viewMetadata = metadata => {
+const viewMetadata = (
+  metadata: Readonly<TransactionDetail['metadata']>,
+): void => {
   const HighlightJson = () => (
     <html lang="en">
       <head>
@@ -582,11 +440,12 @@ const viewMetadata = metadata => {
     </html>
   );
   const newTab = window.open();
-  newTab.document.write(ReactDOMServer.renderToString(<HighlightJson />));
-  newTab.document.close();
+  newTab?.document.write(ReactDOMServer.renderToString(<HighlightJson />));
+  newTab?.document.close();
 };
 
-const getTxExtra = extra =>
+const getTxExtra = (extra: readonly Extra[]): string[] =>
+  // eslint-disable-next-line max-params
   extra.map((item, index, array) =>
     index < array.length - 1 ? txTypeLabel[item] + ', ' : txTypeLabel[item],
   );

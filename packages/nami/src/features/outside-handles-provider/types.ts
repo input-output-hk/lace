@@ -1,5 +1,6 @@
 import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
+import type { EraSummary } from '@cardano-sdk/core';
 import type {
   AnyBip32Wallet,
   WalletManagerActivateProps,
@@ -48,7 +49,6 @@ export interface OutsideHandlesContextValue {
   setFiatCurrency: (fiatCurrency: string) => void;
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
-  walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
   cardanoPrice: number;
@@ -95,4 +95,10 @@ export interface OutsideHandlesContextValue {
   hasNoFunds: boolean;
   switchWalletMode: () => Promise<void>;
   openExternalLink: (url: string) => void;
+  walletAddresses: string[];
+  eraSummaries: EraSummary[];
+  transactions: Wallet.Cardano.HydratedTx[];
+  getTxInputsValueAndAddress: (
+    inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
+  ) => Promise<Wallet.TxInput[]>;
 }

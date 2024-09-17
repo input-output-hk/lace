@@ -29,6 +29,8 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import { useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { BackgroundStorage } from '@lib/scripts/types';
+import { isKeyHashAddress } from '@cardano-sdk/wallet';
+import { useWalletState } from '@hooks/useWalletState';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -45,7 +47,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
     walletInfo,
     currentChain,
     environmentName,
-    blockchainProvider: { stakePoolProvider }
+    blockchainProvider: { stakePoolProvider, chainHistoryProvider }
   } = useWalletStore();
   const { theme, setTheme } = useTheme();
   const { handleAnalyticsChoice, isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
@@ -62,13 +64,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { txFee, isInitializing, initializeCollateralTx, submitCollateralTx } = useCollateral();
 
   const cardanoPrice = priceResult.cardano.price;
-  const walletAddress = walletInfo?.addresses[0].address.toString();
+  const walletAddresses = walletInfo?.addresses
+    .filter((address) => isKeyHashAddress(address))
+    .map(({ address }) => address);
   const { setAvatar } = useWalletAvatar();
   const { delegationTxFee, setDelegationTxFee, setSelectedStakePool, setDelegationTxBuilder, delegationTxBuilder } =
     useDelegationStore();
   const { buildDelegation } = useBuildDelegation();
   const { signAndSubmitTransaction } = useDelegationTransaction();
   const { isBuildingTx, stakingError, setIsBuildingTx } = useStakePoolDetails();
+  const walletState = useWalletState();
   const passwordUtil = useSecrets();
   const getStakePoolInfo = useCallback(
     (id: Wallet.Cardano.PoolId) => getPoolInfos([id], stakePoolProvider),
@@ -111,6 +116,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
       namiMigration: migration
     });
   };
+  const getTxInputsValueAndAddress = useCallback(
+    async (inputs: Wallet.Cardano.TxIn[] | Wallet.Cardano.HydratedTxIn[]) =>
+      await Wallet.getTxInputsValueAndAddress(inputs, chainHistoryProvider, inMemoryWallet),
+    [chainHistoryProvider, inMemoryWallet]
+  );
+
+  const sortedHistoryTx = useMemo(
+    () => walletState?.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot),
+    [walletState]
+  );
 
   return (
     <OutsideHandlesProvider
@@ -132,7 +147,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         setFiatCurrency,
         theme: theme.name,
         setTheme,
-        walletAddress,
         inMemoryWallet,
         currentChain,
         cardanoPrice,
@@ -159,7 +173,11 @@ export const NamiView = withDappContext((): React.ReactElement => {
         hasNoFunds,
         setAvatar,
         switchWalletMode,
-        openExternalLink
+        openExternalLink,
+        walletAddresses,
+        transactions: sortedHistoryTx,
+        eraSummaries: walletState?.eraSummaries,
+        getTxInputsValueAndAddress
       }}
     >
       <Nami />

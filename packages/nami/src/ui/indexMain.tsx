@@ -26,7 +26,7 @@ export const Main = () => {
     connectedDapps,
     fiatCurrency,
     theme,
-    walletAddress,
+    walletAddresses,
     inMemoryWallet,
     isAnalyticsOptIn,
     currentChain,
@@ -137,14 +137,14 @@ export const Main = () => {
                 activeAccount={activeAccount}
                 updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
-                walletAddress={walletAddress}
+                walletAddress={walletAddresses[0]}
                 inMemoryWallet={inMemoryWallet}
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
             <Route path="*">
               <Wallet
-                walletAddress={walletAddress}
+                walletAddress={walletAddresses[0]}
                 nextIndex={nextIndex}
                 activeAccount={activeAccount}
                 accounts={allAccounts}

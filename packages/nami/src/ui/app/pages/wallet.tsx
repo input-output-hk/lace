@@ -67,14 +67,6 @@ import { useDelegation } from '../../../adapters/delegation';
 import {
   createTab,
   displayUnit,
-  getAccounts,
-  getCurrentAccount,
-  getCurrentAccountIndex,
-  getDelegation,
-  getNetwork,
-  getTransactions,
-  updateAccount,
-  onAccountChange,
 } from '../../../api/extension';
 import { currencyToSymbol } from '../../../api/util';
 // Assets
@@ -118,15 +110,6 @@ export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   setAvatar: (image: string) => void;
 };
 
-const useIsMounted = () => {
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => (isMounted.current = false);
-  }, []);
-  return isMounted;
-};
-
 const Wallet = ({
   walletAddress,
   nextIndex,
@@ -146,81 +129,15 @@ const Wallet = ({
   setAvatar,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
-  const isMounted = useIsMounted();
   const history = useHistory();
   const avatarBg = useColorModeValue('white', 'gray.700');
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
   const containerBg = useColorModeValue('white', 'gray.800');
-  const [state, setState] = React.useState({
-    account: null,
-    accounts: null,
-    delegation: null,
-    network: { id: '', node: '' },
-  });
   const [menu, setMenu] = React.useState(false);
   const newAccountRef = React.useRef();
   const aboutRef = React.useRef();
   const deleteAccountRef = React.useRef();
-  const [info, setInfo] = React.useState({
-    avatar: '',
-    name: '',
-    paymentAddr: '',
-    accounts: {},
-  }); // for quicker displaying
   const builderRef = React.useRef();
-
-  const checkTransactions = () =>
-    setInterval(async () => {
-      const currentAccount = await getCurrentAccount();
-      const transactions = await getTransactions();
-      const network = await getNetwork();
-      if (
-        transactions.length > 0 &&
-        currentAccount[network.id].lastUpdate !== transactions[0].txHash
-      ) {
-        await getData();
-      }
-    }, 10_000);
-
-  const getData = async forceUpdate => {
-    const currentIndex = await getCurrentAccountIndex();
-    const accounts = await getAccounts();
-    const { avatar, name, index, paymentAddr } = accounts[currentIndex] || {};
-    if (!isMounted.current) return;
-    setInfo({ avatar, name, currentIndex: index, paymentAddr, accounts });
-    setState(s => ({
-      ...s,
-      account: null,
-      delegation: null,
-    }));
-    await updateAccount(forceUpdate);
-    const allAccounts = await getAccounts();
-    const currentAccount = allAccounts[currentIndex];
-    const network = await getNetwork();
-    const delegation = await getDelegation();
-    if (!isMounted.current) return;
-    setState(s => ({
-      ...s,
-      account: currentAccount,
-      accounts: allAccounts,
-      network,
-      delegation,
-    }));
-  };
-
-  React.useEffect(() => {
-    let accountChangeHandler;
-    let txInterval;
-    getData().then(() => {
-      if (!isMounted.current) return;
-      txInterval = checkTransactions();
-      accountChangeHandler = onAccountChange(async () => getData());
-    });
-    return () => {
-      clearInterval(txInterval);
-      accountChangeHandler && accountChangeHandler.remove();
-    };
-  }, []);
 
   const canDeleteAccount = useMemo(
     () =>
@@ -330,7 +247,7 @@ const Wallet = ({
                       <UserInfo
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
-                        onClick={async () => onAccountClick(account)}
+                        onClick={async () =>  await onAccountClick(account)}
                         avatar={account.avatar}
                         name={account.name}
                         balance={account.balance}
@@ -349,7 +266,7 @@ const Wallet = ({
                 <MenuItem
                   icon={<AddIcon />}
                   onClick={() => {
-                    capture(Events.SettingsNewAccountClick);
+                    void capture(Events.SettingsNewAccountClick);
                     newAccountRef.current.openModal();
                   }}
                 >
@@ -360,7 +277,7 @@ const Wallet = ({
                     color="red.300"
                     icon={<DeleteIcon />}
                     onClick={() => {
-                      capture(Events.AccountDeleteClick);
+                      void capture(Events.AccountDeleteClick);
                       deleteAccountRef.current.openModal();
                     }}
                   >
@@ -616,7 +533,7 @@ const Wallet = ({
             <Tab
               mr={2}
               onClick={() => {
-                capture(Events.AssetsClick);
+                void capture(Events.AssetsClick);
               }}
             >
               <Icon as={GiTwoCoins} boxSize={5} />
@@ -624,7 +541,7 @@ const Wallet = ({
             <Tab
               mr={2}
               onClick={() => {
-                capture(Events.NFTsClick);
+                void capture(Events.NFTsClick);
               }}
               data-testid="collectibles"
             >
@@ -635,7 +552,7 @@ const Wallet = ({
                 as={BsClockHistory}
                 boxSize={5}
                 onClick={() => {
-                  capture(Events.ActivityActivityClick);
+                  void capture(Events.ActivityActivityClick);
                 }}
                 data-testid="clockIcon"
               />
@@ -649,17 +566,7 @@ const Wallet = ({
               <CollectiblesViewer assets={nfts} setAvatar={setAvatar} />
             </TabPanel>
             <TabPanel>
-              <HistoryViewer
-                network={state.network}
-                history={state.account && state.account.history}
-                currentAddr={state.account && state.account.paymentAddr}
-                addresses={
-                  state.accounts &&
-                  Object.keys(state.accounts).map(
-                    index => state.accounts[index].paymentAddr,
-                  )
-                }
-              />
+              <HistoryViewer />
             </TabPanel>
           </TabPanels>
         </Tabs>
@@ -992,7 +899,7 @@ const DelegationPopover = ({ builderRef }) => {
                 <Box h="4" />
                 <Button
                   onClick={() => {
-                    capture(Events.StakingUnstakeClick);
+                    void capture(Events.StakingUnstakeClick);
                     ref.current.initUndelegate();
                   }}
                   mt="5px"
@@ -1036,7 +943,7 @@ const DelegationPopover = ({ builderRef }) => {
       ) : (
         <Button
           onClick={() => {
-            capture(Events.StakingClick);
+            void capture(Events.StakingClick);
             builderRef.current.initDelegation();
           }}
           variant="solid"

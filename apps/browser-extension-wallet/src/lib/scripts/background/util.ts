@@ -122,11 +122,11 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
-export const closeAllLaceWindows = async (): Promise<void> => {
+export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
   const openTabs = await tabs.query({ title: 'Lace' });
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
-    if (DAPP_CONNECTOR_REGEX.test(tab.url)) await tabs.remove(tab.id);
+    if (!shouldRemoveTab || shouldRemoveTab(tab.url)) await tabs.remove(tab.id);
   }
 };
 
@@ -143,7 +143,7 @@ export const ensureUiIsOpenAndLoaded = async (
     : undefined;
 
   const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
-  await closeAllLaceWindows();
+  await closeAllLaceWindows((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
 
   const tab = await launchCip30Popup(url, windowType);
   if (tab.status !== 'complete') {
