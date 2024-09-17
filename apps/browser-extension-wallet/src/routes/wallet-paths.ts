@@ -33,6 +33,13 @@ export const walletRoutePaths = {
     generateKeys: '/shared-wallet/generate-key',
     create: '/shared-wallet/create',
     import: '/shared-wallet/import'
+  },
+  namiMigration: {
+    root: '/nami/migration',
+    activating: '/nami/migration/activating',
+    welcome: '/nami/migration/welcome',
+    customize: '/nami/migration/customize',
+    allDone: '/nami/migration/all-done'
   }
 };
 

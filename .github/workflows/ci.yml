@@ -11,6 +11,7 @@ on:
 permissions:
   pull-requests: write
   actions: read
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -29,6 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Collect Workflow Telemetry Build Packages
         uses: catchpoint/workflow-telemetry-action@v2
@@ -70,6 +72,12 @@ jobs:
         with:
           DIR: packages/staking
           NAME: packages-staking
+
+      - name: Build nami
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
 
   unitTests:
     name: Unit tests
@@ -115,6 +123,12 @@ jobs:
         with:
           name: packages-staking
           path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
 
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -169,6 +183,12 @@ jobs:
           name: packages-staking
           path: packages/staking/dist
 
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -186,30 +206,10 @@ jobs:
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
           BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
 
-  build:
-    name: Build Lace
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Build Lace artifact
-        uses: ./.github/shared/build
-        with:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
-
   smokeTests:
     name: Smoke e2e tests
     runs-on: ubuntu-22.04
-    needs: build
+    needs: release-pkg
     strategy:
       fail-fast: false
       matrix:
@@ -227,7 +227,7 @@ jobs:
       - name: Download Lace build artifact
         uses: actions/download-artifact@v4
         with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          name: 'lace-browser-extension'
           path: ./apps/browser-extension-wallet/dist
 
       - name: Execute E2E tests

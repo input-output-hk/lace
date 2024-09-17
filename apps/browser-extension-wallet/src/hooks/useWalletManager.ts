@@ -625,7 +625,14 @@ export const useWalletManager = (): UseWalletManager => {
       deleteFromLocalStorage('userInfo');
       deleteFromLocalStorage('keyAgentData');
       await backgroundService.clearBackgroundStorage({
-        except: ['fiatPrices', 'userId', 'usePersistentUserId', 'experimentsConfiguration', 'customSubmitTxUrl']
+        except: [
+          'fiatPrices',
+          'userId',
+          'usePersistentUserId',
+          'experimentsConfiguration',
+          'customSubmitTxUrl',
+          'namiMigration'
+        ]
       });
       resetWalletLock();
       setCardanoWallet();

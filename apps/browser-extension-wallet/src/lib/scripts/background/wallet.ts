@@ -31,6 +31,7 @@ import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain } from '@utils/chain';
+import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 
 const logger = console;
 
@@ -132,9 +133,11 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   }
 };
 
+export const getBaseDbName = (name: string): string => name.replace(/[^\da-z]/gi, '');
+
 const storesFactory: StoresFactory = {
   create: ({ name }) => {
-    const baseDbName = name.replace(/[^\da-z]/gi, '');
+    const baseDbName = getBaseDbName(name);
     const docsDbName = `${baseDbName}Docs`;
     return {
       addresses: new storage.PouchDbAddressesStore(docsDbName, 'addresses', logger),
@@ -236,5 +239,7 @@ walletManager
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
+
+cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;

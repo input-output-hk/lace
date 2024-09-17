@@ -31,5 +31,6 @@ module.exports = createJestConfig({
     '<rootDir>/test/__mocks__/ResizeObserver.js',
     '<rootDir>/test/helpers/assertions.js'
   ],
-  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
+  setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock'],
+  testPathIgnorePatterns: ['.*\\.fixture\\.ts$']
 });
