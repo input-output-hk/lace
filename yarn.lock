@@ -11356,7 +11356,7 @@ __metadata:
     openpgp: ^5.11.2
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
-    posthog-js: ^1.161.3
+    posthog-js: ^1.68.4
     process: ^0.11.10
     qrcode: ^1.5.3
     react: 17.0.2
@@ -44940,14 +44940,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:^1.161.3":
-  version: 1.161.3
-  resolution: "posthog-js@npm:1.161.3"
+"posthog-js@npm:^1.68.4":
+  version: 1.161.6
+  resolution: "posthog-js@npm:1.161.6"
   dependencies:
     fflate: ^0.4.8
     preact: ^10.19.3
     web-vitals: ^4.0.1
-  checksum: a813b60d9af5be26b5f860ef8201b4536de0233417fcd831ae24d9d6285e3b812d04572935d6c4ec2cb83f922b52db880b96bc66f9933c3874b6946a70847be7
+  checksum: 6c1154f1f678c8e6d42ac67868090f4d6565443953e23fdae44dfb1d0646212be24aa10af6c5d217bdf6e5c4072730eeabe8154291430fff3a887ef8269d9313
   languageName: node
   linkType: hard
 
