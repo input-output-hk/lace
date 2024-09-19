@@ -31,6 +31,7 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { BackgroundStorage } from '@lib/scripts/types';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { useWalletState } from '@hooks/useWalletState';
+import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -177,7 +178,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         walletAddresses,
         transactions: sortedHistoryTx,
         eraSummaries: walletState?.eraSummaries,
-        getTxInputsValueAndAddress
+        getTxInputsValueAndAddress,
+        certificateInspectorFactory
       }}
     >
       <Nami />

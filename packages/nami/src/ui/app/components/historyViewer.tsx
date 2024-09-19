@@ -25,6 +25,7 @@ const HistoryViewer = () => {
   const [isFinal, setIsFinal] = React.useState(false);
 
   const getTxs = () => {
+    if (!transactions) return;
     const slice = (historySlice ?? []).concat(
       transactions.slice((page - 1) * BATCH, page * BATCH),
     );
@@ -38,7 +39,7 @@ const HistoryViewer = () => {
 
   return (
     <Box position="relative">
-      {history && historySlice ? (
+      {historySlice ? (
         historySlice.length <= 0 ? (
           <Box
             mt="16"
@@ -75,7 +76,6 @@ const HistoryViewer = () => {
             {isFinal ? (
               <Box
                 textAlign="center"
-                // mt={18}
                 fontSize={16}
                 fontWeight="bold"
                 color="gray.400"

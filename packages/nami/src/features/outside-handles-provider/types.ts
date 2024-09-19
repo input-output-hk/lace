@@ -101,4 +101,7 @@ export interface OutsideHandlesContextValue {
   getTxInputsValueAndAddress: (
     inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
   ) => Promise<Wallet.TxInput[]>;
+  certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
+    type: Wallet.Cardano.CertificateType,
+  ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
 }

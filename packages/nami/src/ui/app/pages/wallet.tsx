@@ -93,7 +93,7 @@ import type { OutsideHandlesContextValue } from '../../../features/outside-handl
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
 export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
-  walletAddress: string;
+  activeAddress: string;
   removeAccount: UseAccount['removeAccount'];
   activateAccount: UseAccount['activateAccount'];
   addAccount: UseAccount['addAccount'];
@@ -111,7 +111,7 @@ export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
 };
 
 const Wallet = ({
-  walletAddress,
+  activeAddress,
   nextIndex,
   currency,
   activeAccount,
@@ -469,12 +469,12 @@ const Wallet = ({
                 >
                   <>
                     <Box>
-                      <QrCode value={walletAddress} />
+                      <QrCode value={activeAddress} />
                     </Box>
                     <Box height="4" />
                     <Copy
                       label={<Box fontWeight="normal">Copied address</Box>}
-                      copy={walletAddress}
+                      copy={activeAddress}
                       onClick={() => {
                         capture(Events.ReceiveCopyAddressIconClick);
                       }}
@@ -486,7 +486,7 @@ const Wallet = ({
                         cursor="pointer"
                         wordBreak="break-all"
                       >
-                        {walletAddress} <CopyIcon />
+                        {activeAddress} <CopyIcon />
                       </Text>
                     </Copy>
                     <Box height="2" />

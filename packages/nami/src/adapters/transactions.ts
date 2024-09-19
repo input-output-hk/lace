@@ -94,13 +94,13 @@ export const compileOutputs = (
       output.value?.assets ?? [],
       ([unit, quantity]) => ({
         unit: unit.toString(),
-        quantity: quantity.toString(),
+        quantity: quantity,
       }),
     );
 
     amounts.push({
       unit: 'lovelace',
-      quantity: output.value?.coins?.toString() ?? '0',
+      quantity: output.value?.coins ?? BigInt(0),
     });
 
     addAmounts([...amounts], compiledAmountList);
@@ -125,18 +125,21 @@ const addAmounts = (
     );
 
     // 'Add to' or 'insert' in compiledOutputList
-    const am = JSON.parse(JSON.stringify(amount)); // Deep Copy
+    const am = JSON.parse(
+      JSON.stringify({
+        quantity: amount.quantity.toString(),
+        unit: amount.unit,
+      }),
+    ); // Deep Copy
     entry
-      ? (entry.quantity = (
-          BigInt(entry.quantity) + BigInt(amount.quantity)
-        ).toString())
+      ? (entry.quantity = BigInt(entry.quantity) + BigInt(amount.quantity))
       : compiledAmountList.push(am);
   }
 };
 
 interface CalculatedAmount {
   unit: string;
-  quantity: bigint | string;
+  quantity: bigint;
 }
 
 interface CalculateAmountProps {
@@ -193,6 +196,7 @@ const calculateAmount = ({
 interface GetExtraProps {
   tx: Wallet.Cardano.HydratedTx;
   txType: Type;
+  certificateInspectorFactory: OutsideHandlesContextValue['certificateInspectorFactory'];
 }
 
 export type Extra =
@@ -206,7 +210,11 @@ export type Extra =
   | 'unstake'
   | 'withdrawal';
 
-const getExtra = async ({ tx, txType }: GetExtraProps): Promise<Extra[]> => {
+const getExtra = async ({
+  tx,
+  txType,
+  certificateInspectorFactory,
+}: GetExtraProps): Promise<Extra[]> => {
   const extra: Extra[] = [];
 
   if (tx.witness.redeemers?.length) {
@@ -224,31 +232,29 @@ const getExtra = async ({ tx, txType }: GetExtraProps): Promise<Extra[]> => {
   const burnedAssets = await assetsBurnedInspector(tx);
   if (mintedAssets?.length || burnedAssets?.length) extra.push('mint');
 
-  const stakeRegCerts = tx?.body?.certificates?.filter(({ __typename }) =>
-    [
-      Wallet.Cardano.CertificateType.StakeRegistration,
-      Wallet.Cardano.CertificateType.Registration,
-    ].includes(__typename),
-  );
-  if (stakeRegCerts?.length) extra.push('stake');
+  const stakeRegistrationCerts = await certificateInspectorFactory(
+    Wallet.Cardano.CertificateType.StakeRegistration,
+  )(tx);
+  const registrationCerts = await certificateInspectorFactory(
+    Wallet.Cardano.CertificateType.Registration,
+  )(tx);
+  if (stakeRegistrationCerts || registrationCerts) extra.push('stake');
 
-  const stakeDeregCerts = tx?.body?.certificates?.filter(({ __typename }) =>
-    [
-      Wallet.Cardano.CertificateType.StakeDeregistration,
-      Wallet.Cardano.CertificateType.Unregistration,
-    ].includes(__typename),
-  );
-  if (stakeDeregCerts?.length) extra.push('unstake');
+  const stakeDeregCerts = await certificateInspectorFactory(
+    Wallet.Cardano.CertificateType.StakeDeregistration,
+  )(tx);
+  const unregistrationCerts = await certificateInspectorFactory(
+    Wallet.Cardano.CertificateType.Unregistration,
+  )(tx);
+  if (stakeDeregCerts || unregistrationCerts) extra.push('unstake');
 
   const poolRetireCerts = await poolRetirementInspector(tx);
   if (poolRetireCerts?.length) extra.push('poolRetire');
 
-  const poolUpdateCerts = tx?.body?.certificates?.filter(
-    certificate =>
-      certificate.__typename ===
-      Wallet.Cardano.CertificateType.UpdateDelegateRepresentative,
-  );
-  if (poolUpdateCerts?.length) extra.push('poolUpdate');
+  const updateDelegateRepresentativeCerts = await certificateInspectorFactory(
+    Wallet.Cardano.CertificateType.UpdateDelegateRepresentative,
+  )(tx);
+  if (updateDelegateRepresentativeCerts) extra.push('poolUpdate');
 
   return extra;
 };
@@ -290,6 +296,7 @@ export const useTxInfo = (
     inMemoryWallet,
     eraSummaries,
     walletAddresses,
+    certificateInspectorFactory,
   } = useOutsideHandles();
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
@@ -324,7 +331,7 @@ export const useTxInfo = (
         amounts.find(amount => amount.unit === 'lovelace')!.quantity,
       );
 
-      const info = {
+      const info: TxInfo = {
         txHash: tx.id.toString(),
         fees: tx.body.fee.toString(),
         deposit: implicitCoin.deposit?.toString() ?? '',
@@ -335,10 +342,14 @@ export const useTxInfo = (
             json_metadata: Wallet.cardanoMetadatumToObj(value),
           }),
         ),
-        date: date,
+        date,
         timestamp: getTimestamp(date),
         type,
-        extra: await getExtra({ tx, txType: type }),
+        extra: await getExtra({
+          tx,
+          txType: type,
+          certificateInspectorFactory,
+        }),
         amounts: amounts,
         lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
           ? BigInt(lovelace.toString())

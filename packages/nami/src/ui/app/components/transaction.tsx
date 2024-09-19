@@ -333,7 +333,7 @@ const TxDetail = ({ displayInfo, network }: Readonly<TxDetailProps>) => {
                       return 'https://cardanoscan.io/transaction/';
                     }
                     case 'Preprod': {
-                      return 'https://testnet.cardanoscan.io/transaction/';
+                      return 'https://preprod.cardanoscan.io/transaction/';
                     }
                     case 'Preview': {
                       return 'https://preview.cexplorer.io/tx/';

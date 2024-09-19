@@ -137,14 +137,14 @@ export const Main = () => {
                 activeAccount={activeAccount}
                 updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
-                walletAddress={walletAddresses[0]}
+                activeAddress={walletAddresses[0]}
                 inMemoryWallet={inMemoryWallet}
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
             <Route path="*">
               <Wallet
-                walletAddress={walletAddresses[0]}
+                activeAddress={walletAddresses[0]}
                 nextIndex={nextIndex}
                 activeAccount={activeAccount}
                 accounts={allAccounts}

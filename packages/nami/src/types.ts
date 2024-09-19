@@ -154,7 +154,7 @@ export interface UtxoOutput {
 }
 
 export interface Amount {
-  quantity: bigint | string;
+  quantity: bigint;
   unit: string;
 }
 
