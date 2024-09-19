@@ -5,19 +5,21 @@ import {
   assetsMintedInspector,
   assetsBurnedInspector,
   delegationInspector,
-  stakeKeyDeregistrationInspector,
   poolRetirementInspector,
+  coalesceValueQuantities,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
-import { hexToAscii } from 'api/util';
-import BigNumber from 'bignumber.js';
-import { useOutsideHandles } from 'ui';
 
+import { useOutsideHandles } from '../features/outside-handles-provider/useOutsideHandles';
+
+import { toAsset } from './assets';
+
+import type { OutsideHandlesContextValue } from '../features/outside-handles-provider/types';
+import type { Asset as NamiAsset } from '../types/assets';
 import type { Asset, Cardano } from '@cardano-sdk/core';
 import type { HandleInfo } from '@cardano-sdk/wallet';
 import type { Amount, TransactionDetail, TransactionInfo } from 'types';
-import type { OutsideHandlesContextValue } from 'ui';
 
 export type AssetOrHandleInfo = Asset.AssetInfo | HandleInfo;
 export type AssetOrHandleInfoMap = Map<Cardano.AssetId, AssetOrHandleInfo>;
@@ -87,54 +89,17 @@ const dateFromUnix = (
 export const compileOutputs = (
   outputList: Readonly<uTxOList['outputs'] | Wallet.TxInput[]>,
 ): Amount[] => {
-  const compiledAmountList: Amount[] = [];
+  const coalescedValue: Cardano.Value = coalesceValueQuantities(
+    outputList.map(output => output.value),
+  );
 
-  for (const output of outputList) {
-    const amounts = Array.from(
-      output.value?.assets ?? [],
-      ([unit, quantity]) => ({
-        unit: unit.toString(),
-        quantity: quantity,
-      }),
-    );
-
-    amounts.push({
-      unit: 'lovelace',
-      quantity: output.value?.coins ?? BigInt(0),
-    });
-
-    addAmounts([...amounts], compiledAmountList);
-  }
-
-  return compiledAmountList;
-};
-
-/**
- * Add up an AmountList values to an other AmountList
- * @param {AmountList} amountList - Set of amounts to be added.
- * @param {AmountList} compiledAmountList - The compiled set of amounts.
- */
-const addAmounts = (
-  amountList: Readonly<Amount[]>,
-  // eslint-disable-next-line functional/prefer-immutable-types
-  compiledAmountList: Amount[],
-): void => {
-  for (const amount of amountList) {
-    const entry = compiledAmountList.find(
-      compiledAmount => compiledAmount.unit === amount.unit,
-    );
-
-    // 'Add to' or 'insert' in compiledOutputList
-    const am = JSON.parse(
-      JSON.stringify({
-        quantity: amount.quantity.toString(),
-        unit: amount.unit,
-      }),
-    ); // Deep Copy
-    entry
-      ? (entry.quantity = BigInt(entry.quantity) + BigInt(amount.quantity))
-      : compiledAmountList.push(am);
-  }
+  return Array.from(coalescedValue?.assets ?? [], ([unit, quantity]) => ({
+    unit: unit.toString(),
+    quantity: quantity,
+  })).concat({
+    unit: 'lovelace',
+    quantity: coalescedValue?.coins ?? BigInt(0),
+  });
 };
 
 interface CalculatedAmount {
@@ -268,12 +233,6 @@ const getTimestamp = (date: Date) => {
   )}`;
 };
 
-type DisplayAssetsInfo = CalculatedAmount & {
-  policy: string;
-  name: string;
-  fingerprint: string;
-};
-
 export type TxInfo = Pick<TransactionDetail, 'metadata'> &
   Pick<TransactionInfo, 'deposit' | 'fees'> & {
     txHash: string;
@@ -283,7 +242,7 @@ export type TxInfo = Pick<TransactionDetail, 'metadata'> &
     extra: Extra[];
     amounts: CalculatedAmount[];
     lovelace: bigint;
-    assets: DisplayAssetsInfo[];
+    assets: NamiAsset[];
     refund: string;
   };
 
@@ -360,15 +319,7 @@ export const useTxInfo = (
               : BigInt(0)),
         assets: assets.map(asset => {
           const assetInfo = assetsInfo?.get(Wallet.Cardano.AssetId(asset.unit));
-          const fingerprint = Wallet.Cardano.AssetFingerprint(asset.unit);
-
-          return {
-            unit: asset.unit,
-            quantity: asset.quantity,
-            policy: (assetInfo?.policyId ?? '').toString(),
-            name: (assetInfo?.name ?? '').toString(),
-            fingerprint,
-          };
+          return toAsset(assetInfo!, asset.quantity);
         }),
       };
 

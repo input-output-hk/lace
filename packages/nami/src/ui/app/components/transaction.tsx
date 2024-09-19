@@ -17,7 +17,6 @@ import {
   Skeleton,
 } from '@chakra-ui/react';
 import { Button } from '@chakra-ui/react';
-import { useTxInfo } from 'adapters/transactions';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import ReactDOMServer from 'react-dom/server';
@@ -40,14 +39,15 @@ import {
 } from 'react-icons/ti';
 import ReactTimeAgo from 'react-time-ago';
 
+import { useTxInfo } from '../../../adapters/transactions';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 
 import AssetsPopover from './assetPopoverDiff';
 import UnitDisplay from './unitDisplay';
 
+import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
 import type { Wallet } from '@lace/cardano';
-import type { Extra, TxInfo, Type } from 'adapters/transactions';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
 

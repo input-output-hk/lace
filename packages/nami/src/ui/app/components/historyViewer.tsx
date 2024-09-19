@@ -7,7 +7,7 @@ import { File } from 'react-kawaii';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import Transaction from './transaction';
 
@@ -35,7 +35,7 @@ const HistoryViewer = () => {
 
   React.useEffect(() => {
     getTxs();
-  }, [transactions, page]);
+  }, [page]);
 
   return (
     <Box position="relative">

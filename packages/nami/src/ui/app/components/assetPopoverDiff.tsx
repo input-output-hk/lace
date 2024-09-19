@@ -19,11 +19,10 @@ import { FixedSizeList as List } from 'react-window';
 import Copy from './copy';
 
 import MiddleEllipsis from 'react-middle-ellipsis';
-import { getAsset } from '../../../api/extension';
 import UnitDisplay from './unitDisplay';
 
 const abs = big => {
-  return big < 0 ? big * BigInt(-1) : big;
+  return big < 0 ? big * (-1) : big;
 };
 
 const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
@@ -120,22 +119,6 @@ const AssetsPopover = ({ assets, isDifference }) => {
 };
 
 const Asset = ({ asset, isDifference }) => {
-  const [token, setToken] = React.useState(null);
-  const isMounted = useIsMounted();
-
-  const fetchData = async () => {
-    const detailedAsset = {
-      ...(await getAsset(asset.unit)),
-      quantity: asset.quantity,
-    };
-    if (!isMounted.current) return;
-    setToken(detailedAsset);
-  };
-
-  React.useEffect(() => {
-    fetchData();
-  }, []);
-
   return (
     <Box
       width="100%"
@@ -144,7 +127,7 @@ const Asset = ({ asset, isDifference }) => {
       alignItems="center"
       justifyContent="start"
     >
-      {token && (
+      {asset && (
         <Stack
           width="100%"
           fontSize="xs"
@@ -152,7 +135,7 @@ const Asset = ({ asset, isDifference }) => {
           alignItems="center"
           justifyContent="start"
         >
-          <Avatar userSelect="none" size="xs" name={token.name} />
+          <Avatar userSelect="none" size="xs" name={asset.name} />
 
           <Box
             textAlign="left"
@@ -160,15 +143,15 @@ const Asset = ({ asset, isDifference }) => {
             whiteSpace="nowrap"
             fontWeight="normal"
           >
-            <Copy label="Copied asset" copy={token.fingerprint}>
+            <Copy label="Copied asset" copy={asset.fingerprint}>
               <Box mb="-0.5">
                 <MiddleEllipsis>
-                  <span>{token.name}</span>
+                  <span>{asset.name}</span>
                 </MiddleEllipsis>
               </Box>
               <Box whiteSpace="nowrap" fontSize="xx-small" fontWeight="light">
                 <MiddleEllipsis>
-                  <span>Policy: {token.policy}</span>
+                  <span>Policy: {asset.policy}</span>
                 </MiddleEllipsis>
               </Box>
             </Copy>
@@ -178,7 +161,7 @@ const Asset = ({ asset, isDifference }) => {
               fontWeight="bold"
               color={
                 isDifference
-                  ? token.quantity <= 0
+                  ? asset.quantity <= 0
                     ? 'red.300'
                     : 'teal.500'
                   : 'inherit'
@@ -186,11 +169,11 @@ const Asset = ({ asset, isDifference }) => {
             >
               <Box display="flex" alignItems="center">
                 <Box mr="0.5">
-                  {isDifference ? (token.quantity <= 0 ? '-' : '+') : '+'}{' '}
+                  {isDifference ? (asset.quantity <= 0 ? '-' : '+') : '+'}{' '}
                 </Box>
                 <UnitDisplay
-                  quantity={abs(token.quantity).toString()}
-                  decimals={token.decimals}
+                  quantity={abs(asset.quantity).toString()}
+                  decimals={asset.decimals}
                 />
               </Box>
             </Box>
@@ -199,15 +182,6 @@ const Asset = ({ asset, isDifference }) => {
       )}
     </Box>
   );
-};
-
-const useIsMounted = () => {
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => (isMounted.current = false);
-  }, []);
-  return isMounted;
 };
 
 export default AssetsPopover;
