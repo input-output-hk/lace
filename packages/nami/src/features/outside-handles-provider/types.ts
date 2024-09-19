@@ -7,6 +7,7 @@ import type {
   WalletRepositoryApi,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
+import type { PasswordObj as Password } from '@lace/core';
 export interface IAssetDetails {
   id: string;
   logo: string;
@@ -72,4 +73,24 @@ export interface OutsideHandlesContextValue {
   cardanoCoin: Wallet.CoinId;
   isValidURL: (link: string) => boolean;
   setAvatar: (image: string) => void;
+  buildDelegation: (
+    hexId?: Readonly<Wallet.Cardano.PoolIdHex>,
+  ) => Promise<void>;
+  signAndSubmitTransaction: () => Promise<void>;
+  passwordUtil: {
+    clearSecrets: () => void;
+    password: Partial<Password>;
+    setPassword: (pw: Readonly<Partial<Password>>) => void;
+  };
+  delegationTxFee: string;
+  setSelectedStakePool: (
+    pool: Readonly<Wallet.Cardano.StakePool | undefined>,
+  ) => void;
+  isBuildingTx: boolean;
+  stakingError: string;
+  getStakePoolInfo: (
+    id: Readonly<Wallet.Cardano.PoolId>,
+  ) => Promise<Wallet.Cardano.StakePool[]>;
+  resetDelegationState: () => void;
+  hasNoFunds: boolean;
 }

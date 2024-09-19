@@ -22,8 +22,6 @@ import { useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
-    collateralFee,
-    isInitializingCollateral,
     addAccount: addLaceAccount,
     connectedDapps,
     fiatCurrency,
@@ -35,8 +33,6 @@ export const Main = () => {
     cardanoPrice,
     walletManager,
     walletRepository,
-    submitCollateralTx,
-    initializeCollateralTx,
     setFiatCurrency,
     setTheme,
     removeDapp,
@@ -101,11 +97,6 @@ export const Main = () => {
       walletRepository.updateAccountMetadata(props),
   });
   const balance = useBalance({ inMemoryWallet });
-  const { hasCollateral, reclaimCollateral, submitCollateral } = useCollateral({
-    inMemoryWallet,
-    submitCollateralTx,
-    withSignTxConfirmation,
-  });
   const { assets, nfts } = useAssets({ inMemoryWallet, balance }) ?? [];
 
   return (
@@ -151,9 +142,6 @@ export const Main = () => {
             <Route path="*">
               <Wallet
                 walletAddress={walletAddress}
-                hasCollateral={hasCollateral}
-                isInitializingCollateral={isInitializingCollateral}
-                collateralFee={collateralFee}
                 nextIndex={nextIndex}
                 activeAccount={activeAccount}
                 accounts={allAccounts}
@@ -163,9 +151,6 @@ export const Main = () => {
                 lockedCoins={balance.lockedCoins}
                 unspendableCoins={balance.unspendableCoins}
                 cardanoCoin={cardanoCoin}
-                reclaimCollateral={reclaimCollateral}
-                submitCollateral={submitCollateral}
-                initializeCollateral={initializeCollateralTx}
                 addAccount={addAccount}
                 activateAccount={activateAccount}
                 removeAccount={removeAccount}

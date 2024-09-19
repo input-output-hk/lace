@@ -22,46 +22,38 @@ import {
   Input,
   Tooltip,
 } from '@chakra-ui/react';
+import { Wallet } from '@lace/cardano';
 import { FaRegFileCode } from 'react-icons/fa';
 import { GoStop } from 'react-icons/go';
 
-import { createTab, getPoolMetadata } from '../../../api/extension';
-import {
-  delegationTx,
-  initTx,
-  signAndSubmit,
-  withdrawalTx,
-  signAndSubmitHW,
-  undelegateTx,
-} from '../../../api/extension/wallet';
-import { ERROR, HW, TAB } from '../../../config/config';
+import { useCollateral } from '../../../adapters/collateral';
+import { useDelegation } from '../../../adapters/delegation';
+import { ERROR } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
-interface Props {
-  collateralFee: bigint;
-  hasCollateral: boolean;
-  isInitializingCollateral: boolean;
-  onConfirm: () => void;
-  initializeCollateral: () => Promise<void>;
-  reclaimCollateral: () => Promise<void>;
-  submitCollateral: (password: string) => Promise<void>;
-}
-
-// Assets
-
-const PoolStates = {
+type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
+const PoolStates: Record<States, States> = {
   LOADING: 'LOADING',
   ERROR: 'ERROR',
   EDITING: 'EDITING',
   DONE: 'DONE',
 };
 
-const poolDefaultValue = {
+interface PoolDisplayValue {
+  ticker: string;
+  name: string;
+  id: string;
+  error?: string;
+  state: States;
+  showTooltip: boolean;
+}
+
+const poolDefaultValue: PoolDisplayValue = {
   ticker: '',
   name: '',
   id: '',
@@ -70,7 +62,7 @@ const poolDefaultValue = {
   showTooltip: false,
 };
 
-const poolRightElementStyle = pool => {
+const poolRightElementStyle = (pool: Readonly<PoolDisplayValue>) => {
   if (pool.state === PoolStates.DONE || pool.state === PoolStates.ERROR) {
     return {
       width: 'auto',
@@ -87,11 +79,13 @@ const poolRightElementStyle = pool => {
   };
 };
 
-const poolHasTicker = pool => {
+const poolHasTicker = (pool: Readonly<PoolDisplayValue>): boolean => {
   return pool.state === PoolStates.DONE && Boolean(pool.ticker);
 };
 
-const poolTooltipMessage = pool => {
+const poolTooltipMessage = (
+  pool: Readonly<PoolDisplayValue>,
+): string | undefined => {
   if (pool.state !== PoolStates.DONE) {
     return undefined;
   }
@@ -102,21 +96,39 @@ const poolTooltipMessage = pool => {
   return `${ticker} / ${name}`;
 };
 
-const TransactionBuilder = React.forwardRef<unknown, Props>(
-  (
-    {
-      collateralFee,
-      hasCollateral,
-      isInitializingCollateral,
-      onConfirm,
-      submitCollateral,
-      initializeCollateral,
-      reclaimCollateral,
-    },
-    ref,
-  ) => {
+const TransactionBuilder = React.forwardRef<unknown, undefined>(
+  (undefined, ref) => {
     const capture = useCaptureEvent();
-    const { cardanoCoin } = useOutsideHandles();
+    const {
+      isInitializingCollateral,
+      initializeCollateralTx: initializeCollateral,
+      collateralFee,
+      inMemoryWallet,
+      cardanoCoin,
+      buildDelegation,
+      setSelectedStakePool,
+      delegationTxFee,
+      isBuildingTx,
+      stakingError,
+      passwordUtil: { setPassword },
+      signAndSubmitTransaction,
+      getStakePoolInfo,
+      submitCollateralTx,
+      withSignTxConfirmation,
+      resetDelegationState,
+      hasNoFunds,
+    } = useOutsideHandles();
+    const { initDelegation, stakeRegistration } = useDelegation({
+      inMemoryWallet,
+      buildDelegation,
+      setSelectedStakePool,
+    });
+    const { hasCollateral, reclaimCollateral, submitCollateral } =
+      useCollateral({
+        inMemoryWallet,
+        submitCollateralTx,
+        withSignTxConfirmation,
+      });
     const toast = useToast();
     const {
       isOpen: isOpenCol,
@@ -124,17 +136,14 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
       onClose: onCloseCol,
     } = useDisclosure();
     const [isLoading, setIsLoading] = React.useState(false);
-    const [data, setData] = React.useState({
-      fee: '',
-      tx: null,
-      account: null,
-      stakeRegistration: '',
-      rewards: '',
-      ready: false,
+    const [data, setData] = React.useState<{
+      error?: string;
+      pool: PoolDisplayValue;
+    }>({
+      error: '',
       pool: { ...poolDefaultValue },
     });
     const delegationRef = React.useRef();
-    const withdrawRef = React.useRef();
     const undelegateRef = React.useRef();
     const collateralRef = React.useRef();
 
@@ -150,30 +159,32 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
       }));
 
       try {
-        const metadata = await getPoolMetadata(data.pool.id).catch(() => {
+        let poolId;
+        try {
+          poolId = Wallet.Cardano.PoolId(data.pool.id);
+        } catch {
+          throw new Error('Stake pool not found');
+        }
+
+        const [pool] = await getStakePoolInfo(poolId).catch(() => {
           throw new Error('Stake pool not found');
         });
 
-        const tx = await delegationTx(
-          data.account,
-          data.delegation,
-          data.protocolParameters,
-          metadata.hex,
-        ).catch(() => {
+        if (!pool) throw new Error('Stake pool not found');
+
+        await initDelegation(pool).catch(() => {
           throw new Error(
             'Transaction not possible (maybe insufficient balance)',
           );
         });
-
         setData(d => ({
           ...d,
-          fee: tx.body().fee().to_str(),
-          tx,
           pool: {
-            ticker: metadata.ticker,
-            name: metadata.name,
-            id: metadata.id,
+            ticker: pool.metadata?.ticker!,
+            name: pool.metadata?.name!,
+            id: pool.id.toString(),
             state: PoolStates.DONE,
+            showTooltip: false,
           },
         }));
       } catch (error_) {
@@ -190,93 +201,21 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
     };
 
     React.useImperativeHandle(ref, () => ({
-      initDelegation: async (account, delegation) => {
-        setData({
-          fee: '',
-          stakeRegistration: '',
-          rewards: '',
-          ready: false,
-          error: '',
-          pool: { ...poolDefaultValue },
-        });
-        delegationRef.current.openModal(account.index);
-
-        try {
-          const protocolParameters = await initTx();
-
-          setData(s => ({
-            ...s,
-            account,
-            delegation,
-            protocolParameters,
-            stakeRegistration:
-              !delegation.active && protocolParameters.keyDeposit,
-            ready: true,
-          }));
-        } catch {
+      initDelegation: async () => {
+        delegationRef.current.openModal();
+        if (hasNoFunds) {
           setData(d => ({
             ...d,
             error: 'Transaction not possible (maybe insufficient balance)',
           }));
         }
       },
-      initWithdrawal: async (account, delegation) => {
-        setData({
-          pool: { ...poolDefaultValue },
-          fee: '',
-          stakeRegistration: '',
-          rewards: '',
-          ready: false,
-          error: '',
-        });
-        withdrawRef.current.openModal(account.index);
-        const protocolParameters = await initTx();
+      initUndelegate: async () => {
+        undelegateRef.current.openModal();
         try {
-          const tx = await withdrawalTx(
-            account,
-            delegation,
-            protocolParameters,
-          );
-          setData({
-            pool: { ...poolDefaultValue },
-            tx,
-            account,
-            rewards: delegation.rewards,
-            fee: tx.body().fee().to_str(),
-            ready: true,
-          });
+          await initDelegation();
         } catch {
-          setData(d => ({
-            ...d,
-            error: 'Transaction not possible (maybe reward amount too small)',
-          }));
-        }
-      },
-      initUndelegate: async (account, delegation) => {
-        setData({
-          pool: { ...poolDefaultValue },
-          fee: '',
-          stakeRegistration: '',
-          rewards: '',
-          ready: false,
-          error: '',
-        });
-        undelegateRef.current.openModal(account.index);
-        const protocolParameters = await initTx();
-        try {
-          const tx = await undelegateTx(
-            account,
-            delegation,
-            protocolParameters,
-          );
-          setData({
-            pool: { ...poolDefaultValue },
-            tx,
-            account,
-            fee: tx.body().fee().to_str(),
-            ready: true,
-          });
-        } catch {
+          console.error(error);
           setData(d => ({
             ...d,
             error: 'Transaction not possible (maybe account balance too low)',
@@ -284,14 +223,6 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
         }
       },
       initCollateral: async () => {
-        setData({
-          pool: { ...poolDefaultValue },
-          fee: '',
-          stakeRegistration: '',
-          rewards: '',
-          ready: false,
-          error: '',
-        });
         if (hasCollateral) {
           onOpenCol();
           return;
@@ -314,38 +245,21 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
     return (
       <>
         <ConfirmModal
-          ready={data.ready && data.pool.state === PoolStates.DONE}
-          title="Delegate your funds"
-          sign={async (password, hw) => {
-            if (hw) {
-              if (hw.device === HW.trezor) {
-                return createTab(
-                  TAB.trezorTx,
-                  `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
-                );
-              }
-              return await signAndSubmitHW(data.tx, {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                account: data.account,
-                hw,
-              });
-            }
-            return await signAndSubmit(
-              data.tx,
-              {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                accountIndex: data.account.index,
-              },
-              password,
-            );
+          onCloseBtn={() => {
+            setData({ pool: { ...poolDefaultValue } });
+            resetDelegationState();
           }}
-          onConfirm={(status, signedTx) => {
+          setPassword={setPassword}
+          ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
+          title="Delegate your funds"
+          sign={async () => {
+            try {
+              await signAndSubmitTransaction();
+            } catch (error) {
+              console.error(error);
+            }
+          }}
+          onConfirm={status => {
             if (status === true) {
               capture(Events.StakingConfirmClick);
               toast({
@@ -353,19 +267,14 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                 status: 'success',
                 duration: 4000,
               });
-            } else if (signedTx === ERROR.fullMempool) {
+            } else {
               toast({
                 title: 'Transaction failed',
-                description: 'Mempool full. Try again.',
+                description: stakingError,
                 status: 'error',
                 duration: 3000,
               });
-            } else
-              toast({
-                title: 'Transaction failed',
-                status: 'error',
-                duration: 3000,
-              });
+            }
             delegationRef.current.closeModal();
           }}
           info={
@@ -419,8 +328,8 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                       }));
                     }}
                     placeholder="Enter Pool ID"
-                    onKeyDown={e => {
-                      if (e.key == 'Enter') prepareDelegationTx();
+                    onKeyDown={async e => {
+                      if (e.key == 'Enter') await prepareDelegationTx();
                     }}
                     onMouseEnter={() => {
                       setData(s => ({
@@ -449,7 +358,9 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                         colorScheme="teal"
                         disabled={data.pool.id === '' || data.pool.isLoading}
                         isLoading={data.pool.isLoading}
-                        onClick={async () => prepareDelegationTx()}
+                        onClick={async () => {
+                          await prepareDelegationTx();
+                        }}
                       >
                         Verify
                       </Button>
@@ -469,7 +380,7 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                 </Box>
               ) : (
                 <Box fontSize="sm">
-                  {data.stakeRegistration && (
+                  {stakeRegistration && (
                     <Box
                       mt="1"
                       display="flex"
@@ -480,7 +391,7 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                       <Box w="1" />
                       <UnitDisplay
                         hide
-                        quantity={data.stakeRegistration}
+                        quantity={stakeRegistration}
                         decimals={6}
                         symbol={cardanoCoin.symbol}
                       />
@@ -494,7 +405,7 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                     <Text fontWeight="bold">+ Fee:</Text>
                     <Box w="1" />
                     <UnitDisplay
-                      quantity={data.fee}
+                      quantity={delegationTxFee}
                       decimals={6}
                       symbol={cardanoCoin.symbol}
                     />
@@ -507,143 +418,21 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
           ref={delegationRef}
         />
         <ConfirmModal
-          sign={async (password, hw) => {
-            if (hw) {
-              if (hw.device === HW.trezor) {
-                return createTab(
-                  TAB.trezorTx,
-                  `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
-                );
-              }
-              return await signAndSubmitHW(data.tx, {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                account: data.account,
-                hw,
-              });
-            }
-            return await signAndSubmit(
-              data.tx,
-              {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                accountIndex: data.account.index,
-              },
-              password,
-            );
+          onCloseBtn={() => {
+            setData({ pool: { ...poolDefaultValue } });
+            resetDelegationState();
           }}
-          onConfirm={(status, signedTx) => {
-            if (status === true)
-              toast({
-                title: 'Withdrawal submitted',
-                status: 'success',
-                duration: 4000,
-              });
-            else if (signedTx === ERROR.fullMempool) {
-              toast({
-                title: 'Withdrawal failed',
-                description: 'Mempool full. Try again.',
-                status: 'error',
-                duration: 3000,
-              });
-            } else
-              toast({
-                title: 'Withdrawal failed',
-                status: 'error',
-                duration: 3000,
-              });
-            withdrawRef.current.closeModal();
-          }}
-          ready={data.ready}
-          title="Withdraw Rewards"
-          info={
-            <Box
-              width="100%"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-            >
-              {data.error ? (
-                <Box textAlign="center" mb="4" color="red.300">
-                  {data.error}
-                </Box>
-              ) : (
-                <Box fontSize="sm">
-                  <Box
-                    mt="-2"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <UnitDisplay
-                      fontSize="xl"
-                      fontWeight="bold"
-                      color="teal.500"
-                      hide
-                      quantity={data.rewards}
-                      decimals={6}
-                      symbol={cardanoCoin.symbol}
-                    />
-                  </Box>
-                  <Box h="3" />
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Text fontWeight="bold">+ Fee:</Text>
-                    <Box w="1" />
-                    <UnitDisplay
-                      quantity={data.fee}
-                      decimals={6}
-                      symbol={cardanoCoin.symbol}
-                    />
-                  </Box>
-                  <Box h="4" />
-                </Box>
-              )}
-            </Box>
-          }
-          ref={withdrawRef}
-        />
-        <ConfirmModal
-          ready={data.ready}
+          setPassword={setPassword}
+          ready={!isBuildingTx}
           title="Stake deregistration"
-          sign={async (password, hw) => {
-            if (hw) {
-              if (hw.device === HW.trezor) {
-                return createTab(
-                  TAB.trezorTx,
-                  `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
-                );
-              }
-              return await signAndSubmitHW(data.tx, {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                account: data.account,
-                hw,
-              });
+          sign={async () => {
+            try {
+              await signAndSubmitTransaction();
+            } catch (error) {
+              console.log(error);
             }
-            return await signAndSubmit(
-              data.tx,
-              {
-                keyHashes: [
-                  data.account.paymentKeyHash,
-                  data.account.stakeKeyHash,
-                ],
-                accountIndex: data.account.index,
-              },
-              password,
-            );
           }}
-          onConfirm={(status, signedTx) => {
+          onConfirm={status => {
             if (status === true) {
               capture(Events.StakingUnstakeConfirmClick);
               toast({
@@ -651,20 +440,14 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                 status: 'success',
                 duration: 4000,
               });
-            } else if (signedTx === ERROR.fullMempool) {
+            } else {
               toast({
                 title: 'Transaction failed',
-                description: 'Mempool full. Try again.',
+                description: stakingError,
                 status: 'error',
                 duration: 3000,
               });
-            } else
-              toast({
-                title: 'Transaction failed',
-                status: 'error',
-                duration: 3000,
-              });
-            undelegateRef.current.closeModal();
+            }
           }}
           info={
             <Box
@@ -716,7 +499,7 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                     <Text fontWeight="bold">+ Fee:</Text>
                     <Box w="1" />
                     <UnitDisplay
-                      quantity={data.fee}
+                      quantity={delegationTxFee}
                       decimals={6}
                       symbol={cardanoCoin.symbol}
                     />
@@ -729,32 +512,19 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
           ref={undelegateRef}
         />
         <ConfirmModal
-          ready={isInitializingCollateral === false}
+          ready={!isInitializingCollateral}
           title={
             <Box display="flex" alignItems="center">
               <Icon as={FaRegFileCode} mr="2" /> <Box>Collateral</Box>
             </Box>
           }
-          sign={async (password, hw) => {
-            if (hw) {
-              if (hw.device === HW.trezor) {
-                return createTab(
-                  TAB.trezorTx,
-                  `?tx=${Buffer.from(data.tx.to_bytes()).toString('hex')}`,
-                );
-              }
-              return await signAndSubmitHW(data.tx, {
-                keyHashes: [data.account.paymentKeyHash],
-                account: data.account,
-                hw,
-              });
-            }
-            return await submitCollateral(password);
+          sign={async password => {
+            await submitCollateral(password);
           }}
           onCloseBtn={() => {
             capture(Events.SettingsCollateralXClick);
           }}
-          onConfirm={async (status, signedTx) => {
+          onConfirm={(status, signedTx) => {
             if (status === true) {
               capture(Events.SettingsCollateralConfirmClick);
               toast({
@@ -762,7 +532,6 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                 status: 'success',
                 duration: 4000,
               });
-              onConfirm();
             } else if (signedTx === ERROR.fullMempool) {
               toast({
                 title: 'Transaction failed',
@@ -879,7 +648,6 @@ const TransactionBuilder = React.forwardRef<unknown, Props>(
                       status: 'success',
                       duration: 4000,
                     });
-                    onConfirm(true);
                     onCloseCol();
                     capture(Events.SettingsCollateralXClick);
                     setIsLoading(false);

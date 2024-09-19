@@ -53,6 +53,7 @@ import {
   TabPanel,
   Tooltip,
   useColorModeValue,
+  Flex,
 } from '@chakra-ui/react';
 import { BiWallet } from 'react-icons/bi';
 import {
@@ -64,6 +65,7 @@ import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
 import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 
+import { useDelegation } from '../../../adapters/delegation';
 import {
   createTab,
   displayUnit,
@@ -100,10 +102,8 @@ import type { CurrencyCode } from '../../../adapters/currency';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
-type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   walletAddress: string;
-  hasCollateral: boolean;
-  collateralFee: bigint;
   removeAccount: UseAccount['removeAccount'];
   activateAccount: UseAccount['activateAccount'];
   addAccount: UseAccount['addAccount'];
@@ -115,10 +115,6 @@ type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
   fiatPrice: number;
   lockedCoins: bigint;
   unspendableCoins: bigint;
-  isInitializingCollateral: boolean;
-  initializeCollateral: () => Promise<void>;
-  submitCollateral: (password: string) => Promise<void>;
-  reclaimCollateral: () => Promise<void>;
   assets: (CardanoAsset | NamiAsset)[];
   nfts: NamiAsset[];
   setAvatar: (image: string) => void;
@@ -135,9 +131,6 @@ const useIsMounted = () => {
 
 const Wallet = ({
   walletAddress,
-  collateralFee,
-  hasCollateral,
-  isInitializingCollateral,
   nextIndex,
   currency,
   activeAccount,
@@ -147,9 +140,6 @@ const Wallet = ({
   lockedCoins,
   unspendableCoins,
   cardanoCoin,
-  reclaimCollateral,
-  submitCollateral,
-  initializeCollateral,
   addAccount,
   activateAccount,
   removeAccount,
@@ -160,11 +150,6 @@ const Wallet = ({
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
   const history = useHistory();
-  const delegateButtonBg = useColorModeValue(
-    'gray.100',
-    'rgba(255, 255, 255, 0.08)',
-  );
-  const delegateButtonColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const avatarBg = useColorModeValue('white', 'gray.700');
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
   const containerBg = useColorModeValue('white', 'gray.800');
@@ -270,38 +255,7 @@ const Wallet = ({
             <Image draggable={false} width="30px" src={Logo} />
           </Box>
           {/* Delegation */}
-          <Box zIndex="1" position="absolute" width="full" bottom="5" left="6">
-            {state.delegation && (
-              <>
-                {state.delegation.active ? (
-                  <DelegationPopover
-                    account={state.account}
-                    delegation={state.delegation}
-                  >
-                    {state.delegation.ticker ||
-                      state.delegation.poolId.slice(-9)}
-                  </DelegationPopover>
-                ) : (
-                  <Button
-                    onClick={() => {
-                      capture(Events.StakingClick);
-                      builderRef.current.initDelegation(
-                        state.account,
-                        state.delegation,
-                      );
-                    }}
-                    variant="solid"
-                    size="xs"
-                    color={delegateButtonColor}
-                    background={delegateButtonBg}
-                    rounded="lg"
-                  >
-                    Delegate
-                  </Button>
-                )}
-              </>
-            )}
-          </Box>
+          <DelegationPopover builderRef={builderRef} />
           <Box
             data-testid="menu"
             zIndex="2"
@@ -762,16 +716,7 @@ const Wallet = ({
         activateAccount={activateAccount}
         removeAccount={removeAccount}
       />
-      <TransactionBuilder
-        ref={builderRef}
-        hasCollateral={hasCollateral}
-        collateralFee={collateralFee}
-        isInitializingCollateral={isInitializingCollateral}
-        initializeCollateral={initializeCollateral}
-        submitCollateral={submitCollateral}
-        reclaimCollateral={reclaimCollateral}
-        onConfirm={forceUpdate => getData(forceUpdate)}
-      />
+      <TransactionBuilder ref={builderRef} />
       <About ref={aboutRef} />
     </>
   );
@@ -973,108 +918,144 @@ const DeleteAccountModal = React.forwardRef<
   );
 });
 
-const DelegationPopover = ({ account, delegation, children }) => {
+const DelegationPopover = ({ builderRef }) => {
+  const { inMemoryWallet, cardanoCoin, buildDelegation, setSelectedStakePool } =
+    useOutsideHandles();
+  const { delegation } = useDelegation({
+    inMemoryWallet,
+    buildDelegation,
+    setSelectedStakePool,
+  });
   const capture = useCaptureEvent();
-  const { cardanoCoin } = useOutsideHandles();
-  const withdrawRef = React.useRef();
+  const ref = React.useRef();
+  const containerBg = useColorModeValue('gray.800', 'white');
+  const delegateButtonBg = useColorModeValue(
+    'gray.100',
+    'rgba(255, 255, 255, 0.08)',
+  );
+  const delegateButtonColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   return (
-    <>
-      <Popover offset={[80, 8]}>
-        <PopoverTrigger>
-          <Button
-            data-testid="delegating"
-            style={{
-              all: 'revert',
-              background: 'none',
-              border: 'none',
-              outline: 'none',
-              cursor: 'pointer',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-            }}
-            onClick={() => {
-              capture(Events.StakingClick);
-            }}
-            rightIcon={<ChevronDownIcon />}
-          >
-            {children}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent width="60">
-          <PopoverArrow />
-          <PopoverCloseButton />
-          <PopoverBody
-            mt="2"
-            alignItems="center"
-            justifyContent="center"
-            display="flex"
-            flexDirection="column"
-            textAlign="center"
-          >
-            <Text
-              fontWeight="bold"
-              fontSize="md"
-              textDecoration="underline"
-              cursor="pointer"
-              onClick={() => window.open(delegation.homepage)}
-            >
-              {delegation.ticker}
-            </Text>
-            <Box h="2" />
-            <Text fontWeight="light" fontSize="xs">
-              {delegation.description}
-            </Text>
-            <Box h="3" />
-            <Text fontSize="xs">Available rewards:</Text>
-            <UnitDisplay
-              hide
-              fontWeight="bold"
-              fontSize="sm"
-              quantity={delegation.rewards}
-              decimals={6}
-              symbol={cardanoCoin.symbol}
-            />
-            <Box h="4" />
-            <Tooltip
-              placement="top"
-              isDisabled={BigInt(delegation.rewards) >= BigInt('2000000')}
-              label="2 ADA minimum"
-            >
-              <span>
-                <Button
-                  onClick={() =>
-                    withdrawRef.current.initWithdrawal(account, delegation)
-                  }
-                  isDisabled={BigInt(delegation.rewards) < BigInt('2000000')}
-                  colorScheme="teal"
-                  size="sm"
+    <Box zIndex="1" position="absolute" width="full" bottom="5" left="6">
+      {delegation ? (
+        <>
+          <Popover offset={[80, 8]}>
+            <PopoverTrigger>
+              <Button
+                data-testid="delegating"
+                style={{
+                  all: 'revert',
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                }}
+                onClick={() => {
+                  capture(Events.StakingClick);
+                }}
+                rightIcon={<ChevronDownIcon />}
+              >
+                {delegation.ticker || delegation.poolId.slice(-9)}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent width="60">
+              <PopoverArrow />
+              <PopoverCloseButton />
+              <PopoverBody
+                mt="2"
+                alignItems="center"
+                justifyContent="center"
+                display="flex"
+                flexDirection="column"
+                textAlign="center"
+              >
+                <Text
+                  fontWeight="bold"
+                  fontSize="md"
+                  textDecoration="underline"
+                  cursor="pointer"
+                  onClick={() => window.open(delegation.homepage)}
                 >
-                  Withdraw
+                  {delegation.ticker}
+                </Text>
+                <Box h="2" />
+                <Text fontWeight="light" fontSize="xs">
+                  {delegation.description}
+                </Text>
+                <Box h="3" />
+                <Text fontSize="xs">Available rewards:</Text>
+                <UnitDisplay
+                  hide
+                  fontWeight="bold"
+                  fontSize="sm"
+                  quantity={delegation.rewards}
+                  decimals={6}
+                  symbol={cardanoCoin.symbol}
+                />
+                <Box h="4" />
+                <Button
+                  onClick={() => {
+                    capture(Events.StakingUnstakeClick);
+                    ref.current.initUndelegate();
+                  }}
+                  mt="5px"
+                  colorScheme="red"
+                  size="xm"
+                  variant="link"
+                  fontSize={12}
+                >
+                  Unstake
                 </Button>
-              </span>
-            </Tooltip>
-            <Button
-              onClick={() => {
-                capture(Events.StakingUnstakeClick);
-                withdrawRef.current.initUndelegate(account, delegation);
-              }}
-              mt="10px"
-              colorScheme="red"
-              size="xm"
-              variant="link"
-              fontSize={12}
-            >
-              Unstake
-            </Button>
-            <Box h="2" />
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-      <TransactionBuilder ref={withdrawRef} />
-    </>
+                <Box h="4" />
+                <Flex direction="row" gap align="center">
+                  <Text>Auto-withdraw rewards</Text>
+                  <Tooltip
+                    label={
+                      <Text width="250px">
+                        Rewards are automatically withdrawn when sending
+                        transactions
+                      </Text>
+                    }
+                    fontSize="sm"
+                    hasArrow
+                    placement="top"
+                  >
+                    <InfoOutlineIcon
+                      data-testid="withdrawInfo"
+                      cursor="help"
+                      color={containerBg}
+                      ml="10px"
+                      width="14px"
+                      height="14px"
+                      display="inline-block"
+                    />
+                  </Tooltip>
+                </Flex>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+          <TransactionBuilder ref={ref} />
+        </>
+      ) : (
+        <Button
+          onClick={() => {
+            capture(Events.StakingClick);
+            builderRef.current.initDelegation();
+          }}
+          variant="solid"
+          size="xs"
+          color={delegateButtonColor}
+          background={delegateButtonBg}
+          rounded="lg"
+        >
+          Delegate
+        </Button>
+      )}
+    </Box>
   );
 };
 

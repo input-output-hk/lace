@@ -41,6 +41,18 @@ const config: StorybookConfig = {
 
       config.plugins.push(
         new NormalModuleReplacementPlugin(
+          /features\/outside-handles-provider\/useOutsideHandles$/,
+          join(__dirname, '../src/features/outside-handles-provider/useOutsideHandles.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
+          /adapters\/collateral$/,
+          join(__dirname, '../src/adapters/collateral.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
+          /adapters\/delegation$/,
+          join(__dirname, '../src/adapters/delegation.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
           /api\/extension\/wallet$/,
           join(__dirname, '../src/api/extension/wallet.mock.ts'),
         ),

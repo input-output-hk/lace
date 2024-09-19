@@ -5,7 +5,7 @@ import { displayUnit } from '../../../api/extension';
 const hideZero = (str) =>
   str[str.length - 1] == 0 ? hideZero(str.slice(0, -1)) : str;
 
-const UnitDisplay = ({ quantity, decimals, symbol, hide, ...props }) => {
+const UnitDisplay = ({ quantity, decimals, symbol, hide = false, ...props }) => {
   const num = displayUnit(quantity, decimals)
     .toLocaleString('en-EN', { minimumFractionDigits: decimals })
     .split('.')[0];

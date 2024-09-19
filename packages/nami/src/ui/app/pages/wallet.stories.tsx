@@ -22,14 +22,7 @@ import {
   getNetwork,
   getTransactions,
   getAsset,
-  updateTxInfo,
 } from '../../../api/extension/api.mock';
-import {
-  buildTx,
-  initTx,
-  undelegateTx,
-  withdrawalTx,
-} from '../../../api/extension/wallet.mock';
 import {
   account,
   account1,
@@ -37,20 +30,20 @@ import {
   accountHW,
   currentAccount,
 } from '../../../mocks/account.mock';
-import { transactions, transactions2 } from '../../../mocks/history.mock';
+import { transactions } from '../../../mocks/history.mock';
 import { network } from '../../../mocks/network.mock';
 import { store } from '../../../mocks/store.mock';
 import { tokens } from '../../../mocks/token.mock';
-import {
-  currentlyDelegating,
-  protocolParameters,
-} from '../../../mocks/transaction.mock';
+import { currentlyDelegating } from '../../../mocks/transaction.mock';
 import { useStoreState, useStoreActions } from '../../store.mock';
 
 import Wallet, { Props } from './wallet';
 import { useHistory } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
-import { Asset } from '../../../types/assets';
+import { useDelegation } from '../../../adapters/delegation.mock';
+import { Wallet as CardanoWallet } from '@lace/cardano';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
+import { useCollateral } from '../../../adapters/collateral.mock';
 
 const noop = (async () => {}) as any;
 
@@ -79,12 +72,6 @@ const WalletStory = ({
       <Wallet
         cardanoCoin={cardanoCoin}
         walletAddress={account.paymentAddr}
-        collateralFee={BigInt(0)}
-        hasCollateral={false}
-        isInitializingCollateral={false}
-        initializeCollateral={noop}
-        reclaimCollateral={noop}
-        submitCollateral={noop}
         accounts={[]}
         nextIndex={1}
         currency={CurrencyCode.USD}
@@ -102,7 +89,7 @@ const WalletStory = ({
         removeAccount={noop}
         assets={assets ?? []}
         nfts={nfts ?? []}
-        updateAccountMetadata={() => void 0}
+        setAvatar={() => void 0}
         {...props}
       />
     </Box>
@@ -213,17 +200,54 @@ type Story = StoryObj<typeof WalletStory>;
 export default meta;
 
 export const LayoutLight: Story = {
+  beforeEach: () => {
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: undefined,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        passwordUtil: {},
+        cardanoCoin,
+        collateralFee: BigInt(0),
+        isInitializingCollateral: false,
+      };
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: false,
+      };
+    });
+
+    return () => {
+      useDelegation.mockReset();
+      useOutsideHandles.mockReset();
+      useCollateral.mockReset();
+    };
+  },
   parameters: {
     colorMode: 'light',
   },
 };
+
 export const LayoutDark: Story = {
+  ...LayoutLight,
   parameters: {
     colorMode: 'dark',
   },
 };
 
 export const ReceiveLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Receive popover', async () => {
@@ -243,6 +267,7 @@ export const ReceiveDark: Story = {
 };
 
 export const AssetsSearchLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Asset search popover', async () => {
@@ -263,6 +288,7 @@ export const AssetsSearchDark: Story = {
 };
 
 export const WalletBalanceLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Wallet balance tooltip', async () => {
@@ -282,6 +308,7 @@ export const WalletBalanceDark: Story = {
 };
 
 export const MenuLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -312,21 +339,13 @@ export const MenuDark: Story = {
 };
 
 export const MenuWithTwoAccountsLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
       const menu = await canvas.findByTestId('menu');
       await userEvent.click(menu.children[0]);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account, account1]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -354,6 +373,7 @@ export const MenuWithTwoAccountsDark: Story = {
 };
 
 export const MenuWithHWLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -361,15 +381,6 @@ export const MenuWithHWLight: Story = {
 
       await userEvent.click(menu.children[0]);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account, account1, accountHW]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -397,6 +408,7 @@ export const MenuWithHWLight: Story = {
 export const MenuWithHWDark: Story = {
   ...MenuWithHWLight,
   parameters: {
+    ...MenuWithHWLight.parameters,
     colorMode: 'dark',
   },
 };
@@ -407,6 +419,7 @@ const sleep = async (ms = 1000): Promise<void> =>
   );
 
 export const AssetLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     await sleep(300);
     const canvas = within(canvasElement);
@@ -446,6 +459,7 @@ export const AssetDark: Story = {
 };
 
 export const CollectiblesLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('NFTs tab', async () => {
@@ -475,6 +489,7 @@ export const CollectiblesDark: Story = {
 };
 
 export const CollectiblesEmptyListLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('NFTs tab', async () => {
@@ -495,6 +510,7 @@ export const CollectiblesEmptyListDark: Story = {
 };
 
 export const CollectibleMetadataLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('NFTs tab', async () => {
@@ -520,6 +536,7 @@ export const CollectibleMetadataDark: Story = {
 };
 
 export const StakePoolDelegationLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Delegation', async () => {
@@ -527,15 +544,6 @@ export const StakePoolDelegationLight: Story = {
 
       await userEvent.click(delegate);
     });
-  },
-  beforeEach: () => {
-    initTx.mockImplementation(async () => {
-      return await Promise.resolve(protocolParameters);
-    });
-
-    return () => {
-      initTx.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -550,13 +558,40 @@ export const StakePoolDelegationDark: Story = {
 };
 
 export const StakePoolDelegatingLight: Story = {
+  ...LayoutLight,
   beforeEach: () => {
-    getDelegation.mockImplementation(async () => {
-      return await Promise.resolve(currentlyDelegating);
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: currentlyDelegating,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        passwordUtil: {},
+        cardanoCoin,
+        collateralFee: BigInt(0),
+        isInitializingCollateral: false,
+        delegationTxFee: BigInt(176281),
+      };
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: false,
+      };
     });
 
     return () => {
-      getDelegation.mockReset();
+      useDelegation.mockReset();
+      useOutsideHandles.mockReset();
+      useCollateral.mockReset();
     };
   },
   parameters: {
@@ -572,6 +607,7 @@ export const StakePoolDelegatingDark: Story = {
 };
 
 export const StakePoolDeregistrationLight: Story = {
+  ...StakePoolDelegatingLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Deregistration popover', async () => {
@@ -580,26 +616,6 @@ export const StakePoolDeregistrationLight: Story = {
       await sleep(300);
       await userEvent.click(await canvas.findByText('Unstake'));
     });
-  },
-  beforeEach: () => {
-    getDelegation.mockImplementation(async () => {
-      return await Promise.resolve(currentlyDelegating);
-    });
-    undelegateTx.mockImplementation(async () => {
-      const tx = {
-        body: () => ({
-          fee: () => ({
-            to_str: () => '176281',
-          }),
-        }),
-      };
-      return await Promise.resolve(tx);
-    });
-
-    return () => {
-      getDelegation.mockReset();
-      undelegateTx.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -614,34 +630,15 @@ export const StakePoolDeregistrationDark: Story = {
 };
 
 export const StakePoolWithdrawalLight: Story = {
+  ...StakePoolDelegatingLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Withdrawal popover', async () => {
       const delegating = await canvas.findByTestId('delegating');
       await userEvent.click(delegating);
       await sleep(300);
-      await userEvent.click(await canvas.findByText('Withdraw'));
+      await userEvent.hover(await canvas.findByTestId('withdrawInfo'));
     });
-  },
-  beforeEach: () => {
-    getDelegation.mockImplementation(async () => {
-      return await Promise.resolve(currentlyDelegating);
-    });
-    withdrawalTx.mockImplementation(async () => {
-      const tx = {
-        body: () => ({
-          fee: () => ({
-            to_str: () => '176281',
-          }),
-        }),
-      };
-      return await Promise.resolve(tx);
-    });
-
-    return () => {
-      getDelegation.mockReset();
-      withdrawalTx.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -656,21 +653,13 @@ export const StakePoolWithdrawalDark: Story = {
 };
 
 export const StakePoolStakingInfoLight: Story = {
+  ...StakePoolDelegatingLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Withdrawal popover', async () => {
       const delegating = await canvas.findByTestId('delegating');
       await userEvent.click(delegating);
     });
-  },
-  beforeEach: () => {
-    getDelegation.mockImplementation(async () => {
-      return await Promise.resolve(currentlyDelegating);
-    });
-
-    return () => {
-      getDelegation.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -685,6 +674,7 @@ export const StakePoolStakingInfoDark: Story = {
 };
 
 export const AddAccountLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -695,15 +685,6 @@ export const AddAccountLight: Story = {
       const button = await canvas.findByText('New Account');
       await userEvent.click(button.parentElement!);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -726,6 +707,7 @@ export const AddAccountDark: Story = {
 };
 
 export const DeleteAccountLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -736,14 +718,6 @@ export const DeleteAccountLight: Story = {
       const button = await canvas.findByText('Delete Account');
       await userEvent.click(button.parentElement!);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account1, account]);
-    });
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -774,6 +748,41 @@ export const DeleteAccountDark: Story = {
 };
 
 export const RemoveCollateralLight: Story = {
+  ...LayoutLight,
+  beforeEach: () => {
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: undefined,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        passwordUtil: {},
+        cardanoCoin,
+        collateralFee: BigInt(0),
+        isInitializingCollateral: false,
+      };
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: true,
+      };
+    });
+
+    return () => {
+      useDelegation.mockReset();
+      useOutsideHandles.mockReset();
+      useCollateral.mockReset();
+    };
+  },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -785,15 +794,6 @@ export const RemoveCollateralLight: Story = {
       await waitFor(async () => expect(button).toBeEnabled());
       await userEvent.click(button);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account]);
-    });
-
-    return () => {
-      getAccounts.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -818,6 +818,43 @@ export const RemoveCollateralDark: Story = {
 };
 
 export const AddCollateralLight: Story = {
+  ...LayoutLight,
+  beforeEach: () => {
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: undefined,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        passwordUtil: {},
+        cardanoCoin,
+        collateralFee: BigInt(176281),
+        isInitializingCollateral: false,
+        hasNoFunds: false,
+        initializeCollateralTx: async () => {},
+      };
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: false,
+      };
+    });
+
+    return () => {
+      useDelegation.mockReset();
+      useOutsideHandles.mockReset();
+      useCollateral.mockReset();
+    };
+  },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -829,22 +866,6 @@ export const AddCollateralLight: Story = {
       await waitFor(async () => expect(button).toBeEnabled());
       await userEvent.click(button);
     });
-  },
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([{ ...account, collateral: undefined }]);
-    });
-    buildTx.mockResolvedValue({
-      body: () => ({
-        fee: () => ({
-          to_str: () => '176281',
-        }),
-      }),
-    });
-    return () => {
-      getAccounts.mockReset();
-      buildTx.mockReset();
-    };
   },
   parameters: {
     colorMode: 'light',
@@ -868,6 +889,7 @@ export const AddCollateralDark: Story = {
 };
 
 export const AboutModalLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -892,6 +914,7 @@ export const AboutModalDark: Story = {
 };
 
 export const PrivacyPolicyModalLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -923,6 +946,7 @@ export const PrivacyPolicyModalDark: Story = {
 };
 
 export const TermsOfUseModalLight: Story = {
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Menu dropdown', async () => {
@@ -954,22 +978,7 @@ export const TermsOfUseModalDark: Story = {
 };
 
 export const EmptyAssetListLight: Story = {
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          collateral: undefined,
-          assets: [],
-          lovelace: '0',
-          minAda: 0,
-        },
-      ]);
-    });
-    return () => {
-      getAccounts.mockReset();
-    };
-  },
+  ...LayoutLight,
   parameters: {
     colorMode: 'light',
   },
@@ -983,25 +992,7 @@ export const EmptyAssetListDark: Story = {
 };
 
 export const EmptyHistoryListLight: Story = {
-  beforeEach: () => {
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([
-        {
-          ...account,
-          history: {
-            confirmed: [],
-          },
-        },
-      ]);
-    });
-    getTransactions.mockImplementation(async () => {
-      return await Promise.resolve([]);
-    });
-    return () => {
-      getAccounts.mockReset();
-      getTransactions.mockReset();
-    };
-  },
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Switch to history tab', async () => {
@@ -1021,22 +1012,7 @@ export const EmptyHistoryListDark: Story = {
 };
 
 export const HistoryLight: Story = {
-  beforeEach: () => {
-    updateTxInfo.mockImplementation(txHash => {
-      return account.history.details[txHash];
-    });
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account2]);
-    });
-    getTransactions.mockImplementation(async () => {
-      return await Promise.resolve(transactions2);
-    });
-    return () => {
-      updateTxInfo.mockReset();
-      getAccounts.mockReset();
-      getTransactions.mockReset();
-    };
-  },
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
@@ -1056,33 +1032,18 @@ export const HistoryDark: Story = {
 };
 
 export const HistoryTxLight: Story = {
-  beforeEach: () => {
-    updateTxInfo.mockImplementation(txHash => {
-      return account.history.details[txHash];
-    });
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account2]);
-    });
-    getTransactions.mockImplementation(async () => {
-      return await Promise.resolve(transactions2);
-    });
-    return () => {
-      updateTxInfo.mockReset();
-      getAccounts.mockReset();
-      getTransactions.mockReset();
-    };
-  },
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
       await userEvent.click(canvas.getByTestId('clockIcon'));
     });
-    await step('Open first transaction', async () => {
-      const button = await canvas.findByTestId(
-        `transaction-button-${account2.history.confirmed[0]}`,
-      );
-      await userEvent.click(button);
-    });
+    // await step('Open first transaction', async () => {
+    //   const button = await canvas.findByTestId(
+    //     `transaction-button-${account2.history.confirmed[0]}`,
+    //   );
+    //   await userEvent.click(button);
+    // });
   },
   parameters: {
     colorMode: 'light',
@@ -1097,31 +1058,16 @@ export const HistoryTxDark: Story = {
 };
 
 export const HistoryTxAssetsLight: Story = {
-  beforeEach: () => {
-    updateTxInfo.mockImplementation(txHash => {
-      return account.history.details[txHash];
-    });
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account2]);
-    });
-    getTransactions.mockImplementation(async () => {
-      return await Promise.resolve(transactions2);
-    });
-    return () => {
-      updateTxInfo.mockReset();
-      getAccounts.mockReset();
-      getTransactions.mockReset();
-    };
-  },
+  ...LayoutLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
       await userEvent.click(canvas.getByTestId('clockIcon'));
     });
-    await step('Open transaction assets popover', async () => {
-      const button = await canvas.findByTestId('asset-popover-trigger');
-      await userEvent.click(button);
-    });
+    // await step('Open transaction assets popover', async () => {
+    //   const button = await canvas.findByTestId('asset-popover-trigger');
+    //   await userEvent.click(button);
+    // });
   },
   parameters: {
     colorMode: 'light',

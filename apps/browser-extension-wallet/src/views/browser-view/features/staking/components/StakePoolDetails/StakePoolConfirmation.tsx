@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-nested-ternary */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 import isNil from 'lodash/isNil';
 import { Skeleton } from 'antd';
@@ -52,7 +52,11 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
   const { balance } = useBalances(priceResult?.cardano?.price);
   const { delegationTxFee } = useDelegationStore();
 
-  useBuildDelegation();
+  const { buildDelegation } = useBuildDelegation();
+
+  useEffect(() => {
+    buildDelegation();
+  }, [buildDelegation]);
 
   const {
     logo: poolLogo,

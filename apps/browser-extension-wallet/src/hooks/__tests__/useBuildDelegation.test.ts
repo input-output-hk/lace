@@ -54,7 +54,8 @@ const flushPromises = () => new Promise(setImmediate);
 describe('Testing useBuildDelegation hook', () => {
   describe('Testing build delegation transaction function', () => {
     test('should build delegation using txBuilder', async () => {
-      renderHook(() => useBuildDelegation());
+      const { result } = renderHook(() => useBuildDelegation());
+      await result.current.buildDelegation();
 
       expect(mockSetIsBuildingTx).toBeCalled();
       expect(mockCreateTxBuilder).toBeCalled();

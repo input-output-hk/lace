@@ -1,3 +1,4 @@
+import type { PasswordObj as Password } from '@lace/core';
 import {
   Icon,
   Box,
@@ -19,8 +20,18 @@ import { MdUsb } from 'react-icons/md';
 import { indexToHw, initHW, isHW } from '../../../api/extension';
 import { ERROR, HW } from '../../../config/config';
 
-const ConfirmModal = React.forwardRef(
-  ({ ready, onConfirm, sign, onCloseBtn, title, info }, ref) => {
+interface Props {
+  ready: boolean;
+  onConfirm: (status: boolean, tx: string) => void;
+  sign: (password: string, hw: object) => Promise<void>;
+  setPassword: (pw: Readonly<Partial<Password>>) => void;
+  onCloseBtn: () => void;
+  title: React.ReactNode;
+  info: React.ReactNode;
+}
+
+const ConfirmModal = React.forwardRef<unknown, Props>(
+  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword }, ref) => {
     const {
       isOpen: isOpenNormal,
       onOpen: onOpenNormal,
@@ -68,14 +79,16 @@ const ConfirmModal = React.forwardRef(
           props={props}
           isOpen={isOpenNormal}
           onClose={onCloseNormal}
+          setPassword={setPassword}
         />
       </>
     );
   }
 );
 
-const ConfirmModalNormal = ({ props, isOpen, onClose }) => {
+const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
   const [state, setState] = React.useState({
+    wrongPassword: false,
     password: '',
     show: false,
     name: '',
@@ -85,6 +98,7 @@ const ConfirmModalNormal = ({ props, isOpen, onClose }) => {
 
   React.useEffect(() => {
     setState({
+      wrongPassword: false,
       password: '',
       show: false,
       name: '',
@@ -97,8 +111,9 @@ const ConfirmModalNormal = ({ props, isOpen, onClose }) => {
       setWaitReady(false);
       const signedMessage = await props.sign(state.password);
       await props.onConfirm(true, signedMessage);
+      onClose?.();
     } catch (e) {
-      if (e === ERROR.wrongPassword)
+      if (e === ERROR.wrongPassword || e.name === 'AuthenticationError')
         setState((s) => ({ ...s, wrongPassword: true }));
       else await props.onConfirm(false, e);
     }
@@ -135,9 +150,10 @@ const ConfirmModalNormal = ({ props, isOpen, onClose }) => {
               isInvalid={state.wrongPassword === true}
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
-              onChange={(e) =>
-                setState((s) => ({ ...s, password: e.target.value }))
-              }
+              onChange={(e) => {
+                setPassword?.(e.target);
+                setState((s) => ({ ...s, password: e.target.value }));
+              }}
               onKeyDown={(e) => {
                 if (e.key == 'Enter') confirmHandler();
               }}
