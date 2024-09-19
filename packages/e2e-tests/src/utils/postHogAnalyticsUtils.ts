@@ -1,8 +1,19 @@
 import { browser } from '@wdio/globals';
 
 const getRequestDataPayload = async (request: any): Promise<any> => {
-  const requestPayloadBase64Data = decodeURIComponent(String(request.body)).replace('data=', '');
-  return JSON.parse(Buffer.from(requestPayloadBase64Data, 'base64').toString('ascii'));
+  if (!request.body) {
+    console.warn('Request body is undefined');
+    return {};
+  }
+
+  const requestBody = typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
+
+  try {
+    return JSON.parse(requestBody);
+  } catch {
+    const requestPayloadBase64Data = decodeURIComponent(requestBody).replace('data=', '');
+    return JSON.parse(Buffer.from(requestPayloadBase64Data, 'base64').toString('ascii'));
+  }
 };
 
 export const getAllEventsNames = async (): Promise<string[]> => {
