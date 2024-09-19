@@ -71,7 +71,7 @@ Feature: Onboarding - Create wallet
     And I click "Next" button during wallet setup
     And "Mnemonic writedown" page is displayed with 24 words
     When I click "Help and support" button during wallet setup
-    Then I see "Help and support" page
+    Then I see "Help and support" page URL
 
   @LW-2435
   Scenario: Create Wallet - Mnemonic writedown page - next button

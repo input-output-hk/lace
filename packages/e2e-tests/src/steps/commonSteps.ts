@@ -167,8 +167,8 @@ Then(/^I don't see any toast message$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage('', false);
 });
 
-Then(/^I see "Help and support" page$/, async () => {
-  await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
+Then(/^I see "Help and support" page URL$/, async () => {
+  await helpAndSupportPageAssert.assertSeeHelpAndSupportPageURL();
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
