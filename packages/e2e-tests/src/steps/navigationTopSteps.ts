@@ -91,6 +91,10 @@ When(/^I click on the settings option$/, async () => {
   await MenuHeader.clickSettingsOption();
 });
 
+When(/^I click on the "Sign message" option$/, async () => {
+  await MenuHeader.clickSignMessageButton();
+});
+
 When(/^I click on the Lock Wallet option$/, async () => {
   await MenuHeader.clickLockWalletOption();
 });
