@@ -19,7 +19,7 @@ Feature: Wallet locking / unlocking - Extended view
   Scenario: Extended view - "Help and support" button click
     Given I am on lock screen
     When I click "Help and support" button on unlock screen
-    Then I see "Help and support" page
+    Then I see "Help and support" page URL
 
   @LW-3036 @Smoke
   Scenario: Extended view - Unlocking wallet with correct password opens wallet
