@@ -317,10 +317,17 @@ export const useTxInfo = (
             (Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
               ? BigInt(implicitCoin.deposit?.toString() ?? 0)
               : BigInt(0)),
-        assets: assets.map(asset => {
-          const assetInfo = assetsInfo?.get(Wallet.Cardano.AssetId(asset.unit));
-          return toAsset(assetInfo!, asset.quantity);
-        }),
+        assets: assets
+          .map(asset => {
+            const assetInfo = assetsInfo?.get(
+              Wallet.Cardano.AssetId(asset.unit),
+            );
+            if (!assetInfo) {
+              console.error(`No asset info found for ${asset.unit}`);
+            }
+            return assetInfo ? toAsset(assetInfo, asset.quantity) : undefined;
+          })
+          .filter((a): a is NamiAsset => !!a),
       };
 
       setTxInfo(info);
