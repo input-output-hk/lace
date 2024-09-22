@@ -7,7 +7,6 @@ import { stakePoolTransformer } from '../stake-pool-transformer';
 const cardanoCoin: CoinId = {
   id: '1',
   name: 'Cardano',
-  decimals: 6,
   symbol: 'ADA'
 };
 

@@ -11,7 +11,6 @@ const transactionDate = '2021/09/10';
 export const cardanoCoin: Wallet.CoinId = {
   id: '1',
   name: 'Cardano',
-  decimals: 6,
   symbol: 'A'
 };
 

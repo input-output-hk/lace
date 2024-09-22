@@ -39,7 +39,7 @@ export const getFormattedFiatAmount = ({
   fiatCurrency: CurrencyInfo;
 }): string => {
   const fiatAmount = fiatPrice
-    ? Wallet.util.lovelacesToAdaString(amount.times(new BigNumber(fiatPrice)).toString())
+    ? Wallet.util.convertLovelaceToFiat({ lovelaces: amount.toString(), fiat: fiatPrice }).toString()
     : '';
   return fiatAmount ? `${fiatAmount} ${fiatCurrency.code}` : '-';
 };

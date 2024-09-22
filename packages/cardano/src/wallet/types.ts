@@ -29,7 +29,6 @@ export type CoinId = {
   id: string;
   symbol: string;
   name: string;
-  decimals: number;
 };
 
 export enum TransactionStatus {

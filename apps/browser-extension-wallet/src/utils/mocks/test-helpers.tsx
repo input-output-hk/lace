@@ -569,7 +569,7 @@ export const cardanoStakePoolSelectedDetails = {
   status: 'active',
   ticker: 'STTST',
   blocks: '20',
-  pledge: '2000.00'
+  pledge: '2000'
 };
 
 export const transformedStakePool = {
@@ -585,7 +585,7 @@ export const transformedStakePool = {
     'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
     'stake_test1uq7g7kqeucnqfweqzgxk3dw34e8zg4swnc7nagysug2mm4cm77jrx'
   ],
-  pledge: '2000.00ADA',
+  pledge: '2000ADA',
   retired: false,
   saturation: '5.12',
   size: '- %',

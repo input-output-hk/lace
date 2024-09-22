@@ -15,7 +15,7 @@ describe('Testing availableCoinsTransformer function', () => {
     const coins = availableCoinsTransformer(totalCoins.toString(), assets);
     expect(coins).toEqual([
       {
-        balance: '10.00',
+        balance: '10',
         id: '1',
         symbol: 'ADA'
       },
