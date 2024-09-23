@@ -58,10 +58,11 @@ export class PostHogClient<Action extends string = string> {
           request_batching: false,
           api_host: this.postHogHost,
           autocapture: false,
+          opt_out_useragent_filter: true,
+          disable_compression: true,
           disable_session_recording: true,
           capture_pageview: false,
           capture_pageleave: false,
-          disable_compression: true,
           // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
           disable_persistence: true,
           disable_cookie: true,
