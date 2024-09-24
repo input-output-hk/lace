@@ -58,6 +58,7 @@ export const TransactionCTAsBox = (): React.ReactElement => {
               defaultChecked={isReceiveInAdvancedMode}
               label={t('qrInfo.advancedMode.toggle.label')}
               onCheckedChange={(isChecked) => setIsReceiveInAdvancedMode(isChecked)}
+              testId="advanced-mode-"
             />
           )}
         </Flex>

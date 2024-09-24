@@ -83,7 +83,8 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/SendTransactionSimple*.feature',
       './src/features/e2e/StakingInitialFundsE2E.feature',
       './src/features/e2e/StakingSwitchingPools*.feature',
-      './src/features/SettingsPagePopup*.feature'
+      './src/features/SettingsPagePopup*.feature',
+      './src/features/WalletAddressPageExtended.feature'
     ],
     batch14: ['./src/features/Transactions*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature'],
@@ -141,7 +142,7 @@ export const config: WebdriverIO.Config = {
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 1,
+    retry: 0,
     noStrictFlaky: true
   } as WebdriverIO.CucumberOpts,
   async onPrepare() {

@@ -18,6 +18,7 @@ type Props = {
   tooltipLabel?: string;
   dropdownRender?: (menus: ReactNode) => ReactNode;
   onCopy?: () => void;
+  testId?: 'AddressDisplayItem';
 };
 
 export const AddressDisplayItem = ({
@@ -27,26 +28,31 @@ export const AddressDisplayItem = ({
   items,
   tooltipLabel,
   dropdownRender,
-  onCopy
+  onCopy,
+  testId
 }: Props): JSX.Element => {
   const displayAsMenu = !!items;
 
   const actionToIcon = useMemo(() => {
     if (displayAsMenu) {
-      return <ChevronDownComponent />;
+      return <ChevronDownComponent data-testid={`${testId}-chevron`} />;
     }
 
     if (action === 'copy') {
-      return <CopyToClipboard text={`${label}`}>{actionIconMap[action]}</CopyToClipboard>;
+      return (
+        <CopyToClipboard text={`${label}`} data-testid={`${testId}-copy-button`}>
+          {actionIconMap[action]}
+        </CopyToClipboard>
+      );
     }
 
     return actionIconMap[action];
-  }, [action, displayAsMenu, label]);
+  }, [action, displayAsMenu, label, testId]);
 
   const content = (
-    <Flex justifyContent="space-between" alignItems="center" gap="$8" className={styles.item}>
+    <Flex justifyContent="space-between" alignItems="center" gap="$8" className={styles.item} testId={testId}>
       {icon}
-      {label}
+      <span data-testid={`${testId}-label`}>{label}</span>
       {tooltipLabel && !displayAsMenu ? (
         <Tooltip title={tooltipLabel}>
           <Box w="$20" h="$20" onClick={action === 'copy' && onCopy}>
