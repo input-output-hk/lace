@@ -11394,7 +11394,7 @@ __metadata:
     openpgp: ^5.11.2
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
-    posthog-js: ^1.68.4
+    posthog-js: ^1.161.3
     process: ^0.11.10
     qrcode: ^1.5.3
     react: 17.0.2
@@ -44978,7 +44978,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:^1.68.4":
+"posthog-js@npm:^1.161.3":
   version: 1.161.6
   resolution: "posthog-js@npm:1.161.6"
   dependencies:

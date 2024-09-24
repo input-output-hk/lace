@@ -18,7 +18,7 @@ type Props = {
   tooltipLabel?: string;
   dropdownRender?: (menus: ReactNode) => ReactNode;
   onCopy?: () => void;
-  testId?: 'AddressDisplayItem';
+  testId: string;
 };
 
 export const AddressDisplayItem = ({

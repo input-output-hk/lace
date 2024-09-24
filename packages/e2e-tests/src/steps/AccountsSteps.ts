@@ -7,6 +7,8 @@ import WalletAccountsUnlockDrawerAssert from '../assert/WalletAccountsUnlockDraw
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import WalletAccountsUnlockDrawer from '../elements/accounts/WalletAccountsUnlockDrawer';
 import HoldUpDisableAccountDialog from '../elements/accounts/HoldUpDisableAccountDialog';
+import MainLoader from '../elements/MainLoader';
+import MenuHeader from '../elements/menuHeader';
 
 When(/^I click on chevron for wallet number (\d)$/, async (walletIndex: number) => {
   await new WalletOption(walletIndex).clickOnAccountsMenuButton();
@@ -96,4 +98,17 @@ Then(/^I click "(Cancel|Disable)" on "Hold Up!" account disable modal$/, async (
   await (button === 'Cancel'
     ? HoldUpDisableAccountDialog.clickCancelButton()
     : HoldUpDisableAccountDialog.clickConfirmButton());
+});
+
+When(/^One of additional accounts is active$/, async () => {
+  await MenuHeader.clickMenuButton();
+  await new WalletOption(1).clickOnAccountsMenuButton();
+  const accountItem = new WalletAccountsMenuItem(3);
+  await accountItem.accountEnableButton.waitForClickable();
+  await accountItem.accountEnableButton.click();
+  const password = String(getTestWallet(TestWalletName.TestAutomationWallet).password);
+  await WalletAccountsUnlockDrawer.passwordInput.waitForClickable();
+  await WalletAccountsUnlockDrawer.passwordInput.setValue(password);
+  await WalletAccountsUnlockDrawer.clickConfirmButton();
+  await MainLoader.waitUntilLoaderDisappears();
 });

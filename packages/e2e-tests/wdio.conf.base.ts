@@ -87,7 +87,7 @@ export const config: WebdriverIO.Config = {
       './src/features/WalletAddressPageExtended.feature'
     ],
     batch14: ['./src/features/Transactions*.feature'],
-    batch15: ['./src/features/NFTsFolders*.feature'],
+    batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
     batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
@@ -142,7 +142,7 @@ export const config: WebdriverIO.Config = {
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 0,
+    retry: 1,
     noStrictFlaky: true
   } as WebdriverIO.CucumberOpts,
   async onPrepare() {

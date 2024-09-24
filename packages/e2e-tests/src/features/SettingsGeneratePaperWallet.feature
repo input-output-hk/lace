@@ -80,7 +80,7 @@ Feature: General Settings - Extended Browser View
     And I close the drawer by clicking close button
     Then I see settings page
 
-  @LW-11201
+  @LW-11202
   Scenario: Extended view - Settings - Generate paper wallet - Save your paper wallet - close
     When I open settings from header menu
     And I click on "Generate paper wallet" setting
