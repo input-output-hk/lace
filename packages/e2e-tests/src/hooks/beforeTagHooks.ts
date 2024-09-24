@@ -269,9 +269,13 @@ Before(
   }
 );
 
-Before({ tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect' }, async () => {
-  await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
-  await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
-  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
-});
+Before(
+  { tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet' },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);

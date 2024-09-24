@@ -7,7 +7,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9368
   Scenario: Extended-view - Multi-wallet - Restore - Restore button click
     When I opened "Restore" flow via "Add new wallet" feature
-    Then "Choose recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal for "Restore" flow
     And "Recovery method" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process
 
@@ -16,7 +16,7 @@ Feature: Add new wallet - Restore wallet
     Given I opened "Restore" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then "Choose recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal for "Restore" flow
 
   @LW-9383
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Mnemonic fill - paste from clipboard
@@ -61,7 +61,7 @@ Feature: Add new wallet - Restore wallet
     Given I opened "Restore" flow via "Add new wallet" feature
     When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     And I click "Next" button during wallet setup
-    Then "Wallet setup" page is displayed in modal
+    Then "Let's set up your new wallet" page is displayed in modal for "Create" flow
     And "Wallet setup" step is marked as active on progress timeline
     When I click "Back" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -124,6 +124,7 @@ Feature: Add new wallet - Restore wallet
     Then "Enter wallet" button is enabled
     When I click "Enter wallet" button
     Then I see LW homepage
+    And I wait for main loader to disappear
     And "ValidName" is displayed as a wallet name on the menu button
     When I click the menu button
     Then Wallet number 2 with "ValidName" name is displayed on the user menu
@@ -169,7 +170,7 @@ Feature: Add new wallet - Restore wallet
     Examples:
       | page                  | step                                                                               |
       | Mnemonic verification | "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words |
-      | Wallet setup          | "Wallet setup" page is displayed in modal                                          |
+      | Wallet setup          | "Let's set up your new wallet" page is displayed in modal for "Create" flow        |
 
   @LW-9248
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - proceed

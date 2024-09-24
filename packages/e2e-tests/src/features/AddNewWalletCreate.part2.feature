@@ -34,7 +34,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
-    Then "Wallet setup" page is displayed in modal
+    Then "Let's set up your new wallet" page is displayed in modal for "Create" flow
     And "Wallet setup" step is marked as active on progress timeline
     When I click "Back" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words

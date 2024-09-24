@@ -3,9 +3,17 @@ import ChooseRecoveryMethodPage from '../../elements/onboarding/ChooseRecoveryMe
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import { TimelineSteps } from '../../enums/Onboarding';
+import AddNewWalletMainModal from '../../elements/addNewWallet/MainModal';
 
 class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
-  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore') {
+  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore', isModal = false) {
+    if (isModal) {
+      await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
+      await AddNewWalletMainModal.closeButton.waitForEnabled();
+    } else {
+      await this.assertSeeHelpAndSupportButton();
+      await this.assertSeeLegalLinks();
+    }
     await this.assertSeeStepTitle(await t('paperWallet.chooseRecoveryMethod.title'));
     const expectedDescription =
       flowType === 'Create'
@@ -24,11 +32,9 @@ class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
 
     await this.assertSeeBackButton();
     await this.assertNextButtonTextEquals(await t('core.walletSetupStep.next'));
-    await this.assertSeeHelpAndSupportButton();
-    await this.assertSeeLegalLinks();
   }
 
-  private async assertSeePaperWalletOption(flowType: 'Create' | 'Restore') {
+  async assertSeePaperWalletOption(flowType: 'Create' | 'Restore') {
     await ChooseRecoveryMethodPage.paperWalletRadioButton.waitForDisplayed();
     await ChooseRecoveryMethodPage.paperWalletLabel.waitForDisplayed();
     expect(await ChooseRecoveryMethodPage.paperWalletLabel.getText()).to.equal(
@@ -52,7 +58,7 @@ class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
     }
   }
 
-  private async assertSeeRecoveryPhraseOption() {
+  async assertSeeRecoveryPhraseOption() {
     await ChooseRecoveryMethodPage.recoveryPhraseRadioButton.waitForDisplayed();
     await ChooseRecoveryMethodPage.recoveryPhraseLabel.waitForDisplayed();
     expect(await ChooseRecoveryMethodPage.recoveryPhraseLabel.getText()).to.equal(

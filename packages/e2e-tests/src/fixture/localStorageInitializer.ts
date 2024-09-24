@@ -93,6 +93,10 @@ class LocalStorageInitializer {
     await localStorageManager.removeItem('isMultiDelegationDAppCompatibilityModalVisible');
   };
 
+  disableShowPinExtension = async () => {
+    await localStorageManager.setItem('showPinExtension', 'false');
+  };
+
   initialiseBasicLocalStorageData = async (
     walletName: string,
     chainName: 'Preprod' | 'Preview' | 'Mainnet'
