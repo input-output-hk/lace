@@ -16,6 +16,7 @@ export class MenuHeader {
   private MENU_ADDRESS_BOOK_BUTTON = '//li[@data-testid="header-menu-address-book"]';
   private MENU_ADD_NEW_WALLET_BUTTON = '[data-testid="header-menu-new-wallet"]';
   private MENU_SETTINGS_BUTTON = '//li[@data-testid="header-menu-settings"]';
+  private MENU_SIGN_MESSAGE_BUTTON = '//li[@data-testid="header-menu-sign-message"]';
   private MENU_LOCK_BUTTON = '//li[@data-testid="header-menu-lock"]';
   private MENU_WALLET_OPTION_ITEM = '//button[@data-testid="wallet-option-item"]';
   private MENU_WALLET_OPTION_NAME = '//span[@data-testid="wallet-option-title"]';
@@ -101,6 +102,10 @@ export class MenuHeader {
 
   get menuSettingsButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MENU_SETTINGS_BUTTON);
+  }
+
+  get menuSignMessageButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_SIGN_MESSAGE_BUTTON);
   }
 
   get menuLockButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -196,6 +201,11 @@ export class MenuHeader {
   async clickSettingsOption(): Promise<void> {
     await this.menuSettingsButton.waitForStable();
     await this.menuSettingsButton.click();
+  }
+
+  async clickSignMessageButton(): Promise<void> {
+    await this.menuSignMessageButton.waitForClickable();
+    await this.menuSignMessageButton.click();
   }
 
   async clickAddressBookOption(): Promise<void> {

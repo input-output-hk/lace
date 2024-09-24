@@ -67,15 +67,21 @@ export const SignMessageDrawer: React.FC = () => {
 
   const renderInitialState = () => (
     <>
-      <Text.Body.Large weight="$bold">{t('core.signMessage.instructions')}</Text.Body.Large>
-      <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.subtitle')}</Text.Body.Normal>
+      <Text.Body.Large weight="$bold" data-testid={'drawer-header-title'}>
+        {t('core.signMessage.instructions')}
+      </Text.Body.Large>
+      <Text.Body.Normal className={styles.subtitle} data-testid={'drawer-header-subtitle'}>
+        {t('core.signMessage.subtitle')}
+      </Text.Body.Normal>
       {isHardwareWallet && hardwareWalletError && (
         <div className={styles.errorMessage}>
           <Text.Body.Normal color="error">{hardwareWalletError}</Text.Body.Normal>
         </div>
       )}
       <div className={styles.inputGroup}>
-        <Text.Body.Normal weight="$medium">{t('core.signMessage.addressLabel')}</Text.Body.Normal>
+        <Text.Body.Normal weight="$medium" data-testid={'address-label'}>
+          {t('core.signMessage.addressLabel')}
+        </Text.Body.Normal>
         <WalletOwnAddressDropdown
           addresses={usedAddresses}
           onSelect={setSelectedAddress}
@@ -83,7 +89,9 @@ export const SignMessageDrawer: React.FC = () => {
         />
       </div>
       <div className={styles.inputGroup}>
-        <Text.Body.Normal weight="$medium">{t('core.signMessage.messageLabel')}</Text.Body.Normal>
+        <Text.Body.Normal weight="$medium" data-testid={'message-to-sign-label'}>
+          {t('core.signMessage.messageLabel')}
+        </Text.Body.Normal>
         <TextArea
           placeholder={t('core.signMessage.messagePlaceholder')}
           value={message}
@@ -98,12 +106,16 @@ export const SignMessageDrawer: React.FC = () => {
 
   const renderPasswordPrompt = () => (
     <>
-      <Text.Body.Large weight="$bold">{t('core.signMessage.passwordTitle')}</Text.Body.Large>
-      <Text.Body.Normal className={styles.subtitle}>{t('core.signMessage.passwordSubtitle')}</Text.Body.Normal>
+      <Text.Body.Large weight="$bold" data-testid={'drawer-header-title'}>
+        {t('core.signMessage.passwordTitle')}
+      </Text.Body.Large>
+      <Text.Body.Normal className={styles.subtitle} data-testid={'drawer-header-subtitle'}>
+        {t('core.signMessage.passwordSubtitle')}
+      </Text.Body.Normal>
       <PasswordInput
         onChange={setPassword}
         label={t('core.signMessage.passwordLabel')}
-        dataTestId="sign-message-password-input"
+        dataTestId="password-input"
         error={!!error}
         errorMessage={error}
         wrapperClassName={styles.passwordWrapper}
