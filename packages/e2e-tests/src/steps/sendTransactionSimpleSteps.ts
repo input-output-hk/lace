@@ -45,6 +45,7 @@ import { Key } from 'webdriverio';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
 import { AddressType } from '../enums/AddressTypeEnum';
 import clipboard from 'clipboardy';
+import walletAddressPage from '../elements/walletAddressPage';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -252,6 +253,12 @@ When(
 When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: string) => {
   const addressInput = new AddressInput(1);
   await addressInput.fillAddress(await clipboard.read());
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
+});
+
+When(/^I fill bundle with saved unused address and ([^"]*) ADA$/, async (adaValue: string) => {
+  const addressInput = new AddressInput(1);
+  await addressInput.fillAddress(await walletAddressPage.getSavedLastAddress());
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
 });
 

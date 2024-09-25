@@ -278,7 +278,9 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
               />
             )}
             {isAdditionalAddressesVisible && (
-              <Divider orientation="center">{translations.additionalAddressesTitle}</Divider>
+              <Divider orientation="center" data-testid="additional-addresses-divider">
+                {translations.additionalAddressesTitle}
+              </Divider>
             )}
             {usedAddresses?.length > 1 && (
               <>
@@ -338,6 +340,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
             icon={<PlusCircleOutlined />}
             onClick={generateUnusedAddress}
             label={translations.addNewAddressBtn}
+            data-testid="add-new-address-button"
           />
         </Flex>
       )}

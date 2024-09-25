@@ -102,7 +102,7 @@ export const AddressCard = ({
 
     const { handles } = metadata;
 
-    const adaHandleIcon = <AdaHandleIcon width={ICON_SIZE} height={ICON_SIZE} />;
+    const adaHandleIcon = <AdaHandleIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-ada-handle-icon" />;
 
     if (handles.length === 1) {
       return (
@@ -112,6 +112,7 @@ export const AddressCard = ({
           action="copy"
           tooltipLabel={t('core.addressCard.handle.copy.tooltip')}
           onCopy={doToast}
+          testId="address-ada-handle"
         />
       );
     }
@@ -119,7 +120,7 @@ export const AddressCard = ({
     const items: MenuProps['items'] = handles.map((item, idx) => ({
       label: (
         <Flex gap="$8" alignItems="center" justifyContent="space-between">
-          <span>{item}</span>
+          <span data-testid="adress-ada-handle-dropdown-item">{item}</span>
           <Tooltip title={t('core.addressCard.handle.copy.tooltip')}>
             <CopyToClipboard text={item}>
               <CopyIcon
@@ -137,7 +138,7 @@ export const AddressCard = ({
       icon: adaHandleIcon
     }));
 
-    return <AddressDisplayItem label={items.length} icon={adaHandleIcon} items={items} />;
+    return <AddressDisplayItem label={items.length} icon={adaHandleIcon} items={items} testId="address-ada-handle" />;
   }, [metadata, doToast, t]);
 
   const renderBalanceData = useMemo(() => {
@@ -146,7 +147,11 @@ export const AddressCard = ({
     }
 
     return (
-      <AddressDisplayItem label={metadata.balance} icon={<AdaSymbolIcon width={ICON_SIZE} height={ICON_SIZE} />} />
+      <AddressDisplayItem
+        label={metadata.balance}
+        icon={<AdaSymbolIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-ada-icon" />}
+        testId="address-ada"
+      />
     );
   }, [metadata]);
 
@@ -155,12 +160,12 @@ export const AddressCard = ({
       {
         label: `${metadata.tokens.amount} ${t('core.addressCard.tokens.label')}`,
         key: 'tokens',
-        icon: <TokensIcon width={ICON_SIZE} height={ICON_SIZE} />
+        icon: <TokensIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-tokens-icon" />
       },
       {
         label: `${metadata.tokens.nfts || 0} ${t('core.addressCard.nfts.label')}`,
         key: 'nfts',
-        icon: <NftsIcon width={ICON_SIZE} height={ICON_SIZE} />
+        icon: <NftsIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-nfts-icon" />
       }
     ],
     [metadata, t]
@@ -174,8 +179,10 @@ export const AddressCard = ({
     const items: MenuProps['items'] = getTokenMenuItems();
 
     const customDropdownRender = (menu: React.ReactElement) => (
-      <Box className={styles.customRender}>
-        <Box py="$4">{t('core.addressCard.nativeTokens.label')}</Box>
+      <Box className={styles.customRender} testId="address-tokens-dropdown">
+        <Box py="$4" testId="address-tokens-dropdown-label">
+          {t('core.addressCard.nativeTokens.label')}
+        </Box>
         <Divider h="$1" className={styles.divider} />
         {React.cloneElement(menu)}
       </Box>
@@ -185,8 +192,9 @@ export const AddressCard = ({
       <AddressDisplayItem
         label={items.length}
         items={items}
-        icon={<AssetsIcon width={ICON_SIZE} height={ICON_SIZE} />}
+        icon={<AssetsIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-tokens-icon" />}
         dropdownRender={customDropdownRender}
+        testId="address-tokens"
       />
     );
   }, [metadata, isMetadataGrouped, getTokenMenuItems, t]);
@@ -207,7 +215,7 @@ export const AddressCard = ({
           return {
             label: metadata.stakePool,
             key: 'stake-pool',
-            icon: <StakePoolIcon width={ICON_SIZE} height={ICON_SIZE} />
+            icon: <StakePoolIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-stake-pool-icon" />
           };
         }
       });
@@ -216,7 +224,10 @@ export const AddressCard = ({
       <AddressDisplayItem
         label={t('core.addressCard.more.label')}
         items={items}
-        icon={<MoreIcon className={styles.moreIcon} width={ICON_SIZE} height={ICON_SIZE} />}
+        icon={
+          <MoreIcon className={styles.moreIcon} width={ICON_SIZE} height={ICON_SIZE} data-testid="address-more-icon" />
+        }
+        testId="address-more"
       />
     );
   }, [metadata, getTokenMenuItems, t]);
@@ -226,14 +237,14 @@ export const AddressCard = ({
       <div className={styles.qrCodeContainer} data-testid="address-card-qr-code-container">
         <QRCode data={address} options={useMemo(() => getQRCodeOptions?.(), [getQRCodeOptions])} />
       </div>
-      <Flex className={styles.infoContainer} flexDirection="column" gap="$8">
+      <Flex className={styles.infoContainer} flexDirection="column" gap="$8" testId="address-card-details">
         <Flex justifyContent="space-between" alignItems="center" w="$fill">
           {!name && tagWith && (
-            <Flex alignItems="center" className={styles.tag}>
+            <Flex alignItems="center" className={styles.tag} testId="address-card-title">
               {tagWith.label}
               {tagWith.tooltip && (
                 <Tooltip title={tagWith.tooltip}>
-                  <InfoCircleOutlined />
+                  <InfoCircleOutlined data-testid="address-card-title-info-icon" />
                 </Tooltip>
               )}
             </Flex>
@@ -258,11 +269,12 @@ export const AddressCard = ({
         <p className={styles.address} data-testid="address-card-address">
           {isPopupView ? addEllipsis(address, ADDRESS_HEAD_ELLIPSIS_LENGTH, ADDRESS_TAIL_ELLIPSIS_LENGTH) : address}
         </p>
-        <Flex style={{ flexWrap: 'wrap' }}>
+        <Flex style={{ flexWrap: 'wrap' }} testId="address-card-assets">
           {isUnused && (
             <AddressDisplayItem
               label={t('core.addressCard.unused.label')}
-              icon={<CheckIcon width={ICON_SIZE} height={ICON_SIZE} />}
+              icon={<CheckIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-card-unused-address-icon" />}
+              testId="address-card-unused-address"
             />
           )}
           {metadata?.handles?.length > 0 && renderHandleData}
@@ -272,6 +284,7 @@ export const AddressCard = ({
             <AddressDisplayItem
               label={metadata.stakePool}
               icon={<StakePoolIcon width={ICON_SIZE} height={ICON_SIZE} />}
+              testId="address-stake-pool"
             />
           )}
           {isMetadataGrouped && renderAdditionalData}

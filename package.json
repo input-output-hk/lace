@@ -85,7 +85,7 @@
     "trim-off-newlines": "^1.0.3"
   },
   "dependencies": {
-    "@input-output-hk/lace-ui-toolkit": "1.19.0",
+    "@input-output-hk/lace-ui-toolkit": "1.21.0",
     "normalize.css": "^8.0.1"
   },
   "devDependencies": {
