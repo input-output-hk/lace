@@ -3,7 +3,7 @@ import { getTestWallet } from '../support/walletConfiguration';
 import walletAddressPageAssert from '../assert/walletAddressPageAssert';
 import walletAddressPage from '../elements/walletAddressPage';
 import MenuHeader from '../elements/menuHeader';
-import { Logger } from '../support/logger';
+import { assert } from 'chai';
 
 When(/^I see handles listed on the "Receive" screen$/, async () => {
   await walletAddressPageAssert.assertSeeAdaHandleAddressCard();
@@ -98,9 +98,7 @@ Then(/^I see "Unused address" card in "Advanced mode" for "([^"]*)" wallet$/, as
     expectedUnusedAddress =
       'addr_test1qqwt4f55kmzera42pu86svrck7qghskjk89dwk54fh5fkfmn76le4yjzc77ld2qv6vzxxxvsqspxnx7g3mktx93qthjqw3gggf'; // TODO move to walletConfiguration & WalletRepositoryConfig
   } else {
-    Logger.error(`expected unused address for wallet ${testWalletName} not found`);
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(1);
+    assert.fail(`expected unused address for wallet ${testWalletName} not found`);
   }
   await walletAddressPageAssert.assertSeeUnusedAddressCard(true, expectedUnusedAddress);
 });

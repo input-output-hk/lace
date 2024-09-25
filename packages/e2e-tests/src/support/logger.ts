@@ -6,9 +6,5 @@ export const Logger = {
 
   warn: (message: string): void => {
     console.warn(message);
-  },
-
-  error: (message: string): void => {
-    console.error(message);
   }
 };
