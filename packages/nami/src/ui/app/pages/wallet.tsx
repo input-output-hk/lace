@@ -64,10 +64,7 @@ import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 
 import { useDelegation } from '../../../adapters/delegation';
-import {
-  createTab,
-  displayUnit,
-} from '../../../api/extension';
+import { createTab, displayUnit } from '../../../api/extension';
 import { currencyToSymbol } from '../../../api/util';
 // Assets
 import Logo from '../../../assets/img/logoWhite.svg';
@@ -247,7 +244,7 @@ const Wallet = ({
                       <UserInfo
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
-                        onClick={async () =>  await onAccountClick(account)}
+                        onClick={async () => await onAccountClick(account)}
                         avatar={account.avatar}
                         name={account.name}
                         balance={account.balance}

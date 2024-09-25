@@ -76,6 +76,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { isBuildingTx, stakingError, setIsBuildingTx } = useStakePoolDetails();
   const walletState = useWalletState();
   const passwordUtil = useSecrets();
+  const openExternalLink = useExternalLinkOpener();
   const getStakePoolInfo = useCallback(
     (id: Wallet.Cardano.PoolId) => getPoolInfos([id], stakePoolProvider),
     [stakePoolProvider]
@@ -179,7 +180,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         transactions: sortedHistoryTx,
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
-        certificateInspectorFactory
+        certificateInspectorFactory,
+        openExternalLink
       }}
     >
       <Nami />

@@ -17,7 +17,8 @@ const BATCH = 5;
 
 const HistoryViewer = () => {
   const capture = useCaptureEvent();
-  const { cardanoCoin, transactions, environmentName } = useOutsideHandles();
+  const { cardanoCoin, transactions, environmentName, openExternalLink } =
+    useOutsideHandles();
   const [historySlice, setHistorySlice] = React.useState<
     Wallet.Cardano.HydratedTx[] | undefined
   >();
@@ -70,6 +71,7 @@ const HistoryViewer = () => {
                   tx={tx}
                   network={environmentName}
                   cardanoCoin={cardanoCoin}
+                  openExternalLink={openExternalLink}
                 />
               ))}
             </Accordion>

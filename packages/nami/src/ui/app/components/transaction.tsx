@@ -86,12 +86,14 @@ interface TransactionProps {
   tx: Wallet.Cardano.HydratedTx;
   network: OutsideHandlesContextValue['environmentName'];
   cardanoCoin: OutsideHandlesContextValue['cardanoCoin'];
+  openExternalLink: OutsideHandlesContextValue['openExternalLink'];
 }
 
 const Transaction = ({
   tx,
   network,
   cardanoCoin,
+  openExternalLink,
 }: Readonly<TransactionProps>) => {
   const displayInfo = useTxInfo(tx);
   const colorMode = {
@@ -224,7 +226,11 @@ const Transaction = ({
         )}
         <AccordionPanel wordBreak="break-word" pb={4}>
           {displayInfo && (
-            <TxDetail displayInfo={displayInfo} network={network} />
+            <TxDetail
+              openExternalLink={openExternalLink}
+              displayInfo={displayInfo}
+              network={network}
+            />
           )}
         </AccordionPanel>
         <Box display="flex" flexDirection="column" alignItems="center">
@@ -299,12 +305,37 @@ const TxIcon = ({
   );
 };
 
+const getExplorerUrl = (
+  network: OutsideHandlesContextValue['environmentName'],
+): never | string => {
+  switch (network) {
+    case 'Mainnet': {
+      return 'https://cardanoscan.io/transaction/';
+    }
+    case 'Preprod': {
+      return 'https://preprod.cardanoscan.io/transaction/';
+    }
+    case 'Preview': {
+      return 'https://preview.cexplorer.io/tx/';
+    }
+    case 'Sanchonet': {
+      // eslint-disable-next-line functional/no-throw-statements
+      throw new Error('Not implemented yet: "Sanchonet" case');
+    }
+  }
+};
+
 interface TxDetailProps {
   displayInfo: TxInfo;
   network: OutsideHandlesContextValue['environmentName'];
+  openExternalLink: OutsideHandlesContextValue['openExternalLink'];
 }
 
-const TxDetail = ({ displayInfo, network }: Readonly<TxDetailProps>) => {
+const TxDetail = ({
+  displayInfo,
+  network,
+  openExternalLink,
+}: Readonly<TxDetailProps>) => {
   const capture = useCaptureEvent();
   const colorMode = {
     extraDetail: useColorModeValue('black', 'white'),
@@ -326,28 +357,16 @@ const TxDetail = ({ displayInfo, network }: Readonly<TxDetailProps>) => {
           <Box>
             <Link
               color="teal"
-              href={
-                (() => {
-                  switch (network) {
-                    case 'Mainnet': {
-                      return 'https://cardanoscan.io/transaction/';
-                    }
-                    case 'Preprod': {
-                      return 'https://preprod.cardanoscan.io/transaction/';
-                    }
-                    case 'Preview': {
-                      return 'https://preview.cexplorer.io/tx/';
-                    }
-                    case 'Sanchonet': {
-                      // eslint-disable-next-line functional/no-throw-statements
-                      throw new Error('Not implemented yet: "Sanchonet" case');
-                    }
-                  }
-                })() + displayInfo.txHash
-              }
               isExternal
               onClick={() => {
                 void capture(Events.ActivityActivityDetailTransactionHashClick);
+                try {
+                  openExternalLink(
+                    `${getExplorerUrl(network)}${displayInfo.txHash}`,
+                  );
+                } catch {
+                  console.error('cannot open an external url');
+                }
               }}
             >
               {displayInfo.txHash} <ExternalLinkIcon mx="2px" />
