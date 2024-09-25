@@ -81,6 +81,3 @@ Feature: Wallet address page
     And I see "Unused address" card in "Advanced mode"
     Then "Unused address" card address is different than the saved one
     And Saved "Unused address" card is penultimate
-
-
-

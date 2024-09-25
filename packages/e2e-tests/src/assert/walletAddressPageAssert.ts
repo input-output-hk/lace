@@ -127,24 +127,17 @@ class WalletAddressPageAssert {
       expect(await addressElement.getText()).not.to.be.empty;
     }
 
+    await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE).waitForDisplayed({ reverse: !shouldSee });
+    await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE_INFO_ICON).waitForDisplayed({ reverse: !shouldSee });
+    await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_ICON).waitForDisplayed({ reverse: !shouldSee });
+    await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_LABEL).waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      const titleElement = await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE);
-      await titleElement.waitForDisplayed();
-      expect(await titleElement.getText()).to.equal(await t('qrInfo.advancedMode.tags.unused'));
-
-      const titleIconElement = await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE_INFO_ICON);
-      await titleIconElement.waitForDisplayed();
-      const unusedAddressIcon = await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_ICON);
-      await unusedAddressIcon.waitForDisplayed();
-
-      const unusedAddressLabel = await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_LABEL);
-      await unusedAddressLabel.waitForDisplayed();
-      expect(await unusedAddressLabel.getText()).to.equal(await t('core.addressCard.unused.label'));
-    } else {
-      await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE).waitForDisplayed({ reverse: true });
-      await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE_INFO_ICON).waitForDisplayed({ reverse: true });
-      await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_ICON).waitForDisplayed({ reverse: true });
-      await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_LABEL).waitForDisplayed({ reverse: true });
+      expect(await unusedAddressCard.$(WalletAddressPage.ADDRESS_CARD_TITLE).getText()).to.equal(
+        await t('qrInfo.advancedMode.tags.unused')
+      );
+      expect(await unusedAddressCard.$(WalletAddressPage.UNUSED_ADDRESS_INFO_LABEL).getText()).to.equal(
+        await t('core.addressCard.unused.label')
+      );
     }
   }
 
