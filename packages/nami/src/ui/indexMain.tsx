@@ -89,6 +89,7 @@ export const Main = () => {
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),
+    removeWallet: async props => walletRepository.removeWallet(props),
     activateAccount: async (props, force) =>
       walletManager.activate(props, force),
     wallets$: walletRepository.wallets$,

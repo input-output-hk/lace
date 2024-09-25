@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 import React, { useCallback, useMemo } from 'react';
 import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
@@ -12,7 +13,7 @@ import {
   useBuildDelegation,
   useBalances
 } from '@hooks';
-import { walletManager, walletRepository, withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
 import { useDappContext, withDappContext } from '@src/features/dapp/context';
 import { localDappService } from '../browser-view/features/dapp/components/DappList/localDappService';
@@ -32,7 +33,8 @@ const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 export const NamiView = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
-  const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode, addAccount } = useWalletManager();
+  const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode, addAccount, walletRepository } =
+    useWalletManager();
   const {
     walletUI,
     inMemoryWallet,
@@ -120,7 +122,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         defaultSubmitApi: DEFAULT_SUBMIT_API,
         cardanoCoin,
         isValidURL,
-        setAvatar,
         buildDelegation,
         signAndSubmitTransaction,
         passwordUtil,
@@ -130,7 +131,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         stakingError,
         getStakePoolInfo,
         resetDelegationState,
-        hasNoFunds
+        hasNoFunds,
+        setAvatar
       }}
     >
       <Nami />

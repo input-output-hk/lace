@@ -1379,7 +1379,6 @@ export const getHwAccounts = async ({ device, id }) => {
 
 export const isHW = accountIndex =>
   accountIndex != undefined &&
-  accountIndex != undefined &&
   accountIndex != 0 &&
   typeof accountIndex !== 'number' &&
   (accountIndex.startsWith(HW.trezor) || accountIndex.startsWith(HW.ledger));

@@ -351,11 +351,15 @@ export const MenuWithTwoAccountsLight: Story = {
     colorMode: 'light',
     accounts: [
       {
+        walletId: 'walletId1',
+        index: 1,
         name: account.name,
         avatar: account.avatar,
         balance: BigInt(account.lovelace),
       },
       {
+        walletId: 'walletId1',
+        index: 2,
         name: account1.name,
         avatar: account1.avatar,
         balance: BigInt(account1.lovelace),
@@ -387,16 +391,22 @@ export const MenuWithHWLight: Story = {
     activeAccount: { index: 0, name: account.name, avatar: account.avatar },
     accounts: [
       {
+        walletId: 'walletId1',
+        index: 1,
         name: account.name,
         avatar: account.avatar,
         balance: BigInt(account.lovelace),
       },
       {
+        walletId: 'hw1',
+        index: 1,
         name: account1.name,
         avatar: account1.avatar,
         balance: BigInt(account1.lovelace),
       },
       {
+        walletId: 'hw1',
+        index: 2,
         name: accountHW.name,
         avatar: accountHW.avatar,
         balance: BigInt(0),
@@ -721,15 +731,22 @@ export const DeleteAccountLight: Story = {
   },
   parameters: {
     colorMode: 'light',
-    activeAccount: { index: 1, name: account1.name, avatar: account1.avatar },
+    activeAccount: {
+      walletId: 1,
+      index: 1,
+      name: account1.name,
+      avatar: account1.avatar,
+    },
     accounts: [
       {
+        walletId: 1,
         index: 1,
         name: account1.name,
         avatar: account1.avatar,
         balance: BigInt(0),
       },
       {
+        walletId: 1,
         index: 0,
         name: account.name,
         avatar: account.avatar,

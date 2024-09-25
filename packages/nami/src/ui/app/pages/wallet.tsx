@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   SettingsIcon,
   AddIcon,
-  StarIcon,
   DeleteIcon,
   CopyIcon,
   ChevronDownIcon,
@@ -13,7 +12,6 @@ import {
   Button,
   Box,
   Spacer,
-  Stack,
   Text,
   Icon,
   Image,
@@ -75,7 +73,6 @@ import {
   getDelegation,
   getNetwork,
   getTransactions,
-  isHW,
   updateAccount,
   onAccountChange,
 } from '../../../api/extension';
@@ -96,8 +93,9 @@ import QrCode from '../components/qrCode';
 import { Scrollbars } from '../components/scrollbar';
 import TransactionBuilder from '../components/transactionBuilder';
 import UnitDisplay from '../components/unitDisplay';
+import UserInfo from '../components/userInfo';
 
-import type { UseAccount } from '../../../adapters/account';
+import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
@@ -162,7 +160,7 @@ const Wallet = ({
   const [menu, setMenu] = React.useState(false);
   const newAccountRef = React.useRef();
   const aboutRef = React.useRef();
-  const deletAccountRef = React.useRef();
+  const deleteAccountRef = React.useRef();
   const [info, setInfo] = React.useState({
     avatar: '',
     name: '',
@@ -187,7 +185,7 @@ const Wallet = ({
   const getData = async forceUpdate => {
     const currentIndex = await getCurrentAccountIndex();
     const accounts = await getAccounts();
-    const { avatar, name, index, paymentAddr } = accounts[currentIndex];
+    const { avatar, name, index, paymentAddr } = accounts[currentIndex] || {};
     if (!isMounted.current) return;
     setInfo({ avatar, name, currentIndex: index, paymentAddr, accounts });
     setState(s => ({
@@ -223,6 +221,28 @@ const Wallet = ({
       accountChangeHandler && accountChangeHandler.remove();
     };
   }, []);
+
+  const canDeleteAccount = useMemo(
+    () =>
+      !!activeAccount.hw ||
+      accounts.filter(a => a.walletId === activeAccount.walletId).length > 1,
+    [accounts, activeAccount],
+  );
+  const onAccountClick = useCallback(
+    async (account: Readonly<Account>) => {
+      if (
+        account.index === activeAccount.index &&
+        account.walletId === activeAccount.walletId
+      ) {
+        return;
+      }
+      await activateAccount({
+        accountIndex: account.index,
+        walletId: account.walletId,
+      });
+    },
+    [activeAccount, activateAccount],
+  );
 
   return (
     <>
@@ -306,80 +326,22 @@ const Wallet = ({
                     autoHeight
                     autoHeightMax={210}
                   >
-                    {accounts.map(account => {
-                      return (
-                        <MenuItem
-                          position="relative"
-                          key={account.index}
-                          onClick={async () => {
-                            if (account.index === activeAccount.index) {
-                              return;
-                            }
-                            await activateAccount(account.index);
-                          }}
-                        >
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            width="full"
-                          >
-                            <Box
-                              width={'30px'}
-                              height={'30px'}
-                              mr="12px"
-                              display={'flex'}
-                              alignItems={'center'}
-                              justifyContent={'center'}
-                            >
-                              <AvatarLoader
-                                avatar={account.avatar}
-                                width={'30px'}
-                              />
-                            </Box>
-
-                            <Box
-                              display="flex"
-                              alignItems="center"
-                              width="full"
-                            >
-                              <Box display="flex" flexDirection="column">
-                                <Box height="1.5" />
-                                <Text
-                                  mb="-1"
-                                  fontWeight="bold"
-                                  fontSize="14px"
-                                  isTruncated={true}
-                                  maxWidth="210px"
-                                >
-                                  {account.name}
-                                </Text>
-                                {account ? (
-                                  <UnitDisplay
-                                    quantity={account.balance}
-                                    decimals={6}
-                                    symbol={cardanoCoin.symbol}
-                                  />
-                                ) : (
-                                  <Text>...</Text>
-                                )}
-                              </Box>
-                              {account.index === activeAccount.index && (
-                                <>
-                                  <Box width="4" />
-                                  <StarIcon />
-                                  <Box width="4" />
-                                </>
-                              )}
-                              {isHW(account.index) && (
-                                <Box ml="auto" mr="2">
-                                  HW
-                                </Box>
-                              )}
-                            </Box>
-                          </Stack>
-                        </MenuItem>
-                      );
-                    })}
+                    {accounts.map(account => (
+                      <UserInfo
+                        index={`${account.walletId}${account.index}`}
+                        key={`${account.walletId}${account.index}`}
+                        onClick={async () => onAccountClick(account)}
+                        avatar={account.avatar}
+                        name={account.name}
+                        balance={account.balance}
+                        isActive={
+                          account.index === activeAccount.index &&
+                          account.walletId === activeAccount.walletId
+                        }
+                        cardanoCoin={cardanoCoin}
+                        isHW={account.hw}
+                      />
+                    ))}
                   </Scrollbars>
                 </MenuGroup>
                 <MenuDivider />
@@ -393,21 +355,18 @@ const Wallet = ({
                 >
                   New Account
                 </MenuItem>
-                {(isHW(activeAccount.index) ||
-                  activeAccount.index >=
-                    accounts.filter(({ index }) => !isHW(index)).length - 1) &&
-                  accounts.length > 1 && (
-                    <MenuItem
-                      color="red.300"
-                      icon={<DeleteIcon />}
-                      onClick={() => {
-                        capture(Events.AccountDeleteClick);
-                        deletAccountRef.current.openModal();
-                      }}
-                    >
-                      Delete Account
-                    </MenuItem>
-                  )}
+                {canDeleteAccount && (
+                  <MenuItem
+                    color="red.300"
+                    icon={<DeleteIcon />}
+                    onClick={() => {
+                      capture(Events.AccountDeleteClick);
+                      deleteAccountRef.current.openModal();
+                    }}
+                  >
+                    Delete Account
+                  </MenuItem>
+                )}
                 <MenuItem
                   icon={<Icon as={GiUsbKey} w={3} h={3} />}
                   onClick={() => {
@@ -710,11 +669,11 @@ const Wallet = ({
         addAccount={addAccount}
       />
       <DeleteAccountModal
-        ref={deletAccountRef}
-        name={activeAccount.name}
-        accountIndex={activeAccount.index}
+        ref={deleteAccountRef}
         activateAccount={activateAccount}
         removeAccount={removeAccount}
+        accounts={accounts}
+        activeAccount={activeAccount}
       />
       <TransactionBuilder ref={builderRef} />
       <About ref={aboutRef} />
@@ -855,12 +814,12 @@ const NewAccountModal = React.forwardRef<
 const DeleteAccountModal = React.forwardRef<
   unknown,
   {
-    name: string;
-    accountIndex: number;
-    activateAccount: (index: number, force: boolean) => Promise<void>;
-    removeAccount: (index: number) => Promise<void>;
+    activateAccount: UseAccount['activateAccount'];
+    removeAccount: UseAccount['removeAccount'];
+    accounts: UseAccount['allAccounts'];
+    activeAccount: UseAccount['activeAccount'];
   }
->(({ name, accountIndex, activateAccount, removeAccount }, ref) => {
+>(({ activateAccount, removeAccount, accounts, activeAccount }, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
   const cancelRef = React.useRef();
@@ -871,6 +830,41 @@ const DeleteAccountModal = React.forwardRef<
       onOpen();
     },
   }));
+
+  const nextAccount = useMemo(
+    () =>
+      accounts.find(
+        a =>
+          a.index !== activeAccount.index &&
+          a.walletId === activeAccount.walletId,
+      ) ?? accounts.find(a => !a.hw),
+    [accounts, activeAccount],
+  );
+
+  const deleteAccount = useCallback(async () => {
+    setIsLoading(true);
+    await activateAccount({
+      accountIndex: nextAccount?.index!,
+      walletId: nextAccount?.walletId!,
+      force: true,
+    });
+    setTimeout(async () => {
+      await removeAccount({
+        walletId: activeAccount.walletId,
+        accountIndex: activeAccount.index,
+      });
+    }, 500);
+    capture(Events.AccountDeleteConfirmClick);
+    onClose();
+    setIsLoading(false);
+  }, [
+    setIsLoading,
+    activateAccount,
+    removeAccount,
+    capture,
+    onClose,
+    nextAccount,
+  ]);
 
   return (
     <AlertDialog
@@ -888,7 +882,7 @@ const DeleteAccountModal = React.forwardRef<
 
           <AlertDialogBody>
             <Text fontSize="sm">
-              Are you sure you want to delete <b>{name}</b>?
+              Are you sure you want to delete <b>{activeAccount.name}</b>?
             </Text>
           </AlertDialogBody>
 
@@ -900,14 +894,7 @@ const DeleteAccountModal = React.forwardRef<
               isDisabled={isLoading}
               isLoading={isLoading}
               colorScheme="red"
-              onClick={async () => {
-                setIsLoading(true);
-                await activateAccount(0, true);
-                await removeAccount(accountIndex);
-                capture(Events.AccountDeleteConfirmClick);
-                onClose();
-                setIsLoading(false);
-              }}
+              onClick={deleteAccount}
             >
               Delete
             </Button>

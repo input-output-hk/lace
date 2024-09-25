@@ -10,10 +10,16 @@ import {
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
+import flatten from 'lodash/flatten';
+import groupBy from 'lodash/groupBy';
 import merge from 'lodash/merge';
 
 import type { WalletManagerAddAccountProps } from '../features/outside-handles-provider/types';
-import type { WalletId } from '@cardano-sdk/web-extension';
+import type {
+  WalletId,
+  HardwareWallet,
+  Bip32WalletAccount,
+} from '@cardano-sdk/web-extension';
 import type { Observable } from 'rxjs';
 
 interface AccountsProps {
@@ -30,17 +36,20 @@ interface AccountsProps {
   removeAccount: (
     props: Readonly<RemoveAccountProps>,
   ) => Promise<RemoveAccountProps>;
+  removeWallet: (props: WalletId) => Promise<WalletId>;
   updateAccountMetadata: (
     props: Readonly<UpdateAccountMetadataProps<Wallet.AccountMetadata>>,
   ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata>>;
 }
 
-interface Account {
+export interface Account {
   index: number;
+  walletId: string;
   name: string;
   avatar?: string;
   balance?: string;
   recentSendToAddress?: string;
+  hw?: boolean;
 }
 
 export interface UseAccount {
@@ -51,8 +60,19 @@ export interface UseAccount {
   addAccount: (
     props: Readonly<{ index: number; name: string; passphrase: Uint8Array }>,
   ) => Promise<void>;
-  activateAccount: (accountIndex: number, force?: boolean) => Promise<void>;
-  removeAccount: (accountIndex: number) => Promise<void>;
+  activateAccount: (
+    props: Readonly<{
+      accountIndex: number;
+      walletId?: WalletId;
+      force?: boolean;
+    }>,
+  ) => Promise<void>;
+  removeAccount: (
+    props: Readonly<{
+      accountIndex: number;
+      walletId?: WalletId;
+    }>,
+  ) => Promise<void>;
   updateAccountMetadata: (
     data: Readonly<{
       name?: string;
@@ -79,15 +99,37 @@ const getActiveAccountMetadata = ({
   );
 };
 
-const getNextAccountIndex = (accounts: readonly Account[]) => {
-  for (const [index, account] of accounts.entries()) {
+const getNextAccountIndex = (
+  accounts: readonly Account[],
+  activeAccount: Readonly<Account>,
+) => {
+  const walletAccounts = accounts.filter(
+    a => a.walletId === activeAccount.walletId,
+  );
+
+  for (const [index, account] of walletAccounts.entries()) {
     if (account.index !== index) {
       return index;
     }
   }
 
-  return accounts.length;
+  return walletAccounts.length;
 };
+
+const getAcountsMapper =
+  (
+    wallet: Readonly<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>,
+  ) =>
+  ({
+    accountIndex,
+    metadata,
+  }: Readonly<Bip32WalletAccount<Wallet.AccountMetadata>>) => ({
+    index: accountIndex,
+    walletId: wallet.walletId,
+    name: metadata?.name || `${wallet.type} ${accountIndex}`,
+    hw: wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor,
+    ...metadata.namiMode,
+  });
 
 export const useAccount = ({
   chainId = Wallet.Cardano.ChainIds.Mainnet,
@@ -96,6 +138,7 @@ export const useAccount = ({
   addAccount,
   activateAccount,
   removeAccount,
+  removeWallet,
   updateAccountMetadata,
 }: Readonly<AccountsProps>): UseAccount => {
   const activeWallet = useObservable(activeWalletId$);
@@ -103,42 +146,59 @@ export const useAccount = ({
   const { walletId, accountIndex } = activeWallet ?? {};
 
   const allAccountsSorted = useMemo(() => {
-    const wallet = wallets?.find(elm => elm.walletId === walletId);
-    if (wallet && 'accounts' in wallet) {
-      return wallet.accounts
-        .map(account => ({
-          index: account.accountIndex,
-          name: account.metadata.name,
-          ...account.metadata.namiMode,
-        }))
-        .sort((a, b) => a.index - b.index);
-    }
-    return [];
+    const allWallets = wallets?.filter(
+      (w): w is HardwareWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> =>
+        w.type !== WalletType.Script,
+    );
+    const groupedWallets = groupBy(allWallets, ({ type }) => type);
+    return flatten(
+      Object.entries(groupedWallets)
+        .sort(([type1], [type2]) => {
+          if (type1 === WalletType.InMemory && type2 !== WalletType.InMemory)
+            return -1;
+          if (type2 === WalletType.InMemory && type1 !== WalletType.InMemory)
+            return 1;
+          return 0;
+        })
+        .map(([_type, wallets]) => {
+          const wallet =
+            wallets.find(w => w.walletId === walletId) ?? wallets[0];
+          const accountsMapper = getAcountsMapper(wallet);
+          return 'accounts' in wallet
+            ? wallet.accounts
+                // eslint-disable-next-line functional/prefer-tacit
+                .map(account => accountsMapper(account))
+                .sort((a, b) => a.index - b.index)
+            : [];
+        }),
+    );
   }, [wallets, walletId, accountIndex]);
 
   const activeAccount = useMemo(
     () =>
-      allAccountsSorted.find(({ index }) => accountIndex === index) ?? {
-        index: 0,
-        name: '',
-      },
-    [allAccountsSorted, accountIndex],
+      allAccountsSorted.find(
+        ({ index, walletId }) =>
+          accountIndex === index && walletId === activeWallet?.walletId,
+      ) ??
+      allAccountsSorted[0] ??
+      {},
+    [allAccountsSorted, accountIndex, activeWallet?.walletId],
   );
 
   return {
     allAccounts: allAccountsSorted,
     activeAccount,
-    // TODO: filter hw wallets
     nextIndex: useMemo(
-      () => getNextAccountIndex(allAccountsSorted),
-      [allAccountsSorted],
+      () => getNextAccountIndex(allAccountsSorted, activeAccount),
+      [allAccountsSorted, activeAccount],
     ),
     nonActiveAccounts: useMemo(
       () =>
-        allAccountsSorted
-          .filter(account => account.index !== accountIndex)
-          .sort((a, b) => a.index - b.index),
-      [allAccountsSorted, accountIndex],
+        allAccountsSorted.filter(
+          account =>
+            account.walletId !== walletId || account.index !== accountIndex,
+        ),
+      [allAccountsSorted, accountIndex, walletId],
     ),
     addAccount: useCallback(
       async ({ index, name, passphrase }) => {
@@ -156,20 +216,33 @@ export const useAccount = ({
       [wallets, addAccount],
     ),
     removeAccount: useCallback(
-      async (accountIndex: number) => {
+      async ({ accountIndex, walletId }) => {
         if (walletId === undefined) {
           return;
         }
-        await removeAccount({ accountIndex, walletId });
+        const isLastAccount = !allAccountsSorted.some(
+          a => a.walletId === walletId && a.index !== accountIndex,
+        );
+        console.log(isLastAccount, { accountIndex, walletId });
+        await (isLastAccount
+          ? removeWallet(walletId)
+          : removeAccount({ accountIndex, walletId }));
       },
-      [removeAccount, walletId],
+      [removeAccount, walletId, allAccountsSorted],
     ),
     activateAccount: useCallback(
-      async (accountIndex: number, force = false) => {
+      async props => {
         if (walletId === undefined) {
           return;
         }
-        await activateAccount({ chainId, accountIndex, walletId }, force);
+        await activateAccount(
+          {
+            chainId,
+            accountIndex: props.accountIndex,
+            walletId: props.walletId ?? walletId,
+          },
+          props.force ?? false,
+        );
       },
       [activateAccount, walletId, chainId],
     ),

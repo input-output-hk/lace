@@ -1,4 +1,3 @@
-import { useObservable } from '@lace/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { of } from 'rxjs';
 
