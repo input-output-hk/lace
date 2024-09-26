@@ -25,7 +25,7 @@ class AddNewWalletAssert {
     await AddNewWalletMainModal.container.waitForDisplayed({ reverse: true });
   }
 
-  async assertSeeWalletSetupPageInModal() {
+  async assertSeeWalletSetupPageInModal(flow: 'Create' | 'Create paper wallet' | 'Restore') {
     await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
     await AddNewWalletMainModal.closeButton.waitForEnabled();
     await OnboardingWalletSetupPageAssert.assertSeeStepTitle(await t('core.walletNameAndPasswordSetupStep.title'));
@@ -35,7 +35,7 @@ class AddNewWalletAssert {
     await OnboardingWalletSetupPageAssert.assertSeeWalletNameInput();
     await OnboardingWalletSetupPageAssert.assertSeePasswordInput();
     await OnboardingWalletSetupPageAssert.assertSeeBackButton();
-    await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton();
+    await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton(flow === 'Create paper wallet');
   }
 
   async asserSeeConnectYourDevicePageInModal() {
@@ -60,11 +60,10 @@ class AddNewWalletAssert {
       expect(await CancelAddingNewWalletDialog.title.getText()).to.equal(
         await t('core.multiWallet.confirmationDialog.title')
       );
-      // TODO: uncomment when https://github.com/input-output-hk/lace-ui-toolkit/pull/31 is merged and released
-      // await CancelAddingNewWalletDialog.description.waitForDisplayed();
-      // expect(await CancelAddingNewWalletDialog.description.getText()).to.equal(
-      //   await t('core.multiWallet.confirmationDialog.description')
-      // );
+      await CancelAddingNewWalletDialog.description.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.description.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.description')
+      );
       await CancelAddingNewWalletDialog.goBackButton.waitForDisplayed();
       expect(await CancelAddingNewWalletDialog.goBackButton.getText()).to.equal(
         await t('core.multiWallet.confirmationDialog.cancel')
@@ -74,12 +73,6 @@ class AddNewWalletAssert {
         await t('core.multiWallet.confirmationDialog.confirm')
       );
     }
-  }
-
-  async assertSeeChooseRecoveryMethodPageInModal() {
-    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-    await AddNewWalletMainModal.closeButton.waitForEnabled();
-    // TODO: add proper assertions when paper wallet feature is ready
   }
 }
 

@@ -3,9 +3,18 @@ import { t } from '../../utils/translationService';
 import { TimelineSteps } from '../../enums/Onboarding';
 import SaveYourPaperWalletPage from '../../elements/onboarding/SaveYourPaperWalletPage';
 import { expect } from 'chai';
+import AddNewWalletMainModal from '../../elements/addNewWallet/MainModal';
 
 class SaveYourPaperWalletPageAssert extends OnboardingCommonAssert {
-  async assertSeeSaveYourPaperWalletPage(expectedPaperWalletName: string) {
+  async assertSeeSaveYourPaperWalletPage(expectedPaperWalletName: string, isModal = false) {
+    if (isModal) {
+      await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
+      await AddNewWalletMainModal.closeButton.waitForEnabled();
+    } else {
+      await this.assertSeeHelpAndSupportButton();
+      await this.assertSeeLegalLinks();
+    }
+
     await this.assertSeeStepTitle(await t('paperWallet.savePaperWallet.title'));
     await this.assertSeeStepSubtitle(await t('paperWallet.savePaperWallet.description'));
     await this.assertSeeActiveStepOnProgressTimeline(TimelineSteps.WALLET_SETUP);
@@ -54,9 +63,6 @@ class SaveYourPaperWalletPageAssert extends OnboardingCommonAssert {
     expect(await SaveYourPaperWalletPage.openWalletButton.getText()).to.equal(
       await t('core.walletSetupStep.enterWallet')
     );
-
-    await this.assertSeeHelpAndSupportButton();
-    await this.assertSeeLegalLinks();
   }
 
   async assertOpenWalletButtonEnabled(shouldBeEnabled: boolean): Promise<void> {
