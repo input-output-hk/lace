@@ -28,6 +28,7 @@ import '../../lib/scripts/keep-alive-ui';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
 
 const App = (): React.ReactElement => (
   <BackgroundServiceAPIProvider>
@@ -46,7 +47,9 @@ const App = (): React.ReactElement => (
                             <MigrationContainer appMode={APP_MODE_BROWSER}>
                               <DataCheckContainer appMode={APP_MODE_BROWSER}>
                                 <AddressesDiscoveryOverlay>
-                                  <BrowserViewRoutes />
+                                  <NamiMigrationGuard>
+                                    <BrowserViewRoutes />
+                                  </NamiMigrationGuard>
                                 </AddressesDiscoveryOverlay>
                               </DataCheckContainer>
                             </MigrationContainer>

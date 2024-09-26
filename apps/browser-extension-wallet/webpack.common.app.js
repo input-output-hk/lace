@@ -69,7 +69,7 @@ module.exports = () =>
           ]
         },
         {
-          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm)$/,
+          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm|mp4)$/,
           loader: 'file-loader'
         },
         {

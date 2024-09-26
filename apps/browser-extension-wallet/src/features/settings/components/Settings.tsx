@@ -3,6 +3,7 @@ import { ContentLayout } from '@components/Layout';
 import { useTranslation } from 'react-i18next';
 import { SettingsWallet, SettingsSecurity, SettingsHelp, SettingsLegal, SettingsPreferences } from '..';
 import { SettingsRemoveWallet } from '@src/views/browser-view/features/settings/components/SettingsRemoveWallet';
+import { SettingsSwitchToNami } from '@src/views/browser-view/features/settings/components/SettingsSwitchToNami';
 
 export interface SettingsProps {
   defaultPassphraseVisible?: boolean;
@@ -24,6 +25,7 @@ export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: Settings
         />
         <SettingsHelp popupView />
         <SettingsLegal />
+        <SettingsSwitchToNami popupView />
         <SettingsRemoveWallet popupView />
       </div>
     </ContentLayout>

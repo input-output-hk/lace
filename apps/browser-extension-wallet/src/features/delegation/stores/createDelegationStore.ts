@@ -63,7 +63,7 @@ DelegationStore): stakePoolDetailsSelectorProps => {
  */
 export const useDelegationStore = create<DelegationStore>((set) => ({
   delegationTxFee: '0',
-  setSelectedStakePool: (pool: CardanoStakePool) => set({ selectedStakePool: pool }),
+  setSelectedStakePool: (pool: CardanoStakePool | undefined) => set({ selectedStakePool: pool }),
   setDelegationTxBuilder: (txBuilder?: TxBuilder) => set({ delegationTxBuilder: txBuilder }),
   setDelegationTxFee: (fee?: string) => set({ delegationTxFee: fee })
 }));

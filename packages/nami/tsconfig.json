@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationDir": "./",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "dist/",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2018",
+    "baseUrl": "./src",
+    "rootDir": "./"
+  },
+  "exclude": [
+    "dist",
+    "**/storybook-static/*",
+    "**/.storybook/**/*.**",
+    "**/src/ui/app/components/*",
+    "**/src/ui/app/pages/*"
+  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json"]
+}

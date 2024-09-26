@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { PopupView } from '@routes';
@@ -22,40 +22,54 @@ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+import { NamiPopup } from './views/nami-mode';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
 
-const App = (): React.ReactElement => (
-  <BackgroundServiceAPIProvider>
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_POPUP}>
-          <CurrencyStoreProvider>
-            <HashRouter>
-              <PostHogClientProvider>
-                <ExperimentsProvider>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <MigrationContainer appMode={APP_MODE_POPUP}>
-                          <DataCheckContainer appMode={APP_MODE_POPUP}>
-                            <AddressesDiscoveryOverlay>
-                              <BackgroundPageProvider>
-                                <PopupView />
-                              </BackgroundPageProvider>
-                            </AddressesDiscoveryOverlay>
-                          </DataCheckContainer>
-                        </MigrationContainer>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
-                </ExperimentsProvider>
-              </PostHogClientProvider>
-            </HashRouter>
-          </CurrencyStoreProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  </BackgroundServiceAPIProvider>
-);
+const App = (): React.ReactElement => {
+  const [mode, setMode] = useState<'lace' | 'nami'>();
+  useEffect(() => {
+    const getWalletMode = async () => {
+      const { namiMigration } = await getBackgroundStorage();
+      setMode(namiMigration?.mode || 'lace');
+    };
+
+    getWalletMode();
+  }, []);
+
+  return (
+    <BackgroundServiceAPIProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_POPUP}>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_POPUP}>
+                            <DataCheckContainer appMode={APP_MODE_POPUP}>
+                              <AddressesDiscoveryOverlay>
+                                <BackgroundPageProvider>
+                                  {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                </BackgroundPageProvider>
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    </BackgroundServiceAPIProvider>
+  );
+};
 
 const mountNode = document.querySelector('#lace-popup');
 ReactDOM.render(<App />, mountNode);

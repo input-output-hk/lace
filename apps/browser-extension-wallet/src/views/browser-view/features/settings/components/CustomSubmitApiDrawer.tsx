@@ -13,6 +13,7 @@ import SwitchIcon from '@assets/icons/switch.component.svg';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
 import PlayIcon from '@assets/icons/play-icon.component.svg';
 import PauseIcon from '@assets/icons/pause-icon.component.svg';
+import { config } from '@src/config';
 
 const { Text } = Typography;
 
@@ -23,7 +24,7 @@ interface CustomSubmitApiDrawerProps {
 }
 
 const LEARN_SUBMIT_API_URL = 'https://github.com/IntersectMBO/cardano-node/tree/master/cardano-submit-api';
-const DEFAULT_SUBMIT_API = 'http://localhost:8090/api/submit/tx';
+const { DEFAULT_SUBMIT_API } = config();
 
 export const CustomSubmitApiDrawer = ({
   visible,
