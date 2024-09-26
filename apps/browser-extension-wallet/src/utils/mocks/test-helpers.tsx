@@ -636,6 +636,7 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendEvent: jest.fn(),
   sendPageNavigationEvent: jest.fn(),
   setChain: jest.fn(),
+  isFeatureFlagEnabled: jest.fn(),
   sendAliasEvent: jest.fn(),
   subscribeToInitializationProcess: jest.fn(),
   overrideFeatureFlags: jest.fn(),

@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserId } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
-import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
+import { DEV_POSTHOG_TOKEN } from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
@@ -35,7 +35,7 @@ describe('PostHogClient', () => {
 
     await waitFor(() => expect(client).toBeDefined());
     expect(posthog.init).toHaveBeenCalledWith(
-      expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
+      expect.stringContaining(DEV_POSTHOG_TOKEN),
       expect.objectContaining({
         // eslint-disable-next-line camelcase
         api_host: posthogHost
@@ -93,7 +93,7 @@ describe('PostHogClient', () => {
     client.setChain(previewChain);
     expect(posthog.set_config).toHaveBeenCalledWith(
       expect.objectContaining({
-        token: DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[previewChain.networkMagic]
+        token: DEV_POSTHOG_TOKEN
       })
     );
   });

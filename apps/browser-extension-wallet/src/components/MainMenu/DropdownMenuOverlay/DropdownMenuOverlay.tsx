@@ -23,6 +23,7 @@ import classNames from 'classnames';
 import type { AnyBip32Wallet } from '@cardano-sdk/web-extension';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -39,6 +40,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   sendAnalyticsEvent,
   ...props
 }): React.ReactElement => {
+  const posthog = usePostHogClientContext();
+  const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
 
@@ -85,7 +88,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {process.env.USE_SHARED_WALLET === 'true' && !isSharedWallet && <AddSharedWalletLink isPopup={isPopup} />}
+            {sharedWalletsEnabled && !isSharedWallet && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />
             <Separator />
