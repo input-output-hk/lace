@@ -4,7 +4,7 @@ import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import commonAssert from '../assert/commonAssert';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import helpAndSupportPageAssert from '../assert/helpAndSupportPageAssert';
 import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
@@ -43,7 +43,11 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import {
+  addAndActivateWalletInRepository,
+  addAndActivateWalletsInRepository,
+  clearWalletRepository
+} from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 
@@ -167,8 +171,8 @@ Then(/^I don't see any toast message$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage('', false);
 });
 
-Then(/^I see "Help and support" page$/, async () => {
-  await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
+Then(/^I see "Help and support" page URL$/, async () => {
+  await helpAndSupportPageAssert.assertSeeHelpAndSupportPageURL();
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
@@ -198,6 +202,27 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
+
+Then(
+  /^I open wallet: "([^"]*)" from wallet repository in: (extended|popup) mode$/,
+  async (walletName: string, mode: 'extended' | 'popup') => {
+    await cleanBrowserStorage();
+    await clearWalletRepository();
+    await localStorageManager.cleanLocalStorage();
+    await addAndActivateWalletsInRepository([walletName as TestWalletName]);
+    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    if (mode === 'popup') {
+      await popupView.visit();
+    }
+    await browser.refresh();
+    await closeAllTabsExceptOriginalOne();
+    await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+    await settingsExtendedPageObject.closeWalletSyncedToast();
+    await topNavigationAssert.assertLogoPresent();
+    await mainMenuPageObject.navigateToSection('Tokens', mode);
+  }
+);
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
   await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);

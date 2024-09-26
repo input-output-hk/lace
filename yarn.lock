@@ -12306,6 +12306,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@input-output-hk/lace-ui-toolkit@npm:1.21.0":
+  version: 1.21.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.21.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.21.0%2F46f0c3e6ffb0d24a15ca2dd26455f1ea9422a964"
+  dependencies:
+    "@radix-ui/react-alert-dialog": ^1.0.4
+    "@radix-ui/react-avatar": ^1.0.2
+    "@radix-ui/react-checkbox": ^1.0.4
+    "@radix-ui/react-collapsible": ^1.0.3
+    "@radix-ui/react-dialog": ^1.0.4
+    "@radix-ui/react-form": ^0.0.3
+    "@radix-ui/react-popover": ^1.0.7
+    "@radix-ui/react-progress": ^1.0.3
+    "@radix-ui/react-radio-group": ^1.1.3
+    "@radix-ui/react-scroll-area": ^1.0.5
+    "@radix-ui/react-select": 1.2.2
+    "@radix-ui/react-switch": ^1.0.3
+    "@radix-ui/react-tabs": ^1.0.3
+    "@radix-ui/react-toast": ^1.0.3
+    "@radix-ui/react-toggle-group": ^1.0.4
+    "@radix-ui/react-tooltip": ^1.0.6
+    "@vanilla-extract/css": 1.11.1
+    "@vanilla-extract/css-utils": 0.1.3
+    "@vanilla-extract/recipes": 0.5.1
+    "@vanilla-extract/sprinkles": 1.5.1
+    antd: 4.24.12
+    classnames: ^2.3.2
+    lodash: ^4.17.21
+    polished: ^4.2.2
+    react-responsive: ^9.0.2
+    react-virtuoso: " 4.6.3"
+    recharts: ^2.6.2
+  peerDependencies:
+    react: ">=17.0.2"
+    react-dom: ">=17.0.2"
+  checksum: 2e924c8dcac128ccd58608205b806aa23a59eb3aa8c42887695fed8413bde98abd8cf164ccba576a19607969bcbd907061d76d379a6bf98115e42c6bffe28be2
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -13167,7 +13205,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.34.2
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 1.19.0
+    "@input-output-hk/lace-ui-toolkit": 1.21.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -13215,7 +13253,7 @@ __metadata:
     openpgp: ^5.11.2
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
-    posthog-js: ^1.68.4
+    posthog-js: ^1.161.3
     process: ^0.11.10
     qrcode: ^1.5.3
     react: 17.0.2
@@ -29747,9 +29785,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.0, caniuse-lite@npm:^1.0.30001109, caniuse-lite@npm:^1.0.30001248, caniuse-lite@npm:^1.0.30001251, caniuse-lite@npm:^1.0.30001280, caniuse-lite@npm:^1.0.30001400, caniuse-lite@npm:^1.0.30001517, caniuse-lite@npm:^1.0.30001565":
-  version: 1.0.30001599
-  resolution: "caniuse-lite@npm:1.0.30001599"
-  checksum: d7e619e2e723547b7311ba0ca5134d9cd55df548e93dbedcf8a6e4ec74c7db91969c4272fb1ab2fd94cddeac6a8176ebf05853eb06689d5e76bb97d979a214b0
+  version: 1.0.30001663
+  resolution: "caniuse-lite@npm:1.0.30001663"
+  checksum: 489a642feb6826a0fc7cfd7dbc35a3341cc1439eafdf0dae79338cf9033c5d9eddaedacbef7935acaddbb3c226a51097ed53d66dc6d8128cd6938c6763e1bbc4
   languageName: node
   linkType: hard
 
@@ -36680,7 +36718,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:^0.4.1":
+"fflate@npm:^0.4.8":
   version: 0.4.8
   resolution: "fflate@npm:0.4.8"
   checksum: 29d8cbe44d5e7f53e7f5a160ac7f9cc025480c7b3bfd85c5f898cbe20dfa2dad4732daa534982664bf30b35896a90af44ea33ede5d94c5ffd1b8b0c0a0a56ca2
@@ -43194,7 +43232,7 @@ __metadata:
     "@babel/runtime": 7.15.3
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 1.19.0
+    "@input-output-hk/lace-ui-toolkit": 1.21.0
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0
@@ -48910,12 +48948,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"posthog-js@npm:^1.68.4":
-  version: 1.68.4
-  resolution: "posthog-js@npm:1.68.4"
+"posthog-js@npm:^1.161.3":
+  version: 1.161.6
+  resolution: "posthog-js@npm:1.161.6"
   dependencies:
-    fflate: ^0.4.1
-  checksum: 9efd470a0794459c088d935c55f0b5030964970cd019770517a34979ab72096d808372a2ef5ba455ddd477ae251631fab2627ba9c69aad5593dd4e6f66004da4
+    fflate: ^0.4.8
+    preact: ^10.19.3
+    web-vitals: ^4.0.1
+  checksum: 6c1154f1f678c8e6d42ac67868090f4d6565443953e23fdae44dfb1d0646212be24aa10af6c5d217bdf6e5c4072730eeabe8154291430fff3a887ef8269d9313
   languageName: node
   linkType: hard
 
@@ -48944,6 +48984,13 @@ __metadata:
     uuid: 8.3.2
     vuvuzela: 1.0.3
   checksum: a7fccc451ab1aa94ebb69175ac53049818c6de1e2e25c96e0f814eb040a3d9de48038b9477269aae120ae8794cf503b9da9fc785d5c65ffbf4e794f2705eb2d4
+  languageName: node
+  linkType: hard
+
+"preact@npm:^10.19.3":
+  version: 10.24.0
+  resolution: "preact@npm:10.24.0"
+  checksum: bcc55910a159e534b1a1d07abb332854d31adfdab3236c81e5ec17e9650038735ccde36b5830b443c1a7b68a41918ba922c9711bf14430e7562e34b76f3a8ea0
   languageName: node
   linkType: hard
 
@@ -58972,6 +59019,13 @@ __metadata:
   version: 3.0.3
   resolution: "web-streams-polyfill@npm:3.0.3"
   checksum: 14299a9cbbca1bf0ffc16c7844990fc85eb0921ba7ff84efbad964738f0ff8e6d2bc3b2617a8728415843be7f40236992c136ff2c89cde3a153636e824b3e712
+  languageName: node
+  linkType: hard
+
+"web-vitals@npm:^4.0.1":
+  version: 4.2.3
+  resolution: "web-vitals@npm:4.2.3"
+  checksum: 6d916af95a93a7b12ef99e21fe6f6f914c23d6499e1389ceb197505e620e89faf7deaff1f2a3854a21e384d5fc9740a9cbfa7bba97902e184ddb95f54e3928c1
   languageName: node
   linkType: hard
 

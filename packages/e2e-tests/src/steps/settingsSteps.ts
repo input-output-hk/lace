@@ -29,9 +29,14 @@ import CommonDrawerElements from '../elements/CommonDrawerElements';
 import MenuHeader from '../elements/menuHeader';
 import CustomSubmitApiAssert from '../assert/settings/CustomSubmitApiAssert';
 import CustomSubmitApiDrawer from '../elements/settings/CustomSubmitApiDrawer';
+import SecureYourPaperWalletDrawerAssert from '../assert/settings/SecureYourPaperWalletDrawerAssert';
+import SecureYourPaperWalletDrawer from '../elements/settings/SecureYourPaperWalletDrawer';
+import EnterYourPasswordDrawerAssert from '../assert/settings/EnterYourPasswordDrawerAssert';
+import EnterYourPasswordDrawer from '../elements/settings/EnterYourPasswordDrawer';
+import SaveYourPaperWalletDrawerAssert from '../assert/settings/SaveYourPaperWalletDrawerAssert';
 
 Given(
-  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API)" setting$/,
+  /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API|Generate paper wallet)" setting$/,
   async (settingsElement) => {
     await settingsExtendedPageObject.clickSettingsItem(settingsElement);
   }
@@ -358,3 +363,40 @@ Then(
 When(/^I close "Custom submit API" drawer$/, async () => {
   await CustomSubmitApiDrawer.closeDrawer();
 });
+
+Then(/^"Secure your paper wallet" drawer is displayed$/, async () => {
+  await SecureYourPaperWalletDrawerAssert.assertSeeSecureYourPaperWalletDrawer();
+});
+
+Then(
+  /^"Next" button is (enabled|disabled) on "Secure your paper wallet" drawer$/,
+  async (state: 'enabled' | 'disabled') => {
+    await SecureYourPaperWalletDrawerAssert.assertNextButtonEnabled(state === 'enabled');
+  }
+);
+
+When(/^I click "Next" button on "Secure your paper wallet" page$/, async () => {
+  await SecureYourPaperWalletDrawer.clickNextButton();
+});
+
+Then(/^"Enter your password" page is displayed for "Generate paper wallet" flow$/, async () => {
+  await EnterYourPasswordDrawerAssert.assertSeeSecureYourPaperWalletDrawer();
+});
+
+Then(
+  /^"Generate paper wallet" button is (enabled|disabled) on "Enter your password" drawer$/,
+  async (state: 'enabled' | 'disabled') => {
+    await EnterYourPasswordDrawerAssert.assertGeneratePaperWalletButtonEnabled(state === 'enabled');
+  }
+);
+
+When(/^I click "Generate paper wallet" button on "Enter your password" drawer$/, async () => {
+  await EnterYourPasswordDrawer.clickGeneratePaperWalletButton();
+});
+
+Then(
+  /^"Save your paper wallet" drawer is displayed with "([^"]*)" file name$/,
+  async (expectedPaperWalletName: string) => {
+    await SaveYourPaperWalletDrawerAssert.assertSeeSaveYourPaperWalletPage(expectedPaperWalletName);
+  }
+);

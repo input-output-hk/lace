@@ -49,7 +49,12 @@ export const WalletOwnAddressDropdown = ({
 
   return (
     <Dropdown menu={menuProps} trigger={['click']}>
-      <Button variant="outlined" color="secondary" className={cn(styles.dropdownBtn)}>
+      <Button
+        variant="outlined"
+        color="secondary"
+        className={cn(styles.dropdownBtn)}
+        data-testid="select-address-button"
+      >
         <span className={styles.content}>{selectedAddress}</span>
       </Button>
     </Dropdown>

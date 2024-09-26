@@ -23,6 +23,11 @@ class SettingsExtendedPageObject {
     await SettingsPage.customSubmitAPILink.element.click();
   };
 
+  clickOnGeneratePaperWallet = async () => {
+    await SettingsPage.generatePaperWallet.element.waitForClickable();
+    await SettingsPage.generatePaperWallet.element.click();
+  };
+
   clickOnCookiePolicy = async () => await SettingsPage.cookiePolicy.element.click();
 
   clickOnYourKeys = async () => await SettingsPage.yourKeysLink.element.click();
@@ -117,6 +122,9 @@ class SettingsExtendedPageObject {
         break;
       case 'Custom Submit API':
         await this.clickOnCustomSubmitAPI();
+        break;
+      case 'Generate paper wallet':
+        await this.clickOnGeneratePaperWallet();
         break;
       default:
         throw new Error(`Unsupported element: ${elementName}`);

@@ -45,6 +45,7 @@ class SecureYourPaperWalletPage extends CommonOnboardingElements {
   }
 
   async enterPgpKeyName(name: string): Promise<void> {
+    await this.pgpKeyNameInput.waitForClickable();
     await this.pgpKeyNameInput.setValue(name);
   }
 
@@ -68,6 +69,7 @@ class SecureYourPaperWalletPage extends CommonOnboardingElements {
     }
 
     await clipboard.write(key);
+    await this.yourPublicPgpKeyBlockInput.waitForClickable();
     await this.yourPublicPgpKeyBlockInput.click();
     await browser.keys([Key.Ctrl, 'v']);
     testContext.save('publicPgpKey', key);

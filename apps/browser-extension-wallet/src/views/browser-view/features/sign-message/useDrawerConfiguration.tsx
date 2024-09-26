@@ -47,7 +47,7 @@ export const useDrawerConfiguration = ({
     if (signatureObject?.signature && !error) {
       return (
         <CopyToClipboard text={signatureObject.signature}>
-          <Button onClick={handleCopy}>
+          <Button onClick={handleCopy} data-testid={'copy-button'}>
             {t('core.signMessage.copyToClipboard')}
             <CopyToClipboardImg className={styles.newFolderIcon} />
           </Button>
@@ -55,7 +55,11 @@ export const useDrawerConfiguration = ({
       );
     }
     return (
-      <Button onClick={handleSign} disabled={!selectedAddress || !message || isSigningInProgress}>
+      <Button
+        onClick={handleSign}
+        disabled={!selectedAddress || !message || isSigningInProgress}
+        data-testid={'sign-message-button'}
+      >
         {getActionButtonLabel()}
       </Button>
     );
@@ -84,6 +88,7 @@ export const useDrawerConfiguration = ({
             closeDrawer();
             clearSecrets();
           }}
+          data-testid={'close-button'}
         >
           {t('core.signMessage.closeButton')}
         </Button>

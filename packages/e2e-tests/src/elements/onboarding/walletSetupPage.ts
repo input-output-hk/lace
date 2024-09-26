@@ -119,6 +119,7 @@ class WalletSetupPage extends CommonOnboardingElements {
     fillValues = false
   ): Promise<void> {
     await recoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicWords, true);
+    await recoveryPhrasePage.nextButton.waitForClickable();
     await recoveryPhrasePage.nextButton.click();
     if (fillValues) {
       await this.setWalletNameInput('TestAutomationWallet');

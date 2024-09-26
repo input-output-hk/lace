@@ -26,7 +26,7 @@ export const validateEventProperty = async (event: string, property: string, pro
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
   await browser.setupInterceptor();
-  await browser.excludeUrls([new RegExp('^(?!https://e.lw.iog.io/e).*')]);
+  await browser.excludeUrls([new RegExp('^(?!https://e.lw.iog.io).*'), new RegExp('https://e.lw.iog.io/decide/')]);
 });
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
@@ -76,6 +76,9 @@ When(/^I validate that alias event has assigned same user id "([^"]*)" in postho
 Then(/^I validate that event has correct properties$/, async () => {
   await browser.pause(2000);
   const actualEventPayload = await getLatestEventPayload();
+  expect(actualEventPayload).to.haveOwnProperty('timestamp');
+  expect(actualEventPayload).to.haveOwnProperty('uuid');
+  expect(actualEventPayload).to.haveOwnProperty('event');
   const expectedProperties = [
     '$current_url',
     '$window_id',
@@ -83,16 +86,16 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$browser_language',
     '$browser_version',
     '$device_type',
+    'distinct_id',
     '$host',
     '$insert_id',
     '$lib',
     '$lib_version',
-    '$lib_version',
     '$os',
     // '$os_version', it is not working for all os right now
-    '$pageview_id',
     'posthog_project_id',
     '$pathname',
+    '$raw_user_agent',
     '$referrer',
     '$referring_domain',
     '$screen_height',
@@ -101,12 +104,15 @@ Then(/^I validate that event has correct properties$/, async () => {
     '$viewport_height',
     '$viewport_width',
     'sent_at_local',
-    'view'
+    'view',
+    '$active_feature_flags',
+    '$initial_person_info',
+    'title',
+    '$prev_pageview_pathname'
   ];
   for (const expectedProperty of expectedProperties) {
-    expect(Object.prototype.hasOwnProperty.call(actualEventPayload.properties, expectedProperty)).to.be.true;
+    expect(actualEventPayload.properties).to.haveOwnProperty(expectedProperty);
   }
-  expect(Object.prototype.hasOwnProperty.call(actualEventPayload, 'timestamp')).to.be.true;
 });
 
 Then(/^I validate that the event includes "([^"]*)" property$/, async (property: string) => {

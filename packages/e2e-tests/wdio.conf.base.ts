@@ -27,7 +27,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature'
+      './src/features/analytics/AnalyticsOnboardingEvents.feature',
+      './src/features/SettingsGeneratePaperWallet.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
@@ -82,10 +83,11 @@ export const config: WebdriverIO.Config = {
       './src/features/e2e/SendTransactionSimple*.feature',
       './src/features/e2e/StakingInitialFundsE2E.feature',
       './src/features/e2e/StakingSwitchingPools*.feature',
-      './src/features/SettingsPagePopup*.feature'
+      './src/features/SettingsPagePopup*.feature',
+      './src/features/WalletAddressPageExtended.feature'
     ],
     batch14: ['./src/features/Transactions*.feature'],
-    batch15: ['./src/features/NFTsFolders*.feature'],
+    batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
     batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
