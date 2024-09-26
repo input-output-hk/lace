@@ -40,7 +40,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   ...props
 }): React.ReactElement => {
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
 
   const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
     setManageAccountsWallet(wallet);
@@ -85,7 +85,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {process.env.USE_SHARED_WALLET === 'true' && <AddSharedWalletLink isPopup={isPopup} />}
+            {process.env.USE_SHARED_WALLET === 'true' && !isSharedWallet && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />
             <Separator />

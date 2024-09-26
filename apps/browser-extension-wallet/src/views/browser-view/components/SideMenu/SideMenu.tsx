@@ -7,6 +7,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
+import { useWalletStore } from '@stores';
 
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
@@ -17,6 +18,7 @@ export const SideMenu = (): React.ReactElement => {
     listen
   } = useHistory();
   const analytics = useAnalyticsContext();
+  const { isSharedWallet } = useWalletStore();
 
   const [currentHoveredItem, setCurrentHoveredItem] = useState<MenuItemList | undefined>();
 
@@ -60,9 +62,11 @@ export const SideMenu = (): React.ReactElement => {
   // eslint-disable-next-line unicorn/no-useless-undefined
   const onMouseLeaveItem = () => setCurrentHoveredItem(undefined);
 
+  const menuItems = isSharedWallet ? sideMenuConfig.filter((item) => item.id !== MenuItemList.STAKING) : sideMenuConfig;
+
   return (
     <SideMenuContent
-      menuItems={sideMenuConfig}
+      menuItems={menuItems}
       activeItemId={tab}
       hoveredItemId={currentHoveredItem}
       onClick={handleRedirection}

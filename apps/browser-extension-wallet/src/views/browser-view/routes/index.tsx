@@ -103,7 +103,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     deletingWallet,
     stayOnAllDonePage,
     cardanoWallet,
-    initialHdDiscoveryCompleted
+    initialHdDiscoveryCompleted,
+    isSharedWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const { areExperimentsLoading } = useExperimentsContext();
@@ -111,6 +112,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { page, setBackgroundPage } = useBackgroundPage();
 
   const location = useLocation<{ background?: Location<unknown> }>();
+
+  const currentRoutes = isSharedWallet ? routesMap.filter((route) => route.path !== routes.staking) : routesMap;
 
   useEffect(() => {
     const isCreatingWallet = [routes.newWallet.root, routes.sharedWallet.root].some((path) =>
@@ -188,7 +191,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     return (
       <>
         <Switch location={page || location}>
-          {routesMap.map((route) => (
+          {currentRoutes.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />
           ))}
           <Route path="*" render={() => <Redirect to={routes.assets} />} />
