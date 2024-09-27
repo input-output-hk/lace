@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SettingsWallet, SettingsSecurity, SettingsHelp, SettingsLegal, SettingsPreferences } from '..';
 import { SettingsRemoveWallet } from '@src/views/browser-view/features/settings/components/SettingsRemoveWallet';
 import { SettingsSwitchToNami } from '@src/views/browser-view/features/settings/components/SettingsSwitchToNami';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export interface SettingsProps {
   defaultPassphraseVisible?: boolean;
@@ -12,6 +13,8 @@ export interface SettingsProps {
 
 export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: SettingsProps): React.ReactElement => {
   const { t } = useTranslation();
+  const posthog = usePostHogClientContext();
+  const useSwitchToNamiMode = posthog?.featureFlags?.['use-switch-to-nami-mode'] === true;
 
   return (
     <ContentLayout title={t('settings.title')} data-testid="settings-page-title">
@@ -25,7 +28,7 @@ export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: Settings
         />
         <SettingsHelp popupView />
         <SettingsLegal />
-        <SettingsSwitchToNami popupView />
+        {useSwitchToNamiMode && <SettingsSwitchToNami popupView />}
         <SettingsRemoveWallet popupView />
       </div>
     </ContentLayout>
