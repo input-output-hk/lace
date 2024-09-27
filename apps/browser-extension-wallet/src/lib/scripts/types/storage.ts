@@ -31,6 +31,7 @@ export interface BackgroundStorage {
   usePersistentUserId?: boolean;
   featureFlags?: Record<number, Record<ExperimentName, string | boolean>>;
   customSubmitTxUrl?: string;
+  optedInBeta?: boolean;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

@@ -33,6 +33,7 @@ export enum TxCreationType {
 export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;
+    opted_in_beta: boolean;
   };
 };
 export type PostHogMetadata = {

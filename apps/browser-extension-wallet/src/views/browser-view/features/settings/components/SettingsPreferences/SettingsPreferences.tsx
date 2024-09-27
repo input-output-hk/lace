@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SettingsCard, SettingsLink } from '..';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
@@ -8,6 +8,8 @@ import { ThemeSwitch } from '@components/MainMenu/DropdownMenuOverlay/components
 import { CurrencyDrawer } from './CurrencyDrawer';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { currencyCode } from '@providers/currency/constants';
+import { Switch } from '@lace/common';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const { Title } = Typography;
 
@@ -20,6 +22,18 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
   const [isCurrrencyChoiceDrawerOpen, setIsCurrrencyChoiceDrawerOpen] = useState(false);
   const { t } = useTranslation();
   const { fiatCurrency } = useCurrencyStore();
+  const posthog = usePostHogClientContext();
+  const [isOptInBeta, setIsOptInBeta] = useState(false);
+
+  useEffect(() => {
+    const subscription = posthog.hasOptedInBeta().subscribe((optInStatus) => {
+      setIsOptInBeta(optInStatus);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [posthog]);
 
   const handleOpenCurrencyDrawer = () => {
     setIsCurrrencyChoiceDrawerOpen(true);
@@ -33,6 +47,13 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
 
   const handleSendCurrencyChangeEvent = (currency: currencyCode) =>
     analytics.sendEventToPostHog(PostHogAction.SettingsCurrencySelectCurrencyClick, { currency });
+
+  const handleBetaOptInChoice = async (isOptedIn: boolean) => {
+    await posthog.setOptedInBeta(isOptedIn);
+    setIsOptInBeta(isOptedIn);
+
+    await analytics.sendEventToPostHog(PostHogAction.SettingsBetaProgramClick, { isOptedIn });
+  };
 
   return (
     <>
@@ -60,6 +81,20 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
           addon={<ThemeSwitch section="settings" />}
         >
           {t('browserView.settings.preferences.theme.title')}
+        </SettingsLink>
+        <SettingsLink
+          description={t('browserView.settings.preferences.betaProgram.description')}
+          addon={
+            <Switch
+              testId="settings-beta-program-switch"
+              checked={isOptInBeta}
+              onChange={handleBetaOptInChoice}
+              className={styles.analyticsSwitch}
+            />
+          }
+          data-testid="settings-beta-program-section"
+        >
+          {t('browserView.settings.preferences.betaProgram.title')}
         </SettingsLink>
       </SettingsCard>
     </>

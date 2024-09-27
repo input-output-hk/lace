@@ -10,7 +10,10 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
-const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
+const mockBackgroundStorageUtil = {
+  getBackgroundStorage: jest.fn(() => Promise.resolve({})),
+  setBackgroundStorage: jest.fn()
+};
 const mockUserId$ = new ReplaySubject<UserId>();
 
 jest.mock('posthog-js');
@@ -206,6 +209,8 @@ describe('PostHogClient', () => {
       expect.objectContaining({
         $set: {
           // eslint-disable-next-line camelcase
+          opted_in_beta: false,
+          // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
       })
@@ -233,6 +238,8 @@ describe('PostHogClient', () => {
       expect.objectContaining({
         $set: {
           // eslint-disable-next-line camelcase
+          opted_in_beta: false,
+          // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
       })
@@ -246,6 +253,8 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         $set: {
+          // eslint-disable-next-line camelcase
+          opted_in_beta: false,
           // eslint-disable-next-line camelcase
           user_tracking_type: 'basic'
         }
