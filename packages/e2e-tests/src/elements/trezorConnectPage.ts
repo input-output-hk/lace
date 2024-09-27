@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
+
 class TrezorConnectPage {
   private CONFIRM_BUTTON = '[data-test="@permissions/confirm-button"]';
   private EXPORT_BUTTON = '[id="container"] .confirm';
@@ -5,19 +8,19 @@ class TrezorConnectPage {
   private ANALYTICS_TOGGLE_BUTTON = '[data-test="@analytics/toggle-switch"]';
   private SHADOW_ROOT = '#react';
 
-  get confirmButton() {
+  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
   }
 
-  get analyticsConfirmButton() {
+  get analyticsConfirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SHADOW_ROOT).shadow$(this.ANALYTICS_CONFIRM_BUTTON);
   }
 
-  get analyticsToggleButton() {
+  get analyticsToggleButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SHADOW_ROOT).shadow$(this.ANALYTICS_TOGGLE_BUTTON);
   }
 
-  get exportButton() {
+  get exportButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPORT_BUTTON);
   }
 
