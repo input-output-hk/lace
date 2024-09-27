@@ -359,14 +359,18 @@ const TxDetail = ({
               color="teal"
               isExternal
               onClick={() => {
-                void capture(Events.ActivityActivityDetailTransactionHashClick);
-                try {
-                  openExternalLink(
-                    `${getExplorerUrl(network)}${displayInfo.txHash}`,
+                void (async () => {
+                  await capture(
+                    Events.ActivityActivityDetailTransactionHashClick,
                   );
-                } catch {
-                  console.error('cannot open an external url');
-                }
+                  try {
+                    openExternalLink(
+                      `${getExplorerUrl(network)}${displayInfo.txHash}`,
+                    );
+                  } catch {
+                    console.error('cannot open an external url');
+                  }
+                })();
               }}
             >
               {displayInfo.txHash} <ExternalLinkIcon mx="2px" />
