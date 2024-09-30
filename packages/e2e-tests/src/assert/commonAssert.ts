@@ -76,7 +76,7 @@ class CommonAssert {
         break;
       case 'Terms of service':
       case 'Terms and conditions':
-        expectedUrl = 'https://www.lace.io/lace-terms-of-use.pdf';
+        expectedUrl = 'https://www.lace.io/iohktermsandconditions.pdf';
         break;
       default:
         throw new Error(`Unsupported legal link - ${linkName}`);
