@@ -202,6 +202,7 @@ export enum PostHogAction {
   SettingsCurrencyClick = 'settings | currency | click',
   SettingsCurrencySelectCurrencyClick = 'settings | currency | select currency | click',
   SettingsCurrencyXClick = 'settings | currency | x | click',
+  SettingsBetaProgramClick = 'settings | beta program | click',
   SettingsThemeLightModeClick = 'settings | theme | light mode | click',
   SettingsThemeDarkModeClick = 'settings | theme | dark mode | click',
   SettingsShowRecoveryPhraseClick = 'settings | show recovery phrase | click',

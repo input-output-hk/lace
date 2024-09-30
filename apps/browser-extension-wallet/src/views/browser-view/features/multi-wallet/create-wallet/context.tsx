@@ -50,7 +50,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const history = useHistory();
   const { postHogActions, setFormDirty } = useWalletOnboarding();
   const posthog = usePostHogClientContext();
-  const paperWalletEnabled = posthog?.featureFlags?.['create-paper-wallet'] === true;
+  const paperWalletEnabled = posthog?.isFeatureFlagEnabled('create-paper-wallet');
   const {
     createWallet: createHotWallet,
     createWalletData,

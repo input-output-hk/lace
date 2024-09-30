@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserId } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
-import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
+import { DEV_POSTHOG_TOKEN } from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
@@ -10,7 +10,10 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
-const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
+const mockBackgroundStorageUtil = {
+  getBackgroundStorage: jest.fn(() => Promise.resolve({})),
+  setBackgroundStorage: jest.fn()
+};
 const mockUserId$ = new ReplaySubject<UserId>();
 
 jest.mock('posthog-js');
@@ -35,7 +38,7 @@ describe('PostHogClient', () => {
 
     await waitFor(() => expect(client).toBeDefined());
     expect(posthog.init).toHaveBeenCalledWith(
-      expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
+      expect.stringContaining(DEV_POSTHOG_TOKEN),
       expect.objectContaining({
         // eslint-disable-next-line camelcase
         api_host: posthogHost
@@ -93,7 +96,7 @@ describe('PostHogClient', () => {
     client.setChain(previewChain);
     expect(posthog.set_config).toHaveBeenCalledWith(
       expect.objectContaining({
-        token: DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[previewChain.networkMagic]
+        token: DEV_POSTHOG_TOKEN
       })
     );
   });
@@ -206,6 +209,8 @@ describe('PostHogClient', () => {
       expect.objectContaining({
         $set: {
           // eslint-disable-next-line camelcase
+          opted_in_beta: false,
+          // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
       })
@@ -233,6 +238,8 @@ describe('PostHogClient', () => {
       expect.objectContaining({
         $set: {
           // eslint-disable-next-line camelcase
+          opted_in_beta: false,
+          // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
       })
@@ -246,6 +253,8 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         $set: {
+          // eslint-disable-next-line camelcase
+          opted_in_beta: false,
           // eslint-disable-next-line camelcase
           user_tracking_type: 'basic'
         }

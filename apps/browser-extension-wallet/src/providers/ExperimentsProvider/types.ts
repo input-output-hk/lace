@@ -6,10 +6,10 @@ export enum ExperimentsConfigStatus {
 }
 
 export enum ExperimentName {
-  COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN = 'combined-setup-name-password',
   CREATE_PAPER_WALLET = 'create-paper-wallet',
   RESTORE_PAPER_WALLET = 'restore-paper-wallet',
-  USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode'
+  USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
+  SHARED_WALLETS = 'shared-wallets'
 }
 
 interface FeatureFlag {
@@ -17,16 +17,7 @@ interface FeatureFlag {
   default: boolean;
 }
 
-type Variant = ReadonlyArray<string>;
-
-interface ExperiementVariant {
-  variants: Variant;
-  default: string;
-}
-
-export type CombinedSetupNamePasswordVariants = readonly ['control', 'test'];
-
 export type ExperimentsConfig = {
-  [key in ExperimentName]: FeatureFlag | ExperiementVariant;
+  [key in ExperimentName]: FeatureFlag;
 };
-export type FallbackConfiguration = Record<ExperimentName, 'control' | boolean>;
+export type FallbackConfiguration = Record<ExperimentName, boolean>;

@@ -266,6 +266,8 @@
   "browserView.settings.preferences.theme.description": "Choose between light or dark for your workstation's theme",
   "browserView.settings.preferences.theme.title": "Theme",
   "browserView.settings.preferences.title": "Preferences",
+  "browserView.settings.preferences.betaProgram.description": "Test out new features and help us improve the product experience",
+  "browserView.settings.preferences.betaProgram.title": "Beta Program",
   "browserView.settings.security.2fa": "2-Factor authentication",
   "browserView.settings.security.analytics.description": "We'll collect anonymous analytics info from your browser extension to help us improve the quality and performance of Lace",
   "browserView.settings.security.analytics.title": "Analytics",

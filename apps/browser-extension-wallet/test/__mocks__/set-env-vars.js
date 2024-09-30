@@ -11,4 +11,4 @@ process.env.USE_HIDE_MY_BALANCE = 'true';
 process.env.USE_POSTHOG_ANALYTICS = 'true';
 process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT = 'false';
 process.env.POSTHOG_HOST = 'https://e.lw.iog.io';
-process.env.POSTHOG_DEV_TOKEN_PREPROD = 'test-token';
+process.env.POSTHOG_DEV_TOKEN = 'test-token';
