@@ -470,44 +470,31 @@ const Whitelisted = ({
         Whitelisted sites
       </Text>
       <Box height="6" />
-      {connectedDapps ? (
-        connectedDapps.length > 0 ? (
-          connectedDapps.map(({ url, logo }, index) => (
-            <Box
-              mb="2"
-              key={index}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              width="65%"
-            >
-              <Image
-                width="24px"
-                src={logo || getFavoriteIcon(url)}
-                fallback={<SkeletonCircle width="24px" height="24px" />}
-              />
-              <Text>{url.split('//')[1]}</Text>
-              <SmallCloseIcon
-                cursor="pointer"
-                onClick={async () => {
-                  capture(Events.SettingsAuthorizedDappsTrashBinIconClick);
-                  await removeDapp(url);
-                }}
-              />
-            </Box>
-          ))
-        ) : (
+      {connectedDapps?.length > 0 ? (
+        connectedDapps.map(({ url, logo }, index) => (
           <Box
-            mt="200"
-            width="full"
+            mb="2"
+            key={index}
             display="flex"
             alignItems="center"
-            justifyContent="center"
-            color="GrayText"
+            justifyContent="space-between"
+            width="65%"
           >
-            No whitelisted sites
+            <Image
+              width="24px"
+              src={logo || getFavoriteIcon(url)}
+              fallback={<SkeletonCircle width="24px" height="24px" />}
+            />
+            <Text>{url.split('//')[1]}</Text>
+            <SmallCloseIcon
+              cursor="pointer"
+              onClick={async () => {
+                capture(Events.SettingsAuthorizedDappsTrashBinIconClick);
+                await removeDapp(url);
+              }}
+            />
           </Box>
-        )
+        ))
       ) : (
         <Box
           mt="200"
@@ -515,11 +502,11 @@ const Whitelisted = ({
           display="flex"
           alignItems="center"
           justifyContent="center"
+          color="GrayText"
         >
-          <Spinner color="teal" speed="0.5s" />
+          No whitelisted sites
         </Box>
       )}
-
       <Box height="6" />
     </Box>
   );
