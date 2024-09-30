@@ -29,7 +29,7 @@ export interface BackgroundStorage {
   fiatPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;
-  experimentsConfiguration?: Record<ExperimentName, string | boolean>;
+  featureFlags?: Record<number, Record<ExperimentName, string | boolean>>;
   customSubmitTxUrl?: string;
 }
 

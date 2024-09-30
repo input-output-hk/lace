@@ -15,16 +15,8 @@ inputs:
     description: 'Build developer preview of Lace'
     required: false
     default: 'false'
-  POSTHOG_PRODUCTION_TOKEN_MAINNET:
-    description: 'Post hog production mainnet token'
-    required: false
-    default: ''
-  POSTHOG_PRODUCTION_TOKEN_PREPROD:
-    description: 'Post hog production preprod token'
-    required: false
-    default: ''
-  POSTHOG_PRODUCTION_TOKEN_PREVIEW:
-    description: 'Post hog production preview token'
+  POSTHOG_PRODUCTION_TOKEN:
+    description: 'Post hog production token'
     required: false
     default: ''
   PRODUCTION_MODE_TRACKING:
@@ -52,9 +44,7 @@ runs:
       env:
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
-        POSTHOG_PRODUCTION_TOKEN_MAINNET: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_MAINNET }}
-        POSTHOG_PRODUCTION_TOKEN_PREPROD: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREPROD }}
-        POSTHOG_PRODUCTION_TOKEN_PREVIEW: ${{ inputs.POSTHOG_PRODUCTION_TOKEN_PREVIEW }}
+        POSTHOG_PRODUCTION_TOKEN: ${{ inputs.POSTHOG_PRODUCTION_TOKEN }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
 
