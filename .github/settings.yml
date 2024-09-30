@@ -10,10 +10,10 @@ repository:
   has_issues: true
   has_projects: false
   has_wiki: false
-  name: lace-with-nami-mode
+  name: lace
   description: The Lace Wallet.
   homepage: https://lace.io
-  private: true
+  private: false
   topics: lace, cardano, wallet, crypto
   enable_automated_security_fixes: true
   enable_vulnerability_alerts: true
