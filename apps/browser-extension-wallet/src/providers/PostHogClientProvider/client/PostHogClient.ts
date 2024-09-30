@@ -1,4 +1,4 @@
-/* eslint-disable camelcase, max-depth, sonarjs/cognitive-complexity */
+/* eslint-disable camelcase, max-depth, sonarjs/cognitive-complexity, promise/no-nesting */
 import posthog, { JsonRecord, JsonType } from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
@@ -22,7 +22,7 @@ import {
 import { BackgroundService, UserIdService } from '@lib/scripts/types';
 import { experiments, getDefaultFeatureFlags } from '@providers/ExperimentsProvider/config';
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 
 type FeatureFlag = 'create-paper-wallet' | 'restore-paper-wallet' | 'shared-wallets';
@@ -46,6 +46,8 @@ export class PostHogClient<Action extends string = string> {
   private hasPostHogInitialized$: BehaviorSubject<boolean>;
   private subscription: Subscription;
   private initSuccess: Promise<boolean>;
+  private readonly optedInBeta$: BehaviorSubject<boolean>;
+  private updatePersonaProperties = false;
   featureFlags: GroupedFeatureFlags;
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -58,44 +60,51 @@ export class PostHogClient<Action extends string = string> {
     const token = this.getApiToken();
     if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
     this.hasPostHogInitialized$ = new BehaviorSubject(false);
+    this.optedInBeta$ = new BehaviorSubject(false);
 
-    this.initSuccess = this.userIdService
-      .getUserId(chain.networkMagic)
-      .then((id) => {
-        posthog.init(token, {
-          request_batching: false,
-          api_host: this.postHogHost,
-          autocapture: false,
-          opt_out_useragent_filter: true,
-          disable_compression: true,
-          disable_session_recording: true,
-          capture_pageview: false,
-          capture_pageleave: false,
-          // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
-          disable_persistence: true,
-          disable_cookie: true,
-          persistence: 'memory',
-          bootstrap: {
-            distinctID: id,
-            isIdentifiedID: true
-          },
-          property_blacklist: [
-            '$autocapture_disabled_server_side',
-            '$console_log_recording_enabled_server_side',
-            '$device_id',
-            '$session_recording_recorder_version_server_side',
-            '$time'
-          ]
-        });
+    this.backgroundServiceUtils
+      .getBackgroundStorage()
+      .then((storage) => {
+        this.optedInBeta$.next(storage?.optedInBeta ?? false);
+
+        this.initSuccess = this.userIdService
+          .getUserId(chain.networkMagic)
+          .then((id) => {
+            posthog.init(token, {
+              request_batching: false,
+              api_host: this.postHogHost,
+              autocapture: false,
+              opt_out_useragent_filter: true,
+              disable_compression: true,
+              disable_session_recording: true,
+              capture_pageview: false,
+              capture_pageleave: false,
+              // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
+              disable_persistence: true,
+              disable_cookie: true,
+              persistence: 'memory',
+              bootstrap: {
+                distinctID: id,
+                isIdentifiedID: true
+              },
+              property_blacklist: [
+                '$autocapture_disabled_server_side',
+                '$console_log_recording_enabled_server_side',
+                '$device_id',
+                '$session_recording_recorder_version_server_side',
+                '$time'
+              ]
+            });
+          })
+          .then(() => true);
+
+        this.subscribeToDistinctIdUpdate();
+        this.loadExperiments();
       })
-      .then(() => true)
       .catch(() => {
         console.warn('Analytics failed');
         return false;
       });
-
-    this.subscribeToDistinctIdUpdate();
-    this.loadExperiments();
 
     this.featureFlags = {
       [Wallet.Cardano.NetworkMagics.Mainnet]: getDefaultFeatureFlags(),
@@ -203,6 +212,21 @@ export class PostHogClient<Action extends string = string> {
     });
   }
 
+  hasOptedInBeta(): Observable<boolean> {
+    return this.optedInBeta$.pipe(distinctUntilChanged());
+  }
+
+  async setOptedInBeta(optedInBeta: boolean): Promise<void> {
+    await this.backgroundServiceUtils.setBackgroundStorage({
+      optedInBeta
+    });
+
+    this.updatePersonaProperties = true;
+    this.optedInBeta$.next(optedInBeta);
+
+    console.debug('[ANALYTICS] Changing Opted In Beta', optedInBeta);
+  }
+
   isFeatureFlagEnabled(feature: string): boolean {
     return this.featureFlags[this.chain.networkMagic]?.[feature as FeatureFlag] || false;
   }
@@ -281,6 +305,8 @@ export class PostHogClient<Action extends string = string> {
           backgroundStorage?.featureFlags[this.chain.networkMagic] || getDefaultFeatureFlags()
         );
       }
+
+      this.optedInBeta$.next(backgroundStorage?.optedInBeta);
     });
     this.hasPostHogInitialized$.next(true);
   }
@@ -307,15 +333,17 @@ export class PostHogClient<Action extends string = string> {
   protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
     if (!this.userTrackingType) {
       this.userTrackingType = this.currentUserTrackingType;
-      // set user_tracking_type in the first event
-      return { $set: { user_tracking_type: this.userTrackingType } };
+      // set user_tracking_type and opted_in_beta in the first event
+      return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
     }
 
     // eslint-disable-next-line consistent-return
-    if (this.currentUserTrackingType === this.userTrackingType) return;
+    if (this.currentUserTrackingType === this.userTrackingType && !this.updatePersonaProperties) return;
+
+    this.updatePersonaProperties = false;
     this.userTrackingType = this.currentUserTrackingType;
-    // update user_tracking_type if tracking type has changed
-    return { $set: { user_tracking_type: this.userTrackingType } };
+
+    return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
   }
 
   static getAllowedNetworksMapFromPayloads(payloads: Record<string, JsonType>): Record<string, string[]> {
