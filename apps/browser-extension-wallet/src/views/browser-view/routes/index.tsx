@@ -108,7 +108,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     deletingWallet,
     stayOnAllDonePage,
     cardanoWallet,
-    initialHdDiscoveryCompleted
+    initialHdDiscoveryCompleted,
+    isSharedWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const { areExperimentsLoading } = useExperimentsContext();
@@ -118,6 +119,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
 
   const location = useLocation<{ background?: Location<unknown> }>();
 
+  const currentRoutes = isSharedWallet ? routesMap.filter((route) => route.path !== routes.staking) : routesMap;
   const backgroundServices = useBackgroundServiceAPIContext();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
 
@@ -227,7 +229,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     return (
       <>
         <Switch location={page || location}>
-          {routesMap.map((route) => (
+          {currentRoutes.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />
           ))}
           <Route path="*" render={() => <Redirect to={routes.assets} />} />

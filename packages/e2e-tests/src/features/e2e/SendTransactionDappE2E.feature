@@ -92,6 +92,7 @@ Feature: Send Transactions from Dapp - E2E
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
     And I see DApp connector "All done" page
-    Then I click "Send ADA" "Run" button in test DApp
-    Then I see DApp connector "All done" page on 3 window handle
-    And I see DApp connector "Confirm transaction" page on 4 window handle
+    And I click "Send ADA" "Run" button in test DApp without retry
+    When I switch to last window
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
+      | -3.00 tADA - FEE |

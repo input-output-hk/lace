@@ -287,6 +287,12 @@ Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runBu
   }
 });
 
+Then(/^I click "Send ADA" "Run" button in test DApp without retry$/, async () => {
+  await DAppConnectorPageObject.switchToTestDAppWindow();
+  await browser.pause(1000);
+  await TestDAppPage.sendAdaRunButton.click();
+});
+
 Then(/^I click "(Send ADA|Send Token)" button in test DApp$/, async (buttonId: 'Send ADA' | 'Send Token') => {
   await DAppConnectorPageObject.switchToTestDAppWindow();
   switch (buttonId) {

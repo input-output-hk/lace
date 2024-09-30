@@ -21,13 +21,16 @@ import { MenuItemList } from '@src/utils/constants';
 import styles from './MainFooter.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useWalletStore } from '@stores';
 
 const includesCoin = /coin/i;
 
+// eslint-disable-next-line complexity
 export const MainFooter = (): React.ReactElement => {
   const location = useLocation<{ pathname: string }>();
   const history = useHistory();
   const analytics = useAnalyticsContext();
+  const { isSharedWallet } = useWalletStore();
 
   const currentLocation = location?.pathname;
   const isWalletIconActive =
@@ -105,18 +108,20 @@ export const MainFooter = (): React.ReactElement => {
             <TransactionsIcon className={styles.icon} />
           )}
         </button>
-        <button
-          onMouseEnter={() => onMouseEnterItem(MenuItemList.STAKING)}
-          onMouseLeave={onMouseLeaveItem}
-          data-testid="main-footer-staking"
-          onClick={() => handleNavigation(walletRoutePaths.earn)}
-        >
-          {currentLocation === walletRoutePaths.earn ? (
-            <StakingIconActive className={styles.icon} />
-          ) : (
-            <StakingIcon className={styles.icon} />
-          )}
-        </button>
+        {!isSharedWallet && (
+          <button
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.STAKING)}
+            onMouseLeave={onMouseLeaveItem}
+            data-testid="main-footer-staking"
+            onClick={() => handleNavigation(walletRoutePaths.earn)}
+          >
+            {currentLocation === walletRoutePaths.earn ? (
+              <StakingIconActive className={styles.icon} />
+            ) : (
+              <StakingIcon className={styles.icon} />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

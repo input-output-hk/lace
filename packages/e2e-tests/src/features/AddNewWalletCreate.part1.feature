@@ -40,7 +40,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
-    Then "Choose recovery method" page is displayed in modal
+    Then "Choose recovery method" page is displayed in modal for "Create" flow
 
   @LW-9348
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Back button click
