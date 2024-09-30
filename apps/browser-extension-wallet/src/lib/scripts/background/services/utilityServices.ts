@@ -9,7 +9,8 @@ import {
   OpenBrowserData,
   MigrationState,
   TokenPrices,
-  CoinPrices
+  CoinPrices,
+  ChangeModeData
 } from '../../types';
 import { Subject, of, BehaviorSubject } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -17,7 +18,7 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import { getADAPriceFromBackgroundStorage } from '../util';
+import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 
@@ -82,12 +83,26 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.ADD_SHARED_WALLET:
       path = walletRoutePaths.sharedWallet.root;
       break;
+    case BrowserViewSections.NAMI_MIGRATION:
+      path = walletRoutePaths.namiMigration.root;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
 };
 
+const handleOpenPopup = async () => {
+  if (typeof chrome.action.openPopup !== 'function') return;
+  await closeAllLaceWindows();
+  // behaves inconsistently if executed without setTimeout
+  setTimeout(async () => {
+    await chrome.action.openPopup();
+  });
+};
+
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
+
+const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION, TOKEN_PRICE_CHECK_INTERVAL } = config();
 const fetchTokenPrices = () => {
@@ -168,10 +183,12 @@ exposeApi<BackgroundService>(
   {
     api$: of({
       handleOpenBrowser,
+      handleOpenPopup,
       requestMessage$,
       migrationState$,
       coinPrices,
       handleChangeTheme,
+      handleChangeMode,
       clearBackgroundStorage,
       getBackgroundStorage,
       setBackgroundStorage,

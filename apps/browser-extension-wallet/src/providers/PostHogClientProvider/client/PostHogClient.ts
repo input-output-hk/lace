@@ -23,7 +23,7 @@ import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { Subscription, BehaviorSubject } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 
-type FeatureFlags = 'create-paper-wallet' | 'restore-paper-wallet';
+type FeatureFlags = 'create-paper-wallet' | 'restore-paper-wallet' | 'use-switch-to-nami-mode';
 
 /**
  * PostHog API reference:

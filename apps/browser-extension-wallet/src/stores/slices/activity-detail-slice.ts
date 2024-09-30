@@ -82,7 +82,10 @@ const shouldIncludeFee = (
   );
 };
 
-const getPoolInfos = async (poolIds: Wallet.Cardano.PoolId[], stakePoolProvider: Wallet.StakePoolProvider) => {
+export const getPoolInfos = async (
+  poolIds: Wallet.Cardano.PoolId[],
+  stakePoolProvider: Wallet.StakePoolProvider
+): Promise<Wallet.Cardano.StakePool[]> => {
   const filters: Wallet.QueryStakePoolsArgs = {
     filters: {
       identifier: {

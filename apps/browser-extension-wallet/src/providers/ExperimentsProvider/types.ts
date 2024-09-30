@@ -8,7 +8,8 @@ export enum ExperimentsConfigStatus {
 export enum ExperimentName {
   COMBINED_NAME_PASSWORD_ONBOARDING_SCREEN = 'combined-setup-name-password',
   CREATE_PAPER_WALLET = 'create-paper-wallet',
-  RESTORE_PAPER_WALLET = 'restore-paper-wallet'
+  RESTORE_PAPER_WALLET = 'restore-paper-wallet',
+  USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode'
 }
 
 interface FeatureFlag {

@@ -34,3 +34,5 @@ result
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+yalc.lock
