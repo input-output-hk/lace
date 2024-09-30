@@ -1,9 +1,9 @@
 /* eslint-disable max-statements */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
-import { useCurrencyStore, useTheme } from '@providers';
+import { useBackgroundServiceAPIContext, useCurrencyStore, useTheme } from '@providers';
 import {
   useCustomSubmitApi,
   useWalletAvatar,
@@ -27,12 +27,16 @@ import { getPoolInfos } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { useObservable } from '@lace/common';
+import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
+import { BackgroundStorage } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
 export const NamiView = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
+  const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
+  const backgroundServices = useBackgroundServiceAPIContext();
   const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode, addAccount, walletRepository } =
     useWalletManager();
   const {
@@ -87,6 +91,26 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
 
+  useEffect(() => {
+    getBackgroundStorage()
+      .then((storage) => setNamiMigration(storage.namiMigration))
+      .catch(console.error);
+  }, []);
+
+  const switchWalletMode = async () => {
+    const mode = namiMigration?.mode === 'lace' ? 'nami' : 'lace';
+    const migration: BackgroundStorage['namiMigration'] = {
+      ...namiMigration,
+      mode
+    };
+
+    setNamiMigration(migration);
+    backgroundServices.handleChangeMode({ mode });
+    await setBackgroundStorage({
+      namiMigration: migration
+    });
+  };
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -132,7 +156,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         getStakePoolInfo,
         resetDelegationState,
         hasNoFunds,
-        setAvatar
+        setAvatar,
+        switchWalletMode
       }}
     >
       <Nami />

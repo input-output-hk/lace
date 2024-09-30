@@ -15,19 +15,11 @@ import {
   createTypedHooks,
 } from 'easy-peasy';
 
-// import {
-//   getNetwork,
-//   setCurrency,
-//   setNetwork,
-// } from './api/extension';
-
-import { NETWORK_ID, NODE } from '../config/config';
-
 import { sendStore } from './app/pages/send';
 
 import type { AssetInput } from '../types/assets';
 import type { Wallet } from '@lace/cardano';
-import type { Action, Actions } from 'easy-peasy';
+import type { Action } from 'easy-peasy';
 
 interface RouteModel {
   route: string | null;
@@ -54,6 +46,11 @@ interface SendModel {
   setValue: Action<SendModel, Value>;
 }
 
+interface LaceSwitchModel {
+  isLaceSwitchInProgress: boolean;
+  setIsLaceSwitchInProgress: Action<LaceSwitchModel, boolean>;
+}
+
 const routeStore: RouteModel = {
   route: null,
   setRoute: action((state, route) => {
@@ -66,6 +63,12 @@ const globalModel = persist(
   {
     routeStore,
     sendStore: sendStore as SendModel,
+    laceSwitchStore: {
+      isLaceSwitchInProgress: false,
+      setIsLaceSwitchInProgress: action((state, isLaceSwitchInProgress) => {
+        state.isLaceSwitchInProgress = isLaceSwitchInProgress;
+      }),
+    } as LaceSwitchModel,
   },
   { storage: 'localStorage' },
 );
@@ -74,6 +77,7 @@ interface GlobalModel {
   globalModel: {
     routeStore: RouteModel;
     sendStore: SendModel;
+    laceSwitchStore: LaceSwitchModel;
   };
 }
 

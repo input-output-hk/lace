@@ -24,9 +24,20 @@ import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { storage } from 'webextension-polyfill';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
+  storage.onChanged.addListener((changes) => {
+    const oldModeValue = changes.BACKGROUND_STORAGE.oldValue?.namiMigration;
+    const newModeValue = changes.BACKGROUND_STORAGE.newValue?.namiMigration;
+    if (oldModeValue?.mode !== newModeValue?.mode) {
+      setMode(newModeValue);
+      // Force back to original routing
+      window.location.hash = '#';
+    }
+  });
+
   useEffect(() => {
     const getWalletMode = async () => {
       const { namiMigration } = await getBackgroundStorage();
@@ -34,7 +45,7 @@ const App = (): React.ReactElement => {
     };
 
     getWalletMode();
-  }, []);
+  }, [mode]);
 
   return (
     <BackgroundServiceAPIProvider>

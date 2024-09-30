@@ -5,6 +5,8 @@ import image from '@rollup/plugin-image';
 import json from '@rollup/plugin-json';
 import packageJson from './package.json';
 import svgr from '@svgr/rollup';
+import copy from 'rollup-plugin-copy';
+import url from '@rollup/plugin-url';
 
 const common = {
   plugins: [
@@ -17,6 +19,15 @@ const common = {
     css(),
     image(),
     svgr(),
+    copy({
+      targets: [{ src: 'src/assets', dest: 'dist' }],
+    }),
+    url({
+      limit: 0,
+      include: ['**/*.mp4'],
+      emitFiles: true,
+      fileName: '[name][extname]'
+    }),
   ],
   external: [/node_modules/],
 };

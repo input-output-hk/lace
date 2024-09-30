@@ -1,12 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 
 import './app/components/styles.css';
 import '@fontsource/ubuntu/latin.css';
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const colorMode = localStorage['chakra-ui-color-mode'];
 
 const inputSizes = {
   sm: {
@@ -73,9 +70,6 @@ export const theme = extendTheme({
     Button,
     Switch,
   },
-  config: {
-    initialColorMode: colorMode,
-  },
   styles: {
     global: {
       body: {
@@ -92,10 +86,35 @@ export const theme = extendTheme({
 
 interface ThemeProps {
   children: React.ReactNode;
+  initialTheme: 'dark' | 'light';
 }
 
 export const Theme = ({
   children,
-}: Readonly<ThemeProps>): React.ReactElement => (
-  <ChakraProvider theme={theme}>{children}</ChakraProvider>
-);
+  initialTheme,
+}: Readonly<ThemeProps>): React.ReactElement => {
+  const [colorMode, setColorMode] = useState(
+    localStorage['chakra-ui-color-mode'] || initialTheme,
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setColorMode(localStorage['chakra-ui-color-mode'] || initialTheme);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [initialTheme]);
+
+  const customTheme = extendTheme({
+    ...theme,
+    config: {
+      initialColorMode: colorMode,
+    },
+  });
+
+  return <ChakraProvider theme={customTheme}>{children}</ChakraProvider>;
+};

@@ -13226,7 +13226,7 @@ __metadata:
     "@types/text-encoding-utf-8": ^1
     "@types/uuid": ^8.3.4
     "@types/w3c-web-hid": ^1.0.3
-    "@types/webextension-polyfill": 0.8.0
+    "@types/webextension-polyfill": 0.10.0
     "@xsy/nami-migration-tool": "file:./xsy-nami-migration-tool-0.0.39.tgz"
     antd: ^4.24.10
     are-you-es5: ^2.1.2
@@ -13246,7 +13246,7 @@ __metadata:
     graphql-tag: 2.12.5
     i18next: ^22.5.1
     intersection-observer-polyfill: 0.1.0
-    jest-webextension-mock: ^3.7.19
+    jest-webextension-mock: ^3.9.0
     jsqr: ^1.4.0
     lodash: 4.17.21
     node-abort-controller: ^3.1.1
@@ -13267,7 +13267,7 @@ __metadata:
     text-encoding-utf-8: ^1.0.2
     tsconfig-paths-webpack-plugin: 3.5.2
     webassembly-loader-sw: ^1.1.0
-    webextension-polyfill: 0.8.0
+    webextension-polyfill: 0.10.0
     zustand: 3.5.14
   languageName: unknown
   linkType: soft
@@ -13292,6 +13292,7 @@ __metadata:
     "@ledgerhq/devices": ^8.2.1
     "@stablelib/chacha20poly1305": 1.0.1
     "@trezor/transport": ^1.1.18
+    "@types/webextension-polyfill": 0.10.0
     axios: ^1.7.4
     bignumber.js: 9.0.1
     buffer: 6.0.3
@@ -13309,7 +13310,7 @@ __metadata:
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
     typescript: ^4.9.5
-    webextension-polyfill: 0.8.0
+    webextension-polyfill: 0.10.0
   peerDependencies:
     react: 17.0.2
     react-dom: 17.0.2
@@ -24661,10 +24662,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webextension-polyfill@npm:0.8.0":
-  version: 0.8.0
-  resolution: "@types/webextension-polyfill@npm:0.8.0"
-  checksum: e39c97c273b75e48a38bf3d27b88398557c758565d0c32405e0f457c7eef884864e776b36b7093a0a1c8633ddb93b47c49871f191cc89c787e8037ba13d2b1d7
+"@types/webextension-polyfill@npm:0.10.0":
+  version: 0.10.0
+  resolution: "@types/webextension-polyfill@npm:0.10.0"
+  checksum: 1c6d0b3f6f1b1ba666c86d78d6bf079a5382e0c3084a307021ed19dc711a9fc044d82417e322ce403782e343b0fead8ad46db8d97ea19011fb1d85157e2b9d7f
   languageName: node
   linkType: hard
 
@@ -42508,10 +42509,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-webextension-mock@npm:^3.7.19":
-  version: 3.7.19
-  resolution: "jest-webextension-mock@npm:3.7.19"
-  checksum: a63c509df6fd89be8fcaffb3212122cd589a57039b65bb5363240fca056efbf78e9353246fca5fe4f80a81548dafe672fc4d91b604f1814d57f43545849b9303
+"jest-webextension-mock@npm:^3.9.0":
+  version: 3.9.0
+  resolution: "jest-webextension-mock@npm:3.9.0"
+  checksum: 615509d9a54225d7de08ff8fc38fb0f5057fd1a3d76d3e17e52ac8f7f15158ddd2cbcdca007ae743d770e1231802334dfe990afaa50edd13a8e5bbc2ffc2309a
   languageName: node
   linkType: hard
 
@@ -59153,17 +59154,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webextension-polyfill@npm:0.8.0, webextension-polyfill@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "webextension-polyfill@npm:0.8.0"
-  checksum: 56286e6216e15834fdcdc3dcf611000d96b49c9d925de3d657eb5f1e294074180dd3efe78a0966223eb311ac3a0ac5fdf71d324b836bf05724455ffd6c7c98c3
-  languageName: node
-  linkType: hard
-
-"webextension-polyfill@npm:^0.10.0":
+"webextension-polyfill@npm:0.10.0, webextension-polyfill@npm:^0.10.0":
   version: 0.10.0
   resolution: "webextension-polyfill@npm:0.10.0"
   checksum: 4a59036bda571360c2c0b2fb03fe1dc244f233946bcf9a6766f677956c40fd14d270aaa69cdba95e4ac521014afbe4008bfa5959d0ac39f91c990eb206587f91
+  languageName: node
+  linkType: hard
+
+"webextension-polyfill@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "webextension-polyfill@npm:0.8.0"
+  checksum: 56286e6216e15834fdcdc3dcf611000d96b49c9d925de3d657eb5f1e294074180dd3efe78a0966223eb311ac3a0ac5fdf71d324b836bf05724455ffd6c7c98c3
   languageName: node
   linkType: hard
 

@@ -20,9 +20,11 @@ const isTab = window.document.querySelector(`#${TAB.hw}`);
 export const Container = ({
   children,
   environmentName,
+  theme,
 }: Readonly<{
   children: React.ReactNode;
   environmentName: Wallet.ChainName;
+  theme: 'dark' | 'light';
 }>) => {
   const [scroll, setScroll] = React.useState({ el: null, y: 0 });
 
@@ -45,7 +47,7 @@ export const Container = ({
       width={isMain ? `${POPUP_WINDOW.width}px` : '100%'}
       height={isMain ? `${POPUP_WINDOW.height}px` : '100vh'}
     >
-      <Theme>
+      <Theme initialTheme={theme}>
         <StoreProvider environmentName={environmentName}>
           <Scrollbars
             id="scroll"

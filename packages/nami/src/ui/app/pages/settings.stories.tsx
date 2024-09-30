@@ -58,6 +58,10 @@ const SettingsStory = ({
         updateAccountMetadata={async () => undefined}
         isAnalyticsOptIn={false}
         handleAnalyticsChoice={async () => {}}
+        switchWalletMode={async () => {}}
+        switchNetwork={async () => {}}
+        enableCustomNode={async () => {}}
+        defaultSubmitApi=""
       />
     </Box>
   );

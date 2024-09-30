@@ -12,6 +12,9 @@ Object.defineProperty(window, 'matchMedia', {
   }))
 });
 
+if (!chrome.runtime) chrome.runtime = {};
+if (!chrome.runtime.id) chrome.runtime.id = 'history-delete';
+
 // globally mock, unmock in the specific file test
 jest.mock('@src/utils/pgp', () => {});
 

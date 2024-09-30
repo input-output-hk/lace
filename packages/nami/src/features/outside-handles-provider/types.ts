@@ -93,4 +93,5 @@ export interface OutsideHandlesContextValue {
   ) => Promise<Wallet.Cardano.StakePool[]>;
   resetDelegationState: () => void;
   hasNoFunds: boolean;
+  switchWalletMode: () => Promise<void>;
 }

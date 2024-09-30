@@ -38,10 +38,6 @@ export const SettingsSwitchToNami = ({ popupView }: { popupView?: boolean }): Re
       namiMigration: migration
     });
     setModalOpen(false);
-    if (popupView) {
-      window.location.reload();
-      return;
-    }
     if (activated) {
       await analytics.sendEventToPostHog(PostHogAction.SettingsSwitchToNamiClick);
       try {

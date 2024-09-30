@@ -1,12 +1,11 @@
 import React from 'react';
 
 import { Box } from '@chakra-ui/react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter, Switch, Route } from 'react-router-dom';
 
 import { useAccount } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
-import { useCollateral } from '../adapters/collateral';
 import { useFiatCurrency } from '../adapters/currency';
 import {
   useChangePassword,
@@ -17,6 +16,7 @@ import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
 import { Container } from './Container';
+import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
 
 import { useOutsideHandles } from './index';
 
@@ -50,6 +50,7 @@ export const Main = () => {
     cardanoCoin,
     isValidURL,
     setAvatar,
+    switchWalletMode,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -101,8 +102,9 @@ export const Main = () => {
   const { assets, nfts } = useAssets({ inMemoryWallet, balance }) ?? [];
 
   return (
-    <Router>
-      <Container environmentName={environmentName}>
+    <HashRouter>
+      <Container environmentName={environmentName} theme={theme}>
+        <UpgradeToLaceHeader switchWalletMode={switchWalletMode} />
         <Box overflowX="hidden">
           <Switch>
             <Route path="/settings/*">
@@ -163,6 +165,6 @@ export const Main = () => {
           </Switch>
         </Box>
       </Container>
-    </Router>
+    </HashRouter>
   );
 };

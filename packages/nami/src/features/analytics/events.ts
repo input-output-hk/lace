@@ -57,6 +57,13 @@ export enum Events {
   SettingsAuthorizedDappsClick = 'nami mode | settings | authorized dapps | click',
   SettingsAuthorizedDappsTrashBinIconClick = 'nami mode | settings | authorized dapps | trash bin icon | click',
 
+  SettingsSwitchToLaceModeClick = 'nami mode | settings | switch to lace mode | click',
+
+  // switch to lace mode banner
+  SwitchToLaceModeBannerClick = 'nami mode | switch to lace mode banner | click',
+  SwitchToLaceModeBannerActivateLaceButtonClick = 'nami mode | switch to lace mode banner | activate lace button | click',
+  SwitchToLaceModeBannerMaybeLaterButtonClick = 'nami mode | switch to lace mode banner | maybe later | click',
+
   // account
   AccountDeleteClick = 'nami mode | account | delete | click',
   AccountDeleteConfirmClick = 'nami mode | account | delete | confirm | click',

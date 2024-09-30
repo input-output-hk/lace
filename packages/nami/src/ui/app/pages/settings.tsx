@@ -1,4 +1,14 @@
+/* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SunIcon,
+  SmallCloseIcon,
+  RepeatIcon,
+  CheckIcon,
+} from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -17,30 +27,40 @@ import {
   Select,
   useColorModeValue,
 } from '@chakra-ui/react';
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  SunIcon,
-  SmallCloseIcon,
-  RepeatIcon,
-  CheckIcon,
-} from '@chakra-ui/icons';
-import { Wallet } from '@lace/cardano';
-import { getFavoriteIcon } from '../../../api/extension';
-import Account from '../components/account';
-import { Route, Switch, useHistory } from 'react-router-dom';
-import ConfirmModal from '../components/confirmModal';
 import { MdModeEdit } from 'react-icons/md';
+import { Route, Switch, useHistory } from 'react-router-dom';
+
+import { CurrencyCode } from '../../../adapters/currency';
+import { getFavoriteIcon } from '../../../api/extension';
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
+import { useStoreActions } from '../../store';
+import Account from '../components/account';
 import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
-import { LegalSettings } from '../../../features/settings/legal/LegalSettings';
-import { CurrencyCode } from '../../../adapters/currency';
-import { UseAccount } from '../../../adapters/account';
-import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import ConfirmModal from '../components/confirmModal';
 
-type Props = {
+import type { UseAccount } from '../../../adapters/account';
+import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { Wallet } from '@lace/cardano';
+
+type Props = Pick<
+  OutsideHandlesContextValue,
+  | 'availableChains'
+  | 'connectedDapps'
+  | 'defaultSubmitApi'
+  | 'enableCustomNode'
+  | 'environmentName'
+  | 'getCustomSubmitApiForNetwork'
+  | 'handleAnalyticsChoice'
+  | 'isAnalyticsOptIn'
+  | 'isValidURL'
+  | 'removeDapp'
+  | 'setTheme'
+  | 'switchNetwork'
+  | 'theme'
+> & {
   currency: CurrencyCode;
   setCurrency: (currency: CurrencyCode) => void;
   changePassword: (
@@ -51,22 +71,7 @@ type Props = {
   accountName: string;
   accountAvatar?: string;
   updateAccountMetadata: UseAccount['updateAccountMetadata'];
-} & Pick<
-  OutsideHandlesContextValue,
-  | 'theme'
-  | 'setTheme'
-  | 'isAnalyticsOptIn'
-  | 'removeDapp'
-  | 'connectedDapps'
-  | 'handleAnalyticsChoice'
-  | 'switchNetwork'
-  | 'environmentName'
-  | 'availableChains'
-  | 'enableCustomNode'
-  | 'getCustomSubmitApiForNetwork'
-  | 'defaultSubmitApi'
-  | 'isValidURL'
->;
+};
 
 const Settings = ({
   currency,
@@ -89,10 +94,14 @@ const Settings = ({
   getCustomSubmitApiForNetwork,
   defaultSubmitApi,
   isValidURL,
-}: Props) => {
+}: Readonly<Props>) => {
   const history = useHistory();
   const containerBg = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
+  const setIsLaceSwitchInProgress = useStoreActions(
+    actions => actions.globalModel.laceSwitchStore.setIsLaceSwitchInProgress,
+  );
+
   return (
     <>
       <Box
@@ -109,7 +118,9 @@ const Settings = ({
           <IconButton
             aria-label="back button"
             rounded="md"
-            onClick={() => history.goBack()}
+            onClick={() => {
+              history.goBack();
+            }}
             variant="ghost"
             icon={<ChevronLeftIcon boxSize="7" />}
           />
@@ -152,7 +163,11 @@ const Settings = ({
             />
           </Route>
           <Route path="*">
-            <Overview />
+            <Overview
+              onShowLaceBanner={() => {
+                setIsLaceSwitchInProgress(true);
+              }}
+            />
           </Route>
         </Switch>
       </Box>
@@ -160,10 +175,16 @@ const Settings = ({
   );
 };
 
-const Overview = () => {
+const Overview = ({ onShowLaceBanner }: { onShowLaceBanner: () => void }) => {
   const capture = useCaptureEvent();
   const history = useHistory();
   const navigate = history.push;
+
+  const handleShowLaceBannerClick = () => {
+    onShowLaceBanner();
+    void capture(Events.SettingsSwitchToLaceModeClick);
+  };
+
   return (
     <>
       <Box height="10" />
@@ -171,6 +192,30 @@ const Overview = () => {
         Settings
       </Text>
       <Box height="10" />
+      <Button
+        justifyContent="space-between"
+        width="65%"
+        rightIcon={
+          <>
+            <Box
+              backgroundColor="teal.100"
+              paddingX="4px"
+              paddingY="2px"
+              borderRadius="xl"
+            >
+              <Text fontSize="xs" fontWeight="medium" color="gray.900">
+                New
+              </Text>
+            </Box>
+            <ChevronRightIcon />
+          </>
+        }
+        variant="ghost"
+        onClick={handleShowLaceBannerClick}
+      >
+        Switch to Lace Mode
+      </Button>
+      <Box height="1" />
       <Button
         justifyContent="space-between"
         width="65%"
@@ -233,17 +278,19 @@ const GeneralSettings = ({
   changePassword,
   deleteWallet,
   updateAccountMetadata,
-}: Pick<
-  Props,
-  | 'accountAvatar'
-  | 'accountName'
-  | 'changePassword'
-  | 'currency'
-  | 'deleteWallet'
-  | 'setCurrency'
-  | 'setTheme'
-  | 'theme'
-  | 'updateAccountMetadata'
+}: Readonly<
+  Pick<
+    Props,
+    | 'accountAvatar'
+    | 'accountName'
+    | 'changePassword'
+    | 'currency'
+    | 'deleteWallet'
+    | 'setCurrency'
+    | 'setTheme'
+    | 'theme'
+    | 'updateAccountMetadata'
+  >
 >) => {
   const capture = useCaptureEvent();
   const [name, setName] = useState(accountName);
@@ -388,12 +435,12 @@ const GeneralSettings = ({
         onCloseBtn={() => {
           capture(Events.SettingsHoldUpBackClick);
         }}
-        sign={password => {
+        sign={async password => {
           capture(Events.SettingsHoldUpRemoveWalletClick);
           return deleteWallet(password);
         }}
-        onConfirm={async (status, signedTx) => {
-          if (status === true) window.close();
+        onConfirm={async status => {
+          if (status) window.close();
         }}
       />
       <ChangePasswordModal
@@ -407,7 +454,7 @@ const GeneralSettings = ({
 const Whitelisted = ({
   connectedDapps,
   removeDapp,
-}: Pick<Props, 'connectedDapps' | 'removeDapp'>) => {
+}: Readonly<Pick<Props, 'connectedDapps' | 'removeDapp'>>) => {
   const capture = useCaptureEvent();
 
   return (
@@ -480,13 +527,13 @@ const Whitelisted = ({
 
 type NetworkProps = Pick<
   OutsideHandlesContextValue,
-  | 'switchNetwork'
-  | 'environmentName'
   | 'availableChains'
-  | 'enableCustomNode'
-  | 'getCustomSubmitApiForNetwork'
   | 'defaultSubmitApi'
+  | 'enableCustomNode'
+  | 'environmentName'
+  | 'getCustomSubmitApiForNetwork'
   | 'isValidURL'
+  | 'switchNetwork'
 >;
 
 const Network = ({
@@ -497,7 +544,7 @@ const Network = ({
   getCustomSubmitApiForNetwork,
   defaultSubmitApi,
   isValidURL,
-}: NetworkProps) => {
+}: Readonly<NetworkProps>) => {
   const capture = useCaptureEvent();
   const {
     status: isCustomApiEnabledForCurrentNetwork,
@@ -511,10 +558,12 @@ const Network = ({
   const [applied, setApplied] = useState(false);
 
   const endpointHandler = useCallback(async () => {
-    capture(Events.SettingsNetworkCustomNodeClick);
+    await capture(Events.SettingsNetworkCustomNodeClick);
     await enableCustomNode(environmentName, value);
     setApplied(true);
-    setTimeout(() => setApplied(false), 600);
+    setTimeout(() => {
+      setApplied(false);
+    }, 600);
   }, [environmentName, value]);
 
   useEffect(() => {
@@ -534,17 +583,21 @@ const Network = ({
           defaultValue={environmentName as string}
           onChange={async ({ target: { value } }) => {
             switch (value) {
-              case 'Mainnet':
+              case 'Mainnet': {
                 capture(Events.SettingsNetworkMainnetClick);
                 break;
-              case 'Preprod':
+              }
+              case 'Preprod': {
                 capture(Events.SettingsNetworkPreprodClick);
                 break;
-              case 'Preview':
+              }
+              case 'Preview': {
                 capture(Events.SettingsNetworkPreviewClick);
                 break;
-              default:
+              }
+              default: {
                 break;
+              }
             }
 
             await switchNetwork(value as Wallet.ChainName);
@@ -581,7 +634,9 @@ const Network = ({
               endpointHandler();
             }
           }}
-          onChange={e => setValue(e.target.value)}
+          onChange={e => {
+            setValue(e.target.value);
+          }}
           pr="4.5rem"
         />
         <InputRightElement width="4.5rem">
