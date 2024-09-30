@@ -7,6 +7,7 @@ import { getBalance as getBalanceFn } from '@lace/nami/adapters';
 import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { isNotNil } from '@cardano-sdk/util';
+import { getSecureRandomNumber } from '@lace/core';
 
 export const cacheNamiMetadataSubscription = ({
   getBalance = getBalanceFn,
@@ -59,7 +60,7 @@ export const cacheNamiMetadataSubscription = ({
           rewards,
           protocolParameters
         });
-        const avatar = Math.random().toString();
+        const avatar = getSecureRandomNumber().toString();
 
         const updatedMetadata = merge(
           { ...metadata },

@@ -44,6 +44,7 @@ import ConfirmModal from '../components/confirmModal';
 import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { Wallet } from '@lace/cardano';
+import { getSecureRandomNumber } from '@lace/core';
 
 type Props = Pick<
   OutsideHandlesContextValue,
@@ -306,7 +307,7 @@ const GeneralSettings = ({
 
   const avatarHandler = async () => {
     await updateAccountMetadata({
-      namiMode: { avatar: Math.random().toString() },
+      namiMode: { avatar: getSecureRandomNumber().toString() },
     });
     capture(Events.SettingsChangeAvatarClick);
   };

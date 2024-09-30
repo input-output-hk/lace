@@ -16,9 +16,11 @@ import {
 import { Scrollbars } from './scrollbar';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
+import { useOutsideHandles } from 'features/outside-handles-provider/useOutsideHandles';
 
 const TermsOfUse = React.forwardRef((props, ref) => {
   const capture = useCaptureEvent();
+  const { openExternalLink } = useOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
   React.useImperativeHandle(ref, () => ({
     openModal() {
@@ -111,7 +113,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                     isExternal
                     textDecoration="underline"
                     onClick={() =>
-                      window.open(
+                      openExternalLink(
                         'https://static.iohk.io/terms/iog-privacy-policy.pdf'
                       )
                     }
@@ -142,7 +144,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                   the Products. Feel free to submit feedback at{' '}
                   <Link
                     isExternal
-                    onClick={() => window.open('https://iohk.io/en/contact/')}
+                    onClick={() => openExternalLink('https://iohk.io/en/contact/')}
                   >
                     https://iohk.io/en/contact/
                   </Link>
@@ -373,7 +375,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                   isExternal
                   textDecoration="underline"
                   onClick={() =>
-                    window.open(
+                    openExternalLink(
                       'https://static.iohk.io/terms/iog-dmca-policy.pdf'
                     )
                   }
@@ -477,7 +479,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                 the form at{' '}
                 <Link
                   isExternal
-                  onClick={() => window.open('https://iohk.io/en/contact/')}
+                  onClick={() => openExternalLink('https://iohk.io/en/contact/')}
                 >
                   https://iohk.io/en/contact/
                 </Link>{' '}
@@ -634,7 +636,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                       color="teal"
                       isExternal
                       textDecoration="underline"
-                      onClick={() => window.open('https://iohk.io/en/contact/')}
+                      onClick={() => openExternalLink('https://iohk.io/en/contact/')}
                     >
                       contact us
                     </Link>{' '}

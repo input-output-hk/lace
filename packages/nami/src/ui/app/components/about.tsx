@@ -22,9 +22,11 @@ import TermsOfUse from './termsOfUse';
 import PrivacyPolicy from './privacyPolicy';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 const About = React.forwardRef((props, ref) => {
   const capture = useCaptureEvent();
+  const { openExternalLink } = useOutsideHandles()
   const { isOpen, onOpen, onClose } = useDisclosure();
   const Logo = useColorModeValue(LogoBlack, LogoWhite);
   const IOHK = useColorModeValue(IOHKWhite, IOHKBlack);
@@ -61,7 +63,7 @@ const About = React.forwardRef((props, ref) => {
           >
             <Image
               cursor="pointer"
-              onClick={() => window.open('https://namiwallet.io')}
+              onClick={() => openExternalLink('https://namiwallet.io')}
               width="90px"
               src={Logo}
             />
@@ -77,7 +79,7 @@ const About = React.forwardRef((props, ref) => {
               <Text fontSize="xs">
                 Maintained by{' '}
                 <span
-                  onClick={() => window.open('https://iohk.io/')}
+                  onClick={() => openExternalLink('https://iohk.io/')}
                   style={{ textDecoration: 'underline', cursor: 'pointer' }}
                 >
                   IOG
@@ -86,7 +88,7 @@ const About = React.forwardRef((props, ref) => {
               <Box height="4" />
               <Image
                 cursor="pointer"
-                onClick={() => window.open('https://iohk.io/')}
+                onClick={() => openExternalLink('https://iohk.io/')}
                 src={IOHK}
                 width="66px"
               />

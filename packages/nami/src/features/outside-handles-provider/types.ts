@@ -94,4 +94,5 @@ export interface OutsideHandlesContextValue {
   resetDelegationState: () => void;
   hasNoFunds: boolean;
   switchWalletMode: () => Promise<void>;
+  openExternalLink: (url: string) => void;
 }

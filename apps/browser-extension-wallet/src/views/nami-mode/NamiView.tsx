@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useTheme } from '@providers';
+import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
 import {
   useCustomSubmitApi,
   useWalletAvatar,
@@ -90,6 +90,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
+  const openExternalLink = useExternalLinkOpener();
 
   useEffect(() => {
     getBackgroundStorage()
@@ -157,7 +158,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         resetDelegationState,
         hasNoFunds,
         setAvatar,
-        switchWalletMode
+        switchWalletMode,
+        openExternalLink
       }}
     >
       <Nami />

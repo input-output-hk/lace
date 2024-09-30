@@ -906,8 +906,13 @@ const DeleteAccountModal = React.forwardRef<
 });
 
 const DelegationPopover = ({ builderRef }) => {
-  const { inMemoryWallet, cardanoCoin, buildDelegation, setSelectedStakePool } =
-    useOutsideHandles();
+  const {
+    inMemoryWallet,
+    cardanoCoin,
+    buildDelegation,
+    setSelectedStakePool,
+    openExternalLink,
+  } = useOutsideHandles();
   const { delegation } = useDelegation({
     inMemoryWallet,
     buildDelegation,
@@ -965,7 +970,7 @@ const DelegationPopover = ({ builderRef }) => {
                   fontSize="md"
                   textDecoration="underline"
                   cursor="pointer"
-                  onClick={() => window.open(delegation.homepage)}
+                  onClick={() => openExternalLink(delegation.homepage)}
                 >
                   {delegation.ticker}
                 </Text>

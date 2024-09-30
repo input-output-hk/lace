@@ -18,6 +18,7 @@ import {
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 import PrivacyPolicy from '../../../ui/app/components/privacyPolicy';
 import TermsOfUse from '../../../ui/app/components/termsOfUse';
 
@@ -31,6 +32,7 @@ export const LegalSettings = ({
   handleAnalyticsChoice,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
+  const { openExternalLink } = useOutsideHandles();
   const termsReference = useRef<{ openModal: () => void }>();
   const privacyPolicyReference = useRef<{ openModal: () => void }>();
   return (
@@ -68,7 +70,9 @@ export const LegalSettings = ({
                   may include data about how you use our service, your
                   preferences and information about your system. Read more&nbsp;
                   <Link
-                    onClick={() => window.open('https://namiwallet.io')}
+                    onClick={() => {
+                      openExternalLink('https://namiwallet.io');
+                    }}
                     textDecoration="underline"
                   >
                     here

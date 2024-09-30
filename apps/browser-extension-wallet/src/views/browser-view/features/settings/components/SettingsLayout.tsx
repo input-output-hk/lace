@@ -21,7 +21,7 @@ export const SettingsLayout = ({
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const posthog = usePostHogClientContext();
-  const useSwitchToNamiMode = posthog?.featureFlags?.['use-switch-to-nami-mode'] === true;
+  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   const sidePanelContent = (
     <div>

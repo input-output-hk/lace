@@ -117,6 +117,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       withSignTxConfirmation,
       resetDelegationState,
       hasNoFunds,
+      openExternalLink
     } = useOutsideHandles();
     const { initDelegation, stakeRegistration } = useDelegation({
       inMemoryWallet,
@@ -290,7 +291,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 receiving rewards. Alternatively, head to{' '}
                 <Link
                   fontWeight="semibold"
-                  onClick={() => window.open('https://pool.pm')}
+                  onClick={() => openExternalLink('https://pool.pm')}
                 >
                   https://pool.pm
                 </Link>
@@ -568,7 +569,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 <br />
                 <Link
                   fontWeight="semibold"
-                  onClick={() => window.open('https://namiwallet.io')}
+                  onClick={() => openExternalLink('https://namiwallet.io')}
                 >
                   Read more
                 </Link>
