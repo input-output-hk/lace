@@ -91,6 +91,10 @@ const config: StorybookConfig = {
           /@lace\/cardano$/,
           join(__dirname, './mocks/lace-cardano.mock.ts'),
         ),
+        new NormalModuleReplacementPlugin(
+          /@lace\/core$/,
+          join(__dirname, './mocks/lace-core.mock.ts'),
+        ),
       );
     }
 
