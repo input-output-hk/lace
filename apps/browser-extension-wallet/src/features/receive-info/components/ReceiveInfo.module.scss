@@ -22,11 +22,6 @@
   }
 }
 
-.subtitle {
-  color: var(--text-color-secondary);
-  @include text-bodyLarge-medium;
-}
-
 .iconWrapper {
   display: flex;
   flex: 1;
