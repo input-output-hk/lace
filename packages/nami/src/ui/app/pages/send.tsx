@@ -69,7 +69,7 @@ import type { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
-import type { Asset } from '../../../types/assets';
+import type { Asset as NamiAsset } from '../../../types/assets';
 import { UseAccount } from '../../../adapters/account';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
@@ -1091,7 +1091,7 @@ const AssetsSelector = ({
   addAssets,
   value,
 }: {
-  assets: Asset[];
+  assets: NamiAsset[];
   addAssets: any;
   value: any;
 }) => {
@@ -1269,7 +1269,7 @@ const Asset = ({
   onClose,
   addAssets,
 }: {
-  asset: Asset;
+  asset: NamiAsset;
   choice;
   select;
   setChoice;
@@ -1347,7 +1347,7 @@ const Selection = ({
   setChoice,
 }: {
   select;
-  asset: Asset;
+  asset: NamiAsset;
   choice;
   setChoice;
 }) => {

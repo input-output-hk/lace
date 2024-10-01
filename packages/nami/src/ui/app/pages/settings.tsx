@@ -18,7 +18,6 @@ import {
   Switch as ButtonSwitch,
   Image,
   SkeletonCircle,
-  Spinner,
   Checkbox,
   Input,
   InputGroup,
@@ -104,75 +103,73 @@ const Settings = ({
   );
 
   return (
-    <>
-      <Box
-        minHeight="100vh"
-        display="flex"
-        alignItems="center"
-        flexDirection="column"
-        position="relative"
-        background={containerBg}
-        color={textColor}
-      >
-        <Account name={accountName} avatar={accountAvatar} />
-        <Box position="absolute" top="24" left="6">
-          <IconButton
-            aria-label="back button"
-            rounded="md"
-            onClick={() => {
-              history.goBack();
-            }}
-            variant="ghost"
-            icon={<ChevronLeftIcon boxSize="7" />}
-          />
-        </Box>
-        <Switch>
-          <Route path="/settings/general">
-            <GeneralSettings
-              changePassword={changePassword}
-              deleteWallet={deleteWallet}
-              currency={currency}
-              setCurrency={setCurrency}
-              theme={theme}
-              setTheme={setTheme}
-              accountAvatar={accountAvatar}
-              accountName={accountName}
-              updateAccountMetadata={updateAccountMetadata}
-            />
-          </Route>
-          <Route path="/settings/whitelisted">
-            <Whitelisted
-              connectedDapps={connectedDapps}
-              removeDapp={removeDapp}
-            />
-          </Route>
-          <Route path="/settings/network">
-            <Network
-              environmentName={environmentName}
-              switchNetwork={switchNetwork}
-              availableChains={availableChains}
-              enableCustomNode={enableCustomNode}
-              getCustomSubmitApiForNetwork={getCustomSubmitApiForNetwork}
-              defaultSubmitApi={defaultSubmitApi}
-              isValidURL={isValidURL}
-            />
-          </Route>
-          <Route path="/settings/legal">
-            <LegalSettings
-              isAnalyticsOptIn={isAnalyticsOptIn}
-              handleAnalyticsChoice={handleAnalyticsChoice}
-            />
-          </Route>
-          <Route path="*">
-            <Overview
-              onShowLaceBanner={() => {
-                setIsLaceSwitchInProgress(true);
-              }}
-            />
-          </Route>
-        </Switch>
+    <Box
+      minHeight="100vh"
+      display="flex"
+      alignItems="center"
+      flexDirection="column"
+      position="relative"
+      background={containerBg}
+      color={textColor}
+    >
+      <Account name={accountName} avatar={accountAvatar} />
+      <Box position="absolute" top="24" left="6">
+        <IconButton
+          aria-label="back button"
+          rounded="md"
+          onClick={() => {
+            history.goBack();
+          }}
+          variant="ghost"
+          icon={<ChevronLeftIcon boxSize="7" />}
+        />
       </Box>
-    </>
+      <Switch>
+        <Route path="/settings/general">
+          <GeneralSettings
+            changePassword={changePassword}
+            deleteWallet={deleteWallet}
+            currency={currency}
+            setCurrency={setCurrency}
+            theme={theme}
+            setTheme={setTheme}
+            accountAvatar={accountAvatar}
+            accountName={accountName}
+            updateAccountMetadata={updateAccountMetadata}
+          />
+        </Route>
+        <Route path="/settings/whitelisted">
+          <Whitelisted
+            connectedDapps={connectedDapps}
+            removeDapp={removeDapp}
+          />
+        </Route>
+        <Route path="/settings/network">
+          <Network
+            environmentName={environmentName}
+            switchNetwork={switchNetwork}
+            availableChains={availableChains}
+            enableCustomNode={enableCustomNode}
+            getCustomSubmitApiForNetwork={getCustomSubmitApiForNetwork}
+            defaultSubmitApi={defaultSubmitApi}
+            isValidURL={isValidURL}
+          />
+        </Route>
+        <Route path="/settings/legal">
+          <LegalSettings
+            isAnalyticsOptIn={isAnalyticsOptIn}
+            handleAnalyticsChoice={handleAnalyticsChoice}
+          />
+        </Route>
+        <Route path="*">
+          <Overview
+            onShowLaceBanner={() => {
+              setIsLaceSwitchInProgress(true);
+            }}
+          />
+        </Route>
+      </Switch>
+    </Box>
   );
 };
 
