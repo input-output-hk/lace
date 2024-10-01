@@ -13339,7 +13339,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/core@0.1.0, @lace/core@workspace:packages/core":
+"@lace/core@0.1.0, @lace/core@workspace:^, @lace/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@lace/core@workspace:packages/core"
   dependencies:
@@ -13458,6 +13458,7 @@ __metadata:
     "@fontsource/ubuntu": ^5.0.8
     "@lace/cardano": "workspace:^"
     "@lace/common": "workspace:^"
+    "@lace/core": "workspace:^"
     "@rollup/plugin-image": ^3.0.3
     "@storybook/addon-essentials": ^8.1.6
     "@storybook/addon-interactions": ^8.1.6
