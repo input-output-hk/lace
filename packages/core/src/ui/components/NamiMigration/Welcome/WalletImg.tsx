@@ -22,7 +22,7 @@ export const WalletImg = ({ img, icon, color }: Props): JSX.Element => (
       })
     )}
   >
-    <img src={img} />
+    <img src={img} alt="wallet image" />
     <Flex
       alignItems="center"
       justifyContent="center"

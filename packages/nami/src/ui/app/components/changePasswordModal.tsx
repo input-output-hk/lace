@@ -84,7 +84,7 @@ export const ChangePasswordModal = React.forwardRef<
       onClose();
     } catch (e) {
       toast({
-        title: e && e.message ? e.message : 'Password update failed!',
+        title: e instanceof Error ? e.message : 'Password update failed!',
         status: 'error',
         duration: 5000,
       });

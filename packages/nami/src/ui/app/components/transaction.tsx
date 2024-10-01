@@ -581,7 +581,7 @@ const viewMetadata = metadata => {
       </body>
     </html>
   );
-  var newTab = window.open();
+  const newTab = window.open();
   newTab.document.write(ReactDOMServer.renderToString(<HighlightJson />));
   newTab.document.close();
 };

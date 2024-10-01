@@ -2,6 +2,9 @@ import { useCallback, useMemo } from 'react';
 
 import {
   WalletType,
+  type WalletId,
+  type HardwareWallet,
+  type Bip32WalletAccount,
   type AnyWallet,
   type RemoveAccountProps,
   type UpdateAccountMetadataProps,
@@ -15,11 +18,6 @@ import groupBy from 'lodash/groupBy';
 import merge from 'lodash/merge';
 
 import type { WalletManagerAddAccountProps } from '../features/outside-handles-provider/types';
-import type {
-  WalletId,
-  HardwareWallet,
-  Bip32WalletAccount,
-} from '@cardano-sdk/web-extension';
 import type { Observable } from 'rxjs';
 
 interface AccountsProps {

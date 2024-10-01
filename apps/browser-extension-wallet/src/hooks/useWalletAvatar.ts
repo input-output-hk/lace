@@ -17,7 +17,7 @@ export const useWalletAvatar = (): UseWalletAvatar => {
   const [avatars, { updateLocalStorage: setUserAvatar }] = useLocalStorage('userAvatar');
 
   const activeWalletId = cardanoWallet?.source.wallet.walletId;
-  const { accountIndex, metadata } = cardanoWallet?.source.account;
+  const { accountIndex, metadata } = cardanoWallet?.source.account ?? {};
   const handleImage = handle?.profilePic;
   const activeWalletAvatar =
     (environmentName && avatars?.[`${environmentName}${activeWalletId}`]) ||

@@ -592,7 +592,9 @@ const Network = ({
           }}
         >
           {availableChains.map(network => (
-            <option value={network as string}>{network}</option>
+            <option key={network} value={network as string}>
+              {network}
+            </option>
           ))}
         </Select>
       </Box>

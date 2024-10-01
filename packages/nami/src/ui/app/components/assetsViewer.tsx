@@ -21,11 +21,8 @@ import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import { searchTokens } from '../../../adapters/assets';
 import { Asset as NamiAsset } from '../../../types/assets';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
 
 const AssetsViewer = ({ assets }) => {
-  const capture = useCaptureEvent();
   const totalColor = useColorModeValue(
     'rgb(26, 32, 44)',
     'rgba(255, 255, 255, 0.92)',

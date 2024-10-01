@@ -11,9 +11,7 @@ interface Props {
   buildDelegation: (
     hexId?: Readonly<Wallet.Cardano.PoolIdHex>,
   ) => Promise<void>;
-  setSelectedStakePool: (
-    pool?: Readonly<Wallet.Cardano.StakePool | undefined>,
-  ) => void;
+  setSelectedStakePool: (pool?: Readonly<Wallet.Cardano.StakePool>) => void;
 }
 
 export interface TransformedDelegation {
@@ -25,7 +23,7 @@ export interface TransformedDelegation {
 }
 
 export interface Delegation {
-  delegation?: TransformedDelegation | undefined;
+  delegation?: TransformedDelegation;
   initDelegation: (pool?: Readonly<Wallet.Cardano.StakePool>) => Promise<void>;
   stakeRegistration: string;
 }
@@ -52,12 +50,8 @@ export const useDelegation = ({
 
   const initDelegation = useCallback(
     async (pool?: Readonly<Wallet.Cardano.StakePool>) => {
-      try {
-        setSelectedStakePool(pool);
-        await buildDelegation(pool?.hexId);
-      } catch (error) {
-        throw error;
-      }
+      setSelectedStakePool(pool);
+      await buildDelegation(pool?.hexId);
     },
     [buildDelegation, setSelectedStakePool],
   );

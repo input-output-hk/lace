@@ -126,17 +126,15 @@ const StoreInit = ({
           )}
         </>
       ) : (
-        <>
-          <Box
-            height="100%"
-            width="full"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Spinner color="teal" speed="0.5s" />
-          </Box>
-        </>
+        <Box
+          height="100%"
+          width="full"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Spinner color="teal" speed="0.5s" />
+        </Box>
       )}
     </>
   );

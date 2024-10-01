@@ -588,8 +588,8 @@ const Send = ({
                   flexWrap="wrap"
                   paddingRight="2"
                 >
-                  {value.assets.map((asset, index) => (
-                    <Box key={index}>
+                  {value.assets.map(asset => (
+                    <Box key={asset?.unit}>
                       <AssetBadge
                         onRemove={() => {
                           removeAsset(asset);

@@ -35,7 +35,6 @@ import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { Events } from '../../../features/analytics/events';
 import { Asset } from '../../../types/assets';
 import { searchTokens } from '../../../adapters/assets';
-import { Asset as NamiAsset } from '../../../types/assets';
 
 interface Props {
   assets: Asset[];
@@ -43,7 +42,7 @@ interface Props {
 }
 
 const CollectiblesViewer = ({ assets, setAvatar }: Readonly<Props>) => {
-  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(null);
+  const [assetsArray, setAssetsArray] = React.useState<Asset[] | null>(null);
   const [search, setSearch] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const ref = useRef();
@@ -277,13 +276,13 @@ const AssetsGrid = React.forwardRef(({ assets }, ref) => {
       justifyContent="center"
     >
       <SimpleGrid columns={2} spacing={4}>
-        {assets.map((asset, index) => (
-          <Box key={index}>
+        {assets.map((asset) => (
+          <Box key={asset.name}>
             <LazyLoadComponent>
               <Collectible
                 ref={ref}
                 asset={asset}
-                testId={`collectible-${index}`}
+                testId={`collectible-${asset.name}`}
               />
             </LazyLoadComponent>
           </Box>

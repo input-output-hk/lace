@@ -15,10 +15,8 @@ import LaceSecondaryButton from './laceSecondaryButton';
 
 export const getLaceVideoBackgroundSrc = () => {
   return typeof chrome !== 'undefined' &&
-    chrome.runtime &&
-    chrome.runtime?.getURL
-    ? chrome.runtime.getURL('laceVideoBackground.mp4')
-    : laceVideoBackground;
+    chrome.runtime?.getURL('laceVideoBackground.mp4')
+    || laceVideoBackground;
 };
 
 interface Props {

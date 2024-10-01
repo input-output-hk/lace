@@ -1,7 +1,6 @@
 /* eslint-disable functional/immutable-data, @typescript-eslint/no-unsafe-assignment */
 import type { ReactElement } from 'react';
-import { useRef, useState } from 'react';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 import { Box, Image, useColorModeValue } from '@chakra-ui/react';
 

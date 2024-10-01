@@ -159,7 +159,6 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
 
         <Box h={2} />
         {enableSend && (
-          <>
             <Box width="full" display="flex" justifyContent="right">
               <Button
                 mr="4"
@@ -175,7 +174,6 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
                 Send
               </Button>
             </Box>
-          </>
         )}
         <Box h={2} />
       </Collapse>

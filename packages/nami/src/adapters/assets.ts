@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useObservable } from '@lace/common';
 import isNil from 'lodash/isNil';
@@ -89,7 +89,7 @@ export const useAssets = ({ inMemoryWallet, balance }: Readonly<Props>) => {
     const nfts: NamiAsset[] = [];
 
     if (!isNil(utxoTotal?.assets) && utxoTotal?.assets?.size > 0) {
-      for (const [assetId, assetBalance] of utxoTotal?.assets) {
+      for (const [assetId, assetBalance] of utxoTotal.assets) {
         const assetInfo = assetsInfo?.get(assetId);
         if (assetBalance <= 0 || !assetInfo) continue;
 
@@ -132,9 +132,7 @@ export const searchTokens = (
   return data.filter(item =>
     fields.some(
       field =>
-        field in item &&
-        item[field] &&
-        item[field].toLowerCase().includes(lowerSearchValue),
+        field in item && item[field]?.toLowerCase().includes(lowerSearchValue),
     ),
   );
 };

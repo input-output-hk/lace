@@ -25,7 +25,6 @@ const Collectible = React.forwardRef(({ asset, ...props }, ref) => {
   const [showInfo, setShowInfo] = React.useState(false);
 
   return (
-    <>
       <Box
         onClick={() => {
           capture(Events.NFTsImageClick);
@@ -119,7 +118,6 @@ const Collectible = React.forwardRef(({ asset, ...props }, ref) => {
           </Box>
         )}
       </Box>
-    </>
   );
 });
 
