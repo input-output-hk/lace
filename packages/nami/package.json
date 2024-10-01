@@ -71,6 +71,7 @@
     "@fontsource/ubuntu": "^5.0.8",
     "@lace/cardano": "workspace:^",
     "@lace/common": "workspace:^",
+    "@lace/core": "workspace:^",
     "crc": "^4.1.1",
     "debounce-promise": "^3.1.2",
     "easy-peasy": "^6.0.4",
