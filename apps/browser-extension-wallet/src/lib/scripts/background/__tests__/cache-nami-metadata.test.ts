@@ -1,9 +1,20 @@
+/* eslint-disable import/imports-first */
+const mockGetSecureRandomNumber = jest.fn().mockImplementation(() => Math.random());
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-useless-undefined */
 import { Wallet } from '@lace/cardano';
 import { of } from 'rxjs';
 import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { cacheNamiMetadataSubscription } from '../cache-nami-metadata';
+
+jest.mock('@lace/core', () => {
+  const original = jest.requireActual('@lace/core');
+  return {
+    __esModule: true,
+    ...original,
+    getSecureRandomNumber: mockGetSecureRandomNumber
+  };
+});
 
 describe('cacheNamiMetadataSubscription', () => {
   afterEach(() => {
