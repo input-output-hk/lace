@@ -1,9 +1,9 @@
-import { renderHook, act } from '@testing-library/react-hooks';
-import { BehaviorSubject, of } from 'rxjs';
+import { renderHook } from '@testing-library/react-hooks';
+import { of } from 'rxjs';
 
 import { ERROR } from '../config/config';
 
-import { useChangePassword, useDeleteWalletWithPassword } from './wallet';
+import { useChangePassword } from './wallet';
 
 import type {
   WalletManagerApi,
@@ -16,64 +16,6 @@ const extendedAccountPublicKey =
   '2643db5426b889fef14709c85e294aa1' +
   '2ac1f1560a893ea7937c5bfbfdeab459' +
   'b1a396f1174b9c5a673a640d01880c35';
-
-describe('useDeleteWalletWithPassword', () => {
-  const mockDeleteWallet = jest.fn();
-  const mockEmip3decrypt = jest.fn();
-  const mockActiveWalletId$ = of({
-    walletId: 'wallet1',
-    accountIndex: 0,
-  }) as WalletManagerApi['activeWalletId$'];
-  const mockWallets$ = of([
-    {
-      walletId: 'wallet1',
-      encryptedSecrets: { keyMaterial: '1234' },
-    },
-  ]) as WalletRepositoryApi<
-    Wallet.WalletMetadata,
-    Wallet.AccountMetadata
-  >['wallets$'];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should call deleteWallet when the password is correct', async () => {
-    mockEmip3decrypt.mockResolvedValue(new Uint8Array());
-    const { result } = renderHook(() =>
-      useDeleteWalletWithPassword({
-        wallets$: mockWallets$,
-        activeWalletId$: mockActiveWalletId$,
-        deleteWallet: mockDeleteWallet,
-        emip3decrypt: mockEmip3decrypt,
-      }),
-    );
-
-    await result.current('correct-password');
-
-    expect(mockEmip3decrypt).toHaveBeenCalledWith(
-      Buffer.from('1234', 'hex'),
-      Buffer.from('correct-password'),
-    );
-    expect(mockDeleteWallet).toHaveBeenCalledWith(false);
-  });
-
-  it('should throw an error when the password is incorrect', async () => {
-    mockEmip3decrypt.mockRejectedValue(new Error('error'));
-    const { result } = renderHook(() =>
-      useDeleteWalletWithPassword({
-        wallets$: mockWallets$,
-        activeWalletId$: mockActiveWalletId$,
-        deleteWallet: mockDeleteWallet,
-        emip3decrypt: mockEmip3decrypt,
-      }),
-    );
-    await expect(result.current('wrong-password')).rejects.toEqual(
-      ERROR.wrongPassword,
-    );
-    expect(mockDeleteWallet).not.toHaveBeenCalled();
-  });
-});
 
 describe('useChangePassword', () => {
   const mockCreateWallet = jest.fn();

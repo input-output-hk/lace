@@ -30,10 +30,6 @@ export enum Events {
   SettingsNetworkMainnetClick = 'nami mode | settings | network | mainnet | click',
   SettingsNetworkCustomNodeClick = 'nami mode | settings | network | custom node | click',
 
-  SettingsRemoveWalletClick = 'nami mode | settings | remove wallet | click',
-  SettingsHoldUpRemoveWalletClick = 'nami mode | settings | hold up | remove wallet | click',
-  SettingsHoldUpBackClick = 'nami mode | settings | hold up | back | click',
-
   SettingsThemeLightModeClick = 'nami mode | settings | theme | light mode | click',
   SettingsThemeDarkModeClick = 'nami mode | settings | theme | dark mode | click',
 

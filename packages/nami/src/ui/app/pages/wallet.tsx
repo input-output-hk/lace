@@ -162,10 +162,11 @@ const Wallet = ({
     <>
       <Box
         background={containerBg}
-        minHeight="100vh"
+        minHeight="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
+        ma
       >
         <Box
           height="52"

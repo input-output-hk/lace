@@ -7,10 +7,7 @@ import { useAccount } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
-import {
-  useChangePassword,
-  useDeleteWalletWithPassword,
-} from '../adapters/wallet';
+import { useChangePassword } from '../adapters/wallet';
 
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
@@ -57,12 +54,6 @@ export const Main = () => {
     fiatCurrency,
     setFiatCurrency,
   );
-
-  const deleteWalletWithPassword = useDeleteWalletWithPassword({
-    wallets$: walletRepository.wallets$,
-    activeWalletId$: walletManager.activeWalletId$,
-    deleteWallet,
-  });
 
   const changePassword = useChangePassword({
     chainId: currentChain,
@@ -112,7 +103,6 @@ export const Main = () => {
                 removeDapp={removeDapp}
                 connectedDapps={connectedDapps}
                 changePassword={changePassword}
-                deleteWallet={deleteWalletWithPassword}
                 currency={currency}
                 setCurrency={setCurrency}
                 theme={theme}
