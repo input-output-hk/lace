@@ -15,6 +15,7 @@ import { PinExtension } from '@views/browser/features/wallet-setup/components/Pi
 import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 import { useOpenTransactionDrawer } from '@views/browser/features/send-transaction';
+import { useOpenReceiveDrawer } from '../TransactionCTAsBox/useOpenReceiveDrawer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,6 +32,8 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletState } = useWalletStore();
+  const openReceiveDrawer = useOpenReceiveDrawer();
+
   const openTransactionDrawer = useOpenTransactionDrawer({
     content: DrawerContent.SEND_TRANSACTION,
     config: { options: { isAdvancedFlow: true } }
@@ -50,9 +53,16 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openTransactionDrawer();
       }
+      if (
+        backgroundStorage.message?.type === MessageTypes.OPEN_BROWSER_VIEW &&
+        backgroundStorage.message?.data.section === BrowserViewSections.RECEIVE_ADVANCED
+      ) {
+        await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
+        openReceiveDrawer();
+      }
     };
     openDrawer();
-  }, [backgroundServices, openTransactionDrawer]);
+  }, [backgroundServices, openReceiveDrawer, openTransactionDrawer]);
 
   useEffect(() => {
     const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {

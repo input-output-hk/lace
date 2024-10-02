@@ -48,6 +48,7 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
   switch (data.section) {
     case BrowserViewSections.SEND_ADVANCED:
+    case BrowserViewSections.RECEIVE_ADVANCED:
       path = '';
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_BROWSER_VIEW, data } });
       break;

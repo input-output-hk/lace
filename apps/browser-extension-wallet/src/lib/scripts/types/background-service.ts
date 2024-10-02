@@ -25,6 +25,7 @@ export enum MessageTypes {
 
 export enum BrowserViewSections {
   SEND_ADVANCED = 'send-advanced',
+  RECEIVE_ADVANCED = 'receive-advanced',
   STAKING = 'staking',
   NFTS = 'nfts',
   TRANSACTION = 'transaction',
