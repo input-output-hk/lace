@@ -91,7 +91,6 @@ type CreateHardwareWalletRevampedParams = {
   accountIndexes: number[];
   name: string;
   connection: Wallet.HardwareWalletConnection;
-  getAccountName?: (index: number) => string;
 };
 
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
@@ -268,7 +267,7 @@ export const useWalletManager = (): UseWalletManager => {
   }, [currentChain]);
 
   const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
-    async ({ accountIndexes, connection, name, getAccountName = defaultAccountName }) => {
+    async ({ accountIndexes, connection, name }) => {
       const accounts: Bip32WalletAccount<Wallet.AccountMetadata>[] = [];
       for (const accountIndex of accountIndexes) {
         let extendedAccountPublicKey;
@@ -284,7 +283,7 @@ export const useWalletManager = (): UseWalletManager => {
         accounts.push({
           extendedAccountPublicKey,
           accountIndex,
-          metadata: { name: getAccountName(accountIndex) }
+          metadata: { name: defaultAccountName(accountIndex) }
         });
       }
 

@@ -113,7 +113,6 @@ export interface OutsideHandlesContextValue {
       accountIndexes: number[];
       name: string;
       connection: Wallet.HardwareWalletConnection;
-      getAccountName?: (index: number) => string;
     }>,
   ) => Promise<Wallet.CardanoWallet>;
   saveHardwareWallet: (

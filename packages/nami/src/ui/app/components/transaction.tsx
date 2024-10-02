@@ -4,6 +4,7 @@ import React from 'react';
 
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
+  Button,
   Box,
   Link,
   Text,
@@ -16,7 +17,6 @@ import {
   useColorModeValue,
   Skeleton,
 } from '@chakra-ui/react';
-import { Button } from '@chakra-ui/react';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import ReactDOMServer from 'react-dom/server';

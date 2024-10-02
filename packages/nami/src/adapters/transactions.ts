@@ -33,7 +33,7 @@ export type Type =
   | 'multisig'
   | 'self';
 
-interface uTxOList {
+interface UTxOList {
   inputs: Wallet.Cardano.HydratedTxIn[];
   collaterals?: Wallet.Cardano.HydratedTxIn[];
   outputs: Wallet.Cardano.TxOut[];
@@ -42,7 +42,7 @@ interface uTxOList {
 interface GetTxTypeProps {
   currentAddress: string;
   addresses: readonly string[];
-  uTxOList: uTxOList;
+  uTxOList: UTxOList;
 }
 
 const getTxType = ({
@@ -88,7 +88,7 @@ const dateFromUnix = (
  * @return {AmountList} - The compiled set of amounts requested for payment.
  */
 export const compileOutputs = (
-  outputList: Readonly<uTxOList['outputs'] | Wallet.TxInput[]>,
+  outputList: Readonly<UTxOList['outputs'] | Wallet.TxInput[]>,
 ): Amount[] => {
   const coalescedValue: Cardano.Value = coalesceValueQuantities(
     outputList.map(output => output.value),
@@ -111,8 +111,8 @@ interface CalculatedAmount {
 interface CalculateAmountProps {
   currentAddress: string;
   uTxOList: {
-    outputs: uTxOList['outputs'];
-    collaterals: uTxOList['collaterals'];
+    outputs: UTxOList['outputs'];
+    collaterals: UTxOList['collaterals'];
     inputs: Wallet.TxInput[];
   };
   validContract: boolean;

@@ -16,10 +16,7 @@ import TrezorWidget from '../components/TrezorWidget';
 import type { UseAccount } from '../../../adapters/account';
 
 const accountsIndexes = Object.keys(Array.from({ length: 50 }));
-const getAccountName = (
-  index: number,
-  type: WalletType.Ledger | WalletType.Trezor,
-) => `${type} ${index + 1}`;
+const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
 
 interface SelectAccountsProps {
   connection: Wallet.HardwareWalletConnection;
@@ -83,7 +80,7 @@ export const SelectAccounts = ({
                   : undefined,
               ),
             metadata: {
-              name: getAccountName(accountIndex, connection.type),
+              name: defaultAccountName(accountIndex),
               namiMode: { avatar: Math.random().toString() },
             },
             walletId,
@@ -101,7 +98,6 @@ export const SelectAccounts = ({
           connection,
           name: 'Wallet 1',
           accountIndexes,
-          getAccountName: (index: number) => `${connection.type} ${index + 1}`,
         });
         await saveHardwareWallet(cardanoWallet, environmentName);
       } catch (error_) {
@@ -152,8 +148,7 @@ export const SelectAccounts = ({
             >
               <Box ml={6} fontWeight="bold">
                 {' '}
-                Account {Number.parseInt(accountIndex) + 1}{' '}
-                {accountIndex === '0' && ' - Default'}
+                Account {accountIndex} {accountIndex === '0' && ' - Default'}
               </Box>
               <Checkbox
                 isDisabled={isAccountDisabled(accountIndex)}
