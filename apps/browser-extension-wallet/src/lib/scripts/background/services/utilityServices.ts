@@ -7,6 +7,7 @@ import {
   Message,
   MessageTypes,
   OpenBrowserData,
+  OpenNamiBrowserData,
   MigrationState,
   TokenPrices,
   CoinPrices,
@@ -87,9 +88,16 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.NAMI_MIGRATION:
       path = walletRoutePaths.namiMigration.root;
       break;
+    case BrowserViewSections.NAMI_HW_FLOW:
+      path = walletRoutePaths.namiMigration.hwFlow;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
+};
+
+const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
+  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => console.error(error));
 };
 
 const handleOpenPopup = async () => {
@@ -184,6 +192,7 @@ exposeApi<BackgroundService>(
   {
     api$: of({
       handleOpenBrowser,
+      handleOpenNamiBrowser,
       handleOpenPopup,
       requestMessage$,
       migrationState$,

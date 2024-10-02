@@ -9,6 +9,8 @@ import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
 import { useChangePassword } from '../adapters/wallet';
 
+import { HWConnectFlow } from './app/hw/hw';
+import { SuccessAndClose } from './app/hw/success-and-close';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
@@ -48,6 +50,7 @@ export const Main = () => {
     isValidURL,
     setAvatar,
     switchWalletMode,
+    openHWFlow,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -69,7 +72,6 @@ export const Main = () => {
   });
 
   const {
-    nextIndex,
     allAccounts,
     activeAccount,
     nonActiveAccounts,
@@ -132,10 +134,18 @@ export const Main = () => {
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
+            <Route exact path="/hwTab">
+              <HWConnectFlow
+                accounts={allAccounts}
+                activateAccount={activateAccount}
+              />
+            </Route>
+            <Route exact path="/hwTab/success">
+              <SuccessAndClose />
+            </Route>
             <Route path="*">
               <Wallet
                 activeAddress={walletAddresses[0]}
-                nextIndex={nextIndex}
                 activeAccount={activeAccount}
                 accounts={allAccounts}
                 currency={currency}
@@ -150,6 +160,7 @@ export const Main = () => {
                 assets={assets}
                 nfts={nfts}
                 setAvatar={setAvatar}
+                openHWFlow={openHWFlow}
               />
             </Route>
           </Switch>

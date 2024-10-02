@@ -39,7 +39,8 @@ export const walletRoutePaths = {
     activating: '/nami/migration/activating',
     welcome: '/nami/migration/welcome',
     customize: '/nami/migration/customize',
-    allDone: '/nami/migration/all-done'
+    allDone: '/nami/migration/all-done',
+    hwFlow: '/nami/nami-mode/hwTab'
   }
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/no-unsafe-assignment */
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -6,17 +7,17 @@ import { ChevronRightIcon } from '@chakra-ui/icons';
 import { Box, Button, Icon, Image, Text, useColorMode } from '@chakra-ui/react';
 import { MdUsb } from 'react-icons/md';
 
-import { initHW } from '../../../api/extension';
 import LedgerLogo from '../../../assets/img/ledgerLogo.svg';
 import TrezorLogo from '../../../assets/img/trezorLogo.svg';
 import { HW } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
-import type { HardwareDeviceInfo } from './types';
+import type { Wallet } from '@lace/cardano';
 
 interface ConnectHWProps {
-  onConfirm: (data: Readonly<HardwareDeviceInfo>) => void;
+  onConfirm: (data: Readonly<Wallet.HardwareWalletConnection>) => void;
 }
 
 const MANUFACTURER: Record<string, string> = {
@@ -26,6 +27,7 @@ const MANUFACTURER: Record<string, string> = {
 
 export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
   const capture = useCaptureEvent();
+  const { connectHW } = useOutsideHandles();
   const { colorMode } = useColorMode();
   const [selected, setSelected] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -35,6 +37,7 @@ export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
     setIsLoading(true);
     setError('');
     try {
+      let connectionResult: Wallet.HardwareWalletConnection | null = null;
       const device = await navigator.usb.requestDevice({
         filters: [],
       });
@@ -45,19 +48,20 @@ export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
         setIsLoading(false);
         return;
       }
-      if (selected === HW.ledger) {
-        try {
-          await initHW({ device: selected, id: device.productId });
-        } catch {
-          setError('Cardano app not opened');
-          setIsLoading(false);
-          return;
-        }
+
+      try {
+        connectionResult = await connectHW(device);
+      } catch {
+        setError('Cardano app not opened');
+        setIsLoading(false);
+        return;
       }
 
-      void capture(Events.HWConnectNextClick);
-      onConfirm({ device: selected, id: device.productId });
-      return;
+      if (!!connectionResult) {
+        void capture(Events.HWConnectNextClick);
+        onConfirm(connectionResult);
+        return;
+      }
     } catch {
       setError('Device not found');
     }

@@ -72,7 +72,6 @@ const WalletStory = ({
         cardanoCoin={cardanoCoin}
         activeAddress={account.paymentAddr}
         accounts={[]}
-        nextIndex={1}
         currency={CurrencyCode.USD}
         activeAccount={{
           index: 0,
@@ -696,6 +695,8 @@ export const AddAccountLight: Story = {
     colorMode: 'light',
     accounts: [
       {
+        type: 'InMemory',
+        walletId: 'walletId',
         name: account.name,
         avatar: account.avatar,
         balance: BigInt(account.lovelace),

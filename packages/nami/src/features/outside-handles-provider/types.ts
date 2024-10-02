@@ -6,6 +6,7 @@ import type {
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
+  WalletType,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { PasswordObj as Password } from '@lace/core';
@@ -104,4 +105,19 @@ export interface OutsideHandlesContextValue {
   certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
     type: Wallet.Cardano.CertificateType,
   ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
+  openHWFlow: (path: string) => void;
+  walletType: WalletType;
+  connectHW: (usbDevice: USBDevice) => Promise<Wallet.HardwareWalletConnection>;
+  createHardwareWalletRevamped: (
+    params: Readonly<{
+      accountIndexes: number[];
+      name: string;
+      connection: Wallet.HardwareWalletConnection;
+      getAccountName?: (index: number) => string;
+    }>,
+  ) => Promise<Wallet.CardanoWallet>;
+  saveHardwareWallet: (
+    wallet: Readonly<Wallet.CardanoWallet>,
+    chainName?: Wallet.ChainName,
+  ) => Promise<void>;
 }

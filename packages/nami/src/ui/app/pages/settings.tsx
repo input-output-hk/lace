@@ -101,7 +101,7 @@ const Settings = ({
 
   return (
     <Box
-      minHeight="calc(100vh - 30px)"
+      minHeight="100vh"
       display="flex"
       alignItems="center"
       flexDirection="column"

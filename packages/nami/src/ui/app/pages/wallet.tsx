@@ -1,5 +1,7 @@
+/* eslint-disable react/no-multi-comp */
 import React, { useCallback, useMemo } from 'react';
 
+import { WalletType } from '@cardano-sdk/web-extension';
 import {
   SettingsIcon,
   AddIcon,
@@ -63,8 +65,9 @@ import { FaGamepad, FaRegFileCode } from 'react-icons/fa';
 import { GiTwoCoins, GiUsbKey } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 
+import { getNextAccountIndex } from '../../../adapters/account';
 import { useDelegation } from '../../../adapters/delegation';
-import { createTab, displayUnit } from '../../../api/extension';
+import { displayUnit } from '../../../api/extension';
 import { currencyToSymbol } from '../../../api/util';
 // Assets
 import Logo from '../../../assets/img/logoWhite.svg';
@@ -89,12 +92,14 @@ import type { CurrencyCode } from '../../../adapters/currency';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
-export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+export type Props = Pick<
+  OutsideHandlesContextValue,
+  'cardanoCoin' | 'openHWFlow'
+> & {
   activeAddress: string;
   removeAccount: UseAccount['removeAccount'];
   activateAccount: UseAccount['activateAccount'];
   addAccount: UseAccount['addAccount'];
-  nextIndex: number;
   currency: CurrencyCode;
   activeAccount: UseAccount['activeAccount'];
   accounts: UseAccount['allAccounts'];
@@ -109,7 +114,6 @@ export type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
 
 const Wallet = ({
   activeAddress,
-  nextIndex,
   currency,
   activeAccount,
   accounts,
@@ -124,6 +128,7 @@ const Wallet = ({
   assets,
   nfts,
   setAvatar,
+  openHWFlow,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const history = useHistory();
@@ -138,9 +143,15 @@ const Wallet = ({
 
   const canDeleteAccount = useMemo(
     () =>
-      !!activeAccount.hw ||
+      activeAccount.type === WalletType.Ledger ||
+      activeAccount.type === WalletType.Trezor ||
       accounts.filter(a => a.walletId === activeAccount.walletId).length > 1,
     [accounts, activeAccount],
+  );
+
+  const inMemoryWallet = useMemo(
+    () => accounts.find(a => a.type === WalletType.InMemory),
+    [accounts],
   );
   const onAccountClick = useCallback(
     async (account: Readonly<Account>) => {
@@ -162,7 +173,7 @@ const Wallet = ({
     <>
       <Box
         background={containerBg}
-        minHeight="calc(100vh - 30px)"
+        minHeight="100vh"
         display="flex"
         alignItems="center"
         flexDirection="column"
@@ -245,7 +256,9 @@ const Wallet = ({
                       <UserInfo
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
-                        onClick={async () => await onAccountClick(account)}
+                        onClick={() => {
+                          void onAccountClick(account);
+                        }}
                         avatar={account.avatar}
                         name={account.name}
                         balance={account.balance}
@@ -254,22 +267,27 @@ const Wallet = ({
                           account.walletId === activeAccount.walletId
                         }
                         cardanoCoin={cardanoCoin}
-                        isHW={account.hw}
+                        isHW={
+                          account.type === WalletType.Ledger ||
+                          account.type === WalletType.Trezor
+                        }
                       />
                     ))}
                   </Scrollbars>
                 </MenuGroup>
                 <MenuDivider />
 
-                <MenuItem
-                  icon={<AddIcon />}
-                  onClick={() => {
-                    void capture(Events.SettingsNewAccountClick);
-                    newAccountRef.current.openModal();
-                  }}
-                >
-                  New Account
-                </MenuItem>
+                {!!inMemoryWallet && (
+                  <MenuItem
+                    icon={<AddIcon />}
+                    onClick={() => {
+                      void capture(Events.SettingsNewAccountClick);
+                      newAccountRef.current.openModal();
+                    }}
+                  >
+                    New Account
+                  </MenuItem>
+                )}
                 {canDeleteAccount && (
                   <MenuItem
                     color="red.300"
@@ -284,9 +302,11 @@ const Wallet = ({
                 )}
                 <MenuItem
                   icon={<Icon as={GiUsbKey} w={3} h={3} />}
-                  onClick={() => {
-                    capture(Events.HWConnectClick);
-                    createTab(TAB.hw);
+                  onClick={(): void => {
+                    void (async () => {
+                      await capture(Events.HWConnectClick);
+                      openHWFlow(TAB.hw);
+                    })();
                   }}
                 >
                   Connect Hardware Wallet
@@ -568,11 +588,14 @@ const Wallet = ({
           </TabPanels>
         </Tabs>
       </Box>
-      <NewAccountModal
-        ref={newAccountRef}
-        nextIndex={nextIndex}
-        addAccount={addAccount}
-      />
+      {inMemoryWallet?.walletId && (
+        <NewAccountModal
+          ref={newAccountRef}
+          accounts={accounts}
+          walletId={inMemoryWallet?.walletId}
+          addAccount={addAccount}
+        />
+      )}
       <DeleteAccountModal
         ref={deleteAccountRef}
         activateAccount={activateAccount}
@@ -589,10 +612,11 @@ const Wallet = ({
 const NewAccountModal = React.forwardRef<
   unknown,
   {
-    nextIndex: Props['nextIndex'];
+    accounts: Props['accounts'];
     addAccount: Props['addAccount'];
+    walletId: string;
   }
->(({ nextIndex, addAccount }, ref) => {
+>(({ accounts, addAccount, walletId }, ref) => {
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -606,11 +630,12 @@ const NewAccountModal = React.forwardRef<
     setIsLoading(true);
     try {
       await addAccount({
-        index: nextIndex,
+        index: getNextAccountIndex(accounts, walletId),
         name: state.name,
         passphrase: Buffer.from(state.password, 'utf8'),
+        walletId,
       });
-      capture(Events.SettingsNewAccountConfirmClick);
+      await capture(Events.SettingsNewAccountConfirmClick);
       onClose();
     } catch {
       setState(s => ({ ...s, wrongPassword: true }));
@@ -716,6 +741,8 @@ const NewAccountModal = React.forwardRef<
   );
 });
 
+NewAccountModal.displayName = 'NewAccountModal';
+
 const DeleteAccountModal = React.forwardRef<
   unknown,
   {
@@ -742,7 +769,10 @@ const DeleteAccountModal = React.forwardRef<
         a =>
           a.index !== activeAccount.index &&
           a.walletId === activeAccount.walletId,
-      ) ?? accounts.find(a => !a.hw),
+      ) ??
+      accounts.find(
+        a => a.type !== WalletType.Ledger && a.type !== WalletType.Trezor,
+      ),
     [accounts, activeAccount],
   );
 
@@ -810,6 +840,8 @@ const DeleteAccountModal = React.forwardRef<
   );
 });
 
+DeleteAccountModal.displayName = 'DeleteAccountModal';
+
 const DelegationPopover = ({ builderRef }) => {
   const {
     inMemoryWallet,
@@ -875,7 +907,9 @@ const DelegationPopover = ({ builderRef }) => {
                   fontSize="md"
                   textDecoration="underline"
                   cursor="pointer"
-                  onClick={() => openExternalLink(delegation.homepage)}
+                  onClick={() => {
+                    openExternalLink(delegation.homepage);
+                  }}
                 >
                   {delegation.ticker}
                 </Text>
@@ -955,5 +989,7 @@ const DelegationPopover = ({ builderRef }) => {
     </Box>
   );
 };
+
+DelegationPopover.displayName = 'DelegationPopover';
 
 export default Wallet;

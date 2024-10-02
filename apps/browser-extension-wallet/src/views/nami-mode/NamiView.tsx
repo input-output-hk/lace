@@ -32,6 +32,7 @@ import { BackgroundStorage } from '@lib/scripts/types';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { useWalletState } from '@hooks/useWalletState';
 import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
+import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -40,11 +41,22 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const backgroundServices = useBackgroundServiceAPIContext();
-  const { createWallet, getMnemonic, deleteWallet, switchNetwork, enableCustomNode, addAccount, walletRepository } =
-    useWalletManager();
+  const {
+    createWallet,
+    getMnemonic,
+    deleteWallet,
+    switchNetwork,
+    enableCustomNode,
+    addAccount,
+    walletRepository,
+    connectHardwareWalletRevamped,
+    createHardwareWalletRevamped,
+    saveHardwareWallet
+  } = useWalletManager();
   const {
     walletUI,
     inMemoryWallet,
+    walletType,
     walletInfo,
     currentChain,
     environmentName,
@@ -128,6 +140,14 @@ export const NamiView = withDappContext((): React.ReactElement => {
     [walletState]
   );
 
+  const openHWFlow = useCallback(
+    (path: string) => {
+      backgroundServices.handleOpenNamiBrowser({ path });
+    },
+    [backgroundServices]
+  );
+  const connectHW = useWrapWithTimeout(connectHardwareWalletRevamped);
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -179,7 +199,12 @@ export const NamiView = withDappContext((): React.ReactElement => {
         transactions: sortedHistoryTx,
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
-        certificateInspectorFactory
+        certificateInspectorFactory,
+        openHWFlow,
+        walletType,
+        connectHW,
+        createHardwareWalletRevamped,
+        saveHardwareWallet
       }}
     >
       <Nami />
