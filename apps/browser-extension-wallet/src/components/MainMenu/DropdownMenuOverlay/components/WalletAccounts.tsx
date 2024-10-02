@@ -236,14 +236,16 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
 
   const renameAccount = useCallback(
     async (newAccountName: string) => {
+      const account = wallet.accounts.find(({ accountIndex }) => accountIndex === editAccountDrawer.data.accountNumber);
+
       await walletRepository.updateAccountMetadata({
         walletId: wallet.walletId,
         accountIndex: editAccountDrawer.data.accountNumber,
-        metadata: { name: newAccountName }
+        metadata: { ...account?.metadata, name: newAccountName }
       });
       editAccountDrawer.hide();
     },
-    [walletRepository, wallet.walletId, editAccountDrawer]
+    [walletRepository, wallet.walletId, editAccountDrawer, wallet.accounts]
   );
 
   return (

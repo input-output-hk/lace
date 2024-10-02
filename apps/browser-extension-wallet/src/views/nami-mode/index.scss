@@ -1,0 +1,25 @@
+#nami-mode {
+  width: 100%;
+  height: 100%;
+  font-family: sans-serif;
+}
+
+html[data-theme='dark'] {
+  body:has(#nami-mode) {
+    *::selection {
+      background: #375479;
+      background-color: #375479;
+      color: #f8fbfb;
+    }
+  }
+}
+
+body:has(#nami-mode) {
+  font-family: sans-serif !important;
+
+  *::selection {
+    background: #b5d7ff;
+    background-color: #b5d7ff;
+    color: #19202b;
+  }
+}

@@ -69,7 +69,7 @@ module.exports = () =>
           ]
         },
         {
-          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm)$/,
+          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm|mp4)$/,
           loader: 'file-loader'
         },
         {
@@ -82,7 +82,8 @@ module.exports = () =>
       new CopyPlugin({
         patterns: [
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
-          { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' }
+          { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' },
+          { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../[name][ext]' }
         ]
       }),
       new HtmlWebpackPlugin({

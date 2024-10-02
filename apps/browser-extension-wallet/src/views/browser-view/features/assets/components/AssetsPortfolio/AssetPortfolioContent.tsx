@@ -17,7 +17,7 @@ const searchTokens = (data: IAssetDetails[], searchValue: string) => {
   const lowerSearchValue = searchValue.toLowerCase();
 
   return data.filter((item) =>
-    fields.some((field) => field in item && item[field] && item[field].toLowerCase().includes(lowerSearchValue))
+    fields.some((field) => field in item && item[field]?.toLowerCase().includes(lowerSearchValue))
   );
 };
 

@@ -8,6 +8,7 @@ export enum ExperimentsConfigStatus {
 export enum ExperimentName {
   CREATE_PAPER_WALLET = 'create-paper-wallet',
   RESTORE_PAPER_WALLET = 'restore-paper-wallet',
+  USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets'
 }
 

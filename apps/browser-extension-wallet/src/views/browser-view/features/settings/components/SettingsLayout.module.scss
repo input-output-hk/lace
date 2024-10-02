@@ -561,3 +561,15 @@ h5 {
 .fullWidth {
   width: 100%;
 }
+
+.warningIcon {
+  color: var(--lace-yellow) !important;
+  position: relative;
+  top: 7px;
+  margin-right: 6px;
+}
+
+.switchToNamiModalTitle {
+  margin: 0 auto;
+  max-width: 300px;
+}

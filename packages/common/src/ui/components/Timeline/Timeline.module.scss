@@ -1,5 +1,5 @@
 @import '../../styles/theme.scss';
-@import "../../styles/abstracts/typography";
+@import '../../styles/abstracts/typography';
 
 .sideTimeline {
   margin: size_unit(7) 0 size_unit(7) size_unit(5) !important;
@@ -16,7 +16,7 @@
     .ant-timeline-item-head {
       width: size_unit(2.5);
       height: size_unit(2.5);
-      background: var(--bg-color-container);
+      background: transparent;
     }
     .ant-timeline-item-tail {
       left: 0;
@@ -40,6 +40,5 @@
 .inactiveDot {
   @extend .dot;
   border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  background-color: var(--light-mode-light-grey-plus, var(--dark-mode-light-grey));
 }
-

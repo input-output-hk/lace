@@ -31,6 +31,10 @@ export interface BackgroundStorage {
   usePersistentUserId?: boolean;
   featureFlags?: Record<number, Record<ExperimentName, string | boolean>>;
   customSubmitTxUrl?: string;
+  namiMigration?: {
+    completed: boolean;
+    mode: 'lace' | 'nami';
+  };
   optedInBeta?: boolean;
 }
 

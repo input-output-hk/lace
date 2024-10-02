@@ -25,6 +25,7 @@ export type Config = {
   CEXPLORER_BASE_URL: Record<EnvironmentTypes, string>;
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
   SAVED_PRICE_DURATION: number;
+  DEFAULT_SUBMIT_API: string;
 };
 
 // eslint-disable-next-line complexity
@@ -94,6 +95,7 @@ export const config = (): Config => {
     },
     SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
-      : 720
+      : 720,
+    DEFAULT_SUBMIT_API: 'http://localhost:8090/api/submit/tx'
   };
 };
