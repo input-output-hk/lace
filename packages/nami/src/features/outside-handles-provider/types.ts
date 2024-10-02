@@ -104,5 +104,4 @@ export interface OutsideHandlesContextValue {
   certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
     type: Wallet.Cardano.CertificateType,
   ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
-  openExternalLink: (url: string) => void;
 }

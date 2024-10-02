@@ -97,7 +97,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
-  const openExternalLink = useExternalLinkOpener();
 
   useEffect(() => {
     getBackgroundStorage()
@@ -180,8 +179,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         transactions: sortedHistoryTx,
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
-        certificateInspectorFactory,
-        openExternalLink
+        certificateInspectorFactory
       }}
     >
       <Nami />

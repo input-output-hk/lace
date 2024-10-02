@@ -347,8 +347,7 @@ const Wallet = ({
               fontSize="2xl"
               fontWeight="bold"
               quantity={
-                !!balance &&
-                (balance - lockedCoins - unspendableCoins).toString()
+                balance && (balance - lockedCoins - unspendableCoins).toString()
               }
               decimals={6}
               symbol={cardanoCoin.symbol}
@@ -419,7 +418,7 @@ const Wallet = ({
               color="white"
               fontSize="md"
               quantity={
-                !!balance &&
+                balance &&
                 Number.parseInt(
                   displayUnit(
                     balance - lockedCoins - unspendableCoins,

@@ -1,11 +1,12 @@
 /* eslint-disable functional/prefer-immutable-types */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   assetsMintedInspector,
   assetsBurnedInspector,
   delegationInspector,
   poolRetirementInspector,
+  poolRegistrationInspector,
   coalesceValueQuantities,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
@@ -162,6 +163,7 @@ interface GetExtraProps {
   tx: Wallet.Cardano.HydratedTx;
   txType: Type;
   certificateInspectorFactory: OutsideHandlesContextValue['certificateInspectorFactory'];
+  rewardAccountsAddresses: Set<Wallet.Cardano.RewardAccount>;
 }
 
 export type Extra =
@@ -179,6 +181,7 @@ const getExtra = async ({
   tx,
   txType,
   certificateInspectorFactory,
+  rewardAccountsAddresses,
 }: GetExtraProps): Promise<Extra[]> => {
   const extra: Extra[] = [];
 
@@ -188,7 +191,10 @@ const getExtra = async ({
     extra.push('multisig');
   }
 
-  if (tx.body.withdrawals?.length) extra.push('withdrawal');
+  const withdrawal = tx.body.withdrawals?.find(w =>
+    rewardAccountsAddresses.has(w.stakeAddress),
+  );
+  if (withdrawal) extra.push('withdrawal');
 
   const delegationCerts = await delegationInspector(tx);
   if (delegationCerts?.length) extra.push('delegation');
@@ -216,10 +222,8 @@ const getExtra = async ({
   const poolRetireCerts = await poolRetirementInspector(tx);
   if (poolRetireCerts?.length) extra.push('poolRetire');
 
-  const updateDelegateRepresentativeCerts = await certificateInspectorFactory(
-    Wallet.Cardano.CertificateType.UpdateDelegateRepresentative,
-  )(tx);
-  if (updateDelegateRepresentativeCerts) extra.push('poolUpdate');
+  const updateDelegateRepresentativeCerts = await poolRegistrationInspector(tx);
+  if (updateDelegateRepresentativeCerts?.length) extra.push('poolUpdate');
 
   return extra;
 };
@@ -259,6 +263,13 @@ export const useTxInfo = (
   } = useOutsideHandles();
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const rewardAccounts = useObservable(
+    inMemoryWallet.delegation.rewardAccounts$,
+  );
+  const rewardAccountsAddresses = useMemo(
+    () => new Set(rewardAccounts?.map(a => a.address)),
+    [rewardAccounts],
+  );
   const currentAddress = walletAddresses[0];
 
   useEffect(() => {
@@ -308,6 +319,7 @@ export const useTxInfo = (
           tx,
           txType: type,
           certificateInspectorFactory,
+          rewardAccountsAddresses,
         }),
         amounts: amounts,
         lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
