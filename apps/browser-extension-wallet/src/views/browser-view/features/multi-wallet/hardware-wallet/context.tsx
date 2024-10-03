@@ -170,7 +170,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     try {
       cardanoWallet = await createHardwareWalletRevamped({
         connection,
-        ...walletData
+        ...walletData,
+        accountIndexes: [walletData.accountIndex]
       });
     } catch (error) {
       console.error('ERROR creating hardware wallet', { error });

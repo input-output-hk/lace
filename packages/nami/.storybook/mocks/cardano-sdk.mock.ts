@@ -8,6 +8,13 @@ export const Cardano = {
   NetworkMagics: {},
 };
 
+export const WalletType = {
+  InMemory: "InMemory",
+  Ledger: "Ledger",
+  Trezor: "Trezor",
+  Script: "Script"
+}
+
 export const Serialization = {
   TransactionOutput: function () {},
   Value: function () {

@@ -26,7 +26,7 @@ import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
-const NUMBER_OF_ACCOUNTS_PER_WALLET = 24;
+const NUMBER_OF_ACCOUNTS_PER_WALLET = 50;
 const HW_CONNECT_TIMEOUT_MS = 30_000;
 
 type EnableAccountPasswordDialogData = {

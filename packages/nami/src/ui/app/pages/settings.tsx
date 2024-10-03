@@ -66,7 +66,6 @@ type Props = Pick<
     currentPassword: string,
     newPassword: string,
   ) => Promise<void>;
-  deleteWallet: (password: string) => Promise<void>;
   accountName: string;
   accountAvatar?: string;
   updateAccountMetadata: UseAccount['updateAccountMetadata'];
@@ -84,7 +83,6 @@ const Settings = ({
   removeDapp,
   handleAnalyticsChoice,
   changePassword,
-  deleteWallet,
   updateAccountMetadata,
   environmentName,
   switchNetwork,
@@ -127,7 +125,6 @@ const Settings = ({
         <Route path="/settings/general">
           <GeneralSettings
             changePassword={changePassword}
-            deleteWallet={deleteWallet}
             currency={currency}
             setCurrency={setCurrency}
             theme={theme}
@@ -273,7 +270,6 @@ const GeneralSettings = ({
   accountName,
   accountAvatar,
   changePassword,
-  deleteWallet,
   updateAccountMetadata,
 }: Readonly<
   Pick<
@@ -282,7 +278,6 @@ const GeneralSettings = ({
     | 'accountName'
     | 'changePassword'
     | 'currency'
-    | 'deleteWallet'
     | 'setCurrency'
     | 'setTheme'
     | 'theme'
@@ -293,7 +288,6 @@ const GeneralSettings = ({
   const [name, setName] = useState(accountName);
   const [originalName, setOriginalName] = useState(accountName);
   const { setColorMode } = useColorMode();
-  const ref = useRef();
   const changePasswordRef = useRef();
 
   const nameHandler = async () => {
@@ -407,39 +401,6 @@ const GeneralSettings = ({
       >
         Change Password
       </Button>
-      <Box height="10" />
-      <Button
-        size="xs"
-        colorScheme="red"
-        variant="link"
-        onClick={() => {
-          capture(Events.SettingsRemoveWalletClick);
-          ref.current.openModal();
-        }}
-      >
-        Reset Wallet
-      </Button>
-      <ConfirmModal
-        info={
-          <Box mb="4" fontSize="sm" width="full">
-            The wallet will be reset.{' '}
-            <b>Make sure you have written down your seed phrase.</b> It's the
-            only way to recover your current wallet! <br />
-            Type your password below, if you want to continue.
-          </Box>
-        }
-        ref={ref}
-        onCloseBtn={() => {
-          capture(Events.SettingsHoldUpBackClick);
-        }}
-        sign={async password => {
-          capture(Events.SettingsHoldUpRemoveWalletClick);
-          return deleteWallet(password);
-        }}
-        onConfirm={async status => {
-          if (status) window.close();
-        }}
-      />
       <ChangePasswordModal
         ref={changePasswordRef}
         changePassword={changePassword}

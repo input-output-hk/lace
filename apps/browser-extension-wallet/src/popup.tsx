@@ -29,8 +29,8 @@ import { storage } from 'webextension-polyfill';
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
   storage.onChanged.addListener((changes) => {
-    const oldModeValue = changes.BACKGROUND_STORAGE.oldValue?.namiMigration;
-    const newModeValue = changes.BACKGROUND_STORAGE.newValue?.namiMigration;
+    const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
+    const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
     if (oldModeValue?.mode !== newModeValue?.mode) {
       setMode(newModeValue);
       // Force back to original routing

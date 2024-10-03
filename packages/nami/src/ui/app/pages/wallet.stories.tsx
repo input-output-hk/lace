@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
@@ -20,17 +20,15 @@ import {
   getCurrentAccount,
   getDelegation,
   getNetwork,
-  getTransactions,
   getAsset,
 } from '../../../api/extension/api.mock';
 import {
   account,
   account1,
-  account2,
   accountHW,
   currentAccount,
 } from '../../../mocks/account.mock';
-import { transactions } from '../../../mocks/history.mock';
+import { transactions, txInfo } from '../../../mocks/transaction.mock';
 import { network } from '../../../mocks/network.mock';
 import { store } from '../../../mocks/store.mock';
 import { tokens } from '../../../mocks/token.mock';
@@ -44,6 +42,7 @@ import { useDelegation } from '../../../adapters/delegation.mock';
 import { Wallet as CardanoWallet } from '@lace/cardano';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
 import { useCollateral } from '../../../adapters/collateral.mock';
+import { useTxInfo } from '../../../adapters/transactions.mock';
 
 const noop = (async () => {}) as any;
 
@@ -71,9 +70,8 @@ const WalletStory = ({
     <Box overflowX="hidden">
       <Wallet
         cardanoCoin={cardanoCoin}
-        walletAddress={account.paymentAddr}
+        activeAddress={account.paymentAddr}
         accounts={[]}
-        nextIndex={1}
         currency={CurrencyCode.USD}
         activeAccount={{
           index: 0,
@@ -151,9 +149,6 @@ const meta: Meta<typeof WalletStory> = {
     getNetwork.mockImplementation(async () => {
       return await Promise.resolve(network);
     });
-    getTransactions.mockImplementation(async () => {
-      return await Promise.resolve(transactions);
-    });
     useStoreState.mockImplementation((callback: any) => {
       return callback(store);
     });
@@ -187,7 +182,6 @@ const meta: Meta<typeof WalletStory> = {
       getDelegation.mockReset();
       getCurrentAccount.mockReset();
       getNetwork.mockReset();
-      getTransactions.mockReset();
       useStoreState.mockReset();
       useStoreActions.mockReset();
       getAsset.mockReset();
@@ -218,6 +212,7 @@ export const LayoutLight: Story = {
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
+        transactions: [],
       };
     });
     useCollateral.mockImplementation(() => {
@@ -700,6 +695,8 @@ export const AddAccountLight: Story = {
     colorMode: 'light',
     accounts: [
       {
+        type: 'InMemory',
+        walletId: 'walletId',
         name: account.name,
         avatar: account.avatar,
         balance: BigInt(account.lovelace),
@@ -1030,6 +1027,48 @@ export const EmptyHistoryListDark: Story = {
 
 export const HistoryLight: Story = {
   ...LayoutLight,
+  beforeEach: () => {
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: undefined,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useOutsideHandles.mockImplementation(() => {
+      return useMemo(
+        () => ({
+          passwordUtil: {},
+          cardanoCoin,
+          collateralFee: BigInt(0),
+          isInitializingCollateral: false,
+          transactions,
+        }),
+        [],
+      );
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: false,
+      };
+    });
+    useTxInfo.mockImplementation((tx: CardanoWallet.Cardano.HydratedTx) => {
+      return txInfo[tx.id];
+    });
+
+    return () => {
+      useDelegation.mockReset();
+      useOutsideHandles.mockReset();
+      useCollateral.mockReset();
+      useTxInfo.mockReset();
+    };
+  },
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
@@ -1049,18 +1088,18 @@ export const HistoryDark: Story = {
 };
 
 export const HistoryTxLight: Story = {
-  ...LayoutLight,
+  ...HistoryLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
       await userEvent.click(canvas.getByTestId('clockIcon'));
     });
-    // await step('Open first transaction', async () => {
-    //   const button = await canvas.findByTestId(
-    //     `transaction-button-${account2.history.confirmed[0]}`,
-    //   );
-    //   await userEvent.click(button);
-    // });
+    await step('Open first transaction', async () => {
+      const button = await canvas.findByTestId(
+        `transaction-button-${Object.keys(txInfo)[0]}`,
+      );
+      await userEvent.click(button);
+    });
   },
   parameters: {
     colorMode: 'light',
@@ -1075,16 +1114,16 @@ export const HistoryTxDark: Story = {
 };
 
 export const HistoryTxAssetsLight: Story = {
-  ...LayoutLight,
+  ...HistoryLight,
   play: async ({ canvasElement, step }) => {
     const canvas = within(canvasElement);
     await step('Open transaction history', async () => {
       await userEvent.click(canvas.getByTestId('clockIcon'));
     });
-    // await step('Open transaction assets popover', async () => {
-    //   const button = await canvas.findByTestId('asset-popover-trigger');
-    //   await userEvent.click(button);
-    // });
+    await step('Open transaction assets popover', async () => {
+      const button = await canvas.findByTestId('asset-popover-trigger');
+      await userEvent.click(button);
+    });
   },
   parameters: {
     colorMode: 'light',

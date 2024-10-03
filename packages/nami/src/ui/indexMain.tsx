@@ -7,11 +7,10 @@ import { useAccount } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
-import {
-  useChangePassword,
-  useDeleteWalletWithPassword,
-} from '../adapters/wallet';
+import { useChangePassword } from '../adapters/wallet';
 
+import { HWConnectFlow } from './app/hw/hw';
+import { SuccessAndClose } from './app/hw/success-and-close';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
@@ -26,7 +25,7 @@ export const Main = () => {
     connectedDapps,
     fiatCurrency,
     theme,
-    walletAddress,
+    walletAddresses,
     inMemoryWallet,
     isAnalyticsOptIn,
     currentChain,
@@ -51,18 +50,13 @@ export const Main = () => {
     isValidURL,
     setAvatar,
     switchWalletMode,
+    openHWFlow,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
     fiatCurrency,
     setFiatCurrency,
   );
-
-  const deleteWalletWithPassword = useDeleteWalletWithPassword({
-    wallets$: walletRepository.wallets$,
-    activeWalletId$: walletManager.activeWalletId$,
-    deleteWallet,
-  });
 
   const changePassword = useChangePassword({
     chainId: currentChain,
@@ -78,7 +72,6 @@ export const Main = () => {
   });
 
   const {
-    nextIndex,
     allAccounts,
     activeAccount,
     nonActiveAccounts,
@@ -112,7 +105,6 @@ export const Main = () => {
                 removeDapp={removeDapp}
                 connectedDapps={connectedDapps}
                 changePassword={changePassword}
-                deleteWallet={deleteWalletWithPassword}
                 currency={currency}
                 setCurrency={setCurrency}
                 theme={theme}
@@ -137,15 +129,23 @@ export const Main = () => {
                 activeAccount={activeAccount}
                 updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
-                walletAddress={walletAddress}
+                activeAddress={walletAddresses[0]}
                 inMemoryWallet={inMemoryWallet}
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
+            <Route exact path="/hwTab">
+              <HWConnectFlow
+                accounts={allAccounts}
+                activateAccount={activateAccount}
+              />
+            </Route>
+            <Route exact path="/hwTab/success">
+              <SuccessAndClose />
+            </Route>
             <Route path="*">
               <Wallet
-                walletAddress={walletAddress}
-                nextIndex={nextIndex}
+                activeAddress={walletAddresses[0]}
                 activeAccount={activeAccount}
                 accounts={allAccounts}
                 currency={currency}
@@ -160,6 +160,7 @@ export const Main = () => {
                 assets={assets}
                 nfts={nfts}
                 setAvatar={setAvatar}
+                openHWFlow={openHWFlow}
               />
             </Route>
           </Switch>

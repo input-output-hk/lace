@@ -24,6 +24,7 @@ import {
   AddWalletProps,
   AnyBip32Wallet,
   AnyWallet,
+  Bip32WalletAccount,
   WalletId,
   WalletManagerActivateProps,
   WalletManagerApi,
@@ -87,7 +88,7 @@ type WalletManagerAddAccountProps = {
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
 
 type CreateHardwareWalletRevampedParams = {
-  accountIndex: number;
+  accountIndexes: number[];
   name: string;
   connection: Wallet.HardwareWalletConnection;
 };
@@ -266,33 +267,37 @@ export const useWalletManager = (): UseWalletManager => {
   }, [currentChain]);
 
   const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
-    async ({ accountIndex, connection, name }) => {
-      let extendedAccountPublicKey;
-      try {
-        extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
-          connection.type,
-          accountIndex,
-          connection.type === WalletType.Ledger ? connection.value : undefined
-        );
-      } catch (error: unknown) {
-        throw error;
-      }
-      const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lastActiveAccountIndex: accountIndex },
-        type: connection.type,
-        accounts: [
-          {
-            extendedAccountPublicKey,
+    async ({ accountIndexes, connection, name }) => {
+      const accounts: Bip32WalletAccount<Wallet.AccountMetadata>[] = [];
+      for (const accountIndex of accountIndexes) {
+        let extendedAccountPublicKey;
+        try {
+          extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
+            connection.type,
             accountIndex,
-            metadata: { name: defaultAccountName(accountIndex) }
-          }
-        ]
+            connection.type === WalletType.Ledger ? connection.value : undefined
+          );
+        } catch (error: unknown) {
+          throw error;
+        }
+        accounts.push({
+          extendedAccountPublicKey,
+          accountIndex,
+          metadata: { name: defaultAccountName(accountIndex) }
+        });
+      }
+
+      const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata: { name, lastActiveAccountIndex: accountIndexes[0] },
+        type: connection.type,
+        accounts
       };
+
       const walletId = await walletRepository.addWallet(addWalletProps);
       await walletManager.activate({
         walletId,
         chainId: getCurrentChainId(),
-        accountIndex
+        accountIndex: accountIndexes[0]
       });
 
       return {
@@ -323,7 +328,7 @@ export const useWalletManager = (): UseWalletManager => {
       connectedDevice
     }: CreateHardwareWallet): Promise<Wallet.CardanoWallet> =>
       createHardwareWalletRevamped({
-        accountIndex,
+        accountIndexes: [accountIndex],
         connection: {
           type: connectedDevice,
           value: typeof deviceConnection !== 'boolean' ? deviceConnection : undefined

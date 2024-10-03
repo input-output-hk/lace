@@ -1,10 +1,12 @@
 import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
+import type { EraSummary } from '@cardano-sdk/core';
 import type {
   AnyBip32Wallet,
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
+  WalletType,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { PasswordObj as Password } from '@lace/core';
@@ -48,7 +50,6 @@ export interface OutsideHandlesContextValue {
   setFiatCurrency: (fiatCurrency: string) => void;
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
-  walletAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
   cardanoPrice: number;
@@ -95,4 +96,27 @@ export interface OutsideHandlesContextValue {
   hasNoFunds: boolean;
   switchWalletMode: () => Promise<void>;
   openExternalLink: (url: string) => void;
+  walletAddresses: string[];
+  eraSummaries: EraSummary[];
+  transactions: Wallet.Cardano.HydratedTx[];
+  getTxInputsValueAndAddress: (
+    inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
+  ) => Promise<Wallet.TxInput[]>;
+  certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
+    type: Wallet.Cardano.CertificateType,
+  ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
+  openHWFlow: (path: string) => void;
+  walletType: WalletType;
+  connectHW: (usbDevice: USBDevice) => Promise<Wallet.HardwareWalletConnection>;
+  createHardwareWalletRevamped: (
+    params: Readonly<{
+      accountIndexes: number[];
+      name: string;
+      connection: Wallet.HardwareWalletConnection;
+    }>,
+  ) => Promise<Wallet.CardanoWallet>;
+  saveHardwareWallet: (
+    wallet: Readonly<Wallet.CardanoWallet>,
+    chainName?: Wallet.ChainName,
+  ) => Promise<void>;
 }

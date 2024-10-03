@@ -49,6 +49,10 @@ const config: StorybookConfig = {
           join(__dirname, '../src/adapters/collateral.mock.ts'),
         ),
         new NormalModuleReplacementPlugin(
+          /adapters\/transactions$/,
+          join(__dirname, '../src/adapters/transactions.mock.ts'),
+        ),
+        new NormalModuleReplacementPlugin(
           /adapters\/delegation$/,
           join(__dirname, '../src/adapters/delegation.mock.ts'),
         ),

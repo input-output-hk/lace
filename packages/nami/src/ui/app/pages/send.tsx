@@ -74,7 +74,7 @@ import { UseAccount } from '../../../adapters/account';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
 interface Props {
-  walletAddress: string;
+  activeAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
   accounts: UseAccount['nonActiveAccounts'];
@@ -142,7 +142,7 @@ const Send = ({
   accounts,
   activeAccount,
   inMemoryWallet,
-  walletAddress,
+  activeAddress,
   currentChain,
   updateAccountMetadata,
   withSignTxConfirmation,
@@ -208,7 +208,7 @@ const Send = ({
   );
 
   const paymentKeyHash = Ed25519KeyHashHex(
-    Cardano.Address.fromBech32(walletAddress).asBase()!.getPaymentCredential()
+    Cardano.Address.fromBech32(activeAddress).asBase()!.getPaymentCredential()
       .hash,
   );
 
@@ -370,7 +370,7 @@ const Send = ({
     account.current = {};
 
     const checkOutput = new Serialization.TransactionOutput(
-      Cardano.Address.fromBech32(walletAddress),
+      Cardano.Address.fromBech32(activeAddress),
       new Serialization.Value(BigInt(0)),
     );
     const minUtxo = await minAdaRequired(
