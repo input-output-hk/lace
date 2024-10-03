@@ -11,7 +11,8 @@ import {
   MigrationState,
   TokenPrices,
   CoinPrices,
-  ChangeModeData
+  ChangeModeData,
+  ModeApi
 } from '../../types';
 import { Subject, of, BehaviorSubject } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -22,6 +23,7 @@ import { config } from '@src/config';
 import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
+import { modeApiProperties, WALLET_MODE_CHANNEL } from '../injectUtil';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -187,6 +189,20 @@ if (process.env.USE_TOKEN_PRICING === 'true') {
   fetchTokenPrices();
   setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }
+
+exposeApi<ModeApi>(
+  {
+    api$: of({
+      getMode: async () => {
+        const { namiMigration } = await getBackgroundStorage();
+        return namiMigration?.mode || 'lace';
+      }
+    }),
+    baseChannel: WALLET_MODE_CHANNEL,
+    properties: modeApiProperties
+  },
+  { logger: console, runtime }
+);
 
 exposeApi<BackgroundService>(
   {
