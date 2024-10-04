@@ -23,3 +23,28 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   if (!AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
   return url;
 };
+
+export const getMagicForChain = (chainName: Wallet.ChainName): number => {
+  const { AVAILABLE_CHAINS } = config();
+  let magic = 0;
+  switch (chainName) {
+    case 'Mainnet':
+      magic = Wallet.Cardano.NetworkMagics.Mainnet;
+      break;
+    case 'Preprod':
+      magic = Wallet.Cardano.NetworkMagics.Preprod;
+      break;
+    case 'Preview':
+      magic = Wallet.Cardano.NetworkMagics.Preview;
+      break;
+    case 'Sanchonet':
+      magic = Wallet.Cardano.NetworkMagics.Sanchonet;
+      break;
+    default:
+      throw new Error('Incorrect chain supplied');
+  }
+
+  if (!AVAILABLE_CHAINS.includes(chainName)) throw new Error('Chain not supported');
+
+  return magic;
+};
