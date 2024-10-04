@@ -7,7 +7,7 @@ import { runtime } from 'webextension-polyfill';
 import { useHistory } from 'react-router-dom';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useCurrencyStore } from '@providers/currency';
-import { MigrationState } from '@xsy/nami-migration-tool/dist/migrator/migration-state.data';
+import { MigrationState } from './migration-tool/migrator/migration-state.data';
 import { useTheme } from '@providers/ThemeProvider/context';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMigration' | 'checkMigrationStatus'>>(
