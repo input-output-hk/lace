@@ -13,6 +13,7 @@ import {
 } from '@cardano-sdk/core';
 
 import {
+  CardanoWsClient,
   CreateHttpProviderConfig,
   assetInfoHttpProvider,
   chainHistoryHttpProvider,
@@ -56,12 +57,14 @@ export interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
   baseUrl: string;
   customSubmitTxUrl?: string;
+  useWebSocket?: boolean;
 }
 
 export const createProviders = ({
   axiosAdapter,
   baseUrl,
-  customSubmitTxUrl
+  customSubmitTxUrl,
+  useWebSocket
 }: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
     baseUrl,
@@ -69,13 +72,38 @@ export const createProviders = ({
     adapter: axiosAdapter
   };
 
+  const assetProvider = assetInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
+  const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
+  const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+
+  if (useWebSocket) {
+    const url = new URL(baseUrl);
+
+    url.pathname = '/ws';
+    url.protocol = url.protocol === 'https' ? 'wss' : 'ws';
+
+    const wsProvider = new CardanoWsClient({ chainHistoryProvider, logger: console }, { url });
+
+    return {
+      assetProvider,
+      networkInfoProvider: wsProvider.networkInfoProvider,
+      txSubmitProvider,
+      stakePoolProvider,
+      utxoProvider: wsProvider.utxoProvider,
+      chainHistoryProvider: wsProvider.chainHistoryProvider,
+      rewardsProvider
+    };
+  }
+
   return {
-    assetProvider: assetInfoHttpProvider(httpProviderConfig),
+    assetProvider,
     networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
-    txSubmitProvider: createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl),
-    stakePoolProvider: stakePoolHttpProvider(httpProviderConfig),
+    txSubmitProvider,
+    stakePoolProvider,
     utxoProvider: utxoHttpProvider(httpProviderConfig),
-    chainHistoryProvider: chainHistoryHttpProvider(httpProviderConfig),
-    rewardsProvider: rewardsHttpProvider(httpProviderConfig)
+    chainHistoryProvider,
+    rewardsProvider
   };
 };

@@ -13,6 +13,10 @@ const transformManifest = (content, mode) => {
     }
     manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
       .replace(
+        '$CARDANO_WS_SERVICES_URLS',
+        `${process.env.CARDANO_WS_SERVICES_URL_MAINNET} ${process.env.CARDANO_WS_SERVICES_URL_PREPROD} ${process.env.CARDANO_WS_SERVICES_URL_PREVIEW} ${process.env.CARDANO_WS_SERVICES_URL_SANCHONET}`
+      )
+      .replace(
         '$CARDANO_SERVICES_URLS',
         `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`
       )

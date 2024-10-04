@@ -1,9 +1,10 @@
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { getBaseUrlForChain } from '@src/utils/chain';
+import { getBaseUrlForChain, getMagicForChain } from '@src/utils/chain';
 import { BackgroundService, UserIdService as UserIdServiceInterface } from '../types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
@@ -26,12 +27,15 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
 
 export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.WalletProvidersDependencies> => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
-  const { customSubmitTxUrl } = await getBackgroundStorage();
+  const magic = getMagicForChain(chainName);
+  const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
+  const useWebSocket = !!(featureFlags?.[magic]?.[ExperimentName.WEBSOCKET_API] ?? false);
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
     baseUrl: baseCardanoServicesUrl,
-    customSubmitTxUrl
+    customSubmitTxUrl,
+    useWebSocket
   });
 };
 

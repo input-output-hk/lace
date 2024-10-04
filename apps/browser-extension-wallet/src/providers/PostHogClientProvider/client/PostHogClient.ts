@@ -25,7 +25,12 @@ import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 
-type FeatureFlag = 'create-paper-wallet' | 'restore-paper-wallet' | 'shared-wallets' | 'use-switch-to-nami-mode';
+type FeatureFlag =
+  | 'create-paper-wallet'
+  | 'restore-paper-wallet'
+  | 'shared-wallets'
+  | 'use-switch-to-nami-mode'
+  | 'websocket-api';
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;
