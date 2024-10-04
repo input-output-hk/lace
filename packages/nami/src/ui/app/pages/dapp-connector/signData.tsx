@@ -70,13 +70,10 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
       return;
     }
 
-    if (Wallet.Cardano.BaseAddress.fromAddress(addressObj)) {
-      setAddress('payment');
-    } else if (addressObj) {
+    if (Wallet.Cardano.isRewardAccount(address)) {
       setAddress('stake');
     } else {
-      console.error('SignData: Unknown address type', address);
-      setAddress('unknown');
+      setAddress('payment');
     }
   };
 
