@@ -10,8 +10,8 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
-import { ERROR } from 'config/config';
 
+import { ERROR } from '../../../../config/config';
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
@@ -19,7 +19,7 @@ import ConfirmModal from '../../components/confirmModal';
 import { Scrollbars } from '../../components/scrollbar';
 
 import type { UseAccount } from '../../../../adapters/account';
-import type { DappConnector } from 'features/outside-handles-provider';
+import type { DappConnector } from '../../../../features/outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -234,6 +234,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError
             ) {
+              setError(ERROR.wrongPassword);
               throw ERROR.wrongPassword;
             }
             throw error;

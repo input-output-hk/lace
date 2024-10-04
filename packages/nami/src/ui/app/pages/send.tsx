@@ -52,7 +52,6 @@ import AssetBadge from '../components/assetBadge';
 import { ERROR, HW, TAB } from '../../../config/config';
 import { Planet } from 'react-kawaii';
 import { useStoreActions, useStoreState } from '../../store';
-import { action } from 'easy-peasy';
 import AvatarLoader from '../components/avatarLoader';
 import { NumericFormat } from 'react-number-format';
 import Copy from '../components/copy';
@@ -96,47 +95,6 @@ const useIsMounted = () => {
 };
 
 let timer = null;
-
-const initialState = {
-  fee: { fee: '0' },
-  value: { ada: '', assets: [], personalAda: '', minAda: '0' },
-  address: { result: '', display: '', error: '' },
-  message: '',
-  tx: null,
-  txInfo: {
-    minUtxo: 0,
-  },
-};
-
-export const sendStore = {
-  ...initialState,
-  setFee: action((state, fee) => {
-    state.fee = fee;
-  }),
-  setValue: action((state, value) => {
-    state.value = value;
-  }),
-  setMessage: action((state, message) => {
-    state.message = message;
-  }),
-  setTx: action((state, tx) => {
-    state.tx = tx;
-  }),
-  setAddress: action((state, address) => {
-    state.address = address;
-  }),
-  setTxInfo: action((state, txInfo) => {
-    state.txInfo = txInfo;
-  }),
-  reset: action(state => {
-    state.fee = initialState.fee;
-    state.value = initialState.value;
-    state.message = initialState.message;
-    state.address = initialState.address;
-    state.tx = initialState.tx;
-    state.txInfo = initialState.txInfo;
-  }),
-};
 
 const Send = ({
   accounts,
@@ -346,11 +304,11 @@ const Send = ({
         );
       }
 
-      const tx = await buildTx(
-        transactionOutput,
+      const tx = await buildTx({
+        output: transactionOutput,
         auxiliaryData,
         inMemoryWallet,
-      );
+      });
       const inspection = await tx.inspect();
       setFee({ fee: inspection.inputSelection.fee.toString() });
       setTx(tx);
@@ -450,6 +408,7 @@ const Send = ({
                   history.goBack();
                 }}
                 variant="ghost"
+                aria-label={''}
                 icon={<ChevronLeftIcon boxSize="6" />}
               />
             </Box>
@@ -624,9 +583,9 @@ const Send = ({
                 isLoading={
                   !fee.fee &&
                   !fee.error &&
-                  address.result &&
+                  !!address.result &&
                   !address.error &&
-                  (value.ada || value.assets.length > 0)
+                  !!(value.ada || value.assets.length > 0)
                 }
                 width={'366px'}
                 height={'50px'}
@@ -751,12 +710,12 @@ const Send = ({
               hw,
             });
           } else
-            return await signAndSubmit(
+            return await signAndSubmit({
               tx,
               password,
               withSignTxConfirmation,
               inMemoryWallet,
-            );
+            });
         }}
         onConfirm={async (status, signedTx) => {
           if (status === true) {

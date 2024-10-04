@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useMemo } from 'react';
 
@@ -257,7 +258,7 @@ const Wallet = ({
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
                         onClick={() => {
-                          void onAccountClick(account);
+                          onAccountClick(account);
                         }}
                         avatar={account.avatar}
                         name={account.name}

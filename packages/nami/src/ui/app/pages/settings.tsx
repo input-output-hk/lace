@@ -38,7 +38,6 @@ import { useStoreActions } from '../../store';
 import Account from '../components/account';
 import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
-import ConfirmModal from '../components/confirmModal';
 
 import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';

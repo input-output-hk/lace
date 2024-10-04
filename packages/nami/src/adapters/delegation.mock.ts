@@ -6,6 +6,6 @@ import * as actualApi from './delegation';
 
 export * from './delegation';
 
-export const useDelegation = fn(actualApi.useDelegation).mockName(
+export const useDelegation: jest.Mock = fn(actualApi.useDelegation).mockName(
   'useDelegation',
 );

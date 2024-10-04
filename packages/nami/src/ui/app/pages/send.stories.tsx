@@ -11,8 +11,8 @@ import {
   getAdaHandle,
 } from '../../../api/extension/api.mock';
 import { buildTx } from '../../../api/extension/wallet.mock';
-import { minAdaRequired, valueToAssets } from '../../../api/util.mock';
-import { account, account1, currentAccount } from '../../../mocks/account.mock';
+import { minAdaRequired } from '../../../api/util.mock';
+import { account1, currentAccount } from '../../../mocks/account.mock';
 import { store } from '../../../mocks/store.mock';
 import { useStoreState, useStoreActions } from '../../store.mock';
 import { Cardano } from '../../../../.storybook/mocks/cardano-sdk.mock';
@@ -308,7 +308,6 @@ const meta: Meta<typeof SendStory> = {
       useStoreActions.mockReset();
       getAdaHandle.mockReset();
       minAdaRequired.mockReset();
-      valueToAssets.mockReset();
       buildTx.mockReset();
       Route.mockReset();
       Cardano.Address.fromBech32.mockReset();

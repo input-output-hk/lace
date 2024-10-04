@@ -9,15 +9,17 @@ import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
 import { useChangePassword } from '../adapters/wallet';
 
+import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
+import { Enable } from './app/pages/dapp-connector/enable';
+import { SignData } from './app/pages/dapp-connector/signData';
+import { SignTx } from './app/pages/dapp-connector/signTx';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
-
-import { Enable, SignTx, SignData, useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
