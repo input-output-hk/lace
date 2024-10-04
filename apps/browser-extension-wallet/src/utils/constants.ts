@@ -12,11 +12,8 @@ export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbol
 export const cardanoCoin: Wallet.CoinId = {
   id: '1',
   name: 'Cardano',
-  decimals: 6,
   symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]
 };
-
-export const EPOCH_DURATION_DAYS = 5;
 
 export const MIN_COIN_TO_SEND = 1;
 
