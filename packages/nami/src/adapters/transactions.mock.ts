@@ -6,4 +6,6 @@ import * as actualApi from './transactions';
 
 export * from './transactions';
 
-export const useTxInfo = fn(actualApi.useTxInfo).mockName('useTxInfo');
+export const useTxInfo: jest.Mock = fn(actualApi.useTxInfo).mockName(
+  'useTxInfo',
+);

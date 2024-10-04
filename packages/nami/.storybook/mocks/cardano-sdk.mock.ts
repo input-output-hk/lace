@@ -16,6 +16,11 @@ export const WalletType = {
 }
 
 export const Serialization = {
+  Transaction: {
+    fromCbor: (d) => ({
+      toCore: () => d
+    })
+  },
   TransactionOutput: function () {},
   Value: function () {
     return { setMultiasset: () => {} };

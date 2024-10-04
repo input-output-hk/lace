@@ -4,10 +4,7 @@ import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within } from '@storybook/test';
 
-import {
-  getCurrentAccount,
-  getFavoriteIcon,
-} from '../../../api/extension/api.mock';
+import { getFavoriteIcon } from '../../../api/extension/api.mock';
 import { currentAccount } from '../../../mocks/account.mock';
 
 import Settings from './settings';
@@ -88,9 +85,6 @@ const meta: Meta<typeof SettingsStory> = {
     layout: 'centered',
   },
   beforeEach: () => {
-    getCurrentAccount.mockImplementation(async () => {
-      return await Promise.resolve(currentAccount);
-    });
     useStoreState.mockImplementation((callback: any) => {
       return callback(store);
     });
@@ -105,7 +99,6 @@ const meta: Meta<typeof SettingsStory> = {
     });
 
     return () => {
-      getCurrentAccount.mockReset();
       useStoreState.mockReset();
       useStoreActions.mockReset();
       Route.mockReset();

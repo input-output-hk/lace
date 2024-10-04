@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
 import { ChevronRightIcon } from '@chakra-ui/icons';
@@ -39,9 +39,9 @@ import {
 } from './signTxUtil';
 
 import type { TransactionValue } from './signTxUtil';
+import type { UseAccount } from '../../../../adapters/account';
 import type { DappConnector } from '../../../../features/outside-handles-provider';
 import type { Cardano } from '@cardano-sdk/core';
-import type { UseAccount } from 'adapters/account';
 
 interface Props {
   dappConnector: DappConnector;

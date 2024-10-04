@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CheckIcon } from '@chakra-ui/icons';
 import { Box, Button, Text, Image, useColorModeValue } from '@chakra-ui/react';
@@ -7,7 +7,7 @@ import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
 
-import type { DappConnector } from 'features/outside-handles-provider';
+import type { DappConnector } from '../../../../features/outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-null */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
@@ -103,6 +103,18 @@ const Transaction = ({
     assetsBtnHover: useColorModeValue('teal.200', 'gray.700'),
   };
 
+  const extraInfo = useMemo(
+    () =>
+      displayInfo && displayInfo.extra.length > 0 ? (
+        <Text fontSize={12} fontWeight="semibold" color="teal.500">
+          {getTxExtra(displayInfo.extra)}
+        </Text>
+      ) : (
+        ''
+      ),
+    [displayInfo],
+  );
+
   return (
     <AccordionItem borderTop="none" _last={{ borderBottom: 'none' }}>
       <VStack spacing={2}>
@@ -161,12 +173,8 @@ const Transaction = ({
                   decimals={6}
                   symbol={cardanoCoin.symbol}
                 />
-              ) : displayInfo.extra.length > 0 ? (
-                <Text fontSize={12} fontWeight="semibold" color="teal.500">
-                  {getTxExtra(displayInfo.extra)}
-                </Text>
               ) : (
-                ''
+                extraInfo
               )}
               {['internalIn', 'externalIn'].includes(displayInfo.type) ? (
                 ''

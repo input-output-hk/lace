@@ -1,5 +1,4 @@
-/* eslint-disable functional/no-throw-statements */
-import { useOutsideHandles } from '../../ui';
+import { useOutsideHandles } from '../../features/outside-handles-provider/useOutsideHandles';
 
 import type { Events } from './events';
 

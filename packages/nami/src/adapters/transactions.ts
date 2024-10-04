@@ -55,13 +55,15 @@ const getTxType = ({
 
   if (inputsAddr.every(addr => addr === currentAddress)) {
     // sender
+    const internalOrExternalOut = outputsAddr.some(
+      addr => addresses.includes(addr) && addr !== currentAddress,
+    )
+      ? 'internalOut'
+      : 'externalOut';
+
     return outputsAddr.every(addr => addr === currentAddress)
       ? 'self'
-      : outputsAddr.some(
-            addr => addresses.includes(addr) && addr !== currentAddress,
-          )
-        ? 'internalOut'
-        : 'externalOut';
+      : internalOrExternalOut;
   } else if (inputsAddr.every(addr => addr !== currentAddress)) {
     // receiver
     return inputsAddr.some(addr => addresses.includes(addr))
@@ -297,9 +299,12 @@ export const useTxInfo = (
         validContract: tx.inputSource === Wallet.Cardano.InputSource.inputs,
       });
       const assets = amounts.filter(amount => amount.unit !== 'lovelace');
-      const lovelace = BigInt(
-        amounts.find(amount => amount.unit === 'lovelace')!.quantity,
-      );
+      const lovelaceAsset = amounts.find(amount => amount.unit === 'lovelace');
+      const lovelace = BigInt(lovelaceAsset?.quantity ?? '');
+      const deposit =
+        Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
+          ? BigInt(implicitCoin.deposit?.toString() ?? 0)
+          : BigInt(0);
 
       const info: TxInfo = {
         txHash: tx.id.toString(),
@@ -326,9 +331,7 @@ export const useTxInfo = (
           ? BigInt(lovelace.toString())
           : BigInt(lovelace.toString()) +
             BigInt(tx.body.fee.toString()) +
-            (Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
-              ? BigInt(implicitCoin.deposit?.toString() ?? 0)
-              : BigInt(0)),
+            deposit,
         assets: assets
           .map(asset => {
             const assetInfo = assetsInfo?.get(
