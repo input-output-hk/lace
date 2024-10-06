@@ -56,11 +56,10 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "^6.0.0",
-    "@cardano-sdk/core": "0.39.3",
+    "@cardano-sdk/core": "0.41.0",
     "@cardano-sdk/crypto": "0.1.30",
-    "@cardano-sdk/tx-construction": "0.21.4",
-    "@cardano-sdk/web-extension": "0.34.2",
+    "@cardano-sdk/tx-construction": "0.21.8",
+    "@cardano-sdk/web-extension": "0.34.7",
     "@chakra-ui/css-reset": "1.0.0",
     "@chakra-ui/icons": "1.0.13",
     "@chakra-ui/react": "1.6.4",
