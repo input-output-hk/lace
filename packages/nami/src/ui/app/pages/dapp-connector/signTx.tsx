@@ -123,10 +123,11 @@ export const SignTx = ({
       tx.body.scriptIntegrityHash;
     const outputs = tx.body.outputs;
     for (const output of outputs) {
-      if (output.datum) {
+      if (output.datum || output.datumHash) {
         datum = true;
         if (isScriptAddress(output.address)) {
           contract = true;
+          break;
         }
       }
     }
