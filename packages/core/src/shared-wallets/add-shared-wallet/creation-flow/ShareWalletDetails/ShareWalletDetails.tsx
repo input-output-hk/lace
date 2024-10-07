@@ -10,10 +10,15 @@ import styles from './ShareWalletDetails.module.scss';
 import { FILENAME, downloadWalletData } from './utils';
 
 export type LayoutNavigationDownloadProps = LayoutNavigationProps & {
+  onDownloadClick?: () => Promise<void>;
   stateSharedWallet: CreationFlowState;
 };
 
-export const ShareWalletDetails = ({ onNext, stateSharedWallet }: LayoutNavigationDownloadProps): JSX.Element => {
+export const ShareWalletDetails = ({
+  onNext,
+  onDownloadClick,
+  stateSharedWallet,
+}: LayoutNavigationDownloadProps): JSX.Element => {
   const { t } = useTranslation();
 
   const translations = {
@@ -47,7 +52,10 @@ export const ShareWalletDetails = ({ onNext, stateSharedWallet }: LayoutNavigati
         icon={
           <Button
             block
-            onClick={() => downloadWalletData(stateSharedWallet)}
+            onClick={async () => {
+              await onDownloadClick?.();
+              downloadWalletData(stateSharedWallet);
+            }}
             color="gradient"
             data-testid="download-json-btn"
           >

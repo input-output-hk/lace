@@ -1,4 +1,4 @@
 export type LayoutNavigationProps = {
-  onBack?: () => void;
-  onNext?: () => void;
+  onBack?: () => Promise<void> | void;
+  onNext?: () => Promise<void> | void;
 };

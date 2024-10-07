@@ -5,14 +5,18 @@ import { useBuiltTxState } from '../store';
 import { Serialization } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useWalletState } from '@hooks/useWalletState';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const ImportSharedWalletTransaction = (): JSX.Element => {
   const [config] = useDrawer();
   const { setBuiltTxData } = useBuiltTxState();
   const walletState = useWalletState();
+  const analytics = useAnalyticsContext();
 
   return (
     <CoSignEntry
+      onImportError={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignTxImportJsonError)}
       // eslint-disable-next-line react/jsx-handler-names
       onCancel={config.onClose}
       onContinue={async (txData) => {

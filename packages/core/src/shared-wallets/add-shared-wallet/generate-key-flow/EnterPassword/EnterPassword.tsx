@@ -24,7 +24,7 @@ const mapOfWalletTypeIconProperties: Record<WalletKind, ReactElement> = {
 type EnterPasswordProps = {
   loading?: boolean;
   onBack: () => void;
-  onGenerateKeys: (password: string) => void;
+  onGenerateKeys: (password: string) => Promise<void>;
   passwordErrorType?: PasswordErrorType;
   walletKind: WalletKind;
   walletName: string;
@@ -43,7 +43,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   const icon = mapOfWalletTypeIconProperties[kind];
 
   const next = async () => {
-    onGenerateKeys(password);
+    await onGenerateKeys(password);
     setPassword('');
   };
 
