@@ -65,7 +65,7 @@ export const SignTx = ({
   const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
 
   const capture = useCaptureEvent();
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin, walletType } = useOutsideHandles();
   const ref = React.useRef();
   const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
@@ -506,21 +506,12 @@ export const SignTx = ({
       />
       <ConfirmModal
         ref={ref}
+        walletType={walletType}
         onCloseBtn={() => {
           capture(Events.DappConnectorDappTxCancelClick);
         }}
-        sign={async (password, hw) => {
-          if (hw) {
-            // TODO: add hw sign support
-            // return await signTxHW(
-            //   request.data.tx,
-            //   keyHashes.key,
-            //   account,
-            //   hw,
-            //   request.data.partialSign,
-            // );
-          }
-          return await request?.sign(password);
+        sign={async password => {
+          return request?.sign(password ?? '');
         }}
         onConfirm={async (status, signedTx) => {
           if (status) {
