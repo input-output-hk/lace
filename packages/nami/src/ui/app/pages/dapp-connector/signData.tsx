@@ -17,9 +17,11 @@ import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
 import ConfirmModal from '../../components/confirmModal';
 import { Scrollbars } from '../../components/scrollbar';
-
 import type { UseAccount } from '../../../../adapters/account';
-import type { DappConnector } from '../../../../features/outside-handles-provider';
+import {
+  DappConnector,
+  useOutsideHandles,
+} from '../../../../features/outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -44,6 +46,8 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
     const payloadUtf8 = Buffer.from(payload, 'hex').toString('utf8');
     setPayload(payloadUtf8);
   };
+
+  const { walletType } = useOutsideHandles();
 
   const signDataMsg = useMemo(() => {
     const result: JSX.Element[] = [];
@@ -224,9 +228,10 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
       )}
       <ConfirmModal
         ref={ref}
+        walletType={walletType}
         sign={async password => {
           try {
-            return await request?.sign(password);
+            return await request?.sign(password ?? '');
           } catch (error) {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError

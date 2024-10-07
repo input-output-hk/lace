@@ -104,6 +104,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       initializeCollateralTx: initializeCollateral,
       collateralFee,
       inMemoryWallet,
+      walletType,
       cardanoCoin,
       buildDelegation,
       setSelectedStakePool,
@@ -117,7 +118,8 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       withSignTxConfirmation,
       resetDelegationState,
       hasNoFunds,
-      openExternalLink
+      openExternalLink,
+      connectHW,
     } = useOutsideHandles();
     const { initDelegation, stakeRegistration } = useDelegation({
       inMemoryWallet,
@@ -250,6 +252,8 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             setData({ pool: { ...poolDefaultValue } });
             resetDelegationState();
           }}
+          walletType={walletType}
+          connectHW={connectHW}
           setPassword={setPassword}
           ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
           title="Delegate your funds"
@@ -423,6 +427,8 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             setData({ pool: { ...poolDefaultValue } });
             resetDelegationState();
           }}
+          walletType={walletType}
+          connectHW={connectHW}
           setPassword={setPassword}
           ready={!isBuildingTx}
           title="Stake deregistration"
@@ -519,6 +525,9 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               <Icon as={FaRegFileCode} mr="2" /> <Box>Collateral</Box>
             </Box>
           }
+          walletType={walletType}
+          connectHW={connectHW}
+          setPassword={setPassword}
           sign={async password => {
             await submitCollateral(password);
           }}

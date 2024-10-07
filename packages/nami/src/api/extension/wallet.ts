@@ -1,15 +1,9 @@
 import { Cardano } from '@cardano-sdk/core';
 import { firstValueFrom } from 'rxjs';
 
-import {
-  // ERROR,
-  TX,
-} from '../../config/config';
+import { TX } from '../../config/config';
 
-import {
-  // signTxHW,
-  submitTx,
-} from '.';
+import { submitTx } from '.';
 
 import type { OutsideHandlesContextValue } from '../../ui';
 import type { Serialization } from '@cardano-sdk/core';
@@ -38,9 +32,7 @@ export const buildTx = async ({
     invalidHereafter: Cardano.Slot(tip.slot + TX.invalid_hereafter),
   });
 
-  const transaction = txBuilder.build();
-
-  return transaction;
+  return txBuilder.build();
 };
 
 export const signAndSubmit = async ({
@@ -57,45 +49,5 @@ export const signAndSubmit = async ({
   withSignTxConfirmation(async () => {
     const { cbor: signedTx } = await tx.sign();
 
-    const txHash = await submitTx(signedTx, inMemoryWallet);
-
-    return txHash;
+    return await submitTx(signedTx, inMemoryWallet);
   }, password);
-
-export const signAndSubmitHW = async (
-  tx: Serialization.Transaction,
-  {
-    keyHashes,
-    account,
-    hw,
-    partialSign,
-  }: Readonly<{ keyHashes: any; account: any; hw: any; partialSign?: boolean }>,
-) => {
-  console.log(tx, {
-    keyHashes,
-    account,
-    hw,
-    partialSign,
-  });
-  return '';
-  // const witnessSet = await signTxHW(
-  //   tx.toCbor(),
-  //   keyHashes,
-  //   account,
-  //   hw,
-  //   partialSign,
-  // );
-
-  // const transaction = new Serialization.Transaction(
-  //   tx.body(),
-  //   witnessSet,
-  //   tx.auxiliaryData(),
-  // );
-
-  // try {
-  //   const txHash = await submitTx(transaction.toCbor());
-  //   return txHash;
-  // } catch {
-  //   throw ERROR.submit;
-  // }
-};

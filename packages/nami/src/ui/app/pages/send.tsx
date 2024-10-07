@@ -107,7 +107,7 @@ const Send = ({
 }: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin, walletType, connectHW } = useOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -604,6 +604,8 @@ const Send = ({
       </Box>
       <AssetsModal ref={assetsModalRef} />
       <ConfirmModal
+        connectHW={connectHW}
+        walletType={walletType}
         title={'Confirm transaction'}
         info={
           <Box
@@ -700,22 +702,12 @@ const Send = ({
         ref={ref}
         sign={async (password, hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          if (hw) {
-            if (hw.device === HW.trezor) {
-              return createTab(TAB.trezorTx, `?tx=${tx}`);
-            }
-            return await signAndSubmitHW(txDes, {
-              keyHashes: [paymentKeyHash],
-              account: account.current,
-              hw,
-            });
-          } else
-            return await signAndSubmit({
-              tx,
-              password,
-              withSignTxConfirmation,
-              inMemoryWallet,
-            });
+          return await signAndSubmit({
+            tx,
+            password,
+            withSignTxConfirmation,
+            inMemoryWallet,
+          });
         }}
         onConfirm={async (status, signedTx) => {
           if (status === true) {

@@ -325,6 +325,8 @@ export const displayUnit = (
   quantity: bigint | number | string,
   decimals = 6,
 ) => {
+  if (quantity === undefined) return 0;
+
   return Number.parseInt(quantity.toString()) / 10 ** decimals;
 };
 
