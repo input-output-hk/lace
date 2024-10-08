@@ -16,7 +16,7 @@ export const ImportSharedWalletTransaction = (): JSX.Element => {
 
   return (
     <CoSignEntry
-      onImportError={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignTxImportJsonError)}
+      onImportError={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignTxImportJsonError)}
       // eslint-disable-next-line react/jsx-handler-names
       onCancel={config.onClose}
       onContinue={async (txData) => {

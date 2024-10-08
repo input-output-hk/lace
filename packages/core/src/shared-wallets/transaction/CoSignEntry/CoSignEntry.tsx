@@ -30,7 +30,7 @@ const loadFileAsJson = (file: File) =>
 type CoSignEntryProps = {
   onCancel: () => void;
   onContinue: (txData: SharedWalletTransactionSchema) => void;
-  onImportError?: () => Promise<void>;
+  onImportError?: () => void;
 };
 
 export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntryProps) => {
@@ -46,7 +46,7 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
     try {
       loadedData = await loadFileAsJson(event.target.files[0]);
     } catch (error: unknown) {
-      await onImportError?.();
+      onImportError?.();
       if (error instanceof UnrecognizedFile) {
         setErrorKind(ErrorKind.InvalidFile);
         return;
@@ -56,7 +56,7 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
 
     // TODO: validate loaded data against schema
     if (typeof loadedData !== 'object' || !('transaction' in loadedData) || !('metadata' in loadedData)) {
-      await onImportError?.();
+      onImportError?.();
       setErrorKind(ErrorKind.InvalidFile);
     }
 

@@ -27,11 +27,10 @@ export const TransactionCTAsBox = (): React.ReactElement => {
   };
 
   const openSend = () => {
-    // eslint-disable-next-line camelcase
-    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
-    if (isSharedWallet) {
-      analytics.sendEventToPostHog(PostHogAction.SharedWalletsSendClick);
-    }
+    isSharedWallet
+      ? analytics.sendEventToPostHog(PostHogAction.SharedWalletsSendClick)
+      : // eslint-disable-next-line camelcase
+        analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
     openSendTransactionDrawer();
     setTriggerPoint(SendFlowTriggerPoints.SEND_BUTTON);
   };
