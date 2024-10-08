@@ -87,6 +87,11 @@ export const POPUP_WINDOW = {
   height: 630
 };
 
+export const POPUP_WINDOW_NAMI = {
+  width: 400,
+  height: 630
+};
+
 export const HW_POPUP_WINDOW = {
   width: 900,
   height: 630

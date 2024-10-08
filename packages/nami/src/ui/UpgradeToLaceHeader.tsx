@@ -14,6 +14,7 @@ export const UpgradeToLaceHeader = ({
   const location = useLocation();
 
   if (location.pathname.startsWith('/hwTab')) return null;
+  if (location.pathname.startsWith('/dapp')) return null;
 
   return (
     <motion.div
