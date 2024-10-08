@@ -174,11 +174,10 @@ const Wallet = ({
     <>
       <Box
         background={containerBg}
-        minHeight="100vh"
+        minHeight="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        ma
       >
         <Box
           height="52"
@@ -211,6 +210,7 @@ const Wallet = ({
             right="6"
           >
             <Menu
+              placement="bottom-end"
               isOpen={menu}
               autoSelect={false}
               onClose={() => {
@@ -251,7 +251,7 @@ const Wallet = ({
                   <Scrollbars
                     style={{ width: '100%' }}
                     autoHeight
-                    autoHeightMax={210}
+                    autoHeightMax={180}
                   >
                     {accounts.map(account => (
                       <UserInfo

@@ -381,7 +381,7 @@ const Send = ({
   return (
     <>
       <Box
-        height="100vh"
+        height="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"

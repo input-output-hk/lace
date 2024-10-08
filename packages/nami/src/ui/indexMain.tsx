@@ -101,7 +101,7 @@ export const Main = () => {
     <HashRouter>
       <Container environmentName={environmentName} theme={theme}>
         <UpgradeToLaceHeader switchWalletMode={switchWalletMode} />
-        <Box overflowX="hidden">
+        <Box overflowX="hidden" minHeight="calc(100vh - 30px)">
           <Switch>
             <Route path="/settings/*">
               <Settings
