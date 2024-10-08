@@ -66,7 +66,7 @@ const testCases = [
       quantity: '1',
       unit: 'aa0f536f65c1ffd33001a831c418f1e2f3105cfd9741bbcb6202aedc001bc280676f6f7365',
       decimals: 0,
-      image: null,
+      image: undefined,
     },
   ],
   [
@@ -101,7 +101,7 @@ const testCases = [
       quantity: '38709316',
       unit: '659ab0b5658687c2e74cd10dba8244015b713bf503b90557769d77a757696e67526964657273',
       decimals: 6,
-      image: null,
+      image: undefined,
     },
   ],
   [
@@ -169,7 +169,7 @@ const testCases = [
       quantity: '67280096',
       unit: 'e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed724d494e',
       decimals: 0,
-      image: null,
+      image: undefined,
     },
   ],
   [
@@ -196,7 +196,7 @@ const testCases = [
       quantity: '1',
       unit: '359289937f6cd0478f2c0737eed4ba879725c09d9d80caeeadf4a67f6261746d616e',
       decimals: 0,
-      image: null,
+      image: undefined,
     },
   ],
   [

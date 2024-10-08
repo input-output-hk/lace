@@ -49,7 +49,7 @@ const loadAndStoreFeatureMode = async (runtime: MinimalRuntime) =>
  *   - as a side effect, get feature flags from service worker by using the
  *     specified runtime for messaging and store them in local storage
  */
-export const getMode = async (runtime: MinimalRuntime) =>
+export const getMode = async (runtime: MinimalRuntime): Promise<'lace' | 'nami'> =>
   //   const storedMode = localStorage.getItem(MODE_STORAGE_KEY);
   //   if (storedMode) {
   //     // update feature flags in local storage without blocking the return
