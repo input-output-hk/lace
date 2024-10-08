@@ -1,7 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  createTab,
   displayUnit,
   getAdaHandle,
   isValidAddress,
@@ -107,7 +106,7 @@ const Send = ({
 }: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const { cardanoCoin, walletType, connectHW } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -604,7 +603,7 @@ const Send = ({
       </Box>
       <AssetsModal ref={assetsModalRef} />
       <ConfirmModal
-        connectHW={connectHW}
+        openHWFlow={openHWFlow}
         walletType={walletType}
         title={'Confirm transaction'}
         info={
@@ -708,6 +707,21 @@ const Send = ({
             withSignTxConfirmation,
             inMemoryWallet,
           });
+        }}
+        getCbor={async () => {
+          const transaction = new Serialization.Transaction(
+            Serialization.TransactionBody.fromCore(tx.body),
+            Serialization.TransactionWitnessSet.fromCore(
+              tx.witness
+                ? (tx.witness as Cardano.Witness)
+                : { signatures: new Map() },
+            ),
+            tx.auxiliaryData
+              ? Serialization.AuxiliaryData.fromCore(tx.auxiliaryData)
+              : undefined,
+          );
+
+          return transaction.toCbor();
         }}
         onConfirm={async (status, signedTx) => {
           if (status === true) {

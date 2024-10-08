@@ -12,6 +12,7 @@ import { useChangePassword } from '../adapters/wallet';
 import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
+import { TrezorTx } from './app/hw/trezorTx';
 import { Enable } from './app/pages/dapp-connector/enable';
 import { SignData } from './app/pages/dapp-connector/signData';
 import { SignTx } from './app/pages/dapp-connector/signTx';
@@ -145,6 +146,9 @@ export const Main = () => {
             </Route>
             <Route exact path="/hwTab/success">
               <SuccessAndClose />
+            </Route>
+            <Route exact path="/hwTab/trezorTx/:cbor">
+              <TrezorTx />
             </Route>
             <Route path="/dapp/connect">
               <Enable

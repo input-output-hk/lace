@@ -65,7 +65,7 @@ export const SignTx = ({
   const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
 
   const capture = useCaptureEvent();
-  const { cardanoCoin, walletType } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useOutsideHandles();
   const ref = React.useRef();
   const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
@@ -507,6 +507,7 @@ export const SignTx = ({
       />
       <ConfirmModal
         ref={ref}
+        openHWFlow={openHWFlow}
         walletType={walletType}
         onCloseBtn={() => {
           capture(Events.DappConnectorDappTxCancelClick);

@@ -24,8 +24,7 @@ import { MdUsb } from 'react-icons/md';
 
 import { ERROR } from '../../../config/config';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { Events } from "../../../features/analytics/events";
-import type { Wallet } from '@lace/cardano';
+import { useHistory } from 'react-router-dom';
 
 interface Props {
   ready: boolean;
@@ -36,12 +35,12 @@ interface Props {
   title: React.ReactNode;
   info: React.ReactNode;
   walletType: WalletType;
-  connectHW: (device: USBDevice) => Promise<Wallet.HardwareWalletConnection>;
+  openHWFlow: (path: string) => void;
+  getCbor: () => Promise<string>;
 }
 
 const ConfirmModal = React.forwardRef<unknown, Props>(
-  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword, walletType, connectHW }, ref) => {
-
+  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword, walletType, openHWFlow }, ref) => {
     const {
       isOpen: isOpenNormal,
       onOpen: onOpenNormal,
@@ -60,7 +59,7 @@ const ConfirmModal = React.forwardRef<unknown, Props>(
       title,
       info,
       walletType,
-      connectHW
+      openHWFlow
     };
     React.useImperativeHandle(ref, () => ({
       openModal() {
@@ -214,17 +213,22 @@ const ConfirmModalHw = ({ props, isOpen, onClose }) => {
   const [error, setError] = React.useState('');
 
   const confirmHandler = async () => {
-    if (props.ready === false || !waitReady) return;
-    setWaitReady(false);
-    try {
-      const signedMessage = await props.sign(null);
-      await props.onConfirm(true, signedMessage);
-    } catch (e) {
-      console.error(e);
-      if (e === ERROR.submit) props.onConfirm(false, e);
-      else setError('An error occured');
+    if (props.walletType === WalletType.Trezor) {
+      const cbor = await props.getCbor();
+      props.openHWFlow(`hwTab/trezorTx/${cbor}`);
+    } else {
+      if (props.ready === false || !waitReady) return;
+      setWaitReady(false);
+      try {
+        const signedMessage = await props.sign(null);
+        await props.onConfirm(true, signedMessage);
+      } catch (e) {
+        console.error(e);
+        if (e === ERROR.submit) props.onConfirm(false, e);
+        else setError('An error occured');
+      }
+      setWaitReady(true);
     }
-    setWaitReady(true);
   };
 
   React.useEffect(() => {
