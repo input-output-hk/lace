@@ -7,7 +7,7 @@ import {
   Cardano,
   ProviderError,
   ProviderFailure,
-  TxCBOR,
+  Serialization,
 } from '@cardano-sdk/core';
 import { createAvatar } from '@dicebear/avatars';
 import * as style from '@dicebear/avatars-bottts-sprites';
@@ -1166,7 +1166,7 @@ export const submitTx = async (
   inMemoryWallet: Wallet.ObservableWallet,
 ): Promise<Cardano.TransactionId | undefined> => {
   try {
-    const result = await inMemoryWallet.submitTx(TxCBOR(tx));
+    const result = await inMemoryWallet.submitTx(Serialization.TxCBOR(tx));
     return result;
   } catch (error) {
     if (
