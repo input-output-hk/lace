@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
-import { useAccount } from '../adapters/account';
+import { useAccountUtil } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
@@ -83,7 +83,7 @@ export const Main = () => {
     activateAccount,
     removeAccount,
     updateAccountMetadata,
-  } = useAccount({
+  } = useAccountUtil({
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),

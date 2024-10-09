@@ -16,7 +16,7 @@ import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { useEffect, useState } from 'react';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { NamiPopup } from './views/nami-mode';
+import { NamiDappConnector } from './views/nami-mode/indexInternal';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -42,7 +42,9 @@ const App = (): React.ReactElement => {
                       <ThemeProvider>
                         <ExternalLinkOpenerProvider>
                           <AddressesDiscoveryOverlay>
-                            <UIThemeProvider>{mode === 'nami' ? <NamiPopup /> : <DappConnectorView />}</UIThemeProvider>
+                            <UIThemeProvider>
+                              {mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                            </UIThemeProvider>
                           </AddressesDiscoveryOverlay>
                         </ExternalLinkOpenerProvider>
                       </ThemeProvider>
