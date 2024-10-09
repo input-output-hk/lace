@@ -201,7 +201,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
                 height={'50px'}
                 width={'180px'}
                 onClick={async () => {
-                  capture(Events.DappConnectorDappDataCancelClick);
+                  await capture(Events.DappConnectorDappDataCancelClick);
                   await request?.reject(() => {
                     window.close();
                   });
@@ -247,7 +247,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
         }}
         onConfirm={async (status, signedMessage) => {
           if (status) {
-            capture(Events.DappConnectorDappDataConfirmClick);
+            await capture(Events.DappConnectorDappDataConfirmClick);
             const channelCloseDelay = 100;
             setTimeout(() => {
               window.close();

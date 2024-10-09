@@ -112,8 +112,8 @@ export const Enable = ({
         <Button
           height={'50px'}
           width={'180px'}
-          onClick={() => {
-            capture(Events.DappConnectorAuthorizeDappCancelClick);
+          onClick={async () => {
+            await capture(Events.DappConnectorAuthorizeDappCancelClick);
             controller('deny', dappInfo?.url ?? '', () => {
               window.close();
             });
@@ -126,8 +126,8 @@ export const Enable = ({
           height={'50px'}
           width={'180px'}
           colorScheme="teal"
-          onClick={() => {
-            capture(Events.DappConnectorAuthorizeDappAuthorizeClick);
+          onClick={async () => {
+            await capture(Events.DappConnectorAuthorizeDappAuthorizeClick);
             controller('allow', dappInfo?.url ?? '', () => {
               window.close();
             });

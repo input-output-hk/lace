@@ -471,7 +471,7 @@ export const SignTx = ({
                 height={'50px'}
                 width={'180px'}
                 onClick={async () => {
-                  capture(Events.DappConnectorDappTxCancelClick);
+                  await capture(Events.DappConnectorDappTxCancelClick);
                   await request?.reject(() => {
                     window.close();
                   });
@@ -487,7 +487,7 @@ export const SignTx = ({
                 colorScheme="teal"
                 onClick={() => {
                   capture(Events.DappConnectorDappTxSignClick);
-                  ref.current?.openModal(account.index);
+                  (ref.current as any)?.openModal(account.index);
                 }}
               >
                 Sign
@@ -517,7 +517,7 @@ export const SignTx = ({
         }}
         onConfirm={async (status, signedTx) => {
           if (status) {
-            capture(Events.DappConnectorDappTxConfirmClick);
+            await capture(Events.DappConnectorDappTxConfirmClick);
           }
 
           const channelCloseDelay = 100;
