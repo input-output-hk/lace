@@ -193,7 +193,13 @@ export const NamiView = withDappContext((): React.ReactElement => {
     }),
     [currentChain.networkId, walletUI.cardanoCoin]
   );
-  const { txFee, isInitializing, initializeCollateralTx, submitCollateralTx } = useCollateral();
+  const {
+    txFee,
+    isInitializing,
+    initializeCollateralTx,
+    submitCollateralTx,
+    txBuilder: collateralTxBuilder
+  } = useCollateral();
 
   const cardanoPrice = priceResult.cardano.price;
   const walletAddresses = walletInfo?.addresses
@@ -306,6 +312,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         signAndSubmitTransaction,
         passwordUtil,
         delegationTxFee: !!delegationTxBuilder && delegationTxFee,
+        delegationStoreDelegationTxBuilder: delegationTxBuilder,
+        collateralTxBuilder,
         setSelectedStakePool,
         isBuildingTx,
         stakingError,

@@ -24,7 +24,6 @@ import { MdUsb } from 'react-icons/md';
 
 import { ERROR } from '../../../config/config';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { useHistory } from 'react-router-dom';
 
 interface Props {
   ready: boolean;
@@ -37,10 +36,12 @@ interface Props {
   walletType: WalletType;
   openHWFlow: (path: string) => void;
   getCbor: () => Promise<string>;
+  setCollateral?: boolean;
+  isPopup?: boolean;
 }
 
 const ConfirmModal = React.forwardRef<unknown, Props>(
-  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword, walletType, openHWFlow }, ref) => {
+  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword, walletType, openHWFlow, getCbor, setCollateral, isPopup }, ref) => {
     const {
       isOpen: isOpenNormal,
       onOpen: onOpenNormal,
@@ -59,7 +60,10 @@ const ConfirmModal = React.forwardRef<unknown, Props>(
       title,
       info,
       walletType,
-      openHWFlow
+      openHWFlow,
+      getCbor,
+      setCollateral,
+      isPopup
     };
     React.useImperativeHandle(ref, () => ({
       openModal() {
@@ -213,9 +217,19 @@ const ConfirmModalHw = ({ props, isOpen, onClose }) => {
   const [error, setError] = React.useState('');
 
   const confirmHandler = async () => {
-    if (props.walletType === WalletType.Trezor) {
+    if (props.walletType === WalletType.Trezor && props.isPopup) {
       const cbor = await props.getCbor();
-      props.openHWFlow(`hwTab/trezorTx/${cbor}`);
+
+      if (cbor === '') {
+        setError('An error occurred');
+        return;
+      }
+
+      if (props.setCollateral) {
+        props.openHWFlow(`hwTab/trezorTx/${cbor}/${props.setCollateral}`);
+      } else {
+        props.openHWFlow(`hwTab/trezorTx/${cbor}`);
+      }
     } else {
       if (props.ready === false || !waitReady) return;
       setWaitReady(false);

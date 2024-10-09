@@ -70,6 +70,7 @@ import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset as NamiAsset } from '../../../types/assets';
 import { UseAccount } from '../../../adapters/account';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { TxInspection } from '@cardano-sdk/tx-construction/dist/cjs/tx-builder/types';
 
 interface Props {
   activeAddress: string;
@@ -603,6 +604,7 @@ const Send = ({
       </Box>
       <AssetsModal ref={assetsModalRef} />
       <ConfirmModal
+        isPopup={true}
         openHWFlow={openHWFlow}
         walletType={walletType}
         title={'Confirm transaction'}
@@ -709,15 +711,16 @@ const Send = ({
           });
         }}
         getCbor={async () => {
+          const inspection = await tx.inspect();
           const transaction = new Serialization.Transaction(
-            Serialization.TransactionBody.fromCore(tx.body),
+            Serialization.TransactionBody.fromCore(inspection.body),
             Serialization.TransactionWitnessSet.fromCore(
-              tx.witness
-                ? (tx.witness as Cardano.Witness)
+              inspection.witness
+                ? (inspection.witness as Cardano.Witness)
                 : { signatures: new Map() },
             ),
-            tx.auxiliaryData
-              ? Serialization.AuxiliaryData.fromCore(tx.auxiliaryData)
+            inspection.auxiliaryData
+              ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
               : undefined,
           );
 

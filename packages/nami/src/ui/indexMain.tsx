@@ -147,7 +147,7 @@ export const Main = () => {
             <Route exact path="/hwTab/success">
               <SuccessAndClose />
             </Route>
-            <Route exact path="/hwTab/trezorTx/:cbor">
+            <Route exact path="/hwTab/trezorTx/:cbor/:setCollateral?">
               <TrezorTx />
             </Route>
             <Route path="/dapp/connect">
