@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWalletStore } from '@src/stores';
 import { useAppInit } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
@@ -6,12 +6,21 @@ import { withDappContext } from '@src/features/dapp/context';
 import { NamiView } from './NamiView';
 import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
+import { useBackgroundServiceAPIContext } from '@providers';
+import { BrowserViewSections } from '@lib/scripts/types';
 
 export const NamiPopup = withDappContext((): React.ReactElement => {
   const { inMemoryWallet, walletInfo, cardanoWallet, walletState, initialHdDiscoveryCompleted, currentChain } =
     useWalletStore();
+  const backgroundServices = useBackgroundServiceAPIContext();
 
   useAppInit();
+
+  useEffect(() => {
+    if (cardanoWallet === null) {
+      backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
+    }
+  }, [backgroundServices, cardanoWallet]);
 
   return (
     <div id="nami-mode">

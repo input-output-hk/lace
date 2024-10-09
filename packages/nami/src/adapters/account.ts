@@ -34,7 +34,7 @@ interface AccountsProps {
   removeAccount: (
     props: Readonly<RemoveAccountProps>,
   ) => Promise<RemoveAccountProps>;
-  removeWallet: (props: WalletId) => Promise<WalletId>;
+  removeWallet: () => Promise<void>;
   updateAccountMetadata: (
     props: Readonly<UpdateAccountMetadataProps<Wallet.AccountMetadata>>,
   ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata>>;
@@ -219,9 +219,9 @@ export const useAccount = ({
         const isLastAccount = !allAccountsSorted.some(
           a => a.walletId === walletId && a.index !== accountIndex,
         );
-        console.log(isLastAccount, { accountIndex, walletId });
+
         await (isLastAccount
-          ? removeWallet(walletId)
+          ? removeWallet()
           : removeAccount({ accountIndex, walletId }));
       },
       [removeAccount, walletId, allAccountsSorted],
