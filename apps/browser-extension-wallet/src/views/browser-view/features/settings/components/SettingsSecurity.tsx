@@ -37,7 +37,7 @@ export const SettingsSecurity = ({
   const [hideShowPassphraseSetting, setHideShowPassphraseSetting] = useState(true);
   const [isPaperWalletSettingsDrawerOpen, setIsPaperWalletSettingsDrawerOpen] = useState(false);
   const { t } = useTranslation();
-  const { isWalletLocked, isInMemoryWallet, isSharedWallet } = useWalletStore();
+  const { isWalletLocked, isInMemoryWallet, isSharedWallet, isNamiWallet } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
@@ -112,7 +112,7 @@ export const SettingsSecurity = ({
         <Title level={5} className={styles.heading5} data-testid="security-settings-heading">
           {t('browserView.settings.security.title')}
         </Title>
-        {!hideShowPassphraseSetting && !isSharedWallet && (
+        {!hideShowPassphraseSetting && !isSharedWallet && !isNamiWallet && (
           <>
             <SettingsLink
               onClick={handleOpenShowPassphraseDrawer}
