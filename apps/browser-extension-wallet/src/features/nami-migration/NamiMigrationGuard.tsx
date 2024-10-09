@@ -1,7 +1,7 @@
 import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { NamiMigrationAPI, NamiMigrationChannels } from '@lib/scripts/background/nami-migration';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { MigrationState } from '@xsy/nami-migration-tool/dist/migrator/migration-state.data';
+import { MigrationState } from './migration-tool/migrator/migration-state.data';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 import { runtime, storage } from 'webextension-polyfill';
