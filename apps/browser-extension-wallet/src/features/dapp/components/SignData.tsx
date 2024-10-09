@@ -48,6 +48,18 @@ export const SignData = (): React.ReactElement => {
     return !password;
   }, [request, password]);
 
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!confirmIsDisabled) {
+        onConfirm();
+      }
+    },
+    [onConfirm, confirmIsDisabled]
+  );
+
   return (
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
@@ -57,6 +69,7 @@ export const SignData = (): React.ReactElement => {
           </h5>
           <Password
             onChange={handleChange}
+            onSubmit={handleSubmit}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
           />

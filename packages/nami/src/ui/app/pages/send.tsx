@@ -1,7 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  createTab,
   displayUnit,
   getAdaHandle,
   isValidAddress,
@@ -52,7 +51,6 @@ import AssetBadge from '../components/assetBadge';
 import { ERROR, HW, TAB } from '../../../config/config';
 import { Planet } from 'react-kawaii';
 import { useStoreActions, useStoreState } from '../../store';
-import { action } from 'easy-peasy';
 import AvatarLoader from '../components/avatarLoader';
 import { NumericFormat } from 'react-number-format';
 import Copy from '../components/copy';
@@ -72,9 +70,10 @@ import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset as NamiAsset } from '../../../types/assets';
 import { UseAccount } from '../../../adapters/account';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { TxInspection } from '@cardano-sdk/tx-construction/dist/cjs/tx-builder/types';
 
 interface Props {
-  walletAddress: string;
+  activeAddress: string;
   inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
   accounts: UseAccount['nonActiveAccounts'];
@@ -97,59 +96,18 @@ const useIsMounted = () => {
 
 let timer = null;
 
-const initialState = {
-  fee: { fee: '0' },
-  value: { ada: '', assets: [], personalAda: '', minAda: '0' },
-  address: { result: '', display: '', error: '' },
-  message: '',
-  tx: null,
-  txInfo: {
-    minUtxo: 0,
-  },
-};
-
-export const sendStore = {
-  ...initialState,
-  setFee: action((state, fee) => {
-    state.fee = fee;
-  }),
-  setValue: action((state, value) => {
-    state.value = value;
-  }),
-  setMessage: action((state, message) => {
-    state.message = message;
-  }),
-  setTx: action((state, tx) => {
-    state.tx = tx;
-  }),
-  setAddress: action((state, address) => {
-    state.address = address;
-  }),
-  setTxInfo: action((state, txInfo) => {
-    state.txInfo = txInfo;
-  }),
-  reset: action(state => {
-    state.fee = initialState.fee;
-    state.value = initialState.value;
-    state.message = initialState.message;
-    state.address = initialState.address;
-    state.tx = initialState.tx;
-    state.txInfo = initialState.txInfo;
-  }),
-};
-
 const Send = ({
   accounts,
   activeAccount,
   inMemoryWallet,
-  walletAddress,
+  activeAddress,
   currentChain,
   updateAccountMetadata,
   withSignTxConfirmation,
 }: Props) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -208,7 +166,7 @@ const Send = ({
   );
 
   const paymentKeyHash = Ed25519KeyHashHex(
-    Cardano.Address.fromBech32(walletAddress).asBase()!.getPaymentCredential()
+    Cardano.Address.fromBech32(activeAddress).asBase()!.getPaymentCredential()
       .hash,
   );
 
@@ -346,11 +304,11 @@ const Send = ({
         );
       }
 
-      const tx = await buildTx(
-        transactionOutput,
+      const tx = await buildTx({
+        output: transactionOutput,
         auxiliaryData,
         inMemoryWallet,
-      );
+      });
       const inspection = await tx.inspect();
       setFee({ fee: inspection.inputSelection.fee.toString() });
       setTx(tx);
@@ -370,7 +328,7 @@ const Send = ({
     account.current = {};
 
     const checkOutput = new Serialization.TransactionOutput(
-      Cardano.Address.fromBech32(walletAddress),
+      Cardano.Address.fromBech32(activeAddress),
       new Serialization.Value(BigInt(0)),
     );
     const minUtxo = await minAdaRequired(
@@ -423,7 +381,7 @@ const Send = ({
   return (
     <>
       <Box
-        height="100vh"
+        height="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
@@ -450,6 +408,7 @@ const Send = ({
                   history.goBack();
                 }}
                 variant="ghost"
+                aria-label={''}
                 icon={<ChevronLeftIcon boxSize="6" />}
               />
             </Box>
@@ -624,9 +583,9 @@ const Send = ({
                 isLoading={
                   !fee.fee &&
                   !fee.error &&
-                  address.result &&
+                  !!address.result &&
                   !address.error &&
-                  (value.ada || value.assets.length > 0)
+                  !!(value.ada || value.assets.length > 0)
                 }
                 width={'366px'}
                 height={'50px'}
@@ -645,6 +604,9 @@ const Send = ({
       </Box>
       <AssetsModal ref={assetsModalRef} />
       <ConfirmModal
+        isPopup={true}
+        openHWFlow={openHWFlow}
+        walletType={walletType}
         title={'Confirm transaction'}
         info={
           <Box
@@ -741,22 +703,28 @@ const Send = ({
         ref={ref}
         sign={async (password, hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          if (hw) {
-            if (hw.device === HW.trezor) {
-              return createTab(TAB.trezorTx, `?tx=${tx}`);
-            }
-            return await signAndSubmitHW(txDes, {
-              keyHashes: [paymentKeyHash],
-              account: account.current,
-              hw,
-            });
-          } else
-            return await signAndSubmit(
-              tx,
-              password,
-              withSignTxConfirmation,
-              inMemoryWallet,
-            );
+          return await signAndSubmit({
+            tx,
+            password,
+            withSignTxConfirmation,
+            inMemoryWallet,
+          });
+        }}
+        getCbor={async () => {
+          const inspection = await tx.inspect();
+          const transaction = new Serialization.Transaction(
+            Serialization.TransactionBody.fromCore(inspection.body),
+            Serialization.TransactionWitnessSet.fromCore(
+              inspection.witness
+                ? (inspection.witness as Cardano.Witness)
+                : { signatures: new Map() },
+            ),
+            inspection.auxiliaryData
+              ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
+              : undefined,
+          );
+
+          return transaction.toCbor();
         }}
         onConfirm={async (status, signedTx) => {
           if (status === true) {

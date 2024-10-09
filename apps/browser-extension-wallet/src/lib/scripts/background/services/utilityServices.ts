@@ -7,10 +7,12 @@ import {
   Message,
   MessageTypes,
   OpenBrowserData,
+  OpenNamiBrowserData,
   MigrationState,
   TokenPrices,
   CoinPrices,
-  ChangeModeData
+  ChangeModeData,
+  ModeApi
 } from '../../types';
 import { Subject, of, BehaviorSubject } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -21,6 +23,7 @@ import { config } from '@src/config';
 import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
+import { modeApiProperties, WALLET_MODE_CHANNEL } from '../injectUtil';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -87,9 +90,16 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.NAMI_MIGRATION:
       path = walletRoutePaths.namiMigration.root;
       break;
+    case BrowserViewSections.NAMI_HW_FLOW:
+      path = walletRoutePaths.namiMigration.hwFlow;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
+};
+
+const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
+  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => console.error(error));
 };
 
 const handleOpenPopup = async () => {
@@ -180,10 +190,25 @@ if (process.env.USE_TOKEN_PRICING === 'true') {
   setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }
 
+exposeApi<ModeApi>(
+  {
+    api$: of({
+      getMode: async () => {
+        const { namiMigration } = await getBackgroundStorage();
+        return namiMigration?.mode || 'lace';
+      }
+    }),
+    baseChannel: WALLET_MODE_CHANNEL,
+    properties: modeApiProperties
+  },
+  { logger: console, runtime }
+);
+
 exposeApi<BackgroundService>(
   {
     api$: of({
       handleOpenBrowser,
+      handleOpenNamiBrowser,
       handleOpenPopup,
       requestMessage$,
       migrationState$,

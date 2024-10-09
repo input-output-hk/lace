@@ -13,6 +13,7 @@ import { Wallet } from '@lace/cardano';
 import pDebounce from 'p-debounce';
 import { dappInfo$ } from './requestAccess';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { getBackgroundStorage } from './storage';
 
 const DEBOUNCE_THROTTLE = 500;
 
@@ -77,6 +78,12 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   getCollateral: pDebounce(
     async (args) => {
       try {
+        const { namiMigration } = await getBackgroundStorage();
+        if (namiMigration.mode === 'nami') {
+          // User has to explicitly set collateral from the popup UI
+          return [];
+        }
+
         const dappInfo = await senderToDappInfo(args.sender);
         dappSetCollateral$.next({ dappInfo, collateralRequest: args.data });
         await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/set-collateral');

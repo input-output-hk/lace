@@ -1,4 +1,7 @@
 import type { PasswordObj as Password } from '@lace/core';
+
+import React from 'react';
+
 import {
   Icon,
   Box,
@@ -15,10 +18,12 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import React from 'react';
+
+
 import { MdUsb } from 'react-icons/md';
-import { indexToHw, initHW, isHW } from '../../../api/extension';
-import { ERROR, HW } from '../../../config/config';
+
+import { ERROR } from '../../../config/config';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 interface Props {
   ready: boolean;
@@ -28,10 +33,15 @@ interface Props {
   onCloseBtn: () => void;
   title: React.ReactNode;
   info: React.ReactNode;
+  walletType: WalletType;
+  openHWFlow: (path: string) => void;
+  getCbor: () => Promise<string>;
+  setCollateral?: boolean;
+  isPopup?: boolean;
 }
 
 const ConfirmModal = React.forwardRef<unknown, Props>(
-  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword }, ref) => {
+  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword, walletType, openHWFlow, getCbor, setCollateral, isPopup }, ref) => {
     const {
       isOpen: isOpenNormal,
       onOpen: onOpenNormal,
@@ -49,13 +59,15 @@ const ConfirmModal = React.forwardRef<unknown, Props>(
       onCloseBtn,
       title,
       info,
+      walletType,
+      openHWFlow,
+      getCbor,
+      setCollateral,
+      isPopup
     };
-    const [hw, setHw] = React.useState('');
-
     React.useImperativeHandle(ref, () => ({
-      openModal(accountIndex) {
-        if (isHW(accountIndex)) {
-          setHw(indexToHw(accountIndex));
+      openModal() {
+        if (walletType === WalletType.Ledger || walletType === WalletType.Trezor) {
           onOpenHW();
         } else {
           onOpenNormal();
@@ -73,7 +85,6 @@ const ConfirmModal = React.forwardRef<unknown, Props>(
           props={props}
           isOpen={isOpenHW}
           onClose={onCloseHW}
-          hw={hw}
         />
         <ConfirmModalNormal
           props={props}
@@ -201,22 +212,37 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
   );
 };
 
-const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
+const ConfirmModalHw = ({ props, isOpen, onClose }) => {
   const [waitReady, setWaitReady] = React.useState(true);
   const [error, setError] = React.useState('');
 
   const confirmHandler = async () => {
-    if (props.ready === false || !waitReady) return;
-    try {
+    if (props.walletType === WalletType.Trezor && props.isPopup) {
+      const cbor = await props.getCbor();
+
+      if (cbor === '') {
+        setError('An error occurred');
+        return;
+      }
+
+      if (props.setCollateral) {
+        props.openHWFlow(`hwTab/trezorTx/${cbor}/${props.setCollateral}`);
+      } else {
+        props.openHWFlow(`hwTab/trezorTx/${cbor}`);
+      }
+    } else {
+      if (props.ready === false || !waitReady) return;
       setWaitReady(false);
-      const appAda = await initHW({ device: hw.device, id: hw.id });
-      const signedMessage = await props.sign(null, { ...hw, appAda });
-      await props.onConfirm(true, signedMessage);
-    } catch (e) {
-      if (e === ERROR.submit) props.onConfirm(false, e);
-      else setError('An error occured');
+      try {
+        const signedMessage = await props.sign(null);
+        await props.onConfirm(true, signedMessage);
+      } catch (e) {
+        console.error(e);
+        if (e === ERROR.submit) props.onConfirm(false, e);
+        else setError('An error occured');
+      }
+      setWaitReady(true);
     }
-    setWaitReady(true);
   };
 
   React.useEffect(() => {
@@ -250,7 +276,7 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                background={hw.device == HW.ledger ? 'blue.400' : 'green.400'}
+                background={props.walletType === WalletType.Ledger ? 'blue.400' : 'green.400'}
                 rounded="xl"
                 py={2}
                 width="70%"
@@ -258,11 +284,11 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
               >
                 <Icon as={MdUsb} boxSize={5} mr={2} />
                 <Box fontSize="sm">
-                  {!waitReady
-                    ? `Waiting for ${
-                        hw.device == HW.ledger ? 'Ledger' : 'Trezor'
-                      }`
-                    : `Connect ${hw.device == HW.ledger ? 'Ledger' : 'Trezor'}`}
+                  {waitReady
+                    ? `Connect ${props.walletType}`
+                    : `Waiting for ${
+                      props.walletType
+                      }`}
                 </Box>
               </Box>
               {error && (

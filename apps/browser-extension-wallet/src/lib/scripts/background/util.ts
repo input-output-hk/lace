@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { HW_POPUP_WINDOW, POPUP_WINDOW } from '@src/utils/constants';
+import { HW_POPUP_WINDOW, POPUP_WINDOW, POPUP_WINDOW_NAMI } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -76,9 +76,13 @@ const createWindow = (
 export const launchCip30Popup = async (url: string, windowType: Windows.CreateType): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
+  const { namiMigration } = await getBackgroundStorage();
   const newWindow = await createWindow(
     tab.id,
-    calculatePopupWindowPositionAndSize(currentWindow, windowType === 'popup' ? POPUP_WINDOW : HW_POPUP_WINDOW),
+    calculatePopupWindowPositionAndSize(
+      currentWindow,
+      windowType === 'popup' ? (namiMigration.mode === 'lace' ? POPUP_WINDOW : POPUP_WINDOW_NAMI) : HW_POPUP_WINDOW
+    ),
     windowType,
     true
   );
@@ -122,11 +126,11 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
-export const closeAllLaceWindows = async (): Promise<void> => {
+export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
   const openTabs = await tabs.query({ title: 'Lace' });
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
-    if (DAPP_CONNECTOR_REGEX.test(tab.url)) await tabs.remove(tab.id);
+    if (!shouldRemoveTab || shouldRemoveTab(tab.url)) await tabs.remove(tab.id);
   }
 };
 
@@ -143,7 +147,7 @@ export const ensureUiIsOpenAndLoaded = async (
     : undefined;
 
   const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
-  await closeAllLaceWindows();
+  await closeAllLaceWindows((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
 
   const tab = await launchCip30Popup(url, windowType);
   if (tab.status !== 'complete') {

@@ -35,6 +35,7 @@ import { useOutsideHandles } from '../../../features/outside-handles-provider/us
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
+import {Cardano, Serialization} from "@cardano-sdk/core";
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -104,6 +105,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       initializeCollateralTx: initializeCollateral,
       collateralFee,
       inMemoryWallet,
+      walletType,
       cardanoCoin,
       buildDelegation,
       setSelectedStakePool,
@@ -117,7 +119,10 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       withSignTxConfirmation,
       resetDelegationState,
       hasNoFunds,
-      openExternalLink
+      openExternalLink,
+      openHWFlow,
+      delegationStoreDelegationTxBuilder,
+      collateralTxBuilder
     } = useOutsideHandles();
     const { initDelegation, stakeRegistration } = useDelegation({
       inMemoryWallet,
@@ -128,7 +133,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       useCollateral({
         inMemoryWallet,
         submitCollateralTx,
-        withSignTxConfirmation,
+        withSignTxConfirmation
       });
     const toast = useToast();
     const {
@@ -189,7 +194,6 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
           },
         }));
       } catch (error_) {
-        console.log(error_);
         setData(d => ({
           ...d,
           pool: {
@@ -216,7 +220,6 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
         try {
           await initDelegation();
         } catch {
-          console.error(error);
           setData(d => ({
             ...d,
             error: 'Transaction not possible (maybe account balance too low)',
@@ -246,10 +249,13 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
     return (
       <>
         <ConfirmModal
+          isPopup={true}
           onCloseBtn={() => {
             setData({ pool: { ...poolDefaultValue } });
             resetDelegationState();
           }}
+          openHWFlow={openHWFlow}
+          walletType={walletType}
           setPassword={setPassword}
           ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
           title="Delegate your funds"
@@ -277,6 +283,35 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               });
             }
             delegationRef.current.closeModal();
+          }}
+          getCbor={async ()=> {
+            if (!delegationStoreDelegationTxBuilder) {
+              toast({
+                title: 'Transaction failed',
+                description: 'Transaction could not be built',
+                status: 'error',
+                duration: 3000,
+              });
+              delegationRef.current.closeModal();
+              return '';
+            }
+
+            const tx = await delegationStoreDelegationTxBuilder.build();
+
+            const inspection = await tx.inspect();
+            const transaction = new Serialization.Transaction(
+              Serialization.TransactionBody.fromCore(inspection.body),
+              Serialization.TransactionWitnessSet.fromCore(
+                inspection.witness
+                  ? (inspection.witness as Cardano.Witness)
+                  : { signatures: new Map() },
+              ),
+              inspection.auxiliaryData
+                ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
+                : undefined,
+            );
+
+            return transaction.toCbor();
           }}
           info={
             <Box
@@ -419,10 +454,13 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
           ref={delegationRef}
         />
         <ConfirmModal
+          isPopup={true}
           onCloseBtn={() => {
             setData({ pool: { ...poolDefaultValue } });
             resetDelegationState();
           }}
+          openHWFlow={openHWFlow}
+          walletType={walletType}
           setPassword={setPassword}
           ready={!isBuildingTx}
           title="Stake deregistration"
@@ -449,6 +487,32 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 duration: 3000,
               });
             }
+          }}
+          getCbor={async ()=> {
+            if (!delegationStoreDelegationTxBuilder) {
+              toast({
+                title: 'Transaction failed',
+                description: 'Transaction could not be built',
+                status: 'error',
+                duration: 3000,
+              });
+              delegationRef.current.closeModal();
+              return '';
+            }
+
+            const tx = await delegationStoreDelegationTxBuilder.build();
+
+            const inspection = await tx.inspect();
+            const transaction = new Serialization.Transaction(
+              Serialization.TransactionBody.fromCore(inspection.body),
+              Serialization.TransactionWitnessSet.fromCore(
+                inspection.witness
+                  ? (inspection.witness as Cardano.Witness)
+                  : { signatures: new Map() },
+              )
+            );
+
+            return transaction.toCbor();
           }}
           info={
             <Box
@@ -513,12 +577,16 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
           ref={undelegateRef}
         />
         <ConfirmModal
+          isPopup={true}
           ready={!isInitializingCollateral}
           title={
             <Box display="flex" alignItems="center">
               <Icon as={FaRegFileCode} mr="2" /> <Box>Collateral</Box>
             </Box>
           }
+          openHWFlow={openHWFlow}
+          walletType={walletType}
+          setPassword={setPassword}
           sign={async password => {
             await submitCollateral(password);
           }}
@@ -548,6 +616,33 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               });
             collateralRef.current.closeModal();
             capture(Events.SettingsCollateralXClick);
+          }}
+          setCollateral={true}
+          getCbor={async ()=> {
+            if (!collateralTxBuilder) {
+              toast({
+                title: 'Transaction failed',
+                description: 'Transaction could not be built',
+                status: 'error',
+                duration: 3000,
+              });
+              delegationRef.current.closeModal();
+              return '';
+            }
+
+            const tx = await collateralTxBuilder.build();
+
+            const inspection = await tx.inspect();
+
+            const transaction = new Serialization.Transaction(
+              Serialization.TransactionBody.fromCore(inspection.body),
+              Serialization.TransactionWitnessSet.fromCore(
+                inspection.witness
+                  ? (inspection.witness as Cardano.Witness)
+                  : { signatures: new Map() },
+              ),
+            );
+            return transaction.toCbor();
           }}
           info={
             <Box

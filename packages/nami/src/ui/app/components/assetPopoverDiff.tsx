@@ -1,5 +1,6 @@
 import React from 'react';
-import { Scrollbars } from '../components/scrollbar';
+
+import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
   Avatar,
   Box,
@@ -14,16 +15,16 @@ import {
   PopoverHeader,
   PopoverTrigger,
 } from '@chakra-ui/react';
-import { ChevronDownIcon } from '@chakra-ui/icons';
-import { FixedSizeList as List } from 'react-window';
-import Copy from './copy';
-
 import MiddleEllipsis from 'react-middle-ellipsis';
-import { getAsset } from '../../../api/extension';
+import { FixedSizeList as List } from 'react-window';
+
+import { Scrollbars } from '../components/scrollbar';
+
+import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 
 const abs = big => {
-  return big < 0 ? big * BigInt(-1) : big;
+  return big < 0 ? big * -1 : big;
 };
 
 const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
@@ -55,7 +56,9 @@ const AssetsPopover = ({ assets, isDifference }) => {
         <Button
           data-testid="asset-popover-trigger"
           size="xs"
-          onClick={e => e.stopPropagation()}
+          onClick={e => {
+            e.stopPropagation();
+          }}
           style={{
             all: 'revert',
             background: 'none',
@@ -74,7 +77,12 @@ const AssetsPopover = ({ assets, isDifference }) => {
         </Button>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent onClick={e => e.stopPropagation()} w="98%">
+        <PopoverContent
+          onClick={e => {
+            e.stopPropagation();
+          }}
+          w="98%"
+        >
           <PopoverArrow ml="4px" />
           <PopoverCloseButton />
           <PopoverHeader fontWeight="bold">Assets</PopoverHeader>
@@ -120,22 +128,8 @@ const AssetsPopover = ({ assets, isDifference }) => {
 };
 
 const Asset = ({ asset, isDifference }) => {
-  const [token, setToken] = React.useState(null);
-  const isMounted = useIsMounted();
-
-  const fetchData = async () => {
-    const detailedAsset = {
-      ...(await getAsset(asset.unit)),
-      quantity: asset.quantity,
-    };
-    if (!isMounted.current) return;
-    setToken(detailedAsset);
-  };
-
-  React.useEffect(() => {
-    fetchData();
-  }, []);
-
+  const differenceColor = asset.quantity <= 0 ? 'red.300' : 'teal.500';
+  const differenceSign = asset.quantity <= 0 ? '-' : '+';
   return (
     <Box
       width="100%"
@@ -144,7 +138,7 @@ const Asset = ({ asset, isDifference }) => {
       alignItems="center"
       justifyContent="start"
     >
-      {token && (
+      {asset && (
         <Stack
           width="100%"
           fontSize="xs"
@@ -152,7 +146,7 @@ const Asset = ({ asset, isDifference }) => {
           alignItems="center"
           justifyContent="start"
         >
-          <Avatar userSelect="none" size="xs" name={token.name} />
+          <Avatar userSelect="none" size="xs" name={asset.name} />
 
           <Box
             textAlign="left"
@@ -160,15 +154,15 @@ const Asset = ({ asset, isDifference }) => {
             whiteSpace="nowrap"
             fontWeight="normal"
           >
-            <Copy label="Copied asset" copy={token.fingerprint}>
+            <Copy label="Copied asset" copy={asset.fingerprint}>
               <Box mb="-0.5">
                 <MiddleEllipsis>
-                  <span>{token.name}</span>
+                  <span>{asset.name}</span>
                 </MiddleEllipsis>
               </Box>
               <Box whiteSpace="nowrap" fontSize="xx-small" fontWeight="light">
                 <MiddleEllipsis>
-                  <span>Policy: {token.policy}</span>
+                  <span>Policy: {asset.policy}</span>
                 </MiddleEllipsis>
               </Box>
             </Copy>
@@ -176,21 +170,13 @@ const Asset = ({ asset, isDifference }) => {
           <Box>
             <Box
               fontWeight="bold"
-              color={
-                isDifference
-                  ? token.quantity <= 0
-                    ? 'red.300'
-                    : 'teal.500'
-                  : 'inherit'
-              }
+              color={isDifference ? differenceColor : 'inherit'}
             >
               <Box display="flex" alignItems="center">
-                <Box mr="0.5">
-                  {isDifference ? (token.quantity <= 0 ? '-' : '+') : '+'}{' '}
-                </Box>
+                <Box mr="0.5">{isDifference ? differenceSign : '+'} </Box>
                 <UnitDisplay
-                  quantity={abs(token.quantity).toString()}
-                  decimals={token.decimals}
+                  quantity={abs(asset.quantity).toString()}
+                  decimals={asset.decimals}
                 />
               </Box>
             </Box>
@@ -199,15 +185,6 @@ const Asset = ({ asset, isDifference }) => {
       )}
     </Box>
   );
-};
-
-const useIsMounted = () => {
-  const isMounted = React.useRef(false);
-  React.useEffect(() => {
-    isMounted.current = true;
-    return () => (isMounted.current = false);
-  }, []);
-  return isMounted;
 };
 
 export default AssetsPopover;

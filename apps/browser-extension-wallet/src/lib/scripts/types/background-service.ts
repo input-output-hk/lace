@@ -43,12 +43,17 @@ export enum BrowserViewSections {
   FORGOT_PASSWORD = 'forgot_password',
   NEW_WALLET = 'new_wallet',
   ADD_SHARED_WALLET = 'add_shared_wallet',
-  NAMI_MIGRATION = 'nami_migration'
+  NAMI_MIGRATION = 'nami_migration',
+  NAMI_HW_FLOW = 'nami_hw_flow'
 }
 
 export interface OpenBrowserData {
   section: BrowserViewSections;
   urlSearchParams?: string;
+}
+
+export interface OpenNamiBrowserData {
+  path: string;
 }
 
 interface ChangeThemeMessage {
@@ -73,6 +78,7 @@ export type Message = ChangeThemeMessage | HTTPConnectionMessage | OpenBrowserMe
 export type BackgroundService = {
   handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
   handleOpenPopup: () => Promise<void>;
+  handleOpenNamiBrowser: (data: OpenNamiBrowserData) => Promise<void>;
   requestMessage$: Subject<Message>;
   migrationState$: BehaviorSubject<MigrationState | undefined>;
   coinPrices: CoinPrices;
@@ -83,4 +89,10 @@ export type BackgroundService = {
   clearBackgroundStorage: typeof clearBackgroundStorage;
   resetStorage: () => Promise<void>;
   backendFailures$: BehaviorSubject<number>;
+};
+
+export type WalletMode = BackgroundStorage['namiMigration']['mode'];
+
+export type ModeApi = {
+  getMode: () => Promise<WalletMode>;
 };

@@ -47,16 +47,20 @@ export interface Account {
   avatar?: string;
   balance?: string;
   recentSendToAddress?: string;
-  hw?: boolean;
+  type?: WalletType;
 }
 
 export interface UseAccount {
   allAccounts: Account[];
   activeAccount: Account;
   nonActiveAccounts: Account[];
-  nextIndex: number;
   addAccount: (
-    props: Readonly<{ index: number; name: string; passphrase: Uint8Array }>,
+    props: Readonly<{
+      index: number;
+      name: string;
+      passphrase: Uint8Array;
+      walletId: string;
+    }>,
   ) => Promise<void>;
   activateAccount: (
     props: Readonly<{
@@ -97,13 +101,11 @@ const getActiveAccountMetadata = ({
   );
 };
 
-const getNextAccountIndex = (
+export const getNextAccountIndex = (
   accounts: readonly Account[],
-  activeAccount: Readonly<Account>,
+  walletId: string,
 ) => {
-  const walletAccounts = accounts.filter(
-    a => a.walletId === activeAccount.walletId,
-  );
+  const walletAccounts = accounts.filter(a => a.walletId === walletId);
 
   for (const [index, account] of walletAccounts.entries()) {
     if (account.index !== index) {
@@ -125,7 +127,7 @@ const getAcountsMapper =
     index: accountIndex,
     walletId: wallet.walletId,
     name: metadata?.name || `${wallet.type} ${accountIndex}`,
-    hw: wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor,
+    type: wallet.type,
     ...metadata.namiMode,
   });
 
@@ -186,10 +188,6 @@ export const useAccount = ({
   return {
     allAccounts: allAccountsSorted,
     activeAccount,
-    nextIndex: useMemo(
-      () => getNextAccountIndex(allAccountsSorted, activeAccount),
-      [allAccountsSorted, activeAccount],
-    ),
     nonActiveAccounts: useMemo(
       () =>
         allAccountsSorted.filter(
@@ -199,7 +197,7 @@ export const useAccount = ({
       [allAccountsSorted, accountIndex, walletId],
     ),
     addAccount: useCallback(
-      async ({ index, name, passphrase }) => {
+      async ({ index, name, passphrase, walletId }) => {
         const wallet = wallets?.find(elm => elm.walletId === walletId);
         if (wallet === undefined || wallet.type === WalletType.Script) {
           return;

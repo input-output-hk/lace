@@ -31,7 +31,10 @@ export interface History {
 export interface TransactionDetail {
   block: BlockDetailResponse;
   info: TransactionInfo;
-  metadata: MetadataResponse[];
+  metadata: {
+    json_metadata: unknown[] | string;
+    label: string;
+  }[];
   utxos: UtxosResponse;
 }
 
@@ -80,7 +83,7 @@ export type TransactionInfoResponse = BlockfrostResponse & {
   valid_contract: boolean;
 };
 
-interface TransactionInfo {
+export interface TransactionInfo {
   asset_mint_or_burn_count: number;
   block: string;
   block_height: number;
@@ -151,7 +154,7 @@ export interface UtxoOutput {
 }
 
 export interface Amount {
-  quantity: number;
+  quantity: bigint;
   unit: string;
 }
 

@@ -7,18 +7,20 @@ import { useAccount } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
-import {
-  useChangePassword,
-  useDeleteWalletWithPassword,
-} from '../adapters/wallet';
+import { useChangePassword } from '../adapters/wallet';
 
+import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
+import { HWConnectFlow } from './app/hw/hw';
+import { SuccessAndClose } from './app/hw/success-and-close';
+import { TrezorTx } from './app/hw/trezorTx';
+import { Enable } from './app/pages/dapp-connector/enable';
+import { SignData } from './app/pages/dapp-connector/signData';
+import { SignTx } from './app/pages/dapp-connector/signTx';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
-
-import { useOutsideHandles } from './index';
 
 export const Main = () => {
   const {
@@ -26,7 +28,7 @@ export const Main = () => {
     connectedDapps,
     fiatCurrency,
     theme,
-    walletAddress,
+    walletAddresses,
     inMemoryWallet,
     isAnalyticsOptIn,
     currentChain,
@@ -51,18 +53,14 @@ export const Main = () => {
     isValidURL,
     setAvatar,
     switchWalletMode,
+    openHWFlow,
+    dappConnector,
   } = useOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
     fiatCurrency,
     setFiatCurrency,
   );
-
-  const deleteWalletWithPassword = useDeleteWalletWithPassword({
-    wallets$: walletRepository.wallets$,
-    activeWalletId$: walletManager.activeWalletId$,
-    deleteWallet,
-  });
 
   const changePassword = useChangePassword({
     chainId: currentChain,
@@ -78,7 +76,6 @@ export const Main = () => {
   });
 
   const {
-    nextIndex,
     allAccounts,
     activeAccount,
     nonActiveAccounts,
@@ -105,14 +102,13 @@ export const Main = () => {
     <HashRouter>
       <Container environmentName={environmentName} theme={theme}>
         <UpgradeToLaceHeader switchWalletMode={switchWalletMode} />
-        <Box overflowX="hidden">
+        <Box overflowX="hidden" minHeight="calc(100vh - 30px)">
           <Switch>
             <Route path="/settings/*">
               <Settings
                 removeDapp={removeDapp}
                 connectedDapps={connectedDapps}
                 changePassword={changePassword}
-                deleteWallet={deleteWalletWithPassword}
                 currency={currency}
                 setCurrency={setCurrency}
                 theme={theme}
@@ -137,15 +133,44 @@ export const Main = () => {
                 activeAccount={activeAccount}
                 updateAccountMetadata={updateAccountMetadata}
                 currentChain={currentChain}
-                walletAddress={walletAddress}
+                activeAddress={walletAddresses[0]}
                 inMemoryWallet={inMemoryWallet}
                 withSignTxConfirmation={withSignTxConfirmation}
               />
             </Route>
+            <Route exact path="/hwTab">
+              <HWConnectFlow
+                accounts={allAccounts}
+                activateAccount={activateAccount}
+              />
+            </Route>
+            <Route exact path="/hwTab/success">
+              <SuccessAndClose />
+            </Route>
+            <Route exact path="/hwTab/trezorTx/:cbor/:setCollateral?">
+              <TrezorTx />
+            </Route>
+            <Route path="/dapp/connect">
+              <Enable
+                dappConnector={dappConnector}
+                controller={dappConnector.authorizeDapp}
+                accountAvatar={activeAccount.avatar}
+                accountName={activeAccount.name}
+              />
+            </Route>
+            <Route path="/dapp/sign-tx">
+              <SignTx
+                dappConnector={dappConnector}
+                inMemoryWallet={inMemoryWallet}
+                account={activeAccount}
+              />
+            </Route>
+            <Route path="/dapp/sign-data">
+              <SignData dappConnector={dappConnector} account={activeAccount} />
+            </Route>
             <Route path="*">
               <Wallet
-                walletAddress={walletAddress}
-                nextIndex={nextIndex}
+                activeAddress={walletAddresses[0]}
                 activeAccount={activeAccount}
                 accounts={allAccounts}
                 currency={currency}
@@ -160,6 +185,7 @@ export const Main = () => {
                 assets={assets}
                 nfts={nfts}
                 setAvatar={setAvatar}
+                openHWFlow={openHWFlow}
               />
             </Route>
           </Switch>

@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { useAccount } from './account';
+import { getNextAccountIndex, useAccount } from './account';
 
 import type {
   AnyWallet,
@@ -68,7 +68,7 @@ const getAccountData = (
     index: accIndex,
     walletId: wallet.walletId,
     name: acc?.metadata?.name || `${wallet.type} ${accIndex}`,
-    hw: wallet.type === 'Ledger' || wallet.type === 'Trezor',
+    type: wallet.type,
     ...acc?.metadata?.namiMode,
   };
 };
@@ -263,7 +263,9 @@ describe('useAccount', () => {
       }),
     );
 
-    expect(result.current.nextIndex).toEqual(3);
+    expect(getNextAccountIndex(result.current.allAccounts, 'wallet1')).toEqual(
+      3,
+    );
 
     act(() => {
       wallets$.next([
@@ -296,7 +298,9 @@ describe('useAccount', () => {
       ]);
     });
 
-    expect(result.current.nextIndex).toEqual(2);
+    expect(getNextAccountIndex(result.current.allAccounts, 'wallet1')).toEqual(
+      2,
+    );
   });
 
   it('should call removeWallet with correct arguments', async () => {

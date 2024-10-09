@@ -79,7 +79,7 @@ const UserInfo = ({ onClick, avatar, name, balance, isActive, isHW, cardanoCoin,
                 symbol={cardanoCoin.symbol}
               />
             ) : (
-              <Text>...</Text>
+              <Text>Select to load...</Text>
             )}
           </Box>
           {isActive && (

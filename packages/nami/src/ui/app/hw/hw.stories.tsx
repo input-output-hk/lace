@@ -5,22 +5,33 @@ import { useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn, userEvent, within } from '@storybook/test';
 
-import {
-  createHWAccounts,
-  getHwAccounts,
-  initHW,
-} from '../../../api/extension/api.mock';
-import { accountHW } from '../../../mocks/account.mock';
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
 
 import { HWConnectFlow } from './hw';
+import { SuccessAndClose } from './success-and-close';
 
 const HWConnectStory = ({
   colorMode,
-}: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
+  Component,
+}: Readonly<{
+  colorMode: 'dark' | 'light';
+  Component: React.FC<{ colorMode: 'dark' | 'light' }>;
+}>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
 
-  return <HWConnectFlow />;
+  return Component ? <Component colorMode={colorMode} /> : <HWConnectFlow />;
+};
+
+const HWSuccessStory = ({
+  colorMode,
+}: Readonly<{
+  colorMode: 'dark' | 'light';
+}>): React.ReactElement => {
+  const { setColorMode } = useColorMode();
+  setColorMode(colorMode);
+
+  return <SuccessAndClose />;
 };
 
 declare global {
@@ -61,12 +72,6 @@ const meta: Meta<typeof HWConnectStory> = {
     },
   },
   beforeEach: () => {
-    getHwAccounts.mockImplementation(async () => {
-      return await Promise.resolve([accountHW]);
-    });
-    createHWAccounts.mockImplementation(async () => {
-      return await Promise.resolve([accountHW]);
-    });
     window.chrome = {
       runtime: {
         getURL: (): string => {
@@ -94,9 +99,14 @@ const meta: Meta<typeof HWConnectStory> = {
       };
     });
 
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        connectHW: () => true,
+      };
+    });
+
     return () => {
-      getHwAccounts.mockClear();
-      createHWAccounts.mockClear();
+      useOutsideHandles.mockClear();
     };
   },
 };
@@ -162,43 +172,8 @@ export const SelectAccountDark: Story = {
 };
 
 export const SuccessAndCloseLight: Story = {
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-
-    await step('Select account', async () => {
-      const ledgerButton = await canvas.findByTestId('ledger');
-      await userEvent.click(ledgerButton);
-
-      const continueButton = await canvas.findByText('Continue');
-      await userEvent.click(continueButton);
-    });
-
-    await step('Submit and close', async () => {
-      const connectButton = await canvas.findByText('Continue');
-      await userEvent.click(connectButton);
-    });
-  },
-  beforeEach: () => {
-    initHW.mockImplementation(async () => {
-      return await Promise.resolve({
-        getExtendedPublicKeys: () => {
-          return [
-            {
-              publicKeyHex:
-                '4335d502b9888f7c862174328c0fd1eb037931cb5cf46a6d3e307fac3f37d619',
-              chainCodeHex:
-                '07080cdbb22a73d911705592afdd82b1a51ce62e3f33d68499b3ffcff28cce3e',
-            },
-          ];
-        },
-      });
-    });
-
-    return () => {
-      initHW.mockReset();
-    };
-  },
   parameters: {
+    Component: HWSuccessStory,
     colorMode: 'light',
   },
 };
@@ -206,6 +181,7 @@ export const SuccessAndCloseLight: Story = {
 export const SuccessAndCloseDark: Story = {
   ...SuccessAndCloseLight,
   parameters: {
+    Component: HWSuccessStory,
     colorMode: 'dark',
   },
 };
