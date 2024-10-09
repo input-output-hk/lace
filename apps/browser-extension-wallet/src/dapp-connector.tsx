@@ -10,7 +10,7 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
 import { UIThemeProvider } from '@providers/UIThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
-import { APP_MODE_POPUP } from './utils/constants';
+import { APP_MODE_POPUP, POPUP_WINDOW_NAMI_TITLE } from './utils/constants';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
@@ -23,6 +23,9 @@ const App = (): React.ReactElement => {
   useEffect(() => {
     const getWalletMode = async () => {
       const { namiMigration } = await getBackgroundStorage();
+      if (namiMigration?.mode === 'nami') {
+        document.title = POPUP_WINDOW_NAMI_TITLE;
+      }
       setMode(namiMigration?.mode || 'lace');
     };
 

@@ -92,6 +92,8 @@ export const POPUP_WINDOW_NAMI = {
   height: 630
 };
 
+export const POPUP_WINDOW_NAMI_TITLE = 'Nami (Lace)';
+
 export const HW_POPUP_WINDOW = {
   width: 900,
   height: 630
