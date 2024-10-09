@@ -94,16 +94,16 @@ export const Footer = withAddressBookContext(
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
-    const sendEventToPostHog = async (evtAction: PostHogAction) =>
-      await analytics.sendEventToPostHog(evtAction, {
+    const sendEventToPostHog = (evtAction: PostHogAction) =>
+      analytics.sendEventToPostHog(evtAction, {
         trigger_point: triggerPoint,
         [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
       });
 
-    const sendAnalytics = useCallback(async () => {
+    const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {
         case Sections.FORM: {
-          await sendEventToPostHog(
+          sendEventToPostHog(
             PostHogAction[
               isSharedWallet ? 'SharedWalletsSendTxDataReviewTxClick' : 'SendTransactionDataReviewTransactionClick'
             ]
@@ -111,17 +111,17 @@ export const Footer = withAddressBookContext(
           break;
         }
         case Sections.SUMMARY: {
-          await (builtTxData.importedSharedWalletTx
+          builtTxData.importedSharedWalletTx
             ? sendEventToPostHog(PostHogAction.SharedWalletsCosignTxSummaryConfirmClick)
             : sendEventToPostHog(
                 PostHogAction[
                   isSharedWallet ? 'SharedWalletsSendTxSummaryConfirmClick' : 'SendTransactionSummaryConfirmClick'
                 ]
-              ));
+              );
           break;
         }
         case Sections.CONFIRMATION: {
-          await sendEventToPostHog(
+          sendEventToPostHog(
             PostHogAction[
               isSharedWallet ? 'SharedWalletsSendTxConfirmationConfirmClick' : 'SendTransactionConfirmationConfirmClick'
             ]
@@ -129,14 +129,14 @@ export const Footer = withAddressBookContext(
           break;
         }
         case Sections.SUCCESS_TX: {
-          await sendEventToPostHog(
+          sendEventToPostHog(
             PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneViewTxClick' : 'SendAllDoneViewTransactionClick']
           );
           break;
         }
         case Sections.UNAUTHORIZED_TX:
         case Sections.FAIL_TX: {
-          await sendEventToPostHog(
+          sendEventToPostHog(
             PostHogAction[
               isSharedWallet ? 'SharedWalletsSendSomethingWentWrongBackClick' : 'SendSomethingWentWrongBackClick'
             ]
@@ -144,7 +144,7 @@ export const Footer = withAddressBookContext(
           break;
         }
         case Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON: {
-          await sendEventToPostHog(PostHogAction.SharedWalletsCosignTxContinueClick);
+          sendEventToPostHog(PostHogAction.SharedWalletsCosignTxContinueClick);
           break;
         }
       }
@@ -300,7 +300,7 @@ export const Footer = withAddressBookContext(
     }, [setSection, setSubmitingTxState, isPopupView]);
 
     const onConfirm = useCallback(async () => {
-      await sendAnalytics();
+      sendAnalytics();
       const isConfirmPass = currentSection.currentSection === Sections.CONFIRMATION;
       const txHasSucceeded = currentSection.currentSection === Sections.SUCCESS_TX;
       const txHasFailed =
@@ -352,7 +352,7 @@ export const Footer = withAddressBookContext(
       setSubmitingTxState
     ]);
 
-    const handleClose = async () => {
+    const handleClose = () => {
       switch (currentSection.currentSection) {
         case Sections.SUCCESS_TX: {
           sendEventToPostHog(

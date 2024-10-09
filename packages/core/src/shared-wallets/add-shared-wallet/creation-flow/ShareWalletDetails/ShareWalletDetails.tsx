@@ -10,7 +10,7 @@ import styles from './ShareWalletDetails.module.scss';
 import { FILENAME, downloadWalletData } from './utils';
 
 export type LayoutNavigationDownloadProps = LayoutNavigationProps & {
-  onDownloadClick?: () => Promise<void>;
+  onDownloadClick?: () => void;
   stateSharedWallet: CreationFlowState;
 };
 
@@ -53,7 +53,7 @@ export const ShareWalletDetails = ({
           <Button
             block
             onClick={async () => {
-              await onDownloadClick?.();
+              onDownloadClick?.();
               downloadWalletData(stateSharedWallet);
             }}
             color="gradient"

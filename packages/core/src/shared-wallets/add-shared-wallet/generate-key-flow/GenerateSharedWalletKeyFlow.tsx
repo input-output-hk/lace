@@ -21,7 +21,7 @@ type GenerateSharedWalletKeyFlowProps = StoreSharedProps & {
   activeWalletType: LinkedWalletType;
   onClose?: () => Promise<void>;
   onCopyKeys?: () => Promise<void>;
-  onGenerateKeys?: () => Promise<void>;
+  onGenerateKeys?: () => void;
 };
 
 export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> = ({
@@ -40,8 +40,8 @@ export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> 
           <EnterPassword
             loading={state.loading}
             onBack={() => dispatch({ type: ActionType.Back })}
-            onGenerateKeys={async (password) => {
-              await onGenerateKeys?.();
+            onGenerateKeys={(password) => {
+              onGenerateKeys?.();
               dispatch({ password, type: ActionType.KeysGenerationTriggered });
             }}
             passwordErrorType={state.passwordErrorType}

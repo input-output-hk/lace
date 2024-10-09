@@ -92,12 +92,8 @@ export const SharedWallet = (): JSX.Element => {
               activeWalletName={walletInfo?.name || ''}
               activeWalletType={activeWalletType}
               generateKey={generateKey}
-              onGenerateKeys={async () =>
-                await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)
-              }
-              onCopyKeys={async () =>
-                await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)
-              }
+              onGenerateKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)}
+              onCopyKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)}
               onClose={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCloseClick)}
               navigateToParentFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
             />
@@ -115,26 +111,26 @@ export const SharedWallet = (): JSX.Element => {
                 exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
                 sharedWalletKey={sharedWalletKey}
                 onCreateSharedWallet={handleCreateWallet}
-                onWalletNameNextClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateWalletNameNextClick);
+                onWalletNameNextClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateWalletNameNextClick);
                 }}
-                onAddCosignersNextClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateAddCosignersNextClick);
+                onAddCosignersNextClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateAddCosignersNextClick);
                 }}
-                onImportantInfoNextClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoContinueClick);
+                onImportantInfoNextClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoContinueClick);
                 }}
-                onImportantInfoBackClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoBackClick);
+                onImportantInfoBackClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoBackClick);
                 }}
-                onDefineQuorumNextClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumNextClick);
+                onDefineQuorumNextClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumNextClick);
                 }}
-                onDefineQuorumDownloadClick={async () => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumDownloadClick);
+                onDefineQuorumDownloadClick={() => {
+                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumDownloadClick);
                 }}
-                onOpenSharedWalletClick={async () => {
-                  await analytics.sendEventToPostHog(
+                onOpenSharedWalletClick={() => {
+                  analytics.sendEventToPostHog(
                     PostHogAction.SharedWalletsCreateShareWalletDetailsOpenSharedWalletClick
                   );
                 }}
