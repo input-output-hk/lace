@@ -119,4 +119,5 @@ export interface OutsideHandlesContextValue {
     wallet: Readonly<Wallet.CardanoWallet>,
     chainName?: Wallet.ChainName,
   ) => Promise<void>;
+  removeWallet: () => Promise<void>;
 }
