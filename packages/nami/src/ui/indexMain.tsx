@@ -57,6 +57,7 @@ const App = () => {
     defaultSubmitApi,
     isValidURL,
     setAvatar,
+    removeWallet,
   } = useOutsideHandles();
 
   const { inMemoryWallet, withSignTxConfirmation, cardanoCoin, openHWFlow } =
@@ -91,7 +92,7 @@ const App = () => {
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),
-    removeWallet: async props => walletRepository.removeWallet(props),
+    removeWallet,
     activateAccount: async (props, force) =>
       walletManager.activate(props, force),
     wallets$: walletRepository.wallets$,

@@ -3,7 +3,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme,
+  useAnalyticsContext
+} from '@providers';
 import {
   useCustomSubmitApi,
   useWalletAvatar,
@@ -26,13 +32,14 @@ import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 import { getPoolInfos } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
 import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { useWalletState } from '@hooks/useWalletState';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { BackgroundStorage } from '@lib/scripts/types';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -41,6 +48,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
   const {
     createWalletFromPrivateKey,
     getMnemonic,
@@ -60,7 +68,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     walletInfo,
     currentChain,
     environmentName,
-    blockchainProvider: { stakePoolProvider, chainHistoryProvider }
+    blockchainProvider: { stakePoolProvider, chainHistoryProvider },
+    setDeletingWallet
   } = useWalletStore();
   const { theme, setTheme } = useTheme();
   const { handleAnalyticsChoice, isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
@@ -122,7 +131,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
       .catch(console.error);
   }, []);
 
-  const switchWalletMode = async () => {
+  const switchWalletMode = useCallback(async () => {
     const mode = namiMigration?.mode === 'lace' ? 'nami' : 'lace';
     const migration: BackgroundStorage['namiMigration'] = {
       ...namiMigration,
@@ -134,7 +143,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     await setBackgroundStorage({
       namiMigration: migration
     });
-  };
+  }, [backgroundServices, namiMigration]);
+
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.TxIn[] | Wallet.Cardano.HydratedTxIn[]) =>
       await Wallet.getTxInputsValueAndAddress(inputs, chainHistoryProvider, inMemoryWallet),
@@ -154,6 +164,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
   );
   const connectHW = useWrapWithTimeout(connectHardwareWalletRevamped);
 
+  const removeWallet = useCallback(async () => {
+    setDeletingWallet(true);
+    await analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+    });
+    await deleteWallet();
+    setDeletingWallet(false);
+  }, [analytics, deleteWallet, setDeletingWallet, walletRepository]);
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -169,6 +189,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         createWallet: createWalletFromPrivateKey,
         getMnemonic,
         deleteWallet,
+        removeWallet,
         fiatCurrency: fiatCurrency.code,
         setFiatCurrency,
         theme: theme.name,
