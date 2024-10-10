@@ -299,7 +299,7 @@ export const Footer = withAddressBookContext(
       };
     }, [setSection, setSubmitingTxState, isPopupView]);
 
-    const onConfirm = useCallback(async () => {
+    const onConfirm = useCallback(() => {
       sendAnalytics();
       const isConfirmPass = currentSection.currentSection === Sections.CONFIRMATION;
       const txHasSucceeded = currentSection.currentSection === Sections.SUCCESS_TX;

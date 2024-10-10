@@ -35,8 +35,8 @@ export const TransactionCTAsBox = (): React.ReactElement => {
     setTriggerPoint(SendFlowTriggerPoints.SEND_BUTTON);
   };
 
-  const onCoSignClick = async () => {
-    await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignClick);
+  const onCoSignClick = () => {
+    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignClick);
     openCoSignTransactionDrawer();
   };
 
