@@ -3,9 +3,11 @@ import { useContext } from 'react';
 
 import { context } from './context';
 
-import type { DappOutsideHandlesContextValue } from './types';
+import type { CommonOutsideHandlesContextValue } from './types';
 
-export const useOutsideHandles = (): DappOutsideHandlesContextValue | never => {
+export const useOutsideHandles = ():
+  | CommonOutsideHandlesContextValue
+  | never => {
   const contextValue = useContext(context);
   if (!contextValue) throw new Error('OutsideHandles context not defined');
   return contextValue;

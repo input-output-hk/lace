@@ -1,19 +1,14 @@
 import React from 'react';
-import {
-  StarIcon,
-} from '@chakra-ui/icons';
-import {
-  Box,
-  Stack,
-  Text,
-  MenuItem,
-} from '@chakra-ui/react';
+
+import { StarIcon } from '@chakra-ui/icons';
+import { Box, Stack, Text, MenuItem } from '@chakra-ui/react';
 
 import AvatarLoader from '../components/avatarLoader';
 import UnitDisplay from '../components/unitDisplay';
-import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 
-type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
+
+type Props = Pick<CommonOutsideHandlesContextValue, 'cardanoCoin'> & {
   onClick?: () => void;
   avatar?: string;
   name: string;
@@ -25,23 +20,24 @@ type Props = Pick<OutsideHandlesContextValue, 'cardanoCoin'> & {
 
 const hashCode = (s: string): number => {
   let h;
-  for(let i = 0; i < s.length; i++)
-        h = Math.imul(31, h) + s.charCodeAt(i) | 0;
+  for (let i = 0; i < s.length; i++)
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
   return h;
-}
+};
 
-const UserInfo = ({ onClick, avatar, name, balance, isActive, isHW, cardanoCoin, index }: Props) => {
+const UserInfo = ({
+  onClick,
+  avatar,
+  name,
+  balance,
+  isActive,
+  isHW,
+  cardanoCoin,
+  index,
+}: Readonly<Props>) => {
   return (
-    <MenuItem
-      index={index || 22}
-      position="relative"
-      onClick={onClick}
-    >
-      <Stack
-        direction="row"
-        alignItems="center"
-        width="full"
-      >
+    <MenuItem index={index || 22} position="relative" onClick={onClick}>
+      <Stack direction="row" alignItems="center" width="full">
         <Box
           width={'30px'}
           height={'30px'}
@@ -50,17 +46,10 @@ const UserInfo = ({ onClick, avatar, name, balance, isActive, isHW, cardanoCoin,
           alignItems={'center'}
           justifyContent={'center'}
         >
-          <AvatarLoader
-            avatar={avatar || hashCode(index)}
-            width={'30px'}
-          />
+          <AvatarLoader avatar={avatar || hashCode(index)} width={'30px'} />
         </Box>
 
-        <Box
-          display="flex"
-          alignItems="center"
-          width="full"
-        >
+        <Box display="flex" alignItems="center" width="full">
           <Box display="flex" flexDirection="column">
             <Box height="1.5" />
             <Text

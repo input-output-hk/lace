@@ -1,3 +1,6 @@
+import React from 'react';
+
+import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Box,
   IconButton,
@@ -13,21 +16,24 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
-import React from 'react';
-import Asset from './asset';
 import { Planet } from 'react-kawaii';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
+
 import { searchTokens } from '../../../adapters/assets';
-import { Asset as NamiAsset } from '../../../types/assets';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+
+import Asset from './asset';
+
+import type { Asset as NamiAsset } from '../../../types/assets';
 
 const AssetsViewer = ({ assets }) => {
   const totalColor = useColorModeValue(
     'rgb(26, 32, 44)',
     'rgba(255, 255, 255, 0.92)',
   );
-  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(null);
+  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(
+    null,
+  );
   const [search, setSearch] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const createArray = async () => {
@@ -37,7 +43,11 @@ const AssetsViewer = ({ assets }) => {
       return;
     }
     setAssetsArray(null);
-    await new Promise((res, rej) => setTimeout(() => res(), 10));
+    await new Promise((res, rej) =>
+      setTimeout(() => {
+        res();
+      }, 10),
+    );
     const filteredAssets = search ? searchTokens(assets, search) : assets;
     setTotal(filteredAssets.length);
     setAssetsArray(filteredAssets);
@@ -56,7 +66,38 @@ const AssetsViewer = ({ assets }) => {
   return (
     <>
       <Box position="relative" zIndex="0">
-        {!(assets && assetsArray) ? (
+        {assets && assetsArray ? (
+          assetsArray.length <= 0 ? (
+            <Box
+              mt="16"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+              opacity="0.5"
+            >
+              <Planet size={80} mood="ko" color="#61DDBC" />
+              <Box height="2" />
+              <Text fontWeight="bold" color="GrayText">
+                No Assets
+              </Text>
+            </Box>
+          ) : (
+            <>
+              <Box
+                color={totalColor}
+                textAlign="center"
+                fontSize="sm"
+                opacity={0.4}
+              >
+                {total} {total == 1 ? 'Asset' : 'Assets'}
+              </Box>
+              <Box h="5" />
+
+              <AssetsGrid assets={assetsArray} />
+            </>
+          )
+        ) : (
           <Box
             mt="28"
             display="flex"
@@ -65,35 +106,6 @@ const AssetsViewer = ({ assets }) => {
           >
             <Spinner color="teal" speed="0.5s" />
           </Box>
-        ) : assetsArray.length <= 0 ? (
-          <Box
-            mt="16"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexDirection="column"
-            opacity="0.5"
-          >
-            <Planet size={80} mood="ko" color="#61DDBC" />
-            <Box height="2" />
-            <Text fontWeight="bold" color="GrayText">
-              No Assets
-            </Text>
-          </Box>
-        ) : (
-          <>
-            <Box
-              color={totalColor}
-              textAlign="center"
-              fontSize="sm"
-              opacity={0.4}
-            >
-              {total} {total == 1 ? 'Asset' : 'Assets'}
-            </Box>
-            <Box h="5" />
-
-            <AssetsGrid assets={assetsArray} />
-          </>
         )}
       </Box>
       <Box position="absolute" left="6" top="0">
@@ -104,7 +116,7 @@ const AssetsViewer = ({ assets }) => {
 };
 
 const AssetsGrid = ({ assets }) => {
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin } = useCommonOutsideHandles();
   return (
     <Box
       display="flex"
@@ -178,16 +190,21 @@ const Search = ({ setSearch, assets }) => {
               rounded="md"
               placeholder="Search policy, asset, name"
               fontSize="xs"
-              onInput={(e) => {
+              onInput={e => {
                 setInput(e.target.value);
               }}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter' && input) setSearch(input);
               }}
             />
             <InputRightElement
               children={
-                <SmallCloseIcon cursor="pointer" onClick={() => setInput('')} />
+                <SmallCloseIcon
+                  cursor="pointer"
+                  onClick={() => {
+                    setInput('');
+                  }}
+                />
               }
             />
           </InputGroup>

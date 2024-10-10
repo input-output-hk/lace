@@ -3,16 +3,16 @@ import React, { useMemo } from 'react';
 
 import { Provider } from './context';
 
-import type { DappOutsideHandlesContextValue } from './types';
+import type { CommonOutsideHandlesContextValue } from './types';
 
 type OutsideHandlesProviderProps =
-  PropsWithChildren<DappOutsideHandlesContextValue>;
+  PropsWithChildren<CommonOutsideHandlesContextValue>;
 
 export const OutsideHandlesProvider = ({
   children,
   ...props
 }: Readonly<OutsideHandlesProviderProps>): React.ReactElement => {
-  const contextValue = useMemo<DappOutsideHandlesContextValue>(
+  const contextValue = useMemo<CommonOutsideHandlesContextValue>(
     () => props,
     Object.values(props),
   );

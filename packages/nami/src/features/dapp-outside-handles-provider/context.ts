@@ -1,8 +1,10 @@
 import { createContext } from 'react';
 
-import type { OutsideHandlesContextValue } from './types';
+import type { DappOutsideHandlesContextValue } from './types';
 
-// eslint-disable-next-line unicorn/no-null
-export const context = createContext<OutsideHandlesContextValue | null>(null);
+export const context = createContext<DappOutsideHandlesContextValue | null>(
+  // eslint-disable-next-line unicorn/no-null
+  null,
+);
 
 export const { Provider } = context;

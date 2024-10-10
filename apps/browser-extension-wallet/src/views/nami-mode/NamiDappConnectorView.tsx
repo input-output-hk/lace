@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import React, { useCallback, useMemo } from 'react';
-import { DappConnector, DApp, DappOutsideHandlesProvider } from '@lace/nami';
+import { DappConnector, DApp, DappOutsideHandlesProvider, CommonOutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext, useTheme } from '@providers';
 import { useWalletManager } from '@hooks';
@@ -15,6 +15,7 @@ import * as cip30 from '@cardano-sdk/dapp-connector';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { finalize, firstValueFrom, map, of } from 'rxjs';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { useAnalytics } from './hooks';
 
 const DAPP_TOAST_DURATION = 100;
 const dappConnector: DappConnector = {
@@ -129,6 +130,7 @@ const dappConnector: DappConnector = {
 };
 
 export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
+  const { sendEventToPostHog } = useAnalytics();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletRepository } = useWalletManager();
   const { walletUI, inMemoryWallet, walletType, currentChain, environmentName } = useWalletStore();
@@ -152,18 +154,24 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     <DappOutsideHandlesProvider
       {...{
         theme: theme.name,
-        inMemoryWallet,
         walletManager,
         walletRepository,
         environmentName,
-        dappConnector,
-        withSignTxConfirmation,
-        cardanoCoin,
-        walletType,
-        openHWFlow
+        dappConnector
       }}
     >
-      <DApp />
+      <CommonOutsideHandlesProvider
+        {...{
+          cardanoCoin,
+          walletType,
+          openHWFlow,
+          inMemoryWallet,
+          withSignTxConfirmation,
+          sendEventToPostHog
+        }}
+      >
+        <DApp />
+      </CommonOutsideHandlesProvider>
     </DappOutsideHandlesProvider>
   );
 });

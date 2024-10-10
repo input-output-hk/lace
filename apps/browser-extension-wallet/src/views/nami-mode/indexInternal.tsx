@@ -3,7 +3,7 @@ import { useWalletStore } from '@src/stores';
 import { useAppInit } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
 import { withDappContext } from '@src/features/dapp/context';
-import { NamiView } from './NamiView';
+import { NamiDappConnectorView } from './NamiDappConnectorView';
 import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 
@@ -12,5 +12,5 @@ export const NamiDappConnector = withDappContext((): React.ReactElement => {
 
   useAppInit();
 
-  return <div id="nami-mode">{hdDiscoveryStatus === 'Idle' ? <NamiView /> : <MainLoader />}</div>;
+  return <div id="nami-mode">{hdDiscoveryStatus === 'Idle' ? <NamiDappConnectorView /> : <MainLoader />}</div>;
 });

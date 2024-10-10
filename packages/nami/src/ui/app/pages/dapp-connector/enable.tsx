@@ -7,7 +7,7 @@ import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
 
-import type { DappConnector } from '../../../../features/outside-handles-provider';
+import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;

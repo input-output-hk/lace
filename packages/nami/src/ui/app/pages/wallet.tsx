@@ -75,6 +75,7 @@ import Logo from '../../../assets/img/logoWhite.svg';
 import { TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import About from '../components/about';
 import AssetsViewer from '../components/assetsViewer';
@@ -90,11 +91,11 @@ import UserInfo from '../components/userInfo';
 
 import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
-import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
 export type Props = Pick<
-  OutsideHandlesContextValue,
+  CommonOutsideHandlesContextValue,
   'cardanoCoin' | 'openHWFlow'
 > & {
   activeAddress: string;
@@ -844,13 +845,9 @@ const DeleteAccountModal = React.forwardRef<
 DeleteAccountModal.displayName = 'DeleteAccountModal';
 
 const DelegationPopover = ({ builderRef }) => {
-  const {
-    inMemoryWallet,
-    cardanoCoin,
-    buildDelegation,
-    setSelectedStakePool,
-    openExternalLink,
-  } = useOutsideHandles();
+  const { buildDelegation, setSelectedStakePool, openExternalLink } =
+    useOutsideHandles();
+  const { inMemoryWallet, cardanoCoin } = useCommonOutsideHandles();
   const { delegation } = useDelegation({
     inMemoryWallet,
     buildDelegation,

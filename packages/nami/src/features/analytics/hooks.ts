@@ -1,9 +1,9 @@
-import { useOutsideHandles } from '../../features/outside-handles-provider/useOutsideHandles';
+import { useCommonOutsideHandles } from '../../features/common-outside-handles-provider';
 
 import type { Events } from './events';
 
 export const useCaptureEvent = () => {
-  const { sendEventToPostHog } = useOutsideHandles();
+  const { sendEventToPostHog } = useCommonOutsideHandles();
 
   return async (event: Events): Promise<void> => {
     await sendEventToPostHog(event);

@@ -4,7 +4,8 @@ import { Box } from '@chakra-ui/react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
 import { useAccount } from '../adapters/account';
-import { useOutsideHandles } from '../features/outside-handles-provider/useOutsideHandles';
+import { useCommonOutsideHandles } from '../features/common-outside-handles-provider';
+import { useDappOutsideHandles } from '../features/dapp-outside-handles-provider';
 
 import { TrezorTx } from './app/hw/trezorTx';
 import { Enable } from './app/pages/dapp-connector/enable';
@@ -15,12 +16,13 @@ import { Container } from './Container';
 export const Main = () => {
   const {
     theme,
-    inMemoryWallet,
     walletManager,
     walletRepository,
     environmentName,
     dappConnector,
-  } = useOutsideHandles();
+  } = useDappOutsideHandles();
+
+  const { inMemoryWallet } = useCommonOutsideHandles();
 
   const { activeAccount } = useAccount({
     wallets$: walletRepository.wallets$,

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Box,
   Button,
@@ -8,13 +9,15 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { Scrollbars } from './scrollbar';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
+
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+
 import Asset from './asset';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { Scrollbars } from './scrollbar';
 
 const AssetsModal = React.forwardRef((props, ref) => {
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin } = useCommonOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [data, setData] = React.useState({
     title: '',
@@ -24,12 +27,12 @@ const AssetsModal = React.forwardRef((props, ref) => {
   });
   const background = useColorModeValue('white', 'gray.800');
 
-  const abs = (big) => {
+  const abs = big => {
     return big < 0 ? BigInt(big) * BigInt(-1) : big;
   };
 
   React.useImperativeHandle(ref, () => ({
-    openModal(data) {
+    openModal: data => {
       setData(data);
       onOpen();
     },

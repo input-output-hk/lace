@@ -42,9 +42,8 @@ export interface DappConnector {
   }>;
 }
 
-export interface OutsideHandlesContextValue {
+export interface DappOutsideHandlesContextValue {
   theme: 'dark' | 'light';
-  inMemoryWallet: Wallet.ObservableWallet;
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<
     Wallet.WalletMetadata,
@@ -52,11 +51,4 @@ export interface OutsideHandlesContextValue {
   >;
   environmentName: Wallet.ChainName;
   dappConnector: DappConnector;
-  withSignTxConfirmation: <T>(
-    action: () => Promise<T>,
-    password?: string,
-  ) => Promise<T>;
-  cardanoCoin: Wallet.CoinId;
-  walletType: WalletType;
-  openHWFlow: (path: string) => void;
 }
