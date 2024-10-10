@@ -42,7 +42,6 @@ export interface OutsideHandlesContextValue {
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
-  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   deleteWallet: (
     isForgotPasswordFlow?: boolean,
   ) => Promise<WalletManagerActivateProps | undefined>;
