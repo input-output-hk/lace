@@ -709,14 +709,18 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password, hw) => {
+        sign={async (password, _hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          return await signAndSubmit({
-            tx,
-            password,
-            withSignTxConfirmation,
-            inMemoryWallet,
-          });
+          try {
+            await signAndSubmit({
+              tx,
+              password,
+              withSignTxConfirmation,
+              inMemoryWallet,
+            });
+          } catch (error) {
+            console.log('Failed to sign and submit transaction', error);
+          }
         }}
         getCbor={async () => {
           const inspection = await tx.inspect();
@@ -742,7 +746,7 @@ const Send = ({
               status: 'success',
               duration: 5000,
             });
-            if (await isValidAddress(address.result, currentChain)) {
+            if (isValidAddress(address.result, currentChain)) {
               await updateAccountMetadata({
                 namiMode: { recentSendToAddress: address.result },
               });

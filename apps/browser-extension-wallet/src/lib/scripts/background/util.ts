@@ -81,7 +81,7 @@ export const launchCip30Popup = async (url: string, windowType: Windows.CreateTy
     tab.id,
     calculatePopupWindowPositionAndSize(
       currentWindow,
-      windowType === 'popup' ? (namiMigration.mode === 'lace' ? POPUP_WINDOW : POPUP_WINDOW_NAMI) : HW_POPUP_WINDOW
+      windowType === 'popup' ? (namiMigration?.mode === 'nami' ? POPUP_WINDOW_NAMI : POPUP_WINDOW) : HW_POPUP_WINDOW
     ),
     windowType,
     true
