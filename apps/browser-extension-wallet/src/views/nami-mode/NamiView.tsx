@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
+import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
@@ -28,11 +28,11 @@ import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
-import { BackgroundStorage } from '@lib/scripts/types';
-import { isKeyHashAddress } from '@cardano-sdk/wallet';
-import { useWalletState } from '@hooks/useWalletState';
-import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
+import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
+import { useWalletState } from '@hooks/useWalletState';
+import { isKeyHashAddress } from '@cardano-sdk/wallet';
+import { BackgroundStorage } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -74,7 +74,13 @@ export const NamiView = withDappContext((): React.ReactElement => {
     }),
     [currentChain.networkId, walletUI.cardanoCoin]
   );
-  const { txFee, isInitializing, initializeCollateralTx, submitCollateralTx } = useCollateral();
+  const {
+    txFee,
+    isInitializing,
+    initializeCollateralTx,
+    submitCollateralTx,
+    txBuilder: collateralTxBuilder
+  } = useCollateral();
 
   const cardanoPrice = priceResult.cardano.price;
   const walletAddresses = walletInfo?.addresses
@@ -160,7 +166,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         connectedDapps,
         isAnalyticsOptIn,
         handleAnalyticsChoice,
-        sendEventToPostHog,
         createWallet,
         getMnemonic,
         deleteWallet,
@@ -168,10 +173,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         setFiatCurrency,
         theme: theme.name,
         setTheme,
-        inMemoryWallet,
         currentChain,
         cardanoPrice,
-        withSignTxConfirmation,
         walletManager,
         walletRepository,
         switchNetwork,
@@ -180,12 +183,13 @@ export const NamiView = withDappContext((): React.ReactElement => {
         enableCustomNode,
         getCustomSubmitApiForNetwork,
         defaultSubmitApi: DEFAULT_SUBMIT_API,
-        cardanoCoin,
         isValidURL,
         buildDelegation,
         signAndSubmitTransaction,
         passwordUtil,
         delegationTxFee: !!delegationTxBuilder && delegationTxFee,
+        delegationStoreDelegationTxBuilder: delegationTxBuilder,
+        collateralTxBuilder,
         setSelectedStakePool,
         isBuildingTx,
         stakingError,
@@ -200,14 +204,23 @@ export const NamiView = withDappContext((): React.ReactElement => {
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
         certificateInspectorFactory,
-        openHWFlow,
-        walletType,
         connectHW,
         createHardwareWalletRevamped,
         saveHardwareWallet
       }}
     >
-      <Nami />
+      <CommonOutsideHandlesProvider
+        {...{
+          cardanoCoin,
+          walletType,
+          openHWFlow,
+          inMemoryWallet,
+          withSignTxConfirmation,
+          sendEventToPostHog
+        }}
+      >
+        <Nami />
+      </CommonOutsideHandlesProvider>
     </OutsideHandlesProvider>
   );
 });

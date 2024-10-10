@@ -15,8 +15,6 @@ import {
   createTypedHooks,
 } from 'easy-peasy';
 
-import { sendStore } from './app/pages/send';
-
 import type { AssetInput } from '../types/assets';
 import type { Wallet } from '@lace/cardano';
 import type { Action } from 'easy-peasy';
@@ -56,6 +54,47 @@ const routeStore: RouteModel = {
   setRoute: action((state, route) => {
     // eslint-disable-next-line functional/immutable-data
     state.route = route;
+  }),
+};
+
+const initialState = {
+  fee: { fee: '0' },
+  value: { ada: '', assets: [], personalAda: '', minAda: '0' },
+  address: { result: '', display: '', error: '' },
+  message: '',
+  tx: null,
+  txInfo: {
+    minUtxo: 0,
+  },
+};
+
+export const sendStore = {
+  ...initialState,
+  setFee: action((state, fee) => {
+    state.fee = fee;
+  }),
+  setValue: action((state, value) => {
+    state.value = value;
+  }),
+  setMessage: action((state, message) => {
+    state.message = message;
+  }),
+  setTx: action((state, tx) => {
+    state.tx = tx;
+  }),
+  setAddress: action((state, address) => {
+    state.address = address;
+  }),
+  setTxInfo: action((state, txInfo) => {
+    state.txInfo = txInfo;
+  }),
+  reset: action(state => {
+    state.fee = initialState.fee;
+    state.value = initialState.value;
+    state.message = initialState.message;
+    state.address = initialState.address;
+    state.tx = initialState.tx;
+    state.txInfo = initialState.txInfo;
   }),
 };
 

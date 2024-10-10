@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-null */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
@@ -48,6 +48,7 @@ import UnitDisplay from './unitDisplay';
 
 import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
 import type { Wallet } from '@lace/cardano';
+import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
 
@@ -85,7 +86,7 @@ const txTypeLabel = {
 interface TransactionProps {
   tx: Wallet.Cardano.HydratedTx;
   network: OutsideHandlesContextValue['environmentName'];
-  cardanoCoin: OutsideHandlesContextValue['cardanoCoin'];
+  cardanoCoin: CommonOutsideHandlesContextValue['cardanoCoin'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
 }
 
@@ -102,6 +103,18 @@ const Transaction = ({
     txBgHover: useColorModeValue('teal.100', 'gray.600'),
     assetsBtnHover: useColorModeValue('teal.200', 'gray.700'),
   };
+
+  const extraInfo = useMemo(
+    () =>
+      displayInfo && displayInfo.extra.length > 0 ? (
+        <Text fontSize={12} fontWeight="semibold" color="teal.500">
+          {getTxExtra(displayInfo.extra)}
+        </Text>
+      ) : (
+        ''
+      ),
+    [displayInfo],
+  );
 
   return (
     <AccordionItem borderTop="none" _last={{ borderBottom: 'none' }}>
@@ -161,12 +174,8 @@ const Transaction = ({
                   decimals={6}
                   symbol={cardanoCoin.symbol}
                 />
-              ) : displayInfo.extra.length > 0 ? (
-                <Text fontSize={12} fontWeight="semibold" color="teal.500">
-                  {getTxExtra(displayInfo.extra)}
-                </Text>
               ) : (
-                ''
+                extraInfo
               )}
               {['internalIn', 'externalIn'].includes(displayInfo.type) ? (
                 ''

@@ -23,6 +23,7 @@ export type UseCollateralReturn = {
   isSubmitting: boolean;
   txFee: Cardano.Lovelace;
   hasEnoughAda: boolean;
+  txBuilder?: TxBuilder;
 };
 
 export const useCollateral = (): UseCollateralReturn => {
@@ -109,6 +110,7 @@ export const useCollateral = (): UseCollateralReturn => {
     isInitializing,
     isSubmitting,
     txFee,
-    hasEnoughAda
+    hasEnoughAda,
+    txBuilder
   };
 };

@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Box, Text, Spinner, Accordion, Button } from '@chakra-ui/react';
@@ -7,6 +7,7 @@ import { File } from 'react-kawaii';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import Transaction from './transaction';
@@ -17,8 +18,10 @@ const BATCH = 5;
 
 const HistoryViewer = () => {
   const capture = useCaptureEvent();
-  const { cardanoCoin, transactions, environmentName, openExternalLink } =
+  const { transactions, environmentName, openExternalLink } =
     useOutsideHandles();
+
+  const { cardanoCoin } = useCommonOutsideHandles();
   const [historySlice, setHistorySlice] = React.useState<
     Wallet.Cardano.HydratedTx[] | undefined
   >();
@@ -38,78 +41,78 @@ const HistoryViewer = () => {
     getTxs();
   }, [page]);
 
-  return (
-    <Box position="relative">
-      {historySlice ? (
-        historySlice.length <= 0 ? (
-          <Box
-            mt="16"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexDirection="column"
-            opacity="0.5"
-          >
-            <File size={80} mood="ko" color="#61DDBC" />
-            <Box height="2" />
-            <Text fontWeight="bold" color="GrayText">
-              No History
-            </Text>
-          </Box>
-        ) : (
-          <>
-            <Accordion
-              allowToggle
-              borderBottom="none"
-              onClick={() => {
-                void capture(Events.ActivityActivityActivityRowClick);
-              }}
-            >
-              {historySlice.map(tx => (
-                <Transaction
-                  key={tx.id.toString()}
-                  tx={tx}
-                  network={environmentName}
-                  cardanoCoin={cardanoCoin}
-                  openExternalLink={openExternalLink}
-                />
-              ))}
-            </Accordion>
-            {isFinal ? (
-              <Box
-                textAlign="center"
-                fontSize={16}
-                fontWeight="bold"
-                color="gray.400"
-              >
-                ... nothing more
-              </Box>
-            ) : (
-              <Box textAlign="center">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setTimeout(() => {
-                      setPage(page + 1);
-                    });
-                  }}
-                  colorScheme="orange"
-                  aria-label="More"
-                  fontSize={20}
-                  w="50%"
-                  h="30px"
-                  rounded="xl"
-                >
-                  <ChevronDownIcon fontSize="30px" />
-                </Button>
-              </Box>
-            )}
-          </>
-        )
+  const history = useMemo(
+    () =>
+      historySlice && historySlice.length <= 0 ? (
+        <Box
+          mt="16"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexDirection="column"
+          opacity="0.5"
+        >
+          <File size={80} mood="ko" color="#61DDBC" />
+          <Box height="2" />
+          <Text fontWeight="bold" color="GrayText">
+            No History
+          </Text>
+        </Box>
       ) : (
-        <HistorySpinner />
-      )}
-    </Box>
+        <>
+          <Accordion
+            allowToggle
+            borderBottom="none"
+            onClick={() => {
+              void capture(Events.ActivityActivityActivityRowClick);
+            }}
+          >
+            {historySlice?.map(tx => (
+              <Transaction
+                key={tx.id.toString()}
+                tx={tx}
+                network={environmentName}
+                cardanoCoin={cardanoCoin}
+                openExternalLink={openExternalLink}
+              />
+            ))}
+          </Accordion>
+          {isFinal ? (
+            <Box
+              textAlign="center"
+              fontSize={16}
+              fontWeight="bold"
+              color="gray.400"
+            >
+              ... nothing more
+            </Box>
+          ) : (
+            <Box textAlign="center">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setTimeout(() => {
+                    setPage(page + 1);
+                  });
+                }}
+                colorScheme="orange"
+                aria-label="More"
+                fontSize={20}
+                w="50%"
+                h="30px"
+                rounded="xl"
+              >
+                <ChevronDownIcon fontSize="30px" />
+              </Button>
+            </Box>
+          )}
+        </>
+      ),
+    [historySlice, setPage, openExternalLink, capture],
+  );
+
+  return (
+    <Box position="relative">{historySlice ? history : <HistorySpinner />}</Box>
   );
 };
 

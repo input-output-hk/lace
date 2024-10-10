@@ -3,25 +3,33 @@ import React from 'react';
 import { Box, useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import {
-  getCurrentAccount,
-  getFavoriteIcon,
-} from '../../../../api/extension/api.mock';
+import { getFavoriteIcon } from '../../../../api/extension/api.mock';
 
-import Enable from './enable';
-import { currentAccount } from '../../../../mocks/account.mock';
+import { Enable } from './enable';
 
 const EnableStory = ({
   colorMode,
 }: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
+  const origin = 'https://app.sundae.fi';
 
   return (
     <Box width="400" height="572">
       <Enable
-        request={{ origin: 'https://app.sundae.fi' }}
+        request={{ origin }}
         controller={{ returnData: () => {} }}
+        accountName={'Account 1'}
+        accountAvatar="0.51801253"
+        dappConnector={{
+          getDappInfo: async () =>
+            await {
+              logo: getFavoriteIcon(origin),
+              name: 'name',
+              url: origin,
+              domain: origin.split('//')[1],
+            },
+        }}
       />
     </Box>
   );
@@ -48,9 +56,6 @@ const meta: Meta<typeof EnableStory> = {
     layout: 'centered',
   },
   beforeEach: () => {
-    getCurrentAccount.mockImplementation(async () => {
-      return await Promise.resolve(currentAccount);
-    });
     getFavoriteIcon.mockImplementation(() => {
       return 'https://app.sundae.fi/static/images/favicon.png';
     });
@@ -60,7 +65,6 @@ const meta: Meta<typeof EnableStory> = {
       },
     };
     return () => {
-      getCurrentAccount.mockReset();
       getFavoriteIcon.mockReset();
     };
   },

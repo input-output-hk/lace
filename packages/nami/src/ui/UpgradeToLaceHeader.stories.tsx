@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { Meta, StoryObj } from '@storybook/react';
 
+import { useLocation } from '../../.storybook/mocks/react-router-dom.mock';
 import { store } from '../mocks/store.mock';
 
 import { useStoreActions, useStoreState } from './store.mock';
@@ -29,6 +30,12 @@ const meta: Meta<typeof UpgradeToLaceHeader> = {
     layout: 'centered',
   },
   beforeEach: () => {
+    useLocation.mockImplementation(
+      () =>
+        ({
+          pathname: '',
+        }) as any,
+    );
     useStoreState.mockImplementation((callback: any) => {
       return callback({
         ...store,

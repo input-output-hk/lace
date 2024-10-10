@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useMemo } from 'react';
 
@@ -74,6 +75,7 @@ import Logo from '../../../assets/img/logoWhite.svg';
 import { TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import About from '../components/about';
 import AssetsViewer from '../components/assetsViewer';
@@ -89,11 +91,11 @@ import UserInfo from '../components/userInfo';
 
 import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
-import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 
 export type Props = Pick<
-  OutsideHandlesContextValue,
+  CommonOutsideHandlesContextValue,
   'cardanoCoin' | 'openHWFlow'
 > & {
   activeAddress: string;
@@ -173,11 +175,10 @@ const Wallet = ({
     <>
       <Box
         background={containerBg}
-        minHeight="100vh"
+        minHeight="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        ma
       >
         <Box
           height="52"
@@ -210,6 +211,7 @@ const Wallet = ({
             right="6"
           >
             <Menu
+              placement="bottom-end"
               isOpen={menu}
               autoSelect={false}
               onClose={() => {
@@ -250,14 +252,14 @@ const Wallet = ({
                   <Scrollbars
                     style={{ width: '100%' }}
                     autoHeight
-                    autoHeightMax={210}
+                    autoHeightMax={180}
                   >
                     {accounts.map(account => (
                       <UserInfo
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
                         onClick={() => {
-                          void onAccountClick(account);
+                          onAccountClick(account);
                         }}
                         avatar={account.avatar}
                         name={account.name}
@@ -843,13 +845,9 @@ const DeleteAccountModal = React.forwardRef<
 DeleteAccountModal.displayName = 'DeleteAccountModal';
 
 const DelegationPopover = ({ builderRef }) => {
-  const {
-    inMemoryWallet,
-    cardanoCoin,
-    buildDelegation,
-    setSelectedStakePool,
-    openExternalLink,
-  } = useOutsideHandles();
+  const { buildDelegation, setSelectedStakePool, openExternalLink } =
+    useOutsideHandles();
+  const { inMemoryWallet, cardanoCoin } = useCommonOutsideHandles();
   const { delegation } = useDelegation({
     inMemoryWallet,
     buildDelegation,

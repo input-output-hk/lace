@@ -38,7 +38,6 @@ import { useStoreActions } from '../../store';
 import Account from '../components/account';
 import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
-import ConfirmModal from '../components/confirmModal';
 
 import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
@@ -101,7 +100,7 @@ const Settings = ({
 
   return (
     <Box
-      minHeight="100vh"
+      minHeight="calc(100vh - 30px)"
       display="flex"
       alignItems="center"
       flexDirection="column"

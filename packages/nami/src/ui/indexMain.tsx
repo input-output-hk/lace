@@ -3,12 +3,14 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
-import { useAccount } from '../adapters/account';
+import { useAccountUtil } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
 import { useChangePassword } from '../adapters/wallet';
 
+import { useCommonOutsideHandles } from './../features/common-outside-handles-provider';
+import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
 import Send from './app/pages/send';
@@ -17,8 +19,6 @@ import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
 
-import { useOutsideHandles } from './index';
-
 export const Main = () => {
   const {
     addAccount: addLaceAccount,
@@ -26,7 +26,6 @@ export const Main = () => {
     fiatCurrency,
     theme,
     walletAddresses,
-    inMemoryWallet,
     isAnalyticsOptIn,
     currentChain,
     cardanoPrice,
@@ -39,19 +38,19 @@ export const Main = () => {
     getMnemonic,
     deleteWallet,
     handleAnalyticsChoice,
-    withSignTxConfirmation,
     environmentName,
     switchNetwork,
     availableChains,
     enableCustomNode,
     getCustomSubmitApiForNetwork,
     defaultSubmitApi,
-    cardanoCoin,
     isValidURL,
     setAvatar,
     switchWalletMode,
-    openHWFlow,
   } = useOutsideHandles();
+
+  const { inMemoryWallet, withSignTxConfirmation, cardanoCoin, openHWFlow } =
+    useCommonOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
     fiatCurrency,
@@ -79,7 +78,7 @@ export const Main = () => {
     activateAccount,
     removeAccount,
     updateAccountMetadata,
-  } = useAccount({
+  } = useAccountUtil({
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),
@@ -98,7 +97,7 @@ export const Main = () => {
     <HashRouter>
       <Container environmentName={environmentName} theme={theme}>
         <UpgradeToLaceHeader switchWalletMode={switchWalletMode} />
-        <Box overflowX="hidden">
+        <Box overflowX="hidden" minHeight="calc(100vh - 30px)">
           <Switch>
             <Route path="/settings/*">
               <Settings

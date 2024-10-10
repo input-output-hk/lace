@@ -1,15 +1,7 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import {
-  createTab,
-  displayUnit,
-  getAdaHandle,
-  isValidAddress,
-  toUnit,
-} from '../../../api/extension';
-import Account from '../components/account';
-import { Scrollbars } from '../components/scrollbar';
-import ConfirmModal from '../components/confirmModal';
+
+import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
+import { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -39,39 +31,44 @@ import {
   useToast,
   Icon,
 } from '@chakra-ui/react';
-import MiddleEllipsis from 'react-middle-ellipsis';
-import UnitDisplay from '../components/unitDisplay';
-import {
-  buildTx,
-  signAndSubmit,
-  signAndSubmitHW,
-} from '../../../api/extension/wallet';
-import { assetsToValue, minAdaRequired } from '../../../api/util';
-import { FixedSizeList as List } from 'react-window';
-import AssetBadge from '../components/assetBadge';
-import { ERROR, HW, TAB } from '../../../config/config';
-import { Planet } from 'react-kawaii';
-import { useStoreActions, useStoreState } from '../../store';
-import { action } from 'easy-peasy';
-import AvatarLoader from '../components/avatarLoader';
-import { NumericFormat } from 'react-number-format';
-import Copy from '../components/copy';
-import AssetsModal from '../components/assetsModal';
-import { MdModeEdit } from 'react-icons/md';
-import useConstant from 'use-constant';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
+import { useObservable } from '@lace/common';
 import debouncePromise from 'debounce-promise';
 import latest from 'promise-latest';
-import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
-import { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
-import type { Wallet } from '@lace/cardano';
-import { useObservable } from '@lace/common';
-import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
+import { MdModeEdit } from 'react-icons/md';
+import { Planet } from 'react-kawaii';
+import MiddleEllipsis from 'react-middle-ellipsis';
+import { NumericFormat } from 'react-number-format';
+import { useHistory } from 'react-router-dom';
+import { FixedSizeList as List } from 'react-window';
+import useConstant from 'use-constant';
+
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
+import {
+  displayUnit,
+  getAdaHandle,
+  isValidAddress,
+  toUnit,
+} from '../../../api/extension';
+import { buildTx, signAndSubmit } from '../../../api/extension/wallet';
+import { assetsToValue, minAdaRequired } from '../../../api/util';
+import { ERROR } from '../../../config/config';
+import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import { useStoreActions, useStoreState } from '../../store';
+import Account from '../components/account';
+import AssetBadge from '../components/assetBadge';
+import AssetsModal from '../components/assetsModal';
+import AvatarLoader from '../components/avatarLoader';
+import ConfirmModal from '../components/confirmModal';
+import Copy from '../components/copy';
+import { Scrollbars } from '../components/scrollbar';
+import UnitDisplay from '../components/unitDisplay';
+
+import type { UseAccount } from '../../../adapters/account';
 import type { Asset as NamiAsset } from '../../../types/assets';
-import { UseAccount } from '../../../adapters/account';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import type { Wallet } from '@lace/cardano';
 
 interface Props {
   activeAddress: string;
@@ -95,48 +92,7 @@ const useIsMounted = () => {
   return isMounted;
 };
 
-let timer = null;
-
-const initialState = {
-  fee: { fee: '0' },
-  value: { ada: '', assets: [], personalAda: '', minAda: '0' },
-  address: { result: '', display: '', error: '' },
-  message: '',
-  tx: null,
-  txInfo: {
-    minUtxo: 0,
-  },
-};
-
-export const sendStore = {
-  ...initialState,
-  setFee: action((state, fee) => {
-    state.fee = fee;
-  }),
-  setValue: action((state, value) => {
-    state.value = value;
-  }),
-  setMessage: action((state, message) => {
-    state.message = message;
-  }),
-  setTx: action((state, tx) => {
-    state.tx = tx;
-  }),
-  setAddress: action((state, address) => {
-    state.address = address;
-  }),
-  setTxInfo: action((state, txInfo) => {
-    state.txInfo = txInfo;
-  }),
-  reset: action(state => {
-    state.fee = initialState.fee;
-    state.value = initialState.value;
-    state.message = initialState.message;
-    state.address = initialState.address;
-    state.tx = initialState.tx;
-    state.txInfo = initialState.txInfo;
-  }),
-};
+const timer = null;
 
 const Send = ({
   accounts,
@@ -146,10 +102,10 @@ const Send = ({
   currentChain,
   updateAccountMetadata,
   withSignTxConfirmation,
-}: Props) => {
+}: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -218,12 +174,12 @@ const Send = ({
 
   const prepareTx = async (
     _,
-    data: {
+    data: Readonly<{
       value: any;
       address: any;
       message: any;
       protocolParameters: Cardano.ProtocolParameters;
-    },
+    }>,
   ) => {
     if (!isMounted.current) return;
 
@@ -248,7 +204,11 @@ const Send = ({
 
     setFee({ fee: '' });
     setTx(null);
-    await new Promise((res, rej) => setTimeout(() => res(null)));
+    await new Promise((res, rej) =>
+      setTimeout(() => {
+        res(null);
+      }),
+    );
     try {
       const output = {
         address: _address.result,
@@ -287,15 +247,15 @@ const Send = ({
       );
 
       if (BigInt(minAda) <= BigInt(toUnit(_value.personalAda || '0'))) {
-        const displayAda = parseFloat(
-          _value.personalAda.replace(/[,\s]/g, ''),
+        const displayAda = Number.parseFloat(
+          _value.personalAda.replace(/[\s,]/g, ''),
         ).toLocaleString('en-EN', { minimumFractionDigits: 6 });
         output.amount[0].quantity = toUnit(_value.personalAda || '0');
         !focus.current && setValue({ ..._value, ada: displayAda });
       } else if (_value.assets.length > 0) {
         output.amount[0].quantity = minAda;
-        const minAdaDisplay = parseFloat(
-          displayUnit(minAda).toString().replace(/[,\s]/g, ''),
+        const minAdaDisplay = Number.parseFloat(
+          displayUnit(minAda).toString().replace(/[\s,]/g, ''),
         ).toLocaleString('en-EN', { minimumFractionDigits: 6 });
         setValue({
           ..._value,
@@ -315,13 +275,15 @@ const Send = ({
         assetsToValue(output.amount),
       );
 
-      const generalMetadata: Map<bigint, Serialization.TransactionMetadatum> =
-        new Map();
+      const generalMetadata = new Map<
+        bigint,
+        Serialization.TransactionMetadatum
+      >();
       const auxiliaryData = new Serialization.AuxiliaryData();
 
       // setting metadata for optional message (CIP-0020)
       if (_message) {
-        function chunkSubstr(str, size) {
+        const chunkSubstr = (str, size) => {
           const numChunks = Math.ceil(str.length / size);
           const chunks = new Array(numChunks);
 
@@ -330,7 +292,7 @@ const Send = ({
           }
 
           return chunks;
-        }
+        };
         const msg = { msg: chunkSubstr(_message, 64) };
         generalMetadata.set(
           BigInt('674'),
@@ -346,15 +308,15 @@ const Send = ({
         );
       }
 
-      const tx = await buildTx(
-        transactionOutput,
+      const tx = await buildTx({
+        output: transactionOutput,
         auxiliaryData,
         inMemoryWallet,
-      );
+      });
       const inspection = await tx.inspect();
       setFee({ fee: inspection.inputSelection.fee.toString() });
       setTx(tx);
-    } catch (e) {
+    } catch {
       setFee({ error: 'Transaction not possible' });
     }
   };
@@ -385,17 +347,21 @@ const Send = ({
   const objectToArray = obj => Object.keys(obj).map(key => obj[key]);
 
   const addAssets = _assets => {
-    _assets.forEach(asset => {
+    for (const asset of _assets) {
       assets.current[asset.unit] = { ...asset };
-    });
+    }
     const assetsList = objectToArray(assets.current);
-    triggerTxUpdate(() => setValue({ ...value, assets: assetsList }));
+    triggerTxUpdate(() => {
+      setValue({ ...value, assets: assetsList });
+    });
   };
 
   const removeAsset = asset => {
     delete assets.current[asset.unit];
     const assetsList = objectToArray(assets.current);
-    triggerTxUpdate(() => setValue({ ...value, assets: assetsList }));
+    triggerTxUpdate(() => {
+      setValue({ ...value, assets: assetsList });
+    });
   };
 
   React.useEffect(() => {
@@ -423,7 +389,7 @@ const Send = ({
   return (
     <>
       <Box
-        height="100vh"
+        height="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
@@ -450,6 +416,7 @@ const Send = ({
                   history.goBack();
                 }}
                 variant="ghost"
+                aria-label={''}
                 icon={<ChevronLeftIcon boxSize="6" />}
               />
             </Box>
@@ -495,15 +462,15 @@ const Send = ({
                   <InputLeftElement
                     children={
                       <Box pl={4}>
-                        {!isLoading ? (
-                          <Box>{cardanoCoin.symbol}</Box>
-                        ) : (
+                        {isLoading ? (
                           <Spinner
                             color="teal"
                             speed="0.5s"
                             boxSize="9px"
                             size="xs"
                           />
+                        ) : (
+                          <Box>{cardanoCoin.symbol}</Box>
                         )}
                       </Box>
                     }
@@ -524,11 +491,11 @@ const Send = ({
                       value.ada = val;
                       value.personalAda = val;
                       const v = value;
-                      triggerTxUpdate(() =>
+                      triggerTxUpdate(() => {
                         setValue({
                           ...v,
-                        }),
-                      );
+                        });
+                      });
                     }}
                     variant="filled"
                     isDisabled={isLoading}
@@ -599,9 +566,9 @@ const Send = ({
                           assets.current[asset.unit].input = val;
                           const v = value;
                           v.assets = objectToArray(assets.current);
-                          triggerTxUpdate(() =>
-                            setValue({ ...v, assets: v.assets }),
-                          );
+                          triggerTxUpdate(() => {
+                            setValue({ ...v, assets: v.assets });
+                          });
                         }}
                         asset={asset}
                       />
@@ -624,9 +591,9 @@ const Send = ({
                 isLoading={
                   !fee.fee &&
                   !fee.error &&
-                  address.result &&
+                  !!address.result &&
                   !address.error &&
-                  (value.ada || value.assets.length > 0)
+                  !!(value.ada || value.assets.length > 0)
                 }
                 width={'366px'}
                 height={'50px'}
@@ -645,6 +612,9 @@ const Send = ({
       </Box>
       <AssetsModal ref={assetsModalRef} />
       <ConfirmModal
+        isPopup={true}
+        openHWFlow={openHWFlow}
+        walletType={walletType}
         title={'Confirm transaction'}
         info={
           <Box
@@ -739,34 +709,45 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password, hw) => {
+        sign={async (password, _hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          if (hw) {
-            if (hw.device === HW.trezor) {
-              return createTab(TAB.trezorTx, `?tx=${tx}`);
-            }
-            return await signAndSubmitHW(txDes, {
-              keyHashes: [paymentKeyHash],
-              account: account.current,
-              hw,
-            });
-          } else
-            return await signAndSubmit(
+          try {
+            await signAndSubmit({
               tx,
               password,
               withSignTxConfirmation,
               inMemoryWallet,
-            );
+            });
+          } catch (error) {
+            console.error('Failed to sign and submit transaction', error);
+            throw error;
+          }
+        }}
+        getCbor={async () => {
+          const inspection = await tx.inspect();
+          const transaction = new Serialization.Transaction(
+            Serialization.TransactionBody.fromCore(inspection.body),
+            Serialization.TransactionWitnessSet.fromCore(
+              inspection.witness
+                ? (inspection.witness as Cardano.Witness)
+                : { signatures: new Map() },
+            ),
+            inspection.auxiliaryData
+              ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
+              : undefined,
+          );
+
+          return transaction.toCbor();
         }}
         onConfirm={async (status, signedTx) => {
-          if (status === true) {
+          if (status) {
             capture(Events.SendTransactionConfirmed);
             toast({
               title: 'Transaction submitted',
               status: 'success',
               duration: 5000,
             });
-            if (await isValidAddress(address.result, currentChain)) {
+            if (isValidAddress(address.result, currentChain)) {
               await updateAccountMetadata({
                 namiMode: { recentSendToAddress: address.result },
               });
@@ -806,19 +787,15 @@ const AddressPopup = ({
   triggerTxUpdate,
   isLoading,
   recentSendToAddress,
-}: {
-  accounts: {
-    name: string;
-    avatar?: string;
-    address?: string;
-  }[];
+}: Readonly<{
+  accounts: { name: string; avatar?: string; address?: string }[];
   recentSendToAddress?: string;
   currentChain: Wallet.Cardano.ChainId;
   setAddress: any;
   address: { result: string; display: string; error?: string };
   triggerTxUpdate: any;
   isLoading: boolean;
-}) => {
+}>) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const checkColor = useColorModeValue('teal.500', 'teal.200');
   const ref = React.useRef(false);
@@ -851,22 +828,19 @@ const AddressPopup = ({
         handle.slice(1),
         handleResolver,
       );
-      if (
+      addr =
         handle.length > 1 &&
         resolvedAddress &&
         isValidAddress(resolvedAddress, currentChain)
-      ) {
-        addr = {
-          result: resolvedAddress,
-          display: handle,
-        };
-      } else {
-        addr = {
-          result: '',
-          display: handle,
-          error: '$handle not found',
-        };
-      }
+          ? {
+              result: resolvedAddress,
+              display: handle,
+            }
+          : {
+              result: '',
+              display: handle,
+              error: '$handle not found',
+            };
     }
 
     return addr;
@@ -879,10 +853,16 @@ const AddressPopup = ({
   return (
     <Popover
       isOpen={(Boolean(recentSendToAddress) || accounts.length > 0) && isOpen}
-      onOpen={() => !isLoading && !address.result && !address.error && onOpen()}
+      onOpen={() => {
+        !isLoading && !address.result && !address.error && onOpen();
+      }}
       autoFocus={false}
       onClose={async () => {
-        await new Promise<void>((res, rej) => setTimeout(() => res()));
+        await new Promise<void>((res, rej) =>
+          setTimeout(() => {
+            res();
+          }),
+        );
         if (ref.current) {
           ref.current = false;
           return;
@@ -900,13 +880,19 @@ const AddressPopup = ({
             value={address.display}
             spellCheck={false}
             onBlur={async e => {
-              await new Promise<void>((res, rej) => setTimeout(() => res()));
+              await new Promise<void>((res, rej) =>
+                setTimeout(() => {
+                  res();
+                }),
+              );
               if (ref.current) {
                 ref.current = false;
                 return;
               }
               onClose();
-              setTimeout(() => e.target.blur());
+              setTimeout(() => {
+                e.target.blur();
+              });
             }}
             fontSize="xs"
             placeholder="Address or $handle"
@@ -1090,11 +1076,7 @@ const AssetsSelector = ({
   assets,
   addAssets,
   value,
-}: {
-  assets: NamiAsset[];
-  addAssets: any;
-  value: any;
-}) => {
+}: Readonly<{ assets: NamiAsset[]; addAssets: any; value: any }>) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [search, setSearch] = React.useState('');
   const select = React.useRef(false);
@@ -1115,7 +1097,7 @@ const AssetsSelector = ({
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
-        <Button isDisabled={!assets || assets.length < 1} flex={1} size="sm">
+        <Button isDisabled={!assets || assets.length === 0} flex={1} size="sm">
           + Assets
         </Button>
       </PopoverTrigger>
@@ -1145,7 +1127,9 @@ const AssetsSelector = ({
               children={
                 <SmallCloseIcon
                   cursor="pointer"
-                  onClick={() => setSearch('')}
+                  onClick={() => {
+                    setSearch('');
+                  }}
                 />
               }
             />
@@ -1164,7 +1148,9 @@ const AssetsSelector = ({
                   aria-label="close button"
                   size="xs"
                   rounded="md"
-                  onClick={() => setChoice({})}
+                  onClick={() => {
+                    setChoice({});
+                  }}
                   icon={<CloseIcon />}
                 />
 
@@ -1268,14 +1254,14 @@ const Asset = ({
   setChoice,
   onClose,
   addAssets,
-}: {
+}: Readonly<{
   asset: NamiAsset;
   choice;
   select;
   setChoice;
   onClose;
   addAssets;
-}) => {
+}>) => {
   const hoverColor = useColorModeValue('gray.100', 'gray.600');
 
   return (
@@ -1345,12 +1331,7 @@ const Selection = ({
   asset,
   choice,
   setChoice,
-}: {
-  select;
-  asset: NamiAsset;
-  choice;
-  setChoice;
-}) => {
+}: Readonly<{ select; asset: NamiAsset; choice; setChoice }>) => {
   const selectColor = useColorModeValue('orange.500', 'orange.200');
   return (
     <Box
