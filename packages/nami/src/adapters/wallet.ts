@@ -20,7 +20,6 @@ interface ChangePasswordProps {
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
-  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   activeWalletId$: Readonly<WalletManagerApi['activeWalletId$']>;
   wallets$: Observable<
     AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[]
@@ -45,7 +44,6 @@ export const useChangePassword = ({
   addAccount,
   activateWallet,
   createWallet,
-  getMnemonic,
   deleteWallet,
   updateAccountMetadata,
   wallets$,
@@ -114,7 +112,6 @@ export const useChangePassword = ({
     [
       chainId,
       accountIndex,
-      getMnemonic,
       createWallet,
       deleteWallet,
       updateAccountMetadata,

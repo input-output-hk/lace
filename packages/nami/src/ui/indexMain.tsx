@@ -36,7 +36,6 @@ export const Main = () => {
     setTheme,
     removeDapp,
     createWallet,
-    getMnemonic,
     deleteWallet,
     handleAnalyticsChoice,
     withSignTxConfirmation,
@@ -68,7 +67,6 @@ export const Main = () => {
     activateWallet: async props => walletManager.activate(props),
     deleteWallet,
     createWallet,
-    getMnemonic,
   });
 
   const {
