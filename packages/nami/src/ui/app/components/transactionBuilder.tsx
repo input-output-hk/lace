@@ -270,6 +270,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               await signAndSubmitTransaction();
             } catch (error) {
               console.error(error);
+              throw error;
             }
           }}
           onConfirm={status => {
@@ -477,6 +478,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               await signAndSubmitTransaction();
             } catch (error) {
               console.log(error);
+              throw error;
             }
           }}
           onConfirm={status => {

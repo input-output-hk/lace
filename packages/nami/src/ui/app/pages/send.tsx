@@ -719,7 +719,8 @@ const Send = ({
               inMemoryWallet,
             });
           } catch (error) {
-            console.log('Failed to sign and submit transaction', error);
+            console.error('Failed to sign and submit transaction', error);
+            throw error;
           }
         }}
         getCbor={async () => {
