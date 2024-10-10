@@ -47,7 +47,6 @@ const App = () => {
     setTheme,
     removeDapp,
     createWallet,
-    getMnemonic,
     deleteWallet,
     handleAnalyticsChoice,
     environmentName,
@@ -78,7 +77,6 @@ const App = () => {
     activateWallet: async props => walletManager.activate(props),
     deleteWallet,
     createWallet,
-    getMnemonic,
   });
 
   const {
