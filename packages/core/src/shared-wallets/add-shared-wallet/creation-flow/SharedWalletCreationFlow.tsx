@@ -7,9 +7,26 @@ import { SharedWalletCreationStore, SharedWalletCreationStoreSharedProps } from 
 import { ShareWalletDetails } from './ShareWalletDetails';
 import { SharedWalletCreationActionType, SharedWalletCreationStep } from './state-and-types';
 
-type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps;
+type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps & {
+  onAddCosignersNextClick?: () => void;
+  onDefineQuorumDownloadClick?: () => void;
+  onDefineQuorumNextClick?: () => void;
+  onImportantInfoBackClick?: () => void;
+  onImportantInfoNextClick?: () => void;
+  onOpenSharedWalletClick?: () => void;
+  onWalletNameNextClick?: () => void;
+};
 
-export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (props) => (
+export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = ({
+  onWalletNameNextClick,
+  onAddCosignersNextClick,
+  onImportantInfoNextClick,
+  onImportantInfoBackClick,
+  onDefineQuorumNextClick,
+  onDefineQuorumDownloadClick,
+  onOpenSharedWalletClick,
+  ...props
+}) => (
   <SharedWalletCreationStore {...props}>
     {({ state, dispatch }) => (
       <>
@@ -19,7 +36,10 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
             walletName={state.walletName || ''}
             activeWalletAddress=""
             onBack={() => dispatch({ type: SharedWalletCreationActionType.BACK })}
-            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            onNext={() => {
+              onWalletNameNextClick?.();
+              dispatch({ type: SharedWalletCreationActionType.NEXT });
+            }}
             onWalletNameChange={(walletName) =>
               dispatch({ type: SharedWalletCreationActionType.CHANGE_WALLET_NAME, walletName })
             }
@@ -29,7 +49,10 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
           state.step === SharedWalletCreationStep.CoSignersImportantInfo) && (
           <AddCoSigners
             onBack={() => dispatch({ type: SharedWalletCreationActionType.BACK })}
-            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            onNext={() => {
+              onAddCosignersNextClick?.();
+              dispatch({ type: SharedWalletCreationActionType.NEXT });
+            }}
             onValueChange={(coSigner) => dispatch({ coSigner, type: SharedWalletCreationActionType.COSIGNERS_CHANGED })}
             coSigners={state.coSigners}
             coSignersDirty={state.coSignerInputsDirty}
@@ -39,7 +62,10 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
         {state.step === SharedWalletCreationStep.Quorum && (
           <QuorumOption
             onBack={() => dispatch({ type: SharedWalletCreationActionType.BACK })}
-            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            onNext={() => {
+              onDefineQuorumNextClick?.();
+              dispatch({ type: SharedWalletCreationActionType.NEXT });
+            }}
             onChange={(quorumRules) =>
               dispatch({ quorumRules, type: SharedWalletCreationActionType.QUORUM_RULES_CHANGED })
             }
@@ -49,15 +75,27 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = (pro
         )}
         {state.step === SharedWalletCreationStep.ShareDetails && (
           <ShareWalletDetails
-            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            onDownloadClick={() => {
+              onDefineQuorumDownloadClick?.();
+            }}
+            onNext={() => {
+              onOpenSharedWalletClick?.();
+              dispatch({ type: SharedWalletCreationActionType.NEXT });
+            }}
             stateSharedWallet={state}
           />
         )}
         {state.step === SharedWalletCreationStep.CoSignersImportantInfo && (
           <ImportantInfoDialog
             open
-            onBack={() => dispatch({ type: SharedWalletCreationActionType.BACK })}
-            onNext={() => dispatch({ type: SharedWalletCreationActionType.NEXT })}
+            onBack={() => {
+              onImportantInfoBackClick?.();
+              dispatch({ type: SharedWalletCreationActionType.BACK });
+            }}
+            onNext={() => {
+              onImportantInfoNextClick?.();
+              dispatch({ type: SharedWalletCreationActionType.NEXT });
+            }}
             zIndex={1001}
           />
         )}

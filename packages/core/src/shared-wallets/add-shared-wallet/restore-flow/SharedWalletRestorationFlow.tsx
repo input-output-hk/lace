@@ -11,6 +11,7 @@ import { validateJson } from './validateJson';
 type SharedWalletRestorationProps = {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
+  onImportJsonError?: () => Promise<void>;
   onRestoreSharedWallet: (data: CreateWalletParams) => void;
   sharedKeys: string;
 };
@@ -22,6 +23,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
   exitTheFlow,
   navigateToAppHome,
   onRestoreSharedWallet,
+  onImportJsonError,
 }) => {
   const [file, setFile] = useState<File | undefined>();
   const [cosignerData, setCosignerData] = useState<CreateWalletParams | undefined>(undefined);
@@ -80,6 +82,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           setCosignerData(result.data);
         }
       } catch (error_: unknown) {
+        await onImportJsonError?.();
         setError(error_ as FileValidationError);
       }
     };
@@ -87,7 +90,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
     if (file) {
       validate(file);
     }
-  }, [file, sharedKeys]);
+  }, [file, onImportJsonError, sharedKeys]);
 
   return (
     <>
