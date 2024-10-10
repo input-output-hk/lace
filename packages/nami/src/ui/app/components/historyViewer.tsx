@@ -7,6 +7,7 @@ import { File } from 'react-kawaii';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import Transaction from './transaction';
@@ -17,8 +18,10 @@ const BATCH = 5;
 
 const HistoryViewer = () => {
   const capture = useCaptureEvent();
-  const { cardanoCoin, transactions, environmentName, openExternalLink } =
+  const { transactions, environmentName, openExternalLink } =
     useOutsideHandles();
+
+  const { cardanoCoin } = useCommonOutsideHandles();
   const [historySlice, setHistorySlice] = React.useState<
     Wallet.Cardano.HydratedTx[] | undefined
   >();

@@ -12,6 +12,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 
+import { useCommonOutsideHandles } from '../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../features/outside-handles-provider/useOutsideHandles';
 
 import { toAsset } from './assets';
@@ -258,11 +259,11 @@ export const useTxInfo = (
   const [txInfo, setTxInfo] = useState<TxInfo | undefined>();
   const {
     getTxInputsValueAndAddress,
-    inMemoryWallet,
     eraSummaries,
     walletAddresses,
     certificateInspectorFactory,
   } = useOutsideHandles();
+  const { inMemoryWallet } = useCommonOutsideHandles();
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
   const rewardAccounts = useObservable(

@@ -3,19 +3,16 @@ import React from 'react';
 import { Box } from '@chakra-ui/react';
 import { HashRouter, Switch, Route } from 'react-router-dom';
 
-import { useAccount } from '../adapters/account';
+import { useAccountUtil } from '../adapters/account';
 import { useAssets } from '../adapters/assets';
 import { useBalance } from '../adapters/balance';
 import { useFiatCurrency } from '../adapters/currency';
 import { useChangePassword } from '../adapters/wallet';
 
+import { useCommonOutsideHandles } from './../features/common-outside-handles-provider';
 import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
-import { TrezorTx } from './app/hw/trezorTx';
-import { Enable } from './app/pages/dapp-connector/enable';
-import { SignData } from './app/pages/dapp-connector/signData';
-import { SignTx } from './app/pages/dapp-connector/signTx';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
@@ -29,7 +26,6 @@ export const Main = () => {
     fiatCurrency,
     theme,
     walletAddresses,
-    inMemoryWallet,
     isAnalyticsOptIn,
     currentChain,
     cardanoPrice,
@@ -42,20 +38,19 @@ export const Main = () => {
     getMnemonic,
     deleteWallet,
     handleAnalyticsChoice,
-    withSignTxConfirmation,
     environmentName,
     switchNetwork,
     availableChains,
     enableCustomNode,
     getCustomSubmitApiForNetwork,
     defaultSubmitApi,
-    cardanoCoin,
     isValidURL,
     setAvatar,
     switchWalletMode,
-    openHWFlow,
-    dappConnector,
   } = useOutsideHandles();
+
+  const { inMemoryWallet, withSignTxConfirmation, cardanoCoin, openHWFlow } =
+    useCommonOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
     fiatCurrency,
@@ -83,7 +78,7 @@ export const Main = () => {
     activateAccount,
     removeAccount,
     updateAccountMetadata,
-  } = useAccount({
+  } = useAccountUtil({
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),
@@ -146,27 +141,6 @@ export const Main = () => {
             </Route>
             <Route exact path="/hwTab/success">
               <SuccessAndClose />
-            </Route>
-            <Route exact path="/hwTab/trezorTx/:cbor/:setCollateral?">
-              <TrezorTx />
-            </Route>
-            <Route path="/dapp/connect">
-              <Enable
-                dappConnector={dappConnector}
-                controller={dappConnector.authorizeDapp}
-                accountAvatar={activeAccount.avatar}
-                accountName={activeAccount.name}
-              />
-            </Route>
-            <Route path="/dapp/sign-tx">
-              <SignTx
-                dappConnector={dappConnector}
-                inMemoryWallet={inMemoryWallet}
-                account={activeAccount}
-              />
-            </Route>
-            <Route path="/dapp/sign-data">
-              <SignData dappConnector={dappConnector} account={activeAccount} />
             </Route>
             <Route path="*">
               <Wallet

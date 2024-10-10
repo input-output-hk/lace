@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { getNextAccountIndex, useAccount } from './account';
+import { getNextAccountIndex, useAccountUtil } from './account';
 
 import type {
   AnyWallet,
@@ -90,7 +90,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -135,7 +135,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -182,7 +182,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -226,7 +226,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -252,7 +252,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$: wallets$ as unknown as Wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -311,7 +311,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -348,7 +348,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,

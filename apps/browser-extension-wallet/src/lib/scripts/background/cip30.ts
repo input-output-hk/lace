@@ -44,48 +44,60 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     // Also transactions can be submitted by the dApps externally
     // once they've got the witnesss keys if they construct their own transactions
     Promise.resolve(true),
-  signTx: pDebounce(async () => {
-    try {
-      const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
-      const ready = await userPromptService.readyToSignTx();
-      if (!ready) return false;
-      return cancelOnTabClose(tab);
-    } catch (error) {
-      console.error(error);
-      return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
-    }
-  }, DEBOUNCE_THROTTLE),
-  signData: pDebounce(async () => {
-    try {
-      const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
-      const ready = await userPromptService.readyToSignData();
-      if (!ready) return false;
-      return cancelOnTabClose(tab);
-    } catch (error) {
-      console.error(error);
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign data'));
-    }
-  }, DEBOUNCE_THROTTLE),
-  getCollateral: pDebounce(async (args) => {
-    try {
-      const { namiMigration } = await getBackgroundStorage();
-      if (namiMigration.mode === 'nami') {
-        // User has to explicitly set collateral from the popup UI
-        return [];
+  signTx: pDebounce(
+    async () => {
+      try {
+        const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
+        const ready = await userPromptService.readyToSignTx();
+        if (!ready) return false;
+        return cancelOnTabClose(tab);
+      } catch (error) {
+        console.error(error);
+        return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
       }
+    },
+    DEBOUNCE_THROTTLE,
+    { before: true }
+  ),
+  signData: pDebounce(
+    async () => {
+      try {
+        const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
+        const ready = await userPromptService.readyToSignData();
+        if (!ready) return false;
+        return cancelOnTabClose(tab);
+      } catch (error) {
+        console.error(error);
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign data'));
+      }
+    },
+    DEBOUNCE_THROTTLE,
+    { before: true }
+  ),
+  getCollateral: pDebounce(
+    async (args) => {
+      try {
+        const { namiMigration } = await getBackgroundStorage();
+        if (namiMigration.mode === 'nami') {
+          // User has to explicitly set collateral from the popup UI
+          return [];
+        }
 
-      const dappInfo = await senderToDappInfo(args.sender);
-      dappSetCollateral$.next({ dappInfo, collateralRequest: args.data });
-      await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/set-collateral');
+        const dappInfo = await senderToDappInfo(args.sender);
+        dappSetCollateral$.next({ dappInfo, collateralRequest: args.data });
+        await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/set-collateral');
 
-      return userPromptService.getCollateralRequest();
-    } catch (error) {
-      // eslint-disable-next-line unicorn/no-useless-undefined
-      dappSetCollateral$.next(undefined);
-      throw new Error(error);
-    }
-  }, DEBOUNCE_THROTTLE)
+        return userPromptService.getCollateralRequest();
+      } catch (error) {
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        dappSetCollateral$.next(undefined);
+        throw new Error(error);
+      }
+    },
+    DEBOUNCE_THROTTLE,
+    { before: true }
+  )
 };
 
 const walletApi = walletCip30.createWalletApi(

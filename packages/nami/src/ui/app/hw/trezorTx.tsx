@@ -11,7 +11,7 @@ import { filter, map, take } from 'rxjs/operators';
 import { submitTx } from '../../../api/extension';
 import LogoOriginal from '../../../assets/img/logo.svg';
 import LogoWhite from '../../../assets/img/logoWhite.svg';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 
 export const TrezorTx = (): ReactElement => {
   const backgroundColor = useColorModeValue('gray.200', 'gray.800');
@@ -22,7 +22,7 @@ export const TrezorTx = (): ReactElement => {
   }>();
 
   const toast = useToast();
-  const { inMemoryWallet, withSignTxConfirmation } = useOutsideHandles();
+  const { inMemoryWallet, withSignTxConfirmation } = useCommonOutsideHandles();
 
   React.useEffect(() => {
     withSignTxConfirmation(async () => {

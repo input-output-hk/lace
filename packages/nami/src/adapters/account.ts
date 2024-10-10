@@ -132,15 +132,9 @@ const getAcountsMapper =
   });
 
 export const useAccount = ({
-  chainId = Wallet.Cardano.ChainIds.Mainnet,
   wallets$,
   activeWalletId$,
-  addAccount,
-  activateAccount,
-  removeAccount,
-  removeWallet,
-  updateAccountMetadata,
-}: Readonly<AccountsProps>): UseAccount => {
+}: Readonly<Pick<AccountsProps, 'activeWalletId$' | 'wallets$'>>) => {
   const activeWallet = useObservable(activeWalletId$);
   const wallets = useObservable(wallets$);
   const { walletId, accountIndex } = activeWallet ?? {};
@@ -184,6 +178,34 @@ export const useAccount = ({
       {},
     [allAccountsSorted, accountIndex, activeWallet?.walletId],
   );
+
+  return useMemo(
+    () => ({
+      allAccountsSorted,
+      activeAccount,
+    }),
+    [allAccountsSorted, activeAccount],
+  );
+};
+
+export const useAccountUtil = ({
+  chainId = Wallet.Cardano.ChainIds.Mainnet,
+  wallets$,
+  activeWalletId$,
+  addAccount,
+  activateAccount,
+  removeAccount,
+  removeWallet,
+  updateAccountMetadata,
+}: Readonly<AccountsProps>): UseAccount => {
+  const activeWallet = useObservable(activeWalletId$);
+  const wallets = useObservable(wallets$);
+  const { walletId, accountIndex } = activeWallet ?? {};
+
+  const { allAccountsSorted, activeAccount } = useAccount({
+    wallets$,
+    activeWalletId$,
+  });
 
   return {
     allAccounts: allAccountsSorted,

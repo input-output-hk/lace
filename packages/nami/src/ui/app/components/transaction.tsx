@@ -48,6 +48,7 @@ import UnitDisplay from './unitDisplay';
 
 import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
 import type { Wallet } from '@lace/cardano';
+import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
 
@@ -85,7 +86,7 @@ const txTypeLabel = {
 interface TransactionProps {
   tx: Wallet.Cardano.HydratedTx;
   network: OutsideHandlesContextValue['environmentName'];
-  cardanoCoin: OutsideHandlesContextValue['cardanoCoin'];
+  cardanoCoin: CommonOutsideHandlesContextValue['cardanoCoin'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
 }
 

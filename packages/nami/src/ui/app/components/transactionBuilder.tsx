@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { Serialization } from '@cardano-sdk/core';
 import { CheckIcon, WarningIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -31,11 +32,13 @@ import { useDelegation } from '../../../adapters/delegation';
 import { ERROR } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
-import {Cardano, Serialization} from "@cardano-sdk/core";
+
+import type { Cardano } from '@cardano-sdk/core';
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -104,9 +107,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       isInitializingCollateral,
       initializeCollateralTx: initializeCollateral,
       collateralFee,
-      inMemoryWallet,
-      walletType,
-      cardanoCoin,
+
       buildDelegation,
       setSelectedStakePool,
       delegationTxFee,
@@ -116,14 +117,19 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       signAndSubmitTransaction,
       getStakePoolInfo,
       submitCollateralTx,
-      withSignTxConfirmation,
       resetDelegationState,
       hasNoFunds,
       openExternalLink,
-      openHWFlow,
       delegationStoreDelegationTxBuilder,
-      collateralTxBuilder
+      collateralTxBuilder,
     } = useOutsideHandles();
+    const {
+      inMemoryWallet,
+      walletType,
+      cardanoCoin,
+      withSignTxConfirmation,
+      openHWFlow,
+    } = useCommonOutsideHandles();
     const { initDelegation, stakeRegistration } = useDelegation({
       inMemoryWallet,
       buildDelegation,
@@ -133,7 +139,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
       useCollateral({
         inMemoryWallet,
         submitCollateralTx,
-        withSignTxConfirmation
+        withSignTxConfirmation,
       });
     const toast = useToast();
     const {
@@ -267,7 +273,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             }
           }}
           onConfirm={status => {
-            if (status === true) {
+            if (status) {
               capture(Events.StakingConfirmClick);
               toast({
                 title: 'Delegation submitted',
@@ -284,7 +290,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             }
             delegationRef.current.closeModal();
           }}
-          getCbor={async ()=> {
+          getCbor={async () => {
             if (!delegationStoreDelegationTxBuilder) {
               toast({
                 title: 'Transaction failed',
@@ -326,7 +332,9 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 receiving rewards. Alternatively, head to{' '}
                 <Link
                   fontWeight="semibold"
-                  onClick={() => openExternalLink('https://pool.pm')}
+                  onClick={() => {
+                    openExternalLink('https://pool.pm');
+                  }}
                 >
                   https://pool.pm
                 </Link>
@@ -472,7 +480,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             }
           }}
           onConfirm={status => {
-            if (status === true) {
+            if (status) {
               capture(Events.StakingUnstakeConfirmClick);
               toast({
                 title: 'Deregistration submitted',
@@ -488,7 +496,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
               });
             }
           }}
-          getCbor={async ()=> {
+          getCbor={async () => {
             if (!delegationStoreDelegationTxBuilder) {
               toast({
                 title: 'Transaction failed',
@@ -509,7 +517,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 inspection.witness
                   ? (inspection.witness as Cardano.Witness)
                   : { signatures: new Map() },
-              )
+              ),
             );
 
             return transaction.toCbor();
@@ -594,7 +602,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             capture(Events.SettingsCollateralXClick);
           }}
           onConfirm={(status, signedTx) => {
-            if (status === true) {
+            if (status) {
               capture(Events.SettingsCollateralConfirmClick);
               toast({
                 title: 'Collateral added',
@@ -618,7 +626,7 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             capture(Events.SettingsCollateralXClick);
           }}
           setCollateral={true}
-          getCbor={async ()=> {
+          getCbor={async () => {
             if (!collateralTxBuilder) {
               toast({
                 title: 'Transaction failed',
@@ -664,7 +672,9 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
                 <br />
                 <Link
                   fontWeight="semibold"
-                  onClick={() => openExternalLink('https://namiwallet.io')}
+                  onClick={() => {
+                    openExternalLink('https://namiwallet.io');
+                  }}
                 >
                   Read more
                 </Link>

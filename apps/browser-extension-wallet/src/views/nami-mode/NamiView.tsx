@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { DappConnector, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
+import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
 import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
@@ -13,7 +13,7 @@ import {
   useBuildDelegation,
   useBalances
 } from '@hooks';
-import { signingCoordinator, walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
+import { walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
 import { useDappContext, withDappContext } from '@src/features/dapp/context';
 import { localDappService } from '../browser-view/features/dapp/components/DappList/localDappService';
@@ -32,128 +32,9 @@ import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardwa
 import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { useWalletState } from '@hooks/useWalletState';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
-import { BackgroundStorage, DappDataService } from '@lib/scripts/types';
-import { consumeRemoteApi, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { runtime } from 'webextension-polyfill';
-import * as cip30 from '@cardano-sdk/dapp-connector';
-import { UserPromptService } from '@lib/scripts/background/services';
-import { finalize, firstValueFrom, map, of } from 'rxjs';
-import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { BackgroundStorage } from '@lib/scripts/types';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
-
-const DAPP_TOAST_DURATION = 100;
-const dappConnector: DappConnector = {
-  getDappInfo: () => {
-    const dappDataService = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
-      {
-        baseChannel: DAPP_CHANNELS.dappData,
-        properties: {
-          getDappInfo: RemoteApiPropertyType.MethodReturningPromise
-        }
-      },
-      { logger: console, runtime }
-    );
-    return dappDataService.getDappInfo();
-  },
-  authorizeDapp: (authorization: 'deny' | 'allow', url: string, onCleanup: () => void) => {
-    const api$ = of({
-      allowOrigin(origin: cip30.Origin): Promise<'deny' | 'allow'> {
-        if (!url.startsWith(origin)) {
-          return Promise.reject();
-        }
-        return Promise.resolve(authorization);
-      }
-    });
-
-    const userPromptService = exposeApi<Pick<UserPromptService, 'allowOrigin'>>(
-      {
-        api$,
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { allowOrigin: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
-
-    setTimeout(() => {
-      userPromptService.shutdown();
-      onCleanup();
-    }, DAPP_TOAST_DURATION);
-  },
-  getSignTxRequest: async () => {
-    const userPromptService = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
-
-    return firstValueFrom(
-      signingCoordinator.transactionWitnessRequest$.pipe(
-        map(async (r) => ({
-          dappInfo: await senderToDappInfo(r.signContext.sender),
-          request: {
-            data: { tx: r.transaction.toCbor(), addresses: r.signContext.knownAddresses },
-            reject: async (onCleanup: () => void) => {
-              await r.reject('User declined to sign');
-              setTimeout(() => {
-                onCleanup();
-              }, DAPP_TOAST_DURATION);
-            },
-            sign: async (password: string) => {
-              const passphrase = Buffer.from(password, 'utf8');
-              await r.sign(passphrase, { willRetryOnFailure: true });
-            }
-          }
-        })),
-        finalize(() => userPromptService.shutdown())
-      )
-    );
-  },
-  getSignDataRequest: async () => {
-    const userPromptService = exposeApi<Pick<UserPromptService, 'readyToSignData'>>(
-      {
-        api$: of({
-          async readyToSignData(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignData: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
-
-    return firstValueFrom(
-      signingCoordinator.signDataRequest$.pipe(
-        map(async (r) => ({
-          dappInfo: await senderToDappInfo(r.signContext.sender),
-          request: {
-            data: { payload: r.signContext.payload, address: r.signContext.signWith },
-            reject: async (onCleanup: () => void) => {
-              await r.reject('User rejected to sign');
-              setTimeout(() => {
-                onCleanup();
-              }, DAPP_TOAST_DURATION);
-            },
-            sign: async (password: string) => {
-              const passphrase = Buffer.from(password, 'utf8');
-              return r.sign(passphrase, { willRetryOnFailure: true });
-            }
-          }
-        })),
-        finalize(() => userPromptService.shutdown())
-      )
-    );
-  }
-};
 
 export const NamiView = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
@@ -285,7 +166,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         connectedDapps,
         isAnalyticsOptIn,
         handleAnalyticsChoice,
-        sendEventToPostHog,
         createWallet,
         getMnemonic,
         deleteWallet,
@@ -293,10 +173,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         setFiatCurrency,
         theme: theme.name,
         setTheme,
-        inMemoryWallet,
         currentChain,
         cardanoPrice,
-        withSignTxConfirmation,
         walletManager,
         walletRepository,
         switchNetwork,
@@ -305,9 +183,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         enableCustomNode,
         getCustomSubmitApiForNetwork,
         defaultSubmitApi: DEFAULT_SUBMIT_API,
-        cardanoCoin,
         isValidURL,
-        dappConnector,
         buildDelegation,
         signAndSubmitTransaction,
         passwordUtil,
@@ -328,14 +204,23 @@ export const NamiView = withDappContext((): React.ReactElement => {
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
         certificateInspectorFactory,
-        openHWFlow,
-        walletType,
         connectHW,
         createHardwareWalletRevamped,
         saveHardwareWallet
       }}
     >
-      <Nami />
+      <CommonOutsideHandlesProvider
+        {...{
+          cardanoCoin,
+          walletType,
+          openHWFlow,
+          inMemoryWallet,
+          withSignTxConfirmation,
+          sendEventToPostHog
+        }}
+      >
+        <Nami />
+      </CommonOutsideHandlesProvider>
     </OutsideHandlesProvider>
   );
 });

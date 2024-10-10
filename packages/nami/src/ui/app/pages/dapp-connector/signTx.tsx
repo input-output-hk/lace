@@ -24,7 +24,6 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
-import { useOutsideHandles } from '../../../../features/outside-handles-provider';
 import Account from '../../components/account';
 import AssetsModal from '../../components/assetsModal';
 import ConfirmModal from '../../components/confirmModal';
@@ -40,8 +39,9 @@ import {
 
 import type { TransactionValue } from './signTxUtil';
 import type { UseAccount } from '../../../../adapters/account';
-import type { DappConnector } from '../../../../features/outside-handles-provider';
+import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
 import type { Cardano } from '@cardano-sdk/core';
+import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -65,7 +65,7 @@ export const SignTx = ({
   const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
 
   const capture = useCaptureEvent();
-  const { cardanoCoin, walletType, openHWFlow } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
   const ref = React.useRef();
   const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
@@ -537,7 +537,7 @@ export const SignTx = ({
 const DetailsModal = React.forwardRef(
   // eslint-disable-next-line react/prop-types
   ({ externalValue, property, keyHashes, tx, assetsModalRef }, ref) => {
-    const { cardanoCoin } = useOutsideHandles();
+    const { cardanoCoin } = useCommonOutsideHandles();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const background = useColorModeValue('white', 'gray.800');
     const innerBackground = useColorModeValue('gray.100', 'gray.700');

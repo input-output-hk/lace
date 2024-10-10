@@ -5,7 +5,7 @@ import { TX } from '../../config/config';
 
 import { submitTx } from '.';
 
-import type { OutsideHandlesContextValue } from '../../ui';
+import type { CommonOutsideHandlesContextValue } from '../../features/common-outside-handles-provider';
 import type { Serialization } from '@cardano-sdk/core';
 import type { UnwitnessedTx } from '@cardano-sdk/tx-construction';
 import type { Wallet } from '@lace/cardano';
@@ -43,7 +43,7 @@ export const signAndSubmit = async ({
 }: Readonly<{
   tx: UnwitnessedTx;
   password: string;
-  withSignTxConfirmation: OutsideHandlesContextValue['withSignTxConfirmation'];
+  withSignTxConfirmation: CommonOutsideHandlesContextValue['withSignTxConfirmation'];
   inMemoryWallet: Wallet.ObservableWallet;
 }>) =>
   withSignTxConfirmation(async () => {

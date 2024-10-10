@@ -18,10 +18,8 @@ import Account from '../../components/account';
 import ConfirmModal from '../../components/confirmModal';
 import { Scrollbars } from '../../components/scrollbar';
 import type { UseAccount } from '../../../../adapters/account';
-import {
-  DappConnector,
-  useOutsideHandles,
-} from '../../../../features/outside-handles-provider';
+import { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -47,7 +45,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
     setPayload(payloadUtf8);
   };
 
-  const { walletType } = useOutsideHandles();
+  const { walletType } = useCommonOutsideHandles();
 
   const signDataMsg = useMemo(() => {
     const result: JSX.Element[] = [];
