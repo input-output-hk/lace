@@ -40,15 +40,11 @@ import {
 } from '@chakra-ui/react';
 import MiddleEllipsis from 'react-middle-ellipsis';
 import UnitDisplay from '../components/unitDisplay';
-import {
-  buildTx,
-  signAndSubmit,
-  signAndSubmitHW,
-} from '../../../api/extension/wallet';
+import { buildTx, signAndSubmit } from '../../../api/extension/wallet';
 import { assetsToValue, minAdaRequired } from '../../../api/util';
 import { FixedSizeList as List } from 'react-window';
 import AssetBadge from '../components/assetBadge';
-import { ERROR, HW, TAB } from '../../../config/config';
+import { ERROR } from '../../../config/config';
 import { Planet } from 'react-kawaii';
 import { useStoreActions, useStoreState } from '../../store';
 import AvatarLoader from '../components/avatarLoader';
@@ -70,7 +66,6 @@ import { toAsset, withHandleInfo } from '../../../adapters/assets';
 import type { Asset as NamiAsset } from '../../../types/assets';
 import { UseAccount } from '../../../adapters/account';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
-import { TxInspection } from '@cardano-sdk/tx-construction/dist/cjs/tx-builder/types';
 
 interface Props {
   activeAddress: string;
@@ -701,14 +696,18 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password, hw) => {
+        sign={async (password, _hw) => {
           capture(Events.SendTransactionConfirmationConfirmClick);
-          return await signAndSubmit({
-            tx,
-            password,
-            withSignTxConfirmation,
-            inMemoryWallet,
-          });
+          try {
+            await signAndSubmit({
+              tx,
+              password,
+              withSignTxConfirmation,
+              inMemoryWallet,
+            });
+          } catch (error) {
+            console.log('Failed to sign and submit transaction', error);
+          }
         }}
         getCbor={async () => {
           const inspection = await tx.inspect();
@@ -734,7 +733,7 @@ const Send = ({
               status: 'success',
               duration: 5000,
             });
-            if (await isValidAddress(address.result, currentChain)) {
+            if (isValidAddress(address.result, currentChain)) {
               await updateAccountMetadata({
                 namiMode: { recentSendToAddress: address.result },
               });

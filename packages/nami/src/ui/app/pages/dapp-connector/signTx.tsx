@@ -513,7 +513,11 @@ export const SignTx = ({
           capture(Events.DappConnectorDappTxCancelClick);
         }}
         sign={async password => {
-          return request?.sign(password ?? '');
+          try {
+            await request?.sign(password ?? '');
+          } catch (error) {
+            setIsLoading(l => ({ ...l, error: `Failed to sign. ${error}` }));
+          }
         }}
         onConfirm={async (status, signedTx) => {
           if (status) {
