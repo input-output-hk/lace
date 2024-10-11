@@ -1,4 +1,4 @@
-import type * as Nami from '@xsy/nami-migration-tool/dist/migrator/migration-data.data';
+import type * as Nami from '@src/features/nami-migration/migration-tool/migrator/migration-data.data';
 import * as Extension from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { HexBlob } from '@cardano-sdk/util';

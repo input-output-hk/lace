@@ -121,7 +121,7 @@ const Settings = ({
         />
       </Box>
       <Switch>
-        <Route path="/settings/general">
+        <Route path="/settings/general" exact>
           <GeneralSettings
             changePassword={changePassword}
             currency={currency}
@@ -133,13 +133,13 @@ const Settings = ({
             updateAccountMetadata={updateAccountMetadata}
           />
         </Route>
-        <Route path="/settings/whitelisted">
+        <Route path="/settings/whitelisted" exact>
           <Whitelisted
             connectedDapps={connectedDapps}
             removeDapp={removeDapp}
           />
         </Route>
-        <Route path="/settings/network">
+        <Route path="/settings/network" exact>
           <Network
             environmentName={environmentName}
             switchNetwork={switchNetwork}
@@ -150,7 +150,7 @@ const Settings = ({
             isValidURL={isValidURL}
           />
         </Route>
-        <Route path="/settings/legal">
+        <Route path="/settings/legal" exact>
           <LegalSettings
             isAnalyticsOptIn={isAnalyticsOptIn}
             handleAnalyticsChoice={handleAnalyticsChoice}

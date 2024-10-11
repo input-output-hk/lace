@@ -51,6 +51,7 @@ const outsideHandlesMocks: OutsideHandlesContextValue = {
   walletName: undefined,
   currentChain: undefined,
   isSharedWallet: false,
+  isNamiWallet: false,
 };
 
 // Please use <LocalThemeProvider> to present dark theme
