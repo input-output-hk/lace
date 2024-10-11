@@ -364,7 +364,7 @@ describe('useAccount', () => {
       walletId: 'wallet',
     });
 
-    expect(mockRemoveWallet).toHaveBeenCalledWith('wallet');
+    expect(mockRemoveWallet).toHaveBeenCalledWith();
 
     expect(mockRemoveAccount).not.toHaveBeenCalled();
   });

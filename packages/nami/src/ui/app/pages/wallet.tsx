@@ -780,11 +780,13 @@ const DeleteAccountModal = React.forwardRef<
 
   const deleteAccount = useCallback(async () => {
     setIsLoading(true);
-    await activateAccount({
-      accountIndex: nextAccount?.index!,
-      walletId: nextAccount?.walletId!,
-      force: true,
-    });
+    if (nextAccount) {
+      await activateAccount({
+        accountIndex: nextAccount?.index,
+        walletId: nextAccount?.walletId,
+        force: true,
+      });
+    }
     setTimeout(async () => {
       await removeAccount({
         walletId: activeAccount.walletId,
