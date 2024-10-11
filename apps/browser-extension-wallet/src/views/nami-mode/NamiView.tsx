@@ -42,7 +42,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const backgroundServices = useBackgroundServiceAPIContext();
   const {
-    createWallet,
+    createWalletFromPrivateKey,
     getMnemonic,
     deleteWallet,
     switchNetwork,
@@ -166,7 +166,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         connectedDapps,
         isAnalyticsOptIn,
         handleAnalyticsChoice,
-        createWallet,
+        createWallet: createWalletFromPrivateKey,
         getMnemonic,
         deleteWallet,
         fiatCurrency: fiatCurrency.code,
