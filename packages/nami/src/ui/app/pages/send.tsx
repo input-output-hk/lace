@@ -69,6 +69,7 @@ import UnitDisplay from '../components/unitDisplay';
 import type { UseAccount } from '../../../adapters/account';
 import type { Asset as NamiAsset } from '../../../types/assets';
 import type { Wallet } from '@lace/cardano';
+import { encodeToCbor } from '../../../adapters/transactions';
 
 interface Props {
   activeAddress: string;
@@ -725,19 +726,12 @@ const Send = ({
         }}
         getCbor={async () => {
           const inspection = await tx.inspect();
-          const transaction = new Serialization.Transaction(
-            Serialization.TransactionBody.fromCore(inspection.body),
-            Serialization.TransactionWitnessSet.fromCore(
-              inspection.witness
-                ? (inspection.witness as Cardano.Witness)
-                : { signatures: new Map() },
-            ),
-            inspection.auxiliaryData
-              ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
-              : undefined,
-          );
 
-          return transaction.toCbor();
+          return encodeToCbor({
+            body: inspection.body,
+            witness: inspection.witness,
+            auxiliaryData: inspection.auxiliaryData,
+          });
         }}
         onConfirm={async (status, signedTx) => {
           if (status) {

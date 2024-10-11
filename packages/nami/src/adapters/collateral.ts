@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from 'react';
 
+import { isNotNil } from '@cardano-sdk/util';
 import { useObservable } from '@lace/common';
+import { firstValueFrom } from 'rxjs';
+import { filter, map, take } from 'rxjs/operators';
 
 import type { Wallet } from '@lace/cardano';
 
@@ -35,4 +38,21 @@ export const useCollateral = ({
   );
 
   return { hasCollateral, reclaimCollateral, submitCollateral };
+};
+
+export const getCollateralUtxo = async (
+  txId: Readonly<Wallet.Cardano.TransactionId>,
+  inMemoryWallet: Wallet.ObservableWallet,
+): Promise<Wallet.Cardano.Utxo> => {
+  return await firstValueFrom(
+    inMemoryWallet.utxo.available$.pipe(
+      map(utxos =>
+        utxos.find(
+          o => o[0].txId === txId && o[1].value.coins === BigInt('5000000'),
+        ),
+      ),
+      filter(isNotNil),
+      take(1),
+    ),
+  );
 };

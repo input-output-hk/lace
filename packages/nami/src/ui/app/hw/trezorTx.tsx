@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 import { firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
+import { getCollateralUtxo } from '../../../adapters/collateral';
 import { submitTx } from '../../../api/extension';
 import LogoOriginal from '../../../assets/img/logo.svg';
 import LogoWhite from '../../../assets/img/logoWhite.svg';
@@ -46,19 +47,7 @@ export const TrezorTx = (): ReactElement => {
 
         if (txId) {
           if (setCollateral) {
-            const utxo = await firstValueFrom(
-              inMemoryWallet.utxo.available$.pipe(
-                map(utxos =>
-                  utxos.find(
-                    o =>
-                      o[0].txId === txId &&
-                      o[1].value.coins === BigInt('5000000'),
-                  ),
-                ),
-                filter(isNotNil),
-                take(1),
-              ),
-            );
+            const utxo = await getCollateralUtxo(txId, inMemoryWallet);
             await inMemoryWallet.utxo.setUnspendable([utxo]);
           }
 

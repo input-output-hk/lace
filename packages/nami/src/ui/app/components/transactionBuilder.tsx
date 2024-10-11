@@ -39,6 +39,7 @@ import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
 
 import type { Cardano } from '@cardano-sdk/core';
+import {encodeToCbor} from "../../../adapters/transactions";
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -306,19 +307,12 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             const tx = await delegationStoreDelegationTxBuilder.build();
 
             const inspection = await tx.inspect();
-            const transaction = new Serialization.Transaction(
-              Serialization.TransactionBody.fromCore(inspection.body),
-              Serialization.TransactionWitnessSet.fromCore(
-                inspection.witness
-                  ? (inspection.witness as Cardano.Witness)
-                  : { signatures: new Map() },
-              ),
-              inspection.auxiliaryData
-                ? Serialization.AuxiliaryData.fromCore(inspection.auxiliaryData)
-                : undefined,
-            );
 
-            return transaction.toCbor();
+            return encodeToCbor({
+              body: inspection.body,
+              witness: inspection.witness,
+              auxiliaryData: inspection.auxiliaryData
+            });
           }}
           info={
             <Box
@@ -513,16 +507,11 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
             const tx = await delegationStoreDelegationTxBuilder.build();
 
             const inspection = await tx.inspect();
-            const transaction = new Serialization.Transaction(
-              Serialization.TransactionBody.fromCore(inspection.body),
-              Serialization.TransactionWitnessSet.fromCore(
-                inspection.witness
-                  ? (inspection.witness as Cardano.Witness)
-                  : { signatures: new Map() },
-              ),
-            );
 
-            return transaction.toCbor();
+            return encodeToCbor({
+              body: inspection.body,
+              witness: inspection.witness
+            });
           }}
           info={
             <Box
@@ -644,15 +633,11 @@ const TransactionBuilder = React.forwardRef<unknown, undefined>(
 
             const inspection = await tx.inspect();
 
-            const transaction = new Serialization.Transaction(
-              Serialization.TransactionBody.fromCore(inspection.body),
-              Serialization.TransactionWitnessSet.fromCore(
-                inspection.witness
-                  ? (inspection.witness as Cardano.Witness)
-                  : { signatures: new Map() },
-              ),
-            );
-            return transaction.toCbor();
+            return encodeToCbor({
+              body: inspection.body,
+              witness: inspection.witness,
+              auxiliaryData: inspection.auxiliaryData
+            });
           }}
           info={
             <Box

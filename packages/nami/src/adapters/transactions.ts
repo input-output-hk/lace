@@ -8,6 +8,7 @@ import {
   poolRetirementInspector,
   poolRegistrationInspector,
   coalesceValueQuantities,
+  Serialization,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
@@ -252,6 +253,28 @@ export type TxInfo = Pick<TransactionDetail, 'metadata'> &
     assets: NamiAsset[];
     refund: string;
   };
+
+export interface EncodeToCborArgs {
+  body: Wallet.Cardano.TxBody;
+  witness: Wallet.Cardano.Witness;
+  auxiliaryData?: Wallet.Cardano.AuxiliaryData;
+}
+
+export const encodeToCbor = (args: EncodeToCborArgs): Serialization.TxCBOR => {
+  const transaction = new Serialization.Transaction(
+    Serialization.TransactionBody.fromCore(args.body),
+    Serialization.TransactionWitnessSet.fromCore(
+      args.witness
+        ? (args.witness as Cardano.Witness)
+        : { signatures: new Map() },
+    ),
+    args.auxiliaryData
+      ? Serialization.AuxiliaryData.fromCore(args.auxiliaryData)
+      : undefined,
+  );
+
+  return transaction.toCbor();
+};
 
 export const useTxInfo = (
   tx: Wallet.Cardano.HydratedTx,
