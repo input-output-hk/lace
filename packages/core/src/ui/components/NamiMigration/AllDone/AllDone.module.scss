@@ -1,0 +1,9 @@
+@import '../../../styles/theme.scss';
+@import '../../../../../../common/src/ui/styles/abstracts/typography';
+
+.wrapper {
+  svg {
+    width: 87px !important;
+    height: 87px !important;
+  }
+}

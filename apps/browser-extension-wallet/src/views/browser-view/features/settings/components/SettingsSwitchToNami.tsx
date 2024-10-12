@@ -82,7 +82,7 @@ export const SettingsSwitchToNami = ({ popupView }: { popupView?: boolean }): Re
           }
           data-testid="settings-nami-mode-section"
         >
-          Nami layout
+          <></>
         </SettingsLink>
       </SettingsCard>
     </>

@@ -206,7 +206,7 @@ const Overview = ({ onShowLaceBanner }: { onShowLaceBanner: () => void }) => {
         variant="ghost"
         onClick={handleShowLaceBannerClick}
       >
-        Switch to Lace Mode
+        Upgrade to Lace
       </Button>
       <Box height="1" />
       <Button
