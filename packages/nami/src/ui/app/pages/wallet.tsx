@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
+import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { WalletType } from '@cardano-sdk/web-extension';
@@ -93,6 +94,8 @@ import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
 import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
+import type { AboutRef } from '../components/about';
+import type { TransactionBuilderRef } from '../components/transactionBuilder';
 
 export type Props = Pick<
   CommonOutsideHandlesContextValue,
@@ -138,10 +141,10 @@ const Wallet = ({
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
   const containerBg = useColorModeValue('white', 'gray.800');
   const [menu, setMenu] = React.useState(false);
-  const newAccountRef = React.useRef();
-  const aboutRef = React.useRef();
-  const deleteAccountRef = React.useRef();
-  const builderRef = React.useRef();
+  const newAccountRef = React.useRef<NewAccountRef>(null);
+  const aboutRef = React.useRef<AboutRef>(null);
+  const deleteAccountRef = React.useRef<DeleteAccountRef>(null);
+  const builderRef = React.useRef<TransactionBuilderRef>(null);
 
   const canDeleteAccount = useMemo(
     () =>
@@ -284,7 +287,7 @@ const Wallet = ({
                     icon={<AddIcon />}
                     onClick={() => {
                       void capture(Events.SettingsNewAccountClick);
-                      newAccountRef.current.openModal();
+                      newAccountRef.current?.openModal();
                     }}
                   >
                     New Account
@@ -296,7 +299,7 @@ const Wallet = ({
                     icon={<DeleteIcon />}
                     onClick={() => {
                       void capture(Events.AccountDeleteClick);
-                      deleteAccountRef.current.openModal();
+                      deleteAccountRef.current?.openModal();
                     }}
                   >
                     Delete Account
@@ -318,7 +321,7 @@ const Wallet = ({
                   icon={<Icon as={FaRegFileCode} w={3} h={3} />}
                   onClick={() => {
                     capture(Events.SettingsCollateralClick);
-                    builderRef.current.initCollateral();
+                    builderRef.current?.initCollateral();
                   }}
                 >
                   {' '}
@@ -333,7 +336,7 @@ const Wallet = ({
                 >
                   Settings
                 </MenuItem>
-                <MenuItem onClick={() => aboutRef.current.openModal()}>
+                <MenuItem onClick={() => aboutRef.current?.openModal()}>
                   About
                 </MenuItem>
               </MenuList>
@@ -579,7 +582,7 @@ const Wallet = ({
           </TabList>
           <TabPanels>
             <TabPanel>
-              <AssetsViewer assets={assets} />
+              <AssetsViewer assets={assets as NamiAsset[]} />
             </TabPanel>
             <TabPanel>
               <CollectiblesViewer assets={nfts} setAvatar={setAvatar} />
@@ -611,8 +614,12 @@ const Wallet = ({
   );
 };
 
+interface NewAccountRef {
+  openModal: () => void;
+}
+
 const NewAccountModal = React.forwardRef<
-  unknown,
+  NewAccountRef,
   {
     accounts: Props['accounts'];
     addAccount: Props['addAccount'];
@@ -626,6 +633,7 @@ const NewAccountModal = React.forwardRef<
     password: '',
     show: false,
     name: '',
+    wrongPassword: false,
   });
 
   const confirmHandler = async () => {
@@ -656,6 +664,7 @@ const NewAccountModal = React.forwardRef<
       password: '',
       show: false,
       name: '',
+      wrongPassword: false,
     });
   }, [isOpen]);
 
@@ -690,7 +699,7 @@ const NewAccountModal = React.forwardRef<
           <InputGroup size="md">
             <Input
               variant="filled"
-              isInvalid={state.wrongPassword === true}
+              isInvalid={state.wrongPassword}
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
               onChange={e => {
@@ -713,7 +722,7 @@ const NewAccountModal = React.forwardRef<
               </Button>
             </InputRightElement>
           </InputGroup>
-          {state.wrongPassword === true && (
+          {state.wrongPassword && (
             <Text color="red.300">Password is wrong</Text>
           )}
         </ModalBody>
@@ -745,8 +754,12 @@ const NewAccountModal = React.forwardRef<
 
 NewAccountModal.displayName = 'NewAccountModal';
 
+interface DeleteAccountRef {
+  openModal: () => void;
+}
+
 const DeleteAccountModal = React.forwardRef<
-  unknown,
+  DeleteAccountRef,
   {
     activateAccount: UseAccount['activateAccount'];
     removeAccount: UseAccount['removeAccount'];
@@ -756,7 +769,7 @@ const DeleteAccountModal = React.forwardRef<
 >(({ activateAccount, removeAccount, accounts, activeAccount }, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
-  const cancelRef = React.useRef();
+  const cancelRef = React.useRef(null);
   const capture = useCaptureEvent();
 
   React.useImperativeHandle(ref, () => ({
@@ -846,7 +859,9 @@ const DeleteAccountModal = React.forwardRef<
 
 DeleteAccountModal.displayName = 'DeleteAccountModal';
 
-const DelegationPopover = ({ builderRef }) => {
+const DelegationPopover = ({
+  builderRef,
+}: Readonly<{ builderRef: RefObject<TransactionBuilderRef> }>) => {
   const { buildDelegation, setSelectedStakePool, openExternalLink } =
     useOutsideHandles();
   const { inMemoryWallet, cardanoCoin } = useCommonOutsideHandles();
@@ -856,7 +871,7 @@ const DelegationPopover = ({ builderRef }) => {
     setSelectedStakePool,
   });
   const capture = useCaptureEvent();
-  const ref = React.useRef();
+  const ref = React.useRef<TransactionBuilderRef>(null);
   const containerBg = useColorModeValue('gray.800', 'white');
   const delegateButtonBg = useColorModeValue(
     'gray.100',
@@ -931,7 +946,7 @@ const DelegationPopover = ({ builderRef }) => {
                 <Button
                   onClick={() => {
                     void capture(Events.StakingUnstakeClick);
-                    ref.current.initUndelegate();
+                    ref.current?.initUndelegate();
                   }}
                   mt="5px"
                   colorScheme="red"
@@ -975,7 +990,7 @@ const DelegationPopover = ({ builderRef }) => {
         <Button
           onClick={() => {
             void capture(Events.StakingClick);
-            builderRef.current.initDelegation();
+            builderRef?.current?.initDelegation();
           }}
           variant="solid"
           size="xs"

@@ -1,7 +1,15 @@
+/* eslint-disable unicorn/consistent-function-scoping */
+/* eslint-disable unicorn/prefer-logical-operator-over-ternary */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+/* eslint-disable unicorn/prefer-string-slice */
+/* eslint-disable unicorn/no-new-array */
+/* eslint-disable unicorn/no-null */
+/* eslint-disable @typescript-eslint/naming-convention */
+import type { RefObject } from 'react';
 import React from 'react';
 
 import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
-import { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -43,6 +51,7 @@ import { FixedSizeList as List } from 'react-window';
 import useConstant from 'use-constant';
 
 import { toAsset, withHandleInfo } from '../../../adapters/assets';
+import { encodeToCbor } from '../../../adapters/transactions';
 import {
   displayUnit,
   getAdaHandle,
@@ -68,8 +77,9 @@ import UnitDisplay from '../components/unitDisplay';
 
 import type { UseAccount } from '../../../adapters/account';
 import type { Asset as NamiAsset } from '../../../types/assets';
+import type { AssetsModalRef } from '../components/assetsModal';
+import type { ConfirmModalRef } from '../components/confirmModal';
 import type { Wallet } from '@lace/cardano';
-import { encodeToCbor } from '../../../adapters/transactions';
 
 interface Props {
   activeAddress: string;
@@ -86,14 +96,14 @@ interface Props {
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
-  React.useEffect(() => {
+  React.useEffect((): (() => void) => {
     isMounted.current = true;
     return () => (isMounted.current = false);
   }, []);
   return isMounted;
 };
 
-const timer = null;
+const objectToArray = obj => Object.keys(obj).map(key => obj[key]);
 
 const Send = ({
   accounts,
@@ -140,20 +150,20 @@ const Send = ({
   };
 
   const assets = React.useRef({});
-  const account = React.useRef(null);
+  const account = React.useRef<object | null>(null);
   const resetState = useStoreActions(
     actions => actions.globalModel.sendStore.reset,
   );
   const history = useHistory();
   const navigate = history.push;
   const toast = useToast();
-  const ref = React.useRef();
+  const ref = React.useRef<ConfirmModalRef>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const focus = React.useRef(false);
   const background = useColorModeValue('gray.100', 'gray.600');
   const containerBg = useColorModeValue('white', 'gray.800');
 
-  const assetsModalRef = React.useRef();
+  const assetsModalRef = React.useRef<AssetsModalRef>(null);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
   const assetsInfo = withHandleInfo(
@@ -162,11 +172,6 @@ const Send = ({
   );
   const rewards = useObservable(
     inMemoryWallet?.balance.rewardAccounts.rewards$,
-  );
-
-  const paymentKeyHash = Ed25519KeyHashHex(
-    Cardano.Address.fromBech32(activeAddress).asBase()!.getPaymentCredential()
-      .hash,
   );
 
   const walletAssets = Array.from(utxoTotal?.assets || [])
@@ -237,7 +242,10 @@ const Send = ({
 
       const checkOutput = new Serialization.TransactionOutput(
         Cardano.Address.fromBytes(
-          isValidAddress(_address.result, currentChain),
+          isValidAddress(
+            _address.result,
+            currentChain,
+          ) as unknown as Wallet.HexBlob,
         ),
         assetsToValue(output.amount),
       );
@@ -271,7 +279,10 @@ const Send = ({
 
       const transactionOutput = new Serialization.TransactionOutput(
         Cardano.Address.fromBytes(
-          isValidAddress(_address.result, currentChain),
+          isValidAddress(
+            _address.result,
+            currentChain,
+          ) as unknown as Wallet.HexBlob,
         ),
         assetsToValue(output.amount),
       );
@@ -345,8 +356,6 @@ const Send = ({
     setTxInfo({ minUtxo });
   };
 
-  const objectToArray = obj => Object.keys(obj).map(key => obj[key]);
-
   const addAssets = _assets => {
     for (const asset of _assets) {
       assets.current[asset.unit] = { ...asset };
@@ -414,7 +423,7 @@ const Send = ({
               <IconButton
                 rounded="md"
                 onClick={() => {
-                  history.goBack();
+                  history.push('/');
                 }}
                 variant="ghost"
                 aria-label={''}
@@ -460,22 +469,20 @@ const Send = ({
                 justifyContent="center"
               >
                 <InputGroup size="sm" flex={3}>
-                  <InputLeftElement
-                    children={
-                      <Box pl={4}>
-                        {isLoading ? (
-                          <Spinner
-                            color="teal"
-                            speed="0.5s"
-                            boxSize="9px"
-                            size="xs"
-                          />
-                        ) : (
-                          <Box>{cardanoCoin.symbol}</Box>
-                        )}
-                      </Box>
-                    }
-                  />
+                  <InputLeftElement>
+                    <Box pl={4}>
+                      {isLoading ? (
+                        <Spinner
+                          color="teal"
+                          speed="0.5s"
+                          boxSize="9px"
+                          size="xs"
+                        />
+                      ) : (
+                        <Box>{cardanoCoin.symbol}</Box>
+                      )}
+                    </Box>
+                  </InputLeftElement>
                   <NumericFormat
                     pl="10"
                     allowNegative={false}
@@ -529,12 +536,16 @@ const Send = ({
                 justifyContent={'center'}
               >
                 <InputGroup size="sm">
-                  <InputLeftElement children={<Icon as={MdModeEdit} />} />
+                  <InputLeftElement>
+                    <Icon as={MdModeEdit} />
+                  </InputLeftElement>
                   <Input
                     value={message}
                     onInput={e => {
-                      const msg = e.target.value;
-                      triggerTxUpdate(() => setMessage(msg));
+                      const msg = (e.target as HTMLInputElement).value;
+                      triggerTxUpdate(() => {
+                        setMessage(msg);
+                      });
                     }}
                     size={'sm'}
                     variant={'flushed'}
@@ -598,11 +609,11 @@ const Send = ({
                 }
                 width={'366px'}
                 height={'50px'}
-                isDisabled={!tx || !address.result || fee.error}
+                isDisabled={!tx || !address.result || !!fee.error}
                 colorScheme="orange"
                 onClick={() => {
                   capture(Events.SendTransactionDataReviewTransactionClick);
-                  ref.current.openModal(account.current.index);
+                  ref.current?.openModal();
                 }}
               >
                 {fee.error ? fee.error : 'Send'}
@@ -639,7 +650,7 @@ const Send = ({
                 mt={1}
                 size={'xs'}
                 onClick={() =>
-                  assetsModalRef.current.openModal({
+                  assetsModalRef.current?.openModal({
                     userInput: true,
                     assets: value.assets.map(asset => ({
                       ...asset,
@@ -710,7 +721,7 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password, _hw) => {
+        sign={async (password = '') => {
           capture(Events.SendTransactionConfirmationConfirmClick);
           try {
             await signAndSubmit({
@@ -733,7 +744,7 @@ const Send = ({
             auxiliaryData: inspection.auxiliaryData,
           });
         }}
-        onConfirm={async (status, signedTx) => {
+        onConfirm={async (status, error) => {
           if (status) {
             capture(Events.SendTransactionConfirmed);
             toast({
@@ -746,7 +757,7 @@ const Send = ({
                 namiMode: { recentSendToAddress: address.result },
               });
             }
-          } else if (signedTx === ERROR.fullMempool) {
+          } else if (error === ERROR.fullMempool) {
             toast({
               title: 'Transaction failed',
               description: 'Mempool full. Try again.',
@@ -754,7 +765,7 @@ const Send = ({
               duration: 3000,
               isClosable: true,
             });
-            ref.current.closeModal();
+            ref.current?.closeModal();
             return; // don't go back to home screen. let user try to submit same tx again
           } else
             toast({
@@ -764,7 +775,7 @@ const Send = ({
             });
           ref.current?.closeModal();
           setTimeout(() => {
-            navigate(-1);
+            history.push('/');
           }, 200);
         }}
       />
@@ -893,7 +904,7 @@ const AddressPopup = ({
             onInput={async e => {
               const handleInputToken = latestHandleInputToken.current + 1;
               latestHandleInputToken.current = handleInputToken;
-              setAddress({ display: e.target.value });
+              setAddress({ display: (e.target as HTMLInputElement).value });
               const addr = await handleInputDebounced(e);
 
               if (handleInputToken !== latestHandleInputToken.current) {
@@ -906,9 +917,9 @@ const AddressPopup = ({
             isInvalid={Boolean(address.error)}
           />
           {address.result && !address.error && (
-            <InputRightElement
-              children={<CheckIcon boxSize="3" color={checkColor} />}
-            />
+            <InputRightElement>
+              <CheckIcon boxSize="3" color={checkColor} />
+            </InputRightElement>
           )}
         </InputGroup>
       </PopoverTrigger>
@@ -992,7 +1003,6 @@ const AddressPopup = ({
                         width="full"
                         variant="ghost"
                         onClick={() => {
-                          clearTimeout(timer);
                           triggerTxUpdate(() =>
                             setAddress({
                               result: address,
@@ -1041,13 +1051,24 @@ const AddressPopup = ({
 };
 
 // Asset Popup
+interface CustomScrollbarsProps {
+  onScroll?: React.UIEventHandler;
+  children?: React.ReactNode;
+  forwardedRef:
+    | React.ForwardedRef<unknown>
+    | ((ref: RefObject<any> | null) => void);
+  style?: React.CSSProperties;
+}
 
-const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
+const CustomScrollbars = ({
+  onScroll,
+  forwardedRef,
+  style,
+  children,
+}: Readonly<CustomScrollbarsProps>) => {
   const refSetter = React.useCallback(scrollbarsRef => {
-    if (scrollbarsRef) {
-      forwardedRef(scrollbarsRef.view);
-    } else {
-      forwardedRef(null);
+    if (typeof forwardedRef === 'function') {
+      forwardedRef(scrollbarsRef.view || null);
     }
   }, []);
 
@@ -1103,8 +1124,8 @@ const AssetsSelector = ({
           justifyContent="center"
         >
           <InputGroup
-            width={Object.keys(choice).length <= 0 && '90%'}
-            flex={Object.keys(choice).length > 0 && 3}
+            width={Object.keys(choice).length <= 0 ? '90%' : undefined}
+            flex={Object.keys(choice).length > 0 ? 3 : undefined}
             size="sm"
           >
             <Input
@@ -1114,19 +1135,17 @@ const AssetsSelector = ({
               placeholder="Search policy, asset, name"
               fontSize="xs"
               onInput={e => {
-                setSearch(e.target.value);
+                setSearch((e.target as HTMLInputElement).value);
               }}
             />
-            <InputRightElement
-              children={
-                <SmallCloseIcon
-                  cursor="pointer"
-                  onClick={() => {
-                    setSearch('');
-                  }}
-                />
-              }
-            />
+            <InputRightElement>
+              <SmallCloseIcon
+                cursor="pointer"
+                onClick={() => {
+                  setSearch('');
+                }}
+              />
+            </InputRightElement>
           </InputGroup>
           {Object.keys(choice).length > 0 && (
             <>

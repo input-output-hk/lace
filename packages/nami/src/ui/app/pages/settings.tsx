@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -27,7 +28,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { MdModeEdit } from 'react-icons/md';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 
 import { CurrencyCode } from '../../../adapters/currency';
 import { getFavoriteIcon } from '../../../api/extension';
@@ -41,6 +42,7 @@ import { ChangePasswordModal } from '../components/changePasswordModal';
 
 import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { ChangePasswordModalComponentRef } from '../components/changePasswordModal';
 import type { Wallet } from '@lace/cardano';
 
 type Props = Pick<
@@ -92,6 +94,7 @@ const Settings = ({
   isValidURL,
 }: Readonly<Props>) => {
   const history = useHistory();
+  const location = useLocation();
   const containerBg = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const setIsLaceSwitchInProgress = useStoreActions(
@@ -114,7 +117,9 @@ const Settings = ({
           aria-label="back button"
           rounded="md"
           onClick={() => {
-            history.goBack();
+            history.push(
+              location.pathname === '/settings/' ? '/' : '/settings/',
+            );
           }}
           variant="ghost"
           icon={<ChevronLeftIcon boxSize="7" />}
@@ -215,7 +220,7 @@ const Overview = ({ onShowLaceBanner }: { onShowLaceBanner: () => void }) => {
         rightIcon={<ChevronRightIcon />}
         variant="ghost"
         onClick={() => {
-          navigate('/settings/general');
+          navigate('general');
         }}
       >
         General settings
@@ -287,7 +292,7 @@ const GeneralSettings = ({
   const [name, setName] = useState(accountName);
   const [originalName, setOriginalName] = useState(accountName);
   const { setColorMode } = useColorMode();
-  const changePasswordRef = useRef();
+  const changePasswordRef = useRef<ChangePasswordModalComponentRef>(null);
 
   const nameHandler = async () => {
     await updateAccountMetadata({ name });
@@ -395,7 +400,7 @@ const GeneralSettings = ({
         size="sm"
         onClick={() => {
           capture(Events.SettingsChangePasswordClick);
-          changePasswordRef.current.openModal();
+          changePasswordRef.current?.openModal();
         }}
       >
         Change Password

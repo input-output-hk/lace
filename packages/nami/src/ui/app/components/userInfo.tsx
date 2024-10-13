@@ -1,3 +1,6 @@
+/* eslint-disable unicorn/prefer-math-trunc */
+/* eslint-disable unicorn/prefer-code-point */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import React from 'react';
 
 import { StarIcon } from '@chakra-ui/icons';
@@ -46,7 +49,10 @@ const UserInfo = ({
           alignItems={'center'}
           justifyContent={'center'}
         >
-          <AvatarLoader avatar={avatar || hashCode(index)} width={'30px'} />
+          <AvatarLoader
+            avatar={avatar || hashCode(index).toString()}
+            width={'30px'}
+          />
         </Box>
 
         <Box display="flex" alignItems="center" width="full">

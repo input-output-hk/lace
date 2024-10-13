@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
+import type { RefObject } from 'react';
 import React from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
@@ -24,6 +25,7 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
 import Account from '../../components/account';
 import AssetsModal from '../../components/assetsModal';
 import ConfirmModal from '../../components/confirmModal';
@@ -40,8 +42,9 @@ import {
 import type { TransactionValue } from './signTxUtil';
 import type { UseAccount } from '../../../../adapters/account';
 import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import type { Asset as NamiAsset } from '../../../../types/assets';
+import type { AssetsModalRef } from '../../components/assetsModal';
 import type { Cardano } from '@cardano-sdk/core';
-import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -52,6 +55,16 @@ interface Props {
 const abs = big => {
   return big < 0 ? big * BigInt(-1) : big;
 };
+
+interface Property {
+  metadata: boolean;
+  certificate: boolean;
+  withdrawal: boolean;
+  minting: boolean;
+  script: boolean;
+  contract: boolean;
+  datum: boolean;
+}
 
 export const SignTx = ({
   inMemoryWallet,
@@ -70,7 +83,7 @@ export const SignTx = ({
   const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
-  const [property, setProperty] = React.useState({
+  const [property, setProperty] = React.useState<Property>({
     metadata: false,
     certificate: false,
     withdrawal: false,
@@ -90,8 +103,8 @@ export const SignTx = ({
     error: '',
   });
 
-  const assetsModalRef = React.useRef();
-  const detailsModalRef = React.useRef();
+  const assetsModalRef = React.useRef<AssetsModalRef>(null);
+  const detailsModalRef = React.useRef<DetailsModalRef>(null);
 
   const getFee = (tx: Readonly<Cardano.Tx>) => {
     const fee = tx.body.fee.toString();
@@ -333,10 +346,10 @@ export const SignTx = ({
                         {(() => {
                           const positiveAssets = assets.filter(
                             v => v.quantity < 0,
-                          );
+                          ) as unknown as NamiAsset[];
                           const negativeAssets = assets.filter(
                             v => v.quantity > 0,
-                          );
+                          ) as unknown as NamiAsset[];
                           return (
                             <Box
                               display={'flex'}
@@ -380,7 +393,7 @@ export const SignTx = ({
                                   colorScheme={'teal'}
                                   size={'xs'}
                                   onClick={() =>
-                                    assetsModalRef.current.openModal({
+                                    assetsModalRef.current?.openModal({
                                       background: 'teal.400',
                                       color: 'white',
                                       assets: positiveAssets,
@@ -519,7 +532,7 @@ export const SignTx = ({
             setIsLoading(l => ({ ...l, error: `Failed to sign. ${error}` }));
           }
         }}
-        onConfirm={async (status, signedTx) => {
+        onConfirm={async status => {
           if (status) {
             await capture(Events.DappConnectorDappTxConfirmClick);
           }
@@ -534,296 +547,321 @@ export const SignTx = ({
   );
 };
 
-const DetailsModal = React.forwardRef(
-  // eslint-disable-next-line react/prop-types
-  ({ externalValue, property, keyHashes, tx, assetsModalRef }, ref) => {
-    const { cardanoCoin } = useCommonOutsideHandles();
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const background = useColorModeValue('white', 'gray.800');
-    const innerBackground = useColorModeValue('gray.100', 'gray.700');
+export interface DetailsModalRef {
+  openModal: () => void;
+}
 
-    React.useImperativeHandle(ref, () => ({
-      openModal: () => {
-        onOpen();
-      },
-    }));
-    return (
-      <Modal isOpen={isOpen} onClose={onClose} size="full">
-        <ModalContent
-          m={0}
-          rounded="none"
-          overflow={'hidden'}
-          background={background}
-        >
-          <ModalBody p={0}>
-            <Scrollbars style={{ width: '100%', height: '88vh' }}>
+interface DetailsModalComponentProp {
+  externalValue: TransactionValue['externalValue'];
+  assetsModalRef: RefObject<AssetsModalRef>;
+  property: Property;
+  keyHashes: {
+    key: string[];
+    kind: string[];
+  };
+  tx: Serialization.TxCBOR | undefined;
+}
+
+const DetailsModalComponent = (
+  {
+    externalValue,
+    property,
+    keyHashes,
+    tx,
+    assetsModalRef,
+  }: Readonly<DetailsModalComponentProp>,
+  ref,
+) => {
+  const { cardanoCoin } = useCommonOutsideHandles();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const background = useColorModeValue('white', 'gray.800');
+  const innerBackground = useColorModeValue('gray.100', 'gray.700');
+
+  React.useImperativeHandle(ref, () => ({
+    openModal: () => {
+      onOpen();
+    },
+  }));
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="full">
+      <ModalContent
+        m={0}
+        rounded="none"
+        overflow={'hidden'}
+        background={background}
+      >
+        <ModalBody p={0}>
+          <Scrollbars style={{ width: '100%', height: '88vh' }}>
+            <Box
+              width={'full'}
+              display={'flex'}
+              alignItems={'center'}
+              justifyContent={'center'}
+              flexDirection={'column'}
+            >
+              <Box h={8} />
+              <Box
+                fontSize={'xl'}
+                fontWeight={'bold'}
+                maxWidth={'240px'}
+                textAlign={'center'}
+              >
+                Details
+              </Box>
+              <Box h={6} />
               <Box
                 width={'full'}
+                px={8}
                 display={'flex'}
                 alignItems={'center'}
                 justifyContent={'center'}
                 flexDirection={'column'}
               >
-                <Box h={8} />
-                <Box
-                  fontSize={'xl'}
-                  fontWeight={'bold'}
-                  maxWidth={'240px'}
-                  textAlign={'center'}
-                >
-                  Details
-                </Box>
-                <Box h={6} />
-                <Box
-                  width={'full'}
-                  px={8}
-                  display={'flex'}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  flexDirection={'column'}
-                >
-                  {' '}
-                  {Object.keys(externalValue).length > 0 && (
-                    <Box width={'full'}>
-                      <Text fontSize="md" fontWeight={'bold'}>
-                        Recipients
-                      </Text>
-                      <Box height="4" />
-                      {Object.keys(externalValue).map((address, index) => {
-                        const lovelace = externalValue[address].value.find(
-                          v => v.unit === 'lovelace',
-                        ).quantity;
-                        const assets = externalValue[address].value.filter(
-                          v => v.unit !== 'lovelace',
-                        );
-                        return (
-                          <Box key={index} mb="6">
-                            <Stack direction="row" alignItems="center">
-                              <Box
-                                position={'relative'}
-                                background={innerBackground}
-                                rounded={'xl'}
-                                p={2}
-                              >
-                                <Copy label="Copied address" copy={address}>
-                                  <Box
-                                    width="160px"
-                                    whiteSpace="nowrap"
-                                    fontWeight="normal"
-                                    textAlign={'center'}
-                                    display={'flex'}
-                                    alignItems={'center'}
-                                    justifyContent={'center'}
-                                    flexDirection={'column'}
-                                  >
-                                    <MiddleEllipsis>
-                                      <span style={{ cursor: 'pointer' }}>
-                                        {address}
-                                      </span>
-                                    </MiddleEllipsis>
-                                  </Box>
-                                </Copy>
-                                {externalValue[address].script && (
-                                  <Box
-                                    position={'absolute'}
-                                    bottom={-2}
-                                    left={4}
-                                    background={innerBackground}
-                                    mt={1}
-                                    rounded="full"
-                                    px={1}
-                                    fontSize={'xs'}
-                                    color={'orange'}
-                                    fontWeight={'medium'}
-                                  >
-                                    {externalValue[address].datumHash ? (
-                                      <Copy
-                                        label="Copied datum hash"
-                                        copy={externalValue[address].datumHash}
-                                      >
-                                        Contract
-                                      </Copy>
-                                    ) : (
-                                      'Script'
-                                    )}
-                                  </Box>
-                                )}
-                              </Box>
-                              <Box
-                                textAlign="center"
-                                width={'160px'}
-                                display={'flex'}
-                                alignItems={'center'}
-                                justifyContent={'center'}
-                                flexDirection={'column'}
-                              >
-                                <UnitDisplay
-                                  hide
-                                  fontSize={'sm'}
-                                  fontWeight="bold"
-                                  quantity={lovelace}
-                                  decimals="6"
-                                  symbol={cardanoCoin.symbol}
-                                />
-                                {assets.length > 0 && (
-                                  <Button
-                                    mt={1}
-                                    size={'xs'}
-                                    onClick={() =>
-                                      assetsModalRef.current.openModal({
-                                        assets: assets,
-                                        title: (
-                                          <Box>
-                                            Address receiving{' '}
-                                            <Box as={'span'}>
-                                              {assets.length}
-                                            </Box>{' '}
-                                            {assets.length == 1
-                                              ? 'asset'
-                                              : 'assets'}
-                                          </Box>
-                                        ),
-                                      })
-                                    }
-                                  >
-                                    + {assets.length}{' '}
-                                    {assets.length > 1 ? 'Assets' : 'Asset'}
-                                  </Button>
-                                )}
-                              </Box>
-                            </Stack>
-                          </Box>
-                        );
-                      })}
-                      <Box h={4} />
-                    </Box>
-                  )}
-                  {property.metadata && (
-                    <>
-                      <Text width={'full'} fontSize="md" fontWeight={'bold'}>
-                        Metadata
-                      </Text>
-                      <Box height="4" />
-                      <Box
-                        padding="2.5"
-                        rounded={'xl'}
-                        width={'full'}
-                        height={'200px'}
-                        background={innerBackground}
-                      >
-                        <Scrollbars autoHide>
-                          <pre>
-                            <code>
-                              {JSON.stringify(property.metadata, null, 2)}
-                            </code>
-                          </pre>
-                        </Scrollbars>
-                      </Box>
-                      <Box h={10} />
-                    </>
-                  )}
-                  <Box fontSize="md" fontWeight={'bold'} width={'full'}>
-                    Signing keys
-                  </Box>
-                  <Box height="4" />
-                  <Box width={'full'} display={'flex'}>
-                    {keyHashes.kind.map((keyHash, index) => (
-                      <Box
-                        mr={2}
-                        py={1}
-                        px={2}
-                        background={innerBackground}
-                        rounded={'full'}
-                        key={index}
-                      >
-                        <Box
-                          as={'b'}
-                          color={keyHash == 'payment' ? 'teal.400' : 'orange'}
-                        >
-                          {keyHash}
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                  <Box h={10} />
-                  {Object.keys(property).some(key => property[key]) && (
-                    <>
-                      <Box fontSize="md" fontWeight={'bold'} width={'full'}>
-                        Tags
-                      </Box>
-                      <Box height="4" />
-                      <Box width={'full'} display={'flex'} flexWrap={'wrap'}>
-                        {Object.keys(property)
-                          .filter(p => property[p])
-                          .map((p, index) => (
+                {' '}
+                {Object.keys(externalValue).length > 0 && (
+                  <Box width={'full'}>
+                    <Text fontSize="md" fontWeight={'bold'}>
+                      Recipients
+                    </Text>
+                    <Box height="4" />
+                    {Object.keys(externalValue).map((address, index) => {
+                      const lovelace = externalValue?.[address]?.value?.find(
+                        v => v.unit === 'lovelace',
+                      )?.quantity;
+                      const assets = externalValue[address].value.filter(
+                        v => v.unit !== 'lovelace',
+                      ) as unknown as NamiAsset[];
+                      return (
+                        <Box key={index} mb="6">
+                          <Stack direction="row" alignItems="center">
                             <Box
-                              mb={2}
-                              mr={2}
-                              py={1}
-                              px={2}
+                              position={'relative'}
                               background={innerBackground}
-                              rounded={'full'}
-                              key={index}
+                              rounded={'xl'}
+                              p={2}
                             >
-                              <Box as={'b'}>
-                                {p == 'minting' && 'Minting'}
-                                {p == 'certificate' && 'Certificate'}
-                                {p == 'withdrawal' && 'Withdrawal'}
-                                {p == 'metadata' && 'Metadata'}
-                                {p == 'contract' && 'Contract'}
-                                {p == 'script' && 'Script'}
-                                {p == 'datum' && 'Datum'}
-                              </Box>
+                              <Copy label="Copied address" copy={address}>
+                                <Box
+                                  width="160px"
+                                  whiteSpace="nowrap"
+                                  fontWeight="normal"
+                                  textAlign={'center'}
+                                  display={'flex'}
+                                  alignItems={'center'}
+                                  justifyContent={'center'}
+                                  flexDirection={'column'}
+                                >
+                                  <MiddleEllipsis>
+                                    <span style={{ cursor: 'pointer' }}>
+                                      {address}
+                                    </span>
+                                  </MiddleEllipsis>
+                                </Box>
+                              </Copy>
+                              {externalValue[address].script && (
+                                <Box
+                                  position={'absolute'}
+                                  bottom={-2}
+                                  left={4}
+                                  background={innerBackground}
+                                  mt={1}
+                                  rounded="full"
+                                  px={1}
+                                  fontSize={'xs'}
+                                  color={'orange'}
+                                  fontWeight={'medium'}
+                                >
+                                  {externalValue[address].datumHash ? (
+                                    <Copy
+                                      label="Copied datum hash"
+                                      copy={
+                                        externalValue[address].datumHash ?? ''
+                                      }
+                                    >
+                                      Contract
+                                    </Copy>
+                                  ) : (
+                                    'Script'
+                                  )}
+                                </Box>
+                              )}
                             </Box>
-                          ))}
-                      </Box>
-                      <Box h={10} />
-                    </>
-                  )}
-                  <Box h={5} />
-                  <Text width={'full'} fontSize="md" fontWeight={'bold'}>
-                    Raw transaction
-                  </Text>
-                  <Box height="4" />
-                  <Box
-                    padding="2.5"
-                    rounded={'xl'}
-                    width={'full'}
-                    height={'200px'}
-                    background={innerBackground}
-                  >
-                    <Scrollbars autoHide>{tx}</Scrollbars>
+                            <Box
+                              textAlign="center"
+                              width={'160px'}
+                              display={'flex'}
+                              alignItems={'center'}
+                              justifyContent={'center'}
+                              flexDirection={'column'}
+                            >
+                              <UnitDisplay
+                                hide
+                                fontSize={'sm'}
+                                fontWeight="bold"
+                                quantity={lovelace}
+                                decimals="6"
+                                symbol={cardanoCoin.symbol}
+                              />
+                              {assets.length > 0 && (
+                                <Button
+                                  mt={1}
+                                  size={'xs'}
+                                  onClick={() =>
+                                    assetsModalRef.current?.openModal({
+                                      assets,
+                                      title: (
+                                        <Box>
+                                          Address receiving{' '}
+                                          <Box as={'span'}>{assets.length}</Box>{' '}
+                                          {assets.length == 1
+                                            ? 'asset'
+                                            : 'assets'}
+                                        </Box>
+                                      ),
+                                    })
+                                  }
+                                >
+                                  + {assets.length}{' '}
+                                  {assets.length > 1 ? 'Assets' : 'Asset'}
+                                </Button>
+                              )}
+                            </Box>
+                          </Stack>
+                        </Box>
+                      );
+                    })}
+                    <Box h={4} />
                   </Box>
-                  <Box h={10} />
+                )}
+                {property.metadata && (
+                  <>
+                    <Text width={'full'} fontSize="md" fontWeight={'bold'}>
+                      Metadata
+                    </Text>
+                    <Box height="4" />
+                    <Box
+                      padding="2.5"
+                      rounded={'xl'}
+                      width={'full'}
+                      height={'200px'}
+                      background={innerBackground}
+                    >
+                      <Scrollbars autoHide>
+                        <pre>
+                          <code>
+                            {JSON.stringify(property.metadata, null, 2)}
+                          </code>
+                        </pre>
+                      </Scrollbars>
+                    </Box>
+                    <Box h={10} />
+                  </>
+                )}
+                <Box fontSize="md" fontWeight={'bold'} width={'full'}>
+                  Signing keys
                 </Box>
+                <Box height="4" />
+                <Box width={'full'} display={'flex'}>
+                  {keyHashes.kind.map((keyHash, index) => (
+                    <Box
+                      mr={2}
+                      py={1}
+                      px={2}
+                      background={innerBackground}
+                      rounded={'full'}
+                      key={index}
+                    >
+                      <Box
+                        as={'b'}
+                        color={keyHash == 'payment' ? 'teal.400' : 'orange'}
+                      >
+                        {keyHash}
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+                <Box h={10} />
+                {Object.keys(property).some(key => property[key]) && (
+                  <>
+                    <Box fontSize="md" fontWeight={'bold'} width={'full'}>
+                      Tags
+                    </Box>
+                    <Box height="4" />
+                    <Box width={'full'} display={'flex'} flexWrap={'wrap'}>
+                      {Object.keys(property)
+                        .filter(p => property[p])
+                        .map((p, index) => (
+                          <Box
+                            mb={2}
+                            mr={2}
+                            py={1}
+                            px={2}
+                            background={innerBackground}
+                            rounded={'full'}
+                            key={index}
+                          >
+                            <Box as={'b'}>
+                              {p == 'minting' && 'Minting'}
+                              {p == 'certificate' && 'Certificate'}
+                              {p == 'withdrawal' && 'Withdrawal'}
+                              {p == 'metadata' && 'Metadata'}
+                              {p == 'contract' && 'Contract'}
+                              {p == 'script' && 'Script'}
+                              {p == 'datum' && 'Datum'}
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
+                    <Box h={10} />
+                  </>
+                )}
+                <Box h={5} />
+                <Text width={'full'} fontSize="md" fontWeight={'bold'}>
+                  Raw transaction
+                </Text>
+                <Box height="4" />
                 <Box
-                  position={'fixed'}
-                  bottom={0}
+                  padding="2.5"
+                  rounded={'xl'}
                   width={'full'}
+                  height={'200px'}
+                  background={innerBackground}
+                >
+                  <Scrollbars autoHide>{tx}</Scrollbars>
+                </Box>
+                <Box h={10} />
+              </Box>
+              <Box
+                position={'fixed'}
+                bottom={0}
+                width={'full'}
+                display={'flex'}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                <Box
+                  width={'full'}
+                  height={'12vh'}
+                  background={background}
                   display={'flex'}
                   alignItems={'center'}
                   justifyContent={'center'}
                 >
-                  <Box
-                    width={'full'}
-                    height={'12vh'}
-                    background={background}
-                    display={'flex'}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                  >
-                    <Button onClick={onClose} width={'180px'}>
-                      Back
-                    </Button>
-                  </Box>
+                  <Button onClick={onClose} width={'180px'}>
+                    Back
+                  </Button>
                 </Box>
               </Box>
-            </Scrollbars>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    );
-  },
-);
+            </Box>
+          </Scrollbars>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+};
+
+DetailsModalComponent.displayName = 'DetailsModal';
+
+const DetailsModal = React.forwardRef(DetailsModalComponent);
 
 DetailsModal.displayName = 'DetailsModal';

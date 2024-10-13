@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useMemo } from 'react';
 
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
@@ -10,7 +11,7 @@ export const useHandleResolver = (
   networkMagic: Cardano.NetworkMagics,
 ): HandleProvider => {
   return useMemo(() => {
-    const serverUrl = HANDLE_SERVER_URLS[networkMagic];
+    const serverUrl = HANDLE_SERVER_URLS[networkMagic]!;
     return handleHttpProvider({
       baseUrl: serverUrl,
       logger: console,

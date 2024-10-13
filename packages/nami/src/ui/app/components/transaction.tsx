@@ -123,7 +123,6 @@ const Transaction = ({
           <Box align="center" fontSize={14} fontWeight={500} color="gray.500">
             <ReactTimeAgo
               date={displayInfo.date}
-              title={displayInfo.formatDate}
               locale="en-US"
               timeStyle="round-minute"
             />

@@ -21,7 +21,6 @@ export const getAdaHandle: jest.Mock = fn(actualApi.getAdaHandle).mockName(
 
 export const initHW: jest.Mock = fn(
   async ({ device, id }: Readonly<HardwareDeviceInfo>) => {
-    console.log({ device, id });
     return actualApi.initHW();
   },
 ).mockName('initHW');

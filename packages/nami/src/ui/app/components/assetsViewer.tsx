@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import React from 'react';
 
 import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
@@ -24,9 +25,9 @@ import { useCommonOutsideHandles } from '../../../features/common-outside-handle
 
 import Asset from './asset';
 
-import type { Asset as NamiAsset } from '../../../types/assets';
+import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 
-const AssetsViewer = ({ assets }) => {
+const AssetsViewer = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
   const totalColor = useColorModeValue(
     'rgb(26, 32, 44)',
     'rgba(255, 255, 255, 0.92)',
@@ -45,7 +46,7 @@ const AssetsViewer = ({ assets }) => {
     setAssetsArray(null);
     await new Promise((res, rej) =>
       setTimeout(() => {
-        res();
+        res(void 0);
       }, 10),
     );
     const filteredAssets = search ? searchTokens(assets, search) : assets;
@@ -115,7 +116,7 @@ const AssetsViewer = ({ assets }) => {
   );
 };
 
-const AssetsGrid = ({ assets }) => {
+const AssetsGrid = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
   const { cardanoCoin } = useCommonOutsideHandles();
   return (
     <Box
@@ -129,12 +130,16 @@ const AssetsGrid = ({ assets }) => {
           <LazyLoadComponent>
             <Box
               width="full"
-              mt={index > 0 && 4}
+              mt={(index > 0 && 4) || undefined}
               display="flex"
               alignItems="center"
               justifyContent="center"
             >
-              <Asset cardanoCoin={cardanoCoin} asset={asset} enableSend />
+              <Asset
+                cardanoCoin={cardanoCoin}
+                asset={asset as AssetInput}
+                enableSend
+              />
             </Box>
           </LazyLoadComponent>
         </Box>
@@ -143,10 +148,13 @@ const AssetsGrid = ({ assets }) => {
   );
 };
 
-const Search = ({ setSearch, assets }) => {
+const Search = ({
+  setSearch,
+  assets,
+}: Readonly<{ setSearch: (s: string) => void; assets: NamiAsset[] }>) => {
   const [input, setInput] = React.useState('');
   const iconColor = useColorModeValue('gray.800', 'rgba(255, 255, 255, 0.92)');
-  const ref = React.useRef();
+  const ref = React.useRef<HTMLInputElement>(null);
   React.useEffect(() => {
     if (!assets) {
       setInput('');
@@ -157,7 +165,7 @@ const Search = ({ setSearch, assets }) => {
     <Popover
       returnFocusOnClose={false}
       placement="bottom-start"
-      onOpen={() => setTimeout(() => ref.current.focus())}
+      onOpen={() => setTimeout(() => ref.current?.focus())}
     >
       <PopoverTrigger>
         <IconButton
@@ -191,22 +199,20 @@ const Search = ({ setSearch, assets }) => {
               placeholder="Search policy, asset, name"
               fontSize="xs"
               onInput={e => {
-                setInput(e.target.value);
+                setInput((e.target as HTMLInputElement).value);
               }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && input) setSearch(input);
               }}
             />
-            <InputRightElement
-              children={
-                <SmallCloseIcon
-                  cursor="pointer"
-                  onClick={() => {
-                    setInput('');
-                  }}
-                />
-              }
-            />
+            <InputRightElement>
+              <SmallCloseIcon
+                cursor="pointer"
+                onClick={() => {
+                  setInput('');
+                }}
+              />
+            </InputRightElement>
           </InputGroup>
           <Box w="2" />
           <IconButton
@@ -214,7 +220,9 @@ const Search = ({ setSearch, assets }) => {
             size="sm"
             rounded="md"
             color="teal.400"
-            onClick={() => input && setSearch(input)}
+            onClick={() => {
+              input && setSearch(input);
+            }}
             icon={<SearchIcon />}
           />
         </PopoverBody>

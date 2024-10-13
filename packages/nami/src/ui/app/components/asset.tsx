@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -21,11 +22,11 @@ import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 
 import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
-import type { AssetInput } from '../../../types/assets';
+import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
-  React.useEffect(() => {
+  React.useEffect((): (() => void) => {
     isMounted.current = true;
     return () => (isMounted.current = false);
   }, []);
@@ -34,10 +35,10 @@ const useIsMounted = () => {
 
 type Props = Pick<CommonOutsideHandlesContextValue, 'cardanoCoin'> &
   PropsWithChildren<{
-    asset: AssetInput;
-    enableSend: boolean;
-    background: string;
-    color: string;
+    asset: NamiAsset;
+    enableSend?: boolean;
+    background?: string;
+    color?: string;
   }>;
 
 const Asset = ({
@@ -187,7 +188,7 @@ const Asset = ({
               size="xs"
               rightIcon={<BsArrowUpRight />}
               onClick={e => {
-                setValue({ ...value, assets: [asset] });
+                setValue({ ...value, assets: [asset as AssetInput] });
                 capture(Events.SendClick);
                 navigate('/send');
               }}
@@ -202,7 +203,7 @@ const Asset = ({
   );
 };
 
-const Fallback = ({ name }) => {
+const Fallback = ({ name }: Readonly<{ name?: string }>) => {
   const [timedOut, setTimedOut] = React.useState(false);
   const isMounted = useIsMounted();
   React.useEffect(() => {

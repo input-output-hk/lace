@@ -14,12 +14,13 @@ import { Wallet } from '@lace/cardano';
 import { ERROR } from '../../../../config/config';
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
 import Account from '../../components/account';
 import ConfirmModal from '../../components/confirmModal';
 import { Scrollbars } from '../../components/scrollbar';
+
 import type { UseAccount } from '../../../../adapters/account';
-import { DappConnector } from '../../../../features/dapp-outside-handles-provider';
-import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
+import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -229,7 +230,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
         walletType={walletType}
         sign={async password => {
           try {
-            return await request?.sign(password ?? '');
+            await request?.sign(password ?? '');
           } catch (error) {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError
@@ -243,7 +244,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
         onCloseBtn={() => {
           capture(Events.DappConnectorDappDataCancelClick);
         }}
-        onConfirm={async (status, signedMessage) => {
+        onConfirm={async status => {
           if (status) {
             await capture(Events.DappConnectorDappDataConfirmClick);
             const channelCloseDelay = 100;

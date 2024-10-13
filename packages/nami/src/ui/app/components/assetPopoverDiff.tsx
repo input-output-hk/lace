@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import React from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
@@ -27,9 +28,23 @@ const abs = big => {
   return big < 0 ? big * -1 : big;
 };
 
-const CustomScrollbars = ({ onScroll, forwardedRef, style, children }) => {
+interface CustomScrollbarsProps {
+  onScroll?: React.UIEventHandler;
+  children?: React.ReactNode;
+  forwardedRef:
+    | React.ForwardedRef<unknown>
+    | ((ref: RefObject<any> | null) => void);
+  style?: React.CSSProperties;
+}
+
+const CustomScrollbars = ({
+  onScroll,
+  forwardedRef,
+  style,
+  children,
+}: Readonly<CustomScrollbarsProps>) => {
   const refSetter = React.useCallback(scrollbarsRef => {
-    if (scrollbarsRef) {
+    if (typeof forwardedRef === 'function') {
       forwardedRef(scrollbarsRef.view);
     }
   }, []);

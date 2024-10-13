@@ -135,12 +135,12 @@ export const avatarToImage = (avatar: string) => {
 };
 
 export const displayUnit = (
-  quantity: bigint | number | string,
-  decimals = 6,
+  quantity?: bigint | number | string,
+  decimals: number | string = 6,
 ) => {
   if (quantity === undefined) return 0;
 
-  return Number.parseInt(quantity.toString()) / 10 ** decimals;
+  return Number.parseInt(quantity.toString()) / 10 ** Number(decimals);
 };
 
 export const toUnit = (amount: string, decimals = 6) => {

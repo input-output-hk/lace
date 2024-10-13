@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import React from 'react';
+
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Avatar,
@@ -10,11 +13,12 @@ import {
   InputRightElement,
   SkeletonCircle,
 } from '@chakra-ui/react';
-import React from 'react';
+import { NumericFormat } from 'react-number-format';
+
 import { toUnit } from '../../../api/extension';
 
 import AssetPopover from './assetPopover';
-import { NumericFormat } from 'react-number-format';
+
 import type { AssetInput } from '../../../types/assets';
 
 const useIsMounted = () => {
@@ -32,11 +36,7 @@ const AssetBadge = ({
   asset,
   onRemove,
   onInput,
-}: {
-  asset: AssetInput;
-  onRemove;
-  onInput;
-}) => {
+}: Readonly<{ asset: AssetInput; onRemove; onInput }>) => {
   const [width, setWidth] = React.useState(
     BigInt(asset.quantity) <= 1 ? 60 : 200,
   );
@@ -56,53 +56,50 @@ const AssetBadge = ({
   return (
     <Box m="0.5">
       <InputGroup size="sm">
-        <InputLeftElement
-          rounded="lg"
-          children={
-            <Box
-              userSelect="none"
-              width="6"
-              height="6"
-              rounded="full"
-              overflow="hidden"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <AssetPopover asset={asset}>
-                <Button
-                  style={{
-                    all: 'revert',
-                    margin: 0,
-                    padding: 0,
-                    background: 'none',
-                    border: 'none',
-                    outline: 'none',
-                    width: '100%',
-                    height: '100%',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Image
-                    width="full"
-                    rounded="sm"
-                    src={asset.image}
-                    fallback={
-                      !asset.image ? (
-                        <Avatar size="xs" name={asset.name} />
-                      ) : (
-                        <Fallback name={asset.name} />
-                      )
-                    }
-                  />
-                </Button>
-              </AssetPopover>
-            </Box>
-          }
-        />
+        <InputLeftElement rounded="lg">
+          <Box
+            userSelect="none"
+            width="6"
+            height="6"
+            rounded="full"
+            overflow="hidden"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <AssetPopover asset={asset}>
+              <Button
+                style={{
+                  all: 'revert',
+                  margin: 0,
+                  padding: 0,
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  width: '100%',
+                  height: '100%',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Image
+                  width="full"
+                  rounded="sm"
+                  src={asset.image}
+                  fallback={
+                    asset.image ? (
+                      <Fallback name={asset.name} />
+                    ) : (
+                      <Avatar size="xs" name={asset.name} />
+                    )
+                  }
+                />
+              </Button>
+            </AssetPopover>
+          </Box>
+        </InputLeftElement>
         <NumericFormat
           allowNegative={false}
           px="8"
@@ -132,22 +129,21 @@ const AssetBadge = ({
           }
           customInput={Input}
         />
-        <InputRightElement
-          rounded="lg"
-          children={
-            <SmallCloseIcon cursor="pointer" onClick={() => onRemove()} />
-          }
-        />
+        <InputRightElement rounded="lg">
+          <SmallCloseIcon cursor="pointer" onClick={onRemove} />
+        </InputRightElement>
       </InputGroup>
     </Box>
   );
 };
 
-const Fallback = ({ name }) => {
+const Fallback = ({ name }: Readonly<{ name?: string }>) => {
   const [timedOut, setTimedOut] = React.useState(false);
   const isMounted = useIsMounted();
   React.useEffect(() => {
-    setTimeout(() => isMounted.current && setTimedOut(true), 30000);
+    setTimeout(() => {
+      isMounted.current && setTimedOut(true);
+    }, 30_000);
   }, []);
   if (timedOut) return <Avatar size="xs" name={name} />;
   return <SkeletonCircle size="5" />;

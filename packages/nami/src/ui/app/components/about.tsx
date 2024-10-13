@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { ForwardedRef } from 'react';
+
 import {
   Modal,
   ModalOverlay,
@@ -14,31 +15,37 @@ import {
   Link,
 } from '@chakra-ui/react';
 
-import LogoWhite from '../../../assets/img/logoWhite.svg';
-import LogoBlack from '../../../assets/img/logo.svg';
-import IOHKWhite from '../../../assets/img/iohkWhite.svg';
 import IOHKBlack from '../../../assets/img/iohk.svg';
-import TermsOfUse from './termsOfUse';
-import PrivacyPolicy from './privacyPolicy';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
+import IOHKWhite from '../../../assets/img/iohkWhite.svg';
+import LogoBlack from '../../../assets/img/logo.svg';
+import LogoWhite from '../../../assets/img/logoWhite.svg';
 import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
-const About = React.forwardRef((props, ref) => {
+import PrivacyPolicy, { PrivacyPolicyRef } from './privacyPolicy';
+import TermsOfUse, { TermsOfUseRef } from './termsOfUse';
+
+export interface AboutRef {
+  openModal: () => void;
+  closeModal: () => void;
+}
+
+const About = (_props, ref) => {
   const capture = useCaptureEvent();
-  const { openExternalLink } = useOutsideHandles()
+  const { openExternalLink } = useOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const Logo = useColorModeValue(LogoBlack, LogoWhite);
   const IOHK = useColorModeValue(IOHKWhite, IOHKBlack);
 
-  const termsRef = React.useRef();
-  const privacyPolRef = React.useRef();
+  const termsRef = React.useRef<TermsOfUseRef>(null);
+  const privacyPolRef = React.useRef<PrivacyPolicyRef>(null);
 
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
-    closeModal() {
+    closeModal: () => {
       onClose();
     },
   }));
@@ -63,7 +70,9 @@ const About = React.forwardRef((props, ref) => {
           >
             <Image
               cursor="pointer"
-              onClick={() => openExternalLink('https://namiwallet.io')}
+              onClick={() => {
+                openExternalLink('https://namiwallet.io');
+              }}
               width="90px"
               src={Logo}
             />
@@ -79,7 +88,9 @@ const About = React.forwardRef((props, ref) => {
               <Text fontSize="xs">
                 Maintained by{' '}
                 <span
-                  onClick={() => openExternalLink('https://iohk.io/')}
+                  onClick={() => {
+                    openExternalLink('https://iohk.io/');
+                  }}
                   style={{ textDecoration: 'underline', cursor: 'pointer' }}
                 >
                   IOG
@@ -88,7 +99,9 @@ const About = React.forwardRef((props, ref) => {
               <Box height="4" />
               <Image
                 cursor="pointer"
-                onClick={() => openExternalLink('https://iohk.io/')}
+                onClick={() => {
+                  openExternalLink('https://iohk.io/');
+                }}
                 src={IOHK}
                 width="66px"
               />
@@ -99,7 +112,7 @@ const About = React.forwardRef((props, ref) => {
               <Link
                 onClick={() => {
                   capture(Events.SettingsTermsAndConditionsClick);
-                  termsRef.current.openModal();
+                  termsRef.current?.openModal();
                 }}
                 color="GrayText"
                 _hover={{ color: 'GrayText', textDecoration: 'underline' }}
@@ -108,7 +121,7 @@ const About = React.forwardRef((props, ref) => {
               </Link>
               <span> | </span>
               <Link
-                onClick={() => privacyPolRef.current.openModal()}
+                onClick={() => privacyPolRef.current?.openModal()}
                 color="GrayText"
                 _hover={{ color: 'GrayText', textDecoration: 'underline' }}
               >
@@ -123,6 +136,6 @@ const About = React.forwardRef((props, ref) => {
       <PrivacyPolicy ref={privacyPolRef} />
     </>
   );
-});
+};
 
-export default About;
+export default React.forwardRef(About);

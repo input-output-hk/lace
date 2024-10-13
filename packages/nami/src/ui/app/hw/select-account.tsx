@@ -101,7 +101,7 @@ export const SelectAccounts = ({
         });
         await saveHardwareWallet(cardanoWallet, environmentName);
       } catch (error_) {
-        console.log(error_);
+        console.error(error_);
         setError('An error occured');
       }
     }

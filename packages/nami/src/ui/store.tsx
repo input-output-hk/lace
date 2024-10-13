@@ -42,6 +42,17 @@ interface SendModel {
   setAddress: Action<SendModel, Address>;
   value: Value;
   setValue: Action<SendModel, Value>;
+  fee: { fee?: string; error?: string };
+  setFee: Action<SendModel, { fee?: string; error?: string }>;
+  message: string;
+  setMessage: Action<SendModel, string>;
+  tx: any;
+  setTx: Action<SendModel, any>;
+  txInfo: {
+    minUtxo: number | string;
+  };
+  setTxInfo: Action<SendModel, { minUtxo: number | string }>;
+  reset: Action<SendModel>;
 }
 
 interface LaceSwitchModel {
@@ -57,7 +68,18 @@ const routeStore: RouteModel = {
   }),
 };
 
-const initialState = {
+interface SendStore {
+  fee: { fee: string };
+  value: { ada: string; assets: any[]; personalAda: string; minAda: string };
+  address: { result: string; display: string; error: string };
+  message: string;
+  tx: any;
+  txInfo: {
+    minUtxo: number;
+  };
+}
+
+const initialState: SendStore = {
   fee: { fee: '0' },
   value: { ada: '', assets: [], personalAda: '', minAda: '0' },
   address: { result: '', display: '', error: '' },
@@ -70,25 +92,25 @@ const initialState = {
 
 export const sendStore = {
   ...initialState,
-  setFee: action((state, fee) => {
+  setFee: action<SendStore>((state, fee) => {
     state.fee = fee;
   }),
-  setValue: action((state, value) => {
+  setValue: action<SendStore>((state, value) => {
     state.value = value;
   }),
-  setMessage: action((state, message) => {
+  setMessage: action<SendStore>((state, message) => {
     state.message = message;
   }),
-  setTx: action((state, tx) => {
+  setTx: action<SendStore>((state, tx) => {
     state.tx = tx;
   }),
-  setAddress: action((state, address) => {
+  setAddress: action<SendStore>((state, address) => {
     state.address = address;
   }),
-  setTxInfo: action((state, txInfo) => {
+  setTxInfo: action<SendStore>((state, txInfo) => {
     state.txInfo = txInfo;
   }),
-  reset: action(state => {
+  reset: action<SendStore>(state => {
     state.fee = initialState.fee;
     state.value = initialState.value;
     state.message = initialState.message;

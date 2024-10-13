@@ -1,4 +1,6 @@
+/* eslint-disable react/no-unescaped-entities */
 import React from 'react';
+
 import {
   Box,
   Text,
@@ -13,20 +15,27 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
-import { Scrollbars } from './scrollbar';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
 import { useOutsideHandles } from 'features/outside-handles-provider/useOutsideHandles';
 
-const TermsOfUse = React.forwardRef((props, ref) => {
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+
+import { Scrollbars } from './scrollbar';
+
+export interface TermsOfUseRef {
+  openModal: () => void;
+  closeModal: () => void;
+}
+
+const TermsOfUse = React.forwardRef((_props, ref) => {
   const capture = useCaptureEvent();
   const { openExternalLink } = useOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
-    closeModal() {
+    closeModal: () => {
       onClose();
     },
   }));
@@ -112,11 +121,11 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                     color="teal"
                     isExternal
                     textDecoration="underline"
-                    onClick={() =>
+                    onClick={() => {
                       openExternalLink(
-                        'https://static.iohk.io/terms/iog-privacy-policy.pdf'
-                      )
-                    }
+                        'https://static.iohk.io/terms/iog-privacy-policy.pdf',
+                      );
+                    }}
                   >
                     Privacy Policy
                   </Link>
@@ -144,7 +153,9 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                   the Products. Feel free to submit feedback at{' '}
                   <Link
                     isExternal
-                    onClick={() => openExternalLink('https://iohk.io/en/contact/')}
+                    onClick={() => {
+                      openExternalLink('https://iohk.io/en/contact/');
+                    }}
                   >
                     https://iohk.io/en/contact/
                   </Link>
@@ -374,11 +385,11 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                   color="teal"
                   isExternal
                   textDecoration="underline"
-                  onClick={() =>
+                  onClick={() => {
                     openExternalLink(
-                      'https://static.iohk.io/terms/iog-dmca-policy.pdf'
-                    )
-                  }
+                      'https://static.iohk.io/terms/iog-dmca-policy.pdf',
+                    );
+                  }}
                 >
                   Digital Millennium Copyright Act (DMCA) Policy
                 </Link>
@@ -479,7 +490,9 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                 the form at{' '}
                 <Link
                   isExternal
-                  onClick={() => openExternalLink('https://iohk.io/en/contact/')}
+                  onClick={() => {
+                    openExternalLink('https://iohk.io/en/contact/');
+                  }}
                 >
                   https://iohk.io/en/contact/
                 </Link>{' '}
@@ -636,7 +649,9 @@ const TermsOfUse = React.forwardRef((props, ref) => {
                       color="teal"
                       isExternal
                       textDecoration="underline"
-                      onClick={() => openExternalLink('https://iohk.io/en/contact/')}
+                      onClick={() => {
+                        openExternalLink('https://iohk.io/en/contact/');
+                      }}
                     >
                       contact us
                     </Link>{' '}
@@ -657,5 +672,7 @@ const TermsOfUse = React.forwardRef((props, ref) => {
     </Modal>
   );
 });
+
+TermsOfUse.displayName = 'TermsOfUse';
 
 export default TermsOfUse;

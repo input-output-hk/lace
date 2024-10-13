@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 /* eslint-disable functional/prefer-immutable-types */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable max-params */
@@ -126,7 +127,8 @@ export const getKeyHashes = (
 
   //get key hashes from scripts
   const scripts = tx.witness.scripts?.filter(
-    script => script.__type === Cardano.ScriptType.Native,
+    (script): script is Cardano.NativeScript =>
+      script.__type === Cardano.ScriptType.Native,
   );
   const keyHashFromScript = (scripts: Cardano.NativeScript[]) => {
     for (const script of scripts) {

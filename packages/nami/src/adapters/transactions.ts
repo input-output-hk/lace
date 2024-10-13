@@ -256,7 +256,7 @@ export type TxInfo = Pick<TransactionDetail, 'metadata'> &
 
 export interface EncodeToCborArgs {
   body: Wallet.Cardano.TxBody;
-  witness: Wallet.Cardano.Witness;
+  witness?: Wallet.Cardano.Witness;
   auxiliaryData?: Wallet.Cardano.AuxiliaryData;
 }
 

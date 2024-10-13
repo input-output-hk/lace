@@ -1,4 +1,6 @@
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+
 import {
   Popover,
   PopoverArrow,
@@ -12,8 +14,10 @@ import {
   Avatar,
   Text,
 } from '@chakra-ui/react';
+
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
+
 import type { Asset } from '../../../types/assets';
 
 type Props = PropsWithChildren<{
@@ -21,7 +25,7 @@ type Props = PropsWithChildren<{
   gutter?: number;
 }>;
 
-const AssetPopover = ({ asset, gutter, ...props }: Props) => {
+const AssetPopover = ({ asset, gutter, ...props }: Readonly<Props>) => {
   return (
     <Popover placement="top-start" gutter={gutter}>
       <PopoverTrigger>
@@ -90,7 +94,6 @@ const AssetPopover = ({ asset, gutter, ...props }: Props) => {
                 </Copy>
                 <Box h="1" />
                 <Copy
-                  width="full"
                   label="Copied asset"
                   copy={asset.fingerprint}
                 >
