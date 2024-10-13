@@ -3,7 +3,6 @@ import type { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import type {
   WalletManagerApi,
   WalletRepositoryApi,
-  WalletType,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { HexBlob } from '@lace/cardano/dist/wallet';

@@ -1,4 +1,4 @@
-import React, { ForwardedRef } from 'react';
+import React from 'react';
 
 import {
   Modal,
@@ -23,8 +23,11 @@ import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
-import PrivacyPolicy, { PrivacyPolicyRef } from './privacyPolicy';
-import TermsOfUse, { TermsOfUseRef } from './termsOfUse';
+import PrivacyPolicy from './privacyPolicy';
+import TermsOfUse from './termsOfUse';
+
+import type { PrivacyPolicyRef } from './privacyPolicy';
+import type { TermsOfUseRef } from './termsOfUse';
 
 export interface AboutRef {
   openModal: () => void;

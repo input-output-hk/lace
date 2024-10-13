@@ -155,7 +155,6 @@ const Send = ({
     actions => actions.globalModel.sendStore.reset,
   );
   const history = useHistory();
-  const navigate = history.push;
   const toast = useToast();
   const ref = React.useRef<ConfirmModalRef>(null);
   const [isLoading, setIsLoading] = React.useState(true);

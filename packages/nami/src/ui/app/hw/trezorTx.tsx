@@ -2,11 +2,8 @@ import React from 'react';
 import type { ReactElement } from 'react';
 
 import { Serialization } from '@cardano-sdk/core';
-import { isNotNil } from '@cardano-sdk/util';
 import { Box, Image, useColorModeValue, useToast } from '@chakra-ui/react';
 import { useParams } from 'react-router-dom';
-import { firstValueFrom } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
 
 import { getCollateralUtxo } from '../../../adapters/collateral';
 import { submitTx } from '../../../api/extension';

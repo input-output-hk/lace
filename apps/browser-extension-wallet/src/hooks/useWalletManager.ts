@@ -69,7 +69,7 @@ export interface CreateWalletFromPrivateKeyParams {
 export type CreateWalletParamsBase = {
   name: string;
   chainId?: Wallet.Cardano.ChainId;
-  passphrase?: Buffer | undefined;
+  passphrase?: Buffer;
   metadata: Wallet.WalletMetadata;
   encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;

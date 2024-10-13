@@ -11,7 +11,7 @@ export const useHandleResolver = (
   networkMagic: Cardano.NetworkMagics,
 ): HandleProvider => {
   return useMemo(() => {
-    const serverUrl = HANDLE_SERVER_URLS[networkMagic]!;
+    const serverUrl = HANDLE_SERVER_URLS[networkMagic];
     return handleHttpProvider({
       baseUrl: serverUrl,
       logger: console,
