@@ -45,7 +45,7 @@ const CustomScrollbars = ({
 }: Readonly<CustomScrollbarsProps>) => {
   const refSetter = React.useCallback(scrollbarsRef => {
     if (typeof forwardedRef === 'function') {
-      forwardedRef(scrollbarsRef.view);
+      scrollbarsRef ? forwardedRef(scrollbarsRef.view) : forwardedRef(null);
     }
   }, []);
 
