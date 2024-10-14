@@ -140,7 +140,7 @@ describe('useCollateral', () => {
 
   describe('getCollateralUtxo', () => {
     test('should return the UTXO that matches the tx ID and has enough ADA', async () => {
-      const utxo = [{ txId: 'txId' }, { coins: BigInt(5_000_000) }];
+      const utxo = [{ txId: 'txId' }, { value: { coins: BigInt(5_000_000) } }];
       const available$ = of([utxo]);
 
       const foundUtxo = await getCollateralUtxo(
