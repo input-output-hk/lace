@@ -539,7 +539,6 @@ const Send = ({
                     <Icon as={MdModeEdit} />
                   </InputLeftElement>
                   <Input
-                    value={message}
                     onInput={e => {
                       const msg = (e.target as HTMLInputElement).value;
                       triggerTxUpdate(() => {
