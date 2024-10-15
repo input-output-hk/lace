@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useMemo } from 'react';
 
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 
 import { HANDLE_SERVER_URLS } from './config';
 
@@ -13,6 +13,7 @@ export const useHandleResolver = (
   return useMemo(() => {
     const serverUrl = HANDLE_SERVER_URLS[networkMagic];
     return handleHttpProvider({
+      adapter: axiosFetchAdapter,
       baseUrl: serverUrl,
       logger: console,
     });
