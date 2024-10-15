@@ -9,6 +9,7 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { BackgroundStorage } from '@lib/scripts/types';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { WarningIconTriangleSolidComponent } from '@input-output-hk/lace-ui-toolkit';
 
 const { Title } = Typography;
 
@@ -71,7 +72,14 @@ export const SettingsSwitchToNami = ({ popupView }: { popupView?: boolean }): Re
           {t('browserView.settings.legacyMode.section')}
         </Title>
         <SettingsLink
-          description={t('browserView.settings.legacyMode.interface.description')}
+          description={
+            <>
+              {t('browserView.settings.legacyMode.interface.description1')}
+              <br />
+              <WarningIconTriangleSolidComponent className={styles.warningIcon} />{' '}
+              {t('browserView.settings.legacyMode.interface.description2')}
+            </>
+          }
           addon={
             <Switch
               testId="settings-nami-mode-switch"
