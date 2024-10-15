@@ -1,8 +1,7 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable, toast } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { useMaxAda } from '@hooks/useMaxAda';
-import { useTranslation } from 'react-i18next';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
@@ -27,7 +26,6 @@ export type UseCollateralReturn = {
 };
 
 export const useCollateral = (): UseCollateralReturn => {
-  const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
   const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
   const { inMemoryWallet, isInMemoryWallet } = useWalletStore();
@@ -88,7 +86,6 @@ export const useCollateral = (): UseCollateralReturn => {
           }
         });
       }
-      toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
     } catch (error) {
       // redirect to tx fail screen in case of hw
       if (!isInMemoryWallet) {
@@ -103,7 +100,7 @@ export const useCollateral = (): UseCollateralReturn => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [txBuilder, inMemoryWallet, isInMemoryWallet, t, setBuiltTxData]);
+  }, [txBuilder, inMemoryWallet, isInMemoryWallet, setBuiltTxData]);
   return {
     initializeCollateralTx,
     submitCollateralTx,
