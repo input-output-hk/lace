@@ -21,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
 import MiddleEllipsis from 'react-middle-ellipsis';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
@@ -80,7 +80,6 @@ export const SignTx = ({
   const capture = useCaptureEvent();
   const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
   const ref = React.useRef();
-  const [collateral, setCollateral] = React.useState<Wallet.Cardano.Utxo>();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
   const [property, setProperty] = React.useState<Property>({
@@ -156,38 +155,30 @@ export const SignTx = ({
     });
   };
 
+  /** Verify if transaction collateral inputs are the same as the collaterals marked in the wallet */
   const checkCollateral = (
     tx: Readonly<Cardano.Tx>,
-    utxos: readonly Cardano.Utxo[],
-    collateral: Readonly<Wallet.Cardano.Utxo | undefined>,
+    collaterals: readonly Cardano.Utxo[] | undefined,
   ) => {
     const collateralInputs = tx.body.collaterals;
     if (!collateralInputs) return;
 
-    // checking all wallet utxos if used as collateral
+    if (!collaterals?.length) {
+      setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
+      return;
+    }
+
+    // Every transaction collateralInput must be in the collaterals marked in the wallet
     for (const collateralInput of collateralInputs) {
-      for (const utxo of utxos) {
-        const input = utxo[0];
-        if (
-          input.txId === collateralInput.txId &&
-          input.index === collateralInput.index
-        ) {
-          // collateral utxo is less than 50 ADA. That's also fine.
-          if (utxo[1].value.coins <= 50_000_000) return;
-
-          if (!collateral) {
-            setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
-            return;
-          }
-
-          if (
-            collateralInput.txId !== collateral[0].txId ||
-            collateralInput.index !== collateral[0].index
-          ) {
-            setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
-            return;
-          }
-        }
+      if (
+        !collaterals.some(
+          collateral =>
+            collateral[0].txId === collateralInput.txId &&
+            collateral[0].index === collateralInput.index,
+        )
+      ) {
+        setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
+        return;
       }
     }
   };
@@ -197,16 +188,7 @@ export const SignTx = ({
     setRequest(request);
     setDappInfo(dappInfo);
 
-    setCollateral(
-      await firstValueFrom(
-        inMemoryWallet.utxo.unspendable$.pipe(
-          map(collaterals => {
-            if (collaterals.length === 0) return undefined;
-            return collaterals[0];
-          }),
-        ),
-      ),
-    );
+    const collaterals = await firstValueFrom(inMemoryWallet.utxo.unspendable$);
 
     const utxos = await firstValueFrom(inMemoryWallet.utxo.available$);
     const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
@@ -219,7 +201,7 @@ export const SignTx = ({
       ),
     );
 
-    checkCollateral(tx, utxos, collateral);
+    checkCollateral(tx, collaterals);
 
     const keyHashes = getKeyHashes(
       tx,
