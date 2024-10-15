@@ -7,6 +7,8 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { RefObject } from 'react';
+import { useCallback } from 'react';
+import { useMemo } from 'react';
 import React from 'react';
 
 import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
@@ -76,7 +78,7 @@ import { Scrollbars } from '../components/scrollbar';
 import UnitDisplay from '../components/unitDisplay';
 
 import type { UseAccount } from '../../../adapters/account';
-import type { Asset as NamiAsset } from '../../../types/assets';
+import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
 import type { Wallet } from '@lace/cardano';
@@ -165,17 +167,26 @@ const Send = ({
   const assetsModalRef = React.useRef<AssetsModalRef>(null);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const utxoTotal = useObservable(inMemoryWallet?.balance.utxo.total$);
-  const assetsInfo = withHandleInfo(
-    useObservable(inMemoryWallet.assetInfo$),
-    useObservable(inMemoryWallet.handles$),
+  const rawAssetsInfo = useObservable(inMemoryWallet.assetInfo$);
+  const handles = useObservable(inMemoryWallet.handles$);
+
+  const assetsInfo = useMemo(
+    () => withHandleInfo(rawAssetsInfo, handles),
+    [rawAssetsInfo, handles],
   );
   const rewards = useObservable(
     inMemoryWallet?.balance.rewardAccounts.rewards$,
   );
 
-  const walletAssets = Array.from(utxoTotal?.assets || [])
-    .filter(([assetId]) => assetsInfo.has(assetId))
-    .map(([assetId, quantity]) => toAsset(assetsInfo.get(assetId)!, quantity));
+  const walletAssets = useMemo(
+    () =>
+      Array.from(utxoTotal?.assets || [])
+        .filter(([assetId]) => assetsInfo.has(assetId))
+        .map(([assetId, quantity]) =>
+          toAsset(assetsInfo.get(assetId)!, quantity),
+        ),
+    [utxoTotal?.assets, assetsInfo],
+  );
 
   const prepareTx = async (
     _,
@@ -355,28 +366,34 @@ const Send = ({
     setTxInfo({ minUtxo });
   };
 
-  const addAssets = _assets => {
-    for (const asset of _assets) {
-      assets.current[asset.unit] = { ...asset };
-    }
-    const assetsList = objectToArray(assets.current);
-    triggerTxUpdate(() => {
-      setValue({ ...value, assets: assetsList });
-    });
-  };
+  const addAssets = useCallback(
+    _assets => {
+      for (const asset of _assets) {
+        assets.current[asset.unit] = { ...asset };
+      }
+      const assetsList = objectToArray(assets.current);
+      triggerTxUpdate(() => {
+        setValue({ ...value, assets: assetsList });
+      });
+    },
+    [triggerTxUpdate, setValue],
+  );
 
-  const removeAsset = asset => {
-    delete assets.current[asset.unit];
-    const assetsList = objectToArray(assets.current);
-    triggerTxUpdate(() => {
-      setValue({ ...value, assets: assetsList });
-    });
-  };
+  const removeAsset = useCallback(
+    asset => {
+      delete assets.current[asset.unit];
+      const assetsList = objectToArray(assets.current);
+      triggerTxUpdate(() => {
+        setValue({ ...value, assets: assetsList });
+      });
+    },
+    [assets.current, triggerTxUpdate, setValue],
+  );
 
   React.useEffect(() => {
     if (protocolParameters) {
-      setTx(null);
-      setFee({ fee: '' });
+      if (tx !== null) setTx(null);
+      if (fee.fee !== '' || fee.error) setFee({ fee: '' });
       prepareTxDebounced(0, {
         value,
         address,
@@ -384,7 +401,7 @@ const Send = ({
         protocolParameters,
       });
     }
-  }, [txUpdate]);
+  }, [txUpdate, message]);
 
   React.useEffect(() => {
     init();
@@ -395,6 +412,20 @@ const Send = ({
       resetState();
     };
   }, []);
+
+  const onAssetInput = useCallback(
+    async (asset: Readonly<AssetInput>, val: number | string) => {
+      if (!assets.current[asset.unit]) return;
+      assets.current[asset.unit].input = val;
+      const v = value;
+      v.assets = objectToArray(assets.current);
+      triggerTxUpdate(() => {
+        setValue({ ...v, assets: v.assets });
+      });
+    },
+    [assets.current, triggerTxUpdate, setValue],
+  );
+
   return (
     <>
       <Box
@@ -539,11 +570,10 @@ const Send = ({
                     <Icon as={MdModeEdit} />
                   </InputLeftElement>
                   <Input
+                    defaultValue={message}
                     onInput={e => {
                       const msg = (e.target as HTMLInputElement).value;
-                      triggerTxUpdate(() => {
-                        setMessage(msg);
-                      });
+                      setMessage(msg);
                     }}
                     size={'sm'}
                     variant={'flushed'}
@@ -568,18 +598,8 @@ const Send = ({
                   {value.assets.map(asset => (
                     <Box key={asset?.unit}>
                       <AssetBadge
-                        onRemove={() => {
-                          removeAsset(asset);
-                        }}
-                        onInput={async val => {
-                          if (!assets.current[asset.unit]) return;
-                          assets.current[asset.unit].input = val;
-                          const v = value;
-                          v.assets = objectToArray(assets.current);
-                          triggerTxUpdate(() => {
-                            setValue({ ...v, assets: v.assets });
-                          });
-                        }}
+                        onRemove={removeAsset}
+                        onInput={onAssetInput}
                         asset={asset}
                       />
                     </Box>
@@ -1095,7 +1115,7 @@ const AssetsSelector = ({
   const select = React.useRef(false);
   const [choice, setChoice] = React.useState({});
 
-  const filterAssets = () => {
+  const filteredAssets = useMemo(() => {
     const filter1 = asset =>
       value.assets.every(asset2 => asset.unit !== asset2.unit);
     const filter2 = asset =>
@@ -1105,7 +1125,7 @@ const AssetsSelector = ({
           asset.fingerprint.includes(search)
         : true;
     return assets.filter(asset => filter1(asset) && filter2(asset));
-  };
+  }, [assets, value, search]);
 
   return (
     <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
@@ -1193,17 +1213,17 @@ const AssetsSelector = ({
             my="1"
           >
             {assets ? (
-              filterAssets().length > 0 ? (
+              filteredAssets.length > 0 ? (
                 <List
                   outerElementType={CustomScrollbarsVirtualList}
                   height={200}
-                  itemCount={filterAssets().length}
+                  itemCount={filteredAssets.length}
                   itemSize={45}
                   width={385}
                   layout="vertical"
                 >
                   {({ index, style }) => {
-                    const asset = filterAssets()[index];
+                    const asset = filteredAssets[index];
                     return (
                       <Box
                         style={style}

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
@@ -36,21 +36,30 @@ const AssetBadge = ({
   asset,
   onRemove,
   onInput,
-}: Readonly<{ asset: AssetInput; onRemove; onInput }>) => {
+}: Readonly<{
+  asset: AssetInput;
+  onRemove: (asset: Readonly<AssetInput>) => void;
+  onInput: (asset: Readonly<AssetInput>, input: number | string) => void;
+}>) => {
   const [width, setWidth] = React.useState(
     BigInt(asset.quantity) <= 1 ? 60 : 200,
   );
+  const [isPopoveVisible, setIsPopoverVisible] = React.useState(false);
   const [value, setValue] = React.useState('');
+
+  const onPopoverClose = useCallback(() => {
+    setIsPopoverVisible(false);
+  }, [setIsPopoverVisible]);
 
   React.useEffect(() => {
     const initialWidth = BigInt(asset.quantity) <= 1 ? 60 : 200;
     setWidth(initialWidth);
     if (BigInt(asset.quantity) == BigInt(1)) {
       setValue('1');
-      onInput(1);
+      onInput(asset, 1);
     } else {
       setValue(asset.input);
-      onInput(asset.input);
+      onInput(asset, asset.input);
     }
   }, [asset]);
   return (
@@ -67,7 +76,11 @@ const AssetBadge = ({
             alignItems="center"
             justifyContent="center"
           >
-            <AssetPopover asset={asset}>
+            <AssetPopover
+              isOpen={isPopoveVisible}
+              onClose={onPopoverClose}
+              asset={asset}
+            >
               <Button
                 style={{
                   all: 'revert',
@@ -82,6 +95,9 @@ const AssetBadge = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                }}
+                onClick={() => {
+                  setIsPopoverVisible(!isPopoveVisible);
                 }}
               >
                 <Image
@@ -119,7 +135,7 @@ const AssetBadge = ({
           placeholder="Set quantity"
           onValueChange={({ formattedValue }) => {
             setValue(formattedValue);
-            onInput(formattedValue);
+            onInput(asset, formattedValue);
           }}
           isInvalid={
             asset.input &&
@@ -130,7 +146,12 @@ const AssetBadge = ({
           customInput={Input}
         />
         <InputRightElement rounded="lg">
-          <SmallCloseIcon cursor="pointer" onClick={onRemove} />
+          <SmallCloseIcon
+            cursor="pointer"
+            onClick={() => {
+              onRemove(asset);
+            }}
+          />
         </InputRightElement>
       </InputGroup>
     </Box>
