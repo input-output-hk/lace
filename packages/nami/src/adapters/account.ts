@@ -4,6 +4,7 @@ import {
   WalletType,
   type WalletId,
   type HardwareWallet,
+  type InMemoryWallet,
   type Bip32WalletAccount,
   type AnyWallet,
   type RemoveAccountProps,
@@ -34,7 +35,7 @@ interface AccountsProps {
   removeAccount: (
     props: Readonly<RemoveAccountProps>,
   ) => Promise<RemoveAccountProps>;
-  removeWallet: () => Promise<void>;
+  removeWallet: (isChangePasswordFlow?: boolean) => Promise<void>;
   updateAccountMetadata: (
     props: Readonly<UpdateAccountMetadataProps<Wallet.AccountMetadata>>,
   ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata>>;
@@ -116,6 +117,10 @@ export const getNextAccountIndex = (
   return walletAccounts.length;
 };
 
+type NonScriptWallet =
+  | HardwareWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+  | InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
 const getAcountsMapper =
   (
     wallet: Readonly<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>,
@@ -141,16 +146,21 @@ export const useAccount = ({
 
   const allAccountsSorted = useMemo(() => {
     const allWallets = wallets?.filter(
-      (w): w is HardwareWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> =>
-        w.type !== WalletType.Script,
+      (w): w is NonScriptWallet => w.type !== WalletType.Script,
     );
     const groupedWallets = groupBy(allWallets, ({ type }) => type);
     return flatten(
       Object.entries(groupedWallets)
         .sort(([type1], [type2]) => {
-          if (type1 === WalletType.InMemory && type2 !== WalletType.InMemory)
+          if (
+            (type1 as WalletType) === WalletType.InMemory &&
+            (type2 as WalletType) !== WalletType.InMemory
+          )
             return -1;
-          if (type2 === WalletType.InMemory && type1 !== WalletType.InMemory)
+          if (
+            (type2 as WalletType) === WalletType.InMemory &&
+            (type1 as WalletType) !== WalletType.InMemory
+          )
             return 1;
           return 0;
         })
