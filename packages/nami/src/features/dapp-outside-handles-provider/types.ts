@@ -1,4 +1,9 @@
-import type { Serialization } from '@cardano-sdk/core';
+import type {
+  Inspector,
+  Serialization,
+  TransactionSummaryInspection,
+  TxInspector,
+} from '@cardano-sdk/core';
 import type { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import type {
   WalletManagerApi,
@@ -39,6 +44,11 @@ export interface DappConnector {
       sign: (password: string) => Promise<Cip30DataSignature>;
     };
   }>;
+  getTxSummaryInspector: (tx: Readonly<Wallet.Cardano.Tx>) => Promise<
+    TxInspector<{
+      summary: Inspector<TransactionSummaryInspection>;
+    }>
+  >;
 }
 
 export interface DappOutsideHandlesContextValue {

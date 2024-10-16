@@ -8,9 +8,36 @@ import {
   totalAddressOutputsValueInspector,
   Cardano,
 } from '@cardano-sdk/core';
+import { Wallet } from '@lace/cardano';
+import { toAsset } from 'adapters/assets';
 import groupBy from 'lodash/groupBy';
 
-import type { Wallet } from '@lace/cardano';
+import type { Asset, CardanoAsset } from '../../../../types/assets';
+import type { AssetInfoWithAmount } from '@cardano-sdk/core';
+
+const isNFT = (asset: AssetInfoWithAmount) =>
+  asset.assetInfo.supply === BigInt(1);
+
+const getFallbackName = (asset: AssetInfoWithAmount) => {
+  try {
+    return Wallet.Cardano.AssetName.toUTF8(asset.assetInfo.name);
+  } catch {
+    return asset.assetInfo.assetId;
+  }
+};
+
+const getAssetTokenName = (assetWithAmount: AssetInfoWithAmount) => {
+  if (isNFT(assetWithAmount)) {
+    return (
+      assetWithAmount.assetInfo.nftMetadata?.name ??
+      getFallbackName(assetWithAmount)
+    );
+  }
+  return (
+    assetWithAmount.assetInfo.tokenMetadata?.ticker ??
+    getFallbackName(assetWithAmount)
+  );
+};
 
 const inputResolver = (
   utxos: Readonly<Wallet.Cardano.Utxo[]>,
@@ -186,27 +213,14 @@ export const getKeyHashes = (
   return { key: requiredKeyHashes, kind: keyKind };
 };
 
-interface Asset {
-  /** The unit of the asset ('lovelace' for ADA, or the asset ID for other tokens) */
-  unit: Cardano.AssetId | 'lovelace';
-  /** The quantity of the asset */
-  quantity: bigint;
-  /** The asset fingerprint (for non-ADA assets) */
-  fingerprint?: Cardano.AssetFingerprint;
-  /** The asset name (for non-ADA assets) */
-  name?: Cardano.AssetName;
-  /** The policy ID of the asset (for non-ADA assets) */
-  policy?: Cardano.PolicyId;
-}
-
 interface ExternalOutput {
-  value: Asset[];
+  value: (Asset | CardanoAsset)[];
   script?: boolean;
   datumHash?: string;
 }
 
 export interface TransactionValue {
-  ownValue: Asset[];
+  ownValue: (Asset | CardanoAsset)[];
   externalValue: Record<string, ExternalOutput>;
 }
 
@@ -242,22 +256,29 @@ export const isScriptAddress = (address: Cardano.PaymentAddress) => {
  * @param {Cardano.Value} value - The Cardano.Value object to convert.
  * @returns {Asset[]} An array of Asset objects representing the value.
  */
-export const valueToAssetsSdk = (value: Cardano.Value): Asset[] => {
-  const assets: Asset[] = [];
-  assets.push({ unit: 'lovelace', quantity: value.coins });
+export const valueToAssetsSdk = (
+  value: Cardano.Value,
+  assetInfos: Map<Cardano.AssetId, AssetInfoWithAmount>,
+): (Asset | CardanoAsset)[] => {
+  const assets: (Asset | CardanoAsset)[] = [
+    {
+      unit: 'lovelace',
+      quantity: value.coins.toString(),
+    },
+  ];
 
   for (const [assetId, quantity] of value.assets || []) {
-    const policy = Cardano.AssetId.getPolicyId(assetId);
-    const name = Cardano.AssetId.getAssetName(assetId);
-    const fingerprint = Cardano.AssetFingerprint.fromParts(policy, name);
-    const asset: Asset = {
-      quantity,
-      unit: assetId,
-      policy,
-      name,
-      fingerprint,
-    };
-    assets.push(asset);
+    const assetInfo = assetInfos.get(assetId);
+    if (!assetInfo) {
+      console.error('Asset info not found for asset ID:', assetId);
+      continue;
+    }
+
+    const namiAsset = toAsset(assetInfo.assetInfo, assetInfo.amount);
+
+    // Use the Value quantity because the balanced value is calculated later. Only use asset info for the rest of information,
+    // like displayName and decimals.
+    assets.push({ ...namiAsset, quantity: quantity.toString() });
   }
 
   return assets;
@@ -267,13 +288,16 @@ export const getValueWithSdk = async (
   tx: Readonly<Cardano.Tx>,
   utxos: Readonly<Wallet.Cardano.Utxo[]>,
   addresses: Cardano.PaymentAddress[],
+  assetInfos: Map<Cardano.AssetId, AssetInfoWithAmount>,
 ): Promise<TransactionValue> => {
   const inputValue = valueToAssetsSdk(
     await totalAddressInputsValueInspector(addresses, inputResolver(utxos))(tx),
+    assetInfos,
   );
 
   const ownOutputValue = valueToAssetsSdk(
     await totalAddressOutputsValueInspector(addresses)(tx),
+    assetInfos,
   );
 
   const externalOutputsByAddress = Object.entries(
@@ -308,40 +332,34 @@ export const getValueWithSdk = async (
     ]),
   ];
 
-  const ownOutputValueDifference = involvedAssets.map<Asset>(unit => {
-    const leftValue = inputValue.find(asset => asset.unit === unit);
-    const rightValue = ownOutputValue.find(asset => asset.unit === unit);
-    const difference =
-      BigInt(leftValue ? leftValue.quantity : '') -
-      BigInt(rightValue ? rightValue.quantity : '');
-    if (unit === 'lovelace') {
-      return { unit, quantity: difference };
-    }
+  const ownOutputValueDifference = involvedAssets.map<Asset | CardanoAsset>(
+    unit => {
+      const leftValue = inputValue.find(asset => asset.unit === unit);
+      const rightValue = ownOutputValue.find(asset => asset.unit === unit);
+      const difference =
+        BigInt(leftValue ? leftValue.quantity : '') -
+        BigInt(rightValue ? rightValue.quantity : '');
+      if (unit === 'lovelace') {
+        return { unit, quantity: difference.toString() };
+      }
 
-    const policy = Cardano.AssetId.getPolicyId(unit);
-    const name = Cardano.AssetId.getAssetName(unit);
-    const fingerprint = Cardano.AssetFingerprint.fromParts(policy, name);
+      const asset = leftValue ?? rightValue!;
 
-    return {
-      unit,
-      quantity: difference,
-      fingerprint,
-      name,
-      policy,
-    };
-  });
+      return { ...asset, quantity: difference.toString() };
+    },
+  );
 
   // Similar to externalOutputs, but with the value converted from Cardano.Value to Asset[]
   const externalValue: Record<Cardano.PaymentAddress, ExternalOutput> = {};
   for (const [address, valueAndDatumHash] of externalOutputs) {
     externalValue[address] = {
       ...valueAndDatumHash,
-      value: valueToAssetsSdk(valueAndDatumHash.value),
+      value: valueToAssetsSdk(valueAndDatumHash.value, assetInfos),
     };
   }
 
   const ownValue = ownOutputValueDifference.filter(
-    v => v.quantity != BigInt(0),
+    v => BigInt(v.quantity) != BigInt(0),
   );
   // Returns
   return { ownValue, externalValue };

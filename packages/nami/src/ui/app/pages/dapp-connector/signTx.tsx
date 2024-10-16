@@ -1,3 +1,4 @@
+/* eslint-disable functional/prefer-immutable-types */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
@@ -44,7 +45,7 @@ import type { UseAccount } from '../../../../adapters/account';
 import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
 import type { Asset as NamiAsset } from '../../../../types/assets';
 import type { AssetsModalRef } from '../../components/assetsModal';
-import type { Cardano } from '@cardano-sdk/core';
+import type { AssetInfoWithAmount, Cardano } from '@cardano-sdk/core';
 
 interface Props {
   dappConnector: DappConnector;
@@ -193,11 +194,16 @@ export const SignTx = ({
     const utxos = await firstValueFrom(inMemoryWallet.utxo.available$);
     const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
     getFee(tx);
+
+    const summaryInspector = await dappConnector.getTxSummaryInspector(tx);
+    const { summary } = await summaryInspector(tx);
+
     setValue(
       await getValue(
         tx,
         utxos,
         request.data.addresses.map(a => a.address),
+        summary.assets,
       ),
     );
 
@@ -217,6 +223,7 @@ export const SignTx = ({
       setKeyHashes(keyHashes);
     }
     getProperties(tx);
+
     setIsLoading(l => ({ ...l, loading: false }));
   };
   const background = useColorModeValue('gray.100', 'gray.700');
@@ -306,9 +313,11 @@ export const SignTx = ({
                       justifyContent="center"
                       fontSize={lovelace.toString().length < 14 ? '3xl' : '2xl'}
                       fontWeight="bold"
-                      color={lovelace <= 0 ? 'teal.400' : 'red.400'}
+                      color={
+                        BigInt(lovelace) <= BigInt(0) ? 'teal.400' : 'red.400'
+                      }
                     >
-                      <Text>{lovelace <= 0 ? '+' : '-'}</Text>
+                      <Text>{BigInt(lovelace) <= BigInt(0) ? '+' : '-'}</Text>
                       <UnitDisplay
                         hide
                         quantity={abs(lovelace)}
@@ -327,10 +336,10 @@ export const SignTx = ({
                         {' '}
                         {(() => {
                           const positiveAssets = assets.filter(
-                            v => v.quantity < 0,
+                            v => BigInt(v.quantity) < BigInt(0),
                           ) as unknown as NamiAsset[];
                           const negativeAssets = assets.filter(
-                            v => v.quantity > 0,
+                            v => BigInt(v.quantity) > BigInt(0),
                           ) as unknown as NamiAsset[];
                           return (
                             <Box

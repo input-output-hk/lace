@@ -2,8 +2,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { DappConnector, DApp, DappOutsideHandlesProvider, CommonOutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
-import { useBackgroundServiceAPIContext, useTheme } from '@providers';
-import { useHandleResolver, useWalletManager } from '@hooks';
+import { useAppSettingsContext, useBackgroundServiceAPIContext, useTheme } from '@providers';
+import { useChainHistoryProvider, useHandleResolver, useWalletManager } from '@hooks';
 import { signingCoordinator, walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { withDappContext } from '@src/features/dapp/context';
 import { CARDANO_COIN_SYMBOL } from './constants';
@@ -16,9 +16,14 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { finalize, firstValueFrom, map, of } from 'rxjs';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { useAnalytics } from './hooks';
+import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@cardano-sdk/core';
+import { Wallet } from '@lace/cardano';
+import { createWalletAssetProvider } from '@cardano-sdk/wallet';
+import { useObservable } from '@lace/common';
+import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
 
 const DAPP_TOAST_DURATION = 100;
-const dappConnector: DappConnector = {
+const dappConnector: Omit<DappConnector, 'getTxSummaryInspector'> = {
   getDappInfo: () => {
     const dappDataService = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
       {
@@ -133,7 +138,16 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
   const { sendEventToPostHog } = useAnalytics();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletRepository } = useWalletManager();
-  const { walletUI, inMemoryWallet, walletType, currentChain, environmentName } = useWalletStore();
+  const {
+    walletUI,
+    inMemoryWallet,
+    walletType,
+    currentChain,
+    environmentName,
+    walletInfo,
+    blockchainProvider: { assetProvider }
+  } = useWalletStore();
+
   const { theme } = useTheme();
   const cardanoCoin = useMemo(
     () => ({
@@ -142,6 +156,43 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     }),
     [currentChain.networkId, walletUI.cardanoCoin]
   );
+
+  const [{ chainName }] = useAppSettingsContext();
+  const chainHistoryProvider = useChainHistoryProvider({ chainName });
+
+  const txInputResolver = useMemo(
+    () =>
+      utxoAndBackendChainHistoryResolver({
+        utxo: inMemoryWallet.utxo,
+        transactions: inMemoryWallet.transactions,
+        chainHistoryProvider
+      }),
+    [inMemoryWallet, chainHistoryProvider]
+  );
+
+  const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
+  const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
+  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
+
+  const getTxSummaryInspector = async (tx: Wallet.Cardano.Tx) =>
+    createTxInspector({
+      summary: transactionSummaryInspector({
+        addresses: userAddresses,
+        rewardAccounts: rewardAccountsAddresses,
+        inputResolver: txInputResolver,
+        protocolParameters,
+        assetProvider: createWalletAssetProvider({
+          assetProvider,
+          assetInfo$: inMemoryWallet.assetInfo$,
+          tx,
+          logger: console
+        }),
+        // eslint-disable-next-line no-magic-numbers, new-cap
+        timeout: Milliseconds(6000),
+        logger: console
+      })
+    });
 
   const openHWFlow = useCallback(
     (path: string) => {
@@ -159,7 +210,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         walletManager,
         walletRepository,
         environmentName,
-        dappConnector
+        dappConnector: { ...dappConnector, getTxSummaryInspector }
       }}
     >
       <CommonOutsideHandlesProvider
