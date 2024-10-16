@@ -182,6 +182,7 @@ const App = () => {
             activeAddress={walletAddresses[0]}
             inMemoryWallet={inMemoryWallet}
             withSignTxConfirmation={withSignTxConfirmation}
+            environmentName={environmentName}
           />
         </Route>
         <Route exact path="/hwTab">

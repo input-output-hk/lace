@@ -46,7 +46,7 @@ export interface Account {
   name: string;
   avatar?: string;
   balance?: string;
-  recentSendToAddress?: string;
+  recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   type?: WalletType;
 }
 
@@ -276,7 +276,7 @@ export const useAccountUtil = ({
           wallets,
         });
         const updatedMetadata = merge({ ...metadata }, data);
-
+        console.log(updatedMetadata);
         return updateAccountMetadata({
           walletId,
           accountIndex,

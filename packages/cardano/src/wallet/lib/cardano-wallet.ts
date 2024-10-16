@@ -38,7 +38,7 @@ export interface AccountMetadata {
     avatar: string;
     balance?: string;
     address?: string;
-    recentSendToAddress?: string;
+    recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   };
 }
 

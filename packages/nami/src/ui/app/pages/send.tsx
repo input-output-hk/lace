@@ -78,6 +78,7 @@ import { Scrollbars } from '../components/scrollbar';
 import UnitDisplay from '../components/unitDisplay';
 
 import type { UseAccount } from '../../../adapters/account';
+import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
@@ -94,6 +95,7 @@ interface Props {
     action: () => Promise<T>,
     password?: string,
   ) => Promise<T>;
+  environmentName: OutsideHandlesContextValue['environmentName'];
 }
 
 const useIsMounted = () => {
@@ -115,6 +117,7 @@ const Send = ({
   currentChain,
   updateAccountMetadata,
   withSignTxConfirmation,
+  environmentName,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
@@ -473,7 +476,9 @@ const Send = ({
               width="80%"
             >
               <AddressPopup
-                recentSendToAddress={activeAccount.recentSendToAddress}
+                recentSendToAddress={
+                  activeAccount.recentSendToAddress?.[environmentName]
+                }
                 accounts={accounts}
                 currentChain={currentChain}
                 setAddress={setAddress}
@@ -772,7 +777,9 @@ const Send = ({
             });
             if (isValidAddress(address.result, currentChain)) {
               await updateAccountMetadata({
-                namiMode: { recentSendToAddress: address.result },
+                namiMode: {
+                  recentSendToAddress: { [environmentName]: address.result },
+                },
               });
             }
           } else if (error === ERROR.fullMempool) {
