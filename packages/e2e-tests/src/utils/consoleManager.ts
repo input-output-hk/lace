@@ -29,9 +29,7 @@ export class ConsoleManager {
         ConsoleManager.cdpSessions.push(client);
         await client.send(this.CONSOLE_ENABLE);
         client.on('Console.messageAdded', async (entry: any) => {
-          if (entry.message.level !== 'debug') {
-            ConsoleManager.capturedLogs.push(entry.message);
-          }
+          ConsoleManager.capturedLogs.push(entry.message);
         });
       });
     });
