@@ -9,7 +9,7 @@ Feature: Wallet accounts
     When I click the menu button
     And I click on chevron for wallet number 1
     Then "Accounts" menu is displayed
-    And I see 24 accounts on the list
+    And I see 50 accounts on the list
     And each account item contains icon, logo and path
 
   @LW-9319

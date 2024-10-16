@@ -42,6 +42,15 @@ export class ConsoleManager {
   };
 
   getLogs = async (): Promise<ConsoleLogEntry[]> => ConsoleManager.capturedLogs;
+
+  getLogsAsString = async (): Promise<string | undefined> => {
+    let logs;
+    for (const log of ConsoleManager.capturedLogs) {
+      logs = `${logs} ${JSON.stringify(log)}`;
+    }
+    return logs;
+  };
+
   closeOpenedCdpSessions = async (): Promise<void> => {
     await this.clearLogs();
     ConsoleManager.cdpSessions.map(async (session) => {
