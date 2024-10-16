@@ -2,6 +2,7 @@ import type { Events } from '../../features/analytics/events';
 import type { HandleProvider } from '@cardano-sdk/core';
 import type { WalletType } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
+import type { PostHogProperties } from '@lace/common';
 
 export interface CommonOutsideHandlesContextValue {
   cardanoCoin: Wallet.CoinId;
@@ -12,6 +13,9 @@ export interface CommonOutsideHandlesContextValue {
     action: () => Promise<T>,
     password?: string,
   ) => Promise<T>;
-  sendEventToPostHog: (action: Events) => Promise<void>;
+  sendEventToPostHog: (
+    action: Events,
+    properties?: PostHogProperties,
+  ) => Promise<void>;
   handleResolver: HandleProvider;
 }

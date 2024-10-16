@@ -1,16 +1,19 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from '@hooks';
 import { useAnalyticsContext } from '@providers';
-import { Action, EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { Action, EnhancedAnalyticsOptInStatus, PostHogProperties } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 
 export const useAnalytics = (): {
   isAnalyticsOptIn: boolean;
-  sendEventToPostHog: (action: Action) => Promise<void>;
+  sendEventToPostHog: (action: Action, properties?: PostHogProperties) => Promise<void>;
   handleAnalyticsChoice: (isOptedIn: boolean) => Promise<void>;
 } => {
   const analytics = useAnalyticsContext();
-  const sendEventToPostHog = useCallback((action: Action) => analytics.sendEventToPostHog(action), [analytics]);
+  const sendEventToPostHog = useCallback(
+    (action: Action, properties?: PostHogProperties) => analytics.sendEventToPostHog(action, properties),
+    [analytics]
+  );
   const [analyticsStatus, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.OptedOut

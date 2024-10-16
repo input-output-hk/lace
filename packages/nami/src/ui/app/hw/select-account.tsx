@@ -107,7 +107,7 @@ export const SelectAccounts = ({
     }
     onConfirm();
     void capture(Events.HWSelectAccountNextClick, {
-      numAccounts: accountIndexes.length,
+      numAccounts: accountIndexes.length.toString(),
     });
     setIsLoading(false);
   };
