@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { DappConnector, DApp, DappOutsideHandlesProvider, CommonOutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext, useTheme } from '@providers';
-import { useWalletManager } from '@hooks';
+import { useHandleResolver, useWalletManager } from '@hooks';
 import { signingCoordinator, walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { withDappContext } from '@src/features/dapp/context';
 import { CARDANO_COIN_SYMBOL } from './constants';
@@ -150,6 +150,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     [backgroundServices]
   );
 
+  const handleResolver = useHandleResolver();
+
   return (
     <DappOutsideHandlesProvider
       {...{
@@ -167,7 +169,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
           openHWFlow,
           inMemoryWallet,
           withSignTxConfirmation,
-          sendEventToPostHog
+          sendEventToPostHog,
+          handleResolver
         }}
       >
         <DApp />
