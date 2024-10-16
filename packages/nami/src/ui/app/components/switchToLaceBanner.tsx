@@ -201,7 +201,7 @@ export const SwitchToLaceBanner = ({ switchWalletMode }: Props) => {
                     bgGradient="linear(180deg, transparent, rgba(255, 255, 255, 0.9) 50%)"
                   />
                   <LaceButton onClick={handleSwitchWalletMode} block>
-                    Activate Lace Mode
+                    Activate Lace mode
                   </LaceButton>
                   <LaceSecondaryButton
                     onClick={() => {

@@ -237,7 +237,7 @@
   "browserView.settings.legacyMode.interface.description2": "Some Lace features will not be available.",
   "browserView.settings.legacyMode.confirmation.title": "You're about to activate Nami mode.",
   "browserView.settings.legacyMode.confirmation.description": "In legacy mode, some Lace features will not be available. You can revert back to Lace at any point.",
-  "browserView.settings.legacyMode.confirmation.cancel": "Cancel",
+  "browserView.settings.legacyMode.confirmation.cancel": "Back",
   "browserView.settings.legacyMode.confirmation.confirm": "Continue",
   "browserView.settings.legal.cookiePolicy.description": "Read our cookie policy",
   "browserView.settings.legal.cookiePolicy.title": "Cookie policy",
