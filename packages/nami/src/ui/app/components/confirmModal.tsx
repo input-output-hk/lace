@@ -284,9 +284,9 @@ const ConfirmModalHw = ({
       }
 
       if (props.setCollateral) {
-        openHWFlow(`hwTab/trezorTx/${cbor}/${props.setCollateral}`);
+        openHWFlow(`/hwTab/trezorTx/${cbor}/${props.setCollateral}`);
       } else {
-        openHWFlow(`hwTab/trezorTx/${cbor}`);
+        openHWFlow(`/hwTab/trezorTx/${cbor}`);
       }
     } else {
       if (props.ready === false || !waitReady) return;

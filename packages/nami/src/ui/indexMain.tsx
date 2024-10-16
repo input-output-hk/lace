@@ -20,6 +20,7 @@ import { useCommonOutsideHandles } from './../features/common-outside-handles-pr
 import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
+import { TrezorTx } from './app/hw/trezorTx';
 import Send from './app/pages/send';
 import Settings from './app/pages/settings';
 import Wallet from './app/pages/wallet';
@@ -109,6 +110,10 @@ const App = () => {
   );
 
   const init = () => {
+    if (location.pathname.startsWith('/hwTab')) {
+      setIsLoading(false);
+      return;
+    }
     if (route?.startsWith('/settings') || route?.startsWith('/send')) {
       route
         .slice(1)
@@ -128,7 +133,7 @@ const App = () => {
   }, []);
 
   React.useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && !location.pathname.startsWith('/hwTab')) {
       setRoute(location.pathname);
     }
   }, [location.pathname, isLoading, setRoute]);
@@ -190,6 +195,9 @@ const App = () => {
             accounts={allAccounts}
             activateAccount={activateAccount}
           />
+        </Route>
+        <Route exact path="/hwTab/trezorTx/:cbor/:setCollateral?">
+          <TrezorTx />
         </Route>
         <Route exact path="/hwTab/success">
           <SuccessAndClose />
