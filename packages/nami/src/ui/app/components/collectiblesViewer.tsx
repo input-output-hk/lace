@@ -250,7 +250,7 @@ export const CollectibleModalComponent = (
                 size="xs"
                 rightIcon={<BsArrowUpRight />}
                 onClick={e => {
-                  setValue({ ...value, assets: [asset as AssetInput] });
+                  setValue({ ...value, assets: [{...asset, input: ''}] });
                   navigate('/send');
                 }}
               >

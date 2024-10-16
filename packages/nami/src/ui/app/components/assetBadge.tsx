@@ -39,7 +39,7 @@ const AssetBadge = ({
 }: Readonly<{
   asset: AssetInput;
   onRemove: (asset: Readonly<AssetInput>) => void;
-  onInput: (asset: Readonly<AssetInput>, input: number | string) => void;
+  onInput: (asset: Readonly<AssetInput>, input: string) => void;
 }>) => {
   const [width, setWidth] = React.useState(
     BigInt(asset.quantity) <= 1 ? 60 : 200,
@@ -56,7 +56,7 @@ const AssetBadge = ({
     setWidth(initialWidth);
     if (BigInt(asset.quantity) == BigInt(1)) {
       setValue('1');
-      onInput(asset, 1);
+      onInput(asset, '1');
     } else {
       setValue(asset.input);
       onInput(asset, asset.input);

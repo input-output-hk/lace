@@ -63,7 +63,6 @@ import {
 import { buildTx, signAndSubmit } from '../../../api/extension/wallet';
 import { assetsToValue, minAdaRequired } from '../../../api/util';
 import { ERROR } from '../../../config/config';
-import { useHandleResolver } from '../../../features/ada-handle/useHandleResolver';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
@@ -108,6 +107,8 @@ const useIsMounted = () => {
 };
 
 const objectToArray = obj => Object.keys(obj).map(key => obj[key]);
+
+export const isAdaHandleEnabled = process.env.USE_ADA_HANDLE === 'true';
 
 const Send = ({
   accounts,
@@ -154,7 +155,7 @@ const Send = ({
     setTxUpdate(update => !update);
   };
 
-  const assets = React.useRef({});
+  const assets = React.useRef<Record<string, AssetInput>>({});
   const account = React.useRef<object | null>(null);
   const resetState = useStoreActions(
     actions => actions.globalModel.sendStore.reset,
@@ -417,7 +418,7 @@ const Send = ({
   }, []);
 
   const onAssetInput = useCallback(
-    async (asset: Readonly<AssetInput>, val: number | string) => {
+    async (asset: Readonly<AssetInput>, val: string) => {
       if (!assets.current[asset.unit]) return;
       assets.current[asset.unit].input = val;
       const v = value;
@@ -830,7 +831,7 @@ const AddressPopup = ({
   const checkColor = useColorModeValue('teal.500', 'teal.200');
   const ref = React.useRef(false);
   const latestHandleInputToken = React.useRef(0);
-  const handleResolver = useHandleResolver(currentChain.networkMagic);
+  const { handleResolver } = useCommonOutsideHandles();
 
   const handleInput = async e => {
     const value = e.target.value;
@@ -851,7 +852,7 @@ const AddressPopup = ({
       };
     }
 
-    if (isHandle) {
+    if (isHandle && isAdaHandleEnabled) {
       const handle = value;
 
       const resolvedAddress = await getAdaHandle(

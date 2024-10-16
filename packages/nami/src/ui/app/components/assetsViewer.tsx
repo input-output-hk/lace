@@ -137,7 +137,7 @@ const AssetsGrid = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
             >
               <Asset
                 cardanoCoin={cardanoCoin}
-                asset={asset as AssetInput}
+                asset={asset}
                 enableSend
               />
             </Box>

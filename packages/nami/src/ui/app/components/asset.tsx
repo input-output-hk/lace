@@ -188,7 +188,7 @@ const Asset = ({
               size="xs"
               rightIcon={<BsArrowUpRight />}
               onClick={e => {
-                setValue({ ...value, assets: [asset as AssetInput] });
+                setValue({ ...value, assets: [{...asset, input: ''}] });
                 capture(Events.SendClick);
                 navigate('/send');
               }}

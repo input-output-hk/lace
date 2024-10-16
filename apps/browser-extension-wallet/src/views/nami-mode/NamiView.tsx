@@ -17,7 +17,8 @@ import {
   useFetchCoinPrice,
   useWalletManager,
   useBuildDelegation,
-  useBalances
+  useBalances,
+  useHandleResolver
 } from '@hooks';
 import { walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
@@ -90,6 +91,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     submitCollateralTx,
     txBuilder: collateralTxBuilder
   } = useCollateral();
+
+  const handleResolver = useHandleResolver();
 
   const cardanoPrice = priceResult.cardano.price;
   const walletAddresses = walletInfo?.addresses
@@ -237,7 +240,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
           openHWFlow,
           inMemoryWallet,
           withSignTxConfirmation,
-          sendEventToPostHog
+          sendEventToPostHog,
+          handleResolver
         }}
       >
         <Nami />

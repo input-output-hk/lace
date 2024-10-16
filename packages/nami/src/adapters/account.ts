@@ -276,7 +276,7 @@ export const useAccountUtil = ({
           wallets,
         });
         const updatedMetadata = merge({ ...metadata }, data);
-        console.log(updatedMetadata);
+
         return updateAccountMetadata({
           walletId,
           accountIndex,
