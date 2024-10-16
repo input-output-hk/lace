@@ -111,4 +111,5 @@ export interface OutsideHandlesContextValue {
     chainName?: Wallet.ChainName,
   ) => Promise<void>;
   removeWallet: () => Promise<void>;
+  setDeletingWallet: (isDeleting: boolean) => void;
 }

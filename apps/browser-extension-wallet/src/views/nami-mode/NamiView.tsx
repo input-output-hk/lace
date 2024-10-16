@@ -230,7 +230,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         certificateInspectorFactory,
         connectHW,
         createHardwareWalletRevamped,
-        saveHardwareWallet
+        saveHardwareWallet,
+        setDeletingWallet
       }}
     >
       <CommonOutsideHandlesProvider

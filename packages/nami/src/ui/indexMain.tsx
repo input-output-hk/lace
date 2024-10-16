@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { Box, Spinner } from '@chakra-ui/react';
 import {
@@ -59,6 +59,7 @@ const App = () => {
     isValidURL,
     setAvatar,
     removeWallet,
+    setDeletingWallet,
   } = useOutsideHandles();
 
   const { inMemoryWallet, withSignTxConfirmation, cardanoCoin, openHWFlow } =
@@ -69,7 +70,7 @@ const App = () => {
     setFiatCurrency,
   );
 
-  const changePassword = useChangePassword({
+  const changePasswordUtil = useChangePassword({
     chainId: currentChain,
     wallets$: walletRepository.wallets$,
     activeWalletId$: walletManager.activeWalletId$,
@@ -80,6 +81,17 @@ const App = () => {
     deleteWallet,
     createWallet,
   });
+
+  // reusing setDeletingWallet to make sure wallet is "recreated" with the new password
+  // before app sets deletion state back to false
+  const changePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      setDeletingWallet(true);
+      await changePasswordUtil(currentPassword, newPassword);
+      setDeletingWallet(false);
+    },
+    [setDeletingWallet, changePasswordUtil],
+  );
 
   const {
     allAccounts,
