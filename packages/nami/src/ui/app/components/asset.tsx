@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   Box,
@@ -66,6 +66,36 @@ const Asset = ({
     setShow(!show);
   };
 
+  const fallback = useMemo(() => {
+    if (asset.image) {
+      return <Fallback name={asset.name} />;
+    } else if (asset.unit === 'lovelace') {
+      return (
+        <Box
+          width={'full'}
+          height={'full'}
+          background={'blue.500'}
+          color={'white'}
+          display={'flex'}
+          alignItems={'center'}
+          justifyContent={'center'}
+          fontSize={'xl'}
+          fontWeight={'normal'}
+        >
+          {cardanoCoin.symbol}
+        </Box>
+      );
+    }
+    return (
+      <Avatar
+        fontWeight={'normal'}
+        width="full"
+        height="full"
+        name={asset.name}
+      />
+    );
+  }, [asset, cardanoCoin]);
+
   return (
     <Box
       data-testid="asset"
@@ -92,32 +122,7 @@ const Asset = ({
               draggable={false}
               width="full"
               src={asset.image}
-              fallback={
-                asset.image ? (
-                  <Fallback name={asset.name} />
-                ) : asset.unit === 'lovelace' ? (
-                  <Box
-                    width={'full'}
-                    height={'full'}
-                    background={'blue.500'}
-                    color={'white'}
-                    display={'flex'}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                    fontSize={'xl'}
-                    fontWeight={'normal'}
-                  >
-                    {cardanoCoin.symbol}
-                  </Box>
-                ) : (
-                  <Avatar
-                    fontWeight={'normal'}
-                    width="full"
-                    height="full"
-                    name={asset.name}
-                  />
-                )
-              }
+              fallback={fallback}
             />
           </Box>
 

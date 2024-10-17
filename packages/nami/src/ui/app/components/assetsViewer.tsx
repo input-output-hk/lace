@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null */
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import {
@@ -64,50 +64,55 @@ const AssetsViewer = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
     };
   }, []);
 
-  return (
-    <>
-      <Box position="relative" zIndex="0">
-        {assets && assetsArray ? (
-          assetsArray.length <= 0 ? (
-            <Box
-              mt="16"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              flexDirection="column"
-              opacity="0.5"
-            >
-              <Planet size={80} mood="ko" color="#61DDBC" />
-              <Box height="2" />
-              <Text fontWeight="bold" color="GrayText">
-                No Assets
-              </Text>
-            </Box>
-          ) : (
-            <>
-              <Box
-                color={totalColor}
-                textAlign="center"
-                fontSize="sm"
-                opacity={0.4}
-              >
-                {total} {total == 1 ? 'Asset' : 'Assets'}
-              </Box>
-              <Box h="5" />
-
-              <AssetsGrid assets={assetsArray} />
-            </>
-          )
-        ) : (
+  const AssetComponent = useMemo(() => {
+    if (assets && assetsArray) {
+      if (assetsArray.length <= 0) {
+        return (
           <Box
-            mt="28"
+            mt="16"
             display="flex"
             alignItems="center"
             justifyContent="center"
+            flexDirection="column"
+            opacity="0.5"
           >
-            <Spinner color="teal" speed="0.5s" />
+            <Planet size={80} mood="ko" color="#61DDBC" />
+            <Box height="2" />
+            <Text fontWeight="bold" color="GrayText">
+              No Assets
+            </Text>
           </Box>
-        )}
+        );
+      } else {
+        return (
+          <>
+            <Box
+              color={totalColor}
+              textAlign="center"
+              fontSize="sm"
+              opacity={0.4}
+            >
+              {total} {total == 1 ? 'Asset' : 'Assets'}
+            </Box>
+            <Box h="5" />
+
+            <AssetsGrid assets={assetsArray} />
+          </>
+        );
+      }
+    }
+
+    return (
+      <Box mt="28" display="flex" alignItems="center" justifyContent="center">
+        <Spinner color="teal" speed="0.5s" />
+      </Box>
+    );
+  }, [assets, assetsArray, totalColor, total]);
+
+  return (
+    <>
+      <Box position="relative" zIndex="0">
+        {AssetComponent}
       </Box>
       <Box position="absolute" left="6" top="0">
         <Search setSearch={setSearch} assets={assets} />

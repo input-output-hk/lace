@@ -150,6 +150,8 @@ export const useAccount = ({
       (w): w is NonScriptWallet => w.type !== WalletType.Script,
     );
     const groupedWallets = groupBy(allWallets, ({ type }) => type);
+
+    // TODO: refactor and reduce complexity + nesting
     return flatten(
       Object.entries(groupedWallets)
         .sort(([type1], [type2]) => {
