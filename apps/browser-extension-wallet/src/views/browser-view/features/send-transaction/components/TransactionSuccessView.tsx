@@ -65,7 +65,7 @@ export const TransactionSuccessView = ({ footerSlot }: { footerSlot?: React.Reac
       );
       const recipientTypesUnique = uniq(recipientTypes);
       const recipientSourceUnique = uniq(recipientSources);
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneView, {
+      analytics.sendEventToPostHog(PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneView' : 'SendAllDoneView'], {
         // eslint-disable-next-line camelcase
         trigger_point: triggerPoint,
         tokens: customAnalyticsProperties,

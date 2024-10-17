@@ -6,6 +6,7 @@ import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/
 import styles from './TransactionSuccessView.module.scss';
 import { useAnalyticsSendFlowTriggerPoint } from '../store';
 import { WarningBanner } from '@lace/common';
+import { useWalletStore } from '@src/stores';
 
 interface TransactionFailProps {
   showCustomApiBanner?: boolean;
@@ -15,13 +16,17 @@ export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFail
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
+  const { isSharedWallet } = useWalletStore();
 
   useEffect(() => {
-    analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongView, {
-      // eslint-disable-next-line camelcase
-      trigger_point: triggerPoint,
-      [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
-    });
+    analytics.sendEventToPostHog(
+      PostHogAction[isSharedWallet ? 'SharedWalletsSendSomethingWentWrongView' : 'SendSomethingWentWrongView'],
+      {
+        // eslint-disable-next-line camelcase
+        trigger_point: triggerPoint,
+        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+      }
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
