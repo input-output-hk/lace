@@ -122,20 +122,53 @@ interface CalculateAmountProps {
   validContract: boolean;
 }
 
+const getAddressCredentials = (
+  address: string,
+): [
+  Wallet.Crypto.Hash28ByteBase16 | undefined,
+  Wallet.Crypto.Hash28ByteBase16 | undefined,
+] => {
+  const addr = Wallet.Cardano.Address.fromBech32(address);
+  return [
+    addr.getProps().paymentPart?.hash,
+    addr.getProps().delegationPart?.hash,
+  ];
+};
+
+const matchesAnyCredential = (
+  address: Wallet.Cardano.PaymentAddress | undefined,
+  [ownPaymentCred, ownStakingCred]: [
+    Wallet.Crypto.Hash28ByteBase16 | undefined,
+    Wallet.Crypto.Hash28ByteBase16 | undefined,
+  ],
+) => {
+  if (!address) return false;
+  const [otherPaymentCred, otherStakingCred] = getAddressCredentials(
+    address.toString(),
+  );
+  return (
+    otherPaymentCred === ownPaymentCred || otherStakingCred === ownStakingCred
+  );
+};
+
 const calculateAmount = ({
   currentAddress,
   uTxOList,
   validContract = false,
 }: CalculateAmountProps): CalculatedAmount[] => {
+  const ownCredentials = getAddressCredentials(currentAddress);
+
   const inputs = compileOutputs(
     uTxOList.inputs.filter(
       ({ address, txId }) =>
-        address === currentAddress &&
+        matchesAnyCredential(address, ownCredentials) &&
         !(uTxOList.collaterals?.find(c => c.txId === txId) && validContract),
     ),
   );
   const outputs = compileOutputs(
-    uTxOList.outputs.filter(({ address }) => address === currentAddress),
+    uTxOList.outputs.filter(({ address }) =>
+      matchesAnyCredential(address, ownCredentials),
+    ),
   );
   const amounts: Amount[] = [];
 
