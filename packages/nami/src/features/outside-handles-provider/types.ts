@@ -91,7 +91,7 @@ export interface OutsideHandlesContextValue {
   openExternalLink: (url: string) => void;
   walletAddresses: string[];
   eraSummaries: EraSummary[];
-  transactions: Wallet.Cardano.HydratedTx[];
+  transactions: (Wallet.Cardano.HydratedTx | Wallet.TxInFlight)[];
   getTxInputsValueAndAddress: (
     inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
   ) => Promise<Wallet.TxInput[]>;

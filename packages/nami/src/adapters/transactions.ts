@@ -277,7 +277,7 @@ export const encodeToCbor = (args: EncodeToCborArgs): Serialization.TxCBOR => {
 };
 
 export const useTxInfo = (
-  tx: Wallet.Cardano.HydratedTx,
+  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight,
 ): TxInfo | undefined => {
   const [txInfo, setTxInfo] = useState<TxInfo | undefined>();
   const {
@@ -299,7 +299,7 @@ export const useTxInfo = (
   const currentAddress = walletAddresses[0];
 
   useEffect(() => {
-    if (!protocolParameters) return;
+    if (!protocolParameters || 'cbor' in tx) return;
     void (async () => {
       const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
         protocolParameters,

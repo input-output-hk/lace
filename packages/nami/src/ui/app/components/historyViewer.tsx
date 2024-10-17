@@ -23,23 +23,21 @@ const HistoryViewer = () => {
 
   const { cardanoCoin } = useCommonOutsideHandles();
   const [historySlice, setHistorySlice] = React.useState<
-    Wallet.Cardano.HydratedTx[] | undefined
+    (Wallet.Cardano.HydratedTx | Wallet.TxInFlight)[] | undefined
   >();
   const [page, setPage] = React.useState(1);
   const [isFinal, setIsFinal] = React.useState(false);
 
   const getTxs = () => {
     if (!transactions) return;
-    const slice = (historySlice ?? []).concat(
-      transactions.slice((page - 1) * BATCH, page * BATCH),
-    );
+    const slice = transactions.slice(0, page * BATCH);
     if (slice.length < page * BATCH) setIsFinal(true);
     setHistorySlice(slice);
   };
 
   React.useEffect(() => {
     getTxs();
-  }, [page]);
+  }, [page, transactions]);
 
   const history = useMemo(
     () =>

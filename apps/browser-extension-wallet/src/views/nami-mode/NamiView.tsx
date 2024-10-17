@@ -154,8 +154,14 @@ export const NamiView = withDappContext((): React.ReactElement => {
     [chainHistoryProvider, inMemoryWallet]
   );
 
-  const sortedHistoryTx = useMemo(
-    () => walletState?.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot),
+  const sortedTx = useMemo(
+    () =>
+      walletState
+        ? [
+            ...walletState.transactions.outgoing.inFlight,
+            ...walletState.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot)
+          ]
+        : undefined,
     [walletState]
   );
 
@@ -224,7 +230,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         switchWalletMode,
         openExternalLink,
         walletAddresses,
-        transactions: sortedHistoryTx,
+        transactions: sortedTx,
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
         certificateInspectorFactory,

@@ -84,7 +84,7 @@ const txTypeLabel = {
 };
 
 interface TransactionProps {
-  tx: Wallet.Cardano.HydratedTx;
+  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight;
   network: OutsideHandlesContextValue['environmentName'];
   cardanoCoin: CommonOutsideHandlesContextValue['cardanoCoin'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
