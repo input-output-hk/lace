@@ -484,6 +484,7 @@ const Send = ({
                 address={address}
                 triggerTxUpdate={triggerTxUpdate}
                 isLoading={isLoading}
+                environmentName={environmentName}
               />
               {address.error && (
                 <Text
@@ -816,14 +817,16 @@ const AddressPopup = ({
   triggerTxUpdate,
   isLoading,
   recentSendToAddress,
+  environmentName,
 }: Readonly<{
-  accounts: { name: string; avatar?: string; address?: string }[];
+  accounts: UseAccount['nonActiveAccounts'];
   recentSendToAddress?: string;
   currentChain: Wallet.Cardano.ChainId;
   setAddress: any;
   address: { result: string; display: string; error?: string };
   triggerTxUpdate: any;
   isLoading: boolean;
+  environmentName: OutsideHandlesContextValue['environmentName'];
 }>) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const checkColor = useColorModeValue('teal.500', 'teal.200');
@@ -877,6 +880,11 @@ const AddressPopup = ({
 
   const handleInputDebounced = useConstant(() =>
     debouncePromise(latest(handleInput), 700),
+  );
+
+  const filteredAccounts = useMemo(
+    () => accounts.filter(a => a.address?.[environmentName]),
+    [accounts],
   );
 
   return (
@@ -1005,7 +1013,7 @@ const AddressPopup = ({
                   </Box>
                 </Button>
               )}
-              {accounts.length > 0 && (
+              {filteredAccounts.length > 0 && (
                 <>
                   {' '}
                   <Text
@@ -1018,10 +1026,10 @@ const AddressPopup = ({
                   >
                     Accounts
                   </Text>
-                  {accounts.map(({ name, address, avatar }) => {
+                  {filteredAccounts.map(({ name, address, avatar }) => {
                     return (
                       <Button
-                        key={address}
+                        key={address?.[environmentName]}
                         ml="2"
                         my="1"
                         width="full"
@@ -1029,8 +1037,8 @@ const AddressPopup = ({
                         onClick={() => {
                           triggerTxUpdate(() =>
                             setAddress({
-                              result: address,
-                              display: address,
+                              result: address?.[environmentName],
+                              display: address?.[environmentName],
                             }),
                           );
                           onClose();
@@ -1056,7 +1064,7 @@ const AddressPopup = ({
                               fontWeight="normal"
                             >
                               <MiddleEllipsis>
-                                <span>{address}</span>
+                                <span>{address?.[environmentName]}</span>
                               </MiddleEllipsis>
                             </Box>
                           </Box>

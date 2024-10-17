@@ -232,6 +232,7 @@ const App = () => {
             nfts={nfts}
             setAvatar={setAvatar}
             openHWFlow={openHWFlow}
+            environmentName={environmentName}
           />
         </Route>
       </Switch>

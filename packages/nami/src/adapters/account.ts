@@ -46,7 +46,8 @@ export interface Account {
   walletId: string;
   name: string;
   avatar?: string;
-  balance?: string;
+  balance?: Partial<Record<Wallet.ChainName, string>>;
+  address?: Partial<Record<Wallet.ChainName, string>>;
   recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   type?: WalletType;
 }

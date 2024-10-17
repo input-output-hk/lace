@@ -34,5 +34,5 @@
     "**/*.stories.tsx",
     "**/*.mock.ts"
   ],
-  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json"]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.jsx", "**/*.json", "./src/typings"]
 }

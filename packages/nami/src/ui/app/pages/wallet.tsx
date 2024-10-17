@@ -93,6 +93,7 @@ import UserInfo from '../components/userInfo';
 import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
 import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
+import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 import type { AboutRef } from '../components/about';
 import type { TransactionBuilderRef } from '../components/transactionBuilder';
@@ -115,6 +116,7 @@ export type Props = Pick<
   assets: (CardanoAsset | NamiAsset)[];
   nfts: NamiAsset[];
   setAvatar: (image: string) => void;
+  environmentName: OutsideHandlesContextValue['environmentName'];
 };
 
 const Wallet = ({
@@ -134,6 +136,7 @@ const Wallet = ({
   nfts,
   setAvatar,
   openHWFlow,
+  environmentName,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const history = useHistory();
@@ -266,7 +269,7 @@ const Wallet = ({
                         }}
                         avatar={account.avatar}
                         name={account.name}
-                        balance={account.balance}
+                        balance={account.balance?.[environmentName]}
                         isActive={
                           account.index === activeAccount.index &&
                           account.walletId === activeAccount.walletId
