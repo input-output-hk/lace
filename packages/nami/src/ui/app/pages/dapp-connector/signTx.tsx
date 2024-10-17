@@ -54,7 +54,7 @@ interface Props {
 }
 
 const abs = big => {
-  return big < 0 ? big * BigInt(-1) : big;
+  return big < 0 ? BigInt(big) * BigInt(-1) : big;
 };
 
 interface Property {
