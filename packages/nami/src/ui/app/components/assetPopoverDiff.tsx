@@ -25,7 +25,7 @@ import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 
 const abs = big => {
-  return big < 0 ? big * -1 : big;
+  return big < 0 ? BigInt(big) * BigInt(-1) : big;
 };
 
 interface CustomScrollbarsProps {
