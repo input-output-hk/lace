@@ -10,6 +10,7 @@ import { submitTx } from '../../../api/extension';
 import LogoOriginal from '../../../assets/img/logo.svg';
 import LogoWhite from '../../../assets/img/logoWhite.svg';
 import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import { useStoreActions } from '../../../ui/store';
 
 export const TrezorTx = (): ReactElement => {
   const backgroundColor = useColorModeValue('gray.200', 'gray.800');
@@ -18,6 +19,13 @@ export const TrezorTx = (): ReactElement => {
     cbor: string;
     setCollateral?: string;
   }>();
+
+  const setRoute = useStoreActions(
+    actions => actions.globalModel.routeStore.setRoute,
+  );
+  const resetSend = useStoreActions(
+    actions => actions.globalModel.sendStore.reset,
+  );
 
   const toast = useToast();
   const { inMemoryWallet, withSignTxConfirmation } = useCommonOutsideHandles();
@@ -69,6 +77,8 @@ export const TrezorTx = (): ReactElement => {
         });
       }
 
+      setRoute('/');
+      resetSend();
       setTimeout(() => {
         window.close();
       }, 3000);
