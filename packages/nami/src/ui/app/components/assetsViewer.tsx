@@ -1,3 +1,7 @@
+/* eslint-disable unicorn/no-null */
+import React, { useMemo } from 'react';
+
+import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
 import {
   Box,
   IconButton,
@@ -13,21 +17,24 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { SearchIcon, SmallCloseIcon } from '@chakra-ui/icons';
-import React from 'react';
-import Asset from './asset';
 import { Planet } from 'react-kawaii';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
-import { searchTokens } from '../../../adapters/assets';
-import { Asset as NamiAsset } from '../../../types/assets';
 
-const AssetsViewer = ({ assets }) => {
+import { searchTokens } from '../../../adapters/assets';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+
+import Asset from './asset';
+
+import type { Asset as NamiAsset } from '../../../types/assets';
+
+const AssetsViewer = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
   const totalColor = useColorModeValue(
     'rgb(26, 32, 44)',
     'rgba(255, 255, 255, 0.92)',
   );
-  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(null);
+  const [assetsArray, setAssetsArray] = React.useState<NamiAsset[] | null>(
+    null,
+  );
   const [search, setSearch] = React.useState('');
   const [total, setTotal] = React.useState(0);
   const createArray = async () => {
@@ -37,7 +44,11 @@ const AssetsViewer = ({ assets }) => {
       return;
     }
     setAssetsArray(null);
-    await new Promise((res, rej) => setTimeout(() => res(), 10));
+    await new Promise((res, rej) =>
+      setTimeout(() => {
+        res(void 0);
+      }, 10),
+    );
     const filteredAssets = search ? searchTokens(assets, search) : assets;
     setTotal(filteredAssets.length);
     setAssetsArray(filteredAssets);
@@ -53,19 +64,10 @@ const AssetsViewer = ({ assets }) => {
     };
   }, []);
 
-  return (
-    <>
-      <Box position="relative" zIndex="0">
-        {!(assets && assetsArray) ? (
-          <Box
-            mt="28"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Spinner color="teal" speed="0.5s" />
-          </Box>
-        ) : assetsArray.length <= 0 ? (
+  const AssetComponent = useMemo(() => {
+    if (assets && assetsArray) {
+      if (assetsArray.length <= 0) {
+        return (
           <Box
             mt="16"
             display="flex"
@@ -80,7 +82,9 @@ const AssetsViewer = ({ assets }) => {
               No Assets
             </Text>
           </Box>
-        ) : (
+        );
+      } else {
+        return (
           <>
             <Box
               color={totalColor}
@@ -94,7 +98,21 @@ const AssetsViewer = ({ assets }) => {
 
             <AssetsGrid assets={assetsArray} />
           </>
-        )}
+        );
+      }
+    }
+
+    return (
+      <Box mt="28" display="flex" alignItems="center" justifyContent="center">
+        <Spinner color="teal" speed="0.5s" />
+      </Box>
+    );
+  }, [assets, assetsArray, totalColor, total]);
+
+  return (
+    <>
+      <Box position="relative" zIndex="0">
+        {AssetComponent}
       </Box>
       <Box position="absolute" left="6" top="0">
         <Search setSearch={setSearch} assets={assets} />
@@ -103,8 +121,8 @@ const AssetsViewer = ({ assets }) => {
   );
 };
 
-const AssetsGrid = ({ assets }) => {
-  const { cardanoCoin } = useOutsideHandles();
+const AssetsGrid = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
+  const { cardanoCoin } = useCommonOutsideHandles();
   return (
     <Box
       display="flex"
@@ -117,7 +135,7 @@ const AssetsGrid = ({ assets }) => {
           <LazyLoadComponent>
             <Box
               width="full"
-              mt={index > 0 && 4}
+              mt={(index > 0 && 4) || undefined}
               display="flex"
               alignItems="center"
               justifyContent="center"
@@ -131,10 +149,13 @@ const AssetsGrid = ({ assets }) => {
   );
 };
 
-const Search = ({ setSearch, assets }) => {
+const Search = ({
+  setSearch,
+  assets,
+}: Readonly<{ setSearch: (s: string) => void; assets: NamiAsset[] }>) => {
   const [input, setInput] = React.useState('');
   const iconColor = useColorModeValue('gray.800', 'rgba(255, 255, 255, 0.92)');
-  const ref = React.useRef();
+  const ref = React.useRef<HTMLInputElement>(null);
   React.useEffect(() => {
     if (!assets) {
       setInput('');
@@ -145,7 +166,7 @@ const Search = ({ setSearch, assets }) => {
     <Popover
       returnFocusOnClose={false}
       placement="bottom-start"
-      onOpen={() => setTimeout(() => ref.current.focus())}
+      onOpen={() => setTimeout(() => ref.current?.focus())}
     >
       <PopoverTrigger>
         <IconButton
@@ -178,18 +199,21 @@ const Search = ({ setSearch, assets }) => {
               rounded="md"
               placeholder="Search policy, asset, name"
               fontSize="xs"
-              onInput={(e) => {
-                setInput(e.target.value);
+              onInput={e => {
+                setInput((e.target as HTMLInputElement).value);
               }}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key === 'Enter' && input) setSearch(input);
               }}
             />
-            <InputRightElement
-              children={
-                <SmallCloseIcon cursor="pointer" onClick={() => setInput('')} />
-              }
-            />
+            <InputRightElement>
+              <SmallCloseIcon
+                cursor="pointer"
+                onClick={() => {
+                  setInput('');
+                }}
+              />
+            </InputRightElement>
           </InputGroup>
           <Box w="2" />
           <IconButton
@@ -197,7 +221,9 @@ const Search = ({ setSearch, assets }) => {
             size="sm"
             rounded="md"
             color="teal.400"
-            onClick={() => input && setSearch(input)}
+            onClick={() => {
+              input && setSearch(input);
+            }}
             icon={<SearchIcon />}
           />
         </PopoverBody>

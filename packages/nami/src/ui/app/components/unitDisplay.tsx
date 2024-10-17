@@ -1,16 +1,35 @@
 import React from 'react';
+
 import { Box } from '@chakra-ui/react';
+
 import { displayUnit } from '../../../api/extension';
 
-const hideZero = (str) =>
-  str[str.length - 1] == 0 ? hideZero(str.slice(0, -1)) : str;
+const hideZero = (str: string) =>
+  str.endsWith('0') ? hideZero(str.slice(0, -1)) : str;
 
-const UnitDisplay = ({ quantity, decimals, symbol, hide = false, ...props }) => {
+interface Props {
+  quantity?: bigint | number | string;
+  decimals?: number | string;
+  symbol?: React.ReactNode;
+  hide?: boolean;
+  fontSize?: number | string;
+  fontWeight?: number | string;
+  color?: string;
+  display?: string;
+}
+
+const UnitDisplay = ({
+  quantity,
+  decimals,
+  symbol,
+  hide = false,
+  ...props
+}: Readonly<Props>) => {
   const num = displayUnit(quantity, decimals)
-    .toLocaleString('en-EN', { minimumFractionDigits: decimals })
+    .toLocaleString('en-EN', { minimumFractionDigits: Number(decimals) })
     .split('.')[0];
   const subNum = displayUnit(quantity, decimals)
-    .toLocaleString('en-EN', { minimumFractionDigits: decimals })
+    .toLocaleString('en-EN', { minimumFractionDigits: Number(decimals) })
     .split('.')[1];
   return (
     <Box {...props}>

@@ -26,7 +26,10 @@ export const Container = ({
   environmentName: Wallet.ChainName;
   theme: 'dark' | 'light';
 }>) => {
-  const [scroll, setScroll] = React.useState({ el: null, y: 0 });
+  const [scroll, setScroll] = React.useState<{
+    el: HTMLElement | null;
+    y: number;
+  }>({ el: null, y: 0 });
 
   useEffect(() => {
     window.document.body.addEventListener('keydown', e => {
@@ -53,15 +56,21 @@ export const Container = ({
             id="scroll"
             style={{ width: '100vw', height: '100vh' }}
             autoHide
-            onScroll={e => {
-              setScroll({ el: e.target, y: e.target.scrollTop });
+            onScroll={({ target }) => {
+              setScroll({
+                el: target as HTMLElement,
+                y: (target as HTMLElement).scrollTop,
+              });
             }}
           >
             {children}
             {scroll.y > 1200 && (
               <IconButton
                 onClick={() => {
-                  scroll.el.scrollTo({ behavior: 'smooth', top: 0 });
+                  (scroll?.el as unknown as HTMLElement).scrollTo({
+                    behavior: 'smooth',
+                    top: 0,
+                  });
                 }}
                 position="fixed"
                 bottom="15px"
@@ -71,6 +80,7 @@ export const Container = ({
                 colorScheme="teal"
                 opacity={0.85}
                 icon={<ChevronUpIcon />}
+                aria-label={''}
               />
             )}
           </Scrollbars>

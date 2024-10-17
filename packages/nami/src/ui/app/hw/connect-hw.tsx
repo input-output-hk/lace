@@ -57,7 +57,7 @@ export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
         return;
       }
 
-      if (!!connectionResult) {
+      if (connectionResult) {
         void capture(Events.HWConnectNextClick);
         onConfirm(connectionResult);
         return;

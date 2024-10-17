@@ -1,3 +1,7 @@
+/* eslint-disable unicorn/no-null */
+/* eslint-disable react/no-unescaped-entities */
+import React from 'react';
+
 import {
   Button,
   Box,
@@ -14,22 +18,25 @@ import {
   useToast,
   useDisclosure,
 } from '@chakra-ui/react';
-import React from 'react';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
 
-export const ChangePasswordModal = React.forwardRef<
-  {},
-  {
-    changePassword: (
-      currentPassword: string,
-      newPassword: string,
-    ) => Promise<void>;
-  }
->(({ changePassword }, ref) => {
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+
+interface Props {
+  changePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<void>;
+}
+
+export interface ChangePasswordModalComponentRef {
+  openModal: () => void;
+}
+
+const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   const capture = useCaptureEvent();
-  const cancelRef = React.useRef();
-  const inputRef = React.useRef();
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -39,7 +46,7 @@ export const ChangePasswordModal = React.forwardRef<
     newPassword: '',
     repeatPassword: '',
     matchingPassword: false,
-    passwordLen: null,
+    passwordLen: false,
     show: false,
   });
 
@@ -49,13 +56,13 @@ export const ChangePasswordModal = React.forwardRef<
       newPassword: '',
       repeatPassword: '',
       matchingPassword: false,
-      passwordLen: null,
+      passwordLen: false,
       show: false,
     });
   }, [isOpen]);
 
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
   }));
@@ -82,9 +89,10 @@ export const ChangePasswordModal = React.forwardRef<
       capture(Events.SettingsChangePasswordConfirm);
 
       onClose();
-    } catch (e) {
+    } catch (error) {
       toast({
-        title: e instanceof Error ? e.message : 'Password update failed!',
+        title:
+          error instanceof Error ? error.message : 'Password update failed!',
         status: 'error',
         duration: 5000,
       });
@@ -118,16 +126,18 @@ export const ChangePasswordModal = React.forwardRef<
                 variant="filled"
                 pr="4.5rem"
                 type={state.show ? 'text' : 'password'}
-                onChange={e =>
-                  setState(s => ({ ...s, currentPassword: e.target.value }))
-                }
+                onChange={e => {
+                  setState(s => ({ ...s, currentPassword: e.target.value }));
+                }}
                 placeholder="Enter current password"
               />
               <InputRightElement width="4.5rem">
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
+                  onClick={() => {
+                    setState(s => ({ ...s, show: !s.show }));
+                  }}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>
@@ -145,24 +155,26 @@ export const ChangePasswordModal = React.forwardRef<
                 pr="4.5rem"
                 isInvalid={state.passwordLen === false}
                 type={state.show ? 'text' : 'password'}
-                onChange={e =>
-                  setState(s => ({ ...s, newPassword: e.target.value }))
-                }
-                onBlur={e =>
+                onChange={e => {
+                  setState(s => ({ ...s, newPassword: e.target.value }));
+                }}
+                onBlur={e => {
                   setState(s => ({
                     ...s,
                     passwordLen: e.target.value
                       ? e.target.value.length >= 8
-                      : null,
-                  }))
-                }
+                      : false,
+                  }));
+                }}
                 placeholder="Enter new password"
               />
               <InputRightElement width="4.5rem">
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
+                  onClick={() => {
+                    setState(s => ({ ...s, show: !s.show }));
+                  }}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>
@@ -184,21 +196,23 @@ export const ChangePasswordModal = React.forwardRef<
                 focusBorderColor="teal.400"
                 variant="filled"
                 isInvalid={
-                  state.repeatPassword &&
+                  !!state.repeatPassword &&
                   state.newPassword !== state.repeatPassword
                 }
                 pr="4.5rem"
                 type={state.show ? 'text' : 'password'}
-                onChange={e =>
-                  setState(s => ({ ...s, repeatPassword: e.target.value }))
-                }
+                onChange={e => {
+                  setState(s => ({ ...s, repeatPassword: e.target.value }));
+                }}
                 placeholder="Repeat new password"
               />
               <InputRightElement width="4.5rem">
                 <Button
                   h="1.75rem"
                   size="sm"
-                  onClick={() => setState(s => ({ ...s, show: !s.show }))}
+                  onClick={() => {
+                    setState(s => ({ ...s, show: !s.show }));
+                  }}
                 >
                   {state.show ? 'Hide' : 'Show'}
                 </Button>
@@ -235,4 +249,8 @@ export const ChangePasswordModal = React.forwardRef<
       </ModalContent>
     </Modal>
   );
-});
+};
+
+export const ChangePasswordModal = React.forwardRef(
+  ChangePasswordModalComponent,
+);

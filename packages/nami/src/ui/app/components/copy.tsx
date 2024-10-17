@@ -1,7 +1,16 @@
-import { Box, Tooltip } from '@chakra-ui/react';
+/* eslint-disable @typescript-eslint/naming-convention */
 import React from 'react';
 
-const Copy = ({ label, copy, onClick, ...props }) => {
+import { Box, Tooltip } from '@chakra-ui/react';
+
+interface Props {
+  label?: React.ReactNode;
+  copy: string;
+  onClick?: () => void;
+  children?: React.ReactNode;
+}
+
+const Copy = ({ label, copy, onClick, ...props }: Readonly<Props>) => {
   const [copied, setCopied] = React.useState(false);
   return (
     <Tooltip isOpen={copied} label={label}>
@@ -11,7 +20,9 @@ const Copy = ({ label, copy, onClick, ...props }) => {
           if (onClick) onClick();
           navigator.clipboard.writeText(copy);
           setCopied(true);
-          setTimeout(() => setCopied(false), 800);
+          setTimeout(() => {
+            setCopied(false);
+          }, 800);
         }}
       >
         {props.children}

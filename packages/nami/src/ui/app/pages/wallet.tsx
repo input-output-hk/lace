@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
+import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { WalletType } from '@cardano-sdk/web-extension';
@@ -74,6 +76,7 @@ import Logo from '../../../assets/img/logoWhite.svg';
 import { TAB } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import About from '../components/about';
 import AssetsViewer from '../components/assetsViewer';
@@ -89,11 +92,14 @@ import UserInfo from '../components/userInfo';
 
 import type { Account, UseAccount } from '../../../adapters/account';
 import type { CurrencyCode } from '../../../adapters/currency';
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
+import type { AboutRef } from '../components/about';
+import type { TransactionBuilderRef } from '../components/transactionBuilder';
 
 export type Props = Pick<
-  OutsideHandlesContextValue,
+  CommonOutsideHandlesContextValue,
   'cardanoCoin' | 'openHWFlow'
 > & {
   activeAddress: string;
@@ -110,6 +116,7 @@ export type Props = Pick<
   assets: (CardanoAsset | NamiAsset)[];
   nfts: NamiAsset[];
   setAvatar: (image: string) => void;
+  environmentName: OutsideHandlesContextValue['environmentName'];
 };
 
 const Wallet = ({
@@ -129,6 +136,7 @@ const Wallet = ({
   nfts,
   setAvatar,
   openHWFlow,
+  environmentName,
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const history = useHistory();
@@ -136,10 +144,10 @@ const Wallet = ({
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
   const containerBg = useColorModeValue('white', 'gray.800');
   const [menu, setMenu] = React.useState(false);
-  const newAccountRef = React.useRef();
-  const aboutRef = React.useRef();
-  const deleteAccountRef = React.useRef();
-  const builderRef = React.useRef();
+  const newAccountRef = React.useRef<NewAccountRef>(null);
+  const aboutRef = React.useRef<AboutRef>(null);
+  const deleteAccountRef = React.useRef<DeleteAccountRef>(null);
+  const builderRef = React.useRef<TransactionBuilderRef>(null);
 
   const canDeleteAccount = useMemo(
     () =>
@@ -173,11 +181,10 @@ const Wallet = ({
     <>
       <Box
         background={containerBg}
-        minHeight="100vh"
+        minHeight="calc(100vh - 30px)"
         display="flex"
         alignItems="center"
         flexDirection="column"
-        ma
       >
         <Box
           height="52"
@@ -210,6 +217,7 @@ const Wallet = ({
             right="6"
           >
             <Menu
+              placement="bottom-end"
               isOpen={menu}
               autoSelect={false}
               onClose={() => {
@@ -250,18 +258,18 @@ const Wallet = ({
                   <Scrollbars
                     style={{ width: '100%' }}
                     autoHeight
-                    autoHeightMax={210}
+                    autoHeightMax={180}
                   >
                     {accounts.map(account => (
                       <UserInfo
                         index={`${account.walletId}${account.index}`}
                         key={`${account.walletId}${account.index}`}
                         onClick={() => {
-                          void onAccountClick(account);
+                          onAccountClick(account);
                         }}
                         avatar={account.avatar}
                         name={account.name}
-                        balance={account.balance}
+                        balance={account.balance?.[environmentName]}
                         isActive={
                           account.index === activeAccount.index &&
                           account.walletId === activeAccount.walletId
@@ -282,7 +290,7 @@ const Wallet = ({
                     icon={<AddIcon />}
                     onClick={() => {
                       void capture(Events.SettingsNewAccountClick);
-                      newAccountRef.current.openModal();
+                      newAccountRef.current?.openModal();
                     }}
                   >
                     New Account
@@ -294,7 +302,7 @@ const Wallet = ({
                     icon={<DeleteIcon />}
                     onClick={() => {
                       void capture(Events.AccountDeleteClick);
-                      deleteAccountRef.current.openModal();
+                      deleteAccountRef.current?.openModal();
                     }}
                   >
                     Delete Account
@@ -316,7 +324,7 @@ const Wallet = ({
                   icon={<Icon as={FaRegFileCode} w={3} h={3} />}
                   onClick={() => {
                     capture(Events.SettingsCollateralClick);
-                    builderRef.current.initCollateral();
+                    builderRef.current?.initCollateral();
                   }}
                 >
                   {' '}
@@ -331,7 +339,7 @@ const Wallet = ({
                 >
                   Settings
                 </MenuItem>
-                <MenuItem onClick={() => aboutRef.current.openModal()}>
+                <MenuItem onClick={() => aboutRef.current?.openModal()}>
                   About
                 </MenuItem>
               </MenuList>
@@ -577,7 +585,7 @@ const Wallet = ({
           </TabList>
           <TabPanels>
             <TabPanel>
-              <AssetsViewer assets={assets} />
+              <AssetsViewer assets={assets as NamiAsset[]} />
             </TabPanel>
             <TabPanel>
               <CollectiblesViewer assets={nfts} setAvatar={setAvatar} />
@@ -609,8 +617,12 @@ const Wallet = ({
   );
 };
 
+interface NewAccountRef {
+  openModal: () => void;
+}
+
 const NewAccountModal = React.forwardRef<
-  unknown,
+  NewAccountRef,
   {
     accounts: Props['accounts'];
     addAccount: Props['addAccount'];
@@ -624,6 +636,7 @@ const NewAccountModal = React.forwardRef<
     password: '',
     show: false,
     name: '',
+    wrongPassword: false,
   });
 
   const confirmHandler = async () => {
@@ -654,6 +667,7 @@ const NewAccountModal = React.forwardRef<
       password: '',
       show: false,
       name: '',
+      wrongPassword: false,
     });
   }, [isOpen]);
 
@@ -688,7 +702,7 @@ const NewAccountModal = React.forwardRef<
           <InputGroup size="md">
             <Input
               variant="filled"
-              isInvalid={state.wrongPassword === true}
+              isInvalid={state.wrongPassword}
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
               onChange={e => {
@@ -711,7 +725,7 @@ const NewAccountModal = React.forwardRef<
               </Button>
             </InputRightElement>
           </InputGroup>
-          {state.wrongPassword === true && (
+          {state.wrongPassword && (
             <Text color="red.300">Password is wrong</Text>
           )}
         </ModalBody>
@@ -743,8 +757,12 @@ const NewAccountModal = React.forwardRef<
 
 NewAccountModal.displayName = 'NewAccountModal';
 
+interface DeleteAccountRef {
+  openModal: () => void;
+}
+
 const DeleteAccountModal = React.forwardRef<
-  unknown,
+  DeleteAccountRef,
   {
     activateAccount: UseAccount['activateAccount'];
     removeAccount: UseAccount['removeAccount'];
@@ -754,7 +772,7 @@ const DeleteAccountModal = React.forwardRef<
 >(({ activateAccount, removeAccount, accounts, activeAccount }, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
-  const cancelRef = React.useRef();
+  const cancelRef = React.useRef(null);
   const capture = useCaptureEvent();
 
   React.useImperativeHandle(ref, () => ({
@@ -778,11 +796,13 @@ const DeleteAccountModal = React.forwardRef<
 
   const deleteAccount = useCallback(async () => {
     setIsLoading(true);
-    await activateAccount({
-      accountIndex: nextAccount?.index!,
-      walletId: nextAccount?.walletId!,
-      force: true,
-    });
+    if (nextAccount) {
+      await activateAccount({
+        accountIndex: nextAccount?.index,
+        walletId: nextAccount?.walletId,
+        force: true,
+      });
+    }
     setTimeout(async () => {
       await removeAccount({
         walletId: activeAccount.walletId,
@@ -842,21 +862,19 @@ const DeleteAccountModal = React.forwardRef<
 
 DeleteAccountModal.displayName = 'DeleteAccountModal';
 
-const DelegationPopover = ({ builderRef }) => {
-  const {
-    inMemoryWallet,
-    cardanoCoin,
-    buildDelegation,
-    setSelectedStakePool,
-    openExternalLink,
-  } = useOutsideHandles();
+const DelegationPopover = ({
+  builderRef,
+}: Readonly<{ builderRef: RefObject<TransactionBuilderRef> }>) => {
+  const { buildDelegation, setSelectedStakePool, openExternalLink } =
+    useOutsideHandles();
+  const { inMemoryWallet, cardanoCoin } = useCommonOutsideHandles();
   const { delegation } = useDelegation({
     inMemoryWallet,
     buildDelegation,
     setSelectedStakePool,
   });
   const capture = useCaptureEvent();
-  const ref = React.useRef();
+  const ref = React.useRef<TransactionBuilderRef>(null);
   const containerBg = useColorModeValue('gray.800', 'white');
   const delegateButtonBg = useColorModeValue(
     'gray.100',
@@ -931,7 +949,7 @@ const DelegationPopover = ({ builderRef }) => {
                 <Button
                   onClick={() => {
                     void capture(Events.StakingUnstakeClick);
-                    ref.current.initUndelegate();
+                    ref.current?.initUndelegate();
                   }}
                   mt="5px"
                   colorScheme="red"
@@ -975,7 +993,7 @@ const DelegationPopover = ({ builderRef }) => {
         <Button
           onClick={() => {
             void capture(Events.StakingClick);
-            builderRef.current.initDelegation();
+            builderRef?.current?.initDelegation();
           }}
           variant="solid"
           size="xs"

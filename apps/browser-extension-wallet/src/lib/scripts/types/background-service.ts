@@ -90,3 +90,9 @@ export type BackgroundService = {
   resetStorage: () => Promise<void>;
   backendFailures$: BehaviorSubject<number>;
 };
+
+export type WalletMode = BackgroundStorage['namiMigration']['mode'];
+
+export type ModeApi = {
+  getMode: () => Promise<WalletMode>;
+};

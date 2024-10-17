@@ -11,17 +11,7 @@ import {
   within,
 } from '@storybook/test';
 
-import {
-  createTab,
-  getAccounts,
-  onAccountChange,
-  updateAccount,
-  getCurrentAccountIndex,
-  getCurrentAccount,
-  getDelegation,
-  getNetwork,
-  getAsset,
-} from '../../../api/extension/api.mock';
+import { createTab } from '../../../api/extension/api.mock';
 import {
   account,
   account1,
@@ -74,6 +64,7 @@ const WalletStory = ({
         accounts={[]}
         currency={CurrencyCode.USD}
         activeAccount={{
+          walletId: 'wallet1',
           index: 0,
           name: currentAccount.name,
           avatar: currentAccount.avatar,
@@ -125,39 +116,12 @@ const meta: Meta<typeof WalletStory> = {
     createTab.mockImplementation(async () => {
       await Promise.resolve();
     });
-    getAccounts.mockImplementation(async () => {
-      return await Promise.resolve([account]);
-    });
-    onAccountChange.mockImplementation(() => {
-      return {
-        // @ts-ignore
-        remove: () => void 0,
-      };
-    });
-    updateAccount.mockImplementation(async () => {
-      await Promise.resolve();
-    });
-    getCurrentAccountIndex.mockImplementation(async () => {
-      return await Promise.resolve(0);
-    });
-    getDelegation.mockImplementation(async () => {
-      return await Promise.resolve({});
-    });
-    getCurrentAccount.mockImplementation(async () => {
-      return await Promise.resolve(currentAccount);
-    });
-    getNetwork.mockImplementation(async () => {
-      return await Promise.resolve(network);
-    });
     useStoreState.mockImplementation((callback: any) => {
       return callback(store);
     });
     useStoreActions.mockImplementation(() => {
       // @ts-ignore
       return () => void 0;
-    });
-    getAsset.mockImplementation(async (unit: keyof typeof tokens) => {
-      return await Promise.resolve(tokens[unit]);
     });
     useHistory.mockImplementation(
       () =>
@@ -175,16 +139,8 @@ const meta: Meta<typeof WalletStory> = {
     // 👇 Reset the Date after each story
     return () => {
       createTab.mockReset();
-      getAccounts.mockReset();
-      onAccountChange.mockReset();
-      updateAccount.mockReset();
-      getCurrentAccountIndex.mockReset();
-      getDelegation.mockReset();
-      getCurrentAccount.mockReset();
-      getNetwork.mockReset();
       useStoreState.mockReset();
       useStoreActions.mockReset();
-      getAsset.mockReset();
       useHistory.mockReset();
       window.setInterval = originalSetInterval;
     };

@@ -1,5 +1,11 @@
 /* eslint-disable no-magic-numbers */
-import { HW_POPUP_WINDOW, POPUP_WINDOW } from '@src/utils/constants';
+import {
+  HW_POPUP_WINDOW,
+  HW_POPUP_WINDOW_NAMI,
+  POPUP_WINDOW,
+  POPUP_WINDOW_NAMI,
+  POPUP_WINDOW_NAMI_TITLE
+} from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -76,9 +82,16 @@ const createWindow = (
 export const launchCip30Popup = async (url: string, windowType: Windows.CreateType): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
+  const { namiMigration } = await getBackgroundStorage();
+  let windowSize = windowType === 'popup' ? POPUP_WINDOW : HW_POPUP_WINDOW;
+
+  if (namiMigration?.mode === 'nami') {
+    windowSize = windowType === 'popup' ? POPUP_WINDOW_NAMI : HW_POPUP_WINDOW_NAMI;
+  }
+
   const newWindow = await createWindow(
     tab.id,
-    calculatePopupWindowPositionAndSize(currentWindow, windowType === 'popup' ? POPUP_WINDOW : HW_POPUP_WINDOW),
+    calculatePopupWindowPositionAndSize(currentWindow, windowSize),
     windowType,
     true
   );
@@ -124,6 +137,8 @@ export const getActiveWallet = async ({
 
 export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
   const openTabs = await tabs.query({ title: 'Lace' });
+  const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
+  openTabs.push(...namiTabs);
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
     if (!shouldRemoveTab || shouldRemoveTab(tab.url)) await tabs.remove(tab.id);
