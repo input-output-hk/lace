@@ -44,11 +44,13 @@ export interface DappConnector {
       sign: (password: string) => Promise<Cip30DataSignature>;
     };
   }>;
-  getTxSummaryInspector: (tx: Readonly<Wallet.Cardano.Tx>) => Promise<
-    TxInspector<{
-      summary: Inspector<TransactionSummaryInspection>;
-    }>
-  >;
+  getAssetInfos: ({
+    assetIds,
+    tx,
+  }: Readonly<{
+    assetIds: Wallet.Cardano.AssetId[];
+    tx: Wallet.Cardano.Tx;
+  }>) => Promise<Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>>;
 }
 
 export interface DappOutsideHandlesContextValue {

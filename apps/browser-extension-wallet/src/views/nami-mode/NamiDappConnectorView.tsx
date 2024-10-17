@@ -2,8 +2,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { DappConnector, DApp, DappOutsideHandlesProvider, CommonOutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
-import { useAppSettingsContext, useBackgroundServiceAPIContext, useTheme } from '@providers';
-import { useChainHistoryProvider, useHandleResolver, useWalletManager } from '@hooks';
+import { useBackgroundServiceAPIContext, useTheme } from '@providers';
+import { useHandleResolver, useWalletManager } from '@hooks';
 import { signingCoordinator, walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { withDappContext } from '@src/features/dapp/context';
 import { CARDANO_COIN_SYMBOL } from './constants';
@@ -16,14 +16,13 @@ import { UserPromptService } from '@lib/scripts/background/services';
 import { finalize, firstValueFrom, map, of } from 'rxjs';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { useAnalytics } from './hooks';
-import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@cardano-sdk/core';
+import { Milliseconds } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
-import { useObservable } from '@lace/common';
-import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
+import { tryGetAssetInfos } from './utils';
 
 const DAPP_TOAST_DURATION = 100;
-const dappConnector: Omit<DappConnector, 'getTxSummaryInspector'> = {
+const dappConnector: Omit<DappConnector, 'getAssetInfos'> = {
   getDappInfo: () => {
     const dappDataService = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
       {
@@ -144,7 +143,6 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     walletType,
     currentChain,
     environmentName,
-    walletInfo,
     blockchainProvider: { assetProvider }
   } = useWalletStore();
 
@@ -157,31 +155,19 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     [currentChain.networkId, walletUI.cardanoCoin]
   );
 
-  const [{ chainName }] = useAppSettingsContext();
-  const chainHistoryProvider = useChainHistoryProvider({ chainName });
+  /** A simplified version of intoAssetInfoWithAmount from SDK packages/core/src/util/transactionSummaryInspector.ts */
+  const getAssetInfos = async ({
+    assetIds,
+    tx
+  }: {
+    assetIds: Wallet.Cardano.AssetId[];
+    tx: Wallet.Cardano.Tx;
+  }): Promise<Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>> => {
+    const assetInfos = new Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>();
 
-  const txInputResolver = useMemo(
-    () =>
-      utxoAndBackendChainHistoryResolver({
-        utxo: inMemoryWallet.utxo,
-        transactions: inMemoryWallet.transactions,
-        chainHistoryProvider
-      }),
-    [inMemoryWallet, chainHistoryProvider]
-  );
-
-  const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
-  const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsAddresses = useMemo(() => userRewardAccounts?.map((key) => key.address), [userRewardAccounts]);
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
-
-  const getTxSummaryInspector = async (tx: Wallet.Cardano.Tx) =>
-    createTxInspector({
-      summary: transactionSummaryInspector({
-        addresses: userAddresses,
-        rewardAccounts: rewardAccountsAddresses,
-        inputResolver: txInputResolver,
-        protocolParameters,
+    if (assetIds.length > 0) {
+      const assets = await tryGetAssetInfos({
+        assetIds,
         assetProvider: createWalletAssetProvider({
           assetProvider,
           assetInfo$: inMemoryWallet.assetInfo$,
@@ -189,10 +175,16 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
           logger: console
         }),
         // eslint-disable-next-line no-magic-numbers, new-cap
-        timeout: Milliseconds(6000),
-        logger: console
-      })
-    });
+        timeout: Milliseconds(6000)
+      });
+
+      for (const asset of assets) {
+        assetInfos.set(asset.assetId, asset);
+      }
+    }
+
+    return assetInfos;
+  };
 
   const openHWFlow = useCallback(
     (path: string) => {
@@ -210,7 +202,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         walletManager,
         walletRepository,
         environmentName,
-        dappConnector: { ...dappConnector, getTxSummaryInspector }
+        dappConnector: { ...dappConnector, getAssetInfos }
       }}
     >
       <CommonOutsideHandlesProvider

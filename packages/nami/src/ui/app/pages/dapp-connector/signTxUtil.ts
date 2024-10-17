@@ -14,6 +14,7 @@ import groupBy from 'lodash/groupBy';
 
 import type { Asset, CardanoAsset } from '../../../../types/assets';
 import type { AssetInfoWithAmount } from '@cardano-sdk/core';
+import type { DappConnector } from 'features/dapp-outside-handles-provider';
 
 const isNFT = (asset: AssetInfoWithAmount) =>
   asset.assetInfo.supply === BigInt(1);
@@ -256,11 +257,8 @@ export const isScriptAddress = (address: Cardano.PaymentAddress) => {
  * @param {Cardano.Value} value - The Cardano.Value object to convert.
  * @returns {Asset[]} An array of Asset objects representing the value.
  */
-export const valueToAssetsSdk = (
-  value: Cardano.Value,
-  assetInfos: Map<Cardano.AssetId, AssetInfoWithAmount>,
-): (Asset | CardanoAsset)[] => {
-  const assets: (Asset | CardanoAsset)[] = [
+export const valueToAssetsSdk = (value: Cardano.Value): CardanoAsset[] => {
+  const assets: CardanoAsset[] = [
     {
       unit: 'lovelace',
       quantity: value.coins.toString(),
@@ -268,17 +266,7 @@ export const valueToAssetsSdk = (
   ];
 
   for (const [assetId, quantity] of value.assets || []) {
-    const assetInfo = assetInfos.get(assetId);
-    if (!assetInfo) {
-      console.error('Asset info not found for asset ID:', assetId);
-      continue;
-    }
-
-    const namiAsset = toAsset(assetInfo.assetInfo, assetInfo.amount);
-
-    // Use the Value quantity because the balanced value is calculated later. Only use asset info for the rest of information,
-    // like displayName and decimals.
-    assets.push({ ...namiAsset, quantity: quantity.toString() });
+    assets.push({ unit: assetId, quantity: quantity.toString() });
   }
 
   return assets;
@@ -288,16 +276,14 @@ export const getValueWithSdk = async (
   tx: Readonly<Cardano.Tx>,
   utxos: Readonly<Wallet.Cardano.Utxo[]>,
   addresses: Cardano.PaymentAddress[],
-  assetInfos: Map<Cardano.AssetId, AssetInfoWithAmount>,
+  getAssetInfos: DappConnector['getAssetInfos'],
 ): Promise<TransactionValue> => {
   const inputValue = valueToAssetsSdk(
     await totalAddressInputsValueInspector(addresses, inputResolver(utxos))(tx),
-    assetInfos,
   );
 
   const ownOutputValue = valueToAssetsSdk(
     await totalAddressOutputsValueInspector(addresses)(tx),
-    assetInfos,
   );
 
   const externalOutputsByAddress = Object.entries(
@@ -332,35 +318,69 @@ export const getValueWithSdk = async (
     ]),
   ];
 
-  const ownOutputValueDifference = involvedAssets.map<Asset | CardanoAsset>(
-    unit => {
-      const leftValue = inputValue.find(asset => asset.unit === unit);
-      const rightValue = ownOutputValue.find(asset => asset.unit === unit);
-      const difference =
-        BigInt(leftValue ? leftValue.quantity : '') -
-        BigInt(rightValue ? rightValue.quantity : '');
-      if (unit === 'lovelace') {
-        return { unit, quantity: difference.toString() };
-      }
+  const ownOutputValueDifference = involvedAssets.map<CardanoAsset>(unit => {
+    const leftValue = inputValue.find(asset => asset.unit === unit);
+    const rightValue = ownOutputValue.find(asset => asset.unit === unit);
+    const difference =
+      BigInt(leftValue ? leftValue.quantity : '') -
+      BigInt(rightValue ? rightValue.quantity : '');
+    if (unit === 'lovelace') {
+      return { unit, quantity: difference.toString() };
+    }
 
-      const asset = leftValue ?? rightValue!;
+    return { unit, quantity: difference.toString() };
+  });
 
-      return { ...asset, quantity: difference.toString() };
-    },
+  const ownValue = ownOutputValueDifference.filter(
+    v => BigInt(v.quantity) != BigInt(0),
   );
+
+  // Prepare an exhaustive list of AssetIds to query for asset info
+  const ownValueAssetIds = ownValue.map(({ unit }) => unit);
+  const externalOutputsAssetIds = externalOutputs
+    .flatMap(([, { value }]) => valueToAssetsSdk(value))
+    .map(({ unit }) => unit);
+  const assetIds = [
+    ...new Set(
+      [...ownValueAssetIds, ...externalOutputsAssetIds].filter(
+        unit => unit !== 'lovelace',
+      ) as Cardano.AssetId[],
+    ),
+  ];
+
+  // Fetch all asset infos for the involved assets only once
+  const assetInfos = await getAssetInfos({ assetIds, tx });
 
   // Similar to externalOutputs, but with the value converted from Cardano.Value to Asset[]
   const externalValue: Record<Cardano.PaymentAddress, ExternalOutput> = {};
   for (const [address, valueAndDatumHash] of externalOutputs) {
     externalValue[address] = {
       ...valueAndDatumHash,
-      value: valueToAssetsSdk(valueAndDatumHash.value, assetInfos),
+      value: valueToAssetsSdk(valueAndDatumHash.value).map(asset =>
+        toAssetInfo(asset, assetInfos),
+      ),
     };
   }
 
-  const ownValue = ownOutputValueDifference.filter(
-    v => BigInt(v.quantity) != BigInt(0),
+  const ownValueWithAssetInfo = ownValue.map(asset =>
+    toAssetInfo(asset, assetInfos),
   );
+
   // Returns
-  return { ownValue, externalValue };
+  return { ownValue: ownValueWithAssetInfo, externalValue };
+};
+
+const toAssetInfo = (
+  cardanoAsset: CardanoAsset,
+  assetInfos: Map<Cardano.AssetId, Wallet.Asset.AssetInfo>,
+) => {
+  if (cardanoAsset.unit === 'lovelace') {
+    return cardanoAsset;
+  }
+
+  const assetInfo = assetInfos.get(cardanoAsset.unit as Cardano.AssetId);
+  if (!assetInfo) {
+    return cardanoAsset;
+  }
+  return toAsset(assetInfo, BigInt(cardanoAsset.quantity));
 };

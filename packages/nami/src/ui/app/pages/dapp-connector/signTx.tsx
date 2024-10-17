@@ -195,15 +195,12 @@ export const SignTx = ({
     const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
     getFee(tx);
 
-    const summaryInspector = await dappConnector.getTxSummaryInspector(tx);
-    const { summary } = await summaryInspector(tx);
-
     setValue(
       await getValue(
         tx,
         utxos,
         request.data.addresses.map(a => a.address),
-        summary.assets,
+        dappConnector.getAssetInfos,
       ),
     );
 
