@@ -51,6 +51,7 @@ runs:
         BROWSER: ${{ inputs.BROWSER }}
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
+        SERVICE_WORKER_LOGS: true
       run: |
         commonTags="@Testnet and not @Pending"
         tagsToRun="'${commonTags}'"
