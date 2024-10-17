@@ -332,7 +332,7 @@ export const useTxInfo = (
   const currentAddress = walletAddresses[0];
 
   useEffect(() => {
-    if (!protocolParameters || 'cbor' in tx) return;
+    if (!protocolParameters || !('blockHeader' in tx)) return;
     void (async () => {
       const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
         protocolParameters,

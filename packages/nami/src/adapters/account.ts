@@ -166,15 +166,24 @@ export const useAccount = ({
           return 0;
         })
         .map(([_type, wallets]) => {
-          const wallet =
-            wallets.find(w => w.walletId === walletId) ?? wallets[0];
-          const accountsMapper = getAcountsMapper(wallet);
-          return 'accounts' in wallet
-            ? wallet.accounts
-                // eslint-disable-next-line functional/prefer-tacit
-                .map(account => accountsMapper(account))
-                .sort((a, b) => a.index - b.index)
-            : [];
+          const filteredWallets =
+            (_type as WalletType) === WalletType.InMemory
+              ? // show only current/first in memory wallet accouts
+                [wallets.find(w => w.walletId === walletId) ?? wallets[0]]
+              : // show all hws accouts
+                wallets;
+
+          return flatten(
+            filteredWallets.map(wallet => {
+              const accountsMapper = getAcountsMapper(wallet);
+              return 'accounts' in wallet
+                ? wallet.accounts
+                    // eslint-disable-next-line functional/prefer-tacit
+                    .map(account => accountsMapper(account))
+                    .sort((a, b) => a.index - b.index)
+                : [];
+            }),
+          );
         }),
     );
   }, [wallets, walletId, accountIndex]);
