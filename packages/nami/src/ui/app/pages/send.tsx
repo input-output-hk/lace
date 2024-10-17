@@ -7,9 +7,7 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { RefObject } from 'react';
-import { useCallback } from 'react';
-import { useMemo } from 'react';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
 import {

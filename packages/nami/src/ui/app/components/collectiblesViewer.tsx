@@ -40,7 +40,7 @@ import Collectible from './collectible';
 import './styles.css';
 import Copy from './copy';
 
-import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
+import type { Asset as NamiAsset } from '../../../types/assets';
 
 interface Props {
   assets: NamiAsset[];
@@ -250,7 +250,7 @@ export const CollectibleModalComponent = (
                 size="xs"
                 rightIcon={<BsArrowUpRight />}
                 onClick={e => {
-                  setValue({ ...value, assets: [{...asset, input: ''}] });
+                  setValue({ ...value, assets: [{ ...asset, input: '' }] });
                   navigate('/send');
                 }}
               >

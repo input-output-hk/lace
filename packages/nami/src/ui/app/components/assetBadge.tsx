@@ -44,7 +44,7 @@ const AssetBadge = ({
   const [width, setWidth] = React.useState(
     BigInt(asset.quantity) <= 1 ? 60 : 200,
   );
-  const [isPopoveVisible, setIsPopoverVisible] = React.useState(false);
+  const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
   const [value, setValue] = React.useState('');
 
   const onPopoverClose = useCallback(() => {
@@ -77,7 +77,7 @@ const AssetBadge = ({
             justifyContent="center"
           >
             <AssetPopover
-              isOpen={isPopoveVisible}
+              isOpen={isPopoverVisible}
               onClose={onPopoverClose}
               asset={asset}
             >
@@ -97,7 +97,7 @@ const AssetBadge = ({
                   justifyContent: 'center',
                 }}
                 onClick={() => {
-                  setIsPopoverVisible(!isPopoveVisible);
+                  setIsPopoverVisible(!isPopoverVisible);
                 }}
               >
                 <Image

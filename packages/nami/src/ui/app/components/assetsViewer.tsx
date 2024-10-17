@@ -25,7 +25,7 @@ import { useCommonOutsideHandles } from '../../../features/common-outside-handle
 
 import Asset from './asset';
 
-import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
+import type { Asset as NamiAsset } from '../../../types/assets';
 
 const AssetsViewer = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
   const totalColor = useColorModeValue(
@@ -135,11 +135,7 @@ const AssetsGrid = ({ assets }: Readonly<{ assets: NamiAsset[] }>) => {
               alignItems="center"
               justifyContent="center"
             >
-              <Asset
-                cardanoCoin={cardanoCoin}
-                asset={asset}
-                enableSend
-              />
+              <Asset cardanoCoin={cardanoCoin} asset={asset} enableSend />
             </Box>
           </LazyLoadComponent>
         </Box>

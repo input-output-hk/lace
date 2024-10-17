@@ -71,13 +71,14 @@ jest.mock('@hooks/useSyncingTheFirstTime', () => ({
 
 const getWrapper =
   () =>
-  ({ children }: { children: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <StoreProvider appMode={APP_MODE_BROWSER}>
-        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-      </StoreProvider>
-    </AppSettingsProvider>
-  );
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <AppSettingsProvider>
+        <StoreProvider appMode={APP_MODE_BROWSER}>
+          <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+        </StoreProvider>
+      </AppSettingsProvider>
+    );
 
 describe('Testing useCollateral hook', () => {
   beforeEach(() => {

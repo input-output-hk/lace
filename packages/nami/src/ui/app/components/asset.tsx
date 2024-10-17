@@ -22,7 +22,7 @@ import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 
 import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
-import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
+import type { Asset as NamiAsset } from '../../../types/assets';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -188,7 +188,7 @@ const Asset = ({
               size="xs"
               rightIcon={<BsArrowUpRight />}
               onClick={e => {
-                setValue({ ...value, assets: [{...asset, input: ''}] });
+                setValue({ ...value, assets: [{ ...asset, input: '' }] });
                 capture(Events.SendClick);
                 navigate('/send');
               }}

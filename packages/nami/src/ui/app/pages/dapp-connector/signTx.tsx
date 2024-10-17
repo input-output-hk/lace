@@ -45,7 +45,7 @@ import type { UseAccount } from '../../../../adapters/account';
 import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
 import type { Asset as NamiAsset } from '../../../../types/assets';
 import type { AssetsModalRef } from '../../components/assetsModal';
-import type { AssetInfoWithAmount, Cardano } from '@cardano-sdk/core';
+import type { Cardano } from '@cardano-sdk/core';
 
 interface Props {
   dappConnector: DappConnector;
