@@ -25,6 +25,7 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { storage } from 'webextension-polyfill';
+import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -62,9 +63,11 @@ const App = (): React.ReactElement => {
                           <MigrationContainer appMode={APP_MODE_POPUP}>
                             <DataCheckContainer appMode={APP_MODE_POPUP}>
                               <AddressesDiscoveryOverlay>
-                                <BackgroundPageProvider>
-                                  {mode === 'nami' ? <NamiPopup /> : <PopupView />}
-                                </BackgroundPageProvider>
+                                <NamiMigrationGuard>
+                                  <BackgroundPageProvider>
+                                    {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                  </BackgroundPageProvider>
+                                </NamiMigrationGuard>
                               </AddressesDiscoveryOverlay>
                             </DataCheckContainer>
                           </MigrationContainer>

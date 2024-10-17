@@ -21,8 +21,6 @@ const startMigration = async () => {
 
   await run({ walletRepository, walletManager, state, collateralRepository });
 
-  await laceMigrationClient.completeMigration();
-
   return {
     currency: state.currency === 'usd' ? currencyCode.USD : currencyCode.EUR,
     analytics: state.analytics,
