@@ -379,7 +379,9 @@ export const Footer = withAddressBookContext(
         // No default
       }
 
-      onClose();
+      setTimeout(() => {
+        onClose();
+      }, 300);
     };
 
     const confirmDisable = useMemo(

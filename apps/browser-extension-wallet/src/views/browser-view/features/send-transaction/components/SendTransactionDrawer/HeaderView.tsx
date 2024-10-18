@@ -186,7 +186,10 @@ export const HeaderNavigation = ({
         }
       );
     }
-    onClose();
+    setTimeout(() => {
+      onClose();
+      // eslint-disable-next-line no-magic-numbers
+    }, 300);
   };
 
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);
