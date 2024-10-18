@@ -42,4 +42,4 @@ export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender
   return Promise.resolve(true);
 };
 
-export const requestAccessDebounced = pDebounce(requestAccess, DEBOUNCE_THROTTLE);
+export const requestAccessDebounced = pDebounce(requestAccess, DEBOUNCE_THROTTLE, { before: true });

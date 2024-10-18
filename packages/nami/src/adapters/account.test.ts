@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { getNextAccountIndex, useAccount } from './account';
+import { getNextAccountIndex, useAccountUtil } from './account';
 
 import type {
   AnyWallet,
@@ -43,7 +43,7 @@ const wallet2 = genWallet('wallet2', 'InMemory');
 const trezorWallet1 = genWallet('trezor wallet1', 'Trezor');
 const trezorWallet2 = genWallet('trezor wallet2', 'Trezor');
 const ledgerWallet1 = genWallet('ledger wallet1', 'Ledger');
-const ledgerrWallet2 = genWallet('ledger wallet2', 'Ledger');
+const ledgerWallet2 = genWallet('ledger wallet2', 'Ledger');
 
 const walletRepository = [
   wallet1,
@@ -51,7 +51,7 @@ const walletRepository = [
   trezorWallet1,
   trezorWallet2,
   ledgerWallet1,
-  ledgerrWallet2,
+  ledgerWallet2,
 ];
 
 const getAccountData = (
@@ -90,7 +90,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -109,9 +109,15 @@ describe('useAccount', () => {
       getAccountData(trezorWallet1, 0),
       getAccountData(trezorWallet1, 1),
       getAccountData(trezorWallet1, 2),
+      getAccountData(trezorWallet2, 0),
+      getAccountData(trezorWallet2, 1),
+      getAccountData(trezorWallet2, 2),
       getAccountData(ledgerWallet1, 0),
       getAccountData(ledgerWallet1, 1),
       getAccountData(ledgerWallet1, 2),
+      getAccountData(ledgerWallet2, 0),
+      getAccountData(ledgerWallet2, 1),
+      getAccountData(ledgerWallet2, 2),
     ]);
 
     expect(result.current.allAccounts).toEqual([
@@ -121,9 +127,15 @@ describe('useAccount', () => {
       getAccountData(trezorWallet1, 0),
       getAccountData(trezorWallet1, 1),
       getAccountData(trezorWallet1, 2),
+      getAccountData(trezorWallet2, 0),
+      getAccountData(trezorWallet2, 1),
+      getAccountData(trezorWallet2, 2),
       getAccountData(ledgerWallet1, 0),
       getAccountData(ledgerWallet1, 1),
       getAccountData(ledgerWallet1, 2),
+      getAccountData(ledgerWallet2, 0),
+      getAccountData(ledgerWallet2, 1),
+      getAccountData(ledgerWallet2, 2),
     ]);
   });
 
@@ -135,7 +147,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -156,9 +168,15 @@ describe('useAccount', () => {
       getAccountData(wallet1, 2),
       getAccountData(trezorWallet1, 0),
       getAccountData(trezorWallet1, 2),
+      getAccountData(trezorWallet2, 0),
+      getAccountData(trezorWallet2, 1),
+      getAccountData(trezorWallet2, 2),
       getAccountData(ledgerWallet1, 0),
       getAccountData(ledgerWallet1, 1),
       getAccountData(ledgerWallet1, 2),
+      getAccountData(ledgerWallet2, 0),
+      getAccountData(ledgerWallet2, 1),
+      getAccountData(ledgerWallet2, 2),
     ]);
 
     expect(result.current.allAccounts).toEqual([
@@ -168,9 +186,15 @@ describe('useAccount', () => {
       getAccountData(trezorWallet1, 0),
       getAccountData(trezorWallet1, 1),
       getAccountData(trezorWallet1, 2),
+      getAccountData(trezorWallet2, 0),
+      getAccountData(trezorWallet2, 1),
+      getAccountData(trezorWallet2, 2),
       getAccountData(ledgerWallet1, 0),
       getAccountData(ledgerWallet1, 1),
       getAccountData(ledgerWallet1, 2),
+      getAccountData(ledgerWallet2, 0),
+      getAccountData(ledgerWallet2, 1),
+      getAccountData(ledgerWallet2, 2),
     ]);
   });
 
@@ -182,7 +206,7 @@ describe('useAccount', () => {
     }) as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -226,7 +250,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -252,7 +276,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$: wallets$ as unknown as Wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -311,7 +335,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -348,7 +372,7 @@ describe('useAccount', () => {
     }) as unknown as WalletManagerApi['activeWalletId$'];
 
     const { result } = renderHook(() =>
-      useAccount({
+      useAccountUtil({
         wallets$,
         activeWalletId$,
         updateAccountMetadata: mockUpdateAccountMetadata,
@@ -364,7 +388,7 @@ describe('useAccount', () => {
       walletId: 'wallet',
     });
 
-    expect(mockRemoveWallet).toHaveBeenCalledWith('wallet');
+    expect(mockRemoveWallet).toHaveBeenCalledWith();
 
     expect(mockRemoveAccount).not.toHaveBeenCalled();
   });

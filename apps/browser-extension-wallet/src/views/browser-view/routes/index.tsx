@@ -35,6 +35,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTranslation } from 'react-i18next';
+import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -86,6 +87,8 @@ const { CHAIN } = config();
  */
 const discardStaleTabs = async (currentTabId: number) => {
   const allTabs = await tabs.query({ title: 'Lace' });
+  const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
+  allTabs.push(...namiTabs);
   const isLaceOrigin = allTabs.find((tab) => tab.id === currentTabId);
   if (!isLaceOrigin) return;
   allTabs.forEach(async (tab) => {

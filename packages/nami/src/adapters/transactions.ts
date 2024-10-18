@@ -8,10 +8,12 @@ import {
   poolRetirementInspector,
   poolRegistrationInspector,
   coalesceValueQuantities,
+  Serialization,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 
+import { useCommonOutsideHandles } from '../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../features/outside-handles-provider/useOutsideHandles';
 
 import { toAsset } from './assets';
@@ -55,13 +57,15 @@ const getTxType = ({
 
   if (inputsAddr.every(addr => addr === currentAddress)) {
     // sender
+    const internalOrExternalOut = outputsAddr.some(
+      addr => addresses.includes(addr) && addr !== currentAddress,
+    )
+      ? 'internalOut'
+      : 'externalOut';
+
     return outputsAddr.every(addr => addr === currentAddress)
       ? 'self'
-      : outputsAddr.some(
-            addr => addresses.includes(addr) && addr !== currentAddress,
-          )
-        ? 'internalOut'
-        : 'externalOut';
+      : internalOrExternalOut;
   } else if (inputsAddr.every(addr => addr !== currentAddress)) {
     // receiver
     return inputsAddr.some(addr => addresses.includes(addr))
@@ -118,20 +122,53 @@ interface CalculateAmountProps {
   validContract: boolean;
 }
 
+const getAddressCredentials = (
+  address: string,
+): [
+  Wallet.Crypto.Hash28ByteBase16 | undefined,
+  Wallet.Crypto.Hash28ByteBase16 | undefined,
+] => {
+  const addr = Wallet.Cardano.Address.fromBech32(address);
+  return [
+    addr.getProps().paymentPart?.hash,
+    addr.getProps().delegationPart?.hash,
+  ];
+};
+
+const matchesAnyCredential = (
+  address: Wallet.Cardano.PaymentAddress | undefined,
+  [ownPaymentCred, ownStakingCred]: [
+    Wallet.Crypto.Hash28ByteBase16 | undefined,
+    Wallet.Crypto.Hash28ByteBase16 | undefined,
+  ],
+) => {
+  if (!address) return false;
+  const [otherPaymentCred, otherStakingCred] = getAddressCredentials(
+    address.toString(),
+  );
+  return (
+    otherPaymentCred === ownPaymentCred || otherStakingCred === ownStakingCred
+  );
+};
+
 const calculateAmount = ({
   currentAddress,
   uTxOList,
   validContract = false,
 }: CalculateAmountProps): CalculatedAmount[] => {
+  const ownCredentials = getAddressCredentials(currentAddress);
+
   const inputs = compileOutputs(
     uTxOList.inputs.filter(
       ({ address, txId }) =>
-        address === currentAddress &&
+        matchesAnyCredential(address, ownCredentials) &&
         !(uTxOList.collaterals?.find(c => c.txId === txId) && validContract),
     ),
   );
   const outputs = compileOutputs(
-    uTxOList.outputs.filter(({ address }) => address === currentAddress),
+    uTxOList.outputs.filter(({ address }) =>
+      matchesAnyCredential(address, ownCredentials),
+    ),
   );
   const amounts: Amount[] = [];
 
@@ -250,17 +287,39 @@ export type TxInfo = Pick<TransactionDetail, 'metadata'> &
     refund: string;
   };
 
+export interface EncodeToCborArgs {
+  body: Wallet.Cardano.TxBody;
+  witness?: Wallet.Cardano.Witness;
+  auxiliaryData?: Wallet.Cardano.AuxiliaryData;
+}
+
+export const encodeToCbor = (args: EncodeToCborArgs): Serialization.TxCBOR => {
+  const transaction = new Serialization.Transaction(
+    Serialization.TransactionBody.fromCore(args.body),
+    Serialization.TransactionWitnessSet.fromCore(
+      args.witness
+        ? (args.witness as Cardano.Witness)
+        : { signatures: new Map() },
+    ),
+    args.auxiliaryData
+      ? Serialization.AuxiliaryData.fromCore(args.auxiliaryData)
+      : undefined,
+  );
+
+  return transaction.toCbor();
+};
+
 export const useTxInfo = (
-  tx: Wallet.Cardano.HydratedTx,
+  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight,
 ): TxInfo | undefined => {
   const [txInfo, setTxInfo] = useState<TxInfo | undefined>();
   const {
     getTxInputsValueAndAddress,
-    inMemoryWallet,
     eraSummaries,
     walletAddresses,
     certificateInspectorFactory,
   } = useOutsideHandles();
+  const { inMemoryWallet } = useCommonOutsideHandles();
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
   const rewardAccounts = useObservable(
@@ -273,7 +332,7 @@ export const useTxInfo = (
   const currentAddress = walletAddresses[0];
 
   useEffect(() => {
-    if (!protocolParameters) return;
+    if (!protocolParameters || !('blockHeader' in tx)) return;
     void (async () => {
       const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
         protocolParameters,
@@ -297,9 +356,12 @@ export const useTxInfo = (
         validContract: tx.inputSource === Wallet.Cardano.InputSource.inputs,
       });
       const assets = amounts.filter(amount => amount.unit !== 'lovelace');
-      const lovelace = BigInt(
-        amounts.find(amount => amount.unit === 'lovelace')!.quantity,
-      );
+      const lovelaceAsset = amounts.find(amount => amount.unit === 'lovelace');
+      const lovelace = BigInt(lovelaceAsset?.quantity ?? '');
+      const deposit =
+        Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
+          ? BigInt(implicitCoin.deposit?.toString() ?? 0)
+          : BigInt(0);
 
       const info: TxInfo = {
         txHash: tx.id.toString(),
@@ -326,9 +388,7 @@ export const useTxInfo = (
           ? BigInt(lovelace.toString())
           : BigInt(lovelace.toString()) +
             BigInt(tx.body.fee.toString()) +
-            (Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
-              ? BigInt(implicitCoin.deposit?.toString() ?? 0)
-              : BigInt(0)),
+            deposit,
         assets: assets
           .map(asset => {
             const assetInfo = assetsInfo?.get(

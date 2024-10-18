@@ -7,6 +7,7 @@ import { getBalance as getBalanceFn } from '@lace/nami/adapters';
 import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { isNotNil } from '@cardano-sdk/util';
+import { getChainName } from '@src/utils/get-chain-name';
 
 export const cacheNamiMetadataSubscription = ({
   getBalance = getBalanceFn,
@@ -22,6 +23,7 @@ export const cacheNamiMetadataSubscription = ({
       filter(isNotNil),
       switchMap((wallet) =>
         zip([
+          of(wallet.props.chainId),
           of(wallet.props.walletId),
           of(wallet.props.accountIndex),
           wallet.observableWallet.addresses$,
@@ -35,7 +37,7 @@ export const cacheNamiMetadataSubscription = ({
     )
     .subscribe(
       ([
-        [activeWalletId, activeWalletAccountIndex, addresses, total, unspendable, rewards, protocolParameters],
+        [chainId, activeWalletId, activeWalletAccountIndex, addresses, total, unspendable, rewards, protocolParameters],
         wallets
       ]) => {
         const address = addresses[0].address;
@@ -51,7 +53,6 @@ export const cacheNamiMetadataSubscription = ({
 
         const { metadata } = account;
         const hasAvatar = Boolean(metadata.namiMode?.avatar);
-        const hasAddress = Boolean(metadata.namiMode?.address);
         const balance = getBalance({
           address: wallet.metadata?.walletAddresses?.[0] || addresses[0].address,
           total,
@@ -61,13 +62,14 @@ export const cacheNamiMetadataSubscription = ({
         });
         const avatar = Math.random().toString();
 
+        const chainName = getChainName(chainId);
         const updatedMetadata = merge(
           { ...metadata },
           {
             namiMode: {
               ...(!hasAvatar && { avatar }),
-              ...(!hasAddress && { address }),
-              balance: (balance.totalCoins - balance.lockedCoins - balance.unspendableCoins).toString()
+              address: { [chainName]: address },
+              balance: { [chainName]: (balance.totalCoins - balance.lockedCoins - balance.unspendableCoins).toString() }
             }
           }
         );

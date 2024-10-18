@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Box,
   Button,
@@ -8,15 +9,32 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import { Scrollbars } from './scrollbar';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
-import Asset from './asset';
-import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
-const AssetsModal = React.forwardRef((props, ref) => {
-  const { cardanoCoin } = useOutsideHandles();
+import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import { abs } from '../../utils';
+
+import Asset from './asset';
+import { Scrollbars } from './scrollbar';
+
+import type { Asset as NamiAsset } from '../../../types/assets';
+
+export interface AssetsModalRef {
+  openModal: (data: Readonly<AssetsModalData>) => void;
+}
+
+interface AssetsModalData {
+  title: React.ReactNode;
+  assets: NamiAsset[];
+  background?: string;
+  color?: string;
+  userInput?: boolean;
+}
+
+const AssetsModal = (_props, ref) => {
+  const { cardanoCoin } = useCommonOutsideHandles();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [data, setData] = React.useState({
+  const [data, setData] = React.useState<AssetsModalData>({
     title: '',
     assets: [],
     background: '',
@@ -24,13 +42,13 @@ const AssetsModal = React.forwardRef((props, ref) => {
   });
   const background = useColorModeValue('white', 'gray.800');
 
-  const abs = (big) => {
-    return big < 0 ? BigInt(big) * BigInt(-1) : big;
-  };
-
   React.useImperativeHandle(ref, () => ({
-    openModal(data) {
-      setData(data);
+    openModal: (data: Readonly<AssetsModalData>) => {
+      const transformedAssets = data?.assets.map((a: Readonly<NamiAsset>) => ({
+        ...a,
+        quantity: abs(a.quantity).toString(),
+      }));
+      setData({ ...data, assets: transformedAssets });
       onOpen();
     },
   }));
@@ -67,32 +85,26 @@ const AssetsModal = React.forwardRef((props, ref) => {
                 {data.title}
               </Box>
               <Box h={6} />
-              {data.assets.map((asset, index) => {
-                asset = {
-                  ...asset,
-                  quantity: abs(asset.quantity).toString(),
-                };
-                return (
-                  <Box key={index} width="full" px={4} my={2}>
-                    <LazyLoadComponent>
-                      <Box
-                        width={'full'}
-                        display={'flex'}
-                        alignItems={'center'}
-                        justifyContent={'center'}
-                        key={index}
-                      >
-                        <Asset
-                          cardanoCoin={cardanoCoin}
-                          asset={asset}
-                          background={data.background}
-                          color={data.color}
-                        />
-                      </Box>
-                    </LazyLoadComponent>
-                  </Box>
-                );
-              })}
+              {data.assets.map((asset, index) => (
+                <Box key={index} width="full" px={4} my={2}>
+                  <LazyLoadComponent>
+                    <Box
+                      width={'full'}
+                      display={'flex'}
+                      alignItems={'center'}
+                      justifyContent={'center'}
+                      key={index}
+                    >
+                      <Asset
+                        cardanoCoin={cardanoCoin}
+                        asset={asset}
+                        background={data.background}
+                        color={data.color}
+                      />
+                    </Box>
+                  </LazyLoadComponent>
+                </Box>
+              ))}
               <Box
                 position={'fixed'}
                 bottom={0}
@@ -120,6 +132,6 @@ const AssetsModal = React.forwardRef((props, ref) => {
       </ModalContent>
     </Modal>
   );
-});
+};
 
-export default AssetsModal;
+export default React.forwardRef(AssetsModal);

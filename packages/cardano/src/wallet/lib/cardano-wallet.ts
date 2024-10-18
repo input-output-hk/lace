@@ -36,9 +36,9 @@ export interface AccountMetadata {
   name: string;
   namiMode?: {
     avatar: string;
-    balance?: string;
-    address?: string;
-    recentSendToAddress?: string;
+    balance?: Partial<Record<Wallet.ChainName, string>>;
+    address?: Partial<Record<Wallet.ChainName, string>>;
+    recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   };
 }
 

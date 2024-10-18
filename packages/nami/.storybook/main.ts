@@ -77,10 +77,6 @@ const config: StorybookConfig = {
           join(__dirname, './mocks/react-router-dom.mock.tsx'),
         ),
         new NormalModuleReplacementPlugin(
-          /loader$/,
-          join(__dirname, '../src/api/loader.mock.ts'),
-        ),
-        new NormalModuleReplacementPlugin(
           /signTxUtil$/,
           join(
             __dirname,

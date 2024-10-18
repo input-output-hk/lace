@@ -6,6 +6,6 @@ import * as actualApi from './collateral';
 
 export * from './collateral';
 
-export const useCollateral = fn(actualApi.useCollateral).mockName(
+export const useCollateral: jest.Mock = fn(actualApi.useCollateral).mockName(
   'useCollateral',
 );

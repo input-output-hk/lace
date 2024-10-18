@@ -27,7 +27,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
     setDappInfo,
     signTxRequest: { request: req, set: setSignTxRequest }
   } = useViewsFlowContext();
-  const { walletType, isHardwareWallet } = useWalletStore();
+  const { walletType, isHardwareWallet, walletInfo, inMemoryWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
   const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
@@ -83,7 +83,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
-      {req ? <DappTransactionContainer /> : <Skeleton loading />}
+      {req && walletInfo && inMemoryWallet ? <DappTransactionContainer /> : <Skeleton loading />}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button

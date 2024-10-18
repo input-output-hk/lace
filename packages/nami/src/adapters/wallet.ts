@@ -20,7 +20,6 @@ interface ChangePasswordProps {
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
-  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   activeWalletId$: Readonly<WalletManagerApi['activeWalletId$']>;
   wallets$: Observable<
     AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[]
@@ -45,7 +44,6 @@ export const useChangePassword = ({
   addAccount,
   activateWallet,
   createWallet,
-  getMnemonic,
   deleteWallet,
   updateAccountMetadata,
   wallets$,
@@ -59,21 +57,35 @@ export const useChangePassword = ({
   return useCallback(
     async (currentPassword: string, newPassword: string) => {
       try {
-        if (!wallet?.metadata?.name) {
+        if (
+          !wallet?.metadata?.name ||
+          !('encryptedSecrets' in wallet) ||
+          !('accounts' in wallet)
+        ) {
           return;
         }
-        const mnemonic = await getMnemonic(Buffer.from(currentPassword));
+
+        const decryptedRootPrivateKeyBytes =
+          await Wallet.KeyManagement.emip3decrypt(
+            Buffer.from(wallet.encryptedSecrets.rootPrivateKeyBytes, 'hex'),
+            Buffer.from(currentPassword, 'utf8'),
+          );
+
+        const encryptedRootPrivateKeyBytes =
+          await Wallet.KeyManagement.emip3encrypt(
+            decryptedRootPrivateKeyBytes,
+            Buffer.from(newPassword, 'utf8'),
+          );
+
         await deleteWallet(false);
         const newWallet = await createWallet({
-          mnemonic,
           name: wallet.metadata.name,
-          password: newPassword,
+          rootPrivateKeyBytes: Wallet.HexBlob.fromBytes(
+            encryptedRootPrivateKeyBytes,
+          ),
+          extendedAccountPublicKey: wallet.accounts[0].extendedAccountPublicKey,
         });
         const { walletId } = newWallet.source.wallet;
-
-        if (!('accounts' in wallet)) {
-          return;
-        }
 
         for await (const account of wallet.accounts) {
           const { accountIndex, metadata, extendedAccountPublicKey } = account;
@@ -100,7 +112,6 @@ export const useChangePassword = ({
     [
       chainId,
       accountIndex,
-      getMnemonic,
       createWallet,
       deleteWallet,
       updateAccountMetadata,

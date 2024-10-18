@@ -8,6 +8,7 @@ import { walletRoutePaths } from '@routes';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useAnalyticsContext } from '@providers';
 import { postHogNamiMigrationActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import * as laceMigrationClient from '@src/features/nami-migration/migration-tool/cross-extension-messaging/lace-migration-client.extension';
 
 export const Customize = (): JSX.Element => {
   const history = useHistory();
@@ -30,6 +31,8 @@ export const Customize = (): JSX.Element => {
         mode
       }
     });
+
+    laceMigrationClient.completeMigration();
 
     if (mode === 'lace') {
       history.push(walletRoutePaths.assets);

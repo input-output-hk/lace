@@ -1,12 +1,11 @@
-import type { Events } from '../../features/analytics/events';
 import type { CreateWalletParams } from '../../types/wallet';
 import type { EraSummary } from '@cardano-sdk/core';
+import type { TxBuilder } from '@cardano-sdk/tx-construction';
 import type {
   AnyBip32Wallet,
   WalletManagerActivateProps,
   WalletManagerApi,
   WalletRepositoryApi,
-  WalletType,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { PasswordObj as Password } from '@lace/core';
@@ -38,11 +37,9 @@ export interface OutsideHandlesContextValue {
   connectedDapps: Wallet.DappInfo[];
   isAnalyticsOptIn: boolean;
   handleAnalyticsChoice: (isOptIn: boolean) => Promise<void>;
-  sendEventToPostHog: (action: Events) => Promise<void>;
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
-  getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
   deleteWallet: (
     isForgotPasswordFlow?: boolean,
   ) => Promise<WalletManagerActivateProps | undefined>;
@@ -50,7 +47,6 @@ export interface OutsideHandlesContextValue {
   setFiatCurrency: (fiatCurrency: string) => void;
   theme: 'dark' | 'light';
   setTheme: (theme: 'dark' | 'light') => void;
-  inMemoryWallet: Wallet.ObservableWallet;
   currentChain: Wallet.Cardano.ChainId;
   cardanoPrice: number;
   walletManager: WalletManagerApi;
@@ -58,10 +54,6 @@ export interface OutsideHandlesContextValue {
     Wallet.WalletMetadata,
     Wallet.AccountMetadata
   >;
-  withSignTxConfirmation: <T>(
-    action: () => Promise<T>,
-    password?: string,
-  ) => Promise<T>;
   switchNetwork: (chainName: Wallet.ChainName) => Promise<void>;
   environmentName: Wallet.ChainName;
   availableChains: Wallet.ChainName[];
@@ -71,7 +63,6 @@ export interface OutsideHandlesContextValue {
     url: string;
   };
   defaultSubmitApi: string;
-  cardanoCoin: Wallet.CoinId;
   isValidURL: (link: string) => boolean;
   setAvatar: (image: string) => void;
   buildDelegation: (
@@ -84,6 +75,8 @@ export interface OutsideHandlesContextValue {
     setPassword: (pw: Readonly<Partial<Password>>) => void;
   };
   delegationTxFee: string;
+  delegationStoreDelegationTxBuilder?: TxBuilder;
+  collateralTxBuilder?: TxBuilder;
   setSelectedStakePool: (
     pool: Readonly<Wallet.Cardano.StakePool | undefined>,
   ) => void;
@@ -98,15 +91,13 @@ export interface OutsideHandlesContextValue {
   openExternalLink: (url: string) => void;
   walletAddresses: string[];
   eraSummaries: EraSummary[];
-  transactions: Wallet.Cardano.HydratedTx[];
+  transactions: (Wallet.Cardano.HydratedTx | Wallet.TxInFlight)[];
   getTxInputsValueAndAddress: (
     inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
   ) => Promise<Wallet.TxInput[]>;
   certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
     type: Wallet.Cardano.CertificateType,
   ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
-  openHWFlow: (path: string) => void;
-  walletType: WalletType;
   connectHW: (usbDevice: USBDevice) => Promise<Wallet.HardwareWalletConnection>;
   createHardwareWalletRevamped: (
     params: Readonly<{
@@ -119,4 +110,6 @@ export interface OutsideHandlesContextValue {
     wallet: Readonly<Wallet.CardanoWallet>,
     chainName?: Wallet.ChainName,
   ) => Promise<void>;
+  removeWallet: () => Promise<void>;
+  setDeletingWallet: (isDeleting: boolean) => void;
 }

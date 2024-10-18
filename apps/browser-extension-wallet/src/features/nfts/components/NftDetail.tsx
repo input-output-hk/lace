@@ -48,7 +48,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
   const handleSetAsAvatar = (image: string) => {
     setAvatar(image);
     toast.notify({ text: t('core.nftDetail.avatarUpdated') });
-    void analytics.sendEventToPostHog(PostHogAction.NFTDetailSetAsAvatarClick);
+    analytics.sendEventToPostHog(PostHogAction.NFTDetailSetAsAvatarClick);
   };
 
   return (

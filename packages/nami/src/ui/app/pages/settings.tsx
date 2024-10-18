@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -27,7 +28,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { MdModeEdit } from 'react-icons/md';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 
 import { CurrencyCode } from '../../../adapters/currency';
 import { getFavoriteIcon } from '../../../api/extension';
@@ -38,10 +39,10 @@ import { useStoreActions } from '../../store';
 import Account from '../components/account';
 import AvatarLoader from '../components/avatarLoader';
 import { ChangePasswordModal } from '../components/changePasswordModal';
-import ConfirmModal from '../components/confirmModal';
 
 import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import type { ChangePasswordModalComponentRef } from '../components/changePasswordModal';
 import type { Wallet } from '@lace/cardano';
 
 type Props = Pick<
@@ -93,6 +94,7 @@ const Settings = ({
   isValidURL,
 }: Readonly<Props>) => {
   const history = useHistory();
+  const location = useLocation();
   const containerBg = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('rgb(26, 32, 44)', 'inherit');
   const setIsLaceSwitchInProgress = useStoreActions(
@@ -101,7 +103,7 @@ const Settings = ({
 
   return (
     <Box
-      minHeight="100vh"
+      minHeight="calc(100vh - 30px)"
       display="flex"
       alignItems="center"
       flexDirection="column"
@@ -115,14 +117,16 @@ const Settings = ({
           aria-label="back button"
           rounded="md"
           onClick={() => {
-            history.goBack();
+            history.push(
+              location.pathname === '/settings/' ? '/' : '/settings/',
+            );
           }}
           variant="ghost"
           icon={<ChevronLeftIcon boxSize="7" />}
         />
       </Box>
       <Switch>
-        <Route path="/settings/general">
+        <Route path="/settings/general" exact>
           <GeneralSettings
             changePassword={changePassword}
             currency={currency}
@@ -134,13 +138,13 @@ const Settings = ({
             updateAccountMetadata={updateAccountMetadata}
           />
         </Route>
-        <Route path="/settings/whitelisted">
+        <Route path="/settings/whitelisted" exact>
           <Whitelisted
             connectedDapps={connectedDapps}
             removeDapp={removeDapp}
           />
         </Route>
-        <Route path="/settings/network">
+        <Route path="/settings/network" exact>
           <Network
             environmentName={environmentName}
             switchNetwork={switchNetwork}
@@ -151,7 +155,7 @@ const Settings = ({
             isValidURL={isValidURL}
           />
         </Route>
-        <Route path="/settings/legal">
+        <Route path="/settings/legal" exact>
           <LegalSettings
             isAnalyticsOptIn={isAnalyticsOptIn}
             handleAnalyticsChoice={handleAnalyticsChoice}
@@ -207,7 +211,7 @@ const Overview = ({ onShowLaceBanner }: { onShowLaceBanner: () => void }) => {
         variant="ghost"
         onClick={handleShowLaceBannerClick}
       >
-        Switch to Lace Mode
+        Upgrade to Lace
       </Button>
       <Box height="1" />
       <Button
@@ -216,7 +220,7 @@ const Overview = ({ onShowLaceBanner }: { onShowLaceBanner: () => void }) => {
         rightIcon={<ChevronRightIcon />}
         variant="ghost"
         onClick={() => {
-          navigate('/settings/general');
+          navigate('general');
         }}
       >
         General settings
@@ -288,7 +292,7 @@ const GeneralSettings = ({
   const [name, setName] = useState(accountName);
   const [originalName, setOriginalName] = useState(accountName);
   const { setColorMode } = useColorMode();
-  const changePasswordRef = useRef();
+  const changePasswordRef = useRef<ChangePasswordModalComponentRef>(null);
 
   const nameHandler = async () => {
     await updateAccountMetadata({ name });
@@ -396,7 +400,7 @@ const GeneralSettings = ({
         size="sm"
         onClick={() => {
           capture(Events.SettingsChangePasswordClick);
-          changePasswordRef.current.openModal();
+          changePasswordRef.current?.openModal();
         }}
       >
         Change Password

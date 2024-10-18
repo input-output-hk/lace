@@ -1,16 +1,14 @@
-import { Box } from '@chakra-ui/react';
 import React from 'react';
+
+import { Box } from '@chakra-ui/react';
+
 import { avatarToImage } from '../../../api/extension';
 
 const AvatarLoader = ({
   avatar,
   width,
   smallRobot,
-}: {
-  avatar?: string;
-  width: string;
-  smallRobot?: boolean;
-}) => {
+}: Readonly<{ avatar?: string; width: string; smallRobot?: boolean }>) => {
   const [loaded, setLoaded] = React.useState('');
 
   const fetchAvatar = async () => {
@@ -30,7 +28,7 @@ const AvatarLoader = ({
       backgroundImage={loaded ? `url(${loaded})` : 'none'}
       backgroundRepeat={'no-repeat'}
       backgroundSize={'cover'}
-    ></Box>
+    />
   );
 };
 

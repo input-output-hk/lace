@@ -49,6 +49,7 @@ export const walletStoreMock = async (
     isSharedWallet: false,
     // TODO: mock [LW-5454]
     cardanoWallet: undefined,
+    isNamiWallet: undefined,
     isWalletLocked: jest.fn(() => false),
     networkStateStatus: StateStatus.LOADED,
     resetActivityState: jest.fn(),

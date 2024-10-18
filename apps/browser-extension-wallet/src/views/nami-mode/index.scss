@@ -4,6 +4,10 @@
   font-family: sans-serif;
 }
 
+html {
+  overflow: hidden;
+}
+
 html[data-theme='dark'] {
   body:has(#nami-mode) {
     *::selection {

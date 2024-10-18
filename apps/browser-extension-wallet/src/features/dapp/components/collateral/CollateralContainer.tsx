@@ -148,29 +148,30 @@ export const DappCollateralContainer = (): React.ReactElement => {
     }
   }, [redirectToCreateFailure]);
 
-  if (!isCalculatingCollateral) {
-    if (insufficientBalance) {
-      return <InsufficientFunds />;
-    } else if (lockableUtxos.length > 0 && isInstanceOfCollateralInfoWithCollateralAmount(collateralInfo)) {
-      return (
-        <DappSetCollateral
-          dappInfo={dappInfo}
-          collateralInfo={collateralInfo}
-          reject={reject}
-          confirm={() => confirmCollateral(lockableUtxos)}
-        />
-      );
-    }
-    // Allow user to create tx to set collateral
+  if (isCalculatingCollateral || !inMemoryWallet) {
+    return <MainLoader text={t('dapp.collateral.calculating')} />;
+  }
+
+  if (insufficientBalance) {
+    return <InsufficientFunds />;
+  } else if (lockableUtxos.length > 0 && isInstanceOfCollateralInfoWithCollateralAmount(collateralInfo)) {
     return (
-      <CreateCollateral
+      <DappSetCollateral
         dappInfo={dappInfo}
         collateralInfo={collateralInfo}
-        confirm={(utxos: Wallet.Cardano.Utxo[]) => confirmCollateral(utxos)}
         reject={reject}
+        confirm={() => confirmCollateral(lockableUtxos)}
       />
     );
   }
 
-  return <MainLoader text={t('dapp.collateral.calculating')} />;
+  // Allow user to create tx to set collateral
+  return (
+    <CreateCollateral
+      dappInfo={dappInfo}
+      collateralInfo={collateralInfo}
+      confirm={(utxos: Wallet.Cardano.Utxo[]) => confirmCollateral(utxos)}
+      reject={reject}
+    />
+  );
 };

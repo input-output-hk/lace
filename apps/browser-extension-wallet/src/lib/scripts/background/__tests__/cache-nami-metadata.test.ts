@@ -43,7 +43,8 @@ describe('cacheNamiMetadataSubscription', () => {
           }
         },
         props: {
-          walletId: 'walletId'
+          walletId: 'walletId',
+          chainId: Wallet.Cardano.ChainIds.Preprod
         }
       })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -85,7 +86,7 @@ describe('cacheNamiMetadataSubscription', () => {
             }
           }
         },
-        props: { walletId: 'walletId', accountIndex: 0 }
+        props: { walletId: 'walletId', accountIndex: 0, chainId: Wallet.Cardano.ChainIds.Preprod }
       })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
@@ -126,8 +127,8 @@ describe('cacheNamiMetadataSubscription', () => {
           name: 'account #0',
           namiMode: {
             avatar: expect.any(String),
-            address: 'address1',
-            balance: '4000'
+            address: { Preprod: 'address1' },
+            balance: { Preprod: '4000' }
           }
         }
       })
@@ -155,7 +156,7 @@ describe('cacheNamiMetadataSubscription', () => {
             }
           }
         },
-        props: { walletId: 'walletId', accountIndex: 1 }
+        props: { walletId: 'walletId', accountIndex: 1, chainId: Wallet.Cardano.ChainIds.Preprod }
       })
     } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
@@ -191,8 +192,8 @@ describe('cacheNamiMetadataSubscription', () => {
           name: 'account #1',
           namiMode: {
             avatar: '0.123',
-            address: 'address2',
-            balance: '6000'
+            address: { Preprod: 'address2' },
+            balance: { Preprod: '6000' }
           }
         }
       })
