@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable camelcase */
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-null */
@@ -102,29 +103,48 @@ export const Footer = withAddressBookContext(
     const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {
         case Sections.FORM: {
-          sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxDataReviewTxClick'
+            : 'SendTransactionDataReviewTransactionClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.SUMMARY: {
-          sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick);
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxSummaryConfirmClick'
+            : 'SendTransactionSummaryConfirmClick';
+          builtTxData.importedSharedWalletTx
+            ? sendEventToPostHog(PostHogAction.SharedWalletsCosignTxSummaryConfirmClick)
+            : sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.CONFIRMATION: {
-          sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxConfirmationConfirmClick'
+            : 'SendTransactionConfirmationConfirmClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.SUCCESS_TX: {
-          sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
+          const event = isSharedWallet ? 'SharedWalletsSendAllDoneViewTxClick' : 'SendAllDoneViewTransactionClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.UNAUTHORIZED_TX:
         case Sections.FAIL_TX: {
-          sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+          const event = isSharedWallet
+            ? 'SharedWalletsSendSomethingWentWrongBackClick'
+            : 'SendSomethingWentWrongBackClick';
+          sendEventToPostHog(PostHogAction[event]);
+          break;
+        }
+        case Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON: {
+          sendEventToPostHog(PostHogAction.SharedWalletsCosignTxContinueClick);
           break;
         }
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentSection.currentSection, isPopupView]);
+    }, [currentSection.currentSection, isPopupView, isSharedWallet]);
 
     const handleReviewAddress = useCallback(
       (result: keyof typeof ACTIONS) => {
@@ -301,7 +321,8 @@ export const Footer = withAddressBookContext(
           return handleVerifyPass();
         }
         case txHasSucceeded: {
-          return onCloseSubmitedTransaction();
+          // Tab is closed sooner than analytics are sent
+          return setTimeout(() => onCloseSubmitedTransaction(), 300);
         }
         case txHasFailed: {
           setSubmitingTxState({ isPasswordValid: true });
@@ -327,13 +348,33 @@ export const Footer = withAddressBookContext(
     ]);
 
     const handleClose = () => {
-      if (currentSection.currentSection === Sections.SUCCESS_TX) {
-        sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
-      } else if (currentSection.currentSection === Sections.FAIL_TX) {
-        sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
+      switch (currentSection.currentSection) {
+        case Sections.SUCCESS_TX: {
+          const event = isSharedWallet ? 'SharedWalletsSendAllDoneCloseClick' : 'SendAllDoneCloseClick';
+          sendEventToPostHog(PostHogAction[event]);
+          break;
+        }
+        case Sections.FAIL_TX: {
+          const event = isSharedWallet
+            ? 'SharedWalletsSendSomethingWentWrongCancelClick'
+            : 'SendSomethingWentWrongCancelClick';
+          sendEventToPostHog(PostHogAction[event]);
+          break;
+        }
+        case Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON: {
+          sendEventToPostHog(PostHogAction.SharedWalletsCosignTxCancelClick);
+          break;
+        }
+        case Sections.SUMMARY: {
+          sendEventToPostHog(PostHogAction.SharedWalletsCosignTxSummaryCancelClick);
+          break;
+        }
+        // No default
       }
 
-      onClose();
+      setTimeout(() => {
+        onClose();
+      }, 300);
     };
 
     const confirmDisable = useMemo(

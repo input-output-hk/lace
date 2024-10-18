@@ -136,6 +136,7 @@ export const HeaderNavigation = ({
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
+  const { isSharedWallet } = useWalletStore();
 
   const shouldRenderArrow = isPopupView
     ? [...sectionsWithArrowIcon, Sections.FORM].includes(section.currentSection)
@@ -169,17 +170,26 @@ export const HeaderNavigation = ({
 
   const onCrossIconClick = () => {
     if (section.currentSection === Sections.SUCCESS_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, {
-        trigger_point: triggerPoint,
-        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
-      });
+      analytics.sendEventToPostHog(
+        PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneXClick' : 'SendAllDoneXClick'],
+        {
+          trigger_point: triggerPoint,
+          [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+        }
+      );
     } else if (section.currentSection === Sections.FAIL_TX || section.currentSection === Sections.UNAUTHORIZED_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, {
-        trigger_point: triggerPoint,
-        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
-      });
+      analytics.sendEventToPostHog(
+        PostHogAction[isSharedWallet ? 'SharedWalletsSendSomethingWentWrongXClick' : 'SendSomethingWentWrongXClick'],
+        {
+          trigger_point: triggerPoint,
+          [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+        }
+      );
     }
-    onClose();
+    setTimeout(() => {
+      onClose();
+      // eslint-disable-next-line no-magic-numbers
+    }, 300);
   };
 
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);

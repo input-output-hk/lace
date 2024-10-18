@@ -42,7 +42,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   const [password, setPassword] = useState('');
   const icon = mapOfWalletTypeIconProperties[kind];
 
-  const next = async () => {
+  const next = () => {
     onGenerateKeys(password);
     setPassword('');
   };
@@ -95,7 +95,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
           onChange={(event) => setPassword(event.target.value)}
           onSubmit={(event) => {
             event.preventDefault();
-            void next();
+            next();
           }}
           errorMessage={passwordErrorMessage}
         />
