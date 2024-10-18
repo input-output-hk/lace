@@ -3,6 +3,8 @@ import type { ReactElement } from 'react';
 
 import { Serialization } from '@cardano-sdk/core';
 import { Box, Image, useColorModeValue, useToast } from '@chakra-ui/react';
+import { Events } from 'features/analytics/events';
+import { useCaptureEvent } from 'features/analytics/hooks';
 import { useParams } from 'react-router-dom';
 
 import { getCollateralUtxo } from '../../../adapters/collateral';
@@ -13,6 +15,7 @@ import { useCommonOutsideHandles } from '../../../features/common-outside-handle
 import { useStoreActions } from '../../../ui/store';
 
 export const TrezorTx = (): ReactElement => {
+  const capture = useCaptureEvent();
   const backgroundColor = useColorModeValue('gray.200', 'gray.800');
   const Logo = useColorModeValue(LogoOriginal, LogoWhite);
   const { cbor, setCollateral } = useParams<{
@@ -61,6 +64,7 @@ export const TrezorTx = (): ReactElement => {
             status: 'success',
             duration: 3000,
           });
+          capture(Events.SendTransactionConfirmed);
         } else {
           toast({
             title: 'Transaction failed',
