@@ -19,21 +19,18 @@ import {
 import MiddleEllipsis from 'react-middle-ellipsis';
 import { FixedSizeList as List } from 'react-window';
 
+import { abs } from '../../utils';
 import { Scrollbars } from '../components/scrollbar';
 
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
 
-const abs = big => {
-  return big < 0 ? BigInt(big) * BigInt(-1) : big;
-};
-
 interface CustomScrollbarsProps {
   onScroll?: React.UIEventHandler;
   children?: React.ReactNode;
   forwardedRef:
-    | React.ForwardedRef<unknown>
-    | ((ref: RefObject<any> | null) => void);
+  | React.ForwardedRef<unknown>
+  | ((ref: RefObject<any> | null) => void);
   style?: React.CSSProperties;
 }
 

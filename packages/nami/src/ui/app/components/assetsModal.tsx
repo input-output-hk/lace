@@ -12,15 +12,12 @@ import {
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 
 import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import { abs } from '../../utils';
 
 import Asset from './asset';
 import { Scrollbars } from './scrollbar';
 
 import type { Asset as NamiAsset } from '../../../types/assets';
-
-const abs = big => {
-  return big < 0 ? BigInt(big) * BigInt(-1) : big;
-};
 
 export interface AssetsModalRef {
   openModal: (data: Readonly<AssetsModalData>) => void;

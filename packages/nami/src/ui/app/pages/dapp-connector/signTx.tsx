@@ -27,6 +27,7 @@ import { firstValueFrom } from 'rxjs';
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
+import { abs } from '../../../utils';
 import Account from '../../components/account';
 import AssetsModal from '../../components/assetsModal';
 import ConfirmModal from '../../components/confirmModal';
@@ -52,10 +53,6 @@ interface Props {
   account: UseAccount['activeAccount'];
   inMemoryWallet: Wallet.ObservableWallet;
 }
-
-const abs = big => {
-  return big < 0 ? BigInt(big) * BigInt(-1) : big;
-};
 
 interface Property {
   metadata: boolean;
@@ -159,27 +156,59 @@ export const SignTx = ({
   /** Verify if transaction collateral inputs are the same as the collaterals marked in the wallet */
   const checkCollateral = (
     tx: Readonly<Cardano.Tx>,
-    collaterals: readonly Cardano.Utxo[] | undefined,
+    utxos: readonly Cardano.Utxo[],
+    collaterals: readonly Cardano.Utxo[],
+    addresses: Wallet.Cardano.PaymentAddress[],
   ) => {
     const collateralInputs = tx.body.collaterals;
     if (!collateralInputs) return;
 
-    if (!collaterals?.length) {
-      setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
-      return;
-    }
-
-    // Every transaction collateralInput must be in the collaterals marked in the wallet
+    // checking all wallet utxos if used as collateral
     for (const collateralInput of collateralInputs) {
-      if (
-        !collaterals.some(
-          collateral =>
-            collateral[0].txId === collateralInput.txId &&
-            collateral[0].index === collateralInput.index,
-        )
-      ) {
-        setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
-        return;
+      for (const input of utxos) {
+        if (
+          input[0].txId === collateralInput.txId &&
+          input[0].index === collateralInput.index
+        ) {
+          // collateral utxo is less than 50 ADA. That's also fine.
+          if (
+            input[1].value.coins <= 50_000_000 &&
+            !input[1].value.assets?.size
+          ) {
+            return;
+          }
+          const collateralReturn = tx.body.collateralReturn;
+          // presence of collateral return means "account" collateral can be ignored
+          if (collateralReturn) {
+            // collateral return usually is paid to account's payment address, however, the DApp
+            // could be providing collateral so blocking the tx is not appropriate.
+            if (
+              addresses.every(address => address !== collateralReturn.address)
+            ) {
+              setIsLoading(l => ({
+                ...l,
+                warning:
+                  'Collateral return is being directed to another owner. Ensure you are not providing the collateral input',
+              }));
+            }
+            return;
+          }
+          if (!collaterals?.length) {
+            setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
+            return;
+          }
+
+          if (
+            !collaterals.some(
+              collateral =>
+                collateral[0].txId === collateralInput.txId &&
+                collateral[0].index === collateralInput.index,
+            )
+          ) {
+            setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
+            return;
+          }
+        }
       }
     }
   };
@@ -195,16 +224,10 @@ export const SignTx = ({
     const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
     getFee(tx);
 
-    setValue(
-      await getValue(
-        tx,
-        utxos,
-        request.data.addresses.map(a => a.address),
-        dappConnector.getAssetInfos,
-      ),
-    );
+    const addresses = request.data.addresses.map(a => a.address);
+    setValue(await getValue(tx, utxos, addresses, dappConnector.getAssetInfos));
 
-    checkCollateral(tx, collaterals);
+    checkCollateral(tx, utxos, collaterals, addresses);
 
     const keyHashes = getKeyHashes(
       tx,
