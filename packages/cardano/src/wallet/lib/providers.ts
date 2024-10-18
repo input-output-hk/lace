@@ -1,6 +1,7 @@
 /* eslint-disable no-new */
 import { WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
+import { Logger } from 'ts-log';
 import {
   AssetProvider,
   ChainHistoryProvider,
@@ -13,6 +14,7 @@ import {
 } from '@cardano-sdk/core';
 
 import {
+  CardanoWsClient,
   CreateHttpProviderConfig,
   assetInfoHttpProvider,
   chainHistoryHttpProvider,
@@ -56,26 +58,63 @@ export interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
   baseUrl: string;
   customSubmitTxUrl?: string;
+  logger?: Logger;
+  useWebSocket?: boolean;
 }
+
+/**
+ * Only one instance must be alive.
+ *
+ * If a new one needs to be created (ex. on network change) the previous instance needs to be closed. */
+let wsProvider: CardanoWsClient;
 
 export const createProviders = ({
   axiosAdapter,
   baseUrl,
-  customSubmitTxUrl
+  customSubmitTxUrl,
+  logger,
+  useWebSocket
 }: ProvidersConfig): WalletProvidersDependencies => {
-  const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
-    baseUrl,
-    logger: console,
-    adapter: axiosAdapter
-  };
+  if (!logger) logger = console;
+
+  const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
+
+  const assetProvider = assetInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
+  const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
+  const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+
+  if (useWebSocket) {
+    const url = new URL(baseUrl);
+
+    url.pathname = '/ws';
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    // On network change this logs an error line as follows but it is expected as long as this function is called twice
+    // 'Async error from WebSocket client' 'not-connected'
+    if (wsProvider) wsProvider.close().catch((error) => console.error(error, 'While closing wsProvider'));
+
+    wsProvider = new CardanoWsClient({ chainHistoryProvider, logger }, { url });
+
+    return {
+      assetProvider,
+      networkInfoProvider: wsProvider.networkInfoProvider,
+      txSubmitProvider,
+      stakePoolProvider,
+      utxoProvider: wsProvider.utxoProvider,
+      chainHistoryProvider: wsProvider.chainHistoryProvider,
+      rewardsProvider
+    };
+  }
 
   return {
-    assetProvider: assetInfoHttpProvider(httpProviderConfig),
+    assetProvider,
     networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
-    txSubmitProvider: createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl),
-    stakePoolProvider: stakePoolHttpProvider(httpProviderConfig),
+    txSubmitProvider,
+    stakePoolProvider,
     utxoProvider: utxoHttpProvider(httpProviderConfig),
-    chainHistoryProvider: chainHistoryHttpProvider(httpProviderConfig),
-    rewardsProvider: rewardsHttpProvider(httpProviderConfig)
+    chainHistoryProvider,
+    rewardsProvider
   };
 };

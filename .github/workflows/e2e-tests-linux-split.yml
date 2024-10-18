@@ -173,6 +173,9 @@ jobs:
           CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_MAINNET_URL }}'
           CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_PREPROD_URL }}'
           CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_PREVIEW_URL }}'
+          CARDANO_WS_SERVER_URL_MAINNET: 'wss://${{ env.CARDANO_MAINNET_URL }}'
+          CARDANO_WS_SERVER_URL_PREPROD: 'wss://${{ env.CARDANO_PREPROD_URL }}'
+          CARDANO_WS_SERVER_URL_PREVIEW: 'wss://${{ env.CARDANO_PREVIEW_URL }}'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
