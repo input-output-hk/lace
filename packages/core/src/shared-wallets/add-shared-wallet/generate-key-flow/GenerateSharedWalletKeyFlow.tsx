@@ -1,12 +1,9 @@
+/* eslint-disable unicorn/consistent-function-scoping */
 import { WalletType } from '@cardano-sdk/web-extension';
 import React, { VFC } from 'react';
 import { CopyKey } from './CopyKey';
 import { EnterPassword, WalletKind } from './EnterPassword';
 import { ActionType, GenerateSharedWalletKeyStep, Store, StoreSharedProps } from './Store';
-
-const makeCopyKeysToClipboard = (sharedWalletKey: string) => async () => {
-  await navigator.clipboard.writeText(sharedWalletKey);
-};
 
 export type LinkedWalletType = Exclude<`${WalletType}`, `${WalletType.Script}`>;
 
@@ -56,8 +53,8 @@ export const GenerateSharedWalletKeyFlow: VFC<GenerateSharedWalletKeyFlowProps> 
               dispatch({ type: ActionType.CloseFlow });
             }}
             onCopyKey={async () => {
-              await onCopyKeys?.();
-              await makeCopyKeysToClipboard(state.sharedWalletKey);
+              onCopyKeys?.();
+              await navigator.clipboard.writeText(state.sharedWalletKey);
             }}
             sharedWalletKey={state.sharedWalletKey}
           />
