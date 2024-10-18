@@ -103,44 +103,39 @@ export const Footer = withAddressBookContext(
     const sendAnalytics = useCallback(() => {
       switch (currentSection.currentSection) {
         case Sections.FORM: {
-          sendEventToPostHog(
-            PostHogAction[
-              isSharedWallet ? 'SharedWalletsSendTxDataReviewTxClick' : 'SendTransactionDataReviewTransactionClick'
-            ]
-          );
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxDataReviewTxClick'
+            : 'SendTransactionDataReviewTransactionClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.SUMMARY: {
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxSummaryConfirmClick'
+            : 'SendTransactionSummaryConfirmClick';
           builtTxData.importedSharedWalletTx
             ? sendEventToPostHog(PostHogAction.SharedWalletsCosignTxSummaryConfirmClick)
-            : sendEventToPostHog(
-                PostHogAction[
-                  isSharedWallet ? 'SharedWalletsSendTxSummaryConfirmClick' : 'SendTransactionSummaryConfirmClick'
-                ]
-              );
+            : sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.CONFIRMATION: {
-          sendEventToPostHog(
-            PostHogAction[
-              isSharedWallet ? 'SharedWalletsSendTxConfirmationConfirmClick' : 'SendTransactionConfirmationConfirmClick'
-            ]
-          );
+          const event = isSharedWallet
+            ? 'SharedWalletsSendTxConfirmationConfirmClick'
+            : 'SendTransactionConfirmationConfirmClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.SUCCESS_TX: {
-          sendEventToPostHog(
-            PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneViewTxClick' : 'SendAllDoneViewTransactionClick']
-          );
+          const event = isSharedWallet ? 'SharedWalletsSendAllDoneViewTxClick' : 'SendAllDoneViewTransactionClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.UNAUTHORIZED_TX:
         case Sections.FAIL_TX: {
-          sendEventToPostHog(
-            PostHogAction[
-              isSharedWallet ? 'SharedWalletsSendSomethingWentWrongBackClick' : 'SendSomethingWentWrongBackClick'
-            ]
-          );
+          const event = isSharedWallet
+            ? 'SharedWalletsSendSomethingWentWrongBackClick'
+            : 'SendSomethingWentWrongBackClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON: {
@@ -355,17 +350,15 @@ export const Footer = withAddressBookContext(
     const handleClose = () => {
       switch (currentSection.currentSection) {
         case Sections.SUCCESS_TX: {
-          sendEventToPostHog(
-            PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneCloseClick' : 'SendAllDoneCloseClick']
-          );
+          const event = isSharedWallet ? 'SharedWalletsSendAllDoneCloseClick' : 'SendAllDoneCloseClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.FAIL_TX: {
-          sendEventToPostHog(
-            PostHogAction[
-              isSharedWallet ? 'SharedWalletsSendSomethingWentWrongCancelClick' : 'SendSomethingWentWrongCancelClick'
-            ]
-          );
+          const event = isSharedWallet
+            ? 'SharedWalletsSendSomethingWentWrongCancelClick'
+            : 'SendSomethingWentWrongCancelClick';
+          sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON: {

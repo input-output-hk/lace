@@ -95,7 +95,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
           onChange={(event) => setPassword(event.target.value)}
           onSubmit={(event) => {
             event.preventDefault();
-            void next();
+            next();
           }}
           errorMessage={passwordErrorMessage}
         />
