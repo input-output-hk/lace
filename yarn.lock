@@ -13331,6 +13331,7 @@ __metadata:
     react-copy-to-clipboard: 5.0.4
     react-dom: 17.0.2
     react-tooltip: 4.2.7
+    ts-log: ^2.2.7
     typescript: ^4.9.5
   peerDependencies:
     react: 17.0.2
@@ -56715,6 +56716,13 @@ __metadata:
   version: 2.2.4
   resolution: "ts-log@npm:2.2.4"
   checksum: 489393cf0d46c3c86a837a589af8b0ec464cb7aa7a75ce9cdf19bf831308f5dda4dc24329359efc920bfb252d3bc5e0c109dcbcc8cb5025348c630f2e3028e24
+  languageName: node
+  linkType: hard
+
+"ts-log@npm:^2.2.7":
+  version: 2.2.7
+  resolution: "ts-log@npm:2.2.7"
+  checksum: c423a5eb54abb9471578902953814d3d0c88b3f237db016998f8998ecf982cb0f748bb8ebf93670eeba9b836ff0ce407d8065a340f3ab218ea7b9442c255b3d4
   languageName: node
   linkType: hard
 
