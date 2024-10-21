@@ -46,13 +46,16 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
     setPayload(payloadUtf8);
   };
 
-  const { walletType } = useCommonOutsideHandles();
+  const { walletType, openHWFlow } = useCommonOutsideHandles();
 
   const signDataMsg = useMemo(() => {
     const result: JSX.Element[] = [];
     for (const line of payload.split(/\r?\n/)) {
       result.push(
-        <p style={{ wordBreak: 'break-word', paddingBlockEnd: '8px' }}>
+        <p
+          key={`line${line}`}
+          style={{ wordBreak: 'break-word', paddingBlockEnd: '8px' }}
+        >
           {line}
         </p>,
       );
@@ -228,6 +231,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
       <ConfirmModal
         ref={ref}
         walletType={walletType}
+        openHWFlow={openHWFlow}
         sign={async password => {
           try {
             await request?.sign(password ?? '');

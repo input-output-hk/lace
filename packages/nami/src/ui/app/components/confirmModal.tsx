@@ -104,7 +104,8 @@ const ConfirmModal = (
 
   return (
     <>
-      {typeof openHWFlow === 'function' && typeof getCbor === 'function' && (
+      {typeof openHWFlow === 'function' &&
+      [WalletType.Ledger, WalletType.Trezor].includes(walletType) ? (
         <ConfirmModalHw
           openHWFlow={openHWFlow}
           getCbor={getCbor}
@@ -112,13 +113,14 @@ const ConfirmModal = (
           isOpen={isOpenHW}
           onClose={onCloseHW}
         />
+      ) : (
+        <ConfirmModalNormal
+          props={props}
+          isOpen={isOpenNormal}
+          onClose={onCloseNormal}
+          setPassword={setPassword}
+        />
       )}
-      <ConfirmModalNormal
-        props={props}
-        isOpen={isOpenNormal}
-        onClose={onCloseNormal}
-        setPassword={setPassword}
-      />
     </>
   );
 };
@@ -262,7 +264,7 @@ interface ConfirmModalHwProps {
   isOpen?: boolean;
   onClose: () => void;
   openHWFlow: (path: string) => void;
-  getCbor: () => Promise<string>;
+  getCbor?: () => Promise<string>;
   props: Props;
 }
 
@@ -278,7 +280,11 @@ const ConfirmModalHw = ({
   const capture = useCaptureEvent();
 
   const confirmHandler = async () => {
-    if (props.walletType === WalletType.Trezor && props.isPopup) {
+    if (
+      props.walletType === WalletType.Trezor &&
+      props.isPopup &&
+      typeof getCbor === 'function'
+    ) {
       const cbor = await getCbor();
 
       if (cbor === '') {
