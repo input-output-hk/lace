@@ -6,6 +6,7 @@ import type { RefObject } from 'react';
 import React from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
+import { toSerializableObject } from '@cardano-sdk/util';
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -120,6 +121,11 @@ export const SignTx = ({
           console.error(`error parsing tx ${tx.id} metadatum`, { error });
         }
       }
+      metadataJson = JSON.stringify(
+        toSerializableObject(metadataJson),
+        null,
+        2,
+      );
     }
 
     const certificate = tx.body.certificates;
@@ -759,9 +765,7 @@ const DetailsModalComponent = (
                     >
                       <Scrollbars autoHide>
                         <pre>
-                          <code>
-                            {JSON.stringify(property.metadata, null, 2)}
-                          </code>
+                          <code>{property.metadata}</code>
                         </pre>
                       </Scrollbars>
                     </Box>
