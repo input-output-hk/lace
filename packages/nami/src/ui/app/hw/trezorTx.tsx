@@ -36,6 +36,7 @@ export const TrezorTx = (): ReactElement => {
   React.useEffect(() => {
     withSignTxConfirmation(async () => {
       try {
+        capture(Events.SendTransactionConfirmationConfirmClick);
         const serializableTx = Serialization.Transaction.fromCbor(
           cbor as unknown as Serialization.TxCBOR,
         );
