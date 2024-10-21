@@ -7,6 +7,7 @@ import {
   totalAddressInputsValueInspector,
   totalAddressOutputsValueInspector,
   Cardano,
+  Serialization,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { toAsset } from 'adapters/assets';
@@ -299,7 +300,12 @@ export const getValueWithSdk = async (
     Cardano.PaymentAddress,
     Omit<ExternalOutput, 'value'> & { value: Cardano.Value },
   ][] = externalOutputsByAddress.map(([address, outputs]) => {
-    const datumHash = outputs.find(output => !!output.datumHash)?.datumHash;
+    let datumHash = outputs.find(output => !!output.datumHash)?.datumHash;
+    const datum = outputs.find(output => !!output.datum)?.datum;
+    if (!datumHash && datum !== undefined) {
+      datumHash = Serialization.PlutusData.fromCore(datum).hash();
+    }
+
     return [
       address,
       {
