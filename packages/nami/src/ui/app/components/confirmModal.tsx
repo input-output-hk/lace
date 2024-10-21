@@ -24,8 +24,8 @@ import { MdUsb } from 'react-icons/md';
 import { ERROR } from '../../../config/config';
 
 import type { PasswordObj as Password } from '@lace/core';
-import { useCaptureEvent } from 'features/analytics/hooks';
-import { Events } from 'features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { Events } from '../../../features/analytics/events';
 
 interface Props {
   ready?: boolean;
