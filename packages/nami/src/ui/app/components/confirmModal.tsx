@@ -24,6 +24,8 @@ import { MdUsb } from 'react-icons/md';
 import { ERROR } from '../../../config/config';
 
 import type { PasswordObj as Password } from '@lace/core';
+import { useCaptureEvent } from 'features/analytics/hooks';
+import { Events } from 'features/analytics/events';
 
 interface Props {
   ready?: boolean;
@@ -273,6 +275,7 @@ const ConfirmModalHw = ({
 }: Readonly<ConfirmModalHwProps>) => {
   const [waitReady, setWaitReady] = React.useState(true);
   const [error, setError] = React.useState('');
+  const capture = useCaptureEvent();
 
   const confirmHandler = async () => {
     if (props.walletType === WalletType.Trezor && props.isPopup) {
@@ -294,6 +297,7 @@ const ConfirmModalHw = ({
       try {
         await props.sign();
         await props.onConfirm(true);
+        capture(Events.SendTransactionConfirmed);
       } catch (error_) {
         console.error(error_);
         if (error_ === ERROR.submit) props.onConfirm(false, error_);
