@@ -39,6 +39,22 @@ inputs:
     description: 'Url for sanchonet env'
     required: false
     default: 'https://dev-sanchonet.lw.iog.io'
+  CARDANO_WS_SERVER_URL_MAINNET:
+    description: 'WS url for mainnet env'
+    required: false
+    default: 'wss://dev-mainnet.lw.iog.io'
+  CARDANO_WS_SERVER_URL_PREPROD:
+    description: 'WS url for preprod env'
+    required: false
+    default: 'wss://dev-preprod.lw.iog.io'
+  CARDANO_WS_SERVER_URL_PREVIEW:
+    description: 'WS url for preview env'
+    required: false
+    default: 'wss://dev-preview.lw.iog.io'
+  CARDANO_WS_SERVER_URL_SANCHONET:
+    description: 'WS url for sanchonet env'
+    required: false
+    default: 'wss://dev-sanchonet.lw.iog.io'
 runs:
   using: 'composite'
   steps:
@@ -95,4 +111,8 @@ runs:
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
         CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
         CARDANO_SERVICES_URL_SANCHONET: ${{ inputs.CARDANO_SERVICES_URL_SANCHONET }}
+        CARDANO_WS_SERVER_URL_MAINNET: ${{ inputs.CARDANO_WS_SERVER_URL_MAINNET }}
+        CARDANO_WS_SERVER_URL_PREPROD: ${{ inputs.CARDANO_WS_SERVER_URL_PREPROD }}
+        CARDANO_WS_SERVER_URL_PREVIEW: ${{ inputs.CARDANO_WS_SERVER_URL_PREVIEW }}
+        CARDANO_WS_SERVER_URL_SANCHONET: ${{ inputs.CARDANO_WS_SERVER_URL_SANCHONET }}
       run: yarn browser build

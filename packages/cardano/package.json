@@ -40,16 +40,16 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.21.1",
-    "@cardano-sdk/core": "0.41.0",
+    "@cardano-sdk/cardano-services-client": "0.21.4",
+    "@cardano-sdk/core": "0.41.1",
     "@cardano-sdk/crypto": "0.1.30",
-    "@cardano-sdk/hardware-ledger": "0.12.8",
-    "@cardano-sdk/hardware-trezor": "0.6.7",
-    "@cardano-sdk/key-management": "0.24.6",
-    "@cardano-sdk/tx-construction": "0.21.8",
+    "@cardano-sdk/hardware-ledger": "0.12.9",
+    "@cardano-sdk/hardware-trezor": "0.6.8",
+    "@cardano-sdk/key-management": "0.24.7",
+    "@cardano-sdk/tx-construction": "0.21.9",
     "@cardano-sdk/util": "0.15.5",
-    "@cardano-sdk/wallet": "0.44.8",
-    "@cardano-sdk/web-extension": "0.34.7",
+    "@cardano-sdk/wallet": "0.44.12",
+    "@cardano-sdk/web-extension": "0.34.11",
     "@lace/common": "0.1.0",
     "@ledgerhq/devices": "^8.2.1",
     "@stablelib/chacha20poly1305": "1.0.1",
@@ -71,11 +71,12 @@
     "webextension-polyfill": "0.10.0"
   },
   "devDependencies": {
-    "@cardano-sdk/util-dev": "0.23.3",
+    "@cardano-sdk/util-dev": "0.23.6",
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "@types/webextension-polyfill": "0.10.0",
     "axios": "^1.7.4",
     "rollup-plugin-polyfill-node": "^0.8.0",
+    "ts-log": "^2.2.7",
     "typescript": "^4.9.5"
   },
   "peerDependencies": {

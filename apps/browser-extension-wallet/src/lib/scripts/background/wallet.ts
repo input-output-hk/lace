@@ -32,8 +32,7 @@ import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
-
-const logger = console;
+import { logger } from '@lace/common';
 
 // It is important that this file is not exported from index,
 // because creating wallet repository with store creates an actual pouchdb database

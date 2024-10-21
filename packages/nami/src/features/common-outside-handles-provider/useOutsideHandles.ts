@@ -9,6 +9,7 @@ export const useOutsideHandles = ():
   | CommonOutsideHandlesContextValue
   | never => {
   const contextValue = useContext(context);
-  if (!contextValue) throw new Error('OutsideHandles context not defined');
+  if (!contextValue)
+    throw new Error('Common OutsideHandles context not defined');
   return contextValue;
 };

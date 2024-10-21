@@ -4,7 +4,8 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.CREATE_PAPER_WALLET]: false,
   [ExperimentName.RESTORE_PAPER_WALLET]: false,
   [ExperimentName.USE_SWITCH_TO_NAMI_MODE]: false,
-  [ExperimentName.SHARED_WALLETS]: false
+  [ExperimentName.SHARED_WALLETS]: false,
+  [ExperimentName.WEBSOCKET_API]: false
 });
 
 export const experiments: ExperimentsConfig = {
@@ -21,6 +22,10 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.SHARED_WALLETS]: {
+    value: false,
+    default: false
+  },
+  [ExperimentName.WEBSOCKET_API]: {
     value: false,
     default: false
   }

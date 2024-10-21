@@ -5,8 +5,10 @@ import 'focus-visible/dist/focus-visible';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { theme } from '../src/ui/theme';
-import { Scrollbars } from '../src/ui/app/components/scrollbar';
+import { Scrollbars } from 'react-custom-scrollbars-2';
 import { OutsideHandlesProvider } from '../src/features/outside-handles-provider';
+import { CommonOutsideHandlesProvider } from '../src/features/common-outside-handles-provider';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const noop = (async () => {}) as any;
 const mock = {} as any;
@@ -23,55 +25,103 @@ const preview: Preview = {
   loaders: [],
 };
 
-const cardanoCoin = {
-  id: '1',
-  name: 'Cardano',
-  decimals: 6,
-  symbol: 't₳'
-};
-
 export const decorators = [
   (Story, { parameters: { colorMode, ...props } }) => (
     <OutsideHandlesProvider
-      environmentName='Preprod'
-      getCustomSubmitApiForNetwork={
-        () => ({
-          status: true,
-          url: 'https://cardano-preprod.blockfrost.io/api/v0'
-        })
-      }
-      cardanoCoin={cardanoCoin}
-      sendEventToPostHog={noop}
-      theme="light"
-      fiatCurrency="USD"
-      currentChain={{ networkId: 0, networkMagic: 0 }}
+      collateralFee={BigInt(200)}
+      isInitializingCollateral={false}
+      initializeCollateralTx={noop}
+      submitCollateralTx={noop}
+      addAccount={noop}
+      removeDapp={noop}
+      connectedDapps={[]}
       isAnalyticsOptIn={false}
-      walletAddress=""
-      inMemoryWallet={mock}
-      walletManager={mock}
-      walletRepository={mock}
       handleAnalyticsChoice={noop}
       createWallet={noop}
-      getMnemonic={noop}
       deleteWallet={noop}
+      fiatCurrency="USD"
       setFiatCurrency={noop}
+      theme="light"
       setTheme={noop}
-      withSignTxConfirmation={noop}
+      currentChain={{ networkId: 0, networkMagic: 0 }}
+      cardanoPrice={0.3}
+      walletManager={mock}
+      walletRepository={mock}
+      switchNetwork={noop}
+      environmentName="Preprod"
+      availableChains={['Mainnet', 'Preprod']}
+      enableCustomNode={noop}
+      getCustomSubmitApiForNetwork={() => ({
+        status: true,
+        url: 'https://cardano-preprod.blockfrost.io/api/v0',
+      })}
+      defaultSubmitApi={''}
+      isValidURL={() => true}
+      setAvatar={noop}
+      buildDelegation={noop}
+      signAndSubmitTransaction={noop}
+      passwordUtil={{
+        clearSecrets: noop,
+        password: { input: noop, value: 'pw' },
+        setPassword: noop,
+      }}
+      delegationTxFee="200"
+      delegationStoreDelegationTxBuilder={noop}
+      collateralTxBuilder={noop}
+      setSelectedStakePool={noop}
+      isBuildingTx={false}
+      stakingError={''}
+      getStakePoolInfo={noop}
+      resetDelegationState={noop}
+      hasNoFunds={false}
+      switchWalletMode={noop}
+      openExternalLink={noop}
+      walletAddresses={['']}
+      eraSummaries={[
+        {
+          parameters: {
+            epochLength: 20,
+            slotLength: 20000 as any,
+          },
+          start: {
+            slot: 1,
+            time: new Date(),
+          },
+        },
+      ]}
+      transactions={[]}
+      getTxInputsValueAndAddress={noop}
+      certificateInspectorFactory={noop}
+      connectHW={noop}
+      createHardwareWalletRevamped={noop}
+      saveHardwareWallet={noop}
+      removeWallet={noop}
+      setDeletingWallet={noop}
     >
-      <ChakraProvider
-        theme={extendTheme({
-          ...theme,
-          config: { initialColorMode: colorMode },
-        })}
+      <CommonOutsideHandlesProvider
+        cardanoCoin={{ symbol: 'ADA', decimals: 6, name: 'cardano', id: '1' }}
+        walletType={WalletType.InMemory}
+        openHWFlow={noop}
+        inMemoryWallet={mock}
+        sendEventToPostHog={noop}
+        handleResolver={noop}
+        withSignTxConfirmation={noop}
       >
-        <Scrollbars
-          id="scroll"
-          style={{ width: '100vw', height: '100vh' }}
-          autoHide
+        <ChakraProvider
+          theme={extendTheme({
+            ...theme,
+            config: { initialColorMode: colorMode },
+          })}
         >
-          {Story({ args: { colorMode, ...props } })}
-        </Scrollbars>
-      </ChakraProvider>
+          <Scrollbars
+            id="scroll"
+            style={{ width: '100vw', height: '100vh' }}
+            autoHide
+          >
+            {Story({ args: { colorMode, ...props } })}
+          </Scrollbars>
+        </ChakraProvider>
+      </CommonOutsideHandlesProvider>
     </OutsideHandlesProvider>
   ),
 ];

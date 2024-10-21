@@ -2,16 +2,16 @@
 /* eslint-disable unicorn/no-null */
 import {
   Cardano,
+  Serialization,
   ProviderError,
   ProviderFailure,
-  Serialization,
-  type HandleProvider,
 } from '@cardano-sdk/core';
 import { createAvatar } from '@dicebear/avatars';
 import * as style from '@dicebear/avatars-bottts-sprites';
 
 import { APIError, TxSendError } from '../../config/config';
 
+import type { HandleProvider } from '@cardano-sdk/core';
 import type { Wallet } from '@lace/cardano';
 
 export const getFavoriteIcon = (domain: string) => {

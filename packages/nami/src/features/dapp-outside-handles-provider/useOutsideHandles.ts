@@ -7,6 +7,6 @@ import type { DappOutsideHandlesContextValue } from './types';
 
 export const useOutsideHandles = (): DappOutsideHandlesContextValue | never => {
   const contextValue = useContext(context);
-  if (!contextValue) throw new Error('OutsideHandles context not defined');
+  if (!contextValue) throw new Error('Dapp OutsideHandles context not defined');
   return contextValue;
 };
