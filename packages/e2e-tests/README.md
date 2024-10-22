@@ -56,6 +56,8 @@ UI-mapped gherkin tests for the Lace browser extension
     environment variable)
 - `TEST_DAPP_URL=<url>`(required)
   - url for test DApp (only for DApp Connector tests)
+- `SERVICE_WORKER_LOGS=true|false` default=false (optional)
+  - enables service worker logs collection
 
 ## Run single feature file with params
 
