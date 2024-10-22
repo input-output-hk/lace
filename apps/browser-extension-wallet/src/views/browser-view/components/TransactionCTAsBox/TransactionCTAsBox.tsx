@@ -27,10 +27,17 @@ export const TransactionCTAsBox = (): React.ReactElement => {
   };
 
   const openSend = () => {
-    // eslint-disable-next-line camelcase
-    analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
+    isSharedWallet
+      ? analytics.sendEventToPostHog(PostHogAction.SharedWalletsSendClick)
+      : // eslint-disable-next-line camelcase
+        analytics.sendEventToPostHog(PostHogAction.SendClick, { trigger_point: SendFlowTriggerPoints.SEND_BUTTON });
     openSendTransactionDrawer();
     setTriggerPoint(SendFlowTriggerPoints.SEND_BUTTON);
+  };
+
+  const onCoSignClick = () => {
+    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCosignClick);
+    openCoSignTransactionDrawer();
   };
 
   return (
@@ -38,7 +45,7 @@ export const TransactionCTAsBox = (): React.ReactElement => {
       buttonClassName={styles.btn}
       onSendClick={openSend}
       onReceiveClick={openReceive}
-      onCoSignClick={isSharedWallet ? openCoSignTransactionDrawer : undefined}
+      onCoSignClick={isSharedWallet ? onCoSignClick : undefined}
     />
   );
 };

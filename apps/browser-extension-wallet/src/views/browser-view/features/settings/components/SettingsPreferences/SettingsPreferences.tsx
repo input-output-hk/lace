@@ -52,7 +52,9 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
     await posthog.setOptedInBeta(isOptedIn);
     setIsOptInBeta(isOptedIn);
 
-    await analytics.sendEventToPostHog(PostHogAction.SettingsBetaProgramClick, { isOptedIn });
+    await analytics.sendEventToPostHog(
+      isOptedIn ? PostHogAction.SettingsBetaProgramOptInClick : PostHogAction.SettingsBetaProgramOptOutClick
+    );
   };
 
   return (
