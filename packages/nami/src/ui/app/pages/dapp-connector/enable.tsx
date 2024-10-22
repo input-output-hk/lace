@@ -1,17 +1,51 @@
+import React, { useEffect, useState } from 'react';
+
 import { CheckIcon } from '@chakra-ui/icons';
 import { Box, Button, Text, Image, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
-import { getFavoriteIcon, setWhitelisted } from '../../../../api/extension';
-import { APIError } from '../../../../config/config';
 
-import Account from '../../components/account';
-import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { Events } from '../../../../features/analytics/events';
+import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import Account from '../../components/account';
 
-const Enable = ({ request, controller }) => {
+import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+
+interface Props {
+  dappConnector: DappConnector;
+  controller: (
+    authorization: 'allow' | 'deny',
+    url: string,
+    cleanupCb: () => void,
+  ) => void;
+  accountName: string;
+  accountAvatar?: string;
+}
+
+export const Enable = ({
+  dappConnector,
+  controller,
+  accountName,
+  accountAvatar,
+}: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const background = useColorModeValue('gray.100', 'gray.700');
   const containerBg = useColorModeValue('white', 'gray.800');
+
+  const [dappInfo, setDappInfo] = useState<{
+    logo: string;
+    name: string;
+    url: string;
+    domain: string;
+  }>();
+  useEffect(() => {
+    dappConnector
+      .getDappInfo()
+      .then(({ logo, name, url }) => {
+        setDappInfo({ logo, name, url, domain: url.split('//')[1] });
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
 
   return (
     <Box
@@ -22,7 +56,7 @@ const Enable = ({ request, controller }) => {
       position="relative"
       background={containerBg}
     >
-      <Account />
+      <Account name={accountName} avatar={accountAvatar} />
       <Box h={14} />
       <Box
         display="flex"
@@ -39,15 +73,10 @@ const Enable = ({ request, controller }) => {
           alignItems={'center'}
           justifyContent={'center'}
         >
-          <Image
-            draggable={false}
-            width={6}
-            height={6}
-            src={getFavoriteIcon(request.origin)}
-          />
+          <Image draggable={false} width={6} height={6} src={dappInfo?.logo} />
         </Box>
         <Box height="3" />
-        <Text fontWeight="bold">{request.origin.split('//')[1]}</Text>
+        <Text fontWeight="bold">{dappInfo?.domain ?? 'loading...'}</Text>
         <Box h={14} />
         <Box>This app would like to:</Box>
         <Box h={4} />
@@ -84,9 +113,10 @@ const Enable = ({ request, controller }) => {
           height={'50px'}
           width={'180px'}
           onClick={async () => {
-            capture(Events.DappConnectorAuthorizeDappCancelClick);
-            await controller.returnData({ error: APIError.Refused });
-            window.close();
+            await capture(Events.DappConnectorAuthorizeDappCancelClick);
+            controller('deny', dappInfo?.url ?? '', () => {
+              window.close();
+            });
           }}
         >
           Cancel
@@ -97,10 +127,10 @@ const Enable = ({ request, controller }) => {
           width={'180px'}
           colorScheme="teal"
           onClick={async () => {
-            capture(Events.DappConnectorAuthorizeDappAuthorizeClick);
-            await setWhitelisted(request.origin);
-            await controller.returnData({ data: true });
-            window.close();
+            await capture(Events.DappConnectorAuthorizeDappAuthorizeClick);
+            controller('allow', dappInfo?.url ?? '', () => {
+              window.close();
+            });
           }}
         >
           Access
@@ -109,5 +139,3 @@ const Enable = ({ request, controller }) => {
     </Box>
   );
 };
-
-export default Enable;

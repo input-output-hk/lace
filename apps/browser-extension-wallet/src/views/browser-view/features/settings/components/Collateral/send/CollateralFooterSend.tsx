@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button } from '@lace/common';
+import { Button, toast } from '@lace/common';
 import styles from '../Collateral.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useBackgroundServiceAPIContext } from '@providers';
@@ -52,6 +52,7 @@ export const CollateralFooterSend = ({
       if (popupView && !isInMemory)
         return await backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.COLLATERAL_SETTINGS });
       await submitTx();
+      toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
       if (isInMemory) onClose();
     } catch {
       if (!isInMemory) {

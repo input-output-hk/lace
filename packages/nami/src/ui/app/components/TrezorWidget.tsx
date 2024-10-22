@@ -1,14 +1,21 @@
-import { CloseIcon } from '@chakra-ui/icons';
-import { Box, Modal, ModalContent, ModalOverlay, useDisclosure } from '@chakra-ui/react';
 import React from 'react';
+
+import { CloseIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Modal,
+  ModalContent,
+  ModalOverlay,
+  useDisclosure,
+} from '@chakra-ui/react';
 
 const TrezorWidget = React.forwardRef((props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
-    closeModal() {
+    closeModal: () => {
       onClose();
     },
   }));
@@ -59,5 +66,7 @@ const TrezorWidget = React.forwardRef((props, ref) => {
     </Modal>
   );
 });
+
+TrezorWidget.displayName = 'TrezorWidget';
 
 export default TrezorWidget;

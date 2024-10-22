@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import type { PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+
 import {
   Box,
   Avatar,
@@ -7,34 +11,42 @@ import {
   Button,
   Collapse,
 } from '@chakra-ui/react';
+import { BsArrowUpRight } from 'react-icons/bs';
+import { useHistory } from 'react-router-dom';
+
+import { Events } from '../../../features/analytics/events';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useStoreActions, useStoreState } from '../../store';
-import React, { PropsWithChildren } from 'react';
+
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
-import { useHistory } from 'react-router-dom';
-import { BsArrowUpRight } from 'react-icons/bs';
-import { AssetInput } from '../../../types/assets';
-import { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
-import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { Events } from '../../../features/analytics/events';
+
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
+import type { Asset as NamiAsset } from '../../../types/assets';
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
-  React.useEffect(() => {
+  React.useEffect((): (() => void) => {
     isMounted.current = true;
     return () => (isMounted.current = false);
   }, []);
   return isMounted;
 };
 
-type Props = PropsWithChildren<{
-  asset: AssetInput;
-  enableSend: boolean;
-  background: string;
-  color: string;
-}> & Pick<OutsideHandlesContextValue, 'cardanoCoin'>;
+type Props = Pick<CommonOutsideHandlesContextValue, 'cardanoCoin'> &
+  PropsWithChildren<{
+    asset: NamiAsset;
+    enableSend?: boolean;
+    background?: string;
+    color?: string;
+  }>;
 
-const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
+const Asset = ({
+  asset,
+  enableSend,
+  cardanoCoin,
+  ...props
+}: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const background = useColorModeValue('gray.100', 'gray.700');
   const color = useColorModeValue('rgb(26, 32, 44)', 'inherit');
@@ -51,8 +63,38 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
 
   const onShowDetails = () => {
     if (asset.unit === 'lovelace') return;
-    setShow(!show)
-  }
+    setShow(!show);
+  };
+
+  const fallback = useMemo(() => {
+    if (asset.image) {
+      return <Fallback name={asset.name} />;
+    } else if (asset.unit === 'lovelace') {
+      return (
+        <Box
+          width={'full'}
+          height={'full'}
+          background={'blue.500'}
+          color={'white'}
+          display={'flex'}
+          alignItems={'center'}
+          justifyContent={'center'}
+          fontSize={'xl'}
+          fontWeight={'normal'}
+        >
+          {cardanoCoin.symbol}
+        </Box>
+      );
+    }
+    return (
+      <Avatar
+        fontWeight={'normal'}
+        width="full"
+        height="full"
+        name={asset.name}
+      />
+    );
+  }, [asset, cardanoCoin]);
 
   return (
     <Box
@@ -80,34 +122,7 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
               draggable={false}
               width="full"
               src={asset.image}
-              fallback={
-                !asset.image ? (
-                  asset.unit === 'lovelace' ? (
-                    <Box
-                      width={'full'}
-                      height={'full'}
-                      background={'blue.500'}
-                      color={'white'}
-                      display={'flex'}
-                      alignItems={'center'}
-                      justifyContent={'center'}
-                      fontSize={'xl'}
-                      fontWeight={'normal'}
-                    >
-                      {cardanoCoin.symbol}
-                    </Box>
-                  ) : (
-                    <Avatar
-                      fontWeight={'normal'}
-                      width="full"
-                      height="full"
-                      name={asset.name}
-                    />
-                  )
-                ) : (
-                  <Fallback name={asset.name} />
-                )
-              }
+              fallback={fallback}
             />
           </Box>
 
@@ -139,7 +154,13 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
           <Box width="140px" fontWeight="bold" fontSize={12}>
             Policy
           </Box>
-          <Box fontSize={10} width="340px" onClick={e => e.stopPropagation()}>
+          <Box
+            fontSize={10}
+            width="340px"
+            onClick={e => {
+              e.stopPropagation();
+            }}
+          >
             <Copy label="Copied policy" copy={asset.policy}>
               {asset.policy}
             </Copy>
@@ -150,7 +171,13 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
           <Box width="140px" fontWeight="bold" fontSize={12}>
             Asset
           </Box>
-          <Box fontSize={10} width="340px" onClick={e => e.stopPropagation()}>
+          <Box
+            fontSize={10}
+            width="340px"
+            onClick={e => {
+              e.stopPropagation();
+            }}
+          >
             <Copy label="Copied asset" copy={asset.fingerprint}>
               {asset.fingerprint}
             </Copy>
@@ -159,21 +186,21 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
 
         <Box h={2} />
         {enableSend && (
-            <Box width="full" display="flex" justifyContent="right">
-              <Button
-                mr="4"
-                background={background == 'gray.100' ? 'gray.200' : 'gray.600'}
-                size="xs"
-                rightIcon={<BsArrowUpRight />}
-                onClick={e => {
-                  setValue({ ...value, assets: [asset] });
-                  capture(Events.SendClick);
-                  navigate('/send');
-                }}
-              >
-                Send
-              </Button>
-            </Box>
+          <Box width="full" display="flex" justifyContent="right">
+            <Button
+              mr="4"
+              background={background == 'gray.100' ? 'gray.200' : 'gray.600'}
+              size="xs"
+              rightIcon={<BsArrowUpRight />}
+              onClick={e => {
+                setValue({ ...value, assets: [{ ...asset, input: '' }] });
+                capture(Events.SendClick);
+                navigate('/send');
+              }}
+            >
+              Send
+            </Button>
+          </Box>
         )}
         <Box h={2} />
       </Collapse>
@@ -181,11 +208,13 @@ const Asset = ({ asset, enableSend, cardanoCoin, ...props }: Props) => {
   );
 };
 
-const Fallback = ({ name }) => {
+const Fallback = ({ name }: Readonly<{ name?: string }>) => {
   const [timedOut, setTimedOut] = React.useState(false);
   const isMounted = useIsMounted();
   React.useEffect(() => {
-    setTimeout(() => isMounted.current && setTimedOut(true), 30000);
+    setTimeout(() => {
+      isMounted.current && setTimedOut(true);
+    }, 30_000);
   }, []);
   if (timedOut) return <Avatar name={name} />;
   return <Skeleton width="full" height="full" />;

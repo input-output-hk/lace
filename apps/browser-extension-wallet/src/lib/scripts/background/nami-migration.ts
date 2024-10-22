@@ -1,6 +1,6 @@
 import { runtime } from 'webextension-polyfill';
-import * as laceMigrationClient from '@xsy/nami-migration-tool/dist/cross-extension-messaging/lace-migration-client.extension';
-import { MigrationState } from '@xsy/nami-migration-tool/dist/migrator/migration-state.data';
+import * as laceMigrationClient from '@src/features/nami-migration/migration-tool/cross-extension-messaging/lace-migration-client.extension';
+import { MigrationState } from '@src/features/nami-migration/migration-tool/migrator/migration-state.data';
 import { walletRepository, walletManager, getBaseDbName } from './wallet';
 
 import { run, CollateralRepository } from './nami-migration-runner';
@@ -20,8 +20,6 @@ const startMigration = async () => {
   const state = await laceMigrationClient.requestMigrationData();
 
   await run({ walletRepository, walletManager, state, collateralRepository });
-
-  await laceMigrationClient.completeMigration();
 
   return {
     currency: state.currency === 'usd' ? currencyCode.USD : currencyCode.EUR,

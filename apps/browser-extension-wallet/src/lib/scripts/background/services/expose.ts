@@ -5,7 +5,7 @@ import { UserIdService } from './userIdService';
 import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface } from '@lib/scripts/types';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
-import * as laceMigrationClient from '@xsy/nami-migration-tool/dist/cross-extension-messaging/lace-migration-client.extension';
+import * as laceMigrationClient from '@src/features/nami-migration/migration-tool/cross-extension-messaging/lace-migration-client.extension';
 
 // This was hoisted from userIdService.ts so that it's not being exposed while running the unit tests of the class itself.
 // It might be a good idea to follow the pattern and hoist all exposeApi calls to this file.

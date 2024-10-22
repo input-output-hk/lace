@@ -1,10 +1,15 @@
 import React from 'react';
 
-import Logo from '../../../assets/img/logoWhite.svg';
 import { Box, Text, Image, useColorModeValue } from '@chakra-ui/react';
+
+import Logo from '../../../assets/img/logoWhite.svg';
+
 import AvatarLoader from './avatarLoader';
 
-const Account = ({ name, avatar }: { name: string; avatar?: string }) => {
+const Account = ({
+  name,
+  avatar,
+}: Readonly<{ name: string; avatar?: string }>) => {
   const avatarBg = useColorModeValue('white', 'gray.700');
   const panelBg = useColorModeValue('#349EA3', 'gray.800');
 

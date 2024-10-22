@@ -5,10 +5,6 @@ import { useColorMode } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn, userEvent, within } from '@storybook/test';
 
-import {
-  createHWAccounts,
-  getHwAccounts,
-} from '../../../api/extension/api.mock';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
 
 import { HWConnectFlow } from './hw';
@@ -110,8 +106,6 @@ const meta: Meta<typeof HWConnectStory> = {
     });
 
     return () => {
-      getHwAccounts.mockClear();
-      createHWAccounts.mockClear();
       useOutsideHandles.mockClear();
     };
   },

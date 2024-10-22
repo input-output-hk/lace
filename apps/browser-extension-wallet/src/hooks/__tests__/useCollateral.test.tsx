@@ -5,7 +5,6 @@
 /* eslint-disable import/imports-first */
 const mockUseMaxAda = jest.fn();
 const mockUseBuitTxState = jest.fn();
-const mockToastNotify = jest.fn();
 const mockUseSyncingTheFirstTime = jest.fn();
 const mockCreateTxBuilder = jest.fn();
 const mockUseWalletStore = jest.fn();
@@ -68,13 +67,6 @@ jest.mock('@hooks/useMaxAda', () => ({
 jest.mock('@hooks/useSyncingTheFirstTime', () => ({
   ...jest.requireActual<any>('@hooks/useSyncingTheFirstTime'),
   useSyncingTheFirstTime: mockUseSyncingTheFirstTime
-}));
-
-jest.mock('@lace/common', () => ({
-  ...jest.requireActual<any>('@lace/common'),
-  toast: {
-    notify: mockToastNotify
-  }
 }));
 
 const getWrapper =
@@ -262,7 +254,6 @@ describe('Testing useCollateral hook', () => {
           expect(mockSetUnspendable).not.toHaveBeenCalled();
           expect(inspect).not.toHaveBeenCalled();
           expect(mockSetBuiltTxData).not.toHaveBeenCalled();
-          expect(mockToastNotify).not.toHaveBeenCalled();
         });
 
         mockUseMaxAda.mockReset();
@@ -280,7 +271,6 @@ describe('Testing useCollateral hook', () => {
           expect(mockSetUnspendable).not.toHaveBeenCalled();
           expect(inspect).not.toHaveBeenCalled();
           expect(mockSetBuiltTxData).not.toHaveBeenCalled();
-          expect(mockToastNotify).not.toHaveBeenCalled();
         });
       });
 
@@ -311,7 +301,6 @@ describe('Testing useCollateral hook', () => {
 
         await waitFor(() => {
           expect(mockSubmitTx).toBeCalledWith(signedTx);
-          expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).not.toBeCalled();
         });
@@ -333,7 +322,6 @@ describe('Testing useCollateral hook', () => {
 
         await waitFor(() => {
           expect(mockSubmitTx).toBeCalledWith(signedTx);
-          expect(mockToastNotify).toBeCalledWith({ text: 'Collateral added' });
           expect(mockSetUnspendable).toBeCalledWith([utxo]);
           expect(mockSetBuiltTxData).toBeCalledWith({
             uiTx: {

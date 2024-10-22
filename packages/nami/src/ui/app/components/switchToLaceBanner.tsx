@@ -14,9 +14,11 @@ import { useStoreActions, useStoreState } from '../../store';
 import LaceSecondaryButton from './laceSecondaryButton';
 
 export const getLaceVideoBackgroundSrc = () => {
-  return typeof chrome !== 'undefined' &&
-    chrome.runtime?.getURL('laceVideoBackground.mp4')
-    || laceVideoBackground;
+  return (
+    (typeof chrome !== 'undefined' &&
+      chrome.runtime?.getURL('laceVideoBackground.mp4')) ||
+    laceVideoBackground
+  );
 };
 
 interface Props {
@@ -154,7 +156,7 @@ export const SwitchToLaceBanner = ({ switchWalletMode }: Props) => {
                     bgClip="text"
                     fontWeight="extrabold"
                   >
-                    Your Nami wallet evolved!
+                    Upgrade your wallet!
                   </Text>
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -165,11 +167,11 @@ export const SwitchToLaceBanner = ({ switchWalletMode }: Props) => {
                     }}
                   >
                     <Text fontSize="md" mt="3" color="gray.900">
-                      Enable Lace Mode to unlock access to new and exciting Web
-                      3 features
+                      Enable Lace mode to access new and exciting Web3 features.
                     </Text>
                     <Text mt="3" fontSize="sm" color="gray.600">
-                      You can return to the "Nami Mode" at any time
+                      You can revert to Nami mode at any time via the Settings
+                      page.
                     </Text>
                   </motion.div>
                 </div>
@@ -199,7 +201,7 @@ export const SwitchToLaceBanner = ({ switchWalletMode }: Props) => {
                     bgGradient="linear(180deg, transparent, rgba(255, 255, 255, 0.9) 50%)"
                   />
                   <LaceButton onClick={handleSwitchWalletMode} block>
-                    Activate Lace Mode
+                    Activate Lace mode
                   </LaceButton>
                   <LaceSecondaryButton
                     onClick={() => {

@@ -8,7 +8,6 @@ module.exports = {
     'plugin:unicorn/recommended',
     'plugin:storybook/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:@typescript-eslint/strict',
     'plugin:functional/external-typescript-recommended',
     'plugin:functional/lite',
@@ -90,6 +89,7 @@ module.exports = {
     '@typescript-eslint/consistent-type-exports': 'error',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'react/no-multi-comp': 'off',
     '@typescript-eslint/naming-convention': [
       'error',
       {

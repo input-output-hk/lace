@@ -31,6 +31,7 @@ export const HWConnectFlow = ({
 
   return (
     <Box
+      data-test-id="hw-connect-flow"
       display="flex"
       justifyContent="center"
       alignItems="center"

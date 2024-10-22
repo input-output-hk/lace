@@ -8,3 +8,6 @@ typings
 src/ui/app/components/**
 src/ui/app/pages/**
 **/*.js
+**/*.test.ts
+**/*.stories.tsx
+**/*.mock.ts

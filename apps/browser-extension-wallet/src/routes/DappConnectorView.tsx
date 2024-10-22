@@ -4,7 +4,6 @@ import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useAppInit } from '@src/hooks';
 import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
-import 'antd/dist/antd.css';
 import { Route, Switch } from 'react-router-dom';
 import { MainLayout } from '@components/Layout';
 import {
@@ -39,7 +38,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 export const DappConnectorView = (): React.ReactElement => {
   const { t } = useTranslation();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
-  const { inMemoryWallet, cardanoWallet, walletInfo, initialHdDiscoveryCompleted } = useWalletStore();
+  const { cardanoWallet, hdDiscoveryStatus } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
   const isSharedWallet = useWalletStore((state) => state.isSharedWallet);
 
@@ -108,21 +107,20 @@ export const DappConnectorView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (!!cardanoWallet && walletInfo && inMemoryWallet && initialHdDiscoveryCompleted) {
-    return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
-        <Switch>
-          <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
-          <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
-          <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
-          <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
-          <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
-          <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
-          <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
-          <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
-        </Switch>
-      </MainLayout>
-    );
-  }
-  return <Loader className={styles.loader} />;
+  if (hdDiscoveryStatus !== 'Idle') return <Loader className={styles.loader} />;
+
+  return (
+    <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
+      <Switch>
+        <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
+        <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
+        <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
+        <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
+        <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+        <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+        <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+        <Route exact path={dAppRoutePaths.dappSetCollateral} component={DappCollateralContainer} />
+      </Switch>
+    </MainLayout>
+  );
 };

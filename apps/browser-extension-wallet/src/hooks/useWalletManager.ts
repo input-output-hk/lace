@@ -60,6 +60,20 @@ export interface CreateWalletParams {
   mnemonic: string[];
   chainId?: Wallet.Cardano.ChainId;
 }
+export interface CreateWalletFromPrivateKeyParams {
+  name: string;
+  rootPrivateKeyBytes: HexBlob;
+  extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;
+}
+
+export type CreateWalletParamsBase = {
+  name: string;
+  chainId?: Wallet.Cardano.ChainId;
+  passphrase?: Buffer;
+  metadata: Wallet.WalletMetadata;
+  encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
+  extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;
+};
 
 interface CreateSharedWalletParams {
   name: string;
@@ -105,6 +119,7 @@ export interface UseWalletManager {
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
+  createWalletFromPrivateKey: (args: CreateWalletFromPrivateKeyParams) => Promise<Wallet.CardanoWallet>;
   createInMemorySharedWallet: (args: CreateSharedWalletParams) => Promise<Wallet.CardanoWallet>;
   activateWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createHardwareWallet: (args: CreateHardwareWallet) => Promise<Wallet.CardanoWallet>;
@@ -487,40 +502,23 @@ export const useWalletManager = (): UseWalletManager => {
    * Creates or restores a new in-memory wallet with the cardano-js-sdk and saves it in wallet repository
    */
   const createWallet = useCallback(
-    async ({ mnemonic, name, chainId = getCurrentChainId() }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
+    async ({
+      name,
+      chainId = getCurrentChainId(),
+      passphrase,
+      metadata,
+      encryptedSecrets,
+      extendedAccountPublicKey
+    }: CreateWalletParamsBase): Promise<Wallet.CardanoWallet> => {
       const accountIndex = 0;
-      const passphrase = Buffer.from(password.value, 'utf8');
-      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
-        {
-          chainId,
-          getPassphrase: async () => passphrase,
-          mnemonicWords: mnemonic,
-          accountIndex,
-          purpose: KeyManagement.KeyPurpose.STANDARD
-        },
-        {
-          bip32Ed25519: Wallet.bip32Ed25519,
-          logger
-        }
-      );
-
-      const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lockValue, lastActiveAccountIndex: accountIndex },
-        encryptedSecrets: {
-          keyMaterial: await encryptMnemonic(mnemonic, passphrase),
-          rootPrivateKeyBytes: HexBlob.fromBytes(
-            Buffer.from(
-              (keyAgent.serializableData as Wallet.KeyManagement.SerializableInMemoryKeyAgentData)
-                .encryptedRootPrivateKeyBytes
-            )
-          )
-        },
+        metadata,
+        encryptedSecrets,
         accounts: [
           {
             accountIndex,
             metadata: { name: defaultAccountName(accountIndex) },
-            extendedAccountPublicKey: keyAgent.extendedAccountPublicKey
+            extendedAccountPublicKey
           }
         ],
         type: WalletType.InMemory
@@ -537,7 +535,7 @@ export const useWalletManager = (): UseWalletManager => {
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
       // Clear passphrase
-      passphrase.fill(0);
+      if (passphrase) passphrase.fill(0);
       clearSecrets();
 
       return {
@@ -553,7 +551,60 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [getCurrentChainId, password, clearSecrets]
+    [getCurrentChainId, clearSecrets]
+  );
+
+  const createWalletFromPrivateKey = useCallback(
+    async ({ name, rootPrivateKeyBytes, extendedAccountPublicKey }: CreateWalletFromPrivateKeyParams) =>
+      createWallet({
+        name,
+        metadata: { name, lastActiveAccountIndex: 0 },
+        encryptedSecrets: {
+          keyMaterial: HexBlob.fromBytes(Buffer.from('')),
+          rootPrivateKeyBytes
+        },
+        extendedAccountPublicKey
+      }),
+    [createWallet]
+  );
+
+  const createWalletFromMnemonic = useCallback(
+    async ({ name, chainId = getCurrentChainId(), mnemonic }: CreateWalletParams): Promise<Wallet.CardanoWallet> => {
+      const accountIndex = 0;
+      const passphrase = Buffer.from(password.value, 'utf8');
+      const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
+      const keyAgent = await Wallet.KeyManagement.InMemoryKeyAgent.fromBip39MnemonicWords(
+        {
+          chainId,
+          getPassphrase: async () => passphrase,
+          mnemonicWords: mnemonic,
+          accountIndex,
+          purpose: KeyManagement.KeyPurpose.STANDARD
+        },
+        {
+          bip32Ed25519: Wallet.bip32Ed25519,
+          logger
+        }
+      );
+      const metadata = {
+        name,
+        lastActiveAccountIndex: accountIndex,
+        lockValue
+      };
+      const encryptedSecrets = {
+        keyMaterial: await encryptMnemonic(mnemonic, passphrase),
+        rootPrivateKeyBytes: HexBlob.fromBytes(
+          Buffer.from(
+            (keyAgent.serializableData as Wallet.KeyManagement.SerializableInMemoryKeyAgentData)
+              .encryptedRootPrivateKeyBytes
+          )
+        )
+      };
+      const extendedAccountPublicKey = keyAgent.extendedAccountPublicKey;
+
+      return createWallet({ name, passphrase, metadata, encryptedSecrets, extendedAccountPublicKey });
+    },
+    [createWallet, getCurrentChainId, password?.value]
   );
 
   const activateWallet = useCallback(
@@ -935,7 +986,8 @@ export const useWalletManager = (): UseWalletManager => {
     lockWallet,
     unlockWallet,
     loadWallet,
-    createWallet,
+    createWallet: createWalletFromMnemonic,
+    createWalletFromPrivateKey,
     createInMemorySharedWallet,
     createHardwareWallet,
     createHardwareWalletRevamped,

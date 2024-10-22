@@ -1,7 +1,9 @@
 import React from 'react';
-import QRCodeStyling from 'qr-code-styling';
-import Ada from '../../../assets/img/ada.png';
+
 import { useColorModeValue } from '@chakra-ui/react';
+import QRCodeStyling from 'qr-code-styling';
+
+import Ada from '../../../assets/img/ada.png';
 
 const qrCode = new QRCodeStyling({
   width: 150,
@@ -18,16 +20,16 @@ const qrCode = new QRCodeStyling({
   },
 });
 
-const QrCode = ({ value }) => {
-  const ref = React.useRef(null);
+const QrCode = ({ value }: Readonly<{ value?: string }>) => {
+  const ref = React.useRef<HTMLDivElement>(null);
   const bgColor = useColorModeValue('white', '#2D3748');
   const contentColor = useColorModeValue(
     { corner: '#DD6B20', dots: '#319795' },
-    { corner: '#FBD38D', dots: '#81E6D9' }
+    { corner: '#FBD38D', dots: '#81E6D9' },
   );
 
   React.useEffect(() => {
-    qrCode.append(ref.current);
+    ref.current && qrCode.append(ref.current);
   }, []);
 
   React.useEffect(() => {

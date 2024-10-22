@@ -1,22 +1,13 @@
+/* eslint-disable functional/prefer-immutable-types */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable max-params */
+/* eslint-disable unicorn/no-null */
+import type { RefObject } from 'react';
 import React from 'react';
-import {
-  bytesAddressToBinary,
-  getCurrentAccount,
-  getFavoriteIcon,
-  getUtxos,
-  signTx,
-  signTxHW,
-} from '../../../../api/extension';
-import Account from '../../components/account';
-import { Scrollbars } from '../../components/scrollbar';
-import ConfirmModal from '../../components/confirmModal';
-import { Loader } from '../../../../api/loader';
-import UnitDisplay from '../../components/unitDisplay';
+
+import { metadatum, Serialization } from '@cardano-sdk/core';
+import { toSerializableObject } from '@cardano-sdk/util';
 import { ChevronRightIcon } from '@chakra-ui/icons';
-import MiddleEllipsis from 'react-middle-ellipsis';
-import Copy from '../../components/copy';
-import { TxSignError } from '../../../../config/config';
-import { useStoreState } from '../../../store';
 import {
   Box,
   Stack,
@@ -30,27 +21,67 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import AssetsModal from '../../components/assetsModal';
-import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import { Wallet } from '@lace/cardano';
+import MiddleEllipsis from 'react-middle-ellipsis';
+import { firstValueFrom } from 'rxjs';
+
 import { Events } from '../../../../features/analytics/events';
-import { getKeyHashes, getValue } from './signTxUtil';
-import { useOutsideHandles } from '../../../../features/outside-handles-provider';
+import { useCaptureEvent } from '../../../../features/analytics/hooks';
+import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
+import { abs } from '../../../utils';
+import Account from '../../components/account';
+import AssetsModal from '../../components/assetsModal';
+import ConfirmModal from '../../components/confirmModal';
+import Copy from '../../components/copy';
+import { Scrollbars } from '../../components/scrollbar';
+import UnitDisplay from '../../components/unitDisplay';
 
-const abs = big => {
-  return big < 0 ? big * BigInt(-1) : big;
-};
+import {
+  getKeyHashes,
+  getValueWithSdk as getValue,
+  isScriptAddress,
+} from './signTxUtil';
 
-const SignTx = ({ request, controller }) => {
+import type { TransactionValue } from './signTxUtil';
+import type { UseAccount } from '../../../../adapters/account';
+import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import type { Asset as NamiAsset } from '../../../../types/assets';
+import type { AssetsModalRef } from '../../components/assetsModal';
+import type { Cardano } from '@cardano-sdk/core';
+
+interface Props {
+  dappConnector: DappConnector;
+  account: UseAccount['activeAccount'];
+  inMemoryWallet: Wallet.ObservableWallet;
+}
+
+interface Property {
+  metadata: boolean;
+  certificate: boolean;
+  withdrawal: boolean;
+  minting: boolean;
+  script: boolean;
+  contract: boolean;
+  datum: boolean;
+}
+
+export const SignTx = ({
+  inMemoryWallet,
+  dappConnector,
+  account,
+}: Readonly<Props>) => {
+  const [request, setRequest] =
+    React.useState<
+      Awaited<ReturnType<typeof dappConnector.getSignTxRequest>>['request']
+    >();
+  const [dappInfo, setDappInfo] = React.useState<Wallet.DappInfo>();
+
   const capture = useCaptureEvent();
-  const { cardanoCoin } = useOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
   const ref = React.useRef();
-  const [account, setAccount] = React.useState(null);
   const [fee, setFee] = React.useState('0');
-  const [value, setValue] = React.useState({
-    ownValue: null,
-    externalValue: null,
-  });
-  const [property, setProperty] = React.useState({
+  const [value, setValue] = React.useState<TransactionValue | null>(null);
+  const [property, setProperty] = React.useState<Property>({
     metadata: false,
     certificate: false,
     withdrawal: false,
@@ -59,7 +90,7 @@ const SignTx = ({ request, controller }) => {
     contract: false,
     datum: false,
   });
-  const [tx, setTx] = React.useState('');
+
   // key kind can be payment and stake
   const [keyHashes, setKeyHashes] = React.useState<{
     key: string[];
@@ -70,104 +101,114 @@ const SignTx = ({ request, controller }) => {
     error: '',
   });
 
-  const assetsModalRef = React.useRef();
-  const detailsModalRef = React.useRef();
+  const assetsModalRef = React.useRef<AssetsModalRef>(null);
+  const detailsModalRef = React.useRef<DetailsModalRef>(null);
 
-  const getFee = tx => {
-    const fee = tx.body().fee().to_str();
+  const getFee = (tx: Readonly<Cardano.Tx>) => {
+    const fee = tx.body.fee.toString();
     setFee(fee);
   };
 
-  const getProperties = tx => {
-    let metadata = tx.auxiliary_data() && tx.auxiliary_data().metadata();
-    if (metadata) {
-      const json = {};
-      const keys = metadata.keys();
-      for (let i = 0; i < keys.len(); i++) {
-        const key = keys.get(i);
-        json[key.to_str()] = JSON.parse(
-          Loader.Cardano.decode_metadatum_to_json_str(metadata.get(key), 1),
-        );
+  const getProperties = (tx: Readonly<Cardano.Tx>) => {
+    const metadata = tx.auxiliaryData?.blob;
+    let metadataJson;
+    if (metadata && metadata.size > 0) {
+      metadataJson = {};
+      for (const [key, value] of metadata.entries()) {
+        try {
+          metadataJson[key.toString()] = metadatum.metadatumToJson(value);
+        } catch (error) {
+          console.error(`error parsing tx ${tx.id} metadatum`, { error });
+        }
       }
-      metadata = json;
+      metadataJson = JSON.stringify(
+        toSerializableObject(metadataJson),
+        null,
+        2,
+      );
     }
 
-    const certificate = tx.body().certs();
-    const withdrawal = tx.body().withdrawals();
-    const minting = tx.body().mint();
-    const script = tx.witness_set().native_scripts();
-    let datum;
-    let contract = tx.body().script_data_hash();
-    const outputs = tx.body().outputs();
-    for (let i = 0; i < outputs.len(); i++) {
-      const output = outputs.get(i);
-      if (output.datum()) {
+    const certificate = tx.body.certificates;
+    const withdrawal = tx.body.withdrawals;
+    const minting = tx.body.mint;
+    const script = tx.witness.scripts?.filter(
+      s => s.__type === Wallet.Cardano.ScriptType.Native,
+    );
+    let datum = false;
+    let contract: Wallet.Crypto.Hash32ByteBase16 | boolean | undefined =
+      tx.body.scriptIntegrityHash;
+    const outputs = tx.body.outputs;
+    for (const output of outputs) {
+      if (output.datum || output.datumHash) {
         datum = true;
-        const prefix = bytesAddressToBinary(output.address().to_bytes()).slice(
-          0,
-          4,
-        );
-        // from cardano ledger specs; if any of these prefixes match then it means the payment credential is a script hash, so it's a contract address
-        if (
-          prefix == '0111' ||
-          prefix == '0011' ||
-          prefix == '0001' ||
-          prefix == '0101'
-        ) {
+        if (isScriptAddress(output.address)) {
           contract = true;
+          break;
         }
-        break;
       }
     }
 
     setProperty({
-      metadata,
-      certificate,
-      withdrawal,
-      minting,
-      contract,
-      script,
+      metadata: metadataJson as boolean,
+      certificate: !!certificate,
+      withdrawal: !!withdrawal,
+      minting: !!minting,
+      contract: !!contract,
+      script: !!script,
       datum,
     });
   };
 
-  const checkCollateral = (tx, utxos, account) => {
-    const collateralInputs = tx.body().collateral();
+  /** Verify if transaction collateral inputs are the same as the collaterals marked in the wallet */
+  const checkCollateral = (
+    tx: Readonly<Cardano.Tx>,
+    utxos: readonly Cardano.Utxo[],
+    collaterals: readonly Cardano.Utxo[],
+    addresses: Wallet.Cardano.PaymentAddress[],
+  ) => {
+    const collateralInputs = tx.body.collaterals;
     if (!collateralInputs) return;
 
     // checking all wallet utxos if used as collateral
-    for (let i = 0; i < collateralInputs.len(); i++) {
-      const collateral = collateralInputs.get(i);
-      for (let j = 0; j < utxos.length; j++) {
-        const input = utxos[j].input();
+    for (const collateralInput of collateralInputs) {
+      for (const input of utxos) {
         if (
-          Buffer.from(input.transaction_id().to_bytes()).toString('hex') ==
-            Buffer.from(collateral.transaction_id().to_bytes()).toString(
-              'hex',
-            ) &&
-          input.index() == collateral.index()
+          input[0].txId === collateralInput.txId &&
+          input[0].index === collateralInput.index
         ) {
           // collateral utxo is less than 50 ADA. That's also fine.
           if (
-            utxos[j]
-              .output()
-              .amount()
-              .coin()
-              .compare(Loader.Cardano.BigNum.from_str('50000000')) <= 0
-          )
+            input[1].value.coins <= 50_000_000 &&
+            !input[1].value.assets?.size
+          ) {
             return;
-
-          if (!account.collateral) {
+          }
+          const collateralReturn = tx.body.collateralReturn;
+          // presence of collateral return means "account" collateral can be ignored
+          if (collateralReturn) {
+            // collateral return usually is paid to account's payment address, however, the DApp
+            // could be providing collateral so blocking the tx is not appropriate.
+            if (
+              addresses.every(address => address !== collateralReturn.address)
+            ) {
+              setIsLoading(l => ({
+                ...l,
+                warning:
+                  'Collateral return is being directed to another owner. Ensure you are not providing the collateral input',
+              }));
+            }
+            return;
+          }
+          if (!collaterals?.length) {
             setIsLoading(l => ({ ...l, error: 'Collateral not set' }));
             return;
           }
 
           if (
-            !(
-              Buffer.from(collateral.transaction_id().to_bytes()).toString(
-                'hex',
-              ) == account.collateral.txHash &&
-              collateral.index() == account.collateral.txId
+            !collaterals.some(
+              collateral =>
+                collateral[0].txId === collateralInput.txId &&
+                collateral[0].index === collateralInput.index,
             )
           ) {
             setIsLoading(l => ({ ...l, error: 'Invalid collateral used' }));
@@ -179,19 +220,26 @@ const SignTx = ({ request, controller }) => {
   };
 
   const getInfo = async () => {
-    await Loader.load();
-    const currentAccount = await getCurrentAccount();
-    setAccount(currentAccount);
-    let utxos = await getUtxos();
-    const tx = Loader.Cardano.Transaction.from_bytes(
-      Buffer.from(request.data.tx, 'hex'),
-    );
-    setTx(request.data.tx);
-    getFee(tx);
-    setValue(await getValue(tx, utxos, currentAccount));
+    const { dappInfo, request } = await dappConnector.getSignTxRequest();
+    setRequest(request);
+    setDappInfo(dappInfo);
 
-    checkCollateral(tx, utxos, currentAccount);
-    const keyHashes = await getKeyHashes(tx, utxos, currentAccount);
+    const collaterals = await firstValueFrom(inMemoryWallet.utxo.unspendable$);
+
+    const utxos = await firstValueFrom(inMemoryWallet.utxo.available$);
+    const tx = Serialization.Transaction.fromCbor(request.data.tx).toCore();
+    getFee(tx);
+
+    const addresses = request.data.addresses.map(a => a.address);
+    setValue(await getValue(tx, utxos, addresses, dappConnector.getAssetInfos));
+
+    checkCollateral(tx, utxos, collaterals, addresses);
+
+    const keyHashes = getKeyHashes(
+      tx,
+      utxos,
+      request.data.addresses[0].address,
+    );
     if ('error' in keyHashes) {
       setIsLoading(l => ({
         ...l,
@@ -201,6 +249,7 @@ const SignTx = ({ request, controller }) => {
       setKeyHashes(keyHashes);
     }
     getProperties(tx);
+
     setIsLoading(l => ({ ...l, loading: false }));
   };
   const background = useColorModeValue('gray.100', 'gray.700');
@@ -208,7 +257,7 @@ const SignTx = ({ request, controller }) => {
 
   React.useEffect(() => {
     getInfo();
-  }, []);
+  }, [request]);
   return (
     <>
       {isLoading.loading ? (
@@ -231,7 +280,7 @@ const SignTx = ({ request, controller }) => {
           position="relative"
           background={containerBg}
         >
-          <Account />
+          <Account name={account.name} avatar={account.avatar} />
           <Box h="4" />
           <Box
             display={'flex'}
@@ -253,12 +302,12 @@ const SignTx = ({ request, controller }) => {
                 draggable={false}
                 width={4}
                 height={4}
-                src={getFavoriteIcon(request.origin)}
+                src={dappInfo?.logo}
               />
             </Box>
             <Box w="3" />
             <Text fontSize={'xs'} fontWeight="bold">
-              {request.origin.split('//')[1]}
+              {dappInfo?.url.split('//')[1]}
             </Text>
           </Box>
           <Box h="8" />
@@ -274,10 +323,11 @@ const SignTx = ({ request, controller }) => {
             width="80%"
             padding="5"
           >
-            {value.ownValue ? (
+            {value?.ownValue ? (
               (() => {
-                let lovelace = value.ownValue.find(v => v.unit === 'lovelace');
-                lovelace = lovelace ? lovelace.quantity : '0';
+                const lovelace =
+                  value.ownValue.find(v => v.unit === 'lovelace')?.quantity ??
+                  BigInt(0);
                 const assets = value.ownValue.filter(
                   v => v.unit !== 'lovelace',
                 );
@@ -289,9 +339,11 @@ const SignTx = ({ request, controller }) => {
                       justifyContent="center"
                       fontSize={lovelace.toString().length < 14 ? '3xl' : '2xl'}
                       fontWeight="bold"
-                      color={lovelace <= 0 ? 'teal.400' : 'red.400'}
+                      color={
+                        BigInt(lovelace) <= BigInt(0) ? 'teal.400' : 'red.400'
+                      }
                     >
-                      <Text>{lovelace <= 0 ? '+' : '-'}</Text>
+                      <Text>{BigInt(lovelace) <= BigInt(0) ? '+' : '-'}</Text>
                       <UnitDisplay
                         hide
                         quantity={abs(lovelace)}
@@ -310,11 +362,11 @@ const SignTx = ({ request, controller }) => {
                         {' '}
                         {(() => {
                           const positiveAssets = assets.filter(
-                            v => v.quantity < 0,
-                          );
+                            v => BigInt(v.quantity) < BigInt(0),
+                          ) as unknown as NamiAsset[];
                           const negativeAssets = assets.filter(
-                            v => v.quantity > 0,
-                          );
+                            v => BigInt(v.quantity) > BigInt(0),
+                          ) as unknown as NamiAsset[];
                           return (
                             <Box
                               display={'flex'}
@@ -327,7 +379,7 @@ const SignTx = ({ request, controller }) => {
                                   colorScheme={'red'}
                                   size={'xs'}
                                   onClick={() =>
-                                    assetsModalRef.current.openModal({
+                                    assetsModalRef.current?.openModal({
                                       background: 'red.400',
                                       color: 'white',
                                       assets: negativeAssets,
@@ -358,7 +410,7 @@ const SignTx = ({ request, controller }) => {
                                   colorScheme={'teal'}
                                   size={'xs'}
                                   onClick={() =>
-                                    assetsModalRef.current.openModal({
+                                    assetsModalRef.current?.openModal({
                                       background: 'teal.400',
                                       color: 'white',
                                       assets: positiveAssets,
@@ -415,7 +467,7 @@ const SignTx = ({ request, controller }) => {
             rounded={'xl'}
             size={'xs'}
             rightIcon={<ChevronRightIcon />}
-            onClick={() => detailsModalRef.current.openModal()}
+            onClick={() => detailsModalRef.current?.openModal()}
           >
             Details
           </Button>
@@ -449,11 +501,10 @@ const SignTx = ({ request, controller }) => {
                 height={'50px'}
                 width={'180px'}
                 onClick={async () => {
-                  capture(Events.DappConnectorDappTxCancelClick);
-                  await controller.returnData({
-                    error: TxSignError.UserDeclined,
+                  await capture(Events.DappConnectorDappTxCancelClick);
+                  await request?.reject(() => {
+                    window.close();
                   });
-                  window.close();
                 }}
               >
                 Cancel
@@ -462,11 +513,11 @@ const SignTx = ({ request, controller }) => {
               <Button
                 height={'50px'}
                 width={'180px'}
-                isDisabled={isLoading.loading || isLoading.error}
+                isDisabled={isLoading.loading || !!isLoading.error}
                 colorScheme="teal"
                 onClick={() => {
                   capture(Events.DappConnectorDappTxSignClick);
-                  ref.current.openModal(account.index);
+                  (ref.current as any)?.openModal(account.index);
                 }}
               >
                 Sign
@@ -478,340 +529,354 @@ const SignTx = ({ request, controller }) => {
       <AssetsModal ref={assetsModalRef} />
       <DetailsModal
         ref={detailsModalRef}
-        externalValue={value.externalValue ? value.externalValue : {}}
+        externalValue={value?.externalValue ?? {}}
         assetsModalRef={assetsModalRef}
         property={property}
         keyHashes={keyHashes}
-        tx={tx}
+        tx={request?.data.tx}
       />
       <ConfirmModal
         ref={ref}
+        openHWFlow={openHWFlow}
+        walletType={walletType}
         onCloseBtn={() => {
           capture(Events.DappConnectorDappTxCancelClick);
         }}
-        sign={async (password, hw) => {
-          if (hw) {
-            return await signTxHW(
-              request.data.tx,
-              keyHashes.key,
-              account,
-              hw,
-              request.data.partialSign,
-            );
+        sign={async password => {
+          try {
+            await request?.sign(password ?? '');
+          } catch (error) {
+            setIsLoading(l => ({ ...l, error: `Failed to sign. ${error}` }));
           }
-          return await signTx(
-            request.data.tx,
-            keyHashes.key,
-            password,
-            account.index,
-            request.data.partialSign,
-          );
         }}
-        onConfirm={async (status, signedTx) => {
-          if (status === true) {
-            capture(Events.DappConnectorDappTxConfirmClick);
-            await controller.returnData({
-              data: Buffer.from(signedTx.to_bytes(), 'hex').toString('hex'),
-            });
-          } else {
-            await controller.returnData({ error: signedTx });
+        onConfirm={async status => {
+          if (status) {
+            await capture(Events.DappConnectorDappTxConfirmClick);
           }
-          window.close();
+
+          const channelCloseDelay = 100;
+          setTimeout(() => {
+            window.close();
+          }, channelCloseDelay);
         }}
       />
     </>
   );
 };
 
-const DetailsModal = React.forwardRef(
-  ({ externalValue, property, keyHashes, tx, assetsModalRef }, ref) => {
-    const { cardanoCoin } = useOutsideHandles();
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    const background = useColorModeValue('white', 'gray.800');
-    const innerBackground = useColorModeValue('gray.100', 'gray.700');
+export interface DetailsModalRef {
+  openModal: () => void;
+}
 
-    React.useImperativeHandle(ref, () => ({
-      openModal() {
-        onOpen();
-      },
-    }));
-    return (
-      <Modal isOpen={isOpen} onClose={onClose} size="full">
-        <ModalContent
-          m={0}
-          rounded="none"
-          overflow={'hidden'}
-          background={background}
-        >
-          <ModalBody p={0}>
-            <Scrollbars style={{ width: '100%', height: '88vh' }}>
+interface DetailsModalComponentProp {
+  externalValue: TransactionValue['externalValue'];
+  assetsModalRef: RefObject<AssetsModalRef>;
+  property: Property;
+  keyHashes: {
+    key: string[];
+    kind: string[];
+  };
+  tx: Serialization.TxCBOR | undefined;
+}
+
+const DetailsModalComponent = (
+  {
+    externalValue,
+    property,
+    keyHashes,
+    tx,
+    assetsModalRef,
+  }: Readonly<DetailsModalComponentProp>,
+  ref,
+) => {
+  const { cardanoCoin } = useCommonOutsideHandles();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const background = useColorModeValue('white', 'gray.800');
+  const innerBackground = useColorModeValue('gray.100', 'gray.700');
+
+  React.useImperativeHandle(ref, () => ({
+    openModal: () => {
+      onOpen();
+    },
+  }));
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="full">
+      <ModalContent
+        m={0}
+        rounded="none"
+        overflow={'hidden'}
+        background={background}
+      >
+        <ModalBody p={0}>
+          <Scrollbars style={{ width: '100%', height: '88vh' }}>
+            <Box
+              width={'full'}
+              display={'flex'}
+              alignItems={'center'}
+              justifyContent={'center'}
+              flexDirection={'column'}
+            >
+              <Box h={8} />
+              <Box
+                fontSize={'xl'}
+                fontWeight={'bold'}
+                maxWidth={'240px'}
+                textAlign={'center'}
+              >
+                Details
+              </Box>
+              <Box h={6} />
               <Box
                 width={'full'}
+                px={8}
                 display={'flex'}
                 alignItems={'center'}
                 justifyContent={'center'}
                 flexDirection={'column'}
               >
-                <Box h={8} />
-                <Box
-                  fontSize={'xl'}
-                  fontWeight={'bold'}
-                  maxWidth={'240px'}
-                  textAlign={'center'}
-                >
-                  Details
-                </Box>
-                <Box h={6} />
-                <Box
-                  width={'full'}
-                  px={8}
-                  display={'flex'}
-                  alignItems={'center'}
-                  justifyContent={'center'}
-                  flexDirection={'column'}
-                >
-                  {' '}
-                  {Object.keys(externalValue).length > 0 && (
-                    <Box width={'full'}>
-                      <Text fontSize="md" fontWeight={'bold'}>
-                        Recipients
-                      </Text>
-                      <Box height="4" />
-                      {Object.keys(externalValue).map((address, index) => {
-                        const lovelace = externalValue[address].value.find(
-                          v => v.unit === 'lovelace',
-                        ).quantity;
-                        const assets = externalValue[address].value.filter(
-                          v => v.unit !== 'lovelace',
-                        );
-                        return (
-                          <Box key={index} mb="6">
-                            <Stack direction="row" alignItems="center">
-                              <Box
-                                position={'relative'}
-                                background={innerBackground}
-                                rounded={'xl'}
-                                p={2}
-                              >
-                                <Copy label="Copied address" copy={address}>
-                                  <Box
-                                    width="160px"
-                                    whiteSpace="nowrap"
-                                    fontWeight="normal"
-                                    textAlign={'center'}
-                                    display={'flex'}
-                                    alignItems={'center'}
-                                    justifyContent={'center'}
-                                    flexDirection={'column'}
-                                  >
-                                    <MiddleEllipsis>
-                                      <span style={{ cursor: 'pointer' }}>
-                                        {address}
-                                      </span>
-                                    </MiddleEllipsis>
-                                  </Box>
-                                </Copy>
-                                {externalValue[address].script && (
-                                  <Box
-                                    position={'absolute'}
-                                    bottom={-2}
-                                    left={4}
-                                    background={innerBackground}
-                                    mt={1}
-                                    rounded="full"
-                                    px={1}
-                                    fontSize={'xs'}
-                                    color={'orange'}
-                                    fontWeight={'medium'}
-                                  >
-                                    {externalValue[address].datumHash ? (
-                                      <Copy
-                                        label="Copied datum hash"
-                                        copy={externalValue[address].datumHash}
-                                      >
-                                        Contract
-                                      </Copy>
-                                    ) : (
-                                      'Script'
-                                    )}
-                                  </Box>
-                                )}
-                              </Box>
-                              <Box
-                                textAlign="center"
-                                width={'160px'}
-                                display={'flex'}
-                                alignItems={'center'}
-                                justifyContent={'center'}
-                                flexDirection={'column'}
-                              >
-                                <UnitDisplay
-                                  hide
-                                  fontSize={'sm'}
-                                  fontWeight="bold"
-                                  quantity={lovelace}
-                                  decimals="6"
-                                  symbol={cardanoCoin.symbol}
-                                />
-                                {assets.length > 0 && (
-                                  <Button
-                                    mt={1}
-                                    size={'xs'}
-                                    onClick={() =>
-                                      assetsModalRef.current.openModal({
-                                        assets: assets,
-                                        title: (
-                                          <Box>
-                                            Address receiving{' '}
-                                            <Box as={'span'}>
-                                              {assets.length}
-                                            </Box>{' '}
-                                            {assets.length == 1
-                                              ? 'asset'
-                                              : 'assets'}
-                                          </Box>
-                                        ),
-                                      })
-                                    }
-                                  >
-                                    + {assets.length}{' '}
-                                    {assets.length > 1 ? 'Assets' : 'Asset'}
-                                  </Button>
-                                )}
-                              </Box>
-                            </Stack>
-                          </Box>
-                        );
-                      })}
-                      <Box h={4} />
-                    </Box>
-                  )}
-                  {property.metadata && (
-                    <>
-                      <Text width={'full'} fontSize="md" fontWeight={'bold'}>
-                        Metadata
-                      </Text>
-                      <Box height="4" />
-                      <Box
-                        padding="2.5"
-                        rounded={'xl'}
-                        width={'full'}
-                        height={'200px'}
-                        background={innerBackground}
-                      >
-                        <Scrollbars autoHide>
-                          <pre>
-                            <code>
-                              {JSON.stringify(property.metadata, null, 2)}
-                            </code>
-                          </pre>
-                        </Scrollbars>
-                      </Box>
-                      <Box h={10} />
-                    </>
-                  )}
-                  <Box fontSize="md" fontWeight={'bold'} width={'full'}>
-                    Signing keys
-                  </Box>
-                  <Box height="4" />
-                  <Box width={'full'} display={'flex'}>
-                    {keyHashes.kind.map((keyHash, index) => (
-                      <Box
-                        mr={2}
-                        py={1}
-                        px={2}
-                        background={innerBackground}
-                        rounded={'full'}
-                        key={index}
-                      >
-                        <Box
-                          as={'b'}
-                          color={keyHash == 'payment' ? 'teal.400' : 'orange'}
-                        >
-                          {keyHash}
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                  <Box h={10} />
-                  {Object.keys(property).some(key => property[key]) && (
-                    <>
-                      <Box fontSize="md" fontWeight={'bold'} width={'full'}>
-                        Tags
-                      </Box>
-                      <Box height="4" />
-                      <Box width={'full'} display={'flex'} flexWrap={'wrap'}>
-                        {Object.keys(property)
-                          .filter(p => property[p])
-                          .map((p, index) => (
+                {' '}
+                {Object.keys(externalValue).length > 0 && (
+                  <Box width={'full'}>
+                    <Text fontSize="md" fontWeight={'bold'}>
+                      Recipients
+                    </Text>
+                    <Box height="4" />
+                    {Object.keys(externalValue).map((address, index) => {
+                      const lovelace = externalValue?.[address]?.value?.find(
+                        v => v.unit === 'lovelace',
+                      )?.quantity;
+                      const assets = externalValue[address].value.filter(
+                        v => v.unit !== 'lovelace',
+                      ) as unknown as NamiAsset[];
+                      return (
+                        <Box key={index} mb="6">
+                          <Stack direction="row" alignItems="center">
                             <Box
-                              mb={2}
-                              mr={2}
-                              py={1}
-                              px={2}
+                              position={'relative'}
                               background={innerBackground}
-                              rounded={'full'}
-                              key={index}
+                              rounded={'xl'}
+                              p={2}
                             >
-                              <Box as={'b'}>
-                                {p == 'minting' && 'Minting'}
-                                {p == 'certificate' && 'Certificate'}
-                                {p == 'withdrawal' && 'Withdrawal'}
-                                {p == 'metadata' && 'Metadata'}
-                                {p == 'contract' && 'Contract'}
-                                {p == 'script' && 'Script'}
-                                {p == 'datum' && 'Datum'}
-                              </Box>
+                              <Copy label="Copied address" copy={address}>
+                                <Box
+                                  width="160px"
+                                  whiteSpace="nowrap"
+                                  fontWeight="normal"
+                                  textAlign={'center'}
+                                  display={'flex'}
+                                  alignItems={'center'}
+                                  justifyContent={'center'}
+                                  flexDirection={'column'}
+                                >
+                                  <MiddleEllipsis>
+                                    <span style={{ cursor: 'pointer' }}>
+                                      {address}
+                                    </span>
+                                  </MiddleEllipsis>
+                                </Box>
+                              </Copy>
+                              {externalValue[address].script && (
+                                <Box
+                                  position={'absolute'}
+                                  bottom={-2}
+                                  left={4}
+                                  background={innerBackground}
+                                  mt={1}
+                                  rounded="full"
+                                  px={1}
+                                  fontSize={'xs'}
+                                  color={'orange'}
+                                  fontWeight={'medium'}
+                                >
+                                  {externalValue[address].datumHash ? (
+                                    <Copy
+                                      label="Copied datum hash"
+                                      copy={
+                                        externalValue[address].datumHash ?? ''
+                                      }
+                                    >
+                                      Contract
+                                    </Copy>
+                                  ) : (
+                                    'Script'
+                                  )}
+                                </Box>
+                              )}
                             </Box>
-                          ))}
-                      </Box>
-                      <Box h={10} />
-                    </>
-                  )}
-                  <Box h={5} />
-                  <Text width={'full'} fontSize="md" fontWeight={'bold'}>
-                    Raw transaction
-                  </Text>
-                  <Box height="4" />
-                  <Box
-                    padding="2.5"
-                    rounded={'xl'}
-                    width={'full'}
-                    height={'200px'}
-                    background={innerBackground}
-                  >
-                    <Scrollbars autoHide>{tx}</Scrollbars>
+                            <Box
+                              textAlign="center"
+                              width={'160px'}
+                              display={'flex'}
+                              alignItems={'center'}
+                              justifyContent={'center'}
+                              flexDirection={'column'}
+                            >
+                              <UnitDisplay
+                                hide
+                                fontSize={'sm'}
+                                fontWeight="bold"
+                                quantity={lovelace}
+                                decimals="6"
+                                symbol={cardanoCoin.symbol}
+                              />
+                              {assets.length > 0 && (
+                                <Button
+                                  mt={1}
+                                  size={'xs'}
+                                  onClick={() =>
+                                    assetsModalRef.current?.openModal({
+                                      assets,
+                                      title: (
+                                        <Box>
+                                          Address receiving{' '}
+                                          <Box as={'span'}>{assets.length}</Box>{' '}
+                                          {assets.length == 1
+                                            ? 'asset'
+                                            : 'assets'}
+                                        </Box>
+                                      ),
+                                    })
+                                  }
+                                >
+                                  + {assets.length}{' '}
+                                  {assets.length > 1 ? 'Assets' : 'Asset'}
+                                </Button>
+                              )}
+                            </Box>
+                          </Stack>
+                        </Box>
+                      );
+                    })}
+                    <Box h={4} />
                   </Box>
-                  <Box h={10} />
+                )}
+                {property.metadata && (
+                  <>
+                    <Text width={'full'} fontSize="md" fontWeight={'bold'}>
+                      Metadata
+                    </Text>
+                    <Box height="4" />
+                    <Box
+                      padding="2.5"
+                      rounded={'xl'}
+                      width={'full'}
+                      height={'200px'}
+                      background={innerBackground}
+                    >
+                      <Scrollbars autoHide>
+                        <pre>
+                          <code>{property.metadata}</code>
+                        </pre>
+                      </Scrollbars>
+                    </Box>
+                    <Box h={10} />
+                  </>
+                )}
+                <Box fontSize="md" fontWeight={'bold'} width={'full'}>
+                  Signing keys
                 </Box>
+                <Box height="4" />
+                <Box width={'full'} display={'flex'}>
+                  {keyHashes.kind.map((keyHash, index) => (
+                    <Box
+                      mr={2}
+                      py={1}
+                      px={2}
+                      background={innerBackground}
+                      rounded={'full'}
+                      key={index}
+                    >
+                      <Box
+                        as={'b'}
+                        color={keyHash == 'payment' ? 'teal.400' : 'orange'}
+                      >
+                        {keyHash}
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+                <Box h={10} />
+                {Object.keys(property).some(key => property[key]) && (
+                  <>
+                    <Box fontSize="md" fontWeight={'bold'} width={'full'}>
+                      Tags
+                    </Box>
+                    <Box height="4" />
+                    <Box width={'full'} display={'flex'} flexWrap={'wrap'}>
+                      {Object.keys(property)
+                        .filter(p => property[p])
+                        .map((p, index) => (
+                          <Box
+                            mb={2}
+                            mr={2}
+                            py={1}
+                            px={2}
+                            background={innerBackground}
+                            rounded={'full'}
+                            key={index}
+                          >
+                            <Box as={'b'}>
+                              {p == 'minting' && 'Minting'}
+                              {p == 'certificate' && 'Certificate'}
+                              {p == 'withdrawal' && 'Withdrawal'}
+                              {p == 'metadata' && 'Metadata'}
+                              {p == 'contract' && 'Contract'}
+                              {p == 'script' && 'Script'}
+                              {p == 'datum' && 'Datum'}
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
+                    <Box h={10} />
+                  </>
+                )}
+                <Box h={5} />
+                <Text width={'full'} fontSize="md" fontWeight={'bold'}>
+                  Raw transaction
+                </Text>
+                <Box height="4" />
                 <Box
-                  position={'fixed'}
-                  bottom={0}
+                  padding="2.5"
+                  rounded={'xl'}
                   width={'full'}
+                  height={'200px'}
+                  background={innerBackground}
+                >
+                  <Scrollbars autoHide>{tx}</Scrollbars>
+                </Box>
+                <Box h={10} />
+              </Box>
+              <Box
+                position={'fixed'}
+                bottom={0}
+                width={'full'}
+                display={'flex'}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                <Box
+                  width={'full'}
+                  height={'12vh'}
+                  background={background}
                   display={'flex'}
                   alignItems={'center'}
                   justifyContent={'center'}
                 >
-                  <Box
-                    width={'full'}
-                    height={'12vh'}
-                    background={background}
-                    display={'flex'}
-                    alignItems={'center'}
-                    justifyContent={'center'}
-                  >
-                    <Button onClick={onClose} width={'180px'}>
-                      Back
-                    </Button>
-                  </Box>
+                  <Button onClick={onClose} width={'180px'}>
+                    Back
+                  </Button>
                 </Box>
               </Box>
-            </Scrollbars>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-    );
-  },
-);
+            </Box>
+          </Scrollbars>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+};
 
-export default SignTx;
+DetailsModalComponent.displayName = 'DetailsModal';
+
+const DetailsModal = React.forwardRef(DetailsModalComponent);
+
+DetailsModal.displayName = 'DetailsModal';

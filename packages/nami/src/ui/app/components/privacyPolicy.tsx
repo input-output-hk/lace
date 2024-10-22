@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Box,
   Text,
@@ -13,15 +14,21 @@ import {
   ListItem,
   Link,
 } from '@chakra-ui/react';
+
 import { Scrollbars } from './scrollbar';
 
-const PrivacyPolicy = React.forwardRef((props, ref) => {
+export interface PrivacyPolicyRef {
+  openModal: () => void;
+  closeModal: () => void;
+}
+
+const PrivacyPolicy = React.forwardRef((_props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   React.useImperativeHandle(ref, () => ({
-    openModal() {
+    openModal: () => {
       onOpen();
     },
-    closeModal() {
+    closeModal: () => {
       onClose();
     },
   }));
@@ -588,8 +595,8 @@ const PrivacyPolicy = React.forwardRef((props, ref) => {
                 IOG may update this Privacy Policy from time to time. Such
                 changes will be posted on this page. The effective date of such
                 changes will be notified via email and/or a prominent notice on
-                the Product, with an update to the "effective date" at the top of
-                this Privacy Policy.
+                the Product, with an update to the "effective date" at the top
+                of this Privacy Policy.
               </Text>
               <Text mb="3">
                 You are advised to review this Privacy Policy periodically for
@@ -643,5 +650,7 @@ const PrivacyPolicy = React.forwardRef((props, ref) => {
     </Modal>
   );
 });
+
+PrivacyPolicy.displayName = 'PrivacyPolicy';
 
 export default PrivacyPolicy;

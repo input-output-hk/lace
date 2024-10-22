@@ -1,8 +1,7 @@
-import { useObservable } from '@lace/common';
 import { renderHook } from '@testing-library/react-hooks';
 import { of } from 'rxjs';
 
-import { useCollateral } from './collateral';
+import { getCollateralUtxo, useCollateral } from './collateral';
 
 import type { Wallet } from '@lace/cardano';
 
@@ -137,5 +136,23 @@ describe('useCollateral', () => {
       password,
     );
     expect(mockWithSignTxConfirmation).toBeCalledTimes(1);
+  });
+
+  describe('getCollateralUtxo', () => {
+    test('should return the UTXO that matches the tx ID and has enough ADA', async () => {
+      const utxo = [{ txId: 'txId' }, { value: { coins: BigInt(5_000_000) } }];
+      const available$ = of([utxo]);
+
+      const foundUtxo = await getCollateralUtxo(
+        'txId' as Wallet.Cardano.TransactionId,
+        {
+          utxo: {
+            available$,
+          },
+        } as unknown as Wallet.ObservableWallet,
+      );
+
+      expect(foundUtxo).toEqual(utxo);
+    });
   });
 });

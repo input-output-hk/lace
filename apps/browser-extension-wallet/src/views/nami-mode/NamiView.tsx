@@ -1,9 +1,15 @@
 /* eslint-disable max-statements */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Main as Nami, OutsideHandlesProvider } from '@lace/nami';
+import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
-import { useBackgroundServiceAPIContext, useCurrencyStore, useExternalLinkOpener, useTheme } from '@providers';
+import {
+  useBackgroundServiceAPIContext,
+  useCurrencyStore,
+  useExternalLinkOpener,
+  useTheme,
+  useAnalyticsContext
+} from '@providers';
 import {
   useCustomSubmitApi,
   useWalletAvatar,
@@ -11,7 +17,8 @@ import {
   useFetchCoinPrice,
   useWalletManager,
   useBuildDelegation,
-  useBalances
+  useBalances,
+  useHandleResolver
 } from '@hooks';
 import { walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
@@ -26,13 +33,14 @@ import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 import { getPoolInfos } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
-import { BackgroundStorage } from '@lib/scripts/types';
-import { isKeyHashAddress } from '@cardano-sdk/wallet';
-import { useWalletState } from '@hooks/useWalletState';
-import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
+import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
+import { useWalletState } from '@hooks/useWalletState';
+import { isKeyHashAddress } from '@cardano-sdk/wallet';
+import { BackgroundStorage } from '@lib/scripts/types';
+import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -41,8 +49,9 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const analytics = useAnalyticsContext();
   const {
-    createWallet,
+    createWalletFromPrivateKey,
     getMnemonic,
     deleteWallet,
     switchNetwork,
@@ -60,7 +69,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     walletInfo,
     currentChain,
     environmentName,
-    blockchainProvider: { stakePoolProvider, chainHistoryProvider }
+    blockchainProvider: { stakePoolProvider, chainHistoryProvider },
+    setDeletingWallet
   } = useWalletStore();
   const { theme, setTheme } = useTheme();
   const { handleAnalyticsChoice, isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
@@ -74,7 +84,15 @@ export const NamiView = withDappContext((): React.ReactElement => {
     }),
     [currentChain.networkId, walletUI.cardanoCoin]
   );
-  const { txFee, isInitializing, initializeCollateralTx, submitCollateralTx } = useCollateral();
+  const {
+    txFee,
+    isInitializing,
+    initializeCollateralTx,
+    submitCollateralTx,
+    txBuilder: collateralTxBuilder
+  } = useCollateral();
+
+  const handleResolver = useHandleResolver();
 
   const cardanoPrice = priceResult.cardano.price;
   const walletAddresses = walletInfo?.addresses
@@ -116,7 +134,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
       .catch(console.error);
   }, []);
 
-  const switchWalletMode = async () => {
+  const switchWalletMode = useCallback(async () => {
     const mode = namiMigration?.mode === 'lace' ? 'nami' : 'lace';
     const migration: BackgroundStorage['namiMigration'] = {
       ...namiMigration,
@@ -128,15 +146,22 @@ export const NamiView = withDappContext((): React.ReactElement => {
     await setBackgroundStorage({
       namiMigration: migration
     });
-  };
+  }, [backgroundServices, namiMigration]);
+
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.TxIn[] | Wallet.Cardano.HydratedTxIn[]) =>
       await Wallet.getTxInputsValueAndAddress(inputs, chainHistoryProvider, inMemoryWallet),
     [chainHistoryProvider, inMemoryWallet]
   );
 
-  const sortedHistoryTx = useMemo(
-    () => walletState?.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot),
+  const sortedTx = useMemo(
+    () =>
+      walletState
+        ? [
+            ...walletState.transactions.outgoing.inFlight,
+            ...walletState.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot)
+          ]
+        : undefined,
     [walletState]
   );
 
@@ -147,6 +172,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
     [backgroundServices]
   );
   const connectHW = useWrapWithTimeout(connectHardwareWalletRevamped);
+
+  const removeWallet = useCallback(async () => {
+    setDeletingWallet(true);
+    await analytics.sendEventToPostHog(PostHogAction.SettingsHoldUpRemoveWalletClick, {
+      // eslint-disable-next-line camelcase
+      $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+    });
+    await deleteWallet();
+    setDeletingWallet(false);
+  }, [analytics, deleteWallet, setDeletingWallet, walletRepository]);
 
   return (
     <OutsideHandlesProvider
@@ -160,18 +195,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
         connectedDapps,
         isAnalyticsOptIn,
         handleAnalyticsChoice,
-        sendEventToPostHog,
-        createWallet,
+        createWallet: createWalletFromPrivateKey,
         getMnemonic,
         deleteWallet,
+        removeWallet,
         fiatCurrency: fiatCurrency.code,
         setFiatCurrency,
         theme: theme.name,
         setTheme,
-        inMemoryWallet,
         currentChain,
         cardanoPrice,
-        withSignTxConfirmation,
         walletManager,
         walletRepository,
         switchNetwork,
@@ -180,12 +213,13 @@ export const NamiView = withDappContext((): React.ReactElement => {
         enableCustomNode,
         getCustomSubmitApiForNetwork,
         defaultSubmitApi: DEFAULT_SUBMIT_API,
-        cardanoCoin,
         isValidURL,
         buildDelegation,
         signAndSubmitTransaction,
         passwordUtil,
         delegationTxFee: !!delegationTxBuilder && delegationTxFee,
+        delegationStoreDelegationTxBuilder: delegationTxBuilder,
+        collateralTxBuilder,
         setSelectedStakePool,
         isBuildingTx,
         stakingError,
@@ -196,18 +230,29 @@ export const NamiView = withDappContext((): React.ReactElement => {
         switchWalletMode,
         openExternalLink,
         walletAddresses,
-        transactions: sortedHistoryTx,
+        transactions: sortedTx,
         eraSummaries: walletState?.eraSummaries,
         getTxInputsValueAndAddress,
         certificateInspectorFactory,
-        openHWFlow,
-        walletType,
         connectHW,
         createHardwareWalletRevamped,
-        saveHardwareWallet
+        saveHardwareWallet,
+        setDeletingWallet
       }}
     >
-      <Nami />
+      <CommonOutsideHandlesProvider
+        {...{
+          cardanoCoin,
+          walletType,
+          openHWFlow,
+          inMemoryWallet,
+          withSignTxConfirmation,
+          sendEventToPostHog,
+          handleResolver
+        }}
+      >
+        <Nami />
+      </CommonOutsideHandlesProvider>
     </OutsideHandlesProvider>
   );
 });

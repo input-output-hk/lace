@@ -4,6 +4,7 @@ import {
   WalletType,
   type WalletId,
   type HardwareWallet,
+  type InMemoryWallet,
   type Bip32WalletAccount,
   type AnyWallet,
   type RemoveAccountProps,
@@ -34,7 +35,7 @@ interface AccountsProps {
   removeAccount: (
     props: Readonly<RemoveAccountProps>,
   ) => Promise<RemoveAccountProps>;
-  removeWallet: (props: WalletId) => Promise<WalletId>;
+  removeWallet: (isChangePasswordFlow?: boolean) => Promise<void>;
   updateAccountMetadata: (
     props: Readonly<UpdateAccountMetadataProps<Wallet.AccountMetadata>>,
   ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata>>;
@@ -45,8 +46,9 @@ export interface Account {
   walletId: string;
   name: string;
   avatar?: string;
-  balance?: string;
-  recentSendToAddress?: string;
+  balance?: Partial<Record<Wallet.ChainName, string>>;
+  address?: Partial<Record<Wallet.ChainName, string>>;
+  recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   type?: WalletType;
 }
 
@@ -116,6 +118,10 @@ export const getNextAccountIndex = (
   return walletAccounts.length;
 };
 
+type NonScriptWallet =
+  | HardwareWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+  | InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
 const getAcountsMapper =
   (
     wallet: Readonly<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>,
@@ -132,44 +138,54 @@ const getAcountsMapper =
   });
 
 export const useAccount = ({
-  chainId = Wallet.Cardano.ChainIds.Mainnet,
   wallets$,
   activeWalletId$,
-  addAccount,
-  activateAccount,
-  removeAccount,
-  removeWallet,
-  updateAccountMetadata,
-}: Readonly<AccountsProps>): UseAccount => {
+}: Readonly<Pick<AccountsProps, 'activeWalletId$' | 'wallets$'>>) => {
   const activeWallet = useObservable(activeWalletId$);
   const wallets = useObservable(wallets$);
   const { walletId, accountIndex } = activeWallet ?? {};
 
   const allAccountsSorted = useMemo(() => {
     const allWallets = wallets?.filter(
-      (w): w is HardwareWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> =>
-        w.type !== WalletType.Script,
+      (w): w is NonScriptWallet => w.type !== WalletType.Script,
     );
     const groupedWallets = groupBy(allWallets, ({ type }) => type);
+
+    // TODO: refactor and reduce complexity + nesting
     return flatten(
       Object.entries(groupedWallets)
         .sort(([type1], [type2]) => {
-          if (type1 === WalletType.InMemory && type2 !== WalletType.InMemory)
+          if (
+            (type1 as WalletType) === WalletType.InMemory &&
+            (type2 as WalletType) !== WalletType.InMemory
+          )
             return -1;
-          if (type2 === WalletType.InMemory && type1 !== WalletType.InMemory)
+          if (
+            (type2 as WalletType) === WalletType.InMemory &&
+            (type1 as WalletType) !== WalletType.InMemory
+          )
             return 1;
           return 0;
         })
         .map(([_type, wallets]) => {
-          const wallet =
-            wallets.find(w => w.walletId === walletId) ?? wallets[0];
-          const accountsMapper = getAcountsMapper(wallet);
-          return 'accounts' in wallet
-            ? wallet.accounts
-                // eslint-disable-next-line functional/prefer-tacit
-                .map(account => accountsMapper(account))
-                .sort((a, b) => a.index - b.index)
-            : [];
+          const filteredWallets =
+            (_type as WalletType) === WalletType.InMemory
+              ? // show only current/first in memory wallet accouts
+                [wallets.find(w => w.walletId === walletId) ?? wallets[0]]
+              : // show all hws accouts
+                wallets;
+
+          return flatten(
+            filteredWallets.map(wallet => {
+              const accountsMapper = getAcountsMapper(wallet);
+              return 'accounts' in wallet
+                ? wallet.accounts
+                    // eslint-disable-next-line functional/prefer-tacit
+                    .map(account => accountsMapper(account))
+                    .sort((a, b) => a.index - b.index)
+                : [];
+            }),
+          );
         }),
     );
   }, [wallets, walletId, accountIndex]);
@@ -184,6 +200,34 @@ export const useAccount = ({
       {},
     [allAccountsSorted, accountIndex, activeWallet?.walletId],
   );
+
+  return useMemo(
+    () => ({
+      allAccountsSorted,
+      activeAccount,
+    }),
+    [allAccountsSorted, activeAccount],
+  );
+};
+
+export const useAccountUtil = ({
+  chainId = Wallet.Cardano.ChainIds.Mainnet,
+  wallets$,
+  activeWalletId$,
+  addAccount,
+  activateAccount,
+  removeAccount,
+  removeWallet,
+  updateAccountMetadata,
+}: Readonly<AccountsProps>): UseAccount => {
+  const activeWallet = useObservable(activeWalletId$);
+  const wallets = useObservable(wallets$);
+  const { walletId, accountIndex } = activeWallet ?? {};
+
+  const { allAccountsSorted, activeAccount } = useAccount({
+    wallets$,
+    activeWalletId$,
+  });
 
   return {
     allAccounts: allAccountsSorted,
@@ -219,9 +263,9 @@ export const useAccount = ({
         const isLastAccount = !allAccountsSorted.some(
           a => a.walletId === walletId && a.index !== accountIndex,
         );
-        console.log(isLastAccount, { accountIndex, walletId });
+
         await (isLastAccount
-          ? removeWallet(walletId)
+          ? removeWallet()
           : removeAccount({ accountIndex, walletId }));
       },
       [removeAccount, walletId, allAccountsSorted],

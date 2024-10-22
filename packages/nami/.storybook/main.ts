@@ -41,8 +41,18 @@ const config: StorybookConfig = {
 
       config.plugins.push(
         new NormalModuleReplacementPlugin(
+          /features\/common-outside-handles-provider\/useOutsideHandles$/,
+          join(
+            __dirname,
+            '../src/features/common-outside-handles-provider/useOutsideHandles.mock.ts',
+          ),
+        ),
+        new NormalModuleReplacementPlugin(
           /features\/outside-handles-provider\/useOutsideHandles$/,
-          join(__dirname, '../src/features/outside-handles-provider/useOutsideHandles.mock.ts'),
+          join(
+            __dirname,
+            '../src/features/outside-handles-provider/useOutsideHandles.mock.ts',
+          ),
         ),
         new NormalModuleReplacementPlugin(
           /adapters\/collateral$/,
@@ -75,10 +85,6 @@ const config: StorybookConfig = {
         new NormalModuleReplacementPlugin(
           /^react-router-dom$/,
           join(__dirname, './mocks/react-router-dom.mock.tsx'),
-        ),
-        new NormalModuleReplacementPlugin(
-          /loader$/,
-          join(__dirname, '../src/api/loader.mock.ts'),
         ),
         new NormalModuleReplacementPlugin(
           /signTxUtil$/,

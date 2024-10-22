@@ -1,4 +1,8 @@
-import type { PasswordObj as Password } from '@lace/core';
+/* eslint-disable unicorn/prefer-logical-operator-over-ternary */
+/* eslint-disable @typescript-eslint/naming-convention */
+import React from 'react';
+
+import { WalletType } from '@cardano-sdk/web-extension';
 import {
   Icon,
   Box,
@@ -15,78 +19,125 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react';
-import React from 'react';
 import { MdUsb } from 'react-icons/md';
-import { indexToHw, initHW, isHW } from '../../../api/extension';
-import { ERROR, HW } from '../../../config/config';
+
+import { ERROR } from '../../../config/config';
+
+import type { PasswordObj as Password } from '@lace/core';
+import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { Events } from '../../../features/analytics/events';
 
 interface Props {
-  ready: boolean;
-  onConfirm: (status: boolean, tx: string) => void;
-  sign: (password: string, hw: object) => Promise<void>;
-  setPassword: (pw: Readonly<Partial<Password>>) => void;
-  onCloseBtn: () => void;
-  title: React.ReactNode;
-  info: React.ReactNode;
+  ready?: boolean;
+  onConfirm: (status: boolean, error?: string) => Promise<void> | void;
+  sign: (password?: string) => Promise<void>;
+  setPassword?: (pw: Readonly<Partial<Password>>) => void;
+  onCloseBtn?: () => void;
+  title?: React.ReactNode;
+  info?: React.ReactNode;
+  walletType: WalletType;
+  openHWFlow?: (path: string) => void;
+  getCbor?: () => Promise<string>;
+  setCollateral?: boolean;
+  isPopup?: boolean;
 }
 
-const ConfirmModal = React.forwardRef<unknown, Props>(
-  ({ ready, onConfirm, sign, onCloseBtn, title, info, setPassword }, ref) => {
-    const {
-      isOpen: isOpenNormal,
-      onOpen: onOpenNormal,
-      onClose: onCloseNormal,
-    } = useDisclosure();
-    const {
-      isOpen: isOpenHW,
-      onOpen: onOpenHW,
-      onClose: onCloseHW,
-    } = useDisclosure();
-    const props = {
-      ready,
-      onConfirm,
-      sign,
-      onCloseBtn,
-      title,
-      info,
-    };
-    const [hw, setHw] = React.useState('');
+export interface ConfirmModalRef {
+  openModal: () => void;
+  closeModal: () => void;
+}
 
-    React.useImperativeHandle(ref, () => ({
-      openModal(accountIndex) {
-        if (isHW(accountIndex)) {
-          setHw(indexToHw(accountIndex));
-          onOpenHW();
-        } else {
-          onOpenNormal();
-        }
-      },
-      closeModal() {
-        onCloseNormal();
-        onCloseHW();
-      },
-    }));
+const ConfirmModal = (
+  {
+    ready,
+    onConfirm,
+    sign,
+    onCloseBtn,
+    title,
+    info,
+    setPassword,
+    walletType,
+    openHWFlow,
+    getCbor,
+    setCollateral,
+    isPopup,
+  }: Readonly<Props>,
+  ref,
+) => {
+  const {
+    isOpen: isOpenNormal,
+    onOpen: onOpenNormal,
+    onClose: onCloseNormal,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenHW,
+    onOpen: onOpenHW,
+    onClose: onCloseHW,
+  } = useDisclosure();
+  const props = {
+    ready,
+    onConfirm,
+    sign,
+    onCloseBtn,
+    title,
+    info,
+    walletType,
+    setCollateral,
+    isPopup,
+  };
+  React.useImperativeHandle(ref, () => ({
+    openModal: () => {
+      if (
+        walletType === WalletType.Ledger ||
+        walletType === WalletType.Trezor
+      ) {
+        onOpenHW();
+      } else {
+        onOpenNormal();
+      }
+    },
+    closeModal: () => {
+      onCloseNormal();
+      onCloseHW();
+    },
+  }));
 
-    return (
-      <>
+  return (
+    <>
+      {typeof openHWFlow === 'function' &&
+      [WalletType.Ledger, WalletType.Trezor].includes(walletType) ? (
         <ConfirmModalHw
+          openHWFlow={openHWFlow}
+          getCbor={getCbor}
           props={props}
           isOpen={isOpenHW}
           onClose={onCloseHW}
-          hw={hw}
         />
+      ) : (
         <ConfirmModalNormal
           props={props}
           isOpen={isOpenNormal}
           onClose={onCloseNormal}
           setPassword={setPassword}
         />
-      </>
-    );
-  }
-);
+      )}
+    </>
+  );
+};
 
-const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
+interface ConfirmModalNormalProps {
+  isOpen?: boolean;
+  onClose: () => void;
+  setPassword?: (pw: Readonly<Partial<Password>>) => void;
+  props: Props;
+}
+
+const ConfirmModalNormal = ({
+  props,
+  isOpen,
+  onClose,
+  setPassword,
+}: Readonly<ConfirmModalNormalProps>) => {
   const [state, setState] = React.useState({
     wrongPassword: false,
     password: '',
@@ -94,7 +145,7 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
     name: '',
   });
   const [waitReady, setWaitReady] = React.useState(true);
-  const inputRef = React.useRef();
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     setState({
@@ -109,13 +160,20 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
     if (!state.password || props.ready === false || !waitReady) return;
     try {
       setWaitReady(false);
-      const signedMessage = await props.sign(state.password);
-      await props.onConfirm(true, signedMessage);
+      await props.sign(state.password);
+      await props?.onConfirm(true);
       onClose?.();
-    } catch (e) {
-      if (e === ERROR.wrongPassword || e.name === 'AuthenticationError')
-        setState((s) => ({ ...s, wrongPassword: true }));
-      else await props.onConfirm(false, e);
+    } catch (error) {
+      if (
+        error === ERROR.wrongPassword ||
+        (error instanceof Error && error.name === 'AuthenticationError')
+      )
+        setState(s => ({ ...s, wrongPassword: true }));
+      else
+        await props.onConfirm(
+          false,
+          error instanceof Error ? error.name : (error || '').toString(),
+        );
     }
     setWaitReady(true);
   };
@@ -123,17 +181,16 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
   return (
     <Modal
       size="xs"
-      isOpen={isOpen}
+      isOpen={!!isOpen}
       onClose={() => {
         if (props.onCloseBtn) {
           props.onCloseBtn();
         }
-        onClose()
+        onClose();
       }}
       isCentered
       initialFocusRef={inputRef}
       blockScrollOnMount={false}
-      // styleConfig={{maxWidth: '100%'}}
     >
       <ModalOverlay />
       <ModalContent m={0}>
@@ -147,14 +204,14 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
               ref={inputRef}
               focusBorderColor="teal.400"
               variant="filled"
-              isInvalid={state.wrongPassword === true}
+              isInvalid={state.wrongPassword}
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
-              onChange={(e) => {
+              onChange={e => {
                 setPassword?.(e.target);
-                setState((s) => ({ ...s, password: e.target.value }));
+                setState(s => ({ ...s, password: e.target.value }));
               }}
-              onKeyDown={(e) => {
+              onKeyDown={e => {
                 if (e.key == 'Enter') confirmHandler();
               }}
               placeholder="Enter password"
@@ -163,13 +220,15 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
               <Button
                 h="1.75rem"
                 size="sm"
-                onClick={() => setState((s) => ({ ...s, show: !s.show }))}
+                onClick={() => {
+                  setState(s => ({ ...s, show: !s.show }));
+                }}
               >
                 {state.show ? 'Hide' : 'Show'}
               </Button>
             </InputRightElement>
           </InputGroup>
-          {state.wrongPassword === true && (
+          {state.wrongPassword && (
             <Text color="red.300">Password is wrong</Text>
           )}
         </ModalBody>
@@ -201,22 +260,57 @@ const ConfirmModalNormal = ({ props, isOpen, onClose, setPassword }) => {
   );
 };
 
-const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
+interface ConfirmModalHwProps {
+  isOpen?: boolean;
+  onClose: () => void;
+  openHWFlow: (path: string) => void;
+  getCbor?: () => Promise<string>;
+  props: Props;
+}
+
+const ConfirmModalHw = ({
+  props,
+  isOpen,
+  getCbor,
+  openHWFlow,
+  onClose,
+}: Readonly<ConfirmModalHwProps>) => {
   const [waitReady, setWaitReady] = React.useState(true);
   const [error, setError] = React.useState('');
+  const capture = useCaptureEvent();
 
   const confirmHandler = async () => {
-    if (props.ready === false || !waitReady) return;
-    try {
+    if (
+      props.walletType === WalletType.Trezor &&
+      props.isPopup &&
+      typeof getCbor === 'function'
+    ) {
+      const cbor = await getCbor();
+
+      if (cbor === '') {
+        setError('An error occurred');
+        return;
+      }
+
+      if (props.setCollateral) {
+        openHWFlow(`/hwTab/trezorTx/${cbor}/${props.setCollateral}`);
+      } else {
+        openHWFlow(`/hwTab/trezorTx/${cbor}`);
+      }
+    } else {
+      if (props.ready === false || !waitReady) return;
       setWaitReady(false);
-      const appAda = await initHW({ device: hw.device, id: hw.id });
-      const signedMessage = await props.sign(null, { ...hw, appAda });
-      await props.onConfirm(true, signedMessage);
-    } catch (e) {
-      if (e === ERROR.submit) props.onConfirm(false, e);
-      else setError('An error occured');
+      try {
+        await props.sign();
+        await props.onConfirm(true);
+        capture(Events.SendTransactionConfirmed);
+      } catch (error_) {
+        console.error(error_);
+        if (error_ === ERROR.submit) props.onConfirm(false, error_);
+        else setError('An error occured');
+      }
+      setWaitReady(true);
     }
-    setWaitReady(true);
   };
 
   React.useEffect(() => {
@@ -227,7 +321,7 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
     <>
       <Modal
         size="xs"
-        isOpen={isOpen}
+        isOpen={!!isOpen}
         onClose={onClose}
         isCentered
         blockScrollOnMount={false}
@@ -250,7 +344,11 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                background={hw.device == HW.ledger ? 'blue.400' : 'green.400'}
+                background={
+                  props.walletType === WalletType.Ledger
+                    ? 'blue.400'
+                    : 'green.400'
+                }
                 rounded="xl"
                 py={2}
                 width="70%"
@@ -258,11 +356,9 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
               >
                 <Icon as={MdUsb} boxSize={5} mr={2} />
                 <Box fontSize="sm">
-                  {!waitReady
-                    ? `Waiting for ${
-                        hw.device == HW.ledger ? 'Ledger' : 'Trezor'
-                      }`
-                    : `Connect ${hw.device == HW.ledger ? 'Ledger' : 'Trezor'}`}
+                  {waitReady
+                    ? `Connect ${props.walletType}`
+                    : `Waiting for ${props.walletType}`}
                 </Box>
               </Box>
               {error && (
@@ -301,4 +397,4 @@ const ConfirmModalHw = ({ props, isOpen, onClose, hw }) => {
   );
 };
 
-export default ConfirmModal;
+export default React.forwardRef(ConfirmModal);
