@@ -5,6 +5,7 @@ import React from 'react';
 
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import { Box, Button, Icon, Image, Text, useColorMode } from '@chakra-ui/react';
+import { ledgerUSBVendorId } from '@ledgerhq/devices';
 import { MdUsb } from 'react-icons/md';
 
 import LedgerLogo from '../../../assets/img/ledgerLogo.svg';
@@ -20,9 +21,9 @@ interface ConnectHWProps {
   onConfirm: (data: Readonly<Wallet.HardwareWalletConnection>) => void;
 }
 
-const MANUFACTURER: Record<string, string> = {
-  ledger: 'Ledger',
-  trezor: 'SatoshiLabs',
+const VENDOR_IDS: Record<string, number[]> = {
+  ledger: [ledgerUSBVendorId],
+  trezor: [0x53_4c, 0x12_09], // Model T HID 0x534c and others 0x1209 - taken from https://github.com/vacuumlabs/trezor-suite/blob/develop/packages/transport/src/constants.ts#L13-L21
 };
 
 export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
@@ -41,7 +42,7 @@ export const ConnectHW = ({ onConfirm }: ConnectHWProps): ReactElement => {
       const device = await navigator.usb.requestDevice({
         filters: [],
       });
-      if (device.manufacturerName !== MANUFACTURER[selected]) {
+      if (!VENDOR_IDS[selected].includes(device.vendorId)) {
         setError(
           `Device is not a ${selected === HW.ledger ? 'Ledger' : 'Trezor'}`,
         );
