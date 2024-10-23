@@ -23,6 +23,18 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
+  BLOCKFROST_PROJECT_ID_MAINNET:
+    description: 'MainNet Project ID for Blockfrost API usage'
+    required: true
+  BLOCKFROST_PROJECT_ID_PREPROD:
+    description: 'PreProd Project ID for Blockfrost API usage'
+    required: true
+  BLOCKFROST_PROJECT_ID_PREVIEW:
+    description: 'Preview Project ID for Blockfrost API usage'
+    required: true
+  BLOCKFROST_PROJECT_ID_SANCHONET:
+    description: 'SanchoNet Project ID for Blockfrost API usage'
+    required: true
   CARDANO_SERVICES_URL_MAINNET:
     description: 'Url for mainnet env'
     required: false
@@ -107,6 +119,10 @@ runs:
         POSTHOG_PRODUCTION_TOKEN: ${{ inputs.POSTHOG_PRODUCTION_TOKEN }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+        BLOCKFROST_PROJECT_ID_MAINNET: ${{ inputs.BLOCKFROST_PROJECT_ID_MAINNET }}
+        BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
+        BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
+        BLOCKFROST_PROJECT_ID_SANCHONET: ${{ inputs.BLOCKFROST_PROJECT_ID_SANCHONET }}
         CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
         CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}

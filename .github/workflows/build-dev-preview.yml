@@ -22,6 +22,10 @@ jobs:
       - name: Build dev preview version of Lace
         uses: ./.github/shared/build
         with:
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
           BUILD_DEV_PREVIEW: 'true'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}

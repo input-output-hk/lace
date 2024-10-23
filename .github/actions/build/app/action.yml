@@ -2,6 +2,15 @@ name: buildapp
 description: Build app
 
 inputs:
+  BLOCKFROST_PROJECT_ID_MAINNET:
+    description: 'MainNet Project ID for Blockfrost API usage'
+    required: true
+  BLOCKFROST_PROJECT_ID_PREPROD:
+    description: 'PreProd Project ID for Blockfrost API usage'
+    required: true
+  BLOCKFROST_PROJECT_ID_PREVIEW:
+    description: 'Preview Project ID for Blockfrost API usage'
+    required: true
   DIR:
     description: 'app directory'
     required: true
@@ -42,6 +51,9 @@ runs:
       shell: bash
       working-directory: ${{ inputs.DIR }}
       env:
+        BLOCKFROST_PROJECT_ID_MAINNET: ${{ inputs.BLOCKFROST_PROJECT_ID_MAINNET }}
+        BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
+        BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         POSTHOG_PRODUCTION_TOKEN: ${{ inputs.POSTHOG_PRODUCTION_TOKEN }}
