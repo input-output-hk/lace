@@ -30,7 +30,8 @@ type FeatureFlag =
   | 'restore-paper-wallet'
   | 'shared-wallets'
   | 'use-switch-to-nami-mode'
-  | 'websocket-api';
+  | 'websocket-api'
+  | ExperimentName.BLOCKFROST_ASSET_PROVIDER;
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;
