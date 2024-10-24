@@ -56,15 +56,15 @@ export const useChangePassword = ({
 
   return useCallback(
     async (currentPassword: string, newPassword: string) => {
-      try {
-        if (
-          !wallet?.metadata?.name ||
-          !('encryptedSecrets' in wallet) ||
-          !('accounts' in wallet)
-        ) {
-          throw new Error(ERROR.passwordChangeNotPossible);
-        }
+      if (
+        !wallet?.metadata?.name ||
+        !('encryptedSecrets' in wallet) ||
+        !('accounts' in wallet)
+      ) {
+        throw new Error(ERROR.passwordChangeNotPossible);
+      }
 
+      try {
         const decryptedRootPrivateKeyBytes =
           await Wallet.KeyManagement.emip3decrypt(
             Buffer.from(wallet.encryptedSecrets.rootPrivateKeyBytes, 'hex'),
