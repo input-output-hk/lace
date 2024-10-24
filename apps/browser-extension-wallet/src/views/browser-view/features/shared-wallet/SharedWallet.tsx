@@ -16,13 +16,9 @@ import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { config } from '@src/config';
 import { Wallet } from '@lace/cardano';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-
-const { CHAIN } = config();
-const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 
 type CreateWalletParams = {
   coSigners: CoSigner[];
@@ -35,7 +31,7 @@ export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
   const { walletRepository, generateSharedWalletKey, saveSharedWalletKey, createInMemorySharedWallet } =
     useWalletManager();
-  const { walletInfo, cardanoWallet } = useWalletStore();
+  const { walletInfo, cardanoWallet, environmentName } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
   const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
@@ -60,7 +56,7 @@ export const SharedWallet = (): JSX.Element => {
 
     await createInMemorySharedWallet({
       name: data.name,
-      chainId: DEFAULT_CHAIN_ID,
+      chainId: Wallet.Cardano.ChainIds[environmentName],
       ownSignerWalletId: activeWalletId,
       quorumRules: data.quorumRules,
       coSigners: data.coSigners,
