@@ -21,7 +21,6 @@ import jsQR, { QRCode } from 'jsqr';
 import { Trans } from 'react-i18next';
 import styles from './ScanShieldedMessage.module.scss';
 import cn from 'classnames';
-import { ChainName } from '@lace/cardano/dist/wallet';
 import { useAnalyticsContext } from '@providers';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { Loader } from '@lace/common';
@@ -44,7 +43,7 @@ interface ByteChunk<T> {
   type: 'byte';
 }
 
-type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<ChainName>];
+type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<Wallet.ChainName>];
 
 export const ScanShieldedMessage: VFC = () => {
   const { postHogActions } = useWalletOnboarding();
@@ -118,7 +117,7 @@ export const ScanShieldedMessage: VFC = () => {
     postHogActions.restore.SCAN_QR_CODE_CAMERA_ERROR
   ]);
 
-  const onScanSuccess = async (message: Uint8Array, address: string, chain: ChainName) => {
+  const onScanSuccess = async (message: Uint8Array, address: string, chain: Wallet.ChainName) => {
     setPgpInfo({ ...pgpInfo, shieldedMessage: message });
     setWalletMetadata({ chain, address });
     setValidation({ error: null });

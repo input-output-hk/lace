@@ -10,7 +10,8 @@ export enum ExperimentName {
   RESTORE_PAPER_WALLET = 'restore-paper-wallet',
   USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets',
-  WEBSOCKET_API = 'websocket-api'
+  WEBSOCKET_API = 'websocket-api',
+  BLOCKFROST_ASSET_PROVIDER = 'blockfrost-asset-provider'
 }
 
 interface FeatureFlag {

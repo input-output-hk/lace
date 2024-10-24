@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new */
 import { WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
@@ -5,6 +6,7 @@ import { Logger } from 'ts-log';
 import {
   AssetProvider,
   ChainHistoryProvider,
+  Milliseconds,
   NetworkInfoProvider,
   Provider,
   RewardsProvider,
@@ -25,6 +27,8 @@ import {
   TxSubmitApiProvider,
   txSubmitHttpProvider
 } from '@cardano-sdk/cardano-services-client';
+import { BlockfrostClient, BlockfrostClientConfig, RateLimiter } from './blockfrost/blockfrost-client';
+import { BlockfrostAssetProvider } from './blockfrost';
 
 const createTxSubmitProvider = (
   httpProviderConfig: CreateHttpProviderConfig<Provider>,
@@ -54,13 +58,45 @@ export type AllProviders = {
   rewardsProvider: RewardsProvider;
 };
 
+export type RateLimiterConfig = {
+  size: number;
+  increaseInterval: Milliseconds;
+  increaseAmount: number;
+};
+
 export interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
-  baseUrl: string;
-  customSubmitTxUrl?: string;
+  env: {
+    baseCardanoServicesUrl: string;
+    customSubmitTxUrl?: string;
+    blockfrostConfig: BlockfrostClientConfig & { rateLimiter: RateLimiter };
+  };
   logger?: Logger;
-  useWebSocket?: boolean;
+  experiments: {
+    useWebSocket?: boolean;
+    useBlockfrostAssetProvider?: boolean;
+  };
 }
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+const composeProviders = <P extends object>(...providers: P[]): P =>
+  new Proxy<P>(providers[0], {
+    get(_, p) {
+      return async (...args: any[]) => {
+        let providerIndex = 0;
+        let provider: P;
+        let lastError: any;
+        while ((provider = providers[providerIndex++])) {
+          try {
+            return await (provider[p as keyof P] as any)(...args);
+          } catch (error) {
+            lastError = error;
+          }
+        }
+        throw lastError;
+      };
+    }
+  });
 
 /**
  * Only one instance must be alive.
@@ -70,16 +106,21 @@ let wsProvider: CardanoWsClient;
 
 export const createProviders = ({
   axiosAdapter,
-  baseUrl,
-  customSubmitTxUrl,
+  env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  useWebSocket
+  experiments: { useBlockfrostAssetProvider, useWebSocket }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
 
-  const assetProvider = assetInfoHttpProvider(httpProviderConfig);
+  const cardanoServicesAssetProvider = assetInfoHttpProvider(httpProviderConfig);
+  const blockfrostClient = new BlockfrostClient(blockfrostConfig, {
+    rateLimiter: blockfrostConfig.rateLimiter
+  });
+  const assetProvider = useBlockfrostAssetProvider
+    ? composeProviders(new BlockfrostAssetProvider(blockfrostClient), cardanoServicesAssetProvider)
+    : cardanoServicesAssetProvider;
   const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
   const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
