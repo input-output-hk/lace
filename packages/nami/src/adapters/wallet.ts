@@ -62,7 +62,7 @@ export const useChangePassword = ({
           !('encryptedSecrets' in wallet) ||
           !('accounts' in wallet)
         ) {
-          return;
+          throw new Error(ERROR.passwordChangeNotPossible);
         }
 
         const decryptedRootPrivateKeyBytes =
@@ -106,7 +106,7 @@ export const useChangePassword = ({
         }
         await activateWallet({ chainId, walletId, accountIndex });
       } catch {
-        throw ERROR.wrongPassword;
+        throw new Error(ERROR.wrongPassword);
       }
     },
     [
