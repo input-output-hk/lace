@@ -1,11 +1,11 @@
 import type { Serialization } from '@cardano-sdk/core';
 import type { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
+import type { HexBlob } from '@cardano-sdk/util';
 import type {
   WalletManagerApi,
   WalletRepositoryApi,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
-import type { HexBlob } from '@lace/cardano/dist/wallet';
 
 export interface DappConnector {
   getDappInfo: () => Promise<Wallet.DappInfo>;
