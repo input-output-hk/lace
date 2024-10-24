@@ -11,13 +11,13 @@ import { deleteFromLocalStorage } from '@utils/local-storage';
 import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ShieldedPgpKeyData } from '@src/types';
-import { ChainName } from '@lace/cardano/dist/wallet';
+import { Wallet } from '@lace/cardano';
 
 type OnNameChange = (state: { name: string }) => void;
 type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
 type WalletSummaryInfo = {
   address: string;
-  chain: ChainName;
+  chain: Wallet.ChainName;
 };
 
 interface State {
