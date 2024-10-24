@@ -62,8 +62,13 @@ const App = () => {
     setDeletingWallet,
   } = useOutsideHandles();
 
-  const { inMemoryWallet, withSignTxConfirmation, cardanoCoin, openHWFlow } =
-    useCommonOutsideHandles();
+  const {
+    inMemoryWallet,
+    withSignTxConfirmation,
+    cardanoCoin,
+    openHWFlow,
+    walletType,
+  } = useCommonOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
     fiatCurrency,
@@ -188,6 +193,7 @@ const App = () => {
             getCustomSubmitApiForNetwork={getCustomSubmitApiForNetwork}
             defaultSubmitApi={defaultSubmitApi}
             isValidURL={isValidURL}
+            walletType={walletType}
           />
         </Route>
         <Route path="/send">

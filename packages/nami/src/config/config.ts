@@ -31,6 +31,7 @@ export const POPUP_WINDOW = {
 export const ERROR = {
   accessDenied: 'Access denied',
   wrongPassword: 'Wrong password',
+  passwordChangeNotPossible: 'Cannot change password',
   txTooBig: 'Transaction too big',
   txNotPossible: 'Transaction not possible',
   storeNotEmpty: 'Storage key is already set',

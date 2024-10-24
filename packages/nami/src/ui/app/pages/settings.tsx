@@ -2,6 +2,7 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
+import { WalletType } from '@cardano-sdk/web-extension';
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -44,6 +45,7 @@ import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { ChangePasswordModalComponentRef } from '../components/changePasswordModal';
 import type { Wallet } from '@lace/cardano';
+import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 
 type Props = Pick<
   OutsideHandlesContextValue,
@@ -60,17 +62,18 @@ type Props = Pick<
   | 'setTheme'
   | 'switchNetwork'
   | 'theme'
-> & {
-  currency: CurrencyCode;
-  setCurrency: (currency: CurrencyCode) => void;
-  changePassword: (
-    currentPassword: string,
-    newPassword: string,
-  ) => Promise<void>;
-  accountName: string;
-  accountAvatar?: string;
-  updateAccountMetadata: UseAccount['updateAccountMetadata'];
-};
+> &
+  Pick<CommonOutsideHandlesContextValue, 'walletType'> & {
+    currency: CurrencyCode;
+    setCurrency: (currency: CurrencyCode) => void;
+    changePassword: (
+      currentPassword: string,
+      newPassword: string,
+    ) => Promise<void>;
+    accountName: string;
+    accountAvatar?: string;
+    updateAccountMetadata: UseAccount['updateAccountMetadata'];
+  };
 
 const Settings = ({
   currency,
@@ -92,6 +95,7 @@ const Settings = ({
   getCustomSubmitApiForNetwork,
   defaultSubmitApi,
   isValidURL,
+  walletType,
 }: Readonly<Props>) => {
   const history = useHistory();
   const location = useLocation();
@@ -136,6 +140,7 @@ const Settings = ({
             accountAvatar={accountAvatar}
             accountName={accountName}
             updateAccountMetadata={updateAccountMetadata}
+            walletType={walletType}
           />
         </Route>
         <Route path="/settings/whitelisted" exact>
@@ -275,6 +280,7 @@ const GeneralSettings = ({
   accountAvatar,
   changePassword,
   updateAccountMetadata,
+  walletType,
 }: Readonly<
   Pick<
     Props,
@@ -286,6 +292,7 @@ const GeneralSettings = ({
     | 'setTheme'
     | 'theme'
     | 'updateAccountMetadata'
+    | 'walletType'
   >
 >) => {
   const capture = useCaptureEvent();
@@ -395,20 +402,24 @@ const GeneralSettings = ({
       </Box>
       <Box height="15" />
       <Box height="5" />
-      <Button
-        colorScheme="orange"
-        size="sm"
-        onClick={() => {
-          capture(Events.SettingsChangePasswordClick);
-          changePasswordRef.current?.openModal();
-        }}
-      >
-        Change Password
-      </Button>
-      <ChangePasswordModal
-        ref={changePasswordRef}
-        changePassword={changePassword}
-      />
+      {walletType === WalletType.InMemory && (
+        <>
+          <Button
+            colorScheme="orange"
+            size="sm"
+            onClick={() => {
+              capture(Events.SettingsChangePasswordClick);
+              changePasswordRef.current?.openModal();
+            }}
+          >
+            Change Password
+          </Button>
+          <ChangePasswordModal
+            ref={changePasswordRef}
+            changePassword={changePassword}
+          />
+        </>
+      )}
     </>
   );
 };
