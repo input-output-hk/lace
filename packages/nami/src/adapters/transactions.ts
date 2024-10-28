@@ -128,11 +128,26 @@ const getAddressCredentials = (
   Wallet.Crypto.Hash28ByteBase16 | undefined,
   Wallet.Crypto.Hash28ByteBase16 | undefined,
 ] => {
-  const addr = Wallet.Cardano.Address.fromBech32(address);
-  return [
-    addr.getProps().paymentPart?.hash,
-    addr.getProps().delegationPart?.hash,
-  ];
+  try {
+    const addr = Wallet.Cardano.Address.fromBech32(address);
+    return [
+      addr.getProps().paymentPart?.hash,
+      addr.getProps().delegationPart?.hash,
+    ];
+  } catch (error) {
+    // try casting as byron address
+    try {
+      const addr = Wallet.Cardano.Address.fromBase58(address);
+      return [
+        addr.getProps().paymentPart?.hash,
+        addr.getProps().delegationPart?.hash,
+      ];
+    } catch (error) {
+      console.error(error);
+    }
+    console.error(error);
+    return [undefined, undefined];
+  }
 };
 
 const matchesAnyCredential = (
