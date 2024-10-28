@@ -40,7 +40,7 @@ import { logger } from '@lace/common';
 export const walletRepository = new WalletRepository({
   logger,
   store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
-    { dbName: 'walletRepository' },
+    { dbName: 'walletRepository', computeDocId: (wallet) => wallet.walletId },
     logger
   )
 });
