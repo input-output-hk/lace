@@ -9,6 +9,7 @@ import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
 import { SettingsSwitchToNami } from './SettingsSwitchToNami';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useWalletStore } from '@src/stores';
 
 export interface SettingsLayoutProps {
   defaultPassphraseVisible?: boolean;
@@ -21,6 +22,7 @@ export const SettingsLayout = ({
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const posthog = usePostHogClientContext();
+  const { isSharedWallet } = useWalletStore();
   const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   const sidePanelContent = (
@@ -43,7 +45,7 @@ export const SettingsLayout = ({
         <SettingsSecurity defaultPassphraseVisible={defaultPassphraseVisible} defaultMnemonic={defaultMnemonic} />
         <SettingsHelp />
         <SettingsLegal />
-        {useSwitchToNamiMode && <SettingsSwitchToNami />}
+        {useSwitchToNamiMode && !isSharedWallet && <SettingsSwitchToNami />}
         <SettingsRemoveWallet />
       </SectionLayout>
     </Layout>
