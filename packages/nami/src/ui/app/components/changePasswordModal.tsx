@@ -33,6 +33,15 @@ export interface ChangePasswordModalComponentRef {
   openModal: () => void;
 }
 
+interface State {
+  currentPassword: string;
+  newPassword: string;
+  repeatPassword: string;
+  matchingPassword: boolean;
+  passwordLen: boolean | null;
+  show: boolean;
+}
+
 const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   const capture = useCaptureEvent();
   const cancelRef = React.useRef<HTMLButtonElement>(null);
@@ -41,12 +50,12 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [state, setState] = React.useState({
+  const [state, setState] = React.useState<State>({
     currentPassword: '',
     newPassword: '',
     repeatPassword: '',
     matchingPassword: false,
-    passwordLen: false,
+    passwordLen: null,
     show: false,
   });
 
@@ -56,7 +65,7 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
       newPassword: '',
       repeatPassword: '',
       matchingPassword: false,
-      passwordLen: false,
+      passwordLen: null,
       show: false,
     });
   }, [isOpen]);
