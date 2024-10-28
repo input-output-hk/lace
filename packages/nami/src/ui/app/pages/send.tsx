@@ -1233,7 +1233,7 @@ const AssetsSelector = ({
                   height={200}
                   itemCount={filteredAssets.length}
                   itemSize={45}
-                  width={385}
+                  width={345}
                   layout="vertical"
                 >
                   {({ index, style }) => {
@@ -1259,7 +1259,7 @@ const AssetsSelector = ({
                 </List>
               ) : (
                 <Box
-                  width={385}
+                  width={345}
                   height={200}
                   display="flex"
                   alignItems="center"
@@ -1276,7 +1276,7 @@ const AssetsSelector = ({
               )
             ) : (
               <Box
-                width={385}
+                width={345}
                 height={200}
                 display="flex"
                 alignItems="center"
