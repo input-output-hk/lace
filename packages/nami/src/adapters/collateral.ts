@@ -32,8 +32,11 @@ export const useCollateral = ({
     await inMemoryWallet.utxo.setUnspendable([]);
   }, [inMemoryWallet.utxo]);
   const submitCollateral = useCallback(
-    async (password: string) =>
-      withSignTxConfirmation(submitCollateralTx, password),
+    async (password: string) => {
+      await withSignTxConfirmation(async () => {
+        await submitCollateralTx();
+      }, password);
+    },
     [submitCollateralTx, withSignTxConfirmation],
   );
 
