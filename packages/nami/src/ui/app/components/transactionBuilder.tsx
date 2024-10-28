@@ -587,6 +587,10 @@ const TransactionBuilder = (undefined, ref) => {
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
+          setData(d => ({
+            ...d,
+            error: undefined,
+          }));
         }}
         onConfirm={(status, error) => {
           if (status) {
