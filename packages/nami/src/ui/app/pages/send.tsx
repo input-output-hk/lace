@@ -630,7 +630,7 @@ const Send = ({
                   !address.error &&
                   !!(value.ada || value.assets.length > 0)
                 }
-                width={'366px'}
+                width={'326px'}
                 height={'50px'}
                 isDisabled={!tx || !address.result || !!fee.error}
                 colorScheme="orange"
