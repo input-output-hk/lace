@@ -236,7 +236,7 @@ describe('useChangePassword', () => {
 
     await expect(
       result.current('wrong-password', 'new-password'),
-    ).rejects.toEqual(ERROR.wrongPassword);
+    ).rejects.toEqual(new Error(ERROR.wrongPassword));
     expect(mockDeleteWallet).not.toHaveBeenCalled();
   });
 });
