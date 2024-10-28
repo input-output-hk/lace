@@ -122,7 +122,9 @@ export const Footer = withAddressBookContext(
           const event = isSharedWallet
             ? 'SharedWalletsSendTxConfirmationConfirmClick'
             : 'SendTransactionConfirmationConfirmClick';
-          sendEventToPostHog(PostHogAction[event]);
+          builtTxData.importedSharedWalletTx
+            ? sendEventToPostHog(PostHogAction.SharedWalletsCosignTxConfirmationClick)
+            : sendEventToPostHog(PostHogAction[event]);
           break;
         }
         case Sections.SUCCESS_TX: {
