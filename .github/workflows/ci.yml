@@ -221,6 +221,7 @@ jobs:
           BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
           BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
           BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

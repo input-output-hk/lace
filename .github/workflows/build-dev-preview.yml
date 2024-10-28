@@ -31,6 +31,7 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.DEV_PREVIEW_MANIFEST_PUBLIC_KEY  }}
           CARDANO_SERVICES_URL_SANCHONET: 'https://live-sanchonet.lw.iog.io'
           PRODUCTION_MODE_TRACKING: 'false'
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       - name: Check for linter issues
         run: yarn lint
       - name: Execute unit tests
