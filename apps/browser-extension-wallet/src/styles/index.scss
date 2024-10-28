@@ -17,6 +17,7 @@
 }
 
 #lace-popup:not(:has(#hw-connect-flow)) > #nami-mode {
+  max-width: 100%;
   width: 400px;
 }
 
