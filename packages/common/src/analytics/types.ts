@@ -299,6 +299,7 @@ export enum PostHogAction {
   SharedWalletsCosignTxCancelClick = 'shared wallets | co-sign  | co-sign transaction | cancel | click',
   SharedWalletsCosignTxSummaryConfirmClick = 'shared wallets | co-sign  | co-sign tx summary | confirm | click',
   SharedWalletsCosignTxSummaryCancelClick = 'shared wallets | co-sign  | co-sign tx summary | cancel | click',
+  SharedWalletsCosignTxConfirmationClick = 'shared wallets | co-sign  | co-sign tx confirmation | confirm | click',
   SharedWalletsSendClick = 'shared wallets | send | click',
   SharedWalletsSendTxDataReviewTxClick = 'shared wallets | send | transaction data | review transaction | click',
   SharedWalletsSendTxSummaryConfirmClick = 'shared wallets | send | transaction summary | confirm | click',
