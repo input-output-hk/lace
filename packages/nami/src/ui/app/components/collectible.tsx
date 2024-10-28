@@ -22,6 +22,12 @@ const useIsMounted = () => {
   return isMounted;
 };
 
+const lineClampStyle = {
+  display: '-webkit-box',
+  '-webkit-line-clamp': '3',
+  '-webkit-box-orient': 'vertical',
+};
+
 const CollectibleComponent = ({ asset, ...props }, ref) => {
   const capture = useCaptureEvent();
   const background = useColorModeValue('gray.300', 'white');
@@ -103,7 +109,7 @@ const CollectibleComponent = ({ asset, ...props }, ref) => {
           >
             <Box
               overflow="hidden"
-              className="lineClamp3"
+              style={lineClampStyle}
               fontSize={13}
               fontWeight="bold"
               color="GrayText"
