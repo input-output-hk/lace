@@ -591,7 +591,7 @@ const Send = ({
               <Scrollbars
                 style={{
                   width: '100%',
-                  height: '200px',
+                  height: '170px',
                 }}
               >
                 <Box
