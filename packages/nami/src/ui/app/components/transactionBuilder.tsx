@@ -123,7 +123,7 @@ const TransactionBuilder = (undefined, ref) => {
     delegationTxFee,
     isBuildingTx,
     stakingError,
-    passwordUtil: { setPassword },
+    passwordUtil: { setPassword, clearSecrets },
     signAndSubmitTransaction,
     getStakePoolInfo,
     submitCollateralTx,
@@ -598,13 +598,11 @@ const TransactionBuilder = (undefined, ref) => {
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
-          setData(d => ({
-            ...d,
-            error: undefined,
-          }));
+          clearSecrets();
         }}
         onConfirm={(status, error) => {
           if (status) {
+            clearSecrets();
             capture(Events.SettingsCollateralConfirmClick);
             toast({
               title: 'Collateral added',
