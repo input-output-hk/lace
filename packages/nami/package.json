@@ -39,7 +39,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "rm -rf dist && run -T rollup -c rollup.config.js",
+    "build": "rm -rf dist && run -T rollup -c rollup.config.mjs",
     "build-storybook": "storybook build",
     "chromatic": "echo \"@lace/nami: no chromatic command specified\"",
     "cleanup": "yarn exec rm -rf dist node_modules",
@@ -70,9 +70,9 @@
     "@emotion/react": "^11.4.0",
     "@emotion/styled": "^11.3.0",
     "@fontsource/ubuntu": "^5.0.8",
-    "@lace/cardano": "workspace:^",
-    "@lace/common": "workspace:^",
-    "@lace/core": "workspace:^",
+    "@lace/cardano": "0.1.0",
+    "@lace/common": "0.1.0",
+    "@lace/core": "0.1.0",
     "crc": "^4.1.1",
     "debounce-promise": "^3.1.2",
     "easy-peasy": "^6.0.4",

@@ -10,22 +10,19 @@ import postcss from 'rollup-plugin-postcss';
 const defaultTsPluginOptions = {
   composite: false,
   exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx'],
-  tsconfig: 'src/tsconfig.json',
-}
+  tsconfig: 'src/tsconfig.json'
+};
 
-export default ({
-  tsPluginOptions = defaultTsPluginOptions,
-  input = 'src/index.ts',
-} = {}) => ({
+export default ({ tsPluginOptions = defaultTsPluginOptions, input = 'src/index.ts' } = {}) => ({
   external: [/node_modules/],
   input,
   plugins: [
     resolve({
-      preferBuiltins: false,
+      preferBuiltins: false
     }),
     typescript({
       ...defaultTsPluginOptions,
-      ...tsPluginOptions,
+      ...tsPluginOptions
     }),
     peerDepsExternal(),
     postcss({
@@ -35,11 +32,11 @@ export default ({
       // https://github.com/egoist/rollup-plugin-postcss/issues/367
       inject: (cssVariableName) => `
 import styleInject from 'style-inject';
-styleInject(${cssVariableName});`,
+styleInject(${cssVariableName});`
     }),
     commonjs(),
     nodePolyfills(),
     image(),
-    svgr({ icon: true }),
-  ],
+    svgr({ icon: true })
+  ]
 });

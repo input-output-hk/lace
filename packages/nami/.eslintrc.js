@@ -158,7 +158,7 @@ module.exports = {
       files: [
         'index.js',
         '.eslintrc.js',
-        'rollup.config.ts',
+        'rollup.config.mjs',
         '.storybook/*.js',
       ],
       rules: {

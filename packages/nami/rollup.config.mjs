@@ -3,7 +3,7 @@ import typescript from '@rollup/plugin-typescript';
 import css from 'rollup-plugin-import-css';
 import image from '@rollup/plugin-image';
 import json from '@rollup/plugin-json';
-import packageJson from './package.json';
+import packageJson from './package.json' assert { type: 'json' };
 import svgr from '@svgr/rollup';
 import copy from 'rollup-plugin-copy';
 import url from '@rollup/plugin-url';

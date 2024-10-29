@@ -16,7 +16,7 @@
   "module": "dist/index.esm.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js",
+    "build": "run -T rollup -c rollup.config.mjs",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format": "yarn prettier --write .",
     "format-check": "yarn prettier --check .",

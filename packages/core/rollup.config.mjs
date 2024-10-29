@@ -1,5 +1,5 @@
-import rollupBase from '../../rollup.config.js';
-import packageJson from './package.json';
+import rollupBase from '../../rollup.config.mjs';
+import packageJson from './package.json' assert { type: 'json' };
 import copy from 'rollup-plugin-copy';
 import json from '@rollup/plugin-json';
 import url from '@rollup/plugin-url';
