@@ -79,7 +79,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     async (args) => {
       try {
         const { namiMigration } = await getBackgroundStorage();
-        if (namiMigration.mode === 'nami') {
+        if (namiMigration?.mode === 'nami') {
           // User has to explicitly set collateral from the popup UI
           return [];
         }
