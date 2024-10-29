@@ -25,6 +25,7 @@ import { Wallet } from '@lace/cardano';
 import MiddleEllipsis from 'react-middle-ellipsis';
 import { firstValueFrom } from 'rxjs';
 
+import { ERROR } from '../../../../config/config';
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
@@ -546,7 +547,14 @@ export const SignTx = ({
           try {
             await request?.sign(password ?? '');
           } catch (error) {
+            if (
+              error instanceof Wallet.KeyManagement.errors.AuthenticationError
+            ) {
+              setIsLoading(l => ({ ...l, error: ERROR.wrongPassword }));
+              throw ERROR.wrongPassword;
+            }
             setIsLoading(l => ({ ...l, error: `Failed to sign. ${error}` }));
+            throw `Failed to sign. ${error}`;
           }
         }}
         onConfirm={async status => {
