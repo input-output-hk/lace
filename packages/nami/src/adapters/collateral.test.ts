@@ -112,6 +112,12 @@ describe('useCollateral', () => {
     const unspendable$ = of({
       coins: BigInt(4999),
     });
+    mockWithSignTxConfirmation.mockImplementation(
+      async (mockSubmitCollateralTx, password) => {
+        await mockSubmitCollateralTx();
+      },
+    );
+
     const { result } = renderHook(() =>
       useCollateral({
         inMemoryWallet: {
@@ -132,10 +138,12 @@ describe('useCollateral', () => {
     await result.current.submitCollateral(password);
 
     expect(mockWithSignTxConfirmation).toBeCalledWith(
-      mockSubmitCollateralTx,
+      expect.any(Function),
       password,
     );
+
     expect(mockWithSignTxConfirmation).toBeCalledTimes(1);
+    expect(mockSubmitCollateralTx).toBeCalledTimes(1);
   });
 
   describe('getCollateralUtxo', () => {

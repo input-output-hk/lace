@@ -44,6 +44,7 @@ import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
 
 import type { ConfirmModalRef } from './confirmModal';
+import { firstValueFrom } from 'rxjs';
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -117,13 +118,12 @@ const TransactionBuilder = (undefined, ref) => {
     isInitializingCollateral,
     initializeCollateralTx: initializeCollateral,
     collateralFee,
-
     buildDelegation,
     setSelectedStakePool,
     delegationTxFee,
     isBuildingTx,
     stakingError,
-    passwordUtil: { setPassword },
+    passwordUtil: { setPassword, clearSecrets },
     signAndSubmitTransaction,
     getStakePoolInfo,
     submitCollateralTx,
@@ -248,8 +248,19 @@ const TransactionBuilder = (undefined, ref) => {
       }
       collateralRef.current?.openModal();
 
+      const available = await firstValueFrom(
+        inMemoryWallet.balance.utxo.available$,
+      );
+
       try {
-        await initializeCollateral();
+        if (available.coins < BigInt(5_000_000)) {
+          setData(d => ({
+            ...d,
+            error: 'Transaction not possible (maybe insufficient balance)',
+          }));
+        } else {
+          await initializeCollateral();
+        }
       } catch {
         setData(d => ({
           ...d,
@@ -573,7 +584,7 @@ const TransactionBuilder = (undefined, ref) => {
       />
       <ConfirmModal
         isPopup={true}
-        ready={!isInitializingCollateral}
+        ready={!isInitializingCollateral && !data.error}
         title={
           <Box display="flex" alignItems="center">
             <Icon as={FaRegFileCode} mr="2" /> <Box>Collateral</Box>
@@ -587,9 +598,11 @@ const TransactionBuilder = (undefined, ref) => {
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
+          clearSecrets();
         }}
         onConfirm={(status, error) => {
           if (status) {
+            clearSecrets();
             capture(Events.SettingsCollateralConfirmClick);
             toast({
               title: 'Collateral added',
