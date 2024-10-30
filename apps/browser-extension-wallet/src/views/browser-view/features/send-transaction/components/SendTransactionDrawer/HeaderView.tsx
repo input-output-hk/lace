@@ -64,8 +64,8 @@ export const useHandleClose = (): {
   }, [reset, resetUi, resetSection]);
 
   const closeDrawer = useCallback(() => {
-    resetStates();
     setIsDrawerVisible();
+    resetStates();
   }, [resetStates, setIsDrawerVisible]);
 
   const redirect = useCallback(() => {
