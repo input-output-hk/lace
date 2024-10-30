@@ -67,6 +67,23 @@ inputs:
     description: 'WS url for sanchonet env'
     required: false
     default: 'wss://dev-sanchonet.lw.iog.io'
+  SENTRY_AUTH_TOKEN:
+    description: 'Authentication token for Sentry, used to publish source maps for releases'
+    required: false
+    default: ''
+  SENTRY_DSN:
+    description: 'Data Source Name for Sentry, AKA Client Key. This tells a Sentry SDK where to send events so the events are associated
+    with the correct project'
+    required: false
+    default: ''
+  SENTRY_ORG:
+    description: 'Organization identifier for Sentry'
+    required: false
+    default: ''
+  SENTRY_PROJECT:
+    description: 'Project identifier for Sentry'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -131,4 +148,8 @@ runs:
         CARDANO_WS_SERVER_URL_PREPROD: ${{ inputs.CARDANO_WS_SERVER_URL_PREPROD }}
         CARDANO_WS_SERVER_URL_PREVIEW: ${{ inputs.CARDANO_WS_SERVER_URL_PREVIEW }}
         CARDANO_WS_SERVER_URL_SANCHONET: ${{ inputs.CARDANO_WS_SERVER_URL_SANCHONET }}
+        SENTRY_AUTH_TOKEN: ${{ inputs.SENTRY_AUTH_TOKEN }}
+        SENTRY_DSN: ${{ inputs.SENTRY_DSN }}
+        SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
       run: yarn browser build

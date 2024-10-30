@@ -8,6 +8,18 @@ const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 const commitHash = Buffer.from(require('child_process').execSync('git rev-parse HEAD')).toString();
 const app_version = require('./manifest.json').version;
 
+require('dotenv-defaults').config({
+  path: './.env',
+  encoding: 'utf8'
+});
+
+const envsToExpose = {
+  APP_VERSION: app_version,
+  COMMIT_HASH: commitHash
+  //'process.env': JSON.stringify(process.env)
+};
+if ('SENTRY_DSN' in process.env) envsToExpose['SENTRY_DSN'] = process.env.SENTRY_DSN;
+
 module.exports = () => {
   return {
     output: {
@@ -91,11 +103,7 @@ module.exports = () => {
         systemvars: true,
         allowEmptyValues: true
       }),
-      new EnvironmentPlugin({
-        APP_VERSION: app_version,
-        COMMIT_HASH: commitHash
-        //'process.env': JSON.stringify(process.env)
-      }),
+      new EnvironmentPlugin(envsToExpose),
       new SubresourceIntegrityPlugin()
     ]
   };
