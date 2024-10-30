@@ -1,7 +1,8 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import { Box, Spinner } from '@chakra-ui/react';
+import { Box, Spinner, useToast } from '@chakra-ui/react';
+import { debounce } from 'lodash';
 import {
   HashRouter,
   Switch,
@@ -27,6 +28,8 @@ import Wallet from './app/pages/wallet';
 import { Container } from './Container';
 import { useStoreState, useStoreActions } from './store';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
+
+const toastThrottle = 500;
 
 const App = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -68,6 +71,7 @@ const App = () => {
     cardanoCoin,
     openHWFlow,
     walletType,
+    useNetworkError,
   } = useCommonOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -154,6 +158,21 @@ const App = () => {
       setRoute(location.pathname);
     }
   }, [location.pathname, isLoading, setRoute]);
+
+  const toast = useToast();
+
+  const debouncedToast = useMemo(() => debounce(toast, toastThrottle), []);
+  const showNetworkError = useCallback(
+    () =>
+      debouncedToast({
+        title: 'Network Error',
+        status: 'error',
+        duration: 3000,
+      }),
+    [debouncedToast],
+  );
+
+  useNetworkError(showNetworkError);
 
   if (isLoading) {
     return (

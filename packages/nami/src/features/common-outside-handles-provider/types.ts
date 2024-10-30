@@ -18,4 +18,5 @@ export interface CommonOutsideHandlesContextValue {
     properties?: PostHogProperties,
   ) => Promise<void>;
   handleResolver: HandleProvider;
+  useNetworkError: (cb: () => void) => void;
 }
