@@ -10,14 +10,18 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
+const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirname, 'sentry.js'), p] : p);
+
 module.exports = () =>
   merge(commonConfig(), {
     entry: {
-      popup: path.join(__dirname, 'src/index-popup.tsx'),
-      options: path.join(__dirname, 'src/index-options.tsx'),
-      dappConnector: path.join(__dirname, 'src/index-dapp-connector.tsx'),
+      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx')),
+      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx')),
+      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx')),
       ['trezor-content-script']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-content-script.ts'),
-      ['trezor-usb-permissions']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
+      ['trezor-usb-permissions']: withMaybeSentry(
+        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
+      )
     },
     experiments: {
       syncWebAssembly: true
