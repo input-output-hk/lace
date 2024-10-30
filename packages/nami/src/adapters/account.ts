@@ -180,6 +180,11 @@ export const useAccount = ({
               const accountsMapper = getAcountsMapper(wallet);
               return 'accounts' in wallet
                 ? wallet.accounts
+                    .filter(
+                      account =>
+                        account.purpose !==
+                        Wallet.KeyManagement.KeyPurpose.MULTI_SIG,
+                    )
                     // eslint-disable-next-line functional/prefer-tacit
                     .map(account => accountsMapper(account))
                     .sort((a, b) => a.index - b.index)
