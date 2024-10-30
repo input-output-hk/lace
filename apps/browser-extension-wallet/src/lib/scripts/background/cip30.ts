@@ -2,7 +2,7 @@ import { cip30 as walletCip30 } from '@cardano-sdk/wallet';
 import { ensureUiIsOpenAndLoaded } from './util';
 import { userPromptService } from './services/dappService';
 import { authenticator } from './authenticator';
-import { wallet$, walletManager, walletRepository } from './wallet';
+import { wallet$ } from './wallet';
 import { runtime, Tabs, tabs } from 'webextension-polyfill';
 import { exposeApi, RemoteApiPropertyType, cip30 } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
@@ -47,7 +47,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   signTx: pDebounce(
     async () => {
       try {
-        const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-tx');
+        const tab = await ensureUiIsOpenAndLoaded('#/dapp/sign-tx');
         const ready = await userPromptService.readyToSignTx();
         if (!ready) return false;
         return cancelOnTabClose(tab);
@@ -62,7 +62,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   signData: pDebounce(
     async () => {
       try {
-        const tab = await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/sign-data');
+        const tab = await ensureUiIsOpenAndLoaded('#/dapp/sign-data');
         const ready = await userPromptService.readyToSignData();
         if (!ready) return false;
         return cancelOnTabClose(tab);
@@ -86,7 +86,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 
         const dappInfo = await senderToDappInfo(args.sender);
         dappSetCollateral$.next({ dappInfo, collateralRequest: args.data });
-        await ensureUiIsOpenAndLoaded({ walletManager, walletRepository }, '#/dapp/set-collateral');
+        await ensureUiIsOpenAndLoaded('#/dapp/set-collateral');
 
         return userPromptService.getCollateralRequest();
       } catch (error) {

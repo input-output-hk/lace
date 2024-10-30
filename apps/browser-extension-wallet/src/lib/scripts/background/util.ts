@@ -1,11 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import {
-  HW_POPUP_WINDOW,
-  HW_POPUP_WINDOW_NAMI,
-  POPUP_WINDOW,
-  POPUP_WINDOW_NAMI,
-  POPUP_WINDOW_NAMI_TITLE
-} from '@src/utils/constants';
+import { POPUP_WINDOW, POPUP_WINDOW_NAMI, POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -76,23 +70,18 @@ const createWindow = (
 /**
  * launchCip30Popup
  * @param url - Originating url of current dapp
- * @param windowType 'normal' for hardware wallet interactions, 'popup' for everything else
  * @returns tab - Tab of currently launched dApp connector
  */
-export const launchCip30Popup = async (url: string, windowType: Windows.CreateType): Promise<Tabs.Tab> => {
+export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
   const { namiMigration } = await getBackgroundStorage();
-  let windowSize = windowType === 'popup' ? POPUP_WINDOW : HW_POPUP_WINDOW;
-
-  if (namiMigration?.mode === 'nami') {
-    windowSize = windowType === 'popup' ? POPUP_WINDOW_NAMI : HW_POPUP_WINDOW_NAMI;
-  }
+  const windowSize = namiMigration?.mode === 'nami' ? POPUP_WINDOW_NAMI : POPUP_WINDOW;
 
   const newWindow = await createWindow(
     tab.id,
     calculatePopupWindowPositionAndSize(currentWindow, windowSize),
-    windowType,
+    'popup',
     true
   );
   newWindow.alwaysOnTop = true;
@@ -145,25 +134,15 @@ export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boo
   }
 };
 
-export const ensureUiIsOpenAndLoaded = async (
-  services: WalletManagementServices,
-  url?: string,
-  checkKeyAgent = true
-): Promise<Tabs.Tab> => {
-  const isHardwareWallet = checkKeyAgent
-    ? await (async () => {
-        const active = await getActiveWallet(services);
-        return active?.wallet.type === WalletType.Ledger || active?.wallet.type === WalletType.Trezor;
-      })()
-    : undefined;
-
-  const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
+export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
   await closeAllLaceWindows((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
 
-  const tab = await launchCip30Popup(url, windowType);
+  const tab = await launchCip30Popup(url);
+
   if (tab.status !== 'complete') {
     await waitForTabLoad(tab);
   }
+
   return tab;
 };
 

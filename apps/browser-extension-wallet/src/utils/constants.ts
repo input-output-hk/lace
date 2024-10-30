@@ -94,16 +94,6 @@ export const POPUP_WINDOW_NAMI = {
 
 export const POPUP_WINDOW_NAMI_TITLE = 'Nami (Lace)';
 
-export const HW_POPUP_WINDOW = {
-  width: 900,
-  height: 630
-};
-
-export const HW_POPUP_WINDOW_NAMI = {
-  width: 400,
-  height: 800
-};
-
 export const DAPP_CHANNELS = {
   userPrompt: `user-prompt-${process.env.WALLET_NAME}`,
   authenticator: `authenticator-${process.env.WALLET_NAME}`,
