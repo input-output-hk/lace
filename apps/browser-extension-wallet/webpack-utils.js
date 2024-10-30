@@ -1,3 +1,8 @@
+const constructSentryConnectSrc = (dsn) => {
+  if (/https:\/\/[^@]+@([^/]+).*/.test(dsn)) return dsn.replace(/https:\/\/[^@]+@([^/]+).*/, 'https://$1');
+  return '';
+};
+
 const transformManifest = (content, mode) => {
   require('dotenv-defaults').config({
     path: './.env',
@@ -32,7 +37,8 @@ const transformManifest = (content, mode) => {
           ? 'http://localhost:* http://127.0.0.1:* ws://localhost:3000 ws://0.0.0.0:3000/ws wss://localhost:3000  ws://localhost:3001 ws://0.0.0.0:3001/ws wss://localhost:3001'
           : 'http://localhost:* http://127.0.0.1:*'
       )
-      .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST);
+      .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST)
+      .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN));
 
     if (process.env.LACE_EXTENSION_KEY) {
       manifest.key = manifest.key.replace('$LACE_EXTENSION_KEY', process.env.LACE_EXTENSION_KEY);
