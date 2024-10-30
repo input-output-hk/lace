@@ -42,6 +42,12 @@ import Copy from './copy';
 
 import type { Asset as NamiAsset } from '../../../types/assets';
 
+const lineClampStyle = {
+  display: '-webkit-box',
+  '-webkit-line-clamp': '2',
+  '-webkit-box-orient': 'vertical',
+};
+
 interface Props {
   assets: NamiAsset[];
   setAvatar: (image: string) => void;
@@ -221,7 +227,7 @@ export const CollectibleModalComponent = (
             <Box h={6} />
             <Box
               textAlign="center"
-              className="lineClamp"
+              style={lineClampStyle}
               overflow="hidden"
               fontSize={14}
               fontWeight="bold"

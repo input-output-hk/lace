@@ -33,6 +33,12 @@ const useIsMounted = () => {
   return isMounted;
 };
 
+const lineClampStyle = {
+  display: '-webkit-box',
+  '-webkit-line-clamp': '2',
+  '-webkit-box-orient': 'vertical',
+};
+
 type Props = Pick<CommonOutsideHandlesContextValue, 'cardanoCoin'> &
   PropsWithChildren<{
     asset: NamiAsset;
@@ -128,8 +134,8 @@ const Asset = ({
 
           <Box w={4} />
           <Box
+            style={lineClampStyle}
             width="90px"
-            className="lineClamp"
             fontWeight="bold"
             overflow="hidden"
             fontSize={12}
