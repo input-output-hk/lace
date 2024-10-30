@@ -85,6 +85,7 @@ export * from '@wallet/lib/get-auxiliary-data';
 export * as util from '@wallet/util';
 export * from '@wallet/lib/providers';
 export * from '@wallet/lib/config';
+export type { BlockfrostClientConfig, RateLimiter } from '@wallet/lib/blockfrost';
 
 export * as mockUtils from '@wallet/test/mocks';
 export * from '@wallet/types';

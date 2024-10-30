@@ -176,6 +176,9 @@ jobs:
           CARDANO_WS_SERVER_URL_MAINNET: 'wss://${{ env.CARDANO_MAINNET_URL }}'
           CARDANO_WS_SERVER_URL_PREPROD: 'wss://${{ env.CARDANO_PREPROD_URL }}'
           CARDANO_WS_SERVER_URL_PREVIEW: 'wss://${{ env.CARDANO_PREVIEW_URL }}'
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
 
@@ -228,7 +231,7 @@ jobs:
     name: Process e2e test reports
     needs: [setup, tests]
     runs-on: ${{ needs.setup.outputs.runner }}
-#    when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
+    # when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
     if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts

@@ -20,6 +20,10 @@ const transformManifest = (content, mode) => {
         '$CARDANO_SERVICES_URLS',
         `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`
       )
+      .replace(
+        '$BLOCKFROST_URLS',
+        `${process.env.BLOCKFROST_URL_MAINNET} ${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_SANCHONET}`
+      )
       .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace('$LOCALHOST_SCRIPT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace(

@@ -42,9 +42,15 @@ export const IBlockchainProvider = {
 export const getProviderByChain: BlockchainProviderFactory = (chain = CHAIN) => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chain);
 
+  // TODO: LW-11761 reuse providers that are running in SW instead
   const providers = Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
-    baseUrl: baseCardanoServicesUrl
+    env: {
+      baseCardanoServicesUrl,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      blockfrostConfig: {} as any
+    },
+    experiments: {}
   });
 
   return IBlockchainProvider.fromWalletProviders(providers);

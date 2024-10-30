@@ -6,6 +6,8 @@ import { BackgroundService, UserIdService as UserIdServiceInterface } from '../t
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { logger } from '@lace/common';
+import { config } from '@src/config';
+import Bottleneck from 'bottleneck';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
@@ -26,18 +28,35 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   backendFailures$: RemoteApiPropertyType.HotObservable
 };
 
+const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
+// Important to use the same rateLimiter object for all networks,
+// because Blockfrost rate limit is per IP address, not per project id
+const rateLimiter: Wallet.RateLimiter = new Bottleneck({
+  reservoir: BLOCKFROST_RATE_LIMIT_CONFIG.size,
+  reservoirIncreaseAmount: BLOCKFROST_RATE_LIMIT_CONFIG.increaseAmount,
+  reservoirIncreaseInterval: BLOCKFROST_RATE_LIMIT_CONFIG.increaseInterval,
+  reservoirIncreaseMaximum: BLOCKFROST_RATE_LIMIT_CONFIG.size
+});
+
 export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.WalletProvidersDependencies> => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
   const magic = getMagicForChain(chainName);
   const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
   const useWebSocket = !!(featureFlags?.[magic]?.[ExperimentName.WEBSOCKET_API] ?? false);
+  const useBlockfrostAssetProvider = !!(featureFlags?.[magic]?.[ExperimentName.BLOCKFROST_ASSET_PROVIDER] ?? false);
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
-    baseUrl: baseCardanoServicesUrl,
-    customSubmitTxUrl,
+    env: {
+      baseCardanoServicesUrl,
+      customSubmitTxUrl,
+      blockfrostConfig: {
+        ...BLOCKFROST_CONFIGS[chainName],
+        rateLimiter
+      }
+    },
     logger,
-    useWebSocket
+    experiments: { useWebSocket, useBlockfrostAssetProvider }
   });
 };
 
