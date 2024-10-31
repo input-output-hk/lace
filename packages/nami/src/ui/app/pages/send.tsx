@@ -892,7 +892,9 @@ const AddressPopup = ({
 
   return (
     <Popover
-      isOpen={(Boolean(recentSendToAddress) || accounts.length > 0) && isOpen}
+      isOpen={
+        (Boolean(recentSendToAddress) || filteredAccounts.length > 0) && isOpen
+      }
       onOpen={() => {
         !isLoading && !address.result && !address.error && onOpen();
       }}
