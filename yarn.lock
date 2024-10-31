@@ -13618,6 +13618,7 @@ __metadata:
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
     "@rollup/plugin-url": ^8.0.2
+    "@sentry/rollup-plugin": ^2.22.6
     "@storybook/addon-actions": ^6.5.16
     "@storybook/addon-essentials": ^6.5.16
     "@storybook/addon-interactions": ^6.5.16
@@ -17025,6 +17026,18 @@ __metadata:
   peerDependencies:
     react: ^16.14.0 || 17.x || 18.x || 19.x
   checksum: d9d6a23336afd874a51c9162ed1361a5ef219e449c7c6ba9ac93379972f2cee49d6afbc38fadf6c97b075e9b284bc7a8edc24f1207f561a962b1543b8151cc10
+  languageName: node
+  linkType: hard
+
+"@sentry/rollup-plugin@npm:^2.22.6":
+  version: 2.22.6
+  resolution: "@sentry/rollup-plugin@npm:2.22.6"
+  dependencies:
+    "@sentry/bundler-plugin-core": 2.22.6
+    unplugin: 1.0.1
+  peerDependencies:
+    rollup: ">=3.2.0"
+  checksum: 81f6a18c36b9a4076aab9e00899ff75ff3236f3214ee2f7718d2a501710fd825ef536749ca05bfbcdfdd3dc65dc5f9c78f10b59e7d735ce767b20eef4bbedea2
   languageName: node
   linkType: hard
 
@@ -34101,6 +34114,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^16.4.5":
+  version: 16.4.5
+  resolution: "dotenv@npm:16.4.5"
+  checksum: 301a12c3d44fd49888b74eb9ccf9f07a1f5df43f489e7fcb89647a2edcd84c42d6bc349dc8df099cd18f07c35c7b04685c1a4f3e6a6a9e6b30f8d48c15b7f49c
+  languageName: node
+  linkType: hard
+
 "dotenv@npm:^8.0.0, dotenv@npm:^8.2.0":
   version: 8.6.0
   resolution: "dotenv@npm:8.6.0"
@@ -43838,6 +43858,7 @@ __metadata:
     "@rollup/plugin-json": ^6.0.0
     "@rollup/plugin-node-resolve": 13.0.4
     "@rollup/plugin-typescript": 8.3.0
+    "@sentry/rollup-plugin": ^2.22.6
     "@svgr/rollup": ^6.1.2
     "@svgr/webpack": ^6.1.2
     "@swc-node/register": 1.5.4
@@ -43868,6 +43889,7 @@ __metadata:
     copy-webpack-plugin: 9.0.1
     crypto-browserify: ^3.12.0
     css-loader: 6.2.0
+    dotenv: ^16.4.5
     eslint: ^7.32.0
     eslint-config-prettier: ^8.8.0
     eslint-import-resolver-typescript: ^2.4.0

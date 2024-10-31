@@ -6,12 +6,22 @@ import svgr from '@svgr/rollup';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import postcss from 'rollup-plugin-postcss';
+import { sentryRollupPlugin } from '@sentry/rollup-plugin';
+import dotenv from 'dotenv';
+
+dotenv.config({
+  path: '../../.env',
+  encoding: 'utf8'
+});
 
 const defaultTsPluginOptions = {
   composite: false,
   exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx'],
   tsconfig: 'src/tsconfig.json',
 }
+
+const hasSentryReleaseConfig =
+  !!process.env.SENTRY_AUTH_TOKEN && !!process.env.SENTRY_ORG && !!process.env.SENTRY_PROJECT;
 
 export default ({
   tsPluginOptions = defaultTsPluginOptions,
@@ -41,5 +51,17 @@ styleInject(${cssVariableName});`,
     nodePolyfills(),
     image(),
     svgr({ icon: true }),
+    // Put the Sentry rollup plugin after all other plugins
+    ...(hasSentryReleaseConfig
+      ? [
+        sentryRollupPlugin({
+          authToken: process.env.SENTRY_AUTH_TOKEN,
+          org: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          telemetry: false,
+          url: 'https://sentry.io/'
+        })
+      ]
+      : [])
   ],
 });

@@ -4,3 +4,4 @@
 dist/*
 **/*.js
 apps/desktop/wdio-logs/*
+.env
