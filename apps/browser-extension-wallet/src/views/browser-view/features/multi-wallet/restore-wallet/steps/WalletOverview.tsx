@@ -19,7 +19,7 @@ import { Wallet } from '@lace/cardano';
 import { compactNumberWithUnit } from '@src/utils/format-number';
 import { PortfolioBalance } from '@src/views/browser-view/components';
 import { addEllipsis, WarningBanner, toast } from '@lace/common';
-import { getProviderByChain } from '@src/stores/slices';
+import { getProviders } from '@src/stores/slices';
 import { CARDANO_COIN_SYMBOL, COINGECKO_URL } from '@src/utils/constants';
 import BigNumber from 'bignumber.js';
 import styles from './WalletOverview.module.scss';
@@ -59,7 +59,7 @@ export const WalletOverview = (): JSX.Element => {
     const getData = async () => {
       if (!walletMetadata || !coinPricing.priceResult.cardano.price) return;
       try {
-        const { utxoProvider } = getProviderByChain(walletMetadata.chain);
+        const { utxoProvider } = getProviders();
         const utxos: Wallet.Cardano.Utxo[] = await utxoProvider.utxoByAddresses({
           addresses: [walletMetadata.address]
         });

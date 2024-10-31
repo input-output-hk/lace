@@ -9,16 +9,17 @@ import { useDrawer } from '../../stores';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { Banner, useKeyboardShortcut, useObservable } from '@lace/common';
 import { getAssetImageUrl } from '@src/utils/get-asset-image-url';
-import { useAnalyticsContext, useAppSettingsContext } from '@providers';
+import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ExclamationCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
-import { useChainHistoryProvider, useLocalStorage } from '@hooks';
+import { useLocalStorage } from '@hooks';
 import { Divider } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutputByAddress } from '@src/utils/get-transaction-total-output';
 import { getTotalAssetsByAddress } from '@src/utils/assets-transformers';
 import { formatBalance } from '@src/utils/format-number';
+import { getProviders } from '@stores/slices';
 
 type WalletData = {
   address: Wallet.Cardano.PaymentAddress;
@@ -99,8 +100,7 @@ export const QRInfoWalletDrawer = (): React.ReactElement => {
   const [currentUnusedAddress, setCurrentUnusedAddress] = useState<Wallet.Cardano.PaymentAddress | undefined>();
   const [, closeDrawer] = useDrawer();
   const [isReceiveInAdvancedMode] = useLocalStorage('isReceiveInAdvancedMode', false);
-  const [{ chainName }] = useAppSettingsContext();
-  const chainHistoryProvider = useChainHistoryProvider({ chainName });
+  const { chainHistoryProvider } = getProviders();
 
   useKeyboardShortcut(['Escape'], () => closeDrawer());
 

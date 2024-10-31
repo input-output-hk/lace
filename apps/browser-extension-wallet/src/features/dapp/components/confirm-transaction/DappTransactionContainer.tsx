@@ -12,7 +12,7 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import { Wallet } from '@lace/cardano';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { useWalletStore } from '@stores';
-import { useFetchCoinPrice, useChainHistoryProvider } from '@hooks';
+import { useFetchCoinPrice } from '@hooks';
 import {
   createTxInspector,
   TransactionSummaryInspection,
@@ -25,7 +25,7 @@ import {
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
 
-import { useCurrencyStore, useAppSettingsContext } from '@providers';
+import { useCurrencyStore } from '@providers';
 import { logger, walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
@@ -34,6 +34,7 @@ import { AddressBookSchema, useDbStateValue } from '@lib/storage';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 import { useCexplorerBaseUrl, useDisallowSignTx } from './hooks';
 import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
+import { getProviders } from '@stores/slices';
 
 interface DappTransactionContainerProps {
   errorMessage?: string;
@@ -69,8 +70,6 @@ export const DappTransactionContainer = withAddressBookContext(
     const { fiatCurrency } = useCurrencyStore();
     const { priceResult } = useFetchCoinPrice();
 
-    const [{ chainName }] = useAppSettingsContext();
-
     const [fromAddressTokens, setFromAddressTokens] = useState<
       Map<Cardano.PaymentAddress, TokenTransferValue> | undefined
     >();
@@ -81,7 +80,7 @@ export const DappTransactionContainer = withAddressBookContext(
       TransactionSummaryInspection | undefined
     >();
 
-    const chainHistoryProvider = useChainHistoryProvider({ chainName });
+    const { chainHistoryProvider } = getProviders();
 
     const txInputResolver = useMemo(
       () =>

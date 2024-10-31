@@ -1,5 +1,5 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY } from 'rxjs';
+import { of, combineLatest, map, EMPTY, from, switchMap, filter } from 'rxjs';
 import { getProviders } from './config';
 import {
   DEFAULT_LOOK_AHEAD_SEARCH,
@@ -229,6 +229,28 @@ walletManager
         api$: walletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
         baseChannel: walletChannel(process.env.WALLET_NAME),
         properties: observableWalletProperties
+      },
+      { logger, runtime }
+    );
+
+    exposeApi(
+      {
+        api$: walletManager.activeWallet$.pipe(
+          filter((activeWallet) => !!activeWallet),
+          switchMap((activeWallet) => {
+            if (!activeWallet) {
+              return;
+            }
+
+            const chainId = activeWallet.props.chainId;
+            const chainName: Wallet.ChainName = chainIdToChainName(chainId);
+
+            // eslint-disable-next-line consistent-return
+            return from(getProviders(chainName));
+          })
+        ),
+        baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
+        properties: Wallet.walletProvidersProperties
       },
       { logger, runtime }
     );

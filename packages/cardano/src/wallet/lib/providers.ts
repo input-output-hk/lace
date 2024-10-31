@@ -29,6 +29,7 @@ import {
 } from '@cardano-sdk/cardano-services-client';
 import { BlockfrostClient, BlockfrostClientConfig, RateLimiter } from './blockfrost/blockfrost-client';
 import { BlockfrostAssetProvider } from './blockfrost';
+import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
 const createTxSubmitProvider = (
   httpProviderConfig: CreateHttpProviderConfig<Provider>,
@@ -158,4 +159,46 @@ export const createProviders = ({
     chainHistoryProvider,
     rewardsProvider
   };
+};
+
+export const walletProvidersChannel = (walletName: string): string => `${walletName}-providers`;
+export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDependencies> = {
+  stakePoolProvider: {
+    queryStakePools: RemoteApiPropertyType.MethodReturningPromise,
+    stakePoolStats: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  assetProvider: {
+    getAsset: RemoteApiPropertyType.MethodReturningPromise,
+    getAssets: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  txSubmitProvider: {
+    submitTx: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  networkInfoProvider: {
+    ledgerTip: RemoteApiPropertyType.MethodReturningPromise,
+    protocolParameters: RemoteApiPropertyType.MethodReturningPromise,
+    genesisParameters: RemoteApiPropertyType.MethodReturningPromise,
+    lovelaceSupply: RemoteApiPropertyType.MethodReturningPromise,
+    stake: RemoteApiPropertyType.MethodReturningPromise,
+    eraSummaries: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  utxoProvider: {
+    utxoByAddresses: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  rewardsProvider: {
+    rewardsHistory: RemoteApiPropertyType.MethodReturningPromise,
+    rewardAccountBalance: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  chainHistoryProvider: {
+    transactionsByAddresses: RemoteApiPropertyType.MethodReturningPromise,
+    transactionsByHashes: RemoteApiPropertyType.MethodReturningPromise,
+    blocksByHashes: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  }
 };
