@@ -74,6 +74,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
+  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !isHardwareWallet;
+
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
@@ -88,7 +90,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {sharedWalletsEnabled && !isSharedWallet && !isHardwareWallet && <AddSharedWalletLink isPopup={isPopup} />}
+            {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />
             <Separator />
