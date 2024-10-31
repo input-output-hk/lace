@@ -43,7 +43,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const posthog = usePostHogClientContext();
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isHardwareWallet } = useWalletStore();
 
   const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
     setManageAccountsWallet(wallet);
@@ -74,6 +74,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
+  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !isHardwareWallet;
+
   return (
     <Menu {...props} className={styles.menuOverlay} data-testid="header-menu">
       {currentSection === Sections.Main && (
@@ -88,7 +90,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {sharedWalletsEnabled && !isSharedWallet && <AddSharedWalletLink isPopup={isPopup} />}
+            {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />
             <Separator />
