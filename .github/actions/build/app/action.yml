@@ -36,9 +36,21 @@ inputs:
     description: 'Banxa`s integration URL'
     required: false
     default: 'https://lacewallet.banxa-sandbox.com/'
+  SENTRY_AUTH_TOKEN:
+    description: 'Authentication token for Sentry, used to publish source maps for releases'
+    required: false
+    default: ''
   SENTRY_DSN:
     description: 'Data Source Name for Sentry, AKA Client Key. This tells a Sentry SDK where to send events so the events are associated
     with the correct project'
+    required: false
+    default: ''
+  SENTRY_ORG:
+    description: 'Organization identifier for Sentry, used to publish source maps for releases'
+    required: false
+    default: ''
+  SENTRY_PROJECT:
+    description: 'Project identifier for Sentry, used to publish source maps for releases'
     required: false
     default: ''
 
@@ -64,7 +76,10 @@ runs:
         POSTHOG_PRODUCTION_TOKEN: ${{ inputs.POSTHOG_PRODUCTION_TOKEN }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}
         BANXA_LACE_URL: ${{ inputs.BANXA_LACE_URL }}
+        SENTRY_AUTH_TOKEN: ${{ inputs.SENTRY_AUTH_TOKEN }}
         SENTRY_DSN: ${{ inputs.SENTRY_DSN }}
+        SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
