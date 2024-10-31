@@ -5,6 +5,7 @@ import { SettingsWallet, SettingsSecurity, SettingsHelp, SettingsLegal, Settings
 import { SettingsRemoveWallet } from '@src/views/browser-view/features/settings/components/SettingsRemoveWallet';
 import { SettingsSwitchToNami } from '@src/views/browser-view/features/settings/components/SettingsSwitchToNami';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useWalletStore } from '@src/stores';
 
 export interface SettingsProps {
   defaultPassphraseVisible?: boolean;
@@ -14,6 +15,7 @@ export interface SettingsProps {
 export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: SettingsProps): React.ReactElement => {
   const { t } = useTranslation();
   const posthog = usePostHogClientContext();
+  const { isSharedWallet } = useWalletStore();
   const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   return (
@@ -28,7 +30,7 @@ export const Settings = ({ defaultPassphraseVisible, defaultMnemonic }: Settings
         />
         <SettingsHelp popupView />
         <SettingsLegal />
-        {useSwitchToNamiMode && <SettingsSwitchToNami popupView />}
+        {useSwitchToNamiMode && !isSharedWallet && <SettingsSwitchToNami popupView />}
         <SettingsRemoveWallet popupView />
       </div>
     </ContentLayout>
