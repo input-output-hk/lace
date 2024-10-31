@@ -41,6 +41,7 @@ import {
 } from '@chakra-ui/react';
 import { useObservable } from '@lace/common';
 import debouncePromise from 'debounce-promise';
+import { debounce } from 'lodash';
 import latest from 'promise-latest';
 import { MdModeEdit } from 'react-icons/md';
 import { Planet } from 'react-kawaii';
@@ -148,10 +149,10 @@ const Send = ({
   ];
 
   const [txUpdate, setTxUpdate] = React.useState(false);
-  const triggerTxUpdate = stateChange => {
+  const triggerTxUpdate = useCallback(stateChange => {
     stateChange();
     setTxUpdate(update => !update);
-  };
+  }, []);
 
   const assets = React.useRef<Record<string, AssetInput>>({});
   const account = React.useRef<object | null>(null);
@@ -428,6 +429,8 @@ const Send = ({
     [assets.current, triggerTxUpdate, setValue],
   );
 
+  const setMessageDebounced = useMemo(() => debounce(setMessage, 300), []);
+
   return (
     <>
       <Box
@@ -578,7 +581,7 @@ const Send = ({
                     defaultValue={message}
                     onInput={e => {
                       const msg = (e.target as HTMLInputElement).value;
-                      setMessage(msg);
+                      setMessageDebounced(msg);
                     }}
                     size={'sm'}
                     variant={'flushed'}
@@ -639,7 +642,7 @@ const Send = ({
                   ref.current?.openModal();
                 }}
               >
-                {fee.error ? fee.error : 'Send'}
+                {fee.error || 'Send'}
               </Button>
             </Box>
           </>
@@ -907,6 +910,7 @@ const AddressPopup = ({
         onClose();
       }}
       gutter={1}
+      isLazy
     >
       <PopoverTrigger>
         <InputGroup>
@@ -1142,121 +1146,139 @@ const AssetsSelector = ({
   }, [assets, value, search]);
 
   return (
-    <Popover isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
+    <Popover isLazy isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
         <Button isDisabled={!assets || assets.length === 0} flex={1} size="sm">
           + Assets
         </Button>
       </PopoverTrigger>
-      <PopoverContent w="98%">
-        <PopoverArrow ml="4px" />
-        <PopoverHeader
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <InputGroup
-            width={Object.keys(choice).length <= 0 ? '90%' : undefined}
-            flex={Object.keys(choice).length > 0 ? 3 : undefined}
-            size="sm"
-          >
-            <Input
-              value={search}
-              size="sm"
-              variant="filled"
-              placeholder="Search policy, asset, name"
-              fontSize="xs"
-              onInput={e => {
-                setSearch((e.target as HTMLInputElement).value);
-              }}
-            />
-            <InputRightElement>
-              <SmallCloseIcon
-                cursor="pointer"
-                onClick={() => {
-                  setSearch('');
-                }}
-              />
-            </InputRightElement>
-          </InputGroup>
-          {Object.keys(choice).length > 0 && (
-            <>
-              <Box w="2" />
-              <Box
-                width="100%"
-                flex={1}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <IconButton
-                  aria-label="close button"
-                  size="xs"
-                  rounded="md"
-                  onClick={() => {
-                    setChoice({});
-                  }}
-                  icon={<CloseIcon />}
-                />
-
-                <Box w="3" />
-                <IconButton
-                  aria-label="add asset button"
-                  colorScheme="teal"
-                  size="xs"
-                  rounded="md"
-                  onClick={() => {
-                    onClose();
-                    setTimeout(() => {
-                      addAssets(assets.filter(asset => choice[asset.unit]));
-                      setChoice({});
-                    }, 100);
-                  }}
-                  icon={<CheckIcon />}
-                />
-              </Box>
-            </>
-          )}
-        </PopoverHeader>
-        <PopoverBody p="-2">
-          <Box
+      {isOpen && (
+        <PopoverContent w="98%">
+          <PopoverArrow ml="4px" />
+          <PopoverHeader
             display="flex"
             alignItems="center"
             justifyContent="center"
-            flexDirection="column"
-            my="1"
           >
-            {assets ? (
-              filteredAssets.length > 0 ? (
-                <List
-                  outerElementType={CustomScrollbarsVirtualList}
-                  height={200}
-                  itemCount={filteredAssets.length}
-                  itemSize={45}
-                  width={345}
-                  layout="vertical"
-                >
-                  {({ index, style }) => {
-                    const asset = filteredAssets[index];
-                    return (
-                      <Box
-                        style={style}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Asset
-                          asset={asset}
-                          setChoice={setChoice}
-                          choice={choice}
-                          select={select}
-                          onClose={onClose}
-                          addAssets={addAssets}
-                        />
-                      </Box>
-                    );
+            <InputGroup
+              width={Object.keys(choice).length <= 0 ? '90%' : undefined}
+              flex={Object.keys(choice).length > 0 ? 3 : undefined}
+              size="sm"
+            >
+              <Input
+                value={search}
+                size="sm"
+                variant="filled"
+                placeholder="Search policy, asset, name"
+                fontSize="xs"
+                onInput={e => {
+                  setSearch((e.target as HTMLInputElement).value);
+                }}
+              />
+              <InputRightElement>
+                <SmallCloseIcon
+                  cursor="pointer"
+                  onClick={() => {
+                    setSearch('');
                   }}
-                </List>
+                />
+              </InputRightElement>
+            </InputGroup>
+            {Object.keys(choice).length > 0 && (
+              <>
+                <Box w="2" />
+                <Box
+                  width="100%"
+                  flex={1}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <IconButton
+                    aria-label="close button"
+                    size="xs"
+                    rounded="md"
+                    onClick={() => {
+                      setChoice({});
+                    }}
+                    icon={<CloseIcon />}
+                  />
+
+                  <Box w="3" />
+                  <IconButton
+                    aria-label="add asset button"
+                    colorScheme="teal"
+                    size="xs"
+                    rounded="md"
+                    onClick={() => {
+                      onClose();
+                      setTimeout(() => {
+                        addAssets(assets.filter(asset => choice[asset.unit]));
+                        setChoice({});
+                      }, 100);
+                    }}
+                    icon={<CheckIcon />}
+                  />
+                </Box>
+              </>
+            )}
+          </PopoverHeader>
+          <PopoverBody p="-2">
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexDirection="column"
+              my="1"
+            >
+              {assets ? (
+                filteredAssets.length > 0 ? (
+                  <List
+                    outerElementType={CustomScrollbarsVirtualList}
+                    height={200}
+                    itemCount={filteredAssets.length}
+                    itemSize={45}
+                    width={345}
+                    layout="vertical"
+                  >
+                    {({ index, style }) => {
+                      const asset = filteredAssets[index];
+                      return (
+                        <Box
+                          style={style}
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Asset
+                            asset={asset}
+                            setChoice={setChoice}
+                            choice={choice}
+                            select={select}
+                            onClose={onClose}
+                            addAssets={addAssets}
+                          />
+                        </Box>
+                      );
+                    }}
+                  </List>
+                ) : (
+                  <Box
+                    width={345}
+                    height={200}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexDirection="column"
+                    opacity="0.5"
+                  >
+                    <Planet size={80} mood="ko" color="#61DDBC" />
+                    <Box height="2" />
+                    <Text fontSize={12} fontWeight="bold" color="GrayText">
+                      No Assets
+                    </Text>
+                  </Box>
+                )
               ) : (
                 <Box
                   width={345}
@@ -1264,30 +1286,14 @@ const AssetsSelector = ({
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
-                  flexDirection="column"
-                  opacity="0.5"
                 >
-                  <Planet size={80} mood="ko" color="#61DDBC" />
-                  <Box height="2" />
-                  <Text fontSize={12} fontWeight="bold" color="GrayText">
-                    No Assets
-                  </Text>
+                  <Spinner color="teal" speed="0.5s" />
                 </Box>
-              )
-            ) : (
-              <Box
-                width={345}
-                height={200}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Spinner color="teal" speed="0.5s" />
-              </Box>
-            )}
-          </Box>
-        </PopoverBody>
-      </PopoverContent>
+              )}
+            </Box>
+          </PopoverBody>
+        </PopoverContent>
+      )}
     </Popover>
   );
 };
