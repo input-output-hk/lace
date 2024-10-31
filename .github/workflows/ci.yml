@@ -201,7 +201,10 @@ jobs:
           POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
           BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
 
   build:
     name: Build Lace
