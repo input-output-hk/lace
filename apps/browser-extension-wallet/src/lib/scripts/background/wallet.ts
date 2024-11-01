@@ -1,5 +1,5 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY, from, switchMap, filter } from 'rxjs';
+import { of, combineLatest, map, EMPTY, filter, BehaviorSubject } from 'rxjs';
 import { getProviders } from './config';
 import {
   DEFAULT_LOOK_AHEAD_SEARCH,
@@ -60,10 +60,16 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
   }
 };
 
+// eslint-disable-next-line unicorn/no-null
+const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
+
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = chainIdToChainName(chainId);
     const providers = await getProviders(chainName);
+
+    // Caches current wallet providers.
+    currentWalletProviders$.next(providers);
 
     const baseUrl = getBaseUrlForChain(chainName);
 
@@ -235,20 +241,7 @@ walletManager
 
     exposeApi(
       {
-        api$: walletManager.activeWallet$.pipe(
-          filter((activeWallet) => !!activeWallet),
-          switchMap((activeWallet) => {
-            if (!activeWallet) {
-              return;
-            }
-
-            const chainId = activeWallet.props.chainId;
-            const chainName: Wallet.ChainName = chainIdToChainName(chainId);
-
-            // eslint-disable-next-line consistent-return
-            return from(getProviders(chainName));
-          })
-        ),
+        api$: currentWalletProviders$.pipe(filter((providers) => providers !== null)),
         baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
         properties: Wallet.walletProvidersProperties
       },
