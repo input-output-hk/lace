@@ -50,13 +50,19 @@ describe('Testing useBuildDelegation hook', () => {
     expect(setNetworkConnection).toHaveBeenCalledTimes(0);
 
     // offline
-    backgroundServices.requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: false } });
+    backgroundServices.requestMessage$.next({
+      type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION,
+      data: { connected: false }
+    });
 
     expect(cb).toHaveBeenCalledTimes(1);
     expect(setNetworkConnection).toHaveBeenNthCalledWith(1, NetworkConnectionStates.OFFLINE);
 
     // back online
-    backgroundServices.requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: true } });
+    backgroundServices.requestMessage$.next({
+      type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION,
+      data: { connected: true }
+    });
 
     expect(cb).toHaveBeenCalledTimes(1);
     expect(setNetworkConnection).toHaveBeenNthCalledWith(2, NetworkConnectionStates.CONNNECTED);

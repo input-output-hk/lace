@@ -1,9 +1,7 @@
 /* eslint-disable no-magic-numbers, sonarjs/no-duplicate-string */
 import { WebRequest, webRequest, runtime } from 'webextension-polyfill';
-import { MessageTypes } from '../types';
-import { backendFailures$, requestMessage$ } from './services';
+import { backendFailures$ } from './services';
 
-const INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
 const GATEWAY_TIMEOUT_STATUS_CODE = 503;
 const UNAUTHORIZED_STATUS_CODE = 401;
 

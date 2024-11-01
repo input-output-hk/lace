@@ -24,7 +24,7 @@ export interface ChangeModeData {
 export enum MessageTypes {
   OPEN_BROWSER_VIEW = 'open-browser-view',
   CHANGE_THEME = 'change-theme',
-  HTTP_CONNECTION = 'http-connnection',
+  NETWORK_INFO_PROVIDER_CONNECTION = 'network-info-provider-connnection',
   OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings',
   CHANGE_MODE = 'change-mode'
 }
@@ -61,7 +61,7 @@ interface ChangeThemeMessage {
   data: ChangeThemeData;
 }
 interface HTTPConnectionMessage {
-  type: MessageTypes.HTTP_CONNECTION;
+  type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION;
   data: HTTPConnectionStatus;
 }
 interface OpenBrowserMessage {
