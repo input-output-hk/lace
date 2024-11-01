@@ -250,7 +250,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
           withSignTxConfirmation,
           sendEventToPostHog,
           handleResolver,
-          useNetworkError
+          useNetworkError,
+          networkConnection: walletUI.networkConnection
         }}
       >
         <Nami />

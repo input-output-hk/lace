@@ -4,6 +4,11 @@ import type { WalletType } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { PostHogProperties } from '@lace/common';
 
+export enum NetworkConnectionStates {
+  CONNNECTED = 'connected',
+  OFFLINE = 'offline',
+}
+
 export interface CommonOutsideHandlesContextValue {
   cardanoCoin: Wallet.CoinId;
   walletType: WalletType;
@@ -19,4 +24,5 @@ export interface CommonOutsideHandlesContextValue {
   ) => Promise<void>;
   handleResolver: HandleProvider;
   useNetworkError: (cb: () => void) => void;
+  networkConnection: NetworkConnectionStates;
 }

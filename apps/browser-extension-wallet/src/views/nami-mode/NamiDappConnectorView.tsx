@@ -215,7 +215,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
           withSignTxConfirmation,
           sendEventToPostHog,
           handleResolver,
-          useNetworkError
+          useNetworkError,
+          networkConnection: walletUI.networkConnection
         }}
       >
         <DApp />

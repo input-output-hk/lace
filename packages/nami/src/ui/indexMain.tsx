@@ -29,7 +29,7 @@ import { Container } from './Container';
 import { useStoreState, useStoreActions } from './store';
 import { UpgradeToLaceHeader } from './UpgradeToLaceHeader';
 
-const toastThrottle = 500;
+const toastThrottle = 600;
 
 const App = () => {
   const [isLoading, setIsLoading] = React.useState(true);
@@ -161,13 +161,16 @@ const App = () => {
 
   const toast = useToast();
 
-  const debouncedToast = useMemo(() => debounce(toast, toastThrottle), []);
+  const debouncedToast = useMemo(
+    () => debounce(toast, toastThrottle, { leading: true }),
+    [],
+  );
   const showNetworkError = useCallback(
     () =>
       debouncedToast({
         title: 'Network Error',
         status: 'error',
-        duration: 3000,
+        duration: 5000,
       }),
     [debouncedToast],
   );
