@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 
 Sentry.init({
-  environment: process.env.NODE_ENV,
+  environment: process.env.SENTRY_ENVIRONMENT,
   dsn: process.env.SENTRY_DSN,
   integrations: [Sentry.browserTracingIntegration(), Sentry.browserProfilingIntegration(), Sentry.replayIntegration()],
   // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled

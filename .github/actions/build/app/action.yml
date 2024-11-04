@@ -53,6 +53,10 @@ inputs:
     description: 'Project identifier for Sentry, used to publish source maps for releases'
     required: false
     default: ''
+  SENTRY_ENVIRONMENT:
+    description: 'Project environment for Sentry, used to differentiate issue sources'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -80,6 +84,7 @@ runs:
         SENTRY_DSN: ${{ inputs.SENTRY_DSN }}
         SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
+        SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

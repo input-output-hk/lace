@@ -84,6 +84,10 @@ inputs:
     description: 'Project identifier for Sentry'
     required: false
     default: ''
+  SENTRY_ENVIRONMENT:
+    description: 'Project environment for Sentry, used to differentiate issue sources'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -152,4 +156,5 @@ runs:
         SENTRY_DSN: ${{ inputs.SENTRY_DSN }}
         SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
+        SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
       run: yarn browser build
