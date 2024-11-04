@@ -19,6 +19,7 @@ const envsToExpose = {
   //'process.env': JSON.stringify(process.env)
 };
 if ('SENTRY_DSN' in process.env) envsToExpose['SENTRY_DSN'] = process.env.SENTRY_DSN;
+if ('SENTRY_ENVIRONMENT' in process.env) envsToExpose['SENTRY_ENVIRONMENT'] = process.env.SENTRY_ENVIRONMENT;
 
 module.exports = () => {
   return {

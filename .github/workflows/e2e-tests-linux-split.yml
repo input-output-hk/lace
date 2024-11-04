@@ -179,8 +179,11 @@ jobs:
           BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
           BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
           BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: 'e2e-tests'
 
       - name: Upload build artifact
         if: needs.setup.outputs.build_exists == 'false'
