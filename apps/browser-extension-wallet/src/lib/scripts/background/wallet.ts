@@ -1,5 +1,5 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY, filter, BehaviorSubject } from 'rxjs';
+import { of, combineLatest, map, EMPTY, BehaviorSubject } from 'rxjs';
 import { getProviders } from './config';
 import {
   DEFAULT_LOOK_AHEAD_SEARCH,
@@ -76,7 +76,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     // Sanchonet does not have a handle provider
     const supportsHandleResolver = chainName !== 'Sanchonet';
 
-    // This is used in place of the handle provider for environments where the handle provider is not available
+    // This is used in place ofgetProviders the handle provider for environments where the handle provider is not available
     const noopHandleResolver: HandleProvider = {
       resolveHandles: async () => [],
       healthCheck: async () => ({ ok: true }),
@@ -241,7 +241,7 @@ walletManager
 
     exposeApi(
       {
-        api$: currentWalletProviders$.pipe(filter((providers) => providers !== null)),
+        api$: currentWalletProviders$,
         baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
         properties: Wallet.walletProvidersProperties
       },
