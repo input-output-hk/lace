@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useBackgroundServiceAPIContext } from '@providers';
-import { HTTPConnectionStatus, MessageTypes } from '@lib/scripts/types';
+import { Message, MessageTypes } from '@lib/scripts/types';
 import { useWalletStore } from '@src/stores';
 import { NetworkConnectionStates } from '@src/types';
 import { useNetwork } from './useNetwork';
@@ -11,10 +11,10 @@ export const useNetworkError = (cb: () => void): void => {
   const backgroundServices = useBackgroundServiceAPIContext();
 
   useEffect(() => {
-    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }): void => {
+    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
       let isNetworkInfoProviderConnected = true;
       if (type === MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION) {
-        isNetworkInfoProviderConnected = (data as HTTPConnectionStatus).connected;
+        isNetworkInfoProviderConnected = data.connected;
       }
       if (!isNetworkInfoProviderConnected || !isOnline) {
         cb();
