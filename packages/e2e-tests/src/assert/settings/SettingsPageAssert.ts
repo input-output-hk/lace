@@ -23,6 +23,18 @@ class SettingsPageAssert {
     expect(await SettingsPage.collateralLink.getTitleText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );
+    expect(await SettingsPage.hdWalletSyncLink.getTitleText()).to.equal(
+      await t('browserView.settings.wallet.walletSync.title')
+    );
+    expect(await SettingsPage.currencyLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.currency.title')
+    );
+    expect(await SettingsPage.themeLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.theme.title')
+    );
+    expect(await SettingsPage.betaProgramLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.betaProgram.title')
+    );
     expect(await SettingsPage.showRecoveryPhraseLink.getTitleText()).to.equal(
       await t('browserView.settings.security.showPassphrase.title')
     );
@@ -64,6 +76,18 @@ class SettingsPageAssert {
     );
     expect(await SettingsPage.collateralLink.getDescriptionText()).to.equal(
       await t('browserView.settings.wallet.collateral.description')
+    );
+    expect(await SettingsPage.hdWalletSyncLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.wallet.walletSync.description')
+    );
+    expect(await SettingsPage.currencyLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.currency.description')
+    );
+    expect(await SettingsPage.themeLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.theme.description')
+    );
+    expect(await SettingsPage.betaProgramLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.betaProgram.description')
     );
     expect(await SettingsPage.showRecoveryPhraseLink.getDescriptionText()).to.equal(
       await t('browserView.settings.security.showPassphrase.description')
