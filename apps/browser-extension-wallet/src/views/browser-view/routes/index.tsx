@@ -10,7 +10,6 @@ import { AddressBook } from '../features/adress-book';
 import { ActivityLayout } from '../features/activity';
 import { StakingContainer } from '../features/staking';
 import { StakingWarningModals } from '../features/staking/components/StakingModals';
-import { VotingLayout } from '../features/voting';
 import { WalletSetup } from '../features/wallet-setup';
 import { AssetsView } from '../features/assets';
 import { SettingsLayout } from '../features/settings';
@@ -53,10 +52,6 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.staking,
     component: StakingContainer
-  },
-  {
-    path: routes.voting,
-    component: VotingLayout
   },
   {
     path: routes.signMessage,
