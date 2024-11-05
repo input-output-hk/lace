@@ -25,7 +25,9 @@ export class BlockfrostAssetProvider extends BlockfrostProvider implements Asset
   }
 
   private mapNftMetadata(asset: Responses['asset']): Asset.NftMetadata | null {
-    const image = (asset.onchain_metadata?.image as string | undefined) || asset.metadata?.logo;
+    const image = this.metadatumToString(
+      (asset.onchain_metadata?.image as string | string[] | undefined) || asset.metadata?.logo
+    );
     const name = (asset.onchain_metadata?.name as string | undefined) || asset.metadata?.name;
     if (!image || !name) return null;
     try {
@@ -33,7 +35,9 @@ export class BlockfrostAssetProvider extends BlockfrostProvider implements Asset
         image: Asset.Uri(image),
         version: '1.0',
         name,
-        description: (asset.onchain_metadata?.description as string | undefined) || asset.metadata?.description,
+        description: this.metadatumToString(
+          (asset.onchain_metadata?.description as string | string[] | undefined) || asset.metadata?.description
+        ),
         otherProperties: this.mapNftMetadataOtherProperties(asset.onchain_metadata),
         files: Array.isArray(asset.onchain_metadata?.files)
           ? asset.onchain_metadata.files
@@ -65,6 +69,22 @@ export class BlockfrostAssetProvider extends BlockfrostProvider implements Asset
     }
   }
 
+  private asString = (metadatum: unknown) => (typeof metadatum === 'string' ? metadatum : undefined);
+
+  private metadatumToString = (metadatum: Cardano.Metadatum | undefined): string | undefined => {
+    let stringMetadatum: string | undefined;
+    if (Array.isArray(metadatum)) {
+      const result = metadatum
+        .map((metadata) => this.asString(metadata)) // eslint-disable-next-line unicorn/no-array-callback-reference
+        .filter(isNotNil);
+      stringMetadatum = result.join('');
+    } else {
+      stringMetadatum = this.asString(metadatum);
+    }
+
+    return stringMetadatum;
+  };
+
   private objToMetadatum(obj: unknown): Cardano.Metadatum {
     if (typeof obj === 'string') return obj;
     if (typeof obj === 'number') return BigInt(obj);
@@ -94,9 +114,13 @@ export class BlockfrostAssetProvider extends BlockfrostProvider implements Asset
   private mapTokenMetadata(assetId: Cardano.AssetId, asset: Responses['asset']): Asset.TokenMetadata {
     return {
       decimals: asset.metadata?.decimals,
-      desc: asset.metadata?.description || (asset.onchain_metadata?.description as string | undefined),
+      desc: this.metadatumToString(
+        asset.metadata?.description || (asset.onchain_metadata?.description as string | string[] | undefined)
+      ),
       assetId,
-      icon: asset.metadata?.logo || (asset.onchain_metadata?.image as string | undefined),
+      icon: this.metadatumToString(
+        asset.metadata?.logo || (asset.onchain_metadata?.image as string | string[] | undefined)
+      ),
       name: asset.metadata?.name || (asset.onchain_metadata?.name as string | undefined),
       ticker: asset.metadata?.ticker,
       url: asset.metadata?.url,
