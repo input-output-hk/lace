@@ -52,7 +52,7 @@ export const Banner = ({
   return (
     <div
       className={cn(styles.bannerContainer, {
-        [className]: className,
+        ...(className && { [className]: className }),
         [styles.popupView]: popupView,
         [styles.clickable]: !!onBannerClick
       })}
@@ -74,7 +74,9 @@ export const Banner = ({
         </div>
       )}
       <div
-        className={cn(styles.contentContainer, { [descriptionClassName]: descriptionClassName })}
+        className={cn(styles.contentContainer, {
+          ...(descriptionClassName && { [descriptionClassName]: descriptionClassName })
+        })}
         data-testid="banner-description"
       >
         <div className={cn(styles.descriptionContainer)}>
