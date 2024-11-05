@@ -40,7 +40,7 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@cardano-sdk/cardano-services-client": "0.21.6",
+    "@cardano-sdk/cardano-services-client": "0.21.7",
     "@cardano-sdk/core": "0.41.2",
     "@cardano-sdk/crypto": "0.1.30",
     "@cardano-sdk/hardware-ledger": "0.12.10",
@@ -48,8 +48,8 @@
     "@cardano-sdk/key-management": "0.24.8",
     "@cardano-sdk/tx-construction": "0.21.10",
     "@cardano-sdk/util": "0.15.5",
-    "@cardano-sdk/wallet": "0.44.14",
-    "@cardano-sdk/web-extension": "0.34.13",
+    "@cardano-sdk/wallet": "0.44.15",
+    "@cardano-sdk/web-extension": "0.34.14",
     "@lace/common": "0.1.0",
     "@ledgerhq/devices": "^8.2.1",
     "@stablelib/chacha20poly1305": "1.0.1",
@@ -73,7 +73,11 @@
   },
   "devDependencies": {
     "@blockfrost/blockfrost-js": "^5.5.0",
+<<<<<<< HEAD
     "@cardano-sdk/util-dev": "0.23.8",
+=======
+    "@cardano-sdk/util-dev": "0.23.9",
+>>>>>>> 98f3206c9 (fixup! feat: providers are now consumed from the service worker instead of the UI script)
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "@types/webextension-polyfill": "0.10.0",
     "axios": "^1.7.4",
