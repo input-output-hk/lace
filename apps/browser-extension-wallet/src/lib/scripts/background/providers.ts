@@ -56,9 +56,11 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
 
   return {
     ...providers,
-    networkInfoProvider: {
-      ...providers.networkInfoProvider,
-      ledgerTip: monitorLedgerTipResponses(providers.networkInfoProvider.ledgerTip)
-    }
+    networkInfoProvider: new Proxy<Wallet.NetworkInfoProvider>(providers.networkInfoProvider, {
+      get(target: Wallet.NetworkInfoProvider, prop: keyof Wallet.NetworkInfoProvider) {
+        if (prop === 'ledgerTip') return monitorLedgerTipResponses(providers.networkInfoProvider.ledgerTip);
+        return target[prop];
+      }
+    })
   };
 };
