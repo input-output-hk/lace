@@ -184,6 +184,16 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | custom submit api | enable | click"
     And I validate that 2 analytics event(s) have been sent
 
+  @LW-11798
+  Scenario: Analytics - Extended View - Beta Program - opt-in/opt-out
+    When I open settings from header menu
+    And I set up request interception for posthog analytics request(s)
+    And I click on "Beta Program" switch
+    Then I validate latest analytics single event "settings | beta program | opt-in | click"
+    When I click on "Beta Program" switch
+    Then I validate latest analytics single event "settings | beta program | opt-out | click"
+    And I validate that 2 analytics event(s) have been sent
+
   # this test should be executed as the last one in this suite
   @LW-8559
   Scenario: Analytics - Extended View - Settings - Wallet removal events - Remove wallet

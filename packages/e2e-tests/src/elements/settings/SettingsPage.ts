@@ -25,6 +25,7 @@ class SettingsPage extends CommonDrawerElements {
   private readonly COLLATERAL_LINK_TEST_ID = 'settings-wallet-collateral-link';
   private readonly CUSTOM_SUBMIT_API_LINK_TEST_ID = 'settings-wallet-custom-submit-api-link';
   private readonly THEME_SWITCH_TEST_ID = '[data-testid="switch"]';
+  private readonly BETA_PROGRAM_SWITCH_TEST_ID = '[data-testid="settings-beta-program-switch"]';
   private readonly SHOW_RECOVERY_PHRASE_LINK_TEST_ID = 'settings-show-recovery-phrase-link';
   private readonly GENERATE_PAPER_WALLET_LINK_TEST_ID = 'settings-generate-paperwallet-link';
   private readonly PASSPHRASE_VERIFICATION_LINK_TEST_ID = 'settings-passphrase-verification-link';
@@ -34,6 +35,10 @@ class SettingsPage extends CommonDrawerElements {
   private readonly TNC_LINK_TEST_ID = 'settings-legal-tnc-link';
   private readonly PRIVACY_POLICY_LINK_TEST_ID = 'settings-legal-privacy-policy-link';
   private readonly COOKIE_POLICY_LINK_TEST_ID = 'settings-legal-cookie-policy-link';
+  private readonly WALLET_SYNC_LINK_TEST_ID = 'settings-wallet-wallet-sync';
+  private readonly CURRENCY_LINK_TEST_ID = 'settings-wallet-currency-link';
+  private readonly THEME_LINK_TEST_ID = 'settings-wallet-theme';
+  private readonly BETA_PROGRAM_LINK_TEST_ID = 'settings-beta-program-section';
 
   get aboutLaceWidget(): typeof AboutLaceWidget {
     return AboutLaceWidget;
@@ -88,6 +93,22 @@ class SettingsPage extends CommonDrawerElements {
     return new SettingsLink(this.COLLATERAL_LINK_TEST_ID);
   }
 
+  get hdWalletSyncLink() {
+    return new SettingsLink(this.WALLET_SYNC_LINK_TEST_ID);
+  }
+
+  get currencyLink() {
+    return new SettingsLink(this.CURRENCY_LINK_TEST_ID);
+  }
+
+  get themeLink() {
+    return new SettingsLink(this.THEME_LINK_TEST_ID);
+  }
+
+  get betaProgramLink() {
+    return new SettingsLink(this.BETA_PROGRAM_LINK_TEST_ID);
+  }
+
   get customSubmitAPILink() {
     return new SettingsLink(this.CUSTOM_SUBMIT_API_LINK_TEST_ID);
   }
@@ -140,6 +161,10 @@ class SettingsPage extends CommonDrawerElements {
     return $(this.THEME_SWITCH_TEST_ID);
   }
 
+  get betaProgramSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.BETA_PROGRAM_SWITCH_TEST_ID);
+  }
+
   get securitySettingsElements(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.SECURITY_SETTINGS_ELEMENTS);
   }
@@ -151,6 +176,11 @@ class SettingsPage extends CommonDrawerElements {
   async clickSyncButton(): Promise<void> {
     await this.syncButton.waitForClickable();
     await this.syncButton.click();
+  }
+
+  async clickBetaProgramSwitch(): Promise<void> {
+    await this.betaProgramSwitch.waitForClickable();
+    await this.betaProgramSwitch.click();
   }
 }
 

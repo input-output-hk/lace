@@ -400,3 +400,7 @@ Then(
     await SaveYourPaperWalletDrawerAssert.assertSeeSaveYourPaperWalletPage(expectedPaperWalletName);
   }
 );
+
+When(/^I click on "Beta Program" switch$/, async () => {
+  await SettingsPage.clickBetaProgramSwitch();
+});
