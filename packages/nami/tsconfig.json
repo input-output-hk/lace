@@ -22,7 +22,8 @@
     "strict": true,
     "target": "ES2018",
     "baseUrl": "./src",
-    "rootDir": "./"
+    "rootDir": "./",
+    "strictNullChecks": true
   },
   "exclude": [
     "dist",
