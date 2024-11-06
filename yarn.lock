@@ -13831,7 +13831,7 @@ __metadata:
     esbuild-plugin-svgr: ^2.0.0
     esbuild-scss-modules-plugin: ^1.1.1
     eslint-plugin-storybook: ^0.6.11
-    happy-dom: ^9.18.3
+    happy-dom: ^15.10.2
     i18next: ^22.5.1
     immer: ^10.0.2
     lodash: 4.17.21
@@ -39199,17 +39199,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:^9.18.3":
-  version: 9.18.3
-  resolution: "happy-dom@npm:9.18.3"
+"happy-dom@npm:^15.10.2":
+  version: 15.10.2
+  resolution: "happy-dom@npm:15.10.2"
   dependencies:
-    css.escape: ^1.5.1
     entities: ^4.5.0
-    iconv-lite: ^0.6.3
     webidl-conversions: ^7.0.0
-    whatwg-encoding: ^2.0.0
     whatwg-mimetype: ^3.0.0
-  checksum: 0709a046ce170cfb0186786a7daa8f2656df179f9a482ec3de4b75e50935c914e6aef40fa50f6ee12daa4ca45b514ff8c5a192ed7cb47c02f677e5e48cf8f881
+  checksum: 37ef0875565fe94e3fc47c8ddba422268966ffabc4efd84bc79db692d63b28478090e41a58f68b3e66f1b6dc510a9390fc45a1ceb2b64e9cc1a3c66dd088592f
   languageName: node
   linkType: hard
 
@@ -40126,7 +40123,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2, iconv-lite@npm:^0.6.3":
+"iconv-lite@npm:0.6.3, iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3"
   dependencies:
