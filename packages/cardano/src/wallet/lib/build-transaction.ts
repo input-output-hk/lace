@@ -17,7 +17,7 @@ export const buildTransaction = async (
   wallet: ObservableWallet
 ): Promise<InitializedCardanoTransaction> => {
   const util = createWalletUtil(wallet);
-  const minimumCoinQuantities = await util.validateOutputs(txProps.outputs);
+  const minimumCoinQuantities = await util.validateOutputs(txProps.outputs || []);
   const transaction = await wallet.initializeTx(txProps);
 
   return { transaction, minimumCoinQuantities };

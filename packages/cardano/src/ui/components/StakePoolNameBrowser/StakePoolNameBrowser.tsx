@@ -34,7 +34,7 @@ export const StakePoolNameBrowser = ({
 }: StakePoolNameBrowserProps): React.ReactElement => {
   const title = name || ticker || '-';
   const subTitle: string | React.ReactElement = ticker || (
-    <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />
+    <Ellipsis className={styles.id} text={id || ''} beforeEllipsis={6} afterEllipsis={8} />
   );
 
   return (
@@ -48,13 +48,15 @@ export const StakePoolNameBrowser = ({
           <p className={styles.subTitle} data-testid="stake-pool-item-ticker">
             {subTitle}
           </p>
-          <StatusLogo
-            status={status}
-            isDelegated={isDelegated}
-            isOversaturated={isOversaturated}
-            className={styles.statusLogo}
-            translations={translations}
-          />
+          {status && (
+            <StatusLogo
+              status={status}
+              isDelegated={!!isDelegated}
+              isOversaturated={isOversaturated}
+              className={styles.statusLogo}
+              translations={translations}
+            />
+          )}
         </div>
       </div>
     </div>

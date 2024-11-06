@@ -27,7 +27,7 @@ export const StakePoolMetricsBrowser = ({ data, popupView }: StakePoolMetricsBro
           {t}
         </div>
         <div className={styles.statBody} data-testid={`${testId}-value`}>
-          {unit ? formatNumericValue(value, unit) : value}
+          {unit && value ? formatNumericValue(value, unit) : value}
         </div>
       </div>
     ))}

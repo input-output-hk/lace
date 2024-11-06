@@ -20,7 +20,7 @@ export const calculateAssetBalance = (balance: bigint | string, assetInfo: Asset
   return new BigNumber(balance.toString()).div(new BigNumber(BASE).pow(decimals)).toString();
 };
 
-export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo: Asset.AssetInfo): bigint => {
+export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo?: Asset.AssetInfo): bigint => {
   const tokenMetadataDecimals = assetInfo?.tokenMetadata?.decimals;
   const decimals = tokenMetadataDecimals ? tokenMetadataDecimals : getPlaceholderDecimal(balanceWithDecimals);
 
