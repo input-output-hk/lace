@@ -60,6 +60,9 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       get(target: Wallet.NetworkInfoProvider, prop: keyof Wallet.NetworkInfoProvider) {
         if (prop === 'ledgerTip') return monitorLedgerTipResponses(providers.networkInfoProvider.ledgerTip);
         return target[prop];
+      },
+      has(target, prop) {
+        return prop in target;
       }
     })
   };
