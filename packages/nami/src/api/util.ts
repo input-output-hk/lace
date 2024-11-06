@@ -3,6 +3,7 @@
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/naming-convention */
+import * as CidValidator from '@biglup/is-cid';
 import { Serialization } from '@cardano-sdk/core';
 import { minAdaRequired as minAdaRequiredSDK } from '@cardano-sdk/tx-construction';
 import { crc8 } from 'crc';
@@ -32,6 +33,12 @@ export const convertMetadataPropToString = (
   return null;
 };
 
+const looksLikeIpfsUrlWithoutProtocol = (uri: string) => {
+  const [cid] = uri.split('/');
+  if (!cid) return false;
+  return CidValidator.isValid(cid);
+};
+
 export const linkToSrc = (link: string, base64 = false) => {
   const base64regex =
     /^([\d+/A-Za-z]{4})*(([\d+/A-Za-z]{2}==)|([\d+/A-Za-z]{3}=))?$/;
@@ -42,10 +49,7 @@ export const linkToSrc = (link: string, base64 = false) => {
       '/' +
       link.split('ipfs://')[1].split('ipfs/').slice(-1)[0]
     );
-  else if (
-    (link.startsWith('Qm') && link.length === 46) ||
-    (link.startsWith('baf') && link.length === 59)
-  ) {
+  else if (looksLikeIpfsUrlWithoutProtocol(link)) {
     return provider.api.ipfs + '/' + link;
   } else if (base64 && base64regex.test(link))
     return 'data:image/png;base64,' + link;

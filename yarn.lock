@@ -13706,6 +13706,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@lace/nami@workspace:packages/nami"
   dependencies:
+    "@biglup/is-cid": ^1.0.3
     "@cardano-foundation/ledgerjs-hw-app-cardano": ^6.0.0
     "@cardano-sdk/core": 0.41.2
     "@cardano-sdk/crypto": 0.1.30
