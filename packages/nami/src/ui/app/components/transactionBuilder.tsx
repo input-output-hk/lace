@@ -503,6 +503,7 @@ const TransactionBuilder = (undefined, ref) => {
               duration: 3000,
             });
           }
+          undelegateRef.current?.closeModal();
         }}
         getCbor={async () => {
           if (!delegationStoreDelegationTxBuilder) {
@@ -512,7 +513,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-            delegationRef.current?.closeModal();
+            undelegateRef.current?.closeModal();
             return '';
           }
 
@@ -634,7 +635,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-            delegationRef.current?.closeModal();
+            collateralRef.current?.closeModal();
             return '';
           }
 
