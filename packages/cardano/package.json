@@ -73,11 +73,7 @@
   },
   "devDependencies": {
     "@blockfrost/blockfrost-js": "^5.5.0",
-<<<<<<< HEAD
-    "@cardano-sdk/util-dev": "0.23.8",
-=======
     "@cardano-sdk/util-dev": "0.23.9",
->>>>>>> 98f3206c9 (fixup! feat: providers are now consumed from the service worker instead of the UI script)
     "@emurgo/cardano-message-signing-browser": "1.0.1",
     "@types/webextension-polyfill": "0.10.0",
     "axios": "^1.7.4",
