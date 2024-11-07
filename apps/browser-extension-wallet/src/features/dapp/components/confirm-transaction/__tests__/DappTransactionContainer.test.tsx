@@ -19,11 +19,6 @@ const mockWithAddressBookContext = jest.fn((children) => children);
 const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
-const mockUseChainHistoryProvider = jest.fn().mockReturnValue({
-  transactionsByAddress: jest.fn().mockResolvedValue([]),
-  transactionsByHashes: jest.fn().mockResolvedValue([]),
-  blocksByHashes: jest.fn().mockResolvedValue([])
-});
 import * as React from 'react';
 import { cleanup, render } from '@testing-library/react';
 import { DappTransactionContainer } from '../DappTransactionContainer';
@@ -127,9 +122,19 @@ jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
   useCurrencyStore: mockUseCurrencyStore
 }));
 
-jest.mock('@hooks/useChainHistoryProvider', (): typeof CurrencyProvider => ({
-  ...jest.requireActual<any>('@hooks/useChainHistoryProvider'),
-  useChainHistoryProvider: mockUseChainHistoryProvider
+const mockProviders = {
+  chainHistoryProvider: {
+    transactionsByAddress: jest.fn().mockResolvedValue([]),
+    transactionsByHashes: jest.fn().mockResolvedValue([]),
+    blocksByHashes: jest.fn().mockResolvedValue([])
+  },
+  assetProvider
+};
+
+jest.mock('@stores/slices/blockchain-provider-slice', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@stores/slices/blockchain-provider-slice'),
+  getProviders: () => mockProviders
 }));
 
 jest.mock('@lace/core', () => {

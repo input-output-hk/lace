@@ -1,10 +1,7 @@
 import { BlockchainProviderSlice, SliceCreator } from '../types';
 import { Wallet } from '@lace/cardano';
-import { getBaseUrlForChain } from '@src/utils/chain';
-import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
-import { config } from '@src/config';
-
-const { CHAIN } = config();
+import { consumeRemoteApi } from '@cardano-sdk/web-extension';
+import { runtime } from 'webextension-polyfill';
 
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
@@ -16,45 +13,38 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
 }
 
-export type BlockchainProviderFactory = (chainName: Wallet.ChainName) => IBlockchainProvider;
+export type BlockchainProviderFactory = () => IBlockchainProvider;
 
 export const IBlockchainProvider = {
   toWalletProviders: (providers: IBlockchainProvider): Wallet.WalletProvidersDependencies => ({
-    stakePoolProvider: providers.stakePoolProvider,
-    assetProvider: providers.assetProvider,
-    txSubmitProvider: providers.txSubmitProvider,
-    networkInfoProvider: providers.networkInfoProvider,
-    utxoProvider: providers.utxoProvider,
-    rewardsProvider: providers.rewardsProvider,
-    chainHistoryProvider: providers.chainHistoryProvider
+    stakePoolProvider: providers?.stakePoolProvider,
+    assetProvider: providers?.assetProvider,
+    txSubmitProvider: providers?.txSubmitProvider,
+    networkInfoProvider: providers?.networkInfoProvider,
+    utxoProvider: providers?.utxoProvider,
+    rewardsProvider: providers?.rewardsProvider,
+    chainHistoryProvider: providers?.chainHistoryProvider
   }),
   fromWalletProviders: (providers: Wallet.WalletProvidersDependencies): IBlockchainProvider => ({
-    txSubmitProvider: providers.txSubmitProvider,
-    assetProvider: providers.assetProvider,
-    stakePoolProvider: providers.stakePoolProvider,
-    networkInfoProvider: providers.networkInfoProvider,
-    utxoProvider: providers.utxoProvider,
-    rewardsProvider: providers.rewardsProvider,
-    chainHistoryProvider: providers.chainHistoryProvider
+    txSubmitProvider: providers?.txSubmitProvider,
+    assetProvider: providers?.assetProvider,
+    stakePoolProvider: providers?.stakePoolProvider,
+    networkInfoProvider: providers?.networkInfoProvider,
+    utxoProvider: providers?.utxoProvider,
+    rewardsProvider: providers?.rewardsProvider,
+    chainHistoryProvider: providers?.chainHistoryProvider
   })
 };
 
-export const getProviderByChain: BlockchainProviderFactory = (chain = CHAIN) => {
-  const baseCardanoServicesUrl = getBaseUrlForChain(chain);
+const providers = consumeRemoteApi<Wallet.WalletProvidersDependencies>(
+  {
+    baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
+    properties: Wallet.walletProvidersProperties
+  },
+  { logger: console, runtime }
+);
 
-  // TODO: LW-11761 reuse providers that are running in SW instead
-  const providers = Wallet.createProviders({
-    axiosAdapter: axiosFetchAdapter,
-    env: {
-      baseCardanoServicesUrl,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      blockfrostConfig: {} as any
-    },
-    experiments: {}
-  });
-
-  return IBlockchainProvider.fromWalletProviders(providers);
-};
+export const getProviders: BlockchainProviderFactory = () => IBlockchainProvider.fromWalletProviders(providers);
 
 /**
  * has all wallet info related actions and states
@@ -63,7 +53,7 @@ export const blockchainProviderSlice: SliceCreator<
   BlockchainProviderSlice,
   BlockchainProviderSlice,
   { currentChainName: Wallet.ChainName; blockchainProviderFactory?: BlockchainProviderFactory }
-> = ({ set }, { currentChainName, blockchainProviderFactory = getProviderByChain }) => ({
-  blockchainProvider: blockchainProviderFactory(currentChainName),
-  setBlockchainProvider: (chain) => set({ blockchainProvider: blockchainProviderFactory(chain) })
+> = ({ set }, { blockchainProviderFactory = getProviders }) => ({
+  blockchainProvider: blockchainProviderFactory(),
+  setBlockchainProvider: () => set({ blockchainProvider: blockchainProviderFactory() })
 });

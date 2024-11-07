@@ -21,7 +21,6 @@ export * from './useAssetInfo';
 export * from './useUpdateAddressStatus';
 export * from './useOnAddressSave';
 export * from './useAppInit';
-export * from './useChainHistoryProvider';
 export * from './useWalletAvatar';
 export * from './useActionExecution';
 export * from './useCustomSubmitApi';
