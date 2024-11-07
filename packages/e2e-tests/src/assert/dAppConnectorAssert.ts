@@ -220,11 +220,11 @@ class DAppConnectorAssert {
     expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 2);
 
     expect(await ExampleDAppPage.walletChangeAddress.getText()).to.equal(
-      getTestWallet(TestWalletName.TestAutomationWallet).address
+      getTestWallet(TestWalletName.TestAutomationWallet).accounts[0].address
     );
     expect(await ExampleDAppPage.walletStakingAddress.getText()).not.to.be.empty;
     expect(await ExampleDAppPage.walletUsedAddress.getText()).to.equal(
-      getTestWallet(TestWalletName.TestAutomationWallet).address
+      getTestWallet(TestWalletName.TestAutomationWallet).accounts[0].address
     );
   }
 

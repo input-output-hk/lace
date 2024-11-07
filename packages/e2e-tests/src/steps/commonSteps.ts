@@ -127,7 +127,9 @@ Then(
   async (walletName: string, walletProperty: string) => {
     const testWallet = getTestWallet(walletName);
     const walletPropertyValue =
-      walletProperty === 'public key' ? String(testWallet.publicKey) : String(testWallet.address);
+      walletProperty === 'public key'
+        ? String(testWallet.accounts[0].publicKey)
+        : String(testWallet.accounts[0].address);
     await commonAssert.assertClipboardContains(walletPropertyValue);
   }
 );
@@ -187,14 +189,17 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await cleanBrowserStorage();
   await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
-  if (walletName === 'newCreatedWallet') {
-    const wallets = String(testContext.load('newCreatedWallet'));
-    await addAndActivateWalletInRepository(wallets);
-    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
-  } else {
-    await localStorageInitializer.initializeWallet(walletName);
-    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+
+  await (walletName === 'newCreatedWallet'
+    ? addAndActivateWalletInRepository(String(testContext.load('newCreatedWallet')))
+    : addAndActivateWalletsInRepository([walletName as TestWalletName]));
+
+  await localStorageInitializer.initialiseBasicLocalStorageData(walletName);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+  if (mode === 'popup') {
+    await popupView.visit();
   }
+
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
@@ -202,27 +207,6 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await topNavigationAssert.assertLogoPresent();
   await mainMenuPageObject.navigateToSection('Tokens', mode);
 });
-
-Then(
-  /^I open wallet: "([^"]*)" from wallet repository in: (extended|popup) mode$/,
-  async (walletName: string, mode: 'extended' | 'popup') => {
-    await cleanBrowserStorage();
-    await clearWalletRepository();
-    await localStorageManager.cleanLocalStorage();
-    await addAndActivateWalletsInRepository([walletName as TestWalletName]);
-    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
-    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
-    if (mode === 'popup') {
-      await popupView.visit();
-    }
-    await browser.refresh();
-    await closeAllTabsExceptOriginalOne();
-    await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-    await settingsExtendedPageObject.closeWalletSyncedToast();
-    await topNavigationAssert.assertLogoPresent();
-    await mainMenuPageObject.navigateToSection('Tokens', mode);
-  }
-);
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
   await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);

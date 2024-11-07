@@ -323,12 +323,12 @@ Then(
 Then(
   /^I see review handle drawer in (extended|popup) mode for handle: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', handleName: string) => {
-    const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
+    const previousAddress = String(getTestWallet(testContext.load('activeWallet')).accounts[0].address);
     const receiverWallet =
       mode === 'extended'
         ? getTestWallet(getNonActiveAdaHandleWalletName())
         : getTestWallet(getNonActiveAdaHandle2WalletName());
-    const newAddress = String(receiverWallet.address);
+    const newAddress = String(receiverWallet.accounts[0].address);
     await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
   }
 );

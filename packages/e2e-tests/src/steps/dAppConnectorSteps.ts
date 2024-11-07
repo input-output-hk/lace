@@ -329,7 +329,7 @@ Then(/^I save fee value on DApp "Confirm transaction" page$/, async () => {
 });
 
 Then(/^I set send to wallet address to: "([^"]*)" in test DApp$/, async (walletName: string) => {
-  await TestDAppPage.sendAdaAddressInput.setValue(String(getTestWallet(walletName).address));
+  await TestDAppPage.sendAdaAddressInput.setValue(String(getTestWallet(walletName).accounts[0].address));
 });
 
 Then(

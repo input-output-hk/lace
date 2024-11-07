@@ -81,7 +81,7 @@ Then(
       hash: String(testContext.load('txHashValue')),
       sentAssets: [`1 ${nftName}`],
       sentAda: `1.16 ${Asset.CARDANO.ticker}`,
-      recipientAddress: getTestWallet(walletName).address,
+      recipientAddress: getTestWallet(walletName).accounts[0].address,
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);

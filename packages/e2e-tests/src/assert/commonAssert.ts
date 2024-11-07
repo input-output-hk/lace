@@ -61,7 +61,7 @@ class CommonAssert {
   }
 
   async assertClipboardContainsAddressOfWallet(walletName: string) {
-    const expectedWalletAddress = getTestWallet(walletName).address as string;
+    const expectedWalletAddress = getTestWallet(walletName).accounts[0].address as string;
     await this.assertClipboardContains(expectedWalletAddress);
   }
 

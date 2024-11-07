@@ -9,7 +9,9 @@ const tWelcome = 'browserView.assets.welcome';
 class EmptyStateAssert {
   async assertSeeCommonEmptyStateElements() {
     const walletData = getTestWallet(TestWalletName.TAWalletNoFunds);
-    const expectedAddress = extensionUtils.isMainnet() ? walletData.mainnetAddress : walletData.address;
+    const expectedAddress = extensionUtils.isMainnet()
+      ? walletData.accounts[0].mainnetAddress
+      : walletData.accounts[0].address;
     expect(await FundWalletBanner.getWalletAddress()).to.equal(expectedAddress);
     await FundWalletBanner.qrCode.waitForDisplayed();
     await FundWalletBanner.copyAddressButton.waitForDisplayed();

@@ -1,12 +1,12 @@
-import { WalletConfig } from '../../support/walletConfiguration';
+import { WalletRepositoryConfig } from '../../support/walletConfiguration';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import ShowPublicKeyDrawer from '../../elements/settings/ShowPublicKeyDrawer';
 
 class WalletPublicKeyDrawerAssert {
-  async assertSeePublicKey(wallet: WalletConfig) {
+  async assertSeePublicKey(wallet: WalletRepositoryConfig) {
     await ShowPublicKeyDrawer.walletAddress.waitForDisplayed();
-    expect(await ShowPublicKeyDrawer.walletAddress.getText()).to.equal(wallet.publicKey);
+    expect(await ShowPublicKeyDrawer.walletAddress.getText()).to.equal(wallet.accounts[0].publicKey);
   }
 
   async assertSeeQrCode() {
@@ -39,7 +39,7 @@ class WalletPublicKeyDrawerAssert {
     await this.assertSeeCopyButton(true);
   }
 
-  async assertSeeWalletName(wallet: WalletConfig) {
+  async assertSeeWalletName(wallet: WalletRepositoryConfig) {
     await ShowPublicKeyDrawer.walletName.waitForDisplayed();
     expect(await ShowPublicKeyDrawer.walletName.getText()).to.equal(wallet.name);
   }
