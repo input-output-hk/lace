@@ -167,6 +167,7 @@ class TransactionsDetailsAssert {
     }
   }
 
+  // eslint-disable-next-line max-statements
   async assertTxDetailValuesNotZero(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
@@ -174,8 +175,10 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
       if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
+        await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForClickable();
         await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
         await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
+        await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForClickable();
         await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
         await TransactionDetailsPage.transactionDetailsOutputsDropdown.waitForStable();
 

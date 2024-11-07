@@ -20,10 +20,11 @@ export const getAllEventsNames = async (): Promise<string[]> => {
   const filteredEventNames: string[] = [];
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
   for (const request of requests) {
-    const eventNames = (await getRequestDataPayload(request)).event;
+    if (request.url.includes('blockfrost')) continue;
+    const eventName = (await getRequestDataPayload(request)).event;
     // $pageview is technical event which is not relevant
-    if (eventNames !== '$pageview') {
-      filteredEventNames.push(eventNames);
+    if (eventName !== '$pageview') {
+      filteredEventNames.push(eventName);
     }
   }
   return filteredEventNames;
