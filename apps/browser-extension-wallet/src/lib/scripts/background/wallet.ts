@@ -33,6 +33,8 @@ import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
+import { requestMessage$ } from './services';
+import { MessageTypes } from '../types';
 
 // It is important that this file is not exported from index,
 // because creating wallet repository with store creates an actual pouchdb database
@@ -82,6 +84,12 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       healthCheck: async () => ({ ok: true }),
       getPolicyIds: async () => []
     };
+
+    if ('wsProvider' in providers) {
+      providers.wsProvider.health$.subscribe((check) => {
+        requestMessage$.next({ type: MessageTypes.WS_CONNECTION, data: { connected: check.ok } });
+      });
+    }
 
     if (wallet.type === WalletType.Script) {
       const stakingScript = wallet.stakingScript as SharedWalletScriptKind;

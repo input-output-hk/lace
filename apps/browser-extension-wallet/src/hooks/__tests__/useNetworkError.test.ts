@@ -51,7 +51,7 @@ describe('Testing useBuildDelegation hook', () => {
 
     // offline
     backgroundServices.requestMessage$.next({
-      type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION,
+      type: MessageTypes.HTTP_CONNECTION,
       data: { connected: false }
     });
 
@@ -60,7 +60,7 @@ describe('Testing useBuildDelegation hook', () => {
 
     // back online
     backgroundServices.requestMessage$.next({
-      type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION,
+      type: MessageTypes.HTTP_CONNECTION,
       data: { connected: true }
     });
 

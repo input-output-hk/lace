@@ -12,15 +12,19 @@ export const useNetworkError = (cb: () => void): void => {
 
   useEffect(() => {
     const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
-      let isNetworkInfoProviderConnected = true;
-      if (type === MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION) {
-        isNetworkInfoProviderConnected = data.connected;
+      let isHTTPConnectionStable = true;
+      let isWSConnectionStable = true;
+      if (type === MessageTypes.HTTP_CONNECTION) {
+        isHTTPConnectionStable = data.connected;
+      } else if (type === MessageTypes.WS_CONNECTION) {
+        isWSConnectionStable = data.connected;
       }
-      if (!isNetworkInfoProviderConnected || !isOnline) {
+
+      if (!isHTTPConnectionStable || !isWSConnectionStable || !isOnline) {
         cb();
       }
       setNetworkConnection(
-        isNetworkInfoProviderConnected && isOnline
+        isHTTPConnectionStable && isWSConnectionStable && isOnline
           ? NetworkConnectionStates.CONNNECTED
           : NetworkConnectionStates.OFFLINE
       );

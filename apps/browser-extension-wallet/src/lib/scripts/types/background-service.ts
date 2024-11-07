@@ -12,6 +12,10 @@ export interface HTTPConnectionStatus {
   connected: boolean;
 }
 
+export interface WSConnectionStatus {
+  connected: boolean;
+}
+
 export interface ChangeThemeData {
   theme: themes;
 }
@@ -24,7 +28,8 @@ export interface ChangeModeData {
 export enum MessageTypes {
   OPEN_BROWSER_VIEW = 'open-browser-view',
   CHANGE_THEME = 'change-theme',
-  NETWORK_INFO_PROVIDER_CONNECTION = 'network-info-provider-connnection',
+  HTTP_CONNECTION = 'http-connnection',
+  WS_CONNECTION = 'ws-connnection',
   OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings',
   CHANGE_MODE = 'change-mode'
 }
@@ -61,8 +66,12 @@ interface ChangeThemeMessage {
   data: ChangeThemeData;
 }
 interface HTTPConnectionMessage {
-  type: MessageTypes.NETWORK_INFO_PROVIDER_CONNECTION;
+  type: MessageTypes.HTTP_CONNECTION;
   data: HTTPConnectionStatus;
+}
+interface WSConnectionMessage {
+  type: MessageTypes.WS_CONNECTION;
+  data: WSConnectionStatus;
 }
 interface OpenBrowserMessage {
   type: MessageTypes.OPEN_BROWSER_VIEW | MessageTypes.OPEN_COLLATERAL_SETTINGS;
@@ -73,7 +82,12 @@ interface ChangeMode {
   type: MessageTypes.CHANGE_MODE;
   data: ChangeModeData;
 }
-export type Message = ChangeThemeMessage | HTTPConnectionMessage | OpenBrowserMessage | ChangeMode;
+export type Message =
+  | ChangeThemeMessage
+  | HTTPConnectionMessage
+  | WSConnectionMessage
+  | OpenBrowserMessage
+  | ChangeMode;
 
 export type BackgroundService = {
   handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
