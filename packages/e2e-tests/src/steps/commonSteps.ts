@@ -225,11 +225,16 @@ Then(
 );
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);
+  await browser.throttleNetwork({
+    offline: offline === 'true',
+    latency: 0,
+    downloadThroughput: 0,
+    uploadThroughput: 0
+  });
 });
 
 When(/^I am in the slow network mode$/, async () => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(false, 0, 1000, 1000);
+  await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
 });
 
 When(/^I click outside the drawer$/, async () => {
