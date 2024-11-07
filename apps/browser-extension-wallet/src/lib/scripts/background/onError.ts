@@ -21,7 +21,11 @@ const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => 
 
 const handleRequests = (data: WebRequest.OnCompletedDetailsType) => {
   // every status code number that is below 500 would be considered as successful
-  if (data?.type === 'xmlhttprequest' && data.statusCode < INTERNAL_SERVER_ERROR_STATUS_CODE) {
+  if (
+    data?.type === 'xmlhttprequest' &&
+    data.statusCode < INTERNAL_SERVER_ERROR_STATUS_CODE &&
+    runtime.getURL('').startsWith(data.initiator)
+  ) {
     requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: true } });
     webRequest.onCompleted.removeListener(handleRequests);
   }
