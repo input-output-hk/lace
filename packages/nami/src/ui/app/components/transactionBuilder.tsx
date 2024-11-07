@@ -287,6 +287,25 @@ const TransactionBuilder = (undefined, ref) => {
         title="Delegate your funds"
         sign={async () => {
           try {
+            if (!delegationStoreDelegationTxBuilder) {
+              resetDelegationState();
+              await prepareDelegationTx();
+
+              throw new Error('Transaction could not be built');
+            }
+
+            const tx = await delegationStoreDelegationTxBuilder!.build();
+            const inspection = await tx.inspect();
+
+            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+
+            if (!hasCertificates) {
+              resetDelegationState();
+              await prepareDelegationTx();
+
+              throw new Error('Transaction could not be built');
+            }
+
             await signAndSubmitTransaction();
           } catch (error) {
             console.error(error);
@@ -324,7 +343,6 @@ const TransactionBuilder = (undefined, ref) => {
           }
 
           const tx = await delegationStoreDelegationTxBuilder.build();
-
           const inspection = await tx.inspect();
 
           return encodeToCbor({
@@ -481,6 +499,27 @@ const TransactionBuilder = (undefined, ref) => {
         title="Stake deregistration"
         sign={async () => {
           try {
+            if (!delegationStoreDelegationTxBuilder) {
+              setData({ pool: { ...poolDefaultValue } });
+              resetDelegationState();
+              await initDelegation();
+
+              throw new Error('Transaction could not be built');
+            }
+
+            const tx = await delegationStoreDelegationTxBuilder!.build();
+            const inspection = await tx.inspect();
+
+            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+
+            if (!hasCertificates) {
+              setData({ pool: { ...poolDefaultValue } });
+              resetDelegationState();
+              await initDelegation();
+
+              throw new Error('Transaction could not be built');
+            }
+
             await signAndSubmitTransaction();
           } catch (error) {
             console.error(error);
@@ -503,6 +542,7 @@ const TransactionBuilder = (undefined, ref) => {
               duration: 3000,
             });
           }
+          undelegateRef.current?.closeModal();
         }}
         getCbor={async () => {
           if (!delegationStoreDelegationTxBuilder) {
@@ -512,7 +552,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-            delegationRef.current?.closeModal();
+            undelegateRef.current?.closeModal();
             return '';
           }
 
@@ -634,7 +674,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-            delegationRef.current?.closeModal();
+            collateralRef.current?.closeModal();
             return '';
           }
 
