@@ -33,7 +33,7 @@ import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
-import { requestMessage$ } from './services';
+import { requestMessage$ } from './services/utilityServices';
 import { MessageTypes } from '../types';
 
 // It is important that this file is not exported from index,
