@@ -15,5 +15,13 @@ module.exports = () =>
     // Needed for the service worker to work with a production build
     // TODO: after removing imports from dist/cjs, service worker no longer loads when built in production mode.
     // It is likely that some optimization is triggering it, such as tree shaking.
-    { mode: 'development', optimization: { moduleIds: 'named', mangleExports: false } }
+    {
+      mode: 'development',
+      optimization: {
+        moduleIds: 'named',
+        mangleExports: false,
+        // minimize mess up the source maps
+        minimize: false
+      }
+    }
   );

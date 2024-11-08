@@ -13,6 +13,8 @@ const common = {
     typescript({
       tsconfig: './src/tsconfig.json',
       composite: false,
+      sourceMap: true,
+      inlineSources: true,
     }),
     json(),
     commonjs(),
