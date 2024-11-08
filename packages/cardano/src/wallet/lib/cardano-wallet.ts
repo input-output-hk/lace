@@ -18,6 +18,7 @@ import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
+import { WsProvider } from '@cardano-sdk/cardano-services-client';
 
 export const bip32Ed25519 = new Crypto.SodiumBip32Ed25519();
 
@@ -62,6 +63,7 @@ export interface WalletProvidersDependencies {
   utxoProvider: UtxoProvider;
   rewardsProvider: RewardsProvider;
   chainHistoryProvider: ChainHistoryProvider;
+  wsProvider?: WsProvider;
 }
 
 export interface CreatePersonalWallet {
