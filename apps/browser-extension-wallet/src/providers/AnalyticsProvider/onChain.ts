@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers, @typescript-eslint/no-empty-function */
 import { useEffect } from 'react';
 import { PostHogAction, PostHogProperties, TX_CREATION_TYPE_KEY } from './analyticsTracker';
@@ -115,7 +116,7 @@ export const sendConfirmedTransactionAnalytics = async ({
 
 interface UseOnChainEventAnalytics {
   observable$?: Observable<string[]>;
-  requestLock?: (name: string, options: LockOptions, callback: () => Promise<void>) => void;
+  requestLock?: (name: string, options: LockOptions, callback: () => Promise<void>) => Promise<void>;
   onChainEvent: (tx: string[]) => Promise<void>;
 }
 
@@ -128,7 +129,13 @@ export const useOnChainEventAnalytics = ({
     const controller = new AbortController();
 
     const subscription = observable$.subscribe(async (onChainTransactions) => {
-      requestLock(LOCK_NAME, { signal: controller.signal }, () => onChainEvent(onChainTransactions));
+      try {
+        await requestLock(LOCK_NAME, { signal: controller.signal }, () => onChainEvent(onChainTransactions));
+      } catch (error) {
+        // do nothing if lock request has been manually aborted
+        if (error instanceof Error && error.name === 'AbortError') return;
+        throw error;
+      }
     });
 
     return () => {
