@@ -16,9 +16,7 @@ export const validateEventProperty = async (event: string, property: string, pro
       interval: 1000,
       timeout: 6000,
       timeoutMsg: `Failed while waiting for event '${event}' contains property '${property}' equal to ${propertyValue}. Actual event property value = '${
-        (
-          await getEventPayload(event)
-        ).properties[property]
+        (await getEventPayload(event)).properties[property]
       }'`
     }
   );
@@ -26,7 +24,11 @@ export const validateEventProperty = async (event: string, property: string, pro
 When(/^I set up request interception for posthog analytics request\(s\)$/, async () => {
   await browser.pause(1000);
   await browser.setupInterceptor();
-  await browser.excludeUrls([new RegExp('^(?!https://e.lw.iog.io).*'), new RegExp('https://e.lw.iog.io/decide/')]);
+  await browser.excludeUrls([
+    new RegExp('^(?!https://e.lw.iog.io).*'),
+    new RegExp('https://e.lw.iog.io/decide/'),
+    new RegExp('.+blockfrost.io.*')
+  ]);
 });
 
 When(/^I validate latest analytics multiple events:$/, async (eventActionNames: DataTable) => {
@@ -60,9 +62,7 @@ When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numbe
     interval: 1000,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
-      (
-        await getAllEventsNames()
-      ).length
+      (await getAllEventsNames()).length
     }\n
     Actual events:\n ${(await getAllEventsNames()).toString()}`
   });

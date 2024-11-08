@@ -72,6 +72,7 @@ When(
   async (expectedPassword: 'valid' | 'invalid') => {
     const password =
       expectedPassword === 'valid' ? String(getTestWallet(TestWalletName.MultiAccActive1).password) : 'somePassword';
+    await WalletAccountsUnlockDrawer.passwordInput.waitForClickable();
     await WalletAccountsUnlockDrawer.passwordInput.setValue(password);
   }
 );

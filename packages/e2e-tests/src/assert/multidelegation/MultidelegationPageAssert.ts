@@ -219,7 +219,7 @@ class MultidelegationPageAssert {
   assertSeeTooltipForColumn = async (column: StakePoolListColumn) => {
     await MultidelegationPage.tooltip.waitForStable();
     await MultidelegationPage.tooltip.waitForDisplayed();
-    let expectedTooltipText;
+    let expectedTooltipText: string;
     switch (column) {
       case StakePoolListColumn.Ticker:
         expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
@@ -248,7 +248,11 @@ class MultidelegationPageAssert {
       default:
         throw new Error(`Unsupported column name: ${column}`);
     }
-    expect(await MultidelegationPage.tooltip.getText()).to.equal(expectedTooltipText);
+    await browser.waitUntil(async () => (await MultidelegationPage.tooltip.getText()) === expectedTooltipText, {
+      interval: 500,
+      timeout: 5000,
+      timeoutMsg: `Current tooltip text: ${await MultidelegationPage.tooltip.getText()}\nExpected tooltip text: ${expectedTooltipText}`
+    });
   };
 
   assertSeeStakePoolRow = async (index?: number) => {
