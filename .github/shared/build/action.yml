@@ -88,6 +88,10 @@ inputs:
     description: 'Project environment for Sentry, used to differentiate issue sources'
     required: false
     default: ''
+  WALLET_POLLING_INTERVAL_IN_SEC:
+    description: 'Polling interval for the wallet'
+    required: false
+    default: 45
 runs:
   using: 'composite'
   steps:
@@ -157,4 +161,5 @@ runs:
         SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
+        WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
       run: yarn browser build

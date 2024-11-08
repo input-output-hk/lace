@@ -228,6 +228,7 @@ jobs:
           BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: 'smoke-tests'
+          WALLET_POLLING_INTERVAL_IN_SEC: 5
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
