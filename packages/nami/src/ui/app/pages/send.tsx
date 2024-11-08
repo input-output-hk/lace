@@ -64,7 +64,10 @@ import { assetsToValue, minAdaRequired } from '../../../api/util';
 import { ERROR } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
-import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import {
+  NetworkConnectionStates,
+  useCommonOutsideHandles,
+} from '../../../features/common-outside-handles-provider';
 import { useStoreActions, useStoreState } from '../../store';
 import Account from '../components/account';
 import AssetBadge from '../components/assetBadge';
@@ -121,7 +124,8 @@ const Send = ({
 }: Readonly<Props>) => {
   const capture = useCaptureEvent();
   const isMounted = useIsMounted();
-  const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
+  const { cardanoCoin, walletType, openHWFlow, networkConnection } =
+    useCommonOutsideHandles();
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -430,6 +434,7 @@ const Send = ({
   );
 
   const setMessageDebounced = useMemo(() => debounce(setMessage, 300), []);
+  const isOffline = networkConnection === NetworkConnectionStates.OFFLINE;
 
   return (
     <>
@@ -488,6 +493,7 @@ const Send = ({
                 triggerTxUpdate={triggerTxUpdate}
                 isLoading={isLoading}
                 environmentName={environmentName}
+                isOffline={isOffline}
               />
               {address.error && (
                 <Text
@@ -544,7 +550,7 @@ const Send = ({
                       });
                     }}
                     variant="filled"
-                    isDisabled={isLoading}
+                    isDisabled={isLoading || isOffline}
                     isInvalid={
                       value.ada &&
                       (BigInt(toUnit(value.ada)) < BigInt(txInfo.minUtxo) ||
@@ -564,6 +570,7 @@ const Send = ({
                   addAssets={addAssets}
                   assets={walletAssets}
                   value={value}
+                  isOffline={isOffline}
                 />
               </Stack>
               <Box height="4" />
@@ -587,6 +594,7 @@ const Send = ({
                     variant={'flushed'}
                     placeholder="Optional message"
                     fontSize={'xs'}
+                    disabled={isOffline}
                   />
                 </InputGroup>
               </Box>
@@ -821,6 +829,7 @@ const AddressPopup = ({
   isLoading,
   recentSendToAddress,
   environmentName,
+  isOffline,
 }: Readonly<{
   accounts: UseAccount['nonActiveAccounts'];
   recentSendToAddress?: string;
@@ -830,6 +839,7 @@ const AddressPopup = ({
   triggerTxUpdate: any;
   isLoading: boolean;
   environmentName: OutsideHandlesContextValue['environmentName'];
+  isOffline?: boolean;
 }>) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const checkColor = useColorModeValue('teal.500', 'teal.200');
@@ -917,7 +927,7 @@ const AddressPopup = ({
       <PopoverTrigger>
         <InputGroup>
           <Input
-            disabled={isLoading}
+            disabled={isLoading || isOffline}
             variant="filled"
             autoComplete="off"
             value={address.display}
@@ -1129,7 +1139,13 @@ const AssetsSelector = ({
   assets,
   addAssets,
   value,
-}: Readonly<{ assets: NamiAsset[]; addAssets: any; value: any }>) => {
+  isOffline,
+}: Readonly<{
+  assets: NamiAsset[];
+  addAssets: any;
+  value: any;
+  isOffline?: boolean;
+}>) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [search, setSearch] = React.useState('');
   const select = React.useRef(false);
@@ -1150,7 +1166,11 @@ const AssetsSelector = ({
   return (
     <Popover isLazy isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
       <PopoverTrigger>
-        <Button isDisabled={!assets || assets.length === 0} flex={1} size="sm">
+        <Button
+          isDisabled={!assets || assets.length === 0 || isOffline}
+          flex={1}
+          size="sm"
+        >
           + Assets
         </Button>
       </PopoverTrigger>

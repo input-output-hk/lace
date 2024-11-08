@@ -184,6 +184,7 @@ jobs:
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: 'e2e-tests'
+          WALLET_POLLING_INTERVAL_IN_SEC: 5
 
       - name: Upload build artifact
         if: needs.setup.outputs.build_exists == 'false'

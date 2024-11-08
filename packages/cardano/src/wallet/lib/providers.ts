@@ -146,7 +146,8 @@ export const createProviders = ({
       stakePoolProvider,
       utxoProvider: wsProvider.utxoProvider,
       chainHistoryProvider: wsProvider.chainHistoryProvider,
-      rewardsProvider
+      rewardsProvider,
+      wsProvider
     };
   }
 

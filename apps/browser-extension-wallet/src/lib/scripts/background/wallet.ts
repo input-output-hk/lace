@@ -3,6 +3,7 @@ import { of, combineLatest, map, EMPTY, BehaviorSubject } from 'rxjs';
 import { getProviders } from './config';
 import {
   DEFAULT_LOOK_AHEAD_SEARCH,
+  DEFAULT_POLLING_CONFIG,
   HDSequentialDiscovery,
   createPersonalWallet,
   storage,
@@ -30,9 +31,13 @@ import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';
-import { getBaseUrlForChain } from '@utils/chain';
+import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { requestMessage$ } from './services/utilityServices';
+import { MessageTypes } from '../types';
 
 // It is important that this file is not exported from index,
 // because creating wallet repository with store creates an actual pouchdb database
@@ -83,6 +88,12 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       getPolicyIds: async () => []
     };
 
+    if ('wsProvider' in providers) {
+      providers.wsProvider.health$.subscribe((check) => {
+        requestMessage$.next({ type: MessageTypes.WS_CONNECTION, data: { connected: check.ok } });
+      });
+    }
+
     if (wallet.type === WalletType.Script) {
       const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
       const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
@@ -117,8 +128,21 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
+    const { featureFlags } = await getBackgroundStorage();
+    const magic = getMagicForChain(chainName);
+    const useWebSocket = !!(featureFlags?.[magic]?.[ExperimentName.WEBSOCKET_API] ?? false);
+    const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))
+      ? // eslint-disable-next-line no-magic-numbers
+        Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
+      : DEFAULT_POLLING_CONFIG.pollInterval;
     return createPersonalWallet(
-      { name: walletAccount.metadata.name },
+      {
+        name: walletAccount.metadata.name,
+        polling: {
+          ...DEFAULT_POLLING_CONFIG,
+          interval: useWebSocket ? DEFAULT_POLLING_CONFIG.pollInterval : localPollingIntervalConfig
+        }
+      },
       {
         logger,
         ...providers,

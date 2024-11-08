@@ -259,7 +259,9 @@ export const EnterPgpPrivateKey: VFC = () => {
                 }}
                 label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
                 value={pgpInfo.pgpKeyPassphrase || ''}
-                onSubmit={null}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                }}
                 disabled={pgpInfo.privateKeyIsDecrypted}
                 data-testid="pgp-passphrase"
               />
