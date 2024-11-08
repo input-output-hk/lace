@@ -31,6 +31,11 @@ module.exports = () => {
     module: {
       rules: [
         {
+          test: /packages\/.+\/dist\/.+\.js$/,
+          enforce: 'pre',
+          use: ['source-map-loader']
+        },
+        {
           test: /\.(js|jsx|ts|tsx)$/,
           exclude: /node_modules\/(?!(@cardano-sdk)\/).*/,
           loader: 'swc-loader',
