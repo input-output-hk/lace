@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { FormEvent } from 'react';
 import {
+  OnPasswordChange,
   UncontrolledPasswordBox,
-  UncontrolledPasswordBoxProps,
-  OnPasswordChange
+  UncontrolledPasswordBoxProps
 } from '@input-output-hk/lace-ui-toolkit';
 import { inputProps } from '@lace/common';
 
@@ -16,14 +16,16 @@ export type PasswordProps = {
   onChange: OnPasswordChange;
 } & Omit<inputProps, 'onChange' | 'value'>;
 
-const noop = (): void => void 0;
 const mapProps = (props: PasswordProps): UncontrolledPasswordBoxProps => ({
   ...props,
   testId: props['data-testid'] || props.dataTestId,
   label: props.label || '',
   size: undefined,
   prefix: undefined,
-  onSubmit: props.onSubmit || noop,
+  onSubmit: (event: FormEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    props.onSubmit?.(event);
+  },
   containerClassName: props.wrapperClassName,
   errorMessage: props.error ? props.errorMessage : undefined
 });
