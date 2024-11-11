@@ -65,7 +65,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
 
   const onContinue = () => {
     try {
-      onRestoreSharedWallet(cosignerData);
+      cosignerData && onRestoreSharedWallet(cosignerData);
       navigateToAppHome();
     } catch (error_) {
       console.error(error_);

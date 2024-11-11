@@ -21,9 +21,14 @@ export const validateJson = (
         if (parsedResult.error) {
           reject({ message: FileErrorMessage.UNRECOGNIZED });
         }
-
+        if (!parsedResult.data?.metadata || !parsedResult.data.nativeScript) {
+          throw new Error('no metadata or native script in parsed data result');
+        }
         const { metadata, nativeScript } = parsedResult.data;
         const { coSigners, sharedWalletName } = metadata;
+        if (!sharedWalletName) {
+          throw new Error('no shared wallet name provided');
+        }
         const { scripts } = nativeScript;
 
         const ownHash = await getHashFromPublicKey(sharedKey, paymentScriptKeyPath);
@@ -38,7 +43,13 @@ export const validateJson = (
           data: {
             coSigners: coSigners.map((cosigner: CoSigner) => ({ ...cosigner, id: uuid() })),
             name: sharedWalletName,
-            quorumRules: getQuorumRulesByTag(nativeScript.tag, nativeScript.tag === 'n_of_k' && nativeScript.n),
+            quorumRules: getQuorumRulesByTag(
+              nativeScript.tag === 'n_of_k'
+                ? { n: nativeScript.n, tag: 'n_of_k' }
+                : {
+                    tag: nativeScript.tag,
+                  },
+            ),
           },
         });
       } catch (error) {
