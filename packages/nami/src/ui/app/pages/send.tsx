@@ -1410,6 +1410,7 @@ const Selection = ({
     <Box
       rounded="full"
       width="6"
+      minW="6"
       height="6"
       overflow="hidden"
       onClick={() => (select.current = true)}
