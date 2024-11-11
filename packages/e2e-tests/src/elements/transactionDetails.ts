@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import CommonDrawerElements from './CommonDrawerElements';
+import { browser } from '@wdio/globals';
 
 class ActivityDetailsPage extends CommonDrawerElements {
   protected CONTAINER = '[data-testid="custom-drawer"]';
@@ -382,6 +383,13 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   async getTransactionDetailsStakepoolIds(): Promise<string[]> {
     return await this.getTextValues(await this.transactionDetailsStakePoolIds);
+  }
+
+  async waitUntilTxHashNotEmpty() {
+    await browser.waitUntil(async () => (await this.transactionDetailsHash.getText()) !== '', {
+      timeout: 6000,
+      timeoutMsg: 'failed while waiting for tx hash value'
+    });
   }
 }
 
