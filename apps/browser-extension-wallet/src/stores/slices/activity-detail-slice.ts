@@ -9,7 +9,7 @@ import {
   UISlice
 } from '../types';
 import { CardanoTxOut, Transaction, ActivityDetail, TransactionActivityDetail } from '../../types';
-import { blockTransformer, inputOutputTransformer } from '../../api/transformers';
+import { inputOutputTransformer } from '../../api/transformers';
 import { Wallet } from '@lace/cardano';
 import { getTransactionTotalOutput } from '../../utils/get-transaction-total-output';
 import { inspectTxValues } from '@src/utils/tx-inspection';
@@ -27,6 +27,7 @@ import { formatDate, formatTime } from '@src/utils/format-date';
 import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
 import { getCollateral } from '@cardano-sdk/core';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
+import { eraSlotDateTime } from '@utils/era-slot-datetime';
 
 /**
  * validates if the transaction is confirmed
@@ -82,25 +83,43 @@ const shouldIncludeFee = (
   );
 };
 
+const poolsVolatileCache: Map<Wallet.Cardano.PoolId, Wallet.Cardano.StakePool> = new Map();
+
 export const getPoolInfos = async (
   poolIds: Wallet.Cardano.PoolId[],
   stakePoolProvider: Wallet.StakePoolProvider
 ): Promise<Wallet.Cardano.StakePool[]> => {
-  const filters: Wallet.QueryStakePoolsArgs = {
-    filters: {
-      identifier: {
-        _condition: 'or',
-        values: poolIds.map((poolId) => ({ id: poolId }))
-      }
-    },
-    pagination: {
-      startAt: 0,
-      limit: MAX_POOLS_COUNT
-    }
-  };
-  const { pageResults: pools } = await stakePoolProvider.queryStakePools(filters);
+  const poolsToFetch = [...poolIds];
+  const result: Wallet.Cardano.StakePool[] = [];
 
-  return pools;
+  for (const poolId of poolIds) {
+    const pool = poolsVolatileCache.get(poolId);
+    if (pool) {
+      result.push(pool);
+      poolsToFetch.splice(poolsToFetch.indexOf(poolId), 1);
+    }
+  }
+
+  if (poolsToFetch.length > 0) {
+    const filters: Wallet.QueryStakePoolsArgs = {
+      filters: {
+        identifier: {
+          _condition: 'or',
+          values: poolsToFetch.map((poolId) => ({ id: poolId }))
+        }
+      },
+      pagination: {
+        startAt: 0,
+        limit: MAX_POOLS_COUNT
+      }
+    };
+    const { pageResults: fetchedPools } = await stakePoolProvider.queryStakePools(filters);
+
+    fetchedPools.forEach((pool) => poolsVolatileCache.set(pool.id, pool));
+    result.push(...fetchedPools);
+  }
+
+  return result;
 };
 
 const computeCollateral = async (
@@ -207,12 +226,6 @@ const buildGetActivityDetail =
     const totalOutput = getTransactionTotalOutput(tx.body.outputs).minus(tx.body.fee.toString());
     const totalOutputInAda = Wallet.util.lovelacesToAdaString(totalOutput.toString());
 
-    // Block Info
-    const txBlock = isConfirmedTransaction(tx)
-      ? await Wallet.getBlockInfoByHash(tx.blockHeader.hash, chainHistoryProvider, stakePoolProvider)
-      : undefined;
-    const blocks = txBlock ? blockTransformer(txBlock) : undefined;
-
     // Metadata
     const txMetadata = !isEmpty(tx.auxiliaryData?.blob)
       ? transactionMetadataTransformer(tx.auxiliaryData.blob)
@@ -245,6 +258,16 @@ const buildGetActivityDetail =
       (certificate) => certificate.__typename === Wallet.Cardano.CertificateType.StakeDelegation
     ) as Wallet.Cardano.StakeDelegationCertificate[];
 
+    let utcDate;
+    let utcTime;
+
+    if (isConfirmedTransaction(tx)) {
+      const summaries = await firstValueFrom(wallet.eraSummaries$);
+      const times = eraSlotDateTime(summaries, tx.blockHeader?.slot);
+      utcDate = times.utcDate;
+      utcTime = times.utcTime;
+    }
+
     let transaction: ActivityDetail['activity'] = {
       hash: tx.id.toString(),
       totalOutput: totalOutputInAda,
@@ -254,8 +277,8 @@ const buildGetActivityDetail =
       addrInputs: inputs,
       addrOutputs: outputs,
       metadata: txMetadata,
-      includedUtcDate: blocks?.utcDate,
-      includedUtcTime: blocks?.utcTime,
+      includedUtcDate: utcDate,
+      includedUtcTime: utcTime,
       collateral: collateralInAda,
       votingProcedures: tx.body.votingProcedures,
       proposalProcedures: tx.body.proposalProcedures,
@@ -283,7 +306,7 @@ const buildGetActivityDetail =
     }
 
     set({ fetchingActivityInfo: false });
-    return { activity: transaction, blocks, status, assetAmount, type };
+    return { activity: transaction, status, assetAmount, type };
   };
 
 /**

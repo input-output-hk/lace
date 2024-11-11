@@ -44,6 +44,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
       unspendable$: of([])
     },
     transactions: {
+      history$: of([]),
       outgoing: {
         signed$: of([])
       }
@@ -264,7 +265,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
     });
   });
 
-  test('should return inputs with value and address for more inputs than pagination limit', async () => {
+  test('should return inputs with value and address for every input', async () => {
     const transactionsByHashes = jest.fn().mockImplementation(({ ids }) =>
       Promise.resolve(
         ids.map((id: Cardano.TransactionId) => ({
@@ -293,7 +294,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
 
     await act(async () => {
       const inputs = await result;
-      expect(transactionsByHashes).toBeCalledTimes(2);
+      expect(transactionsByHashes).toBeCalledTimes(30);
       expect(inputs.every(({ value, address }) => value && address)).toBe(true);
       expect(inputs).toHaveLength(30);
     });
