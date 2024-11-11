@@ -28,6 +28,10 @@ inputs:
     description: 'Tags'
     required: false
     default: ''
+  SERVICE_WORKER_LOGS:
+    description: 'Collect service worker logs'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -51,7 +55,7 @@ runs:
         BROWSER: ${{ inputs.BROWSER }}
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
-        SERVICE_WORKER_LOGS: true
+        SERVICE_WORKER_LOGS: ${{ inputs.SERVICE_WORKER_LOGS }}
       run: |
         commonTags="@Testnet and not @Pending"
         tagsToRun="'${commonTags}'"

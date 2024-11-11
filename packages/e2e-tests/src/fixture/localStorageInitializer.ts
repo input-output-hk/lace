@@ -21,7 +21,7 @@ class LocalStorageInitializer {
   }
 
   async initializeAnalyticsStatus(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
-    await localStorageManager.setItem('analyticsStatus', `"${value}"`);
+    await localStorageManager.setItem('analyticsStatus', JSON.stringify(value));
   }
 
   async initializeShowDAppBetaModal(value: boolean): Promise<void> {
@@ -63,6 +63,9 @@ class LocalStorageInitializer {
   }
 
   initialiseBasicLocalStorageData = async (walletName = 'TestAutomationWallet'): Promise<void> => {
+    // Pause fix for flaky tests where local storage keys are disappearing when executed right after opening the extension
+    await browser.pause(500);
+
     testContext.saveWithOverride('activeWallet', walletName);
 
     await this.initializeAnalyticsStatus('ACCEPTED');

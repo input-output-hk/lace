@@ -6,10 +6,12 @@ import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
 import analyticsBanner from '../elements/analyticsBanner';
 import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
+import { setUsePersistentUserId } from '../utils/browserStorage';
 
 const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
   await localStorageInitializer.initialiseBasicLocalStorageData(walletNames[0] as TestWalletName);
+  await setUsePersistentUserId();
   await addAndActivateWalletsInRepository(walletNames);
   await networkManager.logFailedRequests();
 };
@@ -17,6 +19,7 @@ const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalle
 const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
   await localStorageInitializer.initialiseBasicLocalStorageData(walletNames[0] as TestWalletName);
+  await setUsePersistentUserId();
   await addAndActivateWalletsInRepository(walletNames);
   await popupView.visit();
   await networkManager.logFailedRequests();
