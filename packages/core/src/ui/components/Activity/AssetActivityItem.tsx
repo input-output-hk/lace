@@ -92,6 +92,7 @@ const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
   TransactionActivityType.outgoing,
   DelegationActivityType.delegationRegistration,
   ConwayEraCertificatesTypes.Registration,
+  ConwayEraCertificatesTypes.RegisterDelegateRepresentative,
   TransactionActivityType.self,
   DelegationActivityType.delegation,
   TransactionActivityType.awaitingCosignatures
