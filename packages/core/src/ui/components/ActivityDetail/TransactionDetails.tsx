@@ -96,7 +96,7 @@ export const TransactionDetails = ({
             openLink={handleOpenExternalHashLink}
           />
           <Transaction.Summary>{t('core.activityDetails.summary')}</Transaction.Summary>
-          {pools?.length > 0 && (
+          {pools && pools?.length > 0 && (
             <div className={styles.stakingInfo}>
               <div className={cn(styles.title, styles.poolsTitle)} data-testid="rewards-pools-title">
                 {t('core.activityDetails.pools')}
@@ -163,24 +163,24 @@ export const TransactionDetails = ({
               label: t('core.activityDetails.depositReclaim')
             })}
         </Transaction.Block>
-        {votingProcedures?.length > 0 && (
+        {votingProcedures && votingProcedures?.length > 0 && (
           <TxDetailsVotingProcedures votingProcedures={votingProcedures} explorerBaseUrl={explorerBaseUrl} />
         )}
-        {proposalProcedures?.length > 0 && (
+        {proposalProcedures && proposalProcedures?.length > 0 && (
           <TxDetailsProposalProcedures
             proposalProcedures={proposalProcedures}
             cardanoCoin={cardanoCoin}
             explorerBaseUrl={explorerBaseUrl}
           />
         )}
-        {certificates?.length > 0 && (
+        {certificates && certificates?.length > 0 && (
           <TxDetailsCertificates
             certificates={certificates}
             chainNetworkId={chainNetworkId}
             cardanoCoin={cardanoCoin}
           />
         )}
-        {addrInputs?.length > 0 && (
+        {addrInputs && addrInputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
             title={t('core.activityDetails.inputs')}
@@ -197,7 +197,7 @@ export const TransactionDetails = ({
             addressToNameMap={addressToNameMap}
           />
         )}
-        {addrOutputs?.length > 0 && (
+        {addrOutputs && addrOutputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
             title={t('core.activityDetails.outputs')}
@@ -213,7 +213,7 @@ export const TransactionDetails = ({
             addressToNameMap={addressToNameMap}
           />
         )}
-        {metadata?.length > 0 && (
+        {metadata && metadata?.length > 0 && (
           <div className={styles.metadataContainer} data-testid="tx-metadata-section">
             <div className={styles.metadataLabel} data-testid="tx-metadata-title">
               {t('core.activityDetails.metadata')}

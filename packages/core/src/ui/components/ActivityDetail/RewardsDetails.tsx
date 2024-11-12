@@ -8,7 +8,7 @@ import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { useTranslation } from 'react-i18next';
 
 type RewardItem = {
-  pool?: { name: string; ticker: string; id: string };
+  pool: { name: string; ticker: string; id: string };
   amount: string;
 };
 
@@ -20,7 +20,7 @@ export type RewardsInfo = {
 
 export interface RewardsDetailsProps {
   name: string;
-  headerDescription?: string;
+  headerDescription: string;
   status: ActivityStatus.SPENDABLE;
   includedDate: string;
   includedTime: string;
