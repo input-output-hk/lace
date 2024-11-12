@@ -23,7 +23,7 @@ export interface WalletSetupStepLayoutRevampProps {
   isNextEnabled?: boolean;
   isNextLoading?: boolean;
   toolTipText?: string;
-  currentTimelineStep?: WalletTimelineSteps;
+  currentTimelineStep: WalletTimelineSteps;
   isHardwareWallet?: boolean;
 }
 
