@@ -18,7 +18,7 @@ export const AssetInputRow = ({
   rowsLength: number;
   idx: number;
 }): React.ReactElement => {
-  const containerRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const { value, coin, maxDecimals } = row;
   const [isFocused, setIsFocused] = useState(focused);
 

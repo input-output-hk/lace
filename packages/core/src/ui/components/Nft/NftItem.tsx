@@ -13,14 +13,14 @@ export interface ContextMenuProps {
 }
 
 const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProps) => {
-  const contextRef = useRef<HTMLDivElement>();
+  const contextRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
 
   useLayoutEffect(() => {
     if (contextRef?.current) {
       const contentWidth = contextRef?.current?.clientWidth;
       if (width === contentWidth) return;
-      onRender(contextRef?.current?.clientWidth);
+      onRender?.(contextRef?.current?.clientWidth);
       setWidth(contentWidth);
     }
   }, [onRender, contextRef, width]);

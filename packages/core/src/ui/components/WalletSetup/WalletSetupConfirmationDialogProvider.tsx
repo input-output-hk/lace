@@ -15,7 +15,7 @@ interface Props {
   children: (value: ContextType) => React.ReactNode;
 }
 
-const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
+const WalletSetupConfirmationDialogContext = createContext<ContextType | null>(null);
 
 export const useWalletSetupConfirmationDialog = (): ContextType => {
   const context = useContext(WalletSetupConfirmationDialogContext);

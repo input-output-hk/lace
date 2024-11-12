@@ -68,7 +68,7 @@ export const WalletSetupStepLayoutRevamp = ({
   isHardwareWallet = false
 }: WalletSetupStepLayoutRevampProps): React.ReactElement => {
   const { t } = useTranslation();
-  const nextButtonContainerRef = useRef(null);
+  const nextButtonContainerRef = useRef<HTMLSpanElement>(null);
 
   const defaultLabel = {
     next: t('core.walletSetupStep.next'),
