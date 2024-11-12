@@ -123,7 +123,13 @@ const Asset = ({
           alignItems="center"
           px={4}
         >
-          <Box width="44px" height="44px" rounded="full" overflow="hidden">
+          <Box
+            width="44px"
+            height="44px"
+            minW="44px"
+            rounded="full"
+            overflow="hidden"
+          >
             <Image
               draggable={false}
               width="full"
