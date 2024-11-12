@@ -12,8 +12,8 @@ interface Translations {
 }
 interface Props {
   metadata: {
-    url: string;
-    hash: string;
+    url?: string;
+    hash?: string;
     drepId: string;
     depositPaid: string;
   };

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
   address: string;
-  depositReturned: string;
+  depositReturned?: string;
 }
 
 export const UnregistrationCertificate = ({ address, depositReturned }: Props): JSX.Element => {
