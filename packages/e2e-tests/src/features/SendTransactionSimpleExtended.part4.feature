@@ -125,6 +125,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
     And "Review transaction" button is enabled on "Send" page
 
   @LW-2374 @Testnet
+  @Pending # due to issues with Fetch.enable
   Scenario: Extended-view - Transaction error screen displayed on transaction submit error
     Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on page header
