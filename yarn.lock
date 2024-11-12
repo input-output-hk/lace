@@ -9342,9 +9342,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-sdk/wallet@npm:0.44.15, @cardano-sdk/wallet@npm:~0.44.15":
-  version: 0.44.15
-  resolution: "@cardano-sdk/wallet@npm:0.44.15"
+"@cardano-sdk/wallet@npm:0.44.16, @cardano-sdk/wallet@npm:~0.44.16":
+  version: 0.44.16
+  resolution: "@cardano-sdk/wallet@npm:0.44.16"
   dependencies:
     "@cardano-sdk/core": ~0.41.2
     "@cardano-sdk/crypto": ~0.1.30
@@ -9366,13 +9366,13 @@ __metadata:
     ts-custom-error: ^3.2.0
     ts-log: ^2.2.3
     uuid: ^8.3.2
-  checksum: 2cf459a538bf5b49450904a9105988f420191eff3283c4e377be5aecb280337557d1622eff7c2f5b60c68b09c93b1771e57ea230bd7263e749fbe3d12c48ba7f
+  checksum: 695525403993a263aa2375550881ec0288c78fa23205db79e44bc9f4dbd7709c0eb6cc87626bc109f29e3d18ecd63256aff5bc1abb885f9655f01c041b43c935
   languageName: node
   linkType: hard
 
-"@cardano-sdk/web-extension@npm:0.34.14":
-  version: 0.34.14
-  resolution: "@cardano-sdk/web-extension@npm:0.34.14"
+"@cardano-sdk/web-extension@npm:0.34.15":
+  version: 0.34.15
+  resolution: "@cardano-sdk/web-extension@npm:0.34.15"
   dependencies:
     "@cardano-sdk/core": ~0.41.2
     "@cardano-sdk/crypto": ~0.1.30
@@ -9383,7 +9383,7 @@ __metadata:
     "@cardano-sdk/tx-construction": ~0.21.10
     "@cardano-sdk/util": ~0.15.5
     "@cardano-sdk/util-rxjs": ~0.7.38
-    "@cardano-sdk/wallet": ~0.44.15
+    "@cardano-sdk/wallet": ~0.44.16
     backoff-rxjs: ^7.0.0
     lodash: ^4.17.21
     rxjs: ^7.4.0
@@ -9391,7 +9391,7 @@ __metadata:
     ts-log: ^2.2.3
     uuid: ^8.3.2
     webextension-polyfill: ^0.8.0
-  checksum: ceab19ba54647d06d05cf6a558e0d7fbf66bacd11b571a3f604ab0d20249354c01a87b9e75c98efcbba242fd04c69bfdd565b06aef5bce27a13599ea598ebdfc
+  checksum: a526cc4f26d0e05380abdbf4c918176359cc750cd35d185f0693159618d2ae35b778afd20e553ef62fec1e2637fc11d41476ca7ea7659c58981bb07a63ea67bb
   languageName: node
   linkType: hard
 
@@ -13458,8 +13458,8 @@ __metadata:
     "@cardano-sdk/tx-construction": 0.21.10
     "@cardano-sdk/util": 0.15.5
     "@cardano-sdk/util-rxjs": 0.7.38
-    "@cardano-sdk/wallet": 0.44.15
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/wallet": 0.44.16
+    "@cardano-sdk/web-extension": 0.34.15
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
     "@input-output-hk/lace-ui-toolkit": 1.21.0
@@ -13546,8 +13546,8 @@ __metadata:
     "@cardano-sdk/tx-construction": 0.21.10
     "@cardano-sdk/util": 0.15.5
     "@cardano-sdk/util-dev": 0.23.9
-    "@cardano-sdk/wallet": 0.44.15
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/wallet": 0.44.16
+    "@cardano-sdk/web-extension": 0.34.15
     "@emurgo/cardano-message-signing-browser": 1.0.1
     "@lace/common": 0.1.0
     "@ledgerhq/devices": ^8.2.1
@@ -13612,8 +13612,8 @@ __metadata:
     "@babel/preset-env": ^7.22.20
     "@babel/preset-react": ^7.22.15
     "@babel/preset-typescript": ^7.22.15
-    "@cardano-sdk/wallet": 0.44.15
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/wallet": 0.44.16
+    "@cardano-sdk/web-extension": 0.34.15
     "@input-output-hk/lace-ui-toolkit": 1.19.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
@@ -13713,7 +13713,7 @@ __metadata:
     "@cardano-sdk/crypto": 0.1.30
     "@cardano-sdk/tx-construction": 0.21.10
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/web-extension": 0.34.15
     "@chakra-ui/css-reset": 1.0.0
     "@chakra-ui/icons": 1.0.13
     "@chakra-ui/react": 1.6.4
@@ -13796,8 +13796,8 @@ __metadata:
     "@cardano-sdk/input-selection": 0.13.25
     "@cardano-sdk/tx-construction": 0.21.10
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/wallet": 0.44.15
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/wallet": 0.44.16
+    "@cardano-sdk/web-extension": 0.34.15
     "@input-output-hk/lace-ui-toolkit": 1.19.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
@@ -13865,8 +13865,8 @@ __metadata:
     "@cardano-sdk/input-selection": 0.13.25
     "@cardano-sdk/tx-construction": 0.21.10
     "@cardano-sdk/util": 0.15.5
-    "@cardano-sdk/wallet": 0.44.15
-    "@cardano-sdk/web-extension": 0.34.14
+    "@cardano-sdk/wallet": 0.44.16
+    "@cardano-sdk/web-extension": 0.34.15
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
