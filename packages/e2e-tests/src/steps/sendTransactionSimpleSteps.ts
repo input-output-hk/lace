@@ -431,7 +431,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: String(getTestWallet(walletName).address),
+          address: String(getTestWallet(walletName).accounts[0].address),
           addressTag: 'foreign'
         }
       ],
@@ -450,7 +450,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: String(getTestWallet(walletName).address),
+          address: String(getTestWallet(walletName).accounts[0].address),
           assets: [`${laceCoin2Value} LaceCoin2`]
         }
       ],

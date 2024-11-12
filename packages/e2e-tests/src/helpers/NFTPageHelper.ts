@@ -35,8 +35,8 @@ export const progressWithSendUntilPasswordPage = async (
       mode === 'extended' ? getTestWallet(getNonActiveNftWalletName()) : getTestWallet(getNonActiveNft2WalletName());
   }
   const receiverAddress = extensionUtils.isMainnet()
-    ? String(receiverWallet.mainnetAddress)
-    : String(receiverWallet.address);
+    ? String(receiverWallet.accounts[0].mainnetAddress)
+    : String(receiverWallet.accounts[0].address);
   await new AddressInput().fillAddress(receiverAddress);
   await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
   await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });

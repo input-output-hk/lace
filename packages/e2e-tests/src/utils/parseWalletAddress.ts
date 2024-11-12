@@ -4,7 +4,7 @@ import { AddressType } from '../enums/AddressTypeEnum';
 export const parseWalletAddress = (wallet: string, addressType = AddressType.Main): string => {
   switch (addressType) {
     case AddressType.Main:
-      return getTestWallet(wallet).address as string;
+      return getTestWallet(wallet).accounts[0].address as string;
     case AddressType.OtherMultiaddress:
       return getTestWallet(wallet).accounts?.[0].additionalMultiAddress as string;
     case AddressType.SecondAccount:

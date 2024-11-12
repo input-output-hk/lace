@@ -267,6 +267,7 @@ jobs:
           SMOKE_ONLY: true
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
 
   processReports:
     name: Process smoke e2e test reports

@@ -55,7 +55,7 @@ Feature: Wallet address page
 
   @LW-11554 @LW-11555
   Scenario: Extended View - E2E - Unused address becoming used after sending some assets to this address
-    Given I open wallet: "UnusedAddressWallet" from wallet repository in: extended mode
+    Given I open wallet: "UnusedAddressWallet" in: extended mode
     And I click "Receive" button on page header
     And I click "Wallet Address" "Advanced mode" toggle
     And I click "Add address" button in "Advanced mode"
@@ -72,7 +72,7 @@ Feature: Wallet address page
     And I close the drawer by clicking close button
     And I navigate to Transactions extended page
     And the Sent transaction is displayed with value: "2.00 tADA" and tokens count 1
-    And I open wallet: "UnusedAddressWallet" from wallet repository in: extended mode
+    And I open wallet: "UnusedAddressWallet" in: extended mode
     And I click "Receive" button on page header
     And I click "Wallet Address" "Advanced mode" toggle
     Then I do not see "Unused address" card in "Advanced mode"

@@ -1,5 +1,5 @@
 import WalletAddressPage from '../elements/walletAddressPage';
-import { Account, getTestWallet, WalletConfig, WalletRepositoryConfig } from '../support/walletConfiguration';
+import { Account, getTestWallet, WalletRepositoryConfig } from '../support/walletConfiguration';
 import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import extensionUtils from '../utils/utils';
@@ -56,7 +56,9 @@ class WalletAddressPageAssert {
     expect(await titleElement.getText()).to.equal(await t('qrInfo.advancedMode.tags.main'));
 
     const walletData = getTestWallet(testWalletName);
-    const expectedAddress = String(extensionUtils.isMainnet() ? walletData.mainnetAddress : walletData.address);
+    const expectedAddress = String(
+      extensionUtils.isMainnet() ? walletData.accounts[0].mainnetAddress : walletData.accounts[0].address
+    );
 
     const addressElement = await card.$(WalletAddressPage.WALLET_ADDRESS);
     await addressElement.waitForDisplayed();
@@ -162,9 +164,9 @@ class WalletAddressPageAssert {
     }
   }
 
-  async assertSeeWalletNameAndAddress(wallet: WalletConfig, mode: 'extended' | 'popup') {
+  async assertSeeWalletNameAndAddress(wallet: WalletRepositoryConfig, mode: 'extended' | 'popup') {
     expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
-    const address = String(extensionUtils.isMainnet() ? wallet.mainnetAddress : wallet.address);
+    const address = String(extensionUtils.isMainnet() ? wallet.accounts[0].mainnetAddress : wallet.accounts[0].address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
     expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
   }

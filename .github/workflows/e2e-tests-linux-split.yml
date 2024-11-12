@@ -39,6 +39,11 @@ on:
         description: 'Run only smoke tests'
         required: true
         default: false
+      service_worker_logs:
+        type: boolean
+        description: 'Collect service worker logs'
+        required: true
+        default: false
       tags:
         type: string
         description: 'Tags(optional)'
@@ -230,6 +235,7 @@ jobs:
           TAGS: ${{ needs.setup.outputs.tags }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: ${{ needs.setup.outputs.service_worker_logs }}
 
   processReports:
     name: Process e2e test reports
