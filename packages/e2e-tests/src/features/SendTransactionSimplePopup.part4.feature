@@ -130,6 +130,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     Then I see a tooltip showing full value: "0" for Tokens
 
   @LW-2408 @Testnet
+  @Pending # due to issues with Fetch.enable
   Scenario: Popup-view - Transaction error screen displayed on transaction submit error
     Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on Tokens page in popup mode

@@ -84,6 +84,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then The Tx details are displayed for Staking without metadata
 
   @LW-8437 @Testnet
+  @Pending # due to issues with Fetch.enable
   Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error
     Given I save identifiers of stake pools currently in use
     When I open Browse pools tab

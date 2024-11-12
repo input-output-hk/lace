@@ -140,6 +140,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And "Review transaction" button is disabled on "Send" page
 
   @LW-3578
+  @Pending # due to issues with Fetch.enable
   Scenario: Extended-view - Transaction error screen displayed for multiple bundles on transaction submit error
     Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on page header
