@@ -11,6 +11,16 @@ import {
   UpdateCommitteeAction
 } from '../components/ProposalProcedures';
 
+const convertFractionToPercentage = (
+  numerator?: Cardano.Fraction['numerator'],
+  denominator?: Cardano.Fraction['denominator']
+): string => {
+  if (numerator && denominator) {
+    return formatPercentages(numerator / denominator);
+  }
+  return '';
+};
+
 export const getParameterChangeActionViewData = ({
   governanceAction,
   deposit,
@@ -55,18 +65,7 @@ export const getParameterChangeActionViewData = ({
       dRepInactivityPeriod,
       minCommitteeSize,
       committeeTermLimit,
-      dRepVotingThresholds: {
-        motionNoConfidence,
-        committeeNormal,
-        committeeNoConfidence,
-        updateConstitution,
-        hardForkInitiation,
-        ppNetworkGroup,
-        ppEconomicGroup,
-        ppTechnicalGroup,
-        ppGovernanceGroup,
-        treasuryWithdrawal
-      }
+      dRepVotingThresholds
     }
   } = governanceAction;
 
@@ -85,68 +84,99 @@ export const getParameterChangeActionViewData = ({
     },
     protocolParamUpdate: {
       maxTxExUnits: {
-        memory: maxExecutionUnitsPerTransaction.memory.toString(),
-        step: maxExecutionUnitsPerTransaction.steps.toString()
+        memory: maxExecutionUnitsPerTransaction?.memory.toString(),
+        step: maxExecutionUnitsPerTransaction?.steps.toString()
       },
       maxBlockExUnits: {
-        memory: maxExecutionUnitsPerBlock.memory.toString(),
-        step: maxExecutionUnitsPerBlock.steps.toString()
+        memory: maxExecutionUnitsPerBlock?.memory.toString(),
+        step: maxExecutionUnitsPerBlock?.steps.toString()
       },
       networkGroup: {
-        maxBBSize: maxBlockBodySize.toString(),
-        maxTxSize: maxTxSize.toString(),
-        maxBHSize: maxBlockHeaderSize.toString(),
-        maxValSize: maxValueSize.toString(),
-        maxCollateralInputs: maxCollateralInputs.toString()
+        maxBBSize: maxBlockBodySize?.toString(),
+        maxTxSize: maxTxSize?.toString(),
+        maxBHSize: maxBlockHeaderSize?.toString(),
+        maxValSize: maxValueSize?.toString(),
+        maxCollateralInputs: maxCollateralInputs?.toString()
       },
       economicGroup: {
-        minFeeA: minFeeCoefficient.toString(),
-        minFeeB: minFeeConstant.toString(),
-        keyDeposit: stakeKeyDeposit.toString(),
-        poolDeposit: poolDeposit.toString(),
+        minFeeA: minFeeCoefficient?.toString(),
+        minFeeB: minFeeConstant?.toString(),
+        keyDeposit: stakeKeyDeposit?.toString(),
+        poolDeposit: poolDeposit?.toString(),
         rho: monetaryExpansion,
         tau: treasuryExpansion,
-        minPoolCost: minPoolCost.toString(),
-        coinsPerUTxOByte: coinsPerUtxoByte.toString(),
+        minPoolCost: minPoolCost?.toString(),
+        coinsPerUTxOByte: coinsPerUtxoByte?.toString(),
         price: {
-          memory: prices.memory.toString(),
-          step: prices.steps.toString()
+          memory: prices?.memory.toString(),
+          step: prices?.steps.toString()
         }
       },
       technicalGroup: {
         a0: poolInfluence,
-        eMax: poolRetirementEpochBound.toString(),
-        nOpt: desiredNumberOfPools.toString(),
+        eMax: poolRetirementEpochBound?.toString(),
+        nOpt: desiredNumberOfPools?.toString(),
         costModels: {
-          PlutusV1: Object.entries(costModels.get(Cardano.PlutusLanguageVersion.V1)).reduce(
+          PlutusV1: Object.entries(costModels?.get(Cardano.PlutusLanguageVersion.V1) || {}).reduce(
             (acc, cur) => ({ ...acc, [cur[0]]: cur[1] }),
             {}
           ),
-          PlutusV2: Object.entries(costModels.get(Cardano.PlutusLanguageVersion.V2)).reduce(
+          PlutusV2: Object.entries(costModels?.get(Cardano.PlutusLanguageVersion.V2) || {}).reduce(
             (acc, cur) => ({ ...acc, [cur[0]]: cur[1] }),
             {}
           )
         },
-        collateralPercentage: collateralPercentage.toString()
+        collateralPercentage: collateralPercentage?.toString()
       },
       governanceGroup: {
-        govActionLifetime: governanceActionValidityPeriod.toString(),
-        govActionDeposit: governanceActionDeposit.toString(),
-        drepDeposit: dRepDeposit.toString(),
-        drepActivity: dRepInactivityPeriod.toString(),
-        ccMinSize: minCommitteeSize.toString(),
-        ccMaxTermLength: committeeTermLimit.toString(),
+        govActionLifetime: governanceActionValidityPeriod?.toString(),
+        govActionDeposit: governanceActionDeposit?.toString(),
+        drepDeposit: dRepDeposit?.toString(),
+        drepActivity: dRepInactivityPeriod?.toString(),
+        ccMinSize: minCommitteeSize?.toString(),
+        ccMaxTermLength: committeeTermLimit?.toString(),
         dRepVotingThresholds: {
-          motionNoConfidence: formatPercentages(motionNoConfidence.numerator / motionNoConfidence.denominator),
-          committeeNormal: formatPercentages(committeeNormal.numerator / committeeNormal.denominator),
-          committeeNoConfidence: formatPercentages(committeeNoConfidence.numerator / committeeNoConfidence.denominator),
-          updateToConstitution: formatPercentages(updateConstitution.numerator / updateConstitution.denominator),
-          hardForkInitiation: formatPercentages(hardForkInitiation.numerator / hardForkInitiation.denominator),
-          ppNetworkGroup: formatPercentages(ppNetworkGroup.numerator / ppNetworkGroup.denominator),
-          ppEconomicGroup: formatPercentages(ppEconomicGroup.numerator / ppEconomicGroup.denominator),
-          ppTechnicalGroup: formatPercentages(ppTechnicalGroup.numerator / ppTechnicalGroup.denominator),
-          ppGovGroup: formatPercentages(ppGovernanceGroup.numerator / ppGovernanceGroup.denominator),
-          treasuryWithdrawal: formatPercentages(treasuryWithdrawal.numerator / treasuryWithdrawal.denominator)
+          ...(dRepVotingThresholds?.motionNoConfidence && {
+            motionNoConfidence: formatPercentages(
+              dRepVotingThresholds.motionNoConfidence.numerator / dRepVotingThresholds.motionNoConfidence.denominator
+            )
+          }),
+          committeeNormal: convertFractionToPercentage(
+            dRepVotingThresholds?.committeeNormal.numerator,
+            dRepVotingThresholds?.committeeNormal.denominator
+          ),
+          committeeNoConfidence: convertFractionToPercentage(
+            dRepVotingThresholds?.committeeNoConfidence.numerator,
+            dRepVotingThresholds?.committeeNoConfidence.denominator
+          ),
+          updateToConstitution: convertFractionToPercentage(
+            dRepVotingThresholds?.updateConstitution.numerator,
+            dRepVotingThresholds?.updateConstitution.denominator
+          ),
+          hardForkInitiation: convertFractionToPercentage(
+            dRepVotingThresholds?.hardForkInitiation.numerator,
+            dRepVotingThresholds?.hardForkInitiation.denominator
+          ),
+          ppNetworkGroup: convertFractionToPercentage(
+            dRepVotingThresholds?.ppNetworkGroup.numerator,
+            dRepVotingThresholds?.ppNetworkGroup.denominator
+          ),
+          ppEconomicGroup: convertFractionToPercentage(
+            dRepVotingThresholds?.ppEconomicGroup.numerator,
+            dRepVotingThresholds?.ppEconomicGroup.denominator
+          ),
+          ppTechnicalGroup: convertFractionToPercentage(
+            dRepVotingThresholds?.ppTechnicalGroup.numerator,
+            dRepVotingThresholds?.ppTechnicalGroup.denominator
+          ),
+          ppGovGroup: convertFractionToPercentage(
+            dRepVotingThresholds?.ppGovernanceGroup?.numerator,
+            dRepVotingThresholds?.ppGovernanceGroup.denominator
+          ),
+          treasuryWithdrawal: convertFractionToPercentage(
+            dRepVotingThresholds?.treasuryWithdrawal.numerator,
+            dRepVotingThresholds?.treasuryWithdrawal.denominator
+          )
         }
       }
     }

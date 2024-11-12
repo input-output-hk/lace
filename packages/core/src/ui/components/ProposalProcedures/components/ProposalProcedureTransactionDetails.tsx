@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata, Text, sx, Cell } from '@input-output-hk/lace-ui-toolkit';
 import * as Types from './ProposalProcedureTransactionDetailsTypes';
 
-interface Props {
+export interface Props {
   txTitle: string;
   deposit?: string;
   rewardAccount?: string;
@@ -29,12 +29,12 @@ export const ProposalProcedureTransactionDetails = ({
       <Cell>
         <Metadata style={{ alignItems: 'center', background: 'red' }} label={translations.txType} text={txTitle} />
       </Cell>
-      {rewardAccount && (
+      {rewardAccount && translations.rewardAccount && (
         <Cell>
           <Metadata label={translations.rewardAccount} text={rewardAccount} />
         </Cell>
       )}
-      {deposit && (
+      {deposit && translations.deposit && (
         <Cell>
           <Metadata label={translations.deposit} text={deposit} />
         </Cell>
