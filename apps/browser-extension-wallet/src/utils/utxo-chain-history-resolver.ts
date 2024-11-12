@@ -9,6 +9,7 @@ interface UtxoAndBackendChainHistoryResolverArgs {
   utxo: Wallet.ObservableWallet['utxo'];
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   transactions: {
+    history$: Observable<Cardano.HydratedTx[]>;
     outgoing: {
       signed$: Observable<WitnessedTx[]>;
     };

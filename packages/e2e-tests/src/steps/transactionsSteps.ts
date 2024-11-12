@@ -79,6 +79,7 @@ When(
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
       if (valueForCheck === 'hash') {
+        await TransactionDetailsPage.waitUntilTxHashNotEmpty();
         actualValue = await TransactionDetailsPage.transactionDetailsHash.getText();
         expectedValue = String(testContext.load('txHashValue'));
       } else {

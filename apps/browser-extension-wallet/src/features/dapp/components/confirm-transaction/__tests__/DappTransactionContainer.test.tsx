@@ -73,6 +73,7 @@ const inMemoryWallet = {
     available$
   },
   transactions: {
+    history$: new BehaviorSubject([]),
     outgoing: {
       signed$
     }
