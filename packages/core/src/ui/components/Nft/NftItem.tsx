@@ -28,11 +28,11 @@ const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProp
   return (
     <div
       onContextMenu={() => {
-        setClicked(false);
+        setClicked?.(false);
       }}
       onClick={(e) => {
         e.stopPropagation();
-        setClicked(false);
+        setClicked?.(false);
       }}
       className={styles.portal}
       data-testid="portal"
@@ -63,7 +63,7 @@ export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }:
   const repositionContextMenu = useCallback(
     (contextWidth: number) => {
       // checks if context menu could be placed at the right of the cursor
-      const { clientWidth } = document.querySelector('body');
+      const { clientWidth } = document.querySelector('body')!;
       if (contextWidth < points.x)
         setPoints((prevPoints) => ({
           ...prevPoints,
@@ -80,14 +80,14 @@ export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }:
   );
 
   useLayoutEffect(() => {
-    const { clientWidth } = document.querySelector('body');
+    const { clientWidth } = document.querySelector('body')!;
     bodyRef.current = { clientWidth };
   }, []);
 
   const onContextMenu = (e: MouseEvent<HTMLAnchorElement>) => {
     if (!contextMenu) return;
     e.preventDefault();
-    const { clientWidth } = document.querySelector('body');
+    const { clientWidth } = document.querySelector('body')!;
     setPoints({
       x: clientWidth - e.pageX,
       y: e.pageY
