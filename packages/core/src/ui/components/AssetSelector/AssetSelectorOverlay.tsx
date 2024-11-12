@@ -155,7 +155,7 @@ export const AssetSelectorOverlay = ({
 
   const handleTokenClick = (id: string) => {
     const clickAction = isMultipleSelectionAvailable ? addToMultipleSelectionList : onClick;
-    clickAction(id);
+    clickAction?.(id);
   };
 
   const filterAssets = useCallback(async () => {

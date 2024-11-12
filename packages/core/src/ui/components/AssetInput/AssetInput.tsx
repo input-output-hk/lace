@@ -153,18 +153,18 @@ export const AssetInput = ({
 
   const handleOnBlur = () => {
     setIsTouched(true);
-    const currentValue = value && !Number.parseFloat(value) ? placeholderValue : value;
-    onBlur({
+    const currentValue = value && !Number.parseFloat(value) ? placeholderValue : value ?? '0';
+    onBlur?.({
       value: currentValue,
       id: coin.id,
       maxDecimals
     });
-    setFocusInput();
-    setFocus(false);
+    setFocusInput?.();
+    setFocus?.(false);
   };
 
   const handleOnFocus = () => {
-    setFocusInput(inputId);
+    setFocusInput?.(inputId);
     onFocus?.({
       value,
       id: coin.id,

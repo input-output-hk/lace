@@ -132,7 +132,7 @@ export const DappAddressSection = ({
   return (
     <SummaryExpander title={title} disabled={!isEnabled} testId={`dapp-transaction-${addressType}-section-expander`}>
       {[...groupedAddresses.entries()].map(([address, addressData]) => {
-        const addressName = addressToNameMap.get(address);
+        const addressName = addressToNameMap?.get(address);
 
         return (
           <Box mb="$20" key={address}>

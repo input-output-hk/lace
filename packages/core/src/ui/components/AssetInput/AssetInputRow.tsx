@@ -31,8 +31,8 @@ export const AssetInputRow = ({
 
       if (!isInFocusableArea)
         // do not apply compact notation in case we are still in the focusable area
-        onBlur({
-          value,
+        onBlur?.({
+          value: value ?? '0',
           id: coin.id,
           maxDecimals
         });
@@ -44,7 +44,7 @@ export const AssetInputRow = ({
   const onFocus = useCallback(
     (props) => {
       setIsFocused(true);
-      row?.onFocus(props);
+      row?.onFocus?.(props);
     },
     [row]
   );

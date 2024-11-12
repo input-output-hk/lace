@@ -68,7 +68,7 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   const copyRecoveryPhrase = useCallback(async () => {
     await writeMnemonicToClipboard(mnemonic);
-    onCopyToClipboard();
+    onCopyToClipboard?.();
   }, [mnemonic, onCopyToClipboard]);
 
   const pasteRecoveryPhrase = useCallback(
@@ -87,7 +87,7 @@ export const WalletSetupMnemonicStepRevamp = ({
       });
 
       setMnemonicConfirm(newMnemonic);
-      onPasteFromClipboard();
+      onPasteFromClipboard?.();
     },
     [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
   );

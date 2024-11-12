@@ -135,7 +135,7 @@ export const AssetTable = ({
   popupView
 }: AssetTableProps): React.ReactElement => {
   const handleRowClick = (record: IAssetColumn) => ({
-    onClick: () => onRowClick(record?.key)
+    onClick: () => onRowClick?.(record?.key)
   });
   const { t } = useTranslation();
 
