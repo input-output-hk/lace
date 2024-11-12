@@ -66,7 +66,8 @@ export const ErrorDialog: VFC<ErrorDialogProps> = ({ errorKind, onCancel, onConf
           <Dialog.Action
             cancel
             autoFocus
-            label={t(errorsTranslationKeysMap[errorKind].secondaryButton)}
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            label={t(errorsTranslationKeysMap[errorKind].secondaryButton!)}
             onClick={onCancel}
           />
         )}
