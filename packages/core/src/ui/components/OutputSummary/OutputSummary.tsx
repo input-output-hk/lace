@@ -15,7 +15,7 @@ export interface OutputSummaryProps {
   list: SentAssetsList;
   recipientAddress: string;
   recipientName?: string;
-  translations?: TranslationsFor<'recipientAddress' | 'sending'>;
+  translations: TranslationsFor<'recipientAddress' | 'sending'>;
   ownAddresses?: string[];
 }
 
