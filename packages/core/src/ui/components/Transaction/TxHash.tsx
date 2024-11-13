@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { TransactionDetailsProps } from './types';
@@ -13,6 +13,18 @@ type TxHashProps = {
 
 export const TxHash = ({ hash, success, sending, openLink }: TxHashProps): React.ReactElement => {
   const { t } = useTranslation();
+  const hashComponent = useMemo(
+    () =>
+      hash ? (
+        sending ? (
+          <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} />
+        ) : (
+          hash
+        )
+      ) : undefined,
+    [hash, sending]
+  );
+
   return (
     <div data-testid="tx-hash" className={styles.hashContainer}>
       <div className={cn(styles.title, styles.labelWidth)}>
@@ -28,9 +40,7 @@ export const TxHash = ({ hash, success, sending, openLink }: TxHashProps): React
         })}
         onClick={openLink}
       >
-        <div>
-          {sending ? <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} /> : hash}
-        </div>
+        {hashComponent && <div>{hashComponent}</div>}
       </div>
     </div>
   );
