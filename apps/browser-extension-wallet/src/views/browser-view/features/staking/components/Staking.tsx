@@ -1,7 +1,6 @@
-/* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
@@ -25,6 +24,7 @@ import { useObservable } from '@lace/common';
 import { fetchPoolsInfo } from '../utils';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { useExternalLinkOpener } from '@providers';
+import { useRewardAccountsData } from '../hooks';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -65,26 +65,8 @@ export const Staking = (): React.ReactElement => {
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
   const canDelegate = !isDelegating && isNumber(coinBalance) && !hasNoFunds;
 
-  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
-    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
-  );
-  const showRegisterAsDRepBanner =
-    !hasNoFunds &&
-    rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
-    !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee);
-
-  const poolIdToRewardAccountMap = useMemo(
-    () =>
-      new Map(
-        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
-          const { delegatee } = rewardAccount;
-          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-
-          return [delagationInfo?.id.toString(), rewardAccount];
-        })
-      ),
-    [rewardAccountsWithRegisteredStakeCreds]
-  );
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap } = useRewardAccountsData();
+  const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();

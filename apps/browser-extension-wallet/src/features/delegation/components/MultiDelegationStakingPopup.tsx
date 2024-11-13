@@ -30,6 +30,7 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
 import { SignPolicy, useSecrets } from '@lace/core';
 import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
+import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -174,7 +175,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         signPolicy,
         sharedWalletKey,
         coSigners,
-        setIsRegisterAsDRepModalVisible
+        setIsRegisterAsDRepModalVisible,
+        useRewardAccountsData
       }}
     >
       <ContentLayout

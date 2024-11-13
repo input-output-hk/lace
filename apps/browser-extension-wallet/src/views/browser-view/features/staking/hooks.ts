@@ -1,8 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useSecrets } from '@lace/core';
+import { useObservable } from '@lace/common';
+import { Wallet } from '@lace/cardano';
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
   const { password, clearSecrets } = useSecrets();
@@ -16,4 +18,37 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
   }, [delegationTxBuilder, inMemoryWallet, password, clearSecrets]);
 
   return { signAndSubmitTransaction };
+};
+
+export const useRewardAccountsData = (): {
+  areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+  poolIdToRewardAccountMap: Map<string | undefined, Wallet.Cardano.RewardAccountInfo>;
+} => {
+  const { inMemoryWallet } = useWalletStore();
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
+    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+  );
+
+  const areAllRegisteredStakeKeysWithoutVotingDelegation = useMemo(
+    () =>
+      rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
+      !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee),
+    [rewardAccountsWithRegisteredStakeCreds]
+  );
+
+  const poolIdToRewardAccountMap = useMemo(
+    () =>
+      new Map(
+        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
+          const { delegatee } = rewardAccount;
+          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+
+          return [delagationInfo?.id.toString(), rewardAccount];
+        })
+      ),
+    [rewardAccountsWithRegisteredStakeCreds]
+  );
+
+  return { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap };
 };

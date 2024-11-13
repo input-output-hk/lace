@@ -109,4 +109,8 @@ export type OutsideHandlesContextValue = {
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
   coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
   setIsRegisterAsDRepModalVisible: (isVisible: boolean) => void;
+  useRewardAccountsData: () => {
+    areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+    poolIdToRewardAccountMap: Map<string | undefined, Wallet.Cardano.RewardAccountInfo>;
+  };
 };

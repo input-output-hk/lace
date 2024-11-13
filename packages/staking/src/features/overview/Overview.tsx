@@ -1,9 +1,8 @@
 /* eslint-disable complexity */
 import { Box, ControlButton, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import { Skeleton } from 'antd';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -30,6 +29,7 @@ export const Overview = () => {
     isSharedWallet,
     setIsRegisterAsDRepModalVisible,
     openExternalLink,
+    useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -59,25 +59,8 @@ export const Overview = () => {
     totalCoinBalance,
   ]);
 
-  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
-    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus,
-  );
-  const showRegisterAsDRepBanner =
-    rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
-    !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee);
-
-  const poolIdToRewardAccountMap = useMemo(
-    () =>
-      new Map(
-        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
-          const { delegatee } = rewardAccount;
-          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-
-          return [delagationInfo?.id.toString(), rewardAccount];
-        }),
-      ),
-    [rewardAccountsWithRegisteredStakeCreds],
-  );
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountMap } =
+    useRewardAccountsData();
 
   if (
     !totalCoinBalance ||

@@ -1,5 +1,4 @@
-/* eslint-disable complexity */
-import React, { useMemo } from 'react';
+import React from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, Typography } from 'antd';
@@ -13,10 +12,10 @@ import { ExpandViewBanner } from './ExpandViewBanner';
 import styles from './DelegationLayout.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { useWalletStore } from '@src/stores';
-import { useObservable } from '@lace/common';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { useExternalLinkOpener } from '@providers';
 import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
+import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 
 const { Text } = Typography;
 
@@ -74,7 +73,6 @@ export const DelegationLayout = ({
   cardanoCoin
 }: DelegationLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { inMemoryWallet } = useWalletStore();
   const totalResultCount = useWalletStore(({ stakePoolSearchResults }) => stakePoolSearchResults?.totalResultCount);
   const openExternalLink = useExternalLinkOpener();
   const { setIsRegisterAsDRepModalVisible } = useStakePoolDetails();
@@ -88,27 +86,8 @@ export const DelegationLayout = ({
     searchPlaceholder: t('cardano.stakePoolSearch.searchPlaceholder')
   };
 
-  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
-    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
-  );
-  const showRegisterAsDRepBanner =
-    !hasNoFunds &&
-    rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
-    !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee);
-
-  const poolIdToRewardAccountMap = useMemo(
-    () =>
-      new Map(
-        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
-          const { delegatee } = rewardAccount;
-          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-
-          return [delagationInfo?.id.toString(), rewardAccount];
-        })
-      ),
-    [rewardAccountsWithRegisteredStakeCreds]
-  );
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap } = useRewardAccountsData();
+  const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
 
   return (
     <ContentLayout
