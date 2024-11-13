@@ -28,7 +28,7 @@ export interface DappAddressSectionProps {
   groupedAddresses: Map<Cardano.PaymentAddress, GroupedAddressAssets>;
   title: string;
   isEnabled: boolean;
-  coinSymbol: string;
+  coinSymbol?: string;
   addressType: 'from' | 'to';
   ownAddresses: string[];
   addressToNameMap?: Map<string, string>;
@@ -145,7 +145,7 @@ export const DappAddressSection = ({
                 {addressName && (
                   <Box mb="$4" className={styles.addressText}>
                     <Text.Address data-testid="dapp-transaction-address-book-name" color="primary">
-                      {addressToNameMap.get(address)}
+                      {addressName}
                     </Text.Address>
                   </Box>
                 )}
