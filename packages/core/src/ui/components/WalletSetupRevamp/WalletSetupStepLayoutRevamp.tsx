@@ -125,7 +125,7 @@ export const WalletSetupStepLayoutRevamp = ({
                 <Tooltip
                   open={!isNextEnabled && !!toolTipText}
                   title={!isNextEnabled && toolTipText}
-                  getPopupContainer={() => nextButtonContainerRef.current}
+                  getPopupContainer={() => nextButtonContainerRef.current!}
                   autoAdjustOverflow={false}
                 >
                   <Button

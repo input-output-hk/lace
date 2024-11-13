@@ -23,7 +23,7 @@ export interface WalletSetupMnemonicStepProps {
   mnemonicStage: WalletSetupMnemonicStage;
   onBack: () => void;
   onNext: () => void;
-  onStageChange?: (currentStage: WalletSetupMnemonicStage) => void;
+  onStageChange: (currentStage: WalletSetupMnemonicStage) => void;
   translations: TranslationsFor<{
     jsxElementKey: 'copyPasteTooltipText';
     stringKey:
