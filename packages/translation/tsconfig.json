@@ -1,6 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "composite": true,
+    "noEmitOnError": false,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
@@ -12,7 +14,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "outDir": "dist/",
     "resolveJsonModule": true,

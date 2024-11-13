@@ -6,6 +6,7 @@
     "baseUrl": "../src",
     "resolveJsonModule": true,
     "noEmitOnError": false,
+    "strictNullChecks": false,
     "paths": {
       "@assets/*": ["assets/*"],
       "@components/*": ["components/*"],
@@ -26,6 +27,10 @@
       "@views/browser/*": ["views/browser-view/*"]
     }
   },
-  "references": [{ "path": "../../../packages/core/src" }, { "path": "../../../packages/cardano/src" }],
+  "references": [
+    { "path": "../../../packages/core/src" },
+    { "path": "../../../packages/cardano/src" },
+    { "path": "../../../packages/translation/" }
+  ],
   "include": ["**/*", "../test/types/*.d.ts", "**/*.json"]
 }
