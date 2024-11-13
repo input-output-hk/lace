@@ -11,6 +11,8 @@ import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { DrawerHeader, DrawerNavigation } from '@lace/common';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import styles from './StakingModal.module.scss';
+import { config } from '@src/config';
+import { useWalletStore } from '@src/stores';
 
 type StakingModalsProps = {
   popupView?: boolean;
@@ -32,10 +34,13 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
     resetStates
   } = useStakePoolDetails();
 
+  const { environmentName } = useWalletStore();
   const openExternalLink = useExternalLinkOpener();
 
   const [, setDrawerConfig] = useDrawer();
   const analytics = useAnalyticsContext();
+
+  const { GOV_TOOLS_URLS } = config();
 
   return (
     <>
@@ -153,7 +158,7 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
             dataTestId: 'exit-staking-modal-confirm',
             onClick: () => {
               setIsRegisterAsDRepModalVisible(false);
-              openExternalLink(process.env.GOV_TOOLS_URL);
+              openExternalLink(GOV_TOOLS_URLS[environmentName]);
             }
           }
         ]}

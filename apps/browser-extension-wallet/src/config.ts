@@ -32,6 +32,7 @@ export type Config = {
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
   SAVED_PRICE_DURATION: number;
   DEFAULT_SUBMIT_API: string;
+  GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
 };
 
 // eslint-disable-next-line complexity
@@ -134,6 +135,12 @@ export const config = (): Config => {
     SAVED_PRICE_DURATION: !Number.isNaN(Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES))
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
       : 720,
-    DEFAULT_SUBMIT_API: 'http://localhost:8090/api/submit/tx'
+    DEFAULT_SUBMIT_API: 'http://localhost:8090/api/submit/tx',
+    GOV_TOOLS_URLS: {
+      Mainnet: `${process.env.GOV_TOOLS_URL_MAINNET}`,
+      Preprod: `${process.env.GOV_TOOLS_URL_PREPROD}`,
+      Preview: `${process.env.GOV_TOOLS_URL_PREVIEW}`,
+      Sanchonet: `${process.env.GOV_TOOLS_URL_SANCHONET}`
+    }
   };
 };
