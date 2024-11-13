@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import React from 'react';
 import { Typography } from 'antd';
 import cn from 'classnames';

@@ -15,7 +15,7 @@ export const DrawerNavigation = ({
   onCloseIconClick,
   leftActions,
   rightActions,
-  title = undefined
+  title
 }: DrawerNavigationProps): React.ReactElement => (
   <div data-testid="drawer-navigation" className={styles.navigation}>
     {leftActions || <div>{onArrowIconClick && <NavigationButton icon="arrow" onClick={onArrowIconClick} />}</div>}
