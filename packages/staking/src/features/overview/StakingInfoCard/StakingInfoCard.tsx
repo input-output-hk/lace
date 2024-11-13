@@ -1,14 +1,17 @@
+/* eslint-disable no-magic-numbers */
 import Icon from '@ant-design/icons';
-import { Flex } from '@input-output-hk/lace-ui-toolkit';
+import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
-import { getRandomIcon } from '@lace/common';
+import { Banner, addEllipsis, getRandomIcon } from '@lace/common';
 import { TranslationKey } from '@lace/translation';
 import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import InfoIcon from '../../../assets/icons/info-icon.svg';
 import MoonIcon from '../../../assets/icons/moon.component.svg';
 import WarningIcon from '../../../assets/icons/warning.component.svg';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import { StakePoolInfo } from './StakePoolInfo';
 import styles from './StakingInfoCard.module.scss';
 import { Stats } from './Stats';
@@ -26,7 +29,7 @@ export const formatLocaleNumber = (value: string | number, decimalPlaces: number
 const formatNumericValue = (
   val: number | string,
   suffix: number | string,
-  decimalPlaces: number = DEFAULT_DECIMALS
+  decimalPlaces: number = DEFAULT_DECIMALS,
 ): React.ReactElement => (
   <>
     {val ? formatLocaleNumber(String(val), decimalPlaces) : '-'}
@@ -54,6 +57,8 @@ export type StakingInfoCardProps = {
   cardanoCoinSymbol: string;
   markerColor?: string;
   status?: PoolStatus;
+  stakeKey?: string;
+  showRegisterAsDRepBanner?: boolean;
 };
 
 const iconsByPoolStatus: Record<PoolStatus, ReactNode> = {
@@ -87,8 +92,11 @@ export const StakingInfoCard = ({
   cardanoCoinSymbol,
   markerColor,
   status,
+  stakeKey,
+  showRegisterAsDRepBanner,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { setIsRegisterAsDRepModalVisible } = useOutsideHandles();
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -172,6 +180,41 @@ export const StakingInfoCard = ({
           />
         </div>
       </div>
+      <div className={styles.row}>
+        <div className={styles.col}>
+          <Stats
+            text={t('overview.stakingInfoCard.stakeKey')}
+            value={
+              <Tooltip content={stakeKey}>{popupView && stakeKey ? addEllipsis(stakeKey, 14, 9) : stakeKey}</Tooltip>
+            }
+            dataTestid="stats-stake-key"
+          />
+        </div>
+      </div>
+      {!!showRegisterAsDRepBanner && (
+        <div className={cn(styles.row, styles.bannerRow)}>
+          {popupView ? (
+            <Flex className={styles.banner} flexDirection="column" py="$16" px="$24" gap="$24">
+              <Text.Button>{t('overview.stakingInfoCard.registerAsDRepBanner.description')}</Text.Button>
+              <Button.CallToAction
+                w="$fill"
+                onClick={() => setIsRegisterAsDRepModalVisible(true)}
+                data-testid="stats-register-as-drep-cta"
+                label={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
+              />
+            </Flex>
+          ) : (
+            <Banner
+              className={styles.banner}
+              withIcon
+              customIcon={<InfoIcon className={styles.bannerInfoIcon} />}
+              message={t('overview.stakingInfoCard.registerAsDRepBanner.description')}
+              onButtonClick={() => setIsRegisterAsDRepModalVisible(true)}
+              buttonMessage={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

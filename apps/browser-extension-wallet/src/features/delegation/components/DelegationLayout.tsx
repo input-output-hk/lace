@@ -1,9 +1,10 @@
-import React from 'react';
+/* eslint-disable complexity */
+import React, { useMemo } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, Typography } from 'antd';
 import { Wallet } from '@lace/cardano';
-import { StakePoolSearch, StakePoolSearchProps } from '@lace/staking';
+import { StakePoolSearch, StakePoolSearchProps, RegisterAsDRepBanner } from '@lace/staking';
 import { StakeFundsBanner } from '@views/browser/features/staking/components/StakeFundsBanner';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { StakingInfo } from '@views/browser/features/staking/components/StakingInfo';
@@ -12,6 +13,10 @@ import { ExpandViewBanner } from './ExpandViewBanner';
 import styles from './DelegationLayout.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { useWalletStore } from '@src/stores';
+import { useObservable } from '@lace/common';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { useExternalLinkOpener } from '@providers';
+import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 
 const { Text } = Typography;
 
@@ -69,7 +74,10 @@ export const DelegationLayout = ({
   cardanoCoin
 }: DelegationLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { inMemoryWallet } = useWalletStore();
   const totalResultCount = useWalletStore(({ stakePoolSearchResults }) => stakePoolSearchResults?.totalResultCount);
+  const openExternalLink = useExternalLinkOpener();
+  const { setIsRegisterAsDRepModalVisible } = useStakePoolDetails();
   const showExpandView = hasNoFunds || (!hasNoFunds && !isDelegating) || isDelegating;
 
   const stakePoolSearchTranslations = {
@@ -80,6 +88,28 @@ export const DelegationLayout = ({
     searchPlaceholder: t('cardano.stakePoolSearch.searchPlaceholder')
   };
 
+  const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
+    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+  );
+  const showRegisterAsDRepBanner =
+    !hasNoFunds &&
+    rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
+    !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee);
+
+  const poolIdToRewardAccountMap = useMemo(
+    () =>
+      new Map(
+        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
+          const { delegatee } = rewardAccount;
+          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+
+          return [delagationInfo?.id.toString(), rewardAccount];
+        })
+      ),
+    [rewardAccountsWithRegisteredStakeCreds]
+  );
+
   return (
     <ContentLayout
       title={<SectionTitle title={t('staking.sectionTitle')} classname={styles.sectionTilte} />}
@@ -88,6 +118,16 @@ export const DelegationLayout = ({
       <div className={styles.content}>
         <Skeleton loading={!isNumber(coinBalance)}>
           <div className={styles.contentWrapper}>
+            {showRegisterAsDRepBanner && (
+              <Box mt="$16">
+                <RegisterAsDRepBanner
+                  openExternalLink={openExternalLink}
+                  onConfirm={() => setIsRegisterAsDRepModalVisible(true)}
+                  popupView
+                />
+              </Box>
+            )}
+
             {canDelegate && <StakeFundsBanner balance={coinBalance} popupView />}
 
             {hasNoFunds && (
@@ -103,6 +143,7 @@ export const DelegationLayout = ({
               <StakingInfo
                 {...{
                   ...currentStakePool,
+                  stakeKey: poolIdToRewardAccountMap.get(currentStakePool.id)?.address,
                   coinBalance,
                   fiat,
                   totalRewards,

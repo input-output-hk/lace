@@ -1,14 +1,16 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDrawer } from '@views/browser/stores';
 import { DrawerContent } from '@views/browser/components/Drawer/DrawerUIContent';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import { StakingModal } from './StakingModal';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { DrawerHeader, DrawerNavigation } from '@lace/common';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
+import styles from './StakingModal.module.scss';
 
 type StakingModalsProps = {
   popupView?: boolean;
@@ -23,10 +25,14 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
     setExitStakingVisible,
     setStakeConfirmationVisible,
     isStakeConfirmationVisible,
+    isRegisterAsDRepModalVisible,
+    setIsRegisterAsDRepModalVisible,
     setIsDrawerVisible,
     setSection,
     resetStates
   } = useStakePoolDetails();
+
+  const openExternalLink = useExternalLinkOpener();
 
   const [, setDrawerConfig] = useDrawer();
   const analytics = useAnalyticsContext();
@@ -109,6 +115,45 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
                 )
               });
               setIsDrawerVisible(false);
+            }
+          }
+        ]}
+        popupView={popupView}
+      />
+      {/* Register as DRep */}
+      <StakingModal
+        visible={isRegisterAsDRepModalVisible}
+        title={t('browserView.staking.stakingInfo.RegisterAsDRepModal.title')}
+        description={
+          <Box className={styles.modalDescription}>
+            <Trans
+              components={{
+                a: (
+                  <a
+                    onClick={() =>
+                      openExternalLink(`${process.env.FAQ_URL}?question=what-is-the-voltaire-govtool-on-sanchonet`)
+                    }
+                    data-testid="terms-of-service-link"
+                  />
+                )
+              }}
+              i18nKey="browserView.staking.stakingInfo.RegisterAsDRepModal.description"
+            />
+          </Box>
+        }
+        actions={[
+          {
+            body: t('browserView.staking.stakingInfo.RegisterAsDRepModal.cancel'),
+            dataTestId: 'exit-staking-modal-cancel',
+            onClick: () => setIsRegisterAsDRepModalVisible(false),
+            color: 'secondary'
+          },
+          {
+            body: t('browserView.staking.stakingInfo.RegisterAsDRepModal.confirm'),
+            dataTestId: 'exit-staking-modal-confirm',
+            onClick: () => {
+              setIsRegisterAsDRepModalVisible(false);
+              openExternalLink(process.env.GOV_TOOLS_URL);
             }
           }
         ]}

@@ -4,10 +4,16 @@ import { useMultiDelegationEnabled } from '@hooks/useMultiDelegationEnabled';
 import React from 'react';
 import { MultiDelegationStakingPopup } from './MultiDelegationStakingPopup';
 import { DelegationContent } from './DelegationContent';
+import { StakingModals } from '@src/features/stake-pool-details';
 
 export const DelegationContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
   const multiDelegationEnabled = useMultiDelegationEnabled();
 
-  return <>{multiDelegationEnabled ? <MultiDelegationStakingPopup /> : <DelegationContent />}</>;
+  return (
+    <>
+      {multiDelegationEnabled ? <MultiDelegationStakingPopup /> : <DelegationContent />}
+      <StakingModals popupView />
+    </>
+  );
 };

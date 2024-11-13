@@ -22,6 +22,8 @@ import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { SignPolicy, useSecrets } from '@lace/core';
+import { useStakePoolDetails } from '../store';
+import { StakingModals } from './StakingModals';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -63,6 +65,8 @@ export const StakingContainer = (): React.ReactElement => {
   const submittingState = useSubmitingState();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+
+  const { setIsRegisterAsDRepModalVisible } = useStakePoolDetails();
 
   const {
     walletInfo,
@@ -155,11 +159,13 @@ export const StakingContainer = (): React.ReactElement => {
           isSharedWallet,
           signPolicy,
           sharedWalletKey,
-          coSigners
+          coSigners,
+          setIsRegisterAsDRepModalVisible
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>
           {multiDelegationEnabled ? <MultiDelegationStaking /> : <Staking />}
+          <StakingModals />
         </StakingSkeleton>
       </OutsideHandlesProvider>
     </Layout>

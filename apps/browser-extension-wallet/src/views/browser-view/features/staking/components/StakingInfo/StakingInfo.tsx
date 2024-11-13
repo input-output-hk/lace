@@ -8,7 +8,7 @@ import styles from './StakingInfo.module.scss';
 import { StakePoolInfo } from './StakePoolInfo';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
-import { getRandomIcon } from '@lace/common';
+import { addEllipsis, getRandomIcon } from '@lace/common';
 import { formatLocaleNumber } from '@utils/format-number';
 
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
@@ -31,6 +31,7 @@ type stakingInfoPanelProps = {
   lastReward: string;
   ros?: string;
   ticker?: string;
+  stakeKey?: string;
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoin: Wallet.CoinId;
@@ -49,6 +50,7 @@ export const StakingInfo = ({
   lastReward,
   ros,
   ticker,
+  stakeKey,
   onStakePoolSelect,
   popupView,
   cardanoCoin
@@ -137,6 +139,17 @@ export const StakingInfo = ({
                 </Tooltip>
               }
               dataTestid="stats-last-reward"
+            />
+          </div>
+        </div>
+        <div className={styles.row}>
+          <div className={styles.col}>
+            <Stats
+              text={t('browserView.staking.stakingInfo.stats.stakeKey')}
+              value={
+                <Tooltip content={stakeKey}>{popupView && stakeKey ? addEllipsis(stakeKey, 14, 9) : stakeKey}</Tooltip>
+              }
+              dataTestid="stats-stake-key"
             />
           </div>
         </div>

@@ -1,8 +1,9 @@
 /* eslint-disable complexity */
 import { Box, ControlButton, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
 import { Skeleton } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DelegationCard } from '../DelegationCard';
 import { useOutsideHandles } from '../outside-handles-provider';
@@ -11,6 +12,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { useStakingSectionLoadActions } from './hooks';
+import { RegisterAsDRepBanner } from './RegisterAsDRepBanner';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -26,6 +28,8 @@ export const Overview = () => {
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
     isSharedWallet,
+    setIsRegisterAsDRepModalVisible,
+    openExternalLink,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -55,6 +59,26 @@ export const Overview = () => {
     totalCoinBalance,
   ]);
 
+  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
+    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus,
+  );
+  const showRegisterAsDRepBanner =
+    rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
+    !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee);
+
+  const poolIdToRewardAccountMap = useMemo(
+    () =>
+      new Map(
+        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
+          const { delegatee } = rewardAccount;
+          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+
+          return [delagationInfo?.id.toString(), rewardAccount];
+        }),
+      ),
+    [rewardAccountsWithRegisteredStakeCreds],
+  );
+
   if (
     !totalCoinBalance ||
     !protocolParameters?.hasOwnProperty('stakeKeyDeposit') ||
@@ -80,6 +104,7 @@ export const Overview = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    poolIdToRewardAccountMap,
     portfolio: currentPortfolio,
   });
 
@@ -113,6 +138,14 @@ export const Overview = () => {
 
   return (
     <>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$28" mt="$32">
+          <RegisterAsDRepBanner
+            openExternalLink={openExternalLink}
+            onConfirm={() => setIsRegisterAsDRepModalVisible(true)}
+          />
+        </Box>
+      )}
       {!isSharedWallet && (
         <Box mb="$40">
           <DelegationCard
@@ -149,6 +182,9 @@ export const Overview = () => {
         <Box key={item.id} mb="$24" testId="delegated-pool-item">
           <StakingInfoCard
             {...item}
+            showRegisterAsDRepBanner={
+              poolIdToRewardAccountMap.size > 1 && !!poolIdToRewardAccountMap.get(item.id)?.dRepDelegatee
+            }
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
             onStakePoolSelect={() => {

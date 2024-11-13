@@ -29,6 +29,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useSharedWalletData } from '@hooks/useSharedWalletData';
 import { SignPolicy, useSecrets } from '@lace/core';
+import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -120,6 +121,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo, blockchainProvider]);
 
+  const { setIsRegisterAsDRepModalVisible } = useStakePoolDetails();
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -170,7 +173,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isSharedWallet,
         signPolicy,
         sharedWalletKey,
-        coSigners
+        coSigners,
+        setIsRegisterAsDRepModalVisible
       }}
     >
       <ContentLayout
