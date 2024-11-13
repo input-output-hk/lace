@@ -84,12 +84,12 @@ export const getParameterChangeActionViewData = ({
     },
     protocolParamUpdate: {
       maxTxExUnits: {
-        memory: maxExecutionUnitsPerTransaction?.memory.toString(),
-        step: maxExecutionUnitsPerTransaction?.steps.toString()
+        memory: maxExecutionUnitsPerTransaction?.memory?.toString(),
+        step: maxExecutionUnitsPerTransaction?.steps?.toString()
       },
       maxBlockExUnits: {
-        memory: maxExecutionUnitsPerBlock?.memory.toString(),
-        step: maxExecutionUnitsPerBlock?.steps.toString()
+        memory: maxExecutionUnitsPerBlock?.memory?.toString(),
+        step: maxExecutionUnitsPerBlock?.steps?.toString()
       },
       networkGroup: {
         maxBBSize: maxBlockBodySize?.toString(),
@@ -108,8 +108,8 @@ export const getParameterChangeActionViewData = ({
         minPoolCost: minPoolCost?.toString(),
         coinsPerUTxOByte: coinsPerUtxoByte?.toString(),
         price: {
-          memory: prices?.memory.toString(),
-          step: prices?.steps.toString()
+          memory: prices?.memory?.toString(),
+          step: prices?.steps?.toString()
         }
       },
       technicalGroup: {
