@@ -19,8 +19,7 @@ import {
   useSubmitingState,
   useTransactionProps,
   useMetadata,
-  useAnalyticsSendFlowTriggerPoint,
-  useMaxAdaStatus
+  useAnalyticsSendFlowTriggerPoint
 } from '../../store';
 import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
@@ -89,7 +88,6 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
-    const { isMaxAdaLoading } = useMaxAdaStatus();
     const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
@@ -418,8 +416,7 @@ export const Footer = withAddressBookContext(
     }, [t, currentSection.currentSection]);
 
     const isConfirmButtonDisabled =
-      (confirmDisable || isSubmitDisabled || isMaxAdaLoading) &&
-      currentSection.currentSection !== Sections.ADDRESS_CHANGE;
+      (confirmDisable || isSubmitDisabled) && currentSection.currentSection !== Sections.ADDRESS_CHANGE;
 
     const submitHwFormStep = useCallback(() => {
       triggerSubmit();
