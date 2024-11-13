@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable unicorn/no-nested-ternary */
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { Tooltip, Input } from 'antd';
 import { Button, getTextWidth } from '@lace/common';
@@ -114,7 +115,7 @@ export const AssetInput = ({
   }, [invalid]);
 
   useLayoutEffect(() => {
-    adjustInputWidth(focused ? displayValue : compactValue);
+    adjustInputWidth(focused ? displayValue ?? '' : compactValue ?? '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustInputWidth]);
 
@@ -146,7 +147,7 @@ export const AssetInput = ({
 
   const setMaxValue = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
-    if (!hasReachedMaxAmount) {
+    if (!hasReachedMaxAmount && !!max) {
       setValue(max);
     }
   };
@@ -166,7 +167,7 @@ export const AssetInput = ({
   const handleOnFocus = () => {
     setFocusInput?.(inputId);
     onFocus?.({
-      value,
+      value: value ?? placeholderValue,
       id: coin.id,
       maxDecimals
     });
@@ -176,8 +177,8 @@ export const AssetInput = ({
     if (key === 'Enter') inputRef.current.blur();
   };
 
-  const onBlurError = isTouched ? getErrorMessage(error) : undefined;
-  const errorMessage = onBlurErrors?.has(error) ? onBlurError : getErrorMessage(error);
+  const onBlurError = isTouched && error ? getErrorMessage(error) : undefined;
+  const errorMessage = error && onBlurErrors?.has(error) ? onBlurError : error && getErrorMessage(error);
 
   return (
     <div className={styles.assetInputContainer} data-testid-title={`${coin?.ticker}`} data-testid="coin-configure">
@@ -190,7 +191,7 @@ export const AssetInput = ({
         </div>
 
         <div className={styles.amountContainer}>
-          {hasMaxBtn && (!Number.parseFloat(value) || displayMaxBtn) && (
+          {hasMaxBtn && (!Number.parseFloat(value ?? placeholderValue) || displayMaxBtn) && (
             // There is a span element as children of the button that propagates the click event when the button is disabled, this makes the input element to focus adding 0 as value.
             // To fix this issue, I moved the button click event to a parent div, so, when the button is disabled the event propagation can be stopped.
             <div onClick={setMaxValue}>
@@ -206,7 +207,13 @@ export const AssetInput = ({
             </div>
           )}
 
-          <Tooltip title={!isSameNumberFormat(value, compactValue) && !focused && displayValue}>
+          <Tooltip
+            title={
+              !isSameNumberFormat(value ?? placeholderValue, compactValue ?? placeholderValue) &&
+              !focused &&
+              displayValue
+            }
+          >
             <Input
               onMouseDown={onClick}
               ref={inputRef}

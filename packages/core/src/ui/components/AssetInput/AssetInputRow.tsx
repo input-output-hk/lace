@@ -54,7 +54,7 @@ export const AssetInputRow = ({
     () => {
       setIsFocused(false);
       onBlur?.({
-        value,
+        value: value ?? '0',
         id: coin.id,
         maxDecimals
       });
