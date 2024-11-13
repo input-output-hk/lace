@@ -173,7 +173,7 @@ export const AssetTable = ({
       columns={columns}
       dataSource={dataSource}
       onRow={onRowClick ? handleRowClick : undefined}
-      infiniteScrollContainerClass={hasScrollBar && styles.scrollContainer}
+      infiniteScrollContainerClass={hasScrollBar ? styles.scrollContainer : undefined}
       infiniteScrollProps={{
         dataLength: rows?.length || 0,
         next: onLoad,
