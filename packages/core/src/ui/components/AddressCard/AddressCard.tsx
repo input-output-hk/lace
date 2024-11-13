@@ -219,8 +219,11 @@ export const AddressCard = ({
             icon: <StakePoolIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-stake-pool-icon" />
           };
         }
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        return undefined;
       })
-      .filter((item) => isNotNil(item));
+      // eslint-disable-next-line unicorn/no-array-callback-reference
+      .filter(isNotNil);
 
     return (
       <AddressDisplayItem
