@@ -1,4 +1,5 @@
 /* eslint-disable no-magic-numbers */
+import { BlockfrostClientConfig } from '@cardano-sdk/cardano-services-client';
 import { Milliseconds } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes } from '@stores';
@@ -13,6 +14,8 @@ type CExplorerUrlPaths = {
   Policy: string;
 };
 
+type BlockfrostEndpoint = Omit<BlockfrostClientConfig, 'apiVersion'>;
+
 export type Config = {
   TOAST_DURATION: number;
   CHAIN: Wallet.ChainName;
@@ -20,7 +23,7 @@ export type Config = {
   WALLET_SYNC_TIMEOUT: number;
   WALLET_INTERVAL: number;
   CARDANO_SERVICES_URLS: ByNetwork<string>;
-  BLOCKFROST_CONFIGS: ByNetwork<Wallet.BlockfrostClientConfig>;
+  BLOCKFROST_CONFIGS: ByNetwork<BlockfrostEndpoint>;
   BLOCKFROST_RATE_LIMIT_CONFIG: Wallet.RateLimiterConfig;
   ADA_PRICE_CHECK_INTERVAL: number;
   TOKEN_PRICE_CHECK_INTERVAL: number;
@@ -64,7 +67,7 @@ const envChecks = (chosenChain: Wallet.ChainName): void => {
   }
 };
 
-const getBlockfrostConfigs = (): ByNetwork<Wallet.BlockfrostClientConfig> => ({
+const getBlockfrostConfigs = (): ByNetwork<BlockfrostEndpoint> => ({
   Mainnet: {
     baseUrl: process.env.BLOCKFROST_URL_MAINNET,
     projectId: process.env.BLOCKFROST_PROJECT_ID_MAINNET
