@@ -9119,6 +9119,9 @@ __metadata:
     class-validator: ^0.14.0
     isomorphic-ws: ^5.0.0
     json-bigint: ~1.0.0
+    lodash: ^4.17.21
+    rxjs: ^7.4.0
+    ts-custom-error: ^3.2.0
     ts-log: ^2.2.4
     ws: ^8.17.1
   checksum: c1178f4214a86e4f4915ff2b649cdba2eb484d385056f203c78d42548681e9007c9954cda03ff5945466321d7e8f66b3931727969c337b7a4181bc2d924292ac

@@ -8,6 +8,7 @@ import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { logger } from '@lace/common';
 import { config } from '@src/config';
 import Bottleneck from 'bottleneck';
+import { RateLimiter } from '@cardano-sdk/cardano-services-client';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
@@ -31,7 +32,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
 const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
 // Important to use the same rateLimiter object for all networks,
 // because Blockfrost rate limit is per IP address, not per project id
-const rateLimiter: Wallet.RateLimiter = new Bottleneck({
+const rateLimiter: RateLimiter = new Bottleneck({
   reservoir: BLOCKFROST_RATE_LIMIT_CONFIG.size,
   reservoirIncreaseAmount: BLOCKFROST_RATE_LIMIT_CONFIG.increaseAmount,
   reservoirIncreaseInterval: BLOCKFROST_RATE_LIMIT_CONFIG.increaseInterval,
@@ -52,7 +53,8 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       customSubmitTxUrl,
       blockfrostConfig: {
         ...BLOCKFROST_CONFIGS[chainName],
-        rateLimiter
+        rateLimiter,
+        apiVersion: 'v0'
       }
     },
     logger,
