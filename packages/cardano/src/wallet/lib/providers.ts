@@ -25,10 +25,12 @@ import {
   stakePoolHttpProvider,
   utxoHttpProvider,
   TxSubmitApiProvider,
-  txSubmitHttpProvider
+  txSubmitHttpProvider,
+  BlockfrostClientConfig,
+  RateLimiter,
+  BlockfrostClient,
+  BlockfrostAssetProvider
 } from '@cardano-sdk/cardano-services-client';
-import { BlockfrostClient, BlockfrostClientConfig, RateLimiter } from './blockfrost/blockfrost-client';
-import { BlockfrostAssetProvider } from './blockfrost';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
 const createTxSubmitProvider = (
@@ -120,7 +122,7 @@ export const createProviders = ({
     rateLimiter: blockfrostConfig.rateLimiter
   });
   const assetProvider = useBlockfrostAssetProvider
-    ? composeProviders(new BlockfrostAssetProvider(blockfrostClient), cardanoServicesAssetProvider)
+    ? composeProviders(new BlockfrostAssetProvider(blockfrostClient, logger), cardanoServicesAssetProvider)
     : cardanoServicesAssetProvider;
   const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
   const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
