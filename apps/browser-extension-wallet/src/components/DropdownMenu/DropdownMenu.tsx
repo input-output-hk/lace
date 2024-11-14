@@ -61,7 +61,11 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
             title={addEllipsis(walletName, titleCharBeforeEll, titleCharAfterEll)}
-            subtitle={getActiveWalletSubtitle(cardanoWallet?.source.account)}
+            subtitle={addEllipsis(
+              getActiveWalletSubtitle(cardanoWallet?.source.account),
+              titleCharBeforeEll,
+              titleCharAfterEll
+            )}
             active={isDropdownMenuOpen}
             profile={
               activeWalletAvatar

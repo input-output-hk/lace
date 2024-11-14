@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useCallback } from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
@@ -20,6 +21,7 @@ import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
 const WALLET_NAME_MAX_LENGTH = 16;
+const WALLET_OPTION_NAME_MAX_LENGTH = 12;
 const TOAST_DEFAULT_DURATION = 3;
 
 const overlayInnerStyle = {
@@ -91,8 +93,12 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
-          title={wallet.metadata.name}
-          subtitle={lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label')}
+          title={addEllipsis(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH, 0)}
+          subtitle={addEllipsis(
+            lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
+            WALLET_OPTION_NAME_MAX_LENGTH,
+            0
+          )}
           id={`wallet-option-${wallet.walletId}`}
           onClick={async () => {
             if (activeWalletId === wallet.walletId) {
