@@ -22,7 +22,7 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
 
 export const useRewardAccountsData = (): {
   areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
-  poolIdToRewardAccountMap: Map<string | undefined, Wallet.Cardano.RewardAccountInfo>;
+  poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
 } => {
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -40,12 +40,14 @@ export const useRewardAccountsData = (): {
   const poolIdToRewardAccountMap = useMemo(
     () =>
       new Map(
-        rewardAccountsWithRegisteredStakeCreds?.map((rewardAccount) => {
-          const { delegatee } = rewardAccount;
-          const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+        rewardAccountsWithRegisteredStakeCreds
+          ?.map((rewardAccount): [string, Wallet.Cardano.RewardAccountInfo] => {
+            const { delegatee } = rewardAccount;
+            const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
 
-          return [delagationInfo?.id.toString(), rewardAccount];
-        })
+            return [delagationInfo?.id.toString(), rewardAccount];
+          })
+          .filter(([poolId]) => !!poolId)
       ),
     [rewardAccountsWithRegisteredStakeCreds]
   );

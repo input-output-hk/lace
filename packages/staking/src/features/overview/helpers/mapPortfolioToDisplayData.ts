@@ -7,7 +7,7 @@ type MapPortfolioToDisplayDataParams = {
   cardanoCoin: Wallet.CoinId;
   cardanoPrice?: number;
   portfolio: CurrentPortfolioStakePool[];
-  poolIdToRewardAccountMap: Map<string | undefined, Wallet.Cardano.RewardAccountInfo>;
+  poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
 };
 
 export const mapPortfolioToDisplayData = ({

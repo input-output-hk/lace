@@ -166,7 +166,7 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             showRegisterAsDRepBanner={
-              poolIdToRewardAccountMap.size > 1 && !!poolIdToRewardAccountMap.get(item.id)?.dRepDelegatee
+              poolIdToRewardAccountMap.size > 1 && !poolIdToRewardAccountMap.get(item.id)?.dRepDelegatee
             }
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}

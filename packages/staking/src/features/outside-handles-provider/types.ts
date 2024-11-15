@@ -111,6 +111,6 @@ export type OutsideHandlesContextValue = {
   setIsRegisterAsDRepModalVisible: (isVisible: boolean) => void;
   useRewardAccountsData: () => {
     areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
-    poolIdToRewardAccountMap: Map<string | undefined, Wallet.Cardano.RewardAccountInfo>;
+    poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
   };
 };
