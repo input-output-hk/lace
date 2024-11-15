@@ -3,7 +3,7 @@ import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { Button, PostHogAction } from '@lace/common';
-import { OnPasswordChange, Password } from '@lace/core';
+import { Password, useSecrets } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
@@ -21,7 +21,7 @@ export const SignTransaction = (): React.ReactElement => {
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isLoading, setIsLoading] = useState(false);
-  const [password, setPassword] = useState<string>();
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [validPassword, setValidPassword] = useState<boolean>();
   const analytics = useAnalyticsContext();
 
@@ -35,10 +35,12 @@ export const SignTransaction = (): React.ReactElement => {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
 
+    const passphrase = Buffer.from(password.value, 'utf8');
     try {
-      const passphrase = Buffer.from(password, 'utf8');
       await request.sign(passphrase, { willRetryOnFailure: true });
       setValidPassword(true);
+      clearSecrets();
+      passphrase.fill(0);
       redirectToSignSuccess();
     } catch (error) {
       if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
@@ -47,11 +49,11 @@ export const SignTransaction = (): React.ReactElement => {
         redirectToSignFailure();
       }
     } finally {
+      clearSecrets();
+      passphrase.fill(0);
       setIsLoading(false);
     }
   }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request]);
-
-  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
@@ -85,7 +87,7 @@ export const SignTransaction = (): React.ReactElement => {
             {t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')}
           </h5>
           <Password
-            onChange={handleChange}
+            onChange={setPassword}
             onSubmit={handleSubmit}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
