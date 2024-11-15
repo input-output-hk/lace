@@ -11,6 +11,7 @@ import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import adaHandleAssert from './adaHandleAssert';
+import { browser } from '@wdio/globals';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -200,10 +201,14 @@ class NftCreateFolderAssert {
     }
   }
 
-  async verifyNftCounterOnFolderPageMatchesNumberOfNfts() {
-    const displayedCount = (await NftsFolderPage.nftCounter.getText()).slice(1, -1);
-    const realNftCount = String(await NftsFolderPage.nfts.length);
-    expect(displayedCount).to.equal(realNftCount);
+  async waitUntilNftCounterOnFolderPageMatchesNumberOfNfts() {
+    await browser.waitUntil(
+      async () => (await NftsFolderPage.nftCounter.getText()).slice(1, -1) === String(await NftsFolderPage.nfts.length),
+      {
+        timeout: 3000,
+        timeoutMsg: 'failed while waiting for NFT counter value matching NFTs count'
+      }
+    );
   }
 
   async verifyNftItemOnFolderPage(nftItem: WebdriverIO.Element) {
@@ -231,10 +236,11 @@ class NftCreateFolderAssert {
     await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.existingFolderHeader');
 
     await NftsFolderPage.title.waitForDisplayed();
+    await NftsFolderPage.title.waitForStable();
     expect(await NftsFolderPage.title.getText()).to.equal(folderName);
 
     await NftsFolderPage.nftCounter.waitForDisplayed();
-    await this.verifyNftCounterOnFolderPageMatchesNumberOfNfts();
+    await this.waitUntilNftCounterOnFolderPageMatchesNumberOfNfts();
 
     await NftsFolderPage.addNftButton.waitForDisplayed();
     expect(await NftsFolderPage.nfts.length).to.be.greaterThanOrEqual(1);
