@@ -5,6 +5,7 @@ import { complexityLevels, PasswordVerification, PasswordVerificationProps } fro
 import { OnPasswordChange, Password } from '@ui/components/Password';
 import { TranslationsFor } from '@ui/utils/types';
 import { passwordComplexity } from '@src/ui/utils/password-complexity';
+import { useSecrets } from '@src/ui/hooks';
 
 type BarStates = PasswordVerificationProps['complexityBarList'];
 
@@ -47,11 +48,10 @@ export const WalletSetupPasswordStep = ({
   translations,
   getFeedbackTranslations
 }: WalletSetupPasswordStepProps): React.ReactElement => {
-  const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const { password, setPassword, setPasswordConfirmation, passwordConfirmation } = useSecrets();
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
 
-  const { feedbackKeys, score } = useMemo(() => passwordComplexity(password), [password]);
+  const { feedbackKeys, score } = useMemo(() => passwordComplexity(password.value), [password.value]);
   const feedbackTranslation = useMemo(
     () => getFeedbackTranslations(feedbackKeys),
     [feedbackKeys, getFeedbackTranslations]
@@ -63,14 +63,14 @@ export const WalletSetupPasswordStep = ({
     passHasBeenValidated &&
       !passwordConfirmationErrorMessage &&
       score >= minimumPassLevelRequired &&
-      password.length > 0
+      password.value.length > 0
   );
 
   const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
 
   const handlePasswordConfirmationChange: OnPasswordChange = (target) => {
     setPassHasBeenValidated(true);
-    setPasswordConfirmation(target.value);
+    setPasswordConfirmation(target);
   };
 
   return (
@@ -79,7 +79,7 @@ export const WalletSetupPasswordStep = ({
       description={translations.description}
       onBack={onBack}
       onNext={() => {
-        onNext({ password });
+        onNext({ password: password.value });
       }}
       isNextEnabled={isNextEnabled}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
@@ -88,7 +88,7 @@ export const WalletSetupPasswordStep = ({
         <PasswordVerification
           className={styles.input}
           label={translations.password}
-          onChange={(e) => setPassword(e.value)}
+          onChange={setPassword}
           level={score}
           feedbacks={feedbackTranslation}
           complexityBarList={complexityBarList}

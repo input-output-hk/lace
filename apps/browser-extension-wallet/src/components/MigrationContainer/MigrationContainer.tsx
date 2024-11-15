@@ -10,7 +10,7 @@ import { Lock } from '@src/views/browser-view/components/Lock';
 import { MainLoader } from '@components/MainLoader';
 import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
-import { OnPasswordChange } from '@lace/core';
+import { OnPasswordChange, useSecrets } from '@lace/core';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;
@@ -33,12 +33,12 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
   const [renderState, setRenderState] = useState<RenderState>(INITIAL_RENDER_STATE);
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
-  const [password, setPassword] = useState<string>();
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isValidPassword, setIsValidPassword] = useState(true);
 
   const migrate = useCallback(async () => {
     setRenderState(INITIAL_RENDER_STATE);
-    if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, password);
+    if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, password.value);
   }, [migrationState, password, appMode]);
 
   const handlePasswordChange = useCallback<OnPasswordChange>(
@@ -46,7 +46,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       if (!isValidPassword) {
         setIsValidPassword(true);
       }
-      setPassword(target.value);
+      setPassword(target);
     },
     [isValidPassword]
   );
@@ -66,8 +66,11 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       await unlockWallet();
       setIsValidPassword(true);
       await migrate();
+      clearSecrets();
     } catch {
       setIsValidPassword(false);
+    } finally {
+      clearSecrets();
     }
     setIsVerifyingPassword(false);
   }, [unlockWallet, migrate]);
@@ -143,7 +146,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
         isLoading={isVerifyingPassword}
         onUnlock={onUnlock}
         passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
-        unlockButtonDisabled={password === ''}
+        unlockButtonDisabled={!password.value}
         // TODO: show forgot password here too. Use same logic as in ResetDataError on click
         showForgotPassword={false}
       />

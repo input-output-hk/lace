@@ -15,6 +15,7 @@ import { TransactionFail } from '@src/views/browser-view/features/send-transacti
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
 import { FooterHW } from './hardware-wallet/FooterHW';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useSecrets } from '@lace/core';
 
 interface CollateralDrawerProps {
   visible: boolean;
@@ -39,8 +40,7 @@ export const CollateralDrawer = ({
     walletUI: { appMode }
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const [password, setPassword] = useState<string>();
-  const clearPassword = () => setPassword('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
   const isWalletSyncingForTheFirstTime = useSyncingTheFirstTime();
   const { initializeCollateralTx, submitCollateralTx, isInitializing, isSubmitting, hasEnoughAda, txFee } =
@@ -122,7 +122,7 @@ export const CollateralDrawer = ({
       <CollateralFooterReclaim
         setCurrentStep={setSection}
         onClose={handleReclaimCollateral}
-        onClaim={clearPassword}
+        onClaim={clearSecrets}
         isInitializing={isInitializing}
         isSubmitting={isSubmitting}
       />
@@ -131,11 +131,11 @@ export const CollateralDrawer = ({
       <CollateralFooterSend
         setCurrentStep={setSection}
         onClose={handleConfirmCollateral}
-        onClaim={clearPassword}
+        onClaim={clearSecrets}
         walletType={walletType}
         setIsPasswordValid={setIsPasswordValid}
         popupView={popupView}
-        password={password}
+        password={password.value}
         submitCollateralTx={submitCollateralTx}
         hasEnoughAda={hasEnoughAda}
         isInitializing={isInitializing}
