@@ -14,7 +14,7 @@ const hasSentryReleaseConfig =
 
 module.exports = () => ({
   mode: 'production',
-  devtool: hasSentryReleaseConfig ? 'source-map' : false,
+  devtool: 'source-map',
   plugins: [
     ...(hasSentryReleaseConfig
       ? [
