@@ -42,72 +42,71 @@ const HistoryViewer = () => {
   const history = useMemo(
     () =>
       historySlice && historySlice.length <= 0 ? (
-        <Box
-          mt="16"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          flexDirection="column"
-          opacity="0.5"
+      <Box
+        mt="16"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        flexDirection="column"
+        opacity="0.5"
+      >
+        <File size={80} mood="ko" color="#61DDBC" />
+        <Box height="2" />
+        <Text fontWeight="bold" color="GrayText">
+          No History
+        </Text>
+      </Box>
+    ) : (
+      <>
+        <Accordion
+          allowToggle
+          borderBottom="none"
+          onClick={() => {
+            void capture(Events.ActivityActivityActivityRowClick);
+          }}
         >
-          <File size={80} mood="ko" color="#61DDBC" />
-          <Box height="2" />
-          <Text fontWeight="bold" color="GrayText">
-            No History
-          </Text>
-        </Box>
-      ) : (
-        <>
-          <Accordion
-            allowToggle
-            borderBottom="none"
-            onClick={() => {
-              void capture(Events.ActivityActivityActivityRowClick);
-            }}
+          {historySlice?.map(tx => (
+            <MemoizedTransaction
+              key={tx.id.toString()}
+              tx={tx}
+              network={environmentName}
+              cardanoCoin={cardanoCoin}
+              openExternalLink={openExternalLink}
+            />
+          ))}
+        </Accordion>
+        {isFinal ? (
+          <Box
+            textAlign="center"
+            fontSize={16}
+            fontWeight="bold"
+            color="gray.400"
           >
-            {historySlice?.map(tx => (
-              <Transaction
-                key={tx.id.toString()}
-                tx={tx}
-                network={environmentName}
-                cardanoCoin={cardanoCoin}
-                openExternalLink={openExternalLink}
-              />
-            ))}
-          </Accordion>
-          {isFinal ? (
-            <Box
-              textAlign="center"
-              fontSize={16}
-              fontWeight="bold"
-              color="gray.400"
+            ... nothing more
+          </Box>
+        ) : (
+          <Box textAlign="center">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setTimeout(() => {
+                  setPage(page + 1);
+                });
+              }}
+              colorScheme="orange"
+              aria-label="More"
+              fontSize={20}
+              w="50%"
+              h="30px"
+              rounded="xl"
             >
-              ... nothing more
-            </Box>
-          ) : (
-            <Box textAlign="center">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setTimeout(() => {
-                    setPage(page + 1);
-                  });
-                }}
-                colorScheme="orange"
-                aria-label="More"
-                fontSize={20}
-                w="50%"
-                h="30px"
-                rounded="xl"
-              >
-                <ChevronDownIcon fontSize="30px" />
-              </Button>
-            </Box>
-          )}
-        </>
-      ),
-    [historySlice, setPage, openExternalLink, capture],
-  );
+              <ChevronDownIcon fontSize="30px" />
+            </Button>
+          </Box>
+        )}
+      </>
+    );
+  }, [historySlice, page, openExternalLink]);
 
   return (
     <Box position="relative">{historySlice ? history : <HistorySpinner />}</Box>
@@ -119,5 +118,7 @@ const HistorySpinner = () => (
     <Spinner color="teal" speed="0.5s" />
   </Box>
 );
+
+const MemoizedTransaction = React.memo(Transaction);
 
 export default HistoryViewer;
