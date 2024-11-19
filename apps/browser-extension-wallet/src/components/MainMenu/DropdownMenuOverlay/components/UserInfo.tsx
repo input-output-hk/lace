@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useCallback } from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
@@ -41,6 +40,9 @@ interface RenderWalletOptionsParams {
 }
 
 const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
+
+const shortenWalletName = (text: string, length: number) =>
+  text.length > length ? `${text.slice(0, length)}...` : text;
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -93,11 +95,10 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
-          title={addEllipsis(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH, 0)}
-          subtitle={addEllipsis(
+          title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
+          subtitle={shortenWalletName(
             lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
-            WALLET_OPTION_NAME_MAX_LENGTH,
-            0
+            WALLET_OPTION_NAME_MAX_LENGTH
           )}
           id={`wallet-option-${wallet.walletId}`}
           onClick={async () => {

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
-import { Button, addEllipsis } from '@lace/common';
+import { Button } from '@lace/common';
 import { DropdownMenuOverlay } from '../MainMenu';
 import ChevronNormal from '../../assets/icons/chevron-down.component.svg';
 import ChevronSmall from '../../assets/icons/chevron-down-small.component.svg';
@@ -18,6 +18,9 @@ import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 export interface DropdownMenuProps {
   isPopup?: boolean;
 }
+
+const titleCharBeforeEll = 10;
+const addEllipsis = (text: string, length: number) => (text.length > length ? `${text.slice(0, length)}...` : text);
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
@@ -45,9 +48,6 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
 
   const walletName = cardanoWallet?.source?.wallet?.metadata?.name;
 
-  const titleCharBeforeEll = 10;
-  const titleCharAfterEll = 0;
-
   return (
     <Dropdown
       overlayClassName={styles.overlay}
@@ -60,12 +60,8 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       {process.env.USE_MULTI_WALLET === 'true' && walletName ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={addEllipsis(walletName, titleCharBeforeEll, titleCharAfterEll)}
-            subtitle={addEllipsis(
-              getActiveWalletSubtitle(cardanoWallet?.source.account),
-              titleCharBeforeEll,
-              titleCharAfterEll
-            )}
+            title={addEllipsis(walletName, titleCharBeforeEll)}
+            subtitle={addEllipsis(getActiveWalletSubtitle(cardanoWallet?.source.account), titleCharBeforeEll)}
             active={isDropdownMenuOpen}
             profile={
               activeWalletAvatar
