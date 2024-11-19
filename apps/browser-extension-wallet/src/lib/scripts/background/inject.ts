@@ -2,7 +2,8 @@
 import { Cip30Wallet, injectGlobal, WalletProperties } from '@cardano-sdk/dapp-connector';
 import { cip30, injectedRuntime, MessengerDependencies } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
-import { getMode } from './injectUtil';
+import { getWalletMode, isCachedWalletModeResult } from './injectUtil';
+import { WalletMode } from '../types';
 
 const cip30WalletProperties: WalletProperties = {
   // eslint-disable-next-line max-len
@@ -19,6 +20,42 @@ const cip30WalletNamiProperties: WalletProperties = {
   supportedExtensions: []
 };
 
+/** Injects wallet in `lace` namespace, but excludes extensions if mode is `nami` */
+const injectInLaceNs = (
+  mode: WalletMode['mode'],
+  walletApi: ReturnType<typeof consumeRemoteWalletApi>,
+  authenticator: ReturnType<typeof consumeRemoteAuthenticatorApi>,
+  logger: cip30.InitializeInjectedDependencies['logger']
+): void => {
+  const wallet = new Cip30Wallet(
+    // No extensions supported in nami mode
+    { ...cip30WalletProperties, ...(mode === 'nami' && { supportedExtensions: [] }) },
+    { api: walletApi, authenticator, logger }
+  );
+
+  // Always inject in lace namespace
+  injectGlobal(window, wallet, logger);
+};
+
+/**
+ * Inject in nami namespace for compatibility with dapps supporting only nami, when in nami mode and compatibility mode enabled.
+ *
+ * @returns true if injected in nami namespace, false otherwise
+ */
+const injectInNamiNs = (
+  { mode, dappInjectCompatibilityMode }: WalletMode,
+  walletApi: ReturnType<typeof consumeRemoteWalletApi>,
+  authenticator: ReturnType<typeof consumeRemoteAuthenticatorApi>,
+  logger: cip30.InitializeInjectedDependencies['logger']
+): boolean => {
+  if (mode === 'nami' && dappInjectCompatibilityMode) {
+    const namiWallet = new Cip30Wallet(cip30WalletNamiProperties, { api: walletApi, authenticator, logger });
+    injectGlobal(window, namiWallet, logger, 'nami');
+    return true;
+  }
+  return false;
+};
+
 const initializeInjectedScript = async ({ logger }: cip30.InitializeInjectedDependencies) => {
   const dependencies: MessengerDependencies = {
     logger,
@@ -28,14 +65,29 @@ const initializeInjectedScript = async ({ logger }: cip30.InitializeInjectedDepe
   const authenticator = consumeRemoteAuthenticatorApi(cip30WalletProperties, dependencies);
   const walletApi = consumeRemoteWalletApi(cip30WalletProperties, dependencies);
 
-  const mode = await getMode(injectedRuntime);
+  const result = getWalletMode(injectedRuntime);
 
-  const wallet =
-    mode === 'lace'
-      ? new Cip30Wallet(cip30WalletProperties, { api: walletApi, authenticator, logger })
-      : new Cip30Wallet(cip30WalletNamiProperties, { api: walletApi, authenticator, logger });
+  if (isCachedWalletModeResult(result)) {
+    // Cache was primed. Use it to speed up injection
+    const { cachedWalletMode, latestWalletMode } = result;
+    injectInLaceNs(cachedWalletMode.mode, walletApi, authenticator, logger);
+    const namiInjected = injectInNamiNs(cachedWalletMode, walletApi, authenticator, logger);
 
-  injectGlobal(window, wallet, logger, mode === 'nami' ? 'nami' : wallet.name);
+    if (!namiInjected) {
+      // Cached values indicated that we should NOT inject in nami namespace.
+      // No harm in waiting for the latest value and lazy inject it if was updated.
+      const latestMode = await latestWalletMode;
+      injectInNamiNs(latestMode, walletApi, authenticator, logger);
+    }
+  } else {
+    // Cache was not primed
+    // Eagerly inject in lace namespace to speed up injection
+    injectInLaceNs('lace', walletApi, authenticator, logger);
+
+    const { mode, dappInjectCompatibilityMode } = await result.latestWalletMode;
+    // Lazy inject in nami namespace if compatibility mode is active
+    injectInNamiNs({ mode, dappInjectCompatibilityMode }, walletApi, authenticator, logger);
+  }
 };
 
 if (process.env.USE_DAPP_CONNECTOR === 'true') {

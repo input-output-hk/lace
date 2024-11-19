@@ -6,7 +6,7 @@ import {
   runContentScriptMessageProxy
 } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
-import { modeApiProperties, WALLET_MODE_CHANNEL } from './injectUtil';
+import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from './injectUtil';
 
 // Disable logging in production for performance & security measures
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
@@ -21,8 +21,8 @@ if (process.env.USE_DAPP_CONNECTOR === 'true') {
       consumeRemoteWalletApi({ walletName }, dependencies),
       consumeRemoteApi(
         {
-          baseChannel: WALLET_MODE_CHANNEL,
-          properties: modeApiProperties
+          baseChannel: LACE_FEATURES_CHANNEL,
+          properties: laceFeaturesApiProperties
         },
         dependencies
       )
