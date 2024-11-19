@@ -1,15 +1,18 @@
-@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../../packages/common/src/ui/styles/theme.scss';
 
-.errorParagraph {
-  color: var(--data-red);
-  font-size: var(--bodyXS);
-  font-style: normal;
-  font-weight: 400;
-  line-height: size_unit(2);
-  letter-spacing: 0.02em;
-  text-align: left;
+.banner {
+  margin-bottom: 0px !important;
+  margin-top: 0px !important;
+  &.popupView {
+    margin-bottom: 0;
+  }
+
+  .bannerDescription {
+    max-width: 315px;
+  }
 }
 
-.coinInputContainer {
-  flex: 1;
+.bannerPopup {
+  border-radius: 16px;
+  background-color: var(--dark-mode-dark-grey-plus, var(--color-magnolia, #fcf5e3));
 }

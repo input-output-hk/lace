@@ -10,6 +10,7 @@ import { sanitizeNumber } from '@ui/utils/sanitize-number';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { CoreTranslationKey } from '@lace/translation';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
 const isSameNumberFormat = (num1: string, num2: string) => {
   if (!num1 || !num2) return false;
@@ -21,7 +22,15 @@ const defaultInputWidth = 18;
 
 export interface AssetInputProps {
   inputId: string;
-  coin: { id: string; balance: string; src?: string; ticker?: string; shortTicker?: string };
+  coin: {
+    id: string;
+    balance: string;
+    availableBalance?: string;
+    lockedStakeRewards?: string;
+    src?: string;
+    ticker?: string;
+    shortTicker?: string;
+  };
   onChange: (args: { value: string; prevValue?: string; id: string; element?: any; maxDecimals?: number }) => void;
   onBlur?: (args: { value: string; id: string; maxDecimals?: number }) => void;
   onFocus?: (args: { value: string; id: string; maxDecimals?: number }) => void;
@@ -39,11 +48,13 @@ export interface AssetInputProps {
   hasMaxBtn?: boolean;
   displayMaxBtn?: boolean;
   hasReachedMaxAmount?: boolean;
+  hasReachedMaxAvailableAmount?: boolean;
   focused?: boolean;
   onBlurErrors?: Set<string>;
   getErrorMessage: (message: string) => CoreTranslationKey;
   setFocusInput?: (input?: string) => void;
   setFocus?: (focus: boolean) => void;
+  isPopupView?: boolean;
 }
 
 const placeholderValue = '0';
@@ -71,9 +82,11 @@ export const AssetInput = ({
   hasMaxBtn = true,
   displayMaxBtn = false,
   hasReachedMaxAmount,
+  hasReachedMaxAvailableAmount,
   focused,
   setFocusInput,
-  setFocus
+  setFocus,
+  isPopupView
 }: AssetInputProps): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputRef = useRef<any>(null);
@@ -179,8 +192,19 @@ export const AssetInput = ({
   const onBlurError = isTouched ? getErrorMessage(error) : undefined;
   const errorMessage = onBlurErrors?.has(error) ? onBlurError : getErrorMessage(error);
 
+  const lockedRewards = (
+    <>
+      <Text.Body.Normal color="secondary">{coin.availableBalance}</Text.Body.Normal>
+      <Text.Body.Normal color="secondary">{coin.lockedStakeRewards}</Text.Body.Normal>
+    </>
+  );
+
   return (
-    <div className={styles.assetInputContainer} data-testid-title={`${coin?.ticker}`} data-testid="coin-configure">
+    <div
+      className={cn(styles.assetInputContainer, { [styles.withLockedRewards]: !!coin.lockedStakeRewards })}
+      data-testid-title={`${coin?.ticker}`}
+      data-testid="coin-configure"
+    >
       <div data-testid="coin-configure-info" className={styles.assetConfigRow}>
         <div data-testid="coin-configure-text" onClick={onNameClick} className={styles.tickerContainer}>
           <Tooltip title={coin?.shortTicker && coin.ticker}>
@@ -199,7 +223,7 @@ export const AssetInput = ({
                 size="small"
                 color="secondary"
                 className={cn(styles.maxBtn, { [styles.show]: displayMaxBtn })}
-                disabled={hasReachedMaxAmount}
+                disabled={hasReachedMaxAmount || hasReachedMaxAvailableAmount}
               >
                 {t('core.assetInput.maxButton')}
               </Button>
@@ -226,22 +250,34 @@ export const AssetInput = ({
       </div>
 
       <div className={styles.assetBalancesRow}>
-        <p data-testid="coin-configure-balance" className={styles.balanceText}>
-          {coin.balance}
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <p data-testid="coin-configure-fiat-value" className={styles.balanceText}>
+        <Flex gap="$8" flexDirection="column" data-testid="coin-configure-balance" className={styles.balanceText}>
+          <Text.Body.Normal>{coin.balance}</Text.Body.Normal>
+          {!isPopupView && !!coin.lockedStakeRewards && lockedRewards}
+        </Flex>
+        <Flex flexDirection="column" alignItems="flex-end">
+          <p data-testid="coin-configure-fiat-value" className={cn(styles.balanceText, styles.fiatValue)}>
             {focused ? fiatValue : formattedFiatValue}
           </p>
+          {isInvalid && errorMessage && (
+            <span className={styles.invalidInput} data-testid="coin-configure-error-message">
+              {t(errorMessage)}
+            </span>
+          )}
+        </Flex>
+      </div>
+      {isPopupView && !!coin.lockedStakeRewards && (
+        <div className={styles.assetBalancesRow}>
+          <Flex
+            pt="$4"
+            gap="$8"
+            flexDirection="column"
+            data-testid="coin-configure-balance"
+            className={styles.balanceText}
+          >
+            {lockedRewards}
+          </Flex>
         </div>
-      </div>
-      <div className={styles.assetError}>
-        {isInvalid && errorMessage && (
-          <span className={styles.invalidInput} data-testid="coin-configure-error-message">
-            {t(errorMessage)}
-          </span>
-        )}
-      </div>
+      )}
     </div>
   );
 };

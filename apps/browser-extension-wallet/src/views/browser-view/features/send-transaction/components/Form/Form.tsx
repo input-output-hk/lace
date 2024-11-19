@@ -12,12 +12,13 @@ import { useMaxAda } from '@hooks/useMaxAda';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 import { getFee } from '../SendTransactionSummary';
 import { useBuiltTxState, useSpentBalances, useLastFocusedInput, useOutputs } from '../../store';
-import { getReachedMaxAmountList } from '../../helpers';
+import { getNextInsuffisientBalanceInputs, getReachedMaxAmountList, hasReachedMaxAmountAda } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
 import { Box, Text, WarningIconCircleComponent } from '@input-output-hk/lace-ui-toolkit';
 import styles from './Form.module.scss';
+import { useRewardAccountsData } from '../../../staking/hooks';
 
 export interface Props {
   assets: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
@@ -48,9 +49,11 @@ export const Form = ({
   const tokensUsed = useSpentBalances();
   const spendableCoin = useMaxAda();
   const [insufficientBalanceInputs, setInsufficientBalanceInputs] = useState<string[]>([]); // we save all the element input ids with insufficient balance error
+  const [insufficientAvailableBalanceInputs, setInsufficientAvailableBalanceInputs] = useState<string[]>([]);
   const { lastFocusedInput } = useLastFocusedInput();
   const { fiatCurrency } = useCurrencyStore();
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
+  const { lockedStakeRewards } = useRewardAccountsData();
 
   const { setNewOutput } = useOutputs();
 
@@ -75,25 +78,29 @@ export const Form = ({
     [assets, availableRewards, balance, cardanoCoin, tokensUsed]
   );
 
+  const reachedMaxAvailableAmount =
+    balance?.coins &&
+    hasReachedMaxAmountAda({
+      tokensUsed,
+      balance: BigInt(balance?.coins.toString()) - BigInt(lockedStakeRewards.toString()),
+      cardanoCoin,
+      availableRewards
+    });
+
   useEffect(() => {
     if (lastFocusedInput) {
       const id = lastFocusedInput.split('.')[1]; // we get the coin id (cardano id or asset id) to check if it is in the reachedMaxAmountList
-      setInsufficientBalanceInputs((prevInputsList) => {
-        const isInMaxAmountList = reachedMaxAmountList.has(id); // check the if the id exists in reachedMaxAmountList
-        const isInInsufficientBalanceList = prevInputsList.includes(lastFocusedInput); // check the if input element id exists in insufficient balance list
+      setInsufficientBalanceInputs(getNextInsuffisientBalanceInputs(lastFocusedInput, reachedMaxAmountList, id));
 
-        // check if the last focused element has insufficient balance and doesn't exists in insufficient balance list
-        if (isInMaxAmountList && !isInInsufficientBalanceList) {
-          return [...prevInputsList, lastFocusedInput]; // add it to the insufficient balance list
-          // check if the last focused element has balance and exists in insufficient balance list
-        } else if (!isInMaxAmountList && isInInsufficientBalanceList) {
-          return prevInputsList.filter((inputId) => inputId.split('.')[1] !== id); // remove all items with same coin id (cardano id or asset id)
-        }
-
-        return prevInputsList;
-      });
+      setInsufficientAvailableBalanceInputs(
+        getNextInsuffisientBalanceInputs(
+          lastFocusedInput,
+          new Set(reachedMaxAvailableAmount ? [cardanoCoin.id] : []),
+          id
+        )
+      );
     }
-  }, [reachedMaxAmountList, lastFocusedInput]);
+  }, [reachedMaxAmountList, lastFocusedInput, cardanoCoin.id, reachedMaxAvailableAmount]);
   const fee = uiTx?.fee?.toString() ?? '0';
   const totalCost = getFee(fee.toString(), prices?.cardano?.price, cardanoCoin, fiatCurrency);
 
@@ -133,6 +140,7 @@ export const Form = ({
         isBundle={isBundle}
         setIsBundle={setIsBundle}
         insufficientBalanceInputs={insufficientBalanceInputs}
+        insufficientAvailableBalanceInputs={insufficientAvailableBalanceInputs}
         reachedMaxAmountList={reachedMaxAmountList}
         assets={assets}
         assetBalances={assetBalances}

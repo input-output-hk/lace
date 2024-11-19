@@ -61,6 +61,42 @@ export const getOutputValues = (assets: Array<AssetInfo>, cardanoCoin: Wallet.Co
   };
 };
 
+export const getNextInsuffisientBalanceInputs =
+  (lastFocusedInput: string, reachedMaxAmountList: Set<string | Wallet.Cardano.AssetId>, id: string) =>
+  (prevInputsList: string[]): string[] => {
+    const isInMaxAmountList = reachedMaxAmountList.has(id); // check the if the id exists in reachedMaxAmountList
+    const isInInsufficientBalanceList = prevInputsList.includes(lastFocusedInput); // check the if input element id exists in insufficient balance list
+
+    // check if the last focused element has insufficient balance and doesn't exists in insufficient balance list
+    if (isInMaxAmountList && !isInInsufficientBalanceList) {
+      return [...prevInputsList, lastFocusedInput]; // add it to the insufficient balance list
+      // check if the last focused element has balance and exists in insufficient balance list
+    } else if (!isInMaxAmountList && isInInsufficientBalanceList) {
+      return prevInputsList.filter((inputId) => inputId.split('.')[1] !== id); // remove all items with same coin id (cardano id or asset id)
+    }
+
+    return prevInputsList;
+  };
+
+export const hasReachedMaxAmountAda = ({
+  tokensUsed,
+  balance,
+  exceed = false,
+  cardanoCoin,
+  availableRewards = BigInt(0)
+}: {
+  tokensUsed: SpentBalances;
+  balance: Wallet.Cardano.Lovelace;
+  exceed?: boolean;
+  cardanoCoin: Wallet.CoinId;
+  availableRewards?: bigint;
+}): boolean =>
+  tokensUsed[cardanoCoin.id] && balance
+    ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
+        Wallet.util.lovelacesToAdaString((balance + availableRewards).toString())
+      )
+    : false;
+
 export const getReachedMaxAmountList = ({
   assets = new Map(),
   tokensUsed,
@@ -76,12 +112,12 @@ export const getReachedMaxAmountList = ({
   cardanoCoin: Wallet.CoinId;
   availableRewards?: bigint;
 }): (string | Wallet.Cardano.AssetId)[] => {
-  const reachedMaxAmountAda =
-    tokensUsed[cardanoCoin.id] && balance?.coins
-      ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
-          Wallet.util.lovelacesToAdaString((balance.coins + availableRewards).toString())
-        )
-      : false;
+  const reachedMaxAmountAda = hasReachedMaxAmountAda({
+    tokensUsed,
+    balance: balance?.coins,
+    cardanoCoin,
+    availableRewards
+  });
 
   const reachedMaxAmountAssets = balance?.assets?.size
     ? [...balance.assets]
