@@ -159,7 +159,7 @@ export const StakingModals = ({ popupView }: StakingModalsProps): React.ReactEle
             dataTestId: 'exit-staking-modal-confirm',
             onClick: () => {
               setIsRegisterAsDRepModalVisible(false);
-              openExternalLink(GOV_TOOLS_URLS[environmentName]);
+              GOV_TOOLS_URLS[environmentName] && openExternalLink(GOV_TOOLS_URLS[environmentName]);
             }
           }
         ]}

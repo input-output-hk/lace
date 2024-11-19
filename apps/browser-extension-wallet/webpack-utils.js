@@ -26,10 +26,6 @@ const transformManifest = (content, mode) => {
         `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`
       )
       .replace(
-        '$GOV_TOOLS_URLS',
-        `${process.env.GOV_TOOLS_URL_MAINNET} ${process.env.GOV_TOOLS_URL_PREPROD} ${process.env.GOV_TOOLS_URL_PREVIEW} ${process.env.GOV_TOOLS_URL_SANCHONET}`
-      )
-      .replace(
         '$BLOCKFROST_URLS',
         `${process.env.BLOCKFROST_URL_MAINNET} ${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_SANCHONET}`
       )
