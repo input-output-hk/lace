@@ -29,7 +29,21 @@ describe('initializeInjectedScript', () => {
   });
 
   describe('wallet mode not cached eagerly injects in lace with extensions', () => {
-    it('waits for dappInjectCompatibilityMode; does not re-inject in lace without extensions', async () => {
+    it('ignores dappInjectCompatibilityMode when in lace mode', async () => {
+      const latestWalletMode = Promise.resolve({ mode: 'lace', dappInjectCompatibilityMode: true });
+      (getWalletMode as jest.Mock).mockReturnValue({ latestWalletMode });
+
+      await initializeInjectedScript({ logger });
+
+      expect(injectGlobal).toHaveBeenCalledTimes(1);
+      expect(injectGlobal).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+        expect.anything()
+      );
+    });
+
+    it('waits for dappInjectCompatibilityMode; does not inject in nami', async () => {
       const latestWalletMode = Promise.resolve({ mode: 'nami', dappInjectCompatibilityMode: false });
       (getWalletMode as jest.Mock).mockReturnValue({ latestWalletMode });
 
@@ -83,7 +97,7 @@ describe('initializeInjectedScript', () => {
       });
     });
 
-    describe('nami mode injects lace without extensions', () => {
+    describe('nami mode injects lace with extensions', () => {
       it('eagerly injects in nami and does not await latest because dappInjectCompatibilityMode is enabled', async () => {
         const cachedWalletMode: WalletMode = { mode: 'nami', dappInjectCompatibilityMode: true };
         const latestWalletMode = Promise.resolve({ mode: 'nami', dappInjectCompatibilityMode: false });
@@ -93,7 +107,7 @@ describe('initializeInjectedScript', () => {
 
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
           expect.anything()
         );
         expect(injectGlobal).toHaveBeenCalledWith(
@@ -113,7 +127,7 @@ describe('initializeInjectedScript', () => {
 
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
           expect.anything()
         );
         expect(injectGlobal).toHaveBeenCalledWith(
