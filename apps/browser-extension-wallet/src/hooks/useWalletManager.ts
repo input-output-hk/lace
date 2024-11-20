@@ -140,6 +140,7 @@ export interface UseWalletManager {
   reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
+  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
   saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
@@ -154,7 +155,8 @@ const clearBytes = (bytes: Uint8Array) => {
 const getExtendedAccountPublicKey = async (
   wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   accountIndex: number,
-  passphrase?: Uint8Array
+  passphrase?: Uint8Array,
+  purpose: KeyManagement.KeyPurpose = KeyManagement.KeyPurpose.STANDARD
 ) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
@@ -168,7 +170,8 @@ const getExtendedAccountPublicKey = async (
       const accountPrivateKey = await Wallet.KeyManagement.util.deriveAccountPrivateKey({
         bip32Ed25519: Wallet.bip32Ed25519,
         accountIndex,
-        rootPrivateKey: Wallet.Crypto.Bip32PrivateKeyHex(rootPrivateKeyBuffer.toString('hex'))
+        rootPrivateKey: Wallet.Crypto.Bip32PrivateKeyHex(rootPrivateKeyBuffer.toString('hex')),
+        purpose
       });
       const accountPublicKey = await Wallet.bip32Ed25519.getBip32PublicKey(accountPrivateKey);
       clearBytes(passphrase);
@@ -248,6 +251,7 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
   Wallet.connectDeviceRevamped(usbDevice);
 
+// eslint-disable-next-line max-statements
 export const useWalletManager = (): UseWalletManager => {
   const {
     walletLock,
@@ -833,13 +837,23 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
+  const getSharedWalletExtendedPublicKey = useCallback(
+    (passphrase: Uint8Array) => {
+      const { wallet } = cardanoWallet.source;
+      if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
+
+      const accountIndex = 0;
+      return getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
+    },
+    [cardanoWallet]
+  );
+
   const generateSharedWalletKey = useMemo(
     () =>
       makeGenerateSharedWalletKey({
-        chainId: getCurrentChainId(),
-        getMnemonic
+        getSharedWalletExtendedPublicKey
       }),
-    [getCurrentChainId, getMnemonic]
+    [getSharedWalletExtendedPublicKey]
   );
 
   const saveSharedWalletKey = useCallback<UseWalletManager['saveSharedWalletKey']>(
@@ -1002,6 +1016,7 @@ export const useWalletManager = (): UseWalletManager => {
     getMnemonic,
     enableCustomNode,
     generateSharedWalletKey,
-    saveSharedWalletKey
+    saveSharedWalletKey,
+    getSharedWalletExtendedPublicKey
   };
 };
