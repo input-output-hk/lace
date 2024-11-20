@@ -4,6 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { of } from 'rxjs';
 import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { cacheNamiMetadataSubscription } from '../cache-nami-metadata';
+import { TestScheduler } from 'rxjs/testing';
 
 describe('cacheNamiMetadataSubscription', () => {
   afterEach(() => {
@@ -198,5 +199,114 @@ describe('cacheNamiMetadataSubscription', () => {
         }
       })
     );
+  });
+
+  it('should bundle and emit only latest UTxO and address values, when emissions are close to simultaneous', () => {
+    const testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
+
+    testScheduler.run(({ cold }) => {
+      const mockWalletManager = {
+        activeWallet$: of({
+          observableWallet: {
+            addresses$: cold('-a 60ms b', {
+              a: [{ address: 'address1' }],
+              b: [{ address: 'address2' }]
+            }),
+            protocolParameters$: cold('a', { a: { coinsPerUtxoByte: BigInt(100) } }),
+            balance: {
+              rewardAccounts: {
+                rewards$: cold('a', { a: BigInt(2000) })
+              },
+              utxo: {
+                total$: cold('-a 65ms b', {
+                  a: { coins: BigInt(5000), assets: undefined },
+                  b: { coins: BigInt(8000), assets: undefined }
+                }),
+                unspendable$: cold('-a', { a: { coins: BigInt(1000) } })
+              }
+            }
+          },
+          props: { walletId: 'walletId', accountIndex: 0, chainId: Wallet.Cardano.ChainIds.Preprod }
+        }),
+        activeWalletId$: of('walletId'),
+        switchNetwork: jest.fn(),
+        initialize: jest.fn(),
+        activate: jest.fn(),
+        deactivate: jest.fn(),
+        shutdown: jest.fn(),
+        destroyData: jest.fn()
+      } as unknown as WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+      const mockWalletRepository = {
+        wallets$: cold('a', {
+          a: [
+            {
+              walletId: 'walletId',
+              metadata: {},
+              accounts: [{ accountIndex: 0, metadata: { name: 'account #0' } }]
+            }
+          ]
+        }),
+        addWallet: jest.fn(),
+        addAccount: jest.fn(),
+        updateWalletMetadata: jest.fn(),
+        updateAccountMetadata: jest.fn(),
+        removeAccount: jest.fn(),
+        removeWallet: jest.fn()
+      } as unknown as WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+      // eslint-disable-next-line consistent-return
+      const getBalanceMock = jest.fn((input) => {
+        if (input.address === 'address1') {
+          return { totalCoins: BigInt(4000), unspendableCoins: BigInt(1000), lockedCoins: BigInt(2000) };
+        } else if (input.address === 'address2') {
+          return { totalCoins: BigInt(6500), unspendableCoins: BigInt(1500), lockedCoins: BigInt(3000) };
+        }
+      });
+
+      cacheNamiMetadataSubscription({
+        walletManager: mockWalletManager,
+        walletRepository: mockWalletRepository,
+        getBalance: getBalanceMock
+      });
+
+      testScheduler.flush();
+
+      expect(getBalanceMock).toHaveBeenCalledTimes(2);
+
+      expect(mockWalletRepository.updateAccountMetadata).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          walletId: 'walletId',
+          accountIndex: 0,
+          metadata: {
+            name: 'account #0',
+            namiMode: {
+              avatar: expect.any(String),
+              address: { Preprod: 'address1' },
+              balance: { Preprod: '1000' }
+            }
+          }
+        })
+      );
+
+      expect(mockWalletRepository.updateAccountMetadata).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          walletId: 'walletId',
+          accountIndex: 0,
+          metadata: {
+            name: 'account #0',
+            namiMode: {
+              avatar: expect.any(String),
+              address: { Preprod: 'address2' },
+              balance: { Preprod: '2000' }
+            }
+          }
+        })
+      );
+    });
   });
 });
