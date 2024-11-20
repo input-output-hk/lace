@@ -40,13 +40,12 @@ type AddSharedWalletFlowProps = {
   modalOpen?: boolean;
 };
 
-const generateSharedWalletKey = makeGenerateSharedWalletKey({
-  chainId: Wallet.Cardano.ChainIds.Preprod,
-  getMnemonic: async () => Wallet.KeyManagement.util.generateMnemonicWords(),
-});
-
 export const sharedWalletKey =
   '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
+
+const generateSharedWalletKey = makeGenerateSharedWalletKey({
+  getSharedWalletExtendedPublicKey: async () => Wallet.Crypto.Bip32PublicKeyHex(sharedWalletKey),
+});
 
 export const activeWalletName = 'My wallet';
 
