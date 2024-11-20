@@ -56,7 +56,7 @@ const injectInNamiNs = (
   return false;
 };
 
-const initializeInjectedScript = async ({ logger }: cip30.InitializeInjectedDependencies) => {
+export const initializeInjectedScript = async ({ logger }: cip30.InitializeInjectedDependencies) => {
   const dependencies: MessengerDependencies = {
     logger,
     runtime: injectedRuntime
