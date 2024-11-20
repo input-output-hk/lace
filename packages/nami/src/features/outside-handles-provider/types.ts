@@ -93,12 +93,15 @@ export interface OutsideHandlesContextValue {
   hasNoFunds: boolean;
   switchWalletMode: () => Promise<void>;
   openExternalLink: (url: string) => void;
-  walletAddresses: string[];
+  walletAddresses: Wallet.Cardano.PaymentAddress[];
   eraSummaries: EraSummary[];
-  transactions: (Wallet.Cardano.HydratedTx | Wallet.TxInFlight)[];
-  getTxInputsValueAndAddress: (
-    inputs: Readonly<Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]>,
-  ) => Promise<Wallet.TxInput[]>;
+  transactions: {
+    history: Wallet.Cardano.HydratedTx[];
+    outgoing: {
+      inFlight: Wallet.TxInFlight[];
+      signed: Wallet.KeyManagement.WitnessedTx[];
+    };
+  };
   certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
     type: Wallet.Cardano.CertificateType,
   ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
@@ -116,4 +119,7 @@ export interface OutsideHandlesContextValue {
   ) => Promise<void>;
   removeWallet: () => Promise<void>;
   setDeletingWallet: (isDeleting: boolean) => void;
+  chainHistoryProvider: Wallet.ChainHistoryProvider;
+  protocolParameters: Wallet.Cardano.ProtocolParameters;
+  assetInfo: Wallet.Assets;
 }
