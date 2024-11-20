@@ -1,4 +1,4 @@
-import { filter, of, switchMap, zip } from 'rxjs';
+import { combineLatest, debounceTime, filter, of, switchMap } from 'rxjs';
 import merge from 'lodash/merge';
 import { Wallet } from '@lace/cardano';
 // eslint does not support exports property in package.json yet
@@ -8,6 +8,8 @@ import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { isNotNil } from '@cardano-sdk/util';
 import { getChainName } from '@src/utils/get-chain-name';
+
+const DEBOUNCE_TIME_MS = 50;
 
 export const cacheNamiMetadataSubscription = ({
   getBalance = getBalanceFn,
@@ -21,17 +23,18 @@ export const cacheNamiMetadataSubscription = ({
   walletManager.activeWallet$
     .pipe(
       filter(isNotNil),
-      switchMap((wallet) =>
-        zip([
-          of(wallet.props.chainId),
-          of(wallet.props.walletId),
-          of(wallet.props.accountIndex),
-          wallet.observableWallet.addresses$,
-          wallet.observableWallet.balance.utxo.total$,
-          wallet.observableWallet.balance.utxo.unspendable$,
-          wallet.observableWallet.balance.rewardAccounts.rewards$,
-          wallet.observableWallet.protocolParameters$
-        ])
+      switchMap(
+        (wallet) =>
+          combineLatest([
+            of(wallet.props.chainId),
+            of(wallet.props.walletId),
+            of(wallet.props.accountIndex),
+            wallet.observableWallet.addresses$,
+            wallet.observableWallet.balance.utxo.total$,
+            wallet.observableWallet.balance.utxo.unspendable$,
+            wallet.observableWallet.balance.rewardAccounts.rewards$,
+            wallet.observableWallet.protocolParameters$
+          ]).pipe(debounceTime(DEBOUNCE_TIME_MS)) // Debounce of 50ms to avoid multiple triggers when two or more observables emit at the same time (I.E addresses and utxo.total$)
       ),
       blockingWithLatestFrom(walletRepository.wallets$)
     )
