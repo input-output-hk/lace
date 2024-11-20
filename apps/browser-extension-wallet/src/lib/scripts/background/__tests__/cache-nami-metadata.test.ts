@@ -201,7 +201,7 @@ describe('cacheNamiMetadataSubscription', () => {
     );
   });
 
-  it('should emit only once if UTXO and address observables emit simultaneously', () => {
+  it('should bundle and emit only latest UTxO and address values, when emissions are close to simultaneous', () => {
     const testScheduler = new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });

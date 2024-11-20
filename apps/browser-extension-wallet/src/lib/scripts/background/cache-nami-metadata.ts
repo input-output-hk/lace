@@ -34,7 +34,7 @@ export const cacheNamiMetadataSubscription = ({
             wallet.observableWallet.balance.utxo.unspendable$,
             wallet.observableWallet.balance.rewardAccounts.rewards$,
             wallet.observableWallet.protocolParameters$
-          ]).pipe(debounceTime(DEBOUNCE_TIME_MS)) // Debounce of 50ms to avoid multiple triggers when two or more observables emit at the same time (I.E addresses and utxo.total$)
+          ]).pipe(debounceTime(DEBOUNCE_TIME_MS)) // Debounce to avoid multiple triggers when two or more observables emit at the same time (I.E addresses and utxo.total$)
       ),
       blockingWithLatestFrom(walletRepository.wallets$)
     )
