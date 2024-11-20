@@ -20,6 +20,7 @@ import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
 const WALLET_NAME_MAX_LENGTH = 16;
+const WALLET_OPTION_NAME_MAX_LENGTH = 12;
 const TOAST_DEFAULT_DURATION = 3;
 
 const overlayInnerStyle = {
@@ -39,6 +40,9 @@ interface RenderWalletOptionsParams {
 }
 
 const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
+
+const shortenWalletName = (text: string, length: number) =>
+  text.length > length ? `${text.slice(0, length)}...` : text;
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -91,8 +95,11 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
-          title={wallet.metadata.name}
-          subtitle={lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label')}
+          title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
+          subtitle={shortenWalletName(
+            lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
+            WALLET_OPTION_NAME_MAX_LENGTH
+          )}
           id={`wallet-option-${wallet.walletId}`}
           onClick={async () => {
             if (activeWalletId === wallet.walletId) {
