@@ -529,13 +529,13 @@ export const useWalletTxs = () => {
   ]);
 
   useEffect(() => {
-    if (!rewardAccounts) return;
+    if (!rewardAccounts || !transactions) return;
     fetchWalletActivities();
   }, [
     fetchWalletActivities,
-    transactions.history,
-    transactions.outgoing.inFlight,
-    transactions.outgoing.signed,
+    transactions?.history,
+    transactions?.outgoing.inFlight,
+    transactions?.outgoing.signed,
     walletAddresses,
     assetInfo,
     rewardAccounts,
