@@ -1,12 +1,12 @@
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import css from 'rollup-plugin-import-css';
 import image from '@rollup/plugin-image';
 import json from '@rollup/plugin-json';
 import packageJson from './package.json';
 import svgr from '@svgr/rollup';
 import copy from 'rollup-plugin-copy';
 import url from '@rollup/plugin-url';
+import postcss from 'rollup-plugin-postcss';
 
 const common = {
   plugins: [
@@ -18,7 +18,15 @@ const common = {
     }),
     json(),
     commonjs(),
-    css(),
+    postcss({
+      // postcss plugin includes always path to the es version of the style-inject
+      // no matter what build type it is. It makes cjs build requiring esm version
+      // https://github.com/egoist/rollup-plugin-postcss/issues/381
+      // https://github.com/egoist/rollup-plugin-postcss/issues/367
+      inject: cssVariableName => `
+import styleInject from 'style-inject';
+styleInject(${cssVariableName});`,
+    }),
     image(),
     svgr(),
     copy({
