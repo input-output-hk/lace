@@ -27,6 +27,8 @@ import {
   Icon,
   Select,
   useColorModeValue,
+  Flex,
+  Spacer,
 } from '@chakra-ui/react';
 import { MdModeEdit } from 'react-icons/md';
 import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
@@ -73,6 +75,8 @@ type Props = Pick<
     accountName: string;
     accountAvatar?: string;
     updateAccountMetadata: UseAccount['updateAccountMetadata'];
+    isCompatibilityMode: boolean;
+    handleCompatibilityModeChoice: (isCompatibilityMode: boolean) => void;
   };
 
 const Settings = ({
@@ -83,9 +87,11 @@ const Settings = ({
   accountName,
   accountAvatar,
   isAnalyticsOptIn,
+  isCompatibilityMode,
   connectedDapps,
   removeDapp,
   handleAnalyticsChoice,
+  handleCompatibilityModeChoice,
   changePassword,
   updateAccountMetadata,
   environmentName,
@@ -147,6 +153,8 @@ const Settings = ({
           <Whitelisted
             connectedDapps={connectedDapps}
             removeDapp={removeDapp}
+            isCompatibilityMode={isCompatibilityMode}
+            handleCompatibilityModeChoice={handleCompatibilityModeChoice}
           />
         </Route>
         <Route path="/settings/network" exact>
@@ -427,7 +435,17 @@ const GeneralSettings = ({
 const Whitelisted = ({
   connectedDapps,
   removeDapp,
-}: Readonly<Pick<Props, 'connectedDapps' | 'removeDapp'>>) => {
+  isCompatibilityMode,
+  handleCompatibilityModeChoice,
+}: Readonly<
+  Pick<
+    Props,
+    | 'connectedDapps'
+    | 'handleCompatibilityModeChoice'
+    | 'isCompatibilityMode'
+    | 'removeDapp'
+  >
+>) => {
   const capture = useCaptureEvent();
 
   return (
@@ -442,6 +460,16 @@ const Whitelisted = ({
       <Text fontSize="lg" fontWeight="bold">
         Whitelisted sites
       </Text>
+      <Flex minWidth="65%" paddingTop="10px" alignItems="center" gap="2">
+        <Text fontSize="sm">DApp compatibility mode</Text>
+        <Spacer />
+        <ButtonSwitch
+          isChecked={isCompatibilityMode}
+          onChange={() => {
+            handleCompatibilityModeChoice(!isCompatibilityMode);
+          }}
+        />
+      </Flex>
       <Box height="6" />
       {connectedDapps?.length > 0 ? (
         connectedDapps.map(({ url, logo }, index) => (

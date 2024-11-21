@@ -93,6 +93,17 @@ export const NamiView = withDappContext((): React.ReactElement => {
     txBuilder: collateralTxBuilder
   } = useCollateral();
 
+  const [isCompatibilityMode, setIsCompatibilityMode] = useState<boolean>();
+  useEffect(() => {
+    getBackgroundStorage()
+      .then(({ dappInjectCompatibilityMode }) => setIsCompatibilityMode(dappInjectCompatibilityMode))
+      .catch(console.error);
+  }, []);
+  const handleCompatibilityModeChoice = async (newCompatMode: boolean) => {
+    await setBackgroundStorage({ dappInjectCompatibilityMode: newCompatMode });
+    setIsCompatibilityMode(newCompatMode);
+  };
+
   const handleResolver = useHandleResolver();
 
   const cardanoPrice = priceResult.cardano.price;
@@ -195,7 +206,9 @@ export const NamiView = withDappContext((): React.ReactElement => {
         removeDapp,
         connectedDapps,
         isAnalyticsOptIn,
+        isCompatibilityMode,
         handleAnalyticsChoice,
+        handleCompatibilityModeChoice,
         createWallet: createWalletFromPrivateKey,
         getMnemonic,
         deleteWallet,

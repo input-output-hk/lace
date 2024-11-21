@@ -43,6 +43,7 @@ const App = () => {
     theme,
     walletAddresses,
     isAnalyticsOptIn,
+    isCompatibilityMode,
     currentChain,
     cardanoPrice,
     walletManager,
@@ -53,6 +54,7 @@ const App = () => {
     createWallet,
     deleteWallet,
     handleAnalyticsChoice,
+    handleCompatibilityModeChoice,
     environmentName,
     switchNetwork,
     availableChains,
@@ -206,7 +208,9 @@ const App = () => {
             accountAvatar={activeAccount.avatar}
             accountName={activeAccount.name}
             isAnalyticsOptIn={isAnalyticsOptIn}
+            isCompatibilityMode={isCompatibilityMode}
             handleAnalyticsChoice={handleAnalyticsChoice}
+            handleCompatibilityModeChoice={handleCompatibilityModeChoice}
             updateAccountMetadata={updateAccountMetadata}
             environmentName={environmentName}
             switchNetwork={switchNetwork}
