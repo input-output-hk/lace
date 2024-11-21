@@ -460,10 +460,8 @@ const Whitelisted = ({
       <Text fontSize="lg" fontWeight="bold">
         Whitelisted sites
       </Text>
-      <Flex minWidth="65%" padding="0 16px" alignItems="center" gap="2">
-        <Text fontSize="16" fontWeight="bold">
-          Compatibility Mode
-        </Text>
+      <Flex minWidth="65%" paddingTop="10px" alignItems="center" gap="2">
+        <Text fontSize="sm">DApp compatibility mode</Text>
         <Spacer />
         <ButtonSwitch
           isChecked={isCompatibilityMode}
