@@ -102,9 +102,9 @@ Feature: Add new wallet - Create paper wallet
     And I click on "Open wallet" button on "Save your paper wallet" page
     And I wait for main loader to disappear
     Then I see LW homepage
-    And "Paper Wallet 1" is displayed as a wallet name on the menu button
+    And "Paper Wall..." is displayed as a wallet name on the menu button
     When I click the menu button
-    Then Wallet number 2 with "Paper Wallet 1" name is displayed on the user menu
+    Then Wallet number 2 with "Paper Wallet..." name is displayed on the user menu
 
   @LW-11342
   Scenario: Add new wallet - Create - Paper wallet - Choose recovery method - click "Learn more" link
