@@ -189,24 +189,28 @@ const calculateAmount = ({
   const amounts: Amount[] = [];
 
   while (inputs.length > 0) {
-    const input = inputs.pop()!;
-    const outputIndex = outputs.findIndex(amount => amount.unit === input.unit);
-    let qty;
+    const input = inputs.pop();
+    if (input) {
+      const outputIndex = outputs.findIndex(
+        amount => amount.unit === input.unit,
+      );
+      let qty;
 
-    if (outputIndex > -1) {
-      qty =
-        (BigInt(input.quantity) - BigInt(outputs[outputIndex].quantity)) *
-        BigInt(-1);
-      outputs.splice(outputIndex, 1);
-    } else {
-      qty = BigInt(input.quantity) * BigInt(-1);
+      if (outputIndex > -1) {
+        qty =
+          (BigInt(input.quantity) - BigInt(outputs[outputIndex].quantity)) *
+          BigInt(-1);
+        outputs.splice(outputIndex, 1);
+      } else {
+        qty = BigInt(input.quantity) * BigInt(-1);
+      }
+
+      if (qty !== BigInt(0) || input.unit === 'lovelace')
+        amounts.push({
+          unit: input.unit,
+          quantity: qty,
+        });
     }
-
-    if (qty !== BigInt(0) || input.unit === 'lovelace')
-      amounts.push({
-        unit: input.unit,
-        quantity: qty,
-      });
   }
 
   return amounts.concat(outputs);
@@ -325,6 +329,24 @@ export const encodeToCbor = (args: EncodeToCborArgs): Serialization.TxCBOR => {
   return transaction.toCbor();
 };
 
+const getTotalWithdrawlAmount = ({
+  rewardAccountsAddresses,
+  withdrawals = [],
+}: {
+  rewardAccountsAddresses: Set<Wallet.Cardano.RewardAccount>;
+  withdrawals: Wallet.Cardano.Withdrawal[];
+}): bigint => {
+  let total = BigInt(0);
+
+  for (const withdrawal of withdrawals) {
+    if (rewardAccountsAddresses.has(withdrawal.stakeAddress)) {
+      total = total + BigInt(withdrawal.quantity.toString());
+    }
+  }
+
+  return total;
+};
+
 export const getTxInfo = async ({
   tx,
   getTxInputsValueAndAddress,
@@ -380,6 +402,10 @@ export const getTxInfo = async ({
     Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
       ? BigInt(implicitCoin.deposit?.toString() ?? 0)
       : BigInt(0);
+  const totalWithdrawals = getTotalWithdrawlAmount({
+    rewardAccountsAddresses,
+    withdrawals: tx.body.withdrawals ?? [],
+  });
 
   const info: TxInfo = {
     txHash: tx.id.toString(),
@@ -404,7 +430,10 @@ export const getTxInfo = async ({
     amounts: amounts,
     lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
       ? BigInt(lovelace.toString())
-      : BigInt(lovelace.toString()) + BigInt(tx.body.fee.toString()) + deposit,
+      : BigInt(lovelace.toString()) -
+        BigInt(totalWithdrawals.toString()) +
+        BigInt(tx.body.fee.toString()) +
+        deposit,
     assets: assets
       .map(asset => {
         const info = assetInfo?.get(Wallet.Cardano.AssetId(asset.unit));
