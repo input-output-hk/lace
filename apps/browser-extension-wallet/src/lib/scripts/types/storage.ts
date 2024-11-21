@@ -35,6 +35,7 @@ export interface BackgroundStorage {
     completed: boolean;
     mode: 'lace' | 'nami';
   };
+  dappInjectCompatibilityMode?: boolean;
   optedInBeta?: boolean;
 }
 

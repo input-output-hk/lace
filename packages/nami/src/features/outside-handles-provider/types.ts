@@ -36,7 +36,11 @@ export interface OutsideHandlesContextValue {
   removeDapp: (origin: string) => Promise<boolean>;
   connectedDapps: Wallet.DappInfo[];
   isAnalyticsOptIn: boolean;
+  isCompatibilityMode: boolean;
   handleAnalyticsChoice: (isOptIn: boolean) => Promise<void>;
+  handleCompatibilityModeChoice: (
+    isCompatibilityMode: boolean,
+  ) => Promise<void>;
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;

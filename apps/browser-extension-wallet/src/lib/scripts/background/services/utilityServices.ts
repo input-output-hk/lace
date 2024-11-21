@@ -12,7 +12,7 @@ import {
   TokenPrices,
   CoinPrices,
   ChangeModeData,
-  ModeApi
+  LaceFeaturesApi
 } from '../../types';
 import { Subject, of, BehaviorSubject } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -23,7 +23,7 @@ import { config } from '@src/config';
 import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
-import { modeApiProperties, WALLET_MODE_CHANNEL } from '../injectUtil';
+import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -190,16 +190,16 @@ if (process.env.USE_TOKEN_PRICING === 'true') {
   setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }
 
-exposeApi<ModeApi>(
+exposeApi<LaceFeaturesApi>(
   {
     api$: of({
       getMode: async () => {
-        const { namiMigration } = await getBackgroundStorage();
-        return namiMigration?.mode || 'lace';
+        const { namiMigration, dappInjectCompatibilityMode } = await getBackgroundStorage();
+        return { mode: namiMigration?.mode || 'lace', dappInjectCompatibilityMode: !!dappInjectCompatibilityMode };
       }
     }),
-    baseChannel: WALLET_MODE_CHANNEL,
-    properties: modeApiProperties
+    baseChannel: LACE_FEATURES_CHANNEL,
+    properties: laceFeaturesApiProperties
   },
   { logger: console, runtime }
 );

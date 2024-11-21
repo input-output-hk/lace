@@ -105,8 +105,11 @@ export type BackgroundService = {
   backendFailures$: BehaviorSubject<number>;
 };
 
-export type WalletMode = BackgroundStorage['namiMigration']['mode'];
+export type WalletMode = {
+  mode: BackgroundStorage['namiMigration']['mode'];
+  dappInjectCompatibilityMode: BackgroundStorage['dappInjectCompatibilityMode'];
+};
 
-export type ModeApi = {
+export type LaceFeaturesApi = {
   getMode: () => Promise<WalletMode>;
 };
