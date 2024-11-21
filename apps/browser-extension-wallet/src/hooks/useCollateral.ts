@@ -94,7 +94,6 @@ export const useCollateral = (): UseCollateralReturn => {
           uiTx: undefined,
           error: error.message
         });
-        setTxBuilder(undefined);
       }
       throw error;
     } finally {
