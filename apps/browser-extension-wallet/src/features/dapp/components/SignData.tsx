@@ -43,7 +43,7 @@ export const SignData = (): React.ReactElement => {
       clearSecrets();
       setIsLoading(false);
     }
-  }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
+  }, [password, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;

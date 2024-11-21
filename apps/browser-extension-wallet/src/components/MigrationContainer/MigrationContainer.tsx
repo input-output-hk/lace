@@ -48,7 +48,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       }
       setPassword(target);
     },
-    [isValidPassword]
+    [isValidPassword, setPassword]
   );
 
   const lockAndMigrate = useCallback(async () => {
@@ -73,7 +73,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       clearSecrets();
     }
     setIsVerifyingPassword(false);
-  }, [unlockWallet, migrate]);
+  }, [unlockWallet, migrate, clearSecrets]);
 
   useEffect(() => {
     // Load initial migrationState value

@@ -93,7 +93,7 @@ export const CreateCollateral = ({
       clearSecrets();
     }
     setIsSubmitting(false);
-  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm]);
+  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm, clearSecrets]);
 
   const confirmButtonLabel = useMemo(() => {
     if (isInMemoryWallet) {

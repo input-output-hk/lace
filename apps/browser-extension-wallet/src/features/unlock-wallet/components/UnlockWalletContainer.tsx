@@ -32,7 +32,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       }
       setPassword(target);
     },
-    [isValidPassword]
+    [isValidPassword, setPassword]
   );
 
   useEffect(() => {

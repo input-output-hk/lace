@@ -122,7 +122,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       clearSecrets();
       closeDropdownAndShowAccountActivated(accountName);
     },
-    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics]
+    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics, clearSecrets]
   );
 
   const editAccount = useCallback(

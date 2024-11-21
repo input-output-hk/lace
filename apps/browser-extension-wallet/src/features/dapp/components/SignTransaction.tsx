@@ -53,7 +53,7 @@ export const SignTransaction = (): React.ReactElement => {
       passphrase.fill(0);
       setIsLoading(false);
     }
-  }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request]);
+  }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
