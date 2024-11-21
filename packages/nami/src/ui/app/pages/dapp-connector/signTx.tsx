@@ -45,7 +45,10 @@ import {
 
 import type { TransactionValue } from './signTxUtil';
 import type { UseAccount } from '../../../../adapters/account';
-import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import {
+  DappConnector,
+  useDappOutsideHandles,
+} from '../../../../features/dapp-outside-handles-provider';
 import type { Asset as NamiAsset } from '../../../../types/assets';
 import type { AssetsModalRef } from '../../components/assetsModal';
 import type { Cardano } from '@cardano-sdk/core';
@@ -79,6 +82,7 @@ export const SignTx = ({
 
   const capture = useCaptureEvent();
   const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
+  const { passwordUtil } = useDappOutsideHandles();
   const ref = React.useRef();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
@@ -543,9 +547,10 @@ export const SignTx = ({
         onCloseBtn={() => {
           capture(Events.DappConnectorDappTxCancelClick);
         }}
-        sign={async password => {
+        passwordUtil={passwordUtil}
+        sign={async () => {
           try {
-            await request?.sign(password ?? '');
+            await request?.sign(passwordUtil.password?.value ?? '');
           } catch (error) {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError
@@ -555,9 +560,12 @@ export const SignTx = ({
             }
             setIsLoading(l => ({ ...l, error: `Failed to sign. ${error}` }));
             throw `Failed to sign. ${error}`;
+          } finally {
+            passwordUtil.clearSecrets();
           }
         }}
         onConfirm={async status => {
+          passwordUtil.clearSecrets();
           if (status) {
             await capture(Events.DappConnectorDappTxConfirmClick);
           }

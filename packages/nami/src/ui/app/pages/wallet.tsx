@@ -632,8 +632,10 @@ const NewAccountModal = React.forwardRef<
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
+  const {
+    passwordUtil: { password, setPassword, clearSecrets },
+  } = useOutsideHandles();
   const [state, setState] = React.useState({
-    password: '',
     show: false,
     name: '',
     wrongPassword: false,
@@ -645,7 +647,7 @@ const NewAccountModal = React.forwardRef<
       await addAccount({
         index: getNextAccountIndex(accounts, walletId),
         name: state.name,
-        passphrase: Buffer.from(state.password, 'utf8'),
+        passphrase: Buffer.from(password?.value ?? '', 'utf8'),
         walletId,
       });
       await capture(Events.SettingsNewAccountConfirmClick);
@@ -664,7 +666,6 @@ const NewAccountModal = React.forwardRef<
 
   React.useEffect(() => {
     setState({
-      password: '',
       show: false,
       name: '',
       wrongPassword: false,
@@ -706,7 +707,7 @@ const NewAccountModal = React.forwardRef<
               pr="4.5rem"
               type={state.show ? 'text' : 'password'}
               onChange={e => {
-                setState(s => ({ ...s, password: e.target.value }));
+                setPassword(e.target);
               }}
               placeholder="Enter password"
               onKeyDown={e => {
@@ -742,7 +743,7 @@ const NewAccountModal = React.forwardRef<
             Close
           </Button>
           <Button
-            isDisabled={!state.password || !state.name || isLoading}
+            isDisabled={!password?.value || !state.name || isLoading}
             isLoading={isLoading}
             colorScheme="teal"
             onClick={confirmHandler}

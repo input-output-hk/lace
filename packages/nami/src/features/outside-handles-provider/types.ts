@@ -73,6 +73,10 @@ export interface OutsideHandlesContextValue {
     clearSecrets: () => void;
     password: Partial<Password>;
     setPassword: (pw: Readonly<Partial<Password>>) => void;
+    passwordConfirmation: Partial<Password>;
+    setPasswordConfirmation: (pw: Readonly<Partial<Password>>) => void;
+    repeatedPassword: Partial<Password>;
+    setRepeatedConfirmation: (pw: Readonly<Partial<Password>>) => void;
   };
   delegationTxFee: string;
   delegationStoreDelegationTxBuilder?: TxBuilder;

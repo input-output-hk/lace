@@ -9,6 +9,7 @@ import type { CommonOutsideHandlesContextValue } from '../../features/common-out
 import type { Serialization } from '@cardano-sdk/core';
 import type { UnwitnessedTx } from '@cardano-sdk/tx-construction';
 import type { Wallet } from '@lace/cardano';
+import type { PasswordObj } from '@lace/core';
 
 export const buildTx = async ({
   output,
@@ -42,7 +43,7 @@ export const signAndSubmit = async ({
   inMemoryWallet,
 }: Readonly<{
   tx: UnwitnessedTx;
-  password: string;
+  password: Partial<PasswordObj>;
   withSignTxConfirmation: CommonOutsideHandlesContextValue['withSignTxConfirmation'];
   inMemoryWallet: Wallet.ObservableWallet;
 }>) =>
@@ -50,4 +51,4 @@ export const signAndSubmit = async ({
     const { cbor: signedTx } = await tx.sign();
 
     return await submitTx(signedTx, inMemoryWallet);
-  }, password);
+  }, password.value);

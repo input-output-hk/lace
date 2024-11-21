@@ -5,6 +5,7 @@ import type {
   WalletManagerApi,
   WalletRepositoryApi,
 } from '@cardano-sdk/web-extension';
+import type { Password } from '@input-output-hk/lace-ui-toolkit';
 import type { Wallet } from '@lace/cardano';
 
 export interface DappConnector {
@@ -57,4 +58,9 @@ export interface DappOutsideHandlesContextValue {
   >;
   environmentName: Wallet.ChainName;
   dappConnector: DappConnector;
+  passwordUtil: {
+    clearSecrets: () => void;
+    password: Partial<Password>;
+    setPassword: (pw: Readonly<Partial<Password>>) => void;
+  };
 }

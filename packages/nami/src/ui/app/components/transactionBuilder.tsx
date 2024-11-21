@@ -123,7 +123,7 @@ const TransactionBuilder = (undefined, ref) => {
     delegationTxFee,
     isBuildingTx,
     stakingError,
-    passwordUtil: { setPassword, clearSecrets },
+    passwordUtil,
     signAndSubmitTransaction,
     getStakePoolInfo,
     submitCollateralTx,
@@ -279,10 +279,11 @@ const TransactionBuilder = (undefined, ref) => {
         onCloseBtn={() => {
           setData({ pool: { ...poolDefaultValue } });
           resetDelegationState();
+          passwordUtil.clearSecrets();
         }}
+        passwordUtil={passwordUtil}
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
         ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
         title="Delegate your funds"
         sign={async () => {
@@ -494,8 +495,8 @@ const TransactionBuilder = (undefined, ref) => {
         }}
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
         ready={!isBuildingTx}
+        passwordUtil={passwordUtil}
         title="Stake deregistration"
         sign={async () => {
           try {
@@ -632,17 +633,17 @@ const TransactionBuilder = (undefined, ref) => {
         }
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
-        sign={async (password = '') => {
-          await submitCollateral(password);
+        passwordUtil={passwordUtil}
+        sign={async () => {
+          submitCollateral(passwordUtil.password.value ?? '');
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
-          clearSecrets();
+          passwordUtil.clearSecrets();
         }}
         onConfirm={(status, error) => {
+          passwordUtil.clearSecrets();
           if (status) {
-            clearSecrets();
             capture(Events.SettingsCollateralConfirmClick);
             toast({
               title: 'Collateral added',
@@ -662,7 +663,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-          collateralRef.current?.closeModal();
+          setTimeout(() => collateralRef.current?.closeModal(), 0);
           capture(Events.SettingsCollateralXClick);
         }}
         setCollateral={true}
