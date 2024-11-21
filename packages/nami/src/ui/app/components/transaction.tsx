@@ -39,7 +39,6 @@ import {
 } from 'react-icons/ti';
 import ReactTimeAgo from 'react-time-ago';
 
-import { useTxInfo } from '../../../adapters/transactions';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 
@@ -47,7 +46,6 @@ import AssetsPopover from './assetPopoverDiff';
 import UnitDisplay from './unitDisplay';
 
 import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
-import type { Wallet } from '@lace/cardano';
 import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
@@ -84,7 +82,7 @@ const txTypeLabel = {
 };
 
 interface TransactionProps {
-  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight;
+  tx: TxInfo | undefined;
   network: OutsideHandlesContextValue['environmentName'];
   cardanoCoin: CommonOutsideHandlesContextValue['cardanoCoin'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
@@ -96,7 +94,6 @@ const Transaction = ({
   cardanoCoin,
   openExternalLink,
 }: Readonly<TransactionProps>) => {
-  const displayInfo = useTxInfo(tx);
   const colorMode = {
     iconBg: useColorModeValue('white', 'gray.800'),
     txBg: useColorModeValue('teal.50', 'gray.700'),
@@ -106,23 +103,23 @@ const Transaction = ({
 
   const extraInfo = useMemo(
     () =>
-      displayInfo && displayInfo.extra.length > 0 ? (
+      tx && tx.extra.length > 0 ? (
         <Text fontSize={12} fontWeight="semibold" color="teal.500">
-          {getTxExtra(displayInfo.extra)}
+          {getTxExtra(tx.extra)}
         </Text>
       ) : (
         ''
       ),
-    [displayInfo],
+    [tx],
   );
 
   return (
     <AccordionItem borderTop="none" _last={{ borderBottom: 'none' }}>
       <VStack spacing={2}>
-        {displayInfo ? (
+        {tx ? (
           <Box align="center" fontSize={14} fontWeight={500} color="gray.500">
             <ReactTimeAgo
-              date={displayInfo.date}
+              date={tx.date}
               locale="en-US"
               timeStyle="round-minute"
             />
@@ -130,9 +127,9 @@ const Transaction = ({
         ) : (
           <Skeleton width="34%" height="22px" rounded="md" />
         )}
-        {displayInfo ? (
+        {tx ? (
           <AccordionButton
-            data-testid={`transaction-button-${displayInfo.txHash}`}
+            data-testid={`transaction-button-${tx.txHash}`}
             display="flex"
             wordBreak="break-word"
             justifyContent="space-between"
@@ -152,7 +149,7 @@ const Transaction = ({
               position="relative"
               left="-15px"
             >
-              <TxIcon txType={displayInfo.type} extra={displayInfo.extra} />
+              <TxIcon txType={tx.type} extra={tx.extra} />
             </Box>
             <Box
               display="flex"
@@ -161,49 +158,49 @@ const Transaction = ({
               position="relative"
               left="-15px"
             >
-              {displayInfo.lovelace ? (
+              {tx.lovelace ? (
                 <UnitDisplay
                   fontSize={18}
                   color={
-                    displayInfo.lovelace >= 0
+                    tx.lovelace >= 0
                       ? txTypeColor.externalIn
                       : txTypeColor.externalOut
                   }
-                  quantity={displayInfo.lovelace}
+                  quantity={tx.lovelace}
                   decimals={6}
                   symbol={cardanoCoin.symbol}
                 />
               ) : (
                 extraInfo
               )}
-              {['internalIn', 'externalIn'].includes(displayInfo.type) ? (
+              {['internalIn', 'externalIn'].includes(tx.type) ? (
                 ''
               ) : (
                 <Box flexDirection="row" fontSize={12}>
                   Fee:{' '}
                   <UnitDisplay
                     display="inline-block"
-                    quantity={displayInfo.fees}
+                    quantity={tx.fees}
                     decimals={6}
                     symbol={cardanoCoin.symbol}
                   />
-                  {!!Number.parseInt(displayInfo.deposit) && (
+                  {!!Number.parseInt(tx.deposit) && (
                     <>
                       {' & Deposit: '}
                       <UnitDisplay
                         display="inline-block"
-                        quantity={displayInfo.deposit}
+                        quantity={tx.deposit}
                         decimals={6}
                         symbol={cardanoCoin.symbol}
                       />
                     </>
                   )}
-                  {!!Number.parseInt(displayInfo.refund) && (
+                  {!!Number.parseInt(tx.refund) && (
                     <>
                       {' & Refund: '}
                       <UnitDisplay
                         display="inline-block"
-                        quantity={displayInfo.refund}
+                        quantity={tx.refund}
                         decimals={6}
                         symbol={cardanoCoin.symbol}
                       />
@@ -212,7 +209,7 @@ const Transaction = ({
                 </Box>
               )}
 
-              {displayInfo.assets.length > 0 ? (
+              {tx.assets.length > 0 ? (
                 <Box flexDirection="row" fontSize={12}>
                   <Text
                     display="inline-block"
@@ -220,7 +217,7 @@ const Transaction = ({
                     _hover={{ backgroundColor: colorMode.assetsBtnHover }}
                     borderRadius="md"
                   >
-                    <AssetsPopover assets={displayInfo.assets} isDifference />
+                    <AssetsPopover assets={tx.assets} isDifference />
                   </Text>
                 </Box>
               ) : (
@@ -233,10 +230,10 @@ const Transaction = ({
           <Skeleton width="100%" height="72px" rounded="md" />
         )}
         <AccordionPanel wordBreak="break-word" pb={4}>
-          {displayInfo && (
+          {tx && (
             <TxDetail
               openExternalLink={openExternalLink}
-              displayInfo={displayInfo}
+              tx={tx}
               network={network}
             />
           )}
@@ -334,13 +331,13 @@ const getExplorerUrl = (
 };
 
 interface TxDetailProps {
-  displayInfo: TxInfo;
+  tx: TxInfo;
   network: OutsideHandlesContextValue['environmentName'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
 }
 
 const TxDetail = ({
-  displayInfo,
+  tx,
   network,
   openExternalLink,
 }: Readonly<TxDetailProps>) => {
@@ -372,18 +369,16 @@ const TxDetail = ({
                     Events.ActivityActivityDetailTransactionHashClick,
                   );
                   try {
-                    openExternalLink(
-                      `${getExplorerUrl(network)}${displayInfo.txHash}`,
-                    );
+                    openExternalLink(`${getExplorerUrl(network)}${tx.txHash}`);
                   } catch {
                     console.error('cannot open an external url');
                   }
                 })();
               }}
             >
-              {displayInfo.txHash} <ExternalLinkIcon mx="2px" />
+              {tx.txHash} <ExternalLinkIcon mx="2px" />
             </Link>
-            {displayInfo.metadata.length > 0 ? (
+            {tx.metadata.length > 0 ? (
               <Button
                 display="inline-block"
                 colorScheme="orange"
@@ -393,7 +388,7 @@ const TxDetail = ({
                 height="revert"
                 m="0 5px"
                 onClick={() => {
-                  viewMetadata(displayInfo.metadata);
+                  viewMetadata(tx.metadata);
                 }}
               >
                 See Metadata
@@ -414,11 +409,11 @@ const TxDetail = ({
             fontWeight="400"
             minWidth="75px"
           >
-            {displayInfo.timestamp}
+            {tx.timestamp}
           </Box>
         </Box>
       </Box>
-      {displayInfo.extra.length > 0 ? (
+      {tx.extra.length > 0 ? (
         <Box display="flex" flexDirection="column" mt="10px">
           <Box>
             <Box color="gray.600" fontSize="sm" fontWeight="bold">
@@ -430,7 +425,7 @@ const TxDetail = ({
                 fontWeight="semibold"
                 color={colorMode.extraDetail}
               >
-                {getTxExtra(displayInfo.extra)}
+                {getTxExtra(tx.extra)}
               </Text>
             </Box>
           </Box>

@@ -1,5 +1,5 @@
 /* eslint-disable functional/prefer-immutable-types */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   assetsMintedInspector,
@@ -12,6 +12,7 @@ import {
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
+import memoize from 'lodash/memoize';
 
 import { useCommonOutsideHandles } from '../features/common-outside-handles-provider';
 import { useOutsideHandles } from '../features/outside-handles-provider/useOutsideHandles';
@@ -20,7 +21,7 @@ import { toAsset } from './assets';
 
 import type { OutsideHandlesContextValue } from '../features/outside-handles-provider/types';
 import type { Asset as NamiAsset } from '../types/assets';
-import type { Asset, Cardano } from '@cardano-sdk/core';
+import type { Asset, Cardano, EraSummary } from '@cardano-sdk/core';
 import type { HandleInfo } from '@cardano-sdk/wallet';
 import type { Amount, TransactionDetail, TransactionInfo } from 'types';
 
@@ -324,108 +325,222 @@ export const encodeToCbor = (args: EncodeToCborArgs): Serialization.TxCBOR => {
   return transaction.toCbor();
 };
 
-export const useTxInfo = (
-  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight,
-): TxInfo | undefined => {
-  const [txInfo, setTxInfo] = useState<TxInfo | undefined>();
+export const getTxInfo = async ({
+  tx,
+  getTxInputsValueAndAddress,
+  eraSummaries,
+  addresses,
+  certificateInspectorFactory,
+  protocolParameters,
+  assetInfo,
+  rewardAccounts,
+}: {
+  tx: Wallet.Cardano.HydratedTx | Wallet.TxInFlight;
+  getTxInputsValueAndAddress: (
+    inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[],
+  ) => Promise<Wallet.TxInput[]>;
+  eraSummaries: EraSummary[];
+  addresses: Wallet.Cardano.PaymentAddress[];
+  certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
+    type: Wallet.Cardano.CertificateType,
+  ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
+  protocolParameters: Wallet.Cardano.ProtocolParameters;
+  assetInfo: Wallet.Assets;
+  rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
+}): Promise<TxInfo | undefined> => {
+  const rewardAccountsAddresses = new Set(rewardAccounts?.map(a => a.address));
+  const currentAddress = addresses[0];
+
+  if (!protocolParameters || !('blockHeader' in tx)) return undefined;
+  const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
+    protocolParameters,
+    tx.body,
+  );
+  const uTxOList = {
+    inputs: tx.body.inputs,
+    outputs: tx.body.outputs,
+    collaterals: tx.body.collaterals,
+  };
+  const type = getTxType({
+    currentAddress,
+    addresses: addresses,
+    uTxOList,
+  });
+  const date = dateFromUnix(tx.blockHeader.slot, eraSummaries);
+  const txInputs = await getTxInputsValueAndAddress(tx.body.inputs);
+  const amounts = calculateAmount({
+    currentAddress,
+    uTxOList: { ...uTxOList, inputs: txInputs },
+    validContract: tx.inputSource === Wallet.Cardano.InputSource.inputs,
+  });
+  const assets = amounts.filter(amount => amount.unit !== 'lovelace');
+  const lovelaceAsset = amounts.find(amount => amount.unit === 'lovelace');
+  const lovelace = BigInt(lovelaceAsset?.quantity ?? '');
+  const deposit =
+    Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
+      ? BigInt(implicitCoin.deposit?.toString() ?? 0)
+      : BigInt(0);
+
+  const info: TxInfo = {
+    txHash: tx.id.toString(),
+    fees: tx.body.fee.toString(),
+    deposit: implicitCoin.deposit?.toString() ?? '',
+    refund: implicitCoin.reclaimDeposit?.toString() ?? '',
+    metadata: [...(tx.auxiliaryData?.blob?.entries() ?? [])].map(
+      ([key, value]) => ({
+        label: key.toString(),
+        json_metadata: Wallet.cardanoMetadatumToObj(value),
+      }),
+    ),
+    date,
+    timestamp: getTimestamp(date),
+    type,
+    extra: await getExtra({
+      tx,
+      txType: type,
+      certificateInspectorFactory,
+      rewardAccountsAddresses,
+    }),
+    amounts: amounts,
+    lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
+      ? BigInt(lovelace.toString())
+      : BigInt(lovelace.toString()) + BigInt(tx.body.fee.toString()) + deposit,
+    assets: assets
+      .map(asset => {
+        const info = assetInfo?.get(Wallet.Cardano.AssetId(asset.unit));
+        if (!info) {
+          console.error(`No asset info found for ${asset.unit}`);
+        }
+        return info ? toAsset(info, asset.quantity) : undefined;
+      })
+      .filter((a): a is NamiAsset => !!a),
+  };
+
+  return info;
+};
+
+export const mapWalletActivities = memoize(
+  async ({
+    transactions,
+    chainHistoryProvider,
+    eraSummaries,
+    addresses,
+    certificateInspectorFactory,
+    protocolParameters,
+    assetInfo,
+    rewardAccounts,
+    getTxInputsValueAndAddress,
+  }: {
+    transactions: {
+      history: Wallet.Cardano.HydratedTx[];
+      outgoing: {
+        inFlight: Wallet.TxInFlight[];
+        signed: Wallet.KeyManagement.WitnessedTx[];
+      };
+    };
+    chainHistoryProvider: Wallet.ChainHistoryProvider;
+    eraSummaries: EraSummary[];
+    addresses: Wallet.Cardano.PaymentAddress[];
+    certificateInspectorFactory: <T extends Wallet.Cardano.Certificate>(
+      type: Wallet.Cardano.CertificateType,
+    ) => (tx: Readonly<Wallet.Cardano.Tx>) => Promise<T | undefined>;
+    protocolParameters: Wallet.Cardano.ProtocolParameters;
+    assetInfo: Wallet.Assets;
+    rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
+    getTxInputsValueAndAddress: (
+      inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[],
+    ) => Promise<Wallet.TxInput[]>;
+  }) => {
+    return await Promise.all(
+      [
+        ...transactions.outgoing.inFlight,
+        ...transactions.history.sort(
+          (tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot,
+        ),
+      ].map(async tx =>
+        getTxInfo({
+          tx,
+          getTxInputsValueAndAddress,
+          eraSummaries,
+          addresses,
+          certificateInspectorFactory,
+          protocolParameters,
+          assetInfo,
+          rewardAccounts,
+        }),
+      ),
+    );
+  },
+  ({ addresses, transactions, assetInfo, rewardAccounts }) =>
+    `${transactions.history.length}_${transactions.outgoing.inFlight.map(({ id }) => id).join('')}
+    _${assetInfo.size}_${rewardAccounts.length}_${addresses[0]}`,
+);
+
+export const useWalletTxs = () => {
+  const { inMemoryWallet } = useCommonOutsideHandles();
   const {
+    eraSummaries,
+    chainHistoryProvider,
+    walletAddresses,
+    certificateInspectorFactory,
+    transactions,
+    protocolParameters,
+    assetInfo,
+  } = useOutsideHandles();
+  const [txs, setTxs] = useState<(TxInfo | undefined)[]>();
+  const rewardAccounts = useObservable(
+    inMemoryWallet.delegation.rewardAccounts$,
+  );
+
+  const getTxInputsValueAndAddress = useCallback(
+    async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) =>
+      await Wallet.getTxInputsValueAndAddress(
+        inputs,
+        chainHistoryProvider,
+        inMemoryWallet,
+      ),
+    [],
+  );
+
+  const fetchWalletActivities = useCallback(async () => {
+    setTxs(
+      await mapWalletActivities({
+        transactions,
+        chainHistoryProvider,
+        getTxInputsValueAndAddress,
+        eraSummaries,
+        addresses: walletAddresses,
+        certificateInspectorFactory,
+        protocolParameters,
+        assetInfo,
+        rewardAccounts,
+      }),
+    );
+  }, [
+    transactions,
+    chainHistoryProvider,
     getTxInputsValueAndAddress,
     eraSummaries,
     walletAddresses,
     certificateInspectorFactory,
-  } = useOutsideHandles();
-  const { inMemoryWallet } = useCommonOutsideHandles();
-  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
-  const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
-  const rewardAccounts = useObservable(
-    inMemoryWallet.delegation.rewardAccounts$,
-  );
-  const rewardAccountsAddresses = useMemo(
-    () => new Set(rewardAccounts?.map(a => a.address)),
-    [rewardAccounts],
-  );
-  const currentAddress = walletAddresses[0];
-
-  useEffect(() => {
-    if (!protocolParameters || !('blockHeader' in tx)) return;
-    void (async () => {
-      const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
-        protocolParameters,
-        tx.body,
-      );
-      const uTxOList = {
-        inputs: tx.body.inputs,
-        outputs: tx.body.outputs,
-        collaterals: tx.body.collaterals,
-      };
-      const type = getTxType({
-        currentAddress,
-        addresses: walletAddresses,
-        uTxOList,
-      });
-      const date = dateFromUnix(tx.blockHeader.slot, eraSummaries);
-      const txInputs = await getTxInputsValueAndAddress(tx.body.inputs);
-      const amounts = calculateAmount({
-        currentAddress,
-        uTxOList: { ...uTxOList, inputs: txInputs },
-        validContract: tx.inputSource === Wallet.Cardano.InputSource.inputs,
-      });
-      const assets = amounts.filter(amount => amount.unit !== 'lovelace');
-      const lovelaceAsset = amounts.find(amount => amount.unit === 'lovelace');
-      const lovelace = BigInt(lovelaceAsset?.quantity ?? '');
-      const deposit =
-        Number.parseInt(implicitCoin.deposit?.toString() ?? '') > 0
-          ? BigInt(implicitCoin.deposit?.toString() ?? 0)
-          : BigInt(0);
-
-      const info: TxInfo = {
-        txHash: tx.id.toString(),
-        fees: tx.body.fee.toString(),
-        deposit: implicitCoin.deposit?.toString() ?? '',
-        refund: implicitCoin.reclaimDeposit?.toString() ?? '',
-        metadata: [...(tx.auxiliaryData?.blob?.entries() ?? [])].map(
-          ([key, value]) => ({
-            label: key.toString(),
-            json_metadata: Wallet.cardanoMetadatumToObj(value),
-          }),
-        ),
-        date,
-        timestamp: getTimestamp(date),
-        type,
-        extra: await getExtra({
-          tx,
-          txType: type,
-          certificateInspectorFactory,
-          rewardAccountsAddresses,
-        }),
-        amounts: amounts,
-        lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
-          ? BigInt(lovelace.toString())
-          : BigInt(lovelace.toString()) +
-            BigInt(tx.body.fee.toString()) +
-            deposit,
-        assets: assets
-          .map(asset => {
-            const assetInfo = assetsInfo?.get(
-              Wallet.Cardano.AssetId(asset.unit),
-            );
-            if (!assetInfo) {
-              console.error(`No asset info found for ${asset.unit}`);
-            }
-            return assetInfo ? toAsset(assetInfo, asset.quantity) : undefined;
-          })
-          .filter((a): a is NamiAsset => !!a),
-      };
-
-      setTxInfo(info);
-    })();
-  }, [
     protocolParameters,
-    tx,
-    currentAddress,
-    getTxInputsValueAndAddress,
-    assetsInfo,
+    assetInfo,
+    rewardAccounts,
   ]);
 
-  return txInfo;
+  useEffect(() => {
+    if (!rewardAccounts) return;
+    fetchWalletActivities();
+  }, [
+    fetchWalletActivities,
+    transactions.history,
+    transactions.outgoing.inFlight,
+    transactions.outgoing.signed,
+    walletAddresses,
+    assetInfo,
+    rewardAccounts,
+    eraSummaries,
+  ]);
+
+  return txs;
 };

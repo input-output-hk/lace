@@ -132,11 +132,10 @@ export const NamiView = withDappContext((): React.ReactElement => {
   }, [passwordUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
 
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const isStakeRegistered =
     rewardAccounts && rewardAccounts[0].credentialStatus === Wallet.Cardano.StakeCredentialStatus.Registered;
   const { balance } = useBalances(priceResult?.cardano?.price);
-  const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
+  const { coinBalance: minAda } = walletBalanceTransformer(walletState?.protocolParameters?.stakeKeyDeposit.toString());
   const coinBalance = balance?.total?.coinBalance && Number(balance?.total?.coinBalance);
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
 
@@ -159,23 +158,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
       namiMigration: migration
     });
   }, [backgroundServices, namiMigration]);
-
-  const getTxInputsValueAndAddress = useCallback(
-    async (inputs: Wallet.Cardano.TxIn[] | Wallet.Cardano.HydratedTxIn[]) =>
-      await Wallet.getTxInputsValueAndAddress(inputs, chainHistoryProvider, inMemoryWallet),
-    [chainHistoryProvider, inMemoryWallet]
-  );
-
-  const sortedTx = useMemo(
-    () =>
-      walletState
-        ? [
-            ...walletState.transactions.outgoing.inFlight,
-            ...walletState.transactions.history.sort((tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot)
-          ]
-        : undefined,
-    [walletState]
-  );
 
   const openHWFlow = useCallback(
     (path: string) => {
@@ -244,14 +226,16 @@ export const NamiView = withDappContext((): React.ReactElement => {
         switchWalletMode,
         openExternalLink,
         walletAddresses,
-        transactions: sortedTx,
+        transactions: walletState?.transactions,
         eraSummaries: walletState?.eraSummaries,
-        getTxInputsValueAndAddress,
         certificateInspectorFactory,
         connectHW,
         createHardwareWalletRevamped,
         saveHardwareWallet,
-        setDeletingWallet
+        setDeletingWallet,
+        chainHistoryProvider,
+        protocolParameters: walletState?.protocolParameters,
+        assetInfo: walletState?.assetInfo
       }}
     >
       <CommonOutsideHandlesProvider
