@@ -17,7 +17,7 @@ class NftRenameFolderAsserts {
   async assertSeeRenameFolderDrawer(shouldSee: boolean, mode: 'extended' | 'popup') {
     await NftRenameFolderPage.drawerBody.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
-      await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.header');
+      await this.assertSeeDrawerNavigation(mode, 'browserView.nfts.folderDrawer.existingFolderHeader');
       await NftRenameFolderPage.drawerHeaderTitle.waitForClickable();
       expect(await NftRenameFolderPage.drawerHeaderTitle.getText()).to.equal(
         await t('browserView.nfts.renameYourFolder')
