@@ -10,10 +10,10 @@ import styles from './RegisterAsDRepBanner.module.scss';
 type props = {
   popupView?: boolean;
   openExternalLink: (url: string) => void;
-  onConfirm: () => void;
+  govToolUrl?: string;
 };
 
-export const RegisterAsDRepBanner = ({ popupView, openExternalLink, onConfirm }: props): React.ReactElement => {
+export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }: props): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <div className={cn(styles.container, { [styles.popupView!]: popupView })}>
@@ -39,7 +39,7 @@ export const RegisterAsDRepBanner = ({ popupView, openExternalLink, onConfirm }:
         <Box mt="$20" h="$48">
           <Button.CallToAction
             w="$auto"
-            onClick={onConfirm}
+            onClick={() => govToolUrl && openExternalLink(govToolUrl)}
             data-testid="enable-account-password-prompt-confirm-btn"
             label={t('browserView.staking.stakingInfo.RegisterAsDRepBanner.cta')}
           />

@@ -14,8 +14,8 @@ import { SectionTitle } from '@components/Layout/SectionTitle';
 import { useWalletStore } from '@src/stores';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { useExternalLinkOpener } from '@providers';
-import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
+import { config } from '@src/config';
 
 const { Text } = Typography;
 
@@ -73,9 +73,10 @@ export const DelegationLayout = ({
   cardanoCoin
 }: DelegationLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { environmentName } = useWalletStore();
   const totalResultCount = useWalletStore(({ stakePoolSearchResults }) => stakePoolSearchResults?.totalResultCount);
   const openExternalLink = useExternalLinkOpener();
-  const { setIsRegisterAsDRepModalVisible } = useStakePoolDetails();
+  const { GOV_TOOLS_URLS } = config();
   const showExpandView = hasNoFunds || (!hasNoFunds && !isDelegating) || isDelegating;
 
   const stakePoolSearchTranslations = {
@@ -101,7 +102,7 @@ export const DelegationLayout = ({
               <Box mt="$16">
                 <RegisterAsDRepBanner
                   openExternalLink={openExternalLink}
-                  onConfirm={() => setIsRegisterAsDRepModalVisible(true)}
+                  govToolUrl={GOV_TOOLS_URLS[environmentName]}
                   popupView
                 />
               </Box>

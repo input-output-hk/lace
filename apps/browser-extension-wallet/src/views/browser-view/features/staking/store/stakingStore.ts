@@ -46,8 +46,6 @@ export const useStakePoolDetails = create<StakePoolDetails>((set, get) => ({
   setExitStakingVisible: (visibility: boolean) => set({ isExitStakingVisible: visibility }),
   isNoFundsVisible: false,
   setNoFundsVisible: (visibility: boolean) => set({ isNoFundsVisible: visibility }),
-  isRegisterAsDRepModalVisible: false,
-  setIsRegisterAsDRepModalVisible: (visibility: boolean) => set({ isRegisterAsDRepModalVisible: visibility }),
   isBuildingTx: false,
   setIsBuildingTx: (visibility: boolean) => set({ isBuildingTx: visibility }),
   stakingError: undefined,

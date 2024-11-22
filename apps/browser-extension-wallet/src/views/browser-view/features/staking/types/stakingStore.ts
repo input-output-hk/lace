@@ -28,8 +28,6 @@ export interface StakePoolDetails {
   setIsDrawerVisible: (visibility: boolean) => void;
   isStakeConfirmationVisible: boolean;
   setStakeConfirmationVisible: (visibility: boolean) => void;
-  isRegisterAsDRepModalVisible: boolean;
-  setIsRegisterAsDRepModalVisible: (visibility: boolean) => void;
   isExitStakingVisible: boolean;
   setExitStakingVisible: (visibility: boolean) => void;
   isNoFundsVisible: boolean;

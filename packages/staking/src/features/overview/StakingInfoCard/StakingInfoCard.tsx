@@ -96,7 +96,7 @@ export const StakingInfoCard = ({
   showRegisterAsDRepBanner,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { setIsRegisterAsDRepModalVisible } = useOutsideHandles();
+  const { openExternalLink, govToolUrl } = useOutsideHandles();
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -198,7 +198,7 @@ export const StakingInfoCard = ({
               <Text.Button>{t('overview.stakingInfoCard.registerAsDRepBanner.description')}</Text.Button>
               <Button.CallToAction
                 w="$fill"
-                onClick={() => setIsRegisterAsDRepModalVisible(true)}
+                onClick={() => govToolUrl && openExternalLink(govToolUrl)}
                 data-testid="stats-register-as-drep-cta"
                 label={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
               />
@@ -209,7 +209,7 @@ export const StakingInfoCard = ({
               withIcon
               customIcon={<InfoIcon className={styles.bannerInfoIcon} />}
               message={t('overview.stakingInfoCard.registerAsDRepBanner.description')}
-              onButtonClick={() => setIsRegisterAsDRepModalVisible(true)}
+              onButtonClick={() => govToolUrl && openExternalLink(govToolUrl)}
               buttonMessage={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
             />
           )}

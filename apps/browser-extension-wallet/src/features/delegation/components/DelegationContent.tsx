@@ -9,7 +9,7 @@ import { useRedirection, useBalances, useFetchCoinPrice, useDelegationDetails, u
 import { useWalletStore } from '@stores';
 import { networkInfoStatusSelector, stakePoolResultsSelector } from '@stores/selectors/staking-selectors';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { StakePoolDetails } from '../../stake-pool-details';
+import { StakePoolDetails, StakingModals } from '../../stake-pool-details';
 import { Sections } from '@views/browser/features/staking/types';
 import { useStakePoolDetails } from '../../stake-pool-details/store';
 import { useDelegationStore } from '../stores';
@@ -161,6 +161,7 @@ export const DelegationContent = (): React.ReactElement => {
         onStake={onStake}
         popupView
       />
+      <StakingModals popupView />
     </>
   );
 };
