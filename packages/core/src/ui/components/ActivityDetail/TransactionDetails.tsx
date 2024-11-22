@@ -54,6 +54,7 @@ export const TransactionDetails = ({
   const getCollateralStatus = (): CollateralStatus => {
     switch (status) {
       case ActivityStatus.SPENDABLE:
+      case ActivityStatus.LOCKED:
         return CollateralStatus.NONE;
       case ActivityStatus.PENDING:
       case ActivityStatus.AWAITING_COSIGNATURES:

@@ -147,7 +147,7 @@ export interface ActivityDetailSlice {
   } & (
     | {
         type: TransactionActivityType.rewards;
-        status: ActivityStatus.SPENDABLE;
+        status: ActivityStatus.SPENDABLE | ActivityStatus.LOCKED;
         direction?: never;
         activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
       }
@@ -165,7 +165,12 @@ export interface ActivityDetailSlice {
     type: Exclude<ActivityType, TransactionActivityType.rewards>;
   }) => void;
   setRewardsActivityDetail: (params: {
-    activity: { spendableEpoch: Cardano.EpochNo; spendableDate: Date; rewards: Reward[] };
+    status: ActivityStatus.SPENDABLE | ActivityStatus.LOCKED;
+    activity: {
+      spendableEpoch: Cardano.EpochNo;
+      spendableDate: Date;
+      rewards: Reward[];
+    };
   }) => void;
   getActivityDetail: (params: { coinPrices: PriceResult; fiatCurrency: CurrencyInfo }) => Promise<ActivityDetail>;
   resetActivityState: () => void;

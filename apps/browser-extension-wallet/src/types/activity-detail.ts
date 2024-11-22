@@ -72,7 +72,7 @@ export type TransactionActivityDetail = {
 
 export type RewardsActivityDetail = {
   type: TransactionActivityType.rewards;
-  status: ActivityStatus.SPENDABLE;
+  status: ActivityStatus.SPENDABLE | ActivityStatus.LOCKED;
   activity: RewardsActivity;
 };
 

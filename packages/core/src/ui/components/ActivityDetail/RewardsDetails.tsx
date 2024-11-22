@@ -21,7 +21,7 @@ export type RewardsInfo = {
 export interface RewardsDetailsProps {
   name: string;
   headerDescription?: string;
-  status: ActivityStatus.SPENDABLE;
+  status: ActivityStatus.SPENDABLE | ActivityStatus.LOCKED;
   includedDate: string;
   includedTime: string;
   amountTransformer: (amount: string) => string;
@@ -121,9 +121,9 @@ export const RewardsDetails = ({
             <div className={styles.title} data-testid="rewards-status-title">
               {t('core.activityDetails.status')}
             </div>
-            <div data-testid="rewards-status" className={styles.detail}>{`${status
-              .charAt(0)
-              .toUpperCase()}${status.slice(1)}`}</div>
+            <div data-testid="rewards-status" className={styles.detail}>
+              {t(`core.activityDetails.statuses.${status}`)}
+            </div>
           </div>
           <div className={styles.details}>
             <div className={styles.title} data-testid="rewards-epoch-title">

@@ -77,6 +77,7 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
     case ActivityStatus.SUCCESS:
       return <ActivityTypeIcon type={type} />;
     case ActivityStatus.SPENDABLE:
+    case ActivityStatus.LOCKED:
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;

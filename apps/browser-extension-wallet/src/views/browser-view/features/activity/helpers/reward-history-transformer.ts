@@ -14,6 +14,7 @@ interface RewardHistoryTransformerInput {
   fiatPrice: number;
   date: Date;
   cardanoCoin: Wallet.CoinId;
+  isRewardSpendable: boolean;
 }
 
 export const rewardHistoryTransformer = ({
@@ -21,8 +22,11 @@ export const rewardHistoryTransformer = ({
   fiatCurrency,
   fiatPrice,
   date,
-  cardanoCoin
-}: RewardHistoryTransformerInput): TransformedRewardsActivity => {
+  cardanoCoin,
+  isRewardSpendable
+}: RewardHistoryTransformerInput): Omit<TransformedRewardsActivity, 'status'> & {
+  status: ActivityStatus.SPENDABLE | ActivityStatus.LOCKED;
+} => {
   const formattedTimestamp = formatTime({
     date,
     type: 'local'
@@ -42,7 +46,7 @@ export const rewardHistoryTransformer = ({
       fiatCurrency,
       fiatPrice
     }),
-    status: ActivityStatus.SPENDABLE,
+    status: isRewardSpendable ? ActivityStatus.SPENDABLE : ActivityStatus.LOCKED,
     assets: [],
     date,
     formattedTimestamp,

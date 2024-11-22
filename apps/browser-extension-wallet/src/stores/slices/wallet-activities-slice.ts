@@ -44,6 +44,7 @@ import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver'
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
+import { getPoolIdToRewardAccountMap } from '@src/views/browser-view/features/staking/hooks';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -78,6 +79,8 @@ type extendedDelegationActivityType =
 type DelegationActivityItemProps = Omit<ExtendedActivityProps, 'type'> & {
   type: extendedDelegationActivityType;
 };
+
+const PV10_NETWORK_VERSION = 10;
 
 const isDelegationActivity = (activity: ExtendedActivityProps): activity is DelegationActivityItemProps =>
   activity.type in DelegationActivityType ||
@@ -123,7 +126,7 @@ const mapWalletActivities = memoize(
       eraSummaries,
       protocolParameters,
       assetInfo,
-      delegation: { rewardsHistory }
+      delegation: { rewardsHistory, rewardAccounts }
     }: ObservableWalletState,
     { fiatCurrency, cardanoFiatPrice, sendAnalytics }: FetchWalletActivitiesProps,
     {
@@ -139,18 +142,24 @@ const mapWalletActivities = memoize(
       Pick<IBlockchainProvider, 'assetProvider'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
+    const poolIdToRewardAccountMap = getPoolIdToRewardAccountMap(rewardAccounts);
+
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
       const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
       const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
       const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
       const rewardSpendableDate = slotTimeCalc(epochSlotsCalc(spendableEpoch, eraSummaries).firstSlot);
+      const isPv10Network = protocolParameters.protocolVersion.major >= PV10_NETWORK_VERSION;
+      const isRewardSpendable =
+        isPv10Network && !rewards.some(({ poolId }) => poolId && !poolIdToRewardAccountMap.get(poolId)?.dRepDelegatee);
 
       const transformedEpochRewards = rewardHistoryTransformer({
         rewards,
         fiatCurrency,
         fiatPrice: cardanoFiatPrice,
         cardanoCoin,
-        date: rewardSpendableDate
+        date: rewardSpendableDate,
+        isRewardSpendable
       });
 
       return {
@@ -158,6 +167,7 @@ const mapWalletActivities = memoize(
         onClick: () => {
           if (sendAnalytics) sendAnalytics();
           setRewardsActivityDetail({
+            status: transformedEpochRewards.status,
             activity: {
               rewards,
               spendableEpoch,

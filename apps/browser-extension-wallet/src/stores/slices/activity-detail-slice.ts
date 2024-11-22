@@ -16,12 +16,7 @@ import { inspectTxValues } from '@src/utils/tx-inspection';
 import { firstValueFrom } from 'rxjs';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { MAX_POOLS_COUNT } from '@lace/staking';
-import {
-  ActivityStatus,
-  ConwayEraCertificatesTypes,
-  DelegationActivityType,
-  TransactionActivityType
-} from '@lace/core';
+import { ConwayEraCertificatesTypes, DelegationActivityType, TransactionActivityType } from '@lace/core';
 import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
 import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
@@ -321,7 +316,7 @@ export const activityDetailSlice: SliceCreator<
   getActivityDetail: buildGetActivityDetail({ set, get }),
   setTransactionActivityDetail: ({ activity, direction, status, type }) =>
     set({ activityDetail: { activity, direction, status, type } }),
-  setRewardsActivityDetail: ({ activity }) =>
-    set({ activityDetail: { activity, status: ActivityStatus.SPENDABLE, type: TransactionActivityType.rewards } }),
+  setRewardsActivityDetail: ({ activity, status }) =>
+    set({ activityDetail: { activity, status, type: TransactionActivityType.rewards } }),
   resetActivityState: () => set({ activityDetail: undefined, fetchingActivityInfo: false })
 });

@@ -5,6 +5,7 @@ export enum ActivityStatus {
   PENDING = 'sending',
   ERROR = 'error',
   SPENDABLE = 'spendable',
+  LOCKED = 'locked',
   AWAITING_COSIGNATURES = 'awaiting_cosignatures'
 }
 
