@@ -428,12 +428,12 @@ export const getTxInfo = async ({
       rewardAccountsAddresses,
     }),
     amounts: amounts,
-    lovelace: ['internalIn', 'externalIn', 'multisig'].includes(type)
-      ? BigInt(lovelace.toString())
-      : BigInt(lovelace.toString()) -
-        BigInt(totalWithdrawals.toString()) +
-        BigInt(tx.body.fee.toString()) +
-        deposit,
+    lovelace:
+      (['internalIn', 'externalIn', 'multisig'].includes(type)
+        ? BigInt(lovelace.toString())
+        : BigInt(lovelace.toString()) +
+          BigInt(tx.body.fee.toString()) +
+          deposit) - BigInt(totalWithdrawals.toString()),
     assets: assets
       .map(asset => {
         const info = assetInfo?.get(Wallet.Cardano.AssetId(asset.unit));
