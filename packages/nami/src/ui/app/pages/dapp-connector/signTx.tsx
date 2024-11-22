@@ -29,6 +29,7 @@ import { ERROR } from '../../../../config/config';
 import { Events } from '../../../../features/analytics/events';
 import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import { useCommonOutsideHandles } from '../../../../features/common-outside-handles-provider';
+import { useDappOutsideHandles } from '../../../../features/dapp-outside-handles-provider';
 import { abs } from '../../../utils';
 import Account from '../../components/account';
 import AssetsModal from '../../components/assetsModal';
@@ -79,6 +80,7 @@ export const SignTx = ({
 
   const capture = useCaptureEvent();
   const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
+  const { switchWalletMode } = useDappOutsideHandles();
   const ref = React.useRef();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
@@ -254,6 +256,7 @@ export const SignTx = ({
     setIsLoading(l => ({ ...l, loading: false }));
   };
   const background = useColorModeValue('gray.100', 'gray.700');
+  const warningBackground = useColorModeValue('#fcf5e3', '#fcf5e3');
   const containerBg = useColorModeValue('white', 'gray.800');
 
   React.useEffect(() => {
@@ -311,7 +314,40 @@ export const SignTx = ({
               {dappInfo?.url.split('//')[1]}
             </Text>
           </Box>
-          <Box h="8" />
+          <Box h="4" />
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            flexDirection="column"
+            background={warningBackground}
+            rounded="xl"
+            width="80%"
+            padding="18"
+            gridGap="8px"
+          >
+            <Text
+              color="gray.800"
+              fontSize="14"
+              fontWeight="500"
+              lineHeight="24px"
+            >
+              Due to Nami’s limited support for CIP-95 dApps (such as the
+              Cardano GovTool), it is recommended to upgrade to Lace to ensure
+              successful transactions
+            </Text>
+            <Button
+              height="36px"
+              width="100%"
+              colorScheme="teal"
+              onClick={async () => {
+                await switchWalletMode();
+              }}
+            >
+              Upgrade to Lace
+            </Button>
+          </Box>
+          <Box h="4" />
           <Box>This app requests a signature for:</Box>
           <Box h="4" />
           <Box

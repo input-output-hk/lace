@@ -57,4 +57,5 @@ export interface DappOutsideHandlesContextValue {
   >;
   environmentName: Wallet.ChainName;
   dappConnector: DappConnector;
+  switchWalletMode: () => Promise<void>;
 }
