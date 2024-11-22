@@ -118,6 +118,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
           if (recoveryMethod === 'mnemonic') {
             await finalizeWalletCreation(state);
             history.push(walletRoutePaths.assets);
+            window.location.reload();
             break;
           }
           setStep(WalletCreateStep.SavePaperWallet);
@@ -127,6 +128,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
           if (!state.name) throw new Error('Expected name');
           await finalizeWalletCreation(state);
           history.push(walletRoutePaths.assets);
+          window.location.reload();
           break;
         }
       }
