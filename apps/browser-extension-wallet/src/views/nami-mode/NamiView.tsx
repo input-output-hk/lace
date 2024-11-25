@@ -129,7 +129,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
     setDelegationTxFee();
     setDelegationTxBuilder();
     setIsBuildingTx(false);
-  }, [secretsUtil.clearSecrets, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
+  }, [secretsUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
 
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const isStakeRegistered =
