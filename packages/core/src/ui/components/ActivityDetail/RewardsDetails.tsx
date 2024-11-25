@@ -20,7 +20,7 @@ export type RewardsInfo = {
 
 export interface RewardsDetailsProps {
   name: string;
-  headerDescription: string;
+  headerDescription?: string;
   status: ActivityStatus.SPENDABLE;
   includedDate: string;
   includedTime: string;

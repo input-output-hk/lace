@@ -15,7 +15,7 @@ export interface OutputSummaryProps {
   list: SentAssetsList;
   recipientAddress: string;
   recipientName?: string;
-  translations: TranslationsFor<'recipientAddress' | 'sending'>;
+  translations?: TranslationsFor<'recipientAddress' | 'sending'>;
   ownAddresses?: string[];
 }
 
@@ -31,14 +31,14 @@ export const OutputSummary = ({
   return (
     <div className={styles.container} data-testid="output-summary-container">
       <RowContainer data-testid="output-summary-row">
-        {renderLabel({ label: translations.sending, dataTestId: 'output-summary-sending-title' })}
+        {renderLabel({ label: translations?.sending ?? '', dataTestId: 'output-summary-sending-title' })}
         <div className={styles.assetList} data-testid="output-summary-asset-list">
           {renderSentAssets(list)}
         </div>
       </RowContainer>
 
       <RowContainer>
-        {renderLabel({ label: translations.recipientAddress, dataTestId: 'output-summary-recipient-title' })}
+        {renderLabel({ label: translations?.recipientAddress ?? '', dataTestId: 'output-summary-recipient-title' })}
         <Flex className={styles.recipient} flexDirection="column">
           {recipientName && (
             <Box mb="$4" w="$fill">

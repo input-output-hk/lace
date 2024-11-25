@@ -10,9 +10,6 @@ import { NEVER, Observable } from 'rxjs';
  * @returns latest emitted value of the observable; undefined if observable is undefined or hasn't emitted yet
  */
 export const useObservable = <T>(observable: Observable<T> | undefined, defaultValue?: T): T => {
-  const [boundObservable] = useMemo(
-    () => (defaultValue !== undefined ? bind<T>(observable || NEVER, defaultValue) : bind<T>(observable || NEVER)),
-    [observable, defaultValue]
-  );
+  const [boundObservable] = useMemo(() => bind<T>(observable || NEVER, defaultValue as T), [observable, defaultValue]);
   return boundObservable();
 };

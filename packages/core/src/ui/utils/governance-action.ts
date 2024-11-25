@@ -1,3 +1,5 @@
+/* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
 import { Cardano } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { formatPercentages } from '@lace/common';
@@ -84,38 +86,38 @@ export const getParameterChangeActionViewData = ({
     },
     protocolParamUpdate: {
       maxTxExUnits: {
-        memory: maxExecutionUnitsPerTransaction?.memory?.toString(),
-        step: maxExecutionUnitsPerTransaction?.steps?.toString()
+        memory: maxExecutionUnitsPerTransaction?.memory?.toString() ?? '',
+        step: maxExecutionUnitsPerTransaction?.steps?.toString() ?? ''
       },
       maxBlockExUnits: {
-        memory: maxExecutionUnitsPerBlock?.memory?.toString(),
-        step: maxExecutionUnitsPerBlock?.steps?.toString()
+        memory: maxExecutionUnitsPerBlock?.memory?.toString() ?? '',
+        step: maxExecutionUnitsPerBlock?.steps?.toString() ?? ''
       },
       networkGroup: {
-        maxBBSize: maxBlockBodySize?.toString(),
-        maxTxSize: maxTxSize?.toString(),
-        maxBHSize: maxBlockHeaderSize?.toString(),
-        maxValSize: maxValueSize?.toString(),
-        maxCollateralInputs: maxCollateralInputs?.toString()
+        maxBBSize: maxBlockBodySize?.toString() ?? '',
+        maxTxSize: maxTxSize?.toString() ?? '',
+        maxBHSize: maxBlockHeaderSize?.toString() ?? '',
+        maxValSize: maxValueSize?.toString() ?? '',
+        maxCollateralInputs: maxCollateralInputs?.toString() ?? ''
       },
       economicGroup: {
-        minFeeA: minFeeCoefficient?.toString(),
-        minFeeB: minFeeConstant?.toString(),
-        keyDeposit: stakeKeyDeposit?.toString(),
-        poolDeposit: poolDeposit?.toString(),
-        rho: monetaryExpansion,
-        tau: treasuryExpansion,
-        minPoolCost: minPoolCost?.toString(),
-        coinsPerUTxOByte: coinsPerUtxoByte?.toString(),
+        minFeeA: minFeeCoefficient?.toString() ?? '',
+        minFeeB: minFeeConstant?.toString() ?? '',
+        keyDeposit: stakeKeyDeposit?.toString() ?? '',
+        poolDeposit: poolDeposit?.toString() ?? '',
+        rho: monetaryExpansion ?? '',
+        tau: treasuryExpansion ?? '',
+        minPoolCost: minPoolCost?.toString() ?? '',
+        coinsPerUTxOByte: coinsPerUtxoByte?.toString() ?? '',
         price: {
-          memory: prices?.memory?.toString(),
-          step: prices?.steps?.toString()
+          memory: prices?.memory?.toString() ?? '',
+          step: prices?.steps?.toString() ?? ''
         }
       },
       technicalGroup: {
-        a0: poolInfluence,
-        eMax: poolRetirementEpochBound?.toString(),
-        nOpt: desiredNumberOfPools?.toString(),
+        a0: poolInfluence ?? '',
+        eMax: poolRetirementEpochBound?.toString() ?? '',
+        nOpt: desiredNumberOfPools?.toString() ?? '',
         costModels: {
           PlutusV1: Object.entries(costModels?.get(Cardano.PlutusLanguageVersion.V1) || {}).reduce(
             (acc, cur) => ({ ...acc, [cur[0]]: cur[1] }),
@@ -126,21 +128,24 @@ export const getParameterChangeActionViewData = ({
             {}
           )
         },
-        collateralPercentage: collateralPercentage?.toString()
+        collateralPercentage: collateralPercentage?.toString() ?? ''
       },
       governanceGroup: {
-        govActionLifetime: governanceActionValidityPeriod?.toString(),
-        govActionDeposit: governanceActionDeposit?.toString(),
-        drepDeposit: dRepDeposit?.toString(),
-        drepActivity: dRepInactivityPeriod?.toString(),
-        ccMinSize: minCommitteeSize?.toString(),
-        ccMaxTermLength: committeeTermLimit?.toString(),
+        govActionLifetime: governanceActionValidityPeriod?.toString() ?? '',
+        govActionDeposit: governanceActionDeposit?.toString() ?? '',
+        drepDeposit: dRepDeposit?.toString() ?? '',
+        drepActivity: dRepInactivityPeriod?.toString() ?? '',
+        ccMinSize: minCommitteeSize?.toString() ?? '',
+        ccMaxTermLength: committeeTermLimit?.toString() ?? '',
         dRepVotingThresholds: {
-          ...(dRepVotingThresholds?.motionNoConfidence && {
-            motionNoConfidence: formatPercentages(
-              dRepVotingThresholds.motionNoConfidence.numerator / dRepVotingThresholds.motionNoConfidence.denominator
-            )
-          }),
+          ...(dRepVotingThresholds?.motionNoConfidence
+            ? {
+                motionNoConfidence: formatPercentages(
+                  dRepVotingThresholds.motionNoConfidence.numerator /
+                    dRepVotingThresholds.motionNoConfidence.denominator
+                )
+              }
+            : { motionNoConfidence: '' }),
           committeeNormal: convertFractionToPercentage(
             dRepVotingThresholds?.committeeNormal.numerator,
             dRepVotingThresholds?.committeeNormal.denominator
