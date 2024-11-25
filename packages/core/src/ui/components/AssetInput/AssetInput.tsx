@@ -84,7 +84,7 @@ export const AssetInput = ({
   const adjustInputWidth = useCallback((text: string) => {
     if (!inputRef?.current?.input) return;
     const textWidth = !text || text === '0' ? defaultInputWidth : getTextWidth(text, inputRef.current.input);
-    const numberOneQuantity = text?.match(/1/g)?.length || 0;
+    const numberOneQuantity = text?.match(/1/g)?.length ?? 0;
     // cursorBufferWidth - represents a space buffer (in px) between the cursor and particular number char
     // for "1" it's approximately 2.4px from each side, for every other - about 0.5px (it might be diff per font type/weight/letter spacing)
     // eslint-disable-next-line no-magic-numbers
@@ -122,7 +122,7 @@ export const AssetInput = ({
   // eslint-disable-next-line complexity
   const setValue = (newValue: string, element?: any) => {
     const sanitizedValue = sanitizeNumber(newValue);
-    const tokenMaxDecimalsOverflow = maxDecimals || 0;
+    const tokenMaxDecimalsOverflow = maxDecimals ?? 0;
     const isValidNumericValue = validateNumericValue(sanitizedValue, {
       isFloat: allowFloat,
       maxDecimals: tokenMaxDecimalsOverflow?.toString()
@@ -185,7 +185,7 @@ export const AssetInput = ({
       <div data-testid="coin-configure-info" className={styles.assetConfigRow}>
         <div data-testid="coin-configure-text" onClick={onNameClick} className={styles.tickerContainer}>
           <Tooltip title={coin?.shortTicker && coin.ticker}>
-            <span className={styles.ticker}>{coin?.shortTicker || coin?.ticker}</span>
+            <span className={styles.ticker}>{coin?.shortTicker ?? coin?.ticker}</span>
           </Tooltip>
           <Chevron className={styles.icon} />
         </div>

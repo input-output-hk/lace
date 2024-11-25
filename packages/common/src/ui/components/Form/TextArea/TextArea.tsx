@@ -75,7 +75,7 @@ export const TextArea = ({
         data-testid={dataTestId}
         value={localVal}
         autoSize
-        rows={props.rows || 1}
+        rows={props.rows ?? 1}
         className={cn(styles.textArea, {
           ...(className && { [className]: className }),
           [styles.isResizable]: isResizable,

@@ -34,7 +34,7 @@ const initialContextMenu = {
 const contextMenuWidth = 200;
 
 export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFolderItemProps): React.ReactElement => {
-  const restOfNfts = (nfts?.length || 0) - numberOfNftsToShow + 1;
+  const restOfNfts = (nfts?.length ?? 0) - numberOfNftsToShow + 1;
   const [contextMenu, setContextMenu] = React.useState(initialContextMenu);
 
   const shouldShowCompactNumber = restOfNfts > maxRestOfNftsNumber;

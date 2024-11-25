@@ -138,7 +138,7 @@ export const AssetActivityItem = ({
 
       const assetsIdsText = assets
         ?.slice(0, items)
-        .map(({ val, info }) => `${val} ${info?.ticker || '"?"'}`)
+        .map(({ val, info }) => `${val} ${info?.ticker ?? '"?"'}`)
         .join(', ');
       const suffix = assets && assets?.length - items > 0 ? `, +${assets.length - items}` : '';
       const appendedAssetId = assetsIdsText ? `, ${assetsIdsText}` : '';
@@ -209,7 +209,7 @@ export const AssetActivityItem = ({
           {customIcon ? (
             <Image src={customIcon} className={styles.icon} preview={false} alt="asset image" />
           ) : (
-            <ActivityStatusIcon status={status ?? ActivityStatus.ERROR} type={type!} />
+            type && <ActivityStatusIcon status={status ?? ActivityStatus.ERROR} type={type} />
           )}
         </div>
         <div data-testid="asset-info" className={styles.info}>
@@ -252,11 +252,9 @@ export const AssetActivityItem = ({
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets
-                      ?.slice(assetsToShow, assets.length)
-                      .map(({ id, val, info }) => (
-                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker || '?'}`}</div>
-                      ))}
+                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
+                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                    ))}
                   </>
                 }
               >

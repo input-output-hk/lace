@@ -32,9 +32,9 @@ export const StakePoolNameBrowser = ({
   isOversaturated,
   translations
 }: StakePoolNameBrowserProps): React.ReactElement => {
-  const title = name || ticker || '-';
-  const subTitle: string | React.ReactElement = ticker || (
-    <Ellipsis className={styles.id} text={id || ''} beforeEllipsis={6} afterEllipsis={8} />
+  const title = name ?? ticker ?? '-';
+  const subTitle: string | React.ReactElement = ticker ?? (
+    <Ellipsis className={styles.id} text={id ?? ''} beforeEllipsis={6} afterEllipsis={8} />
   );
 
   return (

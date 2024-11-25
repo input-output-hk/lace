@@ -31,7 +31,7 @@ export const passwordComplexity = (password?: string): { feedbackKeys: string[];
 
   const { feedback, score } = zxcvbn(password);
   const translationFeedbackKeyList = feedback.suggestions
-    .map((text) => translationKeysMap.get(text) || translationKeysMap.get(defaultKey))
+    .map((text) => translationKeysMap.get(text) ?? translationKeysMap.get(defaultKey))
     // eslint-disable-next-line unicorn/no-array-callback-reference
     .filter(isNotNil);
 

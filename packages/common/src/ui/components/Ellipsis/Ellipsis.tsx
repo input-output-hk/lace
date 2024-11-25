@@ -103,7 +103,7 @@ export const Ellipsis = ({
     <div
       style={{ ...(ellipsisInTheMiddle && { width: '100%' }) }}
       ref={ref}
-      data-testid={dataTestId || 'ellipsis-container'}
+      data-testid={dataTestId ?? 'ellipsis-container'}
       className={className}
     >
       {withTooltip && (
