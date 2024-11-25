@@ -819,7 +819,7 @@ const Send = ({
               status: 'error',
               duration: 3000,
             });
-          setTimeout(() => ref.current?.closeModal(), 50);
+          setTimeout(() => ref.current?.closeModal(), 0);
           setTimeout(() => {
             history.push('/');
           }, 200);

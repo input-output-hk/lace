@@ -51,7 +51,7 @@ export const WalletSetupPasswordStep = ({
   const { password, setPassword, setPasswordConfirmation, passwordConfirmation } = useSecrets();
   const [passHasBeenValidated, setPassHasBeenValidated] = useState<boolean>(false);
 
-  const { feedbackKeys, score } = useMemo(() => passwordComplexity(password.value), [password.value]);
+  const { feedbackKeys, score } = passwordComplexity(password.value);
   const feedbackTranslation = useMemo(
     () => getFeedbackTranslations(feedbackKeys),
     [feedbackKeys, getFeedbackTranslations]

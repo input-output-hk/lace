@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 const NO_PASSWORD: Partial<Password> = {};
 const globalPassword$ = new BehaviorSubject<Partial<Password>>(NO_PASSWORD);
 const globalPasswordConfirmation$ = new BehaviorSubject<Partial<Password>>(NO_PASSWORD);
-const globalRepeatedPassword$ = new BehaviorSubject<Partial<Password>>(NO_PASSWORD); // used for nami password reset
+const globalPasswordConfirmationRepeat$ = new BehaviorSubject<Partial<Password>>(NO_PASSWORD); // used for nami password reset
 
 const deletePasswordValues = (password$: BehaviorSubject<Partial<Password>>) => {
   if (password$.value.input) {
@@ -24,8 +24,8 @@ const setPasswordConfirmation = (pw: Partial<Password>) => {
 };
 
 // used for nami password reset
-const setRepeatedConfirmation = (pw: Partial<Password>) => {
-  globalRepeatedPassword$.next(pw);
+const setPasswordConfirmationRepeat = (pw: Partial<Password>) => {
+  globalPasswordConfirmationRepeat$.next(pw);
 };
 
 const clearSecrets = () => {
@@ -33,9 +33,9 @@ const clearSecrets = () => {
   setPassword(NO_PASSWORD);
   deletePasswordValues(globalPasswordConfirmation$);
   setPasswordConfirmation(NO_PASSWORD);
-  deletePasswordValues(globalRepeatedPassword$);
+  deletePasswordValues(globalPasswordConfirmationRepeat$);
   // used for nami password reset
-  setRepeatedConfirmation(NO_PASSWORD);
+  setPasswordConfirmationRepeat(NO_PASSWORD);
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -43,7 +43,7 @@ export const useSecrets = () => {
   const password = useObservable(globalPassword$, NO_PASSWORD);
   const passwordConfirmation = useObservable(globalPasswordConfirmation$, NO_PASSWORD);
   // used for nami password reset
-  const repeatedPassword = useObservable(globalRepeatedPassword$, NO_PASSWORD);
+  const repeatedPassword = useObservable(globalPasswordConfirmationRepeat$, NO_PASSWORD);
 
   return {
     clearSecrets,
@@ -53,6 +53,6 @@ export const useSecrets = () => {
     setPasswordConfirmation,
     // used for nami password reset
     repeatedPassword,
-    setRepeatedConfirmation
+    setPasswordConfirmationRepeat
   };
 };

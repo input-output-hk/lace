@@ -70,7 +70,7 @@ export const decorators = [
         passwordConfirmation: { input: noop, value: 'pw' },
         repeatedPassword: { input: noop, value: '' },
         setPasswordConfirmation: noop,
-        setRepeatedConfirmation: noop,
+        setPasswordConfirmationRepeat: noop,
       }}
       delegationTxFee="200"
       delegationStoreDelegationTxBuilder={noop}

@@ -133,7 +133,7 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
           <Box>
             <NamiPassword
               label="Repeat new password"
-              onChange={secretsUtil.setRepeatedConfirmation}
+              onChange={secretsUtil.setPasswordConfirmationRepeat}
               onSubmit={confirmHandler}
             />
 
