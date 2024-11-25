@@ -39,6 +39,10 @@ import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { requestMessage$ } from './services/utilityServices';
 import { MessageTypes } from '../types';
 
+if (typeof window !== 'undefined') {
+  throw new TypeError('This module should only be imported in service worker');
+}
+
 // It is important that this file is not exported from index,
 // because creating wallet repository with store creates an actual pouchdb database
 // which results in some trash files when running the tests (leveldb directory)
