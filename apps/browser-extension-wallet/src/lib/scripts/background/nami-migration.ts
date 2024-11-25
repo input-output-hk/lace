@@ -8,6 +8,7 @@ import { currencyCode } from '@providers/currency/constants';
 import { exposeApi, getWalletStoreId, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { storage } from '@cardano-sdk/wallet';
 import { of } from 'rxjs';
+import { NamiMigrationChannels } from '@lib/scripts/types';
 
 const collateralRepository: CollateralRepository = async ({ utxo, chainId, walletId, accountIndex }) => {
   const walletStoreId = getWalletStoreId(walletId, chainId, accountIndex);
@@ -27,10 +28,6 @@ const startMigration = async () => {
     themeColor: state.themeColor
   };
 };
-
-export enum NamiMigrationChannels {
-  MIGRATION = 'migration'
-}
 
 export interface NamiMigrationAPI {
   checkMigrationStatus: () => Promise<MigrationState>;

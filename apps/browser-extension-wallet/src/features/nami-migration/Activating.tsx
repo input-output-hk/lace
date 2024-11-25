@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 
 import { NamiMigrationUpdatingYourWallet } from '@lace/core';
 import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { NamiMigrationAPI, NamiMigrationChannels } from '@lib/scripts/background/nami-migration';
+import type { NamiMigrationAPI } from '@lib/scripts/background/nami-migration';
 import { runtime } from 'webextension-polyfill';
 import { useHistory } from 'react-router-dom';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useCurrencyStore } from '@providers/currency';
 import { MigrationState } from './migration-tool/migrator/migration-state.data';
 import { useTheme } from '@providers/ThemeProvider/context';
+import { NamiMigrationChannels } from '@lib/scripts/types';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMigration' | 'checkMigrationStatus'>>(
   {
