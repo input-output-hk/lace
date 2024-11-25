@@ -66,7 +66,13 @@ export const AddressDisplayItem = ({
   );
 
   return displayAsMenu ? (
-    <Dropdown menu={{ items }} placement="top" autoAdjustOverflow dropdownRender={dropdownRender}>
+    <Dropdown
+      overlayClassName={styles.wrapper}
+      menu={{ items }}
+      placement="top"
+      autoAdjustOverflow
+      dropdownRender={dropdownRender}
+    >
       {content}
     </Dropdown>
   ) : (

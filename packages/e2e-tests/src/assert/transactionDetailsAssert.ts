@@ -150,6 +150,7 @@ class TransactionsDetailsAssert {
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
       if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
+        await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
         await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
         await TransactionDetailsPage.transactionDetailsOutputsDropdown.click();
         await TransactionDetailsPage.transactionDetailsInputAddress.waitForDisplayed();

@@ -65,10 +65,10 @@ export const SelectAccounts = ({
           selected[currentState] && !isAccountDisabled(currentState),
       )
       .map(Number);
-    // enable more accounts for existing hw
-    if (walletId && existingAccountsIndexes.size > 0) {
-      for (const accountIndex of accountIndexes) {
-        try {
+    try {
+      // enable more accounts for existing hw
+      if (walletId && existingAccountsIndexes.size > 0) {
+        for (const accountIndex of accountIndexes) {
           await walletRepository.addAccount({
             accountIndex,
             extendedAccountPublicKey:
@@ -85,31 +85,27 @@ export const SelectAccounts = ({
             },
             walletId,
           });
-        } catch (error: unknown) {
-          throw error;
         }
-      }
-      await activateAccount({ accountIndex: accountIndexes[0], walletId });
-    } else {
-      // create new hw
-      let cardanoWallet: Wallet.CardanoWallet;
-      try {
-        cardanoWallet = await createHardwareWalletRevamped({
+        await activateAccount({ accountIndex: accountIndexes[0], walletId });
+      } else {
+        // create new hw
+        const cardanoWallet = await createHardwareWalletRevamped({
           connection,
           name: 'Wallet 1',
           accountIndexes,
         });
         await saveHardwareWallet(cardanoWallet, environmentName);
-      } catch (error_) {
-        console.error(error_);
-        setError('An error occured');
       }
+      onConfirm();
+      void capture(Events.HWSelectAccountNextClick, {
+        numAccounts: accountIndexes.length.toString(),
+      });
+    } catch (error_) {
+      console.error(error_);
+      setError('An error occured');
+    } finally {
+      setIsLoading(false);
     }
-    onConfirm();
-    void capture(Events.HWSelectAccountNextClick, {
-      numAccounts: accountIndexes.length.toString(),
-    });
-    setIsLoading(false);
   };
 
   const isAccountDisabled = useCallback(

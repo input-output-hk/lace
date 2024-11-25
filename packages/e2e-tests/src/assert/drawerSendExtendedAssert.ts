@@ -362,7 +362,11 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
-    await new AddressInput().invalidAdaHandleIcon.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await new AddressInput().invalidAdaHandleIcon.waitForDisplayed({
+      reverse: !shouldBeDisplayed,
+      timeout: 10_000,
+      interval: 50
+    });
   }
 
   async assertSeeAdaHandleError(shouldBeDisplayed: boolean) {
@@ -374,7 +378,11 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
-    await new AddressInput().searchLoader.waitForDisplayed({ reverse: !shouldBeDisplayed, interval: 50 });
+    await new AddressInput().searchLoader.waitForDisplayed({
+      reverse: !shouldBeDisplayed,
+      interval: 50,
+      timeout: 10_000
+    });
   }
 
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {

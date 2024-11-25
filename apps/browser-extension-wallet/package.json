@@ -1,6 +1,6 @@
 {
   "name": "@lace/browser-extension-wallet",
-  "version": "1.17.3",
+  "version": "1.17.5",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
   "bugs": {
@@ -41,15 +41,15 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cardano-sdk/cardano-services-client": "0.21.7",
-    "@cardano-sdk/core": "0.41.2",
-    "@cardano-sdk/dapp-connector": "0.12.42",
-    "@cardano-sdk/input-selection": "0.13.25",
-    "@cardano-sdk/tx-construction": "0.21.10",
+    "@cardano-sdk/cardano-services-client": "0.22.3",
+    "@cardano-sdk/core": "0.41.4",
+    "@cardano-sdk/dapp-connector": "0.12.44",
+    "@cardano-sdk/input-selection": "0.13.28",
+    "@cardano-sdk/tx-construction": "0.21.13",
     "@cardano-sdk/util": "0.15.5",
-    "@cardano-sdk/util-rxjs": "0.7.38",
-    "@cardano-sdk/wallet": "0.44.17",
-    "@cardano-sdk/web-extension": "0.34.16",
+    "@cardano-sdk/util-rxjs": "0.7.41",
+    "@cardano-sdk/wallet": "0.44.22",
+    "@cardano-sdk/web-extension": "0.34.21",
     "@emurgo/cip14-js": "~3.0.1",
     "@input-output-hk/lace-ui-toolkit": "1.21.0",
     "@lace/cardano": "0.1.0",
@@ -99,7 +99,7 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
-    "@cardano-sdk/hardware-ledger": "0.12.10",
+    "@cardano-sdk/hardware-ledger": "0.12.13",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@openpgp/web-stream-tools": "0.0.11-patch-0",
     "@pdfme/common": "^4.0.2",

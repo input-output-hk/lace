@@ -24,7 +24,7 @@ class MultidelegationDAppIssueModal {
   }
 
   async clickOnGotItButton(): Promise<void> {
-    await this.gotItButton.waitForClickable();
+    await this.gotItButton.waitForClickable({ timeout: 10_000 });
     await this.gotItButton.click();
   }
 }

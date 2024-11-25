@@ -18,6 +18,7 @@ import { CreateCollateral } from './CreateCollateral';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
+import { useObservable } from '@lace/common';
 
 enum ReturnResponse {
   resolve = 'resolve',
@@ -87,6 +88,9 @@ export const DappCollateralContainer = (): React.ReactElement => {
   const redirectToCreateSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const redirectToCreateFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
 
+  const balance = useObservable(inMemoryWallet.balance.utxo.total$);
+  const availableRewards = useObservable(inMemoryWallet.balance.rewardAccounts.rewards$);
+
   const confirmCollateral = useCallback(
     async (utxos: Wallet.Cardano.Utxo[]) => {
       try {
@@ -101,6 +105,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
     [inMemoryWallet, redirectToCreateFailure, redirectToCreateSuccess]
   );
 
+  /* eslint-disable-next-line sonarjs/cognitive-complexity */
   useEffect(() => {
     try {
       consumeRemoteApi<Pick<DappDataService, 'getCollateralRequest'>>(
@@ -114,8 +119,11 @@ export const DappCollateralContainer = (): React.ReactElement => {
       )
         .getCollateralRequest()
         .then(({ dappInfo: requestDappInfo, collateralRequest }) => {
+          if (balance === undefined) return; // Balance not loaded yet.
+
           // Set the summary information needed to display
           setDappInfo(requestDappInfo);
+          const coinBalance = balance.coins + availableRewards;
           // Determine if collateral can be set without further fragmentation of wallet UTxOs
           let totalCoins = BigInt(0);
           const usableUtxos: Wallet.Cardano.Utxo[] = [];
@@ -135,18 +143,24 @@ export const DappCollateralContainer = (): React.ReactElement => {
               }
             }
           }
+
           if (totalCoins < collateralRequest.amount) {
-            // Not enough to ADA available to set collateral
-            reject(new ApiError(APIErrorCode.Refused, 'wallet does not have enough ada to set collateral'), false);
-            setInsufficientBalance(true);
+            if (coinBalance > collateralRequest.amount) {
+              setCollateralInfo(collateralRequest);
+            } else {
+              // Not enough ADA available to set collateral
+              reject(new ApiError(APIErrorCode.Refused, 'wallet does not have enough ADA to set collateral'), false);
+              setInsufficientBalance(true);
+            }
           }
+
           setIsCalculatingCollateral(false);
         });
     } catch (error) {
       console.error(error);
       redirectToCreateFailure();
     }
-  }, [redirectToCreateFailure]);
+  }, [redirectToCreateFailure, balance, availableRewards]);
 
   if (isCalculatingCollateral || !inMemoryWallet) {
     return <MainLoader text={t('dapp.collateral.calculating')} />;
