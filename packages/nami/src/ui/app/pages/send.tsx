@@ -130,7 +130,7 @@ const Send = ({
   const { cardanoCoin, walletType, openHWFlow, networkConnection } =
     useCommonOutsideHandles();
 
-  const { passwordUtil } = useOutsideHandles();
+  const { secretsUtil } = useOutsideHandles();
 
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
@@ -667,7 +667,7 @@ const Send = ({
         isPopup={true}
         openHWFlow={openHWFlow}
         walletType={walletType}
-        passwordUtil={passwordUtil}
+        secretsUtil={secretsUtil}
         title={'Confirm transaction'}
         info={
           <Box
@@ -767,7 +767,7 @@ const Send = ({
           try {
             await signAndSubmit({
               tx,
-              password: passwordUtil.password,
+              password: secretsUtil.password,
               withSignTxConfirmation,
               inMemoryWallet,
             });
@@ -775,7 +775,7 @@ const Send = ({
             console.error('Failed to sign and submit transaction', error);
             throw error;
           } finally {
-            passwordUtil.clearSecrets();
+            secretsUtil.clearSecrets();
           }
         }}
         getCbor={async () => {
@@ -788,7 +788,7 @@ const Send = ({
           });
         }}
         onConfirm={async (status, error) => {
-          passwordUtil.clearSecrets();
+          secretsUtil.clearSecrets();
           if (status) {
             capture(Events.SendTransactionConfirmed);
             toast({

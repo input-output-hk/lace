@@ -8,7 +8,7 @@ import type {
   WalletRepositoryApi,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
-import type { PasswordObj as Password } from '@lace/core';
+import type { useSecrets } from '@lace/core';
 export interface IAssetDetails {
   id: string;
   logo: string;
@@ -73,15 +73,7 @@ export interface OutsideHandlesContextValue {
     hexId?: Readonly<Wallet.Cardano.PoolIdHex>,
   ) => Promise<void>;
   signAndSubmitTransaction: () => Promise<void>;
-  passwordUtil: {
-    clearSecrets: () => void;
-    password: Partial<Password>;
-    setPassword: (pw: Readonly<Partial<Password>>) => void;
-    passwordConfirmation: Partial<Password>;
-    setPasswordConfirmation: (pw: Readonly<Partial<Password>>) => void;
-    repeatedPassword: Partial<Password>;
-    setRepeatedConfirmation: (pw: Readonly<Partial<Password>>) => void;
-  };
+  secretsUtil: ReturnType<typeof useSecrets>;
   delegationTxFee: string;
   delegationStoreDelegationTxBuilder?: TxBuilder;
   collateralTxBuilder?: TxBuilder;

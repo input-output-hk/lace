@@ -40,7 +40,7 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   const capture = useCaptureEvent();
   const cancelRef = React.useRef<HTMLButtonElement>(null);
   const toast = useToast();
-  const { passwordUtil } = useOutsideHandles();
+  const { secretsUtil } = useOutsideHandles();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -52,7 +52,7 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   }));
 
   const destroySecrets = () => {
-    passwordUtil.clearSecrets();
+    secretsUtil.clearSecrets();
   };
 
   const handleClose = () => {
@@ -62,11 +62,11 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
 
   const confirmHandler = async () => {
     if (
-      !passwordUtil.password?.value ||
-      !passwordUtil.passwordConfirmation?.value ||
-      !passwordUtil.repeatedPassword?.value ||
-      passwordUtil.passwordConfirmation.value !==
-        passwordUtil.repeatedPassword.value
+      !secretsUtil.password?.value ||
+      !secretsUtil.passwordConfirmation?.value ||
+      !secretsUtil.repeatedPassword?.value ||
+      secretsUtil.passwordConfirmation.value !==
+        secretsUtil.repeatedPassword.value
     )
       return;
 
@@ -74,8 +74,8 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
 
     try {
       await changePassword(
-        passwordUtil.password.value,
-        passwordUtil.passwordConfirmation.value,
+        secretsUtil.password.value,
+        secretsUtil.passwordConfirmation.value,
       );
 
       toast({
@@ -112,18 +112,18 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
           <NamiPassword
             autoFocus
             label="Enter current password"
-            onChange={passwordUtil.setPassword}
+            onChange={secretsUtil.setPassword}
             onSubmit={noop}
           />
           <Box height="4" />
           <Box>
             <NamiPassword
               label="Enter new password"
-              onChange={passwordUtil.setPasswordConfirmation}
+              onChange={secretsUtil.setPasswordConfirmation}
               onSubmit={noop}
             />
-            {!!passwordUtil.password?.value &&
-              passwordUtil.password.value.length < 8 && (
+            {!!secretsUtil.password?.value &&
+              secretsUtil.password.value.length < 8 && (
                 <Text color="red.300">
                   Password must be at least 8 characters long
                 </Text>
@@ -133,14 +133,14 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
           <Box>
             <NamiPassword
               label="Repeat new password"
-              onChange={passwordUtil.setRepeatedConfirmation}
+              onChange={secretsUtil.setRepeatedConfirmation}
               onSubmit={confirmHandler}
             />
 
-            {!!passwordUtil.passwordConfirmation?.value &&
-              !!passwordUtil.repeatedPassword?.value &&
-              passwordUtil.passwordConfirmation.value !==
-                passwordUtil.repeatedPassword?.value && (
+            {!!secretsUtil.passwordConfirmation?.value &&
+              !!secretsUtil.repeatedPassword?.value &&
+              secretsUtil.passwordConfirmation.value !==
+                secretsUtil.repeatedPassword?.value && (
                 <Text color="red.300">Password doesn't match</Text>
               )}
           </Box>
@@ -153,12 +153,12 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
 
           <Button
             isDisabled={
-              !passwordUtil.password?.value ||
-              !passwordUtil.passwordConfirmation?.value ||
-              !passwordUtil.repeatedPassword?.value ||
-              passwordUtil.passwordConfirmation.value !==
-                passwordUtil.repeatedPassword.value ||
-              passwordUtil.passwordConfirmation?.value.length < 8
+              !secretsUtil.password?.value ||
+              !secretsUtil.passwordConfirmation?.value ||
+              !secretsUtil.repeatedPassword?.value ||
+              secretsUtil.passwordConfirmation.value !==
+                secretsUtil.repeatedPassword.value ||
+              secretsUtil.passwordConfirmation?.value.length < 8
             }
             isLoading={isLoading}
             colorScheme="teal"

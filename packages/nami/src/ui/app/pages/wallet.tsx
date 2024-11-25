@@ -633,7 +633,7 @@ const NewAccountModal = React.forwardRef<
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
   const {
-    passwordUtil: { password, setPassword, clearSecrets },
+    secretsUtil: { password, setPassword, clearSecrets },
   } = useOutsideHandles();
   const [state, setState] = React.useState({
     show: false,
@@ -651,6 +651,7 @@ const NewAccountModal = React.forwardRef<
         walletId,
       });
       await capture(Events.SettingsNewAccountConfirmClick);
+      clearSecrets();
       onClose();
     } catch {
       setState(s => ({ ...s, wrongPassword: true }));

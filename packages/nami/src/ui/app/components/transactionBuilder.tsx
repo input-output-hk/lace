@@ -123,7 +123,7 @@ const TransactionBuilder = (undefined, ref) => {
     delegationTxFee,
     isBuildingTx,
     stakingError,
-    passwordUtil,
+    secretsUtil,
     signAndSubmitTransaction,
     getStakePoolInfo,
     submitCollateralTx,
@@ -279,9 +279,9 @@ const TransactionBuilder = (undefined, ref) => {
         onCloseBtn={() => {
           setData({ pool: { ...poolDefaultValue } });
           resetDelegationState();
-          passwordUtil.clearSecrets();
+          secretsUtil.clearSecrets();
         }}
-        passwordUtil={passwordUtil}
+        secretsUtil={secretsUtil}
         openHWFlow={openHWFlow}
         walletType={walletType}
         ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
@@ -298,7 +298,8 @@ const TransactionBuilder = (undefined, ref) => {
             const tx = await delegationStoreDelegationTxBuilder!.build();
             const inspection = await tx.inspect();
 
-            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+            const hasCertificates =
+              (inspection.body.certificates?.length ?? 0) > 0;
 
             if (!hasCertificates) {
               resetDelegationState();
@@ -496,7 +497,7 @@ const TransactionBuilder = (undefined, ref) => {
         openHWFlow={openHWFlow}
         walletType={walletType}
         ready={!isBuildingTx}
-        passwordUtil={passwordUtil}
+        secretsUtil={secretsUtil}
         title="Stake deregistration"
         sign={async () => {
           try {
@@ -511,7 +512,8 @@ const TransactionBuilder = (undefined, ref) => {
             const tx = await delegationStoreDelegationTxBuilder!.build();
             const inspection = await tx.inspect();
 
-            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+            const hasCertificates =
+              (inspection.body.certificates?.length ?? 0) > 0;
 
             if (!hasCertificates) {
               setData({ pool: { ...poolDefaultValue } });
@@ -633,16 +635,16 @@ const TransactionBuilder = (undefined, ref) => {
         }
         openHWFlow={openHWFlow}
         walletType={walletType}
-        passwordUtil={passwordUtil}
+        secretsUtil={secretsUtil}
         sign={async () => {
-          submitCollateral(passwordUtil.password.value ?? '');
+          submitCollateral(secretsUtil.password.value ?? '');
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
-          passwordUtil.clearSecrets();
+          secretsUtil.clearSecrets();
         }}
         onConfirm={(status, error) => {
-          passwordUtil.clearSecrets();
+          secretsUtil.clearSecrets();
           if (status) {
             capture(Events.SettingsCollateralConfirmClick);
             toast({

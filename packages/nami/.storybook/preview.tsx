@@ -63,7 +63,7 @@ export const decorators = [
       setAvatar={noop}
       buildDelegation={noop}
       signAndSubmitTransaction={noop}
-      passwordUtil={{
+      secretsUtil={{
         clearSecrets: noop,
         password: { input: noop, value: 'pw' },
         setPassword: noop,

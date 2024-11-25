@@ -147,7 +147,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     environmentName,
     blockchainProvider: { assetProvider }
   } = useWalletStore();
-  const passwordUtil = useSecrets();
+  const secretsUtil = useSecrets();
 
   const { theme } = useTheme();
   const cardanoCoin = useMemo(
@@ -206,7 +206,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         walletRepository,
         environmentName,
         dappConnector: { ...dappConnector, getAssetInfos },
-        passwordUtil
+        secretsUtil
       }}
     >
       <CommonOutsideHandlesProvider

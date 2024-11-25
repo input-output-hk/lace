@@ -32,7 +32,7 @@ interface Props {
 
 export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   const capture = useCaptureEvent();
-  const { passwordUtil } = useDappOutsideHandles();
+  const { secretsUtil } = useDappOutsideHandles();
   const ref = React.useRef();
   const [payload, setPayload] = React.useState('');
   const [address, setAddress] = React.useState('');
@@ -236,10 +236,10 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
         ref={ref}
         walletType={walletType}
         openHWFlow={openHWFlow}
-        passwordUtil={passwordUtil}
+        secretsUtil={secretsUtil}
         sign={async () => {
           try {
-            await request?.sign(passwordUtil.password.value ?? '');
+            await request?.sign(secretsUtil.password.value ?? '');
           } catch (error) {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError

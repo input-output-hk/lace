@@ -40,7 +40,7 @@ export const CollateralDrawer = ({
     walletUI: { appMode }
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
-  const { password, setPassword, clearSecrets } = useSecrets();
+  const secretsUtil = useSecrets();
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
   const isWalletSyncingForTheFirstTime = useSyncingTheFirstTime();
   const { initializeCollateralTx, submitCollateralTx, isInitializing, isSubmitting, hasEnoughAda, txFee } =
@@ -105,7 +105,7 @@ export const CollateralDrawer = ({
     [Sections.SEND]: (
       <CollateralStepSend
         popupView={popupView}
-        setPassword={setPassword}
+        setPassword={secretsUtil.setPassword}
         isInMemory={isInMemoryWallet}
         isPasswordValid={isPasswordValid}
         setIsPasswordValid={setIsPasswordValid}
@@ -122,7 +122,7 @@ export const CollateralDrawer = ({
       <CollateralFooterReclaim
         setCurrentStep={setSection}
         onClose={handleReclaimCollateral}
-        onClaim={clearSecrets}
+        onClaim={secretsUtil.clearSecrets}
         isInitializing={isInitializing}
         isSubmitting={isSubmitting}
       />
@@ -131,11 +131,11 @@ export const CollateralDrawer = ({
       <CollateralFooterSend
         setCurrentStep={setSection}
         onClose={handleConfirmCollateral}
-        onClaim={clearSecrets}
+        onClaim={secretsUtil.clearSecrets}
         walletType={walletType}
         setIsPasswordValid={setIsPasswordValid}
         popupView={popupView}
-        password={password.value}
+        secretsUtil={secretsUtil}
         submitCollateralTx={submitCollateralTx}
         hasEnoughAda={hasEnoughAda}
         isInitializing={isInitializing}

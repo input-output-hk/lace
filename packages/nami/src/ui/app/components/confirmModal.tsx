@@ -35,7 +35,7 @@ interface Props {
   getCbor?: () => Promise<string>;
   setCollateral?: boolean;
   isPopup?: boolean;
-  passwordUtil: {
+  secretsUtil: {
     clearSecrets: () => void;
     password: Partial<Password>;
     setPassword: (pw: Readonly<Partial<Password>>) => void;
@@ -60,7 +60,7 @@ const ConfirmModal = (
     getCbor,
     setCollateral,
     isPopup,
-    passwordUtil,
+    secretsUtil,
   }: Readonly<Props>,
   ref,
 ) => {
@@ -118,7 +118,7 @@ const ConfirmModal = (
           props={props}
           isOpen={isOpenNormal}
           onClose={onCloseNormal}
-          passwordUtil={passwordUtil}
+          secretsUtil={secretsUtil}
         />
       )}
     </>
@@ -128,8 +128,8 @@ const ConfirmModal = (
 interface ConfirmModalNormalProps {
   isOpen?: boolean;
   onClose: () => void;
-  props: Omit<Props, 'passwordUtil'>;
-  passwordUtil: {
+  props: Omit<Props, 'secretsUtil'>;
+  secretsUtil: {
     clearSecrets: () => void;
     password: Partial<Password>;
     setPassword: (pw: Readonly<Partial<Password>>) => void;
@@ -140,7 +140,7 @@ const ConfirmModalNormal = ({
   props,
   isOpen,
   onClose,
-  passwordUtil,
+  secretsUtil,
 }: Readonly<ConfirmModalNormalProps>) => {
   const [errorMessage, setErrorMessage] = React.useState<string | undefined>();
   const [waitReady, setWaitReady] = React.useState(true);
@@ -150,13 +150,13 @@ const ConfirmModalNormal = ({
   }, [isOpen]);
 
   const handleClose = (cb?: () => void) => {
-    passwordUtil.clearSecrets();
+    secretsUtil.clearSecrets();
     cb?.();
     setTimeout(onClose, 0);
   };
 
   const confirmHandler = async () => {
-    if (!passwordUtil.password?.value || props.ready === false || !waitReady)
+    if (!secretsUtil.password?.value || props.ready === false || !waitReady)
       return;
     try {
       setWaitReady(false);
@@ -164,7 +164,7 @@ const ConfirmModalNormal = ({
       await props?.onConfirm(true);
       handleClose();
     } catch (error) {
-      passwordUtil.clearSecrets();
+      secretsUtil.clearSecrets();
       if (
         error === ERROR.wrongPassword ||
         (error instanceof Error && error.name === 'AuthenticationError')
@@ -198,7 +198,7 @@ const ConfirmModalNormal = ({
           {props.info}
           <NamiPassword
             autoFocus // seems to work fine in nami-mode
-            onChange={passwordUtil.setPassword}
+            onChange={secretsUtil.setPassword}
             label="Enter password"
             errorMessage={errorMessage}
             onSubmit={async () => await confirmHandler()}
@@ -217,9 +217,7 @@ const ConfirmModalNormal = ({
           </Button>
           <Button
             isDisabled={
-              !passwordUtil.password.value ||
-              props.ready === false ||
-              !waitReady
+              !secretsUtil.password.value || props.ready === false || !waitReady
             }
             isLoading={!waitReady}
             colorScheme="teal"
@@ -238,7 +236,7 @@ interface ConfirmModalHwProps {
   onClose: () => void;
   openHWFlow: (path: string) => void;
   getCbor?: () => Promise<string>;
-  props: Omit<Props, 'passwordUtil'>;
+  props: Omit<Props, 'secretsUtil'>;
 }
 
 const ConfirmModalHw = ({
