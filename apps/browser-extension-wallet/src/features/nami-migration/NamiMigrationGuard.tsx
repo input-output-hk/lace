@@ -1,5 +1,5 @@
 import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { NamiMigrationAPI, NamiMigrationChannels } from '@lib/scripts/background/nami-migration';
+import type { NamiMigrationAPI } from '@lib/scripts/background/nami-migration';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { MigrationState } from './migration-tool/migrator/migration-state.data';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useBackgroundServiceAPIContext } from '@providers';
-import { BrowserViewSections } from '@lib/scripts/types';
+import { BrowserViewSections, NamiMigrationChannels } from '@lib/scripts/types';
 import { NamiMigration } from './NamiMigration';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'checkMigrationStatus' | 'abortMigration'>>(
