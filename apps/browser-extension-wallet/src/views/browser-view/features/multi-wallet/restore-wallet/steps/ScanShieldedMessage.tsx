@@ -257,6 +257,7 @@ export const ScanShieldedMessage: VFC = () => {
                     ref={videoRef}
                     autoPlay
                     playsInline
+                    data-testid={'camera-preview-box'}
                   />
                   <canvas ref={canvasRef} className={styles.hidden} />
                 </Box>
@@ -269,6 +270,7 @@ export const ScanShieldedMessage: VFC = () => {
                       onChange={handleDeviceChange}
                       showArrow
                       zIndex={99_999}
+                      id={'camera-selection-box'}
                     >
                       {VideoDeviceSelectOptions}
                     </Select.Root>
@@ -285,21 +287,26 @@ export const ScanShieldedMessage: VFC = () => {
               }}
               label={i18n.t('core.walletSetupStep.back')}
               title={i18n.t('core.walletSetupStep.back')}
+              data-testid="wallet-setup-step-btn-back"
             />
             {scanState === 'scanning' && !validation.error && (
               <Flex alignItems="center" gap="$8" h="$48">
                 <Loader className={styles.loader} />
-                <Text.Label color="secondary">{i18n.t('paperWallet.scanShieldedMessage.lookingForWallet')}</Text.Label>
+                <Text.Label color="secondary" data-testid={'loader-label'}>
+                  {i18n.t('paperWallet.scanShieldedMessage.lookingForWallet')}
+                </Text.Label>
               </Flex>
             )}
             {!!validation.error && (
               <Flex alignItems="center" gap="$8" h="$48">
-                <WarningIcon width={24} height={24} />
+                <WarningIcon width={24} height={24} data-testid={'error-icon'} />
                 <Flex flexDirection="column">
-                  <Text.Body.Small color="secondary" weight="$bold">
+                  <Text.Body.Small color="secondary" weight="$bold" data-testid={'error-title'}>
                     {validation.error.title}
                   </Text.Body.Small>
-                  <Text.Label color="secondary">{validation.error.description}</Text.Label>
+                  <Text.Label color="secondary" data-testid={'error-description'}>
+                    {validation.error.description}
+                  </Text.Label>
                 </Flex>
               </Flex>
             )}

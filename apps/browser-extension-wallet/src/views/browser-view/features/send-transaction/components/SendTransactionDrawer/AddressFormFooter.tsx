@@ -38,7 +38,7 @@ export const AddressFormFooter = withAddressBookContext(() => {
         disabled={!addressToEdit.name || !addressToEdit.address}
         onClick={() => onFormSubmit()}
       >
-        Save
+        {t('browserView.transaction.send.footer.save')}
       </Button>
       <Button size="large" block className={styles.cancel} onClick={() => setPrevSection()}>
         {t('browserView.transaction.send.footer.cancel')}
