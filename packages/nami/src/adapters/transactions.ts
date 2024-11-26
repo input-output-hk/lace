@@ -189,6 +189,7 @@ const calculateAmount = ({
   const amounts: Amount[] = [];
 
   while (inputs.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const input = inputs.pop()!;
     const outputIndex = outputs.findIndex(amount => amount.unit === input.unit);
     let qty;

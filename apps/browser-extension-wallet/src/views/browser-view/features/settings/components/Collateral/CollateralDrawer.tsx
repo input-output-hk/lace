@@ -122,6 +122,7 @@ export const CollateralDrawer = ({
       <CollateralFooterReclaim
         setCurrentStep={setSection}
         onClose={handleReclaimCollateral}
+        // eslint-disable-next-line react/jsx-handler-names
         onClaim={secretsUtil.clearSecrets}
         isInitializing={isInitializing}
         isSubmitting={isSubmitting}
@@ -131,6 +132,7 @@ export const CollateralDrawer = ({
       <CollateralFooterSend
         setCurrentStep={setSection}
         onClose={handleConfirmCollateral}
+        // eslint-disable-next-line react/jsx-handler-names
         onClaim={secretsUtil.clearSecrets}
         walletType={walletType}
         setIsPasswordValid={setIsPasswordValid}
