@@ -55,6 +55,7 @@ When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
 });
 
 When(/^I click on a transaction hash and save hash information$/, async () => {
+  await TransactionDetailsPage.transactionDetailsHash.waitForStable();
   testContext.save('txHashValue', await TransactionDetailsPage.transactionDetailsHash.getText());
   await TransactionDetailsPage.transactionDetailsHash.click();
 });
