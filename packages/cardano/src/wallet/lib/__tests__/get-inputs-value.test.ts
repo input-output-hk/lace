@@ -250,7 +250,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
     ]);
 
     const result = getTxInputsValueAndAddress(
-      Array.from({ length: 30 }).map((_, index) => ({ index, txId: 'txId1' }) as unknown as Cardano.TxIn),
+      Array.from({ length: 30 }).map((_, index) => ({ index, txId: 'txId1' } as unknown as Cardano.TxIn)),
       {
         transactionsByHashes
       } as unknown as ChainHistoryProvider,
@@ -285,7 +285,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
     );
 
     const result = getTxInputsValueAndAddress(
-      Array.from({ length: 30 }).map((_, index) => ({ index: 0, txId: `txId${index}` }) as Cardano.TxIn),
+      Array.from({ length: 30 }).map((_, index) => ({ index: 0, txId: `txId${index}` } as Cardano.TxIn)),
       {
         transactionsByHashes
       } as unknown as ChainHistoryProvider,
