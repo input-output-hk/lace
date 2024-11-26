@@ -13,7 +13,7 @@ const getPlaceholderDecimal = (value: string) => {
   return decimals ? decimals : 0;
 };
 
-export const calculateAssetBalance = (balance: bigint | string, assetInfo: Asset.AssetInfo): string => {
+export const calculateAssetBalance = (balance: bigint | string, assetInfo?: Asset.AssetInfo): string => {
   const decimals = assetInfo?.tokenMetadata?.decimals;
   if (!decimals) return balance.toString();
 
