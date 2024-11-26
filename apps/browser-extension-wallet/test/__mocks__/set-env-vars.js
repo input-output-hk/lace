@@ -20,3 +20,7 @@ process.env.USE_POSTHOG_ANALYTICS = 'true';
 process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT = 'false';
 process.env.POSTHOG_HOST = 'https://e.lw.iog.io';
 process.env.POSTHOG_DEV_TOKEN = 'test-token';
+process.env.MIN_NUMBER_OF_COSIGNERS = '2';
+process.env.TWITTER_URL = 'TWITTER_URL';
+process.env.YOUTUBE_URL = 'YOUTUBE_URL';
+process.env.DISCORD_URL = 'DISCORD_URL';
