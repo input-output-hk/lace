@@ -123,8 +123,8 @@ Feature: Add new wallet - Restore wallet
     When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     Then "Enter wallet" button is enabled
     When I click "Enter wallet" button
-    Then I see LW homepage
     And I wait for main loader to disappear
+    Then I see LW homepage
     And "ValidName" is displayed as a wallet name on the menu button
     When I click the menu button
     Then Wallet number 2 with "ValidName" name is displayed on the user menu

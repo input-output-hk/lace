@@ -1,3 +1,4 @@
+// noinspection JSNonASCIINames
 export const faqArticles: Record<string, Record<string, string>> = {
   'How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?': {
     question: 'how-many-stake-pools-can-i-delegate-stake-to-using-the-multi-staking-or-multi-delegation-feature',
@@ -43,7 +44,7 @@ export const faqArticles: Record<string, Record<string, string>> = {
     question: 'what-type-of-governance-actions-are-supported-by-lace',
     title: 'What type of governance actions are supported by Lace?'
   },
-  'Best practices for using the "copy to clipboard" and "paste from clipboard" recovery phrase features': {
+  'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features': {
     question: 'best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features',
     title: 'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features'
   }
