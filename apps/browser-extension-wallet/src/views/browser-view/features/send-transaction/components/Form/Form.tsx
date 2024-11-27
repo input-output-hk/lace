@@ -12,7 +12,7 @@ import { useMaxAda } from '@hooks/useMaxAda';
 import BundleIcon from '../../../../../../assets/icons/bundle-icon.component.svg';
 import { getFee } from '../SendTransactionSummary';
 import { useBuiltTxState, useSpentBalances, useLastFocusedInput, useOutputs } from '../../store';
-import { getNextInsuffisientBalanceInputs, getReachedMaxAmountList, hasReachedMaxAmountAda } from '../../helpers';
+import { getNextInsufficientBalanceInputs, getReachedMaxAmountList, hasReachedMaxAmountAda } from '../../helpers';
 import { MetadataInput } from './MetadataInput';
 import { BundlesList } from './BundlesList';
 import { formatAdaAllocation, getNextBundleCoinId } from './util';
@@ -90,10 +90,10 @@ export const Form = ({
   useEffect(() => {
     if (lastFocusedInput) {
       const id = lastFocusedInput.split('.')[1]; // we get the coin id (cardano id or asset id) to check if it is in the reachedMaxAmountList
-      setInsufficientBalanceInputs(getNextInsuffisientBalanceInputs(lastFocusedInput, reachedMaxAmountList, id));
+      setInsufficientBalanceInputs(getNextInsufficientBalanceInputs(lastFocusedInput, reachedMaxAmountList, id));
 
       setInsufficientAvailableBalanceInputs(
-        getNextInsuffisientBalanceInputs(
+        getNextInsufficientBalanceInputs(
           lastFocusedInput,
           new Set(reachedMaxAvailableAmount ? [cardanoCoin.id] : []),
           id

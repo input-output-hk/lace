@@ -61,7 +61,7 @@ export const getOutputValues = (assets: Array<AssetInfo>, cardanoCoin: Wallet.Co
   };
 };
 
-export const getNextInsuffisientBalanceInputs =
+export const getNextInsufficientBalanceInputs =
   (lastFocusedInput: string, reachedMaxAmountList: Set<string | Wallet.Cardano.AssetId>, id: string) =>
   (prevInputsList: string[]): string[] => {
     const isInMaxAmountList = reachedMaxAmountList.has(id); // check the if the id exists in reachedMaxAmountList
