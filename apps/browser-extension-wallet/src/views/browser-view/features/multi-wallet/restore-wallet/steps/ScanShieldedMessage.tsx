@@ -216,16 +216,20 @@ export const ScanShieldedMessage: VFC = () => {
     if (scanState === 'blocked') {
       return (
         <Flex flexDirection="column" alignItems="center">
-          <SadEmojiIcon height={40} width={40} />
-          <Text.Label color="secondary">{i18n.t('paperWallet.scanShieldedMessage.cameraAccessBlocked')}</Text.Label>
+          <SadEmojiIcon height={40} width={40} data-testid={'sad-emoji-icon'} />
+          <Text.Label color="secondary" data-testid={'camera-access-blocked-label'}>
+            {i18n.t('paperWallet.scanShieldedMessage.cameraAccessBlocked')}
+          </Text.Label>
         </Flex>
       );
     }
     if (scanState === 'waiting') {
       return (
         <Flex flexDirection="column" alignItems="center">
-          <CameraIcon height={40} width={40} />
-          <Text.Label color="secondary">{i18n.t('paperWallet.scanShieldedMessage.waitingForCameraAccess')}</Text.Label>
+          <CameraIcon height={40} width={40} data-testid={'camera-icon'} />
+          <Text.Label color="secondary" data-testid={'camera-access-prompt-label'}>
+            {i18n.t('paperWallet.scanShieldedMessage.waitingForCameraAccess')}
+          </Text.Label>
         </Flex>
       );
     }

@@ -3,11 +3,10 @@ Feature: Onboarding - Paper Wallet - Restore wallet
 
   @LW-11168
   Scenario: Onboarding - Restore - Choose a recovery method - Paper Wallet - click "Next" button
-    Given Set camera access permission: granted
     When I click "Restore" button on wallet setup page
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
-    Then "Scan your private QR code" page is displayed
+    Then "Scan your private QR code" page is displayed with camera access permission set as "prompted"
 
   @LW-11169
   Scenario: Onboarding - Restore - Choose a recovery method - Paper Wallet - click "Back" button

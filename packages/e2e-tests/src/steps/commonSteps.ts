@@ -427,6 +427,7 @@ When(/^I wait for main loader to disappear$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
 });
 
+// FIXME: does not work while executed on CI
 When(
   /^Set camera access permission: (granted|denied|prompted)$/,
   async (permission: 'granted' | 'denied' | 'prompted') => {

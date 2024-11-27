@@ -543,6 +543,9 @@ When(
   }
 );
 
-Then(/^"Scan your private QR code" page is displayed$/, async () => {
-  await ScanYourPrivateQrCodePageAssert.assertSeeScanYourPrivateQrCodePage();
-});
+Then(
+  /^"Scan your private QR code" page is displayed with camera access permission set as "(granted|denied|prompted)"$/,
+  async (permission: 'granted' | 'denied' | 'prompted') => {
+    await ScanYourPrivateQrCodePageAssert.assertSeeScanYourPrivateQrCodePage(permission);
+  }
+);
