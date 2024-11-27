@@ -3,6 +3,7 @@ Feature: Onboarding - Paper Wallet - Restore wallet
 
   @LW-11168
   Scenario: Onboarding - Restore - Choose a recovery method - Paper Wallet - click "Next" button
+    Given Set camera access permission: granted
     When I click "Restore" button on wallet setup page
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup

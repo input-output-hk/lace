@@ -50,6 +50,7 @@ import {
 } from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
+import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -425,3 +426,11 @@ Then(
 When(/^I wait for main loader to disappear$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
 });
+
+When(
+  /^Set camera access permission: (granted|denied|prompted)$/,
+  async (permission: 'granted' | 'denied' | 'prompted') => {
+    await setCameraAccessPermission(permission);
+    await browser.refresh();
+  }
+);
