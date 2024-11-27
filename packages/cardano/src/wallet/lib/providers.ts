@@ -81,26 +81,6 @@ export interface ProvidersConfig {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-const composeProviders = <P extends object>(...providers: P[]): P =>
-  new Proxy<P>(providers[0], {
-    get(_, p) {
-      return async (...args: any[]) => {
-        let providerIndex = 0;
-        let provider: P;
-        let lastError: any;
-        while ((provider = providers[providerIndex++])) {
-          try {
-            return await (provider[p as keyof P] as any)(...args);
-          } catch (error) {
-            lastError = error;
-          }
-        }
-        throw lastError;
-      };
-    }
-  });
-
 /**
  * Only one instance must be alive.
  *
@@ -117,13 +97,12 @@ export const createProviders = ({
 
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
 
-  const cardanoServicesAssetProvider = assetInfoHttpProvider(httpProviderConfig);
   const blockfrostClient = new BlockfrostClient(blockfrostConfig, {
     rateLimiter: blockfrostConfig.rateLimiter
   });
   const assetProvider = useBlockfrostAssetProvider
-    ? composeProviders(new BlockfrostAssetProvider(blockfrostClient, logger), cardanoServicesAssetProvider)
-    : cardanoServicesAssetProvider;
+    ? new BlockfrostAssetProvider(blockfrostClient, logger)
+    : assetInfoHttpProvider(httpProviderConfig);
   const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
   const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
