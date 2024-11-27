@@ -18,6 +18,7 @@ import { useEffect, useState } from 'react';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { NamiDappConnector } from './views/nami-mode/indexInternal';
 import { storage } from 'webextension-polyfill';
+import { TxWitnessRequestProvider } from '@providers/TxWitnessRequestProvider';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -56,7 +57,9 @@ const App = (): React.ReactElement => {
                         <ExternalLinkOpenerProvider>
                           <AddressesDiscoveryOverlay>
                             <UIThemeProvider>
-                              {mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                              <TxWitnessRequestProvider>
+                                {mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                              </TxWitnessRequestProvider>
                             </UIThemeProvider>
                           </AddressesDiscoveryOverlay>
                         </ExternalLinkOpenerProvider>

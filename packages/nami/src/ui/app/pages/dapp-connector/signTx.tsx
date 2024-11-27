@@ -80,7 +80,11 @@ export const SignTx = ({
 
   const capture = useCaptureEvent();
   const { cardanoCoin, walletType, openHWFlow } = useCommonOutsideHandles();
-  const { switchWalletMode } = useDappOutsideHandles();
+  const {
+    switchWalletMode,
+    dappConnector: { txWitnessRequest },
+  } = useDappOutsideHandles();
+
   const ref = React.useRef();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
@@ -223,7 +227,9 @@ export const SignTx = ({
   };
 
   const getInfo = async () => {
-    const { dappInfo, request } = await dappConnector.getSignTxRequest();
+    if (!txWitnessRequest) return;
+    const { dappInfo, request } =
+      await dappConnector.getSignTxRequest(txWitnessRequest);
     setRequest(request);
     setDappInfo(dappInfo);
 
@@ -261,7 +267,7 @@ export const SignTx = ({
 
   React.useEffect(() => {
     getInfo();
-  }, [request]);
+  }, [txWitnessRequest]);
   return (
     <>
       {isLoading.loading ? (

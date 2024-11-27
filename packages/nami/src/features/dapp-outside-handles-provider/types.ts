@@ -4,6 +4,7 @@ import type { HexBlob } from '@cardano-sdk/util';
 import type {
   WalletManagerApi,
   WalletRepositoryApi,
+  TransactionWitnessRequest,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 
@@ -14,7 +15,11 @@ export interface DappConnector {
     url: string,
     onCleanup: () => void,
   ) => void;
-  getSignTxRequest: () => Promise<{
+  getSignTxRequest: (
+    txWitnessRequest: Readonly<
+      TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
+    >,
+  ) => Promise<{
     dappInfo: Wallet.DappInfo;
     request: {
       data: {
@@ -39,6 +44,10 @@ export interface DappConnector {
       sign: (password: string) => Promise<Cip30DataSignature>;
     };
   }>;
+  txWitnessRequest: TransactionWitnessRequest<
+    Wallet.WalletMetadata,
+    Wallet.AccountMetadata
+  >;
   getAssetInfos: ({
     assetIds,
     tx,

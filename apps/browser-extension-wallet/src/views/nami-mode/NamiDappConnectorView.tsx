@@ -22,9 +22,11 @@ import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { tryGetAssetInfos } from './utils';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
+import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
+import type { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 
 const DAPP_TOAST_DURATION = 100;
-const dappConnector: Omit<DappConnector, 'getAssetInfos'> = {
+const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> = {
   getDappInfo: () => {
     const dappDataService = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
       {
@@ -61,42 +63,22 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos'> = {
       onCleanup();
     }, DAPP_TOAST_DURATION);
   },
-  getSignTxRequest: async () => {
-    const userPromptService = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
+  getSignTxRequest: async (r: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>) => ({
+    dappInfo: await senderToDappInfo(r.signContext.sender),
+    request: {
+      data: { tx: r.transaction.toCbor(), addresses: r.signContext.knownAddresses },
+      reject: async (onCleanup: () => void) => {
+        await r.reject('User declined to sign');
+        setTimeout(() => {
+          onCleanup();
+        }, DAPP_TOAST_DURATION);
       },
-      { logger: console, runtime }
-    );
-
-    return firstValueFrom(
-      signingCoordinator.transactionWitnessRequest$.pipe(
-        map(async (r) => ({
-          dappInfo: await senderToDappInfo(r.signContext.sender),
-          request: {
-            data: { tx: r.transaction.toCbor(), addresses: r.signContext.knownAddresses },
-            reject: async (onCleanup: () => void) => {
-              await r.reject('User declined to sign');
-              setTimeout(() => {
-                onCleanup();
-              }, DAPP_TOAST_DURATION);
-            },
-            sign: async (password: string) => {
-              const passphrase = Buffer.from(password, 'utf8');
-              await r.sign(passphrase, { willRetryOnFailure: true });
-            }
-          }
-        })),
-        finalize(() => userPromptService.shutdown())
-      )
-    );
-  },
+      sign: async (password: string) => {
+        const passphrase = Buffer.from(password, 'utf8');
+        await r.sign(passphrase, { willRetryOnFailure: true });
+      }
+    }
+  }),
   getSignDataRequest: async () => {
     const userPromptService = exposeApi<Pick<UserPromptService, 'readyToSignData'>>(
       {
@@ -218,6 +200,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     });
   }, [backgroundServices, namiMigration]);
 
+  const txWitnessRequest = useTxWitnessRequest();
+
   return (
     <DappOutsideHandlesProvider
       {...{
@@ -225,7 +209,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         walletManager,
         walletRepository,
         environmentName,
-        dappConnector: { ...dappConnector, getAssetInfos },
+        dappConnector: { ...dappConnector, txWitnessRequest, getAssetInfos },
         switchWalletMode
       }}
     >
