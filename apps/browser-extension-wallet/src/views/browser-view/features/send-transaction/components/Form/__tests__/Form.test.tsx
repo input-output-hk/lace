@@ -15,6 +15,7 @@ import * as CurrencyProvider from '@providers/currency';
 const mockUseOutputs = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseMaxAda = jest.fn().mockReturnValue(BigInt(100));
+const mockUseRewardAccountsData = jest.fn().mockReturnValue({ lockedStakeRewards: 0 });
 const mockUseAddressState = jest.fn((_row: string) => ({
   address: '',
   handle: '',
@@ -95,6 +96,11 @@ jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
   useCurrencyStore: mockUseCurrencyStore
 }));
 
+jest.mock('@src/views/browser-view/features/staking/hooks', () => ({
+  ...jest.requireActual<any>('@src/views/browser-view/features/staking/hooks'),
+  useRewardAccountsData: mockUseRewardAccountsData
+}));
+
 const setNewOutput = jest.fn();
 mockUseOutputs.mockReturnValue({
   setNewOutput,
@@ -122,16 +128,15 @@ const backgroundService = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <BackgroundServiceAPIProvider value={backgroundService}>
-        <DatabaseProvider>
-          <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-            <AnalyticsProvider analyticsDisabled>{children}</AnalyticsProvider>
-          </PostHogClientProvider>
-        </DatabaseProvider>
-      </BackgroundServiceAPIProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <BackgroundServiceAPIProvider value={backgroundService}>
+      <DatabaseProvider>
+        <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+          <AnalyticsProvider analyticsDisabled>{children}</AnalyticsProvider>
+        </PostHogClientProvider>
+      </DatabaseProvider>
+    </BackgroundServiceAPIProvider>
+  );
 
 const mockProps: Props = {
   assets: new Map(),

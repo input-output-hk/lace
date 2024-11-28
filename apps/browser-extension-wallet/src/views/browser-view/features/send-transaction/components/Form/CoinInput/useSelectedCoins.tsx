@@ -209,7 +209,7 @@ export const useSelectedCoins = ({
           id: cardanoCoin.id,
           ticker: cardanoCoin.symbol,
           balance: t('send.balanceAmount', { amount: compactNumberWithUnit(totalADA) }),
-          ...(lockedStakeRewards && {
+          ...(rewardAcountsData.lockedStakeRewards && {
             availableBalance: t('send.availableBalanceAmount', {
               amount: compactNumberWithUnit(availableADA)
             }),

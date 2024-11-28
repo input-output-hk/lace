@@ -35,7 +35,10 @@ describe('CoinInput util', () => {
         max: '1',
         hasMaxBtn: false,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: true,
+        lockedStakeRewards: '0.00',
+        totalADA: '0.00'
       });
     });
     test('returns 0 for max and true for hasReachedMaxAmount when spendable coins is 0', () => {
@@ -44,7 +47,10 @@ describe('CoinInput util', () => {
         max: '0',
         hasMaxBtn: true,
         hasReachedMaxAmount: true,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '1.00'
       });
     });
     test('returns formatted balance as availableADA, and the spendable coin in ADA as max when there is no spending', () => {
@@ -53,7 +59,10 @@ describe('CoinInput util', () => {
         max: '10',
         hasMaxBtn: true,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
     test('returns the calculated max amount when there is less spent coin than spendable coin', () => {
@@ -62,7 +71,10 @@ describe('CoinInput util', () => {
         max: '7',
         hasMaxBtn: true,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
     test('returns max amount as 0 and hasReachedMaxAmount as true when there is more spent coin than spendable coin', () => {
@@ -71,7 +83,10 @@ describe('CoinInput util', () => {
         max: '0',
         hasMaxBtn: true,
         hasReachedMaxAmount: true,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
   });

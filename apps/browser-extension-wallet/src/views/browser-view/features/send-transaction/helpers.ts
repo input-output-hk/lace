@@ -93,7 +93,7 @@ export const hasReachedMaxAmountAda = ({
 }): boolean =>
   tokensUsed[cardanoCoin.id] && balance
     ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
-        Wallet.util.lovelacesToAdaString((balance + availableRewards).toString())
+        Wallet.util.lovelacesToAdaString((BigInt(balance) + BigInt(availableRewards)).toString())
       )
     : false;
 
