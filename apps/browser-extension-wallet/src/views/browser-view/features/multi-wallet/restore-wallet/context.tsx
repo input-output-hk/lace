@@ -153,6 +153,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
         break;
       case WalletRestoreStep.Setup:
         history.push(walletRoutePaths.assets);
+        window.location.reload();
         break;
     }
   }, [history, step, recoveryMethod]);
