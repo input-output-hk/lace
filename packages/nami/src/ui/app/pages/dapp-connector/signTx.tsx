@@ -42,6 +42,7 @@ import {
   getKeyHashes,
   getValueWithSdk as getValue,
   isScriptAddress,
+  txHasGovernanceFields,
 } from './signTxUtil';
 
 import type { TransactionValue } from './signTxUtil';
@@ -110,6 +111,9 @@ export const SignTx = ({
 
   const assetsModalRef = React.useRef<AssetsModalRef>(null);
   const detailsModalRef = React.useRef<DetailsModalRef>(null);
+
+  const [showSwitchToLaceBanner, setShowSwitchToLaceBanner] =
+    React.useState<boolean>(false);
 
   const getFee = (tx: Readonly<Cardano.Tx>) => {
     const fee = tx.body.fee.toString();
@@ -259,6 +263,8 @@ export const SignTx = ({
     }
     getProperties(tx);
 
+    setShowSwitchToLaceBanner(txHasGovernanceFields(tx));
+
     setIsLoading(l => ({ ...l, loading: false }));
   };
   const background = useColorModeValue('gray.100', 'gray.700');
@@ -268,6 +274,7 @@ export const SignTx = ({
   React.useEffect(() => {
     getInfo();
   }, [txWitnessRequest]);
+
   return (
     <>
       {isLoading.loading ? (
@@ -320,40 +327,44 @@ export const SignTx = ({
               {dappInfo?.url.split('//')[1]}
             </Text>
           </Box>
-          <Box h="4" />
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexDirection="column"
-            background={warningBackground}
-            rounded="xl"
-            width="80%"
-            padding="18"
-            gridGap="8px"
-          >
-            <Text
-              color="gray.800"
-              fontSize="14"
-              fontWeight="500"
-              lineHeight="24px"
-            >
-              Due to Nami’s limited support for CIP-95 dApps (such as the
-              Cardano GovTool), it is recommended to upgrade to Lace to ensure
-              successful transactions
-            </Text>
-            <Button
-              height="36px"
-              width="100%"
-              colorScheme="teal"
-              onClick={async () => {
-                await switchWalletMode();
-              }}
-            >
-              Upgrade to Lace
-            </Button>
-          </Box>
-          <Box h="4" />
+          <Box h={showSwitchToLaceBanner ? 4 : 8} />
+          {showSwitchToLaceBanner && (
+            <>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexDirection="column"
+                background={warningBackground}
+                rounded="xl"
+                width="80%"
+                padding="18"
+                gridGap="8px"
+              >
+                <Text
+                  color="gray.800"
+                  fontSize="14"
+                  fontWeight="500"
+                  lineHeight="24px"
+                >
+                  Due to Nami’s limited support for CIP-95 dApps (such as the
+                  Cardano GovTool), it is recommended to upgrade to Lace to
+                  ensure successful transactions
+                </Text>
+                <Button
+                  height="36px"
+                  width="100%"
+                  colorScheme="teal"
+                  onClick={async () => {
+                    await switchWalletMode();
+                  }}
+                >
+                  Upgrade to Lace
+                </Button>
+              </Box>
+              <Box h="4" />
+            </>
+          )}
           <Box>This app requests a signature for:</Box>
           <Box h="4" />
           <Box

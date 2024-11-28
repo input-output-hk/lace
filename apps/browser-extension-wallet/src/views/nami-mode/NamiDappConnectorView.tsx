@@ -187,7 +187,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
   }, []);
 
   const switchWalletMode = useCallback(async () => {
-    const mode = namiMigration?.mode === 'lace' ? 'nami' : 'lace';
+    const mode = 'lace';
     const migration: BackgroundStorage['namiMigration'] = {
       ...namiMigration,
       mode
