@@ -67,9 +67,10 @@ export const SettingsSecurity = ({
     setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
   }, [isInMemoryWallet, isWalletLocked]);
 
-  const handleCloseShowPassphraseDrawer = () => {
+  const handleCloseShowPassphraseDrawer = async () => {
     setIsShowPassphraseDrawerOpen(false);
-    analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseXClick);
+    await analytics.sendEventToPostHog(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseXClick);
+    window.location.reload();
   };
 
   const handleOpenShowPassphraseDrawer = () => {
