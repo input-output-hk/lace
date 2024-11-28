@@ -18,7 +18,7 @@ export const useTxWitnessRequest = (): TxWitnessRequestContextType => {
   return context;
 };
 
-export const TxWitnessRequestProvider: FC<{ value?: TxWitnessRequestContextType }> = ({ children }) => {
+export const TxWitnessRequestProvider: FC = ({ children }) => {
   const [request, setRequest] = useState<TxWitnessRequestContextType | undefined>();
 
   useEffect(() => {
