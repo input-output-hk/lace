@@ -1,3 +1,4 @@
+// noinspection JSNonASCIINames
 export const faqArticles: Record<string, Record<string, string>> = {
   'How many stake pools can I delegate stake to, using the multi-staking or multi-delegation feature?': {
     question: 'how-many-stake-pools-can-i-delegate-stake-to-using-the-multi-staking-or-multi-delegation-feature',
@@ -35,12 +36,10 @@ export const faqArticles: Record<string, Record<string, string>> = {
     question: 'how-is-the-conway-ledger-era-also-called-governance-era-supported-by-lace',
     title: 'How is the Conway Ledger era (also called governance era) supported by Lace?'
   },
-  'What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment?':
-    {
-      question: 'what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current',
-      title:
-        'What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment?'
-    },
+  'What type of governance features are supported in Lace using the GovTool?': {
+    question: 'what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current',
+    title: 'What type of governance features are supported in Lace using the GovTool?'
+  },
   'What type of governance actions are supported by Lace?': {
     question: 'what-type-of-governance-actions-are-supported-by-lace',
     title: 'What type of governance actions are supported by Lace?'

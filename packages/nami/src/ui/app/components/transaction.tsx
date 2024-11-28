@@ -21,7 +21,6 @@ import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
 import ReactDOMServer from 'react-dom/server';
 import {
-  FaCoins,
   FaPiggyBank,
   FaTrashAlt,
   FaRegEdit,
@@ -271,7 +270,6 @@ const TxIcon = ({
     externalIn: TiArrowForward,
     internalOut: TiArrowShuffle,
     externalOut: TiArrowBack,
-    withdrawal: FaCoins,
     delegation: FaPiggyBank,
     stake: FaUserCheck,
     unstake: IoRemoveCircleSharp,
@@ -282,7 +280,9 @@ const TxIcon = ({
     contract: FaRegFileCode,
   };
 
-  const type = extra.length > 0 ? extra[0] : txType;
+  // there is no withdrawal type of tx in lace (see LW-11844)
+  const filteredExtra = extra.filter(e => e !== 'withdrawal');
+  const type = filteredExtra.length > 0 ? filteredExtra[0] : txType;
 
   let style;
   switch (type) {
