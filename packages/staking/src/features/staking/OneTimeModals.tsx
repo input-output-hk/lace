@@ -17,10 +17,10 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
     triggerMultidelegationFirstVisitSincePortfolioPersistence,
   } = useOutsideHandles();
   const { currentPortfolio } = useDelegationPortfolioStore((store) => ({
-    currentPortfolio: store.currentPortfolio,
+    currentPortfolio: store.hydrated ? store.currentPortfolio : null,
   }));
-  const userAlreadyMultidelegated = currentPortfolio.length > 1;
-  const portfolioSavedOnChain = isPortfolioSavedOnChain(currentPortfolio);
+  const userAlreadyMultidelegated = currentPortfolio && currentPortfolio.length > 1;
+  const portfolioSavedOnChain = currentPortfolio && isPortfolioSavedOnChain(currentPortfolio);
 
   // the useEffects below prevent the modals from appearing to the user in the future e.g. after undelegating the portfolio
   useEffect(() => {
@@ -39,7 +39,7 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
     portfolioSavedOnChain,
   ]);
 
-  if (!userAlreadyMultidelegated) {
+  if (userAlreadyMultidelegated === false) {
     return (
       <MultidelegationBetaModal
         visible={multidelegationFirstVisit}
@@ -59,7 +59,7 @@ export const OneTimeModals = ({ popupView }: OneTimeModalManagerProps) => {
     );
   }
 
-  if (!portfolioSavedOnChain) {
+  if (portfolioSavedOnChain === false) {
     return (
       <PortfolioPersistenceModal
         visible={multidelegationFirstVisitSincePortfolioPersistence}
