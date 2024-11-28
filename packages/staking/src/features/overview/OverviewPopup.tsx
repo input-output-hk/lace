@@ -40,7 +40,7 @@ export const OverviewPopup = () => {
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
 
-  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountMap } =
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
     useRewardAccountsData();
 
   if (
@@ -89,7 +89,7 @@ export const OverviewPopup = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
-    poolIdToRewardAccountMap,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
@@ -131,7 +131,7 @@ export const OverviewPopup = () => {
             <StakingInfoCard
               {...item}
               showRegisterAsDRepBanner={
-                poolIdToRewardAccountMap.size > 1 && !poolIdToRewardAccountMap.get(item.id)?.dRepDelegatee
+                poolIdToRewardAccountsMap.size > 1 && !poolIdToRewardAccountsMap.get(item.id)?.[0]?.dRepDelegatee
               }
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}

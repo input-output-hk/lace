@@ -59,7 +59,7 @@ export const Overview = () => {
     totalCoinBalance,
   ]);
 
-  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountMap } =
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
     useRewardAccountsData();
 
   if (
@@ -87,7 +87,7 @@ export const Overview = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
-    poolIdToRewardAccountMap,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
@@ -163,7 +163,7 @@ export const Overview = () => {
           <StakingInfoCard
             {...item}
             showRegisterAsDRepBanner={
-              poolIdToRewardAccountMap.size > 1 && !poolIdToRewardAccountMap.get(item.id)?.dRepDelegatee
+              poolIdToRewardAccountsMap.size > 1 && !poolIdToRewardAccountsMap.get(item.id)?.[0]?.dRepDelegatee
             }
             markerColor={displayData.length > 1 ? item.color : undefined}
             cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}

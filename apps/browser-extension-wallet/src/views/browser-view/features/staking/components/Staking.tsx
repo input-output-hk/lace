@@ -66,7 +66,7 @@ export const Staking = (): React.ReactElement => {
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
   const canDelegate = !isDelegating && isNumber(coinBalance) && !hasNoFunds;
 
-  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap } = useRewardAccountsData();
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap } = useRewardAccountsData();
   const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
   const { GOV_TOOLS_URLS } = config();
 
@@ -143,7 +143,7 @@ export const Staking = (): React.ReactElement => {
             <StakingInfo
               {...{
                 ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
-                stakeKey: poolIdToRewardAccountMap.get(delegationDetails.id)?.address,
+                stakeKey: poolIdToRewardAccountsMap.get(delegationDetails.id)?.[0]?.address,
                 coinBalance,
                 fiat: priceResult?.cardano?.price,
                 totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),

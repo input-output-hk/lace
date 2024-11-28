@@ -87,7 +87,7 @@ export const DelegationLayout = ({
     searchPlaceholder: t('cardano.stakePoolSearch.searchPlaceholder')
   };
 
-  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap } = useRewardAccountsData();
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap } = useRewardAccountsData();
   const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
 
   return (
@@ -123,7 +123,7 @@ export const DelegationLayout = ({
               <StakingInfo
                 {...{
                   ...currentStakePool,
-                  stakeKey: poolIdToRewardAccountMap.get(currentStakePool.id)?.address,
+                  stakeKey: poolIdToRewardAccountsMap.get(currentStakePool.id)?.[0]?.address,
                   coinBalance,
                   fiat,
                   totalRewards,

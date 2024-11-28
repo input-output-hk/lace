@@ -7,11 +7,11 @@ type MapPortfolioToDisplayDataParams = {
   cardanoCoin: Wallet.CoinId;
   cardanoPrice?: number;
   portfolio: CurrentPortfolioStakePool[];
-  poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
+  poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
 };
 
 export const mapPortfolioToDisplayData = ({
-  poolIdToRewardAccountMap,
+  poolIdToRewardAccountsMap,
   cardanoCoin,
   cardanoPrice,
   portfolio,
@@ -25,7 +25,7 @@ export const mapPortfolioToDisplayData = ({
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
     name: item.displayData.name,
-    stakeKey: poolIdToRewardAccountMap.get(item.displayData.id)?.address,
+    stakeKey: poolIdToRewardAccountsMap.get(item.displayData.id)?.[0]?.address,
     status: ((): 'retired' | 'saturated' | 'retiring' | undefined => {
       if (item.stakePool.status === 'retired') return 'retired';
       if (item.stakePool.status === 'retiring') return 'retiring';

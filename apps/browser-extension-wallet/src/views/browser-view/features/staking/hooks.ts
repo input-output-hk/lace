@@ -5,6 +5,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useSecrets } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
+import groupBy from 'lodash/groupBy';
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
   const { password, clearSecrets } = useSecrets();
@@ -22,35 +23,37 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
 
 export const useRewardAccountsData = (): {
   areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
-  poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
+  poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
 } => {
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsWithRegisteredStakeCreds = rewardAccounts?.filter(
-    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+  const rewardAccountsWithRegisteredStakeCreds = useMemo(
+    () =>
+      rewardAccounts?.filter(
+        ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+      ) ?? [],
+    [rewardAccounts]
   );
 
   const areAllRegisteredStakeKeysWithoutVotingDelegation = useMemo(
     () =>
-      rewardAccountsWithRegisteredStakeCreds?.length > 0 &&
+      rewardAccountsWithRegisteredStakeCreds.length > 0 &&
       !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee),
     [rewardAccountsWithRegisteredStakeCreds]
   );
 
-  const poolIdToRewardAccountMap = useMemo(
+  const poolIdToRewardAccountsMap = useMemo(
     () =>
       new Map(
-        rewardAccountsWithRegisteredStakeCreds
-          ?.map((rewardAccount): [string, Wallet.Cardano.RewardAccountInfo] => {
-            const { delegatee } = rewardAccount;
+        Object.entries(
+          groupBy(rewardAccountsWithRegisteredStakeCreds, ({ delegatee }) => {
             const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-
-            return [delagationInfo?.id.toString(), rewardAccount];
+            return delagationInfo?.id.toString();
           })
-          .filter(([poolId]) => !!poolId)
+        ).filter(([poolId]) => !!poolId)
       ),
     [rewardAccountsWithRegisteredStakeCreds]
   );
 
-  return { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountMap };
+  return { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap };
 };

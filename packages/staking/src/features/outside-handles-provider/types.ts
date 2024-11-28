@@ -110,7 +110,7 @@ export type OutsideHandlesContextValue = {
   coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
   useRewardAccountsData: () => {
     areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
-    poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
+    poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
   };
   govToolUrl?: string;
 };
