@@ -14,8 +14,7 @@ type TxHashProps = {
 export const TxHash = ({ hash, success, sending, openLink }: TxHashProps): React.ReactElement => {
   const { t } = useTranslation();
   const hashComponent = useMemo(
-    () =>
-      sending && hash ? <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} /> : hash,
+    () => (sending ? <CopiableHash hash={hash} copiedText={t('core.activityDetails.copiedToClipboard')} /> : hash),
     [hash, sending, t]
   );
 
@@ -34,7 +33,7 @@ export const TxHash = ({ hash, success, sending, openLink }: TxHashProps): React
         })}
         onClick={openLink}
       >
-        {hashComponent && <div>{hashComponent}</div>}
+        <div>{hashComponent}</div>
       </div>
     </div>
   );

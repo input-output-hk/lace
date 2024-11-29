@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { CoreTranslationKey } from '@lace/translation';
 
-const isSameNumberFormat = (num1: string, num2: string) => {
+const isSameNumberFormat = (num1?: string, num2?: string) => {
   if (!num1 || !num2) return false;
   const strippedNum = Number(num2?.replace(/,/g, ''));
   return Number(num1) === strippedNum;
@@ -24,8 +24,8 @@ export interface AssetInputProps {
   inputId: string;
   coin: { id: string; balance: string; src?: string; ticker?: string; shortTicker?: string };
   onChange: (args: { value: string; prevValue?: string; id: string; element?: any; maxDecimals?: number }) => void;
-  onBlur?: (args: { value: string; id: string; maxDecimals?: number }) => void;
-  onFocus?: (args: { value: string; id: string; maxDecimals?: number }) => void;
+  onBlur?: (args: { value?: string; id: string; maxDecimals?: number }) => void;
+  onFocus?: (args: { value?: string; id: string; maxDecimals?: number }) => void;
   fiatValue: string;
   formattedFiatValue?: string;
   value?: string;
@@ -81,7 +81,7 @@ export const AssetInput = ({
   const [isInvalid, setIsInvalid] = useState(invalid);
   const [isTouched, setIsTouched] = useState(false);
 
-  const adjustInputWidth = useCallback((text: string) => {
+  const adjustInputWidth = useCallback((text?: string) => {
     if (!inputRef?.current?.input) return;
     const textWidth = !text || text === '0' ? defaultInputWidth : getTextWidth(text, inputRef.current.input);
     const numberOneQuantity = text?.match(/1/g)?.length ?? 0;
@@ -115,14 +115,14 @@ export const AssetInput = ({
   }, [invalid]);
 
   useLayoutEffect(() => {
-    adjustInputWidth(focused ? displayValue ?? '' : compactValue ?? '');
+    adjustInputWidth(focused ? displayValue : compactValue);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustInputWidth]);
 
   // eslint-disable-next-line complexity
   const setValue = (newValue: string, element?: any) => {
     const sanitizedValue = sanitizeNumber(newValue);
-    const tokenMaxDecimalsOverflow = maxDecimals ?? 0;
+    const tokenMaxDecimalsOverflow = maxDecimals;
     const isValidNumericValue = validateNumericValue(sanitizedValue, {
       isFloat: allowFloat,
       maxDecimals: tokenMaxDecimalsOverflow?.toString()
@@ -154,7 +154,7 @@ export const AssetInput = ({
 
   const handleOnBlur = () => {
     setIsTouched(true);
-    const currentValue = value && !Number.parseFloat(value) ? placeholderValue : value ?? '0';
+    const currentValue = value && !Number.parseFloat(value) ? placeholderValue : value;
     onBlur?.({
       value: currentValue,
       id: coin.id,
@@ -167,7 +167,7 @@ export const AssetInput = ({
   const handleOnFocus = () => {
     setFocusInput?.(inputId);
     onFocus?.({
-      value: value ?? placeholderValue,
+      value,
       id: coin.id,
       maxDecimals
     });
@@ -207,13 +207,7 @@ export const AssetInput = ({
             </div>
           )}
 
-          <Tooltip
-            title={
-              !isSameNumberFormat(value ?? placeholderValue, compactValue ?? placeholderValue) &&
-              !focused &&
-              displayValue
-            }
-          >
+          <Tooltip title={!isSameNumberFormat(value, compactValue) && !focused && displayValue}>
             <Input
               onMouseDown={onClick}
               ref={inputRef}
