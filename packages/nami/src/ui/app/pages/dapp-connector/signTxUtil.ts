@@ -392,11 +392,22 @@ const toAssetInfo = (
   return toAsset(assetInfo, BigInt(cardanoAsset.quantity));
 };
 
+const ConwayEraGovernanceCertificates = new Set(
+  Object.values(ConwayEraCertificatesTypes).filter(
+    certificate =>
+      ![
+        ConwayEraCertificatesTypes.Registration,
+        ConwayEraCertificatesTypes.Unregistration,
+        ConwayEraCertificatesTypes.StakeRegistrationDelegation,
+      ].includes(certificate),
+  ),
+);
+
 export const txHasGovernanceFields = ({
   body: { certificates, votingProcedures, proposalProcedures },
 }: Wallet.Cardano.Tx) =>
   certificates?.some(certificate =>
-    Object.values(ConwayEraCertificatesTypes).includes(
+    ConwayEraGovernanceCertificates.has(
       certificate.__typename as unknown as ConwayEraCertificatesTypes,
     ),
   ) ||
