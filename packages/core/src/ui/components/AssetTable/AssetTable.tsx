@@ -46,11 +46,11 @@ const renderCell = (
   popupView?: boolean
 ) => (
   <div data-testid="asset-table-cell" className={styles.cellContainer}>
-    {src && defaultSrc && (
+    {src && (
       <ImageWithFallback
         data-testid="asset-table-cell-logo"
         src={src}
-        fallbackSrc={defaultSrc}
+        fallbackSrc={defaultSrc ?? ''}
         alt=""
         className={styles.image}
       />
@@ -162,10 +162,10 @@ export const AssetTable = ({
 
   const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
   useHasScrollBar({ current: document.querySelector(`#${scrollableTargetId}`) }, (withScroll) =>
-    setHasScrollBar(withScroll && (popupView ?? false))
+    setHasScrollBar(withScroll && !!popupView)
   );
 
-  const dataSource = useMemo(() => renderRows(rows, popupView ?? false), [rows, popupView]);
+  const dataSource = useMemo(() => renderRows(rows, !!popupView), [rows, popupView]);
 
   return (
     <InfiniteScrollableTable

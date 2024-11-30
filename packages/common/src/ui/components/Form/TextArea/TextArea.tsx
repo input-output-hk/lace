@@ -39,7 +39,7 @@ export const TextArea = ({
   const [localVal, setLocalVal] = useState<string>('');
 
   const resizeArea = useCallback(() => {
-    if (!ref?.current || !label || !ref.current.resizableTextArea) return;
+    if (!ref?.current?.resizableTextArea || !label) return;
     ref.current.resizableTextArea.textArea.style.height = '56px';
     ref.current.resizableTextArea.textArea.style.height = `${ref.current?.resizableTextArea?.textArea.scrollHeight}px`;
   }, [label]);

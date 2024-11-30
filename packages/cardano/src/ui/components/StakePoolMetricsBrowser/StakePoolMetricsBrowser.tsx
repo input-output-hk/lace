@@ -3,11 +3,14 @@ import isNil from 'lodash/isNil';
 import cn from 'classnames';
 import styles from './StakePoolMetricsBrowser.module.scss';
 
-const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
-  <>
-    {val ?? '-'} {!isNil(val) && <span className={styles.suffix}>{suffix}</span>}
-  </>
-);
+const formatNumericValue = ({ value, unit }: { value?: number | string; unit: number | string }): React.ReactNode =>
+  !isNil(value) ? (
+    <>
+      {value} <span className={styles.suffix}>{unit}</span>
+    </>
+  ) : (
+    '-'
+  );
 
 export interface StakePoolMetricsBrowserProps {
   data: {
@@ -27,7 +30,7 @@ export const StakePoolMetricsBrowser = ({ data, popupView }: StakePoolMetricsBro
           {t}
         </div>
         <div className={styles.statBody} data-testid={`${testId}-value`}>
-          {unit && value ? formatNumericValue(value, unit) : value}
+          {unit ? formatNumericValue({ value, unit }) : value}
         </div>
       </div>
     ))}
