@@ -90,7 +90,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     isInitializing,
     initializeCollateralTx,
     submitCollateralTx,
-    txBuilder: collateralTxBuilder
+    txBuilder: collateralTxBuilder,
+    hasEnoughAda: hasEnoughAdaForCollateral
   } = useCollateral();
 
   const [isCompatibilityMode, setIsCompatibilityMode] = useState<boolean>();
@@ -191,6 +192,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         isCompatibilityMode,
         handleAnalyticsChoice,
         handleCompatibilityModeChoice,
+        hasEnoughAdaForCollateral,
         createWallet: createWalletFromPrivateKey,
         getMnemonic,
         deleteWallet,

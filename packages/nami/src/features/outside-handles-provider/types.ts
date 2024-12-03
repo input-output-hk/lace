@@ -41,6 +41,7 @@ export interface OutsideHandlesContextValue {
   handleCompatibilityModeChoice: (
     isCompatibilityMode: boolean,
   ) => Promise<void>;
+  hasEnoughAdaForCollateral: boolean;
   createWallet: (
     args: Readonly<CreateWalletParams>,
   ) => Promise<Wallet.CardanoWallet>;
