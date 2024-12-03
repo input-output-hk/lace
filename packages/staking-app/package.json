@@ -1,8 +1,10 @@
 {
   "name": "staking-app",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
+  "main": "dist/bundle.js",
+  "module": "dist/bundle.js",
   "scripts": {
     "build": "webpack",
     "build:vite": "tsc -b && vite build",
@@ -11,23 +13,33 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
-  "main": "./dist/poc-app.umd.js",
-  "module": "./dist/poc-app.es.js",
   "dependencies": {
+    "@lace/staking": "0.1.0",
+    "lodash": "4.17.21",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
+    "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.15.0",
+    "@types/babel__core": "^7",
+    "@types/babel__preset-env": "^7",
     "@types/react": "17.0.18",
     "@types/react-dom": "17.0.9",
     "@vitejs/plugin-react": "^4.3.4",
+    "babel-loader": "^9.2.1",
     "eslint": "^9.15.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
-    "typescript": "~5.6.2",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
     "typescript-eslint": "^8.15.0",
-    "vite": "^6.0.1"
+    "vite": "^6.0.1",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4"
   }
 }
