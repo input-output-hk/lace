@@ -2,7 +2,7 @@ const path = require('path');
 const { NormalModuleReplacementPlugin, ProvidePlugin, IgnorePlugin, EnvironmentPlugin, experiments } = require('webpack');
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   entry: './src/main.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -11,6 +11,7 @@ module.exports = {
     libraryTarget: 'umd', // Universal Module Definition for compatibility
     globalObject: 'this', // Fix for environments where `window` is undefined
   },
+  devtool: 'eval-source-map',
   externals: {
     react: 'react', // Avoid bundling React
     'react-dom': 'react-dom', // Avoid bundling ReactDOM
@@ -90,6 +91,17 @@ module.exports = {
           fullySpecified: false
         }
       },
+      {
+        test: /\.wasm$/,
+        type: 'javascript/auto',
+        use: {
+          loader: 'webassembly-loader-sw',
+          options: {
+            export: 'instance',
+            importObjectProps: `'./cardano_message_signing_bg.js': __webpack_require__("../../node_modules/@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js")`
+          }
+        }
+      }
     ],
   },
   resolve: {
