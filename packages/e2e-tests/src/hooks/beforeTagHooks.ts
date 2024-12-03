@@ -29,7 +29,7 @@ Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
 Before(
   {
-    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet'
+    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet or @OnboardingRestorePaperWallet'
   },
   async () => {
     await extendedView.visit();

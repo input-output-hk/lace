@@ -111,3 +111,8 @@ Feature: Onboarding - Restore wallet
     Then I see clipboard tooltip with information about copying and pasting words
     And I click on "clipboard tooltip link"
     Then I see a "FAQ" article with title "Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features"
+
+  @LW-11165
+  Scenario: Onboarding - Restore - "Choose a recovery method" page is displayed
+    When I click "Restore" button on wallet setup page
+    Then "Choose recovery method" page is displayed on "Restore" flow
