@@ -34,6 +34,7 @@ import SecureYourPaperWalletPageAssert from '../assert/onboarding/SecureYourPape
 import SecureYourPaperWalletPage from '../elements/onboarding/SecureYourPaperWalletPage';
 import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWalletPageAssert';
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
+import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -539,5 +540,12 @@ When(
   /^I click on "(Download|Print|Open wallet)" button on "Save your paper wallet" page$/,
   async (button: 'Download' | 'Print' | 'Open wallet') => {
     await SaveYourPaperWalletPage.clickOnButton(button);
+  }
+);
+
+Then(
+  /^"Scan your private QR code" page is displayed with camera access permission set as "(granted|denied|prompted)"$/,
+  async (permission: 'granted' | 'denied' | 'prompted') => {
+    await ScanYourPrivateQrCodePageAssert.assertSeeScanYourPrivateQrCodePage(permission);
   }
 );
