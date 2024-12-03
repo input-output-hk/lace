@@ -25,7 +25,7 @@ export const mapPortfolioToDisplayData = ({
     fiat: cardanoPrice,
     lastReward: Wallet.util.lovelacesToAdaString(item.displayData.lastReward.toString()),
     name: item.displayData.name,
-    stakeKey: poolIdToRewardAccountsMap.get(item.displayData.id)?.[0]?.address,
+    rewardAccount: poolIdToRewardAccountsMap.get(item.displayData.id)?.[0],
     status: ((): 'retired' | 'saturated' | 'retiring' | undefined => {
       if (item.stakePool.status === 'retired') return 'retired';
       if (item.stakePool.status === 'retiring') return 'retiring';

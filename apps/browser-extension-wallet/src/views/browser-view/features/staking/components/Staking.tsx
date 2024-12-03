@@ -143,7 +143,7 @@ export const Staking = (): React.ReactElement => {
             <StakingInfo
               {...{
                 ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
-                stakeKey: poolIdToRewardAccountsMap.get(delegationDetails.id)?.[0]?.address,
+                rewardAccount: poolIdToRewardAccountsMap.get(delegationDetails.id)?.[0],
                 coinBalance,
                 fiat: priceResult?.cardano?.price,
                 totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),

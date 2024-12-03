@@ -123,7 +123,7 @@ export const DelegationLayout = ({
               <StakingInfo
                 {...{
                   ...currentStakePool,
-                  stakeKey: poolIdToRewardAccountsMap.get(currentStakePool.id)?.[0]?.address,
+                  rewardAccount: poolIdToRewardAccountsMap.get(currentStakePool.id)?.[0],
                   coinBalance,
                   fiat,
                   totalRewards,

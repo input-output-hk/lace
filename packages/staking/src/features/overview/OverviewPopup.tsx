@@ -130,9 +130,6 @@ export const OverviewPopup = () => {
           <Box key={item.id} mb="$24" testId="delegated-pool-item">
             <StakingInfoCard
               {...item}
-              showRegisterAsDRepBanner={
-                poolIdToRewardAccountsMap.size > 1 && !poolIdToRewardAccountsMap.get(item.id)?.[0]?.dRepDelegatee
-              }
               popupView
               markerColor={displayData.length > 1 ? item.color : undefined}
               cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}

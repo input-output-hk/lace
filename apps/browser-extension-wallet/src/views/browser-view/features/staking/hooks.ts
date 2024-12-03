@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useCallback, useMemo } from 'react';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
@@ -48,7 +49,7 @@ export const useRewardAccountsData = (): {
         Object.entries(
           groupBy(rewardAccountsWithRegisteredStakeCreds, ({ delegatee }) => {
             const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-            return delagationInfo?.id.toString();
+            return delagationInfo?.id.toString() ?? '';
           })
         ).filter(([poolId]) => !!poolId)
       ),

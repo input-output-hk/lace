@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable no-magic-numbers */
 import Icon from '@ant-design/icons';
 import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
@@ -57,8 +58,7 @@ export type StakingInfoCardProps = {
   cardanoCoinSymbol: string;
   markerColor?: string;
   status?: PoolStatus;
-  stakeKey?: string;
-  showRegisterAsDRepBanner?: boolean;
+  rewardAccount?: Wallet.Cardano.RewardAccountInfo;
 };
 
 const iconsByPoolStatus: Record<PoolStatus, ReactNode> = {
@@ -92,11 +92,15 @@ export const StakingInfoCard = ({
   cardanoCoinSymbol,
   markerColor,
   status,
-  stakeKey,
-  showRegisterAsDRepBanner,
+  rewardAccount,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
   const { openExternalLink, govToolUrl } = useOutsideHandles();
+
+  const dRepDelegatee = rewardAccount?.dRepDelegatee;
+  const isDRepRetired =
+    dRepDelegatee && 'active' in dRepDelegatee.delegateRepresentative && dRepDelegatee.delegateRepresentative.active;
+  const stakeAddress = rewardAccount?.address;
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -180,22 +184,30 @@ export const StakingInfoCard = ({
           />
         </div>
       </div>
-      <div className={styles.row}>
-        <div className={styles.col}>
-          <Stats
-            text={t('overview.stakingInfoCard.stakeKey')}
-            value={
-              <Tooltip content={stakeKey}>{popupView && stakeKey ? addEllipsis(stakeKey, 14, 9) : stakeKey}</Tooltip>
-            }
-            dataTestid="stats-stake-key"
-          />
+      {stakeAddress && (
+        <div className={styles.row}>
+          <div className={styles.col}>
+            <Stats
+              text={t('overview.stakingInfoCard.stakeKey')}
+              value={
+                <Tooltip content={stakeAddress}>{popupView ? addEllipsis(stakeAddress, 14, 9) : stakeAddress}</Tooltip>
+              }
+              dataTestid="stats-stake-key"
+            />
+          </div>
         </div>
-      </div>
-      {!!showRegisterAsDRepBanner && (
+      )}
+      {!!rewardAccount && (!dRepDelegatee || isDRepRetired) && (
         <div className={cn(styles.row, styles.bannerRow)}>
           {popupView ? (
             <Flex className={styles.banner} flexDirection="column" py="$16" px="$24" gap="$24">
-              <Text.Button>{t('overview.stakingInfoCard.registerAsDRepBanner.description')}</Text.Button>
+              <Text.Button>
+                {t(
+                  isDRepRetired
+                    ? 'overview.stakingInfoCard.registerAsDRepBanner.descriptionRetired'
+                    : 'overview.stakingInfoCard.registerAsDRepBanner.description'
+                )}
+              </Text.Button>
               <Button.CallToAction
                 w="$fill"
                 onClick={() => govToolUrl && openExternalLink(govToolUrl)}
@@ -208,7 +220,11 @@ export const StakingInfoCard = ({
               className={styles.banner}
               withIcon
               customIcon={<InfoIcon className={styles.bannerInfoIcon} />}
-              message={t('overview.stakingInfoCard.registerAsDRepBanner.description')}
+              message={t(
+                isDRepRetired
+                  ? 'overview.stakingInfoCard.registerAsDRepBanner.descriptionRetired'
+                  : 'overview.stakingInfoCard.registerAsDRepBanner.description'
+              )}
               onButtonClick={() => govToolUrl && openExternalLink(govToolUrl)}
               buttonMessage={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
             />

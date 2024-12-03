@@ -31,7 +31,7 @@ type stakingInfoPanelProps = {
   lastReward: string;
   ros?: string;
   ticker?: string;
-  stakeKey?: string;
+  rewardAccount?: Wallet.Cardano.RewardAccountInfo;
   onStakePoolSelect: () => void;
   popupView?: boolean;
   cardanoCoin: Wallet.CoinId;
@@ -50,7 +50,7 @@ export const StakingInfo = ({
   lastReward,
   ros,
   ticker,
-  stakeKey,
+  rewardAccount,
   onStakePoolSelect,
   popupView,
   cardanoCoin
@@ -142,17 +142,21 @@ export const StakingInfo = ({
             />
           </div>
         </div>
-        <div className={styles.row}>
-          <div className={styles.col}>
-            <Stats
-              text={t('browserView.staking.stakingInfo.stats.stakeKey')}
-              value={
-                <Tooltip content={stakeKey}>{popupView && stakeKey ? addEllipsis(stakeKey, 14, 9) : stakeKey}</Tooltip>
-              }
-              dataTestid="stats-stake-key"
-            />
+        {rewardAccount && (
+          <div className={styles.row}>
+            <div className={styles.col}>
+              <Stats
+                text={t('browserView.staking.stakingInfo.stats.stakeKey')}
+                value={
+                  <Tooltip content={rewardAccount.address}>
+                    {popupView ? addEllipsis(rewardAccount.address, 14, 9) : rewardAccount.address}
+                  </Tooltip>
+                }
+                dataTestid="stats-stake-key"
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
