@@ -97,6 +97,7 @@ import type { OutsideHandlesContextValue } from '../../../features/outside-handl
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 import type { AboutRef } from '../components/about';
 import type { TransactionBuilderRef } from '../components/transactionBuilder';
+import { NamiPassword } from '../components/namiPassword';
 
 export type Props = Pick<
   CommonOutsideHandlesContextValue,
@@ -632,9 +633,7 @@ const NewAccountModal = React.forwardRef<
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
-  const {
-    secretsUtil: { password, setPassword, clearSecrets },
-  } = useOutsideHandles();
+  const { secretsUtil } = useOutsideHandles();
   const [state, setState] = React.useState({
     show: false,
     name: '',
@@ -647,14 +646,16 @@ const NewAccountModal = React.forwardRef<
       await addAccount({
         index: getNextAccountIndex(accounts, walletId),
         name: state.name,
-        passphrase: Buffer.from(password?.value ?? '', 'utf8'),
+        passphrase: Buffer.from(secretsUtil.password?.value ?? '', 'utf8'),
         walletId,
       });
       await capture(Events.SettingsNewAccountConfirmClick);
-      clearSecrets();
-      onClose();
+      secretsUtil.clearSecrets();
+      // wait for digest
+      setTimeout(onClose, 50);
     } catch {
       setState(s => ({ ...s, wrongPassword: true }));
+      secretsUtil.clearSecrets();
     }
     setIsLoading(false);
   };
@@ -702,18 +703,15 @@ const NewAccountModal = React.forwardRef<
           />
           <Spacer height="4" />
           <InputGroup size="md">
-            <Input
-              variant="filled"
-              isInvalid={state.wrongPassword}
-              pr="4.5rem"
-              type={state.show ? 'text' : 'password'}
+            <NamiPassword
               onChange={e => {
-                setPassword(e.target);
+                secretsUtil.setPassword(e);
               }}
-              placeholder="Enter password"
               onKeyDown={e => {
                 if (e.key == 'Enter') confirmHandler();
               }}
+              onSubmit={confirmHandler}
+              label="Enter password"
             />
             <InputRightElement width="4.5rem">
               <Button
@@ -744,7 +742,9 @@ const NewAccountModal = React.forwardRef<
             Close
           </Button>
           <Button
-            isDisabled={!password?.value || !state.name || isLoading}
+            isDisabled={
+              !secretsUtil.password?.value || !state.name || isLoading
+            }
             isLoading={isLoading}
             colorScheme="teal"
             onClick={confirmHandler}
