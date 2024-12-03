@@ -146,8 +146,6 @@
   "modals.beta.button": "Got it",
   "modals.beta.description": "This feature allows you to stake to up to {{maxPools}} pools. This is still in beta version, so some functionality might not be available. Read more about multi-delegation in our <Link>dedicated blog.</Link>",
   "modals.beta.pill": "Beta",
-  "modals.beta.portfolioPersistence.description": "Lace now supports on-chain portfolio persistence! This feature helps protect portfolios from significant drift and ensures cross-device syncing. If you've previously submitted a delegation, please resubmit your current (or a new) delegation to enable on-chain portfolio persistence.",
-  "modals.beta.portfolioPersistence.title": "Multi-delegation: Portfolio Persistence",
   "modals.beta.title": "Multi-delegation",
   "modals.changingPreferences.buttons.cancel": "Cancel",
   "modals.changingPreferences.buttons.confirm": "Fine by me",
