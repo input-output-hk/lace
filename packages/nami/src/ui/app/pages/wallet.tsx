@@ -713,17 +713,6 @@ const NewAccountModal = React.forwardRef<
               onSubmit={confirmHandler}
               label="Enter password"
             />
-            <InputRightElement width="4.5rem">
-              <Button
-                h="1.75rem"
-                size="sm"
-                onClick={() => {
-                  setState(s => ({ ...s, show: !s.show }));
-                }}
-              >
-                {state.show ? 'Hide' : 'Show'}
-              </Button>
-            </InputRightElement>
           </InputGroup>
           {state.wrongPassword && (
             <Text color="red.300">Password is wrong</Text>
