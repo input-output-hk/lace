@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react';
-
+import { v4 as uuidv4 } from 'uuid';
+import { storage } from 'webextension-polyfill';
 Sentry.init({
   environment: process.env.SENTRY_ENVIRONMENT,
   dsn: process.env.SENTRY_DSN,
@@ -18,4 +19,12 @@ Sentry.init({
   replaysSessionSampleRate: 0.005,
   // ...plus for 100% of sessions with an error
   replaysOnErrorSampleRate: 1.0
+});
+
+storage.local.get('SENTRY-UUID').then((storageVar) => {
+  let sentryUuid = storageVar?.['SENTRY-UUID'] ?? uuidv4();
+  if (!storageVar?.['SENTRY-UUID']) {
+    storage.local.set({ 'SENTRY-UUID': sentryUuid });
+  }
+  Sentry.setUser({ id: sentryUuid });
 });
