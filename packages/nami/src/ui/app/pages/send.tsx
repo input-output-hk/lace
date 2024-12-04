@@ -449,9 +449,8 @@ const Send = ({
   const setMessageDebounced = useMemo(() => debounce(setMessage, 300), []);
   const isOffline = networkConnection === NetworkConnectionStates.OFFLINE;
 
-  const setShowSwitchToLaceBannerDebounced = useMemo(
-    () => debounce(setShowSwitchToLaceBanner, 300),
-    [],
+  const setShowSwitchToLaceBannerDebounced = useConstant(() =>
+    debounce(setShowSwitchToLaceBanner, 500),
   );
 
   const reachedMaxAdaAmount = useMemo(
