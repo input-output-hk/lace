@@ -118,6 +118,7 @@ const TransactionBuilder = (undefined, ref) => {
     isInitializingCollateral,
     initializeCollateralTx: initializeCollateral,
     collateralFee,
+    hasEnoughAdaForCollateral,
     buildDelegation,
     setSelectedStakePool,
     delegationTxFee,
@@ -248,12 +249,8 @@ const TransactionBuilder = (undefined, ref) => {
       }
       collateralRef.current?.openModal();
 
-      const available = await firstValueFrom(
-        inMemoryWallet.balance.utxo.available$,
-      );
-
       try {
-        if (available.coins < BigInt(5_000_000)) {
+        if (!hasEnoughAdaForCollateral) {
           setData(d => ({
             ...d,
             error: 'Transaction not possible (maybe insufficient balance)',
