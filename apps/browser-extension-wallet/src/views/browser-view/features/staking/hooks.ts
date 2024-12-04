@@ -5,6 +5,13 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useSecrets } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
+import groupBy from 'lodash/groupBy';
+
+interface UseRewardAccountsDataType {
+  areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+  poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
+  lockedStakeRewards: BigInt;
+}
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
   const { password, clearSecrets } = useSecrets();
@@ -20,20 +27,45 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
   return { signAndSubmitTransaction };
 };
 
-export const useRewardAccountsData = (): {
-  accountsWithRegisteredStakeCredsWithoutVotingDelegation: Wallet.Cardano.RewardAccountInfo[];
-  accountsWithRegisteredStakeCreds: Wallet.Cardano.RewardAccountInfo[];
-  poolIdToRewardAccountMap: Map<string, Wallet.Cardano.RewardAccountInfo>;
-  lockedStakeRewards: BigInt;
-} => {
+export const getPoolIdToRewardAccountsMap = (
+  rewardAccounts: Wallet.Cardano.RewardAccountInfo[]
+): UseRewardAccountsDataType['poolIdToRewardAccountsMap'] =>
+  new Map(
+    Object.entries(
+      groupBy(rewardAccounts, ({ delegatee }) => {
+        const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+        return delagationInfo?.id.toString() ?? '';
+      })
+    ).filter(([poolId]) => !!poolId)
+  );
+
+export const useRewardAccountsData = (): UseRewardAccountsDataType => {
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const accountsWithRegisteredStakeCreds = rewardAccounts?.filter(
-    ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+  const accountsWithRegisteredStakeCreds = useMemo(
+    () =>
+      rewardAccounts?.filter(
+        ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
+      ) ?? [],
+    [rewardAccounts]
+  );
+
+  const areAllRegisteredStakeKeysWithoutVotingDelegation = useMemo(
+    () =>
+      accountsWithRegisteredStakeCreds.length > 0 &&
+      !accountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee),
+    [accountsWithRegisteredStakeCreds]
   );
 
   const accountsWithRegisteredStakeCredsWithoutVotingDelegation = useMemo(
-    () => accountsWithRegisteredStakeCreds?.filter(({ dRepDelegatee }) => !dRepDelegatee),
+    () =>
+      accountsWithRegisteredStakeCreds.filter(
+        ({ dRepDelegatee }) =>
+          !dRepDelegatee ||
+          (dRepDelegatee &&
+            'active' in dRepDelegatee.delegateRepresentative &&
+            !dRepDelegatee.delegateRepresentative.active)
+      ),
     [accountsWithRegisteredStakeCreds]
   );
 
@@ -49,25 +81,14 @@ export const useRewardAccountsData = (): {
     [accountsWithRegisteredStakeCredsWithoutVotingDelegation]
   );
 
-  const poolIdToRewardAccountMap = useMemo(
-    () =>
-      new Map(
-        accountsWithRegisteredStakeCreds
-          ?.map((rewardAccount): [string, Wallet.Cardano.RewardAccountInfo] => {
-            const { delegatee } = rewardAccount;
-            const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-
-            return [delagationInfo?.id.toString(), rewardAccount];
-          })
-          .filter(([poolId]) => !!poolId)
-      ),
+  const poolIdToRewardAccountsMap = useMemo(
+    () => getPoolIdToRewardAccountsMap(accountsWithRegisteredStakeCreds),
     [accountsWithRegisteredStakeCreds]
   );
 
   return {
-    accountsWithRegisteredStakeCreds,
-    accountsWithRegisteredStakeCredsWithoutVotingDelegation,
+    areAllRegisteredStakeKeysWithoutVotingDelegation,
     lockedStakeRewards,
-    poolIdToRewardAccountMap
+    poolIdToRewardAccountsMap
   };
 };

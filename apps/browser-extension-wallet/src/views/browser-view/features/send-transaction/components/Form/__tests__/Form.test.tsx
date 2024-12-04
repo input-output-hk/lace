@@ -128,15 +128,16 @@ const backgroundService = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <BackgroundServiceAPIProvider value={backgroundService}>
-      <DatabaseProvider>
-        <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-          <AnalyticsProvider analyticsDisabled>{children}</AnalyticsProvider>
-        </PostHogClientProvider>
-      </DatabaseProvider>
-    </BackgroundServiceAPIProvider>
-  );
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <BackgroundServiceAPIProvider value={backgroundService}>
+        <DatabaseProvider>
+          <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+            <AnalyticsProvider analyticsDisabled>{children}</AnalyticsProvider>
+          </PostHogClientProvider>
+        </DatabaseProvider>
+      </BackgroundServiceAPIProvider>
+    );
 
 const mockProps: Props = {
   assets: new Map(),
