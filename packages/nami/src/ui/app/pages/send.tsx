@@ -462,9 +462,9 @@ const Send = ({
   );
 
   useEffect(() => {
-    if (!lockedStakeRewards) return;
-
-    setShowSwitchToLaceBannerDebounced(reachedMaxAdaAmount);
+    setShowSwitchToLaceBannerDebounced(
+      !!lockedStakeRewards && reachedMaxAdaAmount,
+    );
   }, [lockedStakeRewards, reachedMaxAdaAmount]);
 
   return (
