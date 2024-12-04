@@ -123,4 +123,16 @@ export interface OutsideHandlesContextValue {
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   protocolParameters: Wallet.Cardano.ProtocolParameters;
   assetInfo: Wallet.Assets;
+  createHistoricalOwnInputResolver: (
+    props: Readonly<{
+      transactions: {
+        history: Wallet.Cardano.HydratedTx[];
+        outgoing: {
+          inFlight: Wallet.TxInFlight[];
+          signed: Wallet.KeyManagement.WitnessedTx[];
+        };
+      };
+      addresses: Wallet.WalletAddress[];
+    }>,
+  ) => Wallet.Cardano.InputResolver;
 }

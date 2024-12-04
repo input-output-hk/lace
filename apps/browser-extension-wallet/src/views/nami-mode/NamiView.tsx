@@ -42,6 +42,7 @@ import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { BackgroundStorage } from '@lib/scripts/types';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { useNetworkError } from '@hooks/useNetworkError';
+import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -237,7 +238,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         setDeletingWallet,
         chainHistoryProvider,
         protocolParameters: walletState?.protocolParameters,
-        assetInfo: walletState?.assetInfo
+        assetInfo: walletState?.assetInfo,
+        createHistoricalOwnInputResolver
       }}
     >
       <CommonOutsideHandlesProvider

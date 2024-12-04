@@ -1,5 +1,5 @@
 /* eslint-disable functional/prefer-immutable-types */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 
 import {
   assetsMintedInspector,
@@ -515,20 +515,43 @@ export const useWalletTxs = () => {
     transactions,
     protocolParameters,
     assetInfo,
+    createHistoricalOwnInputResolver,
   } = useOutsideHandles();
   const [txs, setTxs] = useState<(TxInfo | undefined)[]>();
   const rewardAccounts = useObservable(
     inMemoryWallet.delegation.rewardAccounts$,
   );
+  const addresses = useObservable(inMemoryWallet.addresses$);
+
+  const { resolveInput } = useMemo(
+    () =>
+      createHistoricalOwnInputResolver({
+        addresses,
+        transactions,
+      }),
+    [addresses, transactions],
+  );
 
   const getTxInputsValueAndAddress = useCallback(
-    async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) =>
-      await Wallet.getTxInputsValueAndAddress(
-        inputs,
-        chainHistoryProvider,
-        inMemoryWallet,
-      ),
-    [],
+    async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) => {
+      const resolvedInputs = new Array<Wallet.Cardano.Utxo>();
+
+      for (const input of inputs) {
+        const output = await resolveInput(input);
+        output &&
+          resolvedInputs.push([{ address: output.address, ...input }, output]);
+      }
+      return resolvedInputs.map(utxo => {
+        const { address, value } = utxo[1];
+
+        return {
+          ...utxo[0],
+          value,
+          address,
+        };
+      });
+    },
+    [resolveInput],
   );
 
   const fetchWalletActivities = useCallback(async () => {
@@ -558,7 +581,7 @@ export const useWalletTxs = () => {
   ]);
 
   useEffect(() => {
-    if (!rewardAccounts || !transactions) return;
+    if (!rewardAccounts || !transactions || !addresses) return;
     fetchWalletActivities();
   }, [
     fetchWalletActivities,
