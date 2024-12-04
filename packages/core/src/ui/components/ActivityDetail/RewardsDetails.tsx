@@ -2,7 +2,6 @@ import React from 'react';
 import cn from 'classnames';
 import { Tooltip } from 'antd';
 import styles from './TransactionDetails.module.scss';
-import { ActivityStatus } from '../Transaction';
 import { Ellipsis } from '@lace/common';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +20,6 @@ export type RewardsInfo = {
 export interface RewardsDetailsProps {
   name: string;
   headerDescription?: string;
-  status: ActivityStatus.SPENDABLE;
   includedDate: string;
   includedTime: string;
   amountTransformer: (amount: string) => string;
@@ -32,7 +30,6 @@ export interface RewardsDetailsProps {
 export const RewardsDetails = ({
   name,
   headerDescription,
-  status,
   includedDate,
   includedTime,
   amountTransformer,
@@ -117,14 +114,6 @@ export const RewardsDetails = ({
             </div>
           )}
 
-          <div className={styles.details}>
-            <div className={styles.title} data-testid="rewards-status-title">
-              {t('core.activityDetails.status')}
-            </div>
-            <div data-testid="rewards-status" className={styles.detail}>{`${status
-              .charAt(0)
-              .toUpperCase()}${status.slice(1)}`}</div>
-          </div>
           <div className={styles.details}>
             <div className={styles.title} data-testid="rewards-epoch-title">
               {t('core.activityDetails.epoch')}
