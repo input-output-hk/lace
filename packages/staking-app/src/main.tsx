@@ -1,12 +1,16 @@
-import React from 'react';
-import * as ReactDOM from 'react-dom';
+import React, { ReactNode } from 'react';
 import App from './App.tsx';
 
-export const render = (containerId: string) => {
+type renderProps = {
+  containerId: string;
+  render: (el: ReactNode, container: Element) => void;
+};
+
+export const renderApp = ({ containerId, render }: renderProps) => {
   const container = document.querySelector(containerId);
   if (!container) {
     throw new Error(`Container with id "${containerId}" not found`);
   }
 
-  ReactDOM.render(<App />, container);
+  render(<App />, container);
 };

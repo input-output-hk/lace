@@ -1,10 +1,12 @@
 import React from 'react';
-import { Staking } from '@lace/staking';
+import { Staking, OutsideHandlesProvider, OutsideHandlesProviderProps } from '@lace/staking';
 
 const App = () => (
   <>
     <h1>Embed Staking</h1>
-    <Staking theme="light" />
+    <OutsideHandlesProvider {...({} as OutsideHandlesProviderProps)}>
+      <Staking theme="light" />
+    </OutsideHandlesProvider>
   </>
 );
 
