@@ -193,7 +193,7 @@ export const useSelectedCoins = ({
         },
         formattedFiatValue: `= ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}`,
         fiatValue: `= ${fiatValue} ${fiatCurrency?.code}`,
-        maxDecimals: cardanoCoin.decimals
+        maxDecimals: 6
       } as AssetInputListProps['rows'][number];
     }
 

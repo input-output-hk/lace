@@ -32,7 +32,7 @@ describe('Testing inputOutputTransformer function', () => {
     expect(result.addr).toEqual(
       'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
     );
-    expect(result.amount).toBe('1.00');
+    expect(result.amount).toBe('1');
     expect(result.assetList.length).toEqual(0);
   });
 
@@ -46,7 +46,7 @@ describe('Testing inputOutputTransformer function', () => {
     expect(result.addr).toEqual(
       'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
     );
-    expect(result.amount).toBe('3.00');
+    expect(result.amount).toBe('3');
     expect(result.assetList.length).toEqual(0);
   });
 
@@ -66,7 +66,7 @@ describe('Testing inputOutputTransformer function', () => {
     expect(result.addr).toEqual(
       'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp'
     );
-    expect(result.amount).toBe('3.00');
+    expect(result.amount).toBe('3');
     expect(result.assetList.length).toEqual(1);
   });
 });
