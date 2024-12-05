@@ -10,6 +10,7 @@ import {
   Serialization,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
+import { ConwayEraCertificatesTypes } from '@lace/core';
 import { toAsset } from 'adapters/assets';
 import groupBy from 'lodash/groupBy';
 
@@ -390,3 +391,25 @@ const toAssetInfo = (
   }
   return toAsset(assetInfo, BigInt(cardanoAsset.quantity));
 };
+
+const ConwayEraGovernanceCertificates = new Set(
+  Object.values(ConwayEraCertificatesTypes).filter(
+    certificate =>
+      ![
+        ConwayEraCertificatesTypes.Registration,
+        ConwayEraCertificatesTypes.Unregistration,
+        ConwayEraCertificatesTypes.StakeRegistrationDelegation,
+      ].includes(certificate),
+  ),
+);
+
+export const txHasGovernanceFields = ({
+  body: { certificates, votingProcedures, proposalProcedures },
+}: Wallet.Cardano.Tx) =>
+  certificates?.some(certificate =>
+    ConwayEraGovernanceCertificates.has(
+      certificate.__typename as unknown as ConwayEraCertificatesTypes,
+    ),
+  ) ||
+  !!votingProcedures?.length ||
+  !!proposalProcedures?.length;

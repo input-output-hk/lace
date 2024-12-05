@@ -10,15 +10,15 @@ import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from 
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
-import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
-import { of, take } from 'rxjs';
+import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
 import { DappTransactionContainer } from './DappTransactionContainer';
+import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -47,30 +47,33 @@ export const ConfirmTransaction = (): React.ReactElement => {
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
+  const txWitnessRequest = useTxWitnessRequest();
+
   useEffect(() => {
-    const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
-      setDappInfo(await senderToDappInfo(r.signContext.sender));
-      setSignTxRequest(r);
-    });
+    (async () => {
+      if (!txWitnessRequest) return (): (() => void) => void 0;
 
-    const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
+      setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
+      setSignTxRequest(txWitnessRequest);
 
-    return () => {
-      subscription.unsubscribe();
-      api.shutdown();
-    };
-  }, [setSignTxRequest, setDappInfo]);
+      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
+        {
+          api$: of({
+            async readyToSignTx(): Promise<boolean> {
+              return Promise.resolve(true);
+            }
+          }),
+          baseChannel: DAPP_CHANNELS.userPrompt,
+          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        },
+        { logger: console, runtime }
+      );
+
+      return () => {
+        api.shutdown();
+      };
+    })();
+  }, [setSignTxRequest, setDappInfo, txWitnessRequest]);
 
   const onCancelTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
