@@ -11,7 +11,7 @@ type NamiPasswordProps = Omit<
 export const NamiPassword = (props: NamiPasswordProps) => {
   return (
     <UncontrolledPasswordBox
-      containerClassName={styles.passwordContainer}
+      containerClassName={styles.namiPasswordContainer}
       {...props}
     />
   );
