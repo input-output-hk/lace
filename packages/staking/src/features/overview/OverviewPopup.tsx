@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
@@ -9,6 +10,7 @@ import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
+import { RegisterAsDRepBanner } from './RegisterAsDRepBanner';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -24,6 +26,9 @@ export const OverviewPopup = () => {
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
     isSharedWallet,
+    openExternalLink,
+    govToolUrl,
+    useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -34,6 +39,9 @@ export const OverviewPopup = () => {
   const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
+
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
+    useRewardAccountsData();
 
   if (
     !totalCoinBalance ||
@@ -81,11 +89,17 @@ export const OverviewPopup = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
   return (
     <>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$28" mt="$32">
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} popupView />
+        </Box>
+      )}
       {stakingNotifications.length > 0 && (
         <Flex mb="$32" flexDirection="column">
           <StakingNotificationBanners notifications={stakingNotifications} popupView />
