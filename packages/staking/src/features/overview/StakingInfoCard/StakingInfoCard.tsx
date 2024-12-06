@@ -99,7 +99,7 @@ export const StakingInfoCard = ({
 
   const dRepDelegatee = rewardAccount?.dRepDelegatee;
   const isDRepRetired =
-    dRepDelegatee && 'active' in dRepDelegatee.delegateRepresentative && dRepDelegatee.delegateRepresentative.active;
+    dRepDelegatee && 'active' in dRepDelegatee.delegateRepresentative && !dRepDelegatee.delegateRepresentative.active;
   const stakeAddress = rewardAccount?.address;
 
   return (
