@@ -194,7 +194,7 @@ const App = () => {
   }
 
   return (
-    <Box overflowX="hidden" minHeight="calc(100vh - 30px)">
+    <Box display="flex" overflowX="hidden" minHeight="calc(100vh - 30px)">
       <Switch>
         <Route path="/settings">
           <Settings

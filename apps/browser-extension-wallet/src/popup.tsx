@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-import { PopupView } from '@routes';
+import { PopupView, walletRoutePaths } from '@routes';
 import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
 import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
@@ -34,8 +34,8 @@ const App = (): React.ReactElement => {
     const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
     if (oldModeValue?.mode !== newModeValue?.mode) {
       setMode(newModeValue);
-      // Force back to original routing
-      window.location.hash = '#';
+      // Force back to original routing unless it is staking route (see LW-11876)
+      if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) window.location.hash = '#';
     }
   });
 
