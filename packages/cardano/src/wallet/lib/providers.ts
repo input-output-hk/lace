@@ -6,6 +6,7 @@ import { Logger } from 'ts-log';
 import {
   AssetProvider,
   ChainHistoryProvider,
+  DRepProvider,
   Milliseconds,
   NetworkInfoProvider,
   Provider,
@@ -60,6 +61,7 @@ export type AllProviders = {
   utxoProvider: UtxoProvider;
   chainHistoryProvider: ChainHistoryProvider;
   rewardsProvider: RewardsProvider;
+  drepProvider: DRepProvider;
 };
 
 export type RateLimiterConfig = {
