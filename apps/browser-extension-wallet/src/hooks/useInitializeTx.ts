@@ -16,7 +16,8 @@ export enum COIN_SELECTION_ERRORS {
   NOT_FRAGMENTED_ENOUGH_ERROR = 'UTxO Not Fragmented Enough',
   FULLY_DEPLETED_ERROR = 'UTxO Fully Depleted',
   MAXIMUM_INPUT_COUNT_EXCEEDED_ERROR = 'Maximum Input Count Exceeded',
-  BUNDLE_AMOUNT_IS_EMPTY = 'Bundle amount is empty'
+  BUNDLE_AMOUNT_IS_EMPTY = 'Bundle amount is empty',
+  AVAILABLE_BALANCE_INSUFFICIENT_ERROR = 'Amount is less than the total balance, but more than the available balance'
 }
 
 export const coinSelectionErrors = new Map<COIN_SELECTION_ERRORS, TranslationKey>([
@@ -24,7 +25,8 @@ export const coinSelectionErrors = new Map<COIN_SELECTION_ERRORS, TranslationKey
   [COIN_SELECTION_ERRORS.NOT_FRAGMENTED_ENOUGH_ERROR, 'general.errors.utxoNotFragmentedEnough'],
   [COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR, 'general.errors.utxoFullyDepleted'],
   [COIN_SELECTION_ERRORS.MAXIMUM_INPUT_COUNT_EXCEEDED_ERROR, 'general.errors.maximumInputCountExceeded'],
-  [COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY, 'general.errors.bundleAmountIsEmpty']
+  [COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY, 'general.errors.bundleAmountIsEmpty'],
+  [COIN_SELECTION_ERRORS.AVAILABLE_BALANCE_INSUFFICIENT_ERROR, 'general.errors.insufficientAvailableBalance']
 ]);
 
 export const getErrorMessage =

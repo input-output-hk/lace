@@ -15,6 +15,7 @@ import * as CurrencyProvider from '@providers/currency';
 const mockUseOutputs = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseMaxAda = jest.fn().mockReturnValue(BigInt(100));
+const mockUseRewardAccountsData = jest.fn().mockReturnValue({ lockedStakeRewards: 0 });
 const mockUseAddressState = jest.fn((_row: string) => ({
   address: '',
   handle: '',
@@ -93,6 +94,11 @@ jest.mock('@hooks/useMaxAda', (): typeof UseMaxAda => ({
 jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
   ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
   useCurrencyStore: mockUseCurrencyStore
+}));
+
+jest.mock('@src/views/browser-view/features/staking/hooks', () => ({
+  ...jest.requireActual<any>('@src/views/browser-view/features/staking/hooks'),
+  useRewardAccountsData: mockUseRewardAccountsData
 }));
 
 const setNewOutput = jest.fn();
