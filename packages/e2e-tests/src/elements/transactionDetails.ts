@@ -58,8 +58,6 @@ class ActivityDetailsPage extends CommonDrawerElements {
   private TRANSACTION_DETAILS_REWARDS_POOL_ID = '[data-testid="rewards-pool-id"]';
   private TRANSACTION_DETAILS_REWARDS_SINGLE_POOL_ADA = '[data-testid="rewards-pool-reward-ada"]';
   private TRANSACTION_DETAILS_REWARDS_SINGLE_POOL_FIAT = '[data-testid="rewards-pool-reward-fiat"]';
-  private TRANSACTION_DETAILS_REWARDS_STATUS_TITLE = '[data-testid="rewards-status-title"]';
-  private TRANSACTION_DETAILS_REWARDS_STATUS = '[data-testid="rewards-status"]';
   private TRANSACTION_DETAILS_REWARDS_EPOCH_TITLE = '[data-testid="rewards-epoch-title"]';
   private TRANSACTION_DETAILS_REWARDS_EPOCH = '[data-testid="rewards-epoch"]';
   private TRANSACTION_DETAILS_REWARDS_TIMESTAMP_TITLE = '[data-testid="rewards-date-title"]';
@@ -303,14 +301,6 @@ class ActivityDetailsPage extends CommonDrawerElements {
 
   get transactionDetailsRewardsSinglePoolFiat(): Promise<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_DETAILS_REWARDS_SINGLE_POOL_FIAT);
-  }
-
-  get transactionDetailsRewardsStatusTitle(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_DETAILS_REWARDS_STATUS_TITLE);
-  }
-
-  get transactionDetailsRewardsStatus(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.TRANSACTION_DETAILS_REWARDS_STATUS);
   }
 
   get transactionDetailsRewardsEpochTitle(): ChainablePromiseElement<WebdriverIO.Element> {

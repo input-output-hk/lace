@@ -3,13 +3,11 @@ import * as React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { RewardsDetails, RewardsDetailsProps } from '../RewardsDetails';
-import { ActivityStatus } from '../../Transaction';
 
 describe('Testing ActivityDetailsBrowser component', () => {
   const rewardsDetailsProps: RewardsDetailsProps = {
     name: 'Name',
     headerDescription: 'Header Description',
-    status: ActivityStatus.SPENDABLE,
     includedDate: 'Date',
     includedTime: 'Time',
     amountTransformer: (amount) => `${amount} $`,
