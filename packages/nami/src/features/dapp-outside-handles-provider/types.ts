@@ -6,6 +6,7 @@ import type {
   WalletRepositoryApi,
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
+import type { useSecrets } from '@lace/core';
 
 export interface DappConnector {
   getDappInfo: () => Promise<Wallet.DappInfo>;
@@ -57,4 +58,5 @@ export interface DappOutsideHandlesContextValue {
   >;
   environmentName: Wallet.ChainName;
   dappConnector: DappConnector;
+  secretsUtil: ReturnType<typeof useSecrets>;
 }

@@ -4,13 +4,13 @@ import { Banner } from '@lace/common';
 import { i18n } from '@lace/translation';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import styles from '../SettingsLayout.module.scss';
-import { Password, PasswordObj } from '@lace/core';
+import { Password, OnPasswordChange } from '@lace/core';
 
 export const PassphraseStage = ({
   setPassword,
   isPasswordValid
 }: {
-  setPassword: (pw: Partial<PasswordObj>) => void;
+  setPassword: OnPasswordChange;
   isPasswordValid: boolean;
 }): JSX.Element => (
   <Flex mt="$8" flexDirection="column" gap="$8">

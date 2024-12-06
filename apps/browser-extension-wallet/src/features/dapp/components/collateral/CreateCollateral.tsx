@@ -1,7 +1,15 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DappCreateCollateralProps } from './types';
-import { OnPasswordChange, Password, DappInfo, RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
+import {
+  OnPasswordChange,
+  Password,
+  DappInfo,
+  RowContainer,
+  renderAmountInfo,
+  renderLabel,
+  useSecrets
+} from '@lace/core';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
@@ -31,12 +39,12 @@ export const CreateCollateral = ({
   const { inMemoryWallet, walletType, isInMemoryWallet } = useWalletStore();
   const addresses = useObservable(inMemoryWallet.addresses$);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [password, setPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isPasswordValid, setIsPasswordValid] = useState(true);
 
   const handleChange: OnPasswordChange = (target) => {
     setIsPasswordValid(true);
-    setPassword(target.value);
+    setPassword(target);
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
@@ -76,15 +84,16 @@ export const CreateCollateral = ({
     };
 
     try {
-      await withSignTxConfirmation(submitTx, password);
+      await withSignTxConfirmation(submitTx, password.value);
     } catch (error) {
       if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
-        setPassword('');
         setIsPasswordValid(false);
       }
+    } finally {
+      clearSecrets();
     }
     setIsSubmitting(false);
-  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm]);
+  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm, clearSecrets]);
 
   const confirmButtonLabel = useMemo(() => {
     if (isInMemoryWallet) {

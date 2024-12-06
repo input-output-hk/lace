@@ -8,6 +8,7 @@ import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { useSecrets } from '@src/../../../packages/core/dist/ui/hooks';
 
 interface CollateralFooterProps {
   onClose: () => void;
@@ -15,7 +16,7 @@ interface CollateralFooterProps {
   walletType: string;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
   popupView: boolean;
-  password: string;
+  secretsUtil: ReturnType<typeof useSecrets>;
   submitCollateralTx: () => Promise<void>;
   hasEnoughAda: boolean;
   isInitializing: boolean;
@@ -29,7 +30,7 @@ export const CollateralFooterSend = ({
   walletType,
   setIsPasswordValid,
   popupView,
-  password,
+  secretsUtil,
   submitCollateralTx,
   hasEnoughAda,
   isInitializing,
@@ -40,7 +41,7 @@ export const CollateralFooterSend = ({
   const backgroundServices = useBackgroundServiceAPIContext();
   const isInMemory = walletType === WalletType.InMemory;
 
-  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, password);
+  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, secretsUtil.password.value);
 
   const handleClick = async () => {
     onClaim();
@@ -79,7 +80,7 @@ export const CollateralFooterSend = ({
   }, [hasEnoughAda, isInMemory, walletType, popupView, t]);
 
   // password is not required for hw flow
-  const isPasswordMissing = isInMemory && !password;
+  const isPasswordMissing = isInMemory && !secretsUtil.password.value;
   const isButtonDisabled = hasEnoughAda && isPasswordMissing;
 
   return (

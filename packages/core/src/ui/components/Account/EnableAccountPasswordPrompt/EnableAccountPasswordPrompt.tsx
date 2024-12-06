@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Box, Button, Flex, PasswordBox, Text } from '@input-output-hk/lace-ui-toolkit';
+import React from 'react';
+import { Box, Button, Flex, Text, UncontrolledPasswordBox } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import styles from './EnableAccountPasswordPrompt.module.scss';
+import { useSecrets } from '@src/ui/hooks';
 
 interface Props {
   open: boolean;
@@ -16,7 +17,7 @@ interface Props {
     confirm: string;
   };
   onCancel: () => void;
-  onConfirm: (passphrase: Uint8Array) => void;
+  onConfirm: () => void;
   isPopup: boolean;
 }
 
@@ -28,32 +29,37 @@ export const EnableAccountPasswordPrompt = ({
   onCancel,
   translations
 }: Props): JSX.Element => {
-  const [currentPassword, setCurrentPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
+
+  const handleClose = () => {
+    clearSecrets();
+    // wait for propogation before executing onCancel
+    setTimeout(onCancel, 0);
+  };
 
   return (
     <Drawer
       zIndex={1100}
       open={open}
-      navigation={<DrawerNavigation title={isPopup ? undefined : translations.title} onArrowIconClick={onCancel} />}
-      onClose={() => {
-        onCancel();
-        setCurrentPassword('');
-      }}
+      navigation={<DrawerNavigation title={isPopup ? undefined : translations.title} onArrowIconClick={handleClose} />}
+      onClose={handleClose}
       popupView={isPopup}
       footer={
         <Flex flexDirection="column">
           <Box mb="$16" w="$fill">
             <Button.CallToAction
               w="$fill"
-              disabled={currentPassword.trim() === ''}
-              onClick={() => onConfirm(Buffer.from(currentPassword))}
+              disabled={!password?.value}
+              onClick={() => {
+                onConfirm();
+              }}
               data-testid="enable-account-password-prompt-confirm-btn"
               label={translations.confirm}
             />
           </Box>
           <Button.Secondary
             w="$fill"
-            onClick={onCancel}
+            onClick={handleClose}
             data-testid="enable-account-password-prompt-cancel-btn"
             label={translations.cancel}
           />
@@ -75,14 +81,13 @@ export const EnableAccountPasswordPrompt = ({
           justifyContent={isPopup ? undefined : 'center'}
           className={isPopup ? styles.passwordPopUpLayout : styles.passwordExtendedLayout}
         >
-          <PasswordBox
-            value={currentPassword}
+          <UncontrolledPasswordBox
             label={translations.passwordPlaceholder}
             data-testid="enable-account-password-input"
-            onChange={(e) => setCurrentPassword(e.target.value)}
+            onChange={setPassword}
             onSubmit={(event): void => {
               event.preventDefault();
-              onConfirm(Buffer.from(currentPassword));
+              onConfirm();
             }}
             errorMessage={wasPasswordIncorrect ? translations.wrongPassword : undefined}
             rootStyle={{ width: '100%' }}

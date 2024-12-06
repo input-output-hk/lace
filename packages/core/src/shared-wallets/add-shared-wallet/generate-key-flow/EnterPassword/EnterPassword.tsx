@@ -2,11 +2,12 @@ import {
   HardwareWalletComponent as ColdWalletIcon,
   Flex,
   WalletComponent as HotWalletIcon,
-  PasswordBox,
   Text,
+  UncontrolledPasswordBox,
 } from '@input-output-hk/lace-ui-toolkit';
+import { useSecrets } from '@src/ui/hooks';
 import cn from 'classnames';
-import React, { ReactElement, VFC, useState } from 'react';
+import React, { ReactElement, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
 import { keyGenerationTimelineSteps } from '../timelineSteps';
@@ -39,12 +40,12 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   walletName,
 }) => {
   const { t } = useTranslation();
-  const [password, setPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const icon = mapOfWalletTypeIconProperties[kind];
 
   const next = () => {
-    onGenerateKeys(password);
-    setPassword('');
+    onGenerateKeys(password.value);
+    clearSecrets();
   };
 
   let passwordErrorMessage;
@@ -88,11 +89,10 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             <Text.Body.Large weight="$bold">{walletName}</Text.Body.Large>
           </Flex>
         </Flex>
-        <PasswordBox
+        <UncontrolledPasswordBox
           disabled={loading}
-          value={password}
           label={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordInputLabel')}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={setPassword}
           onSubmit={(event) => {
             event.preventDefault();
             next();

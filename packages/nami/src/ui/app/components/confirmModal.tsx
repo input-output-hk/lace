@@ -9,9 +9,6 @@ import {
   Text,
   Button,
   useDisclosure,
-  Input,
-  InputGroup,
-  InputRightElement,
   Modal,
   ModalBody,
   ModalContent,
@@ -24,12 +21,12 @@ import { MdUsb } from 'react-icons/md';
 import { ERROR } from '../../../config/config';
 
 import type { PasswordObj as Password } from '@lace/core';
+import { NamiPassword } from './namiPassword';
 
 interface Props {
   ready?: boolean;
   onConfirm: (status: boolean, error?: string) => Promise<void> | void;
-  sign: (password?: string) => Promise<void>;
-  setPassword?: (pw: Readonly<Partial<Password>>) => void;
+  sign: () => Promise<void>;
   onCloseBtn?: () => void;
   title?: React.ReactNode;
   info?: React.ReactNode;
@@ -38,6 +35,11 @@ interface Props {
   getCbor?: () => Promise<string>;
   setCollateral?: boolean;
   isPopup?: boolean;
+  secretsUtil: {
+    clearSecrets: () => void;
+    password: Partial<Password>;
+    setPassword: (pw: Readonly<Partial<Password>>) => void;
+  };
 }
 
 export interface ConfirmModalRef {
@@ -53,12 +55,12 @@ const ConfirmModal = (
     onCloseBtn,
     title,
     info,
-    setPassword,
     walletType,
     openHWFlow,
     getCbor,
     setCollateral,
     isPopup,
+    secretsUtil,
   }: Readonly<Props>,
   ref,
 ) => {
@@ -116,7 +118,7 @@ const ConfirmModal = (
           props={props}
           isOpen={isOpenNormal}
           onClose={onCloseNormal}
-          setPassword={setPassword}
+          secretsUtil={secretsUtil}
         />
       )}
     </>
@@ -126,47 +128,48 @@ const ConfirmModal = (
 interface ConfirmModalNormalProps {
   isOpen?: boolean;
   onClose: () => void;
-  setPassword?: (pw: Readonly<Partial<Password>>) => void;
-  props: Props;
+  props: Omit<Props, 'secretsUtil'>;
+  secretsUtil: {
+    clearSecrets: () => void;
+    password: Partial<Password>;
+    setPassword: (pw: Readonly<Partial<Password>>) => void;
+  };
 }
 
 const ConfirmModalNormal = ({
   props,
   isOpen,
   onClose,
-  setPassword,
+  secretsUtil,
 }: Readonly<ConfirmModalNormalProps>) => {
-  const [state, setState] = React.useState({
-    wrongPassword: false,
-    password: '',
-    show: false,
-    name: '',
-  });
+  const [errorMessage, setErrorMessage] = React.useState<string | undefined>();
   const [waitReady, setWaitReady] = React.useState(true);
-  const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    setState({
-      wrongPassword: false,
-      password: '',
-      show: false,
-      name: '',
-    });
+    setErrorMessage(undefined);
   }, [isOpen]);
 
+  const handleClose = (cb?: () => void) => {
+    secretsUtil.clearSecrets();
+    cb?.();
+    setTimeout(onClose, 0);
+  };
+
   const confirmHandler = async () => {
-    if (!state.password || props.ready === false || !waitReady) return;
+    if (!secretsUtil.password?.value || props.ready === false || !waitReady)
+      return;
     try {
       setWaitReady(false);
-      await props.sign(state.password);
+      await props.sign();
       await props?.onConfirm(true);
-      onClose?.();
+      handleClose();
     } catch (error) {
+      secretsUtil.clearSecrets();
       if (
         error === ERROR.wrongPassword ||
         (error instanceof Error && error.name === 'AuthenticationError')
       )
-        setState(s => ({ ...s, wrongPassword: true }));
+        setErrorMessage('Password is wrong');
       else
         await props.onConfirm(
           false,
@@ -181,13 +184,9 @@ const ConfirmModalNormal = ({
       size="xs"
       isOpen={!!isOpen}
       onClose={() => {
-        if (props.onCloseBtn) {
-          props.onCloseBtn();
-        }
-        onClose();
+        handleClose(() => props.onCloseBtn?.());
       }}
       isCentered
-      initialFocusRef={inputRef}
       blockScrollOnMount={false}
     >
       <ModalOverlay />
@@ -197,38 +196,13 @@ const ConfirmModalNormal = ({
         </ModalHeader>
         <ModalBody>
           {props.info}
-          <InputGroup size="md">
-            <Input
-              ref={inputRef}
-              focusBorderColor="teal.400"
-              variant="filled"
-              isInvalid={state.wrongPassword}
-              pr="4.5rem"
-              type={state.show ? 'text' : 'password'}
-              onChange={e => {
-                setPassword?.(e.target);
-                setState(s => ({ ...s, password: e.target.value }));
-              }}
-              onKeyDown={e => {
-                if (e.key == 'Enter') confirmHandler();
-              }}
-              placeholder="Enter password"
-            />
-            <InputRightElement width="4.5rem">
-              <Button
-                h="1.75rem"
-                size="sm"
-                onClick={() => {
-                  setState(s => ({ ...s, show: !s.show }));
-                }}
-              >
-                {state.show ? 'Hide' : 'Show'}
-              </Button>
-            </InputRightElement>
-          </InputGroup>
-          {state.wrongPassword && (
-            <Text color="red.300">Password is wrong</Text>
-          )}
+          <NamiPassword
+            autoFocus // seems to work fine in nami-mode
+            onChange={secretsUtil.setPassword}
+            label="Enter password"
+            errorMessage={errorMessage}
+            onSubmit={async () => await confirmHandler()}
+          />
         </ModalBody>
 
         <ModalFooter>
@@ -236,16 +210,15 @@ const ConfirmModalNormal = ({
             mr={3}
             variant="ghost"
             onClick={() => {
-              if (props.onCloseBtn) {
-                props.onCloseBtn();
-              }
-              onClose();
+              handleClose(() => props.onCloseBtn?.());
             }}
           >
             Close
           </Button>
           <Button
-            isDisabled={!state.password || props.ready === false || !waitReady}
+            isDisabled={
+              !secretsUtil.password.value || props.ready === false || !waitReady
+            }
             isLoading={!waitReady}
             colorScheme="teal"
             onClick={confirmHandler}
@@ -263,7 +236,7 @@ interface ConfirmModalHwProps {
   onClose: () => void;
   openHWFlow: (path: string) => void;
   getCbor?: () => Promise<string>;
-  props: Props;
+  props: Omit<Props, 'secretsUtil'>;
 }
 
 const ConfirmModalHw = ({

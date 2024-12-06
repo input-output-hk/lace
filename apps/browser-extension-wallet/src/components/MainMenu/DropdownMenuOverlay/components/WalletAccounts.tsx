@@ -12,7 +12,8 @@ import {
   EnableAccountConfirmWithHW,
   EnableAccountConfirmWithHWState,
   EnableAccountPasswordPrompt,
-  useDialogWithData
+  useDialogWithData,
+  useSecrets
 } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
@@ -58,6 +59,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       account: activeAccount
     }
   } = cardanoWallet;
+  const { clearSecrets, password } = useSecrets();
 
   const editAccountDrawer = useDialogWithData<ProfileDropdown.AccountData | undefined>();
   const disableAccountConfirmation = useDialogWithData<ProfileDropdown.AccountData | undefined>();
@@ -117,9 +119,10 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         accountIndex
       });
       const accountName = accountsData.find((acc) => acc.accountNumber === accountIndex)?.label;
+      clearSecrets();
       closeDropdownAndShowAccountActivated(accountName);
     },
-    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics]
+    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics, clearSecrets]
   );
 
   const editAccount = useCallback(
@@ -198,29 +201,30 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [wallet.type, enableAccountPasswordDialog, enableAccountHWSigningDialog, unlockHWAccount]
   );
 
-  const unlockInMemoryWalletAccountWithPassword = useCallback(
-    async (passphrase: Uint8Array) => {
-      const { accountIndex } = enableAccountPasswordDialog.data;
-      const name = defaultAccountName(accountIndex);
-      try {
-        await addAccount({
-          wallet,
-          accountIndex,
-          passphrase,
-          metadata: { name: defaultAccountName(accountIndex) }
-        });
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
-          // eslint-disable-next-line camelcase
-          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-        });
-        enableAccountPasswordDialog.hide();
-        closeDropdownAndShowAccountActivated(name);
-      } catch {
-        enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
-      }
-    },
-    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated, analytics, walletRepository]
-  );
+  const unlockInMemoryWalletAccountWithPassword = async () => {
+    const { accountIndex } = enableAccountPasswordDialog.data;
+    const name = defaultAccountName(accountIndex);
+    const passphrase = Buffer.from(password?.value);
+    try {
+      await addAccount({
+        wallet,
+        accountIndex,
+        passphrase,
+        metadata: { name: defaultAccountName(accountIndex) }
+      });
+      analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
+        // eslint-disable-next-line camelcase
+        $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+      });
+      enableAccountPasswordDialog.hide();
+      closeDropdownAndShowAccountActivated(name);
+    } catch {
+      enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
+    } finally {
+      passphrase.fill(0);
+      clearSecrets();
+    }
+  };
 
   const lockAccount = useCallback(async () => {
     await walletRepository.removeAccount({

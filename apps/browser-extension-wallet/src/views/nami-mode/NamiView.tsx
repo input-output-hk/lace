@@ -119,7 +119,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   const { signAndSubmitTransaction } = useDelegationTransaction();
   const { isBuildingTx, stakingError, setIsBuildingTx } = useStakePoolDetails();
   const walletState = useWalletState();
-  const passwordUtil = useSecrets();
+  const secretsUtil = useSecrets();
   const openExternalLink = useExternalLinkOpener();
   const getStakePoolInfo = useCallback(
     (id: Wallet.Cardano.PoolId) => getPoolInfos([id], stakePoolProvider),
@@ -127,11 +127,11 @@ export const NamiView = withDappContext((): React.ReactElement => {
   );
 
   const resetDelegationState = useCallback(() => {
-    passwordUtil.clearSecrets();
+    secretsUtil.clearSecrets();
     setDelegationTxFee();
     setDelegationTxBuilder();
     setIsBuildingTx(false);
-  }, [passwordUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
+  }, [secretsUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
 
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const isStakeRegistered =
@@ -215,7 +215,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         isValidURL,
         buildDelegation,
         signAndSubmitTransaction,
-        passwordUtil,
+        secretsUtil,
         delegationTxFee: !!delegationTxBuilder && delegationTxFee,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,
         collateralTxBuilder,

@@ -3,7 +3,7 @@ import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
-import { OnPasswordChange, Password } from '@lace/core';
+import { Password, useSecrets } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
@@ -20,15 +20,17 @@ export const SignData = (): React.ReactElement => {
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
   const [isLoading, setIsLoading] = useState(false);
-  const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();
+  const { password, setPassword, clearSecrets } = useSecrets();
 
   const onConfirm = useCallback(async () => {
     setIsLoading(true);
+    const passphrase = Buffer.from(password.value, 'utf8');
     try {
-      const passphrase = Buffer.from(password, 'utf8');
       await request.sign(passphrase, { willRetryOnFailure: true });
       setValidPassword(true);
+      clearSecrets();
+      passphrase.fill(0);
       redirectToSignSuccess();
     } catch (error) {
       if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
@@ -37,11 +39,11 @@ export const SignData = (): React.ReactElement => {
         redirectToSignFailure();
       }
     } finally {
+      passphrase.fill(0);
+      clearSecrets();
       setIsLoading(false);
     }
-  }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
-
-  const handleChange: OnPasswordChange = (target) => setPassword(target.value);
+  }, [password, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]);
 
   const confirmIsDisabled = useMemo(() => {
     if (request.walletType !== WalletType.InMemory) return false;
@@ -68,7 +70,7 @@ export const SignData = (): React.ReactElement => {
             {t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')}
           </h5>
           <Password
-            onChange={handleChange}
+            onChange={setPassword}
             onSubmit={handleSubmit}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}

@@ -17,7 +17,7 @@ const { Text } = Typography;
 interface CollateralStepSendProps {
   txFee: Cardano.Lovelace;
   popupView?: boolean;
-  setPassword: (password: string) => void;
+  setPassword: OnPasswordChange;
   isInMemory: boolean;
   isPasswordValid: boolean;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
@@ -36,7 +36,7 @@ export const CollateralStepSend = ({
   const { t } = useTranslation();
   const handlePasswordChange: OnPasswordChange = (target) => {
     setIsPasswordValid(true);
-    return setPassword(target.value);
+    return setPassword(target);
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();

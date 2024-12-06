@@ -79,7 +79,10 @@ import { Scrollbars } from '../components/scrollbar';
 import UnitDisplay from '../components/unitDisplay';
 
 import type { UseAccount } from '../../../adapters/account';
-import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
+import {
+  OutsideHandlesContextValue,
+  useOutsideHandles,
+} from '../../../features/outside-handles-provider';
 import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
@@ -126,6 +129,9 @@ const Send = ({
   const isMounted = useIsMounted();
   const { cardanoCoin, walletType, openHWFlow, networkConnection } =
     useCommonOutsideHandles();
+
+  const { secretsUtil } = useOutsideHandles();
+
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -661,6 +667,7 @@ const Send = ({
         isPopup={true}
         openHWFlow={openHWFlow}
         walletType={walletType}
+        secretsUtil={secretsUtil}
         title={'Confirm transaction'}
         info={
           <Box
@@ -755,18 +762,20 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password = '') => {
+        sign={async () => {
           capture(Events.SendTransactionConfirmationConfirmClick);
           try {
             await signAndSubmit({
               tx,
-              password,
+              password: secretsUtil.password,
               withSignTxConfirmation,
               inMemoryWallet,
             });
           } catch (error) {
             console.error('Failed to sign and submit transaction', error);
             throw error;
+          } finally {
+            secretsUtil.clearSecrets();
           }
         }}
         getCbor={async () => {
@@ -779,6 +788,7 @@ const Send = ({
           });
         }}
         onConfirm={async (status, error) => {
+          secretsUtil.clearSecrets();
           if (status) {
             capture(Events.SendTransactionConfirmed);
             toast({
@@ -809,7 +819,7 @@ const Send = ({
               status: 'error',
               duration: 3000,
             });
-          ref.current?.closeModal();
+          setTimeout(() => ref.current?.closeModal(), 0);
           setTimeout(() => {
             history.push('/');
           }, 200);

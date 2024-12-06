@@ -13819,7 +13819,7 @@ __metadata:
     react-router-dom: 5.2.0
     react-time-ago: ^7.3.3
     react-window: ^1.8.10
-    rollup-plugin-import-css: ^3.5.0
+    rollup-plugin-postcss: 4.0.1
     rollup-plugin-svg: ^2.0.0
     rxjs: 7.4.0
     sass: ^1.68.0
@@ -16703,7 +16703,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^5.0.2, @rollup/pluginutils@npm:^5.0.4, @rollup/pluginutils@npm:^5.0.5":
+"@rollup/pluginutils@npm:^5.0.2, @rollup/pluginutils@npm:^5.0.5":
   version: 5.1.0
   resolution: "@rollup/pluginutils@npm:5.1.0"
   dependencies:
@@ -53517,17 +53517,6 @@ __metadata:
     globby: 10.0.1
     is-plain-object: ^3.0.0
   checksum: 6eed5b2498fbe44d694f65ae9a9287b13a606b98a232b5a144a94140e8631efae5f5953b573ba68bf2dc59ab11c223ad3ea6f6cd15b51f42287f4bcc234f0e8b
-  languageName: node
-  linkType: hard
-
-"rollup-plugin-import-css@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "rollup-plugin-import-css@npm:3.5.0"
-  dependencies:
-    "@rollup/pluginutils": ^5.0.4
-  peerDependencies:
-    rollup: ^2.x.x || ^3.x.x || ^4.x.x
-  checksum: fda5120f52f29ea2721439ccdba693b0aa1912680c142a491b2cc54b2fb3e01f10234a2153397cd25d5202cfa6a8afd8b80601930c25f8b527a16bf90af9ae35
   languageName: node
   linkType: hard
 

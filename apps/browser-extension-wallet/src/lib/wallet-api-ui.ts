@@ -71,7 +71,7 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
           throw new TypeError('Invalid state: expected password for in-memory wallet');
         }
         const passphrase = Buffer.from(password, 'utf8');
-        await req.sign(passphrase);
+        await req.sign(passphrase).finally(() => passphrase.fill(0));
       } else {
         await req.sign();
       }
