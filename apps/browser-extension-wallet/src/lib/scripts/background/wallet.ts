@@ -48,9 +48,11 @@ if (typeof window !== 'undefined') {
 // which results in some trash files when running the tests (leveldb directory)
 export const walletRepository = new WalletRepository({
   logger,
-  store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
-    { dbName: 'walletRepository', computeDocId: (wallet) => wallet.walletId },
-    logger
+  store$: of(
+    new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
+      { dbName: 'walletRepository', computeDocId: (wallet) => wallet.walletId },
+      logger
+    )
   )
 });
 
@@ -169,7 +171,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
 export const getBaseDbName = (name: string): string => name.replace(/[^\da-z]/gi, '');
 
 const storesFactory: StoresFactory = {
-  create: ({ name }) => {
+  create: async ({ name }) => {
     const baseDbName = getBaseDbName(name);
     const docsDbName = `${baseDbName}Docs`;
     return {
