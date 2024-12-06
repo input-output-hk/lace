@@ -29,7 +29,8 @@ import {
   BlockfrostClientConfig,
   RateLimiter,
   BlockfrostClient,
-  BlockfrostAssetProvider
+  BlockfrostAssetProvider,
+  BlockfrostDRepProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
@@ -107,6 +108,7 @@ export const createProviders = ({
   const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
   const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+  const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
   if (useWebSocket) {
     const url = new URL(baseUrl);
@@ -128,7 +130,8 @@ export const createProviders = ({
       utxoProvider: wsProvider.utxoProvider,
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardsProvider,
-      wsProvider
+      wsProvider,
+      drepProvider
     };
   }
 
@@ -139,7 +142,8 @@ export const createProviders = ({
     stakePoolProvider,
     utxoProvider: utxoHttpProvider(httpProviderConfig),
     chainHistoryProvider,
-    rewardsProvider
+    rewardsProvider,
+    drepProvider
   };
 };
 
@@ -181,6 +185,11 @@ export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDepen
     transactionsByAddresses: RemoteApiPropertyType.MethodReturningPromise,
     transactionsByHashes: RemoteApiPropertyType.MethodReturningPromise,
     blocksByHashes: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  drepProvider: {
+    getDRepInfo: RemoteApiPropertyType.MethodReturningPromise,
+    getDRepsInfo: RemoteApiPropertyType.MethodReturningPromise,
     healthCheck: RemoteApiPropertyType.MethodReturningPromise
   }
 };

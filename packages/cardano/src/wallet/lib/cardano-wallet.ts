@@ -9,7 +9,8 @@ import {
   StakePoolProvider,
   TxSubmitProvider,
   util as coreUtil,
-  UtxoProvider
+  UtxoProvider,
+  DRepProvider
 } from '@cardano-sdk/core';
 import { ObservableWallet, BaseWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
@@ -64,6 +65,7 @@ export interface WalletProvidersDependencies {
   rewardsProvider: RewardsProvider;
   chainHistoryProvider: ChainHistoryProvider;
   wsProvider?: WsProvider;
+  drepProvider: DRepProvider;
 }
 
 export interface CreatePersonalWallet {
