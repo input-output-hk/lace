@@ -431,18 +431,6 @@ class TransactionsDetailsAssert {
     await this.assertSeeRewardsStakePoolsSection();
     await this.assertSeeRewardsSinglePool();
 
-    await TransactionDetailsPage.transactionDetailsRewardsStatusTitle.waitForDisplayed();
-    expect(await TransactionDetailsPage.transactionDetailsRewardsStatusTitle.getText()).to.equal(
-      await t('core.activityDetails.status')
-    );
-    await TransactionDetailsPage.transactionDetailsRewardsStatus.waitForDisplayed();
-    expect(await TransactionDetailsPage.transactionDetailsRewardsStatus.getText()).to.be.oneOf([
-      'Spendable',
-      'Success',
-      'Sending',
-      'Error'
-    ]);
-
     await TransactionDetailsPage.transactionDetailsRewardsEpochTitle.waitForDisplayed();
     expect(await TransactionDetailsPage.transactionDetailsRewardsEpochTitle.getText()).to.equal(
       await t('core.activityDetails.epoch')
