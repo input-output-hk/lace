@@ -2,6 +2,7 @@ import { BlockchainProviderSlice, SliceCreator } from '../types';
 import { Wallet } from '@lace/cardano';
 import { consumeRemoteApi } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
+import { DRepProvider } from '@cardano-sdk/core';
 
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
@@ -11,6 +12,7 @@ export interface IBlockchainProvider {
   utxoProvider: Wallet.UtxoProvider;
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   rewardsProvider: Wallet.RewardsProvider;
+  drepProvider?: DRepProvider;
 }
 
 export type BlockchainProviderFactory = () => IBlockchainProvider;
@@ -23,7 +25,8 @@ export const IBlockchainProvider = {
     networkInfoProvider: providers?.networkInfoProvider,
     utxoProvider: providers?.utxoProvider,
     rewardsProvider: providers?.rewardsProvider,
-    chainHistoryProvider: providers?.chainHistoryProvider
+    chainHistoryProvider: providers?.chainHistoryProvider,
+    drepProvider: providers?.drepProvider
   }),
   fromWalletProviders: (providers: Wallet.WalletProvidersDependencies): IBlockchainProvider => ({
     txSubmitProvider: providers?.txSubmitProvider,
@@ -32,7 +35,8 @@ export const IBlockchainProvider = {
     networkInfoProvider: providers?.networkInfoProvider,
     utxoProvider: providers?.utxoProvider,
     rewardsProvider: providers?.rewardsProvider,
-    chainHistoryProvider: providers?.chainHistoryProvider
+    chainHistoryProvider: providers?.chainHistoryProvider,
+    drepProvider: providers?.drepProvider
   })
 };
 
