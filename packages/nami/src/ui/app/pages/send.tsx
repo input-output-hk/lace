@@ -84,10 +84,6 @@ import UnitDisplay from '../components/unitDisplay';
 import { UpgradeToLaceBanner } from '../components/upgradeToLaceBanner';
 
 import type { UseAccount } from '../../../adapters/account';
-import {
-  OutsideHandlesContextValue,
-  useOutsideHandles,
-} from '../../../features/outside-handles-provider';
 import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
