@@ -103,7 +103,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
               />
             </GenerateSharedWalletKeyInitialStateProvider>
           )}
-          {flow === AddSharedWalletFlowType.Creation && (
+          {flow === AddSharedWalletFlowType.Creation && generatedKeys && (
             <SharedWalletCreationFlowInitialStateProvider value={creationInitialState}>
               <SharedWalletCreationFlow
                 activeWalletName={activeWalletName}
@@ -118,7 +118,7 @@ export const AddSharedWalletStorybookHelper: VFC<AddSharedWalletFlowProps> = ({
               />
             </SharedWalletCreationFlowInitialStateProvider>
           )}
-          {flow === AddSharedWalletFlowType.Import && (
+          {flow === AddSharedWalletFlowType.Import && generatedKeys && (
             <SharedWalletRestorationFlow
               navigateToAppHome={() => {
                 setOpen(false);

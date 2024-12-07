@@ -25,7 +25,7 @@ export const Input = ({
   labelClassName = '',
   ...props
 }: inputProps): React.ReactElement => {
-  const inputRef = useRef();
+  const inputRef = useRef(null);
   const [localVal, setLocalVal] = useState<string>('');
   const onValChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalVal(e?.target?.value ?? '');
@@ -33,7 +33,7 @@ export const Input = ({
   };
 
   useEffect(() => {
-    setLocalVal(value);
+    setLocalVal(value ?? '');
   }, [value]);
 
   useAutoFocus(inputRef, focus);
@@ -53,7 +53,7 @@ export const Input = ({
       data-testid={dataTestId}
       {...props}
       className={cn(styles.input, {
-        [props.className]: props.className,
+        ...(props.className && { [props.className]: props.className }),
         [styles.withLabel]: localVal && label,
         [styles.invalid]: invalid
       })}

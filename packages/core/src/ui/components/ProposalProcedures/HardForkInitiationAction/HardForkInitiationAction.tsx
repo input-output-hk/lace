@@ -5,6 +5,7 @@ import { ProposalProcedureTransactionDetails } from '../components/ProposalProce
 import { Procedure } from '../components/Procedure';
 import { ActionId } from '../components/ActionId';
 import { useTranslation } from 'react-i18next';
+import { TranslationsWithDepositAndRewardAccount } from '../components/ProposalProcedureTransactionDetailsTypes';
 
 export interface HardForkInitiationActionProps {
   data: Types.Data;
@@ -44,7 +45,7 @@ export const HardForkInitiationAction = ({
     <Grid columns="$1" gutters="$20">
       {/* tx details section */}
       <ProposalProcedureTransactionDetails
-        translations={translations.txDetails}
+        translations={translations.txDetails as TranslationsWithDepositAndRewardAccount}
         txTitle={t('core.ProposalProcedure.governanceAction.hardForkInitiation.title')}
         deposit={txDetails.deposit}
         rewardAccount={txDetails.rewardAccount}
@@ -66,7 +67,7 @@ export const HardForkInitiationAction = ({
         </Cell>
       )}
       {/* action id section*/}
-      {actionId && (
+      {actionId && translations.actionId && (
         <>
           <Cell>
             <Divider my={'$16'} />

@@ -16,7 +16,7 @@ export const Switch = ({
     checkedChildren={checkedChildren}
     unCheckedChildren={unCheckedChildren}
     checked={checked}
-    className={cn(styles.switch, { [className]: className })}
+    className={cn(styles.switch, className && { [className]: className })}
     onChange={onChange}
   />
 );

@@ -105,7 +105,7 @@ export const UpdateCommitteeAction = ({
           ))}
         </>
       )}
-      {actionId && (
+      {actionId && translations.actionId && (
         <>
           <Cell>
             <Divider my={'$16'} />

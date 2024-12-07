@@ -61,7 +61,7 @@ const cardanoStakePoolMock: StakePoolSearchResults = {
     }
   ],
   totalResultCount: 1
-};
+} as unknown as StakePoolSearchResults;
 
 const transformedStakePool = {
   ros: '69.00',

@@ -12,6 +12,7 @@ describe('PasswordVerification', () => {
     const { queryAllByTestId, queryByTestId } = render(
       <PasswordVerification
         onChange={onChange}
+        level={0}
         showComplexity
         complexityBarList={[{ isActive: true }, { isActive: true }, { isActive: false }]}
       />
@@ -24,6 +25,7 @@ describe('PasswordVerification', () => {
     const { queryByTestId } = render(
       <PasswordVerification
         showComplexity
+        level={0}
         onChange={onChange}
         complexityBarList={[{ isActive: false }]}
         feedbacks={['Some feedback', 'Another tip']}
@@ -31,7 +33,7 @@ describe('PasswordVerification', () => {
     );
     (queryByTestId('password-input') as HTMLInputElement).value = 'admin123';
     const feedbackDiv = queryByTestId('password-feedback');
-    expect(feedbackDiv.childElementCount).toBe(2);
+    expect(feedbackDiv?.childElementCount).toBe(2);
     expect(feedbackDiv).toHaveTextContent('Some feedback');
     expect(feedbackDiv).toHaveTextContent('Another tip');
   });

@@ -37,7 +37,7 @@ export const WalletAddressList = ({
 
   useEffect(() => {
     const root = document.querySelector(`#${SCROLLABLE_CONTAINER_ID}`);
-    if (hasMore && root.scrollHeight <= root.clientHeight) {
+    if (hasMore && root && root.scrollHeight <= root.clientHeight) {
       loadMoreData();
     }
   }, [hasMore, scrollableTargetId, loadMoreData]);

@@ -33,7 +33,7 @@ const makeButtons = ({ props, defaultLabel }: MakeButtonsParams) => {
   if (!leftButton && 'onBack' in props) {
     leftButton = (
       <Button.Secondary
-        label={props.customBackLabel || defaultLabel.back}
+        label={props.customBackLabel ?? defaultLabel.back}
         onClick={props.onBack}
         data-testid="shared-wallet-step-btn-back"
       />
@@ -45,7 +45,7 @@ const makeButtons = ({ props, defaultLabel }: MakeButtonsParams) => {
     rightButton = (
       <Button.CallToAction
         icon={props.isLoading ? <LoadingComponent className={styles.loadingIcon} /> : undefined}
-        label={props.customNextLabel || defaultLabel.next}
+        label={props.customNextLabel ?? defaultLabel.next}
         onClick={props.onNext}
         disabled={!props.isNextEnabled || props.isLoading}
         data-testid="shared-wallet-step-btn-next"

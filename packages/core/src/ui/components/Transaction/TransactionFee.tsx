@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 export interface TransactionFeeProps {
   fee: string;
   amountTransformer: (amount: string) => string;
-  coinSymbol: string;
+  coinSymbol?: string;
   label?: string;
   className?: string;
   testId?: string;

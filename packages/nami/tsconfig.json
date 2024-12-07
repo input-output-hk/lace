@@ -22,14 +22,13 @@
     "strict": true,
     "target": "ES2018",
     "baseUrl": "./src",
-    "rootDir": "./"
+    "rootDir": "./",
+    "strictNullChecks": true
   },
   "exclude": [
     "dist",
     "**/storybook-static/*",
     "**/.storybook/**/*.**",
-    "**/src/ui/app/components/*",
-    "**/src/ui/app/pages/*",
     "**/*.test.ts",
     "**/*.stories.tsx",
     "**/*.mock.ts"

@@ -65,6 +65,7 @@ export const WalletSetupNamePasswordStepRevamp = ({
 
   const isNextButtonEnabled = () => {
     const hasMinimumLevelRequired = score >= MINIMUM_PASSWORD_LEVEL_REQUIRED;
+    if (!password.value) return false;
     const isNotEmptyPassword = password.value?.length > 0;
     const isValidPassword = Boolean(
       passHasBeenValidated && !passwordConfirmationErrorMessage && hasMinimumLevelRequired && isNotEmptyPassword

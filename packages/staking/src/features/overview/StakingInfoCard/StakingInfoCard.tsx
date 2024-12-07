@@ -77,7 +77,7 @@ export const StakingInfoCard = ({
   id,
   logo,
   margin,
-  name = '',
+  name,
   totalRewards,
   lastReward,
   ros,

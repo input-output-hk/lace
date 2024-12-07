@@ -21,7 +21,7 @@ export const Base = ({ copyText, children, copiedMessage, onCopyClick }: Readonl
       text: copiedMessage,
       icon: CopyIcon
     });
-    onCopyClick();
+    onCopyClick?.();
   };
 
   return (

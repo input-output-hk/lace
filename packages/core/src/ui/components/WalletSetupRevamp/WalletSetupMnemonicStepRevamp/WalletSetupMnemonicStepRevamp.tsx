@@ -23,7 +23,7 @@ export interface WalletSetupMnemonicStepProps {
   mnemonicStage: WalletSetupMnemonicStage;
   onBack: () => void;
   onNext: () => void;
-  onStageChange?: (currentStage: WalletSetupMnemonicStage) => void;
+  onStageChange: (currentStage: WalletSetupMnemonicStage) => void;
   translations: TranslationsFor<{
     jsxElementKey: 'copyPasteTooltipText';
     stringKey:
@@ -68,7 +68,7 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   const copyRecoveryPhrase = useCallback(async () => {
     await writeMnemonicToClipboard(mnemonic);
-    onCopyToClipboard();
+    onCopyToClipboard?.();
   }, [mnemonic, onCopyToClipboard]);
 
   const pasteRecoveryPhrase = useCallback(
@@ -87,7 +87,7 @@ export const WalletSetupMnemonicStepRevamp = ({
       });
 
       setMnemonicConfirm(newMnemonic);
-      onPasteFromClipboard();
+      onPasteFromClipboard?.();
     },
     [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
   );

@@ -16,8 +16,8 @@ export const StakePoolInfo = ({
   id: string;
   onClick?: () => void;
 }): React.ReactElement => {
-  const title = name || ticker || '-';
-  const subTitle: string | React.ReactElement = ticker || (
+  const title = name ?? ticker ?? '-';
+  const subTitle: string | React.ReactElement = ticker ?? (
     <Ellipsis className={styles.id} text={id} beforeEllipsis={6} afterEllipsis={8} />
   );
 

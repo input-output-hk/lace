@@ -1,9 +1,11 @@
-import React from 'react';
+/* eslint-disable consistent-return */
+import React, { useMemo } from 'react';
 import { Metadata, Text, sx, Cell } from '@input-output-hk/lace-ui-toolkit';
 import * as Types from './ParameterChangeActionTypes';
+import { isNotNil } from '@cardano-sdk/util';
 
 interface Props {
-  networkGroup: Types.NetworkGroup;
+  networkGroup?: Partial<Types.NetworkGroup>;
   translations: Types.Translations['networkGroup'];
 }
 
@@ -12,6 +14,25 @@ export const NetworkGroup = ({ networkGroup, translations }: Props): JSX.Element
     color: '$text_primary'
   });
 
+  const metadatums: JSX.Element[] | undefined = useMemo(() => {
+    if (!networkGroup) return;
+    return (
+      Object.entries(networkGroup)
+        .flatMap((entry: [keyof Types.NetworkGroup, string]) => {
+          const [key, value] = entry;
+          if (value) {
+            return (
+              <Cell key={`metadatum${key}`}>
+                <Metadata label={translations[key]} tooltip={translations.tooltip[key]} text={value} />
+              </Cell>
+            );
+          }
+        })
+        // eslint-disable-next-line unicorn/no-array-callback-reference
+        .filter(isNotNil)
+    );
+  }, [networkGroup, translations]);
+
   return (
     <>
       <Cell>
@@ -19,41 +40,7 @@ export const NetworkGroup = ({ networkGroup, translations }: Props): JSX.Element
           {translations.title}
         </Text.Body.Large>
       </Cell>
-      <Cell>
-        <Metadata
-          label={translations.maxBBSize}
-          tooltip={translations.tooltip.maxBBSize}
-          text={networkGroup.maxBBSize}
-        />
-      </Cell>
-      <Cell>
-        <Metadata
-          label={translations.maxTxSize}
-          tooltip={translations.tooltip.maxTxSize}
-          text={networkGroup.maxTxSize}
-        />
-      </Cell>
-      <Cell>
-        <Metadata
-          label={translations.maxBHSize}
-          tooltip={translations.tooltip.maxBHSize}
-          text={networkGroup.maxBHSize}
-        />
-      </Cell>
-      <Cell>
-        <Metadata
-          label={translations.maxValSize}
-          tooltip={translations.tooltip.maxValSize}
-          text={networkGroup.maxValSize}
-        />
-      </Cell>
-      <Cell>
-        <Metadata
-          label={translations.maxCollateralInputs}
-          tooltip={translations.tooltip.maxCollateralInputs}
-          text={networkGroup.maxCollateralInputs}
-        />
-      </Cell>
+      {metadatums}
     </>
   );
 };

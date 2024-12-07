@@ -12,7 +12,7 @@ export enum CollateralStatus {
 export interface Props {
   collateral: string;
   amountTransformer: (amount: string) => string;
-  coinSymbol: string;
+  coinSymbol?: string;
   displayFiat?: boolean;
   className?: string;
   status?: CollateralStatus;

@@ -57,19 +57,14 @@ type ErrorDialogProps = {
 
 export const ErrorDialog: VFC<ErrorDialogProps> = ({ errorKind, onCancel, onConfirm }) => {
   const { t } = useTranslation();
+  const secondaryButton = errorsTranslationKeysMap[errorKind].secondaryButton;
+
   return (
     <Dialog.Root open zIndex={1000} setOpen={() => void 0}>
       <Dialog.Title>{t(errorsTranslationKeysMap[errorKind].title)}</Dialog.Title>
       <Dialog.Description>{t(errorsTranslationKeysMap[errorKind].message)}</Dialog.Description>
       <Dialog.Actions>
-        {errorsTranslationKeysMap[errorKind].secondaryButton && (
-          <Dialog.Action
-            cancel
-            autoFocus
-            label={t(errorsTranslationKeysMap[errorKind].secondaryButton)}
-            onClick={onCancel}
-          />
-        )}
+        {secondaryButton && <Dialog.Action cancel autoFocus label={t(secondaryButton)} onClick={onCancel} />}
         <Dialog.Action autoFocus label={t(errorsTranslationKeysMap[errorKind].primaryButton)} onClick={onConfirm} />
       </Dialog.Actions>
     </Dialog.Root>

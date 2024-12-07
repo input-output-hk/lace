@@ -18,7 +18,8 @@ export interface NavigationButtonProps {
 }
 
 const Icon = ({ icon, iconClassName }: { icon: IconsTypes; iconClassName?: string }) => {
-  if (icon === 'arrow') return <Arrow className={cn(styles.backArrow, { [iconClassName]: iconClassName })} />;
+  if (icon === 'arrow')
+    return <Arrow className={cn(styles.backArrow, iconClassName && { [iconClassName]: iconClassName })} />;
   return <Cross className={styles.crossArrow} />;
 };
 

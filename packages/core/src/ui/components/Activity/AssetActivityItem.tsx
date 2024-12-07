@@ -1,6 +1,7 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable react/no-multi-comp */
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
@@ -64,10 +65,21 @@ export interface AssetActivityItemProps {
 
 const DELEGATION_ASSET_NUMBER = 1;
 
-interface ActivityStatusIconProps {
-  status: ActivityStatus;
+interface ActivityStatusRequiringType {
+  status: ActivityStatus.SUCCESS;
   type: ActivityType;
 }
+
+interface ActivityStatusNotRequiringType {
+  status:
+    | ActivityStatus.SPENDABLE
+    | ActivityStatus.ERROR
+    | ActivityStatus.PENDING
+    | ActivityStatus.AWAITING_COSIGNATURES;
+  type?: ActivityType;
+}
+
+type ActivityStatusIconProps = ActivityStatusRequiringType | ActivityStatusNotRequiringType;
 
 const offsetMargin = 10;
 
@@ -117,7 +129,7 @@ export const AssetActivityItem = ({
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
       if (
-        type in DelegationActivityType ||
+        (type && type in DelegationActivityType) ||
         type === ConwayEraCertificatesTypes.Registration ||
         type === ConwayEraCertificatesTypes.Unregistration ||
         type === TransactionActivityType.self
@@ -126,9 +138,9 @@ export const AssetActivityItem = ({
 
       const assetsIdsText = assets
         ?.slice(0, items)
-        .map(({ val, info }) => `${val} ${info?.ticker || '"?"'}`)
+        .map(({ val, info }) => `${val} ${info?.ticker ?? '"?"'}`)
         .join(', ');
-      const suffix = assets?.length - items > 0 ? `, +${assets.length - items}` : '';
+      const suffix = assets && assets?.length - items > 0 ? `, +${assets.length - items}` : '';
       const appendedAssetId = assetsIdsText ? `, ${assetsIdsText}` : '';
       return {
         text: `${amount}${appendedAssetId}`,
@@ -169,7 +181,7 @@ export const AssetActivityItem = ({
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
-    type in DelegationActivityType ||
+    (type && type in DelegationActivityType) ||
     type === ConwayEraCertificatesTypes.Registration ||
     type === ConwayEraCertificatesTypes.Unregistration ? (
       <p data-testid="tokens-amount" className={styles.description}>
@@ -188,7 +200,7 @@ export const AssetActivityItem = ({
     assetAmountContent
   );
 
-  const isNegativeBalance = negativeBalanceStyling.has(type);
+  const isNegativeBalance = type && negativeBalanceStyling.has(type);
 
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
@@ -197,12 +209,13 @@ export const AssetActivityItem = ({
           {customIcon ? (
             <Image src={customIcon} className={styles.icon} preview={false} alt="asset image" />
           ) : (
-            <ActivityStatusIcon status={status} type={type} />
+            type && <ActivityStatusIcon status={status ?? ActivityStatus.ERROR} type={type} />
           )}
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx &&
+            type &&
             type !== TransactionActivityType.self &&
             !(type in DelegationActivityType) &&
             type !== ConwayEraCertificatesTypes.Registration &&
@@ -240,7 +253,7 @@ export const AssetActivityItem = ({
                 title={
                   <>
                     {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
-                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker || '?'}`}</div>
+                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
                     ))}
                   </>
                 }

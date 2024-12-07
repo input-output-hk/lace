@@ -21,7 +21,7 @@ export const getTxInputsValueAndAddress = async (
 
   for (const input of inputs) {
     const output = await util.resolveInput(input);
-    resolvedInputs.push([{ address: output.address, ...input }, output]);
+    if (output) resolvedInputs.push([{ address: output.address, ...input }, output]);
   }
 
   return resolvedInputs.map((utxo) => {

@@ -23,7 +23,7 @@ export interface WalletSetupStepLayoutRevampProps {
   isNextEnabled?: boolean;
   isNextLoading?: boolean;
   toolTipText?: string;
-  currentTimelineStep?: WalletTimelineSteps;
+  currentTimelineStep: WalletTimelineSteps;
   isHardwareWallet?: boolean;
 }
 
@@ -68,7 +68,7 @@ export const WalletSetupStepLayoutRevamp = ({
   isHardwareWallet = false
 }: WalletSetupStepLayoutRevampProps): React.ReactElement => {
   const { t } = useTranslation();
-  const nextButtonContainerRef = useRef(null);
+  const nextButtonContainerRef = useRef<HTMLSpanElement>(null);
 
   const defaultLabel = {
     next: t('core.walletSetupStep.next'),
@@ -116,7 +116,7 @@ export const WalletSetupStepLayoutRevamp = ({
           <div className={styles.footer} data-testid="wallet-setup-step-footer">
             {onBack && (
               <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
-                {backLabel || defaultLabel.back}
+                {backLabel ?? defaultLabel.back}
               </Button>
             )}
             {customAction}
@@ -125,7 +125,7 @@ export const WalletSetupStepLayoutRevamp = ({
                 <Tooltip
                   open={!isNextEnabled && !!toolTipText}
                   title={!isNextEnabled && toolTipText}
-                  getPopupContainer={() => nextButtonContainerRef.current}
+                  getPopupContainer={() => nextButtonContainerRef.current as HTMLElement}
                   autoAdjustOverflow={false}
                 >
                   <Button
@@ -134,7 +134,7 @@ export const WalletSetupStepLayoutRevamp = ({
                     loading={isNextLoading}
                     data-testid="wallet-setup-step-btn-next"
                   >
-                    {nextLabel || defaultLabel.next}
+                    {nextLabel ?? defaultLabel.next}
                   </Button>
                 </Tooltip>
               </span>

@@ -8,5 +8,5 @@ export enum SharedWalletRestorationStep {
 export type CreateWalletParams = {
   coSigners: CoSigner[];
   name: string;
-  quorumRules: QuorumOptionValue;
+  quorumRules: QuorumOptionValue | null;
 };

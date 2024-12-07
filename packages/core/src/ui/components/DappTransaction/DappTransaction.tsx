@@ -194,8 +194,8 @@ export const DappTransaction = ({
             testId="collateral"
             collateral={Wallet.util.lovelacesToAdaString(collateral.toString())}
             amountTransformer={amountTransformer({
-              price: fiatCurrencyPrice,
-              code: fiatCurrencyCode
+              price: fiatCurrencyPrice ?? 0,
+              code: fiatCurrencyCode ?? ''
             })}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}

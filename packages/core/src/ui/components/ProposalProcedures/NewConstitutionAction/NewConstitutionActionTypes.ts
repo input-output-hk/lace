@@ -11,7 +11,7 @@ export interface Data {
       dataHash: string;
       url: string;
     };
-    scriptHash: string;
+    scriptHash?: string;
   };
 }
 

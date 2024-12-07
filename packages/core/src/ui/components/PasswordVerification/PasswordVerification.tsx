@@ -11,7 +11,7 @@ export const complexityLevels = {
 };
 
 export type PasswordVerificationProps = {
-  level?: number;
+  level: number;
   feedbacks?: string[];
   complexityBarList: Array<{
     isActive?: boolean;

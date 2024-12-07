@@ -4,12 +4,12 @@ const defaultOptions = { suggestionListLength: defaultsuggestionListLength, isCa
 export const wordListSearch = (
   searchWord: string,
   wordList: Array<string>,
-  options: {
+  options?: {
     suggestionListLength?: number;
     isCaseSensitive?: boolean;
-  } = defaultOptions
+  }
 ): Array<string> => {
-  const { suggestionListLength, isCaseSensitive } = options;
+  const { suggestionListLength, isCaseSensitive } = { ...defaultOptions, ...options };
   const suggestionList: Array<string> = [];
   let continueSearching = true;
   let currentLetterIdx = 0;

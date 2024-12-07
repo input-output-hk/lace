@@ -1,8 +1,14 @@
 import * as ProcedureTypes from '../components/ProcedureTypes';
 import * as TxDetailsTypes from '../components/ProposalProcedureTransactionDetailsTypes';
 
+export type DeepPartial<T> = T extends Record<string, unknown>
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
 export interface Data {
-  protocolParamUpdate: ProtocolParamUpdate;
+  protocolParamUpdate: DeepPartial<ProtocolParamUpdate>;
   txDetails: TxDetailsTypes.TxDetails;
   anchor: ProcedureTypes.Procedure['anchor'];
 }

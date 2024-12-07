@@ -25,8 +25,10 @@ export const WalletSetupSelectAccountsStep = ({
     <WalletSetupStepLayout
       title={t('core.walletSetupSelectAccountsStep.selectAccount')}
       onBack={onBack}
-      onNext={() => onSubmit(selectedAccount)}
-      isNextEnabled={selectedAccount >= 0}
+      onNext={() => {
+        if (selectedAccount !== undefined) onSubmit(selectedAccount);
+      }}
+      isNextEnabled={!!selectedAccount && selectedAccount >= 0}
       nextLabel={t('core.walletSetupSelectAccountsStep.exportKeys')}
       description={
         <div className={styles.subtitle}>{t('core.walletSetupSelectAccountsStep.chooseAccountToExport')}</div>

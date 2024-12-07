@@ -54,7 +54,7 @@ export const formatLocaleNumber = (value: string, decimalPlaces: number = DEFAUL
  * @param maxDecimals The maximum number of decimal places to include. Default is 0.
  * @returns The formatted number string.
  */
-export const formatNumberForDisplay = (value: string, maxDecimals = 0): string => {
+export const formatNumberForDisplay = (value?: string, maxDecimals = 0): string => {
   if (!value) return '0';
   // Remove any character that is not a dot or a number
   const parsedStringValue = value.replace(/[^\d.]/g, '');
@@ -137,7 +137,7 @@ export const handleFormattedValueChange = (
  * @param decimals The desired decimal places (default = 2)
  * @returns The formatted value with the desired decimals and the unit as a string
  */
-export const compactNumberWithUnit = (value: number | string, decimals = DEFAULT_DECIMALS): string => {
+export const compactNumberWithUnit = (value?: number | string, decimals = DEFAULT_DECIMALS): string => {
   const bigNumberValue = value ? new BigNumber(value) : new BigNumber(0);
 
   if (bigNumberValue.isNaN()) return formatLocaleNumber('0', decimals);

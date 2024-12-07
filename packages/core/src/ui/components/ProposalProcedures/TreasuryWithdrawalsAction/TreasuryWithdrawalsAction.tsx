@@ -77,7 +77,7 @@ export const TreasuryWithdrawalsAction = ({
           </Cell>
         </React.Fragment>
       ))}
-      {actionId && (
+      {actionId && translations.actionId && (
         <>
           <Cell>
             <Divider my={'$16'} />

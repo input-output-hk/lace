@@ -18,7 +18,10 @@ const TableBodyWrapper = ({
   ...props
 }: Omit<InfiniteScrollProps, 'loader'> & { loaderConfig?: SkeletonProps; infiniteScrollContainerClass?: string }) => (
   <InfiniteScroll
-    className={cn(styles.infiniteScrollContainer, { [infiniteScrollContainerClass]: infiniteScrollContainerClass })}
+    className={cn(
+      styles.infiniteScrollContainer,
+      infiniteScrollContainerClass && { [infiniteScrollContainerClass]: infiniteScrollContainerClass }
+    )}
     {...props}
     loader={<Skeleton {...loaderConfig} />}
   >

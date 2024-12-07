@@ -49,7 +49,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
         signed$: of([])
       }
     }
-  } as ObservableWallet;
+  } as unknown as ObservableWallet;
 
   const multiDelegationTransactionMock: Cardano.HydratedTx = {
     inputSource: Cardano.InputSource.inputs,
@@ -194,11 +194,11 @@ describe('Testing getTxInputsValueAndAddress function', () => {
         'addr_test1qrmavlv5c7za68rq6n6r0hrcqd604j9zsr6tycwtjf3lef0wc4p9nt0e0wwytcy30mxar65892w3k77e5g2uyhx29lhqjt267p'
       );
       // From matched output in mocked transaction
-      expect(inputs[0].value.coins.toString()).toBe('3000000');
+      expect(inputs[0].value?.coins.toString()).toBe('3000000');
       expect(
-        inputs[0].value.assets
-          .get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
-          .toString()
+        inputs[0].value?.assets
+          ?.get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
+          ?.toString()
       ).toBe('30');
     });
   });
@@ -225,11 +225,11 @@ describe('Testing getTxInputsValueAndAddress function', () => {
         'addr_test1qrmavlv5c7za68rq6n6r0hrcqd604j9zsr6tycwtjf3lef0wc4p9nt0e0wwytcy30mxar65892w3k77e5g2uyhx29lhqjt267p'
       );
       // From matched output in mocked transaction
-      expect(inputs[0].value.coins.toString()).toBe('3000000');
+      expect(inputs[0].value?.coins.toString()).toBe('3000000');
       expect(
-        inputs[0].value.assets
-          .get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
-          .toString()
+        inputs[0].value?.assets
+          ?.get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
+          ?.toString()
       ).toBe('30');
     });
   });
@@ -261,7 +261,7 @@ describe('Testing getTxInputsValueAndAddress function', () => {
       const inputs = await result;
       expect(transactionsByHashes).toBeCalledTimes(1);
       expect(inputs[0].address).toBe('address');
-      expect(inputs[0].value.coins.toString()).toBe('3000000');
+      expect(inputs[0].value?.coins.toString()).toBe('3000000');
     });
   });
 
@@ -329,11 +329,11 @@ describe('Testing getTxInputsValueAndAddress function', () => {
       expect(inputs[0].address).toBe(
         'addr_test1qrmavlv5c7za68rq6n6r0hrcqd604j9zsr6tycwtjf3lef0wc4p9nt0e0wwytcy30mxar65892w3k77e5g2uyhx29lhqjt267p'
       );
-      expect(inputs[0].value.coins.toString()).toBe('3000000');
+      expect(inputs[0].value?.coins.toString()).toBe('3000000');
       expect(
-        inputs[0].value.assets
-          .get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
-          .toString()
+        inputs[0].value?.assets
+          ?.get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
+          ?.toString()
       ).toBe('30');
 
       // Assert the properties for the second input
@@ -342,12 +342,12 @@ describe('Testing getTxInputsValueAndAddress function', () => {
       );
 
       expect(
-        inputs[1].value.assets
-          .get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
-          .toString()
+        inputs[1].value?.assets
+          ?.get(Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'))
+          ?.toString()
       ).toBe('10');
 
-      expect(inputs[1].value.coins.toString()).toBe('100000');
+      expect(inputs[1].value?.coins.toString()).toBe('100000');
 
       expect(inputs[2].address).toBe(
         'addr_test1qrrx8s34r6m0w835qe9tj8mqa4ugkwhllw5l4hwpmhakpy8hukqufzmfnrvvr24tschssxw96z8dq9dz09xkg9eghtkqe07423'

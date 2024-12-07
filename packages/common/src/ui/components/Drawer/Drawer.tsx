@@ -44,7 +44,7 @@ export const Drawer = ({
       data-testid={dataTestId}
       className={cn(styles.customDrawer, {
         [styles.popupView]: popupView,
-        [className]: className,
+        ...(className && { [className]: className }),
         [styles.browserView]: !popupView
       })}
       size="large"
@@ -61,7 +61,7 @@ export const Drawer = ({
           data-testid="drawer-scrollable-content"
           ref={scrollableContainerRef}
           className={cn(styles.scrollableContent, {
-            [scrollableContentClassName]: scrollableContentClassName,
+            ...(scrollableContentClassName && { [scrollableContentClassName]: scrollableContentClassName }),
             [styles.nonScrollableContent]: !isScrollable
           })}
         >

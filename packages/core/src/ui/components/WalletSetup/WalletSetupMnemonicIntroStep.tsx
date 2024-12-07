@@ -21,7 +21,7 @@ export const WalletSetupMnemonicIntroStep = ({
   paperWalletEnabled
 }: WalletSetupMnemonicIntroStepProps): React.ReactElement => {
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const videoRef = useRef<HTMLIFrameElement>();
+  const videoRef = useRef<HTMLIFrameElement>(null);
 
   return (
     <WalletSetupStepLayout
@@ -38,8 +38,8 @@ export const WalletSetupMnemonicIntroStep = ({
         className={styles.videoContainer}
         onClick={() => {
           setOverlayVisible(false);
-          videoRef.current.src += '&autoplay=1';
-          onClickVideo();
+          if (videoRef.current) videoRef.current.src += '&autoplay=1';
+          onClickVideo?.();
         }}
       >
         {overlayVisible && <div className={styles.overlay} />}

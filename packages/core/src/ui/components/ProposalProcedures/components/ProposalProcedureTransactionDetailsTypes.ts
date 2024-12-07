@@ -9,3 +9,8 @@ export interface Translations {
   deposit?: string;
   rewardAccount?: string;
 }
+
+export interface TranslationsWithDepositAndRewardAccount extends Translations {
+  deposit: string;
+  rewardAccount: string;
+}

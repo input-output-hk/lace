@@ -13,14 +13,14 @@ export interface ContextMenuProps {
 }
 
 const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProps) => {
-  const contextRef = useRef<HTMLDivElement>();
+  const contextRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
 
   useLayoutEffect(() => {
     if (contextRef?.current) {
       const contentWidth = contextRef?.current?.clientWidth;
       if (width === contentWidth) return;
-      onRender(contextRef?.current?.clientWidth);
+      onRender?.(contextRef?.current?.clientWidth);
       setWidth(contentWidth);
     }
   }, [onRender, contextRef, width]);
@@ -28,11 +28,11 @@ const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProp
   return (
     <div
       onContextMenu={() => {
-        setClicked(false);
+        setClicked?.(false);
       }}
       onClick={(e) => {
         e.stopPropagation();
-        setClicked(false);
+        setClicked?.(false);
       }}
       className={styles.portal}
       data-testid="portal"
@@ -62,8 +62,10 @@ export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }:
 
   const repositionContextMenu = useCallback(
     (contextWidth: number) => {
+      const bodyElement = document.querySelector('body');
+      if (!bodyElement) return;
       // checks if context menu could be placed at the right of the cursor
-      const { clientWidth } = document.querySelector('body');
+      const { clientWidth } = bodyElement;
       if (contextWidth < points.x)
         setPoints((prevPoints) => ({
           ...prevPoints,
@@ -80,14 +82,17 @@ export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }:
   );
 
   useLayoutEffect(() => {
-    const { clientWidth } = document.querySelector('body');
+    const bodyElement = document.querySelector('body');
+    if (!bodyElement) return;
+    const { clientWidth } = bodyElement;
     bodyRef.current = { clientWidth };
   }, []);
 
   const onContextMenu = (e: MouseEvent<HTMLAnchorElement>) => {
-    if (!contextMenu) return;
+    const bodyElement = document.querySelector('body');
+    if (!contextMenu || !bodyElement) return;
     e.preventDefault();
-    const { clientWidth } = document.querySelector('body');
+    const { clientWidth } = bodyElement;
     setPoints({
       x: clientWidth - e.pageX,
       y: e.pageY

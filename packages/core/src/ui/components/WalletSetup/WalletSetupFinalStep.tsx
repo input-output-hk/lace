@@ -25,6 +25,10 @@ const iconsMap: { [key: string]: React.ReactNode } = {
   [DISCORD]: <DiscordLogo />
 };
 
+if (!process.env.TWITTER_URL || !process.env.YOUTUBE_URL || !process.env.DISCORD_URL) {
+  throw new Error('social links not provided');
+}
+
 const links: { url: string; name: keyof typeof iconsMap }[] = [
   { url: process.env.TWITTER_URL, name: TWITTER },
   { url: process.env.YOUTUBE_URL, name: YOUTUBE },

@@ -36,10 +36,10 @@ type CoSignEntryProps = {
 export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntryProps) => {
   const { t } = useTranslation();
   const [errorKind, setErrorKind] = useState<ErrorKind | null>(null);
-  const [loadedFileName, setLoadedFileName] = useState('');
+  const [loadedFileName, setLoadedFileName] = useState<string | null>('');
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files.length === 0) return;
+    if (!event.target.files || event.target.files?.length === 0) return;
     setLoadedFileName(event.target.files[0].name);
 
     let loadedData: unknown;
@@ -55,7 +55,7 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
     }
 
     // TODO: validate loaded data against schema
-    if (typeof loadedData !== 'object' || !('transaction' in loadedData) || !('metadata' in loadedData)) {
+    if (typeof loadedData !== 'object' || !(loadedData && 'transaction' in loadedData) || !('metadata' in loadedData)) {
       onImportError?.();
       setErrorKind(ErrorKind.InvalidFile);
     }
@@ -79,7 +79,8 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
       case ErrorKind.InvalidActiveWallet:
       case ErrorKind.TxAlreadySigned:
       case ErrorKind.TxExpired:
-      case ErrorKind.InsufficientFunds: {
+      case ErrorKind.InsufficientFunds:
+      default: {
         onCancel();
         break;
       }
