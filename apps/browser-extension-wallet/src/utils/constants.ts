@@ -20,6 +20,9 @@ export const EPOCH_DURATION_DAYS = 5;
 
 export const MIN_COIN_TO_SEND = 1;
 
+export const COLLATERAL_ADA_AMOUNT = 5;
+export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
+
 type StaticBalanceTracker = {
   rewardAccounts: {
     rewards$: Wallet.Cardano.Lovelace;
