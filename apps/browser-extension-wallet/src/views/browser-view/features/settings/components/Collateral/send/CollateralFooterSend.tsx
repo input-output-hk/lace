@@ -44,8 +44,6 @@ export const CollateralFooterSend = ({
   const submitTx = async () => withSignTxConfirmation(submitCollateralTx, secretsUtil.password.value);
 
   const handleClick = async () => {
-    onClaim();
-
     if (!hasEnoughAda) {
       return onClose();
     }
@@ -53,6 +51,7 @@ export const CollateralFooterSend = ({
       if (popupView && !isInMemory)
         return await backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.COLLATERAL_SETTINGS });
       await submitTx();
+      onClaim();
       toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
       if (isInMemory) onClose();
     } catch {
