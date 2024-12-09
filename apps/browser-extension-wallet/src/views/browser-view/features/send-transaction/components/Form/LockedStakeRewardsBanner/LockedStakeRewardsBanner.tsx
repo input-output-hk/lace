@@ -39,6 +39,7 @@ export const LockedStakeRewardsBanner = ({ isPopupView }: LockedStakeRewardsBann
       customIcon={<ExclamationCircleOutline />}
       popupView={isPopupView}
       className={cn(styles.banner, { [styles.popupView]: isPopupView })}
+      descriptionClassName={styles.bannerDescriptionContainer}
       message={<Box className={styles.bannerDescription}>{t('general.errors.lockedStakeRewards.description')}</Box>}
       buttonMessage={t('general.errors.lockedStakeRewards.cta')}
       onButtonClick={onGoToStaking}

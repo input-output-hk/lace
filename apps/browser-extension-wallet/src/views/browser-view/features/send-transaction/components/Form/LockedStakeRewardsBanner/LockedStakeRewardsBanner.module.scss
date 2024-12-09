@@ -7,8 +7,13 @@
     margin-bottom: 0;
   }
 
+  .bannerDescriptionContainer {
+    align-items: center;
+  }
+
   .bannerDescription {
     max-width: 315px;
+    font-weight: 500;
   }
 }
 
