@@ -29,55 +29,44 @@ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
-import { useObservable } from '@lace/common';
-import { observableWallet, walletManager } from '@lib/wallet-api-ui';
-import { MainLoader } from '@components/MainLoader';
 
-const App = (): React.ReactElement => {
-  const activeWallet = useObservable(walletManager.activeWalletId$);
-  const balance = useObservable(observableWallet.balance.utxo.available$);
-  if (typeof activeWallet === 'undefined' || (activeWallet && !balance)) {
-    return <MainLoader />;
-  }
-
-  return (
-    <BackgroundServiceAPIProvider>
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_BROWSER}>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <BackgroundPageProvider>
-                  <PostHogClientProvider>
-                    <ExperimentsProvider>
-                      <AnalyticsProvider>
-                        <ThemeProvider>
-                          <UIThemeProvider>
-                            <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <NamiMigrationGuard>
-                                      <BrowserViewRoutes />
-                                    </NamiMigrationGuard>
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
-                            </ExternalLinkOpenerProvider>
-                          </UIThemeProvider>
-                        </ThemeProvider>
-                      </AnalyticsProvider>
-                    </ExperimentsProvider>
-                  </PostHogClientProvider>
-                </BackgroundPageProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    </BackgroundServiceAPIProvider>
-  );
-};
+const App = (): React.ReactElement => (
+  <BackgroundServiceAPIProvider>
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_BROWSER}>
+          <CurrencyStoreProvider>
+            <HashRouter>
+              <BackgroundPageProvider>
+                <PostHogClientProvider>
+                  <ExperimentsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <UIThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_BROWSER}>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <AddressesDiscoveryOverlay>
+                                  <NamiMigrationGuard>
+                                    <BrowserViewRoutes />
+                                  </NamiMigrationGuard>
+                                </AddressesDiscoveryOverlay>
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </UIThemeProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </ExperimentsProvider>
+                </PostHogClientProvider>
+              </BackgroundPageProvider>
+            </HashRouter>
+          </CurrencyStoreProvider>
+        </StoreProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  </BackgroundServiceAPIProvider>
+);
 
 const mountNode = document.querySelector('#lace-app');
 ReactDOM.render(<App />, mountNode);
