@@ -59,7 +59,6 @@ export interface ILocalStorage {
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
   isMultiDelegationDAppCompatibilityModalVisible?: boolean;
-  multidelegationFirstVisitSincePortfolioPersistence?: boolean;
   unconfirmedTransactions: UnconfirmedTransaction[];
   stakingBrowserPreferences: StakingBrowserPreferences;
   showPinExtension?: boolean;

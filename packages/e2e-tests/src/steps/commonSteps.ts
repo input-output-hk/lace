@@ -332,10 +332,6 @@ Given(/^I disable showing Multidelegation beta banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
 });
 
-Given(/^I disable showing Multidelegation persistence banner$/, async () => {
-  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
-});
-
 Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
