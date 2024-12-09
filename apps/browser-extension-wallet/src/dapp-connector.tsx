@@ -17,6 +17,9 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 import { useEffect, useState } from 'react';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { NamiDappConnector } from './views/nami-mode/indexInternal';
+import { useObservable } from '@lace/common';
+import { observableWallet, walletManager } from '@lib/wallet-api-ui';
+import { MainLoader } from '@components/MainLoader';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -31,6 +34,12 @@ const App = (): React.ReactElement => {
 
     getWalletMode();
   }, []);
+
+  const activeWallet = useObservable(walletManager.activeWalletId$);
+  const balance = useObservable(observableWallet.balance.utxo.available$);
+  if (typeof activeWallet === 'undefined' || (activeWallet && !balance)) {
+    return <MainLoader />;
+  }
 
   return (
     <BackgroundServiceAPIProvider>

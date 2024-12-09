@@ -26,6 +26,9 @@ import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { storage } from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
+import { MainLoader } from '@components/MainLoader';
+import { useObservable } from '@lace/common';
+import { observableWallet, walletManager } from '@lib/wallet-api-ui';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -47,6 +50,12 @@ const App = (): React.ReactElement => {
 
     getWalletMode();
   }, [mode]);
+
+  const activeWallet = useObservable(walletManager.activeWalletId$);
+  const balance = useObservable(observableWallet.balance.utxo.available$);
+  if (typeof activeWallet === 'undefined' || (activeWallet && !balance)) {
+    return <MainLoader />;
+  }
 
   return (
     <BackgroundServiceAPIProvider>
