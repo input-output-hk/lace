@@ -44,6 +44,11 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   const icon = mapOfWalletTypeIconProperties[kind];
 
   const next = () => {
+    if (!password.value) {
+      console.error('Password is undefined');
+      return;
+    }
+
     onGenerateKeys(password.value);
     clearSecrets();
   };
