@@ -44,7 +44,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
   const icon = mapOfWalletTypeIconProperties[kind];
 
   const next = () => {
-    onGenerateKeys(password.value);
+    onGenerateKeys(password?.value || '');
     clearSecrets();
   };
 
