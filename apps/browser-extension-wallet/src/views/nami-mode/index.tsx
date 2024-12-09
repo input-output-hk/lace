@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { useAppInit } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
@@ -20,6 +20,15 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
     deletingWallet
   } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const isLoaded = useMemo(
+    () => !!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain,
+    [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted, currentChain]
+  );
+  useEffect(() => {
+    if (isLoaded) {
+      document.querySelector('#preloader')?.remove();
+    }
+  }, [isLoaded]);
 
   useAppInit();
 
@@ -29,13 +38,5 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
     }
   }, [backgroundServices, cardanoWallet, deletingWallet]);
 
-  return (
-    <div id="nami-mode">
-      {!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain ? (
-        <NamiView />
-      ) : (
-        <MainLoader />
-      )}
-    </div>
-  );
+  return <div id="nami-mode">{isLoaded ? <NamiView /> : <MainLoader />}</div>;
 });

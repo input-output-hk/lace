@@ -1,0 +1,47 @@
+.loaderContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 2000;
+}
+
+.loaderContainer .loaderText {
+  color: #3d3b39;
+  font-family: 'proxima-nova', sans-serif;
+  font-variant: tabular-nums;
+  line-height: 1.5715;
+  font-feature-settings: 'tnum';
+  font-size: 14px;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loaderContainer .imageContainer {
+  height: 126px;
+  width: 126px;
+}
+
+.loaderContainer .loaderImage {
+  animation: rotating 2s linear infinite;
+  width: 100%;
+  height: 100%;
+}
