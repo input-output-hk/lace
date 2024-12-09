@@ -7,6 +7,9 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
   private TITLE = '[data-testid="result-message-title"]';
   private DESCRIPTION = '[data-testid="result-message-description"]';
   private SIGNATURE = '[data-testid="sign-message-signature"]';
+  private SIGNATURE_LABEL = '[data-testid="result-message-signature-label"]';
+  private KEY = '[data-testid="sign-message-key"]';
+  private KEY_LABEL = '[data-testid="result-message-key-label"]';
   private COPY_BUTTON = '[data-testid="copy-button"]';
   private CLOSE_BUTTON = '[data-testid="close-button"]';
 
@@ -24,6 +27,18 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
 
   get signature(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SIGNATURE);
+  }
+
+  get signatureLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SIGNATURE_LABEL);
+  }
+
+  get key(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.KEY);
+  }
+
+  get keyLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.KEY_LABEL);
   }
 
   get copyButton(): ChainablePromiseElement<WebdriverIO.Element> {

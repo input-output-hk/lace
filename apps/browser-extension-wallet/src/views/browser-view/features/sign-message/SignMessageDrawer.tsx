@@ -125,17 +125,29 @@ export const SignMessageDrawer: React.FC = () => {
 
   const renderSignature = () => (
     <div className={styles.inputGroup}>
-      <ResultMessage
-        customBgImg={CheckSuccessImg}
-        title={t('core.signMessage.successTitle')}
-        description={t('core.signMessage.successDescription')}
-      />
-      <TextArea
-        value={signatureObject.signature}
-        dataTestId="sign-message-signature"
-        rows={4}
-        className={styles.customTextArea}
-      />
+      <ResultMessage customBgImg={CheckSuccessImg} title={t('core.signMessage.successTitle')} />
+      <div className={styles.inputGroup}>
+        <Text.Body.Normal weight="$medium" data-testid={'result-message-signature-label'}>
+          {t('core.signMessage.signature')}
+        </Text.Body.Normal>
+        <TextArea
+          value={signatureObject.signature}
+          dataTestId="sign-message-signature"
+          rows={4}
+          className={styles.customTextArea}
+        />
+      </div>
+      <div className={styles.inputGroup}>
+        <Text.Body.Normal weight="$medium" data-testid={'result-message-key-label'}>
+          {t('core.signMessage.key')}
+        </Text.Body.Normal>
+        <TextArea
+          value={signatureObject.key}
+          dataTestId="sign-message-key"
+          rows={4}
+          className={styles.customTextArea}
+        />
+      </div>
     </div>
   );
 
