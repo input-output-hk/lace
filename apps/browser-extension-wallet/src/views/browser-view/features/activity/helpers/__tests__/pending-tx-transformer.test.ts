@@ -117,10 +117,10 @@ describe('Testing tx transformers utils', () => {
           deposit: undefined,
           depositReclaim: undefined,
           direction: 'Outgoing',
-          fee: '1.00',
+          fee: '1',
           fiatAmount: '1.00 USD',
           id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',
-          amount: '1.00 ADA',
+          amount: '1 ADA',
           assets: [
             {
               id: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
@@ -141,17 +141,15 @@ describe('Testing tx transformers utils', () => {
   });
 
   describe('getFormattedFiatAmount', () => {
-    test('shoud return properly formatted fiat amount', () => {
-      const amount = new BigNumber('10');
+    test('should return properly formatted fiat amount', () => {
+      const amount = new BigNumber('5500000');
       const fiatPrice = 2;
       const fiatCurrency = { code: 'code', symbol: 'symbol' } as unknown as CurrencyInfo;
       mockLovelacesToAdaString.mockImplementationOnce((val) => val);
 
-      expect(getFormattedFiatAmount({ amount, fiatPrice, fiatCurrency })).toEqual(
-        `${amount.times(new BigNumber(fiatPrice)).toString()} ${fiatCurrency.code}`
-      );
+      expect(getFormattedFiatAmount({ amount, fiatPrice, fiatCurrency })).toEqual(`11.00 ${fiatCurrency.code}`);
     });
-    test('shoud return properly formatted fiat amount in case there is no fiat price', () => {
+    test('should return properly formatted fiat amount in case there is no fiat price', () => {
       const amount = new BigNumber('10');
       const fiatPrice = 0;
       const fiatCurrency = { code: 'code', symbol: 'symbol' } as unknown as CurrencyInfo;
