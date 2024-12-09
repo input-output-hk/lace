@@ -60,10 +60,9 @@ export const WalletSetupPasswordStep = ({
   const passwordConfirmationErrorMessage =
     passHasBeenValidated && password !== passwordConfirmation ? translations.noMatchPassword : '';
   const isNextEnabled = Boolean(
-    passHasBeenValidated &&
-      !passwordConfirmationErrorMessage &&
-      score >= minimumPassLevelRequired &&
-      password.value.length > 0
+    passHasBeenValidated && !passwordConfirmationErrorMessage && score >= minimumPassLevelRequired && password?.value
+      ? password.value.length > 0
+      : false
   );
 
   const complexityBarList: BarStates = useMemo(() => getComplexityBarStateList(score), [score]);
@@ -79,7 +78,7 @@ export const WalletSetupPasswordStep = ({
       description={translations.description}
       onBack={onBack}
       onNext={() => {
-        onNext({ password: password.value });
+        password.value ? onNext({ password: password.value }) : console.error('Password is undefined');
       }}
       isNextEnabled={isNextEnabled}
       currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
