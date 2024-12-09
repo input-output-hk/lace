@@ -131,4 +131,6 @@ export interface OutsideHandlesContextValue {
       addresses: Wallet.WalletAddress[];
     }>,
   ) => Wallet.Cardano.InputResolver;
+  lockedStakeRewards: bigint;
+  redirectToStaking: () => void;
 }
