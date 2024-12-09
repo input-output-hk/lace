@@ -34,7 +34,7 @@
     "prepack": "yarn build",
     "prepare": "ts-patch install -s",
     "prettier": "run -T prettier --write .",
-    "test": "run -T jest --config test/jest.config.js --silent",
+    "test": "run -T jest --config test/jest.config.js",
     "test:e2e": "yarn exec echo \"No e2e tests on this app yet!\"",
     "type-check": "echo \"@lace/browser-extension-wallet: no type-check command specified\"",
     "watch": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack --config webpack.app.dev.js --progress --watch"

@@ -40,6 +40,12 @@ jest.mock('@providers/PostHogClientProvider', () => ({
   usePostHogClientContext: () => postHogClientMocks
 }));
 
+jest.mock('@providers/ExternalLinkOpenerProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/ExternalLinkOpenerProvider'),
+  useExternalLinkOpener: () => jest.fn()
+}));
+
 describe('Testing StakingModal component', () => {
   test('should render no funds modal and open receive drawer with proper header, title and subtitle', async () => {
     mockUseWalletStore.mockReturnValue({
