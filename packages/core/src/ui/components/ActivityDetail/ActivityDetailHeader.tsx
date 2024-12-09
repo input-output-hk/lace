@@ -5,7 +5,7 @@ import styles from './ActivityDetailHeader.module.scss';
 
 export interface ActivityDetailHeaderProps {
   name: string;
-  description: string;
+  description?: string;
   tooltipContent?: string;
 }
 
@@ -26,8 +26,10 @@ export const ActivityDetailHeader = ({
       )}
     </div>
 
-    <div className={styles.assets} data-testid="tx-description-details">
-      {description}
-    </div>
+    {description && (
+      <div className={styles.assets} data-testid="tx-description-details">
+        {description}
+      </div>
+    )}
   </div>
 );

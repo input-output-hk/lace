@@ -54,7 +54,7 @@ export const NoConfidenceAction = ({
       {/* procedure section */}
       <Procedure translations={translations.procedure} data={procedure} />
       {/* action id section*/}
-      {actionId && (
+      {actionId && translations.actionId && (
         <>
           <Cell>
             <Divider my={'$16'} />

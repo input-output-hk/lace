@@ -13,5 +13,6 @@ module.exports = createJestConfig({
   roots: ['<rootDir>/src'],
   testTimeout: 60000,
   testEnvironment: 'jsdom',
+  setupFiles: ['<rootDir>/test/__mocks__/set-env-vars.js'],
   setupFilesAfterEnv: ['./test/jest.setup.js', 'jest-canvas-mock']
 });

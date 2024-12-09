@@ -1,3 +1,4 @@
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 import React from 'react';
 import { Box, Grid, Divider, Metadata, MetadataLink, Cell } from '@input-output-hk/lace-ui-toolkit';
 import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
@@ -8,6 +9,7 @@ import { TechnicalGroup } from './TechnicalGroup';
 import { GovernanceGroup } from './GovernanceGroup';
 import { Card } from '../components/Card';
 import { useTranslation } from 'react-i18next';
+import { isNotNil } from '@cardano-sdk/util';
 
 interface ParameterChangeActionProps {
   data: Types.Data;
@@ -235,17 +237,18 @@ export const ParameterChangeAction = ({
           <Card
             title={translations.networkGroup.maxTxExUnits}
             data={[
-              { label: translations.memory, value: maxTxExUnits.memory },
-              { label: translations.step, value: maxTxExUnits.step }
-            ]}
+              ...(maxTxExUnits?.memory ? [{ label: translations.memory, value: maxTxExUnits.memory }] : []),
+              ...(maxTxExUnits?.step ? [{ label: translations.step, value: maxTxExUnits.step }] : [])
+              // eslint-disable-next-line unicorn/no-array-callback-reference
+            ].filter(isNotNil)}
           />
         </Box>
         <Box mb={'$18'}>
           <Card
             title={translations.networkGroup.maxBlockExUnits}
             data={[
-              { label: translations.memory, value: maxBlockExUnits.memory },
-              { label: translations.step, value: maxBlockExUnits.step }
+              { label: translations.memory, value: maxBlockExUnits?.memory ?? '' },
+              { label: translations.step, value: maxBlockExUnits?.step ?? '' }
             ]}
           />
         </Box>

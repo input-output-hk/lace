@@ -28,7 +28,7 @@ export const AddressFormBrowserView = ({
   const [form] = Form.useForm<valuesPropType>();
   const addressValue = Form.useWatch('address', form);
 
-  const isAddressHandle = isHandle(addressValue);
+  const isAddressHandle = addressValue && isHandle(addressValue);
 
   const resetForm = useCallback(() => {
     form.resetFields();
@@ -96,7 +96,7 @@ export const AddressFormBrowserView = ({
                   invalid={!isAddressFieldValid}
                   label={translations.address}
                   dataTestId="address-form-address-input"
-                  customIcon={!isAddressFieldValidating && isAddressHandle && renderSuffix()}
+                  customIcon={!isAddressFieldValidating && isAddressHandle ? renderSuffix() : undefined}
                   loading={isAddressFieldValidating}
                 />
               </Form.Item>

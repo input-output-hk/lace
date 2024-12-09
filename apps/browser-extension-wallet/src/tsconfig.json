@@ -6,6 +6,7 @@
     "baseUrl": "../src",
     "resolveJsonModule": true,
     "noEmitOnError": false,
+    "strictNullChecks": false,
     "paths": {
       "@assets/*": ["assets/*"],
       "@components/*": ["components/*"],

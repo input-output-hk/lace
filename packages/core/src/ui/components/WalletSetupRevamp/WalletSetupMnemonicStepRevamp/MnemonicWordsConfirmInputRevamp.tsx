@@ -23,7 +23,7 @@ export const MnemonicWordsConfirmInputRevamp = ({
   <div className={styles.container}>
     {words.map((word, index) => (
       <MnemonicWordsAutoCompleteRevamp
-        handlePaste={() => handlePaste(index)}
+        handlePaste={() => handlePaste?.(index)}
         value={word}
         onChange={(value) => {
           const newWords = [...words];

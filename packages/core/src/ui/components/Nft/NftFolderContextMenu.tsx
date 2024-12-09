@@ -15,7 +15,7 @@ const NftFolderContextMenu = ({
   closeContextMenu,
   contextMenuItems
 }: NftFolderContextMenuProps): ReactElement => {
-  const contextMenuRef = useRef<HTMLDivElement>();
+  const contextMenuRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(contextMenuRef, closeContextMenu);
 
   return (

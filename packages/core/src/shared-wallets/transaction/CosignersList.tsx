@@ -35,7 +35,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
               <div className={styles.cosignersListItemAvatar}>
                 <ProfilePicture.UserProfile
                   imageSrc=""
-                  fallbackText={cosignerName.slice(0, 1).toUpperCase()}
+                  fallbackText={cosignerName?.slice(0, 1).toUpperCase() ?? ''}
                   delayMs={0}
                   data-testid="cosigner-list-item-profile-icon"
                   testId="cosigner-list-item-profile-icon"
@@ -45,7 +45,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
                 <Box w="$fill" className={styles.cosignersListItemName}>
                   {sharedWalletKey === ownSharedKey
                     ? t('sharedWallets.transaction.cosignerList.you')
-                    : cosignerName || '...'}
+                    : cosignerName ?? '...'}
                 </Box>
                 <Box w="$fill" className={styles.cosignersListItemAddress}>
                   {sharedWalletKey}

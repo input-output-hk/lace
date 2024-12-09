@@ -94,7 +94,7 @@ export const Ellipsis = ({
   }, [addEllipsisInTheMiddle]);
 
   const children = (
-    <p data-testid={'ellipsis-text'} className={cn(styles[theme], textClassName)}>
+    <p data-testid={'ellipsis-text'} className={cn(theme && styles[theme], textClassName)}>
       {ellipsisInTheMiddle ? content : addEllipsis(text, beforeLength ?? DEFAULT_LENGTH, afterLength ?? DEFAULT_LENGTH)}
     </p>
   );
@@ -103,7 +103,7 @@ export const Ellipsis = ({
     <div
       style={{ ...(ellipsisInTheMiddle && { width: '100%' }) }}
       ref={ref}
-      data-testid={dataTestId || 'ellipsis-container'}
+      data-testid={dataTestId ?? 'ellipsis-container'}
       className={className}
     >
       {withTooltip && (

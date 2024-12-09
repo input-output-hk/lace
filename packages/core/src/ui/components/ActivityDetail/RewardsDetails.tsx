@@ -7,7 +7,7 @@ import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { useTranslation } from 'react-i18next';
 
 type RewardItem = {
-  pool?: { name: string; ticker: string; id: string };
+  pool: { name: string; ticker: string; id: string };
   amount: string;
 };
 

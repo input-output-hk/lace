@@ -15,7 +15,7 @@ describe('DrawerNavigation', () => {
     const { queryByTestId } = render(<DrawerNavigation onArrowIconClick={onClick} />);
     const backButton = queryByTestId('navigation-button-arrow');
     expect(backButton).toBeInTheDocument();
-    fireEvent.click(backButton);
+    backButton && fireEvent.click(backButton);
     expect(onClick).toHaveBeenCalled();
   });
   test('shows close button if on click function is defined', () => {
@@ -23,7 +23,7 @@ describe('DrawerNavigation', () => {
     const { queryByTestId } = render(<DrawerNavigation onCloseIconClick={onClick} />);
     const closeButton = queryByTestId('navigation-button-cross');
     expect(closeButton).toBeInTheDocument();
-    fireEvent.click(closeButton);
+    closeButton && fireEvent.click(closeButton);
     expect(onClick).toHaveBeenCalled();
   });
   test('shows left actions if passed as props instead of back arrow', () => {

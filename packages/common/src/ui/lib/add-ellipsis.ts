@@ -28,9 +28,11 @@ const getCanvasFontSize = (el: HTMLElement) => {
 export const getTextWidth = (text: string, element: HTMLElement): number => {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
-
-  context.font = getCanvasFontSize(element);
-  return context.measureText(text).width;
+  if (context) {
+    context.font = getCanvasFontSize(element);
+    return context.measureText(text).width;
+  }
+  return 0;
 };
 
 export const trimTextInHalfToFitSize = (text: string, el: HTMLElement): string => {

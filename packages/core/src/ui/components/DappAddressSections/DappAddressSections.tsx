@@ -16,7 +16,7 @@ export interface DappAddressSectionProps {
   groupedToAddresses: Map<Cardano.PaymentAddress, GroupedAddressAssets>;
   isToAddressesEnabled: boolean;
   isFromAddressesEnabled: boolean;
-  coinSymbol: string;
+  coinSymbol?: string;
   ownAddresses: string[];
   addressToNameMap?: Map<string, string>;
 }
