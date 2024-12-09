@@ -527,7 +527,7 @@ export const useWalletTxs = () => {
     () =>
       createHistoricalOwnInputResolver({
         addresses,
-        transactions,
+        transactions: transactions ?? { history: [] },
       }),
     [addresses, transactions],
   );
