@@ -18,6 +18,12 @@ export const wordListSearch = (
   if (!searchWord || !wordList?.length) return suggestionList;
 
   const parsedSearchWord = isCaseSensitive ? searchWord : searchWord.toLowerCase();
+  let parsedSearchWordRegExp;
+  try {
+    parsedSearchWordRegExp = new RegExp(`^${parsedSearchWord}.*$`);
+  } catch {
+    return suggestionList;
+  }
 
   while (continueSearching) {
     const currentWord = wordList[currentWordIdx];
@@ -36,10 +42,9 @@ export const wordListSearch = (
   }
 
   for (let idx = 0; idx < suggestionListLength; idx++) {
-    const startWith = new RegExp(`^${parsedSearchWord}.*$`);
     const currentWord = wordList[currentWordIdx + idx];
 
-    if (startWith.test(currentWord)) {
+    if (parsedSearchWordRegExp.test(currentWord)) {
       suggestionList.push(currentWord);
     }
   }
