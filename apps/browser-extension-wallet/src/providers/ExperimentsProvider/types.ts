@@ -11,7 +11,8 @@ export enum ExperimentName {
   USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets',
   WEBSOCKET_API = 'websocket-api',
-  BLOCKFROST_ASSET_PROVIDER = 'blockfrost-asset-provider'
+  BLOCKFROST_ASSET_PROVIDER = 'blockfrost-asset-provider',
+  EXTENSION_STORAGE = 'extension-storage'
 }
 
 interface FeatureFlag {

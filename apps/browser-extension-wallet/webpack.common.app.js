@@ -87,27 +87,15 @@ module.exports = () =>
         patterns: [
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
           { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' },
-          { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../[name][ext]' }
+          { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.html'), to: '../[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.js'), to: '../js/[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.css'), to: '../[name][ext]' },
+          {
+            from: path.resolve(__dirname, '../../packages/common/src/ui/assets/icons/loader.png'),
+            to: '../[name][ext]'
+          }
         ]
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../popup.html',
-        template: 'src/assets/html/popup.html',
-        chunks: ['popup'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../app.html',
-        template: 'src/assets/html/app.html',
-        chunks: ['options'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../dappConnector.html',
-        template: 'src/assets/html/popup.html',
-        chunks: ['dappConnector'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackHarddiskPlugin()
+      })
     ]
   });
