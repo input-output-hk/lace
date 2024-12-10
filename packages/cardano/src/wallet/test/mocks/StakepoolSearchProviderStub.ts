@@ -228,7 +228,7 @@ export const mockedStakePools: Cardano.StakePool[] = pools.map(
     ({
       ...detailsForAll,
       ...pool
-    }) as Cardano.StakePool
+    } as Cardano.StakePool)
 );
 
 export const mockedStakePoolSearchResults: Promise<StakePoolSearchResults> = Promise.resolve({

@@ -122,21 +122,22 @@ const testIds = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_BROWSER}>
-          <I18nextProvider i18n={i18n}>
-            <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-              <CurrencyStoreProvider>
-                <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-              </CurrencyStoreProvider>
-            </AnalyticsProvider>
-          </I18nextProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  );
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <I18nextProvider i18n={i18n}>
+              <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                <CurrencyStoreProvider>
+                  <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+                </CurrencyStoreProvider>
+              </AnalyticsProvider>
+            </I18nextProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    );
 
 describe('Testing SettingsWalletBase component', () => {
   window.ResizeObserver = ResizeObserver;

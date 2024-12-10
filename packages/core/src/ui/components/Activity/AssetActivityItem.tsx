@@ -252,11 +252,9 @@ export const AssetActivityItem = ({
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets
-                      ?.slice(assetsToShow, assets.length)
-                      .map(({ id, val, info }) => (
-                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
-                      ))}
+                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
+                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                    ))}
                   </>
                 }
               >
