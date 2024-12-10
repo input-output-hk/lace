@@ -8,14 +8,14 @@ import {
 } from '../unit-converters';
 
 describe('Testing lovelacesToAdaString function', () => {
-  test('should convert lovelaces to ada', async () => {
+  test('should convert lovelaces to ada - one million', async () => {
     const result = lovelacesToAdaString('1000000');
-    expect(result).toBe('1.00');
+    expect(result).toBe('1');
   });
 
-  test('should return ada value with 4 decimals', async () => {
-    const result = lovelacesToAdaString('1000000', 4);
-    expect(result).toBe('1.0000');
+  test('should convert lovelaces to ada - one million and one', async () => {
+    const result = lovelacesToAdaString('1000001');
+    expect(result).toBe('1.000001');
   });
 });
 
@@ -63,6 +63,6 @@ describe('Testing getFormattedAmount function', () => {
       decimals: 2
     };
     const result = getFormattedAmount({ amount: '2000000', cardanoCoin });
-    expect(result).toBe('2.00 symbol');
+    expect(result).toBe('2 symbol');
   });
 });
