@@ -6,14 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://use.typekit.net" crossorigin />
     <link rel="stylesheet" href="https://use.typekit.net/ksk5ywd.css" />
+
     <title>Lace</title>
+    <link rel="stylesheet" href="preloader.css" />
     <style>
+      html,
+      head,
       body {
         height: 600px;
+        width: 360px;
+        margin: 0;
+        padding: 0;
       }
     </style>
+    <script src="js/load-popup.js"></script>
   </head>
   <body id="lace-popup-body">
+    <div id="preloader" class="overlay loaderContainer" data-testid="preloader">
+      <div class="imageContainer">
+        <img alt="loader" src="loader.png" class="loaderImage" data-testid="preloader-image" />
+      </div>
+      <p class="loaderText" data-testid="preloader-text">Loading...</p>
+    </div>
     <div id="lace-popup"></div>
   </body>
 </html>
