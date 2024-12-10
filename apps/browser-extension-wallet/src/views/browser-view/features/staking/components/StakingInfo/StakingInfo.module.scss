@@ -36,6 +36,7 @@
   flex: 1 0 0;
   padding: 0 size_unit(4);
   width: 50%;
+  max-width: 100%;
   &:first-child {
     padding: 0 size_unit(4);
     border-left: none;
@@ -101,7 +102,7 @@
         padding: 0 size_unit(2);
       }
     }
-    .row:last-of-type {
+    .row:not(:first-of-type) {
       .col {
         justify-content: flex-start;
         padding-left: size_unit(3);
