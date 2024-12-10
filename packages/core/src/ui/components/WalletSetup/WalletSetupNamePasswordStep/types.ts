@@ -5,7 +5,3 @@ export type BarStates = PasswordVerificationProps['complexityBarList'];
 export interface WalletSetupNamePasswordSubmitParams {
   walletName: string;
 }
-
-export interface LegacyWalletSetupNamePasswordSubmitParams {
-  walletName: string;
-}
