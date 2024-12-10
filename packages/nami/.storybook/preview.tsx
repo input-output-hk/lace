@@ -7,7 +7,10 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { theme } from '../src/ui/theme';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import { OutsideHandlesProvider } from '../src/features/outside-handles-provider';
-import { CommonOutsideHandlesProvider } from '../src/features/common-outside-handles-provider';
+import {
+  CommonOutsideHandlesProvider,
+  NetworkConnectionStates,
+} from '../src/features/common-outside-handles-provider';
 import { WalletType } from '@cardano-sdk/web-extension';
 
 const noop = (async () => {}) as any;
@@ -60,10 +63,14 @@ export const decorators = [
       setAvatar={noop}
       buildDelegation={noop}
       signAndSubmitTransaction={noop}
-      passwordUtil={{
+      secretsUtil={{
         clearSecrets: noop,
         password: { input: noop, value: 'pw' },
         setPassword: noop,
+        passwordConfirmation: { input: noop, value: 'pw' },
+        repeatedPassword: { input: noop, value: '' },
+        setPasswordConfirmation: noop,
+        setPasswordConfirmationRepeat: noop,
       }}
       delegationTxFee="200"
       delegationStoreDelegationTxBuilder={noop}
@@ -106,6 +113,8 @@ export const decorators = [
         sendEventToPostHog={noop}
         handleResolver={noop}
         withSignTxConfirmation={noop}
+        useNetworkError={noop}
+        networkConnection={NetworkConnectionStates.CONNNECTED}
       >
         <ChakraProvider
           theme={extendTheme({

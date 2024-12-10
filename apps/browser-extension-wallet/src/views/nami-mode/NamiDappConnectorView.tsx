@@ -21,6 +21,7 @@ import { Wallet } from '@lace/cardano';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { tryGetAssetInfos } from './utils';
 import { useNetworkError } from '@hooks/useNetworkError';
+import { useSecrets } from '@lace/core';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import type { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
@@ -75,7 +76,7 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> =
       },
       sign: async (password: string) => {
         const passphrase = Buffer.from(password, 'utf8');
-        await r.sign(passphrase, { willRetryOnFailure: true });
+        await r.sign(passphrase, { willRetryOnFailure: true }).finally(() => passphrase.fill(0));
       }
     }
   }),
@@ -107,7 +108,7 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> =
             },
             sign: async (password: string) => {
               const passphrase = Buffer.from(password, 'utf8');
-              return r.sign(passphrase, { willRetryOnFailure: true });
+              return r.sign(passphrase, { willRetryOnFailure: true }).finally(() => passphrase.fill(0));
             }
           }
         })),
@@ -130,6 +131,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
     environmentName,
     blockchainProvider: { assetProvider }
   } = useWalletStore();
+  const secretsUtil = useSecrets();
 
   const { theme } = useTheme();
   const cardanoCoin = useMemo(
@@ -210,7 +212,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         walletRepository,
         environmentName,
         dappConnector: { ...dappConnector, txWitnessRequest, getAssetInfos },
-        switchWalletMode
+        switchWalletMode,
+        secretsUtil
       }}
     >
       <CommonOutsideHandlesProvider

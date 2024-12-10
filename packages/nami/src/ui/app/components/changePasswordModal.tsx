@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable react/no-unescaped-entities */
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   Button,
@@ -21,6 +21,9 @@ import {
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
+import { NamiPassword } from './namiPassword';
+import { useOutsideHandles } from 'features/outside-handles-provider';
+import { noop } from 'lodash';
 
 interface Props {
   changePassword: (
@@ -33,42 +36,14 @@ export interface ChangePasswordModalComponentRef {
   openModal: () => void;
 }
 
-interface State {
-  currentPassword: string;
-  newPassword: string;
-  repeatPassword: string;
-  matchingPassword: boolean;
-  passwordLen: boolean | null;
-  show: boolean;
-}
-
 const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   const capture = useCaptureEvent();
   const cancelRef = React.useRef<HTMLButtonElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
   const toast = useToast();
+  const { secretsUtil } = useOutsideHandles();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [state, setState] = React.useState<State>({
-    currentPassword: '',
-    newPassword: '',
-    repeatPassword: '',
-    matchingPassword: false,
-    passwordLen: null,
-    show: false,
-  });
-
-  React.useEffect(() => {
-    setState({
-      currentPassword: '',
-      newPassword: '',
-      repeatPassword: '',
-      matchingPassword: false,
-      passwordLen: null,
-      show: false,
-    });
-  }, [isOpen]);
 
   React.useImperativeHandle(ref, () => ({
     openModal: () => {
@@ -76,19 +51,33 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
     },
   }));
 
+  const destroySecrets = () => {
+    secretsUtil.clearSecrets();
+  };
+
+  const handleClose = () => {
+    destroySecrets();
+    setTimeout(onClose, 0);
+  };
+
   const confirmHandler = async () => {
     if (
-      !state.currentPassword ||
-      !state.newPassword ||
-      !state.repeatPassword ||
-      state.newPassword !== state.repeatPassword
+      !secretsUtil.password?.value ||
+      !secretsUtil.passwordConfirmation?.value ||
+      !secretsUtil.repeatedPassword?.value ||
+      secretsUtil.passwordConfirmation.value !==
+        secretsUtil.repeatedPassword.value
     )
       return;
 
     setIsLoading(true);
 
     try {
-      await changePassword(state.currentPassword, state.newPassword);
+      await changePassword(
+        secretsUtil.password.value,
+        secretsUtil.passwordConfirmation.value,
+      );
+
       toast({
         title: 'Password updated',
         status: 'success',
@@ -96,9 +85,9 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
       });
 
       capture(Events.SettingsChangePasswordConfirm);
-
-      onClose();
+      handleClose();
     } catch (error) {
+      destroySecrets();
       toast({
         title:
           error instanceof Error ? error.message : 'Password update failed!',
@@ -111,13 +100,7 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
   };
 
   return (
-    <Modal
-      size="xs"
-      isOpen={isOpen}
-      onClose={onClose}
-      isCentered
-      initialFocusRef={inputRef}
-    >
+    <Modal size="xs" isOpen={isOpen} onClose={handleClose} isCentered>
       <ModalOverlay />
       <ModalContent m={0}>
         <ModalHeader fontSize="md">Change Password</ModalHeader>
@@ -126,127 +109,56 @@ const ChangePasswordModalComponent = ({ changePassword }: Props, ref) => {
             Type your current password and new password below, if you want to
             continue.
           </Box>
-
-          <Box>
-            <InputGroup size="md">
-              <Input
-                ref={inputRef}
-                focusBorderColor="teal.400"
-                variant="filled"
-                pr="4.5rem"
-                type={state.show ? 'text' : 'password'}
-                onChange={e => {
-                  setState(s => ({ ...s, currentPassword: e.target.value }));
-                }}
-                placeholder="Enter current password"
-              />
-              <InputRightElement width="4.5rem">
-                <Button
-                  h="1.75rem"
-                  size="sm"
-                  onClick={() => {
-                    setState(s => ({ ...s, show: !s.show }));
-                  }}
-                >
-                  {state.show ? 'Hide' : 'Show'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
-          </Box>
-
+          <NamiPassword
+            autoFocus
+            label="Enter current password"
+            onChange={secretsUtil.setPassword}
+            onSubmit={noop}
+          />
           <Box height="4" />
-
           <Box>
-            <InputGroup size="md">
-              <Input
-                focusBorderColor="teal.400"
-                variant="filled"
-                pr="4.5rem"
-                isInvalid={state.passwordLen === false}
-                type={state.show ? 'text' : 'password'}
-                onChange={e => {
-                  setState(s => ({ ...s, newPassword: e.target.value }));
-                }}
-                onBlur={e => {
-                  setState(s => ({
-                    ...s,
-                    passwordLen: e.target.value
-                      ? e.target.value.length >= 8
-                      : false,
-                  }));
-                }}
-                placeholder="Enter new password"
-              />
-              <InputRightElement width="4.5rem">
-                <Button
-                  h="1.75rem"
-                  size="sm"
-                  onClick={() => {
-                    setState(s => ({ ...s, show: !s.show }));
-                  }}
-                >
-                  {state.show ? 'Hide' : 'Show'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
+            <NamiPassword
+              label="Enter new password"
+              onChange={secretsUtil.setPasswordConfirmation}
+              onSubmit={noop}
+            />
+            {!!secretsUtil.password?.value &&
+              secretsUtil.password.value.length < 8 && (
+                <Text color="red.300">
+                  Password must be at least 8 characters long
+                </Text>
+              )}
           </Box>
-
-          {state.passwordLen === false && (
-            <Text color="red.300">
-              Password must be at least 8 characters long
-            </Text>
-          )}
-
           <Box height="4" />
-
           <Box>
-            <InputGroup size="md">
-              <Input
-                focusBorderColor="teal.400"
-                variant="filled"
-                isInvalid={
-                  !!state.repeatPassword &&
-                  state.newPassword !== state.repeatPassword
-                }
-                pr="4.5rem"
-                type={state.show ? 'text' : 'password'}
-                onChange={e => {
-                  setState(s => ({ ...s, repeatPassword: e.target.value }));
-                }}
-                placeholder="Repeat new password"
-              />
-              <InputRightElement width="4.5rem">
-                <Button
-                  h="1.75rem"
-                  size="sm"
-                  onClick={() => {
-                    setState(s => ({ ...s, show: !s.show }));
-                  }}
-                >
-                  {state.show ? 'Hide' : 'Show'}
-                </Button>
-              </InputRightElement>
-            </InputGroup>
+            <NamiPassword
+              label="Repeat new password"
+              onChange={secretsUtil.setPasswordConfirmationRepeat}
+              onSubmit={confirmHandler}
+            />
 
-            {state.repeatPassword &&
-              state.repeatPassword !== state.newPassword && (
+            {!!secretsUtil.passwordConfirmation?.value &&
+              !!secretsUtil.repeatedPassword?.value &&
+              secretsUtil.passwordConfirmation.value !==
+                secretsUtil.repeatedPassword?.value && (
                 <Text color="red.300">Password doesn't match</Text>
               )}
           </Box>
         </ModalBody>
 
         <ModalFooter>
-          <Button mr={3} variant="ghost" onClick={onClose} ref={cancelRef}>
+          <Button mr={3} variant="ghost" onClick={handleClose} ref={cancelRef}>
             Cancel
           </Button>
 
           <Button
             isDisabled={
-              !state.currentPassword ||
-              !state.newPassword ||
-              !state.repeatPassword ||
-              state.newPassword !== state.repeatPassword ||
-              state.passwordLen === false
+              !secretsUtil.password?.value ||
+              !secretsUtil.passwordConfirmation?.value ||
+              !secretsUtil.repeatedPassword?.value ||
+              secretsUtil.passwordConfirmation.value !==
+                secretsUtil.repeatedPassword.value ||
+              secretsUtil.passwordConfirmation?.value.length < 8
             }
             isLoading={isLoading}
             colorScheme="teal"

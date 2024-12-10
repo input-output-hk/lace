@@ -47,7 +47,7 @@ export const WalletAddressItem = ({
 
   return (
     <div
-      onClick={() => onClick({ id, name, address })}
+      onClick={() => onClick?.({ id, name, address })}
       data-testid="address-list-item"
       className={cn(styles.listItemContainer, { [styles.small]: isSmall, className })}
     >

@@ -31,7 +31,7 @@ export const InfoWallet = ({
       text: translations.copiedMessage,
       icon: CopyIcon
     });
-    onClick();
+    onClick?.();
   };
 
   return (

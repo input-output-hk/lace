@@ -13,14 +13,14 @@ const getPlaceholderDecimal = (value: string) => {
   return decimals ? decimals : 0;
 };
 
-export const calculateAssetBalance = (balance: bigint | string, assetInfo: Asset.AssetInfo): string => {
+export const calculateAssetBalance = (balance: bigint | string, assetInfo?: Asset.AssetInfo): string => {
   const decimals = assetInfo?.tokenMetadata?.decimals;
   if (!decimals) return balance.toString();
 
   return new BigNumber(balance.toString()).div(new BigNumber(BASE).pow(decimals)).toString();
 };
 
-export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo: Asset.AssetInfo): bigint => {
+export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo?: Asset.AssetInfo): bigint => {
   const tokenMetadataDecimals = assetInfo?.tokenMetadata?.decimals;
   const decimals = tokenMetadataDecimals ? tokenMetadataDecimals : getPlaceholderDecimal(balanceWithDecimals);
 

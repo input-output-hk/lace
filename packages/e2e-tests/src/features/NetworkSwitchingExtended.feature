@@ -4,7 +4,6 @@ Feature: LW: Network Switching - extended view
   Background:
     Given Wallet is synced
     And I disable showing Multidelegation beta banner
-    And I disable showing Multidelegation persistence banner
 
   @LW-3226
   Scenario Outline: Extended View - Currency symbol is correct when on different network - <network> <ticker>

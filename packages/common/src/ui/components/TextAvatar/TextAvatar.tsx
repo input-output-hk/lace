@@ -28,7 +28,7 @@ export const TextAvatar = ({
   size
 }: TextAvatarProps): React.ReactElement => (
   <Avatar
-    className={classnames([styles[size], styles.textAvatar, className])}
+    className={classnames([size && styles[size], styles.textAvatar, className])}
     style={{ color: iconForegroundColor, background: iconBackgroundColor }}
     data-testid="text-avatar"
   >

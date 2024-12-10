@@ -120,6 +120,7 @@ const Settings = ({
       position="relative"
       background={containerBg}
       color={textColor}
+      w="100%"
     >
       <Account name={accountName} avatar={accountAvatar} />
       <Box position="absolute" top="24" left="6">

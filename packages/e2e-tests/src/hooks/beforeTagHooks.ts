@@ -44,7 +44,6 @@ Before(
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
@@ -55,7 +54,6 @@ Before(
   async () => {
     await popupViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
@@ -122,7 +120,6 @@ Before(
 Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, async () => {
   await popupViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
 });
 
 Before(
@@ -248,7 +245,6 @@ Before(
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
@@ -259,7 +255,6 @@ Before(
   async () => {
     await popupViewRepositoryWalletInitialization([TestWalletName.MultiAccActive1]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
   }
 );
 
@@ -268,7 +263,6 @@ Before(
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-    await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
     await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
     await localStorageInitializer.disableShowPinExtension();
   }

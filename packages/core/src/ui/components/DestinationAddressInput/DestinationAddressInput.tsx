@@ -82,7 +82,7 @@ export const DestinationAddressInput = ({
       [HandleVerificationState.INVALID]: <ExclamationCircleOutlined className={styles.invalid} />,
       [HandleVerificationState.VERIFYING]: undefined
     };
-    const handleIcon = handleIcons[handle] || undefined;
+    const handleIcon = (handle && handleIcons[handle]) || undefined;
 
     const shouldClearButtonBeDisabled =
       (!valid && !empty) ||
@@ -105,7 +105,10 @@ export const DestinationAddressInput = ({
 
   const children = useMemo(() => {
     if (handle === HandleVerificationState.CHANGED_OWNERSHIP) {
-      return value.name && getInputLabel(`$${value.handleResolution.handle}`, value.handleResolution.cardanoAddress);
+      return (
+        value.name &&
+        getInputLabel(`$${value.handleResolution?.handle}`, value.handleResolution?.cardanoAddress.toString() ?? '')
+      );
     }
     return value.name && getInputLabel(value.name, value.address);
   }, [handle, value]);

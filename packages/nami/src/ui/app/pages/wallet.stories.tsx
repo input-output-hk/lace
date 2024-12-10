@@ -164,7 +164,7 @@ export const LayoutLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        passwordUtil: {},
+        secretsUtil: {},
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -534,7 +534,7 @@ export const StakePoolDelegatingLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        passwordUtil: {},
+        secretsUtil: {},
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -733,7 +733,7 @@ export const RemoveCollateralLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        passwordUtil: {},
+        secretsUtil: {},
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -803,7 +803,7 @@ export const AddCollateralLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        passwordUtil: {},
+        secretsUtil: {},
         cardanoCoin,
         collateralFee: BigInt(176281),
         isInitializingCollateral: false,
@@ -998,7 +998,7 @@ export const HistoryLight: Story = {
     useOutsideHandles.mockImplementation(() => {
       return useMemo(
         () => ({
-          passwordUtil: {},
+          secretsUtil: {},
           cardanoCoin,
           collateralFee: BigInt(0),
           isInitializingCollateral: false,

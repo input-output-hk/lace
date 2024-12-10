@@ -193,9 +193,6 @@ export const mockWalletProvider = (): NetworkInfoProvider &
   RewardsProvider &
   StakePoolProvider &
   UtxoProvider => ({
-  protocolParameters: jest.fn().mockResolvedValue(protocolParameters),
-  genesisParameters: jest.fn().mockResolvedValue(genesisParameters),
-  ledgerTip: jest.fn().mockResolvedValue(ledgerTip),
   blocksByHashes: jest
     .fn()
     .mockResolvedValue([{ epoch: Cardano.EpochNo(currentEpoch.number - 3) } as Cardano.ExtendedBlockInfo]),
@@ -215,7 +212,6 @@ export const mockWalletProvider = (): NetworkInfoProvider &
       retiring: 5
     }
   }),
-  healthCheck: jest.fn().mockResolvedValue({ ok: true }),
   utxoByAddresses: jest.fn().mockResolvedValue(utxo),
   rewardAccountBalance: jest.fn().mockResolvedValue(rewards),
   ...networkInfoProviderStub()

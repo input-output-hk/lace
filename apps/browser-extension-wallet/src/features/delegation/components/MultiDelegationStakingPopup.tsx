@@ -22,7 +22,6 @@ import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
-  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
@@ -104,10 +103,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   );
   const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
     useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
-  const [
-    multidelegationFirstVisitSincePortfolioPersistence,
-    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
-  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
     useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
@@ -127,14 +122,11 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         stakingBrowserPreferencesPersistence,
         setStakingBrowserPreferencesPersistence,
         multidelegationFirstVisit,
-        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        triggerMultidelegationFirstVisit: () => {
+          setMultidelegationFirstVisit(false);
+        },
         multidelegationDAppCompatibility,
         triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
-        multidelegationFirstVisitSincePortfolioPersistence,
-        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
-          setMultidelegationFirstVisit(false);
-          setMultidelegationFirstVisitSincePortfolioPersistence(false);
-        },
         expandStakingView: (urlSearchParams?: string) =>
           handleOpenBrowser({ section: BrowserViewSections.STAKING, urlSearchParams }),
         balancesBalance: balance,

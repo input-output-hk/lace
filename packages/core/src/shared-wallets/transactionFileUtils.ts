@@ -32,7 +32,7 @@ export const importMultiSigTransaction = async (file: File): Promise<Wallet.Card
   return new Promise((resolve, reject) => {
     reader.addEventListener('load', async (e) => {
       try {
-        const data = JSON.parse(<string>e.target.result) as SharedWalletTransactionSchema;
+        const data = JSON.parse(<string>e.target?.result) as SharedWalletTransactionSchema;
 
         const {
           transaction: { cborHex },

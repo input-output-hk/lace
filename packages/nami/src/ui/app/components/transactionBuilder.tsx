@@ -124,7 +124,7 @@ const TransactionBuilder = (undefined, ref) => {
     delegationTxFee,
     isBuildingTx,
     stakingError,
-    passwordUtil: { setPassword, clearSecrets },
+    secretsUtil,
     signAndSubmitTransaction,
     getStakePoolInfo,
     submitCollateralTx,
@@ -276,10 +276,11 @@ const TransactionBuilder = (undefined, ref) => {
         onCloseBtn={() => {
           setData({ pool: { ...poolDefaultValue } });
           resetDelegationState();
+          secretsUtil.clearSecrets();
         }}
+        secretsUtil={secretsUtil}
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
         ready={!isBuildingTx && data.pool.state === PoolStates.DONE}
         title="Delegate your funds"
         sign={async () => {
@@ -294,7 +295,8 @@ const TransactionBuilder = (undefined, ref) => {
             const tx = await delegationStoreDelegationTxBuilder!.build();
             const inspection = await tx.inspect();
 
-            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+            const hasCertificates =
+              (inspection.body.certificates?.length ?? 0) > 0;
 
             if (!hasCertificates) {
               resetDelegationState();
@@ -491,8 +493,8 @@ const TransactionBuilder = (undefined, ref) => {
         }}
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
         ready={!isBuildingTx}
+        secretsUtil={secretsUtil}
         title="Stake deregistration"
         sign={async () => {
           try {
@@ -507,7 +509,8 @@ const TransactionBuilder = (undefined, ref) => {
             const tx = await delegationStoreDelegationTxBuilder!.build();
             const inspection = await tx.inspect();
 
-            const hasCertificates = (inspection.body.certificates?.length ?? 0) > 0;
+            const hasCertificates =
+              (inspection.body.certificates?.length ?? 0) > 0;
 
             if (!hasCertificates) {
               setData({ pool: { ...poolDefaultValue } });
@@ -629,17 +632,17 @@ const TransactionBuilder = (undefined, ref) => {
         }
         openHWFlow={openHWFlow}
         walletType={walletType}
-        setPassword={setPassword}
-        sign={async (password = '') => {
-          await submitCollateral(password);
+        secretsUtil={secretsUtil}
+        sign={async () => {
+          submitCollateral(secretsUtil.password.value ?? '');
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
-          clearSecrets();
+          secretsUtil.clearSecrets();
         }}
         onConfirm={(status, error) => {
+          secretsUtil.clearSecrets();
           if (status) {
-            clearSecrets();
             capture(Events.SettingsCollateralConfirmClick);
             toast({
               title: 'Collateral added',
@@ -659,7 +662,7 @@ const TransactionBuilder = (undefined, ref) => {
               status: 'error',
               duration: 3000,
             });
-          collateralRef.current?.closeModal();
+          setTimeout(() => collateralRef.current?.closeModal(), 0);
           capture(Events.SettingsCollateralXClick);
         }}
         setCollateral={true}

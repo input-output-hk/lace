@@ -97,6 +97,7 @@ import type { OutsideHandlesContextValue } from '../../../features/outside-handl
 import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 import type { AboutRef } from '../components/about';
 import type { TransactionBuilderRef } from '../components/transactionBuilder';
+import { NamiPassword } from '../components/namiPassword';
 
 export type Props = Pick<
   CommonOutsideHandlesContextValue,
@@ -185,6 +186,7 @@ const Wallet = ({
         display="flex"
         alignItems="center"
         flexDirection="column"
+        w="100%"
       >
         <Box
           height="52"
@@ -632,8 +634,8 @@ const NewAccountModal = React.forwardRef<
   const capture = useCaptureEvent();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = React.useState(false);
+  const { secretsUtil } = useOutsideHandles();
   const [state, setState] = React.useState({
-    password: '',
     show: false,
     name: '',
     wrongPassword: false,
@@ -645,13 +647,16 @@ const NewAccountModal = React.forwardRef<
       await addAccount({
         index: getNextAccountIndex(accounts, walletId),
         name: state.name,
-        passphrase: Buffer.from(state.password, 'utf8'),
+        passphrase: Buffer.from(secretsUtil.password?.value ?? '', 'utf8'),
         walletId,
       });
       await capture(Events.SettingsNewAccountConfirmClick);
-      onClose();
+      secretsUtil.clearSecrets();
+      // wait for digest
+      setTimeout(onClose, 50);
     } catch {
       setState(s => ({ ...s, wrongPassword: true }));
+      secretsUtil.clearSecrets();
     }
     setIsLoading(false);
   };
@@ -664,7 +669,6 @@ const NewAccountModal = React.forwardRef<
 
   React.useEffect(() => {
     setState({
-      password: '',
       show: false,
       name: '',
       wrongPassword: false,
@@ -700,30 +704,16 @@ const NewAccountModal = React.forwardRef<
           />
           <Spacer height="4" />
           <InputGroup size="md">
-            <Input
-              variant="filled"
-              isInvalid={state.wrongPassword}
-              pr="4.5rem"
-              type={state.show ? 'text' : 'password'}
+            <NamiPassword
               onChange={e => {
-                setState(s => ({ ...s, password: e.target.value }));
+                secretsUtil.setPassword(e);
               }}
-              placeholder="Enter password"
               onKeyDown={e => {
                 if (e.key == 'Enter') confirmHandler();
               }}
+              onSubmit={confirmHandler}
+              label="Enter password"
             />
-            <InputRightElement width="4.5rem">
-              <Button
-                h="1.75rem"
-                size="sm"
-                onClick={() => {
-                  setState(s => ({ ...s, show: !s.show }));
-                }}
-              >
-                {state.show ? 'Hide' : 'Show'}
-              </Button>
-            </InputRightElement>
           </InputGroup>
           {state.wrongPassword && (
             <Text color="red.300">Password is wrong</Text>
@@ -742,7 +732,9 @@ const NewAccountModal = React.forwardRef<
             Close
           </Button>
           <Button
-            isDisabled={!state.password || !state.name || isLoading}
+            isDisabled={
+              !secretsUtil.password?.value || !state.name || isLoading
+            }
             isLoading={isLoading}
             colorScheme="teal"
             onClick={confirmHandler}

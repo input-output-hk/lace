@@ -5,7 +5,7 @@ import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { saveValueInLocalStorage } from '@src/utils/local-storage';
 import { useKeyboardShortcut } from '@lace/common';
-import { OnPasswordChange } from '@lace/core';
+import { OnPasswordChange, useSecrets } from '@lace/core';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -22,7 +22,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const backgroundService = useBackgroundServiceAPIContext();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
-  const [password, setPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isValidPassword, setIsValidPassword] = useState(true);
 
   const handlePasswordChange = useCallback<OnPasswordChange>(
@@ -30,9 +30,9 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       if (!isValidPassword) {
         setIsValidPassword(true);
       }
-      setPassword(target.value);
+      setPassword(target);
     },
-    [isValidPassword]
+    [isValidPassword, setPassword]
   );
 
   useEffect(() => {
@@ -52,6 +52,8 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       }
     } catch {
       setIsValidPassword(false);
+    } finally {
+      clearSecrets();
     }
     setIsVerifyingPassword(false);
   };
@@ -73,7 +75,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       isLoading={isVerifyingPassword}
       onUnlock={onUnlock}
       passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
-      unlockButtonDisabled={password === ''}
+      unlockButtonDisabled={!password.value}
       onForgotPasswordClick={onForgotPasswordClick}
     />
   );

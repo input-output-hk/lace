@@ -136,7 +136,6 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
     return (
       <RewardsDetails
         name={name}
-        status={activityInfo.status}
         includedDate={activityInfo.activity.includedUtcDate}
         includedTime={activityInfo.activity.includedUtcTime}
         amountTransformer={amountTransformer}

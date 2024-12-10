@@ -1,21 +1,13 @@
 import { runtime } from 'webextension-polyfill';
-import {
-  cip30,
-  consumeRemoteApi,
-  MessengerDependencies,
-  runContentScriptMessageProxy
-} from '@cardano-sdk/web-extension';
+import { consumeRemoteApi, MessengerDependencies, runContentScriptMessageProxy } from '@cardano-sdk/web-extension';
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
-import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from './injectUtil';
+import { LACE_FEATURES_CHANNEL, laceFeaturesApiProperties } from './injectUtil';
 
 // Disable logging in production for performance & security measures
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
   console.info('initializing content script');
 
-  const initializeContentScript = (
-    { injectedScriptSrc, walletName }: cip30.InitializeContentScriptProps,
-    dependencies: MessengerDependencies
-  ) => {
+  const initializeContentScript = (walletName: string, dependencies: MessengerDependencies) => {
     const apis = [
       consumeRemoteAuthenticatorApi({ walletName }, dependencies),
       consumeRemoteWalletApi({ walletName }, dependencies),
@@ -27,19 +19,9 @@ if (process.env.USE_DAPP_CONNECTOR === 'true') {
         dependencies
       )
     ];
-    const proxy = runContentScriptMessageProxy(apis, dependencies.logger);
 
-    const script = document.createElement('script');
-    script.async = false;
-    script.src = injectedScriptSrc;
-    script.addEventListener('load', () => script.remove());
-    (document.head || document.documentElement).append(script);
-
-    return proxy;
+    return runContentScriptMessageProxy(apis, dependencies.logger);
   };
 
-  initializeContentScript(
-    { injectedScriptSrc: runtime.getURL('./js/inject.js'), walletName: process.env.WALLET_NAME },
-    { logger: console, runtime }
-  );
+  initializeContentScript(process.env.WALLET_NAME, { logger: console, runtime });
 }

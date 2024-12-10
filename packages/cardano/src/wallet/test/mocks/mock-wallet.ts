@@ -11,6 +11,7 @@ import { TxSubmitProviderFake } from '@wallet/test/mocks/TxSubmitProviderFake';
 import { utxoProviderStub } from './UtxoProviderStub';
 import { chainHistoryProviderStub } from './ChainHistoryProviderStub';
 import { rewardsHistoryProviderStub } from './RewardsProviderStub';
+import { dRepProviderStub } from './DRepProviderStub';
 import { of } from 'rxjs';
 
 const logger = console;
@@ -43,6 +44,7 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
   const utxoProvider = utxoProviderStub();
   const chainHistoryProvider = chainHistoryProviderStub();
   const rewardsProvider = rewardsHistoryProviderStub();
+  const drepProvider = dRepProviderStub();
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   const wallet = createPersonalWallet(
     { name },
@@ -55,6 +57,7 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
       rewardsProvider,
       chainHistoryProvider,
       utxoProvider,
+      drepProvider,
       logger,
       witnesser: KeyManagement.util.createBip32Ed25519Witnesser(asyncKeyAgent),
       bip32Account: new KeyManagement.Bip32Account(keyAgent)

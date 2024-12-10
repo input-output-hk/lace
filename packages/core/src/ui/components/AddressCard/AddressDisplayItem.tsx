@@ -33,6 +33,7 @@ export const AddressDisplayItem = ({
 }: Props): JSX.Element => {
   const displayAsMenu = !!items;
 
+  // eslint-disable-next-line consistent-return
   const actionToIcon = useMemo(() => {
     if (displayAsMenu) {
       return <ChevronDownComponent data-testid={`${testId}-chevron`} />;
@@ -45,8 +46,6 @@ export const AddressDisplayItem = ({
         </CopyToClipboard>
       );
     }
-
-    return actionIconMap[action];
   }, [action, displayAsMenu, label, testId]);
 
   const content = (
@@ -55,7 +54,7 @@ export const AddressDisplayItem = ({
       <span data-testid={`${testId}-label`}>{label}</span>
       {tooltipLabel && !displayAsMenu ? (
         <Tooltip title={tooltipLabel}>
-          <Box w="$20" h="$20" onClick={action === 'copy' && onCopy}>
+          <Box w="$20" h="$20" onClick={() => action === 'copy' && onCopy?.()}>
             {actionToIcon}
           </Box>
         </Tooltip>

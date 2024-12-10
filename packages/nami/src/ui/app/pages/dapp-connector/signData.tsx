@@ -20,7 +20,10 @@ import ConfirmModal from '../../components/confirmModal';
 import { Scrollbars } from '../../components/scrollbar';
 
 import type { UseAccount } from '../../../../adapters/account';
-import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import {
+  DappConnector,
+  useDappOutsideHandles,
+} from '../../../../features/dapp-outside-handles-provider';
 
 interface Props {
   dappConnector: DappConnector;
@@ -29,6 +32,7 @@ interface Props {
 
 export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   const capture = useCaptureEvent();
+  const { secretsUtil } = useDappOutsideHandles();
   const ref = React.useRef();
   const [payload, setPayload] = React.useState('');
   const [address, setAddress] = React.useState('');
@@ -232,9 +236,10 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
         ref={ref}
         walletType={walletType}
         openHWFlow={openHWFlow}
-        sign={async password => {
+        secretsUtil={secretsUtil}
+        sign={async () => {
           try {
-            await request?.sign(password ?? '');
+            await request?.sign(secretsUtil.password.value ?? '');
           } catch (error) {
             if (
               error instanceof Wallet.KeyManagement.errors.AuthenticationError

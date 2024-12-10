@@ -15,7 +15,6 @@ import { calculateSpentBalance, getOutputValues } from '../helpers';
 import { useCallback, useMemo } from 'react';
 import { IAssetInfo } from '@src/features/send/types';
 import { v4 as uuid } from 'uuid';
-import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
 import { compactNumberWithUnit, formatNumberForDisplay } from '@src/utils/format-number';
@@ -86,9 +85,6 @@ export interface Store {
   resetStates: () => void;
   setOutputDefaultStateOnFormSwitch: (form: FormOptions) => void;
 
-  password?: string;
-  setPassword: (pass: string) => void;
-  removePassword: () => void;
   isSubmitingTx?: boolean;
   isPasswordValid?: boolean;
   setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
@@ -338,8 +334,6 @@ const useStore = create<Store>((set, get) => ({
       isPasswordValid: params?.isPasswordValid,
       isSubmitingTx: params?.isSubmitingTx
     }),
-  setPassword: (pass) => set({ password: pass }),
-  removePassword: () => set((state) => omit(state, ['password']), true),
   setIsMultipleSelectionAvailable: (param) =>
     set(
       param === false

@@ -7,7 +7,7 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { RefObject } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
 import {
@@ -41,7 +41,7 @@ import {
 } from '@chakra-ui/react';
 import { useObservable } from '@lace/common';
 import debouncePromise from 'debounce-promise';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import latest from 'promise-latest';
 import { MdModeEdit } from 'react-icons/md';
 import { Planet } from 'react-kawaii';
@@ -68,6 +68,10 @@ import {
   NetworkConnectionStates,
   useCommonOutsideHandles,
 } from '../../../features/common-outside-handles-provider';
+import {
+  useOutsideHandles,
+  type OutsideHandlesContextValue,
+} from '../../../features/outside-handles-provider';
 import { useStoreActions, useStoreState } from '../../store';
 import Account from '../components/account';
 import AssetBadge from '../components/assetBadge';
@@ -77,9 +81,9 @@ import ConfirmModal from '../components/confirmModal';
 import Copy from '../components/copy';
 import { Scrollbars } from '../components/scrollbar';
 import UnitDisplay from '../components/unitDisplay';
+import { UpgradeToLaceBanner } from '../components/upgradeToLaceBanner';
 
 import type { UseAccount } from '../../../adapters/account';
-import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
@@ -126,6 +130,11 @@ const Send = ({
   const isMounted = useIsMounted();
   const { cardanoCoin, walletType, openHWFlow, networkConnection } =
     useCommonOutsideHandles();
+
+  const { secretsUtil } = useOutsideHandles();
+
+  const { lockedStakeRewards } = useOutsideHandles();
+  const [showSwitchToLaceBanner, setShowSwitchToLaceBanner] = useState(false);
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
     useStoreActions(actions => actions.globalModel.sendStore.setAddress),
@@ -227,7 +236,7 @@ const Send = ({
 
     setFee({ fee: '' });
     setTx(null);
-    await new Promise((res, rej) =>
+    await new Promise(res =>
       setTimeout(() => {
         res(null);
       }),
@@ -436,15 +445,34 @@ const Send = ({
   const setMessageDebounced = useMemo(() => debounce(setMessage, 300), []);
   const isOffline = networkConnection === NetworkConnectionStates.OFFLINE;
 
+  const setShowSwitchToLaceBannerDebounced = useConstant(() =>
+    debounce(setShowSwitchToLaceBanner, 500),
+  );
+
+  const reachedMaxAdaAmount = useMemo(
+    () =>
+      BigInt(toUnit(value.ada)) >
+      BigInt(BigInt(utxoTotal?.coins || 0) + BigInt(rewards || 0) || '0') -
+        BigInt(lockedStakeRewards.toString()),
+    [value.ada, utxoTotal?.coins, rewards, lockedStakeRewards],
+  );
+
+  useEffect(() => {
+    setShowSwitchToLaceBannerDebounced(
+      !!lockedStakeRewards && reachedMaxAdaAmount,
+    );
+  }, [lockedStakeRewards, reachedMaxAdaAmount]);
+
   return (
     <>
       <Box
-        height="calc(100vh - 30px)"
         display="flex"
+        flex="1"
         alignItems="center"
         flexDirection="column"
         position="relative"
         background={containerBg}
+        paddingBottom="74px"
       >
         {protocolParameters && isLoading ? (
           <Box
@@ -481,7 +509,13 @@ const Send = ({
               flexDirection="column"
               justifyContent="center"
               width="80%"
+              overflow="hidden"
             >
+              {!!lockedStakeRewards && (
+                <UpgradeToLaceBanner
+                  showSwitchToLaceBanner={showSwitchToLaceBanner}
+                />
+              )}
               <AddressPopup
                 recentSendToAddress={
                   activeAccount.recentSendToAddress?.[environmentName]
@@ -554,11 +588,7 @@ const Send = ({
                     isInvalid={
                       value.ada &&
                       (BigInt(toUnit(value.ada)) < BigInt(txInfo.minUtxo) ||
-                        BigInt(toUnit(value.ada)) >
-                          BigInt(
-                            BigInt(utxoTotal?.coins || 0) +
-                              BigInt(rewards || 0) || '0',
-                          ))
+                        reachedMaxAdaAmount)
                     }
                     onFocus={() => (focus.current = true)}
                     placeholder="0.000000"
@@ -599,38 +629,43 @@ const Send = ({
                 </InputGroup>
               </Box>
               <Box height="4" />
-              <Scrollbars
-                style={{
-                  width: '100%',
-                  height: '170px',
-                }}
-              >
-                <Box
-                  display="flex"
-                  width="full"
-                  flexWrap="wrap"
-                  paddingRight="2"
+              {value.assets.length > 0 && (
+                <Scrollbars
+                  style={{
+                    width: '100%',
+                    height: '170px',
+                  }}
                 >
-                  {value.assets.map(asset => (
-                    <Box key={asset?.unit}>
-                      <AssetBadge
-                        onRemove={removeAsset}
-                        onInput={onAssetInput}
-                        asset={asset}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              </Scrollbars>
+                  <Box
+                    display="flex"
+                    width="full"
+                    flexWrap="wrap"
+                    paddingRight="2"
+                  >
+                    {value.assets.map(asset => (
+                      <Box key={asset?.unit}>
+                        <AssetBadge
+                          onRemove={removeAsset}
+                          onInput={onAssetInput}
+                          asset={asset}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                </Scrollbars>
+              )}
             </Box>
 
             <Box
-              position="absolute"
+              position="fixed"
               width="full"
-              bottom="3"
+              bottom="0"
+              padding="3"
               display="flex"
               alignItems="center"
               justifyContent="center"
+              background={containerBg}
+              zIndex="2"
             >
               <Button
                 data-testid="sendBtn"
@@ -661,6 +696,7 @@ const Send = ({
         isPopup={true}
         openHWFlow={openHWFlow}
         walletType={walletType}
+        secretsUtil={secretsUtil}
         title={'Confirm transaction'}
         info={
           <Box
@@ -755,18 +791,20 @@ const Send = ({
           </Box>
         }
         ref={ref}
-        sign={async (password = '') => {
+        sign={async () => {
           capture(Events.SendTransactionConfirmationConfirmClick);
           try {
             await signAndSubmit({
               tx,
-              password,
+              password: secretsUtil.password,
               withSignTxConfirmation,
               inMemoryWallet,
             });
           } catch (error) {
             console.error('Failed to sign and submit transaction', error);
             throw error;
+          } finally {
+            secretsUtil.clearSecrets();
           }
         }}
         getCbor={async () => {
@@ -779,6 +817,7 @@ const Send = ({
           });
         }}
         onConfirm={async (status, error) => {
+          secretsUtil.clearSecrets();
           if (status) {
             capture(Events.SendTransactionConfirmed);
             toast({
@@ -809,7 +848,7 @@ const Send = ({
               status: 'error',
               duration: 3000,
             });
-          ref.current?.closeModal();
+          setTimeout(() => ref.current?.closeModal(), 0);
           setTimeout(() => {
             history.push('/');
           }, 200);
@@ -910,7 +949,7 @@ const AddressPopup = ({
       }}
       autoFocus={false}
       onClose={async () => {
-        await new Promise<void>((res, rej) =>
+        await new Promise<void>(res =>
           setTimeout(() => {
             res();
           }),
@@ -933,7 +972,7 @@ const AddressPopup = ({
             value={address.display}
             spellCheck={false}
             onBlur={async e => {
-              await new Promise<void>((res, rej) =>
+              await new Promise<void>(res =>
                 setTimeout(() => {
                   res();
                 }),
@@ -1424,7 +1463,7 @@ const Selection = ({
           alignItems="center"
           justifyContent="center"
           color={selectColor === 'orange.200' ? 'black' : 'white'}
-          onClick={e => {
+          onClick={() => {
             delete choice[asset.unit];
             setChoice({ ...choice });
           }}
@@ -1433,7 +1472,7 @@ const Selection = ({
         </Box>
       ) : (
         <Avatar
-          onClick={e => {
+          onClick={() => {
             choice[asset.unit] = true;
             setChoice({ ...choice });
           }}

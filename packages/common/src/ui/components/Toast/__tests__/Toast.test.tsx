@@ -18,9 +18,10 @@ const ToastContainer = ({ text, duration, withProgressBar }: ToastProps) => {
 };
 
 describe('Testing TextContent component', () => {
+  const duration = 10;
   const props: ToastProps = {
     text: 'test text',
-    duration: 10,
+    duration,
     withProgressBar: true
   };
 
@@ -82,6 +83,6 @@ describe('Testing TextContent component', () => {
 
     setTimeout(() => {
       expect(screen.queryAllByText(props.text)).toHaveLength(0);
-    }, props.duration + 1);
+    }, duration + 1);
   });
 });

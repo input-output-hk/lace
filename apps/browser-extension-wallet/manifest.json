@@ -1,7 +1,7 @@
 {
   "name": "$WALLET_MANIFEST_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
-  "version": "1.17.5",
+  "version": "1.17.6",
   "manifest_version": 3,
   "key": "$LACE_EXTENSION_KEY",
   "icons": {
@@ -22,6 +22,13 @@
     "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; frame-src https://connect.trezor.io/ https://www.youtube-nocookie.com; script-src 'self' 'wasm-unsafe-eval' $LOCALHOST_SCRIPT_SRC; font-src 'self' https://use.typekit.net; object-src 'self'; connect-src $BLOCKFROST_URLS $CARDANO_SERVICES_URLS $CARDANO_WS_SERVER_URLS $SENTRY_URL https://coingecko.live-mainnet.eks.lw.iog.io https://muesliswap.live-mainnet.eks.lw.iog.io $LOCALHOST_CONNECT_SRC $POSTHOG_HOST https://use.typekit.net data:; style-src * 'unsafe-inline'; img-src * data:;"
   },
   "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
+      "js": ["./js/inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    },
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
       "js": ["./js/content.js"],
