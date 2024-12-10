@@ -97,8 +97,6 @@ export type OutsideHandlesContextValue = {
   triggerMultidelegationFirstVisit: () => void;
   multidelegationDAppCompatibility: boolean;
   triggerMultidelegationDAppCompatibility: () => void;
-  multidelegationFirstVisitSincePortfolioPersistence: boolean;
-  triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
   walletName: string;
   currentChain: Wallet.Cardano.ChainId;

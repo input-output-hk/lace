@@ -15,7 +15,6 @@ import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, us
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
-  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
 } from '@utils/constants';
 import { useDelegationStore } from '@src/features/delegation/stores';
@@ -35,10 +34,6 @@ export const StakingContainer = (): React.ReactElement => {
   );
   const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
     useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
-  const [
-    multidelegationFirstVisitSincePortfolioPersistence,
-    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
-  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
     const an = {
@@ -142,11 +137,6 @@ export const StakingContainer = (): React.ReactElement => {
           triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
           multidelegationDAppCompatibility,
           triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
-          multidelegationFirstVisitSincePortfolioPersistence,
-          triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
-            setMultidelegationFirstVisit(false);
-            setMultidelegationFirstVisitSincePortfolioPersistence(false);
-          },
           walletAddress,
           walletName,
           currentChain,
