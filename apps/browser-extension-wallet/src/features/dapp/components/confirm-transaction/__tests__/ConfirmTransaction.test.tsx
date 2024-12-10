@@ -12,6 +12,7 @@ const mockUseViewsFlowContext = jest.fn();
 const mockUseSignWithHardwareWallet = jest.fn();
 const mockUseOnBeforeUnload = jest.fn();
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
+const mockUseTxWitnessRequest = jest.fn().mockReturnValue({});
 const mockCreateTxInspector = jest.fn().mockReturnValue(() => ({ minted: [] as any, burned: [] as any }));
 import * as React from 'react';
 import { cleanup, render, act, fireEvent } from '@testing-library/react';
@@ -98,6 +99,16 @@ jest.mock('../hooks.ts', () => {
   };
 });
 
+jest.mock('@src/utils/senderToDappInfo', () => ({
+  ...jest.requireActual<any>('@src/utils/senderToDappInfo'),
+  senderToDappInfo: jest.fn().mockReturnValue({})
+}));
+
+jest.mock('@providers/TxWitnessRequestProvider', () => ({
+  ...jest.requireActual<any>('@providers/TxWitnessRequestProvider'),
+  useTxWitnessRequest: mockUseTxWitnessRequest
+}));
+
 jest.mock('@hooks/useComputeTxCollateral', (): typeof UseComputeTxCollateral => ({
   ...jest.requireActual<typeof UseComputeTxCollateral>('@hooks/useComputeTxCollateral'),
   useComputeTxCollateral: mockUseComputeTxCollateral
@@ -127,13 +138,23 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseViewsFlowContext.mockReset();
     mockUseViewsFlowContext.mockReturnValue({
       utils: {},
+      setDappInfo: jest.fn(),
       signTxRequest: {
         request: {
           transaction: {
             toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
             getId: jest.fn().mockReturnValue({ id: 'test-tx-id' })
           }
-        }
+        },
+        set: jest.fn()
+      }
+    });
+    mockUseTxWitnessRequest.mockReset();
+    mockUseTxWitnessRequest.mockReturnValue({
+      signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
+      transaction: {
+        toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        getId: jest.fn().mockReturnValue({ id: 'test-tx-id' })
       }
     });
     mockConfirmTransactionContent.mockReset();
@@ -168,13 +189,23 @@ describe('Testing ConfirmTransaction component', () => {
     mockUseViewsFlowContext.mockReset();
     mockUseViewsFlowContext.mockReturnValue({
       utils: { setNextView: setNextViewMock },
+      setDappInfo: jest.fn(),
       signTxRequest: {
         request: {
           transaction: {
             getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
             toCore: jest.fn().mockReturnValue(signTxData.tx)
           }
-        }
+        },
+        set: jest.fn()
+      }
+    });
+    mockUseTxWitnessRequest.mockReset();
+    mockUseTxWitnessRequest.mockReturnValue({
+      signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
+      transaction: {
+        getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        toCore: jest.fn().mockReturnValue(signTxData.tx)
       }
     });
 
