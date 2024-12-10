@@ -10,7 +10,7 @@ import groupBy from 'lodash/groupBy';
 interface UseRewardAccountsDataType {
   areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
   poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
-  lockedStakeRewards: BigInt;
+  lockedStakeRewards: bigint;
 }
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {

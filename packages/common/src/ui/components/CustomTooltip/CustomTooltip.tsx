@@ -29,12 +29,12 @@ export const CustomTooltip = ({ id, text, children, ...tooltipProps }: CustomToo
   //  This is a workaround, we need to keep looking for the actual fix
   const handleMouseEnter = () => {
     const element = document.querySelector(`#${id}`);
-    element.classList.add('show');
+    element?.classList.add('show');
   };
 
   const handleMouseLeave = () => {
     const element = document.querySelector(`#${id}`);
-    element.classList.remove('show');
+    element?.classList.remove('show');
   };
 
   const tooltipDelayHide = regexFirefox.test(userAgent) ? 1000 : 0;

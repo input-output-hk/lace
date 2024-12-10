@@ -28,7 +28,7 @@ import { useRewardAccountsData } from '@src/views/browser-view/features/staking/
 
 interface InputFieldActionParams {
   id: string;
-  value: string;
+  value?: string;
   maxDecimals?: number;
 }
 
@@ -192,11 +192,11 @@ export const useSelectedCoins = ({
         coinBalance,
         spendableCoin?.toString(),
         tokensUsed[cardanoCoin.id] || '0',
-        assetInputItem?.value || '0',
+        assetInputItem?.value ?? '0',
         rewardAcountsData.lockedStakeRewards.toString() || '0'
       );
       const fiatValue = Wallet.util.convertAdaToFiat({
-        ada: assetInputItem?.value || '0',
+        ada: assetInputItem?.value ?? '0',
         fiat: prices?.cardano?.price
       });
       return {

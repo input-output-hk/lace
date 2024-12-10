@@ -28,7 +28,7 @@ export const QRCode = ({ data, options }: QRCodeProps): React.ReactElement => {
   const qrCode = useMemo(() => new QRCodeStyling(defaultOptions), []);
   const ref = useRef(null);
   useEffect(() => {
-    qrCode.append(ref.current);
+    qrCode.append(ref.current ?? undefined);
   }, [qrCode]);
 
   useEffect(() => {

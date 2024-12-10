@@ -26,7 +26,7 @@ export const formatLocaleNumber = (value: string | number, decimalPlaces: number
 const formatNumericValue = (
   val: number | string,
   suffix: number | string,
-  decimalPlaces: number = DEFAULT_DECIMALS
+  decimalPlaces: number = DEFAULT_DECIMALS,
 ): React.ReactElement => (
   <>
     {val ? formatLocaleNumber(String(val), decimalPlaces) : '-'}
@@ -77,7 +77,7 @@ export const StakingInfoCard = ({
   id,
   logo,
   margin,
-  name = '',
+  name,
   totalRewards,
   lastReward,
   ros,

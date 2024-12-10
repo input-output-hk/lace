@@ -13,7 +13,8 @@
     "module": "es2020",
     "target": "es2016",
     "preserveConstEnums": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "strictNullChecks": true
   },
   "references": [{ "path": "../../packages/core/src" }, { "path": "../../packages/cardano/src" }]
 }

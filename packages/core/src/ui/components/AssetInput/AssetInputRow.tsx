@@ -20,7 +20,7 @@ export const AssetInputRow = ({
   idx: number;
   isPopupView?: boolean;
 }): React.ReactElement => {
-  const containerRef = useRef<HTMLDivElement>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const { value, coin, maxDecimals } = row;
   const [isFocused, setIsFocused] = useState(focused);
 
@@ -33,7 +33,7 @@ export const AssetInputRow = ({
 
       if (!isInFocusableArea)
         // do not apply compact notation in case we are still in the focusable area
-        onBlur({
+        onBlur?.({
           value,
           id: coin.id,
           maxDecimals
@@ -46,7 +46,7 @@ export const AssetInputRow = ({
   const onFocus = useCallback(
     (props) => {
       setIsFocused(true);
-      row?.onFocus(props);
+      row?.onFocus?.(props);
     },
     [row]
   );

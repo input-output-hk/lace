@@ -1,10 +1,22 @@
 import { Wallet } from '@lace/cardano';
 import { QuorumOptionValue, QuorumRadioOption } from '../creation-flow/Quorum';
 
-type Tag = 'any' | 'all' | 'n_of_k' | 'pubkey' | 'timelock_start' | 'timelock_expiry';
+type TagsNotRequiringCoSigners = 'any' | 'all' | 'pubkey' | 'timelock_start' | 'timelock_expiry';
+type TagRequiringCoSigners = 'n_of_k';
 
-export const getQuorumRulesByTag = (tag: Tag, n?: number): QuorumOptionValue | null => {
-  switch (tag) {
+type tagOptionsNotRequiringNumberOfCosigners = {
+  tag: TagsNotRequiringCoSigners;
+};
+
+type tagOptionsRequiringNumberOfCosigners = {
+  n: number;
+  tag: TagRequiringCoSigners;
+};
+
+type tagOptions = tagOptionsNotRequiringNumberOfCosigners | tagOptionsRequiringNumberOfCosigners;
+
+export const getQuorumRulesByTag = (props: tagOptions): QuorumOptionValue | null => {
+  switch (props.tag) {
     case 'any': {
       return { option: QuorumRadioOption.Any };
     }
@@ -12,7 +24,7 @@ export const getQuorumRulesByTag = (tag: Tag, n?: number): QuorumOptionValue | n
       return { option: QuorumRadioOption.AllAddresses };
     }
     case 'n_of_k': {
-      return { numberOfCosigner: n, option: QuorumRadioOption.NOfK };
+      return { numberOfCosigner: props.n, option: QuorumRadioOption.NOfK };
     }
     default:
       return null;

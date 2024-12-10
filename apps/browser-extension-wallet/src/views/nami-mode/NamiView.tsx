@@ -18,7 +18,8 @@ import {
   useWalletManager,
   useBuildDelegation,
   useBalances,
-  useHandleResolver
+  useHandleResolver,
+  useRedirection
 } from '@hooks';
 import { walletManager, withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { useAnalytics } from './hooks';
@@ -26,7 +27,7 @@ import { useDappContext, withDappContext } from '@src/features/dapp/context';
 import { localDappService } from '../browser-view/features/dapp/components/DappList/localDappService';
 import { isValidURL } from '@src/utils/is-valid-url';
 import { CARDANO_COIN_SYMBOL } from './constants';
-import { useDelegationTransaction } from '../browser-view/features/staking/hooks';
+import { useDelegationTransaction, useRewardAccountsData } from '../browser-view/features/staking/hooks';
 import { useSecrets } from '@lace/core';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
@@ -43,6 +44,7 @@ import { BackgroundStorage } from '@lib/scripts/types';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
+import { walletRoutePaths } from '@routes';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
 
@@ -179,6 +181,10 @@ export const NamiView = withDappContext((): React.ReactElement => {
     setDeletingWallet(false);
   }, [analytics, deleteWallet, setDeletingWallet, walletRepository]);
 
+  const { lockedStakeRewards } = useRewardAccountsData();
+
+  const redirectToStaking = useRedirection(walletRoutePaths.earn);
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -239,7 +245,9 @@ export const NamiView = withDappContext((): React.ReactElement => {
         chainHistoryProvider,
         protocolParameters: walletState?.protocolParameters,
         assetInfo: walletState?.assetInfo,
-        createHistoricalOwnInputResolver
+        createHistoricalOwnInputResolver,
+        lockedStakeRewards,
+        redirectToStaking
       }}
     >
       <CommonOutsideHandlesProvider

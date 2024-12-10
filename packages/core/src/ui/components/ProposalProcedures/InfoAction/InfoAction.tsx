@@ -4,6 +4,7 @@ import * as Types from './InfoActionTypes';
 import { ProposalProcedureTransactionDetails } from '../components/ProposalProcedureTransactionDetails';
 import { Procedure } from '../components/Procedure';
 import { useTranslation } from 'react-i18next';
+import { TranslationsWithDepositAndRewardAccount } from '../components/ProposalProcedureTransactionDetailsTypes';
 
 export interface InfoActionProps {
   data: Types.Data;
@@ -30,7 +31,7 @@ export const InfoAction = ({ data: { procedure, txDetails } }: InfoActionProps):
   return (
     <Grid columns="$1" gutters="$20">
       <ProposalProcedureTransactionDetails
-        translations={translations.txDetails}
+        translations={translations.txDetails as TranslationsWithDepositAndRewardAccount}
         txTitle={t('core.ProposalProcedure.governanceAction.infoAction.title')}
         deposit={txDetails.deposit}
         rewardAccount={txDetails.rewardAccount}

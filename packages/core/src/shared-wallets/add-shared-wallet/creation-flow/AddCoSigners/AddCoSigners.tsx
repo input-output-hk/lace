@@ -9,6 +9,9 @@ import { AddCoSignerInput } from './AddCoSignerInput';
 import styles from './AddCoSigners.module.scss';
 import { CoSigner, CoSignerDirty, CoSignerError } from './type';
 
+if (!process.env.MIN_NUMBER_OF_COSIGNERS) {
+  throw new Error('MIN_NUMBER_OF_COSIGNERS not set');
+}
 const MIN_NUMBER_OF_COSIGNERS = Number.parseInt(process.env.MIN_NUMBER_OF_COSIGNERS);
 
 interface Props {

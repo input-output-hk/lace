@@ -27,7 +27,7 @@ describe.skip('Testing build-transaction', () => {
 
     expect(transaction).toBeDefined();
     expect(minimumCoinQuantities).toBeDefined();
-    expect(minimumCoinQuantities.get(output).coinMissing).toBe(BigInt(0));
+    expect(minimumCoinQuantities.get(output)?.coinMissing).toBe(BigInt(0));
   });
 
   test('should validate and build a transaction successfully with coins missing', async () => {
@@ -39,7 +39,7 @@ describe.skip('Testing build-transaction', () => {
 
     expect(transaction).toBeDefined();
     expect(minimumCoinQuantities).toBeDefined();
-    expect(minimumCoinQuantities.get(output).coinMissing).toBeGreaterThan(BigInt(0));
+    expect(minimumCoinQuantities.get(output)?.coinMissing).toBeGreaterThan(BigInt(0));
   });
 
   test('should throw an error if tx initialization fails', async () => {

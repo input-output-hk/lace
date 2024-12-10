@@ -13,7 +13,7 @@ import { SettingsWallet } from '../SettingsWallet';
 import '@testing-library/jest-dom';
 import { I18nextProvider } from 'react-i18next';
 import { StoreProvider } from '@src/stores';
-import { APP_MODE_BROWSER } from '@src/utils/constants';
+import { APP_MODE_BROWSER, COLLATERAL_AMOUNT_LOVELACES } from '@src/utils/constants';
 import { i18n } from '@lace/translation';
 import {
   AnalyticsProvider,
@@ -25,7 +25,6 @@ import {
 } from '@providers';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
-import { COLLATERAL_AMOUNT_LOVELACES } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import * as hooks from '@hooks';
 import * as common from '@lace/common';
@@ -123,22 +122,21 @@ const testIds = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_BROWSER}>
-            <I18nextProvider i18n={i18n}>
-              <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                <CurrencyStoreProvider>
-                  <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-                </CurrencyStoreProvider>
-              </AnalyticsProvider>
-            </I18nextProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_BROWSER}>
+          <I18nextProvider i18n={i18n}>
+            <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+              <CurrencyStoreProvider>
+                <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+              </CurrencyStoreProvider>
+            </AnalyticsProvider>
+          </I18nextProvider>
+        </StoreProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  );
 
 describe('Testing SettingsWalletBase component', () => {
   window.ResizeObserver = ResizeObserver;

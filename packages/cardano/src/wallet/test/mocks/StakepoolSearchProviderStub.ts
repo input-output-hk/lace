@@ -193,7 +193,7 @@ export const pools: Partial<Cardano.StakePool>[] = [
       homepage: 'https://nordicpool.org'
     }
   }
-];
+] as unknown as Partial<Cardano.StakePool>[];
 
 const detailsForAll: PoolDetails = {
   cost: BigInt('304000000'),
@@ -221,14 +221,14 @@ const detailsForAll: PoolDetails = {
   relays: undefined,
   rewardAccount: Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj'),
   vrf: undefined
-};
+} as unknown as PoolDetails;
 
 export const mockedStakePools: Cardano.StakePool[] = pools.map(
   (pool) =>
     ({
       ...detailsForAll,
       ...pool
-    } as Cardano.StakePool)
+    }) as Cardano.StakePool
 );
 
 export const mockedStakePoolSearchResults: Promise<StakePoolSearchResults> = Promise.resolve({

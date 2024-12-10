@@ -45,9 +45,9 @@ export const stakePoolMock: Cardano.StakePool = {
   status: Cardano.StakePoolStatus.Active,
   vrf: undefined,
   relays: undefined
-};
+} as unknown as Cardano.StakePool;
 
-export const rewardAcountMock: Partial<Cardano.RewardAccountInfo> = {
+export const rewardAcountMock: Cardano.RewardAccountInfo = {
   address: Cardano.RewardAccount('stake_test1urm7tqwy3d5e3kxp424cvtcgr8zaprkszk38jntyzu5t4mqalgvfg'),
   credentialStatus: Cardano.StakeCredentialStatus.Registered,
 
@@ -55,4 +55,4 @@ export const rewardAcountMock: Partial<Cardano.RewardAccountInfo> = {
     nextNextEpoch: stakePoolMock
   },
   rewardBalance: BigInt('0')
-};
+} as unknown as Cardano.RewardAccountInfo;

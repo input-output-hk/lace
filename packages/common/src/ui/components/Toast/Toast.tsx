@@ -44,7 +44,7 @@ export const notify = ({
       </div>
     ),
     duration,
-    className: cn(styles.message, { [className]: className }),
+    className: cn(styles.message, { ...(className && { [className]: className }) }),
     style: {
       marginTop: 'calc(100vh - 90px)',
       ...(!!style && style)

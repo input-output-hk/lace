@@ -3,7 +3,7 @@
 /* eslint-disable sonarjs/no-identical-functions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
-const mockUseMaxAda = jest.fn();
+const mockUseHasEnoughCollateral = jest.fn();
 const mockUseBuitTxState = jest.fn();
 const mockUseSyncingTheFirstTime = jest.fn();
 const mockCreateTxBuilder = jest.fn();
@@ -13,11 +13,10 @@ import { BehaviorSubject } from 'rxjs';
 import { cleanup, renderHook } from '@testing-library/react-hooks';
 import { AppSettingsProvider } from '@providers';
 import { StoreProvider } from '@src/stores';
-import { COLLATERAL_ADA_AMOUNT, COLLATERAL_AMOUNT_LOVELACES, useCollateral } from '@hooks';
-import { APP_MODE_BROWSER } from '@src/utils/constants';
+import { useCollateral } from '@hooks';
+import { APP_MODE_BROWSER, COLLATERAL_AMOUNT_LOVELACES } from '@src/utils/constants';
 import { I18nextProvider } from 'react-i18next';
 import { i18n } from '@lace/translation';
-import { Wallet } from '@lace/cardano';
 import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import { TxInspection } from '@cardano-sdk/tx-construction';
@@ -59,9 +58,9 @@ jest.mock('@src/views/browser-view/features/send-transaction', () => {
   };
 });
 
-jest.mock('@hooks/useMaxAda', () => ({
-  ...jest.requireActual<any>('@hooks/useMaxAda'),
-  useMaxAda: mockUseMaxAda
+jest.mock('@hooks/useHasEnoughCollateral', () => ({
+  ...jest.requireActual<any>('@hooks/useHasEnoughCollateral'),
+  useHasEnoughCollateral: mockUseHasEnoughCollateral
 }));
 
 jest.mock('@hooks/useSyncingTheFirstTime', () => ({
@@ -71,14 +70,13 @@ jest.mock('@hooks/useSyncingTheFirstTime', () => ({
 
 const getWrapper =
   () =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <StoreProvider appMode={APP_MODE_BROWSER}>
-          <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
-        </StoreProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <StoreProvider appMode={APP_MODE_BROWSER}>
+        <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+      </StoreProvider>
+    </AppSettingsProvider>
+  );
 
 describe('Testing useCollateral hook', () => {
   beforeEach(() => {
@@ -91,7 +89,7 @@ describe('Testing useCollateral hook', () => {
   });
   test('should return proper initial states', async () => {
     mockUseBuitTxState.mockReturnValue({});
-    mockUseMaxAda.mockReturnValue('');
+    mockUseHasEnoughCollateral.mockReturnValue(false);
     const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
     await waitFor(() => {
       expect(hook.result.current.isInitializing).toBe(false);
@@ -106,21 +104,21 @@ describe('Testing useCollateral hook', () => {
 
   test('should return proper hasEnoughAda value', async () => {
     mockUseBuitTxState.mockReturnValue({});
-    mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));
+    mockUseHasEnoughCollateral.mockReturnValue(true);
 
     const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
 
     expect(hook.result.current.hasEnoughAda).toBe(true);
 
-    mockUseMaxAda.mockReset();
-    mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT - 1))));
+    mockUseHasEnoughCollateral.mockReset();
+    mockUseHasEnoughCollateral.mockReturnValue(false);
     hook.rerender();
     await waitFor(() => {
       expect(hook.result.current.hasEnoughAda).toBe(false);
     });
 
-    mockUseMaxAda.mockReset();
-    mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT))));
+    mockUseHasEnoughCollateral.mockReset();
+    mockUseHasEnoughCollateral.mockReturnValue(true);
     hook.rerender();
     await waitFor(() => {
       expect(hook.result.current.hasEnoughAda).toBe(true);
@@ -181,7 +179,7 @@ describe('Testing useCollateral hook', () => {
 
     describe('testing initializeCollateralTx', () => {
       test('should exit early in case there is not enough ada or the wallet is syncing for the first time', async () => {
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT - 1))));
+        mockUseHasEnoughCollateral.mockReturnValue(false);
         mockUseSyncingTheFirstTime.mockReturnValue(false);
         const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
 
@@ -196,8 +194,8 @@ describe('Testing useCollateral hook', () => {
           expect(inspect).not.toHaveBeenCalled();
         });
 
-        mockUseMaxAda.mockReset();
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT))));
+        mockUseHasEnoughCollateral.mockReset();
+        mockUseHasEnoughCollateral.mockReturnValue(true);
         mockUseSyncingTheFirstTime.mockReturnValue(true);
         hook.rerender();
         act(() => {
@@ -220,7 +218,7 @@ describe('Testing useCollateral hook', () => {
             coins: COLLATERAL_AMOUNT_LOVELACES
           }
         };
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));
+        mockUseHasEnoughCollateral.mockReturnValue(true);
         mockUseSyncingTheFirstTime.mockReturnValue(false);
         const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
         act(() => {
@@ -239,7 +237,7 @@ describe('Testing useCollateral hook', () => {
     });
     describe('testing submitCollateralTx', () => {
       test('should exit early in case txBuilder is not set', async () => {
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT - 1))));
+        mockUseHasEnoughCollateral.mockReturnValue(false);
         mockUseSyncingTheFirstTime.mockReturnValue(false);
         const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
 
@@ -256,8 +254,8 @@ describe('Testing useCollateral hook', () => {
           expect(mockSetBuiltTxData).not.toHaveBeenCalled();
         });
 
-        mockUseMaxAda.mockReset();
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT))));
+        mockUseHasEnoughCollateral.mockReset();
+        mockUseHasEnoughCollateral.mockReturnValue(true);
         mockUseSyncingTheFirstTime.mockReturnValue(true);
         hook.rerender();
         await act(async () => {
@@ -290,7 +288,7 @@ describe('Testing useCollateral hook', () => {
           isInMemoryWallet: true
         });
 
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));
+        mockUseHasEnoughCollateral.mockReturnValue(true);
         mockUseSyncingTheFirstTime.mockReturnValue(false);
         const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });
 
@@ -309,8 +307,8 @@ describe('Testing useCollateral hook', () => {
       test('should submit the tx and set the colateral for HW (not in memory wallet)', async () => {
         mockSubmitTx.mockReset();
 
-        mockUseMaxAda.mockReset();
-        mockUseMaxAda.mockReturnValue(BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT + 1))));
+        mockUseHasEnoughCollateral.mockReset();
+        mockUseHasEnoughCollateral.mockReturnValue(true);
         mockUseSyncingTheFirstTime.mockReset();
         mockUseSyncingTheFirstTime.mockReturnValue(false);
         const hook = renderHook(() => useCollateral(), { wrapper: getWrapper() });

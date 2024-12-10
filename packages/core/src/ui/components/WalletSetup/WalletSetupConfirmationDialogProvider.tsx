@@ -15,7 +15,7 @@ interface Props {
   children: (value: ContextType) => React.ReactNode;
 }
 
-const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
+const WalletSetupConfirmationDialogContext = createContext<ContextType | null>(null);
 
 export const useWalletSetupConfirmationDialog = (): ContextType => {
   const context = useContext(WalletSetupConfirmationDialogContext);
@@ -26,7 +26,8 @@ export const useWalletSetupConfirmationDialog = (): ContextType => {
 export const WalletSetupConfirmationDialogProvider = ({ children }: Props): React.ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { clearSecrets } = useSecrets();
-  const handleOnConfirmRef = useRef(() => void 0);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const handleOnConfirmRef = useRef(() => {});
   const shouldShowDialog = useRef<boolean>(false);
   const shouldShowDialog$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const { t } = useTranslation();

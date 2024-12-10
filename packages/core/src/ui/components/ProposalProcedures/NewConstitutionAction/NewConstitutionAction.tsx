@@ -72,7 +72,7 @@ export const NewConstitutionAction = ({
         </Cell>
       )}
       {/* action id section*/}
-      {actionId && (
+      {actionId && translations.actionId && (
         <>
           <Cell>
             <Divider my={'$16'} />

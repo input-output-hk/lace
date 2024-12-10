@@ -35,7 +35,7 @@ export const WalletAvatar = ({
   ...avatarProps
 }: WalletAvatarProps): React.ReactElement => (
   <div
-    className={classnames([styles[theme], styles.avatarContainer])}
+    className={classnames([theme && styles[theme], styles.avatarContainer])}
     onClick={handleClick}
     data-testid="wallet-avatar"
   >
