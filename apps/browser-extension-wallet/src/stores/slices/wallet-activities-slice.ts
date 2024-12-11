@@ -372,9 +372,9 @@ const mapWalletActivities = memoize(
           fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
         }),
         ...(activity.type === TransactionActivityType.self && {
-          amount: `${activity.fee} ${cardanoCoin.symbol}`,
+          amount: `${new BigNumber(activity.fee).times(-1)} ${cardanoCoin.symbol}`,
           fiatAmount: cardanoFiatPrice
-            ? `${getFiatAmount(new BigNumber(activity.fee), cardanoFiatPrice)} ${fiatCurrency.code}`
+            ? `${getFiatAmount(new BigNumber(activity.fee).times(-1), cardanoFiatPrice)} ${fiatCurrency.code}`
             : '-'
         }),
         assets: activity.assets.map((asset: ActivityAssetProp) => {
