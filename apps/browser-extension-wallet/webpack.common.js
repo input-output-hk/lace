@@ -85,6 +85,10 @@ module.exports = () => {
           return /.*\/wordlists\/(?!english).*\.json/.test(resource);
         }
       }),
+      new IgnorePlugin({
+        resourceRegExp: /\/(tests|test|__tests__|mocks)(\/|$)/,
+        contextRegExp: /.*/
+      }),
       new IgnorePlugin({ resourceRegExp: /^\.\/wordlists\/(?!english)/, contextRegExp: /bip39\/src$/ }),
       new NormalModuleReplacementPlugin(/blake2b$/, 'blake2b-no-wasm'),
       new NormalModuleReplacementPlugin(/@emurgo\/cip14-js/, path.join(__dirname, './src/utils/cip14.js')),
