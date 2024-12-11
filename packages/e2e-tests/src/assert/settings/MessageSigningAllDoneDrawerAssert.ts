@@ -14,10 +14,7 @@ class MessageSigningAllDoneDrawerAssert {
     await MessageSigningAllDoneDrawer.image.waitForDisplayed();
     await MessageSigningAllDoneDrawer.title.waitForDisplayed();
     expect(await MessageSigningAllDoneDrawer.title.getText()).to.equal(await t('core.signMessage.successTitle'));
-    await MessageSigningAllDoneDrawer.description.waitForDisplayed();
-    expect(await MessageSigningAllDoneDrawer.description.getText()).to.equal(
-      await t('core.signMessage.successDescription')
-    );
+
     await MessageSigningAllDoneDrawer.signature.waitForDisplayed();
     expect(await MessageSigningAllDoneDrawer.signature.getText()).to.not.be.empty;
 

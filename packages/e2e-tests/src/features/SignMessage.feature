@@ -40,7 +40,7 @@ Feature: Sign message
       # For 3rd account from TestAutomationWallet
       | addr_test1qpvl49m3p8z8cmlqrmm...mhy2p8sqj0rsdf |
 
-  @LW-11539
+  @LW-11539 @Smoke
   Scenario: Extended view - Sign message - happy path
     When I click the menu button
     And I click on the "Sign message" option
