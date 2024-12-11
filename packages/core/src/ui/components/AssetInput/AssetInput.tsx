@@ -251,7 +251,7 @@ export const AssetInput = ({
       </div>
 
       <div className={styles.assetBalancesRow}>
-        <Flex gap="$8" flexDirection="column" data-testid="coin-configure-balance" className={styles.balanceText}>
+        <Flex gap="$8" flexDirection="column" testId="coin-configure-balance" className={styles.balanceText}>
           <Text.Body.Normal>{coin.balance}</Text.Body.Normal>
           {!isPopupView && !!coin.lockedStakeRewards && lockedRewards}
         </Flex>
