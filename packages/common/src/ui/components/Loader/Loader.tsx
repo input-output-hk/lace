@@ -7,6 +7,7 @@ export interface LoaderProps {
   className?: string;
 }
 
+// LW-11964 reuse unbundled image and css
 export const Loader = ({ className }: LoaderProps): React.ReactElement => (
   <img
     src={LoaderIcon}

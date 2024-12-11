@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useAppInit } from '@src/hooks';
@@ -56,6 +56,13 @@ export const DappConnectorView = (): React.ReactElement => {
     load();
   }, [isWalletLocked, cardanoWallet]);
 
+  const isLoading = useMemo(() => hdDiscoveryStatus !== 'Idle', [hdDiscoveryStatus]);
+  useEffect(() => {
+    if (!isLoading) {
+      document.querySelector('#preloader')?.remove();
+    }
+  }, [isLoading]);
+
   const onCloseClick = useCallback(() => {
     tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
     window.close();
@@ -107,7 +114,7 @@ export const DappConnectorView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (hdDiscoveryStatus !== 'Idle') return <Loader className={styles.loader} />;
+  if (isLoading) return <Loader className={styles.loader} />;
 
   return (
     <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>

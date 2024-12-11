@@ -62,7 +62,7 @@
     "@cardano-sdk/crypto": "0.1.32",
     "@cardano-sdk/tx-construction": "0.23.0",
     "@cardano-sdk/util": "0.15.5",
-    "@cardano-sdk/web-extension": "0.34.24",
+    "@cardano-sdk/web-extension": "0.36.1",
     "@chakra-ui/css-reset": "1.0.0",
     "@chakra-ui/icons": "1.0.13",
     "@chakra-ui/react": "1.6.4",

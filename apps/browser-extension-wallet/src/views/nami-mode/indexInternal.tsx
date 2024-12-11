@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
 import { useAppInit } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
@@ -9,8 +9,14 @@ import './index.scss';
 
 export const NamiDappConnector = withDappContext((): React.ReactElement => {
   const { hdDiscoveryStatus } = useWalletStore();
+  const isLoaded = useMemo(() => hdDiscoveryStatus === 'Idle', [hdDiscoveryStatus]);
+  useEffect(() => {
+    if (isLoaded) {
+      document.querySelector('#preloader')?.remove();
+    }
+  }, [isLoaded]);
 
   useAppInit();
 
-  return <div id="nami-mode">{hdDiscoveryStatus === 'Idle' ? <NamiDappConnectorView /> : <MainLoader />}</div>;
+  return <div id="nami-mode">{isLoaded ? <NamiDappConnectorView /> : <MainLoader />}</div>;
 });

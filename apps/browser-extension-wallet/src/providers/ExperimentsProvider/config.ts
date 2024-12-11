@@ -6,7 +6,8 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.USE_SWITCH_TO_NAMI_MODE]: false,
   [ExperimentName.SHARED_WALLETS]: false,
   [ExperimentName.WEBSOCKET_API]: false,
-  [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: false
+  [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: false,
+  [ExperimentName.EXTENSION_STORAGE]: false
 });
 
 export const experiments: ExperimentsConfig = {
@@ -31,6 +32,10 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: {
+    value: false,
+    default: false
+  },
+  [ExperimentName.EXTENSION_STORAGE]: {
     value: false,
     default: false
   }

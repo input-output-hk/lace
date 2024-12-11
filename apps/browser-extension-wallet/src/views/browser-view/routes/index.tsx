@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
-import React, { useEffect, useState, ComponentType } from 'react';
+import React, { useEffect, useState, ComponentType, useMemo } from 'react';
 import { Location } from 'history';
 import { Wallet } from '@lace/cardano';
 import { Switch, Redirect, Route, useLocation } from 'react-router-dom';
@@ -191,6 +191,26 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     };
   });
 
+  const isLoaded = useMemo(
+    () => !areExperimentsLoading && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted,
+    [areExperimentsLoading, isLoadingWalletInfo, walletInfo, walletState, initialHdDiscoveryCompleted]
+  );
+
+  const isOnboarding = useMemo(
+    () =>
+      !areExperimentsLoading &&
+      !isLoadingWalletInfo &&
+      !deletingWallet &&
+      (cardanoWallet === null || stayOnAllDonePage),
+    [areExperimentsLoading, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
+  );
+
+  useEffect(() => {
+    if (isLoaded || isOnboarding) {
+      document.querySelector('#preloader')?.remove();
+    }
+  }, [isLoaded, isOnboarding]);
+
   if (namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet) {
     return (
       <Lock
@@ -209,12 +229,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (
-    !areExperimentsLoading &&
-    !isLoadingWalletInfo &&
-    !deletingWallet &&
-    (cardanoWallet === null || stayOnAllDonePage)
-  ) {
+  if (isOnboarding) {
     return (
       <Switch>
         <Route path={'/setup'} component={WalletSetup} />
@@ -223,7 +238,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     );
   }
 
-  if (!areExperimentsLoading && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted) {
+  if (isLoaded) {
     return (
       <>
         <Switch location={page || location}>
