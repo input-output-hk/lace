@@ -5,12 +5,35 @@
 .assetInputContainer {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 5px;
   max-height: 66px;
   height: 66px;
 
   @media (max-width: $breakpoint-popup) {
     max-height: 60px;
+    gap: 0px;
+  }
+
+  &.withLockedRewards {
+    gap: 10px;
+    max-height: none;
+    height: auto;
+
+    @media (max-width: $breakpoint-popup) {
+      gap: 4px;
+      max-height: none;
+    }
+    .balanceText {
+      &.fiatValue {
+        max-height: size_unit(3);
+      }
+    }
+
+    .invalidInput {
+      @media (max-width: 365px) {
+        margin-bottom: size_unit(2);
+      }
+    }
   }
 }
 
@@ -110,7 +133,6 @@
 }
 
 .invalidInput {
-  margin-top: size_unit(1);
   color: var(--data-pink);
   font-size: var(--bodyXS);
   font-weight: 500;

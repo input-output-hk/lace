@@ -28,7 +28,10 @@ export const getMaxSpendableAmount = (totalSpendableBalance = '0', totalSpent = 
 };
 
 type ADARow = {
+  totalADA: string;
   availableADA: string;
+  lockedStakeRewards: string;
+  hasReachedMaxAvailableAmount: boolean;
 } & Pick<AssetInputProps, 'max' | 'allowFloat' | 'hasMaxBtn' | 'hasReachedMaxAmount'>;
 
 /**
@@ -38,24 +41,30 @@ type ADARow = {
  * @param spendableCoin The amount of coins that can be spent in lovelaces.
  * @param spentCoins The total amount of coins spent in ADA (including current input).
  * @param currentSpendingAmount The amount entered in the current input in ADA.
+ * @param lockedStakeRewards Locked Stake Rewards that cannot be withdrawn.
  */
 export const getADACoinProperties = (
   balance: string,
   spendableCoin: string,
   spentCoins: string,
-  currentSpendingAmount: string
+  currentSpendingAmount: string,
+  lockedStakeRewards: string
 ): ADARow => {
   // Convert to ADA
-  const availableADA = Wallet.util.lovelacesToAdaString(balance);
+  const totalADA = Wallet.util.lovelacesToAdaString(balance);
+  const availableADA = Wallet.util.lovelacesToAdaString(new BigNumber(balance).minus(lockedStakeRewards).toString());
   const spendableCoinInAda = Wallet.util.lovelacesToAdaString(spendableCoin, undefined, BigNumber.ROUND_DOWN);
   // Calculate max amount in ADA
   const max = getMaxSpendableAmount(spendableCoinInAda, spentCoins, currentSpendingAmount);
   return {
+    totalADA,
     availableADA,
+    lockedStakeRewards: Wallet.util.lovelacesToAdaString(lockedStakeRewards.toString()),
     max,
     allowFloat: true,
-    hasMaxBtn: Number(availableADA) > 0,
-    hasReachedMaxAmount: new BigNumber(spentCoins).gte(spendableCoinInAda)
+    hasMaxBtn: Number(totalADA) > 0,
+    hasReachedMaxAmount: new BigNumber(spentCoins).gte(spendableCoinInAda),
+    hasReachedMaxAvailableAmount: lockedStakeRewards && new BigNumber(spentCoins).gte(availableADA)
   };
 };
 

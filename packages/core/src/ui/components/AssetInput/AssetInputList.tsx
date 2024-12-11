@@ -17,17 +17,25 @@ export interface AssetInputListProps {
   onAddAsset?: () => void;
   disabled?: boolean;
   translations: TranslationsFor<'addAsset'>;
+  isPopupView?: boolean;
 }
 
 export const AssetInputList = ({
   rows,
   onAddAsset,
   disabled,
-  translations
+  translations,
+  isPopupView
 }: AssetInputListProps): React.ReactElement => (
   <div className={styles.assetInputContainer} data-testid="asset-input-container">
     {rows.map((row, idx) => (
-      <AssetInputRow key={`${row.coin.id}-${idx}`} {...row} idx={idx} rowsLength={rows.length} />
+      <AssetInputRow
+        key={`${row.coin.id}-${idx}`}
+        {...row}
+        idx={idx}
+        rowsLength={rows.length}
+        isPopupView={isPopupView}
+      />
     ))}
     <Button
       className={styles.customBtn}

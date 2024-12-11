@@ -18,6 +18,7 @@ interface Props {
   coinBalance: string;
   isBundle: boolean;
   insufficientBalanceInputs: string[];
+  insufficientAvailableBalanceInputs: string[];
   reachedMaxAmountList: Set<string | Wallet.Cardano.AssetId>;
   assets: Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
   setIsBundle: (value: boolean) => void;
@@ -31,6 +32,7 @@ export const BundlesList = ({
   isBundle,
   setIsBundle,
   insufficientBalanceInputs,
+  insufficientAvailableBalanceInputs,
   reachedMaxAmountList,
   assets,
   assetBalances,
@@ -83,11 +85,13 @@ export const BundlesList = ({
           )}
           <AddressInput row={bundleId} currentNetwork={currentChain.networkId} isPopupView={isPopupView} />
           <CoinInput
+            isPopupView={isPopupView}
             bundleId={bundleId}
             assets={assets}
             assetBalances={assetBalances}
             coinBalance={coinBalance}
             insufficientBalanceInputs={insufficientBalanceInputs}
+            insufficientAvailableBalanceInputs={insufficientAvailableBalanceInputs}
             onAddAsset={() => handleAssetPicker(bundleId)}
             openAssetPicker={(coinId) => handleAssetPicker(bundleId, coinId)}
             canAddMoreAssets={canAddMoreAssets(bundleId)}
