@@ -6,6 +6,7 @@ export { MAX_POOLS_COUNT } from './features/store';
 
 // TODO: remove once multi delegaion feature is GA'd
 /* eslint-disable import/export */
+export { RegisterAsDRepBanner } from './features/overview/RegisterAsDRepBanner';
 export { StakePoolCardProgressBar } from './features/BrowsePools';
 export { StakePoolSearch } from './features/overview';
 export type { StakePoolSearchProps } from './features/overview';

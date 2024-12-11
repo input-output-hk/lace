@@ -1,10 +1,10 @@
-/* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useCallback, useEffect } from 'react';
 import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
+import { RegisterAsDRepBanner } from '@lace/staking';
 import styles from './Staking.modules.scss';
 import { stakePoolResultsSelector, stakingInfoSelector } from '@stores/selectors/staking-selectors';
 import { StakeFundsBanner } from './StakeFundsBanner';
@@ -16,13 +16,16 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails } from './StakePoolDetails';
 import { Sections } from '../types';
 import { StakePoolsTable } from './StakePoolsTable';
-import { StakingModals } from './StakingModals';
 import { StakingInfo } from './StakingInfo';
 import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useObservable } from '@lace/common';
 import { fetchPoolsInfo } from '../utils';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { useExternalLinkOpener } from '@providers';
+import { config } from '@src/config';
+import { useRewardAccountsData } from '../hooks';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -38,7 +41,8 @@ export const Staking = (): React.ReactElement => {
     blockchainProvider,
     walletInfo,
     inMemoryWallet,
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    environmentName
   } = useWalletStore();
   const { fetchStakePools } = useWalletStore(stakePoolResultsSelector);
   const { priceResult } = useFetchCoinPrice();
@@ -47,6 +51,7 @@ export const Staking = (): React.ReactElement => {
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const delegationDetails = useDelegationDetails();
   const { totalRewards, lastReward } = useStakingRewards();
+  const openExternalLink = useExternalLinkOpener();
 
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
 
@@ -60,6 +65,10 @@ export const Staking = (): React.ReactElement => {
   const isDelegating = rewardAccounts && delegationDetails;
   const hasNoFunds = (coinBalance < Number(minAda) && !isStakeRegistered) || (coinBalance === 0 && isStakeRegistered);
   const canDelegate = !isDelegating && isNumber(coinBalance) && !hasNoFunds;
+
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap } = useRewardAccountsData();
+  const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
+  const { GOV_TOOLS_URLS } = config();
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();
@@ -107,46 +116,53 @@ export const Staking = (): React.ReactElement => {
   ]);
 
   return (
-    <div>
-      <SectionTitle
-        title={t('browserView.staking.title')}
-        // eslint-disable-next-line max-len
-        // TODO: removed until we have multidelegation see https://github.com/input-output-hk/lace/pull/1166#issuecomment-1247989647
-        // sideText={`(${isDelegating ? 1 : 0})`}
-      />
-      {hasNoFunds && (
-        <FundWalletBanner
-          title={t('browserView.assets.welcome')}
-          subtitle={t('browserView.staking.fundWalletBanner.subtitle')}
-          prompt={t('browserView.fundWalletBanner.prompt')}
-          walletAddress={walletInfo.addresses[0].address.toString()}
+    <>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$56">
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={GOV_TOOLS_URLS[environmentName]} />
+        </Box>
+      )}
+      <div>
+        <SectionTitle
+          title={t('browserView.staking.title')}
+          // eslint-disable-next-line max-len
+          // TODO: removed until we have multidelegation see https://github.com/input-output-hk/lace/pull/1166#issuecomment-1247989647
+          // sideText={`(${isDelegating ? 1 : 0})`}
         />
-      )}
-      {canDelegate && <StakeFundsBanner balance={coinBalance} />}
-      {isDelegating && (
-        <div className={styles.flexRow}>
-          <StakingInfo
-            {...{
-              ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
-              coinBalance,
-              fiat: priceResult?.cardano?.price,
-              totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),
-              lastReward: Wallet.util.lovelacesToAdaString(lastReward.toString()),
-              cardanoCoin
-            }}
-            onStakePoolSelect={onStakePoolSelect}
+        {hasNoFunds && (
+          <FundWalletBanner
+            title={t('browserView.assets.welcome')}
+            subtitle={t('browserView.staking.fundWalletBanner.subtitle')}
+            prompt={t('browserView.fundWalletBanner.prompt')}
+            walletAddress={walletInfo.addresses[0].address.toString()}
           />
-        </div>
-      )}
-      <StakePoolsTable scrollableTargetId={LACE_APP_ID} />
-      <StakePoolDetails
-        showCloseIcon
-        showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}
-        showExitConfirmation={(section: Sections): boolean => stepsWithExitConfirmation.has(section)}
-        canDelegate={!hasNoFunds}
-        onStake={onStake}
-      />
-      <StakingModals />
-    </div>
+        )}
+        {canDelegate && <StakeFundsBanner balance={coinBalance} />}
+        {isDelegating && (
+          <div className={styles.flexRow}>
+            <StakingInfo
+              {...{
+                ...Wallet.util.stakePoolTransformer({ stakePool: delegationDetails, cardanoCoin }),
+                rewardAccount: poolIdToRewardAccountsMap.get(delegationDetails.id)?.[0],
+                coinBalance,
+                fiat: priceResult?.cardano?.price,
+                totalRewards: Wallet.util.lovelacesToAdaString(totalRewards.toString()),
+                lastReward: Wallet.util.lovelacesToAdaString(lastReward.toString()),
+                cardanoCoin
+              }}
+              onStakePoolSelect={onStakePoolSelect}
+            />
+          </div>
+        )}
+        <StakePoolsTable scrollableTargetId={LACE_APP_ID} />
+        <StakePoolDetails
+          showCloseIcon
+          showBackIcon={(section: Sections): boolean => stepsWithBackBtn.has(section)}
+          showExitConfirmation={(section: Sections): boolean => stepsWithExitConfirmation.has(section)}
+          canDelegate={!hasNoFunds}
+          onStake={onStake}
+        />
+      </div>
+    </>
   );
 };

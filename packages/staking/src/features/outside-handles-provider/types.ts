@@ -106,4 +106,9 @@ export type OutsideHandlesContextValue = {
   signPolicy: SignPolicy;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
   coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
+  useRewardAccountsData: () => {
+    areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+    poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
+  };
+  govToolUrl?: string;
 };

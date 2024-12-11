@@ -11,6 +11,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { useStakingSectionLoadActions } from './hooks';
+import { RegisterAsDRepBanner } from './RegisterAsDRepBanner';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -26,6 +27,9 @@ export const Overview = () => {
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
     isSharedWallet,
+    govToolUrl,
+    openExternalLink,
+    useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -55,6 +59,9 @@ export const Overview = () => {
     totalCoinBalance,
   ]);
 
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
+    useRewardAccountsData();
+
   if (
     !totalCoinBalance ||
     !protocolParameters?.hasOwnProperty('stakeKeyDeposit') ||
@@ -80,6 +87,7 @@ export const Overview = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
@@ -113,6 +121,11 @@ export const Overview = () => {
 
   return (
     <>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$28" mt="$32">
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} />
+        </Box>
+      )}
       {!isSharedWallet && (
         <Box mb="$40">
           <DelegationCard

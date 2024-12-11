@@ -3,7 +3,7 @@ import isNumber from 'lodash/isNumber';
 import { useTranslation } from 'react-i18next';
 import { Skeleton, Typography } from 'antd';
 import { Wallet } from '@lace/cardano';
-import { StakePoolSearch, StakePoolSearchProps } from '@lace/staking';
+import { StakePoolSearch, StakePoolSearchProps, RegisterAsDRepBanner } from '@lace/staking';
 import { StakeFundsBanner } from '@views/browser/features/staking/components/StakeFundsBanner';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { StakingInfo } from '@views/browser/features/staking/components/StakingInfo';
@@ -12,6 +12,10 @@ import { ExpandViewBanner } from './ExpandViewBanner';
 import styles from './DelegationLayout.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { useWalletStore } from '@src/stores';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { useExternalLinkOpener } from '@providers';
+import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
+import { config } from '@src/config';
 
 const { Text } = Typography;
 
@@ -69,7 +73,10 @@ export const DelegationLayout = ({
   cardanoCoin
 }: DelegationLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { environmentName } = useWalletStore();
   const totalResultCount = useWalletStore(({ stakePoolSearchResults }) => stakePoolSearchResults?.totalResultCount);
+  const openExternalLink = useExternalLinkOpener();
+  const { GOV_TOOLS_URLS } = config();
   const showExpandView = hasNoFunds || (!hasNoFunds && !isDelegating) || isDelegating;
 
   const stakePoolSearchTranslations = {
@@ -80,6 +87,9 @@ export const DelegationLayout = ({
     searchPlaceholder: t('cardano.stakePoolSearch.searchPlaceholder')
   };
 
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap } = useRewardAccountsData();
+  const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
+
   return (
     <ContentLayout
       title={<SectionTitle title={t('staking.sectionTitle')} classname={styles.sectionTilte} />}
@@ -88,6 +98,16 @@ export const DelegationLayout = ({
       <div className={styles.content}>
         <Skeleton loading={!isNumber(coinBalance)}>
           <div className={styles.contentWrapper}>
+            {showRegisterAsDRepBanner && (
+              <Box mt="$16">
+                <RegisterAsDRepBanner
+                  openExternalLink={openExternalLink}
+                  govToolUrl={GOV_TOOLS_URLS[environmentName]}
+                  popupView
+                />
+              </Box>
+            )}
+
             {canDelegate && <StakeFundsBanner balance={coinBalance} popupView />}
 
             {hasNoFunds && (
@@ -103,6 +123,7 @@ export const DelegationLayout = ({
               <StakingInfo
                 {...{
                   ...currentStakePool,
+                  rewardAccount: poolIdToRewardAccountsMap.get(currentStakePool.id)?.[0],
                   coinBalance,
                   fiat,
                   totalRewards,
