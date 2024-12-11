@@ -196,7 +196,7 @@ export const useSelectedCoins = ({
         rewardAcountsData.lockedStakeRewards.toString() || '0'
       );
       const fiatValue = Wallet.util.convertAdaToFiat({
-        ada: assetInputItem?.value ?? '0',
+        ada: assetInputItem?.value || '0',
         fiat: prices?.cardano?.price
       });
       return {
