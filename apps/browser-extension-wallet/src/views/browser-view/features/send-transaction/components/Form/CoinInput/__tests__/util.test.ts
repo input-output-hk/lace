@@ -30,48 +30,63 @@ describe('CoinInput util', () => {
 
   describe('getADACoinProperties', () => {
     test('returns 0 for availableADA and false for hasMaxBtn when balance is 0', () => {
-      expect(getADACoinProperties('0', '1000000', '0', '0')).toEqual({
+      expect(getADACoinProperties('0', '1000000', '0', '0', '0')).toEqual({
         availableADA: '0.00',
         max: '1',
         hasMaxBtn: false,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: true,
+        lockedStakeRewards: '0.00',
+        totalADA: '0.00'
       });
     });
     test('returns 0 for max and true for hasReachedMaxAmount when spendable coins is 0', () => {
-      expect(getADACoinProperties('1000000', '0', '0', '0')).toEqual({
+      expect(getADACoinProperties('1000000', '0', '0', '0', '0')).toEqual({
         availableADA: '1.00',
         max: '0',
         hasMaxBtn: true,
         hasReachedMaxAmount: true,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '1.00'
       });
     });
     test('returns formatted balance as availableADA, and the spendable coin in ADA as max when there is no spending', () => {
-      expect(getADACoinProperties('20000000', '10000000', '0', '0')).toEqual({
+      expect(getADACoinProperties('20000000', '10000000', '0', '0', '0')).toEqual({
         availableADA: '20.00',
         max: '10',
         hasMaxBtn: true,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
     test('returns the calculated max amount when there is less spent coin than spendable coin', () => {
-      expect(getADACoinProperties('20000000', '10000000', '5', '2')).toEqual({
+      expect(getADACoinProperties('20000000', '10000000', '5', '2', '0')).toEqual({
         availableADA: '20.00',
         max: '7',
         hasMaxBtn: true,
         hasReachedMaxAmount: false,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
     test('returns max amount as 0 and hasReachedMaxAmount as true when there is more spent coin than spendable coin', () => {
-      expect(getADACoinProperties('20000000', '10000000', '10', '0')).toEqual({
+      expect(getADACoinProperties('20000000', '10000000', '10', '0', '0')).toEqual({
         availableADA: '20.00',
         max: '0',
         hasMaxBtn: true,
         hasReachedMaxAmount: true,
-        allowFloat: true
+        allowFloat: true,
+        hasReachedMaxAvailableAmount: false,
+        lockedStakeRewards: '0.00',
+        totalADA: '20.00'
       });
     });
   });

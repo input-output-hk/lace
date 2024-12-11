@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-magic-numbers */
 const mockCoinStateSelector = {
   uiOutputs: [],
@@ -10,6 +11,7 @@ const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: '
 const mockUseWalletStore = jest.fn().mockReturnValue({
   walletUI: { cardanoCoin: { id: '1', name: 'Cardano', decimals: 6, symbol: 'ADA' }, appMode: 'popup' }
 });
+const mockUseRewardAccountsData = jest.fn().mockReturnValue({ lockedStakeRewards: 0 });
 const mockUseCoinStateSelector = jest.fn().mockReturnValue(mockCoinStateSelector);
 const mockUseBuiltTxState = jest.fn().mockReturnValue({ builtTxData: { error: undefined } });
 const mockUseAddressState = jest.fn().mockReturnValue({ address: undefined });
@@ -41,6 +43,12 @@ jest.mock('@stores', (): typeof Stores => ({
   ...jest.requireActual<typeof Stores>('@stores'),
   useWalletStore: mockUseWalletStore
 }));
+
+jest.mock('@src/views/browser-view/features/staking/hooks', () => ({
+  ...jest.requireActual<any>('@src/views/browser-view/features/staking/hooks'),
+  useRewardAccountsData: mockUseRewardAccountsData
+}));
+
 jest.mock('../../../../store', (): typeof SendTransactionStore => ({
   ...jest.requireActual<typeof SendTransactionStore>('../../../../store'),
   useCoinStateSelector: mockUseCoinStateSelector,
@@ -190,6 +198,33 @@ describe('useSelectedCoin', () => {
 
       expect(result.current.selectedCoins).toHaveLength(1);
       expect(result.current.selectedCoins[0].coin).toEqual({ id: '1', ticker: 'ADA', balance: 'Balance: 1.00M' });
+    });
+    test('gets coin properties from walletUI cardanoCoin in store with compacts coin balance and locked rewards', () => {
+      mockUseRewardAccountsData.mockReturnValueOnce({
+        lockedStakeRewards: '10000000000'
+      });
+
+      mockUseCoinStateSelector.mockReturnValueOnce({
+        ...mockCoinStateSelector,
+        uiOutputs: [{ id: '1', value: '100' }]
+      });
+      const props: UseSelectedCoinsProps = {
+        assetBalances: new Map(),
+        assets: new Map(),
+        bundleId: 'bundleId',
+        coinBalance: '1010000000000',
+        spendableCoin: BigInt(100)
+      };
+      const { result } = renderUseSelectedCoins(props);
+
+      expect(result.current.selectedCoins).toHaveLength(1);
+      expect(result.current.selectedCoins[0].coin).toEqual({
+        id: '1',
+        ticker: 'ADA',
+        balance: 'Balance: 1.01M',
+        availableBalance: 'Available Balance: 1.00M',
+        lockedStakeRewards: 'Locked Stake Rewards: 10,000.00'
+      });
     });
 
     test('converts coin value to fiat and set decimals from walletUI cardanoCoin', () => {

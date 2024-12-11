@@ -12,11 +12,13 @@ export const AssetInputRow = ({
   idx,
   focused,
   onBlur,
+  isPopupView,
   ...row
 }: AssetInputProps & {
   onDelete?: () => void;
   rowsLength: number;
   idx: number;
+  isPopupView?: boolean;
 }): React.ReactElement => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { value, coin, maxDecimals } = row;
@@ -71,6 +73,7 @@ export const AssetInputRow = ({
           setFocus={(focusState) => setIsFocused(focusState)}
           onBlur={onBlur}
           onFocus={onFocus}
+          isPopupView={isPopupView}
         />
         {rowsLength > 1 && (
           <div
