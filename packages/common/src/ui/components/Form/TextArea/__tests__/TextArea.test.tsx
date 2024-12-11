@@ -15,7 +15,7 @@ describe('TextArea', () => {
     const area = queryByTestId('text-area-test');
     expect(area).toHaveValue('');
     act(() => {
-      fireEvent.change(area, { target: { value: 'new value' } });
+      area && fireEvent.change(area, { target: { value: 'new value' } });
     });
     expect(area).toHaveValue('new value');
     expect(onChange).toHaveBeenCalled();
@@ -24,7 +24,8 @@ describe('TextArea', () => {
     const onBlur = jest.fn();
     const { queryByTestId } = render(<TextArea dataTestId="text-area-test" onBlur={onBlur} />);
     await waitFor(() => {
-      fireEvent.blur(queryByTestId('text-area-test'));
+      const area = queryByTestId('text-area-test');
+      area && fireEvent.blur(area);
     });
     expect(onBlur).toHaveBeenCalled();
   });

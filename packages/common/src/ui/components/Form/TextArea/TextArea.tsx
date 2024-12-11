@@ -34,12 +34,12 @@ export const TextArea = ({
   onBlur,
   ...props
 }: textAreaProps): React.ReactElement => {
-  const ref = useRef<TextAreaRef>();
+  const ref = useRef<TextAreaRef>(null);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [localVal, setLocalVal] = useState<string>('');
 
   const resizeArea = useCallback(() => {
-    if (!ref?.current || !label) return;
+    if (!ref?.current?.resizableTextArea || !label) return;
     ref.current.resizableTextArea.textArea.style.height = '56px';
     ref.current.resizableTextArea.textArea.style.height = `${ref.current?.resizableTextArea?.textArea.scrollHeight}px`;
   }, [label]);
@@ -51,7 +51,7 @@ export const TextArea = ({
   };
 
   useEffect(() => {
-    setLocalVal(value);
+    setLocalVal(value ?? '');
     setTimeout(resizeArea);
   }, [value, resizeArea]);
 
@@ -75,9 +75,9 @@ export const TextArea = ({
         data-testid={dataTestId}
         value={localVal}
         autoSize
-        rows={props.rows || 1}
+        rows={props.rows ?? 1}
         className={cn(styles.textArea, {
-          [className]: className,
+          ...(className && { [className]: className }),
           [styles.isResizable]: isResizable,
           [styles.empty]: !value,
           [styles.withLabel]: label,

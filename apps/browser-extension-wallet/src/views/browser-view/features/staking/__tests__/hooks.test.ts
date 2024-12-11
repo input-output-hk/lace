@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable import/imports-first */
 const mockUseWalletStore = jest.fn();
 import { renderHook } from '@testing-library/react-hooks';
@@ -30,24 +31,79 @@ describe('Testing useRewardAccountsData hook', () => {
     const hook = renderHook(() => useRewardAccountsData());
     expect(hook.result.current.areAllRegisteredStakeKeysWithoutVotingDelegation).toEqual(false);
     expect(hook.result.current.poolIdToRewardAccountsMap).toEqual(new Map());
+    expect(hook.result.current.lockedStakeRewards).toEqual(BigInt(0));
 
     act(() => {
       rewardAccounts$.next([{ credentialStatus: Wallet.Cardano.StakeCredentialStatus.Unregistered }]);
     });
     expect(hook.result.current.areAllRegisteredStakeKeysWithoutVotingDelegation).toEqual(false);
     expect(hook.result.current.poolIdToRewardAccountsMap).toEqual(new Map());
+    expect(hook.result.current.lockedStakeRewards).toEqual(BigInt(0));
 
     act(() => {
-      rewardAccounts$.next([{ credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered }]);
+      rewardAccounts$.next([
+        { credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered, rewardBalance: BigInt(0) }
+      ]);
     });
     expect(hook.result.current.areAllRegisteredStakeKeysWithoutVotingDelegation).toEqual(true);
     expect(hook.result.current.poolIdToRewardAccountsMap).toEqual(new Map());
+    expect(hook.result.current.lockedStakeRewards).toEqual(BigInt(0));
+
+    act(() => {
+      rewardAccounts$.next([
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered,
+          dRepDelegatee: { delegateRepresentative: { active: true } },
+          rewardBalance: BigInt(1_000_000)
+        }
+      ]);
+    });
+    expect(hook.result.current.areAllRegisteredStakeKeysWithoutVotingDelegation).toEqual(false);
+    expect(hook.result.current.poolIdToRewardAccountsMap).toEqual(new Map());
+    expect(hook.result.current.lockedStakeRewards).toEqual(BigInt(0));
+
+    act(() => {
+      rewardAccounts$.next([
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Unregistered,
+          rewardBalance: BigInt(1_000_000)
+        },
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Unregistered,
+          dRepDelegatee: { delegateRepresentative: { active: false } },
+          rewardBalance: BigInt(1_000_000)
+        },
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Unregistered,
+          dRepDelegatee: { delegateRepresentative: { active: true } },
+          rewardBalance: BigInt(1_000_000)
+        },
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered,
+          rewardBalance: BigInt(1_000_000)
+        },
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered,
+          dRepDelegatee: { delegateRepresentative: { active: true } },
+          rewardBalance: BigInt(1_000_000)
+        },
+        {
+          credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered,
+          dRepDelegatee: { delegateRepresentative: { active: false } },
+          rewardBalance: BigInt(1_000_000)
+        }
+      ]);
+    });
+    expect(hook.result.current.areAllRegisteredStakeKeysWithoutVotingDelegation).toEqual(false);
+    expect(hook.result.current.poolIdToRewardAccountsMap).toEqual(new Map());
+    expect(hook.result.current.lockedStakeRewards).toEqual(BigInt(2_000_000));
 
     const poolId = 'poolId';
     const rewardAccount = {
       credentialStatus: Wallet.Cardano.StakeCredentialStatus.Registered,
-      dRepDelegatee: {},
-      delegatee: { nextNextEpoch: { id: poolId } }
+      dRepDelegatee: { delegateRepresentative: {} },
+      delegatee: { nextNextEpoch: { id: poolId } },
+      rewardBalance: BigInt(0)
     };
     act(() => {
       rewardAccounts$.next([rewardAccount]);

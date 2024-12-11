@@ -34,7 +34,7 @@ const initialContextMenu = {
 const contextMenuWidth = 200;
 
 export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFolderItemProps): React.ReactElement => {
-  const restOfNfts = nfts.length - numberOfNftsToShow + 1;
+  const restOfNfts = (nfts?.length ?? 0) - numberOfNftsToShow + 1;
   const [contextMenu, setContextMenu] = React.useState(initialContextMenu);
 
   const shouldShowCompactNumber = restOfNfts > maxRestOfNftsNumber;
@@ -59,7 +59,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
   return (
     <div onContextMenu={handleContextMenu}>
-      {contextMenu.show && (
+      {contextMenu.show && contextMenuItems && (
         <NftFolderContextMenu
           x={contextMenu.x}
           y={contextMenu.y}
@@ -70,7 +70,7 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
       <a onClick={onClick} data-testid="folder-item" className={styles.nftItem}>
         <div className={styles.folderWrapper}>
-          {nfts.slice(0, numberOfNftsToShow).map(({ image }, index) =>
+          {nfts?.slice(0, numberOfNftsToShow).map(({ image }, index) =>
             index === numberOfNftsToShow - 1 && nfts.length > numberOfNftsToShow ? (
               <div className={styles.restOfNfts}>{restOfNftsContent}</div>
             ) : (

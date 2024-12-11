@@ -186,6 +186,7 @@ const Wallet = ({
         display="flex"
         alignItems="center"
         flexDirection="column"
+        w="100%"
       >
         <Box
           height="52"

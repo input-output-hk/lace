@@ -16,9 +16,10 @@ export const cardanoCoin: Wallet.CoinId = {
   symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]
 };
 
-export const EPOCH_DURATION_DAYS = 5;
-
 export const MIN_COIN_TO_SEND = 1;
+
+export const COLLATERAL_ADA_AMOUNT = 5;
+export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
 
 type StaticBalanceTracker = {
   rewardAccounts: {
@@ -111,8 +112,6 @@ export const SEND_NFT_DEFAULT_AMOUNT = '1';
 
 export const COINGECKO_URL = 'https://www.coingecko.com';
 
-export const MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY =
-  'multidelegationFirstVisitSincePortfolioPersistence';
 export const MULTIDELEGATION_FIRST_VISIT_LS_KEY = 'multidelegationFirstVisit';
 export const MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY = 'isMultiDelegationDAppCompatibilityModalVisible';
 export const STAKING_BROWSER_PREFERENCES_LS_KEY = 'stakingBrowserPreferences';

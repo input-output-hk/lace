@@ -25,7 +25,8 @@ describe('Password', () => {
     (input as HTMLInputElement).value = 'admin123';
     expect(input).toHaveProperty('type', 'password');
     act(() => {
-      fireEvent.click(queryByTestId('password-input-show-icon'));
+      const icon = queryByTestId('password-input-show-icon');
+      icon && fireEvent.click(icon);
     });
     expect(input).toHaveProperty('type', 'text');
     expect(input).toHaveValue('admin123');
@@ -36,11 +37,13 @@ describe('Password', () => {
     (input as HTMLInputElement).value = 'admin123';
     expect(input).toHaveProperty('type', 'password');
     act(() => {
-      fireEvent.click(queryByTestId('password-input-show-icon'));
+      const icon = queryByTestId('password-input-show-icon');
+      icon && fireEvent.click(icon);
     });
     expect(input).toHaveProperty('type', 'text');
     act(() => {
-      fireEvent.click(queryByTestId('password-input-hide-icon'));
+      const icon = queryByTestId('password-input-hide-icon');
+      icon && fireEvent.click(icon);
     });
     expect(input).toHaveProperty('type', 'password');
   });

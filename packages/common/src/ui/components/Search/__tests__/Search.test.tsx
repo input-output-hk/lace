@@ -14,7 +14,8 @@ describe('Search', () => {
     const onInputBlur = jest.fn();
     const { queryByTestId } = render(<Search onInputBlur={onInputBlur} />);
     act(() => {
-      fireEvent.blur(queryByTestId('search-input'));
+      const input = queryByTestId('search-input');
+      input && fireEvent.blur(input);
     });
     expect(onInputBlur).toHaveBeenCalled();
   });
@@ -22,7 +23,8 @@ describe('Search', () => {
     const onInputFocus = jest.fn();
     const { queryByTestId } = render(<Search onInputFocus={onInputFocus} />);
     act(() => {
-      fireEvent.focus(queryByTestId('search-input'));
+      const input = queryByTestId('search-input');
+      input && fireEvent.focus(input);
     });
     expect(onInputFocus).toHaveBeenCalled();
   });
@@ -32,7 +34,7 @@ describe('Search', () => {
     const clearButton = queryByTestId('search-clear-button');
     expect(clearButton).toBeInTheDocument();
     act(() => {
-      fireEvent.click(clearButton);
+      clearButton && fireEvent.click(clearButton);
     });
     expect(onClearButtonClick).toHaveBeenCalled();
   });

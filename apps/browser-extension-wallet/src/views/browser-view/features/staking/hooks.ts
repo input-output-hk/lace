@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useCallback, useMemo } from 'react';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
@@ -7,6 +6,12 @@ import { useSecrets } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import groupBy from 'lodash/groupBy';
+
+interface UseRewardAccountsDataType {
+  areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+  poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
+  lockedStakeRewards: bigint;
+}
 
 export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
   const { password, clearSecrets } = useSecrets();
@@ -22,13 +27,22 @@ export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Pr
   return { signAndSubmitTransaction };
 };
 
-export const useRewardAccountsData = (): {
-  areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
-  poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
-} => {
+export const getPoolIdToRewardAccountsMap = (
+  rewardAccounts: Wallet.Cardano.RewardAccountInfo[]
+): UseRewardAccountsDataType['poolIdToRewardAccountsMap'] =>
+  new Map(
+    Object.entries(
+      groupBy(rewardAccounts, ({ delegatee }) => {
+        const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
+        return delagationInfo?.id.toString() ?? '';
+      })
+    ).filter(([poolId]) => !!poolId)
+  );
+
+export const useRewardAccountsData = (): UseRewardAccountsDataType => {
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
-  const rewardAccountsWithRegisteredStakeCreds = useMemo(
+  const accountsWithRegisteredStakeCreds = useMemo(
     () =>
       rewardAccounts?.filter(
         ({ credentialStatus }) => Wallet.Cardano.StakeCredentialStatus.Registered === credentialStatus
@@ -38,23 +52,43 @@ export const useRewardAccountsData = (): {
 
   const areAllRegisteredStakeKeysWithoutVotingDelegation = useMemo(
     () =>
-      rewardAccountsWithRegisteredStakeCreds.length > 0 &&
-      !rewardAccountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee),
-    [rewardAccountsWithRegisteredStakeCreds]
+      accountsWithRegisteredStakeCreds.length > 0 &&
+      !accountsWithRegisteredStakeCreds.some(({ dRepDelegatee }) => dRepDelegatee),
+    [accountsWithRegisteredStakeCreds]
+  );
+
+  const accountsWithRegisteredStakeCredsWithoutVotingDelegation = useMemo(
+    () =>
+      accountsWithRegisteredStakeCreds.filter(
+        ({ dRepDelegatee }) =>
+          !dRepDelegatee ||
+          (dRepDelegatee &&
+            'active' in dRepDelegatee.delegateRepresentative &&
+            !dRepDelegatee.delegateRepresentative.active)
+      ),
+    [accountsWithRegisteredStakeCreds]
+  );
+
+  const lockedStakeRewards = useMemo(
+    () =>
+      BigInt(
+        accountsWithRegisteredStakeCredsWithoutVotingDelegation
+          ? Wallet.BigIntMath.sum(
+              accountsWithRegisteredStakeCredsWithoutVotingDelegation.map(({ rewardBalance }) => rewardBalance)
+            )
+          : 0
+      ),
+    [accountsWithRegisteredStakeCredsWithoutVotingDelegation]
   );
 
   const poolIdToRewardAccountsMap = useMemo(
-    () =>
-      new Map(
-        Object.entries(
-          groupBy(rewardAccountsWithRegisteredStakeCreds, ({ delegatee }) => {
-            const delagationInfo = delegatee?.nextNextEpoch || delegatee?.nextEpoch || delegatee?.currentEpoch;
-            return delagationInfo?.id.toString() ?? '';
-          })
-        ).filter(([poolId]) => !!poolId)
-      ),
-    [rewardAccountsWithRegisteredStakeCreds]
+    () => getPoolIdToRewardAccountsMap(accountsWithRegisteredStakeCreds),
+    [accountsWithRegisteredStakeCreds]
   );
 
-  return { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap };
+  return {
+    areAllRegisteredStakeKeysWithoutVotingDelegation,
+    lockedStakeRewards,
+    poolIdToRewardAccountsMap
+  };
 };

@@ -20,6 +20,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import classnames from 'classnames';
 import { useTranslation } from 'react-i18next';
+import { isNotNil } from '@cardano-sdk/util';
 
 export type Props = {
   name?: string;
@@ -73,7 +74,7 @@ export const AddressCard = ({
       text: t('core.addressCard.handle.copy.notification'),
       icon: CopyIcon
     });
-    onCopyClick();
+    onCopyClick?.();
   }, [onCopyClick, t]);
 
   const isMetadataGrouped = useMemo(() => {
@@ -83,10 +84,10 @@ export const AddressCard = ({
 
     const keys = Object.keys(metadata) as (keyof typeof metadata)[];
     const length = keys.reduce((count, key) => {
-      if (key === 'tokens' && metadata.tokens.amount === 0) {
+      if (key === 'tokens' && metadata.tokens?.amount === 0) {
         return count;
       }
-      if (key === 'handles' && metadata.handles.length === 0) {
+      if (key === 'handles' && metadata.handles?.length === 0) {
         return count;
       }
       return metadata[key] ? count + 1 : count;
@@ -158,12 +159,12 @@ export const AddressCard = ({
   const getTokenMenuItems = useCallback(
     () => [
       {
-        label: `${metadata.tokens.amount} ${t('core.addressCard.tokens.label')}`,
+        label: `${metadata?.tokens?.amount} ${t('core.addressCard.tokens.label')}`,
         key: 'tokens',
         icon: <TokensIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-tokens-icon" />
       },
       {
-        label: `${metadata.tokens.nfts || 0} ${t('core.addressCard.nfts.label')}`,
+        label: `${metadata?.tokens?.nfts ?? 0} ${t('core.addressCard.nfts.label')}`,
         key: 'nfts',
         icon: <NftsIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-nfts-icon" />
       }
@@ -218,7 +219,11 @@ export const AddressCard = ({
             icon: <StakePoolIcon width={ICON_SIZE} height={ICON_SIZE} data-testid="address-stake-pool-icon" />
           };
         }
-      });
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        return undefined;
+      })
+      // eslint-disable-next-line unicorn/no-array-callback-reference
+      .filter(isNotNil);
 
     return (
       <AddressDisplayItem
@@ -277,7 +282,7 @@ export const AddressCard = ({
               testId="address-card-unused-address"
             />
           )}
-          {metadata?.handles?.length > 0 && renderHandleData}
+          {metadata?.handles && metadata?.handles?.length > 0 && renderHandleData}
           {renderBalanceData}
           {renderTokenData}
           {metadata?.stakePool && !isMetadataGrouped && (

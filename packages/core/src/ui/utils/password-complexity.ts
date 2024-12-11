@@ -1,3 +1,4 @@
+import { isNotNil } from '@cardano-sdk/util';
 import zxcvbn from 'zxcvbn';
 
 // map each possible suggestion phrase with a key that must be used for translation
@@ -29,9 +30,10 @@ export const passwordComplexity = (password?: string): { feedbackKeys: string[];
   if (!password) return { feedbackKeys: [], score: 0 };
 
   const { feedback, score } = zxcvbn(password);
-  const translationFeedbackKeyList = feedback.suggestions.map(
-    (text) => translationKeysMap.get(text) || translationKeysMap.get(defaultKey)
-  );
+  const translationFeedbackKeyList = feedback.suggestions
+    .map((text) => translationKeysMap.get(text) ?? translationKeysMap.get(defaultKey))
+    // eslint-disable-next-line unicorn/no-array-callback-reference
+    .filter(isNotNil);
 
   /*
     In case user provides strong password (score 3 or 4) we would like to display

@@ -21,6 +21,15 @@ class MessageSigningAllDoneDrawerAssert {
     await MessageSigningAllDoneDrawer.signature.waitForDisplayed();
     expect(await MessageSigningAllDoneDrawer.signature.getText()).to.not.be.empty;
 
+    await MessageSigningAllDoneDrawer.signatureLabel.waitForDisplayed();
+    expect(await MessageSigningAllDoneDrawer.signatureLabel.getText()).to.not.be.empty;
+
+    await MessageSigningAllDoneDrawer.key.waitForDisplayed();
+    expect(await MessageSigningAllDoneDrawer.key.getText()).to.not.be.empty;
+
+    await MessageSigningAllDoneDrawer.keyLabel.waitForDisplayed();
+    expect(await MessageSigningAllDoneDrawer.keyLabel.getText()).to.not.be.empty;
+
     await MessageSigningAllDoneDrawer.copyButton.waitForClickable();
     expect(await MessageSigningAllDoneDrawer.copyButton.getText()).to.equal(
       await t('core.signMessage.copyToClipboard')

@@ -22,7 +22,7 @@ describe('CollapsablePanel', () => {
     );
     const clickable = queryByRole('button');
     act(() => {
-      fireEvent.click(clickable);
+      clickable && fireEvent.click(clickable);
     });
     expect(queryByTestId('test-content')).toBeInTheDocument();
   });

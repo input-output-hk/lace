@@ -24,8 +24,8 @@ export enum ASSET_COMPONENTS {
 
 const getTokensContent = (
   params: {
-    doesWalletHaveTokens: boolean;
-    hasUsedAllTokens: boolean;
+    doesWalletHaveTokens?: boolean;
+    hasUsedAllTokens?: boolean;
     tokens: DropdownList[];
     selectedTokenList?: Array<string>;
   },
@@ -66,8 +66,8 @@ const getTokensContent = (
 const getNftsContent = (
   params: {
     nfts?: Array<NftItemProps & { id: string }>;
-    hasUsedAllNFTs: boolean;
-    hasNFTs: boolean;
+    hasUsedAllNFTs?: boolean;
+    hasNFTs?: boolean;
     selectedTokenList?: Array<string>;
     nftListConfig?: { rows?: number };
   },
@@ -100,7 +100,7 @@ const getNftsContent = (
     case params.hasUsedAllNFTs:
       return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
     default:
-      return <NftList {...params.nftListConfig} items={nftList} />;
+      return <NftList {...params.nftListConfig} items={nftList ?? []} />;
   }
 };
 
@@ -110,8 +110,6 @@ export interface AssetSelectorOverlayProps {
   tokens?: Array<DropdownList>;
   nftListConfig?: { rows?: number };
   onClick?: (id: string) => void;
-  onSearch?: (value: string) => void;
-  value?: string;
   intialSection?: ASSET_COMPONENTS;
   hasUsedAllTokens?: boolean;
   hasUsedAllNFTs?: boolean;
@@ -120,7 +118,7 @@ export interface AssetSelectorOverlayProps {
   isMultipleSelectionAvailable?: boolean;
   addToMultipleSelectionList?: (id: string) => void;
   selectedTokenList?: Array<string>;
-  removeTokenFromList?: (id: string) => void;
+  removeTokenFromList: (id: string) => void;
   className?: string;
   groups?: Array<ASSET_COMPONENTS.TOKENS | ASSET_COMPONENTS.NFTS>;
 }
@@ -155,7 +153,7 @@ export const AssetSelectorOverlay = ({
 
   const handleTokenClick = (id: string) => {
     const clickAction = isMultipleSelectionAvailable ? addToMultipleSelectionList : onClick;
-    clickAction(id);
+    clickAction?.(id);
   };
 
   const filterAssets = useCallback(async () => {
@@ -181,7 +179,7 @@ export const AssetSelectorOverlay = ({
   }, [filterAssets]);
 
   return (
-    <div data-testid="asset-selector" className={cn(styles.assetsContainer, { [className]: className })}>
+    <div data-testid="asset-selector" className={cn(styles.assetsContainer, className && { [className]: className })}>
       {groups.length > 1 && (
         <div className={styles.radioButtons}>
           <Radio.Group
@@ -222,7 +220,7 @@ export const AssetSelectorOverlay = ({
             {
               doesWalletHaveTokens,
               hasUsedAllTokens,
-              tokens: searchResult?.tokens,
+              tokens: searchResult?.tokens ?? [],
               selectedTokenList
             },
             t,

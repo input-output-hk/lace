@@ -3,7 +3,7 @@ import classnames from 'classnames';
 import { TranslationsFor } from '@ui/utils/types';
 import { Button } from '@lace/common';
 
-import { WalletSetupStepLayout } from './WalletSetupStepLayout';
+import { WalletSetupStepLayout, WalletTimelineSteps } from './WalletSetupStepLayout';
 import styles from './WalletSetupModeStep.module.scss';
 
 import { ReactComponent as LightIcon } from '../../assets/icons/light.component.svg';
@@ -57,6 +57,8 @@ export const WalletSetupModeStep = ({ onBack, onNext, translations }: WalletSetu
       onBack={goBack}
       onNext={goForward}
       isNextEnabled={!isSelectionScreen || Boolean(modeSelected)}
+      // TODO: review step if this gets brought back
+      currentTimelineStep={WalletTimelineSteps.WALLET_SETUP}
     >
       <div
         className={classnames(styles.walletSetupModeStep, !isSelectionScreen && styles.fullHeight)}
