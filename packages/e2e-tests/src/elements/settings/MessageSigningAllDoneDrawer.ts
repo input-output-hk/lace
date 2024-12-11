@@ -5,7 +5,6 @@ import type { ChainablePromiseElement } from 'webdriverio';
 class MessageSigningAllDoneDrawer extends CommonDrawerElements {
   private IMAGE = '[data-testid="result-message-img"]';
   private TITLE = '[data-testid="result-message-title"]';
-  private DESCRIPTION = '[data-testid="result-message-description"]';
   private SIGNATURE = '[data-testid="sign-message-signature"]';
   private SIGNATURE_LABEL = '[data-testid="result-message-signature-label"]';
   private KEY = '[data-testid="sign-message-key"]';
@@ -19,10 +18,6 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
-  }
-
-  get description(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DESCRIPTION);
   }
 
   get signature(): ChainablePromiseElement<WebdriverIO.Element> {
