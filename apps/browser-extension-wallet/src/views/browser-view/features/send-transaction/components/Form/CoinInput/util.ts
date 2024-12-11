@@ -47,7 +47,7 @@ export const getADACoinProperties = (
 ): ADARow => {
   // Convert to ADA
   const availableADA = Wallet.util.lovelacesToAdaString(balance);
-  const spendableCoinInAda = Wallet.util.lovelacesToAdaString(spendableCoin, undefined, BigNumber.ROUND_DOWN);
+  const spendableCoinInAda = Wallet.util.lovelacesToAdaString(spendableCoin);
   // Calculate max amount in ADA
   const max = getMaxSpendableAmount(spendableCoinInAda, spentCoins, currentSpendingAmount);
   return {

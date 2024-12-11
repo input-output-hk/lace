@@ -12,7 +12,6 @@ export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbol
 export const cardanoCoin: Wallet.CoinId = {
   id: '1',
   name: 'Cardano',
-  decimals: 6,
   symbol: CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet]
 };
 
