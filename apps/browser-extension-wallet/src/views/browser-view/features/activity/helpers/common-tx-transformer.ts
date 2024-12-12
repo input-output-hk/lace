@@ -187,9 +187,8 @@ export const txTransformer = async ({
     })
   });
 
-  // txSummaryInspector does not use the witness property.
-  // TODO: update transaction inspector to require only the needed type
-  const { summary } = await txSummaryInspector({ ...transaction, witness: undefined });
+  // TODO: investigate why in-flight transactions do not have a `witness` property
+  const { summary } = await txSummaryInspector({ witness: undefined, ...transaction });
 
   const deposit = summary.deposit ? Wallet.util.lovelacesToAdaString(summary.deposit.toString()) : undefined;
   const depositReclaimValue = summary.returnedDeposit;
