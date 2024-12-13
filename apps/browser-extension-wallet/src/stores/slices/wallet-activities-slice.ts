@@ -22,8 +22,7 @@ import {
   AssetActivityItemProps,
   AssetActivityListProps,
   ConwayEraCertificatesTypes,
-  DelegationActivityType,
-  TransactionActivityType
+  DelegationActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
@@ -370,12 +369,6 @@ const mapWalletActivities = memoize(
         ...(isDelegationActivity(activity) && {
           amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
           fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
-        }),
-        ...(activity.type === TransactionActivityType.self && {
-          amount: `${new BigNumber(activity.fee).times(-1)} ${cardanoCoin.symbol}`,
-          fiatAmount: cardanoFiatPrice
-            ? `${getFiatAmount(new BigNumber(activity.fee).times(-1), cardanoFiatPrice)} ${fiatCurrency.code}`
-            : '-'
         }),
         assets: activity.assets.map((asset: ActivityAssetProp) => {
           const assetId = Wallet.Cardano.AssetId(asset.id);
