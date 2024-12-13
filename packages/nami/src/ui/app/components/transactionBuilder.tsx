@@ -634,7 +634,7 @@ const TransactionBuilder = (undefined, ref) => {
         walletType={walletType}
         secretsUtil={secretsUtil}
         sign={async () => {
-          submitCollateral(secretsUtil.password.value ?? '');
+          await submitCollateral(secretsUtil.password.value ?? '');
         }}
         onCloseBtn={() => {
           capture(Events.SettingsCollateralXClick);
