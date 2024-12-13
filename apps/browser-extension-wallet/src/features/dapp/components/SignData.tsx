@@ -10,6 +10,7 @@ import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './SignTransaction.module.scss';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { createPassphrase } from '@lib/wallet-api-ui';
 
 export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export const SignData = (): React.ReactElement => {
 
   const onConfirm = useCallback(async () => {
     setIsLoading(true);
-    const passphrase = Buffer.from(password.value, 'utf8');
+    const passphrase = createPassphrase(password);
     try {
       await request.sign(passphrase, { willRetryOnFailure: true });
       setValidPassword(true);
