@@ -94,7 +94,7 @@ export const withSignTxConfirmation = async <T>(action: () => Promise<T>, passwo
  * @param {Partial<Password>} password The password object to be encoded.
  * @returns {Buffer} A Buffer containing the UTF-8 encoded password.
  */
-const createPassphrase = (password: Partial<Password>): Buffer => Buffer.from(password.value || '', 'utf8');
+export const createPassphrase = (password: Partial<Password>): Buffer => Buffer.from(password.value || '', 'utf8');
 
 /**
  * Handles the process of signing data with confirmation, supporting both in-memory and hardware wallets.
