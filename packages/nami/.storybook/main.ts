@@ -17,6 +17,15 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-links'),
     getAbsolutePath('@storybook/addon-essentials'),
     getAbsolutePath('@chromatic-com/storybook'),
+    {
+      name: '@storybook/addon-styling',
+      options: {
+        sass: {
+          // Require your Sass preprocessor here
+          implementation: require('sass')
+        }
+      }
+    }
   ],
   framework: {
     name: getAbsolutePath('@storybook/react-webpack5'),

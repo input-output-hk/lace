@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, useColorMode } from '@chakra-ui/react';
+import { Box, useColorMode, useColorModeValue } from '@chakra-ui/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { screen, userEvent, within } from '@storybook/test';
 
@@ -16,7 +16,9 @@ import { account1, currentAccount } from '../../../mocks/account.mock';
 import { store } from '../../../mocks/store.mock';
 import { useStoreState, useStoreActions } from '../../store.mock';
 import { Cardano } from '../../../../.storybook/mocks/cardano-sdk.mock';
-
+import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
+import { UpgradeToLaceHeader } from '../../UpgradeToLaceHeader';
+import { useLocation } from '../../../../.storybook/mocks/react-router-dom.mock';
 import Send from './send';
 import { of } from 'rxjs';
 import { Wallet } from '@lace/cardano';
@@ -208,14 +210,26 @@ const inMemoryWallet: Wallet.ObservableWallet = {
 
 const noop = (async () => {}) as any;
 
+declare global {
+  interface Window {
+    chrome: {
+      runtime: {
+        getURL: (path: string) => string;
+      };
+    };
+  }
+}
+
 const SendStory = ({
   colorMode,
 }: Readonly<{ colorMode: 'dark' | 'light' }>): React.ReactElement => {
   const { setColorMode } = useColorMode();
   setColorMode(colorMode);
+  const containerBg = useColorModeValue('white', 'gray.800');
 
   return (
-    <Box width="400" height="600">
+    <Box background={containerBg} width="400" height="600">
+      <UpgradeToLaceHeader switchWalletMode={async () => {}} />
       <Send
         accounts={[
           {
@@ -227,13 +241,16 @@ const SendStory = ({
         activeAccount={{
           name: currentAccount.name,
           avatar: currentAccount.avatar,
-          recentSendToAddress: currentAccount.recentSendToAddresses,
+          recentSendToAddress: {
+            Mainnet: currentAccount.recentSendToAddresses,
+          },
         }}
         updateAccountMetadata={noop}
         walletAddress=""
         withSignTxConfirmation={noop}
         currentChain={{ networkId: 0, networkMagic: 0 }}
         inMemoryWallet={inMemoryWallet as unknown as Wallet.ObservableWallet}
+        environmentName={'Mainnet'}
       />
     </Box>
   );
@@ -260,6 +277,18 @@ const meta: Meta<typeof SendStory> = {
     layout: 'centered',
   },
   beforeEach: () => {
+    useLocation.mockImplementation(
+      () =>
+        ({
+          pathname: '',
+        }) as any,
+    );
+    useOutsideHandles.mockImplementation(() => {
+      return {
+        secretsUtil: { password: {} },
+        lockedStakeRewards: BigInt(0),
+      };
+    });
     createTab.mockImplementation(async () => {
       await Promise.resolve();
     });
@@ -270,6 +299,7 @@ const meta: Meta<typeof SendStory> = {
       return callback({
         ...store,
         globalModel: {
+          laceSwitchStore: { isLaceSwitchInProgress: false },
           sendStore: {
             ...store.globalModel.sendStore,
             txInfo,
@@ -303,6 +333,7 @@ const meta: Meta<typeof SendStory> = {
 
     return () => {
       createTab.mockReset();
+      useOutsideHandles.mockReset();
       isValidAddress.mockReset();
       useStoreState.mockReset();
       useStoreActions.mockReset();
@@ -354,6 +385,7 @@ export const AddressSuccessLight: Story = {
       return callback({
         ...store,
         globalModel: {
+          laceSwitchStore: {},
           sendStore: {
             ...store.globalModel.sendStore,
             txInfo,
@@ -389,6 +421,7 @@ export const AmountErrorLight: Story = {
       return callback({
         ...store,
         globalModel: {
+          laceSwitchStore: {},
           sendStore: {
             ...store.globalModel.sendStore,
             txInfo,
@@ -459,6 +492,7 @@ export const AssetsSetQuantityLight: Story = {
       return callback({
         ...store,
         globalModel: {
+          laceSwitchStore: {},
           sendStore: {
             ...store.globalModel.sendStore,
             txInfo,
@@ -515,6 +549,7 @@ export const AssetsWithQuantityLight: Story = {
       return callback({
         ...store,
         globalModel: {
+          laceSwitchStore: {},
           sendStore: {
             ...store.globalModel.sendStore,
             message: '123',

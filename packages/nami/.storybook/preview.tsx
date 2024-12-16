@@ -2,6 +2,7 @@ import React from 'react';
 import type { Preview } from '@storybook/react';
 import '../src/ui/app/components/styles.css';
 import 'focus-visible/dist/focus-visible';
+import { ThemeColorScheme, ThemeProvider, colorSchemaDecorator } from '@input-output-hk/lace-ui-toolkit';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { theme } from '../src/ui/theme';
@@ -12,6 +13,7 @@ import {
   NetworkConnectionStates,
 } from '../src/features/common-outside-handles-provider';
 import { WalletType } from '@cardano-sdk/web-extension';
+import './index.scss';
 
 const noop = (async () => {}) as any;
 const mock = {} as any;
@@ -133,6 +135,14 @@ export const decorators = [
       </CommonOutsideHandlesProvider>
     </OutsideHandlesProvider>
   ),
+  (Story, args) => {
+    const { decorators: { theme } = {} } = args.parameters;
+    return (
+      <ThemeProvider colorScheme={theme ?? ThemeColorScheme.Light}>
+        <Story />
+      </ThemeProvider>
+    );
+  }
 ];
 
 export default preview;

@@ -22,7 +22,7 @@ import {
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { NamiPassword } from './namiPassword';
-import { useOutsideHandles } from 'features/outside-handles-provider';
+import { useOutsideHandles } from '../../../features/outside-handles-provider';
 import { noop } from 'lodash';
 
 interface Props {

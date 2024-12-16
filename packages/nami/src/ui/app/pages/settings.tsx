@@ -47,7 +47,7 @@ import type { UseAccount } from '../../../adapters/account';
 import type { OutsideHandlesContextValue } from '../../../features/outside-handles-provider';
 import type { ChangePasswordModalComponentRef } from '../components/changePasswordModal';
 import type { Wallet } from '@lace/cardano';
-import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
+import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 
 type Props = Pick<
   OutsideHandlesContextValue,

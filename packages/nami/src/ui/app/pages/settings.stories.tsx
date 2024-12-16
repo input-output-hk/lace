@@ -17,6 +17,18 @@ import {
 } from '../../../../.storybook/mocks/react-router-dom.mock';
 import { CurrencyCode } from '../../../adapters/currency';
 import { Wallet } from '@lace/cardano';
+import { UpgradeToLaceHeader } from '../../UpgradeToLaceHeader';
+import { useLocation } from '../../../../.storybook/mocks/react-router-dom.mock';
+
+declare global {
+  interface Window {
+    chrome: {
+      runtime: {
+        getURL: (path: string) => string;
+      };
+    };
+  }
+}
 
 const SettingsStory = ({
   colorMode,
@@ -34,6 +46,7 @@ const SettingsStory = ({
 
   return (
     <Box width="400" height="600">
+      <UpgradeToLaceHeader switchWalletMode={async () => {}} />
       <Settings
         isValidURL={() => true}
         availableChains={['Mainnet', 'Preprod', 'Preview', 'Sanchonet']}
@@ -61,6 +74,7 @@ const SettingsStory = ({
         switchNetwork={async () => {}}
         enableCustomNode={async () => {}}
         defaultSubmitApi=""
+        walletType="InMemory"
       />
     </Box>
   );
@@ -87,8 +101,20 @@ const meta: Meta<typeof SettingsStory> = {
     layout: 'centered',
   },
   beforeEach: () => {
+    useLocation.mockImplementation(
+      () =>
+        ({
+          pathname: '',
+        }) as any,
+    );
     useStoreState.mockImplementation((callback: any) => {
-      return callback(store);
+      return callback({
+        ...store,
+        globalModel: {
+          ...store.globalModel,
+          laceSwitchStore: { isLaceSwitchInProgress: false },
+        },
+      });
     });
     useStoreActions.mockImplementation(() => {
       return () => void 0;
@@ -156,26 +182,6 @@ export const GeneralChangePasswordDark: Story = {
   ...GeneralChangePasswordLight,
   parameters: {
     ...GeneralChangePasswordLight.parameters,
-    colorMode: 'dark',
-  },
-};
-export const GeneralResetWalletLight: Story = {
-  parameters: {
-    colorMode: 'light',
-    path: '/settings/general',
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement);
-    await step('Toggle', async () => {
-      await userEvent.click(canvas.getByText('Reset Wallet'));
-    });
-  },
-};
-
-export const GeneralResetWalletDark: Story = {
-  ...GeneralResetWalletLight,
-  parameters: {
-    ...GeneralResetWalletLight.parameters,
     colorMode: 'dark',
   },
 };
