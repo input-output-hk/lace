@@ -31,7 +31,12 @@ import {
   RateLimiter,
   BlockfrostClient,
   BlockfrostAssetProvider,
-  BlockfrostDRepProvider
+  BlockfrostChainHistoryProvider,
+  BlockfrostDRepProvider,
+  BlockfrostUtxoProvider,
+  BlockfrostRewardsProvider,
+  BlockfrostTxSubmitProvider,
+  BlockfrostNetworkInfoProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
@@ -81,6 +86,11 @@ export interface ProvidersConfig {
   experiments: {
     useWebSocket?: boolean;
     useBlockfrostAssetProvider?: boolean;
+    useBlockfrostChainHistoryProvider?: boolean;
+    useBlockfrostNetworkInfoProvider?: boolean;
+    useBlockfrostRewardsProvider?: boolean;
+    useBlockfrostTxSubmitProvider?: boolean;
+    useBlockfrostUtxoProvider?: boolean;
   };
 }
 
@@ -94,7 +104,15 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useBlockfrostAssetProvider, useWebSocket }
+  experiments: {
+    useBlockfrostAssetProvider,
+    useBlockfrostChainHistoryProvider,
+    useBlockfrostNetworkInfoProvider,
+    useBlockfrostRewardsProvider,
+    useBlockfrostTxSubmitProvider,
+    useBlockfrostUtxoProvider,
+    useWebSocket
+  }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
@@ -106,10 +124,19 @@ export const createProviders = ({
   const assetProvider = useBlockfrostAssetProvider
     ? new BlockfrostAssetProvider(blockfrostClient, logger)
     : assetInfoHttpProvider(httpProviderConfig);
-  const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
-  const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
+  const networkInfoProvider = useBlockfrostNetworkInfoProvider
+    ? new BlockfrostNetworkInfoProvider(blockfrostClient, logger)
+    : networkInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = useBlockfrostChainHistoryProvider
+    ? new BlockfrostChainHistoryProvider(blockfrostClient, networkInfoProvider, logger)
+    : chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = useBlockfrostRewardsProvider
+    ? new BlockfrostRewardsProvider(blockfrostClient, logger)
+    : rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
-  const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+  const txSubmitProvider = useBlockfrostTxSubmitProvider
+    ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
+    : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
   const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
   if (useWebSocket) {
@@ -137,12 +164,16 @@ export const createProviders = ({
     };
   }
 
+  const utxoProvider = useBlockfrostUtxoProvider
+    ? new BlockfrostUtxoProvider(blockfrostClient, logger)
+    : utxoHttpProvider(httpProviderConfig);
+
   return {
     assetProvider,
-    networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
+    networkInfoProvider,
     txSubmitProvider,
     stakePoolProvider,
-    utxoProvider: utxoHttpProvider(httpProviderConfig),
+    utxoProvider,
     chainHistoryProvider,
     rewardsProvider,
     drepProvider
