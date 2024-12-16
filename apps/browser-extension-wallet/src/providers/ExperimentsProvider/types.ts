@@ -12,8 +12,13 @@ export enum ExperimentName {
   SHARED_WALLETS = 'shared-wallets',
   WEBSOCKET_API = 'websocket-api',
   BLOCKFROST_ASSET_PROVIDER = 'blockfrost-asset-provider',
-  EXTENSION_STORAGE = 'extension-storage',
-  USE_DREP_PROVIDER_OVERRIDE = 'use-drep-provider-override'
+  BLOCKFROST_CHAIN_HISTORY_PROVIDER = 'blockfrost-chain-history-provider',
+  BLOCKFROST_NETWORK_INFO_PROVIDER = 'blockfrost-network-info-provider',
+  BLOCKFROST_REWARDS_PROVIDER = 'blockfrost-rewards-provider',
+  BLOCKFROST_TX_SUBMIT_PROVIDER = 'blockfrost-tx-submit-provider',
+  BLOCKFROST_UTXO_PROVIDER = 'blockfrost-utxo-provider',
+  USE_DREP_PROVIDER_OVERRIDE = 'use-drep-provider-override',
+  EXTENSION_STORAGE = 'extension-storage'
 }
 
 interface FeatureFlag {
