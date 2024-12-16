@@ -43,11 +43,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
   const magic = getMagicForChain(chainName);
   const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
-  const useWebSocket = !!(featureFlags?.[magic]?.[ExperimentName.WEBSOCKET_API] ?? false);
-  const useBlockfrostAssetProvider = !!(featureFlags?.[magic]?.[ExperimentName.BLOCKFROST_ASSET_PROVIDER] ?? false);
-  const useDrepProviderOverrideActiveStatus = !!(
-    featureFlags?.[magic]?.[ExperimentName.USE_DREP_PROVIDER_OVERRIDE] ?? false
-  );
+  const isExperimentEnabled = (experimentName: ExperimentName) => !!(featureFlags?.[magic]?.[experimentName] ?? false);
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
@@ -61,7 +57,16 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       }
     },
     logger,
-    experiments: { useWebSocket, useBlockfrostAssetProvider, useDrepProviderOverrideActiveStatus }
+    experiments: {
+      useDrepProviderOverrideActiveStatus: isExperimentEnabled(ExperimentName.USE_DREP_PROVIDER_OVERRIDE),
+      useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API),
+      useBlockfrostAssetProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_ASSET_PROVIDER),
+      useBlockfrostChainHistoryProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER),
+      useBlockfrostNetworkInfoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER),
+      useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
+      useBlockfrostTxSubmitProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER),
+      useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER)
+    }
   });
 };
 
