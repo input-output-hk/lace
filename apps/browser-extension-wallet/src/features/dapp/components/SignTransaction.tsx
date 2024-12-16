@@ -12,6 +12,7 @@ import styles from './SignTransaction.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { createPassphrase } from '@lib/wallet-api-ui';
 
 export const SignTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -35,7 +36,7 @@ export const SignTransaction = (): React.ReactElement => {
       [TX_CREATION_TYPE_KEY]: TxCreationType.External
     });
 
-    const passphrase = Buffer.from(password.value, 'utf8');
+    const passphrase = createPassphrase(password);
     try {
       await request.sign(passphrase, { willRetryOnFailure: true });
       setValidPassword(true);
