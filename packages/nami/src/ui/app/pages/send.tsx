@@ -131,9 +131,7 @@ const Send = ({
   const { cardanoCoin, walletType, openHWFlow, networkConnection } =
     useCommonOutsideHandles();
 
-  const { secretsUtil } = useOutsideHandles();
-
-  const { lockedStakeRewards } = useOutsideHandles();
+  const { secretsUtil, lockedStakeRewards } = useOutsideHandles();
   const [showSwitchToLaceBanner, setShowSwitchToLaceBanner] = useState(false);
   const [address, setAddress] = [
     useStoreState(state => state.globalModel.sendStore.address),
@@ -452,7 +450,7 @@ const Send = ({
     () =>
       BigInt(toUnit(value.ada)) >
       BigInt(BigInt(utxoTotal?.coins || 0) + BigInt(rewards || 0) || '0') -
-        BigInt(lockedStakeRewards.toString()),
+        BigInt(lockedStakeRewards?.toString() || 0),
     [value.ada, utxoTotal?.coins, rewards, lockedStakeRewards],
   );
 

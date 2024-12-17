@@ -32,7 +32,9 @@ import { useDelegation } from '../../../adapters/delegation.mock';
 import { Wallet as CardanoWallet } from '@lace/cardano';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles.mock';
 import { useCollateral } from '../../../adapters/collateral.mock';
-import { useTxInfo } from '../../../adapters/transactions.mock';
+import { useWalletTxs } from '../../../adapters/transactions.mock';
+import { UpgradeToLaceHeader } from '../../UpgradeToLaceHeader';
+import { useLocation } from '../../../../.storybook/mocks/react-router-dom.mock';
 
 const noop = (async () => {}) as any;
 
@@ -44,6 +46,16 @@ const cardanoCoin = {
 };
 
 process.env.APP_VERSION = '0.1.0';
+
+declare global {
+  interface Window {
+    chrome: {
+      runtime: {
+        getURL: (path: string) => string;
+      };
+    };
+  }
+}
 
 const WalletStory = ({
   colorMode,
@@ -58,6 +70,7 @@ const WalletStory = ({
 
   return (
     <Box overflowX="hidden">
+      <UpgradeToLaceHeader switchWalletMode={async () => {}} />
       <Wallet
         cardanoCoin={cardanoCoin}
         activeAddress={account.paymentAddr}
@@ -113,11 +126,23 @@ const meta: Meta<typeof WalletStory> = {
     layout: 'centered',
   },
   beforeEach: () => {
+    useLocation.mockImplementation(
+      () =>
+        ({
+          pathname: '',
+        }) as any,
+    );
     createTab.mockImplementation(async () => {
       await Promise.resolve();
     });
     useStoreState.mockImplementation((callback: any) => {
-      return callback(store);
+      return callback({
+        ...store,
+        globalModel: {
+          ...store.globalModel,
+          laceSwitchStore: { isLaceSwitchInProgress: false },
+        },
+      });
     });
     useStoreActions.mockImplementation(() => {
       // @ts-ignore
@@ -164,7 +189,7 @@ export const LayoutLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        secretsUtil: {},
+        secretsUtil: { password: {} },
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -478,7 +503,7 @@ export const CollectibleMetadataLight: Story = {
       const menu = await canvas.findByTestId('collectibles');
       await userEvent.click(menu.children[0]);
 
-      const nft = await canvas.findByTestId('collectible-0');
+      const nft = await canvas.findByTestId('collectible-DAI');
       await userEvent.click(nft.children[0]);
     });
   },
@@ -534,7 +559,7 @@ export const StakePoolDelegatingLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        secretsUtil: {},
+        secretsUtil: { password: {} },
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -733,7 +758,7 @@ export const RemoveCollateralLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        secretsUtil: {},
+        secretsUtil: { password: {} },
         cardanoCoin,
         collateralFee: BigInt(0),
         isInitializingCollateral: false,
@@ -803,7 +828,7 @@ export const AddCollateralLight: Story = {
     });
     useOutsideHandles.mockImplementation(() => {
       return {
-        secretsUtil: {},
+        secretsUtil: { password: {} },
         cardanoCoin,
         collateralFee: BigInt(176281),
         isInitializingCollateral: false,
@@ -969,6 +994,34 @@ export const EmptyHistoryListLight: Story = {
       await userEvent.click(canvas.getByTestId('clockIcon'));
     });
   },
+  beforeEach: () => {
+    useWalletTxs.mockImplementation(() => {
+      return [];
+    });
+    useDelegation.mockImplementation(() => {
+      return {
+        delegation: undefined,
+        initDelegation: async (
+          pool?: Readonly<CardanoWallet.Cardano.StakePool>,
+        ) => {
+          await pool;
+        },
+        stakeRegistration: '2000000',
+      };
+    });
+    useCollateral.mockImplementation(() => {
+      return {
+        reclaimCollateral: async () => {},
+        submitCollateral: async () => {},
+        hasCollateral: false,
+      };
+    });
+    return () => {
+      useDelegation.mockReset();
+      useCollateral.mockReset();
+      useWalletTxs.mockReset();
+    };
+  },
   parameters: {
     colorMode: 'light',
   },
@@ -984,6 +1037,9 @@ export const EmptyHistoryListDark: Story = {
 export const HistoryLight: Story = {
   ...LayoutLight,
   beforeEach: () => {
+    useWalletTxs.mockImplementation(() => {
+      return Object.values(txInfo);
+    });
     useDelegation.mockImplementation(() => {
       return {
         delegation: undefined,
@@ -998,7 +1054,7 @@ export const HistoryLight: Story = {
     useOutsideHandles.mockImplementation(() => {
       return useMemo(
         () => ({
-          secretsUtil: {},
+          secretsUtil: { password: {} },
           cardanoCoin,
           collateralFee: BigInt(0),
           isInitializingCollateral: false,
@@ -1014,15 +1070,12 @@ export const HistoryLight: Story = {
         hasCollateral: false,
       };
     });
-    useTxInfo.mockImplementation((tx: CardanoWallet.Cardano.HydratedTx) => {
-      return txInfo[tx.id];
-    });
 
     return () => {
       useDelegation.mockReset();
       useOutsideHandles.mockReset();
       useCollateral.mockReset();
-      useTxInfo.mockReset();
+      useWalletTxs.mockReset();
     };
   },
   play: async ({ canvasElement, step }) => {

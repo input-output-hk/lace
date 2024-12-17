@@ -6,6 +6,6 @@ import * as actualApi from './transactions';
 
 export * from './transactions';
 
-export const useTxInfo: jest.Mock = fn(actualApi.useTxInfo).mockName(
-  'useTxInfo',
+export const useWalletTxs: jest.Mock = fn(actualApi.useWalletTxs).mockName(
+  'useWalletTxs',
 );
