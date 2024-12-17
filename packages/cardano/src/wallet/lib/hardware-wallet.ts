@@ -5,7 +5,7 @@ import { HardwareWalletConnection, DeviceConnection, HardwareWallets, LedgerConn
 import * as HardwareLedger from '@cardano-sdk/hardware-ledger';
 import * as HardwareTrezor from '@cardano-sdk/hardware-trezor';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { ledgerUSBVendorId } from '@ledgerhq/devices';
+import { DeviceModelId, getDeviceModel, ledgerUSBVendorId } from '@ledgerhq/devices';
 import { TREZOR_USB_DESCRIPTORS } from '@trezor/transport';
 
 const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
@@ -46,19 +46,35 @@ const isDeviceDescribedBy = (device: USBDevice, descriptors: Descriptor[]) =>
     (Object.entries(descriptor) as DescriptorEntries<Descriptor>).every(([key, value]) => device[key] === value)
   );
 
+/** ProductId returned by `navigator.usb.requestDevice` uses two bytes (e.g. `0x5000`), but the `productIMM`
+ * stores only the most significant byte (e.g. `0x50`). We need to shift to get the correct filter value.
+ */
+// eslint-disable-next-line no-bitwise, no-magic-numbers
+const productImmToID = (productId: number) => productId << 8;
 const ledgerNanoSWithNoAppOpenProductId = 4113;
 const ledgerNanoSWithCardanoAppOpenProductId = 4117;
 const ledgerNanoSPlusWithNoAppOpenProductId = 20_497;
 const ledgerNanoSPlusWithCardanoAppOpenProductId = 20_501;
 const ledgerNanoXWithNoAppOpenProductId = 16_401;
 const ledgerNanoXWithCardanoAppOpenProductId = 16_405;
+let ledgerProductIdFromLedgerHq: number[] = [];
+try {
+  ledgerProductIdFromLedgerHq = [
+    productImmToID(getDeviceModel(DeviceModelId.nanoS).productIdMM),
+    productImmToID(getDeviceModel(DeviceModelId.nanoSP).productIdMM),
+    productImmToID(getDeviceModel(DeviceModelId.nanoX).productIdMM)
+  ];
+} catch (error) {
+  console.error('Failed to get Ledger device model', error);
+}
 export const ledgerDescriptors = [
   ledgerNanoSWithNoAppOpenProductId,
   ledgerNanoSWithCardanoAppOpenProductId,
   ledgerNanoSPlusWithNoAppOpenProductId,
   ledgerNanoSPlusWithCardanoAppOpenProductId,
   ledgerNanoXWithNoAppOpenProductId,
-  ledgerNanoXWithCardanoAppOpenProductId
+  ledgerNanoXWithCardanoAppOpenProductId,
+  ...ledgerProductIdFromLedgerHq
 ].map((productId) => ({
   vendorId: ledgerUSBVendorId,
   productId

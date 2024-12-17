@@ -51,7 +51,7 @@
     "@cardano-sdk/wallet": "0.46.2",
     "@cardano-sdk/web-extension": "0.36.1",
     "@lace/common": "0.1.0",
-    "@ledgerhq/devices": "^8.2.1",
+    "@ledgerhq/devices": "^8.4.4",
     "@stablelib/chacha20poly1305": "1.0.1",
     "@trezor/transport": "^1.1.18",
     "bignumber.js": "9.0.1",
