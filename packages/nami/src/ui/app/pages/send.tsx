@@ -392,7 +392,7 @@ const Send = ({
         setValue({ ...value, assets: assetsList });
       });
     },
-    [triggerTxUpdate, setValue],
+    [triggerTxUpdate, setValue, value],
   );
 
   const removeAsset = useCallback(
@@ -403,7 +403,7 @@ const Send = ({
         setValue({ ...value, assets: assetsList });
       });
     },
-    [assets.current, triggerTxUpdate, setValue],
+    [assets.current, triggerTxUpdate, setValue, value],
   );
 
   React.useEffect(() => {
@@ -433,13 +433,12 @@ const Send = ({
     async (asset: Readonly<AssetInput>, val: string) => {
       if (!assets.current[asset.unit]) return;
       assets.current[asset.unit].input = val;
-      const v = value;
-      v.assets = objectToArray(assets.current);
+      const newValue = { ...value, assets: objectToArray(assets.current) };
       triggerTxUpdate(() => {
-        setValue({ ...v, assets: v.assets });
+        setValue(newValue);
       });
     },
-    [assets.current, triggerTxUpdate, setValue],
+    [assets.current, triggerTxUpdate, setValue, value],
   );
 
   const setMessageDebounced = useMemo(() => debounce(setMessage, 300), []);
@@ -574,12 +573,11 @@ const Send = ({
                     decimalScale={6}
                     onInput={e => {
                       const val = e.target.value;
-                      value.ada = val;
-                      value.personalAda = val;
-                      const v = value;
                       triggerTxUpdate(() => {
                         setValue({
-                          ...v,
+                          ...value,
+                          ada: val,
+                          personalAda: val,
                         });
                       });
                     }}
