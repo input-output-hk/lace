@@ -16,6 +16,10 @@ export const NamiMigration = (): JSX.Element => {
   const analytics = useAnalyticsContext();
 
   useEffect(() => {
+    document.querySelector('#preloader')?.remove();
+  }, []);
+
+  useEffect(() => {
     analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.OPEN);
   }, [analytics]);
 
