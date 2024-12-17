@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React, { useEffect, useState, ComponentType, useMemo } from 'react';
@@ -205,13 +206,18 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     [areExperimentsLoading, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
   );
 
+  const isInNamiMode = useMemo(
+    () => namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet,
+    [cardanoWallet, isLoadingWalletInfo, namiMigration?.mode]
+  );
+
   useEffect(() => {
-    if (isLoaded || isOnboarding) {
+    if (isLoaded || isOnboarding || isInNamiMode) {
       document.querySelector('#preloader')?.remove();
     }
-  }, [isLoaded, isOnboarding]);
+  }, [isLoaded, isOnboarding, isInNamiMode]);
 
-  if (namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet) {
+  if (isInNamiMode) {
     return (
       <Lock
         message={t('general.lock.namiMode.message')}
