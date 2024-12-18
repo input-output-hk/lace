@@ -26,9 +26,7 @@ export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }
               a: (
                 <a
                   className={styles.legalButton}
-                  onClick={() =>
-                    openExternalLink(`${process.env.FAQ_URL}?question=what-is-the-voltaire-govtool-on-sanchonet`)
-                  }
+                  onClick={() => openExternalLink(`${process.env.FAQ_URL}?question=what-is-the-voltaire-govtool`)}
                   data-testid="terms-of-service-link"
                 />
               ),
