@@ -254,6 +254,7 @@ const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wall
 // eslint-disable-next-line max-statements
 export const useWalletManager = (): UseWalletManager => {
   const {
+    deletingWallet,
     walletLock,
     setWalletLock,
     cardanoWallet,
@@ -406,6 +407,42 @@ export const useWalletManager = (): UseWalletManager => {
     return firstValueFrom(walletRepository.wallets$);
   }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock, getCurrentChainId]);
 
+  const activateWallet = useCallback(
+    async (props: ActivateWalletProps): Promise<void> => {
+      const [wallets, activeWallet] = await firstValueFrom(
+        combineLatest([walletRepository.wallets$, walletManager.activeWalletId$])
+      );
+      if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
+        logger.debug('Wallet is already active');
+        return;
+      }
+      const updateWalletMetadataProps = {
+        walletId: props.walletId,
+        metadata: {
+          ...wallets.find(({ walletId }) => walletId === props.walletId).metadata,
+          lastActiveAccountIndex: props.accountIndex
+        }
+      };
+      await walletRepository.updateWalletMetadata(updateWalletMetadataProps);
+      await walletManager.activate({
+        ...props,
+        chainId: getCurrentChainId()
+      });
+    },
+    [getCurrentChainId]
+  );
+
+  const activateAnyWallet = useCallback(
+    async (wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[]) => {
+      const anyWallet: ActivateWalletProps = {
+        walletId: wallets[0].walletId,
+        accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0]?.accountIndex
+      };
+      await activateWallet(anyWallet);
+    },
+    [activateWallet]
+  );
+
   /**
    * Loads wallet from storage.
    * @returns resolves with wallet information or null when no wallet is found
@@ -427,6 +464,9 @@ export const useWalletManager = (): UseWalletManager => {
       // If there is no active wallet, activate the 1st one
       if (!activeWalletProps) {
         // deleting a wallet calls deactivateWallet(): do nothing, wallet will also be deleted from repository
+        if (!deletingWallet) {
+          await activateAnyWallet(wallets);
+        }
         return;
       }
 
@@ -484,6 +524,8 @@ export const useWalletManager = (): UseWalletManager => {
       cardanoWallet,
       currentChain,
       manageAccountsWallet,
+      activateAnyWallet,
+      deletingWallet,
       setCardanoCoin,
       setManageAccountsWallet
     ]
@@ -611,31 +653,6 @@ export const useWalletManager = (): UseWalletManager => {
 
     return createWallet({ name, passphrase, metadata, encryptedSecrets, extendedAccountPublicKey });
   };
-
-  const activateWallet = useCallback(
-    async (props: ActivateWalletProps): Promise<void> => {
-      const [wallets, activeWallet] = await firstValueFrom(
-        combineLatest([walletRepository.wallets$, walletManager.activeWalletId$])
-      );
-      if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
-        logger.debug('Wallet is already active');
-        return;
-      }
-      await walletManager.deactivate();
-      await walletRepository.updateWalletMetadata({
-        walletId: props.walletId,
-        metadata: {
-          ...wallets.find(({ walletId }) => walletId === props.walletId).metadata,
-          lastActiveAccountIndex: props.accountIndex
-        }
-      });
-      await walletManager.activate({
-        ...props,
-        chainId: getCurrentChainId()
-      });
-    },
-    [getCurrentChainId]
-  );
 
   /**
    * Deletes Wallet from memory, all info from browser storage and destroys all stores
