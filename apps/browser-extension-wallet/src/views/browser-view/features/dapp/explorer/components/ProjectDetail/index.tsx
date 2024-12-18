@@ -12,12 +12,11 @@ import { IogText } from '../../components/Typography';
 import { IogBox, IogRow } from '../../components/Grid';
 import { AboutDapp } from './AboutDapp';
 import { Contact } from './Contact';
-import ExternalLink from '../../assets/icons/external-link.svg';
-import Exclamation from '../../assets/icons/exclamation.svg';
+import ExternalLink from '../../assets/icons/external-link.component.svg';
 
 import './styles.scss';
-import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import Link from 'next/link';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import Icon from '@ant-design/icons';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -30,9 +29,6 @@ const ProjectDetail: React.FC = () => {
     state: { open, data },
     dispatch
   } = useDrawer<ISectionCardItem>();
-  const reportDAppUrl =
-    `${process.env.NEXT_PUBLIC_REPORT_DAPP_URL}?usp=pp_url&entry.2109698197=${data?.title}&entry.5231725=${data?.subject}` ||
-    '';
 
   const { t } = useTranslation();
 
@@ -95,9 +91,6 @@ const ProjectDetail: React.FC = () => {
                 {data?.title}
               </Text.SubHeading>
             </div>
-            <Link href={reportDAppUrl} target="_blank">
-              <Button.Secondary label="Report" icon={<Exclamation />} />
-            </Link>
           </Flex>
           {open && <Tabs className="iog-tabs" items={tabItems} defaultActiveKey="1" />}
         </div>
@@ -109,7 +102,7 @@ const ProjectDetail: React.FC = () => {
             onClick={handleOpenUrl}
             data-testid="app-details-website-btn"
           >
-            <ExternalLink />
+            <Icon component={ExternalLink} />
             {shortenURL(data?.link)}
           </IogButton>
         </IogRow>

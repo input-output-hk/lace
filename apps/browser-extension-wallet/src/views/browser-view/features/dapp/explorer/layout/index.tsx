@@ -4,24 +4,22 @@ import { ILayoutProps } from './types';
 
 import './styles.scss';
 
-const Layout: React.FC<ILayoutProps> = ({ children, isBackgroundLight }) => {
-  return (
+const Layout: React.FC<ILayoutProps> = ({ children }) => (
+  <div
+    id="dappLayout"
+    className={classNames({
+      'iog-layout': true,
+      'iog-layout--light': true
+    })}
+  >
     <div
-      id="dappLayout"
       className={classNames({
-        'iog-layout': true,
-        'iog-layout--light': true
+        'iog-layout-content': true
       })}
     >
-      <div
-        className={classNames({
-          'iog-layout-content': true
-        })}
-      >
-        {children}
-      </div>
+      {children}
     </div>
-  );
-};
+  </div>
+);
 
 export default Layout;

@@ -1,5 +1,3 @@
-/* eslint-disable import/no-unresolved */
-// @ts-nocheck
 import React, { Children, cloneElement, isValidElement } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,7 +7,7 @@ import { ExtractObjectFromData, ISlider } from './types';
 import { EIconsName } from '../Icon';
 import { IogButtonIcon } from '../Button';
 
-import 'swiper/swiper.min.css';
+import 'swiper/css';
 import 'swiper/css/navigation';
 import './styles.scss';
 
@@ -25,7 +23,7 @@ const DEFAULT_PROPS = {
 const BUTTON_CLASS = 'iog-swiper-button-nav';
 
 // eslint-disable-next-line prettier/prettier
-const IogSlider = <Data,>({
+const IogSlider = <Data, >({
   id,
   data,
   children,

@@ -28,6 +28,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   ];
 
   const { data: categories } = useCategoriesFetcher();
+  console.log(JSON.stringify(categories));
   const formattedCategories = [...ALL_CATEGORIES_FILTER, ...formatFiltersResponse(categories)];
 
   useEffect(() => {

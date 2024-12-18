@@ -7,7 +7,6 @@ import { AuditHeader } from '../AuditHeader';
 import { IogRow } from '../../Grid';
 import { IogButton } from '../../Button';
 import { getCompletionDate, handleDownloadCertificate } from './helpers';
-import { t } from 'i18next';
 
 import './styles.scss';
 import { CERTIFICATION_AUDIT_DOWNLOAD_CERTIFICATION_TEST_ID } from './constants';
@@ -18,11 +17,6 @@ export const CertificationAndAudit = () => {
   const {
     state: { data }
   } = useDrawer<ISectionCardItem>();
-
-  const feedbackMessage =
-    data?.certificates && data?.certificates?.length > 0
-      ? t('dappdiscovery.iog_legal_disclaimer')
-      : t('dappdiscovery.audit_certification_not_available');
 
   return (
     <>

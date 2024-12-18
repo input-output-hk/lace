@@ -1,6 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { IGrid, AlignItems, PaddingLength } from './types';
-import { toRem } from '../../Utils/ToRem.styles';
+import { IGrid } from './types';
 import { GridColumnSizeEnum } from './enum';
 
 /**

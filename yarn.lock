@@ -13563,6 +13563,7 @@ __metadata:
     "@types/pluralize": ^0.0.29
     "@types/qrcode": ^1
     "@types/react-lottie": ^1.2.6
+    "@types/react-portal": 4.0.7
     "@types/text-encoding-utf-8": ^1
     "@types/uuid": ^8.3.4
     "@types/w3c-web-hid": ^1.0.3
@@ -13601,12 +13602,16 @@ __metadata:
     react-dom: 17.0.2
     react-hook-form: 7.47.0
     react-i18next: ^12.3.1
+    react-infinite-scroll-hook: ^4.1.1
     react-lottie: ^1.2.3
+    react-modern-drawer: 1.0.1
+    react-portal: 4.2.2
     react-router: 5.2.0
     react-router-dom: 5.2.0
     readable-stream: ^3.6.0
     rxjs: 7.4.0
     source-map-loader: ^5.0.0
+    swiper: ^8.4.4
     text-encoding-utf-8: ^1.0.2
     tsconfig-paths-webpack-plugin: 3.5.2
     webassembly-loader-sw: ^1.1.0
@@ -24830,6 +24835,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-portal@npm:4.0.7":
+  version: 4.0.7
+  resolution: "@types/react-portal@npm:4.0.7"
+  dependencies:
+    "@types/react": "*"
+  checksum: 156c667fa10befa991b82c6bbf21f32968ca3771615ca7f61d8edc4e32087de7a1fe94d826a69fc17d51dd615bc1a6ee1ef4da854c62e7a18b1471f147706b65
+  languageName: node
+  linkType: hard
+
 "@types/react-router-dom@npm:5.1.8":
   version: 5.1.8
   resolution: "@types/react-router-dom@npm:5.1.8"
@@ -34045,6 +34059,15 @@ __metadata:
   version: 0.1.2
   resolution: "dom-walk@npm:0.1.2"
   checksum: 19eb0ce9c6de39d5e231530685248545d9cd2bd97b2cb3486e0bfc0f2a393a9addddfd5557463a932b52fdfcf68ad2a619020cd2c74a5fe46fbecaa8e80872f3
+  languageName: node
+  linkType: hard
+
+"dom7@npm:^4.0.4":
+  version: 4.0.6
+  resolution: "dom7@npm:4.0.6"
+  dependencies:
+    ssr-window: ^4.0.0
+  checksum: 616a68cbae59eaea2e717ada5855346f0ffa4ac10ab96713bb42b90efabce367213c3c491c4bf5502d177b0865c63d8abd298cc8e12bdda171340c853d6b515a
   languageName: node
   linkType: hard
 
@@ -51744,6 +51767,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-infinite-scroll-hook@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "react-infinite-scroll-hook@npm:4.1.1"
+  dependencies:
+    react-intersection-observer-hook: ^2.1.1
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: abad3e547a443ea441bdbbad889ca249b6bd192d90513c33c3a4fb703f74de65b6ee1da06812a82711269e18be5b80f2aaa774e1daf6c460030721a14c3ae3d8
+  languageName: node
+  linkType: hard
+
 "react-inspector@npm:^5.1.0":
   version: 5.1.1
   resolution: "react-inspector@npm:5.1.1"
@@ -51754,6 +51788,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.4 || ^17.0.0
   checksum: ca9e4c1fedb94e4e956dd3142838c5a25a9d61375aee5e8a74dd623bae09a263098a93f220e8d84c7fd39e569e1fa4297d363ddbc91b15bca91baeb7281d7f4f
+  languageName: node
+  linkType: hard
+
+"react-intersection-observer-hook@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "react-intersection-observer-hook@npm:2.1.1"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 47b2317cf71d7b7a557bce73cf7b5a9456c964c44e52ca45ea2f7d7a509ecf128d83bcdfe86ac280f4c7d3b438639a28ec8912013ea9ce372b2c8e8b6ed1f711
   languageName: node
   linkType: hard
 
@@ -51845,6 +51888,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-modern-drawer@npm:1.0.1":
+  version: 1.0.1
+  resolution: "react-modern-drawer@npm:1.0.1"
+  peerDependencies:
+    react: ^16.0.0
+  checksum: 8bd275cf101c2634dad2e5becd1cc395c6118e6ec86b32887bd0bf28f4918943c53beeb0d2b484984233349edda68eafcee2d5ffa73c29fdede03b81cf1f6a3f
+  languageName: node
+  linkType: hard
+
 "react-number-format@npm:^5.3.1":
   version: 5.4.0
   resolution: "react-number-format@npm:5.4.0"
@@ -51882,6 +51934,18 @@ __metadata:
     react: ^16.8.0 || ^17 || ^18
     react-dom: ^16.8.0 || ^17 || ^18
   checksum: 837111c98738011c69b3069a464ea5bdcbf487105b6148e8faf90cb7337e134edb1b98b8824322941c378756cca30a15c18c25f558e53b85ed5762fa0dc8e6b2
+  languageName: node
+  linkType: hard
+
+"react-portal@npm:4.2.2":
+  version: 4.2.2
+  resolution: "react-portal@npm:4.2.2"
+  dependencies:
+    prop-types: ^15.5.8
+  peerDependencies:
+    react: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+    react-dom: ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0
+  checksum: dc7cd0c6907d1859c0eca4571108934ac791eb9eaf020529a26d4732b7bb556a53bf7e87e868f9918bd60c58f512cc36a49aef5671c964d0a49494168fb2abe0
   languageName: node
   linkType: hard
 
@@ -55343,6 +55407,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ssr-window@npm:^4.0.0, ssr-window@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "ssr-window@npm:4.0.2"
+  checksum: df182600927f4f3225224cf8c02338ea637c9750519505bbfb9a9236741a2a7ec088386fb948bca7b447b8303d9109e7dc7672e3de041c79ac2a0e03665af7d2
+  languageName: node
+  linkType: hard
+
 "ssri@npm:^10.0.0, ssri@npm:^10.0.1":
   version: 10.0.1
   resolution: "ssri@npm:10.0.1"
@@ -56592,6 +56663,16 @@ __metadata:
     "@swc/core": ^1.2.147
     webpack: ">=2"
   checksum: fe90948c02a51bb8ffcff1ce3590e01dc12860b0bb7c9e22052b14fa846ed437781ae265614a5e14344bea22001108780f00a6e350e28c0b3499bc4cd11335fb
+  languageName: node
+  linkType: hard
+
+"swiper@npm:^8.4.4":
+  version: 8.4.7
+  resolution: "swiper@npm:8.4.7"
+  dependencies:
+    dom7: ^4.0.4
+    ssr-window: ^4.0.2
+  checksum: c52be6105e12984ba024f8cb4c0627919d4069172c0021ed7c5743c3709b5a814dd50d134813ea4f7019048be6ff9dda96db8f1adf38e317c8bb285574fcd006
   languageName: node
   linkType: hard
 

@@ -1,12 +1,10 @@
 import * as React from 'react';
-import { DefaultTheme, ThemeContext } from 'styled-components';
-import { ITheme } from '../../global/styles/Themes';
 import getIconMetaData from './data';
 import { EIconsTypes } from './enum';
 import SvgIcon from './svg';
 import { IIcon, ISvgIcon, TIconCreator } from './types';
 
-const { useContext, memo } = React;
+const { memo } = React;
 
 const ICON_SIZES = {
   LARGE: 36,
@@ -25,12 +23,11 @@ const getSizeValue = (size: ISvgIcon['size']): number => {
   }
 };
 
-const iconCreator = (props: TIconCreator, theme?: ITheme) => {
+const iconCreator = (props: TIconCreator) => {
   const { family, name, type, size, svgPathKey, ...otherProps } = props;
 
   const svgIconsProps = {
     svgPathKey,
-    theme,
     size: getSizeValue(size),
     ...otherProps
   };
@@ -46,12 +43,10 @@ const iconCreator = (props: TIconCreator, theme?: ITheme) => {
 };
 
 const Component: React.FC<IIcon> = (props) => {
-  const theme = useContext(ThemeContext);
-
   const { name, ...otherProps } = props;
   const iconMetaData = getIconMetaData(name);
 
-  return iconCreator({ ...otherProps, ...iconMetaData }, theme);
+  return iconCreator({ ...otherProps, ...iconMetaData });
 };
 
 export { EIconsName } from './enum';

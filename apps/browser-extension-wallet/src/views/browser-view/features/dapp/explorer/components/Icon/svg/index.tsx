@@ -12,7 +12,6 @@ const SvgIcon: React.FC<ISvgIcon> = (props) => {
     svgPathKey,
     size,
     style,
-    theme,
     strokeColor,
     defaultStrokeColor,
     strokeColorByFill,
@@ -21,7 +20,7 @@ const SvgIcon: React.FC<ISvgIcon> = (props) => {
   } = props;
   const viewBox = defaultViewBox ?? '0 0 24 24';
 
-  const fillColor = color ?? style?.color ?? defaultFill ?? theme?.colors.darkGray;
+  const fillColor = color ?? style?.color ?? defaultFill;
 
   const strokeDefaultColor = strokeColor ?? defaultStrokeColor ?? (strokeColorByFill && fillColor);
 

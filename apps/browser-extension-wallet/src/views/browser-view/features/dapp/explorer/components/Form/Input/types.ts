@@ -1,9 +1,8 @@
 import { UseFormRegister, RegisterOptions, Control, UseFormSetError, FieldValues } from 'react-hook-form';
-import { ERoutes } from '../../../routes/enum';
 import { TIogBoxSizes } from '../types';
 
 interface IInputLink {
-  url: ERoutes;
+  url: string;
   label: string;
   e2eId: string;
 }

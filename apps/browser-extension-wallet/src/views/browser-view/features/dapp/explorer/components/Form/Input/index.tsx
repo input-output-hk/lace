@@ -11,7 +11,8 @@ import { IogBox } from '../../Grid';
 import { IogText } from '../../Typography';
 import { EIconsName } from '../../Icon';
 import { IogButton, IogButtonIcon } from '../../Button';
-import Cancel from '../../../assets/icons/cancel-icon.svg';
+import Cancel from '../../../assets/icons/cancel-icon.component.svg';
+import Icon from '@ant-design/icons';
 
 // Helpers
 import { requireMessageTextColor } from './helpers';
@@ -23,6 +24,7 @@ import './styles.scss';
 const { useRef, useState } = React;
 
 export const IogInput = React.memo(
+  // eslint-disable-next-line complexity
   ({
     register,
     name,
@@ -143,7 +145,7 @@ export const IogInput = React.memo(
             onClick={handleClearInput}
             data-testid="categories-btn-clear"
           >
-            <Cancel />
+            <Icon component={Cancel} />
           </IogButton>
         )}
 

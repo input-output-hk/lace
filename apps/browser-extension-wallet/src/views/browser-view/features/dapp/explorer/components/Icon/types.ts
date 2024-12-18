@@ -17,7 +17,7 @@ interface IIconRules {
 
 export interface IIcon extends IIconStyle, IIconRules {}
 
-type IconStylePickProperties = 'theme' | 'strokeColorByFill' | 'strokeColor';
+type IconStylePickProperties =  'strokeColorByFill' | 'strokeColor';
 
 interface ICommonIconsMetaDataValue {
   type?: EIconsTypes;

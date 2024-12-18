@@ -7,7 +7,6 @@ import { IFonts } from './Fonts/types';
 import { IColors } from './Colors/types';
 import { IContainer } from './Container/types';
 import { IMixins } from './Mixins/types';
-import { DefaultTheme } from 'styled-components';
 
 export interface ITheme extends IColors, IFonts, IOpacity, IBorder, IShadow, IGrid, IContainer, IPadding, IMixins {}
 

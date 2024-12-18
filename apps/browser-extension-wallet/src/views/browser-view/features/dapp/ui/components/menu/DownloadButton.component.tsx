@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@input-output-hk/lace-ui-toolkit';
-import LaceLogoSwirlIcon from '../../assets/lace-logo-swirls.svg';
+import LaceLogoSwirlIcon from '../../assets/lace-logo-swirls.component.svg';
+import Icon from '@ant-design/icons';
 
 export const DownloadButton = ({
   title,
@@ -13,5 +14,10 @@ export const DownloadButton = ({
   target?: string;
   disabled?: boolean;
 }): JSX.Element => (
-  <Button.Primary icon={<LaceLogoSwirlIcon />} label={title} onClick={() => window.open(url, target)} {...props} />
+  <Button.Primary
+    icon={<Icon component={LaceLogoSwirlIcon} />}
+    label={title}
+    onClick={() => window.open(url, target)}
+    {...props}
+  />
 );

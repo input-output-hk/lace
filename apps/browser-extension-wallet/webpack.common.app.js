@@ -88,6 +88,7 @@ module.exports = () =>
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
           { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' },
           { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../[name][ext]' },
+          { from: path.resolve(__dirname, 'src/views/browser-view/features/dapp/explorer/layout/dapp/*.mp4'), to: '../[name][ext]' },
           { from: path.resolve(__dirname, 'src/assets/html/*.html'), to: '../[name][ext]' },
           { from: path.resolve(__dirname, 'src/assets/html/*.js'), to: '../js/[name][ext]' },
           { from: path.resolve(__dirname, 'src/assets/html/*.css'), to: '../[name][ext]' },

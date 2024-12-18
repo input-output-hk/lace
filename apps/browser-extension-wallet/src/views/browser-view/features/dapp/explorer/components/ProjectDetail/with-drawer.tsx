@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from 'react';
 import { Portal } from 'react-portal';
 import ProjectDetail from '../ProjectDetail';

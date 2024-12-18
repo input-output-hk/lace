@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { Image } from 'antd';
 import { IogImageProps } from '../types';
 import { mixins } from '../../../global/styles/Themes';
-import ImageError from '../../../assets/icons/image-error.svg';
+import ImageError from '../../../assets/icons/image-error.component.svg';
 
 import './styles.scss';
 
