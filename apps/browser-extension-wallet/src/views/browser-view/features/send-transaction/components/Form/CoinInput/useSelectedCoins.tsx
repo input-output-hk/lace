@@ -86,9 +86,6 @@ export const useSelectedCoins = ({
    */
   const getError = useCallback(
     (inputId: string, assetInput: AssetInfo): string | undefined => {
-      // If there is an error with the transaction, then display it over any other potential error
-      if (builtTxError) return builtTxError;
-
       // If the asset has an input value but there is no sufficient balance, then display an insufficient balance error.
       if (assetInput?.value && assetInput.value !== '0' && !!insufficientBalanceInputs?.includes(inputId)) {
         return COIN_SELECTION_ERRORS.BALANCE_INSUFFICIENT_ERROR;
@@ -101,6 +98,8 @@ export const useSelectedCoins = ({
       if (address && isValidAddress(address) && assetInputList.every((item) => !(item.value && Number(item.value)))) {
         return COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY;
       }
+      // Display an error with the tx itself
+      if (builtTxError) return builtTxError;
       // eslint-disable-next-line consistent-return
       return undefined;
     },
