@@ -190,7 +190,9 @@ export const StakingInfoCard = ({
             <Stats
               text={t('overview.stakingInfoCard.stakeKey')}
               value={
-                <Tooltip content={stakeAddress}>{popupView ? addEllipsis(stakeAddress, 14, 9) : stakeAddress}</Tooltip>
+                <Tooltip content={stakeAddress}>
+                  <div className={styles.colContent}>{popupView ? addEllipsis(stakeAddress, 14, 9) : stakeAddress}</div>
+                </Tooltip>
               }
               dataTestid="stats-stake-key"
             />
