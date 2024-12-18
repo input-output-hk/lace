@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { storage as sdkStorage } from '@cardano-sdk/wallet';
-import { EMPTY, filter, from, map, mergeMap, Observable, of, share } from 'rxjs';
+import { EMPTY, filter, from, map, mergeMap, Observable, of, share, firstValueFrom } from 'rxjs';
 import { Logger } from 'ts-log';
 import { contextLogger, fromSerializableObject, toSerializableObject } from '@cardano-sdk/util';
 import { ExtensionStore } from './extension-store';
+import isEqual from 'lodash/isEqual';
 
 export type DocumentChange<T> = {
   oldValue?: T;
   newValue?: T;
 };
 
-const undefinedIfEmpty = <T>(value: T | undefined): T | undefined => {
-  if (typeof value === 'object' && (value === null || Object.keys(value).length === 0)) return undefined;
+const undefinedIfEmptyObj = <T>(value: T | undefined): T | undefined => {
+  if (typeof value === 'object' && !Array.isArray(value) && (value === null || Object.keys(value).length === 0))
+    return undefined;
   // eslint-disable-next-line consistent-return
   return value;
 };
@@ -34,8 +36,8 @@ export class ExtensionDocumentStore<T extends {}> extends ExtensionStore impleme
       filter(({ key }) => key === docId),
       map(
         ({ change }): DocumentChange<T> => ({
-          oldValue: undefinedIfEmpty(change.oldValue),
-          newValue: undefinedIfEmpty(change.newValue)
+          oldValue: undefinedIfEmptyObj(change.oldValue),
+          newValue: undefinedIfEmptyObj(change.newValue)
         })
       ),
       share()
@@ -55,11 +57,25 @@ export class ExtensionDocumentStore<T extends {}> extends ExtensionStore impleme
   set(doc: T): Observable<void> {
     this.logger.debug('set', doc);
     return from(
-      (this.idle = this.idle.then(() =>
-        this.storage.set({
+      (this.idle = this.idle.then(async () => {
+        const previousValueMap = await this.storage.get(this.docId);
+        const previousValue = fromSerializableObject(previousValueMap[this.docId]);
+        if (isEqual(previousValue, doc)) {
+          // if values are equal, then we would set to the same value and
+          // this.documentChange$ won't emit and this promise will never resolve
+          return;
+        }
+
+        const storageChange = firstValueFrom(this.documentChange$);
+        await this.storage.set({
           [this.docId]: toSerializableObject(doc)
-        })
-      ))
+        });
+        // do not emit until documentChange$ emits
+        // in order to avoid race conditions:
+        // users expect `observeAll` to emit new value when subscribing
+        // to it immediatelly after `set` emits
+        await storageChange;
+      }))
     );
   }
 
