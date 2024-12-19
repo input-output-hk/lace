@@ -15,6 +15,7 @@ interface IFormatsImage {
   hash: string;
   mime: string;
   name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   path?: any;
   size: number;
   width: number;
@@ -31,8 +32,8 @@ interface IFormats {
 interface IImage {
   id: number;
   name: string;
-  alternativeText?: any;
-  caption?: any;
+  alternativeText?: string;
+  caption?: string;
   width: number;
   height: number;
   formats: IFormats;
@@ -41,8 +42,9 @@ interface IImage {
   mime: string;
   size: number;
   url: string;
-  previewUrl?: any;
+  previewUrl?: string;
   provider: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   providerMetadata?: any;
   createdAt: Date;
   updatedAt: Date;
@@ -76,16 +78,20 @@ export interface ILottie {
   name: string;
   alternativeText: string;
   caption: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   width?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   height?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formats?: any;
   hash: string;
   ext: string;
   mime: string;
   size: number;
   url: string;
-  previewUrl?: any;
+  previewUrl?: string;
   provider: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   providerMetadata?: any;
   createdAt: Date;
   updatedAt: Date;

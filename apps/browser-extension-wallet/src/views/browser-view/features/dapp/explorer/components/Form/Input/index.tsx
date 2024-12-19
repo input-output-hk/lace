@@ -20,6 +20,7 @@ import { getFormArrayError } from '../../../services/helpers';
 
 // Style
 import './styles.scss';
+import { MouseEventHandler } from 'react';
 
 const { useRef, useState } = React;
 
@@ -46,7 +47,8 @@ export const IogInput = React.memo(
     setError,
     onClearField,
     ...rest
-  }: IInputProps) => {
+  }: // eslint-disable-next-line sonarjs/cognitive-complexity
+  IInputProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -58,7 +60,8 @@ export const IogInput = React.memo(
           ...isSearchOptions,
           required
         })
-      : { ref: () => {} };
+      : // eslint-disable-next-line @typescript-eslint/no-empty-function
+        { ref: () => {} };
     const { field } = useController({ control, name });
     const { errors } = useFormState({ control, name });
 
@@ -66,7 +69,7 @@ export const IogInput = React.memo(
       ? getFormArrayError(errors, name)
       : (errors?.[name]?.message as string);
 
-    const handleTogglePasswordVisibility = (e: any): void => {
+    const handleTogglePasswordVisibility: MouseEventHandler<HTMLButtonElement> = (e): void => {
       e.preventDefault();
 
       if (!inputRef.current) return;

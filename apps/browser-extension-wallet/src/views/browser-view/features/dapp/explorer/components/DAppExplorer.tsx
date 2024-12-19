@@ -3,7 +3,7 @@ import SimpleView from './SimpleView';
 import DappLayout from '../layout/dapp';
 import React from 'react';
 
-export const DAppExplorer = () => (
+export const DAppExplorer: React.FC = () => (
   <>
     <Layout>
       <SectionLayout>

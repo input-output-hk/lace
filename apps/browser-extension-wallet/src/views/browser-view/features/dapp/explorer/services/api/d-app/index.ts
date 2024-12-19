@@ -10,18 +10,17 @@ type DAppFetcherParams = {
   _subcategory?: string;
 };
 
+const fetchMore = (): IDApp[] => [];
+
 const useDAppFetcher = (_params: DAppFetcherParams) => {
   const [hasNextPage] = useState(true);
 
   // todo: handle errors
   const { loading, error, data } = {
     loading: false,
-    error: null as Error | null,
+    error: undefined as Error,
     data: mockedData
   };
-
-  const fetchMore = (): IDApp[] => [];
-
   return { loading, data, error, fetchMore, hasNextPage };
 };
 

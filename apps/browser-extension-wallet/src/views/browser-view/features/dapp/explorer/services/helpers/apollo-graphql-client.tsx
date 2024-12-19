@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React from 'react';
 import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink } from '@apollo/client';
 import { offsetLimitPagination } from '@apollo/client/utilities';
@@ -26,7 +25,7 @@ const getApolloGraphqlClient = () => {
 };
 
 const withApolloGraphqlClient = (Component: React.ComponentType): React.FC =>
-  function withApolloGraphqlClient(props) {
+  function innerWithApolloGraphqlClient(props) {
     return (
       <ApolloProvider client={getApolloGraphqlClient()}>
         <Component {...props} />
