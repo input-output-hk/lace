@@ -1,0 +1,60 @@
+@import '../../styles/colors.scss';
+
+.iog-swiper-container {
+  width: 100%;
+  position: relative;
+
+  .swiper:active {
+    cursor: grab;
+  }
+}
+
+.iog-swiper-container--horizontal {
+  width: 100%;
+}
+
+// # Button Container
+.iog-swiper-button-container {
+  position: absolute;
+  display: inline-flex;
+  right: 0;
+  top: -56px;
+
+  &:not(.iog-swiper-button-container--horizontal) > .iog-button-icon:first-child {
+    margin-right: 10px;
+  }
+
+  .swiper-button-disabled {
+    opacity: 0.3;
+  }
+}
+
+.iog-swiper-button-container--horizontal {
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  right: -1px;
+  top: 0;
+  width: 60px;
+  z-index: 1;
+  background: linear-gradient(270deg, #fff 85%, hsla(0, 0%, 100%, 0));
+
+  .iog-button-icon {
+    height: 48px;
+    width: 48px;
+  }
+}
+
+.iog-swiper-button-nav--horizontal--left {
+  left: -1px;
+  right: auto;
+  justify-content: flex-start !important;
+  z-index: 88 !important;
+  background: linear-gradient(90deg, $color-white 65.23%, rgba(255, 255, 255, 0) 100%);
+}
+
+// # Button Nav
+.iog-swiper-button-nav {
+  // background-color: $color-white;
+  // border: none;
+}

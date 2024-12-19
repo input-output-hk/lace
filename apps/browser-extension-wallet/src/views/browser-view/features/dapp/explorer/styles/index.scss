@@ -1,0 +1,600 @@
+@import '~antd/dist/reset.css';
+// @import '~@light-wallet/common/src/ui/styles/theme.scss';
+
+/*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+
+/* Document
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+}
+
+/**
+* 1. Correct the line height in all browsers.
+* 2. Prevent adjustments of font size after orientation changes in iOS.
+*/
+
+html {
+  line-height: 1.15;
+  /* 1 */
+  -webkit-text-size-adjust: 100%;
+  /* 2 */
+}
+
+body {
+  font-family: 'proxima-nova', sans-serif !important;
+}
+
+#dAppStore {
+  position: relative;
+  grid-column: span 2;
+  height: 100vh;
+}
+
+/* Sections
+  ========================================================================== */
+
+/**
+* Render the 'main' element consistently in IE.
+*/
+
+main {
+  display: block;
+}
+
+/**
+* Correct the font size and margin on 'h1' elements within 'section' and
+* 'article' contexts in Chrome, Firefox, and Safari.
+*/
+
+h1 {
+  font-size: 2em;
+  /* margin: 0.67em 0; */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+b {
+  margin: 0;
+}
+
+/* Grouping content
+  ========================================================================== */
+
+/**
+* 1. Add the correct box sizing in Firefox.
+* 2. Show the overflow in Edge and IE.
+*/
+
+hr {
+  box-sizing: content-box;
+  /* 1 */
+  height: 0;
+  /* 1 */
+  overflow: visible;
+  /* 2 */
+}
+
+/**
+* 1. Correct the inheritance and scaling of font size in all browsers.
+* 2. Correct the odd 'em' font sizing in all browsers.
+*/
+
+pre {
+  font-family: monospace, monospace;
+  /* 1 */
+  font-size: 1em;
+  /* 2 */
+}
+
+/* Text-level semantics
+  ========================================================================== */
+
+/**
+* Remove the gray background on active links in IE 10.
+*/
+
+a {
+  background-color: transparent;
+}
+
+/**
+* 1. Remove the bottom border in Chrome 57-
+* 2. Add the correct text decoration in Chrome, Edge, IE, Opera, and Safari.
+*/
+
+abbr[title] {
+  border-bottom: none;
+  /* 1 */
+  text-decoration: underline;
+  /* 2 */
+  text-decoration: underline dotted;
+  /* 2 */
+}
+
+/**
+* Add the correct font weight in Chrome, Edge, and Safari.
+*/
+
+b,
+strong {
+  font-weight: bolder;
+}
+
+/**
+* 1. Correct the inheritance and scaling of font size in all browsers.
+* 2. Correct the odd 'em' font sizing in all browsers.
+*/
+
+code,
+kbd,
+samp {
+  font-family: monospace, monospace;
+  /* 1 */
+  font-size: 1em;
+  /* 2 */
+}
+
+/**
+* Add the correct font size in all browsers.
+*/
+
+small {
+  font-size: 80%;
+}
+
+/**
+* Prevent 'sub' and 'sup' elements from affecting the line height in
+* all browsers.
+*/
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+sup {
+  top: -0.5em;
+}
+
+/* Embedded content
+  ========================================================================== */
+
+/**
+* Remove the border on images inside links in IE 10.
+*/
+
+img {
+  border-style: none;
+}
+
+/* Forms
+  ========================================================================== */
+
+/**
+* 1. Change the font styles in all browsers.
+* 2. Remove the margin in Firefox and Safari.
+*/
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: 'proxima-nova', sans-serif !important;
+  /* 1 */
+  font-size: 100%;
+  /* 1 */
+  line-height: 1.15;
+  /* 1 */
+  margin: 0;
+  /* 2 */
+}
+
+/**
+* Show the overflow in IE.
+* 1. Show the overflow in Edge.
+*/
+
+button,
+input {
+  /* 1 */
+  overflow: visible;
+}
+
+/**
+* Remove the inheritance of text transform in Edge, Firefox, and IE.
+* 1. Remove the inheritance of text transform in Firefox.
+*/
+
+button,
+select {
+  /* 1 */
+  text-transform: none;
+}
+
+/**
+* Correct the inability to style clickable types in iOS and Safari.
+*/
+
+button {
+  cursor: pointer;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+}
+
+/**
+* Remove the inner border and padding in Firefox.
+*/
+
+button::-moz-focus-inner,
+[type='button']::-moz-focus-inner,
+[type='reset']::-moz-focus-inner,
+[type='submit']::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+/**
+* Restore the focus styles unset by the previous rule.
+*/
+
+button:-moz-focusring,
+[type='button']:-moz-focusring,
+[type='reset']:-moz-focusring,
+[type='submit']:-moz-focusring {
+  outline: 1px dotted ButtonText;
+}
+
+/**
+* Correct the padding in Firefox.
+*/
+
+fieldset {
+  padding: 0.35em 0.75em 0.625em;
+}
+
+/**
+* 1. Correct the text wrapping in Edge and IE.
+* 2. Correct the color inheritance from 'fieldset' elements in IE.
+* 3. Remove the padding so developers are not caught out when they zero out
+*    'fieldset' elements in all browsers.
+*/
+
+legend {
+  box-sizing: border-box;
+  /* 1 */
+  color: inherit;
+  /* 2 */
+  display: table;
+  /* 1 */
+  max-width: 100%;
+  /* 1 */
+  padding: 0;
+  /* 3 */
+  white-space: normal;
+  /* 1 */
+}
+
+/**
+* Add the correct vertical alignment in Chrome, Firefox, and Opera.
+*/
+
+progress {
+  vertical-align: baseline;
+}
+
+/**
+* Remove the default vertical scrollbar in IE 10+.
+*/
+
+textarea {
+  overflow: auto;
+}
+
+/**
+* 1. Add the correct box sizing in IE 10.
+* 2. Remove the padding in IE 10.
+*/
+
+[type='checkbox'],
+[type='radio'] {
+  box-sizing: border-box;
+  /* 1 */
+  padding: 0;
+  /* 2 */
+}
+
+/**
+* Correct the cursor style of increment and decrement buttons in Chrome.
+*/
+
+[type='number']::-webkit-inner-spin-button,
+[type='number']::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+* 1. Correct the odd appearance in Chrome and Safari.
+* 2. Correct the outline style in Safari.
+*/
+
+[type='search'] {
+  -webkit-appearance: textfield;
+  /* 1 */
+  outline-offset: -2px;
+  /* 2 */
+}
+
+/**
+* Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+[type='search']::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+* 1. Correct the inability to style clickable types in iOS and Safari.
+* 2. Change font properties to 'inherit' in Safari.
+*/
+
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  /* 1 */
+  font: inherit;
+  /* 2 */
+}
+
+/* Interactive
+  ========================================================================== */
+
+/*
+* Add the correct display in Edge, IE 10+, and Firefox.
+*/
+
+details {
+  display: block;
+}
+
+/*
+* Add the correct display in all browsers.
+*/
+
+summary {
+  display: list-item;
+}
+
+/* Misc
+  ========================================================================== */
+
+/**
+* Add the correct display in IE 10+.
+*/
+
+template {
+  display: none;
+}
+
+/**
+* Add the correct display in IE 10.
+*/
+
+[hidden] {
+  display: none;
+}
+
+html,
+.iog-layout {
+  height: 100%;
+}
+
+.iog-layout {
+  perspective: 340px;
+}
+
+.starfield-container {
+  animation: appears 2000ms ease forwards;
+}
+
+@keyframes appears {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.stars {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5px;
+  height: 1.5px;
+  box-shadow: -1202px -279px #d6d6d6, 1302px 259px #ebebeb, 327px 229px #e0e0e0, 17px 25px #cfcfcf, 495px 465px #e0e0e0,
+    1049px 172px #cccccc, -471px -199px #ebebeb, 1198px 69px #c9c9c9, -975px -270px #d6d6d6, 1358px 99px #e8e8e8,
+    898px -403px #fafafa, 605px 131px whitesmoke, 1296px 205px white, 1050px -263px #e8e8e8, -1077px -364px #d9d9d9,
+    219px 342px #ededed, -1123px 124px #dbdbdb, -1055px -261px #cccccc, -216px -60px #d6d6d6, -826px 292px #cfcfcf,
+    674px 183px #f2f2f2, -806px -224px #dbdbdb, 1315px -430px #fcfcfc, -741px 284px #ebebeb, 841px 278px #f2f2f2,
+    1106px 437px #d1d1d1, -1406px -273px #e0e0e0, -418px -320px #c4c4c4, 476px -104px #fafafa, -17px 45px #e3e3e3,
+    1041px 405px #d6d6d6, 739px -400px #f0f0f0, -150px 81px #e3e3e3, -788px 237px #d4d4d4, 1134px 282px #fafafa,
+    -563px -262px #d6d6d6, -1304px -453px #dedede, 338px -68px #c2c2c2, 786px -16px #f0f0f0, 578px 256px #d9d9d9,
+    -1202px 308px #d4d4d4, 1053px 304px #e8e8e8, 641px -109px #dedede, 650px -479px white, 1366px 230px #c7c7c7,
+    1063px 328px #c9c9c9, 1288px 406px #d6d6d6, 214px -249px #dedede, -223px -376px #dedede, 212px 31px #f7f7f7,
+    143px 347px #d9d9d9, -610px 18px #d1d1d1, -313px -97px #f0f0f0, 853px 345px #fafafa, 1274px 316px #c9c9c9,
+    1196px 80px #dbdbdb, 339px -149px #e6e6e6, 794px 470px #d1d1d1, -11px 423px #fcfcfc, -222px -131px #fafafa,
+    315px 176px #ededed, -1362px -239px #e8e8e8, -748px 237px #ebebeb, 155px 427px #c2c2c2, 742px -135px #fcfcfc,
+    1137px 454px #e8e8e8, -1422px 243px #cfcfcf, -273px 239px #c7c7c7, -685px -222px #f7f7f7, -1465px 449px #c9c9c9,
+    590px 361px white, -1376px 452px #fcfcfc, 1061px 265px #c9c9c9, 1398px -129px #e8e8e8, -426px 442px #e6e6e6,
+    942px 348px #f0f0f0, -955px -209px #cccccc, 206px -102px #cfcfcf, -667px 133px #d1d1d1, -1181px -51px #dbdbdb,
+    1342px 62px #f2f2f2, -115px -266px #f7f7f7, 1057px -358px whitesmoke, -1180px 458px #e3e3e3, -717px 40px #dedede,
+    -1244px 398px whitesmoke, -558px -268px #cfcfcf, 771px -222px #dbdbdb, -516px -372px #c9c9c9, 911px -383px #ededed,
+    -540px -241px white, 1241px -369px #f0f0f0, -1408px -49px #f0f0f0, -370px -298px #e8e8e8, -12px 23px #ededed,
+    997px -428px #c2c2c2, 423px -318px #dedede, 22px 228px #d9d9d9, 696px 417px #cfcfcf, -200px -327px #e8e8e8,
+    764px -67px #ededed, -356px -325px #d1d1d1, -470px 417px #e8e8e8, 999px 467px #dbdbdb, -241px 367px #ebebeb,
+    -1208px 116px #fcfcfc, -556px 442px #e0e0e0, 177px -476px #dedede, 613px -42px #ededed, -367px 132px #c2c2c2,
+    -234px -279px #e8e8e8, -659px -258px #c4c4c4, 199px 354px white, 1340px 49px #dbdbdb, 479px -433px whitesmoke,
+    -1221px 233px #cccccc, -1307px 242px whitesmoke, -1074px -97px #e6e6e6, 1479px 238px #cfcfcf, 272px -21px whitesmoke,
+    -1280px -117px whitesmoke, -547px -112px #e6e6e6, -204px -217px #f7f7f7, 1080px -71px #cfcfcf, -786px -234px #dbdbdb,
+    -1282px 192px #c2c2c2, -1157px -298px #ededed, 357px -112px #e0e0e0, -531px 13px #cfcfcf, 100px -402px #d1d1d1,
+    789px 408px #dedede, 155px 348px #fafafa, -833px 469px #ebebeb, -1075px -479px #dedede, 1003px -162px #e6e6e6,
+    1017px 350px #c2c2c2, 1068px -26px whitesmoke, 1432px 391px #fcfcfc, 126px -190px #ebebeb, 1351px 20px #d4d4d4,
+    -10px -338px #e3e3e3, 179px -82px whitesmoke, 1008px -459px #cfcfcf, 1419px 82px #e3e3e3, -1172px 26px white,
+    1430px -362px #f7f7f7, 213px 262px #f2f2f2, -737px 384px #e0e0e0, -1195px 209px #d9d9d9, -371px -100px #f2f2f2,
+    770px -279px #d4d4d4, 1220px -207px #c9c9c9, -462px 82px #ebebeb, -1263px 288px #dbdbdb, 1065px 216px #cccccc,
+    -678px 63px #cccccc, -749px -473px #e0e0e0, -332px 129px #dbdbdb, 1080px 394px #e6e6e6, -453px -429px #e0e0e0,
+    -716px 260px #cccccc, -886px 174px #f7f7f7, -1013px 23px #ebebeb, 223px 232px #f0f0f0, -1264px -270px #dedede,
+    189px -49px #dbdbdb, 759px 208px white, 1295px 64px #fafafa, -1103px 222px #e6e6e6, -1354px 348px #dbdbdb,
+    1432px 158px #cccccc, 499px 328px #ebebeb, -370px 409px #d9d9d9, -882px 318px #e8e8e8, 1499px -463px #d6d6d6,
+    470px 33px #c7c7c7, -633px -117px #d4d4d4, 784px 291px #d4d4d4, -1292px 201px #fafafa, -826px 267px #cfcfcf,
+    -1154px -329px #e6e6e6, -1301px -9px #e8e8e8, -1225px 451px #c7c7c7, 321px 465px #e0e0e0, 1082px -477px #e3e3e3,
+    119px -104px #cccccc, -1014px 451px #dbdbdb, -896px 340px #d4d4d4, -51px -215px #d4d4d4, -180px 185px #d6d6d6,
+    830px -238px #d4d4d4, -1392px 3px whitesmoke, -221px -274px #d4d4d4, 485px -356px whitesmoke, 1246px 27px #dedede,
+    -1457px 303px #dbdbdb, 588px -274px #cccccc, -1403px -304px #ebebeb, -1197px 378px #e3e3e3, 1223px 313px #e6e6e6,
+    -1491px 3px #cccccc, 334px -158px #c9c9c9, -204px 364px white, 1250px 362px #d1d1d1, -1242px 114px #f0f0f0,
+    1126px -205px white, 871px -100px #e0e0e0, -1371px 430px #cfcfcf, -1339px 63px #f0f0f0, 1120px 474px #d1d1d1,
+    1000px -26px #dbdbdb, -1225px 86px #dbdbdb, -1001px 65px #d6d6d6, -746px 208px #d1d1d1, 772px -127px #f7f7f7,
+    -283px -161px #f2f2f2, -208px 173px #cfcfcf, 42px -92px #c4c4c4, -1422px 280px #dedede, -392px 374px #e6e6e6,
+    278px 75px #e8e8e8, -726px 334px #d1d1d1, -574px -275px #e0e0e0, 510px -36px #cfcfcf, 658px -280px #c2c2c2,
+    -421px 472px #d6d6d6, -978px -450px #dedede, 418px -55px #cfcfcf, 763px -329px #f7f7f7, -1111px 443px #e3e3e3,
+    261px 24px #d9d9d9, -1334px -82px #c9c9c9, 953px -197px white, -804px -58px #e3e3e3, -969px 388px #d9d9d9,
+    1434px 327px whitesmoke, 1229px 126px #c7c7c7, 682px 450px #e8e8e8, -320px -281px #d1d1d1, 275px -69px #fafafa,
+    -1049px -297px #dedede, 318px 474px #cfcfcf, 1070px -119px #d4d4d4, -344px 460px #c2c2c2, 1375px -288px #c9c9c9,
+    434px -223px #e8e8e8, 576px 172px #ebebeb, 1468px -345px #f7f7f7, -1329px -479px #e8e8e8, -1420px 284px #e6e6e6,
+    -1010px 45px #fafafa, -91px -383px #dedede, -840px 292px #cfcfcf, 863px 271px #d6d6d6, 415px 426px #c4c4c4,
+    -719px 200px #f0f0f0, 942px 361px #ededed, 585px 314px #c7c7c7, 344px 10px #ededed, -240px -178px #fafafa,
+    1033px -234px #dedede, 1012px -94px #c4c4c4, -536px -179px #dedede, 43px -96px #fafafa, -534px -317px #d6d6d6,
+    1019px -234px whitesmoke, -541px 419px #e8e8e8, -267px -252px #e6e6e6, -814px -370px #f2f2f2, 529px -305px #d9d9d9,
+    260px -120px white, -213px 21px #cccccc, -220px 146px #dbdbdb, 146px 159px #e0e0e0, -543px 159px #fafafa,
+    269px -291px #f2f2f2, 1351px 294px #d9d9d9, -1377px 275px #cfcfcf, -1332px -61px whitesmoke, 125px -272px #d1d1d1,
+    1416px -310px #d6d6d6, -327px 185px #e8e8e8, 1331px -182px #d6d6d6, 1234px -224px #f2f2f2, -267px -7px #e0e0e0,
+    -229px 431px whitesmoke, -986px 212px #e8e8e8, -280px 43px #e6e6e6, -778px -302px white, 1224px -180px #ebebeb,
+    -1167px 388px #f2f2f2, -174px 343px #dbdbdb, 1149px -73px #c2c2c2, -505px -343px whitesmoke, -935px -284px #e6e6e6,
+    -509px -435px #fcfcfc, 54px 137px #f2f2f2, 192px 313px #d6d6d6, -546px 101px #e8e8e8, -723px -264px #e8e8e8,
+    401px 177px #f2f2f2, 13px 98px #ededed, -371px 375px #cfcfcf, 980px -293px #fcfcfc, -222px -339px white,
+    -865px -462px #dedede, 537px 181px #f0f0f0, 935px -69px #cfcfcf, -635px 323px #f0f0f0, -1375px 434px #c4c4c4,
+    1473px -191px #d9d9d9, -801px -318px #d4d4d4, 487px 292px #e3e3e3, 786px 98px #fcfcfc, 909px 341px #ebebeb,
+    -818px 228px #fcfcfc, 1184px 375px white, -1446px -61px #fafafa, 1046px -346px #d9d9d9, 1333px 63px whitesmoke,
+    -384px 183px #cfcfcf, 557px 149px #e8e8e8, 103px -430px whitesmoke, -77px -299px #ededed, 1327px 244px #fcfcfc,
+    -508px 458px white, 47px -72px #e0e0e0, 994px -18px #e3e3e3, -1119px -178px #d1d1d1, 1077px -119px #c7c7c7,
+    211px -336px #d6d6d6, 376px -2px #f2f2f2, -232px -46px #cccccc, -350px -102px whitesmoke, -1152px 255px #c2c2c2,
+    -1105px 59px white, 1236px -223px #e6e6e6, -781px 29px #e8e8e8, -833px -41px white, -1077px 19px #e0e0e0,
+    607px -423px #ededed, 332px 469px #f7f7f7, 763px -60px #c7c7c7, 610px 219px white, 1265px -380px #fcfcfc,
+    687px 351px #ededed, -798px -93px #c7c7c7, 670px -108px #f2f2f2, 301px -389px #cfcfcf, -963px -424px #e3e3e3,
+    -1190px -329px #d4d4d4;
+  animation: appears 2000ms ease, fly 8s linear infinite;
+  transform-style: preserve-3d;
+  z-index: -1;
+}
+
+.stars:before,
+.stars:after {
+  content: '';
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  box-shadow: inherit;
+}
+
+.stars:before {
+  transform: translate3d(0, 0, -300px);
+  animation: fade1 16s linear infinite;
+}
+
+.stars:after {
+  transform: translate3d(0, 0, -600px);
+  animation: fade2 16s linear infinite;
+}
+
+@keyframes appears {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fly {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 300px);
+  }
+}
+
+@keyframes fade1 {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 0.8;
+  }
+}
+
+@keyframes fade2 {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 0.5;
+  }
+}
+
+.stars.twinkle:before,
+.stars.twinkle:after {
+  content: '';
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  box-shadow: inherit;
+}
+
+.stars.twinkle,
+.stars.twinkle:before,
+.stars.twinkle:after {
+  animation: twinkle linear 4s infinite alternate !important;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+  }
+
+  25% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
