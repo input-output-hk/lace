@@ -59,7 +59,8 @@ Feature: DAppConnector - Common
     Then I see Lace wallet info in DApp when connected
     And I don't see DApp window
 
-  @LW-3807 @Mainnet
+  @LW-3807 @Mainnet @Pending
+  @issue=LW-11988
   Scenario: "No wallet" modal displayed after trying to connect Dapp when there is no wallet
     Given I remove wallet
     And I accept analytics banner on "Get started" page
