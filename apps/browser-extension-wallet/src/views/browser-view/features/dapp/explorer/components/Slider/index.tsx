@@ -7,7 +7,9 @@ import { ExtractObjectFromData, ISlider } from './types';
 import { EIconsName } from '../Icon';
 import { IogButtonIcon } from '../Button';
 
+// eslint-disable-next-line import/no-unresolved
 import 'swiper/css';
+// eslint-disable-next-line import/no-unresolved
 import 'swiper/css/navigation';
 import './styles.scss';
 
@@ -23,7 +25,7 @@ const DEFAULT_PROPS = {
 const BUTTON_CLASS = 'iog-swiper-button-nav';
 
 // eslint-disable-next-line prettier/prettier
-const IogSlider = <Data, >({
+const IogSlider = ({
   id,
   data,
   children,
@@ -37,8 +39,10 @@ const IogSlider = <Data, >({
   buttonStandard = false,
   fallback,
   ...props
-}: ISlider<Data>): React.ReactElement => {
-  const childrenWithProps = (item: ExtractObjectFromData<Data>) =>
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ISlider<any>): React.ReactElement => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const childrenWithProps = (item: ExtractObjectFromData<any>) =>
     Children.map(children, (child) => {
       if (isValidElement(child)) {
         const hasItemProps = itemProps ? itemProps(item) : {};
@@ -94,7 +98,12 @@ const IogSlider = <Data, >({
         slidesPerView={slidesPerView || DEFAULT_PROPS.SLIDES_PER_VIEW}
         {...props}
       >
-        {data?.map((item) => <SwiperSlide key={uuidv4()}>{childrenWithProps(item)}</SwiperSlide>)}
+        {data?.map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (item: any) => (
+            <SwiperSlide key={uuidv4()}>{childrenWithProps(item)}</SwiperSlide>
+          )
+        )}
       </Swiper>
       {data.length <= 0 && fallback}
       <div

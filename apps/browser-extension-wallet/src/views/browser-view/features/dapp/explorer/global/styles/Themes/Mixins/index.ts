@@ -8,7 +8,7 @@ import { toRem } from '../../Utils/ToRem.styles';
  */
 
 const FONT_BASE_SIZE = 16;
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getFormattedSizes = (rules: RuleLengthArray = [], rule: string, isStyleObject?: boolean): any => {
   if (rules && rules.length === 0) return isStyleObject ? {} : '';
   const [...rulesValues] = rules.map((value) => toRem(value));

@@ -28,7 +28,6 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   ];
 
   const { data: categories } = useCategoriesFetcher();
-  console.log(JSON.stringify(categories));
   const formattedCategories = [...ALL_CATEGORIES_FILTER, ...formatFiltersResponse(categories)];
 
   useEffect(() => {
@@ -38,6 +37,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const handleChangeCategory = (category: string) => {
     setActive(category.toLowerCase());
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const swiper = document.querySelector<Element & { swiper: any }>('.iog-classic-view-filters-slider')?.swiper;
     const position = formattedCategories.findIndex(({ value }) => value === category?.toLowerCase());
     swiper?.slideTo(position);
