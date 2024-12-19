@@ -53,7 +53,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see "Add stake pool" button is enabled
     When I click "Add stake pool" button
     And I switch to list view on "Browse pools" tab
-    And I pick "10" pools for delegation from browse pools view: "8BETA, SMAUG, WOOF, TEKO, ADV, MOC2, SQRL, SEA, ALFA"
+    And I pick "10" pools for delegation from browse pools view: "8BETA, ACL, WOOF, TEKO, ADV, MOC2, MKM, SEA, ALFA"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     Then I see Manage delegation drawer
