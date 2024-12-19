@@ -461,33 +461,56 @@ const Whitelisted = ({
       <Text fontSize="lg" fontWeight="bold">
         Whitelisted sites
       </Text>
-      <Flex minWidth="65%" paddingTop="10px" alignItems="center" gap="2">
-        <Text fontSize="sm">DApp compatibility mode</Text>
-        <Spacer />
-        <ButtonSwitch
-          isChecked={isCompatibilityMode}
-          onChange={() => {
-            handleCompatibilityModeChoice(!isCompatibilityMode);
-          }}
-        />
+      <Flex
+        direction="column"
+        width="78%"
+        paddingTop="19px"
+        alignItems="self-start"
+      >
+        <Text lineHeight="18px" fontSize="sm">
+          DApp compatibility mode
+        </Text>
+        <Flex paddingTop="8px" alignItems="center">
+          <Text lineHeight="18px" color="GrayText" fontSize="sm">
+            Use this for DApps that supports Nami but not Lace. Enable it to
+            connect via Nami mode wallet integration
+          </Text>
+          <Spacer />
+          <ButtonSwitch
+            isChecked={isCompatibilityMode}
+            onChange={() => {
+              handleCompatibilityModeChoice(!isCompatibilityMode);
+            }}
+          />
+        </Flex>
       </Flex>
       <Box height="6" />
       {connectedDapps?.length > 0 ? (
         connectedDapps.map(({ url, logo }, index) => (
           <Box
-            mb="2"
+            mb="20px"
             key={index}
             display="flex"
             alignItems="center"
             justifyContent="space-between"
-            width="65%"
+            width="78%"
+            pr="11px"
           >
             <Image
               width="24px"
               src={logo || getFavoriteIcon(url)}
               fallback={<SkeletonCircle width="24px" height="24px" />}
             />
-            <Text>{url.split('//')[1]}</Text>
+            <Text
+              lineHeight="18px"
+              fontSize="sm"
+              display="flex"
+              flex="1"
+              pl="9px"
+              pr="11px"
+            >
+              {url.split('//')[1]}
+            </Text>
             <SmallCloseIcon
               cursor="pointer"
               onClick={async () => {
