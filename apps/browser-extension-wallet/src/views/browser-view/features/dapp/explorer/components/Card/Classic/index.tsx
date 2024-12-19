@@ -11,7 +11,7 @@ export const IogCardClassic: React.FC<IogCardProps> = ({ onClick, ...props }) =>
 
   return (
     <article
-      onClick={() => onClick && onClick(props)}
+      onClick={() => onClick && onClick()}
       className="iog-card-container"
       data-testid={`dapp-grid-app-card-${title}`}
       role="card"

@@ -11,15 +11,17 @@ export type TDrawerAction = 'open' | 'close';
 interface IDrawerActionOptions {
   type?: TDrawerAction;
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Action<Data = any> {
   type: TDrawerAction;
   data?: Data;
   options?: IDrawerActionOptions;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Dispatch<Data = any> = (action: Action<Data>) => void;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface State<Data = any> {
   type?: TDrawerAction;
   open: boolean;
@@ -30,10 +32,12 @@ const INITIAL_STATE = {
   open: false
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DrawerStateContext = React.createContext<{ state: State; dispatch: Dispatch } | undefined>(undefined as any);
 
 DrawerStateContext.displayName = 'DrawerStateContext';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const drawerReducer = (state: State, action: Action): any => {
   switch (action.type) {
     case 'open':
@@ -52,6 +56,7 @@ const DrawerProvider = React.memo(({ children }: { children: React.ReactElement[
 });
 DrawerProvider.displayName = 'DrawerProvider';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const useDrawer = <Data extends Record<any, any>>(): {
   state: State<Data>;
   dispatch: Dispatch<Data>;

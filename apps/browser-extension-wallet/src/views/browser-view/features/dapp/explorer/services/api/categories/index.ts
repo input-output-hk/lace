@@ -7,7 +7,7 @@ const mockedData = JSON.parse(
 export const useCategoriesFetcher = () => {
   const { loading, error, data } = {
     loading: false,
-    error: null as Error | null,
+    error: undefined as Error,
     data: mockedData
   };
 
