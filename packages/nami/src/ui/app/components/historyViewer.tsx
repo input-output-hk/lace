@@ -24,9 +24,7 @@ const HistoryViewer = () => {
   const transactions = useWalletTxs();
 
   const { cardanoCoin } = useCommonOutsideHandles();
-  const [historySlice, setHistorySlice] = React.useState<
-    (TxInfo | undefined)[] | undefined
-  >();
+  const [historySlice, setHistorySlice] = React.useState<TxInfo[] | undefined>();
   const [page, setPage] = React.useState(1);
   const [isFinal, setIsFinal] = React.useState(false);
 
