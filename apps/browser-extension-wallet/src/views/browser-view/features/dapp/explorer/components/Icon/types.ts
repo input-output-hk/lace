@@ -3,7 +3,7 @@ import { IThemeStyledProps } from '../../global/styles/Themes/types';
 import { EIconsName, EIconsTypes } from './enum';
 import { SVGAttributes } from 'react';
 
-interface IIconStyle extends Partial<IThemeStyledProps>, Pick<SVGAttributes<any>, 'style'> {
+interface IIconStyle extends Partial<IThemeStyledProps>, Pick<SVGAttributes<unknown>, 'style'> {
   color?: string;
   strokeColor?: string;
   strokeColorByFill?: boolean;
@@ -17,7 +17,7 @@ interface IIconRules {
 
 export interface IIcon extends IIconStyle, IIconRules {}
 
-type IconStylePickProperties =  'strokeColorByFill' | 'strokeColor';
+type IconStylePickProperties = 'strokeColorByFill' | 'strokeColor';
 
 interface ICommonIconsMetaDataValue {
   type?: EIconsTypes;
@@ -35,12 +35,12 @@ export interface ISvgIconsMetaDataValue
 }
 
 export interface ISvgIcon
-  extends SVGAttributes<any>,
+  extends SVGAttributes<unknown>,
     Omit<ISvgIconsMetaDataValue, 'type'>,
     Pick<IIconStyle, IconStylePickProperties> {}
 
 export interface IVendorIconsMetaDataValue extends ICommonIconsMetaDataValue {
-  family?: any;
+  family?: string;
   name?: string;
 }
 
