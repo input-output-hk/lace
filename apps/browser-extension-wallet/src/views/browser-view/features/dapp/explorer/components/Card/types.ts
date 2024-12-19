@@ -8,8 +8,8 @@ interface IIogCardImage {
 export interface IogCardProps {
   categories?: string[];
   title?: string;
-  color?: string | any;
+  color?: string;
   description?: string;
   image?: Partial<IIogCardImage>;
-  onClick?: (value?: any) => void;
+  onClick?: () => void;
 }

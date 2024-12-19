@@ -12,7 +12,7 @@ export interface IogImageProps extends ImageProps {
   overflow?: boolean;
   circle?: boolean;
   fit?: React.CSSProperties['objectFit'];
-  className?: any;
+  className?: string;
   // onMouseOver?: React.DOMAttributes<unknown>['onMouseOver'];
   // onMouseLeave?: React.DOMAttributes<unknown>['onMouseLeave'];
 }

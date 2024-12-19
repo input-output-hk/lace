@@ -3,15 +3,13 @@ import React from 'react';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 // import allDappsIcon from '../../../components/filters/categories/assets/all-dapps-category-icon.png';
 
-export const CategoryMenu = ({
-  categories,
-  selectedCategory,
-  onCategoryClicked
-}: {
+type CategoryMenuProps = {
   categories: CategoryData[];
   selectedCategory?: CategoryData;
   onCategoryClicked?: (category?: CategoryData) => void;
-}) => (
+};
+
+export const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, selectedCategory, onCategoryClicked }) => (
   <>
     <Flex alignItems="center" gap="$16">
       {/* <CategoryMenuItem*/}

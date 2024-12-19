@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export const formatFileToUrl = (file: any, defaultValue?: any): any => {
   if (!file?.name) return defaultValue || '';
   // eslint-disable-next-line promise/avoid-new

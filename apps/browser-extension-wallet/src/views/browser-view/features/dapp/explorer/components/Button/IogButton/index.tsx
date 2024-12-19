@@ -7,7 +7,7 @@ import { mixins } from '../../../global/styles/Themes';
 import { IogText } from '../../Typography';
 
 import './styles.scss';
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 
 const getThemeClasses = ({
   primary = true,

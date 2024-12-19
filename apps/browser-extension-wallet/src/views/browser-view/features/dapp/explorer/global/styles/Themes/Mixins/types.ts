@@ -17,11 +17,15 @@ export interface IElementSizes {
 }
 export interface IMixins {
   mixins: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setPadding: (props?: RuleLengthArray, isStyleObject?: boolean) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setSpacer: (space?: number, isStyleObject?: boolean) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setMargin: (props?: RuleLengthArray, isStyleObject?: boolean) => any;
     setSize: (sizes: IElementSizes) => Record<string, number>;
     setColor: (color?: keyof IColors['colors']) => Partial<Record<string, string>>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setBackground: (color?: any) => Partial<Record<string, string>>;
     setObjectFit: (
       value?: React.CSSProperties['objectFit']

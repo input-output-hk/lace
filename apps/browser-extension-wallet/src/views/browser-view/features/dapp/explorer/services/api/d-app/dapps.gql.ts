@@ -5,6 +5,7 @@ const defaultPaginationInput = {
   limit: 10
 };
 
+// eslint-disable-next-line template-tag-spacing
 const GET_DAPPS_QUERY = gql`
   query dapps($offset: Int!, $limit: Int!) {
     dapps(offset: $offset, limit: $limit) {
@@ -29,6 +30,7 @@ const GET_DAPPS_QUERY = gql`
   }
 `;
 
+// eslint-disable-next-line template-tag-spacing
 const SEARCH_DAPPS_QUERY = gql`
   query SearchDapps($dappName: String, $categoryName: String, $offset: Int!, $limit: Int!) {
     SearchDapps(dappName: $dappName, categoryName: $categoryName, offset: $offset, limit: $limit) {

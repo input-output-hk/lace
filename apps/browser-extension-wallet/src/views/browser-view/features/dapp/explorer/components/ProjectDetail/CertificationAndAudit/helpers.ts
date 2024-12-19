@@ -3,7 +3,7 @@ export const getCompletionDate = (date?: string): string =>
     .toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' })
     .replace(/(,)/g, '');
 
-export const download = (path: string, filename: string) => {
+export const download = (path: string, filename: string): void => {
   const anchor = document.createElement('a');
   anchor.href = path;
   anchor.download = filename;
@@ -11,7 +11,7 @@ export const download = (path: string, filename: string) => {
   anchor.click();
 };
 
-export const handleDownloadCertificate = async (url: string, fileName: string) => {
+export const handleDownloadCertificate = async (url: string, fileName: string): Promise<void> => {
   const options: RequestInit = {
     method: 'get',
     mode: 'no-cors',

@@ -16,7 +16,7 @@ export const Contact: React.FC = () => {
   const mailIcon = <Icon name={EIconsName.MAIL} size={24} strokeColor="#6F7786" />;
   const websiteIcon = <Icon name={EIconsName.WEBSITE} size={24} strokeColor="#6F7786" />;
 
-  if (!data) return null;
+  if (!data) return <></>;
 
   return (
     <>

@@ -16,7 +16,7 @@ interface IAuditHeaderProps {
   style?: React.CSSProperties;
 }
 
-export const AuditHeader = ({ title, subtitle, image }: IAuditHeaderProps) => (
+export const AuditHeader: React.FC<IAuditHeaderProps> = ({ title, subtitle, image }) => (
   <IogRow className="iog-audit-header">
     <IogBox>
       <IogTitle as="h3" smallest>
