@@ -1,0 +1,63 @@
+@import './shared-colors';
+
+// only applies for dark mode
+$dark: (
+  'black': #000000,
+  'bg-black': #1e1e1e,
+  'mid-black': #252525,
+  'light-black': #282828,
+  'dark-grey-plus': #2e2e2e,
+  'dark-grey': #2f2f2f,
+  'mid-grey': #333333,
+  'grey': #383838,
+  'light-grey': #a9a9a9,
+  'shadow-setup-box': 0px 4px 4px rgba(0, 0, 0, 0.25),
+  'shadow-banner': '0px 0px 40px rgba(0, 0, 0, 0.05), 0px 0px 20px rgba(0, 0, 0, 0.05)'
+);
+
+$dark-theme: (
+  'bg-color': (
+    'body': #1e1e1e,
+    'container': #252525,
+    'container-9': rgba(37, 37, 37, 0.9),
+    'modal': #282828,
+    'icon': #2e2e2e
+  ),
+  'primary': (
+    'default': #7f5af0,
+    'hover': #7452db,
+    'active': #702bed,
+    'accent': rgba(127, 90, 240, 0.302),
+    'gradient': linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%)
+  ),
+  'secondary': (
+    'gradient': linear-gradient(128.79deg, #f4b4d0 0%, #f5c25d 100%)
+  ),
+  'text-color': (
+    'primary': #ffffff,
+    'secondary': #a9a9a9,
+    'white': #ffffff,
+    'black': #212121,
+    'green': #2cb67d,
+    'red': #ff5470,
+    'blue': #3489f7,
+    'grey': #6b7280,
+    'light-grey': #a9a9a9
+  ),
+  'shadow': (
+    'primary-button-hover': 0px 4px 10px rgba(#a78fa0, 0.2) rgba(#4b00b5, 0.3),
+    'inset-white': 2px 1000px 1px var(--bg-color-container) inset,
+    'inset-lgray': 2px 1000px 1px var(--light-mode-light-grey) inset
+  ),
+  'scroll-bar': (
+    'track': transparent,
+    'thum': #333333
+  ),
+  'switch': (
+    'checked-bg-color': #7f5af0,
+    'checked-bg-color-hover': #7452db
+  ),
+  'dark-mode': $dark,
+  'lace': $lace,
+  'data': $data
+);
