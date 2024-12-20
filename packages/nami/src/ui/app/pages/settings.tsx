@@ -472,7 +472,7 @@ const Whitelisted = ({
         </Text>
         <Flex paddingTop="8px" alignItems="center">
           <Text lineHeight="18px" color="GrayText" fontSize="sm">
-            Use this for DApps that supports Nami but not Lace. Enable it to
+            Use this for DApps that support Nami but not Lace. Enable it to
             connect via Nami mode wallet integration
           </Text>
           <Spacer />
