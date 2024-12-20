@@ -51,6 +51,7 @@ import {
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
+import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -429,5 +430,29 @@ When(
   async (permission: 'granted' | 'denied' | 'prompted') => {
     await setCameraAccessPermission(permission);
     await browser.refresh();
+  }
+);
+
+Then(
+  /(invalid|valid|N_8J@bne87A) password is not in snapshot/,
+  async (password: 'invalid' | 'valid' | 'N_8J@bne87A') => {
+    await browser.cdp('HeapProfiler', 'collectGarbage');
+    const snapshot = await browser.takeHeapSnapshot();
+
+    let needle = '';
+    switch (password) {
+      case 'valid':
+        needle = String(getTestWallet(TestWalletName.MultiAccActive1).password);
+        break;
+      case 'invalid':
+        needle = 'somePassword';
+        break;
+      case 'N_8J@bne87A':
+        needle = 'N_8J@bne87A';
+        break;
+    }
+    const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
+
+    expect(needlesFound.length).toEqual(0);
   }
 );
