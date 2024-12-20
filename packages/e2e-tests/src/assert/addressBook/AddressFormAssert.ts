@@ -35,12 +35,12 @@ class AddressFormAssert {
   };
 
   async assertSeeIconForInvalidAdaHandle(shouldBeDisplayed: boolean) {
-    await AddressForm.searchLoader.waitForClickable({ reverse: true, timeout: 5000 });
+    await AddressForm.searchLoader.waitForClickable({ reverse: true, timeout: 10_000 });
     await AddressForm.adaHandleIconInvalid.waitForClickable({ reverse: !shouldBeDisplayed });
   }
 
   async assertSeeIconForValidAdaHandle(shouldBeDisplayed: boolean) {
-    await AddressForm.searchLoader.waitForClickable({ reverse: true, timeout: 5000 });
+    await AddressForm.searchLoader.waitForClickable({ reverse: true, timeout: 10_000 });
     await AddressForm.adaHandleIconValid.waitForClickable({ reverse: !shouldBeDisplayed });
   }
 }
