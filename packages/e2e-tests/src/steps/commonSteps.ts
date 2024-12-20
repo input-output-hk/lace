@@ -51,6 +51,7 @@ import {
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
+import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
 import extensionUtils from '../utils/utils';
 
 Given(/^Lace is ready for test$/, async () => {
@@ -439,3 +440,27 @@ Then(/^Gov Tool page is displayed in a new tab$/, async () => {
     : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
+
+Then(
+  /(invalid|valid|N_8J@bne87A) password is not in snapshot/,
+  async (password: 'invalid' | 'valid' | 'N_8J@bne87A') => {
+    await browser.cdp('HeapProfiler', 'collectGarbage');
+    const snapshot = await browser.takeHeapSnapshot();
+
+    let needle = '';
+    switch (password) {
+      case 'valid':
+        needle = String(getTestWallet(TestWalletName.MultiAccActive1).password);
+        break;
+      case 'invalid':
+        needle = 'somePassword';
+        break;
+      case 'N_8J@bne87A':
+        needle = 'N_8J@bne87A';
+        break;
+    }
+    const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
+
+    expect(needlesFound.length).toEqual(0);
+  }
+);
