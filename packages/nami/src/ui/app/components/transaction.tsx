@@ -15,7 +15,6 @@ import {
   VStack,
   Icon,
   useColorModeValue,
-  Skeleton,
 } from '@chakra-ui/react';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
@@ -81,7 +80,7 @@ const txTypeLabel = {
 };
 
 interface TransactionProps {
-  tx: TxInfo | undefined;
+  tx: TxInfo;
   network: OutsideHandlesContextValue['environmentName'];
   cardanoCoin: CommonOutsideHandlesContextValue['cardanoCoin'];
   openExternalLink: OutsideHandlesContextValue['openExternalLink'];
@@ -95,8 +94,8 @@ const Transaction = ({
 }: Readonly<TransactionProps>) => {
   const colorMode = {
     iconBg: useColorModeValue('white', 'gray.800'),
-    txBg: useColorModeValue('teal.50', 'gray.700'),
-    txBgHover: useColorModeValue('teal.100', 'gray.600'),
+    txBg: useColorModeValue(tx.pending ? 'gray.100' : 'teal.50', tx.pending ? 'gray.500' : 'gray.700'),
+    txBgHover: useColorModeValue(tx.pending ? 'gray.200' : 'teal.100', tx.pending ? 'gray.400' : 'gray.600'),
     assetsBtnHover: useColorModeValue('teal.200', 'gray.700'),
   };
 
@@ -115,119 +114,115 @@ const Transaction = ({
   return (
     <AccordionItem borderTop="none" _last={{ borderBottom: 'none' }}>
       <VStack spacing={2}>
-        {tx ? (
-          <Box align="center" fontSize={14} fontWeight={500} color="gray.500">
+        <Box align="center" fontSize={14} fontWeight={500} color="gray.500">
+          {tx.pending ? (
+            <Text>Pending...</Text>
+          ) : (
             <ReactTimeAgo
               date={tx.date}
               locale="en-US"
               timeStyle="round-minute"
             />
-          </Box>
-        ) : (
-          <Skeleton width="34%" height="22px" rounded="md" />
-        )}
-        {tx ? (
-          <AccordionButton
-            data-testid={`transaction-button-${tx.txHash}`}
+          )}
+        </Box>
+        <AccordionButton
+          data-testid={`transaction-button-${tx.txHash}`}
+          display="flex"
+          wordBreak="break-word"
+          justifyContent="space-between"
+          bg={colorMode.txBg}
+          borderRadius={10}
+          borderLeftRadius={30}
+          p={0}
+          _hover={{ backgroundColor: colorMode.txBgHover }}
+          _focus={{ border: 'none' }}
+        >
+          <Box
             display="flex"
-            wordBreak="break-word"
-            justifyContent="space-between"
-            bg={colorMode.txBg}
-            borderRadius={10}
-            borderLeftRadius={30}
-            p={0}
-            _hover={{ backgroundColor: colorMode.txBgHover }}
-            _focus={{ border: 'none' }}
+            flexShrink={5}
+            p={5}
+            borderRadius={50}
+            bg={colorMode.iconBg}
+            position="relative"
+            left="-15px"
           >
-            <Box
-              display="flex"
-              flexShrink={5}
-              p={5}
-              borderRadius={50}
-              bg={colorMode.iconBg}
-              position="relative"
-              left="-15px"
-            >
-              <TxIcon txType={tx.type} extra={tx.extra} />
-            </Box>
-            <Box
-              display="flex"
-              flexDirection="column"
-              textAlign="center"
-              position="relative"
-              left="-15px"
-            >
-              {tx.lovelace ? (
+            <TxIcon txType={tx.type} extra={tx.extra} />
+          </Box>
+          <Box
+            display="flex"
+            flexDirection="column"
+            textAlign="center"
+            position="relative"
+            left="-15px"
+          >
+            {tx.lovelace ? (
+              <UnitDisplay
+                fontSize={18}
+                color={
+                  tx.lovelace >= 0
+                    ? txTypeColor.externalIn
+                    : txTypeColor.externalOut
+                }
+                quantity={tx.lovelace}
+                decimals={6}
+                symbol={cardanoCoin.symbol}
+              />
+            ) : (
+              extraInfo
+            )}
+            {['internalIn', 'externalIn'].includes(tx.type) ? (
+              ''
+            ) : (
+              <Box flexDirection="row" fontSize={12}>
+                Fee:{' '}
                 <UnitDisplay
-                  fontSize={18}
-                  color={
-                    tx.lovelace >= 0
-                      ? txTypeColor.externalIn
-                      : txTypeColor.externalOut
-                  }
-                  quantity={tx.lovelace}
+                  display="inline-block"
+                  quantity={tx.fees}
                   decimals={6}
                   symbol={cardanoCoin.symbol}
                 />
-              ) : (
-                extraInfo
-              )}
-              {['internalIn', 'externalIn'].includes(tx.type) ? (
-                ''
-              ) : (
-                <Box flexDirection="row" fontSize={12}>
-                  Fee:{' '}
-                  <UnitDisplay
-                    display="inline-block"
-                    quantity={tx.fees}
-                    decimals={6}
-                    symbol={cardanoCoin.symbol}
-                  />
-                  {!!Number.parseInt(tx.deposit) && (
-                    <>
-                      {' & Deposit: '}
-                      <UnitDisplay
-                        display="inline-block"
-                        quantity={tx.deposit}
-                        decimals={6}
-                        symbol={cardanoCoin.symbol}
-                      />
-                    </>
-                  )}
-                  {!!Number.parseInt(tx.refund) && (
-                    <>
-                      {' & Refund: '}
-                      <UnitDisplay
-                        display="inline-block"
-                        quantity={tx.refund}
-                        decimals={6}
-                        symbol={cardanoCoin.symbol}
-                      />
-                    </>
-                  )}
-                </Box>
-              )}
+                {!!Number.parseInt(tx.deposit) && (
+                  <>
+                    {' & Deposit: '}
+                    <UnitDisplay
+                      display="inline-block"
+                      quantity={tx.deposit}
+                      decimals={6}
+                      symbol={cardanoCoin.symbol}
+                    />
+                  </>
+                )}
+                {!!Number.parseInt(tx.refund) && (
+                  <>
+                    {' & Refund: '}
+                    <UnitDisplay
+                      display="inline-block"
+                      quantity={tx.refund}
+                      decimals={6}
+                      symbol={cardanoCoin.symbol}
+                    />
+                  </>
+                )}
+              </Box>
+            )}
 
-              {tx.assets.length > 0 ? (
-                <Box flexDirection="row" fontSize={12}>
-                  <Text
-                    display="inline-block"
-                    fontWeight="bold"
-                    _hover={{ backgroundColor: colorMode.assetsBtnHover }}
-                    borderRadius="md"
-                  >
-                    <AssetsPopover assets={tx.assets} isDifference />
-                  </Text>
-                </Box>
-              ) : (
-                ''
-              )}
-            </Box>
-            <AccordionIcon color="teal.400" mr={5} fontSize={20} />
-          </AccordionButton>
-        ) : (
-          <Skeleton width="100%" height="72px" rounded="md" />
-        )}
+            {tx.assets.length > 0 ? (
+              <Box flexDirection="row" fontSize={12}>
+                <Text
+                  display="inline-block"
+                  fontWeight="bold"
+                  _hover={{ backgroundColor: colorMode.assetsBtnHover }}
+                  borderRadius="md"
+                >
+                  <AssetsPopover assets={tx.assets} isDifference />
+                </Text>
+              </Box>
+            ) : (
+              ''
+            )}
+          </Box>
+          <AccordionIcon color="teal.400" mr={5} fontSize={20} />
+        </AccordionButton>
         <AccordionPanel wordBreak="break-word" pb={4}>
           {tx && (
             <TxDetail
