@@ -24,7 +24,7 @@ const getSizeValue = (size: ISvgIcon['size']): number => {
 };
 
 const iconCreator = (props: TIconCreator) => {
-  const { family, name, type, size, svgPathKey, ...otherProps } = props;
+  const { type, size, svgPathKey, ...otherProps } = props;
 
   const svgIconsProps = {
     svgPathKey,

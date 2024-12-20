@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../drawer';
 import FeaturesCarousel from '../FeaturesCarousel';
 
-export const AboutDapp = () => {
+export const AboutDapp: React.FC = () => {
   const {
     state: { data }
   } = useDrawer<ISectionCardItem>();

@@ -1,3 +1,4 @@
+import React from 'react';
 import { RuleLengthArray } from '../../global/styles/Themes/Mixins/types';
 
 export type TColorsProps =
@@ -29,6 +30,7 @@ export interface ITypographyProps extends TFontSizes {
   id?: HTMLElement['id'];
   className?: HTMLElement['className'] | Record<string, unknown>;
   style?: Partial<HTMLElement['style']>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick?: React.DOMAttributes<any>['onClick'];
   as?: keyof Pick<
     React.ReactHTML,
@@ -41,8 +43,9 @@ export interface ITypographyProps extends TFontSizes {
   spacer?: number;
   uppercase?: boolean;
   margin?: RuleLengthArray;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   altColor?: any;
   color?: TColorsProps;
   justify?: boolean;
-  children: any;
+  children: React.ReactNode;
 }

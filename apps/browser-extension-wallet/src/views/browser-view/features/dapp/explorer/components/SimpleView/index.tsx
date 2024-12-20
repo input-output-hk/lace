@@ -14,7 +14,7 @@ const e2ePrefix = 'dapp-grid';
 
 const dappsCategoryToTitle = (category: string) => (category === 'all' ? 'All DApps' : category);
 
-const SimpleView = () => {
+const SimpleView: React.FC = () => {
   const { register, control, watch, resetField } = useForm({
     mode: 'onChange'
   });

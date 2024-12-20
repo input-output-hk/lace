@@ -18,6 +18,7 @@ const isScrollbarAtBottom = () => {
   const windowHeight = window.innerHeight;
 
   // if difference between visible screen and scrollbar vertical position is less than 5px
+  // eslint-disable-next-line no-magic-numbers
   return Math.round(bodyHeight - windowHeight) - Math.round(window.scrollY) < 5;
 };
 
@@ -34,8 +35,8 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
     search
   });
 
-  const fetchNext = (_renderedDapps: ISectionCardItem[]) =>
-    fetchMore();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const fetchNext = (_renderedDapps: ISectionCardItem[]) => fetchMore();
 
   const loadMoreDapps = () => {
     if (isScrollbarAtBottom() && hasNextPage) {
@@ -74,7 +75,7 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
           categories={[dapp.category, dapp.subcategory].filter(Boolean)}
           image={dapp.image}
           isCertified={dapp.isCertified}
-          onClick={handleOpenDrawer}
+          onClick={() => handleOpenDrawer(dapp)}
           title={dapp.title}
         />
       </div>

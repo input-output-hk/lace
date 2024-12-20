@@ -13,7 +13,7 @@ import { CERTIFICATION_AUDIT_DOWNLOAD_CERTIFICATION_TEST_ID } from './constants'
 
 const { Panel } = Collapse;
 
-export const CertificationAndAudit = () => {
+export const CertificationAndAudit: React.FC = () => {
   const {
     state: { data }
   } = useDrawer<ISectionCardItem>();
