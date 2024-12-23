@@ -138,3 +138,8 @@ Feature: Staking Page - Extended View
     Then I do not see the modal about issues with multi-delegation and DApps
     When I refresh the page
     Then I do not see the modal about issues with multi-delegation and DApps
+
+  @LW-12033 @Testnet
+  Scenario: Popup View - "Delegate your voting power" banner is not displayed if user is not staking, but has funds
+    When I navigate to Staking extended page
+    Then "Delegate your voting power" banner is not displayed

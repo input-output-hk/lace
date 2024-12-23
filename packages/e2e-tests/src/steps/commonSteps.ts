@@ -51,6 +51,7 @@ import {
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
+import extensionUtils from '../utils/utils';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -431,3 +432,10 @@ When(
     await browser.refresh();
   }
 );
+
+Then(/^Gov Tool page is displayed in a new tab$/, async () => {
+  const expectedUrl = extensionUtils.isMainnet()
+    ? 'https://gov.tools/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+  await commonAssert.assertSeeTabWithUrl(expectedUrl);
+});
