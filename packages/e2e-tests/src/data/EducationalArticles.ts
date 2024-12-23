@@ -47,6 +47,10 @@ export const faqArticles: Record<string, Record<string, string>> = {
   'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features': {
     question: 'best-practices-for-using-the-copy-to-clipboard-paste-from-clipboard-recovery-phrase-features',
     title: 'Best practices for using the “copy to clipboard” and “paste from clipboard” recovery phrase features'
+  },
+  'What is the Voltaire GovTool?': {
+    question: 'what-is-the-voltaire-govtool',
+    title: 'What is the Voltaire GovTool?'
   }
 };
 
