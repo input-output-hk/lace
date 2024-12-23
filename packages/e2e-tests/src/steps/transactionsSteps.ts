@@ -1,7 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
 import transactionDetailsAssert, { PoolData } from '../assert/transactionDetailsAssert';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
@@ -10,14 +9,16 @@ import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
 import { TransactionType } from '../types/transactionType';
 import { TransactionStyle } from '../types/transactionStyle';
+import MenuMainExtended from '../elements/menuMainExtended';
+import MenuMainPopup from '../elements/menuMainPopup';
 
 Given(/^I am on the Transactions section - Extended view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'extended');
+  await MenuMainExtended.clickOnTokensButton();
   await transactionsPageAssert.assertTxsLoaded();
 });
 
 Given(/^I am on the Transactions section - popup view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'popup');
+  await MenuMainPopup.clickOnTokensButton();
   await transactionsPageAssert.assertTxsLoaded();
 });
 
@@ -61,7 +62,7 @@ When(/^I click on a transaction hash and save hash information$/, async () => {
 });
 
 When(/^I click on a transaction hash$/, async () => {
-  await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
+  await TransactionDetailsPage.transactionDetailsHash.waitForClickable();
   await TransactionDetailsPage.transactionDetailsHash.click();
 });
 

@@ -3,7 +3,7 @@ import PopupView from '../page/popupView';
 import { browser } from '@wdio/globals';
 
 const visitPageInExtendedMode = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book'
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book'
 ) => {
   switch (page) {
     case 'Tokens':
@@ -21,12 +21,15 @@ const visitPageInExtendedMode = async (
     case 'Settings':
       await ExtendedView.visitSettings();
       break;
-    case 'Address book':
+    case 'Address Book':
       await ExtendedView.visitAddressBook();
+      break;
+    default:
+      throw new Error(`Unknown page: ${page}`);
   }
 };
 
-const visitPageInPopupMode = async (page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book') => {
+const visitPageInPopupMode = async (page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book') => {
   switch (page) {
     case 'Tokens':
       await PopupView.visitTokensPage();
@@ -43,11 +46,16 @@ const visitPageInPopupMode = async (page: 'Tokens' | 'NFTs' | 'Activity' | 'Stak
     case 'Settings':
       await PopupView.visitSettings();
       break;
+    case 'Address Book':
+      await PopupView.visitAddressBook();
+      break;
+    default:
+      throw new Error(`Unknown page: ${page}`);
   }
 };
 
 export const visit = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book',
   mode: 'extended' | 'popup'
 ): Promise<void> => {
   await (mode === 'extended' ? visitPageInExtendedMode(page) : visitPageInPopupMode(page));

@@ -3,7 +3,6 @@ import NftsPage from '../elements/NFTs/nftsPage';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import NftCreateFolderPage from '../elements/NFTs/nftCreateFolderPage';
 import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainModal';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import NftSelectNftsPage from '../elements/NFTs/nftSelectNftsPage';
 import NftSelectNftsAssert from '../assert/nftSelectNftsAssert';
 import IndexedDB from '../fixture/indexedDB';
@@ -19,6 +18,7 @@ import NftAssert from '../assert/nftAssert';
 import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import ToastMessage from '../elements/toastMessage';
+import { visit } from '../utils/pageUtils';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -160,7 +160,7 @@ Then(
 );
 
 When(/^I navigate to "Select NFTs" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
-  await mainMenuPageObject.navigateToSection('NFTs', mode);
+  await visit('NFTs', mode);
   await NftsPage.createFolderButton.waitForClickable();
   await NftsPage.createFolderButton.click();
   await NftCreateFolderPage.setFolderNameInput('Sample NFT folder');
