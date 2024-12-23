@@ -42,3 +42,8 @@ Feature: Empty states
   @LW-6875
   Scenario: Popup view - Hide my balance - no eye icon for wallet with no funds
     Then Eye icon is not displayed on Tokens page
+
+  @LW-12032
+  Scenario: Popup View - "Delegate your voting power" banner is not displayed if user has no funds
+    When I navigate to Staking popup page
+    Then "Delegate your voting power" banner is not displayed

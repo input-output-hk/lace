@@ -16,18 +16,20 @@ type props = {
 export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }: props): React.ReactElement => {
   const { t } = useTranslation();
   return (
-    <div className={cn(styles.container, { [styles.popupView!]: popupView })}>
+    <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="register-as-drep-banner">
       <img className={styles.bg} src={popupView ? bgPopup : BG} />
       <Flex flexDirection="column" justifyContent="center" className={styles.content}>
-        <div className={styles.title}>{t('browserView.staking.stakingInfo.RegisterAsDRepBanner.title')}</div>
-        <div className={styles.description}>
+        <div className={styles.title} data-testid="register-as-drep-banner-title">
+          {t('browserView.staking.stakingInfo.RegisterAsDRepBanner.title')}
+        </div>
+        <div className={styles.description} data-testid="register-as-drep-banner-description">
           <Trans
             components={{
               a: (
                 <a
                   className={styles.legalButton}
                   onClick={() => openExternalLink(`${process.env.FAQ_URL}?question=what-is-the-voltaire-govtool`)}
-                  data-testid="terms-of-service-link"
+                  data-testid="know-more-link"
                 />
               ),
             }}
@@ -38,7 +40,7 @@ export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }
           <Button.CallToAction
             w="$auto"
             onClick={() => govToolUrl && openExternalLink(govToolUrl)}
-            data-testid="enable-account-password-prompt-confirm-btn"
+            data-testid="register-now-at-gov-tool-button"
             label={t('browserView.staking.stakingInfo.RegisterAsDRepBanner.cta')}
           />
         </Box>
