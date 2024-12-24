@@ -39,7 +39,7 @@ export const StakePoolDetailsDrawer = ({
   const { t } = useTranslation();
   const { setIsRestaking } = useSubmitingState();
   const { isInMemoryWallet } = useWalletStore();
-  const { password, clearSecrets } = useSecrets();
+  const { clearSecrets } = useSecrets();
 
   const { setDelegationTxBuilder } = useDelegationStore();
   const analytics = useAnalyticsContext();
@@ -75,9 +75,7 @@ export const StakePoolDetailsDrawer = ({
   ]);
 
   const onArrowIconClick = useCallback(() => {
-    if (password) {
-      clearSecrets();
-    }
+    clearSecrets();
     if (simpleSendConfig.currentSection === Sections.CONFIRMATION && !isInMemoryWallet) {
       return setSection(sectionsConfig[Sections.DETAIL]);
     }
@@ -88,7 +86,6 @@ export const StakePoolDetailsDrawer = ({
   }, [
     closeDrawer,
     isInMemoryWallet,
-    password,
     clearSecrets,
     setPrevSection,
     setSection,
