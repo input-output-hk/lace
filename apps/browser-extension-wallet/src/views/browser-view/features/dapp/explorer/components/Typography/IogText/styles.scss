@@ -1,0 +1,68 @@
+@import '../../../styles/functions.scss';
+@import '../../../styles/colors.scss';
+
+.iog-text {
+  font-size: toRem(12);
+  font-style: normal;
+  font-weight: 300;
+  line-height: toRem(16);
+  letter-spacing: 0.02em;
+  margin: 0;
+
+  color: $color-font-primary;
+  &:is(pre) {
+    white-space: break-spaces;
+  }
+
+  &:is(div) * {
+    color: inherit;
+  }
+}
+
+.iog-text--center {
+  text-align: center;
+}
+
+.iog-text--bold {
+  font-weight: bold;
+}
+
+.iog-text--normal {
+  font-weight: normal;
+}
+
+.iog-text--uppercase {
+  text-transform: uppercase;
+}
+
+.iog-text--smallest {
+  font-size: toRem(10);
+  line-height: toRem(14);
+}
+.iog-text--smaller {
+  font-size: toRem(12);
+  line-height: toRem(16);
+}
+.iog-text--small {
+  font-size: toRem(14);
+  line-height: toRem(20);
+}
+
+.iog-text--x-medium {
+  font-size: toRem(16) !important;
+  line-height: toRem(24) !important;
+}
+
+.iog-text--xx-medium {
+  font-size: toRem(18) !important;
+  line-height: toRem(24) !important;
+}
+
+.iog-text--medium {
+  font-size: toRem(20);
+  line-height: toRem(32);
+}
+
+.iog-text--justify {
+  text-align: justify;
+}

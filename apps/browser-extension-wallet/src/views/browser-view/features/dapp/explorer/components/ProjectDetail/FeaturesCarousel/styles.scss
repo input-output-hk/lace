@@ -1,0 +1,37 @@
+@import '../../../styles/colors.scss';
+@import '../../../styles/functions.scss';
+
+.iog-feature-carrousel-container {
+  h2 {
+    font-weight: bold;
+    font-size: toRem(18);
+    line-height: toRem(24);
+    letter-spacing: 0.02em;
+    color: $color-white;
+    margin-bottom: 10px;
+  }
+  p {
+    font-weight: normal;
+    font-size: toRem(16) !important;
+    line-height: toRem(24) !important;
+    letter-spacing: 0.02em;
+    color: $color-blue-bell;
+  }
+}
+
+.iog-feature-carrousel-border-container {
+  border-radius: 16px;
+
+  .iog-image {
+    background-color: $color-black-rock;
+    object-position: center;
+    border-radius: 12px;
+    height: 329px;
+  }
+}
+
+.iog-swiper-container {
+  .swiper-slide {
+    max-width: 100%;
+  }
+}

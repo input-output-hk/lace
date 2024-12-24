@@ -36,6 +36,7 @@ import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -61,6 +62,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.settings,
     component: SettingsLayout
+  },
+  {
+    path: routes.dapps,
+    component: DAppExplorer
   },
   {
     path: routes.nfts,
