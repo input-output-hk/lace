@@ -1,4 +1,4 @@
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { themes } from '@providers/ThemeProvider';
 import { BackgroundStorage, MigrationState } from './storage';
 import { CoinPrices } from './prices';
@@ -89,6 +89,11 @@ export type Message =
   | OpenBrowserMessage
   | ChangeMode;
 
+export type UnhandledError = {
+  type: 'error' | 'unhandledrejection';
+  message: string;
+};
+
 export type BackgroundService = {
   handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
   handleOpenPopup: () => Promise<void>;
@@ -103,6 +108,7 @@ export type BackgroundService = {
   clearBackgroundStorage: typeof clearBackgroundStorage;
   resetStorage: () => Promise<void>;
   backendFailures$: BehaviorSubject<number>;
+  unhandledError$: Observable<UnhandledError>;
 };
 
 export type WalletMode = {
