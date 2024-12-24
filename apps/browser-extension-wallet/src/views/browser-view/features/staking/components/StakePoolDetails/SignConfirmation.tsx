@@ -1,9 +1,9 @@
 /* eslint-disable react/no-multi-comp */
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { Button, useObservable } from '@lace/common';
-import { Password, OnPasswordChange, useSecrets } from '@lace/core';
+import { Password, OnPasswordChange, useSecrets, PasswordObj } from '@lace/core';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
 import styles from './SignConfirmation.module.scss';
@@ -63,7 +63,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const delegationDetails = useDelegationDetails();
   const isDelegating = !!(rewardAccounts && delegationDetails);
 
-  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
+  const isSubmitDisabled = isSubmitingTx || !password;
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();
@@ -73,39 +73,42 @@ export const SignConfirmationFooter = (): ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.StakingManageDelegationPasswordConfirmationConfirmClick);
   }, [analytics]);
 
-  const handleVerifyPass = useCallback(async () => {
-    setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
-    try {
-      await signAndSubmitTransaction();
-      cleanPasswordInput();
-      sendAnalytics();
-      setIsRestaking(isDelegating);
-      setSection(sectionsConfig[Sections.SUCCESS_TX]);
-      setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
-    } catch (error) {
-      // Error name is 'AuthenticationError' in dev build but 'W' in prod build
-      if (error.message?.includes('Authentication failure')) {
-        setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
-      } else {
-        setSection(sectionsConfig[Sections.FAIL_TX]);
-        setSubmitingTxState({ isSubmitingTx: false });
+  const handleVerifyPass = useCallback(
+    async (passphrase: Partial<PasswordObj>) => {
+      setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: true });
+      try {
+        await signAndSubmitTransaction(passphrase);
+        cleanPasswordInput();
+        sendAnalytics();
+        setIsRestaking(isDelegating);
+        setSection(sectionsConfig[Sections.SUCCESS_TX]);
+        setSubmitingTxState({ isPasswordValid: true, isSubmitingTx: false });
+      } catch (error) {
+        // Error name is 'AuthenticationError' in dev build but 'W' in prod build
+        if (error.message?.includes('Authentication failure')) {
+          setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
+        } else {
+          setSection(sectionsConfig[Sections.FAIL_TX]);
+          setSubmitingTxState({ isSubmitingTx: false });
+        }
       }
-    }
-  }, [
-    setSubmitingTxState,
-    signAndSubmitTransaction,
-    cleanPasswordInput,
-    sendAnalytics,
-    setSection,
-    setIsRestaking,
-    isDelegating
-  ]);
+    },
+    [
+      setSubmitingTxState,
+      signAndSubmitTransaction,
+      cleanPasswordInput,
+      sendAnalytics,
+      setSection,
+      setIsRestaking,
+      isDelegating
+    ]
+  );
 
   return (
     <div className={styles.footer}>
       <Button
         data-testid="stake-sign-confirmation-btn"
-        onClick={handleVerifyPass}
+        onClick={() => handleVerifyPass(password)}
         disabled={isSubmitDisabled}
         loading={isSubmitingTx}
         className={styles.confirmBtn}
