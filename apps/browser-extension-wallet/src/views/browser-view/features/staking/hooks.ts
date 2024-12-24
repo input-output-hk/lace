@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
-import { useSecrets } from '@lace/core';
+import { PasswordObj, useSecrets } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import groupBy from 'lodash/groupBy';
@@ -13,16 +13,21 @@ interface UseRewardAccountsDataType {
   lockedStakeRewards: bigint;
 }
 
-export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
-  const { password, clearSecrets } = useSecrets();
+export const useDelegationTransaction = (): {
+  signAndSubmitTransaction: (password: Partial<PasswordObj>) => Promise<void>;
+} => {
+  const { clearSecrets } = useSecrets();
   const { inMemoryWallet } = useWalletStore();
   const { delegationTxBuilder } = useDelegationStore();
-  const signAndSubmitTransaction = useCallback(async () => {
-    const tx = delegationTxBuilder.build();
-    const signedTx = await withSignTxConfirmation(() => tx.sign(), password.value);
-    await inMemoryWallet.submitTx(signedTx);
-    clearSecrets();
-  }, [delegationTxBuilder, inMemoryWallet, password, clearSecrets]);
+  const signAndSubmitTransaction = useCallback(
+    async (password: Partial<PasswordObj>) => {
+      const tx = delegationTxBuilder.build();
+      const signedTx = await withSignTxConfirmation(() => tx.sign(), password.value);
+      await inMemoryWallet.submitTx(signedTx);
+      clearSecrets();
+    },
+    [delegationTxBuilder, inMemoryWallet, clearSecrets]
+  );
 
   return { signAndSubmitTransaction };
 };

@@ -35,7 +35,7 @@ export const SignMessageDrawer: React.FC = () => {
     }
   }, [error]);
 
-  const handleSign = useCallback(() => {
+  const handleSign = () => {
     if (!isHardwareWallet && !password.value) {
       analytics.sendEventToPostHog(PostHogAction.SignMessageAskingForPassword);
       setShouldShowPasswordPrompt(true);
@@ -43,7 +43,7 @@ export const SignMessageDrawer: React.FC = () => {
       analytics.sendEventToPostHog(PostHogAction.SignMessageAskingHardwareWalletInteraction);
       performSigning(selectedAddress, message, password);
     }
-  }, [isHardwareWallet, password, analytics, performSigning, selectedAddress, message]);
+  };
 
   const handleCopy = useCallback(() => {
     toast.notify({

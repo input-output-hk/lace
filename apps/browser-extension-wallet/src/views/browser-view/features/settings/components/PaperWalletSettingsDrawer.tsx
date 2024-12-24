@@ -58,15 +58,13 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
-  const getPassphrase = useCallback(
-    async (userPassword) => {
-      await validatePassword();
-      const mnemonic = await getMnemonic(Buffer.from(userPassword));
+  const getPassphrase = async () => {
+    await validatePassword();
+    const mnemonic = await getMnemonic(Buffer.from(password.value));
 
-      setPassphrase(mnemonic);
-    },
-    [getMnemonic, validatePassword]
-  );
+    setPassphrase(mnemonic);
+  };
+
   const analytics = useAnalyticsContext();
 
   const handleClose = useCallback(() => {
@@ -82,7 +80,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
       await validatePassword();
-      await getPassphrase(password.value);
+      await getPassphrase();
       analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
       setStage('save');
       setProcessingState({ isPasswordValid: true, isProcessing: false });
@@ -91,7 +89,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       clearSecrets();
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, clearSecrets, analytics]);
+  }, [isProcessing, validatePassword, getPassphrase, clearSecrets, analytics]);
 
   useEffect(() => {
     if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
@@ -129,7 +127,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     }
   }, [stage, isPasswordValid, setPgpInfo, pgpInfo, setPassword, formattedWalletName]);
 
-  const footer = useMemo(() => {
+  const footer = () => {
     switch (stage) {
       case 'secure': {
         return (
@@ -149,7 +147,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         return (
           <Button.CallToAction
             w="$fill"
-            disabled={!password}
+            disabled={!password.value}
             label={i18n.t('browserView.settings.generatePaperWallet.title')}
             onClick={handleVerifyPass}
             data-testid="generate-paper-wallet-button"
@@ -195,7 +193,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       default:
         throw new Error(INCORRECT_STAGE_ERROR);
     }
-  }, [stage, pgpInfo, setStage, handleVerifyPass, password, pdfInstance, formattedWalletName, analytics]);
+  };
 
   const drawerHeader = useMemo(() => {
     switch (stage) {
