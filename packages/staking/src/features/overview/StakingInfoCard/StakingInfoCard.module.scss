@@ -41,6 +41,12 @@
       padding: 0 size_unit(2);
     }
   }
+
+  .colContent {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .marker {

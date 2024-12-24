@@ -242,8 +242,8 @@ describe('useSelectedCoin', () => {
       const { result } = renderUseSelectedCoins(props);
 
       expect(result.current.selectedCoins).toHaveLength(1);
-      expect(result.current.selectedCoins[0].fiatValue).toEqual('= 2000000.00 usd');
-      expect(result.current.selectedCoins[0].formattedFiatValue).toEqual('= 2.00M usd');
+      expect(result.current.selectedCoins[0].fiatValue).toEqual('≈ 2000000.00 usd');
+      expect(result.current.selectedCoins[0].formattedFiatValue).toEqual('≈ 2.00M usd');
       expect(result.current.selectedCoins[0].maxDecimals).toEqual(6);
       expect(result.current.selectedCoins[0].allowFloat).toEqual(true);
     });

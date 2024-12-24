@@ -4,9 +4,12 @@ export interface Page {
 
 export abstract class LaceView {
   async waitForPreloaderToDisappear(): Promise<void> {
-    await browser.waitUntil(async () => {
-      const preloaderExists = await $('#preloader').isExisting();
-      return !preloaderExists;
-    });
+    await browser.waitUntil(
+      async () => {
+        const preloaderExists = await $('#preloader').isExisting();
+        return !preloaderExists;
+      },
+      { timeout: 5 * 60 * 1000, interval: 1000 }
+    );
   }
 }

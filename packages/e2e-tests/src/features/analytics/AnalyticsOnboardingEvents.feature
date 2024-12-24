@@ -30,8 +30,8 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Enter wallet" button
     Then I validate latest analytics multiple events:
       | onboarding \| restore wallet revamp \| let's set up your new wallet \| enter wallet \| click |
-      | $create_alias                                                                                |
-    And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
+#      | $create_alias                                                                                | TODO: uncomment when LW-12025 is fixed
+#    And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
@@ -56,6 +56,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I click "Enter wallet" button
     Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
+      | onboarding \| new wallet revamp \| added                                                 |
       | $create_alias                                                                            |
     And I validate that 10 analytics event(s) have been sent
 

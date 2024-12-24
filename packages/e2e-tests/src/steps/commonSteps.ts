@@ -52,6 +52,7 @@ import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
+import extensionUtils from '../utils/utils';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -456,3 +457,10 @@ Then(
     expect(needlesFound.length).toEqual(0);
   }
 );
+
+Then(/^Gov Tool page is displayed in a new tab$/, async () => {
+  const expectedUrl = extensionUtils.isMainnet()
+    ? 'https://gov.tools/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+  await commonAssert.assertSeeTabWithUrl(expectedUrl);
+});

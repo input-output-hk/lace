@@ -22,7 +22,7 @@ export const config: WebdriverIO.Config = {
     batch3: [
       './src/features/analytics/AnalyticsActivity*.feature',
       './src/features/analytics/AnalyticsAddress*.feature',
-      './src/features/analytics/AnalyticsEventProperites*.feature',
+      './src/features/analytics/AnalyticsEventProperties*.feature',
       './src/features/analytics/AnalyticsFiatOnRampOffRamp.feature',
       './src/features/analytics/AnalyticsForgotPassword.feature',
       './src/features/analytics/AnalyticsNavigation*.feature',

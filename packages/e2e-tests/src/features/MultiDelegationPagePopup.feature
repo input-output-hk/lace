@@ -17,3 +17,8 @@ Feature: Staking Page - Popup View
     When I click "Expand view" on Start Staking page
     And I switch to last window
     Then I see Lace extension main page in extended mode
+
+  @LW-12034 @Testnet
+  Scenario: Popup View - "Delegate your voting power" banner is not displayed if user is not staking, but has funds
+    When I navigate to Staking popup page
+    Then "Delegate your voting power" banner is not displayed

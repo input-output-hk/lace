@@ -149,7 +149,9 @@ export const StakingInfo = ({
                 text={t('browserView.staking.stakingInfo.stats.stakeKey')}
                 value={
                   <Tooltip content={rewardAccount.address}>
-                    {popupView ? addEllipsis(rewardAccount.address, 14, 9) : rewardAccount.address}
+                    <div className={styles.colContent}>
+                      {popupView ? addEllipsis(rewardAccount.address, 14, 9) : rewardAccount.address}
+                    </div>
                   </Tooltip>
                 }
                 dataTestid="stats-stake-key"
