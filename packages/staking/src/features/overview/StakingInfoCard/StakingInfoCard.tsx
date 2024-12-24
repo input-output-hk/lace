@@ -30,7 +30,7 @@ export const formatLocaleNumber = (value: string | number, decimalPlaces: number
 const formatNumericValue = (
   val: number | string,
   suffix: number | string,
-  decimalPlaces: number = DEFAULT_DECIMALS,
+  decimalPlaces: number = DEFAULT_DECIMALS
 ): React.ReactElement => (
   <>
     {val ? formatLocaleNumber(String(val), decimalPlaces) : '-'}
@@ -207,7 +207,7 @@ export const StakingInfoCard = ({
                 {t(
                   isDRepRetired
                     ? 'overview.stakingInfoCard.registerAsDRepBanner.descriptionRetired'
-                    : 'overview.stakingInfoCard.registerAsDRepBanner.description',
+                    : 'overview.stakingInfoCard.registerAsDRepBanner.description'
                 )}
               </Text.Button>
               <Button.CallToAction
@@ -225,7 +225,7 @@ export const StakingInfoCard = ({
               message={t(
                 isDRepRetired
                   ? 'overview.stakingInfoCard.registerAsDRepBanner.descriptionRetired'
-                  : 'overview.stakingInfoCard.registerAsDRepBanner.description',
+                  : 'overview.stakingInfoCard.registerAsDRepBanner.description'
               )}
               onButtonClick={() => govToolUrl && openExternalLink(govToolUrl)}
               buttonMessage={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
