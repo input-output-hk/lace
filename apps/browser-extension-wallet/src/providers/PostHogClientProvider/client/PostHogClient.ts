@@ -32,7 +32,8 @@ type FeatureFlag =
   | 'use-switch-to-nami-mode'
   | 'websocket-api'
   | ExperimentName.BLOCKFROST_ASSET_PROVIDER
-  | ExperimentName.EXTENSION_STORAGE;
+  | ExperimentName.EXTENSION_STORAGE
+  | ExperimentName.USE_DREP_PROVIDER_OVERRIDE;
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;

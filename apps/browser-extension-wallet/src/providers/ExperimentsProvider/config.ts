@@ -7,7 +7,8 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.SHARED_WALLETS]: false,
   [ExperimentName.WEBSOCKET_API]: false,
   [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: false,
-  [ExperimentName.EXTENSION_STORAGE]: false
+  [ExperimentName.EXTENSION_STORAGE]: false,
+  [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: false
 });
 
 export const experiments: ExperimentsConfig = {
@@ -36,6 +37,10 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.EXTENSION_STORAGE]: {
+    value: false,
+    default: false
+  },
+  [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: {
     value: false,
     default: false
   }

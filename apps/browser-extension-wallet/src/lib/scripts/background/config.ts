@@ -45,6 +45,9 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
   const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
   const useWebSocket = !!(featureFlags?.[magic]?.[ExperimentName.WEBSOCKET_API] ?? false);
   const useBlockfrostAssetProvider = !!(featureFlags?.[magic]?.[ExperimentName.BLOCKFROST_ASSET_PROVIDER] ?? false);
+  const useDrepProviderOverrideActiveStatus = !!(
+    featureFlags?.[magic]?.[ExperimentName.USE_DREP_PROVIDER_OVERRIDE] ?? false
+  );
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
@@ -58,7 +61,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       }
     },
     logger,
-    experiments: { useWebSocket, useBlockfrostAssetProvider }
+    experiments: { useWebSocket, useBlockfrostAssetProvider, useDrepProviderOverrideActiveStatus }
   });
 };
 

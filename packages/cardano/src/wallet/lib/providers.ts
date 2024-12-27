@@ -15,6 +15,7 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
+import type { DRepInfo } from '@cardano-sdk/core';
 
 import {
   CardanoWsClient,
@@ -81,6 +82,7 @@ export interface ProvidersConfig {
   experiments: {
     useWebSocket?: boolean;
     useBlockfrostAssetProvider?: boolean;
+    useDrepProviderOverrideActiveStatus?: boolean;
   };
 }
 
@@ -94,7 +96,7 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useBlockfrostAssetProvider, useWebSocket }
+  experiments: { useBlockfrostAssetProvider, useWebSocket, useDrepProviderOverrideActiveStatus }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
@@ -111,6 +113,34 @@ export const createProviders = ({
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
   const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
   const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
+
+  // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
+  const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
+    get(target, property, receiver) {
+      const original = Reflect.get(target, property, receiver);
+      if (property === 'getDRepInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo = await original.apply(target, args);
+          return {
+            ...response,
+            active: true
+          };
+        };
+      }
+
+      if (property === 'getDRepsInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo[] = await original.apply(target, args);
+          return response.map((drepInfo) => ({
+            ...drepInfo,
+            active: true
+          }));
+        };
+      }
+
+      return original;
+    }
+  });
 
   if (useWebSocket) {
     const url = new URL(baseUrl);
@@ -133,7 +163,7 @@ export const createProviders = ({
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardsProvider,
       wsProvider,
-      drepProvider
+      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
     };
   }
 
@@ -145,7 +175,7 @@ export const createProviders = ({
     utxoProvider: utxoHttpProvider(httpProviderConfig),
     chainHistoryProvider,
     rewardsProvider,
-    drepProvider
+    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
   };
 };
 
