@@ -42,6 +42,7 @@ export const getPoolIdToRewardAccountsMap = (
 export const useRewardAccountsData = (): UseRewardAccountsDataType => {
   const { inMemoryWallet } = useWalletStore();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
+  const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
   const accountsWithRegisteredStakeCreds = useMemo(
     () =>
       rewardAccounts?.filter(
@@ -69,17 +70,22 @@ export const useRewardAccountsData = (): UseRewardAccountsDataType => {
     [accountsWithRegisteredStakeCreds]
   );
 
-  const lockedStakeRewards = useMemo(
-    () =>
-      BigInt(
-        accountsWithRegisteredStakeCredsWithoutVotingDelegation
-          ? Wallet.BigIntMath.sum(
-              accountsWithRegisteredStakeCredsWithoutVotingDelegation.map(({ rewardBalance }) => rewardBalance)
-            )
-          : 0
-      ),
-    [accountsWithRegisteredStakeCredsWithoutVotingDelegation]
-  );
+  const lockedStakeRewards = useMemo(() => {
+    if (
+      !protocolParameters?.protocolVersion ||
+      // eslint-disable-next-line no-magic-numbers
+      protocolParameters.protocolVersion.major < 10 ||
+      !accountsWithRegisteredStakeCredsWithoutVotingDelegation
+    ) {
+      return BigInt(0);
+    }
+
+    return BigInt(
+      Wallet.BigIntMath.sum(
+        accountsWithRegisteredStakeCredsWithoutVotingDelegation.map(({ rewardBalance }) => rewardBalance)
+      )
+    );
+  }, [accountsWithRegisteredStakeCredsWithoutVotingDelegation, protocolParameters]);
 
   const poolIdToRewardAccountsMap = useMemo(
     () => getPoolIdToRewardAccountsMap(accountsWithRegisteredStakeCreds),

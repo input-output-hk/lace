@@ -98,8 +98,9 @@ export const StakingInfoCard = ({
   const { openExternalLink, govToolUrl } = useOutsideHandles();
 
   const dRepDelegatee = rewardAccount?.dRepDelegatee;
-  const isDRepRetired =
-    dRepDelegatee && 'active' in dRepDelegatee.delegateRepresentative && !dRepDelegatee.delegateRepresentative.active;
+  const isDRepRetired = false;
+  // const isDRepRetired =
+  //   dRepDelegatee && 'active' in dRepDelegatee.delegateRepresentative && !dRepDelegatee.delegateRepresentative.active;
   const stakeAddress = rewardAccount?.address;
 
   return (
