@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { storage, Storage } from 'webextension-polyfill';
 import isNil from 'lodash/isNil';
 import { applyMigrations, migrationsRequirePassword } from '@lib/scripts/migrations';
@@ -11,7 +11,7 @@ import { MainLoader } from '@components/MainLoader';
 import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
 import { useSecrets } from '@lace/core';
-import type { OnPasswordChange, PasswordObj } from '@lace/core';
+import type { OnPasswordChange } from '@lace/core';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;
@@ -36,14 +36,13 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const { password, setPassword, clearSecrets } = useSecrets();
   const [isValidPassword, setIsValidPassword] = useState(true);
+  // Create a ref to access password without creating dependencies
+  const getPassword = useRef(() => password.value);
 
-  const migrate = useCallback(
-    async (spendingPassphrase: Partial<PasswordObj>) => {
-      setRenderState(INITIAL_RENDER_STATE);
-      if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, spendingPassphrase.value);
-    },
-    [migrationState, appMode]
-  );
+  const migrate = useCallback(async () => {
+    setRenderState(INITIAL_RENDER_STATE);
+    if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, getPassword.current());
+  }, [migrationState, appMode, getPassword]);
 
   const handlePasswordChange = useCallback<OnPasswordChange>(
     (target) => {
@@ -55,35 +54,28 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
     [isValidPassword, setPassword]
   );
 
-  const lockAndMigrate = useCallback(
-    async (spendingPassphrase) => {
-      const shouldLock = await migrationsRequirePassword(migrationState);
-      if (shouldLock) {
-        setRenderState({ didMigrationFail: false, locked: true, isMigrating: true });
-        return;
-      }
-      await migrate(spendingPassphrase);
-    },
-    [migrate, migrationState]
-  );
+  const lockAndMigrate = useCallback(async () => {
+    const shouldLock = await migrationsRequirePassword(migrationState);
+    if (shouldLock) {
+      setRenderState({ didMigrationFail: false, locked: true, isMigrating: true });
+      return;
+    }
+    await migrate();
+  }, [migrate, migrationState]);
 
-  const onUnlock = useCallback(
-    async (spendingPassphrase: Partial<PasswordObj>): Promise<void> => {
-      setIsVerifyingPassword(true);
-      try {
-        await unlockWallet();
-        setIsValidPassword(true);
-        await migrate(spendingPassphrase);
-        clearSecrets();
-      } catch {
-        setIsValidPassword(false);
-      } finally {
-        clearSecrets();
-      }
-      setIsVerifyingPassword(false);
-    },
-    [unlockWallet, migrate, clearSecrets]
-  );
+  const onUnlock = useCallback(async (): Promise<void> => {
+    setIsVerifyingPassword(true);
+    try {
+      await unlockWallet();
+      setIsValidPassword(true);
+      await migrate();
+    } catch {
+      setIsValidPassword(false);
+    } finally {
+      clearSecrets();
+    }
+    setIsVerifyingPassword(false);
+  }, [unlockWallet, migrate, clearSecrets]);
 
   useEffect(() => {
     // Load initial migrationState value
@@ -121,7 +113,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       if (!migrationState) return;
       switch (migrationState.state) {
         case 'not-applied': {
-          await lockAndMigrate(password);
+          await lockAndMigrate();
           break;
         }
         case 'not-loaded': {
@@ -131,7 +123,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
         case 'migrating': {
           if (isLoadingFirstTime) {
             // This means an update was interrupted while migrating last time the app was opened
-            await lockAndMigrate(password);
+            await lockAndMigrate();
             break;
           }
           setRenderState(INITIAL_RENDER_STATE);
@@ -154,7 +146,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
     return appMode === APP_MODE_POPUP ? (
       <UnlockWallet
         isLoading={isVerifyingPassword}
-        onUnlock={() => onUnlock(password)}
+        onUnlock={onUnlock}
         passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
         unlockButtonDisabled={!password.value}
         // TODO: show forgot password here too. Use same logic as in ResetDataError on click

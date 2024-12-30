@@ -17,7 +17,7 @@ import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SettingsLayout.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PassphraseStage, SaveStage, SecureStage } from './PaperWallet';
-import { useSecrets } from '@lace/core';
+import { PasswordObj, useSecrets } from '@lace/core';
 
 const INCORRECT_STAGE_ERROR = 'incorrect stage supplied';
 interface Props {
@@ -58,12 +58,6 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
-  const getPassphrase = async () => {
-    await validatePassword();
-    const mnemonic = await getMnemonic(Buffer.from(password.value));
-
-    setPassphrase(mnemonic);
-  };
 
   const analytics = useAnalyticsContext();
 
@@ -75,21 +69,25 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     onClose();
   }, [setStage, setPgpInfo, clearSecrets, setPassphrase, onClose]);
 
-  const handleVerifyPass = useCallback(async () => {
-    if (isProcessing) return;
-    setProcessingState({ isPasswordValid: true, isProcessing: true });
-    try {
-      await validatePassword();
-      await getPassphrase();
-      analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
-      setStage('save');
-      setProcessingState({ isPasswordValid: true, isProcessing: false });
-      clearSecrets();
-    } catch {
-      clearSecrets();
-      setProcessingState({ isPasswordValid: false, isProcessing: false });
-    }
-  }, [isProcessing, validatePassword, getPassphrase, clearSecrets, analytics]);
+  const handleVerifyPass = useCallback(
+    async (userPassphrase: Partial<PasswordObj>) => {
+      if (isProcessing) return;
+      setProcessingState({ isPasswordValid: true, isProcessing: true });
+      try {
+        await validatePassword();
+        const mnemonic = await getMnemonic(Buffer.from(userPassphrase.value));
+        setPassphrase(mnemonic);
+        analytics.sendEventToPostHog(PostHogAction.SettingsPaperWalletPasswordNextClick);
+        setStage('save');
+        setProcessingState({ isPasswordValid: true, isProcessing: false });
+        clearSecrets();
+      } catch {
+        clearSecrets();
+        setProcessingState({ isPasswordValid: false, isProcessing: false });
+      }
+    },
+    [isProcessing, validatePassword, getMnemonic, clearSecrets, analytics]
+  );
 
   useEffect(() => {
     if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
@@ -147,9 +145,9 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         return (
           <Button.CallToAction
             w="$fill"
-            disabled={!password.value}
+            disabled={!password}
             label={i18n.t('browserView.settings.generatePaperWallet.title')}
-            onClick={handleVerifyPass}
+            onClick={() => handleVerifyPass(password)}
             data-testid="generate-paper-wallet-button"
           />
         );
