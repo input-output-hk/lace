@@ -17,7 +17,7 @@ import { sectionsConfig, useStakePoolDetails } from '../../store';
 import Cardano from '../../../../../../assets/images/cardano-blue-bg.png';
 import styles from './StakePoolConfirmation.module.scss';
 import ArrowDown from '../../../../../../assets/icons/arrow-down.component.svg';
-import { Sections, StakingError } from '@views/browser/features/staking/types';
+import { Sections, StakingErrorType } from '@views/browser/features/staking/types';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { ContinueInBrowserDialog } from '@components/ContinueInBrowserDialog';
@@ -75,8 +75,8 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
       : undefined;
 
   const ErrorMessages = {
-    [StakingError.UTXO_FULLY_DEPLETED]: t('browserView.staking.details.errors.utxoFullyDepleted'),
-    [StakingError.UTXO_BALANCE_INSUFFICIENT]: t('browserView.staking.details.errors.utxoBalanceInsufficient')
+    [StakingErrorType.UTXO_FULLY_DEPLETED]: t('browserView.staking.details.errors.utxoFullyDepleted'),
+    [StakingErrorType.UTXO_BALANCE_INSUFFICIENT]: t('browserView.staking.details.errors.utxoBalanceInsufficient')
   };
 
   const ItemStatRenderer = ({ img, text, subText }: statRendererProps) => (
@@ -108,9 +108,9 @@ export const StakePoolConfirmation = ({ popupView }: StakePoolConfirmationProps)
           {t('browserView.staking.details.confirmation.subTitle')}
         </div>
       </div>
-      {stakingError && (
+      {stakingError && stakingError.type !== StakingErrorType.REWARDS_LOCKED && (
         <div>
-          <Banner customIcon={ExclamationMarkIcon} withIcon message={ErrorMessages[stakingError]} />
+          <Banner customIcon={ExclamationMarkIcon} withIcon message={ErrorMessages[stakingError.type]} />
         </div>
       )}
       <div className={cn(styles.container, { [styles.popupView]: popupView })} data-testid="sp-confirmation-container">

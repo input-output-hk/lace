@@ -26,6 +26,7 @@ import {
   InputRightElement,
   Input,
   Tooltip,
+  ModalFooter,
 } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
 import { FaRegFileCode } from 'react-icons/fa';
@@ -44,7 +45,8 @@ import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
 
 import type { ConfirmModalRef } from './confirmModal';
-import { firstValueFrom } from 'rxjs';
+import { StakingErrorType } from '../../../features/outside-handles-provider';
+import { Ellipsis } from '@lace/common';
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -124,6 +126,7 @@ const TransactionBuilder = (undefined, ref) => {
     delegationTxFee,
     isBuildingTx,
     stakingError,
+    accountsWithLockedRewards,
     secretsUtil,
     signAndSubmitTransaction,
     getStakePoolInfo,
@@ -133,6 +136,7 @@ const TransactionBuilder = (undefined, ref) => {
     openExternalLink,
     delegationStoreDelegationTxBuilder,
     collateralTxBuilder,
+    govToolsUrl,
   } = useOutsideHandles();
   const {
     inMemoryWallet,
@@ -267,17 +271,82 @@ const TransactionBuilder = (undefined, ref) => {
     },
   }));
 
+  const handleClose = () => {
+    setData({ pool: { ...poolDefaultValue } });
+    resetDelegationState();
+    secretsUtil.clearSecrets();
+  };
+
   const error = data.error || data.pool.error;
+  const lockedRewardAccounts = stakingError === StakingErrorType.REWARDS_LOCKED && accountsWithLockedRewards?.length
+    ? accountsWithLockedRewards
+    : [];
+
+  if (lockedRewardAccounts.length) {
+    return (
+      <Modal
+        size="xs"
+        isOpen
+        onClose={handleClose}
+        isCentered
+        blockScrollOnMount={false}
+      >
+        <ModalOverlay />
+        <ModalContent m={0}>
+          <ModalHeader fontSize="md">Stake deregistration</ModalHeader>
+          <ModalBody>
+            <Box display={'flex'} justifyContent={'center'}>
+              <Icon as={GoStop} w={50} h={50} color="red.500" />
+            </Box>
+            <Box h="4" />
+            <Text fontSize="sm">
+              Due to Cardano protocol rules, some of your stake keys cannot be de-registered as they have pending
+              rewards. To withdraw the rewards, you must first delegate the voting power of those stake keys using
+              {' '}<Link
+                fontWeight="semibold"
+                onClick={() => {
+                  openExternalLink(govToolsUrl);
+                }}
+              >
+                Gov.tools
+              </Link>
+              {' '}portal. Once delegated, you will be able to de-register the keys.
+            </Text>
+            <UnorderedList mt='10px'>
+              {lockedRewardAccounts.map(({ cbor, key }) => (
+                <ListItem key={key}>
+                <Box display={'flex'}>
+                  <Ellipsis withTooltip={false} text={key} beforeEllipsis={12} afterEllipsis={6} />
+                  {!!cbor && (
+                    <>
+                      &nbsp;(
+                      <Ellipsis withTooltip={false} text={cbor} beforeEllipsis={6} afterEllipsis={6} />)
+                    </>
+                  )}
+                </Box>
+                </ListItem>
+              ))}
+            </UnorderedList>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              mr={3}
+              variant="ghost"
+              onClick={handleClose}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    );
+  }
 
   return (
     <>
       <ConfirmModal
         isPopup={true}
-        onCloseBtn={() => {
-          setData({ pool: { ...poolDefaultValue } });
-          resetDelegationState();
-          secretsUtil.clearSecrets();
-        }}
+        onCloseBtn={handleClose}
         secretsUtil={secretsUtil}
         openHWFlow={openHWFlow}
         walletType={walletType}
