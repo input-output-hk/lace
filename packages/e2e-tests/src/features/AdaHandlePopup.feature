@@ -123,7 +123,7 @@ Feature: ADA handle - popup view
     And I see handles listed on the "Receive" screen
     And I close the drawer by clicking close button
     And I navigate to NFTs popup page
-    When I create folder with name: "Ada Handle folder" that contains 4 NFTs
+    When I create folder with name: "Ada Handle folder" that contains 5 NFTs
     Then I see a thumbnail of ADA handle with custom image on the NFT folder with name: "Ada Handle folder"
     When I left click on the NFT folder with name "Ada Handle folder"
     And I see "Ada Handle folder" NFT folder page in popup mode
