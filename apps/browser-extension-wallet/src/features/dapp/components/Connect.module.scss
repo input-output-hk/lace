@@ -52,7 +52,7 @@
 }
 
 .footer {
-  background-color: var(--bg-color-white);
+  background-color: var(--light-mode-body, var(--dark-mode-bg-black));
   @extend %flex-column;
   justify-content: center;
   gap: size_unit(1);
