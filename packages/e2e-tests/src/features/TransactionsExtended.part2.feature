@@ -48,7 +48,8 @@ Feature: Transactions - Extended view
       | Sent                      | default - negative |
       | Received                  | green - positive   |
       | Self Transaction          | default - negative |
-      | Rewards                   | green - positive   |
+#      enable rewards type of transaction when it's available
+#      | Rewards                   | green - positive   |
       | Delegation                | default - negative |
       | Stake Key De-Registration | green - positive   |
       | Stake Key Registration    | default - negative |
@@ -64,7 +65,8 @@ Feature: Transactions - Extended view
       | Sent                      |
       | Received                  |
       | Self Transaction          |
-      | Rewards                   |
+#      enable rewards type of transaction when it's available
+#      | Rewards                   |
       | Delegation                |
       | Stake Key De-Registration |
       | Stake Key Registration    |
