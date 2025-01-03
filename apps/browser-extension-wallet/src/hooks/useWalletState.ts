@@ -31,7 +31,7 @@ type FlattenObservableProperties<T> = T extends Map<any, any> | String | Number 
     }
   : T;
 export type ObservableWalletState = FlattenObservableProperties<
-  Omit<ObservableWallet, 'fatalError$' | 'transactions'> & {
+  Omit<ObservableWallet, 'transactions'> & {
     transactions: {
       history$: ObservableWallet['transactions']['history$'];
       outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$' | 'signed$'>;
