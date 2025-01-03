@@ -13,7 +13,8 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER]: false,
   [ExperimentName.BLOCKFROST_UTXO_PROVIDER]: false,
   [ExperimentName.EXTENSION_STORAGE]: false,
-  [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: false
+  [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: false,
+  [ExperimentName.DAPP_EXPLORER]: false
 });
 
 export const experiments: ExperimentsConfig = {
@@ -66,6 +67,10 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: {
+    value: false,
+    default: false
+  },
+  [ExperimentName.DAPP_EXPLORER]: {
     value: false,
     default: false
   }

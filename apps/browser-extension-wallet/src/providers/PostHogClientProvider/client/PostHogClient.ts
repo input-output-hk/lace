@@ -25,20 +25,7 @@ import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 
-type FeatureFlag =
-  | 'create-paper-wallet'
-  | 'restore-paper-wallet'
-  | 'shared-wallets'
-  | 'use-switch-to-nami-mode'
-  | 'websocket-api'
-  | ExperimentName.BLOCKFROST_ASSET_PROVIDER
-  | ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER
-  | ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER
-  | ExperimentName.BLOCKFROST_REWARDS_PROVIDER
-  | ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER
-  | ExperimentName.BLOCKFROST_UTXO_PROVIDER
-  | ExperimentName.EXTENSION_STORAGE
-  | ExperimentName.USE_DREP_PROVIDER_OVERRIDE;
+type FeatureFlag = `${ExperimentName}`;
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;

@@ -1,0 +1,81 @@
+@import './shared-colors';
+@import './shadows';
+
+/*
+Ideally, we should have the same variable names for both themes but there are case where we are using a especific colour like text-color-black
+
+so in those cases, what I propose to do is something like
+
+color: var(--light-color, --dark-color, --custom-color, #fff (default value));
+
+where
+--light-color is going to be defined only in light mode
+--dark-color is going to be defined only in dark mode
+--custom-color is going to be defined in any other cases that we want to create a custom theme
+if the variables are undefined we use the fallback color
+*/
+
+// only aply for light mode
+$light: (
+  'black': #3d3b39,
+  'cream': #fcf5e3,
+  'dark-grey-plus': #7e8593,
+  'dark-grey': #6f7786,
+  'mid-grey': #c0c0c0,
+  'light-grey-plus': #efefef,
+  'light-grey-plus-56': rgba(239, 239, 239, 0.56),
+  'light-grey': #f9f9f9,
+  'light-grey-56': rgba(249, 249, 249, 0.56)
+);
+
+$light-theme: (
+  'bg-color': (
+    'body': #ffffff,
+    'container': #ffffff,
+    'container-9': rgba(255, 255, 255, 0.9),
+    'modal': #ffffff,
+    'navigator-icon': #f9f9f9
+  ),
+  'primary': (
+    'default': #7f5af0,
+    'hover': #7452db,
+    'active': #7452db,
+    'accent': rgba(127, 90, 240, 0.3),
+    'gradient': linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%)
+  ),
+  'secondary': (
+    'gradient': linear-gradient(128.79deg, #f4b4d0 0%, #f5c25d 100%)
+  ),
+  'color': (
+    'white': #fff
+  ),
+  'text-color': (
+    'primary': #3d3b39,
+    'secondary': #6f7786,
+    'white': #ffffff,
+    'black': #212121,
+    'green': #2cb67d,
+    'red': #ff5470,
+    'blue': #3489f7,
+    'grey': #6b7280,
+    'light-grey': #6f7786
+  ),
+  'shadow': (
+    'primary-button-hover': 0px 4px 10px rgba(#a78fa0, 0.2) rgba(#4b00b5, 0.3),
+    'inset-white': 2px 1000px 1px var(--color-white) inset,
+    'inset-lgray': 2px 1000px 1px var(--light-mode-light-grey) inset,
+    'setup-box': 0px 0px 20px rgba(167, 143, 160, 0.15)
+  ),
+  'shadows': $shadows,
+  'scroll-bar': (
+    'track': #fff,
+    'thum': #efefef
+  ),
+  'switch': (
+    'checked-bg-color': linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%),
+    'checked-bg-color-hover': linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%)
+  ),
+  'light-mode': $light,
+  'lace': $lace,
+  'data': $data
+);

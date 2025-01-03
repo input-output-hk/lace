@@ -40,6 +40,15 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     activeIcon: NftIconActive
   },
   {
+    id: MenuItemList.DAPPS,
+    label: 'browserView.sideMenu.links.dappStore',
+    testId: 'item-dapps',
+    path: routes.dapps,
+    regularIcon: NftIconDefault,
+    hoverIcon: NftIconHover,
+    activeIcon: NftIconActive
+  },
+  {
     id: MenuItemList.TRANSACTIONS,
     label: 'browserView.sideMenu.links.activity',
     testId: 'item-transactions',

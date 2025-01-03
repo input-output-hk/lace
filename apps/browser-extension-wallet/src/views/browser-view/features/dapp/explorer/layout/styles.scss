@@ -1,0 +1,41 @@
+@import '../styles/colors.scss';
+
+.iog-layout {
+  height: 100vh;
+  background: linear-gradient(0deg, #131533, #131533);
+}
+
+.iog-layout--light {
+  background: $color-white !important;
+
+  :not(.iog-header--explorer-view) ~ .iog-dapp-layout {
+    @media (max-width: 1368px) {
+      transform: scale(0.85);
+    }
+  }
+}
+
+.iog-layout-content {
+  position: relative;
+  height: 100%;
+}
+
+.iog-layout-content--scrollable {
+  overflow: auto !important;
+
+  .iog-dapp-layout {
+    overflow: initial;
+  }
+}
+
+.iog-layout--welcome {
+  .iog-header__button {
+    opacity: 0;
+  }
+}
+
+.iog-layout--navigation-loading {
+  .iog-sidebar__container {
+    padding: 250px;
+  }
+}
