@@ -13,6 +13,7 @@ export enum ExperimentName {
   WEBSOCKET_API = 'websocket-api',
   BLOCKFROST_ASSET_PROVIDER = 'blockfrost-asset-provider',
   EXTENSION_STORAGE = 'extension-storage',
+  USE_DREP_PROVIDER_OVERRIDE = 'use-drep-provider-override',
   DAPP_EXPLORER = 'dapp-explorer'
 }
 

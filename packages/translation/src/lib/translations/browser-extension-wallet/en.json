@@ -454,7 +454,7 @@
   "browserView.staking.stakingInfo.StakeFundsBanner.title": "Start staking",
   "browserView.staking.stakingInfo.RegisterAsDRepBanner.title": "Delegate your voting power",
   "browserView.staking.stakingInfo.RegisterAsDRepBanner.description": "Please register as a DRep or delegate your voting rights to a DRep in the Gov Tool portal to ensure Lace can utilize your stake delegation rewards. <a>Know more</a>",
-  "browserView.staking.stakingInfo.RegisterAsDRepBanner.cta": "Register now at Gov Tool ",
+  "browserView.staking.stakingInfo.RegisterAsDRepBanner.cta": "Register now at Gov Tool",
   "browserView.staking.stakingInfo.stats.Fee": "Fee",
   "browserView.staking.stakingInfo.stats.Margin": "Margin",
   "browserView.staking.stakingInfo.stats.stakeKey": "Stake key",

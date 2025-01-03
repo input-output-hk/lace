@@ -25,10 +25,10 @@ Feature: CIP-95 Static methods
     And I click "Only once" button in DApp authorization window
     And I switch to window with CIP-95 test DApp
     And I wait for CIP-95 test DApp to be populated with data
-    Then .getPubDRepKey() returned "0260bdbdb0bf572c524672709849c6fe6a778b73bc2a65776e6a9a850dd690e9"
+    Then .getPubDRepKey() returned "912f7179f6c7d41e62168f15c947879b3ee89aa94f69bd60c93d756385062afd"
     And .getRegisteredPubStakeKeys() returned:
       | index | key                                                              |
-      | 0     | 9832a01bc835d16e380db33476d5cf10bd777b7aa4eb8aec017fdb7bbbfceb28 |
+      | 0     | cbcb3e0af7a089a8e94da7382b2b02eee6aad4a501cf4d0e01eda44a2a71ca85 |
 
   @LW-10613
   Scenario: CIP-95 - Static methods - user has staked funds on multiple stake pools
