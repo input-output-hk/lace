@@ -35,6 +35,7 @@ import SecureYourPaperWalletPage from '../elements/onboarding/SecureYourPaperWal
 import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWalletPageAssert';
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
+import LocalStorageInitializer from '../fixture/localStorageInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -194,13 +195,13 @@ Then(/^I do not see autocomplete options list$/, async () => {
   await onboardingRecoveryPhrasePageAssert.assertNotSeeMnemonicAutocompleteOptions();
 });
 
-Given(/^I create new wallet and save wallet information$/, async () => {
-  // issue LW-11288 - please remove when it will be fixed / check on CI is needed
+Given(/^I create new wallet with name: "([^"]*)" and save wallet information$/, async (walletName: string) => {
   await browser.pause(1000);
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
+  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true, walletName, 'default');
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingWalletSetupPage.clickEnterWalletButton();
+  await LocalStorageInitializer.disableShowPinExtension();
   await TopNavigationAssert.assertLogoPresent();
   await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
   const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
@@ -258,8 +259,12 @@ Given(
   /^I enter wallet name: "([^"]*)", password: "([^"]*)" and password confirmation: "([^"]*)"$/,
   async (walletName: string, password: string, passwordConfirmation: string) => {
     await OnboardingWalletSetupPage.setWalletNameInput(walletName);
-    await OnboardingWalletSetupPage.setWalletPasswordInput(password);
-    await OnboardingWalletSetupPage.setWalletPasswordConfirmInput(passwordConfirmation);
+    await OnboardingWalletSetupPage.setWalletPasswordInput(
+      password === 'default' ? String(process.env.WALLET_1_PASSWORD) : password
+    );
+    await OnboardingWalletSetupPage.setWalletPasswordConfirmInput(
+      passwordConfirmation === 'default' ? String(process.env.WALLET_1_PASSWORD) : passwordConfirmation
+    );
   }
 );
 

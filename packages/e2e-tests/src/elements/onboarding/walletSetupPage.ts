@@ -116,15 +116,19 @@ class WalletSetupPage extends CommonOnboardingElements {
   async goToWalletSetupPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = false
+    fillValues = false,
+    walletName?: string,
+    walletPassword?: string
   ): Promise<void> {
     await recoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicWords, true);
     await recoveryPhrasePage.nextButton.waitForClickable();
     await recoveryPhrasePage.nextButton.click();
     if (fillValues) {
-      await this.setWalletNameInput('TestAutomationWallet');
-      await this.setWalletPasswordInput('N_8J@bne87A');
-      await this.setWalletPasswordConfirmInput('N_8J@bne87A');
+      const name = walletName === undefined ? 'TestAutomationWallet' : walletName.slice(0, 20);
+      await this.setWalletNameInput(name);
+      const password = walletPassword === 'default' ? String(process.env.WALLET_1_PASSWORD) : 'N_8J@bne87A';
+      await this.setWalletPasswordInput(password);
+      await this.setWalletPasswordConfirmInput(password);
     }
   }
 }
