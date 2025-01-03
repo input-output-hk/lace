@@ -41,7 +41,6 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@apollo/client": "3.7.7",
     "@cardano-sdk/cardano-services-client": "0.23.3",
     "@cardano-sdk/core": "0.42.1",
     "@cardano-sdk/dapp-connector": "0.12.47",
