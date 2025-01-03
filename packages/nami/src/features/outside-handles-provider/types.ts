@@ -1,6 +1,9 @@
 import type { CreateWalletParams } from '../../types/wallet';
 import type { EraSummary } from '@cardano-sdk/core';
-import type { TxBuilder } from '@cardano-sdk/tx-construction';
+import type {
+  DataOfKeyWithLockedRewards,
+  TxBuilder,
+} from '@cardano-sdk/tx-construction';
 import type {
   AnyBip32Wallet,
   WalletManagerActivateProps,
@@ -25,6 +28,12 @@ export interface WalletManagerAddAccountProps {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
+}
+
+export enum StakingErrorType {
+  UTXO_FULLY_DEPLETED = 'UTXO_FULLY_DEPLETED',
+  UTXO_BALANCE_INSUFFICIENT = 'UTXO_BALANCE_INSUFFICIENT',
+  REWARDS_LOCKED = 'REWARDS_LOCKED',
 }
 
 export interface OutsideHandlesContextValue {
@@ -82,7 +91,8 @@ export interface OutsideHandlesContextValue {
     pool: Readonly<Wallet.Cardano.StakePool | undefined>,
   ) => void;
   isBuildingTx: boolean;
-  stakingError: string;
+  stakingError?: StakingErrorType;
+  accountsWithLockedRewards?: DataOfKeyWithLockedRewards[];
   getStakePoolInfo: (
     id: Readonly<Wallet.Cardano.PoolId>,
   ) => Promise<Wallet.Cardano.StakePool[]>;
@@ -133,4 +143,5 @@ export interface OutsideHandlesContextValue {
   ) => Wallet.Cardano.InputResolver;
   lockedStakeRewards: bigint;
   redirectToStaking: () => void;
+  govToolsUrl: string;
 }

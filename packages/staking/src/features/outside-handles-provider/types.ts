@@ -110,5 +110,5 @@ export type OutsideHandlesContextValue = {
     areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
     poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
   };
-  govToolUrl?: string;
+  govToolUrl: string;
 };

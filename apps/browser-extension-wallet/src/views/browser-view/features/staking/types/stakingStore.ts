@@ -1,3 +1,4 @@
+import { DataOfKeyWithLockedRewards } from '@cardano-sdk/tx-construction';
 export enum Sections {
   DETAIL = 'detail',
   CONFIRMATION = 'confirmation',
@@ -6,10 +7,19 @@ export enum Sections {
   FAIL_TX = 'fail_tx'
 }
 
-export enum StakingError {
+export enum StakingErrorType {
   UTXO_FULLY_DEPLETED = 'UTXO_FULLY_DEPLETED',
-  UTXO_BALANCE_INSUFFICIENT = 'UTXO_BALANCE_INSUFFICIENT'
+  UTXO_BALANCE_INSUFFICIENT = 'UTXO_BALANCE_INSUFFICIENT',
+  REWARDS_LOCKED = 'REWARDS_LOCKED'
 }
+
+export type StakingError =
+  | { type: StakingErrorType.UTXO_BALANCE_INSUFFICIENT }
+  | { type: StakingErrorType.UTXO_FULLY_DEPLETED }
+  | {
+      data: DataOfKeyWithLockedRewards[];
+      type: StakingErrorType.REWARDS_LOCKED;
+    };
 
 export interface SectionConfig {
   currentSection: Sections;
