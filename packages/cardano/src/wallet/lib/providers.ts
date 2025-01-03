@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-new */
+/* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
 import { WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
 import { Logger } from 'ts-log';
@@ -15,6 +15,7 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
+import type { DRepInfo } from '@cardano-sdk/core';
 
 import {
   CardanoWsClient,
@@ -31,7 +32,12 @@ import {
   RateLimiter,
   BlockfrostClient,
   BlockfrostAssetProvider,
-  BlockfrostDRepProvider
+  BlockfrostChainHistoryProvider,
+  BlockfrostDRepProvider,
+  BlockfrostUtxoProvider,
+  BlockfrostRewardsProvider,
+  BlockfrostTxSubmitProvider,
+  BlockfrostNetworkInfoProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
@@ -81,6 +87,12 @@ export interface ProvidersConfig {
   experiments: {
     useWebSocket?: boolean;
     useBlockfrostAssetProvider?: boolean;
+    useDrepProviderOverrideActiveStatus?: boolean;
+    useBlockfrostChainHistoryProvider?: boolean;
+    useBlockfrostNetworkInfoProvider?: boolean;
+    useBlockfrostRewardsProvider?: boolean;
+    useBlockfrostTxSubmitProvider?: boolean;
+    useBlockfrostUtxoProvider?: boolean;
   };
 }
 
@@ -94,7 +106,16 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useBlockfrostAssetProvider, useWebSocket }
+  experiments: {
+    useBlockfrostAssetProvider,
+    useBlockfrostChainHistoryProvider,
+    useBlockfrostNetworkInfoProvider,
+    useBlockfrostRewardsProvider,
+    useBlockfrostTxSubmitProvider,
+    useBlockfrostUtxoProvider,
+    useDrepProviderOverrideActiveStatus,
+    useWebSocket
+  }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
@@ -106,11 +127,48 @@ export const createProviders = ({
   const assetProvider = useBlockfrostAssetProvider
     ? new BlockfrostAssetProvider(blockfrostClient, logger)
     : assetInfoHttpProvider(httpProviderConfig);
-  const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
-  const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
+  const networkInfoProvider = useBlockfrostNetworkInfoProvider
+    ? new BlockfrostNetworkInfoProvider(blockfrostClient, logger)
+    : networkInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = useBlockfrostChainHistoryProvider
+    ? new BlockfrostChainHistoryProvider(blockfrostClient, networkInfoProvider, logger)
+    : chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = useBlockfrostRewardsProvider
+    ? new BlockfrostRewardsProvider(blockfrostClient, logger)
+    : rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
-  const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+  const txSubmitProvider = useBlockfrostTxSubmitProvider
+    ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
+    : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
   const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
+
+  // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
+  const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
+    get(target, property, receiver) {
+      const original = Reflect.get(target, property, receiver);
+      if (property === 'getDRepInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo = await original.apply(target, args);
+          return {
+            ...response,
+            active: true
+          };
+        };
+      }
+
+      if (property === 'getDRepsInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo[] = await original.apply(target, args);
+          return response.map((drepInfo) => ({
+            ...drepInfo,
+            active: true
+          }));
+        };
+      }
+
+      return original;
+    }
+  });
 
   if (useWebSocket) {
     const url = new URL(baseUrl);
@@ -133,19 +191,23 @@ export const createProviders = ({
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardsProvider,
       wsProvider,
-      drepProvider
+      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
     };
   }
 
+  const utxoProvider = useBlockfrostUtxoProvider
+    ? new BlockfrostUtxoProvider(blockfrostClient, logger)
+    : utxoHttpProvider(httpProviderConfig);
+
   return {
     assetProvider,
-    networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
+    networkInfoProvider,
     txSubmitProvider,
     stakePoolProvider,
-    utxoProvider: utxoHttpProvider(httpProviderConfig),
+    utxoProvider,
     chainHistoryProvider,
     rewardsProvider,
-    drepProvider
+    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
   };
 };
 

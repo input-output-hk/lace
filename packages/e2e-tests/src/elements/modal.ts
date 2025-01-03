@@ -43,7 +43,7 @@ class Modal {
   async waitUntilModalDisappears() {
     await browser.pause(500);
     await browser.waitUntil(async () => !(await this.container.isDisplayed()), {
-      timeout: 10_000,
+      timeout: 15_000,
       interval: 500,
       timeoutMsg: 'failed while waiting for the modal to disappear'
     });

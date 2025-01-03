@@ -68,3 +68,8 @@ Feature: Empty states
     When I click "Set Collateral" button in test DApp
     Then I don't see DApp window
 
+  @LW-12031
+  Scenario: Extended View - "Delegate your voting power" banner is not displayed if user has no funds
+    When I navigate to Staking extended page
+    Then "Delegate your voting power" banner is not displayed
+

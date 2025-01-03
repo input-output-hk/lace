@@ -43,6 +43,8 @@ import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard
 import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
 import SwitchingPoolsModalAssert from '../assert/multidelegation/SwitchingPoolsModalAssert';
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import DelegateYourVotingPowerBanner from '../elements/multidelegation/DelegateYourVotingPowerBanner';
+import DelegateYourVotingPowerBannerAssert from '../assert/multidelegation/DelegateYourVotingPowerBannerAssert';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -693,4 +695,16 @@ Then(/^the staking error screen is displayed$/, async () => {
 
 Then(/^I see "Switching to less pools" modal$/, async () => {
   await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
+});
+
+Then(/^"Delegate your voting power" banner (is|is not) displayed$/, async (state: 'is' | 'is not') => {
+  await DelegateYourVotingPowerBannerAssert.assertSeeDelegateYourVotingPowerBanner(state === 'is');
+});
+
+When(/^I click on "Know more" link on "Delegate your voting power" banner$/, async () => {
+  await DelegateYourVotingPowerBanner.clickOnKnowMoreLink();
+});
+
+When(/^I click on "Register now at Gov Tool" button$/, async () => {
+  await DelegateYourVotingPowerBanner.clickRegisterButton();
 });

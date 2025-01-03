@@ -34,7 +34,7 @@ Feature: Delegating funds to new pool E2E
     And I click "Next" button on staking portfolio bar
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
-    And I enter newly created wallet password and confirm staking
+    And I enter correct wallet password and confirm staking
     Then Initial staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I open Overview tab
