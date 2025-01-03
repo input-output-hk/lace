@@ -1,4 +1,4 @@
-import { omit } from 'lodash';
+import omit from 'lodash/omit';
 import * as React from 'react';
 import { Icon } from '../../Icon';
 import { IIogButtonIconProps } from '../types';

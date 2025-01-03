@@ -11,5 +11,5 @@ export interface IogCardProps {
   description?: string;
   isCertified?: boolean;
   image?: Partial<IIogCardImage>;
-  onClick?: (value?: any) => void;
+  onClick?: () => void;
 }

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { EIconsName, Icon } from '../../../../components/Icon';
 
-export const SocialIcon = (data: { iconId: string }) => {
+// eslint-disable-next-line complexity
+export const SocialIcon: React.FC<{ iconId: string }> = (data) => {
   const iconFun = (icon: EIconsName) => <Icon name={icon} size={24} strokeColor="#6F7786" />;
 
   switch (data.iconId) {

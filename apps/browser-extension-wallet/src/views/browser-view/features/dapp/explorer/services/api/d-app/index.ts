@@ -10,18 +10,18 @@ type DAppFetcherParams = {
   _subcategory?: string;
 };
 
+const fetchMore = (): IDApp[] => [];
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unused-vars
 const useDAppFetcher = (_params: DAppFetcherParams) => {
   const [hasNextPage] = useState(true);
 
   // todo: handle errors
   const { loading, error, data } = {
     loading: false,
-    error: null as Error | null,
+    error: undefined as Error,
     data: mockedData
   };
-
-  const fetchMore = (): IDApp[] => [];
-
   return { loading, data, error, fetchMore, hasNextPage };
 };
 

@@ -6,7 +6,7 @@ import { getFontColor } from '../helpers';
 
 import './styles.scss';
 
-export const IogText = ({
+export const IogText: React.FC<ITypographyProps> = ({
   as = 'p',
   center,
   bold,
@@ -27,7 +27,7 @@ export const IogText = ({
   children,
   justify,
   ...props
-}: ITypographyProps) =>
+}) =>
   React.createElement(
     as,
     {

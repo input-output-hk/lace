@@ -28,16 +28,16 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   ];
 
   const { data: categories } = useCategoriesFetcher();
-  console.log(JSON.stringify(categories));
   const formattedCategories = [...ALL_CATEGORIES_FILTER, ...formatFiltersResponse(categories)];
 
   useEffect(() => {
     if (onChangeCategory) onChangeCategory(active);
-  }, []);
+  }, [active, onChangeCategory]);
 
   const handleChangeCategory = (category: string) => {
     setActive(category.toLowerCase());
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const swiper = document.querySelector<Element & { swiper: any }>('.iog-classic-view-filters-slider')?.swiper;
     const position = formattedCategories.findIndex(({ value }) => value === category?.toLowerCase());
     swiper?.slideTo(position);
@@ -50,6 +50,8 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
     };
 
     if (query.category) handleChangeCategory(query.category);
+    // TODO: refactor the dependency on handleChangeCategory which is re-created on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, categories]);
 
   const handleSetActive = (value: string) => {

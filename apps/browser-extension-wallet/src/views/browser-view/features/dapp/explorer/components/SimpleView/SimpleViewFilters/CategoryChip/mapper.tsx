@@ -12,10 +12,8 @@ import Defi from './assets/defi.component.svg';
 import { Categories } from './categories.enum';
 import Icon from '@ant-design/icons';
 
-export const mapCategory = (category: string) => {
+export const mapCategory = (category: string): React.ReactNode => {
   const _category = category.toUpperCase();
-
-  console.log('!DEBUG ShowAll', ShowAll);
 
   const icon = (() => {
     switch (_category) {
@@ -40,6 +38,7 @@ export const mapCategory = (category: string) => {
       case Categories.All:
         return ShowAll;
       default:
+        // eslint-disable-next-line unicorn/no-null
         return null;
     }
   })();

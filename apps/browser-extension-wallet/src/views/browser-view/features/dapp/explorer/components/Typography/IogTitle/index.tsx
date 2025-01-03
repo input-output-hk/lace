@@ -6,7 +6,7 @@ import { getFontColor } from '../helpers';
 
 import './styles.scss';
 
-export const IogTitle = ({
+export const IogTitle: React.FC<ITypographyProps> = ({
   as = 'h1',
   center,
   bold,
@@ -23,7 +23,7 @@ export const IogTitle = ({
   style,
   children,
   ...props
-}: ITypographyProps) =>
+}) =>
   React.createElement(
     as,
     {
