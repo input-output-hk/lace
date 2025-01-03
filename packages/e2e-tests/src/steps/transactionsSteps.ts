@@ -255,3 +255,7 @@ Then(/^I save tx hash value "([^"]*)"$/, async (hash: string) => {
   Logger.log(`saving tx hash: ${hash}`);
   testContext.save('txHashValue', hash);
 });
+
+Then(/^Transactions counter is showing value higher than (\d+)$/, async (transactionsMaxNumber: number) => {
+  await transactionsPageAssert.assertCounterShowingMoreTransactionsThan(transactionsMaxNumber);
+});
