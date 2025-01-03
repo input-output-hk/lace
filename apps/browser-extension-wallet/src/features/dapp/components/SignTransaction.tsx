@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
@@ -30,36 +30,36 @@ export const SignTransaction = (): React.ReactElement => {
     signTxRequest: { request }
   } = useViewsFlowContext();
 
-  const onConfirm = useCallback(async () => {
-    setIsLoading(true);
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick, {
-      [TX_CREATION_TYPE_KEY]: TxCreationType.External
-    });
+  const onConfirm = useCallback(
+    async (spendingPassphrase) => {
+      setIsLoading(true);
+      analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick, {
+        [TX_CREATION_TYPE_KEY]: TxCreationType.External
+      });
 
-    const passphrase = createPassphrase(password);
-    try {
-      await request.sign(passphrase, { willRetryOnFailure: true });
-      setValidPassword(true);
-      clearSecrets();
-      passphrase.fill(0);
-      redirectToSignSuccess();
-    } catch (error) {
-      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
-        setValidPassword(false);
-      } else {
-        redirectToSignFailure();
+      const passphrase = createPassphrase(spendingPassphrase);
+      try {
+        await request.sign(passphrase, { willRetryOnFailure: true });
+        setValidPassword(true);
+        clearSecrets();
+        passphrase.fill(0);
+        redirectToSignSuccess();
+      } catch (error) {
+        if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+          setValidPassword(false);
+        } else {
+          redirectToSignFailure();
+        }
+      } finally {
+        clearSecrets();
+        passphrase.fill(0);
+        setIsLoading(false);
       }
-    } finally {
-      clearSecrets();
-      passphrase.fill(0);
-      setIsLoading(false);
-    }
-  }, [password, analytics, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]);
+    },
+    [analytics, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
+  );
 
-  const confirmIsDisabled = useMemo(() => {
-    if (request.walletType !== WalletType.InMemory) return false;
-    return !password;
-  }, [request, password]);
+  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password;
 
   const onCancel = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
@@ -69,12 +69,12 @@ export const SignTransaction = (): React.ReactElement => {
   };
 
   const handleSubmit = useCallback(
-    (event) => {
+    (event, spendingPassphrase) => {
       event.preventDefault();
       event.stopPropagation();
 
       if (!confirmIsDisabled) {
-        onConfirm();
+        onConfirm(spendingPassphrase);
       }
     },
     [onConfirm, confirmIsDisabled]
@@ -89,7 +89,7 @@ export const SignTransaction = (): React.ReactElement => {
           </h5>
           <Password
             onChange={setPassword}
-            onSubmit={handleSubmit}
+            onSubmit={(e) => handleSubmit(e, password)}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             autoFocus

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletStore } from '@stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
@@ -13,16 +13,19 @@ interface UseRewardAccountsDataType {
   lockedStakeRewards: bigint;
 }
 
-export const useDelegationTransaction = (): { signAndSubmitTransaction: () => Promise<void> } => {
-  const { password, clearSecrets } = useSecrets();
+export const useDelegationTransaction = (): {
+  signAndSubmitTransaction: () => Promise<void>;
+} => {
+  const { clearSecrets, password } = useSecrets();
   const { inMemoryWallet } = useWalletStore();
   const { delegationTxBuilder } = useDelegationStore();
-  const signAndSubmitTransaction = useCallback(async () => {
+
+  const signAndSubmitTransaction = async () => {
     const tx = delegationTxBuilder.build();
     const signedTx = await withSignTxConfirmation(() => tx.sign(), password.value);
     await inMemoryWallet.submitTx(signedTx);
     clearSecrets();
-  }, [delegationTxBuilder, inMemoryWallet, password, clearSecrets]);
+  };
 
   return { signAndSubmitTransaction };
 };

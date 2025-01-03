@@ -63,6 +63,7 @@ Feature: Wallet accounts
     And I click "Confirm" button on the account unlock drawer
     Then I see "Account #3 activated" toast
     And I wait for main loader to disappear
+    And valid password is not in snapshot
     And I do not see account unlock drawer with all elements in extended mode
     When I click "Receive" button on page header
     Then I see "Wallet Address" page in extended mode for account: 3 and wallet "MultiAccActive1"

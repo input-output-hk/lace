@@ -8,7 +8,8 @@ import {
   RowContainer,
   renderAmountInfo,
   renderLabel,
-  useSecrets
+  useSecrets,
+  PasswordObj
 } from '@lace/core';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
@@ -67,33 +68,38 @@ export const CreateCollateral = ({
     getTx();
   }, [collateralInfo.amount, inMemoryWallet, addresses]);
 
-  const createCollateralTx = useCallback(async () => {
-    setIsSubmitting(true);
-    const submitTx = async () => {
-      const signedTx = await collateralTx.tx.sign();
-      await inMemoryWallet.submitTx(signedTx);
-      const utxo = await firstValueFrom(
-        inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === collateralInfo.amount)),
-          filter(isNotNil),
-          take(1)
-        )
-      );
-      await inMemoryWallet.utxo.setUnspendable([utxo]);
-      confirm([utxo]);
-    };
+  const createCollateralTx = useCallback(
+    async (passphrase: Partial<PasswordObj>) => {
+      setIsSubmitting(true);
+      const submitTx = async () => {
+        const signedTx = await collateralTx.tx.sign();
+        await inMemoryWallet.submitTx(signedTx);
+        const utxo = await firstValueFrom(
+          inMemoryWallet.utxo.available$.pipe(
+            map((utxos) =>
+              utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === collateralInfo.amount)
+            ),
+            filter(isNotNil),
+            take(1)
+          )
+        );
+        await inMemoryWallet.utxo.setUnspendable([utxo]);
+        confirm([utxo]);
+      };
 
-    try {
-      await withSignTxConfirmation(submitTx, password.value);
-    } catch (error) {
-      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
-        setIsPasswordValid(false);
+      try {
+        await withSignTxConfirmation(submitTx, passphrase.value);
+      } catch (error) {
+        if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+          setIsPasswordValid(false);
+        }
+      } finally {
+        clearSecrets();
       }
-    } finally {
-      clearSecrets();
-    }
-    setIsSubmitting(false);
-  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm, clearSecrets]);
+      setIsSubmitting(false);
+    },
+    [collateralTx, collateralInfo.amount, inMemoryWallet, confirm, clearSecrets]
+  );
 
   const confirmButtonLabel = useMemo(() => {
     if (isInMemoryWallet) {
@@ -159,7 +165,7 @@ export const CreateCollateral = ({
           loading={isSubmitting}
           className={styles.footerBtn}
           size="large"
-          onClick={createCollateralTx}
+          onClick={() => createCollateralTx(password)}
         >
           {confirmButtonLabel}
         </Button>
