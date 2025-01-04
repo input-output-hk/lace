@@ -1,0 +1,175 @@
+@import '../../../styles/colors.scss';
+@import '../../../styles/utils/mixins.scss';
+
+.iog-input {
+  transition: all 300ms;
+  @include input-default-style;
+
+  z-index: 1;
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: $color-light-grey-plus solid 2px;
+  }
+}
+
+.iog-input-container {
+  > p {
+    padding: 0 22px;
+  }
+}
+
+.iog-input-container--light {
+  color: $color-font-primary;
+  padding-top: 64px;
+  .iog-input,
+  &:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  &:before {
+    content: '';
+    border-radius: 16px;
+    z-index: 0;
+    background-color: $color-background-light;
+    width: 100%;
+    height: 64px;
+  }
+  .iog-text {
+    font-weight: 400;
+  }
+
+  .iog-input {
+    border-radius: 16px;
+    background: transparent;
+    color: $color-font-primary;
+    height: 64px;
+    font-size: toRem(16);
+    line-height: toRem(24);
+    padding: 16px 24px;
+
+    &:disabled {
+      opacity: 0.3;
+
+      ~ .iog-input__label {
+        opacity: 0.3;
+      }
+    }
+
+    &:not(:placeholder-shown) ~ .iog-input__label {
+      transform: scale(0.9) translate(-4%, -15px);
+    }
+
+    &:not(:placeholder-shown) {
+      padding: 32px 24px 11px !important;
+    }
+  }
+
+  ::placeholder {
+    /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: $color-font-primary;
+    opacity: 1; /* Firefox */
+  }
+
+  :-ms-input-placeholder {
+    /* Internet Explorer 10-11 */
+    color: $color-font-primary;
+  }
+
+  ::-ms-input-placeholder {
+    /* Microsoft Edge */
+    color: $color-font-primary;
+  }
+
+  .iog-link {
+    color: $color-font-primary;
+    text-decoration: none;
+  }
+
+  .iog-input__password-visibility-button {
+    top: 20px;
+  }
+}
+
+.iog-input--has-input-link {
+  .iog-link-container {
+    float: right;
+  }
+
+  .iog-link {
+    font-size: toRem(16);
+    margin-top: toRem(8);
+  }
+}
+
+.iog-input-container--password {
+  .iog-input {
+    padding-right: 46px;
+  }
+}
+
+.iog-input__password-visibility-button {
+  position: absolute;
+  top: 13px;
+  right: 0;
+  padding: 0;
+  margin-right: 22px;
+  z-index: 2;
+}
+
+.iog-input__search-indicator-button {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  padding: 0;
+  margin-right: 22px;
+  z-index: 2;
+}
+
+.iog-input__label {
+  font-weight: 500;
+  position: absolute;
+  left: 24px;
+  top: 20px;
+  padding: 0;
+}
+
+.iog-input-container--search {
+  .iog-input {
+    padding-left: 64px;
+
+    &:not(:placeholder-shown) {
+      padding: 32px 64px 11px !important;
+    }
+  }
+
+  .iog-input__label {
+    left: 64px;
+    color: $color-darker-grey !important;
+  }
+}
+
+.iog-input-container--search--active {
+  .iog-input {
+    padding-right: 106px;
+  }
+}
+
+.iog-input__search-indicator-button--clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 60px;
+  height: 52px;
+  border-radius: 8px;
+  background-color: $color-light-grey;
+  z-index: 2;
+  * {
+    color: $color-font-black !important;
+  }
+}

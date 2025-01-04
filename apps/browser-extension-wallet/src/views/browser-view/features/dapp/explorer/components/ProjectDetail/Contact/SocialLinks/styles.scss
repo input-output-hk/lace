@@ -1,0 +1,32 @@
+@import '../../../../styles/colors.scss';
+
+.ant-tooltip-arrow {
+  display: none !important;
+}
+
+.ant-tooltip-inner {
+  color: $color-dark-grey-v3 !important;
+  background-color: white !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 0 16px rgba(167, 143, 160, 0.2) !important;
+  border-radius: 11px !important;
+}
+
+.iog-social-links {
+  display: flex;
+  gap: 16px;
+  padding-top: 24px;
+
+  .iog-social-link {
+    min-width: 48px;
+    min-height: 48px;
+    background: $color-light-grey;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+
+    > * {
+      margin: auto;
+    }
+  }
+}

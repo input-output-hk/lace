@@ -1,0 +1,183 @@
+@import '../../../styles/theme.scss';
+@import '../../../styles/colors.scss';
+
+@keyframes expandHover {
+  from {
+    height: 100px;
+    top: -1px;
+    left: -1px;
+  }
+
+  to {
+    height: 210px;
+    left: -20px;
+    top: -80px;
+    width: 100%;
+    background-color: $color-white;
+    box-shadow: 1px 1px 5px $color-light-grey-plus;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+.iog-card-container {
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  background-color: $color-secondary;
+  height: 100px;
+  z-index: 99;
+  border-radius: 11px;
+  border: 1px solid $color-border-light;
+  padding: 20px;
+  width: calc(100% - 40px);
+
+  &:hover {
+    background-color: $color-background-light;
+    border-color: $color-light-grey-plus;
+    animation: expandHover 0.25s forwards ease-in-out;
+    position: absolute;
+    animation-delay: 0.5s;
+
+    .iog-card-content {
+      opacity: 0;
+      animation: fadeIn 1s ease-in-out forwards;
+      animation-delay: 0.5s;
+    }
+  }
+
+  .iog-card-content {
+    opacity: 0;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    margin-top: 10px;
+    overflow: hidden;
+
+    .iog-card-description { 
+      font-weight: 400;
+    }
+  }
+}
+
+.iog-card-header {
+  width: 100%;
+  display: flex;
+
+  > div {
+    &:first-child {
+      margin-right: 16px;
+    }
+    &:last-child {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+}
+
+.iog-card-box {
+  z-index: 1;
+
+  .iog-icon {
+    z-index: -1;
+  }
+
+  > h3 {
+    word-break: break-word;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+    font-weight: 400;
+  }
+}
+
+.iog-card-categories-box {
+  display: inline-flex;
+  align-items: center;
+  p + p {
+    display: inline-flex;
+    align-items: center;
+    &:before {
+      content: '';
+      margin: 2px 5px 0;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background-color: var(--dotColor);
+    }
+  }
+}
+
+.iog-card-body {
+  width: 100%;
+  margin-top: 24px;
+  border-top: 1px solid $color-border-light;
+  flex: 1;
+  > .iog-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.iog-card-box__image {
+  position: relative;
+  border: 1.5px solid $theme-light-grey-border;
+  border-radius: 12px;
+  max-height: 52px;
+  max-width: 52px;
+
+  > .iog-image {
+    z-index: 1;
+  }
+}
+
+.iog-card-footer {
+  width: 100%;
+  padding-top: 16px;
+  border-top: 1px solid $color-border-light;
+
+  > div:first-child {
+    margin-right: 8px;
+  }
+}
+
+.iog-card-title {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  display: inline-block !important;
+
+  @media (min-width: $breakpoint-popup) {
+    max-width: 12ch;
+  }
+
+  @media (min-width: $breakpoint-small) {
+    max-width: 16ch;
+  }
+
+  @media (min-width: $breakpoint-medium) {
+    max-width: 20ch;
+  }
+
+  @media (min-width: $breakpoint-large) {
+    max-width: 12ch;
+  }
+}
+
+.card-container {
+  min-width: 260px;
+}

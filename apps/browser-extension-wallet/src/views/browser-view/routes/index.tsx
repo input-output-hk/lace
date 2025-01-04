@@ -36,6 +36,9 @@ import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -61,6 +64,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.settings,
     component: SettingsLayout
+  },
+  {
+    path: routes.dapps,
+    component: DAppExplorer
   },
   {
     path: routes.nfts,
@@ -115,10 +122,16 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
   const { t } = useTranslation();
-
+  const posthog = usePostHogClientContext();
+  const dappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
   const location = useLocation<{ background?: Location<unknown> }>();
 
-  const currentRoutes = isSharedWallet ? routesMap.filter((route) => route.path !== routes.staking) : routesMap;
+  const availableRoutes = routesMap.filter((route) => {
+    if (route.path === routes.staking && isSharedWallet) return false;
+    if (route.path === routes.dapps && !dappExplorerEnabled) return false;
+    return true;
+  });
+
   const backgroundServices = useBackgroundServiceAPIContext();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
 
@@ -248,7 +261,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     return (
       <>
         <Switch location={page || location}>
-          {currentRoutes.map((route) => (
+          {availableRoutes.map((route) => (
             <Route key={route.path} path={route.path} component={route.component} />
           ))}
           <Route path="*" render={() => <Redirect to={routes.assets} />} />

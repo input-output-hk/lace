@@ -1,0 +1,75 @@
+@import '../../../styles/theme.scss';
+
+.iog-simple-view-content-container {
+  display: block;
+  position: relative;
+  overflow: visible;
+  margin-bottom: 20px;
+  min-height: 100px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  .iog-feedback {
+    display: none;
+  }
+}
+
+.card-container {
+  position: relative;
+}
+
+.iog-empty-state-container {
+  display: flex;
+  min-height: 200px;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.iog-section-group--filtered {
+  h2 {
+    display: flex;
+    align-items: center;
+
+    a {
+      cursor: default;
+    }
+  }
+}
+
+.iog-section-group {
+  &:not(:first-child) {
+    margin-top: 32px;
+  }
+}
+
+.iog-section-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: min-content;
+  gap: size_unit(2);
+  grid-row-gap: size_unit(2.5);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (min-width: 1660px) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+.iog-section-header {
+  padding-right: 114px;
+
+  .iog-link * {
+    text-decoration: none;
+  }
+
+  > .iog-box {
+    align-self: center;
+  }
+}
