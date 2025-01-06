@@ -48,18 +48,18 @@ export const SignTransaction = (): React.ReactElement => {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           setValidPassword(false);
         } else {
+          clearSecrets();
+          passphrase.fill(0);
           redirectToSignFailure();
         }
       } finally {
-        clearSecrets();
-        passphrase.fill(0);
         setIsLoading(false);
       }
     },
     [analytics, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
   );
 
-  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password;
+  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password.value;
 
   const onCancel = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationCancelClick, {
@@ -98,7 +98,7 @@ export const SignTransaction = (): React.ReactElement => {
       </div>
       <div className={styles.actions}>
         <Button
-          onClick={onConfirm}
+          onClick={() => onConfirm(password)}
           disabled={confirmIsDisabled}
           className={styles.actionBtn}
           data-testid="sign-transaction-confirm"

@@ -63,7 +63,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const delegationDetails = useDelegationDetails();
   const isDelegating = !!(rewardAccounts && delegationDetails);
 
-  const isSubmitDisabled = isSubmitingTx || !password;
+  const isSubmitDisabled = isSubmitingTx || !password.value;
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();

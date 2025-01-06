@@ -145,7 +145,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         return (
           <Button.CallToAction
             w="$fill"
-            disabled={!password}
+            disabled={!password.value}
             label={i18n.t('browserView.settings.generatePaperWallet.title')}
             onClick={() => handleVerifyPass(password)}
             data-testid="generate-paper-wallet-button"

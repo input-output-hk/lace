@@ -39,18 +39,18 @@ export const SignData = (): React.ReactElement => {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           setValidPassword(false);
         } else {
+          clearSecrets();
+          passphrase.fill(0);
           redirectToSignFailure();
         }
       } finally {
-        passphrase.fill(0);
-        clearSecrets();
         setIsLoading(false);
       }
     },
     [redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
   );
 
-  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password;
+  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password.value;
 
   const handleSubmit = useCallback(
     (event, passphrase) => {
@@ -82,7 +82,7 @@ export const SignData = (): React.ReactElement => {
       <div className={styles.actions}>
         <Button
           onClick={() => onConfirm(password)}
-          disabled={confirmIsDisabled || !password || isLoading}
+          disabled={confirmIsDisabled || !password.value || isLoading}
           className={styles.actionBtn}
           data-testid="sign-transaction-confirm"
         >
