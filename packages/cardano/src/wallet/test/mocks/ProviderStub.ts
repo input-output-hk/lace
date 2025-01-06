@@ -99,6 +99,7 @@ export const queryTransactionsResult: Cardano.HydratedTx[] = [
     blockHeader: {
       slot: Cardano.Slot(ledgerTip.slot - 100_000)
     },
+    id: Cardano.TransactionId('0000000000000000000000000000000000000000000000000000000000000000'),
     body: {
       certificates: [
         {
