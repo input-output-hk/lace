@@ -217,10 +217,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       });
       passphrase.fill(0);
       secretsUtil.clearSecrets();
-      setTimeout(() => {
-        enableAccountPasswordDialog.hide();
-        closeDropdownAndShowAccountActivated(name);
-      }, 0);
+      enableAccountPasswordDialog.hide();
+      closeDropdownAndShowAccountActivated(name);
     } catch {
       enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
     } finally {

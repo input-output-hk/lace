@@ -106,7 +106,7 @@ export const ShowPassphraseDrawer = ({
     setPassphrase([]);
     secretsUtil.clearSecrets();
     setIsPassphraseVisible(false);
-    setTimeout(onClose, 0);
+    onClose();
   };
 
   useKeyboardShortcut(['Escape'], () => handleOnClose());
