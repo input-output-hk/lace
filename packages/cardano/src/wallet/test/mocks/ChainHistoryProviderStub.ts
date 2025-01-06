@@ -3,7 +3,7 @@ import { Cardano, ChainHistoryProvider } from '@cardano-sdk/core';
 import { currentEpoch, queryTransactionsResult } from './ProviderStub';
 
 export const chainHistoryProviderStub = (): ChainHistoryProvider => ({
-  transactionsByAddresses: jest.fn().mockResolvedValue(queryTransactionsResult),
+  transactionsByAddresses: jest.fn().mockResolvedValue({ pageResults: queryTransactionsResult }),
   transactionsByHashes: jest.fn().mockResolvedValue(queryTransactionsResult),
   blocksByHashes: jest.fn().mockResolvedValue([
     {
