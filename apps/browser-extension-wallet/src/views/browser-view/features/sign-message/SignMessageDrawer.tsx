@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
 import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets } from '@lace/core';
@@ -24,10 +24,13 @@ export const SignMessageDrawer: React.FC = () => {
     performSigning
   } = useSignMessageState();
   const { password, setPassword, clearSecrets } = useSecrets();
-
   const [selectedAddress, setSelectedAddress] = useState('');
   const [message, setMessage] = useState('');
   const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState(false);
+  // This is required as we can't memoize password, but we need to pass most recent value to handleSign.
+  // There might be a better way to do this, but it requires refactoring of the whole component + useDrawerConfiguration
+  const passwordRef = useRef(password);
+  passwordRef.current = password;
 
   useEffect(() => {
     if (error) {
@@ -35,15 +38,15 @@ export const SignMessageDrawer: React.FC = () => {
     }
   }, [error]);
 
-  const handleSign = () => {
-    if (!isHardwareWallet && !password.value) {
+  const handleSign = useCallback(() => {
+    if (!isHardwareWallet && !passwordRef.current.value) {
       analytics.sendEventToPostHog(PostHogAction.SignMessageAskingForPassword);
       setShouldShowPasswordPrompt(true);
     } else {
       analytics.sendEventToPostHog(PostHogAction.SignMessageAskingHardwareWalletInteraction);
-      performSigning(selectedAddress, message, password);
+      performSigning(selectedAddress, message, passwordRef.current);
     }
-  };
+  }, [isHardwareWallet, analytics, performSigning, selectedAddress, message]);
 
   const handleCopy = useCallback(() => {
     toast.notify({
