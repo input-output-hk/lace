@@ -375,7 +375,7 @@ walletManager
               addresses$: observableWallet.addresses$,
               assetInfo$: observableWallet.assetInfo$,
               balance: observableWallet.balance,
-              createTxBuilder: observableWallet.createTxBuilder,
+              createTxBuilder: observableWallet.createTxBuilder.bind(observableWallet),
               currentEpoch$: observableWallet.currentEpoch$,
               delegation: observableWallet.delegation,
               discoverAddresses: observableWallet.discoverAddresses.bind(observableWallet),
