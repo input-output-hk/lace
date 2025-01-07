@@ -44,6 +44,8 @@ import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-s
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
 
+const MAX_TX_TO_FETCH = 1000;
+
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
 }
@@ -361,7 +363,47 @@ walletManager
 
     exposeApi(
       {
-        api$: walletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
+        api$: walletManager.activeWallet$.pipe(
+          map((activeWallet) => {
+            if (!activeWallet) return;
+
+            const observableWallet = activeWallet.observableWallet;
+
+            // eslint-disable-next-line consistent-return
+            return {
+              addSignatures: observableWallet.addSignatures.bind(observableWallet),
+              addresses$: observableWallet.addresses$,
+              assetInfo$: observableWallet.assetInfo$,
+              balance: observableWallet.balance,
+              createTxBuilder: observableWallet.createTxBuilder,
+              currentEpoch$: observableWallet.currentEpoch$,
+              delegation: observableWallet.delegation,
+              discoverAddresses: observableWallet.discoverAddresses.bind(observableWallet),
+              eraSummaries$: observableWallet.eraSummaries$,
+              finalizeTx: observableWallet.finalizeTx.bind(observableWallet),
+              genesisParameters$: observableWallet.genesisParameters$,
+              getName: observableWallet.getName.bind(observableWallet),
+              getNextUnusedAddress: observableWallet.getNextUnusedAddress.bind(observableWallet),
+              governance: observableWallet.governance,
+              handles$: observableWallet.handles$,
+              initializeTx: observableWallet.initializeTx.bind(observableWallet),
+              protocolParameters$: observableWallet.protocolParameters$,
+              publicStakeKeys$: observableWallet.publicStakeKeys$,
+              signData: observableWallet.signData.bind(observableWallet),
+              submitTx: observableWallet.submitTx.bind(observableWallet),
+              syncStatus: observableWallet.syncStatus,
+              tip$: observableWallet.tip$,
+              transactions: {
+                history$: observableWallet.transactions.history$.pipe(
+                  map((history) => history.slice(-MAX_TX_TO_FETCH))
+                ),
+                outgoing: observableWallet.transactions.outgoing,
+                rollback$: observableWallet.transactions.rollback$
+              },
+              utxo: observableWallet.utxo
+            };
+          })
+        ),
         baseChannel: walletChannel(process.env.WALLET_NAME),
         properties: observableWalletProperties
       },
