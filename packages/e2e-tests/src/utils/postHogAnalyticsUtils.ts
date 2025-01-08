@@ -16,22 +16,26 @@ const getRequestDataPayload = async (request: any): Promise<any> => {
   }
 };
 
-export const getAllEventsNames = async (): Promise<string[]> => {
-  const filteredEventNames: string[] = [];
+export const getAllPostHogEventNames = async (): Promise<string[]> => {
+  const postHogEventNames: string[] = [];
   const requests = await browser.getRequests({ includePending: true, orderBy: 'START' });
   for (const request of requests) {
-    if (request.url.includes('blockfrost')) continue;
+    if (request.url.includes('blockfrost')) continue; // Skip Blockfrost-related calls
     const eventName = (await getRequestDataPayload(request)).event;
-    // $pageview is technical event which is not relevant
-    if (eventName !== '$pageview') {
-      filteredEventNames.push(eventName);
-    }
+    postHogEventNames.push(eventName);
   }
-  return filteredEventNames;
+  return postHogEventNames;
 };
 
-export const getLatestEventsNames = async (numberOfLatestRequest = 1): Promise<string[]> => {
-  const allEventNames = await getAllEventsNames();
+export const getAllAnalyticsEventsNames = async (): Promise<string[]> => {
+  const postHogEventNames = await getAllPostHogEventNames();
+  return postHogEventNames.filter(
+    (eventName) => !['$pageview', '$feature_flag_called', '$create_alias'].includes(eventName)
+  );
+};
+
+export const getLatestAnalyticsEventsNames = async (numberOfLatestRequest = 1): Promise<string[]> => {
+  const allEventNames = await getAllAnalyticsEventsNames();
   return allEventNames.slice(-numberOfLatestRequest);
 };
 
@@ -49,4 +53,10 @@ export const getEventPayload = async (expectedEventName: string): Promise<any> =
     }
   }
   throw new Error(`Event with name ${expectedEventName} not found`);
+};
+
+export const getPostHogEvent = async (expectedEventName: string): Promise<string | undefined> => {
+  const postHogEventNames = await getAllPostHogEventNames();
+  const foundName = postHogEventNames.find((eventName) => eventName === expectedEventName);
+  return foundName ? await getEventPayload(foundName) : undefined;
 };

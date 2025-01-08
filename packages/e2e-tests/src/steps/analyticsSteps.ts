@@ -3,10 +3,11 @@ import { expect } from 'chai';
 import { browser } from '@wdio/globals';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import {
-  getAllEventsNames,
+  getAllAnalyticsEventsNames,
   getEventPayload,
   getLatestEventPayload,
-  getLatestEventsNames
+  getLatestAnalyticsEventsNames,
+  getPostHogEvent
 } from '../utils/postHogAnalyticsUtils';
 
 export const validateEventProperty = async (event: string, property: string, propertyValue: string): Promise<void> => {
@@ -35,12 +36,12 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
   const expectedEventNames = dataTableAsStringArray(eventActionNames);
   for (const expectedEventName of expectedEventNames) {
     await browser.waitUntil(
-      async () => (await getLatestEventsNames(expectedEventNames.length)).includes(expectedEventName),
+      async () => (await getLatestAnalyticsEventsNames(expectedEventNames.length)).includes(expectedEventName),
       {
         interval: 1000,
         timeout: 6000,
         timeoutMsg: `Failed while waiting for event ${expectedEventName}. \nActual events:\n ${(
-          await getAllEventsNames()
+          await getAllAnalyticsEventsNames()
         ).toString()}`
       }
     );
@@ -48,23 +49,23 @@ When(/^I validate latest analytics multiple events:$/, async (eventActionNames: 
 });
 
 When(/^I validate latest analytics single event "([^"]*)"$/, async (eventActionName: string) => {
-  await browser.waitUntil(async () => (await getLatestEventsNames()).includes(eventActionName), {
+  await browser.waitUntil(async () => (await getLatestAnalyticsEventsNames()).includes(eventActionName), {
     interval: 500,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for event '${eventActionName}'. \nActual events:\n ${(
-      await getAllEventsNames()
+      await getAllAnalyticsEventsNames()
     ).toString()}`
   });
 });
 
 When(/^I validate that (\d+) analytics event\(s\) have been sent$/, async (numberOfRequests: number) => {
-  await browser.waitUntil(async () => (await getAllEventsNames()).length === Number(numberOfRequests), {
+  await browser.waitUntil(async () => (await getAllAnalyticsEventsNames()).length === Number(numberOfRequests), {
     interval: 1000,
     timeout: 6000,
     timeoutMsg: `Failed while waiting for amount events sent: ${Number(numberOfRequests)}. Actual events amount sent: ${
-      (await getAllEventsNames()).length
+      (await getAllAnalyticsEventsNames()).length
     }\n
-    Actual events:\n ${(await getAllEventsNames()).toString()}`
+    Actual events:\n ${(await getAllAnalyticsEventsNames()).toString()}`
   });
   await browser.disableInterceptor();
 });
@@ -130,5 +131,12 @@ Then(
   /^I validate that the "([^"]*)" event includes property "([^"]*)" with value "([^"]*)" in posthog$/,
   async (event: string, property: string, propertyValue: string) => {
     await validateEventProperty(event, property, propertyValue);
+  }
+);
+
+Then(
+  /^"(\$create_alias|\$feature_flag_called|\$pageview)" PostHog event was sent$/,
+  async (eventName: '$create_alias' | '$feature_flag_called' | '$pageview') => {
+    expect(await getPostHogEvent(eventName)).to.not.be.undefined;
   }
 );
