@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { IogCardClassic } from '../../../components/Card';
 import IogEmptyState from '../../../components/EmptyState';
 import { EDrawerAction, useDrawer } from '../../../components/ProjectDetail/drawer';
@@ -13,15 +14,6 @@ import './styles.scss';
 // Defines pagination parameters for infinite scroll mechanism.
 const MAX_ITEMS_PER_PAGE = 20;
 
-const isScrollbarAtBottom = () => {
-  const bodyHeight = document.body.scrollHeight;
-  const windowHeight = window.innerHeight;
-
-  // if difference between visible screen and scrollbar vertical position is less than 5px
-  // eslint-disable-next-line no-magic-numbers
-  return Math.round(bodyHeight - windowHeight) - Math.round(window.scrollY) < 5;
-};
-
 const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, search }) => {
   const { dispatch } = useDrawer<ISectionCardItem>();
   const {
@@ -35,40 +27,22 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
     search
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const fetchNext = (_renderedDapps: ISectionCardItem[]) => fetchMore();
-
-  const loadMoreDapps = () => {
-    if (isScrollbarAtBottom() && hasNextPage) {
-      fetchNext(dapps);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', loadMoreDapps);
-
-    return () => {
-      window.removeEventListener('scroll', loadMoreDapps);
-    };
-  });
-
   const handleOpenDrawer = (drawerData: ISectionCardItem) => {
     dispatch({ type: EDrawerAction.OPEN, data: drawerData });
   };
 
-  const showDApps = !loading && dapps?.length !== undefined && dapps.length > 0;
   const showEmptyState = !loading && dapps?.length === 0;
 
   const [infiniteScrollRef] = useInfiniteScroll({
     loading,
     hasNextPage,
-    onLoadMore: loadMoreDapps,
+    onLoadMore: fetchMore,
     rootMargin: '0px 0px 0px 0px'
   });
 
   const renderCards = (dappsToRender: ISectionCardItem[]) =>
-    dappsToRender.map((dapp) => (
-      <div key={`card-${dapp.subject}`} className="card-container">
+    dappsToRender.map((dapp, index) => (
+      <div key={`card-${dapp.subject}-${index}`} className="card-container">
         <IogCardClassic
           {...dapp}
           description={dapp.shortDescription}
@@ -90,9 +64,13 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
   }
 
   return (
-    <div className="iog-simple-view-content-container" ref={infiniteScrollRef}>
-      {showDApps && <div className="iog-section-card-grid">{renderCards(dapps)}</div>}
-      {loading && <Skeleton />}
+    <div className="iog-simple-view-content-container">
+      <div className="iog-section-card-grid">{renderCards(dapps)}</div>
+      {(loading || hasNextPage) && (
+        <Box mt={'$24'} ref={infiniteScrollRef}>
+          <Skeleton />
+        </Box>
+      )}
     </div>
   );
 };

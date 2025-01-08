@@ -13,7 +13,7 @@ export const walletRoutePaths = {
   send: '/send/:id',
   settings: '/settings',
   staking: '/staking',
-  dapps: '/dapps',
+  dapps: '/dapp-explorer',
   voting: '/voting',
   signMessage: '/sign-message',
   setup: {

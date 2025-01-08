@@ -90,7 +90,6 @@
     "qrcode": "^1.5.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-hook-form": "7.47.0",
     "react-i18next": "^12.3.1",
     "react-infinite-scroll-hook": "^4.1.1",
     "react-lottie": "^1.2.3",

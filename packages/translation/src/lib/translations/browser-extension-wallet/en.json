@@ -371,7 +371,7 @@
   "browserView.sideMenu.links.addNewWallet": "Add new wallet",
   "browserView.sideMenu.links.addressBook": "Address Book",
   "browserView.sideMenu.links.addSharedWallet": "Add shared wallet",
-  "browserView.sideMenu.links.dappStore": "Dapp Store",
+  "browserView.sideMenu.links.dappExplorer": "DApp Explorer",
   "browserView.sideMenu.links.general": "General",
   "browserView.sideMenu.links.nfts": "NFTs",
   "browserView.sideMenu.links.staking": "Staking",

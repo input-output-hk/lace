@@ -28,8 +28,10 @@ $aside-width-large: 420px;
     padding-right: 24px;
   }
 
-  @media (min-width: $breakpoint-small) {
-    margin-top: 120px;
+  &.withAside {
+    @media (min-width: $breakpoint-small) {
+      margin-top: 120px;
+    }
   }
 }
 
