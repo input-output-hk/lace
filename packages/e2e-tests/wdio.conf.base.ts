@@ -92,7 +92,7 @@ export const config: WebdriverIO.Config = {
   },
   automationProtocol: 'webdriver',
   exclude: [],
-  maxInstances: 1,
+  maxInstances: 5,
   maxInstancesPerCapability: 1,
   path: '/',
   logLevel: 'error',
