@@ -30,7 +30,7 @@ Feature: Maintenance feature
     Then The Transaction submitted screen is displayed in extended mode
     And I print wallet "<wallet_name>" data for walletConfiguration file
     Examples:
-      | wallet_name                    |
+      | wallet_name                                 |
       | WalletAnalyticsReceiveSimpleTransaction2E2E |
 
   @CreateNewWallet
@@ -38,5 +38,5 @@ Feature: Maintenance feature
     Given I create new wallet with name: "<wallet_name>" and save wallet information
     And I print wallet "<wallet_name>" data for walletConfiguration file
     Examples:
-      | wallet_name                    |
+      | wallet_name          |
       | TestAutomationWallet |
