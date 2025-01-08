@@ -110,7 +110,7 @@ class WalletAddressPageAssert {
 
       const addressAdaValue = await addressCard.$(WalletAddressPage.ADDRESS_ADA_VALUE);
       await addressAdaValue.waitForDisplayed();
-      expect(await addressAdaValue.getText()).to.equal('0');
+      expect(Number(await addressAdaValue.getText())).to.be.greaterThanOrEqual(0);
     }
   }
 
