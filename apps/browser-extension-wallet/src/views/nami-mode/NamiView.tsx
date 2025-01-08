@@ -45,8 +45,9 @@ import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { walletRoutePaths } from '@routes';
+import { StakingErrorType } from '@views/browser/features/staking/types';
 
-const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API } = config();
+const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API, GOV_TOOLS_URLS } = config();
 
 export const NamiView = withDappContext((): React.ReactElement => {
   const { setFiatCurrency, fiatCurrency } = useCurrencyStore();
@@ -119,7 +120,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
     useDelegationStore();
   const { buildDelegation } = useBuildDelegation();
   const { signAndSubmitTransaction } = useDelegationTransaction();
-  const { isBuildingTx, stakingError, setIsBuildingTx } = useStakePoolDetails();
+  const { isBuildingTx, stakingError, setIsBuildingTx, setStakingError } = useStakePoolDetails();
   const walletState = useWalletState();
   const secretsUtil = useSecrets();
   const openExternalLink = useExternalLinkOpener();
@@ -133,7 +134,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
     setDelegationTxFee();
     setDelegationTxBuilder();
     setIsBuildingTx(false);
-  }, [secretsUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx]);
+    setStakingError();
+  }, [secretsUtil, setDelegationTxBuilder, setDelegationTxFee, setIsBuildingTx, setStakingError]);
 
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const isStakeRegistered =
@@ -227,7 +229,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         collateralTxBuilder,
         setSelectedStakePool,
         isBuildingTx,
-        stakingError,
+        stakingError: stakingError?.type,
+        accountsWithLockedRewards: stakingError?.type === StakingErrorType.REWARDS_LOCKED && stakingError.data,
         getStakePoolInfo,
         resetDelegationState,
         hasNoFunds,
@@ -247,7 +250,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
         assetInfo: walletState?.assetInfo,
         createHistoricalOwnInputResolver,
         lockedStakeRewards,
-        redirectToStaking
+        redirectToStaking,
+        govToolsUrl: GOV_TOOLS_URLS[environmentName]
       }}
     >
       <CommonOutsideHandlesProvider
