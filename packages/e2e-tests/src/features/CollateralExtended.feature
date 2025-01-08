@@ -5,7 +5,7 @@ Feature: Collateral - extended view
     Given Wallet is synced
     And I reclaim collateral (if active) in extended mode
 
-  @LW-5520
+  @LW-5520 @memory-snapshot
   Scenario: Extended View - Settings - Add/Reclaim Collateral
     And I am on Settings extended page
     Then I see collateral as: "Inactive" in settings
@@ -13,6 +13,7 @@ Feature: Collateral - extended view
     Then all elements of Inactive collateral drawer are displayed
     When I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
+    And valid password is not in snapshot
     When I navigate to Transactions extended page
     And I can see transaction 1 with type "Self Transaction"
     When I navigate to Settings extended page

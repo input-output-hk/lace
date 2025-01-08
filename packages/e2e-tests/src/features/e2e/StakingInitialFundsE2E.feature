@@ -1,7 +1,7 @@
 @Staking-initial-E2E @E2E @Testnet
 Feature: Delegating funds to new pool E2E
 
-  @LW-2685 @Smoke
+  @LW-2685 @Smoke @memory-snapshot
   Scenario: Extended view - Staking - Delegating funds to new pool (if not staked yet) E2E.
     Given I create new wallet and save wallet information
     And Wallet is synced
@@ -18,6 +18,7 @@ Feature: Delegating funds to new pool E2E
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed in extended mode
+    And valid password is not in snapshot
     When I close the drawer by clicking close button
     And I navigate to Transactions extended page
     Then the Sent transaction is displayed with value: "5.00 tADA" and tokens count 1

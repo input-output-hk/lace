@@ -112,7 +112,7 @@ Feature: Add new wallet - Restore wallet
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
 
-  @LW-9386 @LW-9375
+  @LW-9386 @LW-9375 @memory-snapshot
   Scenario Outline: Extended-view - Multi-wallet - Restore - <mnemonicLength>-word mnemonic - happy path
     Given I opened "Restore" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
@@ -125,6 +125,7 @@ Feature: Add new wallet - Restore wallet
     When I click "Enter wallet" button
     And I wait for main loader to disappear
     Then I see LW homepage
+    And "N_8J@bne87A" password is not in snapshot
     And "ValidName" is displayed as a wallet name on the menu button
     When I click the menu button
     Then Wallet number 2 with "ValidName" name is displayed on the user menu

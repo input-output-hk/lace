@@ -51,7 +51,7 @@ Feature: Wallet accounts
       | I close the drawer by clicking back button           |
       | I click "Cancel" button on the account unlock drawer |
 
-  @LW-9312
+  @LW-9312 @memory-snapshot
   Scenario: Extended View - Accounts menu - Unlocking account
     Given I click "Receive" button on page header
     And I see "Wallet Address" page in extended mode for account: 0 and wallet "MultiAccActive1"
