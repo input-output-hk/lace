@@ -40,7 +40,7 @@ Feature: Sign message
       # For 3rd account from TestAutomationWallet
       | addr_test1qzcsy9ulqjfjyga36yt...q8x8u84q58umw7 |
 
-  @LW-11539 @Smoke
+  @LW-11539 @Smoke @memory-snapshot
   Scenario: Extended view - Sign message - happy path
     When I click the menu button
     And I click on the "Sign message" option
@@ -53,6 +53,7 @@ Feature: Sign message
     When I fill password input with correct password
     And I click on "Sign message" button
     Then "All done" drawer is displayed for message signing flow
+    And valid password is not in snapshot
     When I click on "Copy signature to clipboard" button
     Then I see a toast with text: "Copied to clipboard"
     And signature in clipboard is equal to the one displayed on drawer

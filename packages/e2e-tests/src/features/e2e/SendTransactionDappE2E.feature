@@ -34,7 +34,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 3.00 and wallet: "WalletSendDappTransactionE2E" address
 
-  @LW-6797 @Testnet
+  @LW-6797 @Testnet @memory-snapshot
   Scenario: Send Token from DApp E2E
     And I de-authorize all DApps in extended mode
     And I save token: "LaceCoin2" balance
@@ -63,6 +63,7 @@ Feature: Send Transactions from Dapp - E2E
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
     And I see DApp connector "All done" page
+    And valid password is not in snapshot
     And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace

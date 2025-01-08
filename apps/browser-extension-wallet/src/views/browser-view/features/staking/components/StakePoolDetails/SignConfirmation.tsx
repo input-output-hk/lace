@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { ReactElement, useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { Button, useObservable } from '@lace/common';
@@ -63,7 +63,7 @@ export const SignConfirmationFooter = (): ReactElement => {
   const delegationDetails = useDelegationDetails();
   const isDelegating = !!(rewardAccounts && delegationDetails);
 
-  const isSubmitDisabled = useMemo(() => isSubmitingTx || !password, [isSubmitingTx, password]);
+  const isSubmitDisabled = isSubmitingTx || !password.value;
 
   const cleanPasswordInput = useCallback(() => {
     removePassword();

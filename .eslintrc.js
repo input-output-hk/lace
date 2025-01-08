@@ -1,6 +1,6 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
-  plugins: ['lodash'],
+  plugins: ['lodash', 'local-rules'],
   extends: [
     '@atixlabs/eslint-config/configurations/react',
     'plugin:@typescript-eslint/recommended',
@@ -33,7 +33,9 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': ['error'],
     'no-console': ['error', { allow: ['warn', 'error', 'info', 'debug'] }],
     'lodash/import-scope': ['error', 'method'],
-    'promise/avoid-new': 'off'
+    'promise/avoid-new': 'off',
+    // detect + prevent usage of sensitive props from useSecrets being memoized
+    'local-rules/prevent-memoization-of-sensitive-values': 'error'
   },
   overrides: [
     {

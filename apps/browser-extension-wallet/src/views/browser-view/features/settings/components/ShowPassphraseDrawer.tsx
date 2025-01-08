@@ -42,12 +42,12 @@ export const ShowPassphraseDrawer = ({
     isProcessing: false,
     isPasswordValid: true
   });
-  const { password, setPassword, clearSecrets: removePassword } = useSecrets();
+  const secretsUtil = useSecrets();
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
 
-  const isConfirmButtonDisabled = isPassphraseVisible ? false : !password.value || isProcessing;
+  const isConfirmButtonDisabled = isPassphraseVisible ? false : !secretsUtil.password.value || isProcessing;
 
-  const handleChange: OnPasswordChange = (target) => setPassword(target);
+  const handleChange: OnPasswordChange = (target) => secretsUtil.setPassword(target);
   const toggleBlurWords = () => {
     setBlurWords(!blurWords);
     if (!blurWords) {
@@ -64,23 +64,23 @@ export const ShowPassphraseDrawer = ({
     [getMnemonic]
   );
 
-  const handleVerifyPass = useCallback(async () => {
+  const handleVerifyPass = async () => {
     if (isProcessing) return;
 
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
       await validatePassword();
-      await getPassphrase(password.value);
+      await getPassphrase(secretsUtil.password.value);
       setIsPassphraseVisible(true);
       setProcessingState({ isPasswordValid: true, isProcessing: false });
-      removePassword();
+      secretsUtil.clearSecrets();
       sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseEnterYourPasswordShowRecoveryPhraseClick);
     } catch {
-      removePassword();
+      secretsUtil.clearSecrets();
       setIsPassphraseVisible(false);
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password.value, getPassphrase, sendAnalyticsEvent, removePassword]);
+  };
 
   const handleShowPassphrase = async () => {
     if (isPassphraseVisible) {
@@ -101,12 +101,12 @@ export const ShowPassphraseDrawer = ({
   };
 
   const handleOnClose = () => {
-    onClose();
     setProcessingState({ isPasswordValid: true, isProcessing: false });
     setBlurWords(false);
     setPassphrase([]);
-    removePassword();
+    secretsUtil.clearSecrets();
     setIsPassphraseVisible(false);
+    onClose();
   };
 
   useKeyboardShortcut(['Escape'], () => handleOnClose());

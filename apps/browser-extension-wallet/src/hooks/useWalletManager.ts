@@ -800,7 +800,7 @@ export const useWalletManager = (): UseWalletManager => {
   /**
    * Recovers wallet info from encrypted lock using the wallet password
    */
-  const unlockWallet = useCallback(async (): Promise<boolean> => {
+  const unlockWallet = async (): Promise<boolean> => {
     if (!walletLock) return true;
     const passphrase = Buffer.from(password.value);
     try {
@@ -826,7 +826,7 @@ export const useWalletManager = (): UseWalletManager => {
       passphrase.fill(0);
       clearSecrets();
     }
-  }, [walletLock, loadWallet, password, clearSecrets]);
+  };
 
   const getMnemonic = useCallback(
     async (passphrase: Uint8Array) => {

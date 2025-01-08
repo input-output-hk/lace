@@ -59,7 +59,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       account: activeAccount
     }
   } = cardanoWallet;
-  const { clearSecrets, password } = useSecrets();
+  const secretsUtil = useSecrets();
 
   const editAccountDrawer = useDialogWithData<ProfileDropdown.AccountData | undefined>();
   const disableAccountConfirmation = useDialogWithData<ProfileDropdown.AccountData | undefined>();
@@ -119,10 +119,9 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         accountIndex
       });
       const accountName = accountsData.find((acc) => acc.accountNumber === accountIndex)?.label;
-      clearSecrets();
       closeDropdownAndShowAccountActivated(accountName);
     },
-    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics, clearSecrets]
+    [wallet.walletId, activateWallet, accountsData, closeDropdownAndShowAccountActivated, analytics]
   );
 
   const editAccount = useCallback(
@@ -204,7 +203,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
   const unlockInMemoryWalletAccountWithPassword = async () => {
     const { accountIndex } = enableAccountPasswordDialog.data;
     const name = defaultAccountName(accountIndex);
-    const passphrase = Buffer.from(password?.value);
+    const passphrase = Buffer.from(secretsUtil.password?.value);
     try {
       await addAccount({
         wallet,
@@ -216,13 +215,15 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         // eslint-disable-next-line camelcase
         $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
       });
+      passphrase.fill(0);
+      secretsUtil.clearSecrets();
       enableAccountPasswordDialog.hide();
       closeDropdownAndShowAccountActivated(name);
     } catch {
       enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
     } finally {
       passphrase.fill(0);
-      clearSecrets();
+      secretsUtil.clearSecrets();
     }
   };
 

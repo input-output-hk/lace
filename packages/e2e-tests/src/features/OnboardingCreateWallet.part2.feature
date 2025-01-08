@@ -35,7 +35,7 @@ Feature: Onboarding - Create wallet
     When I click "Enter wallet" button
     Then I see LW homepage
 
-  @LW-3060
+  @LW-3060 @memory-snapshot
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
@@ -43,6 +43,7 @@ Feature: Onboarding - Create wallet
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
     And I see LW homepage
+    And "N_8J@bne87A" password is not in snapshot
     And I open settings from header menu
     Then Analytics toggle is enabled: true
     When I open settings from header menu
