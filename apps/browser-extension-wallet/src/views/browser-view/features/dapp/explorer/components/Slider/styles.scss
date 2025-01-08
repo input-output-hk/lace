@@ -1,4 +1,5 @@
-@import '../../styles/colors.scss';
+@import '../../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../../packages/common/src/ui/styles/abstracts/typography.scss';
 
 .iog-swiper-container {
   width: 100%;
@@ -35,13 +36,22 @@
   position: absolute;
   right: -1px;
   top: 0;
-  width: 60px;
+  width: 70px;
   z-index: 1;
-  background: linear-gradient(270deg, #fff 85%, hsla(0, 0%, 100%, 0));
+  background: var(--bg-color-body);
 
   .iog-button-icon {
     height: 48px;
     width: 48px;
+    background-color: var(--light-mode-light-grey, var(--dark-mode-grey));
+
+    &:hover {
+      background-color: var(--light-mode-mid-grey, var(--dark-mode-mid-grey));
+    }
+
+    path {
+      stroke: var(--text-color-primary);
+    }
   }
 }
 
@@ -50,11 +60,5 @@
   right: auto;
   justify-content: flex-start !important;
   z-index: 88 !important;
-  background: linear-gradient(90deg, $color-white 65.23%, rgba(255, 255, 255, 0) 100%);
-}
-
-// # Button Nav
-.iog-swiper-button-nav {
-  // background-color: $color-white;
-  // border: none;
+  background: var(--bg-color-body);
 }

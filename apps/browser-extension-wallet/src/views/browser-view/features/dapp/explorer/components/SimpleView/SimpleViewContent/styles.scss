@@ -47,18 +47,17 @@
 
 .iog-section-card-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, minmax(calc(50% - 10px), calc(50% - 10px)));
   grid-auto-rows: min-content;
-  gap: size_unit(2);
-  grid-row-gap: size_unit(2.5);
+  gap: 20px;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
-  @media (min-width: 1660px) {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  @media (min-width: 1680px) {
+    grid-template-columns: repeat(3, minmax(calc(50% - (20px / 3)), calc(50% - (20px / 3))));
   }
 }
 
