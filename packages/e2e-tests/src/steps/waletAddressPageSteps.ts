@@ -83,11 +83,11 @@ Then(/^I see "Additional addresses" divider in "Advanced mode"$/, async () => {
 
 Then(/^I see "Additional addresses" cards in "Advanced mode"$/, async () => {
   const testAutomationWalletAdditionalAddresses = [
-    'addr_test1qp9u2f6e2ss4knzs04mk790mg7r36dw6n60tpy45n5zt9yezart77cuqpsvyw5555azd3e57fjcsfrx5e5e9xmgcmf0slx7s84',
-    'addr_test1qp9u2f6e2ss4knzs04mk790mg7r36dw6n60tpy45n5zt9yuqss8h26pkjatu9u0xtmek5uc72en3k9es2evf3yw552rsa35vu9',
-    'addr_test1qp9u2f6e2ss4knzs04mk790mg7r36dw6n60tpy45n5zt9yl0pqa5s43kzc0s0x8fm59ltwd4vy6jcyh0d026wteklwfqfsgj2x',
-    'addr_test1qp9u2f6e2ss4knzs04mk790mg7r36dw6n60tpy45n5zt9y6uly7jvfa83xwf4dg9pvq2jvr28rjjtcf5jk9wlw4gl99qhgxzrl',
-    'addr_test1qp9u2f6e2ss4knzs04mk790mg7r36dw6n60tpy45n5zt9yu9xdfvzp305lr3ghnn4lp76ut4qcc4f0le0442uaygdyks7e5s3g'
+    'addr_test1qqtwywurxyzpaj47fk2zvrvrk8pjmfevdm79lwpqprlehw3whkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqqae5w3z',
+    'addr_test1qpxaz0jx5alxye49lr3q3c4rcalu9vlny75rxdulrgykzhfwhkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqqwxwg6w',
+    'addr_test1qrn7uuaeq0un44ju0qyjj0ndtetue6z28j3p40h4gasm3g3whkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqq5c6lqf',
+    'addr_test1qpuggh7wq0tk3fl9tnqxp5smcn8dkw2h0pz2yyglqpt8wz3whkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqqux74rq',
+    'addr_test1qz0qskuhrc7nsxy5zwramrp02dxp7wt4d35van3e9vd0hepwhkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqqcn9rdy'
   ]; // TODO move to walletConfiguration & WalletRepositoryConfig
   await walletAddressPageAssert.assertSeeAddressCardsWithNoAda(testAutomationWalletAdditionalAddresses);
 });
@@ -96,7 +96,7 @@ Then(/^I see "Unused address" card in "Advanced mode" for "([^"]*)" wallet$/, as
   let expectedUnusedAddress;
   if (testWalletName === 'TestAutomationWallet') {
     expectedUnusedAddress =
-      'addr_test1qqwt4f55kmzera42pu86svrck7qghskjk89dwk54fh5fkfmn76le4yjzc77ld2qv6vzxxxvsqspxnx7g3mktx93qthjqw3gggf'; // TODO move to walletConfiguration & WalletRepositoryConfig
+      'addr_test1qzgcga96klwu99dhw93mf53g9cmszuwd3mkt544g538sn7fwhkp6nu4xa245h28we8hsxhpkswu0yl7z2r48x70z2nqqmm73xn'; // TODO move to walletConfiguration & WalletRepositoryConfig
   } else {
     assert.fail(`expected unused address for wallet ${testWalletName} not found`);
   }
