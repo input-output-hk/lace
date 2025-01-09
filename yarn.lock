@@ -13557,7 +13557,6 @@ __metadata:
     react-i18next: ^12.3.1
     react-infinite-scroll-hook: ^4.1.1
     react-lottie: ^1.2.3
-    react-modern-drawer: 1.0.1
     react-portal: 4.2.2
     react-router: 5.2.0
     react-router-dom: 5.2.0
@@ -51788,15 +51787,6 @@ __metadata:
     react: ^16.8 || ^17 || ^18
     react-dom: ^16.8 || ^17 || ^18
   checksum: d3ccc8036ec284119bea02e20ebaf4fdb652f805b5850fa56a262fbd7b889a2882de5591eabe515c4f70432fd1d6942c97ac1008caefac9712a7dce3d014bce0
-  languageName: node
-  linkType: hard
-
-"react-modern-drawer@npm:1.0.1":
-  version: 1.0.1
-  resolution: "react-modern-drawer@npm:1.0.1"
-  peerDependencies:
-    react: ^16.0.0
-  checksum: 8bd275cf101c2634dad2e5becd1cc395c6118e6ec86b32887bd0bf28f4918943c53beeb0d2b484984233349edda68eafcee2d5ffa73c29fdede03b81cf1f6a3f
   languageName: node
   linkType: hard
 

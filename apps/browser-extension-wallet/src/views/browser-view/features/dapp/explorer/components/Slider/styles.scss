@@ -14,7 +14,6 @@
   width: 100%;
 }
 
-// # Button Container
 .iog-swiper-button-container {
   position: absolute;
   display: inline-flex;
@@ -60,5 +59,15 @@
   right: auto;
   justify-content: flex-start !important;
   z-index: 88 !important;
+  background: var(--bg-color-body);
+}
+
+.iog-swiper-button-nav {
+   background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+   border: none;
+
+  svg {
+    stroke: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
   background: var(--bg-color-body);
 }
