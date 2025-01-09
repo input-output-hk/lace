@@ -40,6 +40,8 @@ import {
   BlockfrostNetworkInfoProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
+import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } from '@cardano-sdk/wallet';
 
 const createTxSubmitProvider = (
   httpProviderConfig: CreateHttpProviderConfig<Provider>,
@@ -93,6 +95,7 @@ export interface ProvidersConfig {
     useBlockfrostRewardsProvider?: boolean;
     useBlockfrostTxSubmitProvider?: boolean;
     useBlockfrostUtxoProvider?: boolean;
+    useBlockfrostAddressDiscovery?: boolean;
   };
 }
 
@@ -114,6 +117,7 @@ export const createProviders = ({
     useBlockfrostTxSubmitProvider,
     useBlockfrostUtxoProvider,
     useDrepProviderOverrideActiveStatus,
+    useBlockfrostAddressDiscovery,
     useWebSocket
   }
 }: ProvidersConfig): WalletProvidersDependencies => {
@@ -141,6 +145,10 @@ export const createProviders = ({
     ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
     : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
   const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
+
+  const addressDiscovery = useBlockfrostAddressDiscovery
+    ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
+    : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
 
   // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
   const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
@@ -191,6 +199,7 @@ export const createProviders = ({
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardsProvider,
       wsProvider,
+      addressDiscovery,
       drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
     };
   }
@@ -207,6 +216,7 @@ export const createProviders = ({
     utxoProvider,
     chainHistoryProvider,
     rewardsProvider,
+    addressDiscovery,
     drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
   };
 };
