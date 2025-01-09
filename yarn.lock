@@ -13554,7 +13554,6 @@ __metadata:
     qrcode: ^1.5.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-hook-form: 7.47.0
     react-i18next: ^12.3.1
     react-infinite-scroll-hook: ^4.1.1
     react-lottie: ^1.2.3
@@ -51630,15 +51629,6 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
   checksum: 4a86e44cb46dc54caef485f476f4462dedffad7cdb7f80c1ae5e5127311ea3b166366481b664bf732fe893f31c647cb6267ad833bd58f046062235383747ee2b
-  languageName: node
-  linkType: hard
-
-"react-hook-form@npm:7.47.0":
-  version: 7.47.0
-  resolution: "react-hook-form@npm:7.47.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17 || ^18
-  checksum: dec192fec9c54e436f9e47008635dd7849b6b119ed477a9b0cd491367a0b2ced3427cd937febfb245e1cb7578c863917181d903eff4519c2787bf713ec7d3426
   languageName: node
   linkType: hard
 
