@@ -13,14 +13,14 @@ export enum NftsItemsTypes {
   PLACEHOLDER = 'placeholder'
 }
 
-export interface NftFolderItemProps {
+export type NftFolderItemProps = {
   nfts?: Array<NftImageProps & { assetId?: string }>;
   name: string;
   id?: number;
   onClick?: () => void;
   type: NftsItemsTypes.FOLDER;
   contextMenuItems?: Array<{ label: string; onClick: () => void }>;
-}
+};
 
 const numberOfNftsToShow = 4;
 const maxRestOfNftsNumber = 9999;

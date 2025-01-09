@@ -1,10 +1,25 @@
+/* eslint-disable no-magic-numbers */
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import debounce from 'lodash/debounce';
+import useResizeObserver, { ObservedSize } from 'use-resize-observer';
+import { useMediaQuery } from 'react-responsive';
 import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
-import { ListEmptyState, NftFolderItemProps, NftItemProps, NftList, NftListProps, NftsItemsTypes } from '@lace/core';
+import {
+  ListEmptyState,
+  NftFolderItem,
+  NftFolderItemProps,
+  NftItem,
+  NftItemProps,
+  NftListProps,
+  NftPlaceholderItem,
+  NftsItemsTypes,
+  PlaceholderItem
+} from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
 import {
@@ -33,12 +48,22 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
-import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
+import { SearchBox, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
 import { useNftSearch } from '@hooks/useNftSearch';
+import { Grid } from './Grid';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
 const MIN_ASSET_COUNT_FOR_SEARCH = 10;
+
+const LACE_APP_ID = 'lace-app';
+export const STAKE_POOL_CARD_HEIGHT = 84;
+export const STAKE_POOL_GRID_ROW_GAP = 12;
+
+export type StakePoolsGridColumnCount = 2 | 3 | 4;
+
+const DEFAULT_DEBOUNCE = 200;
+const increaseViewportBy = { bottom: 100, top: 0 };
 
 // eslint-disable-next-line max-statements, complexity
 export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
@@ -210,6 +235,77 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
+  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<StakePoolsGridColumnCount>();
+  const [containerWidth, setContainerWidth] = useState<number>();
+  const [initialItemsCount, setInitialItemsCount] = useState(0);
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
+  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1660, minWidth: 668 });
+  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1660 });
+  const numberOfItemsPerMediaQueryMap: Partial<Record<StakePoolsGridColumnCount, boolean>> = useMemo(
+    () => ({
+      2: matchTwoColumnsLayout,
+      3: matchThreeColumnsLayout,
+      4: matchFourColumnsLayout
+    }),
+    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
+  );
+
+  const updateNumberOfItemsInRow = useCallback(() => {
+    if (!ref?.current) return;
+
+    const result = Number(
+      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
+    ) as StakePoolsGridColumnCount;
+
+    setNumberOfItemsPerRow(result);
+  }, [numberOfItemsPerMediaQueryMap]);
+
+  const setContainerWidthCb = useCallback(
+    (size: ObservedSize) => {
+      if (size.width !== containerWidth) {
+        updateNumberOfItemsInRow();
+        setContainerWidth(size.width);
+      }
+    },
+    [containerWidth, updateNumberOfItemsInRow]
+  );
+
+  const onResize = useMemo(
+    () => debounce(setContainerWidthCb, DEFAULT_DEBOUNCE, { leading: true }),
+    [setContainerWidthCb]
+  );
+
+  useResizeObserver<HTMLDivElement>({ onResize, ref });
+
+  const tableReference = useRef<HTMLDivElement | null>(null);
+  const initialRowsCount = useVisibleItemsCount({
+    containerRef: tableReference,
+    rowHeight: STAKE_POOL_CARD_HEIGHT + STAKE_POOL_GRID_ROW_GAP
+  });
+
+  useLayoutEffect(() => {
+    if (initialRowsCount !== undefined && numberOfItemsPerRow !== undefined) {
+      const overscanRows = Math.ceil(increaseViewportBy.bottom / STAKE_POOL_CARD_HEIGHT);
+
+      setInitialItemsCount((overscanRows + Math.max(initialRowsCount, 0)) * numberOfItemsPerRow);
+    }
+  }, [initialRowsCount, numberOfItemsPerRow]);
+
+  const cardsPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
+
+  const itemContent = useCallback(
+    (index: number, data: NftItemProps | NftFolderItemProps | PlaceholderItem | undefined): React.ReactElement => {
+      if (data.type === NftsItemsTypes.FOLDER) return <NftFolderItem key={index} {...data} />;
+      if (data.type === NftsItemsTypes.PLACEHOLDER) return <NftPlaceholderItem key={index} {...data} />;
+      return <NftItem key={index} {...data} />;
+    },
+    []
+  );
+
+  const nftstoDisplay = searchValue !== '' ? filteredResults : items;
 
   return (
     <>
@@ -241,7 +337,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 </Button>
               )}
             </div>
-            <div className={styles.content} data-testid="nft-list-container">
+            <div ref={ref} className={styles.content} data-testid="nft-list-container">
               {items.length > 0 ? (
                 <>
                   {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
@@ -253,13 +349,16 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                       onClear={() => setSearchValue('')}
                     />
                   )}
-                  <Skeleton loading={isSearching}>
-                    {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={4} />}
-                    {searchValue !== '' && filteredResults.length === 0 && (
-                      <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
-                    )}
-                    {searchValue === '' && <NftList items={items} rows={4} />}
-                  </Skeleton>
+                  {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
+                    <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                  )}
+                  <Grid<NftItemProps | NftFolderItemProps | PlaceholderItem | undefined>
+                    tableReference={tableReference}
+                    scrollableTargetId={LACE_APP_ID}
+                    items={isSearching ? cardsPlaceholders : nftstoDisplay}
+                    totalCount={isSearching ? cardsPlaceholders.length : nftstoDisplay.length}
+                    itemContent={itemContent}
+                  />
                 </>
               ) : (
                 <FundWalletBanner

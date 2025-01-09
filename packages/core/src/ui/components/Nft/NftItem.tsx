@@ -44,7 +44,7 @@ const ContextMenu = ({ setClicked, children, onRender, points }: ContextMenuProp
   );
 };
 
-export interface NftItemProps {
+export type NftItemProps = {
   assetId?: string;
   image?: string;
   name: string;
@@ -53,7 +53,7 @@ export interface NftItemProps {
   selected?: boolean;
   type?: NftsItemsTypes.NFT;
   contextMenu?: React.ReactElement;
-}
+};
 
 export const NftItem = ({ image, name, onClick, amount, selected, contextMenu }: NftItemProps): React.ReactElement => {
   const bodyRef = useRef<{ clientWidth?: number }>({ clientWidth: 0 });
