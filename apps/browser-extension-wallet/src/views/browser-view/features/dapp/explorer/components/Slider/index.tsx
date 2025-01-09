@@ -1,8 +1,8 @@
-import React, { Children, cloneElement, isValidElement } from 'react';
+import React, { Children, cloneElement, isValidElement, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import SwiperCore, { Navigation, Virtual, Lazy } from 'swiper';
+import SwiperCore, { Navigation, Virtual, Lazy, Swiper as SwiperType } from 'swiper';
 import { ExtractObjectFromData, ISlider } from './types';
 import { EIconsName } from '../Icon';
 import { IogButtonIcon } from '../Button';
@@ -37,10 +37,22 @@ const IogSlider = ({
   narrowArrows,
   buttonSolid = false,
   buttonStandard = false,
+  showSliderNavigation = true,
   fallback,
   ...props
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ISlider<any>): React.ReactElement => {
+  const swiperRef = useRef<SwiperType | null>(null);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
+
+  const handleSlideChange = () => {
+    if (swiperRef.current) {
+      setIsBeginning(swiperRef.current.isBeginning);
+      setIsEnd(swiperRef.current.isEnd);
+    }
+  };
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const childrenWithProps = (item: ExtractObjectFromData<any>) =>
     Children.map(children, (child) => {
@@ -96,6 +108,8 @@ ISlider<any>): React.ReactElement => {
         navigation={navigation}
         spaceBetween={spaceBetween || DEFAULT_PROPS.SPACE_BETWEEN}
         slidesPerView={slidesPerView || DEFAULT_PROPS.SLIDES_PER_VIEW}
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSlideChange={handleSlideChange}
         {...props}
       >
         {data?.map(
@@ -106,37 +120,43 @@ ISlider<any>): React.ReactElement => {
         )}
       </Swiper>
       {data.length <= 0 && fallback}
-      <div
-        className={classNames({
-          'iog-swiper-button-container': true,
-          'iog-swiper-button-container--horizontal': horizontal
-        })}
-      >
-        {navigation.prevEl && !horizontal && (
+      {showSliderNavigation && (
+        <div
+          className={classNames({
+            'iog-swiper-button-container': true,
+            'iog-swiper-button-container--horizontal': horizontal
+          })}
+        >
+          {navigation.prevEl && !horizontal && (
+            <IogButtonIcon
+              className={classNames([BUTTON_CLASS, formatClassName(navigation.prevEl as string)])}
+              name={arrowIcon.PREV}
+              solid={buttonSolid}
+              standard={buttonStandard}
+              circle
+              iconProps={{
+                size: 12
+              }}
+              onClick={() => swiperRef.current?.slidePrev()}
+              data-testid="scroll-prev"
+              disabled={isBeginning}
+            />
+          )}
           <IogButtonIcon
-            className={classNames([BUTTON_CLASS, formatClassName(navigation.prevEl as string)])}
-            name={arrowIcon.PREV}
+            className={classNames([BUTTON_CLASS, formatClassName(navigation.nextEl as string)])}
+            name={arrowIcon.NEXT}
             solid={buttonSolid}
             standard={buttonStandard}
             circle
             iconProps={{
               size: 12
             }}
-            data-testid="scroll-prev"
+            onClick={() => swiperRef.current?.slideNext()}
+            data-testid="scroll-next"
+            disabled={isEnd}
           />
-        )}
-        <IogButtonIcon
-          className={classNames([BUTTON_CLASS, formatClassName(navigation.nextEl as string)])}
-          name={arrowIcon.NEXT}
-          solid={buttonSolid}
-          standard={buttonStandard}
-          circle
-          iconProps={{
-            size: 12
-          }}
-          data-testid="scroll-next"
-        />
-      </div>
+        </div>
+      )}
     </div>
   );
 };
