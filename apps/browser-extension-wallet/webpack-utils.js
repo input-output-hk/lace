@@ -27,7 +27,7 @@ const transformManifest = (content, mode) => {
       )
       .replace(
         '$BLOCKFROST_URLS',
-        `${process.env.BLOCKFROST_URL_MAINNET} ${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_SANCHONET}`
+        `${process.env.BLOCKFROST_IPFS_URL} ${process.env.BLOCKFROST_URL_MAINNET} ${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_SANCHONET}`
       )
       .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace('$LOCALHOST_SCRIPT_SRC', mode === 'development' ? 'http://localhost:3000' : '')

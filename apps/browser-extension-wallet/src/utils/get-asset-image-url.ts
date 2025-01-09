@@ -3,7 +3,7 @@ export const fortmatImgSrc = (params: { img: string; type: string }): string =>
 
 export const getAssetImageUrl = (image: string): string => {
   if (image.startsWith('ipfs')) {
-    return image.replace('ipfs://', 'https://ipfs.blockfrost.dev/ipfs/');
+    return `https://ipfs.blockfrost.dev/ipfs/${image.replace('ipfs://', '').replace('ipfs/', '')}`;
   }
 
   if (image.startsWith('data:image/')) return image;

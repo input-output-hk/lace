@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import cn from 'classnames';
 import { Spin } from 'antd';
-import { useFetchImage, IMAGE_FETCH_STATUS } from '@lace/common';
+import { useFetchImage } from '@lace/common';
 import NFTPlaceholderImage from '../../assets/images/nft-placeholder.png';
 import styles from './NftImage.module.scss';
 
@@ -18,18 +18,15 @@ export const NftImage = ({
   detailView = false,
   withBorder = false
 }: NftImageProps): React.ReactElement => {
-  const [imageResponse, handleLoad] = useFetchImage({ url: image, fallback: NFTPlaceholderImage });
+  const imageResponse = useFetchImage({ url: image, fallbackImage: NFTPlaceholderImage });
 
-  useEffect(() => {
-    handleLoad();
-  }, [handleLoad]);
-
-  if (imageResponse?.status === IMAGE_FETCH_STATUS.LOADING)
+  if (imageResponse?.status === 'loading')
     return (
       <div className={styles.spinnerContainer}>
         <Spin />
       </div>
     );
+
   return (
     <img
       className={cn(styles.nftImage, {
@@ -39,7 +36,7 @@ export const NftImage = ({
       })}
       data-testid={'nft-image'}
       alt="NFT"
-      src={imageResponse?.src}
+      src={imageResponse.imageSrc}
     />
   );
 };

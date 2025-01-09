@@ -2,9 +2,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import debounce from 'lodash/debounce';
-import useResizeObserver, { ObservedSize } from 'use-resize-observer';
-import { useMediaQuery } from 'react-responsive';
 import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
@@ -29,7 +26,7 @@ import {
   useOutputInitialState
 } from '../../send-transaction';
 import { Button, useObservable } from '@lace/common';
-import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
+import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { Skeleton } from 'antd';
 import { EducationalList, FundWalletBanner, Layout, SectionLayout } from '@src/views/browser-view/components';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
@@ -60,14 +57,19 @@ const LACE_APP_ID = 'lace-app';
 export const STAKE_POOL_CARD_HEIGHT = 84;
 export const STAKE_POOL_GRID_ROW_GAP = 12;
 
-export type StakePoolsGridColumnCount = 2 | 3 | 4;
+export type NftGridColumnCount = 2 | 4;
 
-const DEFAULT_DEBOUNCE = 200;
 const increaseViewportBy = { bottom: 100, top: 0 };
 
 // eslint-disable-next-line max-statements, complexity
 export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
-  const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
+  const {
+    walletInfo,
+    inMemoryWallet,
+    blockchainProvider,
+    environmentName,
+    walletUI: { appMode }
+  } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { t } = useTranslation();
   const assetsInfo = useAssetInfo();
@@ -235,50 +237,10 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
-  const [numberOfItemsPerRow, setNumberOfItemsPerRow] = useState<StakePoolsGridColumnCount>();
-  const [containerWidth, setContainerWidth] = useState<number>();
+  const numberOfItemsPerRow = appMode === APP_MODE_POPUP ? 2 : 4;
   const [initialItemsCount, setInitialItemsCount] = useState(0);
 
   const ref = useRef<HTMLDivElement>(null);
-
-  const matchTwoColumnsLayout = useMediaQuery({ maxWidth: 668 });
-  const matchThreeColumnsLayout = useMediaQuery({ maxWidth: 1660, minWidth: 668 });
-  const matchFourColumnsLayout = useMediaQuery({ minWidth: 1660 });
-  const numberOfItemsPerMediaQueryMap: Partial<Record<StakePoolsGridColumnCount, boolean>> = useMemo(
-    () => ({
-      2: matchTwoColumnsLayout,
-      3: matchThreeColumnsLayout,
-      4: matchFourColumnsLayout
-    }),
-    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
-  );
-
-  const updateNumberOfItemsInRow = useCallback(() => {
-    if (!ref?.current) return;
-
-    const result = Number(
-      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
-    ) as StakePoolsGridColumnCount;
-
-    setNumberOfItemsPerRow(result);
-  }, [numberOfItemsPerMediaQueryMap]);
-
-  const setContainerWidthCb = useCallback(
-    (size: ObservedSize) => {
-      if (size.width !== containerWidth) {
-        updateNumberOfItemsInRow();
-        setContainerWidth(size.width);
-      }
-    },
-    [containerWidth, updateNumberOfItemsInRow]
-  );
-
-  const onResize = useMemo(
-    () => debounce(setContainerWidthCb, DEFAULT_DEBOUNCE, { leading: true }),
-    [setContainerWidthCb]
-  );
-
-  useResizeObserver<HTMLDivElement>({ onResize, ref });
 
   const tableReference = useRef<HTMLDivElement | null>(null);
   const initialRowsCount = useVisibleItemsCount({

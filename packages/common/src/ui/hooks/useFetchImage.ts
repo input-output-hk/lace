@@ -1,101 +1,93 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useMemo, useReducer } from 'react';
+import { useState, useEffect } from 'react';
 
-enum IMAGE_FETCH_ACTION_TYPES {
-  FETCHING = 'FETCHING',
-  FETCHED = 'FETCHED',
-  FETCH_ERROR = 'FETCH_ERROR'
-}
+export type ImageFetchStatus = 'loading' | 'loaded' | 'error';
 
-export enum IMAGE_FETCH_STATUS {
-  LOADING,
-  LOADED,
-  ERROR
-}
-
-interface ImageResponse {
-  status?: IMAGE_FETCH_STATUS;
-  src?: string;
-}
-
-interface FetchImageArgs {
-  url: string;
-  fallback: string;
-}
-
-type FetchAction = {
-  type: IMAGE_FETCH_ACTION_TYPES;
-  payload?: string;
+type ImageFetchStateMap = {
+  loading: { status: 'loading' };
+  loaded: { status: 'loaded'; imageSrc: string };
+  error: { status: 'error'; imageSrc: string };
 };
 
-const handleImageFetch = (image: string) => {
-  const downloadingImage = new Image();
+export type UseFetchImageState = ImageFetchStateMap[ImageFetchStatus];
 
-  const imageResponse: Promise<ImageResponse> = new Promise<ImageResponse>((resolve) => {
-    const onLoadEvent = (event: any) => {
-      resolve({
-        status: IMAGE_FETCH_STATUS.LOADED,
-        src: event.path?.[0].currentSrc || image
-      });
-    };
-    const onErrorEvent = () => {
-      resolve({
-        status: IMAGE_FETCH_STATUS.ERROR
-      });
-    };
+const maxConcurrentRequests = 5;
+const requestQueue: Set<() => Promise<void>> = new Set();
+let concurrentRequestsCount = 0;
 
-    downloadingImage.addEventListener('load', onLoadEvent);
-    downloadingImage.addEventListener('error', onErrorEvent);
-  });
-
-  downloadingImage.src = image;
-
-  return imageResponse;
-};
-
-const initialState = { status: IMAGE_FETCH_STATUS.LOADING };
-
-const fetchImageReducer = (state: ImageResponse, action: FetchAction): ImageResponse => {
-  switch (action.type) {
-    case IMAGE_FETCH_ACTION_TYPES.FETCHING:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.LOADING };
-    case IMAGE_FETCH_ACTION_TYPES.FETCHED:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.LOADED, src: action.payload };
-    case IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.ERROR };
-    default:
-      return state;
+const processNextRequest = async () => {
+  if (requestQueue.size > 0 && concurrentRequestsCount < maxConcurrentRequests) {
+    const [nextRequest] = requestQueue;
+    requestQueue.delete(nextRequest);
+    concurrentRequestsCount++;
+    try {
+      await nextRequest();
+    } finally {
+      processNextRequest();
+    }
   }
 };
 
-const fetchImageDispatcher = async (url: string, dispatcher: React.Dispatch<FetchAction>) => {
-  const response = await handleImageFetch(url);
+const fetchImage = async (url: string, controller: AbortController) => {
+  const response = await fetch(url, {
+    signal: controller.signal,
+    headers: { 'Cache-Control': 'public, max-age=86400' }
+  });
 
-  const type =
-    response.status === IMAGE_FETCH_STATUS.LOADED
-      ? IMAGE_FETCH_ACTION_TYPES.FETCHED
-      : // eslint-disable-next-line unicorn/no-nested-ternary
-      response.status === IMAGE_FETCH_STATUS.ERROR
-      ? IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR
-      : IMAGE_FETCH_ACTION_TYPES.FETCHING;
-  const dispatchValue = { payload: response.src, type };
+  if (!response.ok) throw new Error('Image fetch failed');
 
-  dispatcher(dispatchValue);
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
 };
 
-export const useFetchImage = ({ url, fallback }: FetchImageArgs): [ImageResponse, () => Promise<void>] => {
-  const [result, dispatch] = useReducer(fetchImageReducer, initialState);
-  const handleLoad = useCallback(async () => {
-    await fetchImageDispatcher(url, dispatch);
-  }, [url]);
+export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackImage: string }) => {
+  const [state, setState] = useState<UseFetchImageState>({ status: 'loading' });
 
-  const resultWithFallback = useMemo(
-    () => ({
-      ...result,
-      src: result?.src || fallback
-    }),
-    [result, fallback]
-  );
+  useEffect(() => {
+    if (url.startsWith('data:')) {
+      // TODO investigate the below problem + use getAssetImageUrl
+      // Solve broken links e.g. data:image/png;base64,https://storage.something.com/assets/1235
+      const httpPosition = url.indexOf('http');
+      if (httpPosition === -1) {
+        setState({ status: 'loaded', imageSrc: url });
+      } else {
+        setState({ status: 'loaded', imageSrc: url.slice(httpPosition) });
+      }
 
-  return [resultWithFallback, handleLoad];
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      return () => {};
+    }
+
+    const controller = new AbortController();
+
+    const loadImage = async () => {
+      try {
+        setState({ status: 'loading' });
+
+        const imageSrc = await fetchImage(url, controller);
+
+        setState({ status: 'loaded', imageSrc });
+      } catch {
+        if (!controller.signal.aborted) {
+          setState({ status: 'error', imageSrc: fallbackImage });
+        }
+      } finally {
+        concurrentRequestsCount--;
+        processNextRequest();
+      }
+    };
+
+    if (concurrentRequestsCount < maxConcurrentRequests) {
+      concurrentRequestsCount++;
+      loadImage();
+    } else {
+      requestQueue.add(loadImage);
+    }
+
+    return () => {
+      controller.abort();
+      requestQueue.delete(loadImage);
+    };
+  }, [url, fallbackImage]);
+
+  return state;
 };
