@@ -85,6 +85,8 @@ export * from '@wallet/lib/get-auxiliary-data';
 export * as util from '@wallet/util';
 export * from '@wallet/lib/providers';
 export * from '@wallet/lib/config';
+export * from '@wallet/lib/blockfrost-input-resolver';
+export * from '@wallet/lib/blockfrost-address-discovery';
 
 export * as mockUtils from '@wallet/test/mocks';
 export * from '@wallet/types';
