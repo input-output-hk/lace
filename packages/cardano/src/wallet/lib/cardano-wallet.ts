@@ -12,7 +12,13 @@ import {
   UtxoProvider,
   DRepProvider
 } from '@cardano-sdk/core';
-import { ObservableWallet, BaseWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
+import {
+  ObservableWallet,
+  BaseWalletDependencies,
+  storage,
+  restoreKeyAgent,
+  AddressDiscovery
+} from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
@@ -66,6 +72,7 @@ export interface WalletProvidersDependencies {
   chainHistoryProvider: ChainHistoryProvider;
   wsProvider?: WsProvider;
   drepProvider: DRepProvider;
+  addressDiscovery?: AddressDiscovery;
 }
 
 export interface CreatePersonalWallet {
