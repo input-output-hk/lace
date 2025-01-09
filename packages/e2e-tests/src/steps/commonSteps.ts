@@ -198,11 +198,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
 
   await localStorageInitializer.initialiseBasicLocalStorageData(walletName);
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
-  if (mode === 'popup') {
-    await popupView.visit();
-  }
-
-  await browser.refresh();
+  mode === 'popup' ? await popupView.visit() : await extendedView.visit();
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
