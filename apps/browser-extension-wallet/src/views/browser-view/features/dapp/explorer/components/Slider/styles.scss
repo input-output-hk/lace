@@ -69,5 +69,8 @@
   svg {
     stroke: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
   }
-  background: var(--bg-color-body);
+
+  &:disabled {
+    opacity: 0.24;
+  }
 }

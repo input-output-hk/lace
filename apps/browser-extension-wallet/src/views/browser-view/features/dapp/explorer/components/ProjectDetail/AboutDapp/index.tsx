@@ -10,7 +10,6 @@ export const AboutDapp: React.FC = () => {
   const {
     state: { data }
   } = useDrawer<ISectionCardItem>();
-
   const { t } = useTranslation();
 
   return (
@@ -37,6 +36,7 @@ export const AboutDapp: React.FC = () => {
             slidesPerGroup={1}
             speed={650}
             spaceBetween={20}
+            showSliderNavigation={data.screenshots?.length > 1}
           >
             <FeaturesCarousel />
           </IogSlider>
