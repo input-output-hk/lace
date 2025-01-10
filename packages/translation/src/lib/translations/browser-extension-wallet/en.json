@@ -684,6 +684,8 @@
   "general.errors.maximumInputCountExceeded": "Maximum Input Count Exceeded",
   "general.errors.networkError": "Network Error",
   "general.errors.somethingWentWrong": "Something went wrong, please try again",
+  "general.errors.crash": "Something went wrong",
+  "general.errors.reloadExtension": "Reload extension",
   "general.errors.tryAgain": "Try again",
   "general.errors.uhoh": "Uh Oh!",
   "general.errors.utxoFullyDepleted": "UTxO Fully Depleted",

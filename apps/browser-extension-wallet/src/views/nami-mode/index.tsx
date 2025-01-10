@@ -8,6 +8,8 @@ import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { Crash } from '@components/Crash';
+import { useFatalError } from '@hooks/useFatalError';
 
 export const NamiPopup = withDappContext((): React.ReactElement => {
   const {
@@ -24,11 +26,13 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
     () => !!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted && currentChain,
     [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted, currentChain]
   );
+
+  const fatalError = useFatalError();
   useEffect(() => {
-    if (isLoaded) {
+    if (isLoaded || fatalError) {
       document.querySelector('#preloader')?.remove();
     }
-  }, [isLoaded]);
+  }, [isLoaded, fatalError]);
 
   useAppInit();
 
@@ -37,6 +41,10 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
       backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
     }
   }, [backgroundServices, cardanoWallet, deletingWallet]);
+
+  if (fatalError) {
+    return <Crash />;
+  }
 
   return <div id="nami-mode">{isLoaded ? <NamiView /> : <MainLoader />}</div>;
 });

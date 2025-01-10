@@ -1,0 +1,12 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.crashContainer {
+  @include flex-center;
+  flex-direction: column;
+  height: 100%;
+  gap: size_unit(2);
+
+  .crashText {
+    color: var(--text-color-primary);
+  }
+}

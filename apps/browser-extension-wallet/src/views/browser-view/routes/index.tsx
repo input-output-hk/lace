@@ -39,6 +39,8 @@ import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { useFatalError } from '@hooks/useFatalError';
+import { Crash } from '@components/Crash';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -224,11 +226,17 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     [cardanoWallet, isLoadingWalletInfo, namiMigration?.mode]
   );
 
+  const fatalError = useFatalError();
+
   useEffect(() => {
-    if (isLoaded || isOnboarding || isInNamiMode) {
+    if (isLoaded || isOnboarding || isInNamiMode || fatalError) {
       document.querySelector('#preloader')?.remove();
     }
-  }, [isLoaded, isOnboarding, isInNamiMode]);
+  }, [isLoaded, isOnboarding, isInNamiMode, fatalError]);
+
+  if (fatalError) {
+    return <Crash />;
+  }
 
   if (isInNamiMode) {
     return (

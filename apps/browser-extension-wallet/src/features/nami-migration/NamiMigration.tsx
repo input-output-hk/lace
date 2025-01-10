@@ -9,6 +9,8 @@ import { WalletSetupLayout } from '@views/browser/components';
 import { Portal } from '@views/browser/features/wallet-setup/components/Portal';
 import { useAnalyticsContext } from '@providers';
 import { postHogNamiMigrationActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useFatalError } from '@hooks/useFatalError';
+import { Crash } from '@components/Crash';
 
 const urlPath = walletRoutePaths.namiMigration;
 
@@ -22,6 +24,11 @@ export const NamiMigration = (): JSX.Element => {
   useEffect(() => {
     analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.OPEN);
   }, [analytics]);
+
+  const fatalError = useFatalError();
+  if (fatalError) {
+    return <Crash />;
+  }
 
   return (
     <Portal>

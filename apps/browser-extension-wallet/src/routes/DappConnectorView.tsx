@@ -25,6 +25,8 @@ import { tabs } from 'webextension-polyfill';
 import { useTranslation } from 'react-i18next';
 import { DappSignDataSuccess } from '@src/features/dapp/components/DappSignDataSuccess';
 import { DappSignDataFail } from '@src/features/dapp/components/DappSignDataFail';
+import { Crash } from '@components/Crash';
+import { useFatalError } from '@hooks/useFatalError';
 
 dayjs.extend(duration);
 
@@ -57,16 +59,21 @@ export const DappConnectorView = (): React.ReactElement => {
   }, [isWalletLocked, cardanoWallet]);
 
   const isLoading = useMemo(() => hdDiscoveryStatus !== 'Idle', [hdDiscoveryStatus]);
+  const fatalError = useFatalError();
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading || fatalError) {
       document.querySelector('#preloader')?.remove();
     }
-  }, [isLoading]);
+  }, [isLoading, fatalError]);
 
   const onCloseClick = useCallback(() => {
     tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
     window.close();
   }, []);
+
+  if (fatalError) {
+    return <Crash />;
+  }
 
   if (hasNoAvailableWallet) {
     return (

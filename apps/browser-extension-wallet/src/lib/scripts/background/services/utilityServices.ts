@@ -12,9 +12,10 @@ import {
   TokenPrices,
   CoinPrices,
   ChangeModeData,
-  LaceFeaturesApi
+  LaceFeaturesApi,
+  UnhandledError
 } from '../../types';
-import { Subject, of, BehaviorSubject } from 'rxjs';
+import { Subject, of, BehaviorSubject, merge, map, fromEvent } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
@@ -24,6 +25,7 @@ import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
+import { getErrorMessage } from '@src/utils/get-error-message';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -207,6 +209,17 @@ exposeApi<LaceFeaturesApi>(
   { logger: console, runtime }
 );
 
+const toUnhandledError = (error: unknown, type: UnhandledError['type']): UnhandledError => ({
+  type,
+  message: getErrorMessage(error)
+});
+const unhandledError$ = merge(
+  fromEvent(globalThis, 'error').pipe(map((e: ErrorEvent): UnhandledError => toUnhandledError(e, 'error'))),
+  fromEvent(globalThis, 'unhandledrejection').pipe(
+    map((e: PromiseRejectionEvent): UnhandledError => toUnhandledError(e, 'unhandledrejection'))
+  )
+);
+
 exposeApi<BackgroundService>(
   {
     api$: of({
@@ -225,7 +238,8 @@ exposeApi<BackgroundService>(
         await clearBackgroundStorage();
         await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
       },
-      backendFailures$
+      backendFailures$,
+      unhandledError$
     }),
     baseChannel: BaseChannels.BACKGROUND_ACTIONS,
     properties: backgroundServiceProperties
