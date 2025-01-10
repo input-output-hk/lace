@@ -27,8 +27,7 @@ export const SignMessageDrawer: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [message, setMessage] = useState('');
   const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState(false);
-  // This is required as we can't memoize password, but we need to pass most recent value to handleSign.
-  // There might be a better way to do this, but it requires refactoring of the whole component + useDrawerConfiguration
+  // Create a ref to access password without creating dependencies
   const passwordRef = useRef(password);
   passwordRef.current = password;
 

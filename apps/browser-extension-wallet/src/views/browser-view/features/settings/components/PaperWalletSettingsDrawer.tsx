@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useWalletManager } from '@hooks';
 import { Drawer, DrawerHeader, DrawerNavigation, PostHogAction } from '@lace/common';
 import { i18n } from '@lace/translation';
@@ -58,6 +58,9 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   const { walletInfo } = useWalletStore();
   const { CHAIN } = config();
   const [passphrase, setPassphrase] = useState<string[]>([]);
+  // Create a ref to access password without creating dependencies
+  const passwordRef = useRef(password);
+  passwordRef.current = password;
 
   const analytics = useAnalyticsContext();
 
@@ -125,7 +128,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
     }
   }, [stage, isPasswordValid, setPgpInfo, pgpInfo, setPassword, formattedWalletName]);
 
-  const footer = () => {
+  const footer = useMemo(() => {
     switch (stage) {
       case 'secure': {
         return (
@@ -145,9 +148,9 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
         return (
           <Button.CallToAction
             w="$fill"
-            disabled={!password.value}
+            disabled={!passwordRef.current.value}
             label={i18n.t('browserView.settings.generatePaperWallet.title')}
-            onClick={() => handleVerifyPass(password)}
+            onClick={() => handleVerifyPass(passwordRef.current)}
             data-testid="generate-paper-wallet-button"
           />
         );
@@ -191,7 +194,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
       default:
         throw new Error(INCORRECT_STAGE_ERROR);
     }
-  };
+  }, [stage, pgpInfo, setStage, handleVerifyPass, pdfInstance, formattedWalletName, analytics]);
 
   const drawerHeader = useMemo(() => {
     switch (stage) {

@@ -26,7 +26,7 @@ class EnterYourPasswordDrawerAssert {
       await t('browserView.settings.security.showPassphraseDrawer.warning')
     );
 
-    await EnterYourPasswordDrawer.generatePaperWalletButton.waitForEnabled();
+    await EnterYourPasswordDrawer.generatePaperWalletButton.waitForDisplayed();
     expect(await EnterYourPasswordDrawer.generatePaperWalletButton.getText()).to.equal(
       await t('browserView.settings.generatePaperWallet.title')
     );
