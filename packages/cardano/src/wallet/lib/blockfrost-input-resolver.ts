@@ -43,8 +43,8 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
   public async resolveInput(txIn: Cardano.TxIn, options?: Cardano.ResolveOptions): Promise<Cardano.TxOut | null> {
     this.#logger.debug(`Resolving input ${txIn.txId}#${txIn.index}`);
 
-    if (options?.hints) {
-      for (const hint of options.hints) {
+    if (options?.hints.transactions) {
+      for (const hint of options.hints.transactions) {
         if (txIn.txId === hint.id && hint.body.outputs.length > txIn.index) {
           this.#logger.debug(`Resolved input ${txIn.txId}#${txIn.index} from hint`);
           return hint.body.outputs[txIn.index];

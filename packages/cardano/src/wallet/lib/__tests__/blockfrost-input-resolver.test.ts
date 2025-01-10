@@ -38,7 +38,7 @@ describe('BlockfrostInputResolver', () => {
       }
     } as Cardano.Tx;
 
-    const result = await resolver.resolveInput(txIn, { hints: [hint] });
+    const result = await resolver.resolveInput(txIn, { hints: { transactions: [hint] } });
 
     expect(result).toEqual(hint.body.outputs[0]);
   });
