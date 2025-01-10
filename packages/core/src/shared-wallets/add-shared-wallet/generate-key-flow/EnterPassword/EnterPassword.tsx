@@ -72,7 +72,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
       onBack={onBack}
       onNext={next}
       isLoading={loading}
-      isNextEnabled={!!password}
+      isNextEnabled={!!password.value}
       customNextLabel={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.nextButtonLabel')}
     >
       <Flex gap="$32" flexDirection="column" alignItems="stretch">

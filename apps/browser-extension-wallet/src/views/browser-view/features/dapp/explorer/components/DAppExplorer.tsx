@@ -5,7 +5,7 @@ import React from 'react';
 
 export const DAppExplorer: React.FC = () => (
   <>
-    <Layout>
+    <Layout noAside>
       <SectionLayout>
         <DappLayout>
           <SimpleView />

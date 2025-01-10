@@ -95,6 +95,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.NAMI_HW_FLOW:
       path = walletRoutePaths.namiMigration.hwFlow;
       break;
+    case BrowserViewSections.DAPP_EXPLORER:
+      path = walletRoutePaths.dapps;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));

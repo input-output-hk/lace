@@ -2,80 +2,9 @@
 @import '../../styles/colors.scss';
 @import '../../styles/functions.scss';
 
-.iog-project-details__container {
-  #EZDrawer > #EZDrawer__container {
-    border-radius: 40px;
-    padding: 0 20px 20px;
-  }
-
-  .iog-project-details__divider {
-    border: none;
-    height: 1px;
-    background-color: $color-light-grey-plus;
-    color: $color-light-grey-plus;
-    margin: 1px -20px;
-  }
-}
-
-.project-detail-container {
-  display: flex;
-  flex-direction: column;
-  border-radius: 32px;
-  margin: 24px;
-  padding-right: 40px;
-  padding-left: 40px;
-  height: auto !important;
-  max-height: 95%;
-}
-
-.iog-project-details__content {
-  overflow-y: scroll;
-  padding: size_unit(2.5) size_unit(1.5);
-
-  height: 750px;
-
-  @media (max-height: 838px) {
-    height: 600px;
-  }
-
-  @media (max-height: 730px) {
-    height: 400px;
-  }
-
-  @media (max-height: 540px) {
-    height: 300px;
-  }
-}
-
-.iog-project-details__features-container {
-  .iog-features {
-    color: $color-black !important;
-    margin-bottom: 24px;
-  }
-
-  .swiper-slide {
-    min-width: 100px;
-    width: auto !important;
-  }
-
-  .iog-button-icon--solid {
-    background-color: transparent !important;
-  }
-}
-
-.iog-header-title {
-  padding: size_unit(4) 0;
-}
-
-.iog-description-title {
-  margin: auto;
-  color: $color-black !important;
-}
-
-.iog-close-button-modal {
-  svg {
-    stroke: $color-font-dark !important;
-  }
+.link-icon {
+  height: 24px;
+  width: 24px;
 }
 
 .iog-project-details__header {
@@ -84,60 +13,16 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: 8px;
-
-  p {
-    margin-left: 8px;
-  }
-
-  .header-title {
-    max-width: 350px;
-    word-break: break-all;
-    text-overflow: ellipsis;
-    overflow: hidden !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .iog-project-details__avatar {
-    border: 1.5px solid $theme-light-grey-border;
-    border-radius: 12px;
-  }
-}
-
-.iog-project-details__description-container {
-  margin: size_unit(3) 0;
-
-  .iog-description {
-    color: $color-black !important;
-  }
-}
-
-.iog-button-nav-modal {
-  width: 100%;
-  height: 48px;
-  background: $color-primary !important;
-  border-radius: 16px !important;
-
-  * {
-    color: $color-white !important;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-}
-
-.iog-project-details__footer {
-  padding-top: 24px;
-  padding-bottom: 24px;
-  background-color: $color-white;
-  left: 0;
 }
 
 .iog-tabs {
   .ant-tabs-nav {
     margin: 0 !important;
+    border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+
+    &::before {
+      content: none !important;
+    }
   }
 
   .ant-tabs-tab {
@@ -145,12 +30,12 @@
     line-height: toRem(24);
 
     .ant-tabs-tab-btn {
-      color: $color-dark-grey-v3;
+      color: var(--light-mode-mid-grey, var(--dark-mode-light-grey)) !important;
     }
 
     &-active {
       .ant-tabs-tab-btn {
-        color: $color-font-black !important;
+        color: var(--text-color-primary) !important;
       }
     }
   }

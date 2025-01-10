@@ -22,5 +22,6 @@ export interface ISlider<Data> extends Omit<SwiperProps, 'navigation'> {
   itemProps?: (item: ExtractObjectFromData<Data>) => any;
   buttonSolid?: boolean;
   buttonStandard?: boolean;
+  showSliderNavigation?: boolean;
   fallback?: React.ReactElement;
 }

@@ -439,3 +439,10 @@ Then(/^Gov Tool page is displayed in a new tab$/, async () => {
     : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
+
+Then(
+  /(invalid|valid|"N_8J@bne87A") password is not in snapshot/,
+  async (password: 'invalid' | 'valid' | 'N_8J@bne87A') => {
+    await commonAssert.assertPasswordIsNotPresentInMemorySnapshot(password);
+  }
+);

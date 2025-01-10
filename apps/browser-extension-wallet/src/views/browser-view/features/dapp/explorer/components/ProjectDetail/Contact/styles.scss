@@ -1,39 +1,33 @@
 @import '../../../styles/colors.scss';
 
-.iog-contact {
-  padding-top: 24px;
-  margin-left: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  color: $color-black;
-
-  .iog-contact-item {
-    display: grid;
-    grid-template-columns: 24px auto;
-    grid-template-areas:
+.iog-contact-item {
+  display: grid;
+  grid-template-columns: 24px auto;
+  grid-template-areas:
       'icon title'
       '. data';
     column-gap: 12px;
     font-size: 16px;
     align-items: stretch;
 
-    .iog-contact-item-icon {
-      grid-area: icon;
+  .iog-contact-item-icon {
+    grid-area: icon;
 
-      svg {
-        width: 100%;
-        height: 100%;
-      }
+    svg {
+      width: 100%;
+      height: 100%;
+      stroke: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
     }
+  }
 
-    .iog-contact-item-title {
-      font-weight: bold;
-      grid-area: title;
-    }
+  .iog-contact-item-title {
+    font-weight: bold;
+    grid-area: title;
+    color: var(--text-color-primary) !important;
+  }
 
-    .iog-contact-item-data {
-      grid-area: data;
-    }
+  .iog-contact-item-data {
+    grid-area: data;
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey))
   }
 }

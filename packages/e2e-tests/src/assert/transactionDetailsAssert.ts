@@ -188,14 +188,14 @@ class TransactionsDetailsAssert {
         const txType = await TransactionDetailsPage.transactionDetailsDescription.getText();
 
         const txDetailsInputFiatValueString = await TransactionDetailsPage.transactionDetailsInputFiatAmount.getText();
-        const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.slice(1).split(' ', 1));
+        const txDetailsInputFiatValue = Number(txDetailsInputFiatValueString.split(' ', 1));
 
         const txDetailsOutputADAValueString = await TransactionDetailsPage.transactionDetailsOutputAdaAmount.getText();
         const txDetailsOutputADAValue = Number(txDetailsOutputADAValueString.split(' ', 1));
 
         const txDetailsOutputFiatValueString =
           await TransactionDetailsPage.transactionDetailsOutputFiatAmount.getText();
-        const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.slice(1).split(' ', 1));
+        const txDetailsOutputFiatValue = Number(txDetailsOutputFiatValueString.split(' ', 1));
 
         if (!txType.includes(stakeKeyRegistration)) {
           const txDetailsFeeADAValueString = await TransactionDetailsPage.transactionDetailsFeeADA.getText();

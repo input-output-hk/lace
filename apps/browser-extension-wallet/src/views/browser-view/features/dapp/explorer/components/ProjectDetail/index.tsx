@@ -1,22 +1,16 @@
 import React from 'react';
-import 'react-modern-drawer/dist/index.css';
 import { useTranslation } from 'react-i18next';
-import Drawer from 'react-modern-drawer';
+import { Drawer, DrawerNavigation, Button } from '@lace/common';
 import { Tabs } from 'antd';
 import { EDrawerAction, useDrawer } from './drawer';
 import { ISectionCardItem } from '../../services/helpers/apis-formatter/types';
-import { IogButtonIcon, IogButton } from '../Button';
-import { EIconsName } from '../../components/Icon';
 import { IogImage } from '../../components/Image';
-import { IogText } from '../../components/Typography';
-import { IogBox, IogRow } from '../../components/Grid';
 import { AboutDapp } from './AboutDapp';
 import { Contact } from './Contact';
-import ExternalLink from '../../assets/icons/external-link.component.svg';
+import LinkIcon from '../../assets/icons/link.component.svg';
 
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import Icon from '@ant-design/icons';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -44,70 +38,46 @@ const ProjectDetail: React.FC = () => {
   ];
 
   return (
-    <div className="iog-project-details__container" data-testid="app-drawer-container">
-      <Drawer
-        open={open}
-        onClose={handleClose}
-        direction="right"
-        className="project-detail-container"
-        size={664}
-        overlayColor="#212121"
-        overlayOpacity={0.8}
-      >
-        <IogRow className="iog-header-title" style={{ justifyContent: 'space-between' }}>
-          <IogText as="span" xMedium bold className="iog-description-title" data-testid="app-details-header">
-            {t('dappdiscovery.side_panel.about_this_dapp')}
-          </IogText>
-          <IogBox className="iog-close-button-modal" data-testid="modal-close">
-            <IogButtonIcon
-              circle
-              name={EIconsName.CROSS}
-              onClick={handleClose}
-              solid
-              iconProps={{
-                size: 14
-              }}
-            />
-          </IogBox>
-        </IogRow>
-        <hr className="iog-project-details__divider" />
-        <div className="iog-project-details__content" data-testid="app-details-modal">
-          <Flex justifyContent="space-between" alignItems="center">
-            <div className="iog-project-details__header">
-              {data?.image && (
-                <div className="iog-project-details__avatar">
-                  <IogImage
-                    overflow
-                    fit="contain"
-                    src={data?.image?.src || ''}
-                    alt={data?.image?.alt || 'Image'}
-                    width={80}
-                    height={80}
-                    data-testid="dapp-info-modal-icon"
-                  />
-                </div>
-              )}
-              <Text.SubHeading className="header-title" data-testid="dapp-info-modal-title">
-                {data?.title}
-              </Text.SubHeading>
-            </div>
-          </Flex>
-          {open && <Tabs className="iog-tabs" items={tabItems} defaultActiveKey="1" />}
+    <Drawer
+      open={open}
+      onClose={handleClose}
+      navigation={
+        <DrawerNavigation onCloseIconClick={handleClose} title={t('dappdiscovery.side_panel.about_this_dapp')} />
+      }
+      footer={
+        <div>
+          <Button style={{ width: '100%' }} onClick={handleOpenUrl}>
+            <Flex gap="$8" alignItems="center">
+              <LinkIcon className="link-icon" />
+              <div>{shortenURL(data?.link)}</div>
+            </Flex>
+          </Button>
         </div>
-        <hr className="iog-project-details__divider" />
-        <IogRow className="iog-project-details__footer">
-          <IogButton
-            className="iog-button-nav-modal"
-            primary
-            onClick={handleOpenUrl}
-            data-testid="app-details-website-btn"
-          >
-            <Icon component={ExternalLink} />
-            {shortenURL(data?.link)}
-          </IogButton>
-        </IogRow>
-      </Drawer>
-    </div>
+      }
+    >
+      <div data-testid="app-details-modal">
+        <Flex justifyContent="space-between" alignItems="center">
+          <div className="iog-project-details__header">
+            {data?.image && (
+              <IogImage
+                overflow
+                fit="contain"
+                src={data?.image?.src || ''}
+                alt={data?.image?.alt || 'Image'}
+                width={80}
+                height={80}
+                data-testid="dapp-info-modal-icon"
+              />
+            )}
+            <Flex flexDirection="column" gap="$8">
+              <Text.SubHeading data-testid="dapp-info-modal-title">{data?.title}</Text.SubHeading>
+              <Text.Body.Large>{data?.category}</Text.Body.Large>
+            </Flex>
+          </div>
+        </Flex>
+        {open && <Tabs className="iog-tabs" items={tabItems} defaultActiveKey="1" />}
+      </div>
+    </Drawer>
   );
 };
 

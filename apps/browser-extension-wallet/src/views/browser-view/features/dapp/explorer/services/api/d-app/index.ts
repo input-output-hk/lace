@@ -1,6 +1,11 @@
-import { useState } from 'react';
-import { IDApp, PaginationInput } from './types';
-import mockedData from './dapps';
+import { useEffect, useState } from 'react';
+import { PaginationInput } from './types';
+import { mockedDapps as mockedData } from './dapps';
+import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
+
+const mockedDapps = Array.from({ length: 10 })
+  .fill(1)
+  .flatMap(() => mockedData);
 
 type DAppFetcherParams = {
   category?: string;
@@ -10,20 +15,35 @@ type DAppFetcherParams = {
   _subcategory?: string;
 };
 
-const fetchMore = (): IDApp[] => [];
-
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unused-vars
-const useDAppFetcher = (_params: DAppFetcherParams) => {
-  const [hasNextPage] = useState(true);
+const useDAppFetcher = ({ page: { limit } }: DAppFetcherParams) => {
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [data, setData] = useState<ISectionCardItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // todo: handle errors
-  const { loading, error, data } = {
-    loading: false,
-    error: undefined as Error,
-    data: mockedData
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const fetchingTime = 600;
+      await new Promise((resolve) => setTimeout(resolve, fetchingTime));
+
+      const requestedItemsCount = (currentPage + 1) * limit;
+      const items = mockedDapps.slice(0, requestedItemsCount);
+      if (items.length < requestedItemsCount) {
+        setHasNextPage(false);
+      }
+      setData(items);
+      setLoading(false);
+    })();
+  }, [currentPage, limit]);
+
+  const fetchMore = () => {
+    if (!hasNextPage) return;
+    setCurrentPage(currentPage + 1);
   };
-  return { loading, data, error, fetchMore, hasNextPage };
+
+  return { loading, data, error: undefined as Error, fetchMore, hasNextPage };
 };
 
 export { useDAppFetcher };
-export type UseDAppFetcherReturnType = ReturnType<typeof useDAppFetcher>;

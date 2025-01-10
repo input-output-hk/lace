@@ -85,7 +85,7 @@ Feature: Add new wallet - Create wallet
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
 
-  @LW-9357
+  @LW-9357 @memory-snapshot
   Scenario: Extended-view - Multi-wallet - Create - Add new wallet - happy path
     Given I opened "Create" flow via "Add new wallet" feature
     When I go to "Wallet setup" page from "Create" wallet flow
@@ -93,6 +93,7 @@ Feature: Add new wallet - Create wallet
     And I click "Enter wallet" button
     And I wait for main loader to disappear
     Then I see LW homepage
+    And "N_8J@bne87A" password is not in snapshot
     And "Wallet 2" is displayed as a wallet name on the menu button
     When I click the menu button
     Then Wallet number 2 with "Wallet 2" name is displayed on the user menu

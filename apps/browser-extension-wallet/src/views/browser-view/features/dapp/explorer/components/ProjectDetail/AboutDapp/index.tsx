@@ -1,31 +1,27 @@
 import * as React from 'react';
 import IogSlider from '../../Slider';
-import { IogText, IogTitle } from '../../../components/Typography';
 import { ISectionCardItem } from '../../../services/helpers/apis-formatter/types';
 import { useTranslation } from 'react-i18next';
 import { useDrawer } from '../drawer';
 import FeaturesCarousel from '../FeaturesCarousel';
+import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 
 export const AboutDapp: React.FC = () => {
   const {
     state: { data }
   } = useDrawer<ISectionCardItem>();
-
   const { t } = useTranslation();
 
   return (
     <>
-      <div className="iog-project-details__description-container">
-        <IogText xMedium spacer={24} normal className="iog-description" data-testid="dapp-info-modal-description-text">
-          {data?.longDescription}
-        </IogText>
-      </div>
-
+      <Box my="$24">
+        <Text.Body.Normal>{data?.longDescription}</Text.Body.Normal>
+      </Box>
       {data?.screenshots && (
-        <div className="iog-project-details__features-container">
-          <IogTitle as="h3" xMedium className="iog-features" data-testid="dapp-info-modal-preview-title">
-            {t('dappdiscovery.side_panel.gallery')}
-          </IogTitle>
+        <Box mb="$24">
+          <Box mb="$24">
+            <Text.SubHeading weight="$bold">{t('dappdiscovery.side_panel.gallery')}</Text.SubHeading>
+          </Box>
           <IogSlider
             data={data.screenshots}
             navigation={{
@@ -40,10 +36,11 @@ export const AboutDapp: React.FC = () => {
             slidesPerGroup={1}
             speed={650}
             spaceBetween={20}
+            showSliderNavigation={data.screenshots?.length > 1}
           >
             <FeaturesCarousel />
           </IogSlider>
-        </div>
+        </Box>
       )}
     </>
   );

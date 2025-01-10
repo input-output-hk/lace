@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { storage, Storage } from 'webextension-polyfill';
 import isNil from 'lodash/isNil';
 import { applyMigrations, migrationsRequirePassword } from '@lib/scripts/migrations';
@@ -10,7 +10,8 @@ import { Lock } from '@src/views/browser-view/components/Lock';
 import { MainLoader } from '@components/MainLoader';
 import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
-import { OnPasswordChange, useSecrets } from '@lace/core';
+import { useSecrets } from '@lace/core';
+import type { OnPasswordChange } from '@lace/core';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;
@@ -35,11 +36,13 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const { password, setPassword, clearSecrets } = useSecrets();
   const [isValidPassword, setIsValidPassword] = useState(true);
+  // Create a ref to access password without creating dependencies
+  const getPassword = useRef(() => password.value);
 
   const migrate = useCallback(async () => {
     setRenderState(INITIAL_RENDER_STATE);
-    if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, password.value);
-  }, [migrationState, password, appMode]);
+    if (appMode === APP_MODE_POPUP) await applyMigrations(migrationState, getPassword.current());
+  }, [migrationState, appMode, getPassword]);
 
   const handlePasswordChange = useCallback<OnPasswordChange>(
     (target) => {
@@ -66,7 +69,6 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
       await unlockWallet();
       setIsValidPassword(true);
       await migrate();
-      clearSecrets();
     } catch {
       setIsValidPassword(false);
     } finally {

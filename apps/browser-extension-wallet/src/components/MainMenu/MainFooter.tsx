@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { walletRoutePaths } from '../../routes';
 
 import NftIconDefault from '../../assets/icons/nft-icon.component.svg';
@@ -14,14 +14,20 @@ import StakingIconActive from '../../assets/icons/active-database-icon.component
 import StakingIconDefault from '../../assets/icons/database-icon.component.svg';
 import StakingIconHover from '../../assets/icons/hover-database-icon.component.svg';
 
+import DappExplorerIconDefault from '../../assets/icons/tiles-outlined.component.svg';
+import DappExplorerIconHover from '../../assets/icons/tiles-outlined-gradient.component.svg';
+
 import TransactionsIconDefault from '../../assets/icons/transactions-icon.component.svg';
 import TransactionsIconActive from '../../assets/icons/active-transactions-icon.component.svg';
 import TransactionsIconHover from '../../assets/icons/hover-transactions-icon.component.svg';
 import { MenuItemList } from '@src/utils/constants';
 import styles from './MainFooter.module.scss';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletStore } from '@stores';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { BrowserViewSections } from '@lib/scripts/types';
 
 const includesCoin = /coin/i;
 
@@ -31,7 +37,10 @@ export const MainFooter = (): React.ReactElement => {
   const history = useHistory();
   const analytics = useAnalyticsContext();
   const { isSharedWallet } = useWalletStore();
+  const posthog = usePostHogClientContext();
+  const backgroundServices = useBackgroundServiceAPIContext();
 
+  const isDappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
   const currentLocation = location?.pathname;
   const isWalletIconActive =
     currentLocation === walletRoutePaths.assets || includesCoin.test(currentLocation) || currentLocation === '/';
@@ -49,6 +58,7 @@ export const MainFooter = (): React.ReactElement => {
   const TransactionsIcon =
     currentHoveredItem === MenuItemList.TRANSACTIONS ? TransactionsIconHover : TransactionsIconDefault;
   const StakingIcon = currentHoveredItem === MenuItemList.STAKING ? StakingIconHover : StakingIconDefault;
+  const DappExplorerIcon = currentHoveredItem === MenuItemList.DAPPS ? DappExplorerIconHover : DappExplorerIconDefault;
 
   const sendAnalytics = (postHogAction?: PostHogAction) => {
     if (postHogAction) {
@@ -69,7 +79,16 @@ export const MainFooter = (): React.ReactElement => {
         break;
       case walletRoutePaths.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
+        break;
+      case walletRoutePaths.dapps:
+      // TODO: LW-11885 send proper dapp explorer event
     }
+
+    if (path === walletRoutePaths.dapps) {
+      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.DAPP_EXPLORER });
+      return;
+    }
+
     history.push(path);
   };
 
@@ -120,6 +139,16 @@ export const MainFooter = (): React.ReactElement => {
             ) : (
               <StakingIcon className={styles.icon} />
             )}
+          </button>
+        )}
+        {isDappExplorerEnabled && (
+          <button
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.DAPPS)}
+            onMouseLeave={onMouseLeaveItem}
+            data-testid="main-footer-dapp-explorer"
+            onClick={() => handleNavigation(walletRoutePaths.dapps)}
+          >
+            <DappExplorerIcon className={styles.icon} />
           </button>
         )}
       </div>

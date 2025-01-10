@@ -44,6 +44,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
   const magic = getMagicForChain(chainName);
   const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
+
   const isExperimentEnabled = (experimentName: ExperimentName) => !!(featureFlags?.[magic]?.[experimentName] ?? false);
 
   return Wallet.createProviders({
@@ -66,7 +67,8 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       useBlockfrostNetworkInfoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER),
       useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
       useBlockfrostTxSubmitProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER),
-      useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER)
+      useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER),
+      useBlockfrostAddressDiscovery: isExperimentEnabled(ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY)
     }
   });
 };

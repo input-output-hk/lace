@@ -4,7 +4,7 @@ Feature: Send Simple Transactions - Extended view - E2E
   Background:
     Given Wallet is synced
 
-  @LW-2375
+  @LW-2375 @memory-snapshot
   Scenario: Extended-view - Send ADA (single asset) E2E
     And I save token: "Cardano" balance
     And I click "Send" button on page header
@@ -16,6 +16,7 @@ Feature: Send Simple Transactions - Extended view - E2E
     And I click "Confirm" button on "Transaction summary" page
     And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed in extended mode
+    And valid password is not in snapshot
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
     Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance

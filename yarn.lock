@@ -13554,11 +13554,9 @@ __metadata:
     qrcode: ^1.5.3
     react: 17.0.2
     react-dom: 17.0.2
-    react-hook-form: 7.47.0
     react-i18next: ^12.3.1
     react-infinite-scroll-hook: ^4.1.1
     react-lottie: ^1.2.3
-    react-modern-drawer: 1.0.1
     react-portal: 4.2.2
     react-router: 5.2.0
     react-router-dom: 5.2.0
@@ -36008,6 +36006,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-local-rules@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "eslint-plugin-local-rules@npm:3.0.2"
+  checksum: ad883be0739f022bcd0f49de45354c792bc2ef23ea0030789c3f90b10288b4346ab509fbfd451e87282c0f92393251e51a5a69a2f3ba3865a1a1f780cebef7cb
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-lodash@npm:^7.4.0":
   version: 7.4.0
   resolution: "eslint-plugin-lodash@npm:7.4.0"
@@ -43951,6 +43956,7 @@ __metadata:
     eslint-plugin-filenames: ^1.3.2
     eslint-plugin-import: ^2.23.4
     eslint-plugin-jest: ^24.4.0
+    eslint-plugin-local-rules: ^3.0.2
     eslint-plugin-lodash: ^7.4.0
     eslint-plugin-prettier: ^4.0.0
     eslint-plugin-promise: ^5.1.0
@@ -51625,15 +51631,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:7.47.0":
-  version: 7.47.0
-  resolution: "react-hook-form@npm:7.47.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17 || ^18
-  checksum: dec192fec9c54e436f9e47008635dd7849b6b119ed477a9b0cd491367a0b2ced3427cd937febfb245e1cb7578c863917181d903eff4519c2787bf713ec7d3426
-  languageName: node
-  linkType: hard
-
 "react-i18next@npm:^12.3.1":
   version: 12.3.1
   resolution: "react-i18next@npm:12.3.1"
@@ -51790,15 +51787,6 @@ __metadata:
     react: ^16.8 || ^17 || ^18
     react-dom: ^16.8 || ^17 || ^18
   checksum: d3ccc8036ec284119bea02e20ebaf4fdb652f805b5850fa56a262fbd7b889a2882de5591eabe515c4f70432fd1d6942c97ac1008caefac9712a7dce3d014bce0
-  languageName: node
-  linkType: hard
-
-"react-modern-drawer@npm:1.0.1":
-  version: 1.0.1
-  resolution: "react-modern-drawer@npm:1.0.1"
-  peerDependencies:
-    react: ^16.0.0
-  checksum: 8bd275cf101c2634dad2e5becd1cc395c6118e6ec86b32887bd0bf28f4918943c53beeb0d2b484984233349edda68eafcee2d5ffa73c29fdede03b81cf1f6a3f
   languageName: node
   linkType: hard
 

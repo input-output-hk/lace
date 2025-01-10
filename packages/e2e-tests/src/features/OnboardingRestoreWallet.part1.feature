@@ -52,12 +52,13 @@ Feature: Onboarding - Restore wallet
       | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
-  @LW-2464
+  @LW-2464 @memory-snapshot
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
+    And valid password is not in snapshot
 
   @LW-3063
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet

@@ -63,7 +63,7 @@ Feature: Add new wallet - Create paper wallet
     And I click "Next" button during wallet setup
     Then "Let's set up your new wallet" page is displayed in modal for "Create paper wallet" flow
 
-  @LW-11337
+  @LW-11337 @memory-snapshot
   Scenario: Add new wallet - Create - Paper Wallet - Let's set up your new wallet - click "Generate paper wallet" button
     When I opened "Create" flow via "Add new wallet" feature
     And I select "Paper wallet" as a recovery method
@@ -75,6 +75,7 @@ Feature: Add new wallet - Create paper wallet
     Then "Generate paper wallet" button is enabled
     When I click "Generate paper wallet" button
     Then "Save your paper wallet" page is displayed in modal with "Wallet_1_PaperWallet.pdf" file name
+    And "N_8J@bne87A" password is not in snapshot
 
   @LW-11338
   Scenario: Add new wallet - Create - Paper Wallet - Let's set up your wallet - click "Back" button

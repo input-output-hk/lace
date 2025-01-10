@@ -69,7 +69,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
     And I click "Next" button during wallet setup
     Then "Let's set up your new wallet" page is displayed while creating paper wallet
 
-  @LW-11159
+  @LW-11159 @memory-snapshot
   Scenario: Onboarding - Create - Paper Wallet - Let's set up your new wallet - click "Generate paper wallet" button
     When I click "Create" button on wallet setup page
     And I select "Paper wallet" as a recovery method
@@ -80,6 +80,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
     And I enter wallet name: "Wallet 1", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     Then "Generate paper wallet" button is enabled
     When I click "Generate paper wallet" button
+    And valid password is not in snapshot
     Then "Save your paper wallet" page is displayed with "Wallet_1_PaperWallet.pdf" file name
 
   @LW-11160

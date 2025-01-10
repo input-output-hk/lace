@@ -2,14 +2,7 @@
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
 import { getProviders } from './config';
-import {
-  DEFAULT_LOOK_AHEAD_SEARCH,
-  DEFAULT_POLLING_CONFIG,
-  HDSequentialDiscovery,
-  createPersonalWallet,
-  storage,
-  createSharedWallet
-} from '@cardano-sdk/wallet';
+import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
@@ -177,6 +170,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       ? // eslint-disable-next-line no-magic-numbers
         Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
       : DEFAULT_POLLING_CONFIG.pollInterval;
+
     return createPersonalWallet(
       {
         name: walletAccount.metadata.name,
@@ -196,7 +190,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
               logger
             })
           : noopHandleResolver,
-        addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
         bip32Account
       }

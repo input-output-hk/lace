@@ -19,15 +19,14 @@ import { useOpenReceiveDrawer } from '../TransactionCTAsBox/useOpenReceiveDrawer
 
 interface LayoutProps {
   children: React.ReactNode;
-  isFullWidth?: boolean;
+  noAside?: boolean;
   drawerUIDefaultContent?: DrawerContent;
 }
 
 const toastThrottle = 500;
-const isFlexible = process.env.USE_DESKTOP_LAYOUT === 'true';
 const PIN_EXTENSION_TIMEOUT = 5000;
 
-export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: LayoutProps): React.ReactElement => {
+export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: LayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
@@ -93,7 +92,7 @@ export const Layout = ({ children, drawerUIDefaultContent, isFullWidth }: Layout
   return (
     <div
       id="main"
-      className={classnames(styles.layoutGridContainer, isFullWidth && styles.fullWidth, isFlexible && styles.flexible)}
+      className={classnames(styles.layoutGridContainer, !noAside && styles.withAside, noAside && styles.noAside)}
     >
       <LeftSidePanel theme={theme.name} />
       {showPinExtension && (

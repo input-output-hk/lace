@@ -6,6 +6,7 @@ import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
 import { getTestWallet } from '../support/walletConfiguration';
+import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -83,6 +84,27 @@ class CommonAssert {
     }
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(expectedUrl);
+  }
+
+  async assertPasswordIsNotPresentInMemorySnapshot(password: string) {
+    await browser.cdp('HeapProfiler', 'collectGarbage');
+    const snapshot = await browser.takeHeapSnapshot();
+
+    let needle = '';
+    switch (password) {
+      case 'valid':
+        needle = String(process.env.WALLET_1_PASSWORD);
+        break;
+      case 'invalid':
+        needle = 'somePassword';
+        break;
+      case 'N_8J@bne87A':
+        needle = 'N_8J@bne87A';
+        break;
+    }
+    const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
+
+    expect(needlesFound.length).to.equal(0);
   }
 }
 

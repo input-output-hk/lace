@@ -54,7 +54,7 @@ Feature: General Settings - Extended Browser View
     When I fill correct password
     Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
 
-  @LW-3877 @LW-3879 @Mainnet @Testnet
+  @LW-3877 @LW-3879 @Mainnet @Testnet @memory-snapshot
   Scenario: Extended view - Settings - When user clicks on "Hide passphrase"/"Show passphrase" button on the "Show 24-word passphrase" side drawer all mnemonics are blurred/visible
     When I open settings from header menu
     And I click on "Show recovery phrase" setting
@@ -63,6 +63,7 @@ Feature: General Settings - Extended Browser View
     Then "Show passphrase" button is enabled on "Show 24-word recovery phrase" drawer
     When I click on "Show passphrase" button
     Then all mnemonics from "TestAutomationWallet" wallet are listed
+    And valid password is not in snapshot
     When I click on "Hide passphrase" button
     Then all mnemonics are blurred
     When I click on "Show passphrase" button
