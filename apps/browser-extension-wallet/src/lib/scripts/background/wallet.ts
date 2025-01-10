@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/no-null */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
-import { getProviders } from './config';
+import { getProviders, rateLimiter } from './config';
 import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { BlockfrostClient, handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
@@ -36,6 +36,7 @@ import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
+import { config } from '@src/config';
 
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
@@ -105,12 +106,10 @@ export const walletRepository = new WalletRepository({
 const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
 
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+  // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    const providers = await getProviders(chainName);
-
-    // Caches current wallet providers.
-    currentWalletProviders$.next(providers);
+    let providers = await getProviders(chainName);
 
     const baseUrl = getBaseUrlForChain(chainName);
 
@@ -130,14 +129,36 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       });
     }
 
+    const featureFlags = await getFeatureFlags(chainId.networkMagic);
+    const useBlockfrostInputResolver = isExperimentEnabled(featureFlags, ExperimentName.BLOCKFROST_INPUT_RESOLVER);
+
+    let inputResolver;
+
+    if (useBlockfrostInputResolver) {
+      const { BLOCKFROST_CONFIGS } = config();
+
+      const blockfrostClient = new BlockfrostClient(
+        {
+          ...BLOCKFROST_CONFIGS[chainName],
+          apiVersion: 'v0'
+        },
+        {
+          rateLimiter
+        }
+      );
+
+      inputResolver = new Wallet.BlockfrostInputResolver(blockfrostClient, logger);
+    }
+
     if (wallet.type === WalletType.Script) {
       const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
       const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
 
-      return createSharedWallet(
+      const sharedWallet = createSharedWallet(
         { name: wallet.metadata.name },
         {
           ...providers,
+          inputResolver,
           logger,
           paymentScript,
           stakingScript,
@@ -152,6 +173,16 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           witnesser
         }
       );
+
+      if (inputResolver) {
+        inputResolver.setContext(sharedWallet);
+      }
+
+      // Caches current wallet providers.
+      providers = { ...providers, inputResolver: { resolveInput: sharedWallet.util.resolveInput } };
+      currentWalletProviders$.next(providers);
+
+      return sharedWallet;
     }
 
     const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
@@ -164,14 +195,13 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
-    const featureFlags = await getFeatureFlags(chainId.networkMagic);
     const useWebSocket = isExperimentEnabled(featureFlags, ExperimentName.WEBSOCKET_API);
     const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))
       ? // eslint-disable-next-line no-magic-numbers
         Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
       : DEFAULT_POLLING_CONFIG.pollInterval;
 
-    return createPersonalWallet(
+    const personalWallet = createPersonalWallet(
       {
         name: walletAccount.metadata.name,
         polling: {
@@ -182,6 +212,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       {
         logger,
         ...providers,
+        inputResolver,
         stores,
         handleProvider: supportsHandleResolver
           ? handleHttpProvider({
@@ -194,6 +225,16 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         bip32Account
       }
     );
+
+    if (inputResolver) {
+      inputResolver.setContext(personalWallet);
+    }
+
+    // Caches current wallet providers.
+    providers = { ...providers, inputResolver: { resolveInput: personalWallet.util.resolveInput } };
+    currentWalletProviders$.next(providers);
+
+    return personalWallet;
   }
 };
 

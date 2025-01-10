@@ -265,5 +265,8 @@ export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDepen
     getDRepInfo: RemoteApiPropertyType.MethodReturningPromise,
     getDRepsInfo: RemoteApiPropertyType.MethodReturningPromise,
     healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  inputResolver: {
+    resolveInput: RemoteApiPropertyType.MethodReturningPromise
   }
 };

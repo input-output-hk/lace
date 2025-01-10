@@ -33,7 +33,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
 const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
 // Important to use the same rateLimiter object for all networks,
 // because Blockfrost rate limit is per IP address, not per project id
-const rateLimiter: RateLimiter = new Bottleneck({
+export const rateLimiter: RateLimiter = new Bottleneck({
   reservoir: BLOCKFROST_RATE_LIMIT_CONFIG.size,
   reservoirIncreaseAmount: BLOCKFROST_RATE_LIMIT_CONFIG.increaseAmount,
   reservoirIncreaseInterval: BLOCKFROST_RATE_LIMIT_CONFIG.increaseInterval,
