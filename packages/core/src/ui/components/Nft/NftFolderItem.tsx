@@ -70,11 +70,13 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
       <a onClick={onClick} data-testid="folder-item" className={styles.nftItem}>
         <div className={styles.folderWrapper}>
-          {nfts?.slice(0, numberOfNftsToShow).map(({ image }, index) =>
+          {nfts?.slice(0, numberOfNftsToShow).map(({ image, assetId }, index) =>
             index === numberOfNftsToShow - 1 && nfts.length > numberOfNftsToShow ? (
-              <div className={styles.restOfNfts}>{restOfNftsContent}</div>
+              <div key="rest-of-nfts-placeholder" className={styles.restOfNfts}>
+                {restOfNftsContent}
+              </div>
             ) : (
-              <div data-testid="nft-item-img-container" key={image} className={styles.imageWrapper}>
+              <div data-testid="nft-item-img-container" key={assetId} className={styles.imageWrapper}>
                 <NftImage image={image} />
               </div>
             )
