@@ -1,7 +1,5 @@
-/* eslint-disable no-magic-numbers */
-/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable unicorn/no-useless-undefined */
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
@@ -25,8 +23,8 @@ import {
   useOpenTransactionDrawer,
   useOutputInitialState
 } from '../../send-transaction';
-import { Button, useObservable } from '@lace/common';
-import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
+import { Button, useObservable, VirtualisedGrid } from '@lace/common';
+import { DEFAULT_WALLET_BALANCE, LACE_APP_ID } from '@src/utils/constants';
 import { Skeleton } from 'antd';
 import { EducationalList, FundWalletBanner, Layout, SectionLayout } from '@src/views/browser-view/components';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
@@ -45,31 +43,16 @@ import { NftFoldersRecordParams, useNftsFoldersContext, withNftsFoldersContext }
 import { RenameFolderDrawer } from './RenameFolderDrawer';
 import { NftFolderConfirmationModal } from './NftFolderConfirmationModal';
 import { useAssetInfo } from '@hooks';
-import { SearchBox, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
+import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { useNftSearch } from '@hooks/useNftSearch';
-import { Grid } from './Grid';
 
 export type RenameFolderType = Pick<NftFoldersRecordParams, 'id' | 'name'>;
 
 const MIN_ASSET_COUNT_FOR_SEARCH = 10;
 
-const LACE_APP_ID = 'lace-app';
-export const STAKE_POOL_CARD_HEIGHT = 84;
-export const STAKE_POOL_GRID_ROW_GAP = 12;
-
-export type NftGridColumnCount = 2 | 4;
-
-const increaseViewportBy = { bottom: 100, top: 0 };
-
 // eslint-disable-next-line max-statements, complexity
 export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
-  const {
-    walletInfo,
-    inMemoryWallet,
-    blockchainProvider,
-    environmentName,
-    walletUI: { appMode }
-  } = useWalletStore();
+  const { walletInfo, inMemoryWallet, blockchainProvider, environmentName } = useWalletStore();
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
   const { t } = useTranslation();
   const assetsInfo = useAssetInfo();
@@ -237,26 +220,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
   }, []);
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
-  const numberOfItemsPerRow = appMode === APP_MODE_POPUP ? 2 : 4;
-  const [initialItemsCount, setInitialItemsCount] = useState(0);
 
   const ref = useRef<HTMLDivElement>(null);
-
   const tableReference = useRef<HTMLDivElement | null>(null);
-  const initialRowsCount = useVisibleItemsCount({
-    containerRef: tableReference,
-    rowHeight: STAKE_POOL_CARD_HEIGHT + STAKE_POOL_GRID_ROW_GAP
-  });
-
-  useLayoutEffect(() => {
-    if (initialRowsCount !== undefined && numberOfItemsPerRow !== undefined) {
-      const overscanRows = Math.ceil(increaseViewportBy.bottom / STAKE_POOL_CARD_HEIGHT);
-
-      setInitialItemsCount((overscanRows + Math.max(initialRowsCount, 0)) * numberOfItemsPerRow);
-    }
-  }, [initialRowsCount, numberOfItemsPerRow]);
-
-  const cardsPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
 
   const itemContent = useCallback(
     (index: number, data: NftItemProps | NftFolderItemProps | PlaceholderItem | undefined): React.ReactElement => {
@@ -314,11 +280,13 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                   {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
                     <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
                   )}
-                  <Grid<NftItemProps | NftFolderItemProps | PlaceholderItem | undefined>
+                  <VirtualisedGrid<NftItemProps | NftFolderItemProps | PlaceholderItem | undefined>
+                    testId="nfts-list-scroll-wrapper"
+                    columns={4}
                     tableReference={tableReference}
                     scrollableTargetId={LACE_APP_ID}
-                    items={isSearching ? cardsPlaceholders : nftstoDisplay}
-                    totalCount={isSearching ? cardsPlaceholders.length : nftstoDisplay.length}
+                    items={nftstoDisplay}
+                    totalCount={nftstoDisplay.length}
                     itemContent={itemContent}
                   />
                 </>

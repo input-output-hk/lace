@@ -1,14 +1,25 @@
+/* eslint-disable complexity */
 /* eslint-disable unicorn/no-useless-undefined, max-statements */
 import { useAssetInfo, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
-import { Button, useObservable } from '@lace/common';
+import { Button, useObservable, VirtualisedGrid } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './Nfts.module.scss';
-import { ListEmptyState, NftFolderItemProps, NftItemProps, NftList, NftListProps, NftsItemsTypes } from '@lace/core';
+import {
+  ListEmptyState,
+  NftFolderItem,
+  NftFolderItemProps,
+  NftItem,
+  NftItemProps,
+  NftListProps,
+  NftPlaceholderItem,
+  NftsItemsTypes,
+  PlaceholderItem
+} from '@lace/core';
 import { ContentLayout } from '@src/components/Layout';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
@@ -24,10 +35,10 @@ import { NftFolderConfirmationModal } from '@views/browser/features/nfts/compone
 import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
-import { Skeleton } from 'antd';
 import { useNftSearch } from '@hooks/useNftSearch';
 
 const MIN_ASSET_COUNT_FOR_SEARCH = 10;
+export const extensionScrollableContainerID = 'contentLayout';
 
 export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   const redirectToNftDetail = useRedirection<{ params: { id: string } }>(walletRoutePaths.nftDetail);
@@ -141,6 +152,20 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
     handleSearch(searchItems, value);
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+  const tableReference = useRef<HTMLDivElement | null>(null);
+
+  const itemContent = useCallback(
+    (index: number, data: NftItemProps | NftFolderItemProps | PlaceholderItem | undefined): React.ReactElement => {
+      if (data.type === NftsItemsTypes.FOLDER) return <NftFolderItem key={index} {...data} />;
+      if (data.type === NftsItemsTypes.PLACEHOLDER) return <NftPlaceholderItem key={index} {...data} />;
+      return <NftItem key={index} {...data} />;
+    },
+    []
+  );
+
+  const nftstoDisplay = searchValue !== '' ? filteredResults : items;
+
   return (
     <>
       <ContentLayout
@@ -171,7 +196,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
         mainClassName={styles.nftsLayout}
       >
         <div className={styles.nfts}>
-          <div className={styles.content} data-testid="nft-list-container">
+          <div ref={ref} className={styles.content} data-testid="nft-list-container">
             {items.length > 0 ? (
               <>
                 {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
@@ -183,13 +208,18 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
                     onClear={() => setSearchValue('')}
                   />
                 )}
-                <Skeleton loading={isSearching}>
-                  {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={2} />}
-                  {searchValue !== '' && filteredResults.length === 0 && (
-                    <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
-                  )}
-                  {searchValue === '' && <NftList items={items} rows={2} />}
-                </Skeleton>
+                {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
+                  <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                )}
+                <VirtualisedGrid<NftItemProps | NftFolderItemProps | PlaceholderItem | undefined>
+                  testId="nfts-list-scroll-wrapper"
+                  columns={2}
+                  tableReference={tableReference}
+                  scrollableTargetId={extensionScrollableContainerID}
+                  items={nftstoDisplay}
+                  totalCount={nftstoDisplay.length}
+                  itemContent={itemContent}
+                />
               </>
             ) : (
               <FundWalletBanner

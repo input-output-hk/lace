@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Box, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
+import { VirtualisedGrid } from '@lace/common';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { ReactElement, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -9,7 +10,6 @@ import { ListRange } from 'react-virtuoso';
 import useResizeObserver, { ObservedSize } from 'use-resize-observer';
 import { StakePoolDetails } from '../../store';
 import { STAKE_POOL_CARD_HEIGHT, STAKE_POOL_GRID_ROW_GAP, StakePoolCardSkeleton } from '../StakePoolCard';
-import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';
 import { StakePoolsGridColumnCount } from './types';
@@ -54,14 +54,14 @@ export const StakePoolsGrid = ({
       3: matchThreeColumnsLayout,
       4: matchFourColumnsLayout,
     }),
-    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
+    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout],
   );
 
   const updateNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
     const result = Number(
-      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
+      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0],
     ) as StakePoolsGridColumnCount;
 
     setNumberOfItemsPerRow(result);
@@ -74,12 +74,12 @@ export const StakePoolsGrid = ({
         setContainerWidth(size.width);
       }
     },
-    [containerWidth, updateNumberOfItemsInRow]
+    [containerWidth, updateNumberOfItemsInRow],
   );
 
   const onResize = useMemo(
     () => debounce(setContainerWidthCb, DEFAULT_DEBOUNCE, { leading: true }),
-    [setContainerWidthCb]
+    [setContainerWidthCb],
   );
 
   const columnCount = numberOfItemsPerRow || 3;
@@ -108,7 +108,7 @@ export const StakePoolsGrid = ({
   const itemContent = useCallback(
     (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
       data ? <StakePoolsGridItem {...data} /> : <StakePoolCardSkeleton fadeScale={columnCount} index={index} />,
-    [columnCount]
+    [columnCount],
   );
 
   const cardsPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
@@ -129,7 +129,8 @@ export const StakePoolsGrid = ({
         </>
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
-      <Grid<StakePoolDetails | undefined>
+      <VirtualisedGrid<StakePoolDetails | undefined>
+        testId="stake-pool-list-scroll-wrapper"
         tableReference={tableReference}
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}

@@ -1,6 +1,7 @@
 import { Wallet } from '@lace/cardano';
 
 export const LACE_APP_ID = 'lace-app';
+export const LACE_POPUP_APP_ID = 'lace-popup';
 
 export type ADASymbols = 'ADA' | 'tADA';
 
