@@ -38,7 +38,8 @@ type FeatureFlag =
   | ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER
   | ExperimentName.BLOCKFROST_UTXO_PROVIDER
   | ExperimentName.EXTENSION_STORAGE
-  | ExperimentName.USE_DREP_PROVIDER_OVERRIDE;
+  | ExperimentName.USE_DREP_PROVIDER_OVERRIDE
+  | ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY;
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;
