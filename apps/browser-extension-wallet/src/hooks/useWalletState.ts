@@ -24,14 +24,12 @@ type RemoveObservableNameSuffix<T> = T extends `${infer S}$` ? S : T;
 type FlattenObservableProperties<T> = T extends Map<any, any> | String | Number | Array<any> | Date | null | BigInt
   ? T
   : T extends object
-    ? {
-        [k in keyof T as T[k] extends Function ? never : RemoveObservableNameSuffix<k>]: T[k] extends Observable<
-          infer O
-        >
-          ? FlattenObservableProperties<O>
-          : FlattenObservableProperties<T[k]>;
-      }
-    : T;
+  ? {
+      [k in keyof T as T[k] extends Function ? never : RemoveObservableNameSuffix<k>]: T[k] extends Observable<infer O>
+        ? FlattenObservableProperties<O>
+        : FlattenObservableProperties<T[k]>;
+    }
+  : T;
 export type ObservableWalletState = FlattenObservableProperties<
   Omit<ObservableWallet, 'transactions'> & {
     transactions: {
