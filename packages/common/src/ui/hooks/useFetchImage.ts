@@ -10,28 +10,27 @@ type ImageFetchStateMap = {
 
 export type UseFetchImageState = ImageFetchStateMap[ImageFetchStatus];
 
-const maxConcurrentRequests = 5;
-const requestQueue: Set<() => Promise<void>> = new Set();
-let concurrentRequestsCount = 0;
+// Blockfrost IPFS allows up to 100 concurrent requests, but we limit it to 80 for now
+const maxConcurrentBlockfrostRequests = 80;
+let concurrentBlockfrostRequestsCount = 0;
 
-const processNextRequest = async () => {
-  if (requestQueue.size > 0 && concurrentRequestsCount < maxConcurrentRequests) {
-    const [nextRequest] = requestQueue;
-    requestQueue.delete(nextRequest);
-    concurrentRequestsCount++;
+const blockfrostRequestQueue: Set<() => Promise<void>> = new Set();
+
+const processNextBlockfrostIpfsRequest = async () => {
+  if (blockfrostRequestQueue.size > 0 && concurrentBlockfrostRequestsCount < maxConcurrentBlockfrostRequests) {
+    const [nextBlockfrostRequest] = blockfrostRequestQueue;
+    blockfrostRequestQueue.delete(nextBlockfrostRequest);
+    concurrentBlockfrostRequestsCount++;
     try {
-      await nextRequest();
+      await nextBlockfrostRequest();
     } finally {
-      processNextRequest();
+      processNextBlockfrostIpfsRequest();
     }
   }
 };
 
 const fetchImage = async (url: string, controller: AbortController) => {
-  const response = await fetch(url, {
-    signal: controller.signal,
-    headers: { 'Cache-Control': 'public, max-age=86400' }
-  });
+  const response = await fetch(url, { signal: controller.signal });
 
   if (!response.ok) throw new Error('Image fetch failed');
 
@@ -39,27 +38,34 @@ const fetchImage = async (url: string, controller: AbortController) => {
   return URL.createObjectURL(blob);
 };
 
+const isImageLoading = (imageUrl: string): Promise<boolean> =>
+  new Promise((resolve) => {
+    const img = new Image();
+    img.addEventListener('load', () => resolve(true));
+    img.addEventListener('error', () => resolve(false));
+    img.src = imageUrl;
+  });
+
 export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackImage: string }) => {
   const [state, setState] = useState<UseFetchImageState>({ status: 'loading' });
 
   useEffect(() => {
-    if (url.startsWith('data:')) {
-      // TODO investigate the below problem + use getAssetImageUrl
-      // Solve broken links e.g. data:image/png;base64,https://storage.something.com/assets/1235
-      const httpPosition = url.indexOf('http');
-      if (httpPosition === -1) {
-        setState({ status: 'loaded', imageSrc: url });
-      } else {
-        setState({ status: 'loaded', imageSrc: url.slice(httpPosition) });
-      }
+    if (url.startsWith('data:image/') || !url.startsWith('https://ipfs.blockfrost.dev')) {
+      // eslint-disable-next-line promise/catch-or-return
+      isImageLoading(url).then((isValid) => {
+        if (isValid) {
+          setState({ status: 'loaded', imageSrc: url });
+        } else {
+          setState({ status: 'error', imageSrc: fallbackImage });
+        }
+      });
 
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      return () => {};
+      return () => void 0;
     }
 
     const controller = new AbortController();
 
-    const loadImage = async () => {
+    const loadImageFromBlockfrost = async () => {
       try {
         setState({ status: 'loading' });
 
@@ -71,21 +77,21 @@ export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackIma
           setState({ status: 'error', imageSrc: fallbackImage });
         }
       } finally {
-        concurrentRequestsCount--;
-        processNextRequest();
+        concurrentBlockfrostRequestsCount--;
+        processNextBlockfrostIpfsRequest();
       }
     };
 
-    if (concurrentRequestsCount < maxConcurrentRequests) {
-      concurrentRequestsCount++;
-      loadImage();
+    if (concurrentBlockfrostRequestsCount < maxConcurrentBlockfrostRequests) {
+      concurrentBlockfrostRequestsCount++;
+      loadImageFromBlockfrost();
     } else {
-      requestQueue.add(loadImage);
+      blockfrostRequestQueue.add(loadImageFromBlockfrost);
     }
 
     return () => {
       controller.abort();
-      requestQueue.delete(loadImage);
+      blockfrostRequestQueue.delete(loadImageFromBlockfrost);
     };
   }, [url, fallbackImage]);
 
