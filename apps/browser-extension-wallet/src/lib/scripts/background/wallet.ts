@@ -4,6 +4,7 @@ import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, first
 import { getProviders } from './config';
 import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
   StoresFactory,
@@ -21,7 +22,6 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { SharedWalletScriptKind } from '@lace/core';

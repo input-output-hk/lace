@@ -36,6 +36,8 @@ import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { useFatalError } from '@hooks/useFatalError';
+import { Crash } from '@components/Crash';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -211,11 +213,17 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     [cardanoWallet, isLoadingWalletInfo, namiMigration?.mode]
   );
 
+  const fatalError = useFatalError();
+
   useEffect(() => {
-    if (isLoaded || isOnboarding || isInNamiMode) {
+    if (isLoaded || isOnboarding || isInNamiMode || fatalError) {
       document.querySelector('#preloader')?.remove();
     }
-  }, [isLoaded, isOnboarding, isInNamiMode]);
+  }, [isLoaded, isOnboarding, isInNamiMode, fatalError]);
+
+  if (fatalError) {
+    return <Crash />;
+  }
 
   if (isInNamiMode) {
     return (
