@@ -2,8 +2,13 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { ListRange, VirtuosoGrid, VirtuosoGridProps } from 'react-virtuoso';
 import cn from 'classnames';
-import { Box } from '@input-output-hk/lace-ui-toolkit';
 import styles from './VirtualisedGrid.module.scss';
+
+export const fixedVirtualisedGridColumns = [1, 2, 3, 4, 5, 6, 7, 8] as const;
+export type VirtualisedGridColumns = (typeof fixedVirtualisedGridColumns)[number];
+
+export const getTypedColumn = (column: number): VirtualisedGridColumns | undefined =>
+  fixedVirtualisedGridColumns.find((c) => c === column);
 
 export type GridProps<T> = VirtuosoGridProps<T, null> & {
   items: T[];
@@ -13,7 +18,7 @@ export type GridProps<T> = VirtuosoGridProps<T, null> & {
   scrollableTargetId?: string;
   testId?: string;
   tableReference?: React.Ref<HTMLDivElement>;
-  columns?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  columns?: VirtualisedGridColumns;
 };
 
 export const VirtualisedGrid = <T extends Record<string, unknown> | undefined>({
@@ -35,7 +40,7 @@ export const VirtualisedGrid = <T extends Record<string, unknown> | undefined>({
   }, [scrollableTargetId]);
 
   return (
-    <Box ref={tableReference} testId={testId}>
+    <div ref={tableReference} data-testid={testId}>
       <VirtuosoGrid<T>
         listClassName={cn(styles.grid, { [styles[`grid-${columns}`]]: columns })}
         data={items}
@@ -46,6 +51,6 @@ export const VirtualisedGrid = <T extends Record<string, unknown> | undefined>({
         itemContent={itemContent}
         {...props}
       />
-    </Box>
+    </div>
   );
 };

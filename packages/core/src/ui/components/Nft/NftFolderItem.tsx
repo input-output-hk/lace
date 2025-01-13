@@ -2,10 +2,11 @@
 /* eslint-disable unicorn/numeric-separators-style */
 import React from 'react';
 import cn from 'classnames';
-import { NftImage, NftImageProps } from './NftImage';
+import { NftImage } from './NftImage';
 import styles from './NftItem.module.scss';
 import { Tooltip } from 'antd';
 import NftFolderContextMenu from './NftFolderContextMenu';
+import { NftItemProps } from './NftItem';
 
 export enum NftsItemsTypes {
   FOLDER = 'folder',
@@ -14,7 +15,7 @@ export enum NftsItemsTypes {
 }
 
 export type NftFolderItemProps = {
-  nfts?: Array<NftImageProps & { assetId?: string }>;
+  nfts?: Array<NftItemProps>;
   name: string;
   id?: number;
   onClick?: () => void;

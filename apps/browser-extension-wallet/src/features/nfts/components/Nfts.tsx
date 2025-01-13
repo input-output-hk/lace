@@ -2,24 +2,15 @@
 /* eslint-disable unicorn/no-useless-undefined, max-statements */
 import { useAssetInfo, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
-import { Button, useObservable, VirtualisedGrid } from '@lace/common';
+import { Button, useObservable } from '@lace/common';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import flatten from 'lodash/flatten';
+import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './Nfts.module.scss';
-import {
-  ListEmptyState,
-  NftFolderItem,
-  NftFolderItemProps,
-  NftItem,
-  NftItemProps,
-  NftListProps,
-  NftPlaceholderItem,
-  NftsItemsTypes,
-  PlaceholderItem
-} from '@lace/core';
+import { ListEmptyState, NftFolderItemProps, NftGrid, NftItemProps, NftListProps, NftsItemsTypes } from '@lace/core';
 import { ContentLayout } from '@src/components/Layout';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
@@ -142,7 +133,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
     setSelectedFolderId(undefined);
   }, []);
 
-  const handleNftSearch = (searchItems: NftItemProps[], value: string) => {
+  const handleNftSearch = (searchItems: NftListProps['items'], value: string) => {
     setSearchValue(value);
     if (!hasRecordedAnalytics) {
       analytics.sendEventToPostHog(PostHogAction.NFTsSearchType);
@@ -153,81 +144,69 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   };
 
   const ref = useRef<HTMLDivElement>(null);
-  const tableReference = useRef<HTMLDivElement | null>(null);
-
-  const itemContent = useCallback(
-    (index: number, data: NftItemProps | NftFolderItemProps | PlaceholderItem | undefined): React.ReactElement => {
-      if (data.type === NftsItemsTypes.FOLDER) return <NftFolderItem key={index} {...data} />;
-      if (data.type === NftsItemsTypes.PLACEHOLDER) return <NftPlaceholderItem key={index} {...data} />;
-      return <NftItem key={index} {...data} />;
-    },
-    []
-  );
-
   const nftstoDisplay = searchValue !== '' ? filteredResults : items;
 
   return (
     <>
       <ContentLayout
         title={
-          <div className={styles.sectionTitle}>
-            <SectionTitle
-              classname={styles.title}
-              title={t('browserView.nfts.pageTitle')}
-              sideText={`(${nfts.length})`}
-              isPopup
-            />
-            {nfts.length > 0 && process.env.USE_NFT_FOLDERS === 'true' && (
-              <Button
-                className={styles.newFolderBtn}
-                color="gradient"
-                onClick={() => {
-                  setIsCreateFolderDrawerOpen(true);
-                  analytics.sendEventToPostHog(PostHogAction.NFTsCreateFolderClick);
-                }}
-                data-testid="create-folder-button"
-              >
-                <FolderIcon className={styles.newFolderIcon} />
-              </Button>
-            )}
-          </div>
+          <Skeleton loading={isLoadingFirstTime}>
+            <div className={styles.sectionTitle}>
+              <SectionTitle
+                classname={styles.title}
+                title={t('browserView.nfts.pageTitle')}
+                sideText={`(${nfts.length})`}
+                isPopup
+              />
+              {nfts.length > 0 && process.env.USE_NFT_FOLDERS === 'true' && (
+                <Button
+                  className={styles.newFolderBtn}
+                  color="gradient"
+                  onClick={() => {
+                    setIsCreateFolderDrawerOpen(true);
+                    analytics.sendEventToPostHog(PostHogAction.NFTsCreateFolderClick);
+                  }}
+                  data-testid="create-folder-button"
+                >
+                  <FolderIcon className={styles.newFolderIcon} />
+                </Button>
+              )}
+            </div>
+          </Skeleton>
         }
-        isLoading={isLoadingFirstTime}
         mainClassName={styles.nftsLayout}
       >
         <div className={styles.nfts}>
           <div ref={ref} className={styles.content} data-testid="nft-list-container">
-            {items.length > 0 ? (
-              <>
-                {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
-                  <SearchBox
-                    placeholder={t('browserView.nfts.searchPlaceholder')}
-                    onChange={(value) => handleNftSearch(nfts, value)}
-                    data-testid="nft-search-input"
-                    value={searchValue}
-                    onClear={() => setSearchValue('')}
-                  />
-                )}
-                {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
-                  <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
-                )}
-                <VirtualisedGrid<NftItemProps | NftFolderItemProps | PlaceholderItem | undefined>
-                  testId="nfts-list-scroll-wrapper"
-                  columns={2}
-                  tableReference={tableReference}
-                  scrollableTargetId={extensionScrollableContainerID}
-                  items={nftstoDisplay}
-                  totalCount={nftstoDisplay.length}
-                  itemContent={itemContent}
+            <Skeleton loading={isLoadingFirstTime}>
+              {items.length > 0 ? (
+                <>
+                  {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
+                    <SearchBox
+                      placeholder={t('browserView.nfts.searchPlaceholder')}
+                      onChange={(value) => handleNftSearch(items, value)}
+                      data-testid="nft-search-input"
+                      value={searchValue}
+                      onClear={() => setSearchValue('')}
+                    />
+                  )}
+                  {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
+                    <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                  )}
+                </>
+              ) : (
+                <FundWalletBanner
+                  title={t('browserView.nfts.fundWalletBanner.title')}
+                  prompt={t('browserView.nfts.fundWalletBanner.prompt')}
+                  walletAddress={walletInfo.addresses[0].address.toString()}
                 />
-              </>
-            ) : (
-              <FundWalletBanner
-                title={t('browserView.nfts.fundWalletBanner.title')}
-                prompt={t('browserView.nfts.fundWalletBanner.prompt')}
-                walletAddress={walletInfo.addresses[0].address.toString()}
-              />
-            )}
+              )}
+            </Skeleton>
+            <NftGrid
+              columns={2}
+              scrollableTargetId={extensionScrollableContainerID}
+              items={isLoadingFirstTime ? [] : nftstoDisplay}
+            />
           </div>
         </div>
         <NFTFolderDrawer
