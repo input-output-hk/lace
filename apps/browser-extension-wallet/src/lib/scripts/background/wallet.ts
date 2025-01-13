@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/no-null */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
-import { getProviders, rateLimiter } from './config';
+import { getProviders } from './config';
 import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
-import { BlockfrostClient, handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
@@ -36,7 +36,6 @@ import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
-import { config } from '@src/config';
 
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
@@ -130,25 +129,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     }
 
     const featureFlags = await getFeatureFlags(chainId.networkMagic);
-    const useBlockfrostInputResolver = isExperimentEnabled(featureFlags, ExperimentName.BLOCKFROST_INPUT_RESOLVER);
-
-    let inputResolver;
-
-    if (useBlockfrostInputResolver) {
-      const { BLOCKFROST_CONFIGS } = config();
-
-      const blockfrostClient = new BlockfrostClient(
-        {
-          ...BLOCKFROST_CONFIGS[chainName],
-          apiVersion: 'v0'
-        },
-        {
-          rateLimiter
-        }
-      );
-
-      inputResolver = new Wallet.BlockfrostInputResolver(blockfrostClient, logger);
-    }
 
     if (wallet.type === WalletType.Script) {
       const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
@@ -158,7 +138,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         { name: wallet.metadata.name },
         {
           ...providers,
-          inputResolver,
           logger,
           paymentScript,
           stakingScript,
@@ -173,10 +152,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           witnesser
         }
       );
-
-      if (inputResolver) {
-        inputResolver.setContext(sharedWallet);
-      }
 
       // Caches current wallet providers.
       providers = { ...providers, inputResolver: { resolveInput: sharedWallet.util.resolveInput } };
@@ -212,7 +187,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       {
         logger,
         ...providers,
-        inputResolver,
         stores,
         handleProvider: supportsHandleResolver
           ? handleHttpProvider({
@@ -225,10 +199,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         bip32Account
       }
     );
-
-    if (inputResolver) {
-      inputResolver.setContext(personalWallet);
-    }
 
     // Caches current wallet providers.
     providers = { ...providers, inputResolver: { resolveInput: personalWallet.util.resolveInput } };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
-import { WalletProvidersDependencies } from '@src/wallet';
+import { BlockfrostInputResolver, WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
 import { Logger } from 'ts-log';
 import {
@@ -78,7 +78,7 @@ export type RateLimiterConfig = {
   increaseAmount: number;
 };
 
-export interface ProvidersConfig {
+interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
   env: {
     baseCardanoServicesUrl: string;
@@ -96,6 +96,7 @@ export interface ProvidersConfig {
     useBlockfrostTxSubmitProvider?: boolean;
     useBlockfrostUtxoProvider?: boolean;
     useBlockfrostAddressDiscovery?: boolean;
+    useBlockfrostInputResolver?: boolean;
   };
 }
 
@@ -118,6 +119,7 @@ export const createProviders = ({
     useBlockfrostUtxoProvider,
     useDrepProviderOverrideActiveStatus,
     useBlockfrostAddressDiscovery,
+    useBlockfrostInputResolver,
     useWebSocket
   }
 }: ProvidersConfig): WalletProvidersDependencies => {
@@ -149,6 +151,8 @@ export const createProviders = ({
   const addressDiscovery = useBlockfrostAddressDiscovery
     ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
     : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
+
+  const inputResolver = useBlockfrostInputResolver ? new BlockfrostInputResolver(blockfrostClient, logger) : undefined;
 
   // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
   const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
@@ -200,6 +204,7 @@ export const createProviders = ({
       rewardsProvider,
       wsProvider,
       addressDiscovery,
+      inputResolver,
       drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
     };
   }
@@ -217,6 +222,7 @@ export const createProviders = ({
     chainHistoryProvider,
     rewardsProvider,
     addressDiscovery,
+    inputResolver,
     drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
   };
 };

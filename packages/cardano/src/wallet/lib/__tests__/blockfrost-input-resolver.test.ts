@@ -3,9 +3,6 @@ import { BlockfrostInputResolver } from '../blockfrost-input-resolver';
 import { Cardano } from '@cardano-sdk/core';
 import { BlockfrostClient, BlockfrostError, BlockfrostToCore } from '@cardano-sdk/cardano-services-client';
 import { Logger } from 'ts-log';
-import { InputResolverContext } from '@cardano-sdk/wallet';
-import { of } from 'rxjs';
-import { WitnessedTx } from '@cardano-sdk/key-management';
 
 jest.mock('@cardano-sdk/cardano-services-client');
 
@@ -107,118 +104,5 @@ describe('BlockfrostInputResolver', () => {
       expect(error_).toBeInstanceOf(BlockfrostError);
       expect(error_.status).toEqual(500);
     }
-  });
-
-  describe('context resolution', () => {
-    let contextMock: InputResolverContext;
-
-    beforeEach(() => {
-      contextMock = {
-        transactions: {
-          history$: of([]),
-          outgoing: {
-            signed$: of([])
-          }
-        },
-        utxo: {
-          available$: of([])
-        }
-      };
-
-      resolver.setContext(contextMock);
-    });
-
-    it('should resolve input from context.utxo.available$ if present', async () => {
-      const targetTxIn: Cardano.HydratedTxIn = {
-        address: 'addr...' as Cardano.PaymentAddress,
-        txId: 'ctxTxId' as Cardano.TransactionId,
-        index: 1
-      };
-      const targetTxOut: Cardano.TxOut = {
-        address: 'ctxAddr' as Cardano.PaymentAddress,
-        value: { coins: BigInt(999) }
-      };
-
-      contextMock.utxo.available$ = of([
-        [targetTxIn, targetTxOut],
-        [
-          { address: 'addr...' as Cardano.PaymentAddress, txId: 'otherTxId' as Cardano.TransactionId, index: 0 },
-          { address: 'otherAddr' as Cardano.PaymentAddress, value: { coins: BigInt(123) } }
-        ]
-      ]);
-
-      const result = await resolver.resolveInput(targetTxIn);
-      expect(result).toEqual(targetTxOut);
-      expect(clientMock.request).not.toHaveBeenCalled();
-    });
-
-    it('should resolve input from context.transactions.outgoing.signed$ if present', async () => {
-      const targetTxIn: Cardano.TxIn = { txId: 'signedTxId' as Cardano.TransactionId, index: 0 };
-      const targetTxOut: Cardano.TxOut = {
-        address: 'signedTxAddr' as Cardano.PaymentAddress,
-        value: { coins: BigInt(1234) }
-      };
-
-      const witnessedTx: WitnessedTx = {
-        tx: {
-          id: 'signedTxId' as Cardano.TransactionId,
-          body: {
-            inputs: [],
-            outputs: [targetTxOut]
-          } as unknown as Cardano.TxBody
-        } as unknown as Cardano.Tx
-      } as unknown as WitnessedTx;
-
-      contextMock.transactions.outgoing.signed$ = of([witnessedTx]);
-
-      const result = await resolver.resolveInput(targetTxIn);
-      expect(result).toEqual(targetTxOut);
-      expect(clientMock.request).not.toHaveBeenCalled();
-    });
-
-    it('should resolve input from context.transactions.history$ if present', async () => {
-      const targetTxIn: Cardano.TxIn = { txId: 'historyTxId' as Cardano.TransactionId, index: 1 };
-      const targetTxOut: Cardano.TxOut = {
-        address: 'historyTxAddr' as Cardano.PaymentAddress,
-        value: { coins: BigInt(777) }
-      };
-
-      contextMock.transactions.history$ = of([
-        {
-          id: 'historyTxId' as Cardano.TransactionId,
-          body: {
-            inputs: [],
-            outputs: [
-              { address: 'addr...' as Cardano.PaymentAddress, value: { coins: BigInt(0) } },
-              targetTxOut
-            ] as Cardano.TxOut[]
-          } as unknown as Cardano.TxBody
-        } as unknown as Cardano.HydratedTx
-      ]);
-
-      const result = await resolver.resolveInput(targetTxIn);
-      expect(result).toEqual(targetTxOut);
-      expect(clientMock.request).not.toHaveBeenCalled();
-    });
-
-    it('should fallback to Blockfrost if not found in context', async () => {
-      const txIn: Cardano.TxIn = { txId: 'fallbackTxId' as Cardano.TransactionId, index: 0 };
-      const responseMock = {
-        outputs: [{ output_index: 0, address: 'fetchedAddr', amount: [{ unit: 'lovelace', quantity: '3000' }] }]
-      };
-      clientMock.request.mockResolvedValue(responseMock);
-
-      jest.spyOn(BlockfrostToCore, 'txOut').mockReturnValue({
-        address: 'fetchedAddr' as Cardano.PaymentAddress,
-        value: { coins: BigInt(3000) }
-      } as Cardano.TxOut);
-
-      const result = await resolver.resolveInput(txIn);
-      expect(result).toEqual({
-        address: 'fetchedAddr',
-        value: { coins: BigInt(3000) }
-      });
-      expect(clientMock.request).toHaveBeenCalledWith('txs/fallbackTxId/utxos');
-    });
   });
 });
