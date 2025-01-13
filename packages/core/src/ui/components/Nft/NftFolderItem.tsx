@@ -23,6 +23,11 @@ export type NftFolderItemProps = {
   contextMenuItems?: Array<{ label: string; onClick: () => void }>;
 };
 
+export interface NftListProps {
+  items: Array<NftItemProps | NftFolderItemProps | PlaceholderItem>;
+  rows?: number;
+}
+
 const numberOfNftsToShow = 4;
 const maxRestOfNftsNumber = 9999;
 
@@ -52,10 +57,12 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const { pageX, pageY } = e;
+    const { pageX, pageY, currentTarget } = e;
+    const { x, y } = currentTarget.getBoundingClientRect();
+
     return pageX < window.innerWidth - contextMenuWidth
-      ? setContextMenu({ show: true, x: pageX, y: pageY })
-      : setContextMenu({ show: true, x: pageX - contextMenuWidth, y: pageY });
+      ? setContextMenu({ show: true, x: pageX - x, y: pageY - y })
+      : setContextMenu({ show: true, x: pageX - x - contextMenuWidth, y: pageY - y });
   };
 
   return (

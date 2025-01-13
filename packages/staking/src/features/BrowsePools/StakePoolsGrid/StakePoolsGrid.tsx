@@ -54,14 +54,14 @@ export const StakePoolsGrid = ({
       3: matchThreeColumnsLayout,
       4: matchFourColumnsLayout,
     }),
-    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout],
+    [matchFourColumnsLayout, matchThreeColumnsLayout, matchTwoColumnsLayout]
   );
 
   const updateNumberOfItemsInRow = useCallback(() => {
     if (!ref?.current) return;
 
     const result = Number(
-      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0],
+      Object.entries(numberOfItemsPerMediaQueryMap).find(([, matches]) => matches)?.[0]
     ) as StakePoolsGridColumnCount;
 
     setNumberOfItemsPerRow(result);
@@ -74,12 +74,12 @@ export const StakePoolsGrid = ({
         setContainerWidth(size.width);
       }
     },
-    [containerWidth, updateNumberOfItemsInRow],
+    [containerWidth, updateNumberOfItemsInRow]
   );
 
   const onResize = useMemo(
     () => debounce(setContainerWidthCb, DEFAULT_DEBOUNCE, { leading: true }),
-    [setContainerWidthCb],
+    [setContainerWidthCb]
   );
 
   const columnCount = numberOfItemsPerRow || 3;
@@ -108,7 +108,7 @@ export const StakePoolsGrid = ({
   const itemContent = useCallback(
     (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
       data ? <StakePoolsGridItem {...data} /> : <StakePoolCardSkeleton fadeScale={columnCount} index={index} />,
-    [columnCount],
+    [columnCount]
   );
 
   const cardsPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
