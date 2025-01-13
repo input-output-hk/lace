@@ -25,7 +25,10 @@ export const searchItems = (
   data.filter((item) => {
     if (item.type === NftsItemsTypes.PLACEHOLDER) return true;
     if (item.type === NftsItemsTypes.NFT) return searchNft(item, searchValue, assetsInfo);
-    return item.nfts.some((nft) => searchNft(nft, searchValue, assetsInfo));
+    return (
+      item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+      item.nfts.some((nft) => searchNft(nft, searchValue, assetsInfo))
+    );
   });
 
 export const useNftSearch = (assetsInfo: AssetOrHandleInfoMap): NftSearchResultProps => {
