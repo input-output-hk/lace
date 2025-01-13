@@ -58,6 +58,7 @@ export const Drawer = ({
       {navigation}
       <div className={styles.content} data-testid="drawer-content">
         <div
+          id="drawer-scrollable-content"
           data-testid="drawer-scrollable-content"
           ref={scrollableContainerRef}
           className={cn(styles.scrollableContent, {

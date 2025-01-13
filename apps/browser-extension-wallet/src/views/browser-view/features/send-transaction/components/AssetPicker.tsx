@@ -27,7 +27,7 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
-import { useObservable } from '@lace/common';
+import { useObservable, VirtualisedGridColumns } from '@lace/common';
 
 const formatAssetPickerLists = (
   assetsInfo: AssetOrHandleInfoMap = new Map(),
@@ -83,7 +83,7 @@ const formatAssetPickerLists = (
   return { tokenList: tokens, nftList: nfts };
 };
 
-const nftsPerRow = {
+const nftsPerRow: Record<'popupView' | 'browserView', VirtualisedGridColumns> = {
   popupView: 2,
   browserView: 3
 };
