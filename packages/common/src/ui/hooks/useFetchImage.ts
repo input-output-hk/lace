@@ -35,6 +35,12 @@ const fetchImage = async (url: string, controller: AbortController) => {
   if (!response.ok) throw new Error('Image fetch failed');
 
   const blob = await response.blob();
+
+  const contentLength = response.headers.get('content-length');
+  if (contentLength && blob.size !== Number.parseInt(contentLength, 10)) {
+    throw new Error('Incomplete blob size');
+  }
+
   return URL.createObjectURL(blob);
 };
 
@@ -46,7 +52,7 @@ const isImageLoading = (imageUrl: string): Promise<boolean> =>
     img.src = imageUrl;
   });
 
-export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackImage: string }) => {
+export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackImage: string }): UseFetchImageState => {
   const [state, setState] = useState<UseFetchImageState>({ status: 'loading' });
 
   useEffect(() => {
