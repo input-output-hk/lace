@@ -83,7 +83,7 @@ export const mockWalletState: ObservableWalletState = {
               value: { assets: new Map(), coins: BigInt(200) }
             }
           ],
-          fee: '100000'
+          fee: BigInt(100_000)
         }
       } as unknown as Wallet.Cardano.HydratedTx
     ],
@@ -142,8 +142,7 @@ export const mockWalletUI = {
 
 export const getSendStoreContext =
   (): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) =>
-    <SendStoreProvider>{children}</SendStoreProvider>;
+  ({ children }: { children?: React.ReactNode }) => <SendStoreProvider>{children}</SendStoreProvider>;
 
 export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
