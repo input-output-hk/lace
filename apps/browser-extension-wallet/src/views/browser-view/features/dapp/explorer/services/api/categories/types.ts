@@ -1,5 +1,3 @@
-import { IDApp } from '../d-app/types';
-
 interface ISubcategory {
   id: number;
   name: string;
@@ -108,6 +106,5 @@ export interface ICategory {
   updatedAt?: Date;
   position?: number;
   subcategories?: ISubcategory[];
-  dApps?: IDApp[];
   value?: string;
 }

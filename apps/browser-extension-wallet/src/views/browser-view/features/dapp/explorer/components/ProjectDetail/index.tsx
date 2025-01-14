@@ -37,9 +37,12 @@ const ProjectDetail: React.FC = () => {
     { label: t('dappdiscovery.side_panel.contact'), key: '2', children: <Contact /> }
   ];
 
+  // eslint-disable-next-line unicorn/no-null
+  if (!open || !data) return null;
+
   return (
     <Drawer
-      open={open}
+      open
       onClose={handleClose}
       navigation={
         <DrawerNavigation onCloseIconClick={handleClose} title={t('dappdiscovery.side_panel.about_this_dapp')} />
@@ -74,7 +77,7 @@ const ProjectDetail: React.FC = () => {
                 {data?.title}
               </Text.Body.Normal>
               <Text.Body.Small color="secondary" weight="$semibold">
-                {data?.category}
+                {data.categories.join(', ')}
               </Text.Body.Small>
             </Flex>
           </div>

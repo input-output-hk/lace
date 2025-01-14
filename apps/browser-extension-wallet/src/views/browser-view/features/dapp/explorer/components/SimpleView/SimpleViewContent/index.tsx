@@ -42,13 +42,11 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
 
   const renderCards = (dappsToRender: ISectionCardItem[]) =>
     dappsToRender.map((dapp, index) => (
-      <div key={`card-${dapp.subject}-${index}`} className="card-container">
+      <div key={`card-${dapp.id}-${index}`} className="card-container">
         <IogCardClassic
           {...dapp}
-          description={dapp.shortDescription}
-          categories={[dapp.category, dapp.subcategory].filter(Boolean)}
+          categories={dapp.categories}
           image={dapp.image}
-          isCertified={dapp.isCertified}
           onClick={() => handleOpenDrawer(dapp)}
           title={dapp.title}
         />
