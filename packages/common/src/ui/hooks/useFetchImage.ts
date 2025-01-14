@@ -10,8 +10,9 @@ type ImageFetchStateMap = {
 
 export type UseFetchImageState = ImageFetchStateMap[ImageFetchStatus];
 
-// Blockfrost IPFS allows up to 100 concurrent requests, but we limit it to 80 for now
-const maxConcurrentBlockfrostRequests = 80;
+const BLOCKFROST_IPFS_URL = process.env.BLOCKFROST_IPFS_URL || '';
+
+const maxConcurrentBlockfrostRequests = Number.parseInt(process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS || '0', 10);
 let concurrentBlockfrostRequestsCount = 0;
 
 const blockfrostRequestQueue: Set<() => Promise<void>> = new Set();
@@ -44,11 +45,11 @@ const fetchImage = async (url: string, controller: AbortController) => {
   return URL.createObjectURL(blob);
 };
 
-const isImageLoading = (imageUrl: string): Promise<boolean> =>
-  new Promise((resolve) => {
+const isImageLoading = (imageUrl: string): Promise<void> =>
+  new Promise((resolve, reject) => {
     const img = new Image();
-    img.addEventListener('load', () => resolve(true));
-    img.addEventListener('error', () => resolve(false));
+    img.addEventListener('load', () => resolve());
+    img.addEventListener('error', () => reject());
     img.src = imageUrl;
   });
 
@@ -56,15 +57,14 @@ export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackIma
   const [state, setState] = useState<UseFetchImageState>({ status: 'loading' });
 
   useEffect(() => {
-    if (url.startsWith('data:image/') || !url.startsWith('https://ipfs.blockfrost.dev')) {
-      // eslint-disable-next-line promise/catch-or-return
-      isImageLoading(url).then((isValid) => {
-        if (isValid) {
+    if (url.startsWith('data:image/') || !url.startsWith(BLOCKFROST_IPFS_URL)) {
+      isImageLoading(url)
+        .then(() => {
           setState({ status: 'loaded', imageSrc: url });
-        } else {
+        })
+        .catch(() => {
           setState({ status: 'error', imageSrc: fallbackImage });
-        }
-      });
+        });
 
       return () => void 0;
     }
