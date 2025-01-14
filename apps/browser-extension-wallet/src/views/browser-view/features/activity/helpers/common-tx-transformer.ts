@@ -187,7 +187,7 @@ export const txTransformer = async ({
     })
   });
 
-  // TODO: investigate why in-flight transactions do not have a `witness` property
+  // TODO: LW-8767 investigate why in-flight transactions do not have a `witness` property and add it
   const { summary } = await txSummaryInspector({ witness: undefined, ...transaction });
 
   const deposit = summary.deposit ? Wallet.util.lovelacesToAdaString(summary.deposit.toString()) : undefined;
