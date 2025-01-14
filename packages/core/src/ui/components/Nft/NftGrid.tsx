@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { GridProps, VirtualisedGrid } from '@lace/common';
 import React, { useCallback } from 'react';
 import {

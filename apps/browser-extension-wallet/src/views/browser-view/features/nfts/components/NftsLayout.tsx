@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable unicorn/no-useless-undefined */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import cn from 'classnames';
@@ -118,7 +117,6 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     [analytics]
   );
 
-  // eslint-disable-next-line unicorn/no-useless-undefined
   const closeNftDetails = () => setSelectedNft(undefined);
   const nfts: NftItemProps[] = useMemo(() => {
     const { nftList } = getTokenList({
