@@ -2,6 +2,7 @@ process.env.CARDANO_SERVICES_URL_PREVIEW = 'https://preview-prod.com';
 process.env.CARDANO_SERVICES_URL_PREPROD = 'https://preprod-prod.com';
 process.env.CARDANO_SERVICES_URL_MAINNET = 'https://mainnet-url.com';
 process.env.CARDANO_SERVICES_URL_SANCHONET = 'https://sanchonet-url.com';
+process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS = '100';
 process.env.BLOCKFROST_IPFS_URL = 'https://ipfs.blockfrost.dev';
 process.env.BLOCKFROST_URL_MAINNET = 'https://cardano-mainnet.blockfrost.io';
 process.env.BLOCKFROST_URL_PREPROD = 'https://cardano-preprod.blockfrost.io';
