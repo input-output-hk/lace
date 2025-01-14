@@ -6,10 +6,15 @@ import { backendFailures$, requestMessage$ } from './services';
 const INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
 const GATEWAY_TIMEOUT_STATUS_CODE = 503;
 const UNAUTHORIZED_STATUS_CODE = 401;
+const NOT_FOUND_STATUS_CODE = 404;
 
 const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => {
   if (data?.type === 'xmlhttprequest' && runtime.getURL('').startsWith(data.initiator)) {
-    if (data.statusCode > UNAUTHORIZED_STATUS_CODE && data.statusCode < GATEWAY_TIMEOUT_STATUS_CODE) {
+    const statusCodeQualifiedAsFailure =
+      data.statusCode !== NOT_FOUND_STATUS_CODE &&
+      data.statusCode > UNAUTHORIZED_STATUS_CODE &&
+      data.statusCode < GATEWAY_TIMEOUT_STATUS_CODE;
+    if (statusCodeQualifiedAsFailure) {
       // A backend service request has failed, increment the failed requests count
       backendFailures$.next(backendFailures$.value + 1);
     } else {
