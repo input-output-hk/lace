@@ -77,6 +77,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
           edgeSwipeThreshold={20}
           slidesPerGroup={3}
           speed={650}
+          mousewheel
           navigation={{
             prevEl: '.swiper-filters-prev',
             nextEl: '.swiper-filters-next'

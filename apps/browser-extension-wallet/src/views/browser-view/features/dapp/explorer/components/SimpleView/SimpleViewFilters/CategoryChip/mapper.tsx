@@ -43,5 +43,5 @@ export const mapCategory = (category: string): React.ReactNode => {
     }
   })();
 
-  return <Icon component={icon} />;
+  return icon && <Icon component={icon} />;
 };

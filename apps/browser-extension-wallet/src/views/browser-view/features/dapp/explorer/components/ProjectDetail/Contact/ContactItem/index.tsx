@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { IIcon } from '../../../../components/Icon/types';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 interface ContactItemType {
   itemIcon: React.ReactElement<IIcon>;
@@ -12,11 +13,13 @@ export const ContactItem: React.FC<ContactItemType> = ({ itemIcon, itemTitle, it
     <span className="iog-contact-item-icon" data-testid="contact-icon">
       {itemIcon}
     </span>
-    <span className="iog-contact-item-title" data-testid="contact-name">
-      {itemTitle}
-    </span>
-    <span className="iog-contact-item-data" data-testid="contact-data">
-      {itemData}
-    </span>
+    <Flex flexDirection="column">
+      <span className="iog-contact-item-title" data-testid="contact-name">
+        {itemTitle}
+      </span>
+      <span className="iog-contact-item-data" data-testid="contact-data">
+        {itemData}
+      </span>
+    </Flex>
   </div>
 );

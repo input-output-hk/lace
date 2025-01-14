@@ -28,6 +28,7 @@
   .ant-tabs-tab {
     font-size: toRem(16);
     line-height: toRem(24);
+    font-weight: 400;
 
     .ant-tabs-tab-btn {
       color: var(--light-mode-mid-grey, var(--dark-mode-light-grey)) !important;
