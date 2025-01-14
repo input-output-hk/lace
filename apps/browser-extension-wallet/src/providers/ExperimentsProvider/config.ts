@@ -13,6 +13,7 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER]: false,
   [ExperimentName.BLOCKFROST_UTXO_PROVIDER]: false,
   [ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY]: false,
+  [ExperimentName.BLOCKFROST_INPUT_RESOLVER]: false,
   [ExperimentName.EXTENSION_STORAGE]: false,
   [ExperimentName.USE_DREP_PROVIDER_OVERRIDE]: false,
   [ExperimentName.DAPP_EXPLORER]: false
@@ -64,6 +65,10 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY]: {
+    value: false,
+    default: false
+  },
+  [ExperimentName.BLOCKFROST_INPUT_RESOLVER]: {
     value: false,
     default: false
   },

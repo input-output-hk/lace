@@ -36,26 +36,58 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
   /**
    * Resolves a transaction input (`Cardano.TxIn`) to its corresponding output (`Cardano.TxOut`).
    *
-   * @param txIn - The transaction input to resolve, including its transaction ID and index.
+   * @param input - The transaction input to resolve, including its transaction ID and index.
    * @param options - Optional resolution options (I.E hints for faster lookup).
    * @returns A promise that resolves to the corresponding `Cardano.TxOut` if found, or `null` if not.
    */
-  public async resolveInput(txIn: Cardano.TxIn, options?: Cardano.ResolveOptions): Promise<Cardano.TxOut | null> {
-    this.#logger.debug(`Resolving input ${txIn.txId}#${txIn.index}`);
+  /* eslint-disable sonarjs/cognitive-complexity */
+  public async resolveInput(input: Cardano.TxIn, options?: Cardano.ResolveOptions): Promise<Cardano.TxOut | null> {
+    this.#logger.debug(`Resolving input ${input.txId}#${input.index}`);
 
+    if (this.#txCache.has(txInToId(input))) {
+      this.#logger.debug(`Resolved input ${input.txId}#${input.index} from cache`);
+      return this.#txCache.get(txInToId(input))!;
+    }
+
+    const resolved = this.resolveFromHints(input, options);
+    if (resolved) return resolved;
+
+    const out = await this.fetchAndCacheTxOut(input);
+    if (!out) return null;
+
+    return out;
+  }
+
+  /**
+   * Attempts to resolve the provided input from the hints provided in the resolution options.
+   * @param input - The transaction input to resolve.
+   * @param options - The resolution options containing hints.
+   * @private
+   */
+  private resolveFromHints(input: Cardano.TxIn, options?: Cardano.ResolveOptions): Cardano.TxOut | null {
     if (options?.hints.transactions) {
       for (const hint of options.hints.transactions) {
-        if (txIn.txId === hint.id && hint.body.outputs.length > txIn.index) {
-          this.#logger.debug(`Resolved input ${txIn.txId}#${txIn.index} from hint`);
-          return hint.body.outputs[txIn.index];
+        if (input.txId === hint.id && hint.body.outputs.length > input.index) {
+          this.#logger.debug(`Resolved input ${input.txId}#${input.index} from hint`);
+          this.#txCache.set(txInToId(input), hint.body.outputs[input.index]);
+
+          return hint.body.outputs[input.index];
         }
       }
     }
 
-    const out = await this.fetchAndCacheTxOut(txIn);
-    if (!out) return null;
+    if (options?.hints.utxos) {
+      for (const utxo of options.hints.utxos) {
+        if (input.txId === utxo[0].txId && input.index === utxo[0].index) {
+          this.#logger.debug(`Resolved input ${input.txId}#${input.index} from hint`);
+          this.#txCache.set(txInToId(input), utxo[1]);
 
-    return out;
+          return utxo[1];
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -66,13 +98,6 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
    * @returns A promise that resolves to the corresponding `Cardano.TxOut` if found, or `null` if not.
    */
   private async fetchAndCacheTxOut(txIn: Cardano.TxIn): Promise<Cardano.TxOut | null> {
-    const id = txInToId(txIn);
-
-    if (this.#txCache.has(id)) {
-      this.#logger.debug(`Resolved input ${txIn.txId}#${txIn.index} from cache`);
-      return this.#txCache.get(id)!;
-    }
-
     let response;
 
     try {
@@ -94,7 +119,7 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
 
       const coreTxOut = BlockfrostToCore.txOut(blockfrostUTxO);
 
-      this.#txCache.set(id, coreTxOut);
+      this.#txCache.set(txInToId(txIn), coreTxOut);
 
       this.#logger.debug(`Resolved input ${txIn.txId}#${txIn.index} from Blockfrost`);
       return coreTxOut;

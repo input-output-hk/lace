@@ -49,6 +49,7 @@ export interface IBlockchainProvider {
   utxoProvider: Wallet.UtxoProvider;
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   rewardsProvider: Wallet.RewardsProvider;
+  inputResolver: Wallet.Cardano.InputResolver;
 }
 
 export type OutsideHandlesContextValue = {

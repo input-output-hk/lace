@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
+import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import {
   useBackgroundServiceAPIContext,
   useCurrencyStore,
@@ -31,7 +32,7 @@ import { useDelegationTransaction, useRewardAccountsData } from '../browser-view
 import { useSecrets } from '@lace/core';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
-import { getPoolInfos } from '@src/stores/slices';
+import { getPoolInfos, getProviders } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { PostHogAction, useObservable } from '@lace/common';
@@ -43,7 +44,6 @@ import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { BackgroundStorage } from '@lib/scripts/types';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { useNetworkError } from '@hooks/useNetworkError';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { walletRoutePaths } from '@routes';
 import { StakingErrorType } from '@views/browser/features/staking/types';
 
@@ -184,6 +184,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   }, [analytics, deleteWallet, setDeletingWallet, walletRepository]);
 
   const { lockedStakeRewards } = useRewardAccountsData();
+  const { inputResolver } = getProviders();
 
   const redirectToStaking = useRedirection(walletRoutePaths.earn);
 
@@ -219,6 +220,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         availableChains: AVAILABLE_CHAINS,
         enableCustomNode,
         getCustomSubmitApiForNetwork,
+        createHistoricalOwnInputResolver,
         defaultSubmitApi: DEFAULT_SUBMIT_API,
         isValidURL,
         buildDelegation,
@@ -248,9 +250,9 @@ export const NamiView = withDappContext((): React.ReactElement => {
         chainHistoryProvider,
         protocolParameters: walletState?.protocolParameters,
         assetInfo: walletState?.assetInfo,
-        createHistoricalOwnInputResolver,
         lockedStakeRewards,
         redirectToStaking,
+        inputResolver,
         govToolsUrl: GOV_TOOLS_URLS[environmentName]
       }}
     >

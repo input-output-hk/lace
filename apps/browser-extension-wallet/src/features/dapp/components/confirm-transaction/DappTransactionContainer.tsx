@@ -28,7 +28,6 @@ import { Skeleton } from 'antd';
 import { useCurrencyStore } from '@providers';
 import { logger, walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
-import { utxoAndBackendChainHistoryResolver } from '@src/utils/utxo-chain-history-resolver';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { AddressBookSchema, useDbStateValue } from '@lib/storage';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
@@ -80,17 +79,7 @@ export const DappTransactionContainer = withAddressBookContext(
       TransactionSummaryInspection | undefined
     >();
 
-    const { chainHistoryProvider } = getProviders();
-
-    const txInputResolver = useMemo(
-      () =>
-        utxoAndBackendChainHistoryResolver({
-          utxo: inMemoryWallet.utxo,
-          transactions: inMemoryWallet.transactions,
-          chainHistoryProvider
-        }),
-      [inMemoryWallet, chainHistoryProvider]
-    );
+    const { inputResolver } = getProviders();
 
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
 
@@ -105,7 +94,7 @@ export const DappTransactionContainer = withAddressBookContext(
       return () => subscription?.unsubscribe();
     }, [inMemoryWallet?.governance?.isRegisteredAsDRep$, userAckNonRegisteredState, tx]);
 
-    const txCollateral = useComputeTxCollateral(walletState, tx);
+    const txCollateral = useComputeTxCollateral(inputResolver, walletState, tx);
 
     const userAddresses = useMemo(() => walletInfo.addresses.map((v) => v.address), [walletInfo.addresses]);
     const userRewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -122,7 +111,7 @@ export const DappTransactionContainer = withAddressBookContext(
       const getTxSummary = async () => {
         const inspector = createTxInspector({
           tokenTransfer: tokenTransferInspector({
-            inputResolver: txInputResolver,
+            inputResolver,
             fromAddressAssetProvider: createWalletAssetProvider({
               assetProvider,
               assetInfo$: inMemoryWallet.assetInfo$,
@@ -140,7 +129,7 @@ export const DappTransactionContainer = withAddressBookContext(
           summary: transactionSummaryInspector({
             addresses: userAddresses,
             rewardAccounts: rewardAccountsAddresses,
-            inputResolver: txInputResolver,
+            inputResolver,
             protocolParameters,
             assetProvider: createWalletAssetProvider({
               assetProvider,
@@ -166,7 +155,7 @@ export const DappTransactionContainer = withAddressBookContext(
       walletInfo.addresses,
       userAddresses,
       rewardAccountsAddresses,
-      txInputResolver,
+      inputResolver,
       protocolParameters,
       assetProvider,
       inMemoryWallet.assetInfo$,

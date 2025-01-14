@@ -105,12 +105,10 @@ export const walletRepository = new WalletRepository({
 const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
 
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+  // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    const providers = await getProviders(chainName);
-
-    // Caches current wallet providers.
-    currentWalletProviders$.next(providers);
+    let providers = await getProviders(chainName);
 
     const baseUrl = getBaseUrlForChain(chainName);
 
@@ -130,11 +128,13 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       });
     }
 
+    const featureFlags = await getFeatureFlags(chainId.networkMagic);
+
     if (wallet.type === WalletType.Script) {
       const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
       const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
 
-      return createSharedWallet(
+      const sharedWallet = createSharedWallet(
         { name: wallet.metadata.name },
         {
           ...providers,
@@ -152,6 +152,12 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           witnesser
         }
       );
+
+      // Caches current wallet providers.
+      providers = { ...providers, inputResolver: { resolveInput: sharedWallet.util.resolveInput } };
+      currentWalletProviders$.next(providers);
+
+      return sharedWallet;
     }
 
     const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
@@ -164,14 +170,13 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
-    const featureFlags = await getFeatureFlags(chainId.networkMagic);
     const useWebSocket = isExperimentEnabled(featureFlags, ExperimentName.WEBSOCKET_API);
     const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))
       ? // eslint-disable-next-line no-magic-numbers
         Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
       : DEFAULT_POLLING_CONFIG.pollInterval;
 
-    return createPersonalWallet(
+    const personalWallet = createPersonalWallet(
       {
         name: walletAccount.metadata.name,
         polling: {
@@ -194,6 +199,12 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         bip32Account
       }
     );
+
+    // Caches current wallet providers.
+    providers = { ...providers, inputResolver: { resolveInput: personalWallet.util.resolveInput } };
+    currentWalletProviders$.next(providers);
+
+    return personalWallet;
   }
 };
 
