@@ -10,7 +10,8 @@ import {
   TxSubmitProvider,
   util as coreUtil,
   UtxoProvider,
-  DRepProvider
+  DRepProvider,
+  RewardAccountInfoProvider
 } from '@cardano-sdk/core';
 import {
   ObservableWallet,
@@ -68,6 +69,7 @@ export interface WalletProvidersDependencies {
   txSubmitProvider: TxSubmitProvider;
   networkInfoProvider: NetworkInfoProvider;
   utxoProvider: UtxoProvider;
+  rewardAccountInfoProvider: RewardAccountInfoProvider;
   rewardsProvider: RewardsProvider;
   chainHistoryProvider: ChainHistoryProvider;
   wsProvider?: WsProvider;

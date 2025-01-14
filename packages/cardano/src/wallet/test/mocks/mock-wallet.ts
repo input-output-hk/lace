@@ -1,6 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { Cardano } from '@cardano-sdk/core';
-import { createStubStakePoolProvider } from '@cardano-sdk/util-dev';
+import { Cardano, RewardAccountInfoProvider } from '@cardano-sdk/core';
 import { ObservableWallet, BaseWallet, createPersonalWallet, storage } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { assetsProviderStub } from './AssetsProviderStub';
@@ -11,7 +10,6 @@ import { TxSubmitProviderFake } from '@wallet/test/mocks/TxSubmitProviderFake';
 import { utxoProviderStub } from './UtxoProviderStub';
 import { chainHistoryProviderStub } from './ChainHistoryProviderStub';
 import { rewardsHistoryProviderStub } from './RewardsProviderStub';
-import { dRepProviderStub } from './DRepProviderStub';
 import { of } from 'rxjs';
 
 const logger = console;
@@ -32,10 +30,13 @@ interface MockWallet {
   keyAgent: KeyManagement.InMemoryKeyAgent;
 }
 
+export const rewardAccountInfoProviderStub = (): RewardAccountInfoProvider => {
+  throw new Error('TODO: not implemented');
+};
+
 export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent): Promise<MockWallet> => {
   const keyAgent = customKeyAgent ?? (await testKeyAgent());
   const assetProvider = assetsProviderStub();
-  const stakePoolProvider = createStubStakePoolProvider();
   const networkInfoProvider = networkInfoProviderStub();
   keyAgent.deriveAddress = jest.fn().mockResolvedValue({
     address,
@@ -44,20 +45,20 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
   const utxoProvider = utxoProviderStub();
   const chainHistoryProvider = chainHistoryProviderStub();
   const rewardsProvider = rewardsHistoryProviderStub();
-  const drepProvider = dRepProviderStub();
+  // eslint-disable-next-line sonarjs/no-use-of-empty-return-value
+  const rewardAccountInfoProvider = rewardAccountInfoProviderStub();
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   const wallet = createPersonalWallet(
     { name },
     {
       assetProvider,
-      stakePoolProvider,
       networkInfoProvider,
       stores: storage.createInMemoryWalletStores(),
       txSubmitProvider: TxSubmitProviderFake.make(),
       rewardsProvider,
       chainHistoryProvider,
       utxoProvider,
-      drepProvider,
+      rewardAccountInfoProvider,
       logger,
       witnesser: KeyManagement.util.createBip32Ed25519Witnesser(asyncKeyAgent),
       bip32Account: new KeyManagement.Bip32Account(keyAgent)

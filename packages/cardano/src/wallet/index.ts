@@ -14,6 +14,7 @@ export {
   UtxoProvider,
   ChainHistoryProvider,
   NetworkInfoProvider,
+  RewardAccountInfoProvider,
   SupplySummary,
   StakeSummary,
   SortField,

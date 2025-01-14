@@ -117,6 +117,7 @@ export const mockInMemoryWallet = {
   transactions: {
     rollback$: EMPTY,
     history$: of(mockWalletState.transactions.history),
+    new$: EMPTY,
     outgoing: {
       submitting$: EMPTY,
       inFlight$: of([]),
@@ -142,8 +143,7 @@ export const mockWalletUI = {
 
 export const getSendStoreContext =
   (): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) =>
-    <SendStoreProvider>{children}</SendStoreProvider>;
+  ({ children }: { children?: React.ReactNode }) => <SendStoreProvider>{children}</SendStoreProvider>;
 
 export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],

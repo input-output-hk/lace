@@ -9,6 +9,7 @@ import {
   Milliseconds,
   NetworkInfoProvider,
   Provider,
+  RewardAccountInfoProvider,
   RewardsProvider,
   StakePoolProvider,
   TxSubmitProvider,
@@ -36,7 +37,8 @@ import {
   BlockfrostUtxoProvider,
   BlockfrostRewardsProvider,
   BlockfrostTxSubmitProvider,
-  BlockfrostNetworkInfoProvider
+  BlockfrostNetworkInfoProvider,
+  BlockfrostRewardAccountInfoProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
@@ -69,6 +71,7 @@ export type AllProviders = {
   stakePoolProvider: StakePoolProvider;
   utxoProvider: UtxoProvider;
   chainHistoryProvider: ChainHistoryProvider;
+  rewardAccountInfoProvider: RewardAccountInfoProvider;
   rewardsProvider: RewardsProvider;
   drepProvider: DRepProvider;
 };
@@ -147,16 +150,23 @@ export const createProviders = ({
   const txSubmitProvider = useBlockfrostTxSubmitProvider
     ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
     : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
-  const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
+  const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
   const addressDiscovery = useBlockfrostAddressDiscovery
     ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
     : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
 
+  const rewardAccountInfoProvider = new BlockfrostRewardAccountInfoProvider({
+    client: blockfrostClient,
+    dRepProvider,
+    logger,
+    stakePoolProvider
+  });
+
   const inputResolver = useBlockfrostInputResolver ? new BlockfrostInputResolver(blockfrostClient, logger) : undefined;
 
   // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
-  const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
+  const drepProviderOverrideActiveStatus = new Proxy(dRepProvider, {
     get(target, property, receiver) {
       const original = Reflect.get(target, property, receiver);
       if (property === 'getDRepInfo') {
@@ -202,11 +212,12 @@ export const createProviders = ({
       stakePoolProvider,
       utxoProvider: wsProvider.utxoProvider,
       chainHistoryProvider: wsProvider.chainHistoryProvider,
+      rewardAccountInfoProvider,
       rewardsProvider,
       wsProvider,
       addressDiscovery,
       inputResolver,
-      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
+      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : dRepProvider
     };
   }
 
@@ -221,10 +232,11 @@ export const createProviders = ({
     stakePoolProvider,
     utxoProvider,
     chainHistoryProvider,
+    rewardAccountInfoProvider,
     rewardsProvider,
     addressDiscovery,
     inputResolver,
-    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
+    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : dRepProvider
   };
 };
 
@@ -256,6 +268,11 @@ export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDepen
   utxoProvider: {
     utxoByAddresses: RemoteApiPropertyType.MethodReturningPromise,
     healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  rewardAccountInfoProvider: {
+    delegationPortfolio: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise,
+    rewardAccountInfo: RemoteApiPropertyType.MethodReturningPromise
   },
   rewardsProvider: {
     rewardsHistory: RemoteApiPropertyType.MethodReturningPromise,
