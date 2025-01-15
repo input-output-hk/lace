@@ -27,6 +27,7 @@ import { DappSignDataSuccess } from '@src/features/dapp/components/DappSignDataS
 import { DappSignDataFail } from '@src/features/dapp/components/DappSignDataFail';
 import { Crash } from '@components/Crash';
 import { useFatalError } from '@hooks/useFatalError';
+import { POPUP_WINDOW } from '@src/utils/constants';
 
 dayjs.extend(duration);
 
@@ -57,6 +58,15 @@ export const DappConnectorView = (): React.ReactElement => {
     };
     load();
   }, [isWalletLocked, cardanoWallet]);
+
+  useEffect(() => {
+    // Windows is somehow not opening the popup with the right size. Dynamically changing it, fixes it for now:
+    if (navigator.userAgent.includes('Win')) {
+      const width = POPUP_WINDOW.width + (window.outerWidth - window.innerWidth);
+      const height = POPUP_WINDOW.height + (window.outerHeight - window.innerHeight);
+      window.resizeTo(width, height);
+    }
+  }, []);
 
   const isLoading = useMemo(() => hdDiscoveryStatus !== 'Idle', [hdDiscoveryStatus]);
   const fatalError = useFatalError();
