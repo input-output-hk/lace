@@ -41,11 +41,16 @@ Then(
     name: string,
     mode: 'extended' | 'popup'
   ) => {
-    const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
+    const fee = Number(String(testContext.load('feeValue')).split(' ')[0]);
+    const adaAllocationValue = typeOfAsset === 'NFT' ? 1.17 : 1.19;
+    const adaValue = transactionType === 'Sent' ? -(adaAllocationValue + fee) : adaAllocationValue;
+    const assetValue = transactionType === 'Received' ? 1 : -1;
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended' ? `${fee} ${Asset.CARDANO.ticker}, 1 ${name}` : `${fee} ${Asset.CARDANO.ticker} , +1`,
+        mode === 'extended'
+          ? `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker}, ${assetValue} ${name}`
+          : `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 2
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
