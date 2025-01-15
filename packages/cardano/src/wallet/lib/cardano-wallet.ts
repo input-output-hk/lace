@@ -73,6 +73,7 @@ export interface WalletProvidersDependencies {
   wsProvider?: WsProvider;
   drepProvider: DRepProvider;
   addressDiscovery?: AddressDiscovery;
+  inputResolver?: Cardano.InputResolver;
 }
 
 export interface CreatePersonalWallet {

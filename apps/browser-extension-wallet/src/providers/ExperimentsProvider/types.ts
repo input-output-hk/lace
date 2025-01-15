@@ -18,6 +18,7 @@ export enum ExperimentName {
   BLOCKFROST_TX_SUBMIT_PROVIDER = 'blockfrost-tx-submit-provider',
   BLOCKFROST_UTXO_PROVIDER = 'blockfrost-utxo-provider',
   BLOCKFROST_ADDRESS_DISCOVERY = 'blockfrost-address-discovery',
+  BLOCKFROST_INPUT_RESOLVER = 'blockfrost-input-resolver',
   EXTENSION_STORAGE = 'extension-storage',
   USE_DREP_PROVIDER_OVERRIDE = 'use-drep-provider-override',
   DAPP_EXPLORER = 'dapp-explorer'

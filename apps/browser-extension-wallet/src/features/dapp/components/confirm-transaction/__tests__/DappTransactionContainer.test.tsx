@@ -84,6 +84,9 @@ const inMemoryWallet = {
   protocolParameters$,
   governance: {
     isRegisteredAsDRep$: new BehaviorSubject(true)
+  },
+  util: {
+    resolveInput: jest.fn().mockResolvedValue(null)
   }
 };
 const REWARD_ACCOUNT = Cardano.RewardAccount('stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj');
@@ -129,7 +132,10 @@ const mockProviders = {
     transactionsByHashes: jest.fn().mockResolvedValue([]),
     blocksByHashes: jest.fn().mockResolvedValue([])
   },
-  assetProvider
+  assetProvider,
+  inputResolver: {
+    resolveInput: jest.fn().mockResolvedValue(null)
+  }
 };
 
 jest.mock('@stores/slices/blockchain-provider-slice', () => ({
