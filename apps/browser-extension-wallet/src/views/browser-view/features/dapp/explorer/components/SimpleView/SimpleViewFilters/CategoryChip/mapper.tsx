@@ -4,7 +4,7 @@ import Education from './assets/education.component.svg';
 import Games from './assets/game.component.svg';
 import Identity from './assets/identity.component.svg';
 import Marketplace from './assets/marketplace.component.svg';
-import Nft from './assets/nft.component.svg';
+import Collectibles from './assets/collectibles.component.svg';
 import Other from './assets/other.component.svg';
 import Security from './assets/security.component.svg';
 import ShowAll from './assets/all.component.svg';
@@ -29,8 +29,8 @@ export const mapCategory = (category: string): React.ReactNode => {
         return Identity;
       case Categories.Marketplace:
         return Marketplace;
-      case Categories.Nft:
-        return Nft;
+      case Categories.Collectibles:
+        return Collectibles;
       case Categories.Other:
         return Other;
       case Categories.Security:

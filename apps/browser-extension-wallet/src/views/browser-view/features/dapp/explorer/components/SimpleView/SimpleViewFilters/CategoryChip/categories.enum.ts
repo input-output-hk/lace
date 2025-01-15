@@ -5,8 +5,12 @@ export enum Categories {
   Games = 'GAMES',
   Identity = 'IDENTITY',
   Marketplace = 'MARKETPLACE',
-  Nft = 'NFT',
   Other = 'OTHER',
   Security = 'SECURITY',
+  Collectibles = 'COLLECTIBLES',
+  Marketplaces = 'MARKETPLACES',
+  HighRisk = 'HIGH-RISK',
+  Gambling = 'GAMBLING',
+  Exchanges = 'EXCHANGES',
   All = 'SHOW ALL'
 }
