@@ -209,6 +209,8 @@ jobs:
           SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_URL: ${{ secrets.DAPP_RADAR_API_URL }}
+          DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
   build:
     name: Build Lace
     runs-on: ubuntu-22.04
@@ -232,6 +234,8 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'smoke-tests'
           WALLET_POLLING_INTERVAL_IN_SEC: 5
+          DAPP_RADAR_API_URL: ${{ secrets.DAPP_RADAR_API_URL }}
+          DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
