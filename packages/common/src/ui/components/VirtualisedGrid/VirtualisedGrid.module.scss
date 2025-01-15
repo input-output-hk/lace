@@ -5,6 +5,8 @@
   column-gap: 16px;
   display: grid;
   row-gap: 12px;
+  // performance optimization for very long lists
+  transform: translateZ(0);
 
   @media (min-width: $breakpoint-minimum) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
