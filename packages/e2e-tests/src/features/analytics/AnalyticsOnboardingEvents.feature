@@ -28,9 +28,9 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     And I validate latest analytics single event "onboarding | restore wallet revamp |  enter your recovery phrase  | next | click"
     When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
-    Then I validate latest analytics single event "onboarding | restore wallet revamp | let's set up your new wallet | enter wallet | click"
-#    And "$create_alias" PostHog event was sent  // TODO: uncomment when LW-12025 is fixed
-#    And I validate that alias event has assigned same user id "5b3ca1f1f7a14aad1e79f46213e2777d" in posthog
+    Then I validate latest analytics single event "onboarding | restore wallet revamp | added"
+    And "$create_alias" PostHog event was sent
+    And I validate that alias event has assigned same user id "9646a33207b90ae60ae83770aaa82597" in posthog
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
