@@ -4,6 +4,7 @@ import SimpleViewContent from './SimpleViewContent';
 import SimpleViewFilters from './SimpleViewFilters';
 
 import { DappListTitle } from '../../../ui/components/list/DappListTitle.component';
+import { withDrawer } from '../ProjectDetail/with-drawer';
 
 const { useState } = React;
 const dappsCategoryToTitle = (category: string) => (category === 'all' ? 'All DApps' : category);
@@ -20,4 +21,4 @@ const SimpleView: React.FC = () => {
   );
 };
 
-export default SimpleView;
+export default withDrawer(SimpleView);
