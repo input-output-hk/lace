@@ -10,6 +10,8 @@ import CategoryChip from './CategoryChip';
 import './styles.scss';
 import { useCategoriesFetcher } from '../../../services/api/categories';
 import { formatFiltersResponse } from '../../../services/helpers/apis-formatter';
+import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
 
 const { useState, useEffect } = React;
 
@@ -18,6 +20,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const location = useLocation();
   const [active, setActive] = useState<string>('all');
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
 
   const ALL_CATEGORIES_FILTER = [
     {
@@ -57,6 +60,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const handleSetActive = (value: string) => {
     setActive(value.toLowerCase());
     if (onChangeCategory) onChangeCategory(value);
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, { category: value });
 
     history.push({
       search: value !== 'all' ? `category=${value}` : ''

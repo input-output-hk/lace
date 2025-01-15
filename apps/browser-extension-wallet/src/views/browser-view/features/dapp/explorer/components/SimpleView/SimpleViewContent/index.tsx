@@ -10,6 +10,8 @@ import { Skeleton } from 'antd';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import type { ISimpleViewContent } from './types';
 import './styles.scss';
+import { useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 // Defines pagination parameters for infinite scroll mechanism.
 const MAX_ITEMS_PER_PAGE = 20;
@@ -26,9 +28,15 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
     page: { offset: 0, limit: MAX_ITEMS_PER_PAGE },
     search
   });
+  const analytics = useAnalyticsContext();
 
   const handleOpenDrawer = (drawerData: ISectionCardItem) => {
     dispatch({ type: EDrawerAction.OPEN, data: drawerData });
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerDappTileClick, {
+      title: drawerData.title,
+      category: drawerData.category,
+      link: drawerData.link
+    });
   };
 
   const showEmptyState = !loading && dapps?.length === 0;
