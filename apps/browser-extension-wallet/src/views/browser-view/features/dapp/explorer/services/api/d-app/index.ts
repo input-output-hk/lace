@@ -82,13 +82,17 @@ type DAppFetcherParams = {
 };
 
 const useDAppFetcher = ({ category, page: { limit } }: DAppFetcherParams) => {
-  const [hasNextPage, setHasNextPage] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [data, setData] = useState<ISectionCardItem[]>([]);
+  const [data, setData] = useState<DAppRadarDappItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
+      if (!dappRadarApiKey) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const searchParams = new URLSearchParams('');
       searchParams.set('chain', 'cardano');
@@ -97,29 +101,35 @@ const useDAppFetcher = ({ category, page: { limit } }: DAppFetcherParams) => {
       if (category) {
         searchParams.set('category', category);
       }
-      const response = await window.fetch(`${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`, {
-        headers: {
-          Accept: 'application/json',
-          'x-api-key': dappRadarApiKey
-        }
-      });
-      const { results } = (await response.json()) as { results: DAppRadarDappItem[] };
-      // const requestedItemsCount = (currentPage + 1) * limit;
-      // const items = mockedDapps.slice(0, requestedItemsCount);
-      // if (items.length < requestedItemsCount) {
-      setHasNextPage(false);
-      // }
-      setData(mapResponse(results));
-      setLoading(false);
-    })();
-  }, [category, currentPage, limit]);
 
+      try {
+        const response = await window.fetch(`${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`, {
+          headers: {
+            Accept: 'application/json',
+            'x-api-key': dappRadarApiKey
+          }
+        });
+
+        let results: DAppRadarDappItem[] = [];
+        if (response.ok) {
+          const parsedResponse = (await response.json()) as { results: DAppRadarDappItem[] };
+          results = parsedResponse.results;
+        }
+        setData(results);
+      } catch {
+        console.error('Failed to fetch dapp list.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [category, limit]);
+
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   const fetchMore = () => {
-    if (!hasNextPage) return;
-    setCurrentPage(currentPage + 1);
+    console.error('Pagination not implemented!');
   };
 
-  return { loading, data, error: undefined as Error, fetchMore, hasNextPage };
+  return { loading, data: mapResponse(data), fetchMore, hasNextPage: false };
 };
 
 export { useDAppFetcher };

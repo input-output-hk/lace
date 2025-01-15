@@ -1,5 +1,4 @@
 import * as React from 'react';
-import qs from 'qs';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -10,6 +9,7 @@ import CategoryChip from './CategoryChip';
 import './styles.scss';
 import { useCategoriesFetcher } from '../../../services/api/categories';
 import { formatFiltersResponse } from '../../../services/helpers/apis-formatter';
+import { DefaultCategory } from '@views/browser/features/dapp/explorer/components/SimpleView/SimpleViewFilters/CategoryChip/categories.enum';
 
 const { useState, useEffect } = React;
 
@@ -22,7 +22,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const ALL_CATEGORIES_FILTER = [
     {
       label: t('dappdiscovery.show_all'),
-      value: 'all',
+      value: DefaultCategory.All,
       'data-testid': 'classic-filter-all'
     }
   ];
@@ -45,21 +45,20 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
 
   useEffect(() => {
     if (!location.search) return;
-    const query = qs.parse(location.search.slice(1)) as {
-      category?: string;
-    };
+    const query = new URLSearchParams(location.search.slice(1));
 
-    if (query.category) handleChangeCategory(query.category);
+    if (query.has('category')) handleChangeCategory(query.get('category'));
     // TODO: refactor the dependency on handleChangeCategory which is re-created on every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, categories]);
 
   const handleSetActive = (value: string) => {
-    setActive(value.toLowerCase());
-    if (onChangeCategory) onChangeCategory(value);
+    const nextCategory = value.toLowerCase();
+    setActive(nextCategory);
+    if (onChangeCategory) onChangeCategory(nextCategory);
 
     history.push({
-      search: value !== 'all' ? `category=${value}` : ''
+      search: value !== 'all' ? `category=${nextCategory}` : ''
     });
   };
 
@@ -89,7 +88,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
               'iog-tag--active': value.toLocaleLowerCase() === active.toLowerCase()
             }),
             onClick: () => handleSetActive(value),
-            children: <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} label={label} />
+            children: <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} value={value} label={label} />
           })}
           data-testid="grid-category-slider"
         >

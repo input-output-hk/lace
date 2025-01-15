@@ -1,59 +1,49 @@
 import { useState, useEffect } from 'react';
-import { ICategory } from './types';
-import capitalize from 'lodash/capitalize';
-
-const defaultCategories = [
-  'games',
-  'defi',
-  'collectibles',
-  'marketplaces',
-  'high-risk',
-  'gambling',
-  'exchanges',
-  'social',
-  'other'
-];
-
-const formatCategories = (categories: string[]) =>
-  categories.map((category, index) => ({
-    id: `${category.toLowerCase()}${index}`,
-    name: capitalize(category)
-  }));
+import { DefaultCategory } from '../../../components/SimpleView/SimpleViewFilters/CategoryChip/categories.enum';
 
 type FetchCategoriesResult = {
   loading: boolean;
-  error?: Error;
-  data: ICategory[];
+  data: string[];
 };
 
 const dappRadarCategoriesUrl = `${process.env.DAPP_RADAR_API_URL}/v2/dapps/categories`;
+const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
+
+const defaultCategories = Object.values(DefaultCategory).filter((c) => c !== DefaultCategory.All);
 
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | undefined>();
-  const [data, setData] = useState<ICategory[]>(formatCategories(defaultCategories));
+  const [data, setData] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
+      if (!dappRadarApiKey) {
+        setData(defaultCategories);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await window.fetch(dappRadarCategoriesUrl, {
           headers: {
             Accept: 'application/json',
-            'x-api-key': process.env.DAPP_RADAR_API_KEY
+            'x-api-key': dappRadarApiKey
           }
         });
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
+
+        let categories: string[] = [];
+        if (response.ok) {
+          const result = (await response.json()) as { categories: string[] };
+          categories = result.categories;
         }
-        const result = await response.json();
-        setData(formatCategories(result));
-      } catch (_error) {
-        setError(_error as Error);
+        setData(categories);
+      } catch {
+        console.error('Failed to fetch dapp categories.');
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  return { loading, data, error };
+  return { loading, data };
 };
