@@ -6,6 +6,7 @@ import { useFetchImage } from '../useFetchImage';
 
 const OriginalImage = Image;
 const mockImage = new Image();
+const IMAGE_LOAD_TIME = 1;
 
 describe('useFetchImage', () => {
   const imageEventMock = jest.fn(() => {
@@ -15,7 +16,7 @@ describe('useFetchImage', () => {
   beforeAll(() => {
     global.Image = class {
       constructor() {
-        setTimeout(() => imageEventMock(), 100);
+        setTimeout(() => imageEventMock(), IMAGE_LOAD_TIME);
         return mockImage;
       }
     } as typeof Image;
@@ -41,7 +42,7 @@ describe('useFetchImage', () => {
     expect(initialResponse).toEqual({ status: 'loading' });
     await act(async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
       });
       expect(result.current).toEqual({ status: 'loaded', imageSrc: 'testImage' });
     });
@@ -58,7 +59,7 @@ describe('useFetchImage', () => {
     expect(initialResponse).toEqual({ status: 'loading' });
     await act(async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
       });
       expect(result.current).toEqual({
         status: 'loaded',
@@ -79,7 +80,7 @@ describe('useFetchImage', () => {
     expect(initialResponse).toEqual({ status: 'loading' });
     await act(async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
       });
       expect(result.current).toEqual({ status: 'error', imageSrc: 'fallbackImage' });
     });
@@ -95,7 +96,7 @@ describe('useFetchImage', () => {
     // eslint-disable-next-line sonarjs/no-identical-functions
     await act(async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 100);
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
       });
       expect(result.current).toEqual({ status: 'error', imageSrc: 'fallbackImage' });
     });
