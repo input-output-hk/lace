@@ -115,7 +115,9 @@ ISlider<any>): React.ReactElement => {
       >
         {data?.map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (item: any) => <SwiperSlide key={uuidv4()}>{childrenWithProps(item)}</SwiperSlide>
+          (item: any) => (
+            <SwiperSlide key={uuidv4()}>{childrenWithProps(item)}</SwiperSlide>
+          )
         )}
       </Swiper>
       {data.length <= 0 && fallback}
