@@ -70,7 +70,7 @@ Feature: Send Transactions from Dapp - E2E
     And I navigate to Tokens extended page
     Then the sent amount of: "2" for token "LaceCoin2" is subtracted from the total balance
     When I navigate to Transactions extended page
-    Then the Sent transaction is displayed with value: "1.38 tADA, 2 LaceCoin2" and tokens count 2
+    Then the Sent transaction is displayed with value: "-1.56 tADA, -2 LaceCoin2" and tokens count 2
     And I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletReceiveDappTransactionE2E" address
     When I open wallet: "WalletReceiveDappTransactionE2E" in: extended mode

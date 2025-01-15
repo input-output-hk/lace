@@ -34,7 +34,7 @@ Feature: Transactions - Extended view
     And I save tx hash value "a21a3069e214f34ef32e4797865233f87195b753a4cfbca7bed2ccf4807d98d0"
     And I am on Transactions extended page
     And I wait for the transaction history to be loaded and all transactions to be confirmed
-    When the Sent transaction is displayed with value: "24.79 tADA" and tokens count 1
+    When the Sent transaction is displayed with value: "25.00 tADA" and tokens count 1
     When I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address
 
