@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-nested-ternary */
 import * as React from 'react';
 import { render } from 'react-dom';
 import { DappConnectorView } from '@routes';
@@ -21,7 +22,7 @@ import { storage } from 'webextension-polyfill';
 import { TxWitnessRequestProvider } from '@providers/TxWitnessRequestProvider';
 
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami'>();
+  const [mode, setMode] = useState<'lace' | 'nami' | undefined>();
 
   storage.onChanged.addListener((changes) => {
     const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
@@ -58,7 +59,7 @@ const App = (): React.ReactElement => {
                           <AddressesDiscoveryOverlay>
                             <UIThemeProvider>
                               <TxWitnessRequestProvider>
-                                {mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                                {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
                               </TxWitnessRequestProvider>
                             </UIThemeProvider>
                           </AddressesDiscoveryOverlay>
