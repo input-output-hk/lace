@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './Nfts.module.scss';
 import { ListEmptyState, NftFolderItemProps, NftGrid, NftItemProps, NftListProps, NftsItemsTypes } from '@lace/core';
-import { ContentLayout, extensionScrollableContainerID } from '@src/components/Layout';
+import { ContentLayout } from '@src/components/Layout';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { getTokenList } from '@src/utils/get-token-list';
@@ -27,6 +27,8 @@ import RemoveFolderIcon from '@assets/icons/remove-folder.component.svg';
 import { useAnalyticsContext, useCurrencyStore } from '@providers';
 import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { useNftSearch } from '@hooks/useNftSearch';
+
+export const extensionScrollableContainerID = 'contentLayout';
 
 const MIN_ASSET_COUNT_FOR_SEARCH = 10;
 
@@ -148,6 +150,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
   return (
     <>
       <ContentLayout
+        id={extensionScrollableContainerID}
         title={
           <Skeleton loading={isLoadingFirstTime}>
             <div className={styles.sectionTitle}>
