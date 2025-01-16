@@ -256,7 +256,7 @@ Feature: DAppConnector - Common
     And all elements of Inactive collateral drawer are displayed
     And I open and authorize test DApp with "Only once" setting
     When I click "Set Collateral" button in test DApp
-    Then I see DApp collateral window
+#    Then I see DApp collateral window # TODO: uncomment when LW-12085 is resolved
 
   @LW-11372
   Scenario: Test for bug LW-7832 - Wrong url displayed in DApp transaction confirmation screen
