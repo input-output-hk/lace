@@ -65,7 +65,7 @@ const getTokensContent = (
 
 export interface AssetSelectorOverlayProps {
   translations: TranslationsFor<'assetSelection' | 'tokens' | 'nfts'>;
-  nfts?: Array<NftItemProps>;
+  nfts?: Array<NftItemProps & { id: string }>;
   tokens?: Array<DropdownList>;
   nftListConfig: { rows: VirtualisedGridColumns };
   onClick?: (id: string) => void;
@@ -137,7 +137,7 @@ export const AssetSelectorOverlay = ({
     filterAssets();
   }, [filterAssets]);
 
-  const nftList = searchResult?.nfts?.map(({ assetId: id = '', ...item }) => ({
+  const nftList = searchResult?.nfts?.map(({ id, ...item }) => ({
     ...item,
     onClick: selectedTokenList?.includes(id) ? () => removeTokenFromList(id) : () => handleTokenClick(id),
     selected: selectedTokenList?.includes(id)
