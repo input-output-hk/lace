@@ -64,14 +64,18 @@ const ProjectDetail: React.FC = () => {
                 fit="contain"
                 src={data?.image?.src || ''}
                 alt={data?.image?.alt || 'Image'}
-                width={80}
-                height={80}
+                width={50}
+                height={50}
                 data-testid="dapp-info-modal-icon"
               />
             )}
-            <Flex flexDirection="column" gap="$8">
-              <Text.SubHeading data-testid="dapp-info-modal-title">{data?.title}</Text.SubHeading>
-              <Text.Body.Large>{data?.category}</Text.Body.Large>
+            <Flex flexDirection="column" gap="$4">
+              <Text.Body.Normal data-testid="dapp-info-modal-title" weight="$bold">
+                {data?.title}
+              </Text.Body.Normal>
+              <Text.Body.Small color="secondary" weight="$semibold">
+                {data?.category}
+              </Text.Body.Small>
             </Flex>
           </div>
         </Flex>

@@ -2,7 +2,7 @@ import React, { Children, cloneElement, isValidElement, useRef, useState } from 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import SwiperCore, { Navigation, Virtual, Lazy, Swiper as SwiperType } from 'swiper';
+import SwiperCore, { Navigation, Virtual, Lazy, Swiper as SwiperType, Mousewheel } from 'swiper';
 import { ExtractObjectFromData, ISlider } from './types';
 import { EIconsName } from '../Icon';
 import { IogButtonIcon } from '../Button';
@@ -13,7 +13,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import './styles.scss';
 
-SwiperCore.use([Navigation, Virtual, Lazy]);
+SwiperCore.use([Navigation, Virtual, Lazy, Mousewheel]);
 
 const formatClassName = (className: string) => (className ? className.replace('.', '') : '');
 
@@ -24,7 +24,6 @@ const DEFAULT_PROPS = {
 
 const BUTTON_CLASS = 'iog-swiper-button-nav';
 
-// eslint-disable-next-line prettier/prettier
 const IogSlider = ({
   id,
   data,
@@ -39,6 +38,7 @@ const IogSlider = ({
   buttonStandard = false,
   showSliderNavigation = true,
   fallback,
+  mousewheel,
   ...props
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ISlider<any>): React.ReactElement => {
@@ -110,6 +110,7 @@ ISlider<any>): React.ReactElement => {
         slidesPerView={slidesPerView || DEFAULT_PROPS.SLIDES_PER_VIEW}
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={handleSlideChange}
+        mousewheel={mousewheel}
         {...props}
       >
         {data?.map(

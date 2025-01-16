@@ -1,5 +1,5 @@
 export interface ISimpleViewContent {
   selectedCategory: string;
-  search: string;
+  search?: string;
   dappsSearchCacheTTLInMs?: number;
 }

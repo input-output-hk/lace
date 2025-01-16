@@ -67,7 +67,7 @@ $main-gap: 49px;
     'nav side-panel'
     'nav main';
   margin-right: size_unit(4);
-  grid-template-columns: $navigation-col-width-collapsed 1fr;
+  grid-template-columns: $navigation-col-width-collapsed minmax(0, 1fr);
   grid-template-rows: $row-height 1fr;
   height: 100%;
 
@@ -78,7 +78,7 @@ $main-gap: 49px;
   }
 
   @media (min-width: $breakpoint-xsmall) {
-    grid-template-columns: $navigation-col-width 1fr;
+    grid-template-columns: $navigation-col-width minmax(0, 1fr);
     margin: 0 size_unit(4) 0 size_unit(5);
   }
 

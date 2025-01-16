@@ -5,14 +5,6 @@ interface ISectionCardItemImage {
   height: number;
 }
 
-export interface ISectionRelated {
-  alt: string;
-  caption: string;
-  url: string;
-  title: string;
-  description: string;
-}
-
 export interface ICertification {
   id: number;
   name: string;

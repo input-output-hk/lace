@@ -18,9 +18,9 @@ export const AboutDapp: React.FC = () => {
         <Text.Body.Normal>{data?.longDescription}</Text.Body.Normal>
       </Box>
       {data?.screenshots && (
-        <Box mb="$24">
+        <Box mb="$16">
           <Box mb="$24">
-            <Text.SubHeading weight="$bold">{t('dappdiscovery.side_panel.gallery')}</Text.SubHeading>
+            <Text.Body.Large weight="$bold">{t('dappdiscovery.side_panel.gallery')}</Text.Body.Large>
           </Box>
           <IogSlider
             data={data.screenshots}
