@@ -13,6 +13,7 @@ import { CurrencyInfo } from '@src/types';
 import { isNFT } from './is-nft';
 import { getAssetImage } from './get-asset-image';
 import { Asset } from '@cardano-sdk/core';
+import { TokenInformation } from '@src/views/browser-view/features/assets/types';
 
 const DISPLAY_FALLBACK = '-';
 const NAME_TRUNCATE_LENGTH = 10;
@@ -132,7 +133,7 @@ const getDecimalsFromNftMetadata = (metadata?: Asset.NftMetadata): number | unde
  */
 export const getTokenDisplayMetadata = (
   info?: AssetOrHandleInfo
-): Pick<NonNFTAsset, 'name' | 'description' | 'logo' | 'decimals'> => {
+): Pick<NonNFTAsset, 'name' | 'description' | 'logo' | 'decimals'> & Partial<TokenInformation> => {
   const name =
     info?.tokenMetadata?.name ||
     info?.nftMetadata?.name ||
@@ -145,7 +146,9 @@ export const getTokenDisplayMetadata = (
     name,
     description: ticker,
     decimals,
-    logo: getTokenLogoUrl(info)
+    logo: getTokenLogoUrl(info),
+    policyId: info?.policyId,
+    fingerprint: info?.fingerprint
   };
 };
 
@@ -167,7 +170,7 @@ export const getNftDisplayMetadata = (info?: AssetOrHandleInfo): Pick<NFT, 'name
 export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAsset[]; nftList: NFT[] } => {
   const { assetsInfo = new Map() as AssetOrHandleInfoMap, balance, prices, tokensSpent, fiatCurrency } = params;
   const nfts: NFT[] = [];
-  const tokens: NonNFTAsset[] = [];
+  const tokens: (NonNFTAsset & Partial<TokenInformation>)[] = [];
   if (isNil(balance) || balance.size === 0) {
     return { tokenList: [], nftList: [] };
   }
@@ -209,7 +212,9 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
         description: ftDisplayMetadata.description,
         logo: ftDisplayMetadata.logo,
         defaultLogo: getRandomIcon({ id: assetId.toString(), size: 30 }),
-        decimals: ftDisplayMetadata.decimals
+        decimals: ftDisplayMetadata.decimals,
+        policyId: ftDisplayMetadata.policyId,
+        fingerprint: ftDisplayMetadata.fingerprint
       });
     }
   }
