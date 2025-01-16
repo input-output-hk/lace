@@ -35,7 +35,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   }, [active, onChangeCategory]);
 
   const handleChangeCategory = (category: string) => {
-    setActive(category.toLowerCase());
+    setActive(category);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const swiper = document.querySelector<Element & { swiper: any }>('.iog-classic-view-filters-slider')?.swiper;
@@ -86,10 +86,10 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
             key: `${label}`,
             className: classNames({
               'iog-tag': true,
-              'iog-tag--active': value.toLocaleLowerCase() === active
+              'iog-tag--active': value.toLocaleLowerCase() === active.toLowerCase()
             }),
             onClick: () => handleSetActive(value),
-            children: <CategoryChip active={value.toLocaleLowerCase() === active} label={label} />
+            children: <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} label={label} />
           })}
           data-testid="grid-category-slider"
         >

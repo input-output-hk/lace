@@ -34,7 +34,7 @@
   "dappdiscovery.empty_state.no_dapps_title": "No DApps available",
   "dappdiscovery.empty_state.no_dapps_content1": "There are no DApps matching your criteria at the moment.",
   "dappdiscovery.empty_state.no_dapps_content2": "This will change shortly, come back soon!",
-  "dappdiscovery.general_info": "<p>Dapp Explorer powered by <link1>DappRadar.</link1></p><p>Trying to connect to a Dapp that doesn’t support Lace? Tag them on X to let them know you want Lace support!</p><p>Don’t see your Dapp? <link2>Register</link2> your Dapp with DappRadar to be automatically included in the Lace Dapp explorer.</p>",
+  "dappdiscovery.general_info": "<p>Dapp Explorer powered by <link1>DappRadar.</link1></p><p>Trying to connect to a Dapp that doesn’t support Lace? Tag them on <link2>X</link2> to let them know you want Lace support!</p><p>Don’t see your Dapp? <link3>Register</link3> your Dapp with DappRadar to be automatically included in the Lace Dapp explorer.</p>",
   "addressBook.addressDetail.btn.copy": "Copy",
   "addressBook.deleteModal.buttons.cancel": "No",
   "addressBook.deleteModal.description": "Are you sure? There is no way to undo this action",
