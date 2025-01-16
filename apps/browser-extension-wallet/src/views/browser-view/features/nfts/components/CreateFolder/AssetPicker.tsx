@@ -5,10 +5,9 @@ import { ASSET_COMPONENTS, AssetSelectorOverlay } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useObservable, VirtualisedGridColumns } from '@lace/common';
 import styles from './CreateFolderDrawer.module.scss';
+import { formatNftsList } from '../utils';
 import { useCurrencyStore } from '@providers';
 import { useAssetInfo } from '@hooks';
-import isNil from 'lodash/isNil';
-import { getTokenList } from '@src/utils/get-token-list';
 
 const nftsPerRow: Record<'popupView' | 'browserView', VirtualisedGridColumns> = {
   popupView: 2,
@@ -42,14 +41,7 @@ export const AssetPicker = ({
     ? new Map([...balance.assets].filter(([id]) => !usedNftsIds.includes(id.toString())))
     : balance?.assets;
 
-  const nftList = isNil(balance)
-    ? []
-    : getTokenList({
-        assetsInfo: assets,
-        balance: notUsedAssets,
-        environmentName,
-        fiatCurrency
-      }).nftList;
+  const nftList = formatNftsList(assets, { ...balance, assets: notUsedAssets }, environmentName, fiatCurrency);
 
   const hasNfts = assets ? [...assets.values()].some((asset) => balance?.assets?.has(asset.assetId)) : false;
   const coinInputSelectionTranslations = {
