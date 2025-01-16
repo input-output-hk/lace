@@ -36,7 +36,7 @@ Feature: Transactions - Extended view
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     When the Sent transaction is displayed with value: "24.79 tADA" and tokens count 1
     When I click on a transaction: 1
-    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "WalletReceiveSimpleTransactionE2E" address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "addr_test1qp7vynpwhsyjsqvyw9n8r4uy3uj5hu2arfy94vynvng6556hhqrnhndmg2pntqazt36v700x6kryqjhe75p58v65v6kszx7h3j" address
 
   @LW-9914 @Testnet
   Scenario Outline: Extended View - transaction list - styling: <styling> applied to tx type: <tx_type>

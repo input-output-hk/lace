@@ -425,13 +425,16 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
+    const expectedAddress = walletName.startsWith('addr')
+      ? walletName
+      : String(getTestWallet(walletName).accounts[0].address);
     const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: String(getTestWallet(walletName).accounts[0].address),
+          address: expectedAddress,
           addressTag: 'foreign'
         }
       ],
