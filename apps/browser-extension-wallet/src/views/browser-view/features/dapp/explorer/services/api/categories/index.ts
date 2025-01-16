@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { DefaultCategory } from '../../../components/SimpleView/SimpleViewFilters/CategoryChip/categories.enum';
 
 type FetchCategoriesResult = {
   loading: boolean;
@@ -9,8 +8,6 @@ type FetchCategoriesResult = {
 const dappRadarCategoriesUrl = `${process.env.DAPP_RADAR_API_URL}/v2/dapps/categories`;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 
-const defaultCategories = Object.values(DefaultCategory).filter((c) => c !== DefaultCategory.All);
-
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<string[]>([]);
@@ -18,7 +15,6 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
   useEffect(() => {
     (async () => {
       if (!dappRadarApiKey) {
-        setData(defaultCategories);
         setLoading(false);
         return;
       }
