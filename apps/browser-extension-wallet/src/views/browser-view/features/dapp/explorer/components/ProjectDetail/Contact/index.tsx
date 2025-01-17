@@ -31,6 +31,10 @@ export const Contact: React.FC = () => {
           itemData={data.companyWebsite}
         />
       )}
+      {data.socialLinks.map(({ url, title }) => (
+        // eslint-disable-next-line unicorn/no-null
+        <ContactItem key={title} itemIcon={null} itemTitle={title} itemData={url} />
+      ))}
     </Flex>
   );
 };

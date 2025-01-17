@@ -30,7 +30,11 @@ export interface ISectionCardItem {
   screenshots?: IScreenshot[];
   email: string;
   companyWebsite: string;
-  certificates?: Partial<ISectionCardCertificate[]>;
+  socialLinks: Array<{
+    title: string;
+    type: string;
+    url: string;
+  }>;
 }
 
 export interface ISectionCard {

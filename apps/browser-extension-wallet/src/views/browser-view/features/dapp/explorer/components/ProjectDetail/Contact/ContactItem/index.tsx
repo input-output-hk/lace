@@ -10,9 +10,11 @@ interface ContactItemType {
 
 export const ContactItem: React.FC<ContactItemType> = ({ itemIcon, itemTitle, itemData }) => (
   <div className="iog-contact-item" data-testid="contact-item">
-    <span className="iog-contact-item-icon" data-testid="contact-icon">
-      {itemIcon}
-    </span>
+    {itemIcon && (
+      <span className="iog-contact-item-icon" data-testid="contact-icon">
+        {itemIcon}
+      </span>
+    )}
     <Flex flexDirection="column">
       <span className="iog-contact-item-title" data-testid="contact-name">
         {itemTitle}

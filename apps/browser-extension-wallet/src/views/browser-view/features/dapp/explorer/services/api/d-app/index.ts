@@ -56,21 +56,8 @@ const mapResponse = (dapps: DAppRadarDappItem[]): ISectionCardItem[] =>
     email: '',
     link: dapp.website,
     companyWebsite: '',
-    screenshots: undefined
-
-    // title: string;
-    // shortDescription: string;
-    // subcategory: string;
-    // link: string;
-    // image?: Partial<ISectionCardItemImage>;
-    // longDescription: string;
-    // screenshots?: IScreenshot[];
-    // providerName: string;
-    // email: string;
-    // companyWebsite: string;
-    // certificates?: Partial<ISectionCardCertificate[]>;
-    // selectedCertificate?: Partial<ISectionCardCertificate>;
-    // isCertified?: boolean;
+    screenshots: undefined,
+    socialLinks: dapp.socialLinks
   }));
 
 type DAppFetcherParams = {
@@ -81,7 +68,15 @@ type DAppFetcherParams = {
   _subcategory?: string;
 };
 
-const useDAppFetcher = ({ category, page: { limit } }: DAppFetcherParams) => {
+const useDAppFetcher = ({
+  category,
+  page: { limit }
+}: DAppFetcherParams): {
+  loading: boolean;
+  data: ISectionCardItem[];
+  fetchMore: () => void;
+  hasNextPage: boolean;
+} => {
   const [data, setData] = useState<DAppRadarDappItem[]>([]);
   const [loading, setLoading] = useState(true);
 
