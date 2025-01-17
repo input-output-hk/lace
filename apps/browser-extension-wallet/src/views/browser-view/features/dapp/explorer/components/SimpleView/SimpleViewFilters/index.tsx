@@ -60,7 +60,10 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const handleSetActive = (value: string) => {
     setActive(value.toLowerCase());
     if (onChangeCategory) onChangeCategory(value);
-    void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, { category: value });
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, {
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_category_name: value
+    });
 
     history.push({
       search: value !== 'all' ? `category=${value}` : ''

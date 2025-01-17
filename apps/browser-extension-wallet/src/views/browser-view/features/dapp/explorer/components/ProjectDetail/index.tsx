@@ -33,9 +33,12 @@ const ProjectDetail: React.FC = () => {
   const handleOpenUrl = () => {
     window.open(data?.companyWebsite, 'blank');
     void analytics.sendEventToPostHog(PostHogAction.DappExplorerDetailDrawerRedirectClick, {
-      title: data?.title,
-      category: data?.category,
-      link: data?.link
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_category_name: data?.category,
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_dapp_name: data?.title,
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_dapp_url: data?.link
     });
   };
 
