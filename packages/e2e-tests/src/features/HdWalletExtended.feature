@@ -18,7 +18,7 @@ Feature: HD wallet - extended view
     Then I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
     Examples:
       | txNumber | txType           | txValue | Notes                             |
-      | 1        | Sent             | 17.00   |                                   |
+      | 1        | Sent             | 17.19   |                                   |
       | 2        | Received         | 16.00   | Was received to not first address |
       | 3        | Received         | 4.00    | Was received to first address     |
       | 6        | Self Transaction | 0.17    | Was send to first address         |

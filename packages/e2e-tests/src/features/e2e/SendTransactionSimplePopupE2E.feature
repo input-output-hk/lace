@@ -20,7 +20,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     And I navigate to Tokens popup page
     Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Activity popup page
-    Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
+    Then the Sent transaction is displayed with value: "1.29 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransaction2E2E" address
     When I open wallet: "WalletReceiveSimpleTransaction2E2E" in: popup mode

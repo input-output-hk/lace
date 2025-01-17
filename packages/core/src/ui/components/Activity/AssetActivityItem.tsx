@@ -243,18 +243,17 @@ export const AssetActivityItem = ({
           ref={ref}
         >
           <span>
-            <span data-testid="balance">
-              {isNegativeBalance ? '-' : ''}
-              {assetsText.text}
-            </span>
+            <span data-testid="balance">{assetsText.text}</span>
             {assetsText.suffix && (
               <Tooltip
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
-                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
-                    ))}
+                    {assets
+                      ?.slice(assetsToShow, assets.length)
+                      .map(({ id, val, info }) => (
+                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                      ))}
                   </>
                 }
               >
