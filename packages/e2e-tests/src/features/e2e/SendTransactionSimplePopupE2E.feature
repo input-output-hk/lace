@@ -19,13 +19,13 @@ Feature: Send Simple Transactions - Popup view - E2E
     When I close the drawer by clicking close button
     And I navigate to Tokens popup page
     Then the sent amount of: "1.123" with "saved" fee for token "Cardano" is subtracted from the total balance
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     Then the Sent transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 1.12 and wallet: "WalletReceiveSimpleTransaction2E2E" address
     When I open wallet: "WalletReceiveSimpleTransaction2E2E" in: popup mode
     And Wallet is synced
-    And I navigate to Transactions popup page
+    And I navigate to Activity popup page
     Then the Received transaction is displayed with value: "1.12 tADA" and tokens count 1
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 1.12 and wallet: "WalletSendSimpleTransaction2E2E" address
@@ -43,7 +43,7 @@ Feature: Send Simple Transactions - Popup view - E2E
     And I enter correct password and confirm the transaction
     Then The Transaction submitted screen is displayed in popup mode
     When I close the drawer by clicking close button
-    And I navigate to Transactions popup page
+    And I navigate to Activity popup page
     And I can see transaction 1 with type "Self Transaction"
 
   @LW-5895

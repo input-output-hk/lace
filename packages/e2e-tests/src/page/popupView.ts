@@ -67,6 +67,12 @@ class PopupView extends LaceView implements Page {
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
+
+  async visitDAppExplorer() {
+    await browser.url(`${this.basePopupUrl}#/dapp-explorer`);
+    await this.setPopupWindowSize();
+    await this.waitForPreloaderToDisappear();
+  }
 }
 
 export default new PopupView();

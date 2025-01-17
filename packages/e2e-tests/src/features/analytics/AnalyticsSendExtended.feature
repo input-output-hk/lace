@@ -58,7 +58,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     And I wait 2000 milliseconds
     And I set up request interception for posthog analytics request(s)
     Then Local storage unconfirmedTransaction contains tx with type: "external"
