@@ -243,10 +243,7 @@ export const AssetActivityItem = ({
           ref={ref}
         >
           <span>
-            <span data-testid="balance">
-              {isNegativeBalance ? '-' : ''}
-              {assetsText.text}
-            </span>
+            <span data-testid="balance">{assetsText.text}</span>
             {assetsText.suffix && (
               <Tooltip
                 overlayClassName={styles.tooltip}

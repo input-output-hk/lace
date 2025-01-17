@@ -41,6 +41,7 @@ export const progressWithSendUntilPasswordPage = async (
   await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
   await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });
   await TransactionNewPage.reviewTransactionButton.click();
+  await TransactionSummaryPage.saveFeeValue();
   await TransactionSummaryPage.confirmButton.waitForClickable();
   await TransactionSummaryPage.confirmButton.click();
 };

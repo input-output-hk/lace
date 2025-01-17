@@ -21,11 +21,11 @@ Feature: Delegating funds to new pool E2E
     And valid password is not in snapshot
     When I close the drawer by clicking close button
     And I navigate to Transactions extended page
-    Then the Sent transaction is displayed with value: "5.00 tADA" and tokens count 1
+    Then the Sent transaction is displayed with value: "-15.17 tADA" and tokens count 1
     When I open wallet: "newCreatedWallet" in: extended mode
     And Wallet is synced
     And I navigate to Transactions extended page
-    Then the Received transaction is displayed with value: "5.00 tADA" and tokens count 1
+    Then the Received transaction is displayed with value: "15.00 tADA" and tokens count 1
     And I disable showing Multidelegation beta banner
     And I disable showing Multidelegation DApps issue modal
     And I navigate to Staking extended page
