@@ -31,7 +31,7 @@ Feature: Send Transaction bundles - E2E
     When I close the drawer by clicking close button
     And I navigate to Tokens extended page
     Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     Then the Sent transaction is displayed with value: "4.50 tADA, 0.2333 LaceCoin3, 3 LaceCoin , +1" and tokens count 4
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.sent" for 4 tokens with following details:
@@ -42,7 +42,7 @@ Feature: Send Transaction bundles - E2E
     And The Tx details display the sent metadata
     When I open wallet: "WalletFirstReceiveBundlesTransactionE2E" in: extended mode
     And Wallet is synced
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     Then the Received transaction is displayed with value: "1.34 tADA, 0.2333 LaceCoin3, 1 LaceCoin" and tokens count 3
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.received" for 3 tokens with following details:
@@ -50,7 +50,7 @@ Feature: Send Transaction bundles - E2E
       | WalletSendBundlesTransactionE2E | 1.34 tADA | 0.2333 LaceCoin3,1 LaceCoin |
     When I open wallet: "WalletSecondReceiveBundlesTransactionE2E" in: extended mode
     And Wallet is synced
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     Then the Received transaction is displayed with value: "3.16 tADA, 2 LaceCoin, 1 LaceCoin2" and tokens count 3
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.received" for 3 tokens with following details:

@@ -1,7 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
 import transactionDetailsAssert, { PoolData } from '../assert/transactionDetailsAssert';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
@@ -10,18 +9,14 @@ import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
 import { TransactionType } from '../types/transactionType';
 import { TransactionStyle } from '../types/transactionStyle';
+import { visit } from '../utils/pageUtils';
 
-Given(/^I am on the Transactions section - Extended view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'extended');
+Given(/^I am on the Activity page - (extended|popup) view$/, async (mode: 'extended' | 'popup') => {
+  await visit('Activity', mode);
   await transactionsPageAssert.assertTxsLoaded();
 });
 
-Given(/^I am on the Transactions section - popup view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'popup');
-  await transactionsPageAssert.assertTxsLoaded();
-});
-
-Then(/^Transactions section is displayed$/, async () => {
+Then(/^Activity page is displayed$/, async () => {
   await transactionsPageAssert.assertTxsLoaded();
   await transactionsPageAssert.assertSeeTitleWithCounter();
 });

@@ -22,8 +22,8 @@ Feature: Main Navigation - Extended view
 
   @LW-2695 @Smoke
   Scenario: Extended view - Main Navigation - Transactions item click navigates to transaction page
-    When I navigate to Transactions extended page
-    Then Transactions section is displayed
+    When I navigate to Activity extended page
+    Then Activity page is displayed
 
   @LW-2696 @Smoke
   Scenario: Extended view - Main Navigation - Staking item click navigates to staking page
@@ -40,7 +40,7 @@ Feature: Main Navigation - Extended view
       | section      | validateIfSectionIsDisplayed                               |
       | Tokens       | I see Tokens counter with total number of tokens displayed |
       | NFTs         | I see NFTs counter with total number of NFTs displayed     |
-      | Transactions | Transactions section is displayed                          |
+      | Activity     | Activity page is displayed                                 |
       | Staking      | I see Delegation title displayed for multidelegation       |
       | Settings     | I see settings page                                        |
       | Address Book | I see address book title                                   |
@@ -55,7 +55,7 @@ Feature: Main Navigation - Extended view
       | section      | step                                                                  |
       | Tokens       | I see Tokens "About your wallet" widget with all relevant items       |
       | NFTs         | I see "More on NFTs" widget with all relevant items                   |
-      | Transactions | I see Transactions "Learn about" widget with all relevant items       |
+      | Activity     | I see Activity "Learn about" widget with all relevant items           |
       | Staking      | I see "About staking" widget with all relevant items                  |
       | Settings     | I see "About Lace" component                                          |
       | Address Book | I see Address Book "About your wallet" widget with all relevant items |
@@ -78,8 +78,8 @@ Feature: Main Navigation - Extended view
       | Tokens       | 668   | I see Tokens "About your wallet" widget with all relevant items       | see               |
       | NFTs         | 1280  | I see "More on NFTs" widget with all relevant items                   | do not see        |
       | NFTs         | 668   | I see "More on NFTs" widget with all relevant items                   | see               |
-      | Transactions | 1280  | I see Transactions "Learn about" widget with all relevant items       | do not see        |
-      | Transactions | 668   | I see Transactions "Learn about" widget with all relevant items       | see               |
+      | Activity     | 1280  | I see Activity "Learn about" widget with all relevant items           | do not see        |
+      | Activity     | 668   | I see Activity "Learn about" widget with all relevant items           | see               |
       | Staking      | 1280  | I see "About staking" widget with all relevant items                  | do not see        |
       | Staking      | 668   | I see "About staking" widget with all relevant items                  | see               |
       | Settings     | 1280  | I see "About Lace" component                                          | do not see        |

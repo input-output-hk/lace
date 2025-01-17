@@ -14,7 +14,7 @@ Feature: Collateral - extended view
     When I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
     And valid password is not in snapshot
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     And I can see transaction 1 with type "Self Transaction"
     When I navigate to Settings extended page
     When I click on "Collateral" setting
@@ -28,7 +28,7 @@ Feature: Collateral - extended view
     When I click on "Collateral" setting
     And I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     And I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in extended mode
     And Wallet is synced

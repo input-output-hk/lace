@@ -14,7 +14,7 @@ Feature: Main Navigation - Extended view
       | section      | step                                                                  |
       | Tokens       | I see Tokens "About your wallet" widget with all relevant items       |
       | NFTs         | I see "More on NFTs" widget with all relevant items                   |
-      | Transactions | I see Transactions "Learn about" widget with all relevant items       |
+      | Activity     | I see Activity "Learn about" widget with all relevant items           |
       | Staking      | I see "About staking" widget with all relevant items                  |
       | Settings     | I see "About Lace" component                                          |
       | Address Book | I see Address Book "About your wallet" widget with all relevant items |
@@ -37,8 +37,8 @@ Feature: Main Navigation - Extended view
       | Tokens       | 668   | I see Tokens "About your wallet" widget with all relevant items       | see               |
       | NFTs         | 1280  | I see "More on NFTs" widget with all relevant items                   | do not see        |
       | NFTs         | 668   | I see "More on NFTs" widget with all relevant items                   | see               |
-      | Transactions | 1280  | I see Transactions "Learn about" widget with all relevant items       | do not see        |
-      | Transactions | 668   | I see Transactions "Learn about" widget with all relevant items       | see               |
+      | Activity     | 1280  | I see Activity "Learn about" widget with all relevant items           | do not see        |
+      | Activity     | 668   | I see Activity "Learn about" widget with all relevant items           | see               |
       | Staking      | 1280  | I see "About staking" widget with all relevant items                  | do not see        |
       | Staking      | 668   | I see "About staking" widget with all relevant items                  | see               |
       | Settings     | 1280  | I see "About Lace" component                                          | do not see        |
