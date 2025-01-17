@@ -27,15 +27,16 @@ export const SignMessageDrawer: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [message, setMessage] = useState('');
   const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState(false);
+  const [showHardwareSigningError, setShowHardwareSigningError] = useState(false);
   // Create a ref to access password without creating dependencies
   const passwordRef = useRef(password);
   passwordRef.current = password;
 
   useEffect(() => {
     if (error) {
-      setShouldShowPasswordPrompt(true);
+      isHardwareWallet ? setShowHardwareSigningError(true) : setShouldShowPasswordPrompt(true);
     }
-  }, [error]);
+  }, [error, isHardwareWallet]);
 
   const handleSign = useCallback(() => {
     if (!isHardwareWallet && !passwordRef.current.value) {
@@ -153,6 +154,29 @@ export const SignMessageDrawer: React.FC = () => {
     </div>
   );
 
+  const renderHardwareSigningError = () => (
+    <div className={styles.hardwareErrorContainer}>
+      <ResultMessage
+        status="error"
+        title={
+          <>
+            <div data-testid="sign-message-error-title">{t('browserView.transaction.fail.oopsSomethingWentWrong')}</div>
+          </>
+        }
+        description={
+          <>
+            <div data-testid="sign-message-error-description">
+              {t('browserView.transaction.fail.problemSubmittingYourTransaction')}
+            </div>
+            <div data-testid="sign-message-error-description2" className={styles.message}>
+              {t('browserView.transaction.fail.clickBackAndTryAgain')}
+            </div>
+          </>
+        }
+      />
+    </div>
+  );
+
   const renderContent = () => {
     if (isSigningInProgress) {
       return <MainLoader />;
@@ -164,6 +188,10 @@ export const SignMessageDrawer: React.FC = () => {
 
     if (shouldShowPasswordPrompt) {
       return renderPasswordPrompt();
+    }
+
+    if (showHardwareSigningError) {
+      return renderHardwareSigningError();
     }
 
     return renderInitialState();

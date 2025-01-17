@@ -38,7 +38,7 @@ export const useDrawerConfiguration = ({
   const getActionButtonLabel = useCallback(() => {
     if (isSigningInProgress) return t('core.signMessage.signingInProgress');
     else if (isHardwareWallet) {
-      return t('core.signMessage.signWithHardwareWalletButton');
+      return error ? t('core.signMessage.tryAgainLabel') : t('core.signMessage.signWithHardwareWalletButton');
     }
     return t('core.signMessage.signButton');
   }, [isSigningInProgress, isHardwareWallet, t]);
