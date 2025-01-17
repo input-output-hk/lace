@@ -30,6 +30,7 @@ on:
         default: 'ubuntu-22.04'
         description: runner to use
         options:
+          - aws-hosted
           - self-hosted
           - ubuntu-22.04
           - ubuntu-20.04
@@ -165,7 +166,7 @@ jobs:
 
   build:
     name: Build Lace
-    runs-on: aws-build
+    runs-on: ${{ needs.setup.outputs.runner }}
     needs: setup
     steps:
       - name: Checkout repository
@@ -204,7 +205,7 @@ jobs:
       fail-fast: false
       matrix:
         batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62]
-    runs-on: aws-test
+    runs-on: ${{ needs.setup.outputs.runner }}
     needs: [setup, build]
     permissions:
       actions: read
@@ -240,7 +241,7 @@ jobs:
   processReports:
     name: Process e2e test reports
     needs: [setup, tests]
-    runs-on: aws-reports
+    runs-on: ${{ needs.setup.outputs.runner }}
     # when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
     if: ${{ success() || failure() }}
     steps:
