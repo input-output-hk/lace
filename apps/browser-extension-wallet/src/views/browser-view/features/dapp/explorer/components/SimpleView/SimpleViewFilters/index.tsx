@@ -88,7 +88,9 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
               'iog-tag--active': value.toLocaleLowerCase() === active.toLowerCase()
             }),
             onClick: () => handleSetActive(value),
-            children: <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} value={value} label={label} />
+            children: (
+              <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} value={value} label={label} />
+            )
           })}
           data-testid="grid-category-slider"
         >
