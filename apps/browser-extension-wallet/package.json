@@ -100,6 +100,7 @@
     "rxjs": "7.4.0",
     "swiper": "^8.4.4",
     "webextension-polyfill": "0.10.0",
+    "zod": "^3.23.8",
     "zustand": "3.5.14"
   },
   "devDependencies": {
