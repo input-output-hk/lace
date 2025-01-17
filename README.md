@@ -58,6 +58,8 @@ cp ./apps/.env.defaults ./apps/.env
 
 Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION_KEY`
 
+> If you want to develop DApp Explorer please refer to the [Setting up local connection with DApp Radar API](apps/browser-extension-wallet/src/views/browser-view/features/dapp/README.md) page
+
 ### Build packages and extension
 
 ```sh
