@@ -11,6 +11,7 @@ import LinkIcon from '../../assets/icons/link.component.svg';
 
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { useExternalLinkOpener } from '@providers';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -23,13 +24,13 @@ const ProjectDetail: React.FC = () => {
     state: { open, data },
     dispatch
   } = useDrawer<ISectionCardItem>();
-
+  const openExternalLink = useExternalLinkOpener();
   const { t } = useTranslation();
 
   const handleClose = () => dispatch({ type: EDrawerAction.CLOSE });
 
   const handleOpenUrl = () => {
-    window.open(data?.companyWebsite, 'blank');
+    openExternalLink(data?.link);
   };
 
   const tabItems = [
