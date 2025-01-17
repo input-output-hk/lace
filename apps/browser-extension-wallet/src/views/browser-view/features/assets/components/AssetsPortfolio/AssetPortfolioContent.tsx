@@ -2,7 +2,7 @@ import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import { EmptySearch, FundWalletBanner } from '@views/browser/components';
 import { Skeleton } from 'antd';
-import { AssetTable, IRow } from '@lace/core';
+import { ProgrammableAssetTable, AssetTable, IRow } from '@lace/core';
 import { CONTENT_LAYOUT_ID } from '@components/Layout';
 import { LACE_APP_ID } from '@utils/constants';
 import { IAssetDetails } from '@views/browser/features/assets/types';
@@ -23,6 +23,7 @@ const searchTokens = (data: IAssetDetails[], searchValue: string) => {
 
 interface AssetPortfolioContentProps {
   assetList: IRow[];
+  programmableAssetList: IRow[];
   totalAssets: number;
   isPortfolioBalanceLoading: boolean;
   onRowClick: (id: string) => void;
@@ -32,6 +33,7 @@ interface AssetPortfolioContentProps {
 
 export const AssetPortfolioContent = ({
   assetList,
+  programmableAssetList,
   totalAssets,
   isPortfolioBalanceLoading,
   onRowClick,
@@ -47,6 +49,14 @@ export const AssetPortfolioContent = ({
     data: assetList,
     total: totalAssets
   });
+  const [currentProgrammableAssets, setCurrentProgrammableAssets] = useState<{
+    data: IAssetDetails[];
+    total: number;
+  }>({
+    data: assetList,
+    total: totalAssets
+  });
+
   const { walletInfo } = useWalletStore();
 
   useEffect(() => {
@@ -55,6 +65,13 @@ export const AssetPortfolioContent = ({
       total: searchValue ? currentAssets.total : totalAssets
     });
   }, [assetList, currentAssets.data, currentAssets.total, searchValue, totalAssets]);
+
+  useEffect(() => {
+    setCurrentProgrammableAssets({
+      data: searchValue ? currentProgrammableAssets.data : programmableAssetList,
+      total: searchValue ? currentProgrammableAssets.total : programmableAssetList.length
+    });
+  }, [programmableAssetList, currentProgrammableAssets.data, currentProgrammableAssets.total, searchValue]);
 
   const handleSearch = useCallback(
     (value: string) => {
@@ -90,14 +107,23 @@ export const AssetPortfolioContent = ({
       {
         <Skeleton loading={isPortfolioBalanceLoading || !currentAssets.data}>
           {currentAssets.total > 0 && (
-            <AssetTable
-              rows={currentAssets.data}
-              onRowClick={onRowClick}
-              totalItems={currentAssets.total}
-              scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
-              onLoad={onTableScroll}
-              popupView={isPopupView}
-            />
+            <div>
+              <AssetTable
+                rows={currentAssets.data}
+                onRowClick={onRowClick}
+                totalItems={currentAssets.total}
+                scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
+                onLoad={onTableScroll}
+                popupView={isPopupView}
+              />
+              <ProgrammableAssetTable
+                rows={currentProgrammableAssets.data}
+                totalItems={currentProgrammableAssets.total}
+                scrollableTargetId={isPopupView ? CONTENT_LAYOUT_ID : LACE_APP_ID}
+                onLoad={onTableScroll}
+                popupView={isPopupView}
+              />
+            </div>
           )}
         </Skeleton>
       }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
-import { BlockfrostInputResolver, WalletProvidersDependencies } from '@src/wallet';
+import { WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
 import { Logger } from 'ts-log';
 import {
@@ -31,16 +31,9 @@ import {
   BlockfrostClientConfig,
   RateLimiter,
   BlockfrostClient,
-  BlockfrostAssetProvider,
-  BlockfrostChainHistoryProvider,
-  BlockfrostDRepProvider,
-  BlockfrostUtxoProvider,
-  BlockfrostRewardsProvider,
-  BlockfrostTxSubmitProvider,
-  BlockfrostNetworkInfoProvider
+  BlockfrostDRepProvider
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
 import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } from '@cardano-sdk/wallet';
 
 const createTxSubmitProvider = (
@@ -111,15 +104,6 @@ export const createProviders = ({
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
   experiments: {
-    useBlockfrostAssetProvider,
-    useBlockfrostChainHistoryProvider,
-    useBlockfrostNetworkInfoProvider,
-    useBlockfrostRewardsProvider,
-    useBlockfrostTxSubmitProvider,
-    useBlockfrostUtxoProvider,
-    useDrepProviderOverrideActiveStatus,
-    useBlockfrostAddressDiscovery,
-    useBlockfrostInputResolver,
     useWebSocket
   }
 }: ProvidersConfig): WalletProvidersDependencies => {
@@ -130,29 +114,17 @@ export const createProviders = ({
   const blockfrostClient = new BlockfrostClient(blockfrostConfig, {
     rateLimiter: blockfrostConfig.rateLimiter
   });
-  const assetProvider = useBlockfrostAssetProvider
-    ? new BlockfrostAssetProvider(blockfrostClient, logger)
-    : assetInfoHttpProvider(httpProviderConfig);
-  const networkInfoProvider = useBlockfrostNetworkInfoProvider
-    ? new BlockfrostNetworkInfoProvider(blockfrostClient, logger)
-    : networkInfoHttpProvider(httpProviderConfig);
-  const chainHistoryProvider = useBlockfrostChainHistoryProvider
-    ? new BlockfrostChainHistoryProvider(blockfrostClient, networkInfoProvider, logger)
-    : chainHistoryHttpProvider(httpProviderConfig);
-  const rewardsProvider = useBlockfrostRewardsProvider
-    ? new BlockfrostRewardsProvider(blockfrostClient, logger)
-    : rewardsHttpProvider(httpProviderConfig);
+  const assetProvider = assetInfoHttpProvider(httpProviderConfig);
+  const networkInfoProvider = networkInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = rewardsHttpProvider(httpProviderConfig);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
-  const txSubmitProvider = useBlockfrostTxSubmitProvider
-    ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
-    : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+  const txSubmitProvider = createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
   const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
-  const addressDiscovery = useBlockfrostAddressDiscovery
-    ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
-    : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
+  const addressDiscovery = new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
 
-  const inputResolver = useBlockfrostInputResolver ? new BlockfrostInputResolver(blockfrostClient, logger) : undefined;
+  const inputResolver = undefined;
 
   // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
   const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
@@ -205,13 +177,11 @@ export const createProviders = ({
       wsProvider,
       addressDiscovery,
       inputResolver,
-      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
+      drepProvider: drepProviderOverrideActiveStatus
     };
   }
 
-  const utxoProvider = useBlockfrostUtxoProvider
-    ? new BlockfrostUtxoProvider(blockfrostClient, logger)
-    : utxoHttpProvider(httpProviderConfig);
+  const utxoProvider = utxoHttpProvider(httpProviderConfig);
 
   return {
     assetProvider,
@@ -223,7 +193,7 @@ export const createProviders = ({
     rewardsProvider,
     addressDiscovery,
     inputResolver,
-    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
+    drepProvider: drepProviderOverrideActiveStatus
   };
 };
 

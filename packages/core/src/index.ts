@@ -24,6 +24,7 @@ export * from '@ui/components/TransactionCTAs';
 export * from '@ui/components/DappInfo';
 export * from '@ui/components/AuthorizeDapp';
 export * from '@ui/components/AssetTable';
+export * from '@ui/components/ProgrammableAssetTable';
 export * from '@ui/components/DappTransaction';
 export * from '@ui/components/Send/SendTransactionCost';
 export * from '@ui/components/MnemonicWordsAutoComplete';

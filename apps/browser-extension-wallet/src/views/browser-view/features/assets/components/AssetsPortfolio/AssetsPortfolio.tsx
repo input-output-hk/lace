@@ -30,6 +30,7 @@ const MINUTES_UNTIL_WARNING_BANNER = 3;
 export interface AssetsPortfolioProps {
   appMode: AppMode;
   assetList: IRow[];
+  programmableAssetList: IRow[];
   /**
    * Portfolio total balance in fiat, including assets and available rewards
    */
@@ -44,6 +45,7 @@ export interface AssetsPortfolioProps {
 export const AssetsPortfolio = ({
   appMode,
   assetList,
+  programmableAssetList,
   portfolioTotalBalance,
   isBalanceLoading = false,
   isLoadingFirstTime = false,
@@ -141,6 +143,7 @@ export const AssetsPortfolio = ({
       <AssetPortfolioContent
         totalAssets={totalAssets}
         assetList={assetList}
+        programmableAssetList={programmableAssetList}
         isPortfolioBalanceLoading={isPortfolioBalanceLoading}
         onRowClick={onRowClick}
         onTableScroll={onTableScroll}

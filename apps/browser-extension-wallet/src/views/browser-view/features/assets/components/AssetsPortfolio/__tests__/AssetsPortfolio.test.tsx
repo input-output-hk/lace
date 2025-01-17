@@ -67,6 +67,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_BROWSER}
         assetList={assetList}
+        programmableAssetList={assetList}
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
         totalAssets={assetList.length}
@@ -86,6 +87,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_BROWSER}
         assetList={assetList}
+        programmableAssetList={assetList}
         isLoadingFirstTime
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
@@ -105,6 +107,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_BROWSER}
         assetList={assetList}
+        programmableAssetList={assetList}
         isBalanceLoading
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
@@ -124,6 +127,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_BROWSER}
         assetList={[]}
+        programmableAssetList={[]}
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
         totalAssets={0}
@@ -141,6 +145,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_BROWSER}
         assetList={undefined}
+        programmableAssetList={undefined}
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
         totalAssets={0}
@@ -156,6 +161,7 @@ describe('AssetsPortfolio', () => {
       <AssetsPortfolio
         appMode={APP_MODE_POPUP}
         assetList={assetList}
+        programmableAssetList={assetList}
         onRowClick={onRowClickMock}
         onTableScroll={onTableScrollMock}
         totalAssets={assetList.length}
