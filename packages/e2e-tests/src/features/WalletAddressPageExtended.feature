@@ -70,7 +70,7 @@ Feature: Wallet address page
     And I enter correct password and confirm the transaction
     And The Transaction submitted screen is displayed in extended mode
     And I close the drawer by clicking close button
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     And the Sent transaction is displayed with value: "2.17 tADA" and tokens count 1
     And I open wallet: "UnusedAddressWallet" in: extended mode
     And I click "Receive" button on page header

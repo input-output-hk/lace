@@ -16,7 +16,7 @@ Feature: ADA handle - popup view
     And I enter correct password and confirm the transaction
     And The Transaction submitted screen is displayed in popup mode
     And I close the drawer by clicking close button
-    And I navigate to Transactions popup page
+    And I navigate to Activity popup page
     And the Sent transaction is displayed with handle name: "$handletosend2" in popup mode
     When I navigate to Address Book popup page
     Then I see warning for address row with name "$handletosend2"

@@ -311,7 +311,11 @@ export enum PostHogAction {
   SharedWalletsSendSomethingWentWrongView = 'shared wallets | send | something went wrong | view',
   SharedWalletsSendSomethingWentWrongBackClick = 'shared wallets | send | something went wrong | back | click',
   SharedWalletsSendSomethingWentWrongCancelClick = 'shared wallets | send | something went wrong | cancel | click',
-  SharedWalletsSendSomethingWentWrongXClick = 'shared wallets | send | something went wrong | x | click'
+  SharedWalletsSendSomethingWentWrongXClick = 'shared wallets | send | something went wrong | x | click',
+  // dapp explorer
+  DappExplorerCategoryClick = 'dapp explorer | category | click',
+  DappExplorerDappTileClick = 'dapp explorer | dapp tile | click',
+  DappExplorerDetailDrawerRedirectClick = 'dapp explorer | detail drawer | redirect | click'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

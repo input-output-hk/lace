@@ -19,7 +19,7 @@ Feature: Full experience - popup view
       | page         |
       | Tokens       |
       | NFTs         |
-      | Transactions |
+      | Activity     |
       | Staking      |
       | Address Book |
       | Settings     |

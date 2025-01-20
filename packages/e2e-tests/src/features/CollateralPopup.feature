@@ -13,7 +13,7 @@ Feature: Collateral - popup view
     Then all elements of Inactive collateral drawer are displayed
     When I fill correct password and confirm collateral
     Then I see collateral as: "Active" in settings
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     And I can see transaction 1 with type "Self Transaction"
     When I navigate to Settings popup page
     When I click on "Collateral" setting
@@ -29,7 +29,7 @@ Feature: Collateral - popup view
     Then I see collateral as: "Active" in settings
     And I see a toast with text: "Collateral added"
     And I close a toast message
-    And I navigate to Transactions popup page
+    And I navigate to Activity popup page
     And I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in popup mode
     And Wallet is synced

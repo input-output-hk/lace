@@ -21,8 +21,8 @@ Feature: Main Navigation - Popup View
 
   @LW-2690
   Scenario: Popup View - Main Navigation - Transactions item click navigates to transaction page
-    When I navigate to Transactions popup page
-    Then Transactions section is displayed
+    When I navigate to Activity popup page
+    Then Activity page is displayed
 
   @LW-2691
   Scenario: Popup View - Main Navigation - Staking item click navigates to staking page
@@ -40,7 +40,7 @@ Feature: Main Navigation - Popup View
       | section      | validateIfSectionIsDisplayed                               |
       | Tokens       | I see Tokens counter with total number of tokens displayed |
       | NFTs         | I see NFTs counter with total number of NFTs displayed     |
-      | Transactions | Transactions section is displayed                          |
+      | Activity     | Activity page is displayed                                 |
       | Staking      | I see Delegation title displayed for multidelegation       |
       | Settings     | I see settings page                                        |
       | Address Book | I see address book title                                   |

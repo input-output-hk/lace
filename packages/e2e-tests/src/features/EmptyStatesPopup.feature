@@ -21,7 +21,7 @@ Feature: Empty states
 
   @LW-4448
   Scenario: Popup View - Transactions empty state
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     Then I see empty state banner for Transactions page in popup mode
     When I click "Copy" button on empty state banner
     Then I see a toast with text: "Copied to clipboard"
