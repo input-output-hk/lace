@@ -69,7 +69,7 @@ export {
   validateWalletPassword,
   restoreWallet,
   createKeyAgent,
-  bip32Ed25519,
+  getBip32Ed25519,
   WalletMetadata,
   AccountMetadata
 } from '@wallet/lib/cardano-wallet';
