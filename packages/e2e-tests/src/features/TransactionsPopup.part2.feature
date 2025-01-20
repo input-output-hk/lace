@@ -6,7 +6,7 @@ Feature: Transactions - Popup view
 
   @LW-10596 @Testnet
   Scenario Outline: Popup View - transaction list - styling: <styling> applied to tx type: <tx_type>
-    Given I am on Transactions popup page
+    Given I am on the Activity page - popup view
     When I scroll to the row with transaction type: <tx_type>
     Then I see <styling> styling for transaction type: <tx_type>
     Examples:
@@ -22,7 +22,7 @@ Feature: Transactions - Popup view
 
   @LW-10617 @Testnet
   Scenario Outline: Popup View - transaction list - details of <tx_type> type of transaction
-    Given I am on Transactions popup page
+    Given I am on the Activity page - popup view
     When I scroll to the row with transaction type: <tx_type>
     And I click transaction type: <tx_type>
     Then I see <tx_type> transaction details

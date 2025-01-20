@@ -39,7 +39,7 @@ When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (typ
   await closeAllTabsExceptOriginalOne();
 });
 
-Then(/^I see Transactions "Learn about" widget with all relevant items$/, async () => {
+Then(/^I see Activity "Learn about" widget with all relevant items$/, async () => {
   await educationalListAssert.assertSeeTransactionsWidget();
 });
 
@@ -48,10 +48,10 @@ Then(/^I see "About staking" widget with all relevant items$/, async () => {
 });
 
 Then(
-  /^I (see|do not see) the right side panel for (Tokens|NFTs|Transactions|Staking|Settings|Address Book) section$/,
+  /^I (see|do not see) the right side panel for (Tokens|NFTs|Activity|Staking|Settings|Address Book) section$/,
   async (
     shouldSee: 'see' | 'do not see',
-    section: 'Tokens' | 'NFTs' | 'Transactions' | 'Staking' | 'Settings' | 'Address Book'
+    section: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book'
   ) => {
     await educationalListAssert.assertSeeRightSidePanel(shouldSee === 'see', section);
   }

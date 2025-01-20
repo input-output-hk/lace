@@ -9,6 +9,8 @@ import CategoryChip from './CategoryChip';
 import './styles.scss';
 import { useCategoriesFetcher } from '../../../services/api/categories';
 import { formatFiltersResponse } from '../../../services/helpers/apis-formatter';
+import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
 import { DefaultCategory } from '@views/browser/features/dapp/explorer/components/SimpleView/SimpleViewFilters/CategoryChip/categories.enum';
 
 const { useState, useEffect } = React;
@@ -18,6 +20,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const location = useLocation();
   const [active, setActive] = useState<string>('all');
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
 
   const ALL_CATEGORIES_FILTER = [
     {
@@ -56,6 +59,10 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
     const nextCategory = value.toLowerCase();
     setActive(nextCategory);
     if (onChangeCategory) onChangeCategory(nextCategory);
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, {
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_category_name: value
+    });
 
     history.push({
       search: value !== 'all' ? `category=${nextCategory}` : ''

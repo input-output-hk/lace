@@ -7,7 +7,6 @@ import { t } from '../utils/translationService';
 import testContext from '../utils/testContext';
 import { getTestWallet } from '../support/walletConfiguration';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
@@ -21,6 +20,7 @@ import {
   getNonActiveNftHdWalletName,
   getNonActiveNftWalletName
 } from '../utils/walletUtils';
+import { visit } from '../utils/pageUtils';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
@@ -41,11 +41,16 @@ Then(
     name: string,
     mode: 'extended' | 'popup'
   ) => {
-    const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
+    const fee = Number(String(testContext.load('feeValue')).split(' ')[0]);
+    const adaAllocationValue = typeOfAsset === 'NFT' ? 1.17 : 1.19;
+    const adaValue = transactionType === 'Sent' ? -(adaAllocationValue + fee) : adaAllocationValue;
+    const assetValue = transactionType === 'Received' ? 1 : -1;
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended' ? `${fee} ${Asset.CARDANO.ticker}, 1 ${name}` : `${fee} ${Asset.CARDANO.ticker} , +1`,
+        mode === 'extended'
+          ? `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker}, ${assetValue} ${name}`
+          : `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 2
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
@@ -101,7 +106,7 @@ Given(
       }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
-      await mainMenuPageObject.navigateToSection('NFTs', mode);
+      await visit('NFTs', mode);
       expect(await NftsPage.isNftDisplayed(nftName)).to.be.true;
     }
   }
@@ -115,7 +120,7 @@ Given(
       const walletToLoad = mode === 'extended' ? getNonActiveAdaHandleWalletName() : getNonActiveAdaHandle2WalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
-      await mainMenuPageObject.navigateToSection('NFTs', mode);
+      await visit('NFTs', mode);
       expect(await NftsPage.isNftDisplayed(adahandle)).to.be.true;
     }
   }

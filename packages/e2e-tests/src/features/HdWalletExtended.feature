@@ -14,11 +14,11 @@ Feature: HD wallet - extended view
 
   @LW-7552
   Scenario Outline: Transactions - HD wallet transactions displayed correctly - transaction <txNumber>
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     Then I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
     Examples:
       | txNumber | txType           | txValue | Notes                             |
-      | 1        | Sent             | 17.00   |                                   |
+      | 1        | Sent             | 17.19   |                                   |
       | 2        | Received         | 16.00   | Was received to not first address |
       | 3        | Received         | 4.00    | Was received to first address     |
       | 6        | Self Transaction | 0.17    | Was send to first address         |

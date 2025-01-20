@@ -34,7 +34,7 @@ class CommonAssert {
     const pagePathMap: Record<string, string> = {
       Tokens: '/assets',
       NFTs: '/nfts',
-      Transactions: '/activity',
+      Activity: '/activity',
       Staking: '/staking',
       'Address Book': '/address-book',
       Settings: '/settings'
