@@ -5,7 +5,7 @@ import cn from 'classnames';
 import styles from './VirtualisedGrid.module.scss';
 
 export const fixedVirtualisedGridColumns = [1, 2, 3, 4, 5, 6, 7, 8] as const;
-export type VirtualisedGridColumns = (typeof fixedVirtualisedGridColumns)[number];
+export type VirtualisedGridColumns = typeof fixedVirtualisedGridColumns[number];
 
 export const getTypedColumn = (column: number): VirtualisedGridColumns | undefined =>
   fixedVirtualisedGridColumns.find((c) => c === column);
