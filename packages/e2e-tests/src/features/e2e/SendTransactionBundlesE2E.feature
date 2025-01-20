@@ -1,7 +1,7 @@
 @SendTransactionBundles-E2E @E2E @Testnet
 Feature: Send Transaction bundles - E2E
 
-  @LW-4121 @LW-4122 @LW-3556 @Smoke @Pending @issue=LW-10974
+  @LW-4121 @LW-4122 @LW-3556 @Smoke
   Scenario: Extended view - Sending multiple assets and bundles E2E
     Given Wallet is synced
     And I save token: "Cardano" balance
@@ -32,7 +32,7 @@ Feature: Send Transaction bundles - E2E
     And I navigate to Tokens extended page
     Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Transactions extended page
-    Then the Sent transaction is displayed with value: "4.50 tADA, 0.2333 LaceCoin3, 3 LaceCoin , +1" and tokens count 4
+    Then the Sent transaction is displayed with value: "-4.72 tADA, -1 LaceCoin2, -3 LaceCoin , +1" and tokens count 4
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.sent" for 4 tokens with following details:
       | address                                  | ada       | assets                      |

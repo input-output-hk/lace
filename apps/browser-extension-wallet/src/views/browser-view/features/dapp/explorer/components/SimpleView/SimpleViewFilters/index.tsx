@@ -10,6 +10,8 @@ import CategoryChip from './CategoryChip';
 import './styles.scss';
 import { useCategoriesFetcher } from '../../../services/api/categories';
 import { formatFiltersResponse } from '../../../services/helpers/apis-formatter';
+import { PostHogAction } from '@lace/common';
+import { useAnalyticsContext } from '@providers';
 
 const { useState, useEffect } = React;
 
@@ -18,6 +20,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const location = useLocation();
   const [active, setActive] = useState<string>('all');
   const { t } = useTranslation();
+  const analytics = useAnalyticsContext();
 
   const ALL_CATEGORIES_FILTER = [
     {
@@ -35,7 +38,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   }, [active, onChangeCategory]);
 
   const handleChangeCategory = (category: string) => {
-    setActive(category.toLowerCase());
+    setActive(category);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const swiper = document.querySelector<Element & { swiper: any }>('.iog-classic-view-filters-slider')?.swiper;
@@ -57,6 +60,10 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   const handleSetActive = (value: string) => {
     setActive(value.toLowerCase());
     if (onChangeCategory) onChangeCategory(value);
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, {
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_category_name: value
+    });
 
     history.push({
       search: value !== 'all' ? `category=${value}` : ''
@@ -77,6 +84,7 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
           edgeSwipeThreshold={20}
           slidesPerGroup={3}
           speed={650}
+          mousewheel
           navigation={{
             prevEl: '.swiper-filters-prev',
             nextEl: '.swiper-filters-next'
@@ -85,10 +93,10 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
             key: `${label}`,
             className: classNames({
               'iog-tag': true,
-              'iog-tag--active': value.toLocaleLowerCase() === active
+              'iog-tag--active': value.toLocaleLowerCase() === active.toLowerCase()
             }),
             onClick: () => handleSetActive(value),
-            children: <CategoryChip active={value.toLocaleLowerCase() === active} label={label} />
+            children: <CategoryChip active={value.toLocaleLowerCase() === active.toLowerCase()} label={label} />
           })}
           data-testid="grid-category-slider"
         >

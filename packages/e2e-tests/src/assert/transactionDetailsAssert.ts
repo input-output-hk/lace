@@ -74,7 +74,7 @@ class TransactionsDetailsAssert {
         const expectedAddress = expectedActivityDetails.transactionData[i].address;
         const actualAddressSplit = (await TransactionDetailsPage.transactionDetailsToAddress(i).getText()).split('...');
         if (actualAddressSplit.length === 1) {
-          expect(expectedAddress).to.equal(actualAddressSplit[0]);
+          expect(actualAddressSplit[0]).to.equal(expectedAddress);
         } else {
           expect(expectedAddress.startsWith(actualAddressSplit[0])).to.be.true;
           expect(expectedAddress.endsWith(actualAddressSplit[1])).to.be.true;

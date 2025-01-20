@@ -104,7 +104,7 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
   const finalizeWalletRestoration = useCallback(
     async (params: Partial<CreateWalletParams>) => {
       const { source, wallet } = await createWallet(params);
-      void sendPostWalletAddAnalytics({
+      await sendPostWalletAddAnalytics({
         extendedAccountPublicKey: source.account.extendedAccountPublicKey,
         postHogActionHdWallet: postHogActions.restore.HD_WALLET,
         postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,

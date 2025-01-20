@@ -40,8 +40,8 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
     })();
   }, [createWalletData.name, walletManager.walletRepository, setCreateWalletData]);
 
-  const createWallet = (newData: Partial<CreateWalletParams>) =>
-    walletManager.createWallet({
+  const createWallet = async (newData: Partial<CreateWalletParams>) =>
+    await walletManager.createWallet({
       ...createWalletData,
       ...newData
     });

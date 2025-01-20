@@ -1,17 +1,15 @@
 @import '../../../styles/colors.scss';
 
 .iog-contact-item {
-  display: grid;
-  grid-template-columns: 24px auto;
-  grid-template-areas:
-      'icon title'
-      '. data';
-    column-gap: 12px;
-    font-size: 16px;
-    align-items: stretch;
+  display: flex;
+  flex-direction: row;
+  font-size: 16px;
+  gap: 12px;
 
   .iog-contact-item-icon {
-    grid-area: icon;
+    width: 24px;
+    height: 24px;
+    margin-top: 4px;
 
     svg {
       width: 100%;
@@ -22,12 +20,10 @@
 
   .iog-contact-item-title {
     font-weight: bold;
-    grid-area: title;
     color: var(--text-color-primary) !important;
   }
 
   .iog-contact-item-data {
-    grid-area: data;
-    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey))
+    color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
   }
 }

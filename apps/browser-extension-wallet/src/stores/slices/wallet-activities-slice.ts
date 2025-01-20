@@ -22,8 +22,7 @@ import {
   AssetActivityItemProps,
   AssetActivityListProps,
   ConwayEraCertificatesTypes,
-  DelegationActivityType,
-  TransactionActivityType
+  DelegationActivityType
 } from '@lace/core';
 import { CurrencyInfo, TxDirections } from '@src/types';
 import { getTxDirection, inspectTxType } from '@src/utils/tx-inspection';
@@ -91,7 +90,7 @@ const getDelegationAmount = (activity: DelegationActivityItemProps) => {
     activity.type === DelegationActivityType.delegationRegistration ||
     activity.type === ConwayEraCertificatesTypes.Registration
   ) {
-    return fee.plus(activity.deposit);
+    return fee.plus(activity.deposit).negated();
   }
 
   if (
@@ -101,7 +100,7 @@ const getDelegationAmount = (activity: DelegationActivityItemProps) => {
     return new BigNumber(activity.depositReclaim).minus(fee);
   }
 
-  return fee;
+  return fee.negated();
 };
 
 const FIAT_PRICE_DECIMAL_PLACES = 2;
@@ -370,12 +369,6 @@ const mapWalletActivities = memoize(
         ...(isDelegationActivity(activity) && {
           amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
           fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
-        }),
-        ...(activity.type === TransactionActivityType.self && {
-          amount: `${activity.fee} ${cardanoCoin.symbol}`,
-          fiatAmount: cardanoFiatPrice
-            ? `${getFiatAmount(new BigNumber(activity.fee), cardanoFiatPrice)} ${fiatCurrency.code}`
-            : '-'
         }),
         assets: activity.assets.map((asset: ActivityAssetProp) => {
           const assetId = Wallet.Cardano.AssetId(asset.id);

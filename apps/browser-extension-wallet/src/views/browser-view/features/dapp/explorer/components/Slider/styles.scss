@@ -67,7 +67,15 @@
    border: none;
 
   svg {
+    height: 16px;
+    width: 16px;
     stroke: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
+
+  &:not(:disabled):hover {
+    svg {
+      stroke: var(--text-color-primary) !important;
+    }
   }
 
   &:disabled {
