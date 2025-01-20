@@ -22,7 +22,6 @@ import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDr
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPage from '../elements/tokensPage';
 import localStorageInitializer from '../fixture/localStorageInitializer';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
@@ -45,6 +44,7 @@ import SwitchingPoolsModalAssert from '../assert/multidelegation/SwitchingPoolsM
 import { clearInputFieldValue } from '../utils/inputFieldUtils';
 import DelegateYourVotingPowerBanner from '../elements/multidelegation/DelegateYourVotingPowerBanner';
 import DelegateYourVotingPowerBannerAssert from '../assert/multidelegation/DelegateYourVotingPowerBannerAssert';
+import { visit } from '../utils/pageUtils';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -347,7 +347,7 @@ Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'ext
   await TokensPage.waitUntilCardanoTokenLoaded();
   await TokensPage.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-  await mainMenuPageObject.navigateToSection('Staking', mode);
+  await visit('Staking', mode);
   const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });

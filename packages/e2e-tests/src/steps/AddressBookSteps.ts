@@ -32,8 +32,8 @@ import ReviewAddressDrawerAssert from '../assert/addressBook/ReviewAddressDrawer
 import { getTestWallet } from '../support/walletConfiguration';
 import ReviewAddressDrawer from '../elements/addressbook/ReviewAddressDrawer';
 import Modal from '../elements/modal';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import { getNonActiveAdaHandle2WalletName, getNonActiveAdaHandleWalletName } from '../utils/walletUtils';
+import { visit } from '../utils/pageUtils';
 
 const addressAddedToastTranslationKey = 'browserView.addressBook.toast.addAddress';
 
@@ -369,7 +369,7 @@ When(
 Then(
   /^I add address with name: "([^"]*)" and address: "([^"]*)" to address book in (extended|popup) mode$/,
   async (name: string, address: string, mode: 'extended' | 'popup') => {
-    await mainMenuPageObject.navigateToSection('Address Book', mode);
+    await visit('Address Book', mode);
     await AddressBookPage.clickAddAddressButton();
     await AddressForm.enterName(name === 'empty' ? '' : name);
     await browser.pause(500); // Wait for input field value validation

@@ -1,5 +1,4 @@
 import { Then, When } from '@cucumber/cucumber';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
@@ -103,20 +102,23 @@ Then(/^I expect wallet repository and local storage to (not be|be) empty$/, asyn
 });
 
 When(
-  // eslint-disable-next-line max-len
-  /^I (navigate to|am on) (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) (extended|popup) page$/,
-  async (_ignored: string, targetPage: string, mode: 'extended' | 'popup') => {
-    await mainMenuPageObject.navigateToSection(targetPage, mode);
+  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApp Explorer) (extended|popup) page$/,
+  async (
+    _ignored: string,
+    targetPage: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+    mode: 'extended' | 'popup'
+  ) => {
+    await visit(targetPage, mode, false);
   }
 );
 
 When(
-  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address book) page in (extended|popup) mode$/,
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApp Explorer) page in (extended|popup) mode$/,
   async (
-    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
     mode: 'extended' | 'popup'
   ) => {
-    await visit(page, mode);
+    await visit(page, mode, true);
   }
 );
 
@@ -207,7 +209,7 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();
-  await mainMenuPageObject.navigateToSection('Tokens', mode);
+  await visit('Tokens', mode);
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
@@ -246,7 +248,7 @@ When(/^I hover over "Expand" button$/, async () => {
 });
 
 Then(
-  /^the (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
+  /^the (Tokens|NFTs|Activity|Staking|Dapp Store|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
   async (expectedPage: string) => {
     await commonAssert.assertSeePageInNewTab(expectedPage, 'extended');
   }
