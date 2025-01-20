@@ -4,13 +4,12 @@ import Games from './assets/game.component.svg';
 import Marketplace from './assets/marketplace.component.svg';
 import Collectibles from './assets/collectibles.component.svg';
 import Other from './assets/other.component.svg';
-import ShowAll from './assets/all.component.svg';
+import ShowAll from '../../../../../../../../../assets/icons/tiles-outlined.component.svg';
 import Defi from './assets/defi.component.svg';
 import ArrowChartUp from '../../../../../../../../../assets/icons/arrow-chart-up.component.svg';
 import ArrowsOppositeDirection from '../../../../../../../../../assets/icons/arrows-opposite-direction.component.svg';
-import DollarCircle from '../../../../../../../../../assets/icons/dollar-circle.component.svg';
+import Ticket from '../../../../../../../../../assets/icons/ticket-icon.component.svg';
 import Persons from '../../../../../../../../../assets/icons/persons.component.svg';
-import Icon from '@ant-design/icons';
 
 const mapOfCategoryToIcon: Record<DefaultCategory, React.ComponentType> = {
   [DefaultCategory.All]: ShowAll,
@@ -19,7 +18,7 @@ const mapOfCategoryToIcon: Record<DefaultCategory, React.ComponentType> = {
   [DefaultCategory.Collectibles]: Collectibles,
   [DefaultCategory.Marketplaces]: Marketplace,
   [DefaultCategory.HighRisk]: ArrowChartUp,
-  [DefaultCategory.Gambling]: DollarCircle,
+  [DefaultCategory.Gambling]: Ticket,
   [DefaultCategory.Exchanges]: ArrowsOppositeDirection,
   [DefaultCategory.Social]: Persons,
   [DefaultCategory.Other]: Other
@@ -30,6 +29,6 @@ const isOneOfDefaultCategories = (category: string): category is DefaultCategory
 
 export const mapCategory = (category: string): React.ReactNode => {
   // eslint-disable-next-line unicorn/no-null
-  const icon = isOneOfDefaultCategories(category) ? mapOfCategoryToIcon[category] : null;
-  return icon && <Icon component={icon} />;
+  const Icon = isOneOfDefaultCategories(category) ? mapOfCategoryToIcon[category] : null;
+  return Icon && <Icon />;
 };

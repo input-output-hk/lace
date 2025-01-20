@@ -11,12 +11,12 @@ export interface ICategoryChip {
 }
 
 const CategoryChip: React.FC<ICategoryChip> = ({ label, value, active }) => (
-  <Flex gap="$12" alignItems="center">
-    {mapCategory(value)}
-    <Text.Body.Normal className={cn({ [styles.categoryText]: !!active })} weight="$medium">
+  <Text.Body.Normal className={cn({ [styles.categoryText]: !!active })} weight="$medium">
+    <Flex gap="$12" alignItems="center">
+      <span className={styles.imageContainer}>{mapCategory(value)}</span>
       {label}
-    </Text.Body.Normal>
-  </Flex>
+    </Flex>
+  </Text.Body.Normal>
 );
 
 export default CategoryChip;
