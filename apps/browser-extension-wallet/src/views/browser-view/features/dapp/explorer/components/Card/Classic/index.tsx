@@ -30,7 +30,7 @@ export const IogCardClassic: React.FC<IogCardProps> = ({ onClick, ...props }) =>
             </Text.Body.Normal>
             <Box w="$fill">
               <Text.Body.Small weight="$semibold" color="secondary" data-testid="dappCategory">
-                {categories?.map((category, index) => (categories.length !== index + 1 ? `${category} ` : category))}
+                {categories.join(', ')}
               </Text.Body.Small>
             </Box>
           </Flex>
