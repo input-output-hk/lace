@@ -49,6 +49,11 @@ class ExtendedView extends LaceView implements Page {
     await browser.url(`${await this.getBaseUrl()}#/address-book`);
     await this.waitForPreloaderToDisappear();
   }
+
+  async visitDAppExplorer() {
+    await browser.url(`${await this.getBaseUrl()}#/dapp-explorer`);
+    await this.waitForPreloaderToDisappear();
+  }
 }
 
 export default new ExtendedView();

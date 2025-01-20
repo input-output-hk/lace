@@ -11,7 +11,7 @@ Feature: LW: Network Switching - extended view
     And Wallet is synced
     When I navigate to Tokens extended page
     Then I see <ticker> in the list of tokens
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     Then I see <ticker> in the list of transactions
     When I navigate to Staking extended page

@@ -14,7 +14,7 @@ Feature: HD wallet - extended view
 
   @LW-7552
   Scenario Outline: Transactions - HD wallet transactions displayed correctly - transaction <txNumber>
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     Then I can see transaction <txNumber> has type "<txType>" and value "<txValue>"
     Examples:
       | txNumber | txType           | txValue | Notes                             |
