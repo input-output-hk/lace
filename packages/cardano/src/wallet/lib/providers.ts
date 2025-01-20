@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
-import { BlockfrostInputResolver, WalletProvidersDependencies } from '@src/wallet';
 import { AxiosAdapter } from 'axios';
 import { Logger } from 'ts-log';
 import {
@@ -42,6 +41,8 @@ import {
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
 import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } from '@cardano-sdk/wallet';
+import { WalletProvidersDependencies } from './cardano-wallet';
+import { BlockfrostInputResolver } from './blockfrost-input-resolver';
 
 const createTxSubmitProvider = (
   httpProviderConfig: CreateHttpProviderConfig<Provider>,
