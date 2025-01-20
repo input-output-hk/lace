@@ -20,6 +20,7 @@ describe('useFetchImage', () => {
         return mockImage;
       }
     } as typeof Image;
+    process.env.BLOCKFROST_IPFS_URL = 'https://ipfs.blockfrost.dev';
   });
 
   afterEach(() => {

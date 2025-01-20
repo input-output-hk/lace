@@ -10,7 +10,7 @@ type ImageFetchStateMap = {
 
 export type UseFetchImageState = ImageFetchStateMap[ImageFetchStatus];
 
-const BLOCKFROST_IPFS_URL = process.env.BLOCKFROST_IPFS_URL || '';
+const BLOCKFROST_IPFS_URL = process.env.BLOCKFROST_IPFS_URL || ' ';
 
 const maxConcurrentBlockfrostRequests = Number.parseInt(process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS || '0', 10);
 let concurrentBlockfrostRequestsCount = 0;
