@@ -49,7 +49,7 @@ const isImageLoading = (imageUrl: string): Promise<void> =>
   new Promise((resolve, reject) => {
     const img = new Image();
     img.addEventListener('load', () => resolve());
-    img.addEventListener('error', () => reject());
+    img.addEventListener('error', (err) => reject(err));
     img.src = imageUrl;
   });
 
