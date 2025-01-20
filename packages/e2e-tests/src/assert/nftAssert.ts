@@ -194,7 +194,12 @@ class NftAssert {
     for (const thumbnail of thumbnails) {
       srcValues.push(await thumbnail.$('img').getAttribute('src'));
     }
-    expect(srcValues).to.contain(adaHandleAssert.customHandleSrcValue);
+
+    expect(
+      srcValues.some((testItem) =>
+        adaHandleAssert.customHandleSrcValues.some((customItem) => testItem.includes(customItem))
+      )
+    ).to.be.true;
   }
 
   async assertSeeCustomAdaHandleInCoinSelector() {

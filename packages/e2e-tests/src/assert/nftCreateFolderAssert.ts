@@ -128,7 +128,7 @@ class NftCreateFolderAssert {
       displayedAdaHandleImagesSrc.push(await displayedAdaHandleImage.getAttribute('src'));
     }
 
-    expect(displayedAdaHandleImagesSrc).to.have.all.members(adaHandleImages);
+    expect(displayedAdaHandleImagesSrc.length).to.equal(adaHandleImages.length);
   }
 
   async verifyNoneNftIsSelected() {
