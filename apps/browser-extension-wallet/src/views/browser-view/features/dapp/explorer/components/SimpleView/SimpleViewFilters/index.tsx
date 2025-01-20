@@ -18,7 +18,7 @@ const { useState, useEffect } = React;
 const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) => {
   const history = useHistory();
   const location = useLocation();
-  const [active, setActive] = useState<string>('all');
+  const [active, setActive] = useState<string>(DefaultCategory.All);
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
 
@@ -56,16 +56,15 @@ const SimpleViewFilters: React.FC<ISimpleViewFilters> = ({ onChangeCategory }) =
   }, [location, categories]);
 
   const handleSetActive = (value: string) => {
-    const nextCategory = value.toLowerCase();
-    setActive(nextCategory);
-    if (onChangeCategory) onChangeCategory(nextCategory);
+    setActive(value);
+    if (onChangeCategory) onChangeCategory(value);
     void analytics.sendEventToPostHog(PostHogAction.DappExplorerCategoryClick, {
       // eslint-disable-next-line camelcase
       dapp_explorer_selected_category_name: value
     });
 
     history.push({
-      search: value !== 'all' ? `category=${nextCategory}` : ''
+      search: value !== 'all' ? `category=${value}` : ''
     });
   };
 

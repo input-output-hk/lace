@@ -11,8 +11,7 @@ import LinkIcon from '../../assets/icons/link.component.svg';
 
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { useAnalyticsContext } from '@providers';
-import { useExternalLinkOpener } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -20,7 +19,11 @@ const shortenURL = (url?: string) => {
   return url?.length > maxLength ? `${url.slice(0, maxLength)}...` : url;
 };
 
-const ProjectDetail: React.FC = () => {
+type ProjectDetailProps = {
+  selectedCategory: string;
+};
+
+const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedCategory }) => {
   const {
     state: { open, data },
     dispatch
@@ -36,7 +39,7 @@ const ProjectDetail: React.FC = () => {
     openExternalLink(data?.link);
     void analytics.sendEventToPostHog(PostHogAction.DappExplorerDetailDrawerRedirectClick, {
       // eslint-disable-next-line camelcase
-      dapp_explorer_selected_category_name: data?.category,
+      dapp_explorer_selected_category_name: selectedCategory,
       // eslint-disable-next-line camelcase
       dapp_explorer_selected_dapp_name: data?.title,
       // eslint-disable-next-line camelcase
