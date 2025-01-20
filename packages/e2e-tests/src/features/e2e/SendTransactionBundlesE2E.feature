@@ -32,7 +32,7 @@ Feature: Send Transaction bundles - E2E
     And I navigate to Tokens extended page
     Then the sent amount of: "4.50" with "saved" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Activity extended page
-    Then the Sent transaction is displayed with value: "4.50 tADA, 0.2333 LaceCoin3, 3 LaceCoin , +1" and tokens count 4
+    Then the Sent transaction is displayed with value: "-4.72 tADA, -1 LaceCoin2, -3 LaceCoin , +1" and tokens count 4
     And I click and open recent transactions details until find transaction with correct hash
     Then The Tx details are displayed as "core.activityDetails.sent" for 4 tokens with following details:
       | address                                  | ada       | assets                      |

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Drawer, DrawerNavigation, Button } from '@lace/common';
+import { Drawer, DrawerNavigation, Button, PostHogAction } from '@lace/common';
 import { Tabs } from 'antd';
 import { EDrawerAction, useDrawer } from './drawer';
 import { ISectionCardItem } from '../../services/helpers/apis-formatter/types';
@@ -11,6 +11,7 @@ import LinkIcon from '../../assets/icons/link.component.svg';
 
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { useAnalyticsContext } from '@providers';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -23,6 +24,7 @@ const ProjectDetail: React.FC = () => {
     state: { open, data },
     dispatch
   } = useDrawer<ISectionCardItem>();
+  const analytics = useAnalyticsContext();
 
   const { t } = useTranslation();
 
@@ -30,6 +32,14 @@ const ProjectDetail: React.FC = () => {
 
   const handleOpenUrl = () => {
     window.open(data?.companyWebsite, 'blank');
+    void analytics.sendEventToPostHog(PostHogAction.DappExplorerDetailDrawerRedirectClick, {
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_category_name: data?.category,
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_dapp_name: data?.title,
+      // eslint-disable-next-line camelcase
+      dapp_explorer_selected_dapp_url: data?.link
+    });
   };
 
   const tabItems = [
