@@ -41,7 +41,7 @@ export const useDrawerConfiguration = ({
       return error ? t('core.signMessage.tryAgainLabel') : t('core.signMessage.signWithHardwareWalletButton');
     }
     return t('core.signMessage.signButton');
-  }, [isSigningInProgress, isHardwareWallet, t]);
+  }, [isSigningInProgress, t, isHardwareWallet, error]);
 
   const getActionButton = useCallback(() => {
     if (signatureObject?.signature && !error) {

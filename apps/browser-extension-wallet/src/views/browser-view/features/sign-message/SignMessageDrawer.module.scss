@@ -52,10 +52,5 @@
 }
 
 .hardwareErrorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: size_unit(2);
   flex: 1;
-  justify-content: center;
 }

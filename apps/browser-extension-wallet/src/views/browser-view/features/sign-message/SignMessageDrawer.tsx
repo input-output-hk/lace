@@ -3,7 +3,7 @@ import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
 import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets } from '@lace/core';
 import { TextArea, PostHogAction, toast } from '@lace/common';
-import { Text } from '@input-output-hk/lace-ui-toolkit';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import styles from './SignMessageDrawer.module.scss';
@@ -155,13 +155,17 @@ export const SignMessageDrawer: React.FC = () => {
   );
 
   const renderHardwareSigningError = () => (
-    <div className={styles.hardwareErrorContainer}>
+    <Flex
+      flexDirection="column"
+      alignItems="center"
+      gap="$16"
+      justifyContent="center"
+      className={styles.hardwareErrorContainer}
+    >
       <ResultMessage
         status="error"
         title={
-          <>
-            <div data-testid="sign-message-error-title">{t('browserView.transaction.fail.oopsSomethingWentWrong')}</div>
-          </>
+          <div data-testid="sign-message-error-title">{t('browserView.transaction.fail.oopsSomethingWentWrong')}</div>
         }
         description={
           <>
@@ -174,7 +178,7 @@ export const SignMessageDrawer: React.FC = () => {
           </>
         }
       />
-    </div>
+    </Flex>
   );
 
   const renderContent = () => {
