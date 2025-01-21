@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
-import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets } from '@lace/core';
+import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets, shortenWalletOwnAddress } from '@lace/core';
 import { TextArea, PostHogAction, toast } from '@lace/common';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,8 @@ export const SignMessageDrawer: React.FC = () => {
     error,
     hardwareWalletError,
     isHardwareWallet,
-    performSigning
+    performSigning,
+    resetSigningState
   } = useSignMessageState();
   const { password, setPassword, clearSecrets } = useSecrets();
   const [selectedAddress, setSelectedAddress] = useState('');
@@ -56,6 +57,13 @@ export const SignMessageDrawer: React.FC = () => {
     analytics.sendEventToPostHog(PostHogAction.SignMessageCopySignatureClick);
   }, [analytics, t]);
 
+  const goBack = useCallback(() => {
+    clearSecrets();
+    setShouldShowPasswordPrompt(false);
+    setShowHardwareSigningError(false);
+    resetSigningState();
+  }, [clearSecrets, resetSigningState]);
+
   useDrawerConfiguration({
     selectedAddress,
     message,
@@ -65,7 +73,8 @@ export const SignMessageDrawer: React.FC = () => {
     handleSign,
     handleCopy,
     clearSecrets,
-    signatureObject
+    signatureObject,
+    goBack
   });
 
   const renderInitialState = () => (
@@ -88,7 +97,7 @@ export const SignMessageDrawer: React.FC = () => {
         <WalletOwnAddressDropdown
           addresses={usedAddresses}
           onSelect={setSelectedAddress}
-          placeholder={t('core.signMessage.selectAddress')}
+          placeholder={selectedAddress ? shortenWalletOwnAddress(selectedAddress) : t('core.signMessage.selectAddress')}
         />
       </div>
       <div className={styles.inputGroup}>

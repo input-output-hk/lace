@@ -18,6 +18,7 @@ interface UseDrawerConfigurationProps {
   handleCopy: () => void;
   clearSecrets: () => void;
   signatureObject: Cip30DataSignature | undefined;
+  goBack: () => void;
 }
 
 export const useDrawerConfiguration = ({
@@ -29,7 +30,8 @@ export const useDrawerConfiguration = ({
   handleCopy,
   error,
   clearSecrets,
-  signatureObject
+  signatureObject,
+  goBack
 }: UseDrawerConfigurationProps): void => {
   const { t } = useTranslation();
   const [, setDrawerConfig] = useDrawer();
@@ -38,10 +40,14 @@ export const useDrawerConfiguration = ({
   const getActionButtonLabel = useCallback(() => {
     if (isSigningInProgress) return t('core.signMessage.signingInProgress');
     else if (isHardwareWallet) {
-      return error ? t('core.signMessage.tryAgainLabel') : t('core.signMessage.signWithHardwareWalletButton');
+      return error ? t('core.signMessage.back') : t('core.signMessage.signWithHardwareWalletButton');
     }
     return t('core.signMessage.signButton');
   }, [isSigningInProgress, t, isHardwareWallet, error]);
+
+  const manageSign = useCallback(() => {
+    isHardwareWallet && error ? goBack() : handleSign();
+  }, [isHardwareWallet, error, goBack, handleSign]);
 
   const getActionButton = useCallback(() => {
     if (signatureObject?.signature && !error) {
@@ -56,7 +62,7 @@ export const useDrawerConfiguration = ({
     }
     return (
       <Button
-        onClick={handleSign}
+        onClick={manageSign}
         disabled={!selectedAddress || !message || isSigningInProgress}
         data-testid={'sign-message-button'}
       >
@@ -64,14 +70,14 @@ export const useDrawerConfiguration = ({
       </Button>
     );
   }, [
-    signatureObject,
-    handleCopy,
-    handleSign,
+    signatureObject?.signature,
+    error,
+    manageSign,
     selectedAddress,
     message,
-    error,
     isSigningInProgress,
     getActionButtonLabel,
+    handleCopy,
     t
   ]);
 
@@ -90,11 +96,11 @@ export const useDrawerConfiguration = ({
           }}
           data-testid={'close-button'}
         >
-          {t('core.signMessage.closeButton')}
+          {error && isHardwareWallet ? t('core.signMessage.cancelButton') : t('core.signMessage.closeButton')}
         </Button>
       </div>
     ),
-    [getActionButton, closeDrawer, clearSecrets, t]
+    [getActionButton, error, isHardwareWallet, t, closeDrawer, clearSecrets]
   );
 
   useEffect(() => {
