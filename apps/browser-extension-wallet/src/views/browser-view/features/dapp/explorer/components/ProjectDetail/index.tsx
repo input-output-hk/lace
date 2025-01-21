@@ -12,6 +12,7 @@ import LinkIcon from '../../assets/icons/link.component.svg';
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
+import capitalize from 'lodash/fp/capitalize';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -92,7 +93,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedCategory }) => {
                 {data?.title}
               </Text.Body.Normal>
               <Text.Body.Small color="secondary" weight="$semibold">
-                {data.categories.join(', ')}
+                {data.categories.map((c) => capitalize(c)).join(', ')}
               </Text.Body.Small>
             </Flex>
           </div>
