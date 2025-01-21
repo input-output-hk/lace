@@ -29,6 +29,7 @@ export class ExtensionDocumentStore<T extends {}> extends ExtensionStore impleme
 
   /**
    * @param docId unique document id within the store, used as extension storage key
+   * @param logger
    */
   constructor(protected docId: string, logger: Logger) {
     super(contextLogger(logger, `ExtensionStore(${docId})`));

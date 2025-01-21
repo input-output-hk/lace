@@ -31,7 +31,7 @@ import { WsProvider } from '@cardano-sdk/cardano-services-client';
 let bip32Ed25519: Promise<Crypto.SodiumBip32Ed25519> | undefined;
 
 export const getBip32Ed25519 = async (): Promise<Crypto.SodiumBip32Ed25519> =>
-  bip32Ed25519 || (bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create());
+  bip32Ed25519 || (bip32Ed25519 = Crypto.SodiumBip32Ed25519.create());
 
 export type KeyAgentsByChain = Record<ChainName, { keyAgentData: KeyManagement.SerializableKeyAgentData }>;
 
@@ -96,7 +96,11 @@ export const restoreWallet = async (
   keyAgentData: KeyManagement.SerializableKeyAgentData,
   getPassword: () => Promise<Uint8Array>
 ): Promise<{ keyAgent: KeyManagement.KeyAgent }> => {
-  const keyAgent = await restoreKeyAgent(keyAgentData, { logger: console, bip32Ed25519 }, getPassword);
+  const keyAgent = await restoreKeyAgent(
+    keyAgentData,
+    { logger: console, bip32Ed25519: await getBip32Ed25519() },
+    getPassword
+  );
   return { keyAgent };
 };
 
@@ -128,7 +132,7 @@ export const validateWalletPassword = async (
     // Not needed for this
     {
       logger: console,
-      bip32Ed25519
+      bip32Ed25519: await getBip32Ed25519()
     },
     getPassword
   );
@@ -160,7 +164,7 @@ export const validateWalletMnemonic = async (
     },
     {
       logger: console,
-      bip32Ed25519
+      bip32Ed25519: await getBip32Ed25519()
     }
   );
 
@@ -170,7 +174,7 @@ export const validateWalletMnemonic = async (
   return originalPublicKey === validatingPublicKey;
 };
 
-export const createKeyAgent = (
+export const createKeyAgent = async (
   keyAgentData: KeyManagement.SerializableKeyAgentData,
   getPassword: () => Promise<Uint8Array>
 ): Promise<KeyManagement.KeyAgent> =>
@@ -178,7 +182,7 @@ export const createKeyAgent = (
     keyAgentData,
     {
       logger: console,
-      bip32Ed25519
+      bip32Ed25519: await getBip32Ed25519()
     },
     getPassword
   );
