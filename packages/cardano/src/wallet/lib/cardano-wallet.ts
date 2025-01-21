@@ -28,7 +28,7 @@ import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
 import { WsProvider } from '@cardano-sdk/cardano-services-client';
 
-let bip32Ed25519: Crypto.SodiumBip32Ed25519;
+let bip32Ed25519: Promise<Crypto.SodiumBip32Ed25519> | undefined;
 
 export const getBip32Ed25519 = async (): Promise<Crypto.SodiumBip32Ed25519> =>
   bip32Ed25519 || (bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create());

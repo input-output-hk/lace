@@ -1,10 +1,10 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 import { rewardAcountMock } from '@src/wallet/test/mocks/mock';
 import { mockObservableWallet } from '@src/wallet/test/mocks';
 import { firstValueFrom, of } from 'rxjs';
 import { buildDelegation } from '../build-delegation';
+
 const {
   RewardAccount,
   CredentialType: { KeyHash },
@@ -16,7 +16,7 @@ describe('Testing buildDelegation', () => {
   const stakeKeyHash = RewardAccount.toHash(rewardAcountMock.address);
   const stakeCredential = {
     type: KeyHash,
-    hash: Hash28ByteBase16.fromEd25519KeyHashHex(stakeKeyHash)
+    hash: stakeKeyHash
   };
   const stakeKeyCertificate: Cardano.StakeAddressCertificate = {
     __typename: CertificateType.StakeRegistration,

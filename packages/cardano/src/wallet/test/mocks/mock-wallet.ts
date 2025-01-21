@@ -30,9 +30,19 @@ interface MockWallet {
   keyAgent: KeyManagement.InMemoryKeyAgent;
 }
 
-export const rewardAccountInfoProviderStub = (): RewardAccountInfoProvider => {
-  throw new Error('TODO: not implemented');
-};
+export const rewardAccountInfoProviderStub = (): RewardAccountInfoProvider => ({
+  healthCheck: jest.fn().mockResolvedValue({ ok: true }),
+  rewardAccountInfo: jest.fn().mockResolvedValue({
+    address,
+    credentialStatus: Cardano.StakeCredentialStatus.Registered,
+    rewardBalance: BigInt(1_000_000)
+  }),
+  delegationPortfolio: () =>
+    new Promise<Cardano.Cip17DelegationPortfolio | null>((resolve) => {
+      // eslint-disable-next-line unicorn/no-null
+      resolve(null);
+    })
+});
 
 export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent): Promise<MockWallet> => {
   const keyAgent = customKeyAgent ?? (await testKeyAgent());
