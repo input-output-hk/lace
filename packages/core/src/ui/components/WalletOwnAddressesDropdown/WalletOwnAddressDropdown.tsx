@@ -20,6 +20,9 @@ export type WalletOwnAddressDropdownProps = {
 const FIRST_PART_ADDRESS_LENGTH = 29;
 const LAST_PART_ADDRESS_LENGTH = 14;
 
+export const shortenWalletOwnAddress = (address: string): string =>
+  addEllipsis(address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH);
+
 export const WalletOwnAddressDropdown = ({
   addresses,
   onSelect,
@@ -31,7 +34,7 @@ export const WalletOwnAddressDropdown = ({
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     const selectedItem = addresses.find((address) => address.id.toString() === e.key);
     if (selectedItem) {
-      const shortenedAddress = addEllipsis(selectedItem.address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH);
+      const shortenedAddress = shortenWalletOwnAddress(selectedItem.address);
       setSelectedAddress(shortenedAddress);
       onSelect(selectedItem.address);
     }
