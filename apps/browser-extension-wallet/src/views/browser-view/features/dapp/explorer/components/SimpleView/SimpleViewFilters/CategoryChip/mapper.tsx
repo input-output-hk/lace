@@ -1,47 +1,34 @@
 import * as React from 'react';
-import Development from './assets/development.component.svg';
-import Education from './assets/education.component.svg';
+import { DefaultCategory } from './categories.enum';
 import Games from './assets/game.component.svg';
-import Identity from './assets/identity.component.svg';
 import Marketplace from './assets/marketplace.component.svg';
-import Nft from './assets/nft.component.svg';
+import Collectibles from './assets/collectibles.component.svg';
 import Other from './assets/other.component.svg';
-import Security from './assets/security.component.svg';
-import ShowAll from './assets/all.component.svg';
+import ShowAll from '../../../../../../../../../assets/icons/tiles-outlined.component.svg';
 import Defi from './assets/defi.component.svg';
-import { Categories } from './categories.enum';
-import Icon from '@ant-design/icons';
+import ArrowChartUp from '../../../../../../../../../assets/icons/arrow-chart-up.component.svg';
+import ArrowsOppositeDirection from '../../../../../../../../../assets/icons/arrows-opposite-direction.component.svg';
+import Ticket from '../../../../../../../../../assets/icons/ticket-icon.component.svg';
+import Persons from '../../../../../../../../../assets/icons/persons.component.svg';
+
+const mapOfCategoryToIcon: Record<DefaultCategory, React.ComponentType> = {
+  [DefaultCategory.All]: ShowAll,
+  [DefaultCategory.Games]: Games,
+  [DefaultCategory.Defi]: Defi,
+  [DefaultCategory.Collectibles]: Collectibles,
+  [DefaultCategory.Marketplaces]: Marketplace,
+  [DefaultCategory.HighRisk]: ArrowChartUp,
+  [DefaultCategory.Gambling]: Ticket,
+  [DefaultCategory.Exchanges]: ArrowsOppositeDirection,
+  [DefaultCategory.Social]: Persons,
+  [DefaultCategory.Other]: Other
+};
+
+const isOneOfDefaultCategories = (category: string): category is DefaultCategory =>
+  Object.values<string>(DefaultCategory).includes(category);
 
 export const mapCategory = (category: string): React.ReactNode => {
-  const _category = category.toUpperCase();
-
-  const icon = (() => {
-    switch (_category) {
-      case Categories.Defi:
-        return Defi;
-      case Categories.Development:
-        return Development;
-      case Categories.Education:
-        return Education;
-      case Categories.Games:
-        return Games;
-      case Categories.Identity:
-        return Identity;
-      case Categories.Marketplace:
-        return Marketplace;
-      case Categories.Nft:
-        return Nft;
-      case Categories.Other:
-        return Other;
-      case Categories.Security:
-        return Security;
-      case Categories.All:
-        return ShowAll;
-      default:
-        // eslint-disable-next-line unicorn/no-null
-        return null;
-    }
-  })();
-
-  return icon && <Icon component={icon} />;
+  // eslint-disable-next-line unicorn/no-null
+  const Icon = isOneOfDefaultCategories(category) ? mapOfCategoryToIcon[category] : null;
+  return Icon && <Icon />;
 };

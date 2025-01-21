@@ -34,7 +34,7 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
     dispatch({ type: EDrawerAction.OPEN, data: drawerData });
     void analytics.sendEventToPostHog(PostHogAction.DappExplorerDappTileClick, {
       // eslint-disable-next-line camelcase
-      dapp_explorer_selected_category_name: drawerData?.category,
+      dapp_explorer_selected_category_name: selectedCategory,
       // eslint-disable-next-line camelcase
       dapp_explorer_selected_dapp_name: drawerData?.title,
       // eslint-disable-next-line camelcase
@@ -53,13 +53,11 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
 
   const renderCards = (dappsToRender: ISectionCardItem[]) =>
     dappsToRender.map((dapp, index) => (
-      <div key={`card-${dapp.subject}-${index}`} className="card-container">
+      <div key={`card-${dapp.id}-${index}`} className="card-container">
         <IogCardClassic
           {...dapp}
-          description={dapp.shortDescription}
-          categories={[dapp.category, dapp.subcategory].filter(Boolean)}
+          categories={dapp.categories}
           image={dapp.image}
-          isCertified={dapp.isCertified}
           onClick={() => handleOpenDrawer(dapp)}
           title={dapp.title}
         />

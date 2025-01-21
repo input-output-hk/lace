@@ -11,7 +11,8 @@ import LinkIcon from '../../assets/icons/link.component.svg';
 
 import './styles.scss';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
+import capitalize from 'lodash/fp/capitalize';
 
 const shortenURL = (url?: string) => {
   if (!url) return '';
@@ -19,22 +20,27 @@ const shortenURL = (url?: string) => {
   return url?.length > maxLength ? `${url.slice(0, maxLength)}...` : url;
 };
 
-const ProjectDetail: React.FC = () => {
+type ProjectDetailProps = {
+  selectedCategory: string;
+};
+
+const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedCategory }) => {
   const {
     state: { open, data },
     dispatch
   } = useDrawer<ISectionCardItem>();
   const analytics = useAnalyticsContext();
 
+  const openExternalLink = useExternalLinkOpener();
   const { t } = useTranslation();
 
   const handleClose = () => dispatch({ type: EDrawerAction.CLOSE });
 
   const handleOpenUrl = () => {
-    window.open(data?.companyWebsite, 'blank');
+    openExternalLink(data?.link);
     void analytics.sendEventToPostHog(PostHogAction.DappExplorerDetailDrawerRedirectClick, {
       // eslint-disable-next-line camelcase
-      dapp_explorer_selected_category_name: data?.category,
+      dapp_explorer_selected_category_name: selectedCategory,
       // eslint-disable-next-line camelcase
       dapp_explorer_selected_dapp_name: data?.title,
       // eslint-disable-next-line camelcase
@@ -47,9 +53,12 @@ const ProjectDetail: React.FC = () => {
     { label: t('dappdiscovery.side_panel.contact'), key: '2', children: <Contact /> }
   ];
 
+  // eslint-disable-next-line unicorn/no-null
+  if (!open || !data) return null;
+
   return (
     <Drawer
-      open={open}
+      open
       onClose={handleClose}
       navigation={
         <DrawerNavigation onCloseIconClick={handleClose} title={t('dappdiscovery.side_panel.about_this_dapp')} />
@@ -84,7 +93,7 @@ const ProjectDetail: React.FC = () => {
                 {data?.title}
               </Text.Body.Normal>
               <Text.Body.Small color="secondary" weight="$semibold">
-                {data?.category}
+                {data.categories.map((c) => capitalize(c)).join(', ')}
               </Text.Body.Small>
             </Flex>
           </div>

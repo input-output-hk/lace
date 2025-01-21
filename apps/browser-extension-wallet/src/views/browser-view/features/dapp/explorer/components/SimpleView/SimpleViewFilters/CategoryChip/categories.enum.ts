@@ -1,12 +1,12 @@
-export enum Categories {
-  Defi = 'DEFI',
-  Development = 'DEVELOPMENT',
-  Education = 'EDUCATION',
-  Games = 'GAMES',
-  Identity = 'IDENTITY',
-  Marketplace = 'MARKETPLACE',
-  Nft = 'NFT',
-  Other = 'OTHER',
-  Security = 'SECURITY',
-  All = 'SHOW ALL'
+export enum DefaultCategory {
+  All = 'all',
+  Games = 'games',
+  Defi = 'defi',
+  Collectibles = 'collectibles',
+  Marketplaces = 'marketplaces',
+  HighRisk = 'high-risk',
+  Gambling = 'gambling',
+  Exchanges = 'exchanges',
+  Social = 'social',
+  Other = 'other'
 }

@@ -1,8 +1,6 @@
 interface ISectionCardItemImage {
   alt: string;
   src: string;
-  width: number;
-  height: number;
 }
 
 export interface ICertification {
@@ -22,21 +20,21 @@ export interface ISectionCardCertificate {
 }
 
 export interface ISectionCardItem {
-  subject: string;
-  category: string;
+  id: string;
+  categories: string[];
   title: string;
-  shortDescription: string;
-  subcategory: string;
   link: string;
-  image?: Partial<ISectionCardItemImage>;
+  image?: ISectionCardItemImage;
+  shortDescription: string;
   longDescription: string;
   screenshots?: IScreenshot[];
-  providerName: string;
   email: string;
   companyWebsite: string;
-  certificates?: Partial<ISectionCardCertificate[]>;
-  selectedCertificate?: Partial<ISectionCardCertificate>;
-  isCertified?: boolean;
+  socialLinks: Array<{
+    title: string;
+    type: string;
+    url: string;
+  }>;
 }
 
 export interface ISectionCard {

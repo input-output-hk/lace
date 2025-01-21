@@ -7,7 +7,9 @@ import { Trans } from 'react-i18next';
 export const DappListTitle = ({ title, count }: { title: string; count?: number }): ReactElement => (
   <Flex alignItems="flex-end">
     <Flex justifyContent="center" alignItems="center" gap="$4">
-      <Text.Heading>{title}</Text.Heading>
+      <Text.Heading>
+        <span style={{ textTransform: 'capitalize' }}>{title}</span>
+      </Text.Heading>
       <Tooltip
         label={
           <Trans
@@ -33,7 +35,6 @@ export const DappListTitle = ({ title, count }: { title: string; count?: number 
         <InfoComponent className={styles.icon} />
       </Tooltip>
     </Flex>
-
     {count !== undefined ? (
       <Text.Label>({count})</Text.Label>
     ) : // eslint-disable-next-line unicorn/no-null

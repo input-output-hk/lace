@@ -1,11 +1,64 @@
 import { useEffect, useState } from 'react';
-import { PaginationInput } from './types';
-import { mockedDapps as mockedData } from './dapps';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
 
-const mockedDapps = Array.from({ length: 10 })
-  .fill(1)
-  .flatMap(() => mockedData);
+const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
+const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
+
+export type PaginationInput = {
+  offset: number;
+  limit: number;
+};
+
+type DAppRadarDappItem = {
+  dappId: number;
+  name: string;
+  description: string;
+  fullDescription: string;
+  logo: string;
+  link: string;
+  website: string;
+  chains: string[];
+  categories: string[];
+  socialLinks: Array<{
+    title: string;
+    type: string;
+    url: string;
+  }>;
+  metrics: {
+    transactions: number;
+    transactionsPercentageChange: number;
+    uaw: number;
+    uawPercentageChange: number;
+    volume: number;
+    volumePercentageChange: number;
+    balance: number;
+    balancePercentageChange: number;
+  };
+  tags: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+};
+
+const mapResponse = (dapps: DAppRadarDappItem[]): ISectionCardItem[] =>
+  dapps.map((dapp) => ({
+    id: String(dapp.dappId),
+    categories: dapp.categories,
+    title: dapp.name,
+    image: {
+      src: dapp.logo,
+      alt: dapp.name
+    },
+    certificates: undefined,
+    shortDescription: dapp.description,
+    longDescription: dapp.fullDescription,
+    email: '',
+    link: dapp.website,
+    companyWebsite: '',
+    screenshots: undefined,
+    socialLinks: dapp.socialLinks
+  }));
 
 type DAppFetcherParams = {
   category?: string;
@@ -15,35 +68,63 @@ type DAppFetcherParams = {
   _subcategory?: string;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-unused-vars
-const useDAppFetcher = ({ page: { limit } }: DAppFetcherParams) => {
-  const [hasNextPage, setHasNextPage] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [data, setData] = useState<ISectionCardItem[]>([]);
+const useDAppFetcher = ({
+  category,
+  page: { limit }
+}: DAppFetcherParams): {
+  loading: boolean;
+  data: ISectionCardItem[];
+  fetchMore: () => void;
+  hasNextPage: boolean;
+} => {
+  const [data, setData] = useState<DAppRadarDappItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      setLoading(true);
-      const fetchingTime = 600;
-      await new Promise((resolve) => setTimeout(resolve, fetchingTime));
-
-      const requestedItemsCount = (currentPage + 1) * limit;
-      const items = mockedDapps.slice(0, requestedItemsCount);
-      if (items.length < requestedItemsCount) {
-        setHasNextPage(false);
+      if (!dappRadarApiKey) {
+        setData([]);
+        setLoading(false);
+        return;
       }
-      setData(items);
-      setLoading(false);
-    })();
-  }, [currentPage, limit]);
 
+      setLoading(true);
+      const searchParams = new URLSearchParams('');
+      searchParams.set('chain', 'cardano');
+      searchParams.set('range', '30d');
+      searchParams.set('top', '100');
+      if (category) {
+        searchParams.set('category', category);
+      }
+
+      try {
+        const response = await window.fetch(`${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`, {
+          headers: {
+            Accept: 'application/json',
+            'x-api-key': dappRadarApiKey
+          }
+        });
+
+        let results: DAppRadarDappItem[] = [];
+        if (response.ok) {
+          const parsedResponse = (await response.json()) as { results: DAppRadarDappItem[] };
+          results = parsedResponse.results;
+        }
+        setData(results);
+      } catch {
+        console.error('Failed to fetch dapp list.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [category, limit]);
+
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   const fetchMore = () => {
-    if (!hasNextPage) return;
-    setCurrentPage(currentPage + 1);
+    console.error('Pagination not implemented!');
   };
 
-  return { loading, data, error: undefined as Error, fetchMore, hasNextPage };
+  return { loading, data: mapResponse(data), fetchMore, hasNextPage: false };
 };
 
 export { useDAppFetcher };

@@ -37,8 +37,6 @@ import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
-import { usePostHogClientContext } from '@providers/PostHogClientProvider';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/Crash';
 
@@ -124,13 +122,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
   const { t } = useTranslation();
-  const posthog = usePostHogClientContext();
-  const dappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
   const location = useLocation<{ background?: Location<unknown> }>();
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
-    if (route.path === routes.dapps && !dappExplorerEnabled) return false;
     return true;
   });
 

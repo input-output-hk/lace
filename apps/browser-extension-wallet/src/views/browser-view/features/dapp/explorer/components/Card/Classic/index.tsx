@@ -1,4 +1,5 @@
 import React from 'react';
+import capitalize from 'lodash/fp/capitalize';
 import { IogImage } from '../../Image';
 import { IogCardProps } from './types';
 import './styles.scss';
@@ -30,7 +31,7 @@ export const IogCardClassic: React.FC<IogCardProps> = ({ onClick, ...props }) =>
             </Text.Body.Normal>
             <Box w="$fill">
               <Text.Body.Small weight="$semibold" color="secondary" data-testid="dappCategory">
-                {categories?.map((category, index) => (categories.length !== index + 1 ? `${category} ` : category))}
+                {categories.map((c) => capitalize(c)).join(', ')}
               </Text.Body.Small>
             </Box>
           </Flex>
