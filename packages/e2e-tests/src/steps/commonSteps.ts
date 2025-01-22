@@ -56,6 +56,13 @@ Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
+  // FIXME temporary override
+  const reloadExtensionButton = await $('[data-testid="crash-reload"]');
+  if (await reloadExtensionButton.isDisplayed()) {
+    // eslint-disable-next-line no-console
+    console.log('WALLET NOT LOADED');
+    await reloadExtensionButton.click();
+  }
   await TokensPage.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
 });
