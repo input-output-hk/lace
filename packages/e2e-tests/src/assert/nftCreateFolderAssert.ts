@@ -109,12 +109,29 @@ class NftCreateFolderAssert {
 
   async verifySeeAllAdaHandles() {
     const ownedAdaHandleNames: string[] = testContext.load('displayedAdaHandleNames');
-    const displayedNfts = await TokenSelectionPage.nftContainers;
+    let displayedNfts = await TokenSelectionPage.nftContainers;
 
     const displayedAdaHandleNames: string[] = [];
-    for (const nftContainer of displayedNfts) {
-      displayedAdaHandleNames.push(await nftContainer.getText());
-    }
+    let previousContainerCount = 0;
+
+    do {
+      previousContainerCount = displayedNfts.length;
+
+      for (const nftContainer of displayedNfts) {
+        await nftContainer.scrollIntoView();
+        await browser.pause(300);
+
+        const nftName = await nftContainer.getText();
+        if (!displayedAdaHandleNames.includes(nftName)) {
+          displayedAdaHandleNames.push(nftName);
+        }
+      }
+
+      await browser.pause(300);
+
+      displayedNfts = await TokenSelectionPage.nftContainers;
+    } while (displayedNfts.length > previousContainerCount);
+
     expect(ownedAdaHandleNames).to.have.all.members(displayedAdaHandleNames);
   }
 

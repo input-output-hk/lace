@@ -61,23 +61,28 @@ class NftSelectNftsPage extends CommonDrawerElements {
   }
 
   async waitForNft(nftName: string) {
-    let previousNftCount = 0;
-
     await browser.waitUntil(
       async () => {
         const nft = await this.getNftByName(nftName);
+
         if (nft !== undefined) {
           return true;
         }
 
-        const nfts = await this.nfts;
-        const currentNftCount = nfts.length;
+        const nftContainers = await this.nfts;
+        if (nftContainers.length > 0) {
+          const lastContainer = nftContainers[nftContainers.length - 1];
+          const offsetY = 30;
 
-        if (currentNftCount > previousNftCount) {
-          previousNftCount = currentNftCount;
-          const lastNft = nfts[currentNftCount - 1];
-          await lastNft.scrollIntoView();
-          return false;
+          await browser.execute(
+            (el, yOffset) => {
+              el.scrollIntoView({ block: 'center', inline: 'center' });
+              window.scrollBy(0, yOffset);
+            },
+            lastContainer,
+            offsetY
+          );
+          await browser.pause(500);
         }
 
         return false;
