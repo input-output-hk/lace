@@ -1,6 +1,6 @@
 import { Signer } from 'bitcoinjs-lib';
 import { KeyPair } from '../common';
-import * as ecc from 'tiny-secp256k1';
+import * as ecc from '@bitcoinerlab/secp256k1';
 
 export class BitcoinSigner implements Signer {
   publicKey: Buffer;

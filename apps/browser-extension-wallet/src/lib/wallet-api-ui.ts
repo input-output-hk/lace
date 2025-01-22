@@ -11,7 +11,7 @@ import {
   walletManagerChannel,
   walletManagerProperties,
   walletRepositoryProperties,
-  WalletType
+  WalletType, RemoteApiProperties, RemoteApiPropertyType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { firstValueFrom, from, of } from 'rxjs';
@@ -19,6 +19,9 @@ import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 import { Password } from '@input-output-hk/lace-ui-toolkit';
 import { logger } from '@lace/common';
+import { BitcoinWallet } from '@lace/bitcoin';
+
+export const logger = console;
 
 export const walletManager = consumeRemoteApi(
   { baseChannel: walletManagerChannel(process.env.WALLET_NAME), properties: walletManagerProperties },
@@ -54,7 +57,27 @@ export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Wall
   { logger, runtime }
 );
 
-export const keyAgentFactory = createKeyAgentFactory({ getBip32Ed25519: Wallet.getBip32Ed25519, logger });
+const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
+  getInfo: RemoteApiPropertyType.MethodReturningPromise,
+  getNetwork: RemoteApiPropertyType.MethodReturningPromise,
+  getAddress: RemoteApiPropertyType.MethodReturningPromise,
+  getCurrentFeeMarket: RemoteApiPropertyType.MethodReturningPromise,
+  submitTransaction: RemoteApiPropertyType.MethodReturningPromise,
+  utxos$: RemoteApiPropertyType.HotObservable,
+  balance$: RemoteApiPropertyType.HotObservable,
+  transactionHistory$: RemoteApiPropertyType.HotObservable,
+};
+
+export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
+  {
+    baseChannel: repositoryChannel('bitcoin-wallet'),
+    properties: bitcoinWalletProperties,
+    errorTypes: [Error]
+  },
+  { logger, runtime }
+);
+
+export const keyAgentFactory = createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger });
 
 export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },

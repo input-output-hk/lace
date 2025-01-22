@@ -1,7 +1,7 @@
-import * as crypto from 'crypto';
+import { pbkdf2Sync } from 'pbkdf2';
 import { HDKey } from '@scure/bip32';
 import * as bitcoin from 'bitcoinjs-lib';
-import * as ecc from 'tiny-secp256k1';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { AddressType } from './address';
 
 bitcoin.initEccLib(ecc);
@@ -85,7 +85,7 @@ const testnetDerivationPaths = {
  */
 export const deriveBip39Seed = (mnemonic: string, passphrase: string = ''): Buffer => {
   const salt = `mnemonic${passphrase}`;
-  return crypto.pbkdf2Sync(mnemonic, salt, 2048, 64, 'sha512');
+  return pbkdf2Sync(mnemonic, salt, 2048, 64, 'sha512');
 };
 
 /**
@@ -108,7 +108,7 @@ export const deriveBip39Seed = (mnemonic: string, passphrase: string = ''): Buff
  */
 export const deriveElectrumSeed = (mnemonic: string, password: string = ''): Buffer => {
   const salt = `electrum${password}`;
-  return crypto.pbkdf2Sync(mnemonic, salt, 2048, 64, 'sha512');
+  return pbkdf2Sync(mnemonic, salt, 2048, 64, 'sha512');
 };
 
 /**
