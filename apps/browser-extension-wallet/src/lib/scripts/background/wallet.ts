@@ -37,7 +37,10 @@ import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-s
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
 
-if (typeof window !== 'undefined') {
+// In chrome, the background.js runs in a service worker, so window will be defined.
+// Firefox background.js runs in a hidden web page, because firefox does not support service workers.
+// Use getBackgroundPage to determine if we're in background.js. It exists only in a background page.
+if (typeof window !== 'undefined' && typeof runtime.getBackgroundPage !== 'function') {
   throw new TypeError('This module should only be imported in service worker');
 }
 
