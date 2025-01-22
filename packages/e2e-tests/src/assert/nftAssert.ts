@@ -10,6 +10,7 @@ import chaiSorted from 'chai-sorted';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
+import { scrollToTheTop } from '../utils/scrollUtils';
 
 use(chaiSorted);
 
@@ -117,6 +118,15 @@ class NftAssert {
   }
 
   async assertNftDisplayedOnNftsPage(nftName: string, shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      await NftsPage.waitForNft(nftName);
+    } else {
+      try {
+        await NftsPage.waitForNft(nftName);
+      } catch {
+        await scrollToTheTop(NftsPage.NFT_CONTAINER);
+      }
+    }
     const nftItem = await NftsPage.getNftContainer(nftName);
     await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
   }

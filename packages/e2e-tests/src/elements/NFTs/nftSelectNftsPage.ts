@@ -4,6 +4,7 @@ import SearchInput from '../searchInput';
 import { browser } from '@wdio/globals';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
+import { scrollDownWithOffset, scrollToWithYOffset } from '../../utils/scrollUtils';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -69,26 +70,11 @@ class NftSelectNftsPage extends CommonDrawerElements {
           return true;
         }
 
-        const nftContainers = await this.nfts;
-        if (nftContainers.length > 0) {
-          const lastContainer = nftContainers[nftContainers.length - 1];
-          const offsetY = 30;
-
-          await browser.execute(
-            (el, yOffset) => {
-              el.scrollIntoView({ block: 'center', inline: 'center' });
-              window.scrollBy(0, yOffset);
-            },
-            lastContainer,
-            offsetY
-          );
-          await browser.pause(500);
-        }
-
+        await scrollDownWithOffset(await this.nfts);
         return false;
       },
       {
-        timeout: 6000,
+        timeout: 3000,
         timeoutMsg: `Failed while waiting for NFT: ${nftName}`
       }
     );
@@ -96,6 +82,13 @@ class NftSelectNftsPage extends CommonDrawerElements {
 
   async selectNFTs(numberOfNFTs: number) {
     for (let i = 0; i < numberOfNFTs; i++) {
+      if (i === 5) {
+        const nft = await this.nfts[i];
+        if (nft) {
+          await browser.pause(200);
+          await scrollToWithYOffset(nft, 30);
+        }
+      }
       await this.nfts[i].waitForClickable();
       await this.nfts[i].click();
     }

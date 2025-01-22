@@ -12,6 +12,7 @@ import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainMo
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import adaHandleAssert from './adaHandleAssert';
 import { browser } from '@wdio/globals';
+import { scrollToWithYOffset } from '../utils/scrollUtils';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -97,11 +98,29 @@ class NftCreateFolderAssert {
 
   async verifySeeAllOwnedNfts() {
     const ownedNftNames = testContext.load('ownedNfts');
-    const displayedNfts = await TokenSelectionPage.nftContainers;
-
     const displayedNftNames: string[] = [];
-    for (const nftContainer of displayedNfts) {
-      displayedNftNames.push(await nftContainer.getText());
+    let previousFirstVisibleNft = '';
+    let hasMoreNftsToScroll = true;
+
+    while (hasMoreNftsToScroll) {
+      const displayedNfts = await TokenSelectionPage.nftContainers;
+
+      for (const nftContainer of displayedNfts) {
+        const nftName = await nftContainer.getText();
+        if (!displayedNftNames.includes(nftName)) {
+          displayedNftNames.push(nftName);
+        }
+      }
+
+      const firstVisibleNft = displayedNfts.length > 0 ? await displayedNfts[0].getText() : 'not_found';
+      if (firstVisibleNft === previousFirstVisibleNft) {
+        hasMoreNftsToScroll = false;
+      } else {
+        previousFirstVisibleNft = firstVisibleNft;
+        const lastNft = displayedNfts[displayedNfts.length - 1];
+        await scrollToWithYOffset(lastNft, 30);
+        await browser.pause(300);
+      }
     }
 
     expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
