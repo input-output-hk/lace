@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
@@ -41,24 +42,26 @@ type DAppRadarDappItem = {
   }>;
 };
 
-const mapResponse = (dapps: DAppRadarDappItem[]): ISectionCardItem[] =>
-  dapps.map((dapp) => ({
-    id: String(dapp.dappId),
-    categories: dapp.categories,
-    title: dapp.name,
-    image: {
-      src: dapp.logo,
-      alt: dapp.name
-    },
-    certificates: undefined,
-    shortDescription: dapp.description,
-    longDescription: dapp.fullDescription,
-    email: '',
-    link: dapp.website,
-    companyWebsite: '',
-    screenshots: undefined,
-    socialLinks: dapp.socialLinks
-  }));
+const mapResponse = (dapps: DAppRadarDappItem[], disallowedDappIds: Set<number>): ISectionCardItem[] =>
+  dapps
+    .filter(({ dappId }) => !disallowedDappIds.has(dappId))
+    .map((dapp) => ({
+      id: String(dapp.dappId),
+      categories: dapp.categories,
+      title: dapp.name,
+      image: {
+        src: dapp.logo,
+        alt: dapp.name
+      },
+      certificates: undefined,
+      shortDescription: dapp.description,
+      longDescription: dapp.fullDescription,
+      email: '',
+      link: dapp.website,
+      companyWebsite: '',
+      screenshots: undefined,
+      socialLinks: dapp.socialLinks
+    }));
 
 type DAppFetcherParams = {
   category?: string;
@@ -79,6 +82,18 @@ const useDAppFetcher = ({
 } => {
   const [data, setData] = useState<DAppRadarDappItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const dappExplorerFeaturePayload = usePostHogClientContext().getFeatureFlagPayload('dapp-explorer');
+
+  const disallowedDappIds = useMemo(
+    () =>
+      dappExplorerFeaturePayload
+        ? new Set<number>([
+            ...dappExplorerFeaturePayload.disallowedDapps.legalIssues,
+            ...dappExplorerFeaturePayload.disallowedDapps.connectivityIssues
+          ])
+        : new Set<number>(),
+    [dappExplorerFeaturePayload]
+  );
 
   useEffect(() => {
     (async () => {
@@ -124,7 +139,7 @@ const useDAppFetcher = ({
     console.error('Pagination not implemented!');
   };
 
-  return { loading, data: mapResponse(data), fetchMore, hasNextPage: false };
+  return { loading, data: mapResponse(data, disallowedDappIds), fetchMore, hasNextPage: false };
 };
 
 export { useDAppFetcher };
