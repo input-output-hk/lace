@@ -1,0 +1,20 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+$size: size_unit(4);
+
+.root {
+  align-items: center;
+  background: var(--primary-gradient);
+  border-radius: $size;
+  display: flex;
+  height: $size;
+  justify-content: center;
+  width: $size;
+
+  .letter {
+    color: var(--text-color-white, #ffffff);
+    font-size: var(--body);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+}

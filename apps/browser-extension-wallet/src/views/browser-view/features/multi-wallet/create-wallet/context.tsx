@@ -76,6 +76,8 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     [setCreateWalletData]
   );
 
+  const finalizeBitcoinWalletCreation = useCallback(async () => { console.error('finalizeBitcoinWalletCreation')}, []);
+
   const finalizeWalletCreation = useCallback(
     async (params: Partial<CreateWalletParams>) => {
       const wallet = await createHotWallet(params);
@@ -97,7 +99,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       }
       switch (step) {
         case WalletCreateStep.ChooseRecoveryMethod: {
-          if (recoveryMethod === 'mnemonic') {
+          if (recoveryMethod === 'mnemonic' || recoveryMethod === 'mnemonic-bitcoin') {
             setStep(WalletCreateStep.RecoveryPhraseWriteDown);
             break;
           }
@@ -121,6 +123,14 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
             window.location.reload();
             break;
           }
+
+          if (recoveryMethod === 'mnemonic-bitcoin') {
+            await finalizeBitcoinWalletCreation();
+            history.push(walletRoutePaths.assets);
+            window.location.reload();
+            break;
+          }
+
           setStep(WalletCreateStep.SavePaperWallet);
           break;
         }

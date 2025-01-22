@@ -41,6 +41,24 @@ export interface AccountMetadata {
     address?: Partial<Record<Wallet.ChainName, string>>;
     recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
   };
+  bitcoin?: {
+    extendedAccountPublicKeys: {
+      mainnet: {
+        legacy: string;
+        segWit: string;
+        nativeSegWit: string;
+        taproot: string;
+        electrumNativeSegWit: string;
+      },
+      testnet: {
+        legacy: string;
+        segWit: string;
+        nativeSegWit: string;
+        taproot: string;
+        electrumNativeSegWit: string;
+      }
+    }
+  }
 }
 
 export interface CardanoWallet {

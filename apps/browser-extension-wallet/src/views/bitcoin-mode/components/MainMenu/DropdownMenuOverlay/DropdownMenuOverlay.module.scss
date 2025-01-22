@@ -1,0 +1,213 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
+
+.menuOverlay {
+  border-radius: size_unit(2) !important;
+  border: 1px var(--light-mode-light-grey) solid !important;
+  box-shadow: var(--shadows-toast-tooltip);
+  margin-top: size_unit(0.5) !important;
+  background-color: var(--bg-color-container, #ffffff) !important;
+  min-width: 275px;
+
+  .borderBottom {
+    border-bottom: 1px var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef)) solid;
+  }
+
+  .userInfoWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: size_unit(2);
+
+    .userInfo {
+      display: flex;
+      align-items: center;
+      gap: size_unit(2);
+      margin: 0 -12px;
+      padding: size_unit(0.5) size_unit(1);
+
+      &:hover {
+        background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
+        border-radius: 12px;
+      }
+
+      .userMeta {
+        cursor: pointer;
+
+        .walletName {
+          margin: 0;
+          color: var(--text-color-primary);
+          @include text-body-semi-bold;
+        }
+
+        .walletAddress {
+          margin: 0;
+          color: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #a9a9a9));
+          @include text-address($weight: 500);
+        }
+      }
+    }
+  }
+
+  .singleWalletWrapper {
+    padding: 10px size_unit(2) size_unit(2.75);
+  }
+
+  .multiWalletWrapper {
+    padding-bottom: size_unit(2.75);
+  }
+
+  .walletStatusInfo {
+    margin-left: 8px;
+    cursor: default;
+    display: flex;
+  }
+
+  .links {
+    margin: size_unit(2) 0;
+
+    .menuItem,
+    .menuItemTheme {
+      @include text-body-medium;
+      padding: size_unit(2) size_unit(2) !important;
+      margin: 0 size_unit(1) !important;
+      border-radius: 12px !important;
+      background-color: var(--bg-color-container, #ffffff) !important;
+      color: var(--text-color-primary);
+
+      &:hover {
+        background: var(--light-mode-light-grey, var(--dark-mode-mid-grey, #efefef)) !important;
+      }
+
+      &.cta {
+        cursor: pointer;
+      }
+    }
+
+    .menuItemTheme {
+      :global {
+        button.ant-switch {
+          height: size_unit(3);
+          width: size_unit(5.5);
+        }
+
+        .ant-switch>div.ant-switch-handle {
+          height: size_unit(2.5);
+          width: size_unit(2.5);
+        }
+
+        .ant-switch>span.ant-switch-inner svg {
+          margin-top: 1px;
+        }
+
+        .ant-switch.ant-switch-checked>span.ant-switch-inner {
+          margin: 0 size_unit(35) 0 size_unit(0.5);
+        }
+
+        .ant-switch.ant-switch-checked>div.ant-switch-handle {
+          left: calc(100% - 20px - 2px);
+        }
+      }
+
+      display: flex;
+      justify-content: space-between !important;
+
+      &:hover {
+        background: transparent !important;
+      }
+    }
+  }
+}
+
+.separator {
+  display: flex;
+  height: 1.5px;
+  background: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #efefef));
+  width: auto;
+  margin: size_unit(1.5) size_unit(3);
+}
+
+.menuOverlay li:first-child {
+  background: transparent;
+  padding: 0 size_unit(1);
+}
+
+.tooltip {
+  color: var(--text-color-secondary);
+  font-size: var(--bodySmall);
+  font-weight: 500;
+  line-height: size_unit(3);
+}
+
+.userAvatar {
+  background: var(--primary-gradient);
+  border-radius: 100px;
+  height: size_unit(4);
+  width: size_unit(4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    color: var(--dark-mode-mid-black, var(--text-color-white, #ffffff));
+    font-size: var(--body);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .avatar {
+    font-size: size_unit(4);
+    cursor: pointer;
+  }
+
+  &.isPopup {
+    height: 26px;
+    width: 26px;
+  }
+
+  .userAvatarImage {
+    border-radius: 30px;
+  }
+}
+
+.networkChoise {
+  align-items: center !important;
+  display: flex;
+  justify-content: space-between;
+
+  .value {
+    color: var(--primary-default, #7f5af0);
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
+
+.switchIcon {
+  font-size: 16px;
+}
+
+.popUpContainer,
+.extendedContainer {
+  @include scroll-bar-style;
+  overflow-y: scroll;
+  margin: size_unit(1) size_unit(1) size_unit(1) 0;
+
+  :global {
+    .ant-dropdown-menu-item-group-title {
+      padding: 0;
+    }
+  }
+}
+
+.popUpContainerHigher {
+  max-height: 475px;
+}
+
+.popUpContainerLower {
+  max-height: 440px;
+}
+
+.extendedContainer {
+  max-height: 600px;
+}

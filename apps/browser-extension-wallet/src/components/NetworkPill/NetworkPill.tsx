@@ -1,10 +1,11 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, {ReactElement, useMemo } from 'react';
 import classnames from 'classnames';
 import styles from './NetworkPill.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useNetwork } from '@hooks';
 import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 interface NetworkPillProp {
   isExpandable?: boolean;
@@ -15,7 +16,9 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
   const { isOnline, isBackendFailing } = useNetwork();
+  const { blockchain } = useCurrentBlockchain();
 
+  console.error('NetworkPill blockchain', blockchain);
   return useMemo(() => {
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
@@ -31,7 +34,7 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
               [styles.networkPillText]: isExpandable
             })}
           >
-            {environmentName}
+            {blockchain === Blockchain.Cardano ? environmentName : 'Testnet4'}
           </span>
         </div>
       );
@@ -73,5 +76,5 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
       );
     }
     return <></>;
-  }, [isOnline, isBackendFailing, environmentName, t, isExpandable]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, isBackendFailing, environmentName, t, isExpandable, blockchain]); // eslint-disable-line react-hooks/exhaustive-deps
 };
