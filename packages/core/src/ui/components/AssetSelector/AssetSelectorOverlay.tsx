@@ -121,6 +121,8 @@ export interface AssetSelectorOverlayProps {
   removeTokenFromList: (id: string) => void;
   className?: string;
   groups?: Array<ASSET_COMPONENTS.TOKENS | ASSET_COMPONENTS.NFTS>;
+  searchNfts: (item: NftItemProps, searchValue: string) => boolean;
+  searchTokens?: (item: DropdownList, searchValue: string) => boolean;
 }
 
 export const AssetSelectorOverlay = ({
@@ -139,7 +141,9 @@ export const AssetSelectorOverlay = ({
   removeTokenFromList,
   doesWalletHaveTokens,
   className,
-  groups = [ASSET_COMPONENTS.TOKENS, ASSET_COMPONENTS.NFTS]
+  groups = [ASSET_COMPONENTS.TOKENS, ASSET_COMPONENTS.NFTS],
+  searchNfts,
+  searchTokens
 }: AssetSelectorOverlayProps): React.ReactElement => {
   const { t } = useTranslation();
   const [value, setValue] = useState<string>();
@@ -158,21 +162,15 @@ export const AssetSelectorOverlay = ({
 
   const filterAssets = useCallback(async () => {
     const filter = () => {
-      const filteredNfts = nfts?.filter((item) => !value || stringIncludesValue(item.name, value));
-      const filteredTokens = tokens?.filter(
-        (item) =>
-          !value ||
-          item.id === value ||
-          stringIncludesValue(item.name, value) ||
-          stringIncludesValue(item.description, value)
-      );
+      const filteredNfts = nfts?.filter((item) => !value || searchNfts(item, value));
+      const filteredTokens = tokens?.filter((item) => !value || searchTokens?.(item, value));
       return Promise.resolve({ filteredNfts, filteredTokens });
     };
     setIsSearching(true);
     const result = await filter();
     setSearchResult({ nfts: result.filteredNfts ?? [], tokens: result.filteredTokens ?? [] });
     setIsSearching(false);
-  }, [nfts, tokens, value]);
+  }, [nfts, searchNfts, searchTokens, tokens, value]);
 
   useEffect(() => {
     filterAssets();
