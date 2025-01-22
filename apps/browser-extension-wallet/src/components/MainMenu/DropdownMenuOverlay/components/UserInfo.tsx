@@ -47,9 +47,10 @@ const shortenWalletName = (text: string, length: number) =>
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository } = useWalletManager();
+  const { activateWallet, walletRepository, bitcoinWallet } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
+  const bitcoinBalance = useObservable(bitcoinWallet.balance$, BigInt(0));
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
@@ -93,46 +94,50 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       const walletAvatar = getAvatar(wallet.walletId);
 
       return (
-        <ProfileDropdown.WalletOption
-          key={wallet.walletId}
-          title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
-          subtitle={shortenWalletName(
-            lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
-            WALLET_OPTION_NAME_MAX_LENGTH
-          )}
-          id={`wallet-option-${wallet.walletId}`}
-          onClick={async () => {
-            if (activeWalletId === wallet.walletId) {
-              return;
-            }
-            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+        <div>
+          <a>BITCOIN BALANCE: {bitcoinBalance}</a>
+          <ProfileDropdown.WalletOption
+            key={wallet.walletId}
+            title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
+            subtitle={shortenWalletName(
+              lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
+              WALLET_OPTION_NAME_MAX_LENGTH
+            )}
+            id={`wallet-option-${wallet.walletId}`}
+            onClick={async () => {
+              if (activeWalletId === wallet.walletId) {
+                return;
+              }
+              analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
 
-            await activateWallet({
-              walletId: wallet.walletId,
-              ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
-            });
-            setIsDropdownMenuOpen(false);
-            toast.notify({
-              duration: TOAST_DEFAULT_DURATION,
-              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
-            });
-          }}
-          type={getUiWalletType(wallet.type)}
-          profile={
-            walletAvatar
-              ? {
+              await activateWallet({
+                walletId: wallet.walletId,
+                ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
+              });
+              setIsDropdownMenuOpen(false);
+              toast.notify({
+                duration: TOAST_DEFAULT_DURATION,
+                text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
+              });
+            }}
+            type={getUiWalletType(wallet.type)}
+            profile={
+              walletAvatar
+                ? {
                   fallbackText: fullWalletName,
                   imageSrc: walletAvatar
                 }
-              : undefined
-          }
-          {...(wallet.type !== WalletType.Script && {
-            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
-          })}
-        />
+                : undefined
+            }
+            {...(wallet.type !== WalletType.Script && {
+              onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
+            })}
+          />
+        </div>
       );
     },
     [
+      bitcoinBalance,
       activateWallet,
       activeWalletId,
       analytics,

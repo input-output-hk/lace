@@ -9034,6 +9034,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bitcoinerlab/secp256k1@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@bitcoinerlab/secp256k1@npm:1.2.0"
+  dependencies:
+    "@noble/curves": ^1.7.0
+  checksum: c95eda77bc271f178d19a9c48cce53e5a303f6710dbd650aa24405416d87b52ab03038b7e28cc55150a0cdf0bd463d2b299791777c332c1556c86d03159e965a
+  languageName: node
+  linkType: hard
+
 "@blockfrost/blockfrost-js@npm:^5.5.0":
   version: 5.6.0
   resolution: "@blockfrost/blockfrost-js@npm:5.6.0"
@@ -13480,26 +13489,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lace/bitcoin@workspace:packages/bitcoin":
+"@lace/bitcoin@0.1.0, @lace/bitcoin@workspace:packages/bitcoin":
   version: 0.0.0-use.local
   resolution: "@lace/bitcoin@workspace:packages/bitcoin"
   dependencies:
-    "@cardano-sdk/key-management": 0.25.1
+    "@bitcoinerlab/secp256k1": ^1.2.0
     "@lace/common": 0.1.0
     "@scure/bip32": ^1.6.0
+    "@types/pbkdf2": ^3
     axios: ^1.7.4
     bip39: ^3.1.0
     bitcoinjs-lib: ^6.1.7
     buffer: 6.0.3
     classnames: 2.3.1
     dayjs: 1.10.7
+    hash.js: ^1.1.7
     lodash: 4.17.21
+    pbkdf2: ^3.1.2
     randombytes: 2.1.0
     react: 17.0.2
     react-dom: 17.0.2
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
-    tiny-secp256k1: ^2.2.3
     ts-custom-error: ^3.3.1
     ts-log: ^2.2.7
     type-fest: ^4.26.1
@@ -13529,6 +13540,7 @@ __metadata:
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
     "@input-output-hk/lace-ui-toolkit": 1.21.0
+    "@lace/bitcoin": 0.1.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -13597,6 +13609,7 @@ __metadata:
     swiper: ^8.4.4
     text-encoding-utf-8: ^1.0.2
     tsconfig-paths-webpack-plugin: 3.5.2
+    vm-browserify: ^1.1.2
     webassembly-loader-sw: ^1.1.0
     webextension-polyfill: 0.10.0
     zustand: 3.5.14
@@ -14241,7 +14254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:~1.8.1":
+"@noble/curves@npm:^1.7.0, @noble/curves@npm:~1.8.1":
   version: 1.8.1
   resolution: "@noble/curves@npm:1.8.1"
   dependencies:
@@ -24717,6 +24730,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: d15024b1957c21cf3b8887329d9bd8dfde754cf13a09d76ae25f1391cfc62bb8b8d7b760773c5dbaa748172fba8b3e0c3dbe962af6ccbd69b76df12a48dfba40
+  languageName: node
+  linkType: hard
+
+"@types/pbkdf2@npm:^3":
+  version: 3.1.2
+  resolution: "@types/pbkdf2@npm:3.1.2"
+  dependencies:
+    "@types/node": "*"
+  checksum: bebe1e596cbbe5f7d2726a58859e61986c5a42459048e29cb7f2d4d764be6bbb0844572fd5d70ca8955a8a17e8b4ed80984fc4903e165d9efb8807a3fbb051aa
   languageName: node
   linkType: hard
 
@@ -39567,7 +39589,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hash.js@npm:^1.0.0, hash.js@npm:^1.0.3":
+"hash.js@npm:^1.0.0, hash.js@npm:^1.0.3, hash.js@npm:^1.1.7":
   version: 1.1.7
   resolution: "hash.js@npm:1.1.7"
   dependencies:
@@ -57258,15 +57280,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-secp256k1@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "tiny-secp256k1@npm:2.2.3"
-  dependencies:
-    uint8array-tools: 0.0.7
-  checksum: f7a74a1fceacab39d268907cd84798d3a07f3de2e00ba2557a043316ef45298d9acc96fb1614d72c728c3e512ecfef985b0fbd43b7fdb789fd9901df983e3e44
-  languageName: node
-  linkType: hard
-
 "tiny-warning@npm:^1.0.0, tiny-warning@npm:^1.0.3":
   version: 1.0.3
   resolution: "tiny-warning@npm:1.0.3"
@@ -58381,13 +58394,6 @@ __metadata:
     uint8arraylist: ^2.0.0
     uint8arrays: ^5.0.0
   checksum: fef8205bec41fdbc5166a7a106e34d54ac4e574512e497783951d60983a7b0c27a740b287522c6ad9e1a9ed27c5481cddd92caaa93ac7aac96b57364a7e1d20e
-  languageName: node
-  linkType: hard
-
-"uint8array-tools@npm:0.0.7":
-  version: 0.0.7
-  resolution: "uint8array-tools@npm:0.0.7"
-  checksum: 6ffc45c7d2136757d63c6e556eb8345f908948618a9de37c805fec1249d989c265187b3fbef6cffc4ce5129083204829025b3c58800a0f24c8548e243d42ba13
   languageName: node
   linkType: hard
 

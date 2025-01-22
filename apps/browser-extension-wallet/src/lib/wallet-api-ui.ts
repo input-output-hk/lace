@@ -11,13 +11,14 @@ import {
   walletManagerChannel,
   walletManagerProperties,
   walletRepositoryProperties,
-  WalletType
+  WalletType, RemoteApiProperties, RemoteApiPropertyType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { firstValueFrom, from, of } from 'rxjs';
 import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 import { Password } from '@input-output-hk/lace-ui-toolkit';
+import { BitcoinWallet } from '@lace/bitcoin';
 
 export const logger = console;
 
@@ -51,6 +52,26 @@ export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Wall
     baseChannel: repositoryChannel(process.env.WALLET_NAME),
     properties: walletRepositoryProperties,
     errorTypes: [WalletConflictError]
+  },
+  { logger, runtime }
+);
+
+const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
+  getInfo: RemoteApiPropertyType.MethodReturningPromise,
+  getNetwork: RemoteApiPropertyType.MethodReturningPromise,
+  getAddress: RemoteApiPropertyType.MethodReturningPromise,
+  getCurrentFeeMarket: RemoteApiPropertyType.MethodReturningPromise,
+  submitTransaction: RemoteApiPropertyType.MethodReturningPromise,
+  utxos$: RemoteApiPropertyType.HotObservable,
+  balance$: RemoteApiPropertyType.HotObservable,
+  transactionHistory$: RemoteApiPropertyType.HotObservable,
+};
+
+export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
+  {
+    baseChannel: repositoryChannel('bitcoin-wallet'),
+    properties: bitcoinWalletProperties,
+    errorTypes: [Error]
   },
   { logger, runtime }
 );

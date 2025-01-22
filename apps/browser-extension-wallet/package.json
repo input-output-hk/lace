@@ -52,6 +52,7 @@
     "@cardano-sdk/web-extension": "0.37.5",
     "@emurgo/cip14-js": "~3.0.1",
     "@input-output-hk/lace-ui-toolkit": "1.21.0",
+    "@lace/bitcoin": "0.1.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
@@ -126,6 +127,7 @@
     "source-map-loader": "^5.0.0",
     "text-encoding-utf-8": "^1.0.2",
     "tsconfig-paths-webpack-plugin": "3.5.2",
+    "vm-browserify": "^1.1.2",
     "webassembly-loader-sw": "^1.1.0"
   }
 }

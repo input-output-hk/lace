@@ -6,7 +6,7 @@ import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
+import { logger, observableWallet, signingCoordinator, walletManager, walletRepository, bitcoinWallet } from '@src/lib/wallet-api-ui';
 import {
   bufferReviver,
   clearLocalStorage,
@@ -50,6 +50,7 @@ import {
   makeGenerateSharedWalletKey,
   useSecrets
 } from '@lace/core';
+import { BitcoinWallet } from '@lace/bitcoin';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -110,6 +111,7 @@ type CreateHardwareWalletRevampedParams = {
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
 
 export interface UseWalletManager {
+  bitcoinWallet: BitcoinWallet.BitcoinWallet;
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
@@ -1030,6 +1032,7 @@ export const useWalletManager = (): UseWalletManager => {
     switchNetwork,
     walletManager,
     walletRepository,
+    bitcoinWallet,
     getMnemonic,
     enableCustomNode,
     generateSharedWalletKey,

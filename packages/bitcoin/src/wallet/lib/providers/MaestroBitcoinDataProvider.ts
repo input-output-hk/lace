@@ -8,7 +8,7 @@ import {
   UTxO
 } from './BitcoinDataProvider';
 import { Network } from '../common';
-import { createHash } from 'node:crypto';
+import { sha256 } from 'hash.js';
 
 export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   private api: AxiosInstance;
@@ -211,8 +211,12 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
    */
   private computeTransactionHash(rawTransaction: string): string {
     const buffer = Buffer.from(rawTransaction, 'hex');
-    const hash1 = createHash('sha256').update(buffer).digest();
-    const hash2 = createHash('sha256').update(hash1).digest();
-    return hash2.reverse().toString('hex');
+    const hash1 = sha256().update(buffer).digest();
+    const hash2 = sha256().update(Buffer.from(hash1)).digest();
+    return Buffer.from(hash2)
+      .toString('hex')
+      .match(/.{2}/g)!
+      .reverse()
+      .join('');
   }
 }

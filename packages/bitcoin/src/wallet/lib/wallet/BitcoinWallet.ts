@@ -9,7 +9,7 @@ import {
 } from '../common';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Signer } from 'bitcoinjs-lib';
-import * as ecc from 'tiny-secp256k1';
+import * as ecc from '@bitcoinerlab/secp256k1';
 
 bitcoin.initEccLib(ecc);
 
@@ -109,11 +109,11 @@ export class BitcoinWallet {
   private readonly pollInterval: number;
   private readonly historyDepth: number;
   private provider: BlockchainDataProvider;
+  private info: BitcoinWalletInfo;
+  private network: Network;
+  private address: DerivedAddress;
 
-  public info: BitcoinWalletInfo;
-  public network: Network;
   public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
-  public address: DerivedAddress;
   public utxos$: BehaviorSubject<UTxO[]> = new BehaviorSubject(new Array<UTxO>());
   public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
 
@@ -150,6 +150,18 @@ export class BitcoinWallet {
       .subscribe((balance) => {
         this.balance$.next(balance);
       });
+  }
+
+  public async getInfo(): Promise<BitcoinWalletInfo> {
+    return this.info;
+  }
+
+  public async getNetwork(): Promise<Network> {
+    return this.network;
+  }
+
+  public async getAddress(): Promise<DerivedAddress> {
+    return this.address;
   }
 
   /**
