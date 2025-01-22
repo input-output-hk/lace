@@ -21,6 +21,7 @@ const transformManifest = (content, mode) => {
         '$CARDANO_WS_SERVER_URLS',
         `${process.env.CARDANO_WS_SERVER_URL_MAINNET} ${process.env.CARDANO_WS_SERVER_URL_PREPROD} ${process.env.CARDANO_WS_SERVER_URL_PREVIEW} ${process.env.CARDANO_WS_SERVER_URL_SANCHONET}`
       )
+      .replace('$MAESTRO_URLS', `${process.env.MAESTRO_URL_MAINNET} ${process.env.MAESTRO_URL_TESTNET}`)
       .replace(
         '$CARDANO_SERVICES_URLS',
         `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`

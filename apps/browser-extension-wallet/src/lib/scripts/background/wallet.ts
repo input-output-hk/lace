@@ -31,7 +31,7 @@ import {
   walletChannel,
   walletManagerChannel,
   walletManagerProperties,
-  walletRepositoryProperties
+  walletRepositoryProperties, RemoteApiPropertyType
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
@@ -58,6 +58,8 @@ const pollController$ = new TrackerSubject(
     tap((isActive) => logger.debug('Session active:', isActive))
   )
 );
+import { BitcoinWallet } from '@lace/bitcoin';
+import { RemoteApiProperties } from '@cardano-sdk/web-extension';
 
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
@@ -354,6 +356,40 @@ const storesFactory: StoresFactory = {
     return extensionStores;
   }
 };
+
+const walletInfo = {
+  walletName: 'Bitcoin Wallet 1',
+  publicKeyHex: '029bb34ca00cb77ec4ee55d08096ef3e615915841c1f2add83f4444ecea848c9f9',
+  encryptedPrivateKeyHex: 'b2be18c1d5ab2e4c247e4e9047f6a27f40e5944d6ce03dfbffa6883b759ca1ef9269088b685afa050f12feb2100daaa2f2964b1d129cd9eb0fbd9e42c37a954b81cf692f8799ececeba035915a3802ed80a70a6a38c93c4a6c9a6f91',
+  encryptedMnemonicsHex: 'd30980b9e9a0d2df3be5a060d5c153ad653125035df329c59044a642c30db4f28191e2d55d015cf28439c41e66cc2684464a8ed2cdfc953850d0b39bb4e356d501b9faea753af0dcbc0e626cbaa23bce1b3b7c662c373e785780c05584f245f9838c4ac6de49d02859f3e39592bd75612770242aead6c46a5a691c3d02dde5150c8364440b938706f486fcf396caa5a5ae3a7eb396f7892801c03a70b2337ae8d93f881bfecef3212352c9c64cd0bcb37a38e49aebb8775ecbb7cb020d458c83381f7d2116a6218e44995e1672655939785120ddc82bf9912af531b4',
+  derivationPath: 'm/84\'/1\'/0\'/0/0'
+};
+
+const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
+//const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();
+export const bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 10000, 20, walletInfo, BitcoinWallet.Network.Testnet);
+
+const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
+  getInfo: RemoteApiPropertyType.MethodReturningPromise,
+  getNetwork: RemoteApiPropertyType.MethodReturningPromise,
+  getAddress: RemoteApiPropertyType.MethodReturningPromise,
+  getCurrentFeeMarket: RemoteApiPropertyType.MethodReturningPromise,
+  submitTransaction: RemoteApiPropertyType.MethodReturningPromise,
+  utxos$: RemoteApiPropertyType.HotObservable,
+  balance$: RemoteApiPropertyType.HotObservable,
+  transactionHistory$: RemoteApiPropertyType.HotObservable,
+  pendingTransactions$: RemoteApiPropertyType.HotObservable,
+  addresses$: RemoteApiPropertyType.HotObservable,
+};
+
+exposeApi(
+  {
+    api$: of(bitcoinWallet),
+    baseChannel: repositoryChannel('bitcoin-wallet'),
+    properties: bitcoinWalletProperties
+  },
+  { logger, runtime }
+);
 
 const signingCoordinatorApi = consumeSigningCoordinatorApi({ logger, runtime });
 export const walletManager = new WalletManager(

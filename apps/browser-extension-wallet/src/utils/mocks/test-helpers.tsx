@@ -616,6 +616,10 @@ export const mockPrices: PriceResult = {
     price: 0.4,
     priceVariationPercentage24h: 1.293
   },
+  bitcoin: {
+    price: 0.4,
+    priceVariationPercentage24h: 1.293
+  },
   tokens: new Map()
 };
 

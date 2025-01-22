@@ -1,0 +1,289 @@
+import {BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO} from './../providers';
+import {BehaviorSubject, interval, of, startWith} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {AddressType, BitcoinWalletInfo, deriveAddressByType, DerivedAddress, KeyPair, Network} from '../common';
+import * as bitcoin from 'bitcoinjs-lib';
+import {Signer} from 'bitcoinjs-lib';
+import * as ecc from '@bitcoinerlab/secp256k1';
+import isEqual from 'lodash/isEqual';
+
+bitcoin.initEccLib(ecc);
+
+export class CustomSigner implements Signer {
+  publicKey: Buffer;
+
+  /**
+   * Creates a new CustomSigner instance.
+   * @param keyPair - The key pair to use for signing.
+   */
+  constructor(private keyPair: KeyPair) {
+    if (!keyPair.privateKey) {
+      throw new Error('Private key is required to sign transactions.');
+    }
+    this.publicKey = keyPair.publicKey;
+  }
+
+  /**
+   * Signs a hash using tiny-secp256k1's sign function.
+   * @param {Buffer} hash - The hash to sign (must be 32 bytes).
+   * @param {boolean} _lowR - Optional flag for lowR signatures (ignored here).
+   * @returns {Buffer} The signature as a buffer.
+   */
+  sign(hash: Buffer, _lowR: boolean = false): Buffer {
+    if (hash.length !== 32) {
+      throw new Error('Hash must be 32 bytes.');
+    }
+
+    const signature = ecc.sign(new Uint8Array(hash), new Uint8Array(this.keyPair.privateKey));
+    return Buffer.from(signature);
+  }
+
+  /**
+   * Returns the public key.
+   * @returns {Buffer} The public key as a buffer.
+   */
+  getPublicKey(): Buffer {
+    return this.publicKey;
+  }
+
+  /**
+   * Clears the private key from memory.
+   *
+   * This is a security measure to prevent the private key from being exposed in memory.
+   */
+  clearSecrets() {
+    this.keyPair.privateKey.fill(0);
+  }
+}
+
+/**
+ * Represents the fee market for estimating transaction fees.
+ */
+export type FeeMarket = {
+  /**
+   * The fee rate in satoshis per byte.
+   */
+  feeRate: number;
+
+  /**
+   * The confirmation target time in seconds.
+   * This represents the estimated time within which the transaction is expected to be confirmed.
+   */
+  targetConfirmationTime: number;
+};
+
+/**
+ * Represents the estimated fees for different transaction speeds.
+ *
+ * The estimated fees are categorized into three tiers: `fast`, `standard`, and `slow`.
+ * Each tier includes the fee rate (in satoshis per byte) and the expected confirmation
+ * time (in seconds).
+ */
+export type EstimatedFees = {
+  /**
+   * Fast tier: The fee and confirmation time for transactions requiring
+   * high priority and the fastest possible confirmation.
+   */
+  fast: FeeMarket;
+
+  /**
+   * Standard tier: The fee and confirmation time for transactions with
+   * average priority, balancing cost and confirmation speed.
+   */
+  standard: FeeMarket;
+
+  /**
+   * Slow tier: The fee and confirmation time for transactions with
+   * low priority, suitable for non-urgent transfers.
+   */
+  slow: FeeMarket;
+};
+
+export class BitcoinWallet {
+  private lastKnownBlock: BlockInfo | null = null;
+  private transactionHistory: TransactionHistoryEntry[] = [];
+  private readonly pollInterval: number;
+  private readonly historyDepth: number;
+  private provider: BlockchainDataProvider;
+  private info: BitcoinWalletInfo;
+  private network: Network;
+  private address: DerivedAddress;
+
+  public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
+  public pendingTransactions$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
+  public utxos$: BehaviorSubject<UTxO[]> = new BehaviorSubject(new Array<UTxO>());
+  public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
+  public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject([]);
+
+  constructor(
+    provider: BlockchainDataProvider,
+    pollInterval: number = 300000,
+    historyDepth: number = 20,
+    info: BitcoinWalletInfo,
+    network: Network = Network.Testnet
+  ) {
+    const bitcoinNetwork = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+    this.network = network;
+    this.pollInterval = pollInterval;
+    this.historyDepth = historyDepth;
+    this.provider = provider;
+    this.info = info;
+
+    const pubKey = Buffer.from(info.publicKeyHex, 'hex');
+    const address = deriveAddressByType(pubKey, AddressType.NativeSegWit, bitcoinNetwork);
+
+    this.address =
+      {
+        address,
+        addressType: AddressType.NativeSegWit,
+        derivationPath: info.derivationPath
+      };
+
+    this.addresses$.next([this.address]);
+    this.startPolling();
+
+    this.utxos$
+      .pipe(
+        map((utxos) => utxos.reduce((total, utxo) => total + utxo.satoshis, BigInt(0)))
+      )
+      .subscribe((balance) => {
+        this.balance$.next(balance);
+      });
+  }
+
+  public async getInfo(): Promise<BitcoinWalletInfo> {
+    return this.info;
+  }
+
+  public async getNetwork(): Promise<Network> {
+    return this.network;
+  }
+
+  public async getAddress(): Promise<DerivedAddress> {
+    return this.address;
+  }
+
+  /**
+   * Fetches the current fee market for estimating transaction fees.
+   */
+  public async getCurrentFeeMarket(): Promise<EstimatedFees> {
+    try {
+      if (this.network === Network.Testnet) {
+        return {
+          fast: {
+            feeRate: 0.00002500,
+            targetConfirmationTime: 1
+          },
+          standard: {
+            feeRate: 0.00001500,
+            targetConfirmationTime: 3
+          },
+          slow: {
+            feeRate: 0.00001000,
+            targetConfirmationTime: 6
+          }
+        };
+      }
+
+      const fastEstimate = await this.provider.estimateFee(1, FeeEstimationMode.Conservative);
+      const standardEstimate = await this.provider.estimateFee(3, FeeEstimationMode.Conservative);
+      const slowEstimate = await this.provider.estimateFee(6, FeeEstimationMode.Conservative);
+
+      return {
+        fast: {
+          feeRate: fastEstimate.feeRate,
+          targetConfirmationTime: fastEstimate.blocks * 10 * 60
+        },
+        standard: {
+          feeRate: standardEstimate.feeRate,
+          targetConfirmationTime: standardEstimate.blocks * 10 * 60
+        },
+        slow: {
+          feeRate: slowEstimate.feeRate,
+          targetConfirmationTime: slowEstimate.blocks * 10 * 60
+        }
+      };
+    } catch (error) {
+      console.error('Failed to fetch fee market:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Submits a raw transaction to the blockchain for inclusion in a block.
+   *
+   * @param rawTransaction - The raw transaction data to be broadcast to the network.
+   */
+  public async submitTransaction(rawTransaction: string): Promise<string> {
+    try {
+      return await this.provider.submitTransaction(rawTransaction);
+    } catch (error) {
+      console.error('Failed to submit transaction:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Starts polling for new blocks and updating wallet state.
+   */
+  private startPolling() {
+    interval(this.pollInterval)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.provider.getLastKnownBlock()),
+        catchError((error) => {
+          console.error('Failed to fetch blockchain info during polling:', error);
+          return of(null);
+        })
+      )
+      .subscribe(async (latestBlockInfo: BlockInfo | null) => {
+        if (!latestBlockInfo) return;
+
+        if (!this.lastKnownBlock || this.lastKnownBlock.hash !== latestBlockInfo.hash) {
+          await this.updateState(latestBlockInfo);
+        } else {
+          await this.updatePendingTransactions();
+        }
+      });
+  }
+
+  private async updateTransactions() {
+    const newTxs = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
+
+    if (!isEqual(newTxs, this.transactionHistory)) {
+      this.transactionHistory = newTxs;
+      this.transactionHistory$.next(this.transactionHistory);
+    }
+  }
+
+  private async updatePendingTransactions() {
+    const pendingTxs = await this.provider.getTransactionsInMempool(this.address.address);
+
+    const newPendingTxs = pendingTxs.filter((tx) => !this.transactionHistory.find((historyTx) => historyTx.transactionHash === tx.transactionHash));
+
+    if (!isEqual(newPendingTxs, this.pendingTransactions$.value)) {
+      this.pendingTransactions$.next(newPendingTxs);
+    }
+  }
+
+  private async updateUtxos() {
+    const newUtxos = await this.provider.getUTxOs(this.address.address);
+
+    if (!isEqual(newUtxos, this.utxos$.value)) {
+      this.utxos$.next(newUtxos);
+    }
+  }
+
+  /**
+   * Updates the wallet state by fetching new transactions and UTxOs.
+   */
+  private async updateState(latestBlockInfo: BlockInfo): Promise<void> {
+    this.lastKnownBlock = latestBlockInfo;
+
+    await this.updateTransactions();
+    await this.updatePendingTransactions();
+    await this.updateUtxos();
+
+    this.lastKnownBlock = latestBlockInfo;
+  }
+}

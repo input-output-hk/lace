@@ -1,0 +1,61 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+@mixin half-display {
+  flex: 50%;
+  max-width: 50%;
+  display: flex;
+}
+
+@mixin right-align {
+  @include half-display;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+}
+
+.assetInfo {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(3);
+}
+
+.rowContent {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  .labelContainer {
+    @include half-display;
+    gap: 5px;
+
+    .infoIcon {
+      width: size_unit(2.25);
+      height: size_unit(2.25);
+      margin-bottom: -5px;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+.assetList {
+  @include right-align;
+  gap: size_unit(4);
+}
+
+.recipient {
+  @include half-display;
+  text-align: right;
+}
+
+.address {
+  word-break: break-all;
+  line-height: 17px;
+}
