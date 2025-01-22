@@ -17,6 +17,10 @@ import TransactionsIconActive from '@assets/icons/active-transactions-icon.compo
 import StakingIconDefault from '@assets/icons/database-icon.component.svg';
 import StakingIconHover from '@assets/icons/hover-database-icon.component.svg';
 import StakingIconActive from '@assets/icons/active-database-icon.component.svg';
+
+import DappExplorerIconDefault from '@assets/icons/tiles-outlined.component.svg';
+import DappExplorerIconHover from '@assets/icons/tiles-outlined-gradient.component.svg';
+import DappExplorerIconActive from '@assets/icons/tiles-solid-gradient.component.svg';
 import { SideMenuItemConfig } from '@types';
 
 export const sideMenuConfig: SideMenuItemConfig[] = [
@@ -56,5 +60,14 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     regularIcon: StakingIconDefault,
     hoverIcon: StakingIconHover,
     activeIcon: StakingIconActive
+  },
+  {
+    id: MenuItemList.DAPPS,
+    label: 'browserView.sideMenu.links.dappExplorer',
+    testId: 'item-dapps',
+    path: routes.dapps,
+    regularIcon: DappExplorerIconDefault,
+    hoverIcon: DappExplorerIconHover,
+    activeIcon: DappExplorerIconActive
   }
 ];

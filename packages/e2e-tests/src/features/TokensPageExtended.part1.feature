@@ -62,11 +62,11 @@ Feature: LW: Tokens tab - extended view
     When I click on a widget item with subtitle: "<subtitle>"
     Then I see a "<type>" article with title "<subtitle>"
     Examples:
-      | type     | subtitle                                                                                                            |
-      | Glossary | What is a digital asset?                                                                                            |
-      | FAQ      | How do I send and receive funds?                                                                                    |
-      | Video    | Secure self-custody with Lace                                                                                       |
-      | Video    | Connecting to DApps with Lace                                                                                       |
-      | FAQ      | How is the Conway Ledger era (also called governance era) supported by Lace?                                        |
-      | FAQ      | What type of governance features are supported in Lace using the GovTool in the current SanchoNet test environment? |
-      | FAQ      | What type of governance actions are supported by Lace?                                                              |
+      | type     | subtitle                                                                     |
+      | Glossary | What is a digital asset?                                                     |
+      | FAQ      | How do I send and receive funds?                                             |
+      | Video    | Secure self-custody with Lace                                                |
+      | Video    | Connecting to DApps with Lace                                                |
+      | FAQ      | How is the Conway Ledger era (also called governance era) supported by Lace? |
+      | FAQ      | What type of governance features are supported in Lace using the GovTool?    |
+      | FAQ      | What type of governance actions are supported by Lace?                       |

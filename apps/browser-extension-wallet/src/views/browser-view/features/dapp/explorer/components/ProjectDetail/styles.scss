@@ -1,0 +1,48 @@
+@import '../../styles/theme.scss';
+@import '../../styles/colors.scss';
+@import '../../styles/functions.scss';
+
+.link-icon {
+  height: 24px;
+  width: 24px;
+}
+
+.iog-project-details__header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.iog-tabs {
+  .ant-tabs-nav {
+    margin: 0 !important;
+    border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+
+    &::before {
+      content: none !important;
+    }
+  }
+
+  .ant-tabs-tab {
+    font-size: toRem(16);
+    line-height: toRem(24);
+    font-weight: 400;
+
+    .ant-tabs-tab-btn {
+      color: var(--light-mode-mid-grey, var(--dark-mode-light-grey)) !important;
+    }
+
+    &-active {
+      .ant-tabs-tab-btn {
+        color: var(--text-color-primary) !important;
+      }
+    }
+  }
+
+  .ant-tabs-ink-bar {
+    background: linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%);
+    border-radius: 100px;
+  }
+}

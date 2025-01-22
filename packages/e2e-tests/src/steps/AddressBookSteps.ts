@@ -29,11 +29,11 @@ import AddressForm from '../elements/addressbook/AddressForm';
 import ToastMessageAssert from '../assert/toastMessageAssert';
 import { t } from '../utils/translationService';
 import ReviewAddressDrawerAssert from '../assert/addressBook/ReviewAddressDrawerAssert';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { getTestWallet } from '../support/walletConfiguration';
 import ReviewAddressDrawer from '../elements/addressbook/ReviewAddressDrawer';
 import Modal from '../elements/modal';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
+import { getNonActiveAdaHandle2WalletName, getNonActiveAdaHandleWalletName } from '../utils/walletUtils';
+import { visit } from '../utils/pageUtils';
 
 const addressAddedToastTranslationKey = 'browserView.addressBook.toast.addAddress';
 
@@ -323,12 +323,12 @@ Then(
 Then(
   /^I see review handle drawer in (extended|popup) mode for handle: "([^"]*)"$/,
   async (mode: 'extended' | 'popup', handleName: string) => {
-    const previousAddress = String(getTestWallet(testContext.load('activeWallet')).address);
+    const previousAddress = String(getTestWallet(testContext.load('activeWallet')).accounts[0].address);
     const receiverWallet =
       mode === 'extended'
-        ? getTestWallet(await nftsPageObject.getNonActiveAdaHandleWalletName())
-        : getTestWallet(await nftsPageObject.getNonActiveAdaHandle2WalletName());
-    const newAddress = String(receiverWallet.address);
+        ? getTestWallet(getNonActiveAdaHandleWalletName())
+        : getTestWallet(getNonActiveAdaHandle2WalletName());
+    const newAddress = String(receiverWallet.accounts[0].address);
     await ReviewAddressDrawerAssert.assertSeeReviewAddressDrawer(mode, handleName, previousAddress, newAddress);
   }
 );
@@ -369,7 +369,7 @@ When(
 Then(
   /^I add address with name: "([^"]*)" and address: "([^"]*)" to address book in (extended|popup) mode$/,
   async (name: string, address: string, mode: 'extended' | 'popup') => {
-    await mainMenuPageObject.navigateToSection('Address Book', mode);
+    await visit('Address Book', mode);
     await AddressBookPage.clickAddAddressButton();
     await AddressForm.enterName(name === 'empty' ? '' : name);
     await browser.pause(500); // Wait for input field value validation

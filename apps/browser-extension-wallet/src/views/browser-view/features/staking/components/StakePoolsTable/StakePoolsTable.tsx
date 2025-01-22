@@ -190,7 +190,7 @@ export const StakePoolsTable = ({ scrollableTargetId }: stakePoolsTableProps): R
           loading={fetchingPools}
         />
       </div>
-      <Box mt="$16" className={styles.tableWrapper} data-testid="stake-pool-list-container">
+      <Box mt="$16" className={styles.tableWrapper} testId="stake-pool-list-container">
         <Table.Header
           dataTestId="stake-pool"
           headers={headers}

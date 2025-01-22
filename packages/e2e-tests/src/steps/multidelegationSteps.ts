@@ -22,7 +22,6 @@ import ManageStakingDrawerAssert from '../assert/multidelegation/ManageStakingDr
 import StartStakingPageAssert from '../assert/multidelegation/StartStakingPageAssert';
 import TokensPage from '../elements/tokensPage';
 import localStorageInitializer from '../fixture/localStorageInitializer';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import StartStakingPage from '../elements/multidelegation/StartStakingPage';
 import PortfolioBar from '../elements/multidelegation/PortfolioBar';
 import PortfolioBarAssert from '../assert/multidelegation/PortfolioBarAssert';
@@ -38,6 +37,14 @@ import StakingInfoCard from '../elements/multidelegation/StakingInfoCard';
 import StakingExitModal from '../elements/multidelegation/StakingExitModal';
 import StakingExitModalAssert from '../assert/multidelegation/StakingExitModalAssert';
 import StakingErrorDrawerAssert from '../assert/multidelegation/StakingErrorDrawerAssert';
+import MultidelegationDAppIssueModalAssert from '../assert/multidelegation/MultidelegationDAppIssueModalAssert';
+import { StakePoolGridCard } from '../elements/multidelegation/StakePoolGridCard';
+import { StakePoolListItem } from '../elements/multidelegation/StakePoolListItem';
+import SwitchingPoolsModalAssert from '../assert/multidelegation/SwitchingPoolsModalAssert';
+import { clearInputFieldValue } from '../utils/inputFieldUtils';
+import DelegateYourVotingPowerBanner from '../elements/multidelegation/DelegateYourVotingPowerBanner';
+import DelegateYourVotingPowerBannerAssert from '../assert/multidelegation/DelegateYourVotingPowerBannerAssert';
+import { visit } from '../utils/pageUtils';
 
 const validPassword = 'N_8J@bne87A';
 
@@ -114,6 +121,7 @@ When(/^I save identifiers of stake pools currently in use$/, async () => {
 
 When(/^I input "([^"]*)" into stake pool search bar$/, async (term: string) => {
   const searchTerm = await parseSearchTerm(term);
+  await clearInputFieldValue(await MultidelegationPage.stakingPageSearchInput);
   await MultidelegationPage.fillSearch(searchTerm);
   await MultidelegationPage.searchLoader.waitForDisplayed({ reverse: true, timeout: 10_000 });
 });
@@ -240,9 +248,12 @@ Then(/^I see the stake pool search control with appropriate content$/, async () 
   await MultidelegationPageAssert.assertSeeSearchComponent();
 });
 
-Then(/^there are (\d+) stake pools returned$/, async (resultsCount: number) => {
-  await MultidelegationPageAssert.assertSeeSearchResults(resultsCount);
-});
+Then(
+  /^there are (\d+) stake pools returned for (grid|list) view$/,
+  async (resultsCount: number, viewType: 'grid' | 'list') => {
+    await MultidelegationPageAssert.assertSeeSearchResults(resultsCount, viewType);
+  }
+);
 
 Then(/^\(if applicable\) first stake pool search result has "([^"]*)" ticker$/, async (expectedTicker: string) => {
   if ((await MultidelegationPage.displayedPools.length) > 0) {
@@ -336,8 +347,7 @@ Given(/^I am on Start Staking page in (extended|popup) mode$/, async (mode: 'ext
   await TokensPage.waitUntilCardanoTokenLoaded();
   await TokensPage.saveTokenBalance('Cardano');
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
-  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
-  await mainMenuPageObject.navigateToSection('Staking', mode);
+  await visit('Staking', mode);
   const cardanoBalance = String(await TokensPage.loadTokenBalance('Cardano'));
   await StartStakingPageAssert.assertSeeStartStakingPage(cardanoBalance, mode);
 });
@@ -599,10 +609,30 @@ Then(
   }
 );
 
-When(/^I close the modal about issues with multidelegation and DApps$/, async () => {
-  if (await MultidelegationDAppIssueModal.gotItButton.isDisplayed()) {
-    await MultidelegationDAppIssueModal.gotItButton.click();
+When(/^I click on "Got it" button inside the modal about issues with multi-delegation and DApps$/, async () => {
+  await MultidelegationDAppIssueModal.clickOnGotItButton();
+});
+
+When(/^I click on a random stake pool from the (grid|list)$/, async (mode: 'grid' | 'list') => {
+  if (mode === 'grid') {
+    const randomCardIndex = await MultidelegationPage.getRandomStakePooGridCardIndex();
+    await new StakePoolGridCard(randomCardIndex).container.click();
+  } else {
+    const randomItemIndex = await MultidelegationPage.getRandomStakePoolListItemIndex();
+    await new StakePoolListItem(randomItemIndex).container.click();
   }
+});
+
+Then(
+  /^I (see|do not see) the modal about issues with multi-delegation and DApps$/,
+  async (status: 'see' | 'do not see') => {
+    await MultidelegationDAppIssueModalAssert.assertSeeModal(status === 'see');
+  }
+);
+
+When(/^I reset default behaviour for modal about issues with multi-delegation and DApps$/, async () => {
+  await localStorageInitializer.removeConfigurationForShowingMultidelegationDAppsIssueModal();
+  await browser.refresh();
 });
 
 Then(/^I see currently staking component for stake pool:$/, async (stakePools: DataTable) => {
@@ -661,4 +691,20 @@ When(/^I click "(Cancel|Fine by me)" button on "Switching pool\?" modal$/, async
 
 Then(/^the staking error screen is displayed$/, async () => {
   await StakingErrorDrawerAssert.assertSeeStakingError();
+});
+
+Then(/^I see "Switching to less pools" modal$/, async () => {
+  await SwitchingPoolsModalAssert.assertSeeSwitchingToLessPoolsModal();
+});
+
+Then(/^"Delegate your voting power" banner (is|is not) displayed$/, async (state: 'is' | 'is not') => {
+  await DelegateYourVotingPowerBannerAssert.assertSeeDelegateYourVotingPowerBanner(state === 'is');
+});
+
+When(/^I click on "Know more" link on "Delegate your voting power" banner$/, async () => {
+  await DelegateYourVotingPowerBanner.clickOnKnowMoreLink();
+});
+
+When(/^I click on "Register now at Gov Tool" button$/, async () => {
+  await DelegateYourVotingPowerBanner.clickRegisterButton();
 });

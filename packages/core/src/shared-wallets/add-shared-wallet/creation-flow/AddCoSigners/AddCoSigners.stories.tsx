@@ -16,8 +16,8 @@ export default meta;
 
 export const Overview = (): JSX.Element => {
   const [coSigners, setCoSigners] = useState<CoSigner[]>([
-    { id: uuid(), keys: '', name: '' },
-    { id: uuid(), keys: '', name: '' },
+    { id: uuid(), name: '', sharedWalletKey: '' },
+    { id: uuid(), name: '', sharedWalletKey: '' },
   ]);
 
   return (

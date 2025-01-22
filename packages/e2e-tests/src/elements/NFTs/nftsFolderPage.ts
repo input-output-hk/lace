@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 import CommonDrawerElements from '../CommonDrawerElements';
+import { ChainablePromiseElement } from 'webdriverio';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class NftsFolderPage extends CommonDrawerElements {
   private FOLDER_TITLE = '[data-testid="selected-folder-title"]';
@@ -10,23 +12,23 @@ class NftsFolderPage extends CommonDrawerElements {
   public NFT_NAME = '[data-testid="nft-item-name"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.FOLDER_TITLE);
   }
 
-  get nftCounter() {
+  get nftCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.FOLDER_NFT_COUNT);
   }
 
-  get addNftButton() {
+  get addNftButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADD_NFT_BUTTON);
   }
 
-  get assetSelectorContainer() {
+  get assetSelectorContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  get nfts() {
+  get nfts(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 

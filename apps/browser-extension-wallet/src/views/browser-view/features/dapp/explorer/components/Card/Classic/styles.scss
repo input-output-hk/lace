@@ -1,0 +1,37 @@
+@import '../../../styles/theme.scss';
+@import '../../../styles/colors.scss';
+
+.iog-card-container {
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 30px;
+
+  &:hover {
+    background-color: var(--dark-mode-mid-grey, var(--data-light-grey, #f9f9f9));
+  }
+}
+
+.iog-card-box__body {
+  flex-grow: 0;
+  overflow: hidden;
+
+  span {
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+  }
+}
+
+.iog-card-box__image {
+  flex-shrink: 0;
+  position: relative;
+  border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+  border-radius: 16px;
+  max-height: 48px;
+  max-width: 48px;
+  overflow: hidden;
+}

@@ -9,10 +9,10 @@ import { useStakePoolDetails, sectionsConfig } from '../../store';
 import Exclamation from '../../../../../../assets/images/Exclamation.png';
 import styles from './TransactionComplete.module.scss';
 import { useDelegationTransaction } from '@views/browser/features/staking/hooks';
-import { usePassword } from '@views/browser/features/send-transaction';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { useSecrets } from '@lace/core';
 
 type TransactionFailProps = {
   popupView?: boolean;
@@ -40,7 +40,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setIsDrawerVisible, resetStates, setSection } = useStakePoolDetails();
   const { setDelegationTxBuilder } = useDelegationStore();
-  const { removePassword } = usePassword();
+  const { clearSecrets } = useSecrets();
   const analytics = useAnalyticsContext();
 
   const closeDrawer = () => {
@@ -58,7 +58,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       await signAndSubmitTransaction();
       setIsLoading(false);
       setSection(sectionsConfig[Sections.SUCCESS_TX]);
-      removePassword();
+      clearSecrets();
     } catch (error) {
       console.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);

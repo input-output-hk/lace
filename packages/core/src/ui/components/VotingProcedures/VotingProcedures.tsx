@@ -2,11 +2,11 @@ import React, { Fragment } from 'react';
 import { Box, Cell, Grid, Metadata, MetadataLink, Text, Divider, sx } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { CoreTranslationKey } from '@lace/translation';
-import { VoterTypeEnum, VotesEnum } from '@lace/cardano/dist/wallet/util';
+import type { Wallet } from '@lace/cardano';
 
 type VotingProcedure = {
   voter: {
-    type: VoterTypeEnum;
+    type: Wallet.util.VoterTypeEnum;
     dRepId?: string;
   };
   votes: {
@@ -16,7 +16,7 @@ type VotingProcedure = {
       txHashUrl?: string; // Dependent on having an explorer to link
     };
     votingProcedure: {
-      vote: VotesEnum;
+      vote: Wallet.util.VotesEnum;
       anchor: {
         url: string;
         hash: string;
@@ -56,13 +56,15 @@ export const VotingProcedures = ({ data }: Props): JSX.Element => {
   return (
     <>
       {data.map(({ voter, votes }, idx) => (
-        <Box key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
+        <Box mb="$16" key={voter.dRepId} mt={idx > 0 ? '$40' : '$0'}>
           <Grid columns="$1" gutters="$16">
-            <Cell>
-              <Text.Body.Large className={textCss} weight="$bold">
-                {indexCounter(translations.vote, idx, data.length)}
-              </Text.Body.Large>
-            </Cell>
+            {data.length > 1 && (
+              <Cell>
+                <Text.Body.Large className={textCss} weight="$bold">
+                  {indexCounter(translations.vote, idx, data.length)}
+                </Text.Body.Large>
+              </Cell>
+            )}
             <Cell>
               <Metadata
                 label={translations.voterType}

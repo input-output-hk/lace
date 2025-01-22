@@ -6,14 +6,12 @@ Feature: Staking Page - Delegated funds - Multiple pools - Popup View
 
   @LW-8330
   Scenario: Popup View - Delegation card displays correct data
-    And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
     Then I see Delegation title displayed for multidelegation
     And I see Delegation card displaying correct data
 
   @LW-8338
   Scenario: Popup View - Delegated pools cards are present
-    And I disable showing Multidelegation persistence banner
     When I navigate to Staking popup page
     And I see Delegation pool cards are displayed
 
@@ -40,3 +38,13 @@ Feature: Staking Page - Delegated funds - Multiple pools - Popup View
     And I navigate to Staking popup page
     When I click on pool name in the first currently staking component
     Then I see stake pool details drawer for "AzureADA" stake pool opened from currently staked component
+
+  @LW-10852
+  Scenario: Popup View - Modal about multi-delegation and DApp issues is displayed for user already using multi-delegation
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking popup page
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "$WALLET_MANIFEST_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
-  "version": "1.13.0",
+  "version": "1.18.2",
   "icons": {
     "16": "icon16.png",
     "32": "icon32.png",
@@ -18,9 +18,16 @@
   "permissions": ["webRequest", "storage", "tabs", "unlimitedStorage"],
   "host_permissions": ["<all_urls>"],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; connect-src $CARDANO_SERVICES_URLS $COINGECKO_URL $MUESLISWAP_URL $LOCALHOST_CONNECT_SRC $POSTHOG_URL $TYPEKIT_URL data:; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+    "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; frame-src https://connect.trezor.io/ https://www.youtube-nocookie.com; script-src 'self' 'wasm-unsafe-eval' $LOCALHOST_SCRIPT_SRC; font-src 'self' https://use.typekit.net; object-src 'self'; connect-src $BLOCKFROST_URLS $CARDANO_SERVICES_URLS $CARDANO_WS_SERVER_URLS $SENTRY_URL $DAPP_RADAR_APPI_URL https://coingecko.live-mainnet.eks.lw.iog.io https://muesliswap.live-mainnet.eks.lw.iog.io $LOCALHOST_CONNECT_SRC $POSTHOG_HOST https://use.typekit.net data:; style-src * 'unsafe-inline'; img-src * data:;"
   },
   "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file://*/*"],
+      "js": ["./js/inject.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": true
+    },
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
       "js": ["./js/content.js"],
@@ -28,7 +35,7 @@
       "all_frames": true
     },
     {
-      "matches": ["*://connect.trezor.io/*/popup.html"],
+      "matches": ["*://connect.trezor.io/*/popup.html*"],
       "js": ["js/trezor-content-script.js"],
       "all_frames": true
     }

@@ -7,10 +7,11 @@
   }
 }
 
-.draweHeaderTitle {
+.drawerHeaderTitle {
   display: flex;
   flex-direction: column;
   gap: size_unit(2);
+
   .title {
     @include text-heading;
     letter-spacing: -0.015em;
@@ -29,4 +30,31 @@
 
 .infoContainer {
   padding: size_unit(4.5) 0;
+  width: 100%;
+}
+
+:global(.ant-divider-horizontal) {
+  color: var(--text-color-primary) !important;
+
+  &:before, &:after {
+    background-color: var(--dark-mode-light-grey, --text-color-primary);
+  }
+}
+
+.addNewAddressContainer {
+  :global(.ant-typography) {
+    font-weight: 400 !important;
+  }
+
+  button {
+    border: 1.5px solid var(--light-mode-dark-grey);
+  }
+
+  .addNewAddressBanner {
+    height: 80px;
+  }
+
+  .addNewAddressBannerIcon {
+    color: var(--text-color-red);
+  }
 }

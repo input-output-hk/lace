@@ -2,8 +2,9 @@
 import * as React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { TransactionDetails, TransactionDetailsProps } from '../TransactionDetails';
+import { TransactionDetails } from '../TransactionDetails';
 import { Wallet } from '@lace/cardano';
+import { TransactionDetailsProps } from '../../Transaction';
 
 const transactionDate = '2021/09/10';
 

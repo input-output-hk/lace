@@ -5,17 +5,19 @@ import { StakePoolNameBrowser, StakePoolNameBrowserProps } from '../StakePoolNam
 import '@testing-library/jest-dom';
 
 describe('Testing StakePoolNameBrowser component', () => {
+  const name = 'name';
+  const ticker = 'ticker';
   const props: StakePoolNameBrowserProps = {
-    name: 'name',
-    ticker: 'ticker',
+    name,
+    ticker,
     isDelegated: true,
     translations: { retiring: 'retiring', retired: 'retired', delegating: 'delegating', saturated: 'saturated' }
   };
   test('should display all stake pool metrics with icons', async () => {
     const { findByText, findByTestId } = render(<StakePoolNameBrowser {...props} />);
     const roiLabel = await findByTestId('stake-pool-item-logo');
-    const nameValue = await findByText(props.name);
-    const tickerValue = await findByText(props.ticker);
+    const nameValue = await findByText(name);
+    const tickerValue = await findByText(ticker);
 
     expect(roiLabel).toBeVisible();
     expect(nameValue).toBeVisible();

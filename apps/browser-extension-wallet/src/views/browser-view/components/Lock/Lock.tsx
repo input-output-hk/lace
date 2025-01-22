@@ -11,7 +11,13 @@ import { useTheme } from '@providers/ThemeProvider/context';
 
 const { Text } = Typography;
 
-export const Lock = (): React.ReactElement => {
+type Props = {
+  message?: string;
+  description?: string;
+  icon?: string;
+};
+
+export const Lock = ({ message, description, icon }: Props): React.ReactElement => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const openExternalLink = useExternalLinkOpener();
@@ -33,12 +39,12 @@ export const Lock = (): React.ReactElement => {
       <div className={styles.centerContent}>
         <div className={styles.content}>
           <div className={styles.lockMessage}>
-            <img className={styles.mark} src={laceLogoMark} alt="LACE" data-testid="lock-screen-img" />
+            <img className={styles.mark} src={icon ?? laceLogoMark} alt="LACE" data-testid="lock-screen-img" />
             <Text className={styles.title} data-testid="lock-screen-text1">
-              {t('general.lock.yourWalletIsLocked')}
+              {message ?? t('general.lock.yourWalletIsLocked')}
             </Text>
             <Text className={styles.description} data-testid="lock-screen-text2">
-              {t('general.lock.toUnlockOpenPopUp')}
+              {description ?? t('general.lock.toUnlockOpenPopUp')}
             </Text>
           </div>
         </div>

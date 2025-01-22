@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-useless-undefined */
 /* eslint-disable no-magic-numbers */
 import { Asset } from '@cardano-sdk/core';
 import { calculateAssetBalance, assetBalanceToBigInt } from '../asset-balance';
@@ -17,7 +18,7 @@ describe('asset-balance', () => {
     });
 
     test('with no decimals', () => {
-      expect(calculateAssetBalance(BigInt(15), undefined as Asset.AssetInfo)).toEqual('15');
+      expect(calculateAssetBalance(BigInt(15), undefined)).toEqual('15');
       expect(calculateAssetBalance(BigInt(15), {} as Asset.AssetInfo)).toEqual('15');
       expect(calculateAssetBalance(BigInt(15), { tokenMetadata: undefined } as Asset.AssetInfo)).toEqual('15');
       expect(calculateAssetBalance(BigInt(15), { tokenMetadata: { decimals: undefined } } as Asset.AssetInfo)).toEqual(
@@ -41,7 +42,7 @@ describe('asset-balance', () => {
     });
 
     test('with no decimals in metadata', () => {
-      expect(assetBalanceToBigInt('15', undefined as Asset.AssetInfo)).toEqual(BigInt(15));
+      expect(assetBalanceToBigInt('15', undefined)).toEqual(BigInt(15));
       expect(assetBalanceToBigInt('15', {} as Asset.AssetInfo)).toEqual(BigInt(15));
       expect(assetBalanceToBigInt('15', { tokenMetadata: undefined } as Asset.AssetInfo)).toEqual(BigInt(15));
       expect(assetBalanceToBigInt('15', { tokenMetadata: { decimals: undefined } } as Asset.AssetInfo)).toEqual(

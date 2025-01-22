@@ -4,7 +4,7 @@
 
 First, install the dependencies:
 
-```bash
+```sh
 yarn install --frozen-lockfile
 ```
 
@@ -12,7 +12,7 @@ yarn install --frozen-lockfile
 
 Storybook is used for development
 
-```bash
+```sh
 yarn storybook
 ```
 

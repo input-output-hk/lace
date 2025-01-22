@@ -5,22 +5,20 @@ import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './ConfirmTransaction.module.scss';
-import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@stores';
 import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from './hooks';
-import { getTxType } from './utils';
-import { ConfirmTransactionContent } from './ConfirmTransactionContent';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
-import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS } from '@src/utils/constants';
-import { of, take } from 'rxjs';
+import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
+import { DappTransactionContainer } from './DappTransactionContainer';
+import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -29,22 +27,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
     setDappInfo,
     signTxRequest: { request: req, set: setSignTxRequest }
   } = useViewsFlowContext();
-
-  const { walletType, isHardwareWallet } = useWalletStore();
+  const { walletType, isHardwareWallet, walletInfo, inMemoryWallet } = useWalletStore();
   const analytics = useAnalyticsContext();
-  const [confirmTransactionError, setConfirmTransactionError] = useState(false);
+  const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
-  const [txType, setTxType] = useState<Wallet.Cip30TxType>();
-
-  useEffect(() => {
-    const fetchTxType = async () => {
-      if (!req) return;
-      const type = await getTxType(req.transaction.toCore());
-      setTxType(type);
-    };
-    fetchTxType();
-  }, [req]);
 
   const onConfirmTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
@@ -60,30 +47,33 @@ export const ConfirmTransaction = (): React.ReactElement => {
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
   };
 
+  const txWitnessRequest = useTxWitnessRequest();
+
   useEffect(() => {
-    const subscription = signingCoordinator.transactionWitnessRequest$.pipe(take(1)).subscribe(async (r) => {
-      setDappInfo(await senderToDappInfo(r.signContext.sender));
-      setSignTxRequest(r);
-    });
+    (async () => {
+      if (!txWitnessRequest) return (): (() => void) => void 0;
 
-    const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
+      setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
+      setSignTxRequest(txWitnessRequest);
 
-    return () => {
-      subscription.unsubscribe();
-      api.shutdown();
-    };
-  }, [setSignTxRequest, setDappInfo]);
+      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
+        {
+          api$: of({
+            async readyToSignTx(): Promise<boolean> {
+              return Promise.resolve(true);
+            }
+          }),
+          baseChannel: DAPP_CHANNELS.userPrompt,
+          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
+        },
+        { logger: console, runtime }
+      );
+
+      return () => {
+        api.shutdown();
+      };
+    })();
+  }, [setSignTxRequest, setDappInfo, txWitnessRequest]);
 
   const onCancelTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
@@ -96,11 +86,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
-      {req && txType ? (
-        <ConfirmTransactionContent txType={txType} onError={() => setConfirmTransactionError(true)} />
-      ) : (
-        <Skeleton loading />
-      )}
+      {req && walletInfo && inMemoryWallet ? <DappTransactionContainer /> : <Skeleton loading />}
       {!confirmTransactionError && (
         <div className={styles.actions}>
           <Button

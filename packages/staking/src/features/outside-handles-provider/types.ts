@@ -1,6 +1,7 @@
 import { TxBuilder } from '@cardano-sdk/tx-construction';
+import { Password } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityListProps } from '@lace/core';
+import { AssetActivityListProps, SignPolicy } from '@lace/core';
 import { StakePoolSortOptions, StakingBrowserPreferences } from 'features/BrowsePools';
 import type { IAnalyticsTracker } from '@lace/common';
 
@@ -28,9 +29,9 @@ export interface SubmittingState {
 }
 
 export interface PasswordHook {
-  password?: string;
-  setPassword: (pass: string) => void;
-  removePassword: () => void;
+  password?: Partial<Password>;
+  setPassword: (pass: Partial<Password>) => void;
+  clearSecrets: () => void;
 }
 
 export enum StateStatus {
@@ -48,6 +49,7 @@ export interface IBlockchainProvider {
   utxoProvider: Wallet.UtxoProvider;
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   rewardsProvider: Wallet.RewardsProvider;
+  inputResolver: Wallet.Cardano.InputResolver;
 }
 
 export type OutsideHandlesContextValue = {
@@ -96,10 +98,18 @@ export type OutsideHandlesContextValue = {
   triggerMultidelegationFirstVisit: () => void;
   multidelegationDAppCompatibility: boolean;
   triggerMultidelegationDAppCompatibility: () => void;
-  multidelegationFirstVisitSincePortfolioPersistence: boolean;
-  triggerMultidelegationFirstVisitSincePortfolioPersistence: () => void;
   walletAddress: string;
+  walletName: string;
   currentChain: Wallet.Cardano.ChainId;
   isMultidelegationSupportedByDevice: (walletType: string) => Promise<boolean>;
   isCustomSubmitApiEnabled: boolean;
+  isSharedWallet: boolean;
+  signPolicy: SignPolicy;
+  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
+  coSigners: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
+  useRewardAccountsData: () => {
+    areAllRegisteredStakeKeysWithoutVotingDelegation: boolean;
+    poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
+  };
+  govToolUrl: string;
 };

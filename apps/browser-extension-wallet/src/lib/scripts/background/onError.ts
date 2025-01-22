@@ -6,10 +6,15 @@ import { backendFailures$, requestMessage$ } from './services';
 const INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
 const GATEWAY_TIMEOUT_STATUS_CODE = 503;
 const UNAUTHORIZED_STATUS_CODE = 401;
+const NOT_FOUND_STATUS_CODE = 404;
 
 const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => {
   if (data?.type === 'xmlhttprequest' && runtime.getURL('').startsWith(data.initiator)) {
-    if (data.statusCode > UNAUTHORIZED_STATUS_CODE && data.statusCode < GATEWAY_TIMEOUT_STATUS_CODE) {
+    const statusCodeQualifiedAsFailure =
+      data.statusCode !== NOT_FOUND_STATUS_CODE &&
+      data.statusCode > UNAUTHORIZED_STATUS_CODE &&
+      data.statusCode < GATEWAY_TIMEOUT_STATUS_CODE;
+    if (statusCodeQualifiedAsFailure) {
       // A backend service request has failed, increment the failed requests count
       backendFailures$.next(backendFailures$.value + 1);
     } else {
@@ -21,7 +26,11 @@ const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => 
 
 const handleRequests = (data: WebRequest.OnCompletedDetailsType) => {
   // every status code number that is below 500 would be considered as successful
-  if (data?.type === 'xmlhttprequest' && data.statusCode < INTERNAL_SERVER_ERROR_STATUS_CODE) {
+  if (
+    data?.type === 'xmlhttprequest' &&
+    data.statusCode < INTERNAL_SERVER_ERROR_STATUS_CODE &&
+    runtime.getURL('').startsWith(data.initiator)
+  ) {
     requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: true } });
     webRequest.onCompleted.removeListener(handleRequests);
   }

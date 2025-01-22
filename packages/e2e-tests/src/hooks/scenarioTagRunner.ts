@@ -9,10 +9,13 @@ import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
 
 import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import allure from '@wdio/allure-reporter';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
-  // use Before hooks in feature steps file, see AddressBook.ts as an example
+  if (String(process.env.SERVICE_WORKER_LOGS) === 'true') {
+    await consoleManager.startLogsCollection();
+  }
 });
 
 After({ tags: 'not @Pending and not @pending' }, async () => {
@@ -27,5 +30,16 @@ After({ tags: 'not @Pending and not @pending' }, async () => {
 });
 
 AfterStep(async (scenario) => {
-  if (scenario.result.status === 'FAILED') await browser.takeScreenshot();
+  if (scenario.result.status === 'FAILED') {
+    await browser.takeScreenshot();
+
+    if (String(process.env.SERVICE_WORKER_LOGS) === 'true') {
+      const logs = await consoleManager.getLogsAsString();
+      if (logs !== undefined) {
+        allure.addAttachment('Service worker logs', logs, 'text/plain');
+      }
+    }
+    await consoleManager.clearLogs();
+    await consoleManager.closeOpenedCdpSessions();
+  }
 });

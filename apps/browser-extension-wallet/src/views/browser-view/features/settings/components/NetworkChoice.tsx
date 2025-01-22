@@ -11,6 +11,7 @@ import { config } from '@src/config';
 import { useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const { AVAILABLE_CHAINS } = config();
 
@@ -40,9 +41,17 @@ const walletProfileEventByNetworkName: Record<Wallet.ChainName, networkEventUser
   Sanchonet: PostHogAction.UserWalletProfileNetworkSanchonetClick
 };
 
+export const cardanoNetworkMap: { [key in Wallet.ChainName]: Wallet.Cardano.NetworkMagics } = {
+  Mainnet: Wallet.Cardano.NetworkMagics.Mainnet,
+  Preprod: Wallet.Cardano.NetworkMagics.Preprod,
+  Preview: Wallet.Cardano.NetworkMagics.Preview,
+  Sanchonet: Wallet.Cardano.NetworkMagics.Sanchonet
+};
+
 export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-profile' }): React.ReactElement => {
   const { t } = useTranslation();
-  const { environmentName } = useWalletStore();
+  const posthog = usePostHogClientContext();
+  const { environmentName, isSharedWallet } = useWalletStore();
   const { switchNetwork } = useWalletManager();
   const analytics = useAnalyticsContext();
 
@@ -81,6 +90,10 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
     return event;
   };
 
+  const availableChains = isSharedWallet
+    ? AVAILABLE_CHAINS.filter((chain) => posthog?.featureFlags[cardanoNetworkMap[chain]]['shared-wallets'])
+    : AVAILABLE_CHAINS;
+
   return (
     <Radio.Group
       className={styles.radioGroup}
@@ -88,7 +101,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
       value={environmentName}
       data-testid={'network-choice-radio-group'}
     >
-      {AVAILABLE_CHAINS.map((network) => (
+      {availableChains.map((network) => (
         <a className={styles.radio} key={network}>
           <Radio
             value={network}

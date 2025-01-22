@@ -6,7 +6,7 @@ import cn from 'classnames';
 import { InfoCircleOutlined, DownOutlined } from '@ant-design/icons';
 import { addEllipsis, Button } from '@lace/common';
 
-import { TxOutputInput } from './TransactionDetailAsset';
+import { TxOutputInput } from '../Transaction';
 import { TranslationsFor } from '../../utils/types';
 
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
@@ -100,7 +100,7 @@ export const TransactionInputOutput = ({
                     )}
                     <Box
                       mb={addressName ? '$4' : '$12'}
-                      data-testid="tx-address"
+                      testId="tx-address"
                       className={cn([styles.rightAlign, styles.addressTextContainer])}
                     >
                       <Tooltip title={inputAddress}>

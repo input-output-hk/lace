@@ -18,7 +18,6 @@ export const getWalletStatus = (status: {
   isStartingSync: boolean;
   offline: boolean;
 }): WalletStatusProps => {
-  // console.log(status);
   /* check if the wallet is syncing the first time
    this is needed because by default the status.synced is false
    so without this when the wallet was syncing the first time we were displaying the not synced status   */

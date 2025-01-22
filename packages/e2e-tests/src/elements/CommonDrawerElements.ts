@@ -19,7 +19,7 @@ class CommonDrawerElements {
   }
 
   get drawerHeaderBackButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.DRAWER_HEADER_BACK_BUTTON);
+    return $(this.DRAWER_BODY).$(this.DRAWER_HEADER_BACK_BUTTON);
   }
 
   get drawerHeaderCloseButton(): ChainablePromiseElement<WebdriverIO.Element> {

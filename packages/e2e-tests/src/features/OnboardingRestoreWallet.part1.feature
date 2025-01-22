@@ -4,6 +4,7 @@ Feature: Onboarding - Restore wallet
   @LW-2457
   Scenario: Restore Wallet - Mnemonic writedown page - next button
     Given I click "Restore" button on wallet setup page
+    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     And "Next" button is disabled during onboarding process
 
@@ -31,6 +32,7 @@ Feature: Onboarding - Restore wallet
   @LW-2462 @Smoke
   Scenario: Restore Wallet - Name your wallet - happy path to "Enter wallet step"
     Given I click "Restore" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I enter 24 correct mnemonic words on "Mnemonic verification" page
     And I click "Next" button during wallet setup
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -50,12 +52,13 @@ Feature: Onboarding - Restore wallet
       | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
-  @LW-2464
+  @LW-2464 @memory-snapshot
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
+    And valid password is not in snapshot
 
   @LW-3063
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
@@ -81,6 +84,7 @@ Feature: Onboarding - Restore wallet
   @LW-2628
   Scenario: Restore Wallet - autofill words
     Given I click "Restore" button on wallet setup page
+    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
@@ -112,6 +116,7 @@ Feature: Onboarding - Restore wallet
   @LW-4612
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - paste word exceeding the limit
     Given I click "Restore" button on wallet setup page
+    And I click "Next" button during wallet setup
     And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "abcdefghijklmnopqrstuvwxyz"
     Then the mnemonic input contains the word "abcdefghij"

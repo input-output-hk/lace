@@ -7,13 +7,7 @@ import { I18nextProvider } from 'react-i18next';
 import dayjs from 'dayjs';
 import i18n from 'i18next';
 import { Wallet } from '@lace/cardano';
-import {
-  AnalyticsProvider,
-  AppSettingsProvider,
-  AxiosClientProvider,
-  CurrencyStoreProvider,
-  DatabaseProvider
-} from '@providers';
+import { AnalyticsProvider, AppSettingsProvider, CurrencyStoreProvider, DatabaseProvider } from '@providers';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { MockWalletStore, walletStoreMock } from '@utils/mocks/store';
 import { WalletStore } from '@stores/types';
@@ -76,15 +70,13 @@ export const buildMockProviders = async (
                 customSlice={storeCustomSlice}
               >
                 <CurrencyStoreProvider>
-                  <AxiosClientProvider>
-                    <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                      <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                        <ExternalLinkOpenerProvider>
-                          <HashRouter>{children}</HashRouter>
-                        </ExternalLinkOpenerProvider>
-                      </AnalyticsProvider>
-                    </PostHogClientProvider>
-                  </AxiosClientProvider>
+                  <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                    <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                      <ExternalLinkOpenerProvider>
+                        <HashRouter>{children}</HashRouter>
+                      </ExternalLinkOpenerProvider>
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
                 </CurrencyStoreProvider>
               </MockWalletStore>
             </DatabaseProvider>

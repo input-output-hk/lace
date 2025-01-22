@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import { Cardano } from '@cardano-sdk/core';
 import { drepIDasBech32FromHash } from './drep';
 
@@ -87,10 +88,12 @@ export const mapVotingProcedureToView = (
       },
       votingProcedure: {
         vote: getVote(vote.votingProcedure.vote),
-        anchor: !!vote.votingProcedure.anchor && {
-          url: vote.votingProcedure.anchor.url,
-          hash: vote.votingProcedure.anchor.dataHash.toString()
-        }
+        anchor: vote.votingProcedure.anchor
+          ? {
+              url: vote.votingProcedure.anchor.url,
+              hash: vote.votingProcedure.anchor.dataHash.toString()
+            }
+          : null
       }
     }))
   };

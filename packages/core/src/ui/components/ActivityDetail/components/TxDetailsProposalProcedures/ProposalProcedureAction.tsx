@@ -66,7 +66,10 @@ export const ProposalProcedureAction = ({
           key={`${governanceAction.__typename}_${anchor.dataHash}`}
           data={getInfoActionViewData({
             anchor,
-            explorerBaseUrl
+            explorerBaseUrl,
+            rewardAccount,
+            cardanoCoin,
+            deposit
           })}
         />
       );

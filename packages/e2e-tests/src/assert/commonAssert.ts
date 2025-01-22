@@ -6,6 +6,7 @@ import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
 import { getTestWallet } from '../support/walletConfiguration';
+import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -33,7 +34,7 @@ class CommonAssert {
     const pagePathMap: Record<string, string> = {
       Tokens: '/assets',
       NFTs: '/nfts',
-      Transactions: '/activity',
+      Activity: '/activity',
       Staking: '/staking',
       'Address Book': '/address-book',
       Settings: '/settings'
@@ -61,7 +62,7 @@ class CommonAssert {
   }
 
   async assertClipboardContainsAddressOfWallet(walletName: string) {
-    const expectedWalletAddress = getTestWallet(walletName).address as string;
+    const expectedWalletAddress = getTestWallet(walletName).accounts[0].address as string;
     await this.assertClipboardContains(expectedWalletAddress);
   }
 
@@ -76,13 +77,34 @@ class CommonAssert {
         break;
       case 'Terms of service':
       case 'Terms and conditions':
-        expectedUrl = 'https://www.lace.io/lace-terms-of-use.pdf';
+        expectedUrl = 'https://www.lace.io/iohktermsandconditions.pdf';
         break;
       default:
         throw new Error(`Unsupported legal link - ${linkName}`);
     }
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(expectedUrl);
+  }
+
+  async assertPasswordIsNotPresentInMemorySnapshot(password: string) {
+    await browser.cdp('HeapProfiler', 'collectGarbage');
+    const snapshot = await browser.takeHeapSnapshot();
+
+    let needle = '';
+    switch (password) {
+      case 'valid':
+        needle = String(process.env.WALLET_1_PASSWORD);
+        break;
+      case 'invalid':
+        needle = 'somePassword';
+        break;
+      case 'N_8J@bne87A':
+        needle = 'N_8J@bne87A';
+        break;
+    }
+    const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
+
+    expect(needlesFound.length).to.equal(0);
   }
 }
 

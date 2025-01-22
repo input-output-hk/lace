@@ -1,5 +1,6 @@
+/* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -9,7 +10,7 @@ import {
 } from '@providers';
 import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
-import { usePassword, useSubmitingState } from '@views/browser/features/send-transaction';
+import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
 import { compactNumberWithUnit } from '@utils/format-number';
 import { SectionTitle } from '@components/Layout/SectionTitle';
@@ -21,11 +22,14 @@ import { useWalletActivities } from '@hooks/useWalletActivities';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
-  MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY,
   STAKING_BROWSER_PREFERENCES_LS_KEY
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
+import { useSharedWalletData } from '@hooks/useSharedWalletData';
+import { SignPolicy, useSecrets } from '@lace/core';
+import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
+import { config } from '@src/config';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -33,7 +37,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { handleOpenBrowser } = useBackgroundServiceAPIContext();
   const { delegationTxBuilder, setDelegationTxBuilder, delegationTxFee, setDelegationTxFee } = useDelegationStore();
   const openExternalLink = useExternalLinkOpener();
-  const password = usePassword();
+  const password = useSecrets();
   const submittingState = useSubmitingState();
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
@@ -51,7 +55,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     blockchainProvider,
     walletInfo,
     currentChain,
-    environmentName
+    environmentName,
+    isSharedWallet
   } = useWalletStore((state) => ({
     walletType: state.walletType,
     inMemoryWallet: state.inMemoryWallet,
@@ -64,8 +69,19 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     blockchainProvider: state.blockchainProvider,
     walletInfo: state.walletInfo,
     currentChain: state.currentChain,
-    environmentName: state.environmentName
+    environmentName: state.environmentName,
+    isSharedWallet: state.isSharedWallet
   }));
+  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
+  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+
+  useEffect(() => {
+    (async () => {
+      const policy = await getSignPolicy('staking');
+      setSignPolicy(policy);
+    })();
+  }, [getSignPolicy]);
+
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
     const analytics = {
@@ -89,20 +105,19 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   );
   const [multidelegationDAppCompatibility, { updateLocalStorage: setMultidelegationDAppCompatibility }] =
     useLocalStorage(MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY, true);
-  const [
-    multidelegationFirstVisitSincePortfolioPersistence,
-    { updateLocalStorage: setMultidelegationFirstVisitSincePortfolioPersistence }
-  ] = useLocalStorage(MULTIDELEGATION_FIRST_VISIT_SINCE_PORTFOLIO_PERSISTENCE_LS_KEY, true);
 
   const [stakingBrowserPreferencesPersistence, { updateLocalStorage: setStakingBrowserPreferencesPersistence }] =
     useLocalStorage(STAKING_BROWSER_PREFERENCES_LS_KEY, DEFAULT_STAKING_BROWSER_PREFERENCES);
 
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
+  const walletName = walletInfo.name;
   const analytics = useAnalyticsContext();
 
   useEffect(() => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo, blockchainProvider]);
+
+  const { GOV_TOOLS_URLS } = config();
 
   return (
     <OutsideHandlesProvider
@@ -111,14 +126,11 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         stakingBrowserPreferencesPersistence,
         setStakingBrowserPreferencesPersistence,
         multidelegationFirstVisit,
-        triggerMultidelegationFirstVisit: () => setMultidelegationFirstVisit(false),
+        triggerMultidelegationFirstVisit: () => {
+          setMultidelegationFirstVisit(false);
+        },
         multidelegationDAppCompatibility,
         triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
-        multidelegationFirstVisitSincePortfolioPersistence,
-        triggerMultidelegationFirstVisitSincePortfolioPersistence: () => {
-          setMultidelegationFirstVisit(false);
-          setMultidelegationFirstVisitSincePortfolioPersistence(false);
-        },
         expandStakingView: (urlSearchParams?: string) =>
           handleOpenBrowser({ section: BrowserViewSections.STAKING, urlSearchParams }),
         balancesBalance: balance,
@@ -147,9 +159,16 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         // TODO: LW-7575 make compactNumber reusable and not pass it here.
         compactNumber: compactNumberWithUnit,
         walletAddress,
+        walletName,
         currentChain,
         isMultidelegationSupportedByDevice,
-        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status
+        isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
+        isSharedWallet,
+        signPolicy,
+        sharedWalletKey,
+        coSigners,
+        useRewardAccountsData,
+        govToolUrl: GOV_TOOLS_URLS[environmentName]
       }}
     >
       <ContentLayout

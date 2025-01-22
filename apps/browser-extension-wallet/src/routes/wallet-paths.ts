@@ -13,8 +13,9 @@ export const walletRoutePaths = {
   send: '/send/:id',
   settings: '/settings',
   staking: '/staking',
-  dapps: '/dapps',
+  dapps: '/dapp-explorer',
   voting: '/voting',
+  signMessage: '/sign-message',
   setup: {
     home: '/setup',
     create: '/setup/create',
@@ -29,9 +30,17 @@ export const walletRoutePaths = {
   },
   sharedWallet: {
     root: '/shared-wallet',
-    generateKeys: '/shared-wallet/generate-keys',
+    generateKeys: '/shared-wallet/generate-key',
     create: '/shared-wallet/create',
     import: '/shared-wallet/import'
+  },
+  namiMigration: {
+    root: '/nami/migration',
+    activating: '/nami/migration/activating',
+    welcome: '/nami/migration/welcome',
+    customize: '/nami/migration/customize',
+    allDone: '/nami/migration/all-done',
+    hwFlow: '/nami/nami-mode/hwTab'
   }
 };
 
@@ -40,6 +49,8 @@ export const dAppRoutePaths = {
   dappConnect: '/dapp/connect',
   dappTxSignFailure: '/dapp/transaction/failure',
   dappTxSignSuccess: '/dapp/transaction/success',
+  dappDataSignFailure: '/dapp/data/failure',
+  dappDataSignSuccess: '/dapp/data/success',
   dappSignTx: '/dapp/sign-tx',
   dappSubmitTx: '/dapp/submit-tx',
   dappSignData: '/dapp/sign-data',

@@ -1,9 +1,14 @@
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { getBaseUrlForChain } from '@src/utils/chain';
+import { getBaseUrlForChain, getMagicForChain } from '@src/utils/chain';
 import { BackgroundService, UserIdService as UserIdServiceInterface } from '../types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { logger } from '@lace/common';
+import { config } from '@src/config';
+import Bottleneck from 'bottleneck';
+import { RateLimiter } from '@cardano-sdk/cardano-services-client';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,
@@ -13,22 +18,59 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
     tokenPrices$: RemoteApiPropertyType.HotObservable
   },
   handleOpenBrowser: RemoteApiPropertyType.MethodReturningPromise,
+  handleOpenNamiBrowser: RemoteApiPropertyType.MethodReturningPromise,
+  handleOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeTheme: RemoteApiPropertyType.MethodReturningPromise,
+  handleChangeMode: RemoteApiPropertyType.MethodReturningPromise,
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
-  backendFailures$: RemoteApiPropertyType.HotObservable
+  backendFailures$: RemoteApiPropertyType.HotObservable,
+  unhandledError$: RemoteApiPropertyType.HotObservable
 };
+
+const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
+// Important to use the same rateLimiter object for all networks,
+// because Blockfrost rate limit is per IP address, not per project id
+export const rateLimiter: RateLimiter = new Bottleneck({
+  reservoir: BLOCKFROST_RATE_LIMIT_CONFIG.size,
+  reservoirIncreaseAmount: BLOCKFROST_RATE_LIMIT_CONFIG.increaseAmount,
+  reservoirIncreaseInterval: BLOCKFROST_RATE_LIMIT_CONFIG.increaseInterval,
+  reservoirIncreaseMaximum: BLOCKFROST_RATE_LIMIT_CONFIG.size
+});
 
 export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.WalletProvidersDependencies> => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
-  const { customSubmitTxUrl } = await getBackgroundStorage();
+  const magic = getMagicForChain(chainName);
+  const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
+
+  const isExperimentEnabled = (experimentName: ExperimentName) => !!(featureFlags?.[magic]?.[experimentName] ?? false);
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
-    baseUrl: baseCardanoServicesUrl,
-    customSubmitTxUrl
+    env: {
+      baseCardanoServicesUrl,
+      customSubmitTxUrl,
+      blockfrostConfig: {
+        ...BLOCKFROST_CONFIGS[chainName],
+        rateLimiter,
+        apiVersion: 'v0'
+      }
+    },
+    logger,
+    experiments: {
+      useDrepProviderOverrideActiveStatus: isExperimentEnabled(ExperimentName.USE_DREP_PROVIDER_OVERRIDE),
+      useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API),
+      useBlockfrostAssetProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_ASSET_PROVIDER),
+      useBlockfrostChainHistoryProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER),
+      useBlockfrostNetworkInfoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER),
+      useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
+      useBlockfrostTxSubmitProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER),
+      useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER),
+      useBlockfrostAddressDiscovery: isExperimentEnabled(ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY),
+      useBlockfrostInputResolver: isExperimentEnabled(ExperimentName.BLOCKFROST_INPUT_RESOLVER)
+    }
   });
 };
 

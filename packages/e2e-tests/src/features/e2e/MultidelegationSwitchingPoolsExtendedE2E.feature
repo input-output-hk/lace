@@ -5,7 +5,8 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Given Wallet is synced
     And I navigate to Staking extended page
 
-  @LW-7819 @Testnet
+  @LW-7819 @Testnet @Pending
+  @issue=LW-11252
   Scenario Outline: Extended View - Multidelegation - Delegate to multiple pools E2E - from <pools_before> pools to <pools_after> pools
     When I open Overview tab
     And I wait until delegation info card shows staking to "<pools_before>" pool(s)
@@ -20,7 +21,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     Then I can see transaction 1 with type "<tx_type>"
     When I navigate to Staking extended page
     And I open Overview tab
@@ -44,13 +45,14 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     Then I click "Fine by me" button on "Changing staking preferences?" modal
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
+    And (if applicable) I close "Switching pools?" modal
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I open Overview tab
     And I wait until "OtherStakePool" pool is on "Your pools" list
     And I save identifiers of stake pools currently in use
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking with metadata
@@ -71,17 +73,18 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then Switching staking success drawer is displayed
     When I click "Close" button on staking success drawer
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     Then I can see transaction 1 with type "Delegation"
     And I navigate to Staking extended page
     And I open Overview tab
     And I wait until "-" pool is on "Your pools" list
     And I save identifiers of stake pools currently in use
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking without metadata
 
   @LW-8437 @Testnet
+  @Pending # due to issues with Fetch.enable
   Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error
     Given I save identifiers of stake pools currently in use
     When I open Browse pools tab

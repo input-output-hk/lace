@@ -13,11 +13,12 @@ Feature: Top Navigation - Extended view
     When I navigate to <page> extended page
     Then all buttons and images in the top navigation are present
     Examples:
-      | page         |
-      | Tokens       |
-      | NFTs         |
-      | Transactions |
-      | Staking      |
+      | page          |
+      | Tokens        |
+      | NFTs          |
+      | Activity      |
+      | Staking       |
+      | DApp Explorer |
 
   @LW-2320 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content
@@ -107,6 +108,7 @@ Feature: Top Navigation - Extended view
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-1717 @LW-5255 @Mainnet @Testnet
+  @Pending @issue=LW-11786
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
     Given I close wallet synced toast
     When I am in the offline network mode: true

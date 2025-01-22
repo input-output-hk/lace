@@ -33,20 +33,20 @@
     flex-direction: column;
     justify-content: flex-end;
     position: absolute;
-    bottom: size_unit(2.5);
+    top: size_unit(2.5);
     right: size_unit(2.5);
 
     @media (min-width: $breakpoint-minimum) {
-      bottom: size_unit(3.5);
+      top: size_unit(3.5);
       right: size_unit(3.5);
     }
 
     .copyButton {
       color: var(--light-mode-black, #fff);
       cursor: pointer;
-      height: size_unit(2);
+      width: size_unit(3);
+      height: size_unit(3);
       opacity: 0;
-      width: size_unit(2);
     }
   }
 }

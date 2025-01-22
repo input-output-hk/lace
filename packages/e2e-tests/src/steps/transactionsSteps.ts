@@ -1,7 +1,6 @@
 import { DataTable, Given, Then, When } from '@cucumber/cucumber';
 import transactionsPageAssert, { ExpectedTransactionRowAssetDetails } from '../assert/transactionsPageAssert';
 import transactionDetailsAssert, { PoolData } from '../assert/transactionDetailsAssert';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import transactionBundleAssert from '../assert/transaction/transactionBundleAssert';
 import NewTransactionExtendedPageObject from '../pageobject/newTransactionExtendedPageObject';
 import testContext from '../utils/testContext';
@@ -10,18 +9,14 @@ import TransactionsPage from '../elements/transactionsPage';
 import { Logger } from '../support/logger';
 import { TransactionType } from '../types/transactionType';
 import { TransactionStyle } from '../types/transactionStyle';
+import { visit } from '../utils/pageUtils';
 
-Given(/^I am on the Transactions section - Extended view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'extended');
+Given(/^I am on the Activity page - (extended|popup) view$/, async (mode: 'extended' | 'popup') => {
+  await visit('Activity', mode);
   await transactionsPageAssert.assertTxsLoaded();
 });
 
-Given(/^I am on the Transactions section - popup view$/, async () => {
-  await mainMenuPageObject.navigateToSection('Transactions', 'popup');
-  await transactionsPageAssert.assertTxsLoaded();
-});
-
-Then(/^Transactions section is displayed$/, async () => {
+Then(/^Activity page is displayed$/, async () => {
   await transactionsPageAssert.assertTxsLoaded();
   await transactionsPageAssert.assertSeeTitleWithCounter();
 });
@@ -55,12 +50,13 @@ When(/^I click on a transaction: (\d)$/, async (rowNumber: number) => {
 });
 
 When(/^I click on a transaction hash and save hash information$/, async () => {
+  await TransactionDetailsPage.transactionDetailsHash.waitForStable();
   testContext.save('txHashValue', await TransactionDetailsPage.transactionDetailsHash.getText());
   await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
 When(/^I click on a transaction hash$/, async () => {
-  await TransactionDetailsPage.transactionDetailsHash.waitForDisplayed();
+  await TransactionDetailsPage.transactionDetailsHash.waitForClickable();
   await TransactionDetailsPage.transactionDetailsHash.click();
 });
 
@@ -79,6 +75,7 @@ When(
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsSkeleton.waitForDisplayed({ timeout: 30_000, reverse: true });
       if (valueForCheck === 'hash') {
+        await TransactionDetailsPage.waitUntilTxHashNotEmpty();
         actualValue = await TransactionDetailsPage.transactionDetailsHash.getText();
         expectedValue = String(testContext.load('txHashValue'));
       } else {

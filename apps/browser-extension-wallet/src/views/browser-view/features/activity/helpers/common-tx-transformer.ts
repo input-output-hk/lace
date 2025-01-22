@@ -4,19 +4,20 @@
 import BigNumber from 'bignumber.js';
 import { Wallet } from '@lace/cardano';
 import { CurrencyInfo, TxDirections } from '@types';
-import { inspectTxValues, inspectTxType, txIncludesConwayCertificates } from '@src/utils/tx-inspection';
+import { inspectTxType, txIncludesConwayCertificates } from '@src/utils/tx-inspection';
 import { formatDate, formatTime } from '@src/utils/format-date';
-import { getTransactionTotalAmount } from '@src/utils/get-transaction-total-amount';
 import type { TransformedActivity, TransformedTransactionActivity } from './types';
 import { ActivityStatus, ConwayEraCertificatesTypes, DelegationActivityType } from '@lace/core';
 import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
+import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@cardano-sdk/core';
 
-const { util } = Wallet.Cardano;
+// eslint-disable-next-line no-magic-numbers
+const TIMEOUT = 1000 as Milliseconds;
 
 export interface TxTransformerInput {
-  tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx;
+  tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx | Wallet.KeyManagement.WitnessedTx;
   walletAddresses: Wallet.KeyManagement.GroupedAddress[];
   fiatCurrency: CurrencyInfo;
   fiatPrice?: number;
@@ -26,6 +27,7 @@ export interface TxTransformerInput {
   direction?: TxDirections;
   status?: Wallet.TransactionStatus;
   resolveInput: Wallet.Cardano.ResolveInput;
+  isSharedWallet?: boolean;
 }
 
 export const getFormattedFiatAmount = ({
@@ -91,7 +93,7 @@ const splitDelegationTx = (tx: TransformedActivity, hasConwayEraCerts: boolean):
 };
 
 const transformTransactionStatus = (
-  tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx,
+  tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx | Wallet.Cardano.Tx,
   status: Wallet.TransactionStatus
 ): ActivityStatus => {
   if (hasPhase2ValidationFailed(tx)) {
@@ -102,50 +104,33 @@ const transformTransactionStatus = (
     [Wallet.TransactionStatus.PENDING]: ActivityStatus.PENDING,
     [Wallet.TransactionStatus.ERROR]: ActivityStatus.ERROR,
     [Wallet.TransactionStatus.SUCCESS]: ActivityStatus.SUCCESS,
-    [Wallet.TransactionStatus.SPENDABLE]: ActivityStatus.SPENDABLE
+    [Wallet.TransactionStatus.SPENDABLE]: ActivityStatus.SPENDABLE,
+    [Wallet.TransactionStatus.AWAITING_COSIGNATURES]: ActivityStatus.AWAITING_COSIGNATURES
   };
   return statuses[status];
 };
 
 type GetTxFormattedAmount = (
-  args: Pick<
-    TxTransformerInput,
-    'walletAddresses' | 'tx' | 'direction' | 'resolveInput' | 'cardanoCoin' | 'fiatCurrency' | 'fiatPrice'
-  >
+  args: Pick<TxTransformerInput, 'tx' | 'cardanoCoin' | 'fiatCurrency' | 'fiatPrice'> & { amount: bigint }
 ) => Promise<{
   amount: string;
   fiatAmount: string;
 }>;
 
-const getTxFormattedAmount: GetTxFormattedAmount = async ({
-  resolveInput,
-  tx,
-  walletAddresses,
-  direction,
-  cardanoCoin,
-  fiatCurrency,
-  fiatPrice
-}) => {
-  if (hasPhase2ValidationFailed(tx)) {
+const getTxFormattedAmount: GetTxFormattedAmount = async ({ tx, cardanoCoin, fiatCurrency, fiatPrice, amount }) => {
+  const outputAmount = new BigNumber(amount.toString());
+  const transaction = 'tx' in tx ? tx.tx : tx;
+  const { body } = transaction;
+  if (hasPhase2ValidationFailed(transaction)) {
     return {
-      amount: Wallet.util.getFormattedAmount({ amount: tx.body.totalCollateral.toString(), cardanoCoin }),
+      amount: Wallet.util.getFormattedAmount({ amount: body.totalCollateral.toString(), cardanoCoin }),
       fiatAmount: getFormattedFiatAmount({
-        amount: new BigNumber(tx.body.totalCollateral?.toString() ?? '0'),
+        amount: new BigNumber(body.totalCollateral?.toString() ?? '0'),
         fiatCurrency,
         fiatPrice
       })
     };
   }
-
-  const outputAmount = await getTransactionTotalAmount({
-    addresses: walletAddresses,
-    inputs: tx.body.inputs,
-    outputs: tx.body.outputs,
-    fee: tx.body.fee,
-    direction,
-    withdrawals: tx.body.withdrawals,
-    resolveInput
-  });
 
   return {
     amount: Wallet.util.getFormattedAmount({ amount: outputAmount.toString(), cardanoCoin }),
@@ -154,18 +139,18 @@ const getTxFormattedAmount: GetTxFormattedAmount = async ({
 };
 
 /**
-  Simplifies the transaction object to be used in the activity list
+ Simplifies the transaction object to be used in the activity list
 
-  @param tx the transaction object
-  @param walletAddresses the addresses of the wallet and the reward account
-  @param fiatCurrency the fiat currency details
-  @param fiatPrice the fiat price of ADA
-  @param protocolParameters the protocol parameters
-  @param cardanoCoin the ADA coin details
-  @param time the time of the transaction
-  @param direction the direction of the transaction
-  @param status the status of the transaction
-  @param date the date of the transaction
+ @param tx the transaction object
+ @param walletAddresses the addresses of the wallet and the reward account
+ @param fiatCurrency the fiat currency details
+ @param fiatPrice the fiat price of ADA
+ @param protocolParameters the protocol parameters
+ @param cardanoCoin the ADA coin details
+ @param time the time of the transaction
+ @param direction the direction of the transaction
+ @param status the status of the transaction
+ @param date the date of the transaction
  */
 
 export const txTransformer = async ({
@@ -178,19 +163,40 @@ export const txTransformer = async ({
   date,
   direction,
   status,
-  resolveInput
+  resolveInput,
+  isSharedWallet
 }: TxTransformerInput): Promise<TransformedTransactionActivity[]> => {
-  const implicitCoin = util.computeImplicitCoin(protocolParameters, tx.body);
-  const deposit = implicitCoin.deposit ? Wallet.util.lovelacesToAdaString(implicitCoin.deposit.toString()) : undefined;
-  const depositReclaimValue = Wallet.util.calculateDepositReclaim(implicitCoin);
+  const transaction = 'tx' in tx ? tx.tx : tx;
+
+  const txSummaryInspector = createTxInspector({
+    summary: transactionSummaryInspector({
+      addresses: walletAddresses.map((addr) => addr.address),
+      rewardAccounts: walletAddresses.map((addr) => addr.rewardAccount),
+      inputResolver: { resolveInput },
+      protocolParameters,
+      // Using a dummy asset provider as we don't need to fetch assets for the summary
+      // On reject, the summary inspector will use the information it can extract from the assetId, and
+      // all we need here is the id and the amount
+      assetProvider: {
+        getAsset: () => Promise.reject({}),
+        getAssets: () => Promise.reject({}),
+        healthCheck: () => Promise.resolve({ ok: true })
+      },
+      timeout: TIMEOUT,
+      logger: console
+    })
+  });
+
+  // TODO: LW-8767 investigate why in-flight transactions do not have a `witness` property and add it
+  const { summary } = await txSummaryInspector({ witness: undefined, ...transaction });
+
+  const deposit = summary.deposit ? Wallet.util.lovelacesToAdaString(summary.deposit.toString()) : undefined;
+  const depositReclaimValue = summary.returnedDeposit;
   const depositReclaim = depositReclaimValue
     ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
     : undefined;
-  const { assets } = await inspectTxValues({
-    addresses: walletAddresses,
-    tx: tx as unknown as Wallet.Cardano.HydratedTx,
-    direction
-  });
+
+  const assets = summary.assets;
 
   const formattedDate = dayjs().isSame(date, 'day')
     ? 'Today'
@@ -202,33 +208,32 @@ export const txTransformer = async ({
 
   const assetsEntries = assets
     ? [...assets.entries()]
-        .map(([id, val]) => ({ id: id.toString(), val: val.toString() }))
+        .map(([id, { amount: val }]) => ({ id: id.toString(), val: val.toString() }))
         .sort((a, b) => Number(b.val) - Number(a.val))
     : [];
 
   const formattedAmount = await getTxFormattedAmount({
     cardanoCoin,
     fiatCurrency,
-    resolveInput,
     tx,
-    walletAddresses,
-    direction,
-    fiatPrice
+    fiatPrice,
+    amount: summary.coins
   });
 
   const baseTransformedActivity = {
-    id: tx.id.toString(),
+    id: transaction.id.toString(),
     deposit,
     depositReclaim,
-    fee: Wallet.util.lovelacesToAdaString(tx.body.fee.toString()),
-    status: transformTransactionStatus(tx, status),
+    fee: Wallet.util.lovelacesToAdaString(summary.fee.toString()),
+    status: transformTransactionStatus(transaction, status),
     amount: formattedAmount.amount,
     fiatAmount: formattedAmount.fiatAmount,
     assets: assetsEntries,
     assetsNumber: (assets?.size ?? 0) + 1,
     date,
-    formattedDate:
-      status === Wallet.TransactionStatus.PENDING ? capitalize(Wallet.TransactionStatus.PENDING) : formattedDate,
+    formattedDate: [Wallet.TransactionStatus.PENDING, Wallet.TransactionStatus.AWAITING_COSIGNATURES].includes(status)
+      ? capitalize(Wallet.TransactionStatus.PENDING)
+      : formattedDate,
     formattedTimestamp
   };
 
@@ -238,12 +243,13 @@ export const txTransformer = async ({
   // SDK Ticket LW-8767 should fix the type of Input in TxInFlight to contain the address
   const type = await inspectTxType({
     walletAddresses,
-    tx: tx as unknown as Wallet.Cardano.HydratedTx,
-    inputResolver: { resolveInput }
+    tx: transaction as unknown as Wallet.Cardano.HydratedTx,
+    inputResolver: { resolveInput },
+    isSharedWallet
   });
 
   if (type === DelegationActivityType.delegation) {
-    return splitDelegationTx(baseTransformedActivity, txIncludesConwayCertificates(tx.body.certificates));
+    return splitDelegationTx(baseTransformedActivity, txIncludesConwayCertificates(transaction.body.certificates));
   }
 
   return [

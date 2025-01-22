@@ -7,7 +7,7 @@ import {
   Cip1694GovernanceActivityType,
   ConwayEraCertificatesTypes
 } from '../ActivityDetail';
-import { ActivityStatus } from './AssetActivityItem';
+import { ActivityStatus } from '../Transaction';
 
 const meta: Meta<typeof AssetActivityList> = {
   title: 'Sanchonet/ActivityHistory/AssetActivityList',

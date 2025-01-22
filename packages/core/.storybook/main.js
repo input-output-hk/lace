@@ -69,6 +69,8 @@ module.exports = {
       new NodePolyfillPlugin()
     );
 
+    config.resolve.fallback.fs = false;
+
     return config;
   },
   core: {

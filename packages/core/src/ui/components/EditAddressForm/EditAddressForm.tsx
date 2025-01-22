@@ -87,7 +87,7 @@ export const EditAddressForm = ({
                     invalid={!isAddressFieldValid}
                     label={translations.address}
                     dataTestId="address-form-address-input"
-                    customIcon={!isAddressFieldValidating && isAddressHandle && renderSuffix()}
+                    customIcon={(!isAddressFieldValidating && isAddressHandle && renderSuffix()) || undefined}
                     loading={isAddressFieldValidating}
                   />
                 </Form.Item>

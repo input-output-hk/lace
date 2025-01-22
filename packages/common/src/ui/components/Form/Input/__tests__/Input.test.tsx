@@ -15,7 +15,7 @@ describe('Input', () => {
     const input = queryByTestId('input-test');
     expect(input).toHaveValue('');
     act(() => {
-      fireEvent.change(input, { target: { value: 'new value' } });
+      input && fireEvent.change(input, { target: { value: 'new value' } });
     });
     expect(input).toHaveValue('new value');
     expect(onChange).toHaveBeenCalled();

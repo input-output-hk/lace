@@ -24,17 +24,19 @@ type RemoveObservableNameSuffix<T> = T extends `${infer S}$` ? S : T;
 type FlattenObservableProperties<T> = T extends Map<any, any> | String | Number | Array<any> | Date | null | BigInt
   ? T
   : T extends object
-  ? {
-      [k in keyof T as T[k] extends Function ? never : RemoveObservableNameSuffix<k>]: T[k] extends Observable<infer O>
-        ? FlattenObservableProperties<O>
-        : FlattenObservableProperties<T[k]>;
-    }
-  : T;
+    ? {
+        [k in keyof T as T[k] extends Function ? never : RemoveObservableNameSuffix<k>]: T[k] extends Observable<
+          infer O
+        >
+          ? FlattenObservableProperties<O>
+          : FlattenObservableProperties<T[k]>;
+      }
+    : T;
 export type ObservableWalletState = FlattenObservableProperties<
-  Omit<ObservableWallet, 'fatalError$' | 'transactions'> & {
+  Omit<ObservableWallet, 'transactions'> & {
     transactions: {
       history$: ObservableWallet['transactions']['history$'];
-      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$'>;
+      outgoing: Pick<ObservableWallet['transactions']['outgoing'], 'inFlight$' | 'signed$'>;
     };
   }
 >;
@@ -105,6 +107,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
     wallet.tip$,
     wallet.transactions.history$,
     wallet.transactions.outgoing.inFlight$,
+    wallet.transactions.outgoing.signed$,
     wallet.utxo.available$,
     wallet.utxo.total$,
     wallet.utxo.unspendable$
@@ -136,6 +139,7 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         tip,
         transactionsHistory,
         transactionsHistoryOutgoingInFlight,
+        transactionsHistoryOutgoingSigned,
         utxoAvailable,
         utxoTotal,
         utxoUnspendable
@@ -177,7 +181,8 @@ const combineObservable = ({ wallet }: Wallet.CardanoWallet): Observable<Observa
         transactions: {
           history: transactionsHistory,
           outgoing: {
-            inFlight: transactionsHistoryOutgoingInFlight
+            inFlight: transactionsHistoryOutgoingInFlight,
+            signed: transactionsHistoryOutgoingSigned
           }
         },
         utxo: {

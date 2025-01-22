@@ -1,26 +1,27 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNil from 'lodash/isNil';
+import { Wallet } from '@lace/cardano';
 import { AssetTableProps } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { useCurrencyStore } from '@providers/currency';
-import { cardanoTransformer, assetTransformer } from '@src/utils/assets-transformers';
-import { SectionLayout, Layout, TopUpWalletCard } from '@src/views/browser-view/components';
-import { useDrawer } from '@src/views/browser-view/stores';
+import { assetTransformer, cardanoTransformer } from '@src/utils/assets-transformers';
+import { Layout, SectionLayout, TopUpWalletCard } from '@src/views/browser-view/components';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { walletRoutePaths } from '@routes';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
-import { useAnalyticsContext, useAppSettingsContext } from '@providers';
+import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { isNFT } from '@src/utils/is-nft';
 import {
   SendFlowAnalyticsProperties,
-  useCoinStateSelector,
+  SendFlowTriggerPoints,
   useAnalyticsSendFlowTriggerPoint,
-  SendFlowTriggerPoints
+  useCoinStateSelector,
+  useOpenTransactionDrawer
 } from '../../send-transaction';
 import { getTotalWalletBalance, sortAssets } from '../utils';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
@@ -44,7 +45,7 @@ interface AssetsProps {
 // eslint-disable-next-line max-statements
 export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
-  const [, setSendDrawerVisibility] = useDrawer();
+  const openTransactionDrawer = useOpenTransactionDrawer({ content: DrawerContent.SEND_TRANSACTION });
   const { priceResult, status: fetchPriceStatus } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
@@ -56,15 +57,15 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     activityDetail,
     resetActivityState,
     blockchainProvider,
-    environmentName
+    environmentName,
+    currentChain
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
-  const [{ chainName }] = useAppSettingsContext();
-  const isMainnet = chainName === 'Mainnet';
+  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
@@ -226,7 +227,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       redirectToSend({ params: { id } });
     } else {
       setAssetDetails();
-      setSendDrawerVisibility({ content: DrawerContent.SEND_TRANSACTION });
+      openTransactionDrawer();
     }
   };
 

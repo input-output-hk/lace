@@ -1,0 +1,36 @@
+.iog-card-container {
+  cursor: pointer;
+  align-items: flex-start;
+  flex-direction: column;
+  background: #1b1f42;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.iog-card-box {
+  z-index: 1;
+  .iog-icon {
+    z-index: -1;
+  }
+
+  .iog-image {
+    padding: 9.5px;
+
+    &::part(image) {
+      border-radius: 50%;
+    }
+  }
+}
+
+.iog-card-box__image {
+  position: relative;
+  > .iog-icon {
+    position: absolute;
+    transform: translateY(-6.5px) translateX(-6.5px);
+  }
+
+  > .iog-image {
+    z-index: 1;
+  }
+}

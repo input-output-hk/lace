@@ -10,14 +10,18 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
+const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirname, 'sentry.js'), p] : p);
+
 module.exports = () =>
   merge(commonConfig(), {
     entry: {
-      popup: path.join(__dirname, 'src/index-popup.tsx'),
-      options: path.join(__dirname, 'src/index-options.tsx'),
-      dappConnector: path.join(__dirname, 'src/index-dapp-connector.tsx'),
+      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx')),
+      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx')),
+      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx')),
       ['trezor-content-script']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-content-script.ts'),
-      ['trezor-usb-permissions']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
+      ['trezor-usb-permissions']: withMaybeSentry(
+        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
+      )
     },
     experiments: {
       syncWebAssembly: true
@@ -69,7 +73,7 @@ module.exports = () =>
           ]
         },
         {
-          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm)$/,
+          test: /\.(eot|otf|ttf|woff|woff2|gif|png|webm|mp4)$/,
           loader: 'file-loader'
         },
         {
@@ -82,27 +86,16 @@ module.exports = () =>
       new CopyPlugin({
         patterns: [
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
-          { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' }
+          { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' },
+          { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.html'), to: '../[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.js'), to: '../js/[name][ext]' },
+          { from: path.resolve(__dirname, 'src/assets/html/*.css'), to: '../[name][ext]' },
+          {
+            from: path.resolve(__dirname, '../../packages/common/src/ui/assets/icons/loader.png'),
+            to: '../[name][ext]'
+          }
         ]
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../popup.html',
-        template: 'src/assets/html/popup.html',
-        chunks: ['popup'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../app.html',
-        template: 'src/assets/html/app.html',
-        chunks: ['options'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackPlugin({
-        filename: '../dappConnector.html',
-        template: 'src/assets/html/popup.html',
-        chunks: ['dappConnector'],
-        alwaysWriteToDisk: true
-      }),
-      new HtmlWebpackHarddiskPlugin()
+      })
     ]
   });

@@ -15,7 +15,7 @@ import { useKeyboardShortcut } from '@lace/common';
 
 export const hasEmptyString = (arr: string[]): boolean => arr.includes('');
 const MNEMONIC_LENGTHS = [12, 15, 24] as const;
-export type RecoveryPhraseLength = typeof MNEMONIC_LENGTHS[number];
+export type RecoveryPhraseLength = (typeof MNEMONIC_LENGTHS)[number];
 
 export interface WalletSetupMnemonicVerificationStepProps {
   mnemonic: string[];
@@ -107,7 +107,7 @@ export const WalletSetupMnemonicVerificationStepRevamp = ({
           </Button>
         </Tooltip>
       }
-      currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+      currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
       isNextEnabled={isSubmitEnabled}
     >
       <div className={styles.mnemonicContainer}>

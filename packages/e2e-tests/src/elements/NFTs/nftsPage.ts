@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 import SectionTitle from '../sectionTitle';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
+import { ChainablePromiseElement } from 'webdriverio';
+import testContext from '../../utils/testContext';
 
 class NftsPage {
   protected LIST_CONTAINER = '[data-testid="nft-list-container"]';
@@ -13,27 +15,27 @@ class NftsPage {
   public NFT_ITEM_IMG_CONTAINER = '[data-testid="nft-item-img-container"]';
   public REST_OF_NFTS = '[data-testid="rest-of-nfts"]';
 
-  get title() {
+  get title(): typeof SectionTitle.sectionTitle {
     return SectionTitle.sectionTitle;
   }
 
-  get counter() {
+  get counter(): typeof SectionTitle.sectionCounter {
     return SectionTitle.sectionCounter;
   }
 
-  get listContainer() {
+  get listContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LIST_CONTAINER);
   }
 
-  get nftContainer() {
+  get nftContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFT_CONTAINER);
   }
 
-  get createFolderButton() {
+  get createFolderButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_FOLDER_BUTTON);
   }
 
-  get nftSearchInput() {
+  get nftSearchInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFT_SEARCH_INPUT);
   }
 
@@ -65,6 +67,27 @@ class NftsPage {
     return (await this.folderContainers.find(
       async (item) => (await item.$(this.NFT_NAME).getText()) === name
     )) as WebdriverIO.Element;
+  }
+
+  async clickNftItem(nftName: string, clickType: 'left' | 'right' = 'left') {
+    const nftNameElement = await this.getNftName(nftName);
+    await nftNameElement.waitForStable();
+    await nftNameElement.click({ button: clickType });
+  }
+
+  async isNftDisplayed(nftName: string): Promise<boolean> {
+    await this.nftContainer.waitForDisplayed({ timeout: 15_000 });
+    const nftItem = await this.getNftContainer(nftName);
+    return nftItem !== undefined;
+  }
+
+  async saveNfts(): Promise<any> {
+    const names: string[] = [];
+
+    for (const nftContainer of await this.nftContainers) {
+      names.push(await nftContainer.getText());
+    }
+    testContext.save('ownedNfts', names);
   }
 }
 

@@ -1,10 +1,9 @@
 import { Then, When } from '@cucumber/cucumber';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import commonAssert from '../assert/commonAssert';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import helpAndSupportPageAssert from '../assert/helpAndSupportPageAssert';
 import { t } from '../utils/translationService';
 import localStorageInitializer from '../fixture/localStorageInitializer';
@@ -43,9 +42,15 @@ import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
-import { addAndActivateWalletInRepository, clearWalletRepository } from '../fixture/walletRepositoryInitializer';
+import {
+  addAndActivateWalletInRepository,
+  addAndActivateWalletsInRepository,
+  clearWalletRepository
+} from '../fixture/walletRepositoryInitializer';
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
+import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
+import extensionUtils from '../utils/utils';
 
 Given(/^Lace is ready for test$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
@@ -97,20 +102,23 @@ Then(/^I expect wallet repository and local storage to (not be|be) empty$/, asyn
 });
 
 When(
-  // eslint-disable-next-line max-len
-  /^I (navigate to|am on) (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) (extended|popup) page$/,
-  async (_ignored: string, targetPage: string, mode: 'extended' | 'popup') => {
-    await mainMenuPageObject.navigateToSection(targetPage, mode);
+  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApp Explorer) (extended|popup) page$/,
+  async (
+    _ignored: string,
+    targetPage: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+    mode: 'extended' | 'popup'
+  ) => {
+    await visit(targetPage, mode, false);
   }
 );
 
 When(
-  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address book) page in (extended|popup) mode$/,
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApp Explorer) page in (extended|popup) mode$/,
   async (
-    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address book',
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
     mode: 'extended' | 'popup'
   ) => {
-    await visit(page, mode);
+    await visit(page, mode, true);
   }
 );
 
@@ -123,7 +131,9 @@ Then(
   async (walletName: string, walletProperty: string) => {
     const testWallet = getTestWallet(walletName);
     const walletPropertyValue =
-      walletProperty === 'public key' ? String(testWallet.publicKey) : String(testWallet.address);
+      walletProperty === 'public key'
+        ? String(testWallet.accounts[0].publicKey)
+        : String(testWallet.accounts[0].address);
     await commonAssert.assertClipboardContains(walletPropertyValue);
   }
 );
@@ -146,7 +156,9 @@ Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: strin
     'Switched network': 'browserView.settings.wallet.network.networkSwitched',
     'Network Error': 'general.errors.networkError',
     'Copied to clipboard': 'general.clipboard.copiedToClipboard',
-    'Collateral added': 'browserView.settings.wallet.collateral.toast.add'
+    'Collateral added': 'browserView.settings.wallet.collateral.toast.add',
+    'Your custom submit API is enabled...': 'browserView.settings.wallet.customSubmitApi.usingCustomTxSubmitEndpoint',
+    'Your custom submit API is disabled...': 'browserView.settings.wallet.customSubmitApi.usingStandardTxSubmitEndpoint'
   };
 
   const translationKey = toastTextToTranslationKeyMap[toastText];
@@ -165,8 +177,8 @@ Then(/^I don't see any toast message$/, async () => {
   await ToastMessageAssert.assertSeeToastMessage('', false);
 });
 
-Then(/^I see "Help and support" page$/, async () => {
-  await helpAndSupportPageAssert.assertSeeHelpAndSupportPage();
+Then(/^I see "Help and support" page URL$/, async () => {
+  await helpAndSupportPageAssert.assertSeeHelpAndSupportPageURL();
 });
 
 Then(/New tab with url containing "([^"]*)" is opened/, async (urlPart: string) => {
@@ -181,28 +193,36 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await cleanBrowserStorage();
   await clearWalletRepository();
   await localStorageManager.cleanLocalStorage();
-  if (walletName === 'newCreatedWallet') {
-    const wallets = String(testContext.load('newCreatedWallet'));
-    await addAndActivateWalletInRepository(wallets);
-    await localStorageInitializer.initialiseBasicLocalStorageData(walletName, 'Preprod');
-  } else {
-    await localStorageInitializer.initializeWallet(walletName);
-    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+
+  await (walletName === 'newCreatedWallet'
+    ? addAndActivateWalletInRepository(String(testContext.load('newCreatedWallet')))
+    : addAndActivateWalletsInRepository([walletName as TestWalletName]));
+
+  await localStorageInitializer.initialiseBasicLocalStorageData(walletName);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+  if (mode === 'popup') {
+    await popupView.visit();
   }
+
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
   await topNavigationAssert.assertLogoPresent();
-  await mainMenuPageObject.navigateToSection('Tokens', mode);
+  await visit('Tokens', mode);
 });
 
 When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(offline === 'true', 0, 0, 0);
+  await browser.throttleNetwork({
+    offline: offline === 'true',
+    latency: 0,
+    downloadThroughput: 0,
+    uploadThroughput: 0
+  });
 });
 
 When(/^I am in the slow network mode$/, async () => {
-  await networkManager.changeNetworkCapabilitiesOfBrowser(false, 0, 1000, 1000);
+  await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
 });
 
 When(/^I click outside the drawer$/, async () => {
@@ -228,7 +248,7 @@ When(/^I hover over "Expand" button$/, async () => {
 });
 
 Then(
-  /^the (Tokens|NFTs|Transactions|Staking|Dapp Store|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
+  /^the (Tokens|NFTs|Activity|Staking|Dapp Store|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
   async (expectedPage: string) => {
     await commonAssert.assertSeePageInNewTab(expectedPage, 'extended');
   }
@@ -315,12 +335,12 @@ Given(/^I disable showing Multidelegation beta banner$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
 });
 
-Given(/^I disable showing Multidelegation persistence banner$/, async () => {
-  await localStorageInitializer.disableShowingMultidelegationPersistenceBanner();
-});
-
 Given(/^I disable showing Multidelegation DApps issue modal$/, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+});
+
+Given(/^I disable showing multi-address discovery modal$/, async () => {
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Then(/^I wait until modal disappears$/, async () => {
@@ -405,3 +425,26 @@ Then(
 When(/^I wait for main loader to disappear$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
 });
+
+// FIXME: does not work while executed on CI
+When(
+  /^Set camera access permission: (granted|denied|prompted)$/,
+  async (permission: 'granted' | 'denied' | 'prompted') => {
+    await setCameraAccessPermission(permission);
+    await browser.refresh();
+  }
+);
+
+Then(/^Gov Tool page is displayed in a new tab$/, async () => {
+  const expectedUrl = extensionUtils.isMainnet()
+    ? 'https://gov.tools/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+  await commonAssert.assertSeeTabWithUrl(expectedUrl);
+});
+
+Then(
+  /(invalid|valid|"N_8J@bne87A") password is not in snapshot/,
+  async (password: 'invalid' | 'valid' | 'N_8J@bne87A') => {
+    await commonAssert.assertPasswordIsNotPresentInMemorySnapshot(password);
+  }
+);

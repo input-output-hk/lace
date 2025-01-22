@@ -27,7 +27,7 @@ const iconsByType: Record<SortField, ReactNode> = {
 };
 
 export const PoolMetric = ({ metricType, metricValue }: PoolMetricProps) => (
-  <Flex alignItems="center" gap="$4" className={styles.metric} data-testid="stake-pool-metric">
+  <Flex alignItems="center" gap="$4" className={styles.metric} testId="stake-pool-metric">
     {iconsByType[metricType]}
     <Text.Body.Small weight="$medium" data-testid="stake-pool-metric-value">
       {metricValue ?? '-'}

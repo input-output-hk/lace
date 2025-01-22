@@ -3,8 +3,8 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 
 export const shelley = new Address(
   'Shelley',
-  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).address),
-  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).mainnetAddress)
+  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).accounts[0].address),
+  String(getTestWallet(TestWalletName.TAWalletDelegatedFunds).accounts[0].mainnetAddress)
 );
 
 export const byron = new Address(

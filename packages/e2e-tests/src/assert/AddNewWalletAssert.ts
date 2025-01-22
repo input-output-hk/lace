@@ -6,6 +6,7 @@ import { isPopupMode } from '../utils/pageUtils';
 import { expect } from 'chai';
 import ConnectYourDevicePage from '../elements/onboarding/ConnectYourDevicePage';
 import ConnectYourDevicePageAssert from './onboarding/ConnectYourDevicePageAssert';
+import CancelAddingNewWalletDialog from '../elements/addNewWallet/CancelAddingNewWalletDialog';
 
 class AddNewWalletAssert {
   async assertMainModalIsDisplayedInExtendedMode() {
@@ -20,7 +21,11 @@ class AddNewWalletAssert {
     await OnboardingMainPageAssert.assertSeeRestoreWalletOption();
   }
 
-  async assertSeeWalletSetupPageInModal() {
+  async assertMainModalIsNotDisplayed() {
+    await AddNewWalletMainModal.container.waitForDisplayed({ reverse: true });
+  }
+
+  async assertSeeWalletSetupPageInModal(flow: 'Create' | 'Create paper wallet' | 'Restore') {
     await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
     await AddNewWalletMainModal.closeButton.waitForEnabled();
     await OnboardingWalletSetupPageAssert.assertSeeStepTitle(await t('core.walletNameAndPasswordSetupStep.title'));
@@ -30,7 +35,7 @@ class AddNewWalletAssert {
     await OnboardingWalletSetupPageAssert.assertSeeWalletNameInput();
     await OnboardingWalletSetupPageAssert.assertSeePasswordInput();
     await OnboardingWalletSetupPageAssert.assertSeeBackButton();
-    await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton();
+    await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton(flow === 'Create paper wallet');
   }
 
   async asserSeeConnectYourDevicePageInModal() {
@@ -46,6 +51,28 @@ class AddNewWalletAssert {
 
     await ConnectYourDevicePageAssert.assertSeeBackButton();
     await ConnectYourDevicePageAssert.assertSeeTryAgainButton(false);
+  }
+
+  async assertSeeStartOverDialog(shouldSee: boolean) {
+    await CancelAddingNewWalletDialog.body.waitForDisplayed({ reverse: !shouldSee });
+    if (shouldSee) {
+      await CancelAddingNewWalletDialog.title.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.title.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.title')
+      );
+      await CancelAddingNewWalletDialog.description.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.description.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.description')
+      );
+      await CancelAddingNewWalletDialog.goBackButton.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.goBackButton.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.cancel')
+      );
+      await CancelAddingNewWalletDialog.proceedButton.waitForDisplayed();
+      expect(await CancelAddingNewWalletDialog.proceedButton.getText()).to.equal(
+        await t('core.multiWallet.confirmationDialog.confirm')
+      );
+    }
   }
 }
 

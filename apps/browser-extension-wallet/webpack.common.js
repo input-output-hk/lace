@@ -8,6 +8,19 @@ const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
 const commitHash = Buffer.from(require('child_process').execSync('git rev-parse HEAD')).toString();
 const app_version = require('./manifest.json').version;
 
+require('dotenv-defaults').config({
+  path: './.env',
+  encoding: 'utf8'
+});
+
+const envsToExpose = {
+  APP_VERSION: app_version,
+  COMMIT_HASH: commitHash
+  //'process.env': JSON.stringify(process.env)
+};
+if ('SENTRY_DSN' in process.env) envsToExpose['SENTRY_DSN'] = process.env.SENTRY_DSN;
+if ('SENTRY_ENVIRONMENT' in process.env) envsToExpose['SENTRY_ENVIRONMENT'] = process.env.SENTRY_ENVIRONMENT;
+
 module.exports = () => {
   return {
     output: {
@@ -18,6 +31,11 @@ module.exports = () => {
     },
     module: {
       rules: [
+        {
+          test: /packages\/.+\/dist\/.+\.js$/,
+          enforce: 'pre',
+          use: ['source-map-loader']
+        },
         {
           test: /\.(js|jsx|ts|tsx)$/,
           exclude: /node_modules\/(?!(@cardano-sdk)\/).*/,
@@ -56,6 +74,7 @@ module.exports = () => {
         zlib: require.resolve('browserify-zlib'),
         dns: false,
         tls: false,
+        process: false,
         child_process: false
       },
       plugins: [new TsconfigPathsPlugin({ configFile: 'src/tsconfig.json' })]
@@ -65,6 +84,10 @@ module.exports = () => {
         checkResource(resource) {
           return /.*\/wordlists\/(?!english).*\.json/.test(resource);
         }
+      }),
+      new IgnorePlugin({
+        resourceRegExp: /\/(tests|test|__tests__|mocks)(\/|$)/,
+        contextRegExp: /.*/
       }),
       new IgnorePlugin({ resourceRegExp: /^\.\/wordlists\/(?!english)/, contextRegExp: /bip39\/src$/ }),
       new NormalModuleReplacementPlugin(/blake2b$/, 'blake2b-no-wasm'),
@@ -90,11 +113,7 @@ module.exports = () => {
         systemvars: true,
         allowEmptyValues: true
       }),
-      new EnvironmentPlugin({
-        APP_VERSION: app_version,
-        COMMIT_HASH: commitHash
-        //'process.env': JSON.stringify(process.env)
-      }),
+      new EnvironmentPlugin(envsToExpose),
       new SubresourceIntegrityPlugin()
     ]
   };

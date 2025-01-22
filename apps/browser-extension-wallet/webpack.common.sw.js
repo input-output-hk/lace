@@ -7,12 +7,14 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
+const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirname, 'sentry.js'), p] : p);
+
 // service worker script (background.ts) needs a separate webpack config,
 // because it needs a different loader for WASM
 module.exports = () =>
   merge(commonConfig(), {
     entry: {
-      background: path.join(__dirname, 'src/lib/scripts/background/index.ts'),
+      background: withMaybeSentry(path.join(__dirname, 'src/lib/scripts/background/index.ts')),
       content: path.join(__dirname, 'src/lib/scripts/background/content.ts'),
       inject: path.join(__dirname, 'src/lib/scripts/background/inject.ts')
     },

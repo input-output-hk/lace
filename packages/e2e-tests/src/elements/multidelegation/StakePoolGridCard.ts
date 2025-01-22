@@ -8,6 +8,7 @@ export class StakePoolGridCard {
   private CARD_TITLE = '[data-testid="stake-pool-card-title"]';
   private SATURATION_VALUE = '[data-testid="saturation-value"]';
   private METRIC_VALUE = '[data-testid="stake-pool-metric-value"]';
+  private SATURATION_PROGRESS_BAR = '[data-testid="stake-pool-card-saturation-bar"]';
 
   protected card: ChainablePromiseElement<WebdriverIO.Element | undefined>;
 
@@ -31,6 +32,10 @@ export class StakePoolGridCard {
 
   get metricValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.card.$(this.METRIC_VALUE);
+  }
+
+  get saturationProgressBar(): ChainablePromiseElement<WebdriverIO.Element> {
+    return this.card.$(this.SATURATION_PROGRESS_BAR);
   }
 
   async click(): Promise<void> {

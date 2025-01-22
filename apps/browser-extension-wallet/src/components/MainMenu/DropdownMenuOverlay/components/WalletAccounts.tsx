@@ -12,7 +12,8 @@ import {
   EnableAccountConfirmWithHW,
   EnableAccountConfirmWithHWState,
   EnableAccountPasswordPrompt,
-  useDialogWithData
+  useDialogWithData,
+  useSecrets
 } from '@lace/core';
 import { useWalletStore } from '@src/stores';
 import { useWalletManager } from '@hooks';
@@ -26,7 +27,7 @@ import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 
 const defaultAccountName = (accountNumber: number) => `Account #${accountNumber}`;
 
-const NUMBER_OF_ACCOUNTS_PER_WALLET = 24;
+const NUMBER_OF_ACCOUNTS_PER_WALLET = 50;
 const HW_CONNECT_TIMEOUT_MS = 30_000;
 
 type EnableAccountPasswordDialogData = {
@@ -58,6 +59,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       account: activeAccount
     }
   } = cardanoWallet;
+  const secretsUtil = useSecrets();
 
   const editAccountDrawer = useDialogWithData<ProfileDropdown.AccountData | undefined>();
   const disableAccountConfirmation = useDialogWithData<ProfileDropdown.AccountData | undefined>();
@@ -198,29 +200,32 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
     [wallet.type, enableAccountPasswordDialog, enableAccountHWSigningDialog, unlockHWAccount]
   );
 
-  const unlockInMemoryWalletAccountWithPassword = useCallback(
-    async (passphrase: Uint8Array) => {
-      const { accountIndex } = enableAccountPasswordDialog.data;
-      const name = defaultAccountName(accountIndex);
-      try {
-        await addAccount({
-          wallet,
-          accountIndex,
-          passphrase,
-          metadata: { name: defaultAccountName(accountIndex) }
-        });
-        analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
-          // eslint-disable-next-line camelcase
-          $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
-        });
-        enableAccountPasswordDialog.hide();
-        closeDropdownAndShowAccountActivated(name);
-      } catch {
-        enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
-      }
-    },
-    [wallet, addAccount, enableAccountPasswordDialog, closeDropdownAndShowAccountActivated, analytics, walletRepository]
-  );
+  const unlockInMemoryWalletAccountWithPassword = async () => {
+    const { accountIndex } = enableAccountPasswordDialog.data;
+    const name = defaultAccountName(accountIndex);
+    const passphrase = Buffer.from(secretsUtil.password?.value);
+    try {
+      await addAccount({
+        wallet,
+        accountIndex,
+        passphrase,
+        metadata: { name: defaultAccountName(accountIndex) }
+      });
+      analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
+        // eslint-disable-next-line camelcase
+        $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
+      });
+      passphrase.fill(0);
+      secretsUtil.clearSecrets();
+      enableAccountPasswordDialog.hide();
+      closeDropdownAndShowAccountActivated(name);
+    } catch {
+      enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
+    } finally {
+      passphrase.fill(0);
+      secretsUtil.clearSecrets();
+    }
+  };
 
   const lockAccount = useCallback(async () => {
     await walletRepository.removeAccount({
@@ -236,14 +241,16 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
 
   const renameAccount = useCallback(
     async (newAccountName: string) => {
+      const account = wallet.accounts.find(({ accountIndex }) => accountIndex === editAccountDrawer.data.accountNumber);
+
       await walletRepository.updateAccountMetadata({
         walletId: wallet.walletId,
         accountIndex: editAccountDrawer.data.accountNumber,
-        metadata: { name: newAccountName }
+        metadata: { ...account?.metadata, name: newAccountName }
       });
       editAccountDrawer.hide();
     },
-    [walletRepository, wallet.walletId, editAccountDrawer]
+    [walletRepository, wallet.walletId, editAccountDrawer, wallet.accounts]
   );
 
   return (

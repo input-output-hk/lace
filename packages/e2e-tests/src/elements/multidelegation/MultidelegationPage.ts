@@ -701,6 +701,18 @@ class MultidelegationPage {
     }
     return gridContent;
   }
+
+  async getRandomStakePoolListItemIndex(): Promise<number> {
+    const cardsQuantity = await this.displayedPools.length;
+    const min = 1;
+    return Math.floor(Math.random() * (cardsQuantity - min + 1)) + min;
+  }
+
+  async getRandomStakePooGridCardIndex(): Promise<number> {
+    const cardsQuantity = await this.displayedCards.length;
+    const min = 1;
+    return Math.floor(Math.random() * (cardsQuantity - min + 1)) + min;
+  }
 }
 
 export default new MultidelegationPage();

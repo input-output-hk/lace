@@ -8,11 +8,11 @@ export interface FormLayoutProps {
 }
 
 export const FormLayout = ({ children }: FormLayoutProps): React.ReactElement => {
-  const { outputMap, hasInvalidOutputs } = useTransactionProps();
+  const { outputsMap, hasInvalidOutputs } = useTransactionProps();
   const [metadata] = useMetadata();
   const { setBuiltTxData } = useBuiltTxState();
   const { inMemoryWallet } = useWalletStore();
-  useInitializeTx(inMemoryWallet, setBuiltTxData, { outputs: outputMap, metadata, hasInvalidOutputs });
+  useInitializeTx(inMemoryWallet, setBuiltTxData, { outputs: outputsMap, metadata, hasInvalidOutputs });
 
   return <div style={{ paddingBottom: '19px' }}>{children}</div>;
 };

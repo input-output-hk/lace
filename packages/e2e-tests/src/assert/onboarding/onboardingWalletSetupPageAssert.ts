@@ -35,9 +35,12 @@ class OnboardingWalletSetupPageAssert extends OnboardingCommonAssert {
     await this.assertNextButtonEnabled(true);
   }
 
-  async assertSeeEnterWalletButton() {
+  async assertSeeEnterWalletButton(isCreatingPaperWallet = false) {
     await walletSetupPage.enterWalletButton.waitForDisplayed();
-    await this.assertNextButtonTextEquals(await t('core.walletNameAndPasswordSetupStep.enterWallet'));
+    const translationKey = isCreatingPaperWallet
+      ? 'core.walletNameAndPasswordSetupStep.generatePaperWallet'
+      : 'core.walletNameAndPasswordSetupStep.enterWallet';
+    await this.assertNextButtonTextEquals(await t(translationKey));
   }
 
   async assertSeePasswordRecommendation(expectedMessage: string, shouldSee: boolean) {
@@ -69,13 +72,14 @@ class OnboardingWalletSetupPageAssert extends OnboardingCommonAssert {
     }
   }
 
-  async assertSeeWalletSetupPage() {
+  async assertSeeWalletSetupPage(isCreatingPaperWallet = false): Promise<void> {
     await this.assertSeeStepTitle(await t('core.walletNameAndPasswordSetupStep.title'));
     await this.assertSeeStepSubtitle(await t('core.walletNameAndPasswordSetupStep.description'));
     await this.assertSeeWalletNameInput();
     await this.assertSeePasswordInput();
     await this.assertSeeBackButton();
-    await this.assertSeeEnterWalletButton();
+
+    await this.assertSeeEnterWalletButton(isCreatingPaperWallet);
 
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();

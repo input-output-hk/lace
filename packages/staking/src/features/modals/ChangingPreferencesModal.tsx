@@ -15,7 +15,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
     portfolioMutators: store.mutators,
     visible: store.activeDelegationFlow === DelegationFlow.ChangingPreferences,
   }));
-  const { analytics } = useOutsideHandles();
+  const { analytics, isSharedWallet } = useOutsideHandles();
 
   return (
     <StakingModal
@@ -37,7 +37,7 @@ export const ChangingPreferencesModal = ({ popupView }: StakingModalsProps): Rea
           dataTestId: 'switch-pools-modal-confirm',
           onClick: () => {
             analytics.sendEventToPostHog(PostHogAction.StakingChangingStakingPreferencesFineByMeClick);
-            portfolioMutators.executeCommand({ type: 'ConfirmChangingPreferences' });
+            portfolioMutators.executeCommand({ data: { isSharedWallet }, type: 'ConfirmChangingPreferences' });
           },
         },
       ]}

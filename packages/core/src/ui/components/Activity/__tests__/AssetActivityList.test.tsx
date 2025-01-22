@@ -3,8 +3,7 @@ import * as React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AssetActivityList, AssetActivityListProps } from '../AssetActivityList';
-import { ActivityStatus } from '../AssetActivityItem';
-import { TransactionActivityType } from '../../ActivityDetail';
+import { ActivityStatus, TransactionActivityType } from '../../Transaction';
 
 const activityTranslations = {
   asset: 'asset',

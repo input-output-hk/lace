@@ -6,7 +6,13 @@ export interface Providers {
 }
 
 export enum WalletCreateStep {
-  RecoveryPhraseWriteDown = 'RecoveryPhraseWriteDown',
+  // Legacy
   RecoveryPhraseInput = 'RecoveryPhraseInput',
+  RecoveryPhraseWriteDown = 'RecoveryPhraseWriteDown',
+  // Paper wallet
+  ChooseRecoveryMethod = 'ChooseRecoveryMethod',
+  SecurePaperWallet = 'SecurePaperWallet',
+  SavePaperWallet = 'SavePaperWallet',
+  // Common
   Setup = 'Setup'
 }

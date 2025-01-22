@@ -180,3 +180,33 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
     When I press keyboard Escape button
     # When I press keyboard Enter button
     Then Drawer is not displayed
+
+  @LW-10998
+  Scenario Outline: Extended View - Multidelegation - 'Switching pool' modal displayed while reducing number of staked pools, click <action>
+    When I navigate to Staking extended page
+    And I open Overview tab
+    And I click Manage button
+    Then I see Manage delegation drawer
+    When I expand all pools details
+    And I remove "1" pools from delegation portfolio
+    And I input 20% ratio for pool 1
+    Then "Confirm new portfolio" button is enabled
+    When I click "Confirm new portfolio" button
+    And I click on "Next" button on staking confirmation drawer
+    Then I see "Switching to less pools" modal
+    And I click "<action>" button on "Switching pool?" modal
+    Then <nextStep>
+    Examples:
+      | action     | nextStep                                         |
+      | Cancel     | I see Manage delegation drawer Confirmation page |
+      | Fine by me | staking password drawer is displayed             |
+
+  @LW-10852
+  Scenario: Extended View - Modal about multi-delegation and DApp issues is displayed for user already using multi-delegation
+    Given I reset default behaviour for modal about issues with multi-delegation and DApps
+    When I navigate to Staking extended page
+    Then I see the modal about issues with multi-delegation and DApps
+    When I click on "Got it" button inside the modal about issues with multi-delegation and DApps
+    Then I do not see the modal about issues with multi-delegation and DApps
+    When I refresh the page
+    Then I do not see the modal about issues with multi-delegation and DApps

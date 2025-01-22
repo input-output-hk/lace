@@ -4,7 +4,7 @@ import IntersectionObserver from 'intersection-observer-polyfill';
 import classnames from 'classnames';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { DropdownMenu } from '@components/DropdownMenu';
-import { SendReceiveBox } from '../SendReceiveBox';
+import { TransactionCTAsBox } from '../TransactionCTAsBox';
 import styles from './SectionLayout.modules.scss';
 import { SidePanelButton } from '../SidePanelButton/SidePanelButton';
 import { CollapsiblePanelContainer } from '../CollapsiblePanelContainer/CollapsiblePanelContainer';
@@ -15,7 +15,7 @@ export const CONTENT_ID = 'content';
 const intersectionObserverInit: IntersectionObserverInit = { threshold: 1 };
 
 interface SectionLayoutProps {
-  sidePanelContent: React.ReactNode;
+  sidePanelContent?: React.ReactNode;
   isSidePanelFixed?: boolean;
 }
 
@@ -64,9 +64,11 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
         [styles.navigationBoxFlexible]: process.env.USE_MULTI_WALLET === 'true'
       })}
     >
-      <SendReceiveBox />
+      <TransactionCTAsBox />
       <DropdownMenu />
-      {isScreenTooSmallForSidePanel && <SidePanelButton active={isPanelVisible} onClick={toggleSidePanelVisibility} />}
+      {!!sidePanelContent && isScreenTooSmallForSidePanel && (
+        <SidePanelButton active={isPanelVisible} onClick={toggleSidePanelVisibility} />
+      )}
     </div>
   );
 
@@ -92,12 +94,14 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
           {process.env.USE_MULTI_WALLET === 'true' ? (
             <>
               <div className={styles.topNavigationBox}>{topNavigation}</div>
-              {!isScreenTooSmallForSidePanel && <div className={styles.sidePanelContentBox}>{sidePanelContent}</div>}
+              {!!sidePanelContent && !isScreenTooSmallForSidePanel && (
+                <div className={styles.sidePanelContentBox}>{sidePanelContent}</div>
+              )}
             </>
           ) : (
             <>
               {topNavigation}
-              {!isScreenTooSmallForSidePanel && sidePanelContent}
+              {!!sidePanelContent && !isScreenTooSmallForSidePanel && sidePanelContent}
             </>
           )}
         </div>

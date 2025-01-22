@@ -1,5 +1,4 @@
 import { When } from '@wdio/cucumber-framework';
-import nftsPageObject from '../pageobject/nftsPageObject';
 import { Given, Then } from '@cucumber/cucumber';
 import nftAssert from '../assert/nftAssert';
 import { Asset } from '../data/Asset';
@@ -8,22 +7,29 @@ import { t } from '../utils/translationService';
 import testContext from '../utils/testContext';
 import { getTestWallet } from '../support/walletConfiguration';
 import transactionDetailsAssert from '../assert/transactionDetailsAssert';
-import mainMenuPageObject from '../pageobject/mainMenuPageObject';
 import topNavigationAssert from '../assert/topNavigationAssert';
 import localStorageInitializer from '../fixture/localStorageInitializer';
 import NftsPage from '../elements/NFTs/nftsPage';
 import { expect } from 'chai';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import nftDetails from '../elements/NFTs/nftDetails';
+import {
+  getNonActiveAdaHandle2WalletName,
+  getNonActiveAdaHandleWalletName,
+  getNonActiveNft2WalletName,
+  getNonActiveNftHdWalletName,
+  getNonActiveNftWalletName
+} from '../utils/walletUtils';
+import { visit } from '../utils/pageUtils';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
   async (clickType: 'left' | 'right' | '', nftName: string) => {
-    await nftsPageObject.clickNftItemOnNftsPage(nftName, clickType === '' ? 'left' : clickType);
+    await NftsPage.clickNftItem(nftName, clickType === '' ? 'left' : clickType);
   }
 );
 
-When(/^I click on NFT with name: "([^"]*)" in asset selector$/, async (nftName: string) => {
+When(/^I click on NFT with name: "([^"]*)"$/, async (nftName: string) => {
   await TokenSelectionPage.clickNftItemInAssetSelector(nftName);
 });
 
@@ -35,11 +41,16 @@ Then(
     name: string,
     mode: 'extended' | 'popup'
   ) => {
-    const fee = typeOfAsset === 'NFT' ? '1.17' : '1.19';
+    const fee = Number(String(testContext.load('feeValue')).split(' ')[0]);
+    const adaAllocationValue = typeOfAsset === 'NFT' ? 1.17 : 1.19;
+    const adaValue = transactionType === 'Sent' ? -(adaAllocationValue + fee) : adaAllocationValue;
+    const assetValue = transactionType === 'Received' ? 1 : -1;
     const expectedTransactionRowAssetDetailsSent = {
       type: transactionType,
       tokensAmount:
-        mode === 'extended' ? `${fee} ${Asset.CARDANO.ticker}, 1 ${name}` : `${fee} ${Asset.CARDANO.ticker} , +1`,
+        mode === 'extended'
+          ? `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker}, ${assetValue} ${name}`
+          : `${adaValue.toFixed(2)} ${Asset.CARDANO.ticker} , +1`,
       tokensCount: 2
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
@@ -75,7 +86,7 @@ Then(
       hash: String(testContext.load('txHashValue')),
       sentAssets: [`1 ${nftName}`],
       sentAda: `1.16 ${Asset.CARDANO.ticker}`,
-      recipientAddress: getTestWallet(walletName).address,
+      recipientAddress: getTestWallet(walletName).accounts[0].address,
       status: 'Success'
     };
     await transactionDetailsAssert.assertSeeActivityDetails(expectedActivityDetails);
@@ -85,21 +96,18 @@ Then(
 Given(
   /^I use a (single|HD) wallet with "([^"]*)" NFT in (popup|extended) mode$/,
   async (walletType: 'single' | 'HD', nftName: string, mode: 'extended' | 'popup') => {
-    const isNftDisplayed = await nftsPageObject.isNftDisplayed(nftName);
+    const isNftDisplayed = await NftsPage.isNftDisplayed(nftName);
     if (!isNftDisplayed) {
       let walletToLoad;
       if (walletType === 'HD') {
-        walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
+        walletToLoad = getNonActiveNftHdWalletName();
       } else {
-        walletToLoad =
-          mode === 'extended'
-            ? await nftsPageObject.getNonActiveNftWalletName()
-            : await nftsPageObject.getNonActiveNft2WalletName();
+        walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
       }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
-      await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(nftName)).to.be.true;
+      await visit('NFTs', mode);
+      expect(await NftsPage.isNftDisplayed(nftName)).to.be.true;
     }
   }
 );
@@ -107,16 +115,13 @@ Given(
 Given(
   /^I use a wallet with ADA handle "([^"]*)" NFT in (popup|extended) mode$/,
   async (adahandle: string, mode: 'extended' | 'popup') => {
-    const isAdaHandle = await nftsPageObject.isNftDisplayed(adahandle);
+    const isAdaHandle = await NftsPage.isNftDisplayed(adahandle);
     if (!isAdaHandle) {
-      const walletToLoad =
-        mode === 'extended'
-          ? await nftsPageObject.getNonActiveAdaHandleWalletName()
-          : await nftsPageObject.getNonActiveAdaHandle2WalletName();
+      const walletToLoad = mode === 'extended' ? getNonActiveAdaHandleWalletName() : getNonActiveAdaHandle2WalletName();
       await localStorageInitializer.reInitializeWallet(walletToLoad);
       await topNavigationAssert.assertWalletIsInSyncedStatus();
-      await mainMenuPageObject.navigateToSection('NFTs', mode);
-      expect(await nftsPageObject.isNftDisplayed(adahandle)).to.be.true;
+      await visit('NFTs', mode);
+      expect(await NftsPage.isNftDisplayed(adahandle)).to.be.true;
     }
   }
 );
@@ -137,20 +142,17 @@ Then(/^each NFT has name and image displayed$/, async () => {
 });
 
 When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'extended' | 'popup') => {
-  const walletToLoad =
-    mode === 'extended'
-      ? await nftsPageObject.getNonActiveNftWalletName()
-      : await nftsPageObject.getNonActiveNft2WalletName();
+  const walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
 When(/^I open NFT receiving HD wallet$/, async () => {
-  const walletToLoad = await nftsPageObject.getNonActiveNftHdWalletName();
+  const walletToLoad = getNonActiveNftHdWalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
 });
 
 When(/^I save all NFTs that I have$/, async () => {
-  await nftsPageObject.saveNfts();
+  await NftsPage.saveNfts();
 });
 
 When(/^I save NFT details$/, async () => {

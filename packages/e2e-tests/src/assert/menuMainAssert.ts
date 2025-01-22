@@ -56,7 +56,9 @@ class MenuMainPopupPageAssert {
 
   async assertAddressIsNotEqual(wallet = TestWalletName.TestAutomationWallet) {
     const walletData = getTestWallet(wallet);
-    const expectedAddress = extensionUtils.isMainnet() ? walletData.mainnetAddress : walletData.address;
+    const expectedAddress = extensionUtils.isMainnet()
+      ? walletData.accounts[0].mainnetAddress
+      : walletData.accounts[0].address;
     const actualAddress = await FundWalletBanner.getWalletAddress();
     expect(actualAddress).to.not.equal(expectedAddress);
   }

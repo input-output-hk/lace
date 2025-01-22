@@ -33,6 +33,7 @@ export enum TxCreationType {
 export type PostHogPersonProperties = {
   $set: {
     user_tracking_type: UserTrackingType;
+    opted_in_beta: boolean;
   };
 };
 export type PostHogMetadata = {
@@ -41,6 +42,7 @@ export type PostHogMetadata = {
   view: ExtensionViews;
   sent_at_local: string;
   posthog_project_id: number;
+  network: string;
 } & PostHogPersonProperties;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

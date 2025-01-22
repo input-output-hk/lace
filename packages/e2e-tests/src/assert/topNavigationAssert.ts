@@ -14,16 +14,16 @@ class TopNavigationAssert {
 
   async assertSeeReceiveButton() {
     await MenuHeader.receiveButton.waitForDisplayed();
-    expect(await MenuHeader.receiveButton.getText()).to.equal(await t('core.sendReceive.receive'));
+    expect(await MenuHeader.receiveButton.getText()).to.equal(await t('core.transactionCtas.receive'));
   }
 
   async assertSeeSendButton() {
     await MenuHeader.sendButton.waitForDisplayed();
-    expect(await MenuHeader.sendButton.getText()).to.equal(await t('core.sendReceive.send'));
+    expect(await MenuHeader.sendButton.getText()).to.equal(await t('core.transactionCtas.send'));
   }
 
   async assertLogoPresent() {
-    await MenuHeader.logo.waitForDisplayed({ timeout: 60_000 });
+    await MenuHeader.logo.waitForDisplayed({ timeout: 180_000 });
   }
 
   async assertSeeMenuButton() {

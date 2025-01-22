@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@lace/common';
-import Icon, { DownloadOutlined } from '@ant-design/icons';
+import { DownloadOutlined } from '@ant-design/icons';
 import QRCodeStyling from 'qr-code-styling';
 import styles from './Voting.module.scss';
 import { TranslationsFor } from '@wallet/util/types';
@@ -16,12 +16,12 @@ export const CatalystScanStep = ({
   certificate,
   translations
 }: CatalystScanStepProps): React.ReactElement => {
-  const qrCodeRef = useRef(null);
-  const qrCode = useRef<QRCodeStyling>(null);
+  const qrCodeRef = useRef<HTMLDivElement | null>(null);
+  const qrCode = useRef<QRCodeStyling | null>(null);
 
   useEffect(() => {
     qrCode.current = new QRCodeStyling({ data: certificate, width: 240, height: 240 });
-    qrCode.current.append(qrCodeRef.current);
+    qrCode.current.append(qrCodeRef.current || undefined);
   }, [certificate]);
 
   return (
@@ -34,10 +34,10 @@ export const CatalystScanStep = ({
           <div ref={qrCodeRef} />
           <div>
             <Button
-              onClick={() => qrCode.current.download({ name: 'certificate', extension: 'png' })}
+              onClick={() => qrCode.current?.download({ name: 'certificate', extension: 'png' })}
               color="secondary"
             >
-              <Icon component={DownloadOutlined} /> {translations.downloadButton}
+              <DownloadOutlined /> {translations.downloadButton}
             </Button>
           </div>
         </div>

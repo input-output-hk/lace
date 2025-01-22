@@ -1,16 +1,10 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-import { PopupView } from '@routes';
+import { PopupView, walletRoutePaths } from '@routes';
 import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
-import {
-  AppSettingsProvider,
-  AxiosClientProvider,
-  DatabaseProvider,
-  ThemeProvider,
-  AnalyticsProvider
-} from '@providers';
+import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
 import '@lib/i18n';
 import 'antd/dist/antd.css';
 import './styles/index.scss';
@@ -28,13 +22,37 @@ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+import { NamiPopup } from './views/nami-mode';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { storage } from 'webextension-polyfill';
+import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
 
-const App = (): React.ReactElement => (
-  <BackgroundServiceAPIProvider>
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_POPUP}>
-          <AxiosClientProvider>
+const App = (): React.ReactElement => {
+  const [mode, setMode] = useState<'lace' | 'nami'>();
+  storage.onChanged.addListener((changes) => {
+    const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
+    const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
+    if (oldModeValue?.mode !== newModeValue?.mode) {
+      setMode(newModeValue);
+      // Force back to original routing unless it is staking route (see LW-11876)
+      if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) window.location.hash = '#';
+    }
+  });
+
+  useEffect(() => {
+    const getWalletMode = async () => {
+      const { namiMigration } = await getBackgroundStorage();
+      setMode(namiMigration?.mode || 'lace');
+    };
+
+    getWalletMode();
+  }, [mode]);
+
+  return (
+    <BackgroundServiceAPIProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_POPUP}>
             <CurrencyStoreProvider>
               <HashRouter>
                 <PostHogClientProvider>
@@ -45,9 +63,11 @@ const App = (): React.ReactElement => (
                           <MigrationContainer appMode={APP_MODE_POPUP}>
                             <DataCheckContainer appMode={APP_MODE_POPUP}>
                               <AddressesDiscoveryOverlay>
-                                <BackgroundPageProvider>
-                                  <PopupView />
-                                </BackgroundPageProvider>
+                                <NamiMigrationGuard>
+                                  <BackgroundPageProvider>
+                                    {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                  </BackgroundPageProvider>
+                                </NamiMigrationGuard>
                               </AddressesDiscoveryOverlay>
                             </DataCheckContainer>
                           </MigrationContainer>
@@ -58,12 +78,12 @@ const App = (): React.ReactElement => (
                 </PostHogClientProvider>
               </HashRouter>
             </CurrencyStoreProvider>
-          </AxiosClientProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  </BackgroundServiceAPIProvider>
-);
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    </BackgroundServiceAPIProvider>
+  );
+};
 
 const mountNode = document.querySelector('#lace-popup');
 ReactDOM.render(<App />, mountNode);

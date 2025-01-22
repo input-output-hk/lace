@@ -28,6 +28,15 @@ export const getBackgroundStorageItem: any = async (key: string) => {
   return JSON.stringify(backgroundStorage[key]);
 };
 
+export const setMigrationState = async (): Promise<void> => {
+  await verifyBrowserStorageSupport();
+  try {
+    await browser.execute("await chrome.storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } })", []);
+  } catch (error) {
+    throw new Error(`Setting browser storage failed: ${error}`);
+  }
+};
+
 export const setBackgroundStorage = async (data: Record<string, unknown>): Promise<void> => {
   await verifyBrowserStorageSupport();
 
@@ -38,16 +47,22 @@ export const setBackgroundStorage = async (data: Record<string, unknown>): Promi
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(updatedBackgroundStorage)}})`,
       []
     );
-    await browser.execute("await chrome.storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } })", []);
+    await setMigrationState();
   } catch (error) {
     throw new Error(`Setting browser storage failed: ${error}`);
   }
 };
 
-export const setMigrationState = async (): Promise<void> => {
+export const setUsePersistentUserId = async (): Promise<void> => {
   await verifyBrowserStorageSupport();
+
+  const backgroundStorage = await getBackgroundStorage();
+  backgroundStorage.usePersistentUserId = true;
   try {
-    await browser.execute("await chrome.storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } })", []);
+    await browser.execute(
+      `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
+      []
+    );
   } catch (error) {
     throw new Error(`Setting browser storage failed: ${error}`);
   }

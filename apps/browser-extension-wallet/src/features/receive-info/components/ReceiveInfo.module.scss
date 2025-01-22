@@ -6,12 +6,24 @@
   padding: size_unit(4.5) 0;
 }
 
-.title {
-  color: var(--text-color-primary);
-  @include text-heading;
+.subTitle {
+  button {
+    &:focus:not(:active) {
+      outline-color: unset;
+      outline-width: 0;
+      outline-style: none;
+    }
+
+    background-color: var(--dark-mode-light-grey, #c0c0c0);
+
+    &[data-state="checked"]:not(:disabled) {
+      background: var(--lace-gradient);
+    }
+  }
 }
 
-.subtitle {
-  color: var(--text-color-secondary);
-  @include text-bodyLarge-medium;
+.iconWrapper {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
 }

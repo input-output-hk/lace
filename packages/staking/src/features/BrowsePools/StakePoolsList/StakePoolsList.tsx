@@ -1,5 +1,7 @@
+/* eslint-disable react/no-multi-comp */
 import { Box, Flex, Table, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import { useOutsideHandles } from 'features/outside-handles-provider';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ListRange } from 'react-virtuoso';
 import { StakePoolDetails } from '../../store';
@@ -9,13 +11,6 @@ import * as styles from './StakePoolsList.css';
 import { StakePoolsListHeader } from './StakePoolsListHeader';
 import { StakePoolsListRow } from './StakePoolsListRow';
 import { StakePoolsListRowSkeleton } from './StakePoolsListRowSkeleton';
-
-const itemContent = (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
-  data ? (
-    <StakePoolsListRow {...data} />
-  ) : (
-    <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection />
-  );
 
 export type StakePoolsListProps = {
   scrollableTargetId: string;
@@ -42,6 +37,7 @@ export const StakePoolsList = ({
   scrollableTargetId,
 }: StakePoolsListProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { isSharedWallet } = useOutsideHandles();
   const tableReference = useRef<HTMLDivElement | null>(null);
   const [initialItemsCount, setInitialItemsCount] = useState(0);
   const showEmptyPlaceholder = !showSkeleton && pools.length === 0;
@@ -70,8 +66,18 @@ export const StakePoolsList = ({
 
   const rowPlaceholders = useMemo(() => Array.from<undefined>({ length: initialItemsCount }), [initialItemsCount]);
 
+  const itemContent = useCallback(
+    (index: number, data: StakePoolDetails | undefined): React.ReactElement =>
+      data ? (
+        <StakePoolsListRow {...data} />
+      ) : (
+        <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection={!isSharedWallet} />
+      ),
+    [isSharedWallet],
+  );
+
   return (
-    <Box className={styles.box} w="$fill" data-testid="stake-pools-list-container">
+    <Box className={styles.box} w="$fill" testId="stake-pools-list-container">
       {selectedPools?.length > 0 && (
         <Box w="$fill" pb="$6">
           <Text.Body.Normal className={styles.selectedTitle} weight="$semibold">

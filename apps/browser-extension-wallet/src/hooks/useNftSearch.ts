@@ -12,17 +12,16 @@ interface NftSearchResultProps {
   handleSearch: (items: NftItemProps[], searchValue: string) => void;
 }
 
+export const searchNft = (item: NftItemProps, searchValue: string, assetsInfo: AssetOrHandleInfoMap): boolean =>
+  item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+  item.assetId === searchValue ||
+  assetsInfo.get(Cardano.AssetId(item.assetId)).policyId === searchValue;
+
 export const searchNfts = (
   data: NftItemProps[],
   searchValue: string,
   assetsInfo: AssetOrHandleInfoMap
-): NftItemProps[] =>
-  data.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      item.assetId === searchValue ||
-      assetsInfo.get(Cardano.AssetId(item.assetId)).policyId === searchValue
-  );
+): NftItemProps[] => data.filter((nft) => searchNft(nft, searchValue, assetsInfo));
 
 export const useNftSearch = (assetsInfo: AssetOrHandleInfoMap): NftSearchResultProps => {
   const [isSearching, setIsSearching] = useState(false);

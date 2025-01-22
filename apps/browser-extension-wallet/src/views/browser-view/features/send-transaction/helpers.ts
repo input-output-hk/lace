@@ -12,6 +12,15 @@ import BigNumber from 'bignumber.js';
 import isNil from 'lodash/isNil';
 import { isNFT } from '@src/utils/is-nft';
 import flatMapDeep from 'lodash/flatMapDeep';
+import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@types';
+import { PriceResult } from '@hooks';
+import { SentAssetsList } from '@lace/core';
+import { walletBalanceTransformer } from '@src/api/transformers';
+import isUndefined from 'lodash/isUndefined';
+import { getTokenAmountInFiat, parseFiat } from '@utils/assets-transformers';
+
+type Unpacked<T> = T extends (infer U)[] ? U : T;
+type AssetsListItem = Unpacked<SentAssetsList>;
 
 export const calculateSpentBalance = (outputs: OutputList): SpentBalances => {
   let spentBalances: Record<string, string> = {};
@@ -52,6 +61,42 @@ export const getOutputValues = (assets: Array<AssetInfo>, cardanoCoin: Wallet.Co
   };
 };
 
+export const getNextInsufficientBalanceInputs =
+  (lastFocusedInput: string, reachedMaxAmountList: Set<string | Wallet.Cardano.AssetId>, id: string) =>
+  (prevInputsList: string[]): string[] => {
+    const isInMaxAmountList = reachedMaxAmountList.has(id); // check the if the id exists in reachedMaxAmountList
+    const isInInsufficientBalanceList = prevInputsList.includes(lastFocusedInput); // check the if input element id exists in insufficient balance list
+
+    // check if the last focused element has insufficient balance and doesn't exists in insufficient balance list
+    if (isInMaxAmountList && !isInInsufficientBalanceList) {
+      return [...prevInputsList, lastFocusedInput]; // add it to the insufficient balance list
+      // check if the last focused element has balance and exists in insufficient balance list
+    } else if (!isInMaxAmountList && isInInsufficientBalanceList) {
+      return prevInputsList.filter((inputId) => inputId.split('.')[1] !== id); // remove all items with same coin id (cardano id or asset id)
+    }
+
+    return prevInputsList;
+  };
+
+export const hasReachedMaxAmountAda = ({
+  tokensUsed,
+  balance,
+  exceed = false,
+  cardanoCoin,
+  availableRewards = BigInt(0)
+}: {
+  tokensUsed: SpentBalances;
+  balance: Wallet.Cardano.Lovelace;
+  exceed?: boolean;
+  cardanoCoin: Wallet.CoinId;
+  availableRewards?: bigint;
+}): boolean =>
+  tokensUsed[cardanoCoin.id] && balance
+    ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
+        Wallet.util.lovelacesToAdaString((BigInt(balance) + BigInt(availableRewards)).toString())
+      )
+    : false;
+
 export const getReachedMaxAmountList = ({
   assets = new Map(),
   tokensUsed,
@@ -67,12 +112,12 @@ export const getReachedMaxAmountList = ({
   cardanoCoin: Wallet.CoinId;
   availableRewards?: bigint;
 }): (string | Wallet.Cardano.AssetId)[] => {
-  const reachedMaxAmountAda =
-    tokensUsed[cardanoCoin.id] && balance?.coins
-      ? new BigNumber(tokensUsed[cardanoCoin.id])[exceed ? 'gt' : 'gte'](
-          Wallet.util.lovelacesToAdaString((balance.coins + availableRewards).toString())
-        )
-      : false;
+  const reachedMaxAmountAda = hasReachedMaxAmountAda({
+    tokensUsed,
+    balance: balance?.coins,
+    cardanoCoin,
+    availableRewards
+  });
 
   const reachedMaxAmountAssets = balance?.assets?.size
     ? [...balance.assets]
@@ -179,4 +224,52 @@ export const getTokensProperty = (
     }
   }
   return [...tokensAnalyticsPropertyMap.values()];
+};
+
+export const formatRow = ({
+  output,
+  assetInfo,
+  cardanoCoin,
+  fiatCurrency,
+  prices
+}: {
+  output: CardanoTxOut;
+  assetInfo: Map<Wallet.Cardano.AssetId, TokensDetails>;
+  cardanoCoin: Wallet.CoinId;
+  fiatCurrency: CurrencyInfo;
+  prices?: PriceResult;
+}): SentAssetsList => {
+  const cardanoAmount = walletBalanceTransformer(output.value.coins.toString(), prices?.cardano?.price);
+
+  const cardano: AssetsListItem = {
+    assetAmount: `${cardanoAmount.coinBalance} ${cardanoCoin.symbol}`,
+    fiatAmount: `${cardanoAmount.fiatBalance} ${fiatCurrency?.code}`
+  };
+
+  if (isUndefined(output.value.assets)) return [cardano];
+
+  const mapEntries = [...output.value.assets.entries()];
+
+  const assetList: SentAssetsList = [];
+  for (const [id, balance] of mapEntries) {
+    const asset = assetInfo?.get(id);
+    if (asset) {
+      const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
+      const amount = Wallet.util.calculateAssetBalance(balance, asset);
+      const tokenPriceInAda = prices?.tokens?.get(id)?.priceInAda;
+      const fiatAmount =
+        asset.tokenMetadata !== undefined && tokenPriceInAda
+          ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${
+              fiatCurrency?.code
+            }`
+          : '-';
+
+      assetList.push({
+        assetAmount: `${amount} ${ticker ?? asset.assetId}`,
+        fiatAmount
+      });
+    }
+  }
+
+  return [cardano, ...assetList];
 };

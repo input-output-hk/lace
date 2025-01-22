@@ -1,0 +1,1 @@
+export { NamiMigrationUpdatingYourWallet } from './NamiMigrationUpdatingYourWallet';

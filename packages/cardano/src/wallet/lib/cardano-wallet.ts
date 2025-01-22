@@ -9,15 +9,23 @@ import {
   StakePoolProvider,
   TxSubmitProvider,
   util as coreUtil,
-  UtxoProvider
+  UtxoProvider,
+  DRepProvider
 } from '@cardano-sdk/core';
-import { ObservableWallet, BaseWalletDependencies, storage, restoreKeyAgent } from '@cardano-sdk/wallet';
+import {
+  ObservableWallet,
+  BaseWalletDependencies,
+  storage,
+  restoreKeyAgent,
+  AddressDiscovery
+} from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
 import { ChainName } from '../types';
 import * as Crypto from '@cardano-sdk/crypto';
 import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
+import { WsProvider } from '@cardano-sdk/cardano-services-client';
 
 export const bip32Ed25519 = new Crypto.SodiumBip32Ed25519();
 
@@ -28,11 +36,18 @@ export interface WalletMetadata {
   lockValue?: HexBlob;
   lastActiveAccountIndex?: number;
   walletAddresses?: Cardano.PaymentAddress[];
-  extendedAccountPublicKey?: Wallet.Crypto.Bip32PublicKeyHex;
+  multiSigExtendedPublicKey?: Wallet.Crypto.Bip32PublicKeyHex;
+  coSigners?: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
 }
 
 export interface AccountMetadata {
   name: string;
+  namiMode?: {
+    avatar: string;
+    balance?: Partial<Record<Wallet.ChainName, string>>;
+    address?: Partial<Record<Wallet.ChainName, string>>;
+    recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
+  };
 }
 
 export interface CardanoWallet {
@@ -55,6 +70,10 @@ export interface WalletProvidersDependencies {
   utxoProvider: UtxoProvider;
   rewardsProvider: RewardsProvider;
   chainHistoryProvider: ChainHistoryProvider;
+  wsProvider?: WsProvider;
+  drepProvider: DRepProvider;
+  addressDiscovery?: AddressDiscovery;
+  inputResolver?: Cardano.InputResolver;
 }
 
 export interface CreatePersonalWallet {

@@ -15,7 +15,7 @@ export const UserAvatar = ({ walletName, isPopup, avatar }: UserAvatarProps): Re
     {avatar ? (
       <Image src={avatar} className={styles.userAvatarImage} preview={false} />
     ) : (
-      <span>{walletName && walletName[0]?.toUpperCase()}</span>
+      <span>{walletName?.[0]?.toUpperCase()}</span>
     )}
   </div>
 );

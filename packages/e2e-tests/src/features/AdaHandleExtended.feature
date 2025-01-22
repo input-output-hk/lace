@@ -78,7 +78,7 @@ Feature: ADA handle - extended view
     And I click "Receive" button on page header
     And I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for default wallet address
-    Then I see a toast with text: "Address copied"
+    Then I see a toast with text: "Copied to clipboard"
     And I close a toast message
     And Clipboard contains address of wallet: "WalletAdaHandle"
     When I click "Copy" button on "Receive" page for handle: "$cde"
@@ -115,7 +115,7 @@ Feature: ADA handle - extended view
     And click on the NFTs button in the coin selector dropdown
     Then NFT with name: "$test_handle_1" is displayed in coin selector
     And I see ADA handle NFT with custom image on the Coin selector page
-    When I click on NFT with name: "$test_handle_1" in asset selector
+    When I click on NFT with name: "$test_handle_1"
     Then the "$test_handle_1" asset is displayed in bundle 1
 
   @LW-7429
@@ -125,7 +125,7 @@ Feature: ADA handle - extended view
     And I see handles listed on the "Receive" screen
     And I close the drawer by clicking close button
     And I navigate to NFTs extended page
-    When I create folder with name: "Ada Handle folder" that contains 4 NFTs
+    When I create folder with name: "Ada Handle folder" that contains 5 NFTs
     Then I see a thumbnail of ADA handle with custom image on the NFT folder with name: "Ada Handle folder"
     When I left click on the NFT folder with name "Ada Handle folder"
     And I see "Ada Handle folder" NFT folder page in extended mode

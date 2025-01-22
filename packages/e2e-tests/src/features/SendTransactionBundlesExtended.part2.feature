@@ -14,7 +14,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And click on the coin selector for "tADA" asset in bundle 2
     And click on an token with name: "LaceCoin"
     And I enter a value of: 1 to the "LaceCoin1" asset in bundle 2
-    Then transaction fee is around 0.19 ADA and Ada allocation cost is around 1.07 ADA
+    Then transaction fee is around 0.20 ADA and Ada allocation cost is around 1.07 ADA
 
   @LW-4505
   Scenario: Extended-view - Cancel transaction with multiple bundles on Summary page
@@ -71,7 +71,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Add bundle" button on "Send" page
     And I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin" in asset selector
+    And I click on NFT with name: "Ibilecoin"
     And I click "Add token or NFT" button for bundle 2
     And click on the NFTs button in the coin selector dropdown
     Then NFT with name: "Ibilecoin" is not displayed in coin selector
@@ -102,11 +102,11 @@ Feature: Send - Extended Browser View (Advanced Tx)
     Then the maximum available amount is displayed in bundle: 1 for "LaceCoin2" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Ibilecoin" in asset selector
+    And I click on NFT with name: "Ibilecoin"
     Then the maximum available amount is displayed in bundle: 1 for "Ibilecoin" asset
     When I click "Add token or NFT" button for bundle 1
     And click on the NFTs button in the coin selector dropdown
-    And I click on NFT with name: "Bison Coin" in asset selector
+    And I click on NFT with name: "Bison Coin"
     Then the maximum available amount is displayed in bundle: 1 for "Bison Coin" asset
     And "Review transaction" button is enabled on "Send" page
 
@@ -140,6 +140,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And "Review transaction" button is disabled on "Send" page
 
   @LW-3578
+  @Pending # due to issues with Fetch.enable
   Scenario: Extended-view - Transaction error screen displayed for multiple bundles on transaction submit error
     Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
     And I click "Send" button on page header

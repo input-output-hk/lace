@@ -1,8 +1,7 @@
-import { PasswordVerificationProps } from '@lace/common';
+import { PasswordVerificationProps } from '@ui/components/PasswordVerification';
 
 export type ValidationErrorKeys = 'nameMaxLength';
 export type BarStates = PasswordVerificationProps['complexityBarList'];
 export interface WalletSetupNamePasswordSubmitParams {
-  password: string;
   walletName: string;
 }

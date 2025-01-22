@@ -29,7 +29,7 @@ export const Grid = <T extends Record<string, unknown> | undefined>({
   }, [scrollableTargetId]);
 
   return (
-    <Flex h="$fill" ref={tableReference} data-testid="stake-pool-list-scroll-wrapper">
+    <Flex h="$fill" ref={tableReference} testId="stake-pool-list-scroll-wrapper">
       <VirtuosoGrid<T>
         listClassName={cx.grid}
         data={items}

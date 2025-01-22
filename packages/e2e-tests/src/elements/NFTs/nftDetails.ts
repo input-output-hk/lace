@@ -39,7 +39,7 @@ class NftDetails {
     return this.drawerBody.$(new CommonDrawerElements().DRAWER_HEADER_CLOSE_BUTTON);
   }
 
-  get nftTitleOnPopup() {
+  get nftTitleOnPopup(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFT_TITLE_ON_POPUP);
   }
 
@@ -51,7 +51,7 @@ class NftDetails {
     return this.drawerBody.$(this.SET_AS_AVATAR_BUTTON);
   }
 
-  get tokenInfoSection() {
+  get tokenInfoSection(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKEN_INFO_SECTION);
   }
 
@@ -95,11 +95,11 @@ class NftDetails {
     return this.drawerBody.$(this.ATTRIBUTES_LABEL);
   }
 
-  get attributesSection() {
+  get attributesSection(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ATTRIBUTES_SECTION);
   }
 
-  get sendNFTButton() {
+  get sendNFTButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEND_NFT_BUTTON);
   }
 

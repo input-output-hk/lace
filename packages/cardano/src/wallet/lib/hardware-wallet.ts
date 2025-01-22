@@ -18,8 +18,8 @@ const DEFAULT_COMMUNICATION_TYPE = KeyManagement.CommunicationType.Web;
 
 // https://github.com/trezor/connect/blob/develop/docs/index.md#trezor-connect-manifest
 export const manifest: KeyManagement.TrezorConfig['manifest'] = {
-  appUrl: process.env.WEBSITE_URL,
-  email: process.env.EMAIL_ADDRESS
+  appUrl: process.env.WEBSITE_URL as unknown as string,
+  email: process.env.EMAIL_ADDRESS as unknown as string
 };
 
 const initializeTrezor = () =>
@@ -28,7 +28,7 @@ const initializeTrezor = () =>
     communicationType: DEFAULT_COMMUNICATION_TYPE
   });
 
-const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> = {
+const connectDevices: Partial<Record<HardwareWallets, () => Promise<DeviceConnection>>> = {
   [WalletType.Ledger]: async () =>
     await HardwareLedger.LedgerKeyAgent.checkDeviceConnection(DEFAULT_COMMUNICATION_TYPE),
   ...(AVAILABLE_WALLETS.includes(WalletType.Trezor) && {
@@ -36,7 +36,8 @@ const connectDevices: Record<HardwareWallets, () => Promise<DeviceConnection>> =
   })
 };
 
-export const connectDevice = async (model: HardwareWallets): Promise<DeviceConnection> => await connectDevices[model]();
+export const connectDevice = async (model: HardwareWallets): Promise<DeviceConnection> =>
+  await connectDevices[model]?.();
 
 type Descriptor = Partial<USBDevice>;
 type DescriptorEntries<T extends Descriptor> = [keyof T, T[keyof T]][];
@@ -45,23 +46,7 @@ const isDeviceDescribedBy = (device: USBDevice, descriptors: Descriptor[]) =>
     (Object.entries(descriptor) as DescriptorEntries<Descriptor>).every(([key, value]) => device[key] === value)
   );
 
-const ledgerNanoSWithNoAppOpenProductId = 4113;
-const ledgerNanoSWithCardanoAppOpenProductId = 4117;
-const ledgerNanoSPlusWithNoAppOpenProductId = 20_497;
-const ledgerNanoSPlusWithCardanoAppOpenProductId = 20_501;
-const ledgerNanoXWithNoAppOpenProductId = 16_401;
-const ledgerNanoXWithCardanoAppOpenProductId = 16_405;
-export const ledgerDescriptors = [
-  ledgerNanoSWithNoAppOpenProductId,
-  ledgerNanoSWithCardanoAppOpenProductId,
-  ledgerNanoSPlusWithNoAppOpenProductId,
-  ledgerNanoSPlusWithCardanoAppOpenProductId,
-  ledgerNanoXWithNoAppOpenProductId,
-  ledgerNanoXWithCardanoAppOpenProductId
-].map((productId) => ({
-  vendorId: ledgerUSBVendorId,
-  productId
-}));
+export const ledgerDescriptors = [{ vendorId: ledgerUSBVendorId }];
 
 // eslint-disable-next-line unicorn/number-literal-case
 const trezorModelTProductId = 0x53_c1;
@@ -111,7 +96,7 @@ export const getHwExtendedAccountPublicKey = async (
 };
 
 type DeviceSpec = {
-  model: string;
+  model?: string;
   firmwareVersion?: string;
   cardanoAppVersion?: string;
 };
@@ -119,10 +104,10 @@ type DeviceSpec = {
 const makeVersion = (major: number, minor: number, patch: number) => `${major}.${minor}.${patch}`;
 
 export const getDeviceSpec = async (connection: HardwareWalletConnection): Promise<DeviceSpec> => {
-  if (connection.type === WalletType.Ledger) {
+  if (connection.type === WalletType.Ledger && typeof connection.value !== 'undefined') {
     const { version } = await connection.value.getVersion();
     return {
-      model: connection.value.transport.deviceModel.id,
+      model: connection.value.transport.deviceModel?.id,
       cardanoAppVersion: makeVersion(version.major, version.minor, version.patch)
     };
   }

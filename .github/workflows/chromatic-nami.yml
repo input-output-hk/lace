@@ -1,0 +1,42 @@
+name: Chromatic deploy packages/nami
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - packages/nami/**
+  push:
+    paths:
+      - packages/nami/**
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic-deployment:
+    name: Chromatic Nami
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
+      - name: Build
+        run: yarn workspaces foreach -Rpt -v --from '@lace/nami' run build
+
+      - name: Chromatic packages-nami
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
+          TOKEN: ${{ secrets.CHROMATIC_LACE_NAMI_TOKEN }}

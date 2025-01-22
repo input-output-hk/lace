@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
-import isUndefined from 'lodash/isUndefined';
-import { useWalletStore } from '../../../../../stores';
-import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@src/types';
+import { useWalletStore } from '@stores';
+import { CurrencyInfo } from '@src/types';
 import { Wallet } from '@lace/cardano';
-import { PriceResult, useFetchCoinPrice } from '@hooks';
-import { walletBalanceTransformer } from '../../../../../api/transformers';
-import { OutputSummaryList, SentAssetsList, Costs, OutputSummaryProps } from '@lace/core';
+import { useFetchCoinPrice } from '@hooks';
+import { walletBalanceTransformer } from '@src/api/transformers';
+import { OutputSummaryList, Costs, OutputSummaryProps } from '@lace/core';
 import { useBuiltTxState, useMetadata } from '../store';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
@@ -13,66 +12,20 @@ import styles from './SendTransactionSummary.module.scss';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { AddressListType } from '@views/browser/features/activity';
 import { useCurrencyStore } from '@providers';
-import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
 import { useObservable, Banner } from '@lace/common';
 import ExclamationIcon from '../../../../../assets/icons/exclamation-triangle-red.component.svg';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
 import { walletRepository } from '@lib/wallet-api-ui';
+import { formatRow } from '../helpers';
+import SharedWalletSendTransactionSummary from '@views/browser/features/send-transaction/components/SharedWalletSendTransactionSummary';
 
 const { Text } = Typography;
 
-type Unpacked<T> = T extends (infer U)[] ? U : T;
-type AssetsListItem = Unpacked<SentAssetsList>;
-
-const formatRow = ({
-  output,
-  assetInfo,
-  cardanoCoin,
-  fiatCurrency,
-  prices
-}: {
-  output: CardanoTxOut;
-  assetInfo: Map<Wallet.Cardano.AssetId, TokensDetails>;
-  cardanoCoin: Wallet.CoinId;
-  fiatCurrency: CurrencyInfo;
-  prices?: PriceResult;
-}): SentAssetsList => {
-  const cardanoAmount = walletBalanceTransformer(output.value.coins.toString(), prices?.cardano?.price);
-
-  const cardano: AssetsListItem = {
-    assetAmount: `${cardanoAmount.coinBalance} ${cardanoCoin.symbol}`,
-    fiatAmount: `${cardanoAmount.fiatBalance} ${fiatCurrency?.code}`
-  };
-
-  if (isUndefined(output.value.assets)) return [cardano];
-
-  const mapEntries = [...output.value.assets.entries()];
-
-  const assetList: SentAssetsList = [];
-  for (const [id, balance] of mapEntries) {
-    const asset = assetInfo?.get(id);
-    if (asset) {
-      const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
-      const amount = Wallet.util.calculateAssetBalance(balance, asset);
-      const tokenPriceInAda = prices?.tokens?.get(id)?.priceInAda;
-      const fiatAmount =
-        asset.tokenMetadata !== undefined && tokenPriceInAda
-          ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${
-              fiatCurrency?.code
-            }`
-          : '-';
-
-      assetList.push({
-        assetAmount: `${amount} ${ticker ?? asset.assetId}`,
-        fiatAmount
-      });
-    }
-  }
-
-  return [cardano, ...assetList];
-};
+interface SendTransactionSummaryProps {
+  isPopupView?: boolean;
+}
 
 export const getFee = (
   fee: string,
@@ -94,10 +47,6 @@ export const getFee = (
   };
 };
 
-interface SendTransactionSummaryProps {
-  isPopupView?: boolean;
-}
-
 export const SendTransactionSummary = withAddressBookContext(
   ({ isPopupView = false }: SendTransactionSummaryProps): React.ReactElement => {
     const { t } = useTranslation();
@@ -108,7 +57,8 @@ export const SendTransactionSummary = withAddressBookContext(
       inMemoryWallet,
       isHardwareWallet,
       walletType,
-      walletUI: { cardanoCoin }
+      walletUI: { cardanoCoin },
+      isSharedWallet
     } = useWalletStore();
     const { priceResult } = useFetchCoinPrice();
     const isTrezor = walletType === WalletType.Trezor;
@@ -118,6 +68,7 @@ export const SendTransactionSummary = withAddressBookContext(
 
     const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
     const eraSummaries = useObservable(inMemoryWallet.eraSummaries$);
+    const feeValue = walletBalanceTransformer(fee.toString(), priceResult.cardano.price);
 
     const outputSummaryListTranslation = {
       recipientAddress: t('core.outputSummaryList.recipientAddress'),
@@ -150,6 +101,10 @@ export const SendTransactionSummary = withAddressBookContext(
 
     const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
     const allWalletsAddresses = getAllWalletsAddresses(useObservable(walletRepository.wallets$));
+
+    if (isSharedWallet) {
+      return <SharedWalletSendTransactionSummary rows={rows} fee={feeValue.coinBalance} />;
+    }
 
     // Where do we get the deposit field? LW-1363
     return (

@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 
 import { TransactionDetails } from './TransactionDetails';
 import { ComponentProps } from 'react';
-import { ActivityStatus } from '../Activity/AssetActivityItem';
+import { ActivityStatus } from '../Transaction';
 import { Wallet } from '@lace/cardano';
 import { mockProposalProcedure } from '@src/ui/utils';
 import { mockVotingProcedures } from '@src/ui/utils/voting-procedures-mock';

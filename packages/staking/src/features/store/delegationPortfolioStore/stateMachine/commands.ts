@@ -87,10 +87,16 @@ export type UnselectPoolFromDetails = {
 
 export type BeginSingleStaking = {
   type: 'BeginSingleStaking';
+  data: {
+    isSharedWallet: boolean;
+  };
 };
 
 export type ConfirmChangingPreferences = {
   type: 'ConfirmChangingPreferences';
+  data: {
+    isSharedWallet: boolean;
+  };
 };
 
 export type DiscardChangingPreferences = {

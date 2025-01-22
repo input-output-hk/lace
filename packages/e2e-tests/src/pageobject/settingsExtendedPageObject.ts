@@ -1,7 +1,6 @@
 import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 import SettingsPage from '../elements/settings/SettingsPage';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
-import menuHeaderPageObject from './menuHeaderPageObject';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
@@ -10,6 +9,7 @@ import { t } from '../utils/translationService';
 import { Logger } from '../support/logger';
 import { expect } from 'chai';
 import MainLoader from '../elements/MainLoader';
+import MenuHeader from '../elements/menuHeader';
 
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
@@ -18,7 +18,15 @@ class SettingsExtendedPageObject {
 
   clickOnCollateral = async () => await SettingsPage.collateralLink.element.click();
 
-  clickOnCustomSubmitAPI = async () => await SettingsPage.customSubmitAPILink.element.click();
+  clickOnCustomSubmitAPI = async () => {
+    await SettingsPage.customSubmitAPILink.element.waitForClickable();
+    await SettingsPage.customSubmitAPILink.element.click();
+  };
+
+  clickOnGeneratePaperWallet = async () => {
+    await SettingsPage.generatePaperWallet.element.waitForClickable();
+    await SettingsPage.generatePaperWallet.element.click();
+  };
 
   clickOnCookiePolicy = async () => await SettingsPage.cookiePolicy.element.click();
 
@@ -115,13 +123,16 @@ class SettingsExtendedPageObject {
       case 'Custom Submit API':
         await this.clickOnCustomSubmitAPI();
         break;
+      case 'Generate paper wallet':
+        await this.clickOnGeneratePaperWallet();
+        break;
       default:
         throw new Error(`Unsupported element: ${elementName}`);
     }
   };
 
   switchNetworkWithoutClosingDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
-    await menuHeaderPageObject.openSettings();
+    await MenuHeader.openSettings();
     await this.clickOnNetwork();
     await this.clickOnNetworkRadioButton(network);
     await browser.waitUntil(
@@ -136,7 +147,7 @@ class SettingsExtendedPageObject {
   };
 
   removeWallet = async () => {
-    await menuHeaderPageObject.openSettings();
+    await MenuHeader.openSettings();
     await this.clickOnRemoveWallet();
     await Modal.confirmButton.click();
   };

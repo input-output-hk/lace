@@ -22,7 +22,7 @@ Feature: Empty states
 
   @LW-4445 @Smoke
   Scenario: Extended View - Transactions empty state
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     Then I see empty state banner for Transactions page in extended mode
     When I click "Copy" button on empty state banner
     Then I see a toast with text: "Copied to clipboard"
@@ -67,4 +67,9 @@ Feature: Empty states
     Given I open and authorize test DApp with "Only once" setting
     When I click "Set Collateral" button in test DApp
     Then I don't see DApp window
+
+  @LW-12031
+  Scenario: Extended View - "Delegate your voting power" banner is not displayed if user has no funds
+    When I navigate to Staking extended page
+    Then "Delegate your voting power" banner is not displayed
 

@@ -1,0 +1,7 @@
+# Do not ignore the following
+!src/ui/typings/*
+!src/typings/*
+storybook-static
+dist
+
+*storybook.log

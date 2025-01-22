@@ -33,4 +33,6 @@
 
 .loadingIcon {
   @include spin-animation();
+  height: 24px;
+  width: 24px;
 }

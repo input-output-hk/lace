@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { TransactionActivityType } from '../Transaction';
 
 // supported certificates actions
 export enum ConwayEraCertificatesTypes {
@@ -35,13 +36,6 @@ export enum DelegationActivityType {
   'delegation' = 'delegation',
   'delegationRegistration' = 'delegationRegistration',
   'delegationDeregistration' = 'delegationDeregistration'
-}
-
-export enum TransactionActivityType {
-  'outgoing' = 'outgoing',
-  'incoming' = 'incoming',
-  'self' = 'self',
-  'rewards' = 'rewards'
 }
 
 export type TxDetailsCertificateTitles =

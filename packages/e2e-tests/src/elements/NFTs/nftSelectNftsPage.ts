@@ -2,6 +2,8 @@
 import CommonDrawerElements from '../CommonDrawerElements';
 import SearchInput from '../searchInput';
 import { browser } from '@wdio/globals';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
+import { ChainablePromiseElement } from 'webdriverio';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -15,11 +17,11 @@ class NftSelectNftsPage extends CommonDrawerElements {
   public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
 
-  get counter() {
+  get counter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COUNTER);
   }
 
-  get clearButton() {
+  get clearButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLEAR_BUTTON);
   }
 
@@ -27,23 +29,23 @@ class NftSelectNftsPage extends CommonDrawerElements {
     return SearchInput;
   }
 
-  get nextButton() {
+  get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
   }
 
-  get assetSelectorContainer() {
+  get assetSelectorContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  get sadFaceIcon() {
+  get sadFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SAD_FACE_ICON);
   }
 
-  get noResultsMessage() {
+  get noResultsMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_STATE_MESSAGE);
   }
 
-  get nfts() {
+  get nfts(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 

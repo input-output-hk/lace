@@ -59,11 +59,11 @@ export interface ILocalStorage {
   isForgotPasswordFlow?: boolean;
   multidelegationFirstVisit?: boolean;
   isMultiDelegationDAppCompatibilityModalVisible?: boolean;
-  multidelegationFirstVisitSincePortfolioPersistence?: boolean;
   unconfirmedTransactions: UnconfirmedTransaction[];
   stakingBrowserPreferences: StakingBrowserPreferences;
   showPinExtension?: boolean;
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
+  isReceiveInAdvancedMode?: boolean;
 }

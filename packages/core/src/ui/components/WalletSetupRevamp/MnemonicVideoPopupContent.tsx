@@ -16,7 +16,7 @@ export const MnemonicVideoPopupContent = ({
   videoSrc
 }: MnemonicVideoPopupContentProps): ReactElement => {
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const videoRef = useRef<HTMLIFrameElement>();
+  const videoRef = useRef<HTMLIFrameElement>(null);
 
   return (
     <div className={styles.container} data-testid="watch-video-container">
@@ -34,7 +34,7 @@ export const MnemonicVideoPopupContent = ({
           className={styles.videoContainer}
           onClick={() => {
             setOverlayVisible(false);
-            videoRef.current.src += '&autoplay=1';
+            if (videoRef.current) videoRef.current.src += '&autoplay=1';
           }}
         >
           {overlayVisible && <div className={styles.overlay} />}

@@ -47,12 +47,12 @@ Feature: Forgot password
     # When I enter password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
-      | password    | password_conf | passw_err                                                                       | complex_bar_lvl | passw_conf_err                               |
-      | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  |               1 | empty                                        |
-      | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback |               2 | empty                                        |
-      | N_8J@bne87  |               | empty                                                                           |               3 | empty                                        |
-      | N_8J@bne87A | N_8J@bne87    | empty                                                                           |               4 | core.walletSetupRegisterStep.noMatchPassword |
+      | password    | password_conf | passw_err                                                               | complex_bar_lvl | passw_conf_err                               |
+      | a           |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | P@ss        |               | core.walletNameAndPasswordSetupStep.firstLevelPasswordStrengthFeedback  | 1               | empty                                        |
+      | N_8J@bne    |               | core.walletNameAndPasswordSetupStep.secondLevelPasswordStrengthFeedback | 2               | empty                                        |
+      | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
+      | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
   @LW-2354
   Scenario: "Forgot password?" - mnemonic verification - wrong mnemonic

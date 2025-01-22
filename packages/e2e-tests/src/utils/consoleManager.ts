@@ -29,9 +29,7 @@ export class ConsoleManager {
         ConsoleManager.cdpSessions.push(client);
         await client.send(this.CONSOLE_ENABLE);
         client.on('Console.messageAdded', async (entry: any) => {
-          if (entry.message.level !== 'debug') {
-            ConsoleManager.capturedLogs.push(entry.message);
-          }
+          ConsoleManager.capturedLogs.push(entry.message);
         });
       });
     });
@@ -42,6 +40,10 @@ export class ConsoleManager {
   };
 
   getLogs = async (): Promise<ConsoleLogEntry[]> => ConsoleManager.capturedLogs;
+
+  getLogsAsString = async (): Promise<string | undefined> =>
+    ConsoleManager.capturedLogs.map(({ text }) => text).join('\n');
+
   closeOpenedCdpSessions = async (): Promise<void> => {
     await this.clearLogs();
     ConsoleManager.cdpSessions.map(async (session) => {

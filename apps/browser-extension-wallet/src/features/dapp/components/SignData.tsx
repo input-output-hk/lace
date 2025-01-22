@@ -1,14 +1,17 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, inputProps, Password } from '@lace/common';
+import { Button } from '@lace/common';
+import { Password, useSecrets } from '@lace/core';
+import type { PasswordObj } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { Layout } from './Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './SignTransaction.module.scss';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { createPassphrase } from '@lib/wallet-api-ui';
 
 export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -16,36 +19,50 @@ export const SignData = (): React.ReactElement => {
     utils: { setPreviousView },
     signDataRequest: { request }
   } = useViewsFlowContext();
-  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
-  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
+  const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
+  const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
   const [isLoading, setIsLoading] = useState(false);
-  const [password, setPassword] = useState<string>();
   const [validPassword, setValidPassword] = useState<boolean>();
+  const { password, setPassword, clearSecrets } = useSecrets();
 
-  const onConfirm = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const passphrase = Buffer.from(password, 'utf8');
-      await request.sign(passphrase, { willRetryOnFailure: true });
-      setValidPassword(true);
-      redirectToSignSuccess();
-    } catch (error) {
-      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
-        setValidPassword(false);
-      } else {
-        redirectToSignFailure();
+  const onConfirm = useCallback(
+    async (spendingPassphrase: Partial<PasswordObj>) => {
+      setIsLoading(true);
+      const passphrase = createPassphrase(spendingPassphrase);
+      try {
+        await request.sign(passphrase, { willRetryOnFailure: true });
+        setValidPassword(true);
+        clearSecrets();
+        passphrase.fill(0);
+        redirectToSignSuccess();
+      } catch (error) {
+        if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+          setValidPassword(false);
+        } else {
+          clearSecrets();
+          passphrase.fill(0);
+          redirectToSignFailure();
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [password, redirectToSignFailure, redirectToSignSuccess, request]);
+    },
+    [redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
+  );
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password.value;
 
-  const confirmIsDisabled = useMemo(() => {
-    if (request.walletType !== WalletType.InMemory) return false;
-    return !password;
-  }, [request, password]);
+  const handleSubmit = useCallback(
+    (event, passphrase) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!confirmIsDisabled) {
+        onConfirm(passphrase);
+      }
+    },
+    [onConfirm, confirmIsDisabled]
+  );
 
   return (
     <Layout title={undefined}>
@@ -55,8 +72,8 @@ export const SignData = (): React.ReactElement => {
             {t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')}
           </h5>
           <Password
-            onChange={handleChange}
-            value={password}
+            onChange={setPassword}
+            onSubmit={(e) => handleSubmit(e, password)}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
           />
@@ -64,8 +81,8 @@ export const SignData = (): React.ReactElement => {
       </div>
       <div className={styles.actions}>
         <Button
-          onClick={onConfirm}
-          disabled={confirmIsDisabled || isLoading}
+          onClick={() => onConfirm(password)}
+          disabled={confirmIsDisabled || !password.value || isLoading}
           className={styles.actionBtn}
           data-testid="sign-transaction-confirm"
         >

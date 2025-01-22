@@ -15,8 +15,7 @@ export const DrawerNavigation = ({
   onCloseIconClick,
   leftActions,
   rightActions,
-  // eslint-disable-next-line unicorn/no-null
-  title = null
+  title
 }: DrawerNavigationProps): React.ReactElement => (
   <div data-testid="drawer-navigation" className={styles.navigation}>
     {leftActions || <div>{onArrowIconClick && <NavigationButton icon="arrow" onClick={onArrowIconClick} />}</div>}

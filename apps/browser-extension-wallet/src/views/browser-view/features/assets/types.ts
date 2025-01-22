@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import { AssetTableProps } from '@lace/core';
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
-interface TokenInformation {
+export interface TokenInformation {
   policyId: string;
   fingerprint: string;
 }

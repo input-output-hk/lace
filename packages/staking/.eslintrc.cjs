@@ -44,7 +44,7 @@ module.exports = {
           {
             importNames: ['sx', 'style', 'recipe', 'vars', 'LocalThemeProvider'],
             message: "Please import from 'features/theme' or directly e.g. '@vanilla-extract/css'.",
-            name: '@lace/ui',
+            name: '@input-output-hk/lace-ui-toolkit',
           },
         ],
       },

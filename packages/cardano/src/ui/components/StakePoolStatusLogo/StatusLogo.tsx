@@ -44,8 +44,8 @@ export const StatusLogo = ({
   if (status === 'retired' || status === 'retiring') {
     currentStatus = status;
   }
-  const icon = statusIcons[currentStatus];
-  const description = statusInfo[currentStatus];
+  const icon = currentStatus ? statusIcons[currentStatus] : undefined;
+  const description = currentStatus ? statusInfo[currentStatus] : undefined;
 
   return (
     <>

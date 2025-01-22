@@ -16,14 +16,14 @@ import { ReactComponent as CopyIcon } from '../../../assets/icons/purple-copy.co
 import { ReactComponent as PasteIcon } from '../../../assets/icons/purple-paste.component.svg';
 import { useKeyboardShortcut } from '@lace/common';
 
-export type WalletSetupMnemonicStage = 'writedown' | 'input';
+export type WalletSetupMnemonicStage = 'recoverymethod' | 'writedown' | 'input';
 
 export interface WalletSetupMnemonicStepProps {
   mnemonic: string[];
   mnemonicStage: WalletSetupMnemonicStage;
   onBack: () => void;
   onNext: () => void;
-  onStageChange?: (currentStage: WalletSetupMnemonicStage) => void;
+  onStageChange: (currentStage: WalletSetupMnemonicStage) => void;
   translations: TranslationsFor<{
     jsxElementKey: 'copyPasteTooltipText';
     stringKey:
@@ -68,7 +68,7 @@ export const WalletSetupMnemonicStepRevamp = ({
 
   const copyRecoveryPhrase = useCallback(async () => {
     await writeMnemonicToClipboard(mnemonic);
-    onCopyToClipboard();
+    onCopyToClipboard?.();
   }, [mnemonic, onCopyToClipboard]);
 
   const pasteRecoveryPhrase = useCallback(
@@ -87,7 +87,7 @@ export const WalletSetupMnemonicStepRevamp = ({
       });
 
       setMnemonicConfirm(newMnemonic);
-      onPasteFromClipboard();
+      onPasteFromClipboard?.();
     },
     [mnemonic.length, mnemonicConfirm, onPasteFromClipboard]
   );
@@ -155,7 +155,7 @@ export const WalletSetupMnemonicStepRevamp = ({
         description={subtitle}
         onBack={handleBack}
         onNext={handleNext}
-        currentTimelineStep={WalletTimelineSteps.RECOVERY_PHRASE}
+        currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
         customAction={
           <Tooltip
             placement="top"

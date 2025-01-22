@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ExtensionRoutes } from './ExtensionRoutes';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useWalletStore } from '@stores';
@@ -12,6 +12,8 @@ import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { ILocalStorage } from '@src/types';
+import { useFatalError } from '@hooks/useFatalError';
+import { Crash } from '@components/Crash';
 
 dayjs.extend(duration);
 
@@ -55,8 +57,23 @@ export const PopupView = (): React.ReactElement => {
     // (see useEffect in browser-view routes index)
   }, [isWalletLocked, backgroundServices, currentChain, chainName, cardanoWallet]);
 
+  const fatalError = useFatalError();
+  const isLoaded = useMemo(
+    () => !!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted,
+    [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted]
+  );
+  useEffect(() => {
+    if (isLoaded || fatalError) {
+      document.querySelector('#preloader')?.remove();
+    }
+  }, [isLoaded, fatalError]);
+
   const checkMnemonicVerificationFrequency = () =>
     mnemonicVerificationFrequency && isLastValidationExpired(lastMnemonicVerification, mnemonicVerificationFrequency);
+
+  if (fatalError) {
+    return <Crash />;
+  }
 
   if (checkMnemonicVerificationFrequency() && walletLock) {
     return <UnlockWalletContainer validateMnemonic />;
@@ -67,7 +84,7 @@ export const PopupView = (): React.ReactElement => {
     return <UnlockWalletContainer />;
   }
 
-  if (!!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted) {
+  if (isLoaded) {
     return <ExtensionRoutes />;
   }
 

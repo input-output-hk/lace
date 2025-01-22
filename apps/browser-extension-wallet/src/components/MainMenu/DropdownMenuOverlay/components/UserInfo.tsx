@@ -5,7 +5,7 @@ import { Menu, Tooltip as AntdTooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toast, addEllipsis, useObservable } from '@lace/common';
+import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
@@ -20,6 +20,7 @@ import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
 const WALLET_NAME_MAX_LENGTH = 16;
+const WALLET_OPTION_NAME_MAX_LENGTH = 12;
 const TOAST_DEFAULT_DURATION = 3;
 
 const overlayInnerStyle = {
@@ -33,7 +34,15 @@ interface UserInfoProps {
   onOpenWalletAccounts?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
 }
 
+interface RenderWalletOptionsParams {
+  wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  lastActiveAccount?: Bip32WalletAccount<Wallet.AccountMetadata>;
+}
+
 const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [];
+
+const shortenWalletName = (text: string, length: number) =>
+  text.length > length ? `${text.slice(0, length)}...` : text;
 
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -79,59 +88,19 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
     [cardanoWallet]
   );
 
-  // TODO: merge with renderBip32Wallet in case wallet option is not different
-  const renderScriptWallet = useCallback(
-    (wallet: ScriptWallet<Wallet.WalletMetadata>) => {
+  const renderWalletOption = useCallback(
+    ({ wallet, lastActiveAccount }: RenderWalletOptionsParams) => {
       const walletAvatar = getAvatar(wallet.walletId);
 
       return (
         <ProfileDropdown.WalletOption
           key={wallet.walletId}
-          title={wallet.metadata.name}
-          subtitle={t('sharedWallets.userInfo.label')}
+          title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
+          subtitle={shortenWalletName(
+            lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
+            WALLET_OPTION_NAME_MAX_LENGTH
+          )}
           id={`wallet-option-${wallet.walletId}`}
-          onClick={async () => {
-            if (activeWalletId === wallet.walletId) {
-              return;
-            }
-            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
-
-            await activateWallet({
-              walletId: wallet.walletId
-            });
-            setIsDropdownMenuOpen(false);
-            toast.notify({
-              duration: TOAST_DEFAULT_DURATION,
-              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
-            });
-          }}
-          type={getUiWalletType(wallet.type)}
-          profile={
-            walletAvatar
-              ? {
-                  fallbackText: fullWalletName,
-                  imageSrc: walletAvatar
-                }
-              : undefined
-          }
-        />
-      );
-    },
-    [activateWallet, activeWalletId, analytics, fullWalletName, getAvatar, setIsDropdownMenuOpen, t]
-  );
-
-  const renderBip32Wallet = useCallback(
-    (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
-      const lastActiveAccount = getLastActiveAccount(wallet);
-      const walletAvatar = getAvatar(wallet.walletId);
-
-      return (
-        <ProfileDropdown.WalletOption
-          key={wallet.walletId}
-          title={wallet.metadata.name}
-          subtitle={lastActiveAccount.metadata.name}
-          id={`wallet-option-${wallet.walletId}`}
-          onOpenAccountsMenu={() => onOpenWalletAccounts(wallet)}
           onClick={async () => {
             if (activeWalletId === wallet.walletId) {
               return;
@@ -140,7 +109,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
 
             await activateWallet({
               walletId: wallet.walletId,
-              accountIndex: lastActiveAccount.accountIndex
+              ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
             });
             setIsDropdownMenuOpen(false);
             toast.notify({
@@ -157,20 +126,33 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 }
               : undefined
           }
+          {...(wallet.type !== WalletType.Script && {
+            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
+          })}
         />
       );
     },
     [
-      getLastActiveAccount,
-      getAvatar,
-      fullWalletName,
-      onOpenWalletAccounts,
+      activateWallet,
       activeWalletId,
       analytics,
-      activateWallet,
+      fullWalletName,
+      getAvatar,
+      onOpenWalletAccounts,
       setIsDropdownMenuOpen,
       t
     ]
+  );
+
+  const renderScriptWallet = useCallback(
+    (wallet: ScriptWallet<Wallet.WalletMetadata>) => renderWalletOption({ wallet }),
+    [renderWalletOption]
+  );
+
+  const renderBip32Wallet = useCallback(
+    (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) =>
+      renderWalletOption({ wallet, lastActiveAccount: getLastActiveAccount(wallet) }),
+    [getLastActiveAccount, renderWalletOption]
   );
 
   const renderWallet = useCallback(

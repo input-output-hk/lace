@@ -15,7 +15,6 @@ import { calculateSpentBalance, getOutputValues } from '../helpers';
 import { useCallback, useMemo } from 'react';
 import { IAssetInfo } from '@src/features/send/types';
 import { v4 as uuid } from 'uuid';
-import omit from 'lodash/omit';
 import { useWalletStore } from '@src/stores';
 import { isValidAddress, isValidAddressPerNetwork } from '@src/utils/validators';
 import { compactNumberWithUnit, formatNumberForDisplay } from '@src/utils/format-number';
@@ -86,9 +85,6 @@ export interface Store {
   resetStates: () => void;
   setOutputDefaultStateOnFormSwitch: (form: FormOptions) => void;
 
-  password?: string;
-  setPassword: (pass: string) => void;
-  removePassword: () => void;
   isSubmitingTx?: boolean;
   isPasswordValid?: boolean;
   setSubmitingTxState: (args: { isSubmitingTx?: boolean; isPasswordValid?: boolean }) => void;
@@ -338,8 +334,6 @@ const useStore = create<Store>((set, get) => ({
       isPasswordValid: params?.isPasswordValid,
       isSubmitingTx: params?.isSubmitingTx
     }),
-  setPassword: (pass) => set({ password: pass }),
-  removePassword: () => set((state) => omit(state, ['password']), true),
   setIsMultipleSelectionAvailable: (param) =>
     set(
       param === false
@@ -417,7 +411,7 @@ const isValidDestination = (address: string) =>
   isHandle(address) ? isHandle(address) : isValidAddress(address.trim());
 
 export const useTransactionProps = (): {
-  outputMap: OutputsMap;
+  outputsMap: OutputsMap;
   hasInvalidOutputs: boolean;
   hasOutput: boolean;
 } => {
@@ -471,7 +465,7 @@ export const useTransactionProps = (): {
     [addressValueObj]
   );
 
-  const outputMap = useMemo(
+  const outputsMap = useMemo(
     () =>
       new Map(
         addressValueObj.filter(([, { value }]) => (value.coins && Number(value.coins)) || value.assets?.size > 0)
@@ -479,7 +473,7 @@ export const useTransactionProps = (): {
     [addressValueObj]
   );
 
-  return { hasInvalidOutputs: hasInvalidOutputs || outputMap.size === 0, outputMap, hasOutput };
+  return { hasInvalidOutputs: hasInvalidOutputs || outputsMap.size === 0, outputsMap, hasOutput };
 };
 
 export const useOutputInitialState = (): Store['setInitialOutputState'] =>
@@ -512,17 +506,6 @@ export const useSubmitingState = (): {
     setSubmitingTxState,
     isSubmitingTx,
     isPasswordValid
-  }));
-
-export const usePassword = (): {
-  password: Store['password'];
-  setPassword: Store['setPassword'];
-  removePassword: Store['removePassword'];
-} =>
-  useStore((state) => ({
-    password: state.password,
-    setPassword: state.setPassword,
-    removePassword: state.removePassword
   }));
 
 export const useCurrentCoinIdToChange = (): Store['currentCoinToChange'] =>

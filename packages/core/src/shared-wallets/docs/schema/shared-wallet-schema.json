@@ -11,7 +11,7 @@
           "description": "The name of the shared wallet",
           "maxLength": 20
         },
-        "participants": {
+        "coSigners": {
           "type": "array",
           "description": "The list of participants in the shared wallet",
           "items": {
@@ -32,7 +32,7 @@
           }
         }
       },
-      "required": ["participants"],
+      "required": ["coSigners"],
       "additionalProperties": true
     },
     "nativeScript": {

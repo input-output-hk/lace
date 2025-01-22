@@ -45,6 +45,7 @@ import { Key } from 'webdriverio';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
 import { AddressType } from '../enums/AddressTypeEnum';
 import clipboard from 'clipboardy';
+import walletAddressPage from '../elements/walletAddressPage';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -255,6 +256,12 @@ When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: str
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
 });
 
+When(/^I fill bundle with saved unused address and ([^"]*) ADA$/, async (adaValue: string) => {
+  const addressInput = new AddressInput(1);
+  await addressInput.fillAddress(await walletAddressPage.getSavedLastAddress());
+  await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
+});
+
 When(
   /^I save ticker for the (Token|NFT) with name: ([^"]*)$/,
   async (assetType: 'Token' | 'NFT', assetName: string) => {
@@ -299,9 +306,18 @@ Then(/^I enter a value of: ([^"]*) to the "([^"]*)" asset$/, async (valueToEnter
 Then(
   /^I enter a value of: ([^"]*) to the "([^"]*)" asset in bundle (\d) without clearing input$/,
   async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueWithoutClearingField(
       Number.parseFloat(valueToEnter)
     );
+  }
+);
+
+Then(
+  /^I enter an exact value of: ([^"]*) to the "([^"]*)" asset in bundle (\d)$/,
+  async (valueToEnter: string, assetName: string, bundleIndex: number) => {
+    assetName = assetName === 'tADA' && extensionUtils.isMainnet() ? 'ADA' : assetName;
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(valueToEnter, false);
   }
 );
 
@@ -409,13 +425,16 @@ When(/^I save fee value$/, async () => {
 Then(
   /^The Tx details are displayed as "([^"]*)" for ADA with value: ([^"]*) and wallet: "([^"]*)" address$/,
   async (type: string, adaValue: string, walletName: string) => {
+    const expectedAddress = walletName.startsWith('addr')
+      ? walletName
+      : String(getTestWallet(walletName).accounts[0].address);
     const expectedActivityDetails: ExpectedActivityDetails = {
       transactionDescription: `${await t(type)}\n(1)`,
       hash: testContext.load('txHashValue'),
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: String(getTestWallet(walletName).address),
+          address: expectedAddress,
           addressTag: 'foreign'
         }
       ],
@@ -434,7 +453,7 @@ Then(
       transactionData: [
         {
           ada: `${adaValue} ${Asset.CARDANO.ticker}`,
-          address: String(getTestWallet(walletName).address),
+          address: String(getTestWallet(walletName).accounts[0].address),
           assets: [`${laceCoin2Value} LaceCoin2`]
         }
       ],
@@ -485,10 +504,6 @@ Then(/^I click "(Agree|Cancel)" button on "You'll have to start again" modal$/, 
   }
 });
 
-Then(/^the NFT displays ([^"]*) in the value field$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
-});
-
 Then(
   /^send drawer is displayed with all its components in (extended|popup) mode$/,
   async (mode: 'extended' | 'popup') => {
@@ -531,10 +546,6 @@ Then(
 
 Then(/^I see ([^"]*) as displayed value$/, async (expectedValue: string) => {
   await drawerSendExtendedAssert.assertEnteredValue(expectedValue);
-});
-
-Then(/^the displayed value switches to: ([^"]*)$/, async (expectedValue: string) => {
-  await drawerSendExtendedAssert.assertTokensValueAmount(expectedValue);
 });
 
 Then(

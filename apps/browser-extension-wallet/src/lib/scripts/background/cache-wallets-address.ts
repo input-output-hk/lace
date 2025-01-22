@@ -1,31 +1,42 @@
-import { WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
+import { UpdateWalletMetadataProps, WalletManager, WalletRepository } from '@cardano-sdk/web-extension';
+import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { Wallet } from '@lace/cardano';
-import { filter, switchMap, withLatestFrom, zip } from 'rxjs';
+import { EMPTY, filter, map, Observable, switchMap } from 'rxjs';
+import { isNotNil } from '@cardano-sdk/util';
+import uniq from 'lodash/uniq';
+
+export const walletMetadataWithAddresses = (
+  walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+  walletRepository: WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>
+): Observable<UpdateWalletMetadataProps<Wallet.WalletMetadata>> =>
+  walletManager.activeWallet$.pipe(
+    switchMap((activeWallet) =>
+      activeWallet
+        ? activeWallet.observableWallet.addresses$.pipe(
+            map((addresses) => addresses.map(({ address }) => address)),
+            blockingWithLatestFrom(
+              walletRepository.wallets$.pipe(
+                map((wallets) => wallets.find(({ walletId }) => walletId === activeWallet.props.walletId)),
+                filter(isNotNil)
+              )
+            ),
+            map(([walletAddresses, walletEntity]) => ({
+              walletId: activeWallet.props.walletId,
+              metadata: {
+                ...walletEntity.metadata,
+                walletAddresses: uniq([...(walletEntity?.metadata?.walletAddresses || []), ...walletAddresses])
+              }
+            }))
+          )
+        : EMPTY
+    )
+  );
 
 export const cacheActivatedWalletAddressSubscription = (
   walletManager: WalletManager<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   walletRepository: WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>
 ): void => {
-  zip([
-    walletManager.activeWalletId$.pipe(filter((activeWalletId) => Boolean(activeWalletId))),
-    walletManager.activeWallet$.pipe(
-      filter((wallet) => Boolean(wallet)),
-      switchMap((wallet) => wallet.addresses$)
-    )
-  ])
-    .pipe(withLatestFrom(walletRepository.wallets$))
-    .subscribe(([[activeWallet, walletAddresses], wallets]) => {
-      const wallet = wallets.find(({ walletId }) => walletId === activeWallet.walletId);
-      const uniqueAddresses = [
-        ...new Set([...(wallet.metadata.walletAddresses || []), ...walletAddresses.map(({ address }) => address)])
-      ];
-
-      walletRepository.updateWalletMetadata({
-        walletId: activeWallet.walletId,
-        metadata: {
-          ...wallet.metadata,
-          walletAddresses: uniqueAddresses
-        }
-      });
-    });
+  walletMetadataWithAddresses(walletManager, walletRepository).subscribe((updateProps) =>
+    walletRepository.updateWalletMetadata(updateProps)
+  );
 };

@@ -9,12 +9,18 @@ import { WalletSetupFlow, useWalletSetupFlow } from './WalletSetupFlowProvider';
 import { useTranslation } from 'react-i18next';
 
 export enum WalletTimelineSteps {
+  // Legacy
   LEGAL_AND_ANALYTICS,
-  WALLET_SETUP,
   RECOVERY_PHRASE,
-  ALL_DONE,
+  // Paper Wallet
+  CHOOSE_RECOVERY_METHOD,
+  RECOVERY_DETAILS,
+  // hardware wallet
   CONNECT_WALLET,
-  NAME_WALLET
+  // Common
+  NAME_WALLET,
+  WALLET_SETUP,
+  ALL_DONE
 }
 
 export interface WalletSetupStepLayoutProps {
@@ -33,7 +39,7 @@ export interface WalletSetupStepLayoutProps {
   isNextEnabled?: boolean;
   isNextLoading?: boolean;
   toolTipText?: string;
-  currentTimelineStep?: WalletTimelineSteps;
+  currentTimelineStep: WalletTimelineSteps;
   isHardwareWallet?: boolean;
 }
 
@@ -96,7 +102,7 @@ export const WalletSetupStepLayout = ({
   isHardwareWallet = false
 }: WalletSetupStepLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
-  const nextButtonContainerRef = useRef(null);
+  const nextButtonContainerRef = useRef<HTMLDivElement | null>(null);
   const flow = useWalletSetupFlow();
 
   const defaultLabel = {
@@ -137,7 +143,7 @@ export const WalletSetupStepLayout = ({
         <div className={styles.footer} data-testid="wallet-setup-step-footer">
           {onBack ? (
             <Button color="secondary" onClick={onBack} data-testid="wallet-setup-step-btn-back">
-              {backLabel || defaultLabel.back}
+              {backLabel ?? defaultLabel.back}
             </Button>
           ) : (
             <div />
@@ -145,7 +151,7 @@ export const WalletSetupStepLayout = ({
           {stepInfoText && <p data-testid="step-info-text">{stepInfoText}</p>}
           {onSkip && (
             <Button variant="text" onClick={onSkip} data-testid="wallet-setup-step-btn-skip">
-              {skipLabel || defaultLabel.skip}
+              {skipLabel ?? defaultLabel.skip}
             </Button>
           )}
           {onNext && (
@@ -153,7 +159,7 @@ export const WalletSetupStepLayout = ({
               <Tooltip
                 visible={!isNextEnabled && !!toolTipText}
                 title={!isNextEnabled && toolTipText}
-                getPopupContainer={() => nextButtonContainerRef.current}
+                getPopupContainer={() => nextButtonContainerRef.current as HTMLElement}
                 autoAdjustOverflow={false}
               >
                 <Button
@@ -162,7 +168,7 @@ export const WalletSetupStepLayout = ({
                   loading={isNextLoading}
                   data-testid="wallet-setup-step-btn-next"
                 >
-                  {nextLabel || defaultLabel.next}
+                  {nextLabel ?? defaultLabel.next}
                 </Button>
               </Tooltip>
             </div>

@@ -1,9 +1,12 @@
-/* eslint-disable no-new */
-import { WalletProvidersDependencies } from '@src/wallet';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
 import { AxiosAdapter } from 'axios';
+import { Logger } from 'ts-log';
 import {
   AssetProvider,
   ChainHistoryProvider,
+  DRepProvider,
+  Milliseconds,
   NetworkInfoProvider,
   Provider,
   RewardsProvider,
@@ -11,8 +14,10 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
+import type { DRepInfo } from '@cardano-sdk/core';
 
 import {
+  CardanoWsClient,
   CreateHttpProviderConfig,
   assetInfoHttpProvider,
   chainHistoryHttpProvider,
@@ -21,8 +26,23 @@ import {
   stakePoolHttpProvider,
   utxoHttpProvider,
   TxSubmitApiProvider,
-  txSubmitHttpProvider
+  txSubmitHttpProvider,
+  BlockfrostClientConfig,
+  RateLimiter,
+  BlockfrostClient,
+  BlockfrostAssetProvider,
+  BlockfrostChainHistoryProvider,
+  BlockfrostDRepProvider,
+  BlockfrostUtxoProvider,
+  BlockfrostRewardsProvider,
+  BlockfrostTxSubmitProvider,
+  BlockfrostNetworkInfoProvider
 } from '@cardano-sdk/cardano-services-client';
+import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
+import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } from '@cardano-sdk/wallet';
+import { WalletProvidersDependencies } from './cardano-wallet';
+import { BlockfrostInputResolver } from './blockfrost-input-resolver';
 
 const createTxSubmitProvider = (
   httpProviderConfig: CreateHttpProviderConfig<Provider>,
@@ -50,33 +70,210 @@ export type AllProviders = {
   utxoProvider: UtxoProvider;
   chainHistoryProvider: ChainHistoryProvider;
   rewardsProvider: RewardsProvider;
+  drepProvider: DRepProvider;
 };
 
-export interface ProvidersConfig {
+export type RateLimiterConfig = {
+  size: number;
+  increaseInterval: Milliseconds;
+  increaseAmount: number;
+};
+
+interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
-  baseUrl: string;
-  customSubmitTxUrl?: string;
+  env: {
+    baseCardanoServicesUrl: string;
+    customSubmitTxUrl?: string;
+    blockfrostConfig: BlockfrostClientConfig & { rateLimiter: RateLimiter };
+  };
+  logger?: Logger;
+  experiments: {
+    useWebSocket?: boolean;
+    useBlockfrostAssetProvider?: boolean;
+    useDrepProviderOverrideActiveStatus?: boolean;
+    useBlockfrostChainHistoryProvider?: boolean;
+    useBlockfrostNetworkInfoProvider?: boolean;
+    useBlockfrostRewardsProvider?: boolean;
+    useBlockfrostTxSubmitProvider?: boolean;
+    useBlockfrostUtxoProvider?: boolean;
+    useBlockfrostAddressDiscovery?: boolean;
+    useBlockfrostInputResolver?: boolean;
+  };
 }
+
+/**
+ * Only one instance must be alive.
+ *
+ * If a new one needs to be created (ex. on network change) the previous instance needs to be closed. */
+let wsProvider: CardanoWsClient;
 
 export const createProviders = ({
   axiosAdapter,
-  baseUrl,
-  customSubmitTxUrl
+  env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
+  logger,
+  experiments: {
+    useBlockfrostAssetProvider,
+    useBlockfrostChainHistoryProvider,
+    useBlockfrostNetworkInfoProvider,
+    useBlockfrostRewardsProvider,
+    useBlockfrostTxSubmitProvider,
+    useBlockfrostUtxoProvider,
+    useDrepProviderOverrideActiveStatus,
+    useBlockfrostAddressDiscovery,
+    useBlockfrostInputResolver,
+    useWebSocket
+  }
 }: ProvidersConfig): WalletProvidersDependencies => {
-  const httpProviderConfig: CreateHttpProviderConfig<Provider> = {
-    baseUrl,
-    logger: console,
-    adapter: axiosAdapter
-  };
+  if (!logger) logger = console;
+
+  const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
+
+  const blockfrostClient = new BlockfrostClient(blockfrostConfig, {
+    rateLimiter: blockfrostConfig.rateLimiter
+  });
+  const assetProvider = useBlockfrostAssetProvider
+    ? new BlockfrostAssetProvider(blockfrostClient, logger)
+    : assetInfoHttpProvider(httpProviderConfig);
+  const networkInfoProvider = useBlockfrostNetworkInfoProvider
+    ? new BlockfrostNetworkInfoProvider(blockfrostClient, logger)
+    : networkInfoHttpProvider(httpProviderConfig);
+  const chainHistoryProvider = useBlockfrostChainHistoryProvider
+    ? new BlockfrostChainHistoryProvider(blockfrostClient, networkInfoProvider, logger)
+    : chainHistoryHttpProvider(httpProviderConfig);
+  const rewardsProvider = useBlockfrostRewardsProvider
+    ? new BlockfrostRewardsProvider(blockfrostClient, logger)
+    : rewardsHttpProvider(httpProviderConfig);
+  const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
+  const txSubmitProvider = useBlockfrostTxSubmitProvider
+    ? new BlockfrostTxSubmitProvider(blockfrostClient, logger)
+    : createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl);
+  const drepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
+
+  const addressDiscovery = useBlockfrostAddressDiscovery
+    ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
+    : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
+
+  const inputResolver = useBlockfrostInputResolver ? new BlockfrostInputResolver(blockfrostClient, logger) : undefined;
+
+  // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
+  const drepProviderOverrideActiveStatus = new Proxy(drepProvider, {
+    get(target, property, receiver) {
+      const original = Reflect.get(target, property, receiver);
+      if (property === 'getDRepInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo = await original.apply(target, args);
+          return {
+            ...response,
+            active: true
+          };
+        };
+      }
+
+      if (property === 'getDRepsInfo') {
+        return async function (...args: any[]) {
+          const response: DRepInfo[] = await original.apply(target, args);
+          return response.map((drepInfo) => ({
+            ...drepInfo,
+            active: true
+          }));
+        };
+      }
+
+      return original;
+    }
+  });
+
+  if (useWebSocket) {
+    const url = new URL(baseUrl);
+
+    url.pathname = '/ws';
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    // On network change this logs an error line as follows but it is expected as long as this function is called twice
+    // 'Async error from WebSocket client' 'not-connected'
+    if (wsProvider) wsProvider.close().catch((error) => console.error(error, 'While closing wsProvider'));
+
+    wsProvider = new CardanoWsClient({ chainHistoryProvider, logger }, { url });
+
+    return {
+      assetProvider,
+      networkInfoProvider: wsProvider.networkInfoProvider,
+      txSubmitProvider,
+      stakePoolProvider,
+      utxoProvider: wsProvider.utxoProvider,
+      chainHistoryProvider: wsProvider.chainHistoryProvider,
+      rewardsProvider,
+      wsProvider,
+      addressDiscovery,
+      inputResolver,
+      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
+    };
+  }
+
+  const utxoProvider = useBlockfrostUtxoProvider
+    ? new BlockfrostUtxoProvider(blockfrostClient, logger)
+    : utxoHttpProvider(httpProviderConfig);
 
   return {
-    assetProvider: assetInfoHttpProvider(httpProviderConfig),
-    networkInfoProvider: networkInfoHttpProvider(httpProviderConfig),
-    txSubmitProvider: createTxSubmitProvider(httpProviderConfig, customSubmitTxUrl),
-    stakePoolProvider: stakePoolHttpProvider(httpProviderConfig),
-    utxoProvider: utxoHttpProvider(httpProviderConfig),
-    // TODO: remove apiVersion override once the back-ends are all updated to P2P (Node 8.9.2)
-    chainHistoryProvider: chainHistoryHttpProvider({ ...httpProviderConfig, apiVersion: '3.0.1' }),
-    rewardsProvider: rewardsHttpProvider(httpProviderConfig)
+    assetProvider,
+    networkInfoProvider,
+    txSubmitProvider,
+    stakePoolProvider,
+    utxoProvider,
+    chainHistoryProvider,
+    rewardsProvider,
+    addressDiscovery,
+    inputResolver,
+    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : drepProvider
   };
+};
+
+export const walletProvidersChannel = (walletName: string): string => `${walletName}-providers`;
+export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDependencies> = {
+  stakePoolProvider: {
+    queryStakePools: RemoteApiPropertyType.MethodReturningPromise,
+    stakePoolStats: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  assetProvider: {
+    getAsset: RemoteApiPropertyType.MethodReturningPromise,
+    getAssets: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  txSubmitProvider: {
+    submitTx: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  networkInfoProvider: {
+    ledgerTip: RemoteApiPropertyType.MethodReturningPromise,
+    protocolParameters: RemoteApiPropertyType.MethodReturningPromise,
+    genesisParameters: RemoteApiPropertyType.MethodReturningPromise,
+    lovelaceSupply: RemoteApiPropertyType.MethodReturningPromise,
+    stake: RemoteApiPropertyType.MethodReturningPromise,
+    eraSummaries: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  utxoProvider: {
+    utxoByAddresses: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  rewardsProvider: {
+    rewardsHistory: RemoteApiPropertyType.MethodReturningPromise,
+    rewardAccountBalance: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  chainHistoryProvider: {
+    transactionsByAddresses: RemoteApiPropertyType.MethodReturningPromise,
+    transactionsByHashes: RemoteApiPropertyType.MethodReturningPromise,
+    blocksByHashes: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  drepProvider: {
+    getDRepInfo: RemoteApiPropertyType.MethodReturningPromise,
+    getDRepsInfo: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
+  },
+  inputResolver: {
+    resolveInput: RemoteApiPropertyType.MethodReturningPromise
+  }
 };

@@ -25,8 +25,10 @@ jest.mock('../../../store', () => ({
 const handles$ = new BehaviorSubject([]);
 
 const inMemoryWallet = {
-  handles$
+  handles$,
+  getNextUnusedAddress: jest.fn()
 };
+
 jest.mock('@src/stores', () => ({
   ...jest.requireActual<any>('@src/stores'),
   useWalletStore: mockUseWalletStore
@@ -36,6 +38,12 @@ jest.mock('@providers/PostHogClientProvider', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ...jest.requireActual<any>('@providers/PostHogClientProvider'),
   usePostHogClientContext: () => postHogClientMocks
+}));
+
+jest.mock('@providers/ExternalLinkOpenerProvider', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('@providers/ExternalLinkOpenerProvider'),
+  useExternalLinkOpener: () => jest.fn()
 }));
 
 describe('Testing StakingModal component', () => {

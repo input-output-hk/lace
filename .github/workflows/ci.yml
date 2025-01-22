@@ -16,6 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  BUILD_ARTIFACT_NAME: 'lace-dev-${{ github.sha }}'
+
 jobs:
   prepare:
     name: Prepare
@@ -68,6 +71,12 @@ jobs:
           DIR: packages/staking
           NAME: packages-staking
 
+      - name: Build nami
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
+
   unitTests:
     name: Unit tests
     runs-on: ubuntu-20.04
@@ -113,6 +122,12 @@ jobs:
           name: packages-staking
           path: packages/staking/dist
 
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:
@@ -121,24 +136,114 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
-  build_extension:
-    name: Build Lace browser extension
+  release-pkg:
+    name: Release package
+    runs-on: ubuntu-20.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
+      - name: Collect Workflow Telemetry Smoke Tests
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Build Lace browser extension
+        uses: ./.github/actions/build/app
+        with:
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          DIR: apps/browser-extension-wallet
+          NAME: lace-browser-extension
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
+          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
+  build:
+    name: Build Lace
     runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Lace browser extension
+      - name: Build Lace artifact
         uses: ./.github/shared/build
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'smoke-tests'
+          WALLET_POLLING_INTERVAL_IN_SEC: 5
 
-  smokeTestsRun:
-    name: Smoke tests run
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+  smokeTests:
+    name: Smoke e2e tests
     runs-on: ubuntu-22.04
-    needs: build_extension
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -147,25 +252,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Collect Workflow Telemetry Smoke Tests
-        uses: catchpoint/workflow-telemetry-action@v2
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
         with:
-          comment_on_pr: false
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Execute smoke tests
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
-          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
 
-  smokeTests:
-    name: Smoke tests
+  processReports:
+    name: Process smoke e2e test reports
     runs-on: ubuntu-22.04
-    needs: smokeTestsRun
+    needs: smokeTests
     if: always()
     steps:
       - name: Download all smoke tests artifacts
@@ -188,7 +299,7 @@ jobs:
           " > environment.properties
 
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.6.0
+        uses: andrcuns/allure-publish-action@v2.9.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -216,7 +327,7 @@ jobs:
           retention-days: 5
 
       - run: |
-          if [[ ${{ needs.smokeTestsRun.result }} == "success" ]]; then
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
             exit 0
           else
             exit 1

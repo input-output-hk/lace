@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
 import { useObservable } from '@lace/common';
@@ -9,6 +10,7 @@ import { useDelegationPortfolioStore } from '../store';
 import { ExpandViewBanner } from './ExpandViewBanner';
 import { FundWalletBanner } from './FundWalletBanner';
 import { hasMinimumFundsToDelegate, mapPortfolioToDisplayData } from './helpers';
+import { RegisterAsDRepBanner } from './RegisterAsDRepBanner';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -23,6 +25,10 @@ export const OverviewPopup = () => {
     walletAddress,
     walletStoreInMemoryWallet: inMemoryWallet,
     walletStoreWalletActivities: walletActivities,
+    isSharedWallet,
+    openExternalLink,
+    govToolUrl,
+    useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -33,6 +39,9 @@ export const OverviewPopup = () => {
   const stakingNotifications = getCurrentStakingNotifications({ currentPortfolio, walletActivities });
 
   const totalCoinBalance = balancesBalance?.total?.coinBalance || '0';
+
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
+    useRewardAccountsData();
 
   if (
     !totalCoinBalance ||
@@ -80,37 +89,45 @@ export const OverviewPopup = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
   return (
     <>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$28" mt="$32">
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} popupView />
+        </Box>
+      )}
       {stakingNotifications.length > 0 && (
         <Flex mb="$32" flexDirection="column">
           <StakingNotificationBanners notifications={stakingNotifications} popupView />
         </Flex>
       )}
-      <Box mb="$32">
-        <DelegationCard
-          balance={compactNumber(balancesBalance.available.coinBalance)}
-          cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          arrangement="vertical"
-          distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
-            color,
-            name: name || '-',
-            percentage: onChainPercentage,
-            ros: ros ? String(ros) : undefined,
-            saturation: saturation ? String(saturation) : undefined,
-          }))}
-          status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
-        />
-      </Box>
+      {!isSharedWallet && (
+        <Box mb="$32">
+          <DelegationCard
+            balance={compactNumber(balancesBalance.available.coinBalance)}
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+            arrangement="vertical"
+            distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
+              color,
+              name: name || '-',
+              percentage: onChainPercentage,
+              ros: ros ? String(ros) : undefined,
+              saturation: saturation ? String(saturation) : undefined,
+            }))}
+            status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
+          />
+        </Box>
+      )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
       </Flex>
       <Box mb="$32">
         {displayData.map((item) => (
-          <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
+          <Box key={item.id} mb="$24" testId="delegated-pool-item">
             <StakingInfoCard
               {...item}
               popupView

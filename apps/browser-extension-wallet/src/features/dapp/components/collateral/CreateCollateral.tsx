@@ -1,14 +1,23 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DappCreateCollateralProps } from './types';
-import { DappInfo, RowContainer, renderAmountInfo, renderLabel } from '@lace/core';
+import {
+  OnPasswordChange,
+  Password,
+  DappInfo,
+  RowContainer,
+  renderAmountInfo,
+  renderLabel,
+  useSecrets,
+  PasswordObj
+} from '@lace/core';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks';
 import { Layout } from '../Layout';
-import { Banner, Button, Password, inputProps, useObservable } from '@lace/common';
+import { Banner, Button, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { isNotNil } from '@cardano-sdk/util';
@@ -31,12 +40,12 @@ export const CreateCollateral = ({
   const { inMemoryWallet, walletType, isInMemoryWallet } = useWalletStore();
   const addresses = useObservable(inMemoryWallet.addresses$);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [password, setPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isPasswordValid, setIsPasswordValid] = useState(true);
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => {
+  const handleChange: OnPasswordChange = (target) => {
     setIsPasswordValid(true);
-    setPassword(value);
+    setPassword(target);
   };
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
@@ -59,32 +68,38 @@ export const CreateCollateral = ({
     getTx();
   }, [collateralInfo.amount, inMemoryWallet, addresses]);
 
-  const createCollateralTx = useCallback(async () => {
-    setIsSubmitting(true);
-    const submitTx = async () => {
-      const signedTx = await collateralTx.tx.sign();
-      await inMemoryWallet.submitTx(signedTx);
-      const utxo = await firstValueFrom(
-        inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === collateralInfo.amount)),
-          filter(isNotNil),
-          take(1)
-        )
-      );
-      await inMemoryWallet.utxo.setUnspendable([utxo]);
-      confirm([utxo]);
-    };
+  const createCollateralTx = useCallback(
+    async (passphrase: Partial<PasswordObj>) => {
+      setIsSubmitting(true);
+      const submitTx = async () => {
+        const signedTx = await collateralTx.tx.sign();
+        await inMemoryWallet.submitTx(signedTx);
+        const utxo = await firstValueFrom(
+          inMemoryWallet.utxo.available$.pipe(
+            map((utxos) =>
+              utxos.find((o) => o[0].txId === signedTx.tx.id && o[1].value.coins === collateralInfo.amount)
+            ),
+            filter(isNotNil),
+            take(1)
+          )
+        );
+        await inMemoryWallet.utxo.setUnspendable([utxo]);
+        confirm([utxo]);
+      };
 
-    try {
-      await withSignTxConfirmation(submitTx, password);
-    } catch (error) {
-      if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
-        setPassword('');
-        setIsPasswordValid(false);
+      try {
+        await withSignTxConfirmation(submitTx, passphrase.value);
+      } catch (error) {
+        if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
+          setIsPasswordValid(false);
+        }
+      } finally {
+        clearSecrets();
       }
-    }
-    setIsSubmitting(false);
-  }, [collateralTx, collateralInfo.amount, inMemoryWallet, password, confirm]);
+      setIsSubmitting(false);
+    },
+    [collateralTx, collateralInfo.amount, inMemoryWallet, confirm, clearSecrets]
+  );
 
   const confirmButtonLabel = useMemo(() => {
     if (isInMemoryWallet) {
@@ -110,7 +125,6 @@ export const CreateCollateral = ({
               <Spin spinning={false}>
                 <Password
                   onChange={handleChange}
-                  value={password}
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}
@@ -151,7 +165,7 @@ export const CreateCollateral = ({
           loading={isSubmitting}
           className={styles.footerBtn}
           size="large"
-          onClick={createCollateralTx}
+          onClick={() => createCollateralTx(password)}
         >
           {confirmButtonLabel}
         </Button>

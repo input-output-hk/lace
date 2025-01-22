@@ -11,6 +11,8 @@ const defaultTsPluginOptions = {
   composite: false,
   exclude: ['**/*.stories.tsx', '**/*.test.ts', '**/*.test.tsx'],
   tsconfig: 'src/tsconfig.json',
+  sourceMap: true,
+  inlineSources: true
 }
 
 export default ({

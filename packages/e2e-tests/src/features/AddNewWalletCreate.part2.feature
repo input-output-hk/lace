@@ -7,6 +7,7 @@ Feature: Add new wallet - Create wallet
   @LW-9355
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - invalid all words
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I save mnemonic words
     And I click "Next" button during wallet setup
     And I fill passphrase fields using saved 24 words mnemonic in incorrect order
@@ -18,8 +19,10 @@ Feature: Add new wallet - Create wallet
   @LW-9356
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - invalid word
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     When I save mnemonic words
-    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    And I click "Next" button during wallet setup
+    And I enter saved mnemonic words
     And I change one random field
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process
@@ -31,7 +34,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
-    Then "Wallet setup" page is displayed in modal
+    Then "Let's set up your new wallet" page is displayed in modal for "Create" flow
     And "Wallet setup" step is marked as active on progress timeline
     When I click "Back" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
@@ -82,7 +85,7 @@ Feature: Add new wallet - Create wallet
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
 
-  @LW-9357
+  @LW-9357 @memory-snapshot
   Scenario: Extended-view - Multi-wallet - Create - Add new wallet - happy path
     Given I opened "Create" flow via "Add new wallet" feature
     When I go to "Wallet setup" page from "Create" wallet flow
@@ -90,6 +93,7 @@ Feature: Add new wallet - Create wallet
     And I click "Enter wallet" button
     And I wait for main loader to disappear
     Then I see LW homepage
+    And "N_8J@bne87A" password is not in snapshot
     And "Wallet 2" is displayed as a wallet name on the menu button
     When I click the menu button
     Then Wallet number 2 with "Wallet 2" name is displayed on the user menu

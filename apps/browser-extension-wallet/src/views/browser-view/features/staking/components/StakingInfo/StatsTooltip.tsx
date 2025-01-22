@@ -5,9 +5,11 @@ import styles from './Stats.module.scss';
 
 export const Tooltip = ({
   title,
+  content,
   children
 }: {
-  title: string | number;
+  title?: string | number;
+  content?: React.ReactNode;
   children: string | React.ReactElement | React.ReactNode;
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -17,10 +19,12 @@ export const Tooltip = ({
       placement="top"
       className={styles.tooltipWrapper}
       title={
-        <div data-testid="tooltip">
-          <div>{t('browserView.staking.stakingInfo.tooltip.title')}</div>
-          <div>{title}</div>
-        </div>
+        content || (
+          <div data-testid="tooltip">
+            <div>{t('browserView.staking.stakingInfo.tooltip.title')}</div>
+            <div>{title}</div>
+          </div>
+        )
       }
     >
       {children}

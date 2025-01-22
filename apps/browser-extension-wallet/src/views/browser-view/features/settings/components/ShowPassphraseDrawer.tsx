@@ -1,19 +1,10 @@
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import {
-  Button,
-  Drawer,
-  DrawerHeader,
-  DrawerNavigation,
-  inputProps,
-  Password,
-  Banner,
-  useKeyboardShortcut
-} from '@lace/common';
+import { Button, Drawer, DrawerHeader, DrawerNavigation, Banner, useKeyboardShortcut } from '@lace/common';
+import { Password, OnPasswordChange, MnemonicWordsWritedown, useSecrets } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
-import { MnemonicWordsWritedown } from '@lace/core';
 import { useWalletManager } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 
@@ -51,19 +42,18 @@ export const ShowPassphraseDrawer = ({
     isProcessing: false,
     isPasswordValid: true
   });
-  const [password, setPassword] = useState<string>('');
+  const secretsUtil = useSecrets();
   const { unlockWallet: validatePassword, getMnemonic } = useWalletManager();
 
-  const isConfirmButtonDisabled = isPassphraseVisible ? false : !password || isProcessing;
+  const isConfirmButtonDisabled = isPassphraseVisible ? false : !secretsUtil.password.value || isProcessing;
 
-  const handleChange: inputProps['onChange'] = ({ target: { value } }) => setPassword(value);
+  const handleChange: OnPasswordChange = (target) => secretsUtil.setPassword(target);
   const toggleBlurWords = () => {
     setBlurWords(!blurWords);
     if (!blurWords) {
       sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseYourRecoveryPhraseHidePassphraseClick);
     }
   };
-  const removePassword = () => setPassword('');
 
   const getPassphrase = useCallback(
     async (userPassword) => {
@@ -74,23 +64,23 @@ export const ShowPassphraseDrawer = ({
     [getMnemonic]
   );
 
-  const handleVerifyPass = useCallback(async () => {
+  const handleVerifyPass = async () => {
     if (isProcessing) return;
 
     setProcessingState({ isPasswordValid: true, isProcessing: true });
     try {
-      await validatePassword(password);
-      await getPassphrase(password);
+      await validatePassword();
+      await getPassphrase(secretsUtil.password.value);
       setIsPassphraseVisible(true);
       setProcessingState({ isPasswordValid: true, isProcessing: false });
-      removePassword();
+      secretsUtil.clearSecrets();
       sendAnalyticsEvent(PostHogAction.SettingsShowRecoveryPhraseEnterYourPasswordShowRecoveryPhraseClick);
     } catch {
-      removePassword();
+      secretsUtil.clearSecrets();
       setIsPassphraseVisible(false);
       setProcessingState({ isPasswordValid: false, isProcessing: false });
     }
-  }, [isProcessing, validatePassword, password, getPassphrase, sendAnalyticsEvent]);
+  };
 
   const handleShowPassphrase = async () => {
     if (isPassphraseVisible) {
@@ -111,12 +101,12 @@ export const ShowPassphraseDrawer = ({
   };
 
   const handleOnClose = () => {
-    onClose();
     setProcessingState({ isPasswordValid: true, isProcessing: false });
     setBlurWords(false);
     setPassphrase([]);
-    setPassword('');
+    secretsUtil.clearSecrets();
     setIsPassphraseVisible(false);
+    onClose();
   };
 
   useKeyboardShortcut(['Escape'], () => handleOnClose());
@@ -176,7 +166,6 @@ export const ShowPassphraseDrawer = ({
                 <Password
                   className={styles.passwordInput}
                   onChange={handleChange}
-                  value={password}
                   error={!isPasswordValid}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}

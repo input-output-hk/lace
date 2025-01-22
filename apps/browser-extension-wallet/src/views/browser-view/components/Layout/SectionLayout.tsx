@@ -4,6 +4,7 @@ import { SidePanel } from './SidePanel';
 import { useExternalLinkOpener } from '@providers';
 import { Credit } from '@components/Credit';
 import { COINGECKO_URL } from '@utils/constants';
+import classNames from 'classnames';
 
 export const CONTENT_ID = 'content';
 
@@ -25,7 +26,7 @@ export const SectionLayout = ({
 
   return (
     <>
-      <main id={CONTENT_ID} className={styles.content}>
+      <main id={CONTENT_ID} className={classNames(styles.content, !!sidePanelContent && styles.withAside)}>
         <div>{children}</div>
         {hasCredit && <Credit handleOnClick={handleOnClick} />}
       </main>

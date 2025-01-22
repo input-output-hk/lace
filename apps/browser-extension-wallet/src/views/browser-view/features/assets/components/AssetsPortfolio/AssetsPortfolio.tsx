@@ -2,7 +2,7 @@ import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IRow, SendReceive } from '@lace/core';
+import { IRow, TransactionCTAs } from '@lace/core';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { APP_MODE_POPUP, AppMode } from '@src/utils/constants';
 import { compactNumberWithUnit } from '@src/utils/format-number';
@@ -114,20 +114,15 @@ export const AssetsPortfolio = ({
         />
       </div>
       {isPopupView && portfolioBalanceAsBigNumber.gt(0) && (
-        <SendReceive
-          leftButtonOnClick={openSend}
-          rightButtonOnClick={handleRedirectToReceive}
-          isReversed
+        <TransactionCTAs
+          onSendClick={openSend}
+          onReceiveClick={handleRedirectToReceive}
           popupView
-          sharedClass={styles.testPopupClass}
-          translations={{
-            send: t('core.sendReceive.send'),
-            receive: t('core.sendReceive.receive')
-          }}
+          buttonClassName={styles.testPopupClass}
         />
       )}
       {!isPopupView && isScreenTooSmallForSidePanel && USE_FOOR_TOPUP && isMainnet && (
-        <Flex flexDirection="column" gap="$10" mb="$16" data-testid="top-up-wallet-small-card">
+        <Flex flexDirection="column" gap="$10" mb="$16" testId="top-up-wallet-small-card">
           <Text.Body.Normal weight="$medium" color="secondary" data-testid="top-up-wallet-small-card-title">
             {t('browserView.assets.topupWallet.buyButton.title')}
           </Text.Body.Normal>

@@ -7,6 +7,9 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
+import { useWalletStore } from '@stores';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
@@ -17,6 +20,10 @@ export const SideMenu = (): React.ReactElement => {
     listen
   } = useHistory();
   const analytics = useAnalyticsContext();
+  const posthog = usePostHogClientContext();
+  const isDappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
+
+  const { isSharedWallet } = useWalletStore();
 
   const [currentHoveredItem, setCurrentHoveredItem] = useState<MenuItemList | undefined>();
 
@@ -60,9 +67,17 @@ export const SideMenu = (): React.ReactElement => {
   // eslint-disable-next-line unicorn/no-useless-undefined
   const onMouseLeaveItem = () => setCurrentHoveredItem(undefined);
 
+  const excludeItems: MenuItemList[] = [];
+  if (isSharedWallet) {
+    excludeItems.push(MenuItemList.STAKING);
+  }
+  if (!isDappExplorerEnabled) {
+    excludeItems.push(MenuItemList.DAPPS);
+  }
+  const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
   return (
     <SideMenuContent
-      menuItems={sideMenuConfig}
+      menuItems={menuItems}
       activeItemId={tab}
       hoveredItemId={currentHoveredItem}
       onClick={handleRedirection}

@@ -12,7 +12,7 @@ $container-width: 840px;
     box-shadow: var(--shadow-setup-box, none);
     border-radius: size_unit(2);
     max-width: $container-width;
-    max-height: 584px;
+    max-height: 616px;
     width: 100%;
     height: 100%;
     min-width: 650px;
@@ -20,7 +20,7 @@ $container-width: 840px;
   }
   :global(.ant-modal-body) {
     padding: 0;
-    height: 584px;
+    height: 616px;
   }
   :global(.ant-modal-close-x) {
     display: none;

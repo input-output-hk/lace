@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { POPUP_WINDOW } from '@src/utils/constants';
+import { POPUP_WINDOW, POPUP_WINDOW_NAMI, POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -14,6 +14,7 @@ import {
 import { getBackgroundStorage } from './storage';
 
 const { blake2b } = Wallet.Crypto;
+const DAPP_CONNECTOR_REGEX = new RegExp(/dappconnector/i);
 
 type WindowPosition = {
   top: number;
@@ -41,8 +42,8 @@ const calculatePopupWindowPositionAndSize = (
   window: Windows.Window,
   popup: WindowSize
 ): WindowSizeAndPositionProps => ({
-  top: Math.floor(window.top + (window.height - POPUP_WINDOW.height) / 2),
-  left: Math.floor(window.left + (window.width - POPUP_WINDOW.width) / 2),
+  top: Math.floor(window.top + (window.height - popup.height) / 2),
+  left: Math.floor(window.left + (window.width - popup.width) / 2),
   ...popup
 });
 
@@ -69,16 +70,18 @@ const createWindow = (
 /**
  * launchCip30Popup
  * @param url - Originating url of current dapp
- * @param windowType 'normal' for hardware wallet interactions, 'popup' for everything else
  * @returns tab - Tab of currently launched dApp connector
  */
-export const launchCip30Popup = async (url: string, windowType: Windows.CreateType): Promise<Tabs.Tab> => {
+export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
   const tab = await createTab(`../dappConnector.html${url}`, false);
+  const { namiMigration } = await getBackgroundStorage();
+  const windowSize = namiMigration?.mode === 'nami' ? POPUP_WINDOW_NAMI : POPUP_WINDOW;
+
   const newWindow = await createWindow(
     tab.id,
-    calculatePopupWindowPositionAndSize(currentWindow, POPUP_WINDOW),
-    windowType,
+    calculatePopupWindowPositionAndSize(currentWindow, windowSize),
+    'popup',
     true
   );
   newWindow.alwaysOnTop = true;
@@ -121,31 +124,25 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
-export const ensureUiIsOpenAndLoaded = async (
-  services: WalletManagementServices,
-  url?: string,
-  checkKeyAgent = true
-): Promise<Tabs.Tab> => {
-  const isHardwareWallet = checkKeyAgent
-    ? await (async () => {
-        const active = await getActiveWallet(services);
-        return active?.wallet.type === WalletType.Ledger || active?.wallet.type === WalletType.Trezor;
-      })()
-    : undefined;
-
-  const windowType: Windows.CreateType = isHardwareWallet ? 'normal' : 'popup';
-  if (isHardwareWallet) {
-    const openTabs = await tabs.query({ title: 'Lace' });
-    // Close all previously opened lace windows
-    for (const tab of openTabs) {
-      tabs.remove(tab.id);
-    }
+export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
+  const openTabs = await tabs.query({ title: 'Lace' });
+  const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
+  openTabs.push(...namiTabs);
+  // Close all previously opened lace dapp connector windows
+  for (const tab of openTabs) {
+    if (!shouldRemoveTab || shouldRemoveTab(tab.url)) await tabs.remove(tab.id);
   }
+};
 
-  const tab = await launchCip30Popup(url, windowType);
+export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
+  await closeAllLaceWindows((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
+
+  const tab = await launchCip30Popup(url);
+
   if (tab.status !== 'complete') {
     await waitForTabLoad(tab);
   }
+
   return tab;
 };
 

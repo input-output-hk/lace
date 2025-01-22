@@ -1,20 +1,16 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable, toast } from '@lace/common';
-import { useMaxAda } from '@hooks/useMaxAda';
-import { useTranslation } from 'react-i18next';
+import { useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Cardano } from '@cardano-sdk/core';
 import { isNotNil } from '@cardano-sdk/util';
-import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '@src/stores';
 import { useSyncingTheFirstTime } from '@hooks/useSyncingTheFirstTime';
 import { useBuiltTxState } from '@src/views/browser-view/features/send-transaction';
-
-export const COLLATERAL_ADA_AMOUNT = 5;
-export const COLLATERAL_AMOUNT_LOVELACES = BigInt(Wallet.util.adaToLovelacesString(String(COLLATERAL_ADA_AMOUNT)));
+import { COLLATERAL_AMOUNT_LOVELACES } from '@utils/constants';
+import { useHasEnoughCollateral } from '@hooks/useHasEnoughCollateral';
 
 export type UseCollateralReturn = {
   initializeCollateralTx: () => Promise<void>;
@@ -23,10 +19,10 @@ export type UseCollateralReturn = {
   isSubmitting: boolean;
   txFee: Cardano.Lovelace;
   hasEnoughAda: boolean;
+  txBuilder?: TxBuilder;
 };
 
 export const useCollateral = (): UseCollateralReturn => {
-  const { t } = useTranslation();
   const [txFee, setTxFee] = useState<Cardano.Lovelace>();
   const [txBuilder, setTxBuilder] = useState<TxBuilder | undefined>();
   const { inMemoryWallet, isInMemoryWallet } = useWalletStore();
@@ -35,8 +31,7 @@ export const useCollateral = (): UseCollateralReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const addresses = useObservable(inMemoryWallet?.addresses$);
   const walletAddress = addresses?.[0]?.address;
-  const maxAvailableAda = useMaxAda();
-  const hasEnoughAda = useMemo(() => maxAvailableAda >= COLLATERAL_AMOUNT_LOVELACES, [maxAvailableAda]);
+  const hasEnoughAda = useHasEnoughCollateral();
   const isSyncingForTheFirstTime = useSyncingTheFirstTime(); // here we check wallet is syncing for the first time
   const output: Cardano.TxOut = useMemo(
     () => ({
@@ -87,7 +82,6 @@ export const useCollateral = (): UseCollateralReturn => {
           }
         });
       }
-      toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
     } catch (error) {
       // redirect to tx fail screen in case of hw
       if (!isInMemoryWallet) {
@@ -96,19 +90,19 @@ export const useCollateral = (): UseCollateralReturn => {
           uiTx: undefined,
           error: error.message
         });
-        setTxBuilder(undefined);
       }
       throw error;
     } finally {
       setIsSubmitting(false);
     }
-  }, [txBuilder, inMemoryWallet, isInMemoryWallet, t, setBuiltTxData]);
+  }, [txBuilder, inMemoryWallet, isInMemoryWallet, setBuiltTxData]);
   return {
     initializeCollateralTx,
     submitCollateralTx,
     isInitializing,
     isSubmitting,
     txFee,
-    hasEnoughAda
+    hasEnoughAda,
+    txBuilder
   };
 };

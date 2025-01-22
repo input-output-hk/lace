@@ -3,87 +3,18 @@ import React from 'react';
 import cn from 'classnames';
 import { Ellipsis } from '@lace/common';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
-import { TransactionDetailAsset, TransactionMetadataProps, TxOutputInput, TxSummary } from './TransactionDetailAsset';
-import { ActivityStatus } from '../Activity';
+import { ActivityStatus, Transaction, TransactionDetailsProps, TransactionFee } from '../Transaction';
 import styles from './TransactionDetails.module.scss';
 import { TransactionInputOutput } from './TransactionInputOutput';
-import { TransactionFee } from './TransactionFee';
 import { ActivityDetailHeader } from './ActivityDetailHeader';
 import { Collateral, CollateralStatus } from './Collateral';
-import { Wallet } from '@lace/cardano';
 import { TxDetailsCertificates } from './components/TxDetailsCertificates/TxDetailsCertificates';
 import { TxDetailsVotingProcedures } from './components/TxDetailsVotingProcedures';
 import { TxDetailsProposalProcedures } from './components/TxDetailsProposalProcedures';
 import { useTranslation } from 'react-i18next';
-import { Transaction } from '../Transaction';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const displayMetadataMsg = (value: any[]): string => value?.find((val: any) => val.hasOwnProperty('msg'))?.msg || '';
-
-export interface TransactionDetailsProps {
-  hash?: string;
-  name: string;
-  status?: ActivityStatus;
-  /**
-   * Transaction generation date
-   */
-  includedDate?: string;
-  /**
-   * Transaction generation time
-   */
-  includedTime?: string;
-  assets?: TransactionDetailAsset[];
-  /**
-   * Input address list
-   */
-  addrInputs?: TxOutputInput[];
-  /**
-   * Output address list
-   */
-  addrOutputs?: TxOutputInput[];
-  /**
-   * Transaction total output
-   */
-  totalOutput?: string;
-  /**
-   * Transaction collateral
-   */
-  collateral?: string;
-  /**
-   * Transaction fee
-   */
-  fee?: string;
-  pools?: { name: string; ticker: string; id: string }[];
-  /**
-   * Transaction deposit
-   */
-  deposit?: string;
-  /**
-   * Transaction returned deposit
-   */
-  depositReclaim?: string;
-  /**
-   * Transaction metadata
-   */
-  metadata?: TransactionMetadataProps['metadata'];
-  amountTransformer: (amount: string) => string;
-  headerDescription?: string;
-  txSummary?: TxSummary[];
-  coinSymbol: string;
-  tooltipContent?: string;
-  ownAddresses: string[];
-  addressToNameMap: Map<string, string>;
-  isPopupView?: boolean;
-  handleOpenExternalHashLink?: () => void;
-  sendAnalyticsInputs?: () => void;
-  sendAnalyticsOutputs?: () => void;
-  votingProcedures?: Wallet.Cardano.VotingProcedures;
-  proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
-  certificates?: Wallet.Cardano.Certificate[];
-  chainNetworkId: Wallet.Cardano.NetworkId;
-  cardanoCoin: Wallet.CoinId;
-  explorerBaseUrl: string;
-}
 
 export const TransactionDetails = ({
   hash,
@@ -125,6 +56,7 @@ export const TransactionDetails = ({
       case ActivityStatus.SPENDABLE:
         return CollateralStatus.NONE;
       case ActivityStatus.PENDING:
+      case ActivityStatus.AWAITING_COSIGNATURES:
         return CollateralStatus.REVIEW;
       case ActivityStatus.SUCCESS:
         return CollateralStatus.SUCCESS;
@@ -137,11 +69,15 @@ export const TransactionDetails = ({
 
   const renderDepositValueSection = ({ value, label }: { value: string; label: string }) => (
     <div className={styles.details}>
-      <div className={styles.title}>{label}</div>
+      <div className={styles.title} data-testid="deposit-value-title">
+        {label}
+      </div>
       <div className={styles.detail}>
-        <div className={styles.amount}>
-          <span className={styles.ada}>{`${value} ${coinSymbol}`}</span>{' '}
-          <span className={styles.fiat}>{amountTransformer(value)}</span>
+        <div className={styles.amount} data-testid="deposit-values">
+          <span className={styles.ada} data-testid="deposit-value-ada">{`${value} ${coinSymbol}`}</span>{' '}
+          <span className={styles.fiat} data-testid="deposit-value-fiat">
+            {amountTransformer(value)}
+          </span>
         </div>
       </div>
     </div>
@@ -160,9 +96,11 @@ export const TransactionDetails = ({
             openLink={handleOpenExternalHashLink}
           />
           <Transaction.Summary>{t('core.activityDetails.summary')}</Transaction.Summary>
-          {pools?.length > 0 && (
+          {pools && pools?.length > 0 && (
             <div className={styles.stakingInfo}>
-              <div className={cn(styles.title, styles.poolsTitle)}>{t('core.activityDetails.pools')}</div>
+              <div className={cn(styles.title, styles.poolsTitle)} data-testid="rewards-pools-title">
+                {t('core.activityDetails.pools')}
+              </div>
               <div className={styles.poolsList}>
                 {pools?.map((pool) => (
                   <div key={pool.id} className={styles.poolEntry}>
@@ -199,7 +137,7 @@ export const TransactionDetails = ({
           />
           <Transaction.Timestamp includedDate={includedDate} includedTime={includedTime} />
           {collateral && (
-            <Box mb="$32" data-testid="tx-collateral">
+            <Box mb="$32" testId="tx-collateral">
               <Collateral
                 collateral={collateral}
                 amountTransformer={amountTransformer}
@@ -209,7 +147,7 @@ export const TransactionDetails = ({
             </Box>
           )}
           {fee && fee !== '-' && (
-            <Box mb="$32" data-testid="tx-fee">
+            <Box mb="$32" testId="tx-fee">
               <TransactionFee
                 tooltipInfo={t('core.activityDetails.transactionFeeInfo')}
                 fee={fee}
@@ -225,24 +163,24 @@ export const TransactionDetails = ({
               label: t('core.activityDetails.depositReclaim')
             })}
         </Transaction.Block>
-        {votingProcedures?.length > 0 && (
+        {votingProcedures && votingProcedures?.length > 0 && (
           <TxDetailsVotingProcedures votingProcedures={votingProcedures} explorerBaseUrl={explorerBaseUrl} />
         )}
-        {proposalProcedures?.length > 0 && (
+        {proposalProcedures && proposalProcedures?.length > 0 && (
           <TxDetailsProposalProcedures
             proposalProcedures={proposalProcedures}
             cardanoCoin={cardanoCoin}
             explorerBaseUrl={explorerBaseUrl}
           />
         )}
-        {certificates?.length > 0 && (
+        {certificates && certificates?.length > 0 && (
           <TxDetailsCertificates
             certificates={certificates}
             chainNetworkId={chainNetworkId}
             cardanoCoin={cardanoCoin}
           />
         )}
-        {addrInputs?.length > 0 && (
+        {addrInputs && addrInputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
             title={t('core.activityDetails.inputs')}
@@ -259,7 +197,7 @@ export const TransactionDetails = ({
             addressToNameMap={addressToNameMap}
           />
         )}
-        {addrOutputs?.length > 0 && (
+        {addrOutputs && addrOutputs?.length > 0 && (
           <TransactionInputOutput
             amountTransformer={amountTransformer}
             title={t('core.activityDetails.outputs')}
@@ -275,8 +213,8 @@ export const TransactionDetails = ({
             addressToNameMap={addressToNameMap}
           />
         )}
-        {metadata?.length > 0 && (
-          <div className={styles.metadataContainer}>
+        {metadata && metadata?.length > 0 && (
+          <div className={styles.metadataContainer} data-testid="tx-metadata-section">
             <div className={styles.metadataLabel} data-testid="tx-metadata-title">
               {t('core.activityDetails.metadata')}
             </div>

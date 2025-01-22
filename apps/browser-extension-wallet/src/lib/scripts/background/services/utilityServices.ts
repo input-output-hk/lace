@@ -7,19 +7,25 @@ import {
   Message,
   MessageTypes,
   OpenBrowserData,
+  OpenNamiBrowserData,
   MigrationState,
   TokenPrices,
-  CoinPrices
+  CoinPrices,
+  ChangeModeData,
+  LaceFeaturesApi,
+  UnhandledError
 } from '../../types';
-import { Subject, of, BehaviorSubject } from 'rxjs';
+import { Subject, of, BehaviorSubject, merge, map, fromEvent } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import { getADAPriceFromBackgroundStorage } from '../util';
+import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
+import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
+import { getErrorMessage } from '@src/utils/get-error-message';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -48,6 +54,7 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
   let path = '';
   switch (data.section) {
     case BrowserViewSections.SEND_ADVANCED:
+    case BrowserViewSections.RECEIVE_ADVANCED:
       path = '';
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_BROWSER_VIEW, data } });
       break;
@@ -66,6 +73,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.SETTINGS:
       path = walletRoutePaths.settings;
       break;
+    case BrowserViewSections.SIGN_MESSAGE:
+      path = walletRoutePaths.signMessage;
+      break;
     case BrowserViewSections.COLLATERAL_SETTINGS:
       path = walletRoutePaths.settings;
       await setBackgroundStorage({ message: { type: MessageTypes.OPEN_COLLATERAL_SETTINGS, data } });
@@ -79,12 +89,36 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.ADD_SHARED_WALLET:
       path = walletRoutePaths.sharedWallet.root;
       break;
+    case BrowserViewSections.NAMI_MIGRATION:
+      path = walletRoutePaths.namiMigration.root;
+      break;
+    case BrowserViewSections.NAMI_HW_FLOW:
+      path = walletRoutePaths.namiMigration.hwFlow;
+      break;
+    case BrowserViewSections.DAPP_EXPLORER:
+      path = walletRoutePaths.dapps;
+      break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
   await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
 };
 
+const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
+  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => console.error(error));
+};
+
+const handleOpenPopup = async () => {
+  if (typeof chrome.action.openPopup !== 'function') return;
+  await closeAllLaceWindows();
+  // behaves inconsistently if executed without setTimeout
+  setTimeout(async () => {
+    await chrome.action.openPopup();
+  });
+};
+
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
+
+const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION, TOKEN_PRICE_CHECK_INTERVAL } = config();
 const fetchTokenPrices = () => {
@@ -161,14 +195,42 @@ if (process.env.USE_TOKEN_PRICING === 'true') {
   setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
 }
 
+exposeApi<LaceFeaturesApi>(
+  {
+    api$: of({
+      getMode: async () => {
+        const { namiMigration, dappInjectCompatibilityMode } = await getBackgroundStorage();
+        return { mode: namiMigration?.mode || 'lace', dappInjectCompatibilityMode: !!dappInjectCompatibilityMode };
+      }
+    }),
+    baseChannel: LACE_FEATURES_CHANNEL,
+    properties: laceFeaturesApiProperties
+  },
+  { logger: console, runtime }
+);
+
+const toUnhandledError = (error: unknown, type: UnhandledError['type']): UnhandledError => ({
+  type,
+  message: getErrorMessage(error)
+});
+const unhandledError$ = merge(
+  fromEvent(globalThis, 'error').pipe(map((e: ErrorEvent): UnhandledError => toUnhandledError(e, 'error'))),
+  fromEvent(globalThis, 'unhandledrejection').pipe(
+    map((e: PromiseRejectionEvent): UnhandledError => toUnhandledError(e, 'unhandledrejection'))
+  )
+);
+
 exposeApi<BackgroundService>(
   {
     api$: of({
       handleOpenBrowser,
+      handleOpenNamiBrowser,
+      handleOpenPopup,
       requestMessage$,
       migrationState$,
       coinPrices,
       handleChangeTheme,
+      handleChangeMode,
       clearBackgroundStorage,
       getBackgroundStorage,
       setBackgroundStorage,
@@ -176,7 +238,8 @@ exposeApi<BackgroundService>(
         await clearBackgroundStorage();
         await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
       },
-      backendFailures$
+      backendFailures$,
+      unhandledError$
     }),
     baseChannel: BaseChannels.BACKGROUND_ACTIONS,
     properties: backgroundServiceProperties

@@ -2,8 +2,8 @@
 import * as React from 'react';
 import { render, within, fireEvent, queryByTestId } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { AssetActivityItem, AssetActivityItemProps, ActivityStatus } from '../AssetActivityItem';
-import { TransactionActivityType } from '../../ActivityDetail/types';
+import { AssetActivityItem, AssetActivityItemProps } from '../AssetActivityItem';
+import { ActivityStatus, TransactionActivityType } from '../../Transaction';
 import { ActivityType } from '../../ActivityDetail';
 
 const assetsAmountTestId = 'asset-amount';
@@ -51,7 +51,7 @@ describe('Testing AssetActivityItem component', () => {
 
       const totalAmount = await findByTestId('balance');
 
-      expect(totalAmount).toHaveTextContent(`-${props.amount}`);
+      expect(totalAmount).toHaveTextContent(`${props.amount}`);
     });
   });
 
@@ -65,7 +65,7 @@ describe('Testing AssetActivityItem component', () => {
     const { findByTestId } = render(<AssetActivityItem {...props} />);
 
     const activityAmount = await findByTestId(assetsAmountTestId);
-    const tickerText = `-${props.amount}, ${props.assets[0].val} ${props.assets[0].info.ticker}`;
+    const tickerText = `${props.amount}, ${props.assets?.[0].val} ${props.assets?.[0].info?.ticker}`;
     const activityAssetTickerText = await within(activityAmount).findByText(tickerText);
 
     expect(activityAssetTickerText).toBeVisible();

@@ -5,4 +5,4 @@ export type TransactionType =
   | 'Rewards'
   | 'Delegation'
   | 'Stake Key Registration'
-  | 'Stake Key De-Registration ';
+  | 'Stake Key De-Registration';

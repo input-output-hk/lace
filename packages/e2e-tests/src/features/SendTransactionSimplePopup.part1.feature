@@ -161,7 +161,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Send" button on Tokens page in popup mode
     And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
-    When I click on NFT with name: "Ibilecoin" in asset selector
+    When I click on NFT with name: "Ibilecoin"
     Then the "Ibilecoin" asset is displayed in bundle 1
 
   @LW-2402 @Testnet @Mainnet

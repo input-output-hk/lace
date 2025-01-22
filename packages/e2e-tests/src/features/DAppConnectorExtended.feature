@@ -1,4 +1,4 @@
-@DAppConnector-Extended
+@DAppConnector @DAppConnector-Extended
 Feature: DAppConnector - Extended view
 
   Background:

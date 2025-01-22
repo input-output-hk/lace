@@ -20,7 +20,7 @@ export {
   EraSummary,
   HandleResolution,
   TxSubmissionError,
-  TxCBOR
+  Serialization
 } from '@cardano-sdk/core';
 
 export { testnetEraSummaries } from '@cardano-sdk/util-dev';
@@ -38,7 +38,10 @@ export {
   createWalletUtil,
   Assets,
   TxInFlight,
-  WalletAddress
+  WalletAddress,
+  isValidSharedWalletScript,
+  isScriptAddress,
+  isKeyHashAddress
 } from '@cardano-sdk/wallet';
 
 export {
@@ -82,6 +85,8 @@ export * from '@wallet/lib/get-auxiliary-data';
 export * as util from '@wallet/util';
 export * from '@wallet/lib/providers';
 export * from '@wallet/lib/config';
+export * from '@wallet/lib/blockfrost-input-resolver';
+export * from '@wallet/lib/blockfrost-address-discovery';
 
 export * as mockUtils from '@wallet/test/mocks';
 export * from '@wallet/types';

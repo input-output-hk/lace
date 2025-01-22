@@ -12,8 +12,8 @@ interface Translations {
 interface Props {
   metadata: {
     coldCredential: string;
-    hash: string;
-    url: string;
+    hash?: string;
+    url?: string;
   };
 }
 

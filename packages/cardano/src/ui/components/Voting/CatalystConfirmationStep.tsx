@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './Voting.module.scss';
 import { Button } from '@lace/common';
 import CatalystLogo from '../../assets/images/catalyst-logo.png';
-import Icon, { InfoCircleOutlined } from '@ant-design/icons';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { TranslationsFor } from '@wallet/util/types';
 
 export interface CatalystConfirmationStepProps {
@@ -52,7 +52,7 @@ export const CatalystConfirmationStep = ({
         <>
           <div className={styles.fee}>
             <p>
-              {translations.totalFee} <Icon component={InfoCircleOutlined} />
+              {translations.totalFee} <InfoCircleOutlined />
             </p>
             <b>{fee}</b>
           </div>

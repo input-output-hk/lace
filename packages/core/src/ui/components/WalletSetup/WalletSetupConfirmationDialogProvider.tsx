@@ -1,8 +1,9 @@
 /* eslint-disable unicorn/no-null */
 import React, { createContext, useContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { StartOverDialog } from '@ui/components/SharedWallet/StartOverDialog';
+import { StartOverDialog } from './StartOverDialog';
 import { useTranslation } from 'react-i18next';
+import { useSecrets } from '@src/ui/hooks';
 
 interface ContextType {
   isDialogOpen: boolean;
@@ -14,7 +15,7 @@ interface Props {
   children: (value: ContextType) => React.ReactNode;
 }
 
-const WalletSetupConfirmationDialogContext = createContext<ContextType>(null);
+const WalletSetupConfirmationDialogContext = createContext<ContextType | null>(null);
 
 export const useWalletSetupConfirmationDialog = (): ContextType => {
   const context = useContext(WalletSetupConfirmationDialogContext);
@@ -24,7 +25,9 @@ export const useWalletSetupConfirmationDialog = (): ContextType => {
 
 export const WalletSetupConfirmationDialogProvider = ({ children }: Props): React.ReactElement => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const handleOnConfirmRef = useRef(() => void 0);
+  const { clearSecrets } = useSecrets();
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const handleOnConfirmRef = useRef(() => {});
   const shouldShowDialog = useRef<boolean>(false);
   const shouldShowDialog$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
   const { t } = useTranslation();
@@ -75,8 +78,13 @@ export const WalletSetupConfirmationDialogProvider = ({ children }: Props): Reac
           confirm: t('core.multiWallet.confirmationDialog.confirm')
         }}
         events={{
-          onConfirm: handleOnConfirmRef.current,
-          onCancel: () => setIsDialogOpen(false),
+          onConfirm: () => {
+            clearSecrets();
+            handleOnConfirmRef.current();
+          },
+          onCancel: () => {
+            setIsDialogOpen(false);
+          },
           onOpenChanged: setIsDialogOpen
         }}
       />

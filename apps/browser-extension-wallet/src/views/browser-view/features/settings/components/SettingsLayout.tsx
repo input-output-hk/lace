@@ -7,6 +7,9 @@ import { SettingsRemoveWallet } from './SettingsRemoveWallet';
 import { MidnightPreLaunchSettingsBanner } from '@lace/core';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
+import { SettingsSwitchToNami } from './SettingsSwitchToNami';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useWalletStore } from '@src/stores';
 
 export interface SettingsLayoutProps {
   defaultPassphraseVisible?: boolean;
@@ -18,10 +21,13 @@ export const SettingsLayout = ({
   defaultMnemonic
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
+  const posthog = usePostHogClientContext();
+  const { isSharedWallet } = useWalletStore();
+  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   const sidePanelContent = (
     <div>
-      {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+      {process.env.USE_GLACIER_DROP === 'true' ? (
         <Box mb="$32">
           <MidnightPreLaunchSettingsBanner bannerImageUrl={MidnightPreLaunchBannerImage} />
         </Box>
@@ -39,6 +45,7 @@ export const SettingsLayout = ({
         <SettingsSecurity defaultPassphraseVisible={defaultPassphraseVisible} defaultMnemonic={defaultMnemonic} />
         <SettingsHelp />
         <SettingsLegal />
+        {useSwitchToNamiMode && !isSharedWallet && <SettingsSwitchToNami />}
         <SettingsRemoveWallet />
       </SectionLayout>
     </Layout>

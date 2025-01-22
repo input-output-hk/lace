@@ -1,16 +1,19 @@
 import React from 'react';
 import isUndefined from 'lodash/isUndefined';
-import { SendTransaction } from '../../features/send-transaction';
+import { Transaction } from '../../features/send-transaction';
 import { useDrawer } from '../../stores';
 import { Drawer } from '@lace/common';
 import { QRInfoWalletDrawer } from '../QRInfoWalletDrawer';
+import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { WalletUsedAddressesDrawer } from '../WalletUsedAddressesDrawer';
 import { Skeleton } from 'antd';
 
 export enum DrawerContent {
-  SEND_TRANSACTION = 'send-trasaction',
+  SEND_TRANSACTION = 'send-transaction',
+  CO_SIGN_TRANSACTION = 'co-sign-transaction',
   RECEIVE_TRANSACTION = 'receive-transaction',
-  SHOW_USED_ADDRESSES = 'show-used-addresses'
+  SHOW_USED_ADDRESSES = 'show-used-addresses',
+  SIGN_MESSAGE = 'sign-message-addresses'
 }
 
 export interface DrawerConfig {
@@ -26,11 +29,15 @@ export interface DrawerConfig {
 const renderDrawerContent = (content?: DrawerContent) => {
   switch (content) {
     case DrawerContent.SEND_TRANSACTION:
-      return <SendTransaction />;
+      return <Transaction flow="send" />;
+    case DrawerContent.CO_SIGN_TRANSACTION:
+      return <Transaction flow="co-sign" />;
     case DrawerContent.RECEIVE_TRANSACTION:
       return <QRInfoWalletDrawer />;
     case DrawerContent.SHOW_USED_ADDRESSES:
       return <WalletUsedAddressesDrawer />;
+    case DrawerContent.SIGN_MESSAGE:
+      return <SignMessageDrawer />;
     default:
       return <Skeleton />;
   }

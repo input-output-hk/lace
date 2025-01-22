@@ -1,0 +1,10 @@
+$lighter-assets-1: 0px 0px 5px rgba(0, 0, 0, 0.05);
+$lighter-assets-2: 0px 0px 10px rgba(0, 0, 0, 0.05);
+$lighter-assets: $lighter-assets-1, $lighter-assets-2;
+
+$shadows: (
+  'toast-tooltip': 0px 0px 16px rgba(167, 143, 160, 0.2),
+  'card-pop-up': 0px 0px 20px rgba(167, 143, 160, 0.15),
+  'lighter-assets': $lighter-assets,
+  'hover-btn': 0px 4px 10px rgba(167, 143, 160, 0.2)
+);

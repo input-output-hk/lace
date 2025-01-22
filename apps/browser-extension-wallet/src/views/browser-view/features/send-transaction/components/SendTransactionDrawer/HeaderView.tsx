@@ -15,7 +15,6 @@ import {
   useResetStore,
   useResetUiStore,
   useTransactionProps,
-  usePassword,
   useSubmitingState,
   useMultipleSelection,
   useSelectedTokenList,
@@ -37,6 +36,8 @@ import { AssetsCounter } from '@components/AssetSelectionButton/AssetCounter';
 import { saveTemporaryTxDataInStorage } from '../../helpers';
 import { useAddressBookStore } from '@src/features/address-book/store';
 import type { TranslationKey } from '@lace/translation';
+import { DrawerContent } from '@views/browser/components/Drawer';
+import { useSecrets } from '@lace/core';
 
 export const useHandleClose = (): {
   onClose: () => void;
@@ -63,8 +64,8 @@ export const useHandleClose = (): {
   }, [reset, resetUi, resetSection]);
 
   const closeDrawer = useCallback(() => {
-    resetStates();
     setIsDrawerVisible();
+    resetStates();
   }, [resetStates, setIsDrawerVisible]);
 
   const redirect = useCallback(() => {
@@ -116,21 +117,26 @@ const sectionsWithoutCrossIcon = new Set([Sections.ASSET_PICKER, Sections.ADDRES
 
 interface HeaderNavigationProps {
   isPopupView?: boolean;
+  flow?: DrawerContent.SEND_TRANSACTION | DrawerContent.CO_SIGN_TRANSACTION;
 }
 
 const FIRST_ROW = 'output1';
 
-export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.ReactElement => {
+export const HeaderNavigation = ({
+  isPopupView,
+  flow = DrawerContent.SEND_TRANSACTION
+}: HeaderNavigationProps): React.ReactElement => {
   const { t } = useTranslation();
   const { onClose } = useHandleClose();
   const { currentSection: section, setPrevSection } = useSections();
-  const { password, removePassword } = usePassword();
+  const { password, clearSecrets: removePassword } = useSecrets();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { setSubmitingTxState } = useSubmitingState();
   const analytics = useAnalyticsContext();
   const [isMultipleSelectionAvailable, setMultipleSelection] = useMultipleSelection();
   const { selectedTokenList, resetTokenList } = useSelectedTokenList();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
+  const { isSharedWallet } = useWalletStore();
 
   const shouldRenderArrow = isPopupView
     ? [...sectionsWithArrowIcon, Sections.FORM].includes(section.currentSection)
@@ -164,17 +170,26 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
 
   const onCrossIconClick = () => {
     if (section.currentSection === Sections.SUCCESS_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendAllDoneXClick, {
-        trigger_point: triggerPoint,
-        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
-      });
+      analytics.sendEventToPostHog(
+        PostHogAction[isSharedWallet ? 'SharedWalletsSendAllDoneXClick' : 'SendAllDoneXClick'],
+        {
+          trigger_point: triggerPoint,
+          [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+        }
+      );
     } else if (section.currentSection === Sections.FAIL_TX || section.currentSection === Sections.UNAUTHORIZED_TX) {
-      analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick, {
-        trigger_point: triggerPoint,
-        [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
-      });
+      analytics.sendEventToPostHog(
+        PostHogAction[isSharedWallet ? 'SharedWalletsSendSomethingWentWrongXClick' : 'SendSomethingWentWrongXClick'],
+        {
+          trigger_point: triggerPoint,
+          [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+        }
+      );
     }
-    onClose();
+    setTimeout(() => {
+      onClose();
+      // eslint-disable-next-line no-magic-numbers
+    }, 300);
   };
 
   const { uiOutputs } = useCoinStateSelector(FIRST_ROW);
@@ -191,9 +206,14 @@ export const HeaderNavigation = ({ isPopupView }: HeaderNavigationProps): React.
   const selectedTokenClick =
     selectedTokenList.length > 0 ? resetTokenList : () => setMultipleSelection(!isMultipleSelectionAvailable);
 
+  const headerTitle = {
+    [DrawerContent.SEND_TRANSACTION]: t('browserView.transaction.send.drawer.send'),
+    [DrawerContent.CO_SIGN_TRANSACTION]: t('browserView.transaction.send.drawer.coSignTransaction')
+  };
+
   return (
     <DrawerNavigation
-      title={!isPopupView ? <div>{t('core.sendReceive.send')}</div> : undefined}
+      title={!isPopupView ? <div>{headerTitle[flow]}</div> : undefined}
       onArrowIconClick={shouldRenderArrow ? onArrowIconClick : undefined}
       rightActions={
         shouldDisplayAdvancedBtn ? (
@@ -236,13 +256,17 @@ export const useGetHeaderText = (): Record<
   { title?: TranslationKey; subtitle?: TranslationKey; name?: string }
 > => {
   const { addressToEdit } = useAddressBookStore();
+  const { isSharedWallet } = useWalletStore();
 
   return {
     [Sections.FORM]: { title: 'browserView.transaction.send.drawer.newTransaction' },
-    [Sections.SUMMARY]: {
-      title: 'browserView.transaction.send.drawer.transactionSummary',
-      subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
-    },
+    [Sections.IMPORT_SHARED_WALLET_TRANSACTION_JSON]: {},
+    [Sections.SUMMARY]: isSharedWallet
+      ? {}
+      : {
+          title: 'browserView.transaction.send.drawer.transactionSummary',
+          subtitle: 'browserView.transaction.send.drawer.breakdownOfYourTransactionCost'
+        },
     [Sections.CONFIRMATION]: {
       title: 'browserView.transaction.send.confirmationTitle',
       subtitle: 'browserView.transaction.send.signTransactionWithPassword'
@@ -272,9 +296,10 @@ export const HeaderTitle = ({
   const shouldDisplayTitle = ![Sections.FORM, Sections.FAIL_TX, Sections.UNAUTHORIZED_TX].includes(
     section.currentSection
   );
-  const title = shouldDisplayTitle
-    ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
-    : undefined;
+  const title =
+    shouldDisplayTitle && headerText[section.currentSection]?.title
+      ? t(headerText[section.currentSection].title, { name: headerText[section.currentSection].name })
+      : undefined;
   const subtitle = headerText[section.currentSection]?.subtitle
     ? t(headerText[section.currentSection].subtitle)
     : undefined;

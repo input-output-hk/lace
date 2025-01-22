@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
+import { AddSharedWalletStorybookHelper, sharedWalletKey } from './AddSharedWalletStorybookHelper';
 
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
@@ -22,11 +22,11 @@ export const Closed: Story = {
 };
 
 export const OpenNoKeys: Story = {
-  name: 'Open - no keys',
+  name: 'Open - no key',
   render: () => <AddSharedWalletStorybookHelper modalOpen />,
 };
 
 export const OpenKeysAvailable: Story = {
-  name: 'Open - keys available',
-  render: () => <AddSharedWalletStorybookHelper activeWalletSharedKeys={sharedKeys} modalOpen />,
+  name: 'Open - key available',
+  render: () => <AddSharedWalletStorybookHelper activeWalletSharedKey={sharedWalletKey} modalOpen />,
 };

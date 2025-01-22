@@ -57,7 +57,7 @@ export const NftDetail = ({
       size="small"
       label={translations.setAsAvatar}
       icon={<ProfileIcon />}
-      onClick={() => onSetAsAvatar(image)}
+      onClick={() => image && onSetAsAvatar?.(image)}
       data-testid="nft-set-as-avatar-button"
     />
     <div className={styles.info}>
@@ -83,7 +83,7 @@ export const NftDetail = ({
                 </Breadcrumb>
               ) : (
                 <Flex justifyContent="space-between" gap="$1">
-                  <Box data-testid="folder-path-1">Root</Box>
+                  <Box testId="folder-path-1">Root</Box>
                   {folder && <Box px="$8">{'>'}</Box>}
                   {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />}
                 </Flex>

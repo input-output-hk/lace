@@ -30,7 +30,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "View transaction" button on submitted transaction page
     And Local storage unconfirmedTransaction contains tx with type: "internal"
     And I validate latest analytics single event "send | all done | view transaction | click"
-    When the Sent transaction is displayed with value: "2.12 tADA" and tokens count 1
+    When the Sent transaction is displayed with value: "2.30 tADA" and tokens count 1
     Then I validate latest analytics single event "send | transaction confirmed"
     And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "internal" in posthog
     And I validate that 7 analytics event(s) have been sent
@@ -58,11 +58,11 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
-    When I navigate to Transactions extended page
+    When I navigate to Activity extended page
     And I wait 2000 milliseconds
     And I set up request interception for posthog analytics request(s)
     Then Local storage unconfirmedTransaction contains tx with type: "external"
-    When the Sent transaction is displayed with value: "3.00 tADA" and tokens count 1
+    When the Sent transaction is displayed with value: "3.17 tADA" and tokens count 1
     Then I validate latest analytics single event "send | transaction confirmed"
     And I validate that the "send | transaction confirmed" event includes property "tx_creation_type" with value "external" in posthog
     And I validate that 1 analytics event(s) have been sent

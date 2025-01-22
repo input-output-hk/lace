@@ -24,10 +24,11 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useCallback } from 'react';
 import { AssetInfo } from '../../../types';
 import { MAX_NFT_TICKER_LENGTH, MAX_TOKEN_TICKER_LENGTH } from '../../../constants';
+import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 
 interface InputFieldActionParams {
   id: string;
-  value: string;
+  value?: string;
   maxDecimals?: number;
 }
 
@@ -38,6 +39,7 @@ export interface UseSelectedCoinsProps {
   /** Coin balance (ADA) in lovelace */
   coinBalance: string;
   insufficientBalanceInputs?: Array<string>;
+  insufficientAvailableBalanceInputs?: Array<string>;
   openAssetPicker?: (id: string) => void;
   spendableCoin: bigint;
 }
@@ -54,6 +56,7 @@ export const useSelectedCoins = ({
   assets,
   coinBalance,
   insufficientBalanceInputs,
+  insufficientAvailableBalanceInputs,
   openAssetPicker,
   bundleId,
   spendableCoin
@@ -76,26 +79,31 @@ export const useSelectedCoins = ({
   // This is used to focus on the last asset after the changes in the bundle
   const [bundleIdOfLastAddedCoin] = useCurrentRow();
 
+  const rewardAcountsData = useRewardAccountsData();
+
   /**
    * Displays the error with highest priority. Tx level error > Asset level error > Bundle level error
    */
   const getError = useCallback(
     (inputId: string, assetInput: AssetInfo): string | undefined => {
-      // If there is an error with the transaction, then display it over any other potential error
-      if (builtTxError) return builtTxError;
-
       // If the asset has an input value but there is no sufficient balance, then display an insufficient balance error.
       if (assetInput?.value && assetInput.value !== '0' && !!insufficientBalanceInputs?.includes(inputId)) {
         return COIN_SELECTION_ERRORS.BALANCE_INSUFFICIENT_ERROR;
+      }
+      // If the asset has an input value but it is less than the total balance, but more than the available balance, then display an insufficient available balance error.
+      if (assetInput?.value && assetInput.value !== '0' && !!insufficientAvailableBalanceInputs?.includes(inputId)) {
+        return COIN_SELECTION_ERRORS.AVAILABLE_BALANCE_INSUFFICIENT_ERROR;
       }
       // If there is a valid address but all coins have 0 as value or it's missing, then display a bundle empty error
       if (address && isValidAddress(address) && assetInputList.every((item) => !(item.value && Number(item.value)))) {
         return COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY;
       }
+      // Display an error with the tx itself
+      if (builtTxError) return builtTxError;
       // eslint-disable-next-line consistent-return
       return undefined;
     },
-    [address, assetInputList, builtTxError, insufficientBalanceInputs]
+    [address, assetInputList, builtTxError, insufficientBalanceInputs, insufficientAvailableBalanceInputs]
   );
 
   const handleOnChangeCoin = useCallback(
@@ -172,11 +180,19 @@ export const useSelectedCoins = ({
 
     // Asset is cardano coin
     if (assetInputItem.id === cardanoCoin.id) {
-      const { availableADA, hasReachedMaxAmount, ...adaCoinProps } = getADACoinProperties(
+      const {
+        totalADA,
+        availableADA,
+        lockedStakeRewards,
+        hasReachedMaxAmount,
+        hasReachedMaxAvailableAmount,
+        ...adaCoinProps
+      } = getADACoinProperties(
         coinBalance,
         spendableCoin?.toString(),
         tokensUsed[cardanoCoin.id] || '0',
-        assetInputItem?.value || '0'
+        assetInputItem?.value ?? '0',
+        rewardAcountsData.lockedStakeRewards.toString() || '0'
       );
       const fiatValue = Wallet.util.convertAdaToFiat({
         ada: assetInputItem?.value || '0',
@@ -186,13 +202,23 @@ export const useSelectedCoins = ({
         ...commonCoinProps,
         ...adaCoinProps,
         hasReachedMaxAmount: hasReachedMaxAmount && error !== COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR,
+        hasReachedMaxAvailableAmount:
+          hasReachedMaxAvailableAmount && error !== COIN_SELECTION_ERRORS.FULLY_DEPLETED_ERROR,
         coin: {
           id: cardanoCoin.id,
           ticker: cardanoCoin.symbol,
-          balance: t('send.balanceAmount', { amount: compactNumberWithUnit(availableADA) })
+          balance: t('send.balanceAmount', { amount: compactNumberWithUnit(totalADA) }),
+          ...(rewardAcountsData.lockedStakeRewards && {
+            availableBalance: t('send.availableBalanceAmount', {
+              amount: compactNumberWithUnit(availableADA)
+            }),
+            lockedStakeRewards: t('send.lockedStakeRewardsAmount', {
+              amount: compactNumberWithUnit(lockedStakeRewards.toString())
+            })
+          })
         },
-        formattedFiatValue: `= ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}`,
-        fiatValue: `= ${fiatValue} ${fiatCurrency?.code}`,
+        formattedFiatValue: `≈ ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}`,
+        fiatValue: `≈ ${fiatValue} ${fiatCurrency?.code}`,
         maxDecimals: cardanoCoin.decimals
       } as AssetInputListProps['rows'][number];
     }

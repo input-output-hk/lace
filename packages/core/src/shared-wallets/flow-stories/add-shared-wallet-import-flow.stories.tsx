@@ -1,6 +1,10 @@
 import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
+import {
+  AddSharedWalletFlowType,
+  AddSharedWalletStorybookHelper,
+  sharedWalletKey,
+} from './AddSharedWalletStorybookHelper';
 
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
@@ -21,7 +25,7 @@ export const Import: Story = {
   name: 'Import',
   render: () => (
     <AddSharedWalletStorybookHelper
-      activeWalletSharedKeys={sharedKeys}
+      activeWalletSharedKey={sharedWalletKey}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Import}
     />

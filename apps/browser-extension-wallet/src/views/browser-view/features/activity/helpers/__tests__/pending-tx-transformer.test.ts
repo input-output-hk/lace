@@ -9,7 +9,7 @@ let actualLovelacesToAdaString: any;
 import { pendingTxTransformer } from '../pending-tx-transformer';
 import { Wallet } from '@lace/cardano';
 import { cardanoCoin } from '@utils/constants';
-import { TxCBOR } from '@cardano-sdk/core';
+import { Serialization } from '@cardano-sdk/core';
 import { DEFAULT_TIME_FORMAT, formatTime } from '@src/utils/format-date';
 import BigNumber from 'bignumber.js';
 import { getFormattedFiatAmount } from '../common-tx-transformer';
@@ -85,7 +85,7 @@ describe('Testing tx transformers utils', () => {
       mockLovelacesToAdaString.mockImplementation(actualLovelacesToAdaString);
       const date = new Date();
       const result = await pendingTxTransformer({
-        tx: { ...pendingTx, cbor: TxCBOR.serialize(pendingTx) },
+        tx: { ...pendingTx, cbor: Serialization.TxCBOR.serialize(pendingTx) },
         walletAddresses: [
           {
             address: sendingAddress,
@@ -106,7 +106,10 @@ describe('Testing tx transformers utils', () => {
           Promise.resolve({
             address: sendingAddress,
             value: {
-              coins: BigInt('2000000')
+              coins: BigInt('2000000'),
+              assets: new Map([
+                [Wallet.Cardano.AssetId('6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7'), BigInt('100')]
+              ]) as Wallet.Cardano.TokenMap
             }
           })
       });
@@ -118,13 +121,13 @@ describe('Testing tx transformers utils', () => {
           depositReclaim: undefined,
           direction: 'Outgoing',
           fee: '1.00',
-          fiatAmount: '1.00 USD',
+          fiatAmount: '-2.00 USD',
           id: '6804edf9712d2b619edb6ac86861fe93a730693183a262b165fcc1ba1bc99cad',
-          amount: '1.00 ADA',
+          amount: '-2.00 ADA',
           assets: [
             {
               id: '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7',
-              val: '100'
+              val: '-100'
             }
           ],
           assetsNumber: 2,

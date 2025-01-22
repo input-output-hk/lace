@@ -1,0 +1,38 @@
+@import '../../../../../../common/src/ui/styles/abstracts/mixins';
+@import '../../../../../../common/src/ui/styles/theme.scss';
+
+.textArea:global(.ant-input) {
+  @include scroll-bar-style;
+  height: 158px !important;
+  overflow-y: scroll;
+  margin-top: 16px;
+  padding-top: 0 !important;
+  outline: 0 !important;
+  border: none !important;
+
+  &:hover {
+    border: none !important;
+  }
+}
+
+.wrapper {
+  padding-top: 24px !important;
+  background: var(--light-mode-light-grey, var(--dark-mode-dark-grey)) !important;
+  border-radius: 16px;
+}
+
+.validation {
+  height: size_unit(2);
+  padding-left: size_unit(3);
+}
+
+.success {
+  stroke: #2cb67d;
+}
+
+:global(.text-area-label) {
+  top: 30px;
+  left: 24px;
+  width: 520px;
+  background: var(--light-mode-light-grey, var(--dark-mode-dark-grey)) !important;
+}

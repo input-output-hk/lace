@@ -28,8 +28,10 @@ $aside-width-large: 420px;
     padding-right: 24px;
   }
 
-  @media (min-width: $breakpoint-small) {
-    margin-top: 120px;
+  &.withAside {
+    @media (min-width: $breakpoint-small) {
+      margin-top: 120px;
+    }
   }
 }
 
@@ -104,7 +106,7 @@ $aside-width-large: 420px;
   position: absolute;
   right: 0;
   // Large value to fit both send and receive buttons, plus dropdown trigger
-  width: 500px;
+  width: 650px;
 }
 
 .sidePanelContentBox {

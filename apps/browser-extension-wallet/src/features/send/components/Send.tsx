@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-  SendTransaction,
-  useCoinStateSelector,
-  useAddressState,
-  useSections,
   Sections,
-  useMultipleSelection
+  Transaction,
+  useAddressState,
+  useCoinStateSelector,
+  useMultipleSelection,
+  useSections
 } from '@src/views/browser-view/features/send-transaction';
 import {
   Footer,
@@ -76,7 +76,7 @@ export const Send = (): React.ReactElement => {
         }
         popupView
       >
-        <SendTransaction isPopupView />
+        <Transaction flow="send" isPopupView />
       </Drawer>
     </>
   );

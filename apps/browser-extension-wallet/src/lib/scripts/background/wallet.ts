@@ -1,14 +1,10 @@
+/* eslint-disable unicorn/no-null */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY } from 'rxjs';
+import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
 import { getProviders } from './config';
-import {
-  DEFAULT_LOOK_AHEAD_SEARCH,
-  HDSequentialDiscovery,
-  createPersonalWallet,
-  storage,
-  createSharedWallet
-} from '@cardano-sdk/wallet';
+import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
   StoresFactory,
@@ -26,26 +22,27 @@ import {
   walletRepositoryProperties
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { HANDLE_SERVER_URLS } from '@src/features/ada-handle/config';
-import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
-import axiosFetchAdapter from '@vespaiach/axios-fetch-adapter';
+import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
+import { SharedWalletScriptKind } from '@lace/core';
+import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
+import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
+import { logger } from '@lace/common';
+import { getBackgroundStorage } from '@lib/scripts/background/storage';
+import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { requestMessage$ } from './services/utilityServices';
+import { BackgroundStorage, MessageTypes } from '../types';
+import { ExtensionDocumentStore } from './storage/extension-document-store';
+import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
+import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
+import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
 
-const logger = console;
+if (typeof window !== 'undefined') {
+  throw new TypeError('This module should only be imported in service worker');
+}
 
-// It is important that this file is not exported from index,
-// because creating wallet repository with store creates an actual pouchdb database
-// which results in some trash files when running the tests (leveldb directory)
-export const walletRepository = new WalletRepository({
-  logger,
-  store: new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
-    { dbName: 'walletRepository' },
-    logger
-  )
-});
-
-const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
-  switch (chainId.networkMagic) {
+const networkMagicToChainName = (networkMagic: Cardano.NetworkMagic): Wallet.ChainName => {
+  switch (networkMagic) {
     case Wallet.Cardano.ChainIds.Mainnet.networkMagic:
       return 'Mainnet';
     case Wallet.Cardano.ChainIds.Preprod.networkMagic:
@@ -55,39 +52,99 @@ const chainIdToChainName = (chainId: Cardano.ChainId): Wallet.ChainName => {
     case Wallet.Cardano.ChainIds.Sanchonet.networkMagic:
       return 'Sanchonet';
     default:
-      throw new Error(`Unknown network magic: ${chainId.networkMagic}`);
+      throw new Error(`Unknown network magic: ${networkMagic}`);
   }
 };
 
+type FeatureFlags = BackgroundStorage['featureFlags'][0];
+const isExperimentEnabled = (featureFlags: FeatureFlags, experimentName: ExperimentName) =>
+  !!(featureFlags?.[experimentName] ?? false);
+
+const getFeatureFlags = async (networkMagic: Cardano.NetworkMagic) => {
+  const chainName = networkMagicToChainName(networkMagic);
+  const backgroundStorage = await getBackgroundStorage();
+  const magic = getMagicForChain(chainName);
+  return backgroundStorage?.featureFlags?.[magic];
+};
+
+const createPouchdbWalletRepositoryStore = () =>
+  new Wallet.storage.PouchDbCollectionStore<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>(
+    { dbName: 'walletRepository', computeDocId: (wallet) => wallet.walletId },
+    logger
+  );
+
+type StoredWallet = AnyWallet<Wallet.WalletMetadata, Wallet.WalletMetadata>;
+const createWalletRepositoryStore = (): Observable<storage.CollectionStore<StoredWallet>> =>
+  from(
+    (async () => {
+      // wallet repository is always using feature flag of 'mainnet', because it has to be the same for all networks
+      const featureFlags = await getFeatureFlags(Wallet.Cardano.ChainIds.Mainnet.networkMagic);
+      if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
+        const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
+        const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
+        if (!wallets) {
+          const pouchdbStore = createPouchdbWalletRepositoryStore();
+          await migrateCollectionStore(pouchdbStore, extensionStore, logger);
+        }
+        return extensionStore;
+      }
+
+      return createPouchdbWalletRepositoryStore();
+    })()
+  );
+
+// It is important that this file is not exported from index,
+// because creating wallet repository with store creates an actual pouchdb database
+// which results in some trash files when running the tests (leveldb directory)
+export const walletRepository = new WalletRepository({
+  logger,
+  store$: createWalletRepositoryStore()
+});
+
+// eslint-disable-next-line unicorn/no-null
+const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
+
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+  // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
-    const chainName: Wallet.ChainName = chainIdToChainName(chainId);
-    const providers = await getProviders(chainName);
+    const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
+    let providers = await getProviders(chainName);
 
-    const baseUrl = HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic];
+    const baseUrl = getBaseUrlForChain(chainName);
 
-    // This is used in place of the handle provider for environments where the handle provider is not available
+    // Sanchonet does not have a handle provider
+    const supportsHandleResolver = chainName !== 'Sanchonet';
+
+    // This is used in place ofgetProviders the handle provider for environments where the handle provider is not available
     const noopHandleResolver: HandleProvider = {
       resolveHandles: async () => [],
       healthCheck: async () => ({ ok: true }),
       getPolicyIds: async () => []
     };
 
-    if (wallet.type === WalletType.Script) {
-      const stakingScript = wallet.stakingScript as Cardano.RequireAllOfScript;
-      const paymentScript = wallet.paymentScript as Cardano.RequireAllOfScript;
+    if ('wsProvider' in providers) {
+      providers.wsProvider.health$.subscribe((check) => {
+        requestMessage$.next({ type: MessageTypes.WS_CONNECTION, data: { connected: check.ok } });
+      });
+    }
 
-      return createSharedWallet(
+    const featureFlags = await getFeatureFlags(chainId.networkMagic);
+
+    if (wallet.type === WalletType.Script) {
+      const stakingScript = wallet.stakingScript as SharedWalletScriptKind;
+      const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
+
+      const sharedWallet = createSharedWallet(
         { name: wallet.metadata.name },
         {
           ...providers,
           logger,
           paymentScript,
           stakingScript,
-          handleProvider: baseUrl
+          handleProvider: supportsHandleResolver
             ? handleHttpProvider({
                 adapter: axiosFetchAdapter,
-                baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+                baseUrl,
                 logger
               })
             : noopHandleResolver,
@@ -95,6 +152,12 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           witnesser
         }
       );
+
+      // Caches current wallet providers.
+      providers = { ...providers, inputResolver: { resolveInput: sharedWallet.util.resolveInput } };
+      currentWalletProviders$.next(providers);
+
+      return sharedWallet;
     }
 
     const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
@@ -107,30 +170,49 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
     });
 
-    return createPersonalWallet(
-      { name: walletAccount.metadata.name },
+    const useWebSocket = isExperimentEnabled(featureFlags, ExperimentName.WEBSOCKET_API);
+    const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))
+      ? // eslint-disable-next-line no-magic-numbers
+        Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
+      : DEFAULT_POLLING_CONFIG.pollInterval;
+
+    const personalWallet = createPersonalWallet(
+      {
+        name: walletAccount.metadata.name,
+        polling: {
+          ...DEFAULT_POLLING_CONFIG,
+          interval: useWebSocket ? DEFAULT_POLLING_CONFIG.pollInterval : localPollingIntervalConfig
+        }
+      },
       {
         logger,
         ...providers,
         stores,
-        handleProvider: baseUrl
+        handleProvider: supportsHandleResolver
           ? handleHttpProvider({
               adapter: axiosFetchAdapter,
-              baseUrl: HANDLE_SERVER_URLS[Cardano.ChainIds[chainName].networkMagic],
+              baseUrl,
               logger
             })
           : noopHandleResolver,
-        addressDiscovery: new HDSequentialDiscovery(providers.chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH),
         witnesser,
         bip32Account
       }
     );
+
+    // Caches current wallet providers.
+    providers = { ...providers, inputResolver: { resolveInput: personalWallet.util.resolveInput } };
+    currentWalletProviders$.next(providers);
+
+    return personalWallet;
   }
 };
 
-const storesFactory: StoresFactory = {
-  create: ({ name }) => {
-    const baseDbName = name.replace(/[^\da-z]/gi, '');
+export const getBaseDbName = (name: string): string => name.replace(/[^\da-z]/gi, '');
+
+const pouchdbStoresFactory: StoresFactory = {
+  create: async ({ name }) => {
+    const baseDbName = getBaseDbName(name);
     const docsDbName = `${baseDbName}Docs`;
     return {
       addresses: new storage.PouchDbAddressesStore(docsDbName, 'addresses', logger),
@@ -184,6 +266,69 @@ const storesFactory: StoresFactory = {
   }
 };
 
+export const extensionStorageStoresFactory: StoresFactory = {
+  create: async ({ name }) => ({
+    addresses: new ExtensionDocumentStore(`${name}_addresses`, logger),
+    assets: new ExtensionDocumentStore(`${name}_assets`, logger),
+    destroy() {
+      if (!this.destroyed) {
+        // since the database of document stores is shared, destroying any document store destroys all of them
+        this.destroyed = true;
+        logger.warn('Destroying wallet stores...');
+        const destroyDocumentsDb = this.tip.destroy();
+        return combineLatest([
+          destroyDocumentsDb,
+          this.transactions.destroy(),
+          this.utxo.destroy(),
+          this.unspendableUtxo.destroy(),
+          this.rewardsHistory.destroy(),
+          this.stakePools.destroy(),
+          this.rewardsBalances.destroy()
+        ]).pipe(map(() => void 0));
+      }
+      return EMPTY;
+    },
+    destroyed: false,
+    eraSummaries: new ExtensionDocumentStore(`${name}_eraSummaries`, logger),
+    genesisParameters: new ExtensionDocumentStore(`${name}_genesisParameters`, logger),
+    inFlightTransactions: new ExtensionDocumentStore(`${name}_transactionsInFlight`, logger),
+    policyIds: new ExtensionDocumentStore(`${name}_handlePolicyIds`, logger),
+    protocolParameters: new ExtensionDocumentStore(`${name}_protocolParameters`, logger),
+    rewardsBalances: new ExtensionBlobKeyValueStore(`${name}_rewardsBalances`, logger),
+    rewardsHistory: new ExtensionBlobKeyValueStore(`${name}_rewardsHistory`, logger),
+    stakePools: new ExtensionBlobKeyValueStore(`${name}_stakePools`, logger),
+    signedTransactions: new ExtensionDocumentStore(`${name}_signedTransactions`, logger),
+    tip: new ExtensionDocumentStore(`${name}_tip`, logger),
+    transactions: new ExtensionBlobCollectionStore(`${name}_transactions`, logger),
+    unspendableUtxo: new ExtensionBlobCollectionStore(`${name}_unspendableUtxo`, logger),
+    utxo: new ExtensionBlobCollectionStore(`${name}_utxo`, logger),
+    volatileTransactions: new ExtensionDocumentStore(`${name}_volatileTransactions`, logger)
+  })
+};
+
+// Used for migrations to get feature flags, which are enabled per chainId
+// This is coupled with WalletManager implementation (getWalletStoreId function)
+const getNetworkMagic = (storeName: string) => Number.parseInt(storeName.split('-')[1]) as Cardano.NetworkMagic;
+
+const storesFactory: StoresFactory = {
+  async create(props) {
+    const featureFlags = await getFeatureFlags(getNetworkMagic(props.name));
+    if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
+      const extensionStores = await extensionStorageStoresFactory.create(props);
+      if (await shouldAttemptWalletStoresMigration(extensionStores)) {
+        const pouchdbStores = await pouchdbStoresFactory.create(props);
+        if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
+          // TODO: safe to destroy pouchdb stores on successful migration
+          // once EXTENSION_STORAGE experiment runs in production for some time
+          // and we are sure that it's working well
+        }
+      }
+      return extensionStores;
+    }
+    return pouchdbStoresFactory.create(props);
+  }
+};
+
 const signingCoordinatorApi = consumeSigningCoordinatorApi({ logger, runtime });
 export const walletManager = new WalletManager(
   { name: process.env.WALLET_NAME },
@@ -220,9 +365,18 @@ walletManager
 
     exposeApi(
       {
-        api$: walletManager.activeWallet$.asObservable(),
+        api$: walletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
         baseChannel: walletChannel(process.env.WALLET_NAME),
         properties: observableWalletProperties
+      },
+      { logger, runtime }
+    );
+
+    exposeApi(
+      {
+        api$: currentWalletProviders$,
+        baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
+        properties: Wallet.walletProvidersProperties
       },
       { logger, runtime }
     );
@@ -232,5 +386,7 @@ walletManager
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
+
+cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;

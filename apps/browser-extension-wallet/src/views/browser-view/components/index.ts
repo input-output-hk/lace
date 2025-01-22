@@ -3,7 +3,7 @@ export * from './FundWalletBanner';
 export * from './Layout';
 export * from './PortfolioBalance';
 export * from './QRInfoWalletDrawer';
-export * from './SendReceiveBox';
+export * from './TransactionCTAsBox';
 export * from './SideMenu';
 export * from './WarningModal';
 export * from './SocialNetworks';

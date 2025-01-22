@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+import { ChainablePromiseElement } from 'webdriverio';
+
 class ToastMessage {
   private CONTAINER = '[data-testid="toast-content-wrapper"]';
   private MESSAGE_TEXT = '[data-testid="toast-message-text"]';
@@ -5,23 +8,23 @@ class ToastMessage {
   private CLOSE_BUTTON = '[data-testid="toast-close-btn"]';
   private PROGRESS_BAR = '[data-testid="progressbar-wrapper-id"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
   }
 
-  get messageText() {
+  get messageText(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MESSAGE_TEXT);
   }
 
-  get icon() {
+  get icon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ICON);
   }
 
-  get closeButton() {
+  get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLOSE_BUTTON);
   }
 
-  get progressBar() {
+  get progressBar(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PROGRESS_BAR);
   }
 

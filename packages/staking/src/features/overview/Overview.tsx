@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Box, ControlButton, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useObservable } from '@lace/common';
 import { Skeleton } from 'antd';
@@ -10,6 +11,7 @@ import { FundWalletBanner } from './FundWalletBanner';
 import { GetStartedSteps } from './GetStartedSteps';
 import { hasMinimumFundsToDelegate, hasPendingDelegationTransaction, mapPortfolioToDisplayData } from './helpers';
 import { useStakingSectionLoadActions } from './hooks';
+import { RegisterAsDRepBanner } from './RegisterAsDRepBanner';
 import { StakeFundsBanner } from './StakeFundsBanner';
 import { StakingInfoCard } from './StakingInfoCard';
 import { StakingNotificationBanners, getCurrentStakingNotifications } from './StakingNotificationBanners';
@@ -24,6 +26,10 @@ export const Overview = () => {
     walletAddress,
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
+    isSharedWallet,
+    govToolUrl,
+    openExternalLink,
+    useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
   const protocolParameters = useObservable(inMemoryWallet.protocolParameters$);
@@ -53,6 +59,9 @@ export const Overview = () => {
     totalCoinBalance,
   ]);
 
+  const { areAllRegisteredStakeKeysWithoutVotingDelegation: showRegisterAsDRepBanner, poolIdToRewardAccountsMap } =
+    useRewardAccountsData();
+
   if (
     !totalCoinBalance ||
     !protocolParameters?.hasOwnProperty('stakeKeyDeposit') ||
@@ -78,6 +87,7 @@ export const Overview = () => {
   const displayData = mapPortfolioToDisplayData({
     cardanoCoin: walletStoreWalletUICardanoCoin,
     cardanoPrice: fetchCoinPricePriceResult?.cardano?.price,
+    poolIdToRewardAccountsMap,
     portfolio: currentPortfolio,
   });
 
@@ -111,20 +121,27 @@ export const Overview = () => {
 
   return (
     <>
-      <Box mb="$40">
-        <DelegationCard
-          balance={compactNumber(balancesBalance.available.coinBalance)}
-          cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
-          distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
-            color,
-            name: name || '-',
-            percentage: onChainPercentage,
-            ros: ros ? String(ros) : undefined,
-            saturation: saturation ? String(saturation) : undefined,
-          }))}
-          status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
-        />
-      </Box>
+      {showRegisterAsDRepBanner && (
+        <Box mb="$28" mt="$32">
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} />
+        </Box>
+      )}
+      {!isSharedWallet && (
+        <Box mb="$40">
+          <DelegationCard
+            balance={compactNumber(balancesBalance.available.coinBalance)}
+            cardanoCoinSymbol={walletStoreWalletUICardanoCoin.symbol}
+            distribution={displayData.map(({ color, name, onChainPercentage, ros, saturation }) => ({
+              color,
+              name: name || '-',
+              percentage: onChainPercentage,
+              ros: ros ? String(ros) : undefined,
+              saturation: saturation ? String(saturation) : undefined,
+            }))}
+            status={currentPortfolio.length === 1 ? 'simple-delegation' : 'multi-delegation'}
+          />
+        </Box>
+      )}
       {stakingNotifications.length > 0 && (
         <Flex mb="$40" flexDirection="column">
           <StakingNotificationBanners notifications={stakingNotifications} />
@@ -132,15 +149,17 @@ export const Overview = () => {
       )}
       <Flex justifyContent="space-between" mb="$16">
         <Text.SubHeading>{t('overview.yourPoolsSection.heading')}</Text.SubHeading>
-        <ControlButton.Small
-          disabled={pendingDelegationTransaction}
-          onClick={onManageClick}
-          label={t('overview.yourPoolsSection.manageButtonLabel')}
-          data-testid="manage-btn"
-        />
+        {!isSharedWallet && (
+          <ControlButton.Small
+            disabled={pendingDelegationTransaction}
+            onClick={onManageClick}
+            label={t('overview.yourPoolsSection.manageButtonLabel')}
+            data-testid="manage-btn"
+          />
+        )}
       </Flex>
       {displayData.map((item) => (
-        <Box key={item.id} mb="$24" data-testid="delegated-pool-item">
+        <Box key={item.id} mb="$24" testId="delegated-pool-item">
           <StakingInfoCard
             {...item}
             markerColor={displayData.length > 1 ? item.color : undefined}

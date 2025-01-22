@@ -33,7 +33,7 @@ const makeButtons = ({ props, defaultLabel }: MakeButtonsParams) => {
   if (!leftButton && 'onBack' in props) {
     leftButton = (
       <Button.Secondary
-        label={props.customBackLabel || defaultLabel.back}
+        label={props.customBackLabel ?? defaultLabel.back}
         onClick={props.onBack}
         data-testid="shared-wallet-step-btn-back"
       />
@@ -45,7 +45,7 @@ const makeButtons = ({ props, defaultLabel }: MakeButtonsParams) => {
     rightButton = (
       <Button.CallToAction
         icon={props.isLoading ? <LoadingComponent className={styles.loadingIcon} /> : undefined}
-        label={props.customNextLabel || defaultLabel.next}
+        label={props.customNextLabel ?? defaultLabel.next}
         onClick={props.onNext}
         disabled={!props.isNextEnabled || props.isLoading}
         data-testid="shared-wallet-step-btn-next"
@@ -97,7 +97,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
         ))}
       </Timeline>
       <Flex h="$fill" w="$fill" flexDirection="column" p="$40">
-        <Flex data-testid="shared-wallet-step-header" flexDirection="column" justifyContent="center" gap="$32" mb="$32">
+        <Flex testId="shared-wallet-step-header" flexDirection="column" justifyContent="center" gap="$32" mb="$32">
           <Text.Heading data-testid="shared-wallet-step-title">{title}</Text.Heading>
           {description && (
             <Text.Body.Normal weight="$semibold" data-testid="shared-wallet-step-subtitle">
@@ -118,7 +118,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
         </ScrollArea>
 
         <Flex
-          data-testid="shared-wallet-step-footer"
+          testId="shared-wallet-step-footer"
           justifyContent={leftButton ? 'space-between' : 'flex-end'}
           w="$fill"
           alignItems="center"

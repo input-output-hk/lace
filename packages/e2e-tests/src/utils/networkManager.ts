@@ -8,34 +8,6 @@ export class NetworkManager {
   private readonly NETWORK_ENABLE = 'Network.enable';
   private static cdpSessions: CDPSession[] = [];
 
-  changeNetworkCapabilitiesOfBrowser = async (
-    offline: boolean,
-    latency: number,
-    downloadThroughput: number,
-    uploadThroughput: number
-  ): Promise<any> => {
-    await browser.call(async () => {
-      const puppeteer = await browser.getPuppeteer();
-      const targets = puppeteer
-        .targets()
-        .filter(
-          (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
-        );
-      targets.map(async (target) => {
-        const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-        NetworkManager.cdpSessions.push(client);
-        await client.send(this.NETWORK_ENABLE);
-        await client.send('Network.emulateNetworkConditions', {
-          offline,
-          latency,
-          downloadThroughput,
-          uploadThroughput
-        });
-      });
-    });
-    await browser.pause(2000);
-  };
-
   finishWithResponseCode = async (urlPattern: string, responseCode: number): Promise<any> => {
     await browser.call(async () => {
       const puppeteer = await browser.getPuppeteer();

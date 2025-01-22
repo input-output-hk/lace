@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Button } from '@lace/common';
+import { Button, toast } from '@lace/common';
 import styles from '../Collateral.module.scss';
 import { useTranslation } from 'react-i18next';
 import { useBackgroundServiceAPIContext } from '@providers';
@@ -8,6 +8,7 @@ import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { useSecrets } from '@src/../../../packages/core/dist/ui/hooks';
 
 interface CollateralFooterProps {
   onClose: () => void;
@@ -15,7 +16,7 @@ interface CollateralFooterProps {
   walletType: string;
   setIsPasswordValid: (isPasswordValid: boolean) => void;
   popupView: boolean;
-  password: string;
+  secretsUtil: ReturnType<typeof useSecrets>;
   submitCollateralTx: () => Promise<void>;
   hasEnoughAda: boolean;
   isInitializing: boolean;
@@ -29,7 +30,7 @@ export const CollateralFooterSend = ({
   walletType,
   setIsPasswordValid,
   popupView,
-  password,
+  secretsUtil,
   submitCollateralTx,
   hasEnoughAda,
   isInitializing,
@@ -40,11 +41,9 @@ export const CollateralFooterSend = ({
   const backgroundServices = useBackgroundServiceAPIContext();
   const isInMemory = walletType === WalletType.InMemory;
 
-  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, password);
+  const submitTx = async () => withSignTxConfirmation(submitCollateralTx, secretsUtil.password.value);
 
   const handleClick = async () => {
-    onClaim();
-
     if (!hasEnoughAda) {
       return onClose();
     }
@@ -52,6 +51,8 @@ export const CollateralFooterSend = ({
       if (popupView && !isInMemory)
         return await backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.COLLATERAL_SETTINGS });
       await submitTx();
+      onClaim();
+      toast.notify({ text: t('browserView.settings.wallet.collateral.toast.add') });
       if (isInMemory) onClose();
     } catch {
       if (!isInMemory) {
@@ -78,7 +79,7 @@ export const CollateralFooterSend = ({
   }, [hasEnoughAda, isInMemory, walletType, popupView, t]);
 
   // password is not required for hw flow
-  const isPasswordMissing = isInMemory && !password;
+  const isPasswordMissing = isInMemory && !secretsUtil.password.value;
   const isButtonDisabled = hasEnoughAda && isPasswordMissing;
 
   return (

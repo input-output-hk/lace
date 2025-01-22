@@ -101,7 +101,9 @@ export const QuorumOption = ({
               render: ({ optionElement }) => (
                 <Box mb="$16">
                   <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.AllAddresses}`}>
-                    <Flex p="$16">{optionElement}</Flex>
+                    <Flex p="$16">
+                      <Text.Body.Normal>{optionElement}</Text.Body.Normal>
+                    </Flex>
                   </Card.Outlined>
                 </Box>
               ),
@@ -113,7 +115,9 @@ export const QuorumOption = ({
               render: ({ optionElement }) => (
                 <Card.Outlined data-testid={`setup-quorum-user-option-${QuorumRadioOption.NOfK}`}>
                   <Flex p="$16" flexDirection="column">
-                    <Box mb="$10">{optionElement}</Box>
+                    <Box mb="$10">
+                      <Text.Body.Normal>{optionElement}</Text.Body.Normal>
+                    </Box>
                     <Flex
                       pl="$40"
                       w="$fill"

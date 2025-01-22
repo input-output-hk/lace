@@ -217,6 +217,7 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: size_unit(2);
+  gap: size_unit(1);
 
   .poolsTitle {
     @include text-body-semi-bold;
@@ -251,6 +252,13 @@ $border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-
 
   .lightLabel {
     color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
+  }
+
+  .poolName {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

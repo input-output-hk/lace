@@ -8,7 +8,7 @@ export class CoinConfigure {
   protected CONTAINER = '//div[@data-testid="coin-configure"]';
   protected DRAWER_NAVIGATION_HEADER = '//div[@data-testid="drawer-navigation"]';
   private TOKEN_NAME = '//div[@data-testid="coin-configure-text"]';
-  private TOKEN_VALUE = '//p[@data-testid="coin-configure-balance"]';
+  private TOKEN_VALUE = '//div[@data-testid="coin-configure-balance"]';
   private TOKEN_INPUT = '//input[@data-testid="coin-configure-input"]';
   private TOKEN_FIAT_VALUE = '//p[@data-testid="coin-configure-fiat-value"]';
   private ASSET_REMOVE_BUTTON = '//div[@data-testid="asset-input-remove-button"]';
@@ -68,10 +68,10 @@ export class CoinConfigure {
     return Number(value);
   };
 
-  fillTokenValue = async (valueToEnter: number): Promise<void> => {
+  fillTokenValue = async (valueToEnter: number | string, loseFocus = true): Promise<void> => {
     await this.input.waitForClickable();
     await setInputFieldValue(await this.input, String(valueToEnter));
-    await this.clickToLoseFocus();
+    if (loseFocus) await this.clickToLoseFocus();
   };
 
   fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {

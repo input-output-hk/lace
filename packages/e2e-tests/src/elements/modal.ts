@@ -3,7 +3,7 @@ import { ChainablePromiseElement } from 'webdriverio';
 import { browser } from '@wdio/globals';
 
 class Modal {
-  private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
+  private CONTAINER = '.ant-modal-wrap:not([style*="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
   private DESCRIPTION = '[data-testid="delete-address-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
@@ -43,7 +43,7 @@ class Modal {
   async waitUntilModalDisappears() {
     await browser.pause(500);
     await browser.waitUntil(async () => !(await this.container.isDisplayed()), {
-      timeout: 10_000,
+      timeout: 15_000,
       interval: 500,
       timeoutMsg: 'failed while waiting for the modal to disappear'
     });

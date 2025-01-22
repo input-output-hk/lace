@@ -14,9 +14,15 @@ import {
 } from '../../PostHogClientProvider/client';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
-import { PostHogMultiWalletAction, PostHogOnboardingAction } from './events';
+import { PostHogMultiWalletAction, PostHogOnboardingAction, PostHogNamiMigrationAction } from './events';
+import { NamiModeActions } from '@lace/nami';
 
-type Action = PostHogAction | PostHogMultiWalletAction | PostHogOnboardingAction;
+export type Action =
+  | PostHogAction
+  | PostHogMultiWalletAction
+  | PostHogOnboardingAction
+  | PostHogNamiMigrationAction
+  | NamiModeActions;
 
 interface AnalyticsTrackerArgs {
   postHogClient?: PostHogClient<Action>;

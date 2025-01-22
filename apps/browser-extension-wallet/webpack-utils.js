@@ -1,3 +1,8 @@
+const constructSentryConnectSrc = (dsn) => {
+  if (/https:\/\/[^@]+@([^/]+).*/.test(dsn)) return dsn.replace(/https:\/\/[^@]+@([^/]+).*/, 'https://$1');
+  return '';
+};
+
 const transformManifest = (content, mode) => {
   require('dotenv-defaults').config({
     path: './.env',

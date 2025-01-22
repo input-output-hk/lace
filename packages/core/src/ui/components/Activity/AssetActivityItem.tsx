@@ -1,6 +1,7 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable react/no-multi-comp */
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
@@ -9,24 +10,19 @@ import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
 import { ReactComponent as PendingIcon } from '../../assets/icons/pending.component.svg';
 import { ReactComponent as ErrorIcon } from '../../assets/icons/error.component.svg';
+import { ReactComponent as AwaitingSignatureIcon } from '../../assets/icons/awaiting-signatures.svg';
 import pluralize from 'pluralize';
 import { txIconSize } from '@src/ui/utils/icon-size';
-import { DelegationActivityType, TransactionActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
+import { DelegationActivityType, ConwayEraCertificatesTypes } from '../ActivityDetail/types';
 import type { ActivityType } from '../ActivityDetail/types';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '../ActivityDetail/ActivityTypeIcon';
 import { useTranslation } from 'react-i18next';
 import { CoreTranslationKey } from '@lace/translation';
+import { ActivityStatus, TransactionActivityType } from '@ui/components/Transaction';
 
 export type ActivityAssetInfo = { ticker: string };
 export type ActivityAssetProp = { id: string; val: string; info?: ActivityAssetInfo };
-
-export enum ActivityStatus {
-  SUCCESS = 'success',
-  PENDING = 'sending',
-  ERROR = 'error',
-  SPENDABLE = 'spendable'
-}
 
 const DEFAULT_DEBOUNCE = 200;
 
@@ -69,10 +65,21 @@ export interface AssetActivityItemProps {
 
 const DELEGATION_ASSET_NUMBER = 1;
 
-interface ActivityStatusIconProps {
-  status: ActivityStatus;
+interface ActivityStatusRequiringType {
+  status: ActivityStatus.SUCCESS;
   type: ActivityType;
 }
+
+interface ActivityStatusNotRequiringType {
+  status:
+    | ActivityStatus.SPENDABLE
+    | ActivityStatus.ERROR
+    | ActivityStatus.PENDING
+    | ActivityStatus.AWAITING_COSIGNATURES;
+  type?: ActivityType;
+}
+
+type ActivityStatusIconProps = ActivityStatusRequiringType | ActivityStatusNotRequiringType;
 
 const offsetMargin = 10;
 
@@ -85,6 +92,8 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
       return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
+    case ActivityStatus.AWAITING_COSIGNATURES:
+      return <Icon component={AwaitingSignatureIcon} style={iconStyle} data-testid="activity-status" />;
     case ActivityStatus.ERROR:
     default:
       return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
@@ -95,8 +104,10 @@ const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
   TransactionActivityType.outgoing,
   DelegationActivityType.delegationRegistration,
   ConwayEraCertificatesTypes.Registration,
+  ConwayEraCertificatesTypes.RegisterDelegateRepresentative,
   TransactionActivityType.self,
-  DelegationActivityType.delegation
+  DelegationActivityType.delegation,
+  TransactionActivityType.awaitingCosignatures
 ]);
 
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
@@ -118,7 +129,7 @@ export const AssetActivityItem = ({
   const getText = useCallback(
     (items: number): { text: string; suffix: string } => {
       if (
-        type in DelegationActivityType ||
+        (type && type in DelegationActivityType) ||
         type === ConwayEraCertificatesTypes.Registration ||
         type === ConwayEraCertificatesTypes.Unregistration ||
         type === TransactionActivityType.self
@@ -127,9 +138,9 @@ export const AssetActivityItem = ({
 
       const assetsIdsText = assets
         ?.slice(0, items)
-        .map(({ val, info }) => `${val} ${info?.ticker || '"?"'}`)
+        .map(({ val, info }) => `${val} ${info?.ticker ?? '"?"'}`)
         .join(', ');
-      const suffix = assets?.length - items > 0 ? `, +${assets.length - items}` : '';
+      const suffix = assets && assets?.length - items > 0 ? `, +${assets.length - items}` : '';
       const appendedAssetId = assetsIdsText ? `, ${assetsIdsText}` : '';
       return {
         text: `${amount}${appendedAssetId}`,
@@ -166,10 +177,11 @@ export const AssetActivityItem = ({
   }, [debouncedSetText]);
 
   const isPendingTx = status === ActivityStatus.PENDING;
+  const isAwaitingCoSigningTx = status === ActivityStatus.AWAITING_COSIGNATURES;
   const assetsText = useMemo(() => getText(assetsToShow), [getText, assetsToShow]);
 
   const assetAmountContent =
-    type in DelegationActivityType ||
+    (type && type in DelegationActivityType) ||
     type === ConwayEraCertificatesTypes.Registration ||
     type === ConwayEraCertificatesTypes.Unregistration ? (
       <p data-testid="tokens-amount" className={styles.description}>
@@ -188,7 +200,7 @@ export const AssetActivityItem = ({
     assetAmountContent
   );
 
-  const isNegativeBalance = negativeBalanceStyling.has(type);
+  const isNegativeBalance = type && negativeBalanceStyling.has(type);
 
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
@@ -197,12 +209,13 @@ export const AssetActivityItem = ({
           {customIcon ? (
             <Image src={customIcon} className={styles.icon} preview={false} alt="asset image" />
           ) : (
-            <ActivityStatusIcon status={status} type={type} />
+            type && <ActivityStatusIcon status={status ?? ActivityStatus.ERROR} type={type} />
           )}
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
             {isPendingTx &&
+            type &&
             type !== TransactionActivityType.self &&
             !(type in DelegationActivityType) &&
             type !== ConwayEraCertificatesTypes.Registration &&
@@ -210,32 +223,37 @@ export const AssetActivityItem = ({
               ? t('core.assetActivityItem.entry.name.sending')
               : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
-          {descriptionContent}
+          {isAwaitingCoSigningTx ? (
+            <p data-testid="timestamp" className={styles.description}>
+              {t('core.assetActivityItem.entry.name.awaitingCosignatures')}
+            </p>
+          ) : (
+            descriptionContent
+          )}
         </div>
       </div>
       <div data-testid="asset-amount" className={styles.rightSide}>
         <h6
           data-testid="total-amount"
           className={cn(styles.title, {
-            [styles.pendingNegativeBalance]: isNegativeBalance && status === ActivityStatus.PENDING,
+            [styles.pendingNegativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx),
             [styles.positiveBalance]: !isNegativeBalance,
-            [styles.negativeBalance]: isNegativeBalance && status !== ActivityStatus.PENDING
+            [styles.negativeBalance]: isNegativeBalance && (isPendingTx || isAwaitingCoSigningTx)
           })}
           ref={ref}
         >
           <span>
-            <span data-testid="balance">
-              {isNegativeBalance ? '-' : ''}
-              {assetsText.text}
-            </span>
+            <span data-testid="balance">{assetsText.text}</span>
             {assetsText.suffix && (
               <Tooltip
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
-                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker || '?'}`}</div>
-                    ))}
+                    {assets
+                      ?.slice(assetsToShow, assets.length)
+                      .map(({ id, val, info }) => (
+                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                      ))}
                   </>
                 }
               >

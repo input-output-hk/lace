@@ -8,7 +8,11 @@ import { QuorumRadioOption } from '../add-shared-wallet/creation-flow/Quorum';
 import { makeInitialState } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState, SharedWalletCreationStep } from '../add-shared-wallet/creation-flow/state-and-types';
 import { validateCoSigners } from '../add-shared-wallet/creation-flow/validateCoSigners';
-import { AddSharedWalletFlowType, AddSharedWalletStorybookHelper, sharedKeys } from './AddSharedWalletStorybookHelper';
+import {
+  AddSharedWalletFlowType,
+  AddSharedWalletStorybookHelper,
+  sharedWalletKey,
+} from './AddSharedWalletStorybookHelper';
 
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
@@ -29,7 +33,7 @@ export const Setup: Story = {
   name: 'Setup',
   render: () => (
     <AddSharedWalletStorybookHelper
-      activeWalletSharedKeys={sharedKeys}
+      activeWalletSharedKey={sharedWalletKey}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -42,18 +46,18 @@ export const Setup: Story = {
 const coSignersData: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
   {
     id: 'cosigner1',
-    keys: sharedKeys,
     name: 'Sophia',
+    sharedWalletKey,
   },
   {
     id: 'cosigner2',
-    keys: sharedKeys,
     name: 'Martha',
+    sharedWalletKey,
   },
 ]);
 const coSignersStateData: CreationFlowState = {
   activeWalletName: 'My Wallet',
-  coSignerInputsDirty: coSignersData.map((signer) => ({ id: signer.id, keys: true, name: true })),
+  coSignerInputsDirty: coSignersData.map((signer) => ({ id: signer.id, name: true, sharedWalletKey: true })),
   coSignerInputsErrors: [],
   coSigners: coSignersData,
   quorumRules: undefined,
@@ -65,16 +69,16 @@ export const CoSigners: Story = {
   name: 'CoSigners',
   render: () => {
     const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
-      createCoSignerObject(sharedKeys),
+      createCoSignerObject(sharedWalletKey),
     ]);
     return (
       <AddSharedWalletStorybookHelper
-        activeWalletSharedKeys={sharedKeys}
+        activeWalletSharedKey={sharedWalletKey}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
           ...coSignersStateData,
-          coSignerInputsDirty: coSigners.map((signer) => ({ id: signer.id, keys: false, name: false })),
+          coSignerInputsDirty: coSigners.map((signer) => ({ id: signer.id, name: false, sharedWalletKey: false })),
           coSigners,
         }}
       />
@@ -88,28 +92,32 @@ export const CoSignersUserPlus2: Story = {
     const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
       {
         id: 'cosigner1',
-        keys: sharedKeys,
         name: 'Initiator',
+        sharedWalletKey,
       },
       {
         id: 'cosigner2',
-        keys: sharedKeys,
         name: 'Sophia',
+        sharedWalletKey,
       },
       {
         id: 'cosigner3',
-        keys: sharedKeys,
         name: 'Martha',
+        sharedWalletKey,
       },
     ]);
     return (
       <AddSharedWalletStorybookHelper
-        activeWalletSharedKeys={sharedKeys}
+        activeWalletSharedKey={sharedWalletKey}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
           ...coSignersStateData,
-          coSignerInputsDirty: coSigners.map((signer) => ({ id: signer.id, keys: !!signer.keys, name: !!signer.name })),
+          coSignerInputsDirty: coSigners.map((signer) => ({
+            id: signer.id,
+            name: !!signer.name,
+            sharedWalletKey: !!signer.sharedWalletKey,
+          })),
           coSigners,
         }}
       />
@@ -123,23 +131,23 @@ export const CoSignersWithErrors: Story = {
     const coSigners: CreationFlowState['coSigners'] = ensureCorrectCoSignersDataShape([
       {
         id: 'cosigner1',
-        keys: 'invalid keys',
         name: 'Sophia',
+        sharedWalletKey: 'invalid sharedWalletKey',
       },
       {
         id: 'cosigner2',
-        keys: '',
         name: 'Sophia',
+        sharedWalletKey: '',
       },
     ]);
     return (
       <AddSharedWalletStorybookHelper
-        activeWalletSharedKeys={sharedKeys}
+        activeWalletSharedKey={sharedWalletKey}
         modalOpen
         initialFlow={AddSharedWalletFlowType.Creation}
         creationInitialState={{
           ...coSignersStateData,
-          coSignerInputsDirty: coSigners.map((signer) => ({ id: signer.id, keys: true, name: true })),
+          coSignerInputsDirty: coSigners.map((signer) => ({ id: signer.id, name: true, sharedWalletKey: true })),
           coSignerInputsErrors: validateCoSigners(coSigners),
           coSigners,
         }}
@@ -152,7 +160,7 @@ export const CoSignersConfirmation: Story = {
   name: 'CoSigners - confirmation',
   render: () => (
     <AddSharedWalletStorybookHelper
-      activeWalletSharedKeys={sharedKeys}
+      activeWalletSharedKey={sharedWalletKey}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
@@ -163,17 +171,17 @@ export const CoSignersConfirmation: Story = {
   ),
 };
 
-const filteredCosigners = coSignersStateData.coSigners.filter((c) => c.keys && c.name);
+const filteredCosigners = coSignersStateData.coSigners.filter((c) => c.sharedWalletKey && c.name);
 export const Quorum: Story = {
   name: 'Quorum',
   render: () => (
     <AddSharedWalletStorybookHelper
-      activeWalletSharedKeys={sharedKeys}
+      activeWalletSharedKey={sharedWalletKey}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{
         ...coSignersStateData,
-        coSignerInputsDirty: filteredCosigners.map((signer) => ({ id: signer.id, keys: true, name: true })),
+        coSignerInputsDirty: filteredCosigners.map((signer) => ({ id: signer.id, name: true, sharedWalletKey: true })),
         coSigners: filteredCosigners,
         quorumRules: {
           numberOfCosigner: 1,
@@ -188,7 +196,7 @@ export const ShareDetails: Story = {
   name: 'ShareDetails',
   render: () => (
     <AddSharedWalletStorybookHelper
-      activeWalletSharedKeys={sharedKeys}
+      activeWalletSharedKey={sharedWalletKey}
       modalOpen
       initialFlow={AddSharedWalletFlowType.Creation}
       creationInitialState={{

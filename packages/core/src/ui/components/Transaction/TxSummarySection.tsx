@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { TransactionActivityType, TransactionDetailsProps } from '../ActivityDetail';
+import { TransactionDetailsProps, TransactionActivityType } from './types';
 import styles from '../ActivityDetail/TransactionDetails.module.scss';
 import { Ellipsis } from '@lace/common';
 import { Text } from '@input-output-hk/lace-ui-toolkit';

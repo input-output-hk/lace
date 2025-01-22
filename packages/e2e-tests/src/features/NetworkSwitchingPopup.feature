@@ -10,7 +10,7 @@ Feature: LW: Network Switching - popup view
     And Wallet is synced
     When I navigate to Tokens popup page
     Then I see <ticker> in the list of tokens
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     And I wait for the transaction history to be loaded and all transactions to be confirmed
     Then I see <ticker> in the list of transactions
     When I navigate to Staking popup page

@@ -17,6 +17,8 @@ export const buildMockTx = (
     outputs?: Wallet.Cardano.TxOut[];
     certificates?: Wallet.Cardano.Certificate[];
     withdrawals?: Wallet.Cardano.Withdrawal[];
+    votingProcedures?: Wallet.Cardano.VotingProcedures;
+    proposalProcedures?: Wallet.Cardano.ProposalProcedure[];
   } = {}
 ): Wallet.Cardano.HydratedTx =>
   ({
@@ -34,6 +36,8 @@ export const buildMockTx = (
       mint: new Map([
         [Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41'), BigInt(3)]
       ]),
+      proposalProcedures: args.proposalProcedures || undefined,
+      votingProcedures: args.votingProcedures || undefined,
       inputs: args.inputs ?? [
         {
           address: sendingAddress.address,
@@ -80,4 +84,4 @@ export const buildMockTx = (
     },
     id: Wallet.Cardano.TransactionId('e3a443363eb6ee3d67c5e75ec10b931603787581a948d68fa3b2cd3ff2e0d2ad'),
     index: 0
-  } as Wallet.Cardano.HydratedTx);
+  }) as Wallet.Cardano.HydratedTx;

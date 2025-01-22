@@ -2,7 +2,7 @@ import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserId } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
-import { DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP } from '@providers/PostHogClientProvider/client/config';
+import { DEV_POSTHOG_TOKEN } from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
@@ -10,13 +10,16 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
-const mockBackgroundStorageUtil = { getBackgroundStorage: jest.fn(), setBackgroundStorage: jest.fn() };
+const mockBackgroundStorageUtil = {
+  getBackgroundStorage: jest.fn(() => Promise.resolve({})),
+  setBackgroundStorage: jest.fn()
+};
 const mockUserId$ = new ReplaySubject<UserId>();
 
 jest.mock('posthog-js');
 
 describe('PostHogClient', () => {
-  const publicPosthogHost = 'test';
+  const posthogHost = 'test';
   const chain = Wallet.Cardano.ChainIds.Preprod;
   const userId = 'userId';
   const mockUserIdService = {
@@ -31,20 +34,20 @@ describe('PostHogClient', () => {
 
   it('should initialize posthog on construction', async () => {
     // eslint-disable-next-line no-new
-    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
 
     await waitFor(() => expect(client).toBeDefined());
     expect(posthog.init).toHaveBeenCalledWith(
-      expect.stringContaining(DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[chain.networkMagic]),
+      expect.stringContaining(DEV_POSTHOG_TOKEN),
       expect.objectContaining({
         // eslint-disable-next-line camelcase
-        api_host: publicPosthogHost
+        api_host: posthogHost
       })
     );
   });
 
   it('should send page navigation events with distinct id and view = extended as default', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
     await client.sendPageNavigationEvent();
     expect(posthog.capture).toHaveBeenCalledWith(
       '$pageview',
@@ -57,7 +60,7 @@ describe('PostHogClient', () => {
   });
 
   it('should send session started event', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
     await client.sendSessionStartEvent();
     expect(posthog.capture).toHaveBeenCalledWith(
       PostHogAction.WalletSessionStartPageview,
@@ -70,7 +73,7 @@ describe('PostHogClient', () => {
   });
 
   it('should send events with distinct id', async () => {
-    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
     const event = PostHogAction.OnboardingCreateClick;
     const extraProps = { some: 'prop', another: 'test' };
 
@@ -88,12 +91,12 @@ describe('PostHogClient', () => {
 
   it('should be possible to change the chain', () => {
     const previewChain = Wallet.Cardano.ChainIds.Preview;
-    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, publicPosthogHost);
+    const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
     expect(posthog.set_config).not.toHaveBeenCalled();
     client.setChain(previewChain);
     expect(posthog.set_config).toHaveBeenCalledWith(
       expect.objectContaining({
-        token: DEV_NETWORK_ID_TO_POSTHOG_TOKEN_MAP[previewChain.networkMagic]
+        token: DEV_POSTHOG_TOKEN
       })
     );
   });
@@ -104,7 +107,7 @@ describe('PostHogClient', () => {
       mockUserIdService,
       mockBackgroundStorageUtil,
       ExtensionViews.Popup,
-      publicPosthogHost
+      posthogHost
     );
     const event = PostHogAction.OnboardingCreateClick;
 
@@ -124,7 +127,7 @@ describe('PostHogClient', () => {
       mockUserIdService,
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
     const event = PostHogAction.OnboardingCreateClick;
 
@@ -145,7 +148,7 @@ describe('PostHogClient', () => {
       mockUserIdService,
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
     const event = PostHogAction.OnboardingCreateClick;
 
@@ -168,7 +171,7 @@ describe('PostHogClient', () => {
       { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
     await client.sendAliasEvent();
     expect(posthog.alias).toHaveBeenCalledWith(mockAliasProperties.alias, mockAliasProperties.id);
@@ -181,7 +184,7 @@ describe('PostHogClient', () => {
       { ...mockUserIdService, getAliasProperties: mockGetAliasProperties },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
     await client.sendAliasEvent();
     expect(posthog.alias).not.toHaveBeenCalled();
@@ -194,7 +197,7 @@ describe('PostHogClient', () => {
       mockUserIdService,
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
     mockUserIdService.userId$.next({
       type: UserTrackingType.Enhanced,
@@ -205,6 +208,8 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         $set: {
+          // eslint-disable-next-line camelcase
+          opted_in_beta: false,
           // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
@@ -224,7 +229,7 @@ describe('PostHogClient', () => {
       { ...mockUserIdService, userId$: tracking },
       mockBackgroundStorageUtil,
       ExtensionViews.Extended,
-      publicPosthogHost
+      posthogHost
     );
 
     await client.sendEvent(event);
@@ -232,6 +237,8 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         $set: {
+          // eslint-disable-next-line camelcase
+          opted_in_beta: false,
           // eslint-disable-next-line camelcase
           user_tracking_type: 'enhanced'
         }
@@ -246,6 +253,8 @@ describe('PostHogClient', () => {
       event,
       expect.objectContaining({
         $set: {
+          // eslint-disable-next-line camelcase
+          opted_in_beta: false,
           // eslint-disable-next-line camelcase
           user_tracking_type: 'basic'
         }

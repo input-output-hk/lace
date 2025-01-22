@@ -16,7 +16,8 @@ const esmExceptions = jestEsmExceptions([
   '@rxstate/core',
   'intersection-observer-polyfill',
   'p-retry',
-  'p-debounce'
+  'p-debounce',
+  'react-icons'
 ]);
 
 const rootDir = process.cwd();
@@ -32,13 +33,14 @@ const createJestConfig = (jestConfig) => {
       ...jestConfig.transform,
       ...esmExceptions.transform,
       '^.+\\.(ts|tsx)$': [
-        'ts-jest', {
+        'ts-jest',
+        {
           tsconfig: `${rootDir}/src/tsconfig.json`
         }
-     ]
+      ]
     },
     transformIgnorePatterns: [...transformIgnorePatterns, ...esmExceptions.transformIgnorePatterns]
   };
 };
 
-module.exports = { createJestConfig };
+module.exports = { createJestConfig, esmExceptions };

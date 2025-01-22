@@ -33,7 +33,7 @@ export const TopUpWalletDialog = ({
           <TextLink
             onClick={handleOpenTabBanxaHomepage}
             label={t('browserView.assets.topupWallet.disclaimer.full.banxaLinkCaption')}
-            data-testid="top-up-wallet-dialog-disclaimer-link-caption-1"
+            testId="top-up-wallet-dialog-disclaimer-link-caption-1"
           />
           <Text.Body.Normal weight="$medium" color="secondary" data-testid="top-up-wallet-dialog-disclaimer-part2">
             {t('browserView.assets.topupWallet.disclaimer.full.part2')}
@@ -41,7 +41,7 @@ export const TopUpWalletDialog = ({
           <TextLink
             onClick={handleOpenTabBanxaHomepage}
             label={t('browserView.assets.topupWallet.disclaimer.full.banxaLinkCaption')}
-            data-testid="top-up-wallet-dialog-disclaimer-link-caption-2"
+            testId="top-up-wallet-dialog-disclaimer-link-caption-2"
           />
         </Box>
       </Dialog.Description>

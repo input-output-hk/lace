@@ -7,7 +7,7 @@ Feature: Transactions - Extended view
   @LW-8711
   Scenario: Analytics - Popup View - Transactions tab - Details and close
     Given I set up request interception for posthog analytics request(s)
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     Then I validate latest analytics single event "activity | activity | click"
     When I click on a transaction: 1
     Then I validate latest analytics single event "activity | activity | activity row | click"
@@ -21,7 +21,7 @@ Feature: Transactions - Extended view
 
   @LW-8712
   Scenario: Analytics - Popup View - Transactions tab - Details - Click hash
-    When I navigate to Transactions popup page
+    When I navigate to Activity popup page
     When I click on a transaction: 1
     And I set up request interception for posthog analytics request(s)
     And I click on a transaction hash

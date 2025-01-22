@@ -5,6 +5,7 @@ import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { saveValueInLocalStorage } from '@src/utils/local-storage';
 import { useKeyboardShortcut } from '@lace/common';
+import { OnPasswordChange, useSecrets } from '@lace/core';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -21,17 +22,17 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const backgroundService = useBackgroundServiceAPIContext();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
-  const [password, setPassword] = useState('');
+  const { password, setPassword, clearSecrets } = useSecrets();
   const [isValidPassword, setIsValidPassword] = useState(true);
 
-  const handlePasswordChange = useCallback(
-    ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = useCallback<OnPasswordChange>(
+    (target) => {
       if (!isValidPassword) {
         setIsValidPassword(true);
       }
-      setPassword(value);
+      setPassword(target);
     },
-    [isValidPassword]
+    [isValidPassword, setPassword]
   );
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
   const onUnlock = async (): Promise<void> => {
     setIsVerifyingPassword(true);
     try {
-      const decrypted = await unlockWallet(password);
+      const decrypted = await unlockWallet();
       setIsValidPassword(decrypted);
       analytics.sendEventToPostHog(PostHogAction.UnlockWalletWelcomeBackUnlockClick);
       if (decrypted) {
@@ -51,6 +52,8 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
       }
     } catch {
       setIsValidPassword(false);
+    } finally {
+      clearSecrets();
     }
     setIsVerifyingPassword(false);
   };
@@ -71,8 +74,8 @@ export const UnlockWalletContainer = ({ validateMnemonic }: UnlockWalletContaine
     <UnlockWallet
       isLoading={isVerifyingPassword}
       onUnlock={onUnlock}
-      passwordInput={{ value: password, handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
-      unlockButtonDisabled={password === ''}
+      passwordInput={{ handleChange: handlePasswordChange, invalidPass: !isValidPassword }}
+      unlockButtonDisabled={!password.value}
       onForgotPasswordClick={onForgotPasswordClick}
     />
   );

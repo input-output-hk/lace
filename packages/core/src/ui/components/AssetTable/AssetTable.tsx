@@ -50,7 +50,7 @@ const renderCell = (
       <ImageWithFallback
         data-testid="asset-table-cell-logo"
         src={src}
-        fallbackSrc={defaultSrc}
+        fallbackSrc={defaultSrc ?? ''}
         alt=""
         className={styles.image}
       />
@@ -135,7 +135,7 @@ export const AssetTable = ({
   popupView
 }: AssetTableProps): React.ReactElement => {
   const handleRowClick = (record: IAssetColumn) => ({
-    onClick: () => onRowClick(record?.key)
+    onClick: () => onRowClick?.(record?.key)
   });
   const { t } = useTranslation();
 
@@ -162,10 +162,10 @@ export const AssetTable = ({
 
   const [hasScrollBar, setHasScrollBar] = useState<boolean>(false);
   useHasScrollBar({ current: document.querySelector(`#${scrollableTargetId}`) }, (withScroll) =>
-    setHasScrollBar(withScroll && popupView)
+    setHasScrollBar(withScroll && !!popupView)
   );
 
-  const dataSource = useMemo(() => renderRows(rows, popupView), [rows, popupView]);
+  const dataSource = useMemo(() => renderRows(rows, !!popupView), [rows, popupView]);
 
   return (
     <InfiniteScrollableTable
@@ -173,7 +173,7 @@ export const AssetTable = ({
       columns={columns}
       dataSource={dataSource}
       onRow={onRowClick ? handleRowClick : undefined}
-      infiniteScrollContainerClass={hasScrollBar && styles.scrollContainer}
+      infiniteScrollContainerClass={hasScrollBar ? styles.scrollContainer : undefined}
       infiniteScrollProps={{
         dataLength: rows?.length || 0,
         next: onLoad,

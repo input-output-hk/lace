@@ -9,7 +9,7 @@ import { NetworkChoiceDrawer } from './NetworkChoiceDrawer';
 import { useWalletStore } from '@src/stores';
 import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
-import { COLLATERAL_AMOUNT_LOVELACES, useCustomSubmitApi, useRedirection } from '@hooks';
+import { useCustomSubmitApi, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { useSearchParams, useObservable, Button } from '@lace/common';
@@ -19,6 +19,7 @@ import uniq from 'lodash/uniq';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
+import { COLLATERAL_AMOUNT_LOVELACES } from '@utils/constants';
 
 const { Title } = Typography;
 
@@ -171,7 +172,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
-        {process.env.USE_MIDNIGHT_PRELAUNCH_EVENT === 'true' ? (
+        {process.env.USE_GLACIER_DROP === 'true' ? (
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"

@@ -16,7 +16,7 @@ Feature: ADA handle - extended view
     And I enter correct password and confirm the transaction
     And The Transaction submitted screen is displayed in extended mode
     And I close the drawer by clicking close button
-    And I navigate to Transactions extended page
+    And I navigate to Activity extended page
     And the Sent transaction is displayed with handle name: "$handletosend" in extended mode
     When I navigate to Address Book extended page
     Then I see warning for address row with name "$handletosend"

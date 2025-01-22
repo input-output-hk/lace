@@ -7,7 +7,8 @@ import { Cardano, TransactionSummaryInspection, TokenTransferValue, AssetInfoWit
 import { DappTransactionHeader, DappTransactionHeaderProps, TransactionTypes } from '../DappTransactionHeader';
 
 import styles from './DappTransaction.module.scss';
-import { TransactionFee, Collateral } from '@ui/components/ActivityDetail';
+import { Collateral } from '@ui/components/ActivityDetail';
+import { TransactionFee } from '@ui/components/Transaction';
 
 import {
   TransactionType,
@@ -193,8 +194,8 @@ export const DappTransaction = ({
             testId="collateral"
             collateral={Wallet.util.lovelacesToAdaString(collateral.toString())}
             amountTransformer={amountTransformer({
-              price: fiatCurrencyPrice,
-              code: fiatCurrencyCode
+              price: fiatCurrencyPrice ?? 0,
+              code: fiatCurrencyCode ?? ''
             })}
             coinSymbol={coinSymbol}
             className={styles.depositContainer}
