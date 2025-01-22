@@ -2,7 +2,7 @@ import type * as Nami from '@src/features/nami-migration/migration-tool/migrator
 import * as Extension from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { HexBlob } from '@cardano-sdk/util';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { WalletId } from '@cardano-sdk/web-extension';
 
 export type WalletRepository = Extension.WalletRepository<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -188,52 +188,44 @@ type Runer = (args: {
 }) => Promise<void>;
 
 export const run: Runer = async ({ walletRepository, collateralRepository, walletManager, state }) => {
-  const existingWallets = await firstValueFrom(walletRepository.wallets$);
+  // Wallets already present in Lace
+  // Create a mapping of accountPubKey -> walletId. It will be used to determine the walletId based on account publicKey.
+  const existingAccounts = await firstValueFrom(
+    walletRepository.wallets$.pipe(map((existingWallets) => populateExistingAccounts(existingWallets)))
+  );
 
-  if (existingWallets.length === 0) {
-    const walletId = await freshInstall({
-      walletRepository,
-      collateralRepository,
-      encryptedPrivateKey: state.encryptedPrivateKey,
-      accounts: state.accounts
-    });
-    await importHardwareWallets({ walletRepository, collateralRepository, hardwareWallets: state.hardwareWallets });
-
-    await walletManager.activate({
-      walletId,
-      chainId: Wallet.Cardano.ChainIds.Mainnet,
-      accountIndex: 0
-    });
-    return;
-  }
-
-  const existingAccounts = populateExistingAccounts(existingWallets);
-
-  const accountsToAdd = [];
+  // Nami accounts that are not present in Lace
+  const accountsToAdd: Nami.Account[] = [];
+  // Lace WalletId having matching accounts from Nami
   let existingWalletId = '';
+  const isNewMnemonicWallet = () => !existingWalletId;
 
+  // state.accounts are the InMemory Nami wallet accounts
+  // There is only one InMemory wallet in Nami
   for (const account of state.accounts) {
     if (!existingAccounts.has(account.extendedAccountPublicKey)) {
+      // Nami account not found in Lace. Mark for add
       accountsToAdd.push(account);
     } else {
+      // Nami account found in Lace. Take note of the walletId. We'll need it later to add the account to it.
       existingWalletId = existingAccounts.get(account.extendedAccountPublicKey);
     }
   }
 
-  for (const account of state.hardwareWallets) {
-    if (!existingAccounts.has(account.extendedAccountPublicKey)) {
-      accountsToAdd.push(account);
-    }
-  }
+  // Hardware wallets from Nami that are not present in Lace
+  const hwWalletsToAdd: Nami.HarwareWallet[] = state.hardwareWallets.filter(
+    (hwWallet) => !existingAccounts.has(hwWallet.extendedAccountPublicKey)
+  );
 
-  if (accountsToAdd.length === state.accounts.length + state.hardwareWallets.length) {
+  if (isNewMnemonicWallet()) {
+    // The Nami mnemonic wallet is not present in Lace
     const walletId = await freshInstall({
       walletRepository,
       collateralRepository,
       encryptedPrivateKey: state.encryptedPrivateKey,
-      accounts: state.accounts
+      accounts: accountsToAdd
     });
-    await importHardwareWallets({ walletRepository, collateralRepository, hardwareWallets: state.hardwareWallets });
+    await importHardwareWallets({ walletRepository, collateralRepository, hardwareWallets: hwWalletsToAdd });
 
     await walletManager.activate({
       walletId,
@@ -241,14 +233,11 @@ export const run: Runer = async ({ walletRepository, collateralRepository, walle
       accountIndex: 0
     });
   } else {
-    for (const account of accountsToAdd) {
-      await ('vendor' in account
-        ? importHardwareWallet({
-            walletRepository,
-            collateralRepository,
-            hardwareWallet: account as Nami.HarwareWallet
-          })
-        : importAccounts({ walletRepository, collateralRepository, walletId: existingWalletId, account }));
-    }
+    await Promise.all(
+      accountsToAdd.map((account) =>
+        importAccounts({ walletRepository, collateralRepository, walletId: existingWalletId, account })
+      )
+    );
+    await importHardwareWallets({ walletRepository, collateralRepository, hardwareWallets: hwWalletsToAdd });
   }
 };
