@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 
 type FetchCategoriesResult = {
   loading: boolean;
@@ -19,25 +20,29 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
         return;
       }
 
+      let categories: string[] = [];
       try {
-        const response = await window.fetch(dappRadarCategoriesUrl, {
-          headers: {
-            Accept: 'application/json',
-            'x-api-key': dappRadarApiKey
-          }
-        });
+        categories = await cacheRequest(dappRadarCategoriesUrl, async () => {
+          const response = await window.fetch(dappRadarCategoriesUrl, {
+            headers: {
+              Accept: 'application/json',
+              'x-api-key': dappRadarApiKey
+            }
+          });
 
-        let categories: string[] = [];
-        if (response.ok) {
+          if (!response.ok) {
+            throw new Error('Unexpected response');
+          }
+
           const result = (await response.json()) as { categories: string[] };
-          categories = result.categories;
-        }
-        setData(categories);
-      } catch {
-        console.error('Failed to fetch dapp categories.');
-      } finally {
-        setLoading(false);
+          return result.categories;
+        });
+      } catch (error) {
+        console.error('Failed to fetch dapp categories.', error);
       }
+
+      setData(categories);
+      setLoading(false);
     })();
   }, []);
 
