@@ -64,7 +64,8 @@ type FeatureFlagCustomPayloads = {
 
 type FeatureFlagPayloads = {
   [key in FeatureFlag]: FeatureFlagPayload;
-} & FeatureFlagCustomPayloads;
+} &
+  FeatureFlagCustomPayloads;
 
 /**
  * PostHog API reference:
