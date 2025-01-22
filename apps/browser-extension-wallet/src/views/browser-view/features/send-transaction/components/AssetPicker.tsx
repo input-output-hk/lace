@@ -1,6 +1,6 @@
 /* eslint-disable max-params */
-import React, { useEffect, useState } from 'react';
-import { AssetSelectorOverlay, AssetSelectorOverlayProps } from '@lace/core';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AssetSelectorOverlay, AssetSelectorOverlayProps, NftItemProps } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
 import { useFetchCoinPrice, PriceResult, AssetOrHandleInfoMap, useAssetInfo } from '@hooks';
@@ -28,6 +28,8 @@ import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
 import { useObservable } from '@lace/common';
+import { searchToken } from '../../assets/components/AssetsPortfolio/AssetPortfolioContent';
+import { searchNft } from '@hooks/useNftSearch';
 
 const formatAssetPickerLists = (
   assetsInfo: AssetOrHandleInfoMap = new Map(),
@@ -62,10 +64,7 @@ const formatAssetPickerLists = (
     return { ...rest, id: assetId.toString() };
   });
 
-  const nfts = nftList.map((nft) => {
-    const { assetId, ...rest } = nft;
-    return { ...rest, id: assetId.toString() };
-  });
+  const nfts = nftList.map((nft) => ({ ...nft, id: nft.assetId.toString() }));
 
   if (addCardanoAsAnAsset) {
     tokens.push({
@@ -210,9 +209,16 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     setSelectedTokenList(id, isNFT(assetInfo));
   };
 
+  const handleSearchNfts = useCallback(
+    (item: NftItemProps, searchValue: string) => searchNft(item, searchValue, assets),
+    [assets]
+  );
+
   return (
     <>
       <AssetSelectorOverlay
+        searchNfts={handleSearchNfts}
+        searchTokens={searchToken}
         className={styles.selectorOverlay}
         nfts={nftList}
         tokens={tokenList}
