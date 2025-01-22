@@ -37,7 +37,21 @@ const initialContextMenu = {
   y: 0
 };
 
-const contextMenuWidth = 200;
+const CONTEXT_MENU_WIDTH = 240;
+
+export const getContextMenuPoints = <T extends HTMLElement>(
+  e: React.MouseEvent<T>,
+  contextMenuWidth = CONTEXT_MENU_WIDTH
+): { x: number; y: number } => {
+  const bounds = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - bounds.left;
+  const y = e.clientY - bounds.top;
+
+  return {
+    x: e.clientX + contextMenuWidth > window.innerWidth ? x - (e.clientX + contextMenuWidth - window.innerWidth) : x,
+    y
+  };
+};
 
 export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFolderItemProps): React.ReactElement => {
   const restOfNfts = (nfts?.length ?? 0) - numberOfNftsToShow + 1;
@@ -57,16 +71,13 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const { pageX, pageY, currentTarget } = e;
-    const { x, y } = currentTarget.getBoundingClientRect();
+    const points = getContextMenuPoints(e);
 
-    return pageX < window.innerWidth - contextMenuWidth
-      ? setContextMenu({ show: true, x: pageX - x, y: pageY - y })
-      : setContextMenu({ show: true, x: pageX - x - contextMenuWidth, y: pageY - y });
+    setContextMenu({ show: true, ...points });
   };
 
   return (
-    <div onContextMenu={handleContextMenu}>
+    <div className={styles.folderContainer} onContextMenu={handleContextMenu}>
       {contextMenu.show && contextMenuItems && (
         <NftFolderContextMenu
           x={contextMenu.x}
