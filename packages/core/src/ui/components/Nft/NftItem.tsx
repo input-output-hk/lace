@@ -9,7 +9,6 @@ import { useOnClickOutside } from '@src/ui/hooks';
 export interface ContextMenuProps {
   setClicked?: (isClicked: boolean) => void;
   children?: React.ReactElement;
-  onRender?: (width: number) => void;
   points: { x: number; y: number };
 }
 
