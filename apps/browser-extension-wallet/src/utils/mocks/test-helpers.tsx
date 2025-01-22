@@ -142,8 +142,7 @@ export const mockWalletUI = {
 
 export const getSendStoreContext =
   (): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) =>
-    <SendStoreProvider>{children}</SendStoreProvider>;
+  ({ children }: { children?: React.ReactNode }) => <SendStoreProvider>{children}</SendStoreProvider>;
 
 export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
@@ -647,8 +646,10 @@ export const postHogClientMocks: Record<keyof typeof PostHogClient.prototype, je
   sendMergeEvent: jest.fn(),
   isFeatureEnabled: jest.fn(),
   featureFlags: jest.fn(),
+  featureFlagPayloads: jest.fn(),
   hasOptedInBeta: jest.fn(),
-  setOptedInBeta: jest.fn()
+  setOptedInBeta: jest.fn(),
+  getFeatureFlagPayload: jest.fn()
 };
 
 export const mockAnalyticsTracker: Record<keyof typeof AnalyticsTracker.prototype, jest.Mock> = {

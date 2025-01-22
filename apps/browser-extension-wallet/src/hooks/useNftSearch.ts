@@ -31,6 +31,12 @@ export const searchItems = (
     );
   });
 
+export const searchNfts = (
+  data: NftItemProps[],
+  searchValue: string,
+  assetsInfo: AssetOrHandleInfoMap
+): NftItemProps[] => data.filter((nft) => searchNft(nft, searchValue, assetsInfo));
+
 export const useNftSearch = (assetsInfo: AssetOrHandleInfoMap): NftSearchResultProps => {
   const [isSearching, setIsSearching] = useState(false);
   const [filteredResults, setFilteredResults] = useState<NftListProps['items']>([]);

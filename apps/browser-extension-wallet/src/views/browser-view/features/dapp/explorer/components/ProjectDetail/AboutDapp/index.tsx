@@ -15,7 +15,18 @@ export const AboutDapp: React.FC = () => {
   return (
     <>
       <Box my="$24">
-        <Text.Body.Normal>{data?.longDescription}</Text.Body.Normal>
+        <Box mb="$12">
+          <Text.SubHeading>{'Summary'}</Text.SubHeading>
+        </Box>
+        <Text.Body.Normal>{data?.shortDescription}</Text.Body.Normal>
+      </Box>
+      <Box my="$24">
+        <Box mb="$12">
+          <Text.SubHeading>{'DApp Description'}</Text.SubHeading>
+        </Box>
+        <Text.Body.Normal>
+          <div dangerouslySetInnerHTML={{ __html: data?.longDescription }} />
+        </Text.Body.Normal>
       </Box>
       {data?.screenshots && (
         <Box mb="$16">

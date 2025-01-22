@@ -21,12 +21,20 @@ export const Contact: React.FC = () => {
 
   return (
     <Flex flexDirection="column" gap="$24" pt="$24" data-testid="contact-items">
-      <ContactItem itemIcon={mailIcon} itemTitle={t('dappdiscovery.side_panel.email')} itemData={data.email} />
-      <ContactItem
-        itemIcon={websiteIcon}
-        itemTitle={t('dappdiscovery.side_panel.company_website')}
-        itemData={data.companyWebsite}
-      />
+      {!!data.email && (
+        <ContactItem itemIcon={mailIcon} itemTitle={t('dappdiscovery.side_panel.email')} itemData={data.email} />
+      )}
+      {!!data.companyWebsite && (
+        <ContactItem
+          itemIcon={websiteIcon}
+          itemTitle={t('dappdiscovery.side_panel.company_website')}
+          itemData={data.companyWebsite}
+        />
+      )}
+      {data.socialLinks.map(({ url, title }) => (
+        // eslint-disable-next-line unicorn/no-null
+        <ContactItem ofLinkType key={title} itemIcon={null} itemTitle={title} itemData={url} />
+      ))}
     </Flex>
   );
 };

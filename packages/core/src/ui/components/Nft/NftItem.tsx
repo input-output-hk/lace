@@ -38,6 +38,7 @@ const ContextMenu = ({ setClicked, children, points }: ContextMenuProps) => {
 };
 
 export type NftItemProps = {
+  id?: string;
   assetId?: string;
   image?: string;
   name: string;

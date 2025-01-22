@@ -1,13 +1,14 @@
 /* eslint-disable max-params */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ASSET_COMPONENTS, AssetSelectorOverlay } from '@lace/core';
+import { ASSET_COMPONENTS, AssetSelectorOverlay, NftItemProps } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useObservable, VirtualisedGridColumns } from '@lace/common';
 import styles from './CreateFolderDrawer.module.scss';
 import { formatNftsList } from '../utils';
 import { useCurrencyStore } from '@providers';
 import { useAssetInfo } from '@hooks';
+import { searchNft } from '@hooks/useNftSearch';
 
 const nftsPerRow: Record<'popupView' | 'browserView', VirtualisedGridColumns> = {
   popupView: 2,
@@ -71,10 +72,16 @@ export const AssetPicker = ({
     onSetIsFormValid(selectedNFTs.length > 0);
   }, [selectedNFTs, onSetIsFormValid]);
 
+  const handleSearch = useCallback(
+    (item: NftItemProps, searchValue: string) => searchNft(item, searchValue, assets),
+    [assets]
+  );
+
   return (
     <div className={styles.assetsSelectorWrapper} data-testid="asset-selector-wrapper">
       <AssetSelectorOverlay
         nfts={nftList}
+        searchNfts={handleSearch}
         nftListConfig={{ rows: isPopupView ? nftsPerRow.popupView : nftsPerRow.browserView }}
         onClick={setSelectedTokens}
         addToMultipleSelectionList={setSelectedTokens}

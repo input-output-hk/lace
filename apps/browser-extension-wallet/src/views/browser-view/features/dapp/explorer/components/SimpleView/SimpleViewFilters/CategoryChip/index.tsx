@@ -6,16 +6,17 @@ import styles from './styles.module.scss';
 
 export interface ICategoryChip {
   label: string;
+  value: string;
   active?: boolean;
 }
 
-const CategoryChip: React.FC<ICategoryChip> = ({ label, active }) => (
-  <Flex gap="$12" alignItems="center">
-    {mapCategory(label)}
-    <Text.Body.Normal className={cn({ [styles.categoryText]: !!active })} weight="$medium">
+const CategoryChip: React.FC<ICategoryChip> = ({ label, value, active }) => (
+  <Text.Body.Normal className={cn({ [styles.categoryText]: !!active })} weight="$medium">
+    <Flex gap="$12" alignItems="center">
+      <span className={styles.imageContainer}>{mapCategory(value)}</span>
       {label}
-    </Text.Body.Normal>
-  </Flex>
+    </Flex>
+  </Text.Body.Normal>
 );
 
 export default CategoryChip;

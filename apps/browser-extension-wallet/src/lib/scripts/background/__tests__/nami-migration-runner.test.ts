@@ -7,6 +7,7 @@ import { Bip32WalletAccount, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { state } from './nami-migration-runner.fixture';
 import { BehaviorSubject } from 'rxjs';
+import type * as Nami from '@src/features/nami-migration/migration-tool/migrator/migration-data.data';
 
 test('fresh install', async () => {
   const walletRepository: WalletRepository = {
@@ -389,4 +390,65 @@ test('all accounts existing conflict', async () => {
   expect(walletManager.activate).not.toHaveBeenCalled();
   expect(walletRepository.addAccount).not.toHaveBeenCalled();
   expect(walletRepository.addWallet).not.toHaveBeenCalled();
+});
+
+test('LW-12135 one conflicting hw wallet and one new in-memory wallet', async () => {
+  const walletRepository: WalletRepository = {
+    wallets$: new BehaviorSubject<AnyWallet[]>([
+      {
+        accounts: [
+          {
+            accountIndex: 1,
+            extendedAccountPublicKey:
+              '18b35d8e07c1dd096ce359f4ce5ac669a27c8ac23583f9e6a53b7508efd28c849a7b1eda5ac98ed02d6048d0cbe84f91570b9f0cc3acff935cf229cd798da730'
+          }
+        ] as Bip32WalletAccount<Wallet.AccountMetadata>[],
+        type: WalletType.Ledger,
+        walletId: '111111'
+      }
+    ] as AnyWallet[]),
+    addWallet: jest.fn().mockResolvedValueOnce('2222222'),
+    addAccount: jest.fn()
+  } as unknown as WalletRepository;
+
+  const walletManager: WalletManager = {
+    activate: jest.fn()
+  } as unknown as WalletManager;
+
+  const collateralRepository: CollateralRepository = jest.fn();
+
+  const stateOneMnemonicOneHw: Nami.State = {
+    ...state,
+    accounts: [state.accounts[0]], // mnemonic wallet - no conflict/does not exist in Lace
+    hardwareWallets: [state.hardwareWallets[1]] // hw wallet - conflict/already exists in Lace
+  };
+  await run({ walletRepository, walletManager, collateralRepository, state: stateOneMnemonicOneHw });
+
+  // LW-12135: test fails without the fix because it does not correctly detect a new mnemonic wallet
+  expect(walletRepository.addAccount).not.toHaveBeenCalledWith(expect.objectContaining({ walletId: '' }));
+
+  expect(walletManager.activate).toHaveBeenCalledWith({
+    walletId: '2222222',
+    accountIndex: 0,
+    chainId: Wallet.Cardano.ChainIds.Mainnet
+  });
+
+  // LW-12135: validate fix works by checking that the mnemonic wallet is added as a new wallet
+  expect(walletRepository.addWallet).toHaveBeenNthCalledWith(1, {
+    metadata: { name: 'Nami', lastActiveAccountIndex: 0 },
+    encryptedSecrets: {
+      keyMaterial: '',
+      rootPrivateKeyBytes:
+        'da7af7c22eeaf4bb460c02b426792d556a9242a7e8dca47e7628350f4290d97a0078f3dad5812606f4fa993772dc1c0fc5b7941dc91796a111a8d789b8d3f473eb9c67b32f89f5a2518ff02bb5595a00638e99e7799858b42a639edab14d1bd997eeb8ebe518939ca0522a527219062d1585bfd34434dd84c2a3f895d34863158fce54c1c2c2ab8e8fd3d23d70bc3114fd302badca2c850160597443'
+    },
+    accounts: [
+      {
+        accountIndex: 0,
+        metadata: { name: 'Account #0' },
+        extendedAccountPublicKey:
+          'a5f18f73dde7b6f11df448913d60a86bbb397a435269e5024193b293f28892fd33d1225d468aac8f5a9d3cfedceacabe80192fcf0beb5c5c9b7988151f3353cc'
+      }
+    ],
+    type: WalletType.InMemory
+  });
 });

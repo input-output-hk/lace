@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { IogText } from '../Typography';
 import Empty from './images/Empty';
@@ -12,9 +13,9 @@ const IogEmptyState: React.FC = () => {
       <div data-testid="empty-state-image">
         <Empty />
       </div>
-      <IogText xxMedium bold as="div" color="black" data-testid="empty-state-header">
+      <Text.Body.Large weight={'$bold'} data-testid="empty-state-header">
         {t('dappdiscovery.empty_state.no_dapps_title')}
-      </IogText>
+      </Text.Body.Large>
       <IogText as="div" small normal color="dark" center data-testid="empty-state-text">
         {t('dappdiscovery.empty_state.no_dapps_content1')}
       </IogText>

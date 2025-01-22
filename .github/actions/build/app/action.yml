@@ -20,6 +20,9 @@ inputs:
   LACE_EXTENSION_KEY:
     description: 'Public extended manifest key'
     required: true
+  DAPP_RADAR_API_KEY:
+    description: 'Production api token of DApp Radar API'
+    required: true
   BUILD_DEV_PREVIEW:
     description: 'Build developer preview of Lace'
     required: false
@@ -76,6 +79,7 @@ runs:
         BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
         BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
+        DAPP_RADAR_API_KEY: ${{ inputs.DAPP_RADAR_API_KEY }}
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
         POSTHOG_PRODUCTION_TOKEN: ${{ inputs.POSTHOG_PRODUCTION_TOKEN }}
         PRODUCTION_MODE_TRACKING: ${{ inputs.PRODUCTION_MODE_TRACKING }}

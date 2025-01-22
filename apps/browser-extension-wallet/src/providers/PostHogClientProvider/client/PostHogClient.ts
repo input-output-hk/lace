@@ -1,5 +1,5 @@
 /* eslint-disable camelcase, max-depth, sonarjs/cognitive-complexity, promise/no-nesting */
-import posthog, { JsonRecord, JsonType } from 'posthog-js';
+import posthog, { JsonType } from 'posthog-js';
 import dayjs from 'dayjs';
 import { Wallet } from '@lace/cardano';
 import {
@@ -24,8 +24,17 @@ import { experiments, getDefaultFeatureFlags } from '@providers/ExperimentsProvi
 import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
+import {
+  FeatureFlagCommonSchema,
+  FeatureFlagDappExplorerSchema,
+  featureFlagSchema,
+  networksEnumSchema,
+  NetworksEnumSchema
+} from './featureFlagPayloadsSchema';
 
 type FeatureFlag = `${ExperimentName}`;
+
+const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
 
 type FeatureFlags = {
   [key in FeatureFlag]: boolean;
@@ -34,6 +43,28 @@ type FeatureFlags = {
 type GroupedFeatureFlags = {
   [number: number]: FeatureFlags;
 };
+
+type FeatureFlagCommonPayload = {
+  allowedNetworks: ('preview' | 'preprod' | 'mainnet' | 'sanchonet')[];
+};
+
+// Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
+// strict null checks enabled so `false` is a replacement for `undefined` in this case
+// eslint-disable-next-line @typescript-eslint/ban-types
+type FeatureFlagPayload<T extends Record<string, unknown> = {}> = (FeatureFlagCommonPayload & T) | false;
+
+type FeatureFlagCustomPayloads = {
+  [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<{
+    disallowedDapps: {
+      legalIssues: number[];
+      connectivityIssues: number[];
+    };
+  }>;
+};
+
+type FeatureFlagPayloads = {
+  [key in FeatureFlag]: FeatureFlagPayload;
+} & FeatureFlagCustomPayloads;
 
 /**
  * PostHog API reference:
@@ -49,6 +80,7 @@ export class PostHogClient<Action extends string = string> {
   private readonly optedInBeta$: BehaviorSubject<boolean>;
   private updatePersonaProperties = false;
   featureFlags: GroupedFeatureFlags;
+  featureFlagPayloads: FeatureFlagPayloads;
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
@@ -231,6 +263,10 @@ export class PostHogClient<Action extends string = string> {
     return this.featureFlags[this.chain.networkMagic]?.[feature as FeatureFlag] || false;
   }
 
+  getFeatureFlagPayload<T extends FeatureFlag>(featureFlag: T): FeatureFlagPayloads[T] {
+    return this.featureFlagPayloads[featureFlag];
+  }
+
   subscribeToInitializationProcess(callback: (params: boolean) => void): Subscription {
     return this.hasPostHogInitialized$.subscribe(callback);
   }
@@ -271,9 +307,13 @@ export class PostHogClient<Action extends string = string> {
     posthog.onFeatureFlags(async () => {
       const featureFlags: Record<ExperimentName, string | boolean> = posthog.featureFlags.getFlagVariants();
       const featureFlagPayloads = posthog.featureFlags.getFlagPayloads();
-      const allowedNetworksByFeature = PostHogClient.getAllowedNetworksMapFromPayloads(featureFlagPayloads);
+      const payloadsByFeature = PostHogClient.getFeaturePayloads(featureFlagPayloads);
+
+      this.featureFlagPayloads = payloadsByFeature;
 
       for (const networkName in NETWORK_NAME_TO_NETWORK_MAGIC) {
+        if (!isNetworkOfExpectedSchema(networkName)) continue;
+
         if (NETWORK_NAME_TO_NETWORK_MAGIC.hasOwnProperty(networkName)) {
           const networkMagic = NETWORK_NAME_TO_NETWORK_MAGIC[networkName];
 
@@ -281,8 +321,8 @@ export class PostHogClient<Action extends string = string> {
             if (featureFlags.hasOwnProperty(feature)) {
               const isFeatureEnabled = featureFlags[feature as FeatureFlag];
               const flags = this.featureFlags[networkMagic];
-              const payload = featureFlagPayloads[feature as FeatureFlag];
-              const allowedNetworks = payload ? allowedNetworksByFeature[feature as FeatureFlag] : [];
+              const payload = payloadsByFeature[feature as FeatureFlag];
+              const allowedNetworks = payload ? payload.allowedNetworks : [];
               flags[feature as FeatureFlag] = isFeatureEnabled && allowedNetworks.includes(networkName);
             }
           }
@@ -346,30 +386,33 @@ export class PostHogClient<Action extends string = string> {
     return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
   }
 
-  static getAllowedNetworksMapFromPayloads(payloads: Record<string, JsonType>): Record<string, string[]> {
-    const allowedNetworksMap: Record<string, string[]> = {};
+  static getFeaturePayloads(payloads: Record<string, JsonType>): FeatureFlagPayloads {
+    const payloadsByFeature: FeatureFlagPayloads = Object.values(ExperimentName).reduce(
+      (payloadsByFeatureTotal, featureFlagName) => {
+        payloadsByFeatureTotal[featureFlagName] = false;
+        return payloadsByFeatureTotal;
+      },
+      {} as FeatureFlagPayloads
+    );
 
-    for (const [featureFlag, payload] of Object.entries(payloads)) {
-      if (typeof payload === 'string') {
-        try {
-          const parsedPayload = JSON.parse(payload);
-
-          if (parsedPayload && typeof parsedPayload === 'object' && 'allowedNetworks' in parsedPayload) {
-            const allowedNetworks = (parsedPayload as JsonRecord).allowedNetworks;
-
-            if (Array.isArray(allowedNetworks)) {
-              allowedNetworksMap[featureFlag] = allowedNetworks.filter(
-                (item): item is string => typeof item === 'string'
-              );
-            }
-          }
-        } catch (error) {
-          console.error(`Failed to parse payload for ${featureFlag}:`, error);
+    for (const [featureFlag, payload] of Object.entries(payloads) as [ExperimentName, JsonType][]) {
+      try {
+        if (featureFlag === ExperimentName.DAPP_EXPLORER) {
+          // type-casting can be removed after Lace uses strict null checks
+          payloadsByFeature[featureFlag] = featureFlagSchema.dappExplorer.parse(
+            payload
+          ) as FeatureFlagDappExplorerSchema;
+          continue;
         }
+
+        // type-casting can be removed after Lace uses strict null checks
+        payloadsByFeature[featureFlag] = featureFlagSchema.common.parse(payload) as FeatureFlagCommonSchema;
+      } catch (error) {
+        console.error(`Failed to parse payload for ${featureFlag}:`, error);
       }
     }
 
-    return allowedNetworksMap;
+    return payloadsByFeature;
   }
 
   static areAllFeatureFlagsEmpty(featureFlags: GroupedFeatureFlags): boolean {

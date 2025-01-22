@@ -17,8 +17,5 @@ export const formatNftsList = (
 
   const { nftList } = getTokenList({ assetsInfo, balance: balance.assets, environmentName, fiatCurrency });
 
-  return nftList.map((nft) => {
-    const { assetId, ...rest } = nft;
-    return { ...rest, id: assetId.toString() };
-  });
+  return nftList.map((nft) => ({ ...nft, id: nft.assetId.toString() }));
 };

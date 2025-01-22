@@ -18,6 +18,7 @@ interface SignMessageState {
   hardwareWalletError: string;
   isHardwareWallet: boolean;
   performSigning: (address: string, message: string, password: Partial<Password>) => void;
+  resetSigningState: () => void;
 }
 
 export const useSignMessageState = (): SignMessageState => {
@@ -32,6 +33,12 @@ export const useSignMessageState = (): SignMessageState => {
   const [hardwareWalletError, setHardwareWalletError] = useState<string>('');
 
   const addresses = useObservable(inMemoryWallet?.addresses$);
+
+  const resetSigningState = useCallback(() => {
+    setIsSigningInProgress(false);
+    setError('');
+    setHardwareWalletError('');
+  }, []);
 
   const performSigning = useCallback(
     async (address: string, message: string, password: Partial<Password>) => {
@@ -90,6 +97,7 @@ export const useSignMessageState = (): SignMessageState => {
     error,
     hardwareWalletError,
     isHardwareWallet,
-    performSigning
+    performSigning,
+    resetSigningState
   };
 };

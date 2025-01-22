@@ -38,7 +38,8 @@ const transformManifest = (content, mode) => {
           : 'http://localhost:* http://127.0.0.1:*'
       )
       .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST)
-      .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN));
+      .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN))
+      .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL);
 
     if (process.env.LACE_EXTENSION_KEY) {
       manifest.key = manifest.key.replace('$LACE_EXTENSION_KEY', process.env.LACE_EXTENSION_KEY);

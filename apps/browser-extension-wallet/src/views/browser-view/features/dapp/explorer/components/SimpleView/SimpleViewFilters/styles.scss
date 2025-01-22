@@ -10,42 +10,19 @@
   border-radius: 100px;
   cursor: pointer;
   text-align: center;
-
-  svg {
-    width: 24px;
-    height: 24px;
-  }
-  path {
-    stroke: var(--text-color-primary);
-    fill: var(--light-mode-light-grey, var(--dark-mode-grey));
-  }
+  color: var(--text-color-primary);
 }
 
 .iog-tag:hover {
   background-color: var(--light-mode-mid-grey, var(--dark-mode-mid-grey));
-
-  path {
-    stroke: var(--text-color-primary);
-    fill: var(--light-mode-mid-grey, var(--dark-mode-mid-grey));
-  }
 }
 
 .iog-tag--active {
   background-color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
-
-  path {
-    stroke: var(--text-color-white);
-    fill: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
-  }
 }
 
 .iog-tag--active:hover {
   background-color: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
-
-  path {
-    stroke: var(--text-color-white);
-    fill: var(--light-mode-dark-grey, var(--dark-mode-light-grey));
-  }
 }
 
 .iog-simple-view-filters {
@@ -113,10 +90,6 @@
   .iog-icon {
     width: 22px;
     height: auto;
-
-    path {
-      stroke-width: 1.4px;
-    }
   }
 }
 .swiper-filters-next {

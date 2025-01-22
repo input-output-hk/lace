@@ -5,20 +5,21 @@ import { Skeleton } from 'antd';
 import { AssetTable, IRow } from '@lace/core';
 import { CONTENT_LAYOUT_ID } from '@components/Layout';
 import { LACE_APP_ID } from '@utils/constants';
-import { IAssetDetails } from '@views/browser/features/assets/types';
+import { IAssetDetails, TokenInformation } from '@views/browser/features/assets/types';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
 import styles from './AssetsPortfolio.module.scss';
 
 const MIN_ASSETS_COUNT_FOR_SEARCH = 10;
 
-const searchTokens = (data: IAssetDetails[], searchValue: string) => {
-  const fields = ['name', 'policyId', 'fingerprint', 'ticker'] as const;
+const fields = ['name', 'policyId', 'fingerprint', 'ticker'] as const;
+export const searchToken = (item: Partial<IRow> & Partial<TokenInformation>, searchValue: string): boolean =>
+  fields.some((field) => field in item && item[field]?.toLowerCase().includes(searchValue));
+
+export const searchTokens = (data: IAssetDetails[], searchValue: string): IAssetDetails[] => {
   const lowerSearchValue = searchValue.toLowerCase();
 
-  return data.filter((item) =>
-    fields.some((field) => field in item && item[field]?.toLowerCase().includes(lowerSearchValue))
-  );
+  return data.filter((item) => searchToken(item, lowerSearchValue));
 };
 
 interface AssetPortfolioContentProps {
