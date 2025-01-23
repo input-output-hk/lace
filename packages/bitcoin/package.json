@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@types/pbkdf2": "^3",
+    "@types/webextension-polyfill": "0.10.0",
     "axios": "^1.7.4",
     "rollup-plugin-polyfill-node": "^0.8.0",
     "ts-log": "^2.2.7",
