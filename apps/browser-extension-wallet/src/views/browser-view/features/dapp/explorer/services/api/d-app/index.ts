@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 
 const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
@@ -112,25 +113,30 @@ const useDAppFetcher = ({
         searchParams.set('category', category);
       }
 
+      let results: DAppRadarDappItem[] = [];
+      const url = `${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`;
       try {
-        const response = await window.fetch(`${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`, {
-          headers: {
-            Accept: 'application/json',
-            'x-api-key': dappRadarApiKey
-          }
-        });
+        results = await cacheRequest(url, async () => {
+          const response = await window.fetch(url, {
+            headers: {
+              Accept: 'application/json',
+              'x-api-key': dappRadarApiKey
+            }
+          });
 
-        let results: DAppRadarDappItem[] = [];
-        if (response.ok) {
+          if (!response.ok) {
+            throw new Error('Unexpected response');
+          }
+
           const parsedResponse = (await response.json()) as { results: DAppRadarDappItem[] };
-          results = parsedResponse.results;
-        }
-        setData(results);
-      } catch {
-        console.error('Failed to fetch dapp list.');
-      } finally {
-        setLoading(false);
+          return parsedResponse.results;
+        });
+      } catch (error) {
+        console.error('Failed to fetch dapp list.', error);
       }
+
+      setData(results);
+      setLoading(false);
     })();
   }, [category, limit]);
 
