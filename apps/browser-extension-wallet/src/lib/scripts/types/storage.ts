@@ -44,6 +44,7 @@ export interface BackgroundStorage {
     completed: boolean;
     mode: 'lace' | 'nami';
   };
+  activeBlockchain?: 'cardano' | 'bitcoin';
   dappInjectCompatibilityMode?: boolean;
   optedInBeta?: boolean;
   logLevel?: LogLevelString;

@@ -28,27 +28,58 @@ import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard
 import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
 import { AppVersionGuard } from './utils/AppVersionGuard';
+import { BitcoinPopupView } from "@src/views/bitcoin-mode";
+
+const CARDANO_LACE = 'lace';
+const BITCOIN_LACE = 'lace-bitcoin';
 
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami'>();
-  storage.onChanged.addListener((changes) => {
-    const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
-    const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
-    if (oldModeValue?.mode !== newModeValue?.mode) {
-      setMode(newModeValue);
-      // Force back to original routing unless it is staking route (see LW-11876)
-      if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) window.location.hash = '#';
-    }
-  });
+  console.error("RE-RENDER");
+  const [mode, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
 
   useEffect(() => {
+    const handleStorageChange = async (changes: Record<string, Storage.StorageChange>) => {
+      const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
+      const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
+      const activeBlockchainOldValue = changes.BACKGROUND_STORAGE?.oldValue?.activeBlockchain;
+      const activeBlockchainNewValue = changes.BACKGROUND_STORAGE?.newValue?.activeBlockchain;
+
+      console.error("STORAGE CHANGED");
+      console.error(changes);
+
+      if (activeBlockchainOldValue?.activeBlockchain !== activeBlockchainNewValue?.activeBlockchain) {
+        const isCardano = activeBlockchainNewValue?.activeBlockchain === 'cardano';
+        setMode(isCardano ? CARDANO_LACE : BITCOIN_LACE);
+        window.location.hash = '#';
+        return;
+      }
+
+      if (oldModeValue?.mode !== newModeValue?.mode) {
+        setMode(newModeValue?.mode || CARDANO_LACE);
+        // Force back to original routing unless it is staking route
+        if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) {
+          window.location.hash = '#';
+        }
+      }
+    };
+
+    storage.onChanged.addListener(handleStorageChange);
+
     const getWalletMode = async () => {
-      const { namiMigration } = await getBackgroundStorage();
-      setMode(namiMigration?.mode || 'lace');
+      const { namiMigration, activeBlockchain } = await getBackgroundStorage();
+      if (activeBlockchain === 'cardano') {
+        setMode(namiMigration?.mode || CARDANO_LACE);
+      } else {
+        setMode(BITCOIN_LACE);
+      }
     };
 
     getWalletMode();
-  }, [mode]);
+
+    return () => {
+      storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
 
   return (
     <BackgroundServiceAPIProvider>
@@ -58,23 +89,23 @@ const App = (): React.ReactElement => {
             <CurrencyStoreProvider>
               <HashRouter>
                 <PostHogClientProvider>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <MigrationContainer appMode={APP_MODE_POPUP}>
-                          <DataCheckContainer appMode={APP_MODE_POPUP}>
-                            <AddressesDiscoveryOverlay>
-                              <NamiMigrationGuard>
-                                <BackgroundPageProvider>
-                                  <AppVersionGuard>{mode === 'nami' ? <NamiPopup /> : <PopupView />}</AppVersionGuard>
-                                </BackgroundPageProvider>
-                              </NamiMigrationGuard>
-                            </AddressesDiscoveryOverlay>
-                          </DataCheckContainer>
-                        </MigrationContainer>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_POPUP}>
+                            <DataCheckContainer appMode={APP_MODE_POPUP}>
+                              <AddressesDiscoveryOverlay>
+                                <NamiMigrationGuard>
+                                  <BackgroundPageProvider>
+                                    { mode === BITCOIN_LACE ? <BitcoinPopupView /> : (mode === 'nami' ? <NamiPopup /> : <PopupView />) }
+                                  </BackgroundPageProvider>
+                                </NamiMigrationGuard>
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
                 </PostHogClientProvider>
               </HashRouter>
             </CurrencyStoreProvider>
