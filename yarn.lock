@@ -13497,6 +13497,7 @@ __metadata:
     "@lace/common": 0.1.0
     "@scure/bip32": ^1.6.0
     "@types/pbkdf2": ^3
+    "@types/webextension-polyfill": 0.10.0
     axios: ^1.7.4
     bip39: ^3.1.0
     bitcoinjs-lib: ^6.1.7

@@ -56,6 +56,8 @@ export const UserInfo = ({
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const bitcoinBalance = useObservable(bitcoinWallet.balance$, BigInt(0));
+  const transactions = useObservable(bitcoinWallet.transactionHistory$, []);
+  const utxos = useObservable(bitcoinWallet.utxos$, []);
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
@@ -113,7 +115,7 @@ export const UserInfo = ({
             }
             void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
         <div>
-          <a>BITCOIN BALANCE: {bitcoinBalance}</a>
+          <a>BITCOIN BALANCE: {`Bitcoin Balance: ${bitcoinBalance.toString()}`}</a>
           <ProfileDropdown.WalletOption
             key={wallet.walletId}
             title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
@@ -142,9 +144,9 @@ export const UserInfo = ({
             profile={
               walletAvatar
                 ? {
-                  fallbackText: fullWalletName,
-                  imageSrc: walletAvatar
-                }
+                    fallbackText: fullWalletName,
+                    imageSrc: walletAvatar
+                  }
                 : undefined
             }
            {...(wallet.type !== WalletType.Script && {
@@ -233,6 +235,8 @@ export const UserInfo = ({
         {process.env.USE_MULTI_WALLET === 'true' ? undefined : (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
+            <div>{transactions.map((tx) => tx.transactionHash)}</div>
+            <div>{utxos.map((utxo) => utxo.address)}</div>
           </div>
         )}
       </div>

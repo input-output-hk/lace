@@ -69,7 +69,7 @@ module.exports = () => {
         events: require.resolve('events/'),
         buffer: require.resolve('buffer/'),
         stream: require.resolve('readable-stream'),
-        crypto: require.resolve('crypto-browserify'),
+        crypto: false,
         constants: require.resolve('constants-browserify'),
         zlib: require.resolve('browserify-zlib'),
         dns: false,
