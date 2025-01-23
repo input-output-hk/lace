@@ -43,9 +43,16 @@ type DAppRadarDappItem = {
   }>;
 };
 
-const mapResponse = (dapps: DAppRadarDappItem[], disallowedDappIds: Set<number>): ISectionCardItem[] =>
+const mapResponse = (
+  dapps: DAppRadarDappItem[],
+  disallowedDappIds: Set<number>,
+  disallowedDappCategories: Set<string>
+): ISectionCardItem[] =>
   dapps
-    .filter(({ dappId }) => !disallowedDappIds.has(dappId))
+    .filter(
+      ({ dappId, categories }) =>
+        !disallowedDappIds.has(dappId) && !categories.some((category) => disallowedDappCategories.has(category))
+    )
     .map((dapp) => ({
       id: String(dapp.dappId),
       categories: dapp.categories,
@@ -85,16 +92,22 @@ const useDAppFetcher = ({
   const [loading, setLoading] = useState(true);
   const dappExplorerFeaturePayload = usePostHogClientContext().getFeatureFlagPayload('dapp-explorer');
 
-  const disallowedDappIds = useMemo(
-    () =>
-      dappExplorerFeaturePayload
-        ? new Set<number>([
-            ...dappExplorerFeaturePayload.disallowedDapps.legalIssues,
-            ...dappExplorerFeaturePayload.disallowedDapps.connectivityIssues
-          ])
-        : new Set<number>(),
-    [dappExplorerFeaturePayload]
-  );
+  const { disallowedDappIds, disallowedDappCategories } = useMemo(() => {
+    if (!dappExplorerFeaturePayload) {
+      return {
+        disallowedDappIds: new Set<number>(),
+        disallowedDappCategories: new Set<string>()
+      };
+    }
+
+    return {
+      disallowedDappIds: new Set<number>([
+        ...dappExplorerFeaturePayload.disallowedDapps.legalIssues,
+        ...dappExplorerFeaturePayload.disallowedDapps.connectivityIssues
+      ]),
+      disallowedDappCategories: new Set<string>(dappExplorerFeaturePayload.disallowedCategories.legalIssues)
+    };
+  }, [dappExplorerFeaturePayload]);
 
   useEffect(() => {
     (async () => {
@@ -145,7 +158,12 @@ const useDAppFetcher = ({
     console.error('Pagination not implemented!');
   };
 
-  return { loading, data: mapResponse(data, disallowedDappIds), fetchMore, hasNextPage: false };
+  return {
+    loading,
+    data: mapResponse(data, disallowedDappIds, disallowedDappCategories),
+    fetchMore,
+    hasNextPage: false
+  };
 };
 
 export { useDAppFetcher };
