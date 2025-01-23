@@ -69,12 +69,12 @@ runs:
         runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
         eval "$runCommand";
 
-    - name: Save dmesg logs
-      shell: bash
-      if: always()
-      working-directory: ./packages/e2e-tests
-      run: |
-        sudo dmesg > ./dmesg.log
+    #    - name: Save dmesg logs
+    #      shell: bash
+    #      if: always()
+    #      working-directory: ./packages/e2e-tests
+    #      run: |
+    #        sudo dmesg > ./dmesg.log
 
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
