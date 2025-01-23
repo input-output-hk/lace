@@ -20,6 +20,7 @@ export const SettingsSwitchToNami = ({ popupView }: { popupView?: boolean }): Re
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
 
+
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
@@ -34,6 +35,7 @@ export const SettingsSwitchToNami = ({ popupView }: { popupView?: boolean }): Re
     };
 
     setNamiMigration(migration);
+
     backgroundServices.handleChangeMode({ mode });
     await setBackgroundStorage({
       namiMigration: migration

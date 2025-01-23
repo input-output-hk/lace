@@ -9,13 +9,14 @@ import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
-import { useAnalyticsContext } from '@providers';
+import {useAnalyticsContext, useBackgroundServiceAPIContext} from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
+import { BitcoinWallet } from '@lace/bitcoin';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -51,14 +52,13 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const bitcoinBalance = useObservable(bitcoinWallet.balance$, BigInt(0));
-  const transactions = useObservable(bitcoinWallet.transactionHistory$, []);
-  const utxos = useObservable(bitcoinWallet.utxos$, []);
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
   const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
+  const backgroundServices = useBackgroundServiceAPIContext();
 
   const handleName = handle?.nftMetadata?.name;
   const activeWalletId = cardanoWallet.source.wallet.walletId;
@@ -97,7 +97,6 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
 
       return (
         <div>
-          <a>BITCOIN BALANCE: {`Bitcoin Balance: ${bitcoinBalance.toString()}`}</a>
           <ProfileDropdown.WalletOption
             key={wallet.walletId}
             title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
@@ -121,6 +120,15 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 duration: TOAST_DEFAULT_DURATION,
                 text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
               });
+
+              const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
+
+              if (activeBlockchain !== 'cardano') {
+                await backgroundServices.setBackgroundStorage({
+                  activeBlockchain: 'cardano'
+                });
+                window.location.reload();
+              }
             }}
             type={getUiWalletType(wallet.type)}
             profile={
@@ -139,7 +147,6 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       );
     },
     [
-      bitcoinBalance,
       activateWallet,
       activeWalletId,
       analytics,
@@ -147,6 +154,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       getAvatar,
       onOpenWalletAccounts,
       setIsDropdownMenuOpen,
+      backgroundServices,
       t
     ]
   );
@@ -177,6 +185,61 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
     [renderScriptWallet, renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
   );
 
+  const renderBitcoinWalletOption = useCallback(() => {
+      const walletAvatar = getAvatar('Bitcoin');
+
+      return (
+        <div>
+          <ProfileDropdown.WalletOption
+            key={'Bitcoin'}
+            title={shortenWalletName('Bitcoin', WALLET_OPTION_NAME_MAX_LENGTH)}
+            subtitle={shortenWalletName('Account #0', WALLET_OPTION_NAME_MAX_LENGTH)}
+            id={`wallet-option-bitcoin`}
+            onClick={async () => {
+              setIsDropdownMenuOpen(false);
+              await backgroundServices.setBackgroundStorage({
+                activeBlockchain: 'bitcoin'
+              });
+
+              toast.notify({
+                duration: TOAST_DEFAULT_DURATION,
+                text: `Switched to Bitcoin wallet: ${bitcoinBalance.toString()} satoshis`
+              });
+
+              window.location.reload();
+            }}
+            type={getUiWalletType(WalletType.InMemory)}
+            profile={
+              walletAvatar
+                ? {
+                  fallbackText: fullWalletName,
+                  imageSrc: walletAvatar
+                }
+                : undefined
+            }
+          />
+        </div>
+      );
+    },
+    [
+      bitcoinBalance,
+      fullWalletName,
+      getAvatar,
+      setIsDropdownMenuOpen,
+      backgroundServices
+    ]
+  );
+
+  const renderBitcoinWallet = useCallback(
+    (_wallet: BitcoinWallet.BitcoinWallet, isLast: boolean) => (
+      <div key={'Bitcoin'}>
+        {renderBitcoinWalletOption()}
+        {isLast ? undefined : <Separator />}
+      </div>
+    ),
+    [renderBitcoinWalletOption]
+  );
+
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
       <div
@@ -186,7 +249,14 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
         })}
       >
         {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
+          <div>
+            <div>
+              {wallets.map((wallet) => renderWallet(wallet, true))}
+            </div>
+            <div>
+              {renderBitcoinWallet(bitcoinWallet, false)}
+            </div>
+          </div>
         ) : (
           <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
@@ -215,8 +285,6 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
         {process.env.USE_MULTI_WALLET === 'true' ? undefined : (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
-            <div>{transactions.map((tx) => tx.transactionHash)}</div>
-            <div>{utxos.map((utxo) => utxo.address)}</div>
           </div>
         )}
       </div>
