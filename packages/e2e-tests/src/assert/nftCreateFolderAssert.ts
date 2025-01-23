@@ -82,6 +82,7 @@ class NftCreateFolderAssert {
       );
       await NftSelectNftsPage.assetSelectorContainer.waitForDisplayed();
 
+      await TokenSelectionPage.waitForNft(Asset.IBILECOIN.name);
       const ibileCoin = await TokenSelectionPage.getNftContainer(Asset.IBILECOIN.name);
       await ibileCoin.waitForDisplayed();
       const bisonCoin = await TokenSelectionPage.getNftContainer(Asset.BISON_COIN.name);

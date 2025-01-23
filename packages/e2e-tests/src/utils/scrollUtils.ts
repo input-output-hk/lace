@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { browser } from '@wdio/globals';
 
-export const scrollToWithYOffset = async (element: WebdriverIO.Element, offsetY: number) => {
+export const scrollToWithYOffset = async (element: WebdriverIO.Element, offsetY: number): Promise<void> => {
   await browser.execute(
     (el, yOffset) => {
       el.scrollIntoView({ block: 'center', inline: 'center' });
@@ -12,14 +12,14 @@ export const scrollToWithYOffset = async (element: WebdriverIO.Element, offsetY:
   );
 };
 
-export const scrollDownWithOffset = async (elements: WebdriverIO.ElementArray) => {
+export const scrollDownWithOffset = async (elements: WebdriverIO.ElementArray): Promise<void> => {
   if (elements.length > 0) {
     const lastContainer = elements[elements.length - 1];
     await scrollToWithYOffset(lastContainer, 30);
   }
 };
 
-export const scrollToTheTop = async (elementsSelector: string) => {
+export const scrollToTheTop = async (elementsSelector: string): Promise<void> => {
   let elements = await $$(elementsSelector);
   let previousFirstElementName = elements.length > 0 ? await elements[0].getText() : 'not_found';
 
