@@ -13608,7 +13608,6 @@ __metadata:
     swiper: ^8.4.4
     text-encoding-utf-8: ^1.0.2
     tsconfig-paths-webpack-plugin: 3.5.2
-    vm-browserify: ^1.1.2
     webassembly-loader-sw: ^1.1.0
     webextension-polyfill: 0.10.0
     zod: ^3.23.8

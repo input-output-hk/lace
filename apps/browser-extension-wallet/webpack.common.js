@@ -4,6 +4,7 @@ const Dotenv = require('dotenv-webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const { SubresourceIntegrityPlugin } = require('webpack-subresource-integrity');
+
 const commitHash = Buffer.from(require('child_process').execSync('git rev-parse HEAD')).toString();
 const app_version = require('./manifest.json').version;
 
@@ -96,7 +97,6 @@ module.exports = () => {
         '@emurgo/cardano-message-signing-browser'
       ),
       new ProvidePlugin({
-        crypto: 'crypto-browserify',
         Buffer: ['buffer', 'Buffer'],
         process: 'process/browser'
       }),
