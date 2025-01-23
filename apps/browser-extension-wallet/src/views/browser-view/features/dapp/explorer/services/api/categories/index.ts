@@ -56,7 +56,7 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
       setData(categories);
       setLoading(false);
     })();
-  }, []);
+  }, [disallowedDappCategories]);
 
   return { loading, data };
 };
