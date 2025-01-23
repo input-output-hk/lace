@@ -4,7 +4,7 @@ import SearchInput from '../searchInput';
 import { browser } from '@wdio/globals';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
-import { scrollDownWithOffset, scrollToWithYOffset } from '../../utils/scrollUtils';
+import { scrollDownWithOffset } from '../../utils/scrollUtils';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -81,16 +81,29 @@ class NftSelectNftsPage extends CommonDrawerElements {
   }
 
   async selectNFTs(numberOfNFTs: number) {
-    for (let i = 0; i < numberOfNFTs; i++) {
-      if (i === 5) {
-        const nft = await this.nfts[i];
-        if (nft) {
-          await browser.pause(200);
-          await scrollToWithYOffset(nft, 30);
+    let selectedCount = 0;
+
+    while (selectedCount < numberOfNFTs) {
+      const nfts = await this.nfts;
+
+      for (const nft of nfts) {
+        const isSelected = await nft.$(this.NFT_ITEM_SELECTED_CHECKMARK).isExisting();
+        if (isSelected) {
+          continue;
+        }
+
+        await nft.waitForClickable();
+        await nft.click();
+        selectedCount++;
+
+        if (selectedCount >= numberOfNFTs) {
+          return;
         }
       }
-      await this.nfts[i].waitForClickable();
-      await this.nfts[i].click();
+
+      if (selectedCount < numberOfNFTs) {
+        await scrollDownWithOffset(nfts);
+      }
     }
   }
 

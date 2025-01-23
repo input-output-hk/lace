@@ -5,9 +5,10 @@ import { ChainablePromiseElement } from 'webdriverio';
 import testContext from '../../utils/testContext';
 import { browser } from '@wdio/globals';
 import { scrollDownWithOffset } from '../../utils/scrollUtils';
+import NftsCommon from './nftsCommon';
 
 class NftsPage {
-  protected LIST_CONTAINER = '[data-testid="nft-list-container"]';
+  public LIST_CONTAINER = '[data-testid="nft-list-container"]';
   private CREATE_FOLDER_BUTTON = '[data-testid="create-folder-button"]';
   private NFT_SEARCH_INPUT = '[data-testid="nft-search-input"]';
   public NFT_CONTAINER = '[data-testid="nft-item"]';
@@ -85,12 +86,8 @@ class NftsPage {
   }
 
   async saveNfts(): Promise<any> {
-    const names: string[] = [];
-
-    for (const nftContainer of await this.nftContainers) {
-      names.push(await nftContainer.getText());
-    }
-    testContext.save('ownedNfts', names);
+    const ownedNfts = await NftsCommon.getAllNftNamesWithScroll(`${this.LIST_CONTAINER} ${this.NFT_NAME}`);
+    testContext.save('ownedNfts', ownedNfts);
   }
 
   async waitForNft(nftName: string) {

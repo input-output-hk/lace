@@ -11,8 +11,8 @@ class TokenSelectionPage extends CommonDrawerElements {
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
   private TOKEN_ROW = '//div[@data-testid="coin-search-row"]';
   private NFTS_BUTTON = '//input[@data-testid="asset-selector-button-nfts"]';
-  private ASSET_SELECTOR_CONTAINER = '[data-testid="asset-selector"]';
-  private NFT_CONTAINER = '[data-testid="nft-item"]';
+  public ASSET_SELECTOR_CONTAINER = '[data-testid="asset-selector"]';
+  public NFT_CONTAINER = '[data-testid="nft-item"]';
   private NFT_ITEM_NAME = '[data-testid="nft-item-name"]';
   private NFT_ITEM_OVERLAY = '[data-testid="nft-item-overlay"]';
   private NFT_ITEM_SELECTED_CHECKMARK = '[data-testid="nft-item-selected"]';
@@ -135,8 +135,12 @@ class TokenSelectionPage extends CommonDrawerElements {
   };
 
   addAmountOfAssets = async (amount: number, assetType: string) => {
-    for (let i = 1; i <= amount; i++) {
-      assetType === 'Tokens' ? await this.tokenItem(i).container.click() : await this.nftNames[i].click();
+    if (assetType === 'Tokens') {
+      for (let i = 1; i <= amount; i++) {
+        await this.tokenItem(i).container.click();
+      }
+    } else {
+      await this.selectNFTs(amount);
     }
   };
 
@@ -219,6 +223,33 @@ class TokenSelectionPage extends CommonDrawerElements {
         timeoutMsg: `Failed while waiting for NFT: ${nftName}`
       }
     );
+  }
+
+  async selectNFTs(numberOfNFTs: number) {
+    let selectedCount = 0;
+
+    while (selectedCount < numberOfNFTs) {
+      const nfts = await this.nftContainers;
+
+      for (const nft of nfts) {
+        const isSelected = await nft.$(this.NFT_ITEM_SELECTED_CHECKMARK).isExisting();
+        if (isSelected) {
+          continue;
+        }
+
+        await nft.waitForClickable();
+        await nft.click();
+        selectedCount++;
+
+        if (selectedCount >= numberOfNFTs) {
+          return;
+        }
+      }
+
+      if (selectedCount < numberOfNFTs) {
+        await scrollDownWithOffset(nfts);
+      }
+    }
   }
 }
 

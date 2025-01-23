@@ -11,6 +11,7 @@ import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
 import { scrollToTheTop } from '../utils/scrollUtils';
+import NftsCommon from '../elements/NFTs/nftsCommon';
 
 use(chaiSorted);
 
@@ -23,7 +24,9 @@ class NftAssert {
   }
 
   async assertCounterNumberMatchesWalletNFTs() {
-    const nftsNumber = await NftsPage.nftContainers.length;
+    const nftsNumber = (
+      await NftsCommon.getAllNftNamesWithScroll(`${NftsPage.LIST_CONTAINER} ${NftsPage.NFT_CONTAINER}`)
+    ).length;
     const tokensCounterValue = Number((await NftsPage.counter.getText()).slice(1, -1));
     expect(nftsNumber).to.equal(tokensCounterValue);
   }
@@ -118,13 +121,11 @@ class NftAssert {
   }
 
   async assertNftDisplayedOnNftsPage(nftName: string, shouldBeDisplayed: boolean) {
-    if (shouldBeDisplayed) {
+    try {
       await NftsPage.waitForNft(nftName);
-    } else {
-      try {
-        await NftsPage.waitForNft(nftName);
-      } catch {
-        await scrollToTheTop(NftsPage.NFT_CONTAINER);
+    } catch {
+      if (!shouldBeDisplayed) {
+        await scrollToTheTop(`${NftsPage.LIST_CONTAINER} ${NftsPage.NFT_CONTAINER}`);
       }
     }
     const nftItem = await NftsPage.getNftContainer(nftName);
