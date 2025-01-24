@@ -38,6 +38,11 @@ export const getADAPriceFromBackgroundStorage = async (): Promise<BackgroundStor
   return backgroundStorage?.fiatPrices;
 };
 
+export const getBtcPriceFromBackgroundStorage = async (): Promise<BackgroundStorage['fiatBitcoinPrices']> => {
+  const backgroundStorage = await getBackgroundStorage();
+  return backgroundStorage?.fiatBitcoinPrices;
+};
+
 const calculatePopupWindowPositionAndSize = (
   window: Windows.Window,
   popup: WindowSize

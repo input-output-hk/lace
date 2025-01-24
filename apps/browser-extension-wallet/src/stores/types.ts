@@ -21,6 +21,7 @@ import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discovere
 import { Cardano, Reward } from '@cardano-sdk/core';
 import { StakePoolSortOptions } from '@lace/staking';
 import { ObservableWalletState } from '@hooks/useWalletState';
+import { BitcoinWallet } from '@lace/bitcoin';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -104,6 +105,7 @@ export interface WalletInfoSlice {
   walletState: ObservableWalletState | null;
   setWalletState: (walletState: ObservableWalletState | null) => void;
   cardanoWallet: Wallet.CardanoWallet | undefined;
+  bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined;
   walletManager: WalletManagerApi | undefined;
   initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
@@ -114,6 +116,7 @@ export interface WalletInfoSlice {
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
   walletType: WalletType;
+  isBitcoinWallet: boolean;
   isInMemoryWallet: boolean;
   isHardwareWallet: boolean;
   isSharedWallet: boolean;

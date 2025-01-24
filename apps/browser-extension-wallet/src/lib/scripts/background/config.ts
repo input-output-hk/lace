@@ -14,6 +14,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   requestMessage$: RemoteApiPropertyType.HotObservable,
   migrationState$: RemoteApiPropertyType.HotObservable,
   coinPrices: {
+    bitcoinPrices$: RemoteApiPropertyType.HotObservable,
     adaPrices$: RemoteApiPropertyType.HotObservable,
     tokenPrices$: RemoteApiPropertyType.HotObservable
   },
