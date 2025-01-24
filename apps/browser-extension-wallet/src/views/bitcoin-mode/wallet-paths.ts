@@ -1,59 +1,31 @@
 export const walletRoutePaths = {
-  activity: '/activity',
-  addressBook: '/address-book',
-  coinActivity: '/coin/:id/:symbol/:name',
-  confirmDelegation: '/delegate/confirm',
-  delegate: '/delegate',
-  earn: '/earn',
-  nftDetail: '/nft/:id',
-  nfts: '/nfts',
-  assets: '/assets',
-  passphraseInterval: '/settings/passphrase-interval',
-  receive: '/receive',
-  send: '/send/:id',
-  settings: '/settings',
-  staking: '/staking',
-  dapps: '/dapp-explorer',
-  voting: '/voting',
-  signMessage: '/sign-message',
+  activity: '/bitcoin-activity',
+  addressBook: '/bitcoin-address-book',
+  coinActivity: '/bitcoin-coin/:id/:symbol/:name',
+  confirmDelegation: '/bitcoin-delegate/confirm',
+  delegate: '/bitcoin-delegate',
+  earn: '/bitcoin-earn',
+  nftDetail: '/bitcoin-nft/:id',
+  nfts: '/bitcoin-nfts',
+  assets: '/bitcoin-assets',
+  passphraseInterval: '/bitcoin-settings/passphrase-interval',
+  receive: '/bitcoin-receive',
+  send: '/bitcoin-send/:id',
+  settings: '/bitcoin-settings',
+  staking: '/bitcoin-staking',
+  dapps: '/bitcoin-dapp-explorer',
+  voting: '/bitcoin-voting',
+  signMessage: '/bitcoin-sign-message',
   setup: {
-    home: '/setup',
-    create: '/setup/create',
-    hardware: '/setup/hardware',
-    restore: '/setup/restore'
+    home: '/bitcoin-setup',
+    create: '/bitcoin-setup/create',
+    hardware: '/bitcoin-setup/hardware',
+    restore: '/bitcoin-setup/restore'
   },
   newWallet: {
-    root: '/new-wallet',
-    create: '/new-wallet/create',
-    hardware: '/new-wallet/hardware',
-    restore: '/new-wallet/restore'
+    root: '/bitcoin-new-wallet',
+    create: '/bitcoin-new-wallet/create',
+    hardware: '/bitcoin-new-wallet/hardware',
+    restore: '/bitcoin-new-wallet/restore'
   },
-  sharedWallet: {
-    root: '/shared-wallet',
-    generateKeys: '/shared-wallet/generate-key',
-    create: '/shared-wallet/create',
-    import: '/shared-wallet/import'
-  },
-  namiMigration: {
-    root: '/nami/migration',
-    activating: '/nami/migration/activating',
-    welcome: '/nami/migration/welcome',
-    customize: '/nami/migration/customize',
-    allDone: '/nami/migration/all-done',
-    hwFlow: '/nami/nami-mode/hwTab'
-  }
-};
-
-export const dAppRoutePaths = {
-  dappConfirmTransaction: '/dapp/transaction',
-  dappConnect: '/dapp/connect',
-  dappTxSignFailure: '/dapp/transaction/failure',
-  dappTxSignSuccess: '/dapp/transaction/success',
-  dappDataSignFailure: '/dapp/data/failure',
-  dappDataSignSuccess: '/dapp/data/success',
-  dappSignTx: '/dapp/sign-tx',
-  dappSubmitTx: '/dapp/submit-tx',
-  dappSignData: '/dapp/sign-data',
-  dappNoWallet: '/dapp/no-wallet',
-  dappSetCollateral: '/dapp/set-collateral'
 };

@@ -1,0 +1,24 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.pageTitle {
+  @include text-heading;
+  color: var(--text-color-primary);
+  gap: size_unit(1);
+  margin: 0;
+  padding-bottom: size_unit(6);
+
+  .amount {
+    color: var(--text-color-secondary);
+    font-size: var(--bodyLarge);
+    font-weight: 600;
+    line-height: size_unit(5);
+    margin-left: size_unit(1);
+  }
+}
+
+@media (max-width: $breakpoint-popup) {
+  .pageTitle {
+    padding-bottom: size_unit(3);
+  }
+}

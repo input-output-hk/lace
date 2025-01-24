@@ -8,7 +8,6 @@ import {
   UTxO
 } from './BitcoinDataProvider';
 import { Network } from '../common';
-import { sha256 } from 'hash.js';
 
 export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   private api: AxiosInstance;
@@ -113,10 +112,13 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
    * @returns {Promise<string>} A promise that resolves with the transaction hash of the submitted transaction.
    */
   async submitTransaction(rawTransaction: string): Promise<string> {
+    const endpoint = '/rpc/transaction/submit';
+
     try {
-      const response = await this.api.post(`/rpc/transaction/submit`, { body: rawTransaction });
-      if (response.status === 200) {
-        return this.computeTransactionHash(rawTransaction);
+      const response = await this.api.post(endpoint, JSON.stringify(rawTransaction));
+
+      if (response.status === 201 && response.data) {
+        return response.data;
       } else {
         throw new Error(
           `Unexpected response status: ${response.status} - ${JSON.stringify(response.data)}`
@@ -124,16 +126,10 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
       }
     } catch (error: any) {
       if (error.response) {
-        console.error('Transaction submission failed with response:', {
-          status: error.response.status,
-          data: error.response.data,
-          headers: error.response.headers
-        });
         throw new Error(
           `Transaction submission failed: ${error.response.data?.error || 'Unknown error'}`
         );
       } else {
-        console.error('Transaction submission failed with an unknown error:', error);
         throw new Error('Transaction submission failed due to an unknown error.');
       }
     }
@@ -204,19 +200,5 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   private async getTransactionDetails(txHash: string): Promise<any> {
     const response = await this.api.get(`/transactions/${txHash}`);
     return response.data.data;
-  }
-
-  /**
-   * Computes the transaction hash from the raw transaction data.
-   */
-  private computeTransactionHash(rawTransaction: string): string {
-    const buffer = Buffer.from(rawTransaction, 'hex');
-    const hash1 = sha256().update(buffer).digest();
-    const hash2 = sha256().update(Buffer.from(hash1)).digest();
-    return Buffer.from(hash2)
-      .toString('hex')
-      .match(/.{2}/g)!
-      .reverse()
-      .join('');
   }
 }
