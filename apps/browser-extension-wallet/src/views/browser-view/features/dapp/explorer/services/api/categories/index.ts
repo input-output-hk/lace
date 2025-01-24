@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 
 type FetchCategoriesResult = {
   loading: boolean;
@@ -11,6 +13,15 @@ const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<string[]>([]);
+  const dappExplorerFeaturePayload = usePostHogClientContext().getFeatureFlagPayload('dapp-explorer');
+
+  const disallowedDappCategories = useMemo(
+    () =>
+      dappExplorerFeaturePayload
+        ? new Set<string>(dappExplorerFeaturePayload.disallowedCategories.legalIssues)
+        : new Set<string>(),
+    [dappExplorerFeaturePayload]
+  );
 
   useEffect(() => {
     (async () => {
@@ -19,27 +30,33 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
         return;
       }
 
+      let categories: string[] = [];
       try {
-        const response = await window.fetch(dappRadarCategoriesUrl, {
-          headers: {
-            Accept: 'application/json',
-            'x-api-key': dappRadarApiKey
-          }
-        });
+        categories = await cacheRequest(dappRadarCategoriesUrl, async () => {
+          const response = await window.fetch(dappRadarCategoriesUrl, {
+            headers: {
+              Accept: 'application/json',
+              'x-api-key': dappRadarApiKey
+            }
+          });
 
-        let categories: string[] = [];
-        if (response.ok) {
+          if (!response.ok) {
+            throw new Error('Unexpected response');
+          }
+
           const result = (await response.json()) as { categories: string[] };
-          categories = result.categories;
-        }
-        setData(categories);
-      } catch {
-        console.error('Failed to fetch dapp categories.');
-      } finally {
-        setLoading(false);
+          return result.categories;
+        });
+      } catch (error) {
+        console.error('Failed to fetch dapp categories.', error);
       }
+
+      categories = categories.filter((category) => !disallowedDappCategories.has(category));
+
+      setData(categories);
+      setLoading(false);
     })();
-  }, []);
+  }, [disallowedDappCategories]);
 
   return { loading, data };
 };
