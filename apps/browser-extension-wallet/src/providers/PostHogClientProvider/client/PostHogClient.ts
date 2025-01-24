@@ -54,12 +54,7 @@ type FeatureFlagCommonPayload = {
 type FeatureFlagPayload<T extends Record<string, unknown> = {}> = (FeatureFlagCommonPayload & T) | false;
 
 type FeatureFlagCustomPayloads = {
-  [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<{
-    disallowedDapps: {
-      legalIssues: number[];
-      connectivityIssues: number[];
-    };
-  }>;
+  [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<FeatureFlagDappExplorerSchema>;
 };
 
 type FeatureFlagPayloads = {

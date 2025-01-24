@@ -27,11 +27,29 @@ const commonSchema = z.object({
 });
 export type FeatureFlagCommonSchema = DeepRequired<z.infer<typeof commonSchema>>;
 
+// has to be aligned with the response from GET `/dapps/categories`
+// @see https://apis-portal.dappradar.com/full-api-reference#get-/dapps/categories
+export const dappCategoriesEnumSchema = z.enum([
+  'games',
+  'defi',
+  'collectibles',
+  'marketplaces',
+  'high-risk',
+  'gambling',
+  'exchanges',
+  'social',
+  'other'
+]);
+export type DappCategoriesEnumSchema = z.infer<typeof dappCategoriesEnumSchema>;
+
 const dappExplorerSchema = commonSchema.merge(
   z.object({
     disallowedDapps: z.object({
       legalIssues: z.array(z.number()),
       connectivityIssues: z.array(z.number())
+    }),
+    disallowedCategories: z.object({
+      legalIssues: z.array(dappCategoriesEnumSchema)
     })
   })
 );

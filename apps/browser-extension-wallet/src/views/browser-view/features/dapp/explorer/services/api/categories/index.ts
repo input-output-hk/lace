@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 
 type FetchCategoriesResult = {
@@ -12,6 +13,15 @@ const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<string[]>([]);
+  const dappExplorerFeaturePayload = usePostHogClientContext().getFeatureFlagPayload('dapp-explorer');
+
+  const disallowedDappCategories = useMemo(
+    () =>
+      dappExplorerFeaturePayload
+        ? new Set<string>(dappExplorerFeaturePayload.disallowedCategories.legalIssues)
+        : new Set<string>(),
+    [dappExplorerFeaturePayload]
+  );
 
   useEffect(() => {
     (async () => {
@@ -41,10 +51,12 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
         console.error('Failed to fetch dapp categories.', error);
       }
 
+      categories = categories.filter((category) => !disallowedDappCategories.has(category));
+
       setData(categories);
       setLoading(false);
     })();
-  }, []);
+  }, [disallowedDappCategories]);
 
   return { loading, data };
 };
