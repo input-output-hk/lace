@@ -1,5 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { Box, Text, useVisibleItemsCount } from '@input-output-hk/lace-ui-toolkit';
+import { VirtualisedGrid } from '@lace/common';
 import { SortField } from 'features/BrowsePools/types';
 import debounce from 'lodash/debounce';
 import { ReactElement, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -9,7 +10,6 @@ import { ListRange } from 'react-virtuoso';
 import useResizeObserver, { ObservedSize } from 'use-resize-observer';
 import { StakePoolDetails } from '../../store';
 import { STAKE_POOL_CARD_HEIGHT, STAKE_POOL_GRID_ROW_GAP, StakePoolCardSkeleton } from '../StakePoolCard';
-import { Grid } from './Grid';
 import * as styles from './StakePoolsGrid.css';
 import { StakePoolsGridItem } from './StakePoolsGridItem';
 import { StakePoolsGridColumnCount } from './types';
@@ -129,7 +129,8 @@ export const StakePoolsGrid = ({
         </>
       )}
       {showEmptyPlaceholder && <EmptyPlaceholder />}
-      <Grid<StakePoolDetails | undefined>
+      <VirtualisedGrid<StakePoolDetails | undefined>
+        testId="stake-pool-list-scroll-wrapper"
         tableReference={tableReference}
         scrollableTargetId={scrollableTargetId}
         loadMoreData={loadMoreData}

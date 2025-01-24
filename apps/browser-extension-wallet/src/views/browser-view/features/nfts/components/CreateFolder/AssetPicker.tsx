@@ -3,14 +3,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ASSET_COMPONENTS, AssetSelectorOverlay, NftItemProps } from '@lace/core';
 import { useWalletStore } from '@stores';
-import { useObservable } from '@lace/common';
+import { useObservable, VirtualisedGridColumns } from '@lace/common';
 import styles from './CreateFolderDrawer.module.scss';
 import { formatNftsList } from '../utils';
 import { useCurrencyStore } from '@providers';
 import { useAssetInfo } from '@hooks';
 import { searchNft } from '@hooks/useNftSearch';
 
-const nftsPerRow = {
+const nftsPerRow: Record<'popupView' | 'browserView', VirtualisedGridColumns> = {
   popupView: 2,
   browserView: 3
 };

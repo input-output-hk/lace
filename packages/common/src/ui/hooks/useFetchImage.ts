@@ -1,101 +1,105 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useMemo, useReducer } from 'react';
+import { useState, useEffect } from 'react';
 
-enum IMAGE_FETCH_ACTION_TYPES {
-  FETCHING = 'FETCHING',
-  FETCHED = 'FETCHED',
-  FETCH_ERROR = 'FETCH_ERROR'
-}
+export type ImageFetchStatus = 'loading' | 'loaded' | 'error';
 
-export enum IMAGE_FETCH_STATUS {
-  LOADING,
-  LOADED,
-  ERROR
-}
-
-interface ImageResponse {
-  status?: IMAGE_FETCH_STATUS;
-  src?: string;
-}
-
-interface FetchImageArgs {
-  url: string;
-  fallback: string;
-}
-
-type FetchAction = {
-  type: IMAGE_FETCH_ACTION_TYPES;
-  payload?: string;
+type ImageFetchStateMap = {
+  loading: { status: 'loading' };
+  loaded: { status: 'loaded'; imageSrc: string };
+  error: { status: 'error'; imageSrc: string };
 };
 
-const handleImageFetch = (image: string) => {
-  const downloadingImage = new Image();
+export type UseFetchImageState = ImageFetchStateMap[ImageFetchStatus];
 
-  const imageResponse: Promise<ImageResponse> = new Promise<ImageResponse>((resolve) => {
-    const onLoadEvent = (event: any) => {
-      resolve({
-        status: IMAGE_FETCH_STATUS.LOADED,
-        src: event.path?.[0].currentSrc || image
-      });
-    };
-    const onErrorEvent = () => {
-      resolve({
-        status: IMAGE_FETCH_STATUS.ERROR
-      });
-    };
+const BLOCKFROST_IPFS_URL = process.env.BLOCKFROST_IPFS_URL || ' ';
 
-    downloadingImage.addEventListener('load', onLoadEvent);
-    downloadingImage.addEventListener('error', onErrorEvent);
-  });
+const maxConcurrentBlockfrostRequests = Number.parseInt(process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS || '0', 10);
+let concurrentBlockfrostRequestsCount = 0;
 
-  downloadingImage.src = image;
+const blockfrostRequestQueue: Set<() => Promise<void>> = new Set();
 
-  return imageResponse;
-};
-
-const initialState = { status: IMAGE_FETCH_STATUS.LOADING };
-
-const fetchImageReducer = (state: ImageResponse, action: FetchAction): ImageResponse => {
-  switch (action.type) {
-    case IMAGE_FETCH_ACTION_TYPES.FETCHING:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.LOADING };
-    case IMAGE_FETCH_ACTION_TYPES.FETCHED:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.LOADED, src: action.payload };
-    case IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR:
-      return { ...initialState, status: IMAGE_FETCH_STATUS.ERROR };
-    default:
-      return state;
+const processNextBlockfrostIpfsRequest = async () => {
+  if (blockfrostRequestQueue.size > 0 && concurrentBlockfrostRequestsCount < maxConcurrentBlockfrostRequests) {
+    const [nextBlockfrostRequest] = blockfrostRequestQueue;
+    blockfrostRequestQueue.delete(nextBlockfrostRequest);
+    concurrentBlockfrostRequestsCount++;
+    try {
+      await nextBlockfrostRequest();
+    } finally {
+      processNextBlockfrostIpfsRequest();
+    }
   }
 };
 
-const fetchImageDispatcher = async (url: string, dispatcher: React.Dispatch<FetchAction>) => {
-  const response = await handleImageFetch(url);
+const fetchImage = async (url: string, controller: AbortController) => {
+  const response = await fetch(url, { signal: controller.signal });
 
-  const type =
-    response.status === IMAGE_FETCH_STATUS.LOADED
-      ? IMAGE_FETCH_ACTION_TYPES.FETCHED
-      : // eslint-disable-next-line unicorn/no-nested-ternary
-      response.status === IMAGE_FETCH_STATUS.ERROR
-      ? IMAGE_FETCH_ACTION_TYPES.FETCH_ERROR
-      : IMAGE_FETCH_ACTION_TYPES.FETCHING;
-  const dispatchValue = { payload: response.src, type };
+  if (!response.ok) throw new Error('Image fetch failed');
 
-  dispatcher(dispatchValue);
+  const blob = await response.blob();
+
+  const contentLength = response.headers.get('content-length');
+  if (contentLength && blob.size !== Number.parseInt(contentLength, 10)) {
+    throw new Error('Incomplete blob size');
+  }
+
+  return URL.createObjectURL(blob);
 };
 
-export const useFetchImage = ({ url, fallback }: FetchImageArgs): [ImageResponse, () => Promise<void>] => {
-  const [result, dispatch] = useReducer(fetchImageReducer, initialState);
-  const handleLoad = useCallback(async () => {
-    await fetchImageDispatcher(url, dispatch);
-  }, [url]);
+const isImageLoading = (imageUrl: string): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const img = new Image();
+    img.addEventListener('load', () => resolve());
+    img.addEventListener('error', (err) => reject(new Error(err.message)));
+    img.src = imageUrl;
+  });
 
-  const resultWithFallback = useMemo(
-    () => ({
-      ...result,
-      src: result?.src || fallback
-    }),
-    [result, fallback]
-  );
+export const useFetchImage = ({ url, fallbackImage }: { url: string; fallbackImage: string }): UseFetchImageState => {
+  const [state, setState] = useState<UseFetchImageState>({ status: 'loading' });
 
-  return [resultWithFallback, handleLoad];
+  useEffect(() => {
+    if (url.startsWith('data:image/') || !url.startsWith(BLOCKFROST_IPFS_URL)) {
+      isImageLoading(url)
+        .then(() => {
+          setState({ status: 'loaded', imageSrc: url });
+        })
+        .catch(() => {
+          setState({ status: 'error', imageSrc: fallbackImage });
+        });
+
+      return () => void 0;
+    }
+
+    const controller = new AbortController();
+
+    const loadImageFromBlockfrost = async () => {
+      try {
+        setState({ status: 'loading' });
+
+        const imageSrc = await fetchImage(url, controller);
+
+        setState({ status: 'loaded', imageSrc });
+      } catch {
+        if (!controller.signal.aborted) {
+          setState({ status: 'error', imageSrc: fallbackImage });
+        }
+      } finally {
+        concurrentBlockfrostRequestsCount--;
+        processNextBlockfrostIpfsRequest();
+      }
+    };
+
+    if (concurrentBlockfrostRequestsCount < maxConcurrentBlockfrostRequests) {
+      concurrentBlockfrostRequestsCount++;
+      loadImageFromBlockfrost();
+    } else {
+      blockfrostRequestQueue.add(loadImageFromBlockfrost);
+    }
+
+    return () => {
+      controller.abort();
+      blockfrostRequestQueue.delete(loadImageFromBlockfrost);
+    };
+  }, [url, fallbackImage]);
+
+  return state;
 };

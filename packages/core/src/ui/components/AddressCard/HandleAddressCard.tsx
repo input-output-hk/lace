@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styles from './HandleAddressCard.module.scss';
 import { Image, Spin } from 'antd';
 import { Base } from './Base';
 import symbol from '../../assets/images/handle.png';
 import placeholder from '../../assets/images/nft-placeholder.png';
-import { IMAGE_FETCH_STATUS, useFetchImage } from '@lace/common';
+import { useFetchImage } from '@lace/common';
 
 export type Props = {
   name: string;
@@ -14,12 +14,8 @@ export type Props = {
 };
 
 export const HandleAddressCard = ({ name, image, copiedMessage, onCopyClick }: Readonly<Props>): JSX.Element => {
-  const [imageResponse, handleLoad] = useFetchImage({ url: image, fallback: placeholder });
-  const isLoading = imageResponse?.status === IMAGE_FETCH_STATUS.LOADING;
-
-  useEffect(() => {
-    handleLoad();
-  }, [handleLoad]);
+  const imageResponse = useFetchImage({ url: image, fallbackImage: placeholder });
+  const isLoading = imageResponse?.status === 'loading';
 
   return (
     <Base copiedMessage={copiedMessage} copyText={name} onCopyClick={onCopyClick}>

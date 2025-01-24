@@ -38,6 +38,8 @@ export type Config = {
 // eslint-disable-next-line complexity
 const envChecks = (chosenChain: Wallet.ChainName): void => {
   if (
+    !process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS ||
+    !process.env.BLOCKFROST_IPFS_URL ||
     !process.env.CARDANO_SERVICES_URL_MAINNET ||
     !process.env.CARDANO_SERVICES_URL_PREPROD ||
     !process.env.CARDANO_SERVICES_URL_PREVIEW ||

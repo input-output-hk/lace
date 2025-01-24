@@ -10,6 +10,7 @@ import chaiSorted from 'chai-sorted';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
+import NftsCommon from '../elements/NFTs/nftsCommon';
 
 use(chaiSorted);
 
@@ -22,7 +23,9 @@ class NftAssert {
   }
 
   async assertCounterNumberMatchesWalletNFTs() {
-    const nftsNumber = await NftsPage.nftContainers.length;
+    const nftsNumber = (
+      await NftsCommon.getAllNftNamesWithScroll(`${NftsPage.LIST_CONTAINER} ${NftsPage.NFT_CONTAINER}`)
+    ).length;
     const tokensCounterValue = Number((await NftsPage.counter.getText()).slice(1, -1));
     expect(nftsNumber).to.equal(tokensCounterValue);
   }
@@ -117,6 +120,13 @@ class NftAssert {
   }
 
   async assertNftDisplayedOnNftsPage(nftName: string, shouldBeDisplayed: boolean) {
+    try {
+      await NftsPage.waitForNft(nftName);
+    } catch {
+      if (!shouldBeDisplayed) {
+        await NftsPage.scrollToTheTop();
+      }
+    }
     const nftItem = await NftsPage.getNftContainer(nftName);
     await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
   }
@@ -194,7 +204,12 @@ class NftAssert {
     for (const thumbnail of thumbnails) {
       srcValues.push(await thumbnail.$('img').getAttribute('src'));
     }
-    expect(srcValues).to.contain(adaHandleAssert.customHandleSrcValue);
+
+    expect(
+      srcValues.some((testItem) =>
+        adaHandleAssert.customHandleSrcValues.some((customItem) => testItem.includes(customItem))
+      )
+    ).to.be.true;
   }
 
   async assertSeeCustomAdaHandleInCoinSelector() {

@@ -1,10 +1,10 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import cn from 'classnames';
 import styles from './NftsLayout.module.scss';
 import { useWalletStore } from '@stores';
 import { useTranslation } from 'react-i18next';
-import { ListEmptyState, NftFolderItemProps, NftItemProps, NftList, NftListProps, NftsItemsTypes } from '@lace/core';
+import { ListEmptyState, NftFolderItemProps, NftGrid, NftItemProps, NftListProps, NftsItemsTypes } from '@lace/core';
 import flatten from 'lodash/flatten';
 import isNil from 'lodash/isNil';
 import {
@@ -14,7 +14,7 @@ import {
   useOutputInitialState
 } from '../../send-transaction';
 import { Button, useObservable } from '@lace/common';
-import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
+import { DEFAULT_WALLET_BALANCE, LACE_APP_ID } from '@src/utils/constants';
 import { Skeleton } from 'antd';
 import { EducationalList, FundWalletBanner, Layout, SectionLayout } from '@src/views/browser-view/components';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
@@ -77,7 +77,7 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     });
   };
 
-  const handleNftSearch = (items: NftItemProps[], value: string) => {
+  const handleNftSearch = (items: NftListProps['items'], value: string) => {
     setSearchValue(value);
 
     if (!hasRecordedAnalytics) {
@@ -117,7 +117,6 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
     [analytics]
   );
 
-  // eslint-disable-next-line unicorn/no-useless-undefined
   const closeNftDetails = () => setSelectedNft(undefined);
   const nfts: NftItemProps[] = useMemo(() => {
     const { nftList } = getTokenList({
@@ -211,6 +210,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
 
   const showCreateFolder = nfts.length > 0 && nftsNotInFolders.length > 0 && process.env.USE_NFT_FOLDERS === 'true';
 
+  const ref = useRef<HTMLDivElement>(null);
+  const nftstoDisplay = searchValue !== '' ? filteredResults : items;
+
   return (
     <>
       <Layout>
@@ -241,25 +243,23 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                 </Button>
               )}
             </div>
-            <div className={styles.content} data-testid="nft-list-container">
+          </Skeleton>
+          <div ref={ref} className={styles.content} data-testid="nft-list-container">
+            <Skeleton loading={isLoadingFirstTime}>
               {items.length > 0 ? (
                 <>
                   {items.length >= MIN_ASSET_COUNT_FOR_SEARCH && (
                     <SearchBox
                       placeholder={t('browserView.nfts.searchPlaceholder')}
-                      onChange={(value) => handleNftSearch(nfts, value)}
+                      onChange={(value) => handleNftSearch(items, value)}
                       data-testid="nft-search-input"
                       value={searchValue}
                       onClear={() => setSearchValue('')}
                     />
                   )}
-                  <Skeleton loading={isSearching}>
-                    {searchValue !== '' && filteredResults.length > 0 && <NftList items={filteredResults} rows={4} />}
-                    {searchValue !== '' && filteredResults.length === 0 && (
-                      <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
-                    )}
-                    {searchValue === '' && <NftList items={items} rows={4} />}
-                  </Skeleton>
+                  {!isSearching && searchValue !== '' && filteredResults.length === 0 && (
+                    <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+                  )}
                 </>
               ) : (
                 <FundWalletBanner
@@ -270,8 +270,9 @@ export const NftsLayout = withNftsFoldersContext((): React.ReactElement => {
                   shouldHaveVerticalContent
                 />
               )}
-            </div>
-          </Skeleton>
+            </Skeleton>
+            <NftGrid columns={4} scrollableTargetId={LACE_APP_ID} items={isLoadingFirstTime ? [] : nftstoDisplay} />
+          </div>
           <DetailsDrawer
             selectedNft={selectedNft}
             assetsInfo={assetsInfo}

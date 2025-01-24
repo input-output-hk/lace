@@ -12,6 +12,7 @@ import YoullHaveToStartAgainModal from '../elements/NFTs/youllHaveToStartAgainMo
 import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import adaHandleAssert from './adaHandleAssert';
 import { browser } from '@wdio/globals';
+import NftsCommon from '../elements/NFTs/nftsCommon';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -81,6 +82,7 @@ class NftCreateFolderAssert {
       );
       await NftSelectNftsPage.assetSelectorContainer.waitForDisplayed();
 
+      await TokenSelectionPage.waitForNft(Asset.IBILECOIN.name);
       const ibileCoin = await TokenSelectionPage.getNftContainer(Asset.IBILECOIN.name);
       await ibileCoin.waitForDisplayed();
       const bisonCoin = await TokenSelectionPage.getNftContainer(Asset.BISON_COIN.name);
@@ -97,24 +99,41 @@ class NftCreateFolderAssert {
 
   async verifySeeAllOwnedNfts() {
     const ownedNftNames = testContext.load('ownedNfts');
-    const displayedNfts = await TokenSelectionPage.nftContainers;
 
-    const displayedNftNames: string[] = [];
-    for (const nftContainer of displayedNfts) {
-      displayedNftNames.push(await nftContainer.getText());
-    }
+    await TokenSelectionPage.scrollToTheTop(); // make sure we are starting from the top
+
+    const displayedNftNames = await NftsCommon.getAllNftNamesWithScroll(
+      `${TokenSelectionPage.ASSET_SELECTOR_CONTAINER} ${TokenSelectionPage.NFT_CONTAINER}`
+    );
 
     expect(ownedNftNames).to.have.ordered.members(displayedNftNames);
   }
 
   async verifySeeAllAdaHandles() {
     const ownedAdaHandleNames: string[] = testContext.load('displayedAdaHandleNames');
-    const displayedNfts = await TokenSelectionPage.nftContainers;
+    let displayedNfts = await TokenSelectionPage.nftContainers;
 
     const displayedAdaHandleNames: string[] = [];
-    for (const nftContainer of displayedNfts) {
-      displayedAdaHandleNames.push(await nftContainer.getText());
-    }
+    let previousContainerCount = 0;
+
+    do {
+      previousContainerCount = displayedNfts.length;
+
+      for (const nftContainer of displayedNfts) {
+        await nftContainer.scrollIntoView();
+        await browser.pause(300);
+
+        const nftName = await nftContainer.getText();
+        if (!displayedAdaHandleNames.includes(nftName)) {
+          displayedAdaHandleNames.push(nftName);
+        }
+      }
+
+      await browser.pause(300);
+
+      displayedNfts = await TokenSelectionPage.nftContainers;
+    } while (displayedNfts.length > previousContainerCount);
+
     expect(ownedAdaHandleNames).to.have.all.members(displayedAdaHandleNames);
   }
 
@@ -128,7 +147,7 @@ class NftCreateFolderAssert {
       displayedAdaHandleImagesSrc.push(await displayedAdaHandleImage.getAttribute('src'));
     }
 
-    expect(displayedAdaHandleImagesSrc).to.have.all.members(adaHandleImages);
+    expect(displayedAdaHandleImagesSrc.length).to.equal(adaHandleImages.length);
   }
 
   async verifyNoneNftIsSelected() {

@@ -3,12 +3,15 @@ import SectionTitle from '../sectionTitle';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
 import testContext from '../../utils/testContext';
+import { browser } from '@wdio/globals';
+import { scrollDownWithOffset, scrollToTheTop } from '../../utils/scrollUtils';
+import NftsCommon from './nftsCommon';
 
 class NftsPage {
-  protected LIST_CONTAINER = '[data-testid="nft-list-container"]';
+  public LIST_CONTAINER = '[data-testid="nft-list-container"]';
   private CREATE_FOLDER_BUTTON = '[data-testid="create-folder-button"]';
   private NFT_SEARCH_INPUT = '[data-testid="nft-search-input"]';
-  protected NFT_CONTAINER = '[data-testid="nft-item"]';
+  public NFT_CONTAINER = '[data-testid="nft-item"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
   public NFT_NAME = '[data-testid="nft-item-name"]';
   protected FOLDER_CONTAINER = '[data-testid="folder-item"]';
@@ -70,6 +73,7 @@ class NftsPage {
   }
 
   async clickNftItem(nftName: string, clickType: 'left' | 'right' = 'left') {
+    await this.waitForNft(nftName);
     const nftNameElement = await this.getNftName(nftName);
     await nftNameElement.waitForStable();
     await nftNameElement.click({ button: clickType });
@@ -82,12 +86,31 @@ class NftsPage {
   }
 
   async saveNfts(): Promise<any> {
-    const names: string[] = [];
+    const ownedNfts = await NftsCommon.getAllNftNamesWithScroll(`${this.LIST_CONTAINER} ${this.NFT_NAME}`);
+    testContext.save('ownedNfts', ownedNfts);
+  }
 
-    for (const nftContainer of await this.nftContainers) {
-      names.push(await nftContainer.getText());
-    }
-    testContext.save('ownedNfts', names);
+  async waitForNft(nftName: string) {
+    await browser.waitUntil(
+      async () => {
+        const nft = await this.getNftContainer(nftName);
+
+        if (nft !== undefined) {
+          return true;
+        }
+
+        await scrollDownWithOffset(await this.nftContainers);
+        return false;
+      },
+      {
+        timeout: 3000,
+        timeoutMsg: `Failed while waiting for NFT: ${nftName}`
+      }
+    );
+  }
+
+  async scrollToTheTop() {
+    await scrollToTheTop(`${this.LIST_CONTAINER} ${this.NFT_CONTAINER}`);
   }
 }
 

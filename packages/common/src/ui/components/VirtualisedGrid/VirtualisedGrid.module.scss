@@ -1,0 +1,25 @@
+@import '../../styles/theme.scss';
+@import '../../styles/abstracts/typography';
+
+.grid {
+  column-gap: 16px;
+  display: grid;
+  row-gap: 12px;
+  // performance optimization for very long lists
+  transform: translateZ(0);
+
+  @media (min-width: $breakpoint-minimum) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (min-width: $breakpoint-large) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@for $i from 1 through 8 {
+  .grid-#{$i} {
+    grid-template-columns: repeat($i, minmax(0, 1fr));
+  }
+}
