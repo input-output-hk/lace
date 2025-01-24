@@ -68,6 +68,7 @@ Then(/^Lace is loaded properly$/, async () => {
 
 Given(/^Lace with empty wallet is ready for test$/, async () => {
   await TokensPage.waitUntilHeadersLoaded();
+  await browser.pause(300);
 });
 
 Then(/I navigate to home page on (popup|extended) view/, async (viewType: string) => {
