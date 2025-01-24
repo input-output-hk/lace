@@ -5,6 +5,7 @@ import extensionUtils from '../utils/utils';
 import { byron, shelley } from '../data/AddressData';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
+import CommonDrawerElements from '../elements/CommonDrawerElements';
 
 export default new (class NewTransactionExtendedPageObject {
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
@@ -64,13 +65,17 @@ export default new (class NewTransactionExtendedPageObject {
     await TokenSelectionPage.clickTokensButton();
     const tokens = await TokenSelectionPage.getTokensInfo();
     let tokensCount = tokens.length;
-    for (const token of tokens) {
-      tokensCount--;
-      await TokenSelectionPage.clickOnToken(token.name);
-      if (tokensCount) {
-        await new AssetInput(bundleIndex).clickAddAssetButton();
-        await TokenSelectionPage.clickTokensButton();
+    if (tokensCount > 0) {
+      for (const token of tokens) {
+        tokensCount--;
+        await TokenSelectionPage.clickOnToken(token.name);
+        if (tokensCount) {
+          await new AssetInput(bundleIndex).clickAddAssetButton();
+          await TokenSelectionPage.clickTokensButton();
+        }
       }
+    } else {
+      await new CommonDrawerElements().clickHeaderBackButton();
     }
   }
 

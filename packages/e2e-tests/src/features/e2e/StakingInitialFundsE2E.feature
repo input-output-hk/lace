@@ -3,7 +3,7 @@ Feature: Delegating funds to new pool E2E
 
   @LW-2685 @Smoke @memory-snapshot
   Scenario: Extended view - Staking - Delegating funds to new pool (if not staked yet) E2E.
-    Given I create new wallet and save wallet information
+    Given I create new wallet with name: "newCreatedWallet" and save wallet information
     And Wallet is synced
     When I open header menu
     Then I don't see any toast message
@@ -35,7 +35,7 @@ Feature: Delegating funds to new pool E2E
     And I click "Next" button on staking portfolio bar
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
-    And I enter newly created wallet password and confirm staking
+    And I enter correct wallet password and confirm staking
     Then Initial staking success drawer is displayed
     When I click "Close" button on staking success drawer
     And I open Overview tab

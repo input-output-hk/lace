@@ -136,9 +136,9 @@ class TransactionsPageAssert {
 
     await browser.waitUntil(
       async () =>
-        (
-          await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()
-        ).includes(expectedTransactionRowAssetDetails.tokensAmount),
+        (await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()).includes(
+          expectedTransactionRowAssetDetails.tokensAmount
+        ),
       {
         timeout: 8000,
         interval: 1000,
@@ -194,6 +194,14 @@ class TransactionsPageAssert {
       expectedColors
     );
   }
+
+  assertCounterShowingMoreTransactionsThan = async (expectedMaxNumber: number) => {
+    const transactionsCounterValue = Number((await TransactionsPage.counter.getText()).slice(1, -1));
+    expect(transactionsCounterValue).to.be.greaterThan(
+      expectedMaxNumber,
+      `transactions count is lower than ${expectedMaxNumber}, aborting`
+    );
+  };
 }
 
 export default new TransactionsPageAssert();

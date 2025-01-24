@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
+import { ChainablePromiseElement, ChainablePromiseArray } from 'webdriverio';
 import { setInputFieldValue } from '../../utils/inputFieldUtils';
 import { browser } from '@wdio/globals';
 
@@ -29,6 +29,10 @@ export class CoinConfigure {
 
   get nameElement(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.TOKEN_NAME}`);
+  }
+
+  get nameElements(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(`${this.CONTAINER}${this.TOKEN_NAME}`);
   }
 
   get balanceValueElement(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -109,6 +113,15 @@ export class CoinConfigure {
     await this.input.clearValue();
     await this.input.moveTo();
     await this.assetMaxButton.click();
+  };
+
+  getAllTokenNames = async (): Promise<string[]> => {
+    const tab = await this.nameElements;
+    const names: string[] = [];
+    for (const i of tab) {
+      names.push(await i.getText());
+    }
+    return names;
   };
 
   clickToLoseFocus = async (): Promise<void> => {

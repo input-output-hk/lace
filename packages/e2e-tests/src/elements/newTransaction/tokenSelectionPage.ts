@@ -3,6 +3,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 import testContext from '../../utils/testContext';
 import { generateRandomString } from '../../utils/textUtils';
 import { TokenSearchResult } from './tokenSearchResult';
+import { ChainablePromiseElement, ChainablePromiseArray } from 'webdriverio';
 
 class TokenSelectionPage extends CommonDrawerElements {
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
@@ -24,23 +25,23 @@ class TokenSelectionPage extends CommonDrawerElements {
   private SEARCH_INPUT = '[data-testid="asset-selector"] [data-testid="search-input"]';
   public NFT_IMAGE = '[data-testid="nft-image"]';
 
-  get tokensButton() {
+  get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKENS_BUTTON).parentElement().parentElement();
   }
 
-  get nftsButton() {
+  get nftsButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFTS_BUTTON).parentElement().parentElement();
   }
 
-  get searchInput() {
+  get searchInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_INPUT);
   }
 
-  get nftImages() {
+  get nftImages(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.assetSelectorContainer.$$(this.NFT_IMAGE);
   }
 
-  get tokens() {
+  get tokens(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TOKEN_ROW);
   }
 
@@ -48,19 +49,19 @@ class TokenSelectionPage extends CommonDrawerElements {
     return new TokenSearchResult(nameOrIndex);
   }
 
-  get assetSelectorContainer() {
+  get assetSelectorContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ASSET_SELECTOR_CONTAINER);
   }
 
-  get nftItemSelectedCheckmark() {
+  get nftItemSelectedCheckmark(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
-  get nftContainers() {
+  get nftContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.assetSelectorContainer.$$(this.NFT_CONTAINER);
   }
 
-  get nftNames() {
+  get nftNames(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.assetSelectorContainer.$$(this.NFT_ITEM_NAME);
   }
 
@@ -82,35 +83,35 @@ class TokenSelectionPage extends CommonDrawerElements {
     return this.nftContainers[index].$(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
-  get assetsCounter() {
+  get assetsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ASSETS_SELECTION_COUNTER);
   }
 
-  get neutralFaceIcon() {
+  get neutralFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEUTRAL_FACE_ICON);
   }
 
-  get sadFaceIcon() {
+  get sadFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SAD_FACE_ICON);
   }
 
-  get emptyStateMessage() {
+  get emptyStateMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EMPTY_STATE_MESSAGE);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
 
-  get clearButton() {
+  get clearButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLEAR_BUTTON);
   }
 
-  get selectMultipleButton() {
+  get selectMultipleButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SELECT_MULTIPLE_BUTTON);
   }
 
-  get addToTransactionButton() {
+  get addToTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADD_TO_TRANSACTION_BUTTON);
   }
 

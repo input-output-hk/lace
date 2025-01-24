@@ -46,6 +46,7 @@ import { parseWalletAddress } from '../utils/parseWalletAddress';
 import { AddressType } from '../enums/AddressTypeEnum';
 import clipboard from 'clipboardy';
 import walletAddressPage from '../elements/walletAddressPage';
+import { CoinConfigure } from '../elements/newTransaction/coinConfigure';
 
 Given(/I have several contacts whose start with the same characters/, async () => {
   await indexedDB.clearAddressBook();
@@ -144,6 +145,13 @@ When(/^I click MAX button in bundle (\d) for "([^"]*)" asset$/, async (bundleInd
 
 When(/^I select amount: (\d*) of asset type: (Tokens|NFTs)$/, async (amount: number, assetType: 'Tokens' | 'NFTs') => {
   await TokenSelectionPage.addAmountOfAssets(amount, assetType);
+});
+
+When(/^I click MAX button for all selected tokens$/, async () => {
+  const tokenNames = await new CoinConfigure(1).getAllTokenNames();
+  for (const tokenName of tokenNames) {
+    await new CoinConfigure(1, tokenName).clickMaxButton();
+  }
 });
 
 When(/^I deselect (Tokens|NFTs) (\d*)$/, async (assetType: 'Tokens' | 'NFTs', index: number) => {
@@ -254,6 +262,11 @@ When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: str
   const addressInput = new AddressInput(1);
   await addressInput.fillAddress(await clipboard.read());
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
+});
+
+When(/^I fill address input with copied address$/, async () => {
+  const addressInput = new AddressInput(1);
+  await addressInput.fillAddress(await clipboard.read());
 });
 
 When(/^I fill bundle with saved unused address and ([^"]*) ADA$/, async (adaValue: string) => {

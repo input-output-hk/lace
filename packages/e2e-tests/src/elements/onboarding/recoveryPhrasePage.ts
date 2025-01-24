@@ -179,6 +179,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     await ChooseRecoveryMethodPage.nextButton.click();
     if (flowType === 'Create') {
       await this.clickOnCopyToClipboardButton();
+      testContext.save('newCreatedWalletMnemonic', await clipboard.read());
       await this.nextButton.click();
     }
     if (fillValues) {
