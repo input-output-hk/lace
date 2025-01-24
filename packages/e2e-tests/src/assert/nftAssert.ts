@@ -10,7 +10,6 @@ import chaiSorted from 'chai-sorted';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
-import { scrollToTheTop } from '../utils/scrollUtils';
 import NftsCommon from '../elements/NFTs/nftsCommon';
 
 use(chaiSorted);
@@ -125,7 +124,7 @@ class NftAssert {
       await NftsPage.waitForNft(nftName);
     } catch {
       if (!shouldBeDisplayed) {
-        await scrollToTheTop(`${NftsPage.LIST_CONTAINER} ${NftsPage.NFT_CONTAINER}`);
+        await NftsPage.scrollToTheTop();
       }
     }
     const nftItem = await NftsPage.getNftContainer(nftName);

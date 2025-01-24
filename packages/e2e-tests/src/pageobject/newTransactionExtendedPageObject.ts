@@ -81,6 +81,7 @@ export default new (class NewTransactionExtendedPageObject {
     const nftNames = await NftsCommon.getAllNftNamesWithScroll(
       `${TokenSelectionPage.ASSET_SELECTOR_CONTAINER} ${TokenSelectionPage.NFT_CONTAINER}`
     );
+    await TokenSelectionPage.scrollToTheTop();
     let nftsCount = nftNames.length;
     for (const nftName of nftNames) {
       nftsCount--;

@@ -4,7 +4,7 @@ import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
 import testContext from '../../utils/testContext';
 import { browser } from '@wdio/globals';
-import { scrollDownWithOffset } from '../../utils/scrollUtils';
+import { scrollDownWithOffset, scrollToTheTop } from '../../utils/scrollUtils';
 import NftsCommon from './nftsCommon';
 
 class NftsPage {
@@ -107,6 +107,10 @@ class NftsPage {
         timeoutMsg: `Failed while waiting for NFT: ${nftName}`
       }
     );
+  }
+
+  async scrollToTheTop() {
+    await scrollToTheTop(`${this.LIST_CONTAINER} ${this.NFT_CONTAINER}`);
   }
 }
 

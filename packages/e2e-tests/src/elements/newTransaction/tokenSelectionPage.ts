@@ -4,7 +4,7 @@ import testContext from '../../utils/testContext';
 import { generateRandomString } from '../../utils/textUtils';
 import { TokenSearchResult } from './tokenSearchResult';
 import { browser } from '@wdio/globals';
-import { scrollDownWithOffset } from '../../utils/scrollUtils';
+import { scrollDownWithOffset, scrollToTheTop } from '../../utils/scrollUtils';
 import { ChainablePromiseElement } from 'webdriverio';
 
 class TokenSelectionPage extends CommonDrawerElements {
@@ -250,6 +250,10 @@ class TokenSelectionPage extends CommonDrawerElements {
         await scrollDownWithOffset(nfts);
       }
     }
+  }
+
+  async scrollToTheTop() {
+    await scrollToTheTop(`${this.ASSET_SELECTOR_CONTAINER} ${this.NFT_CONTAINER}`);
   }
 }
 

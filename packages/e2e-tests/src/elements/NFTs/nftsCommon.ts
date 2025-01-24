@@ -13,7 +13,8 @@ class NftsCommon {
     while (hasMoreItems) {
       for (const nftElement of nftElements) {
         const nftName = await nftElement.getText();
-        if (!nftNames.includes(nftName)) {
+        if (!nftNames.includes(nftName) && !nftName.toLowerCase().includes('folder')) {
+          // skip saving folders
           nftNames.push(nftName);
         }
       }

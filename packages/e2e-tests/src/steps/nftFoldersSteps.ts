@@ -49,6 +49,7 @@ Given(
 );
 
 When(/^I click "Create folder" button on NFTs page$/, async () => {
+  await NftsPage.createFolderButton.waitForClickable();
   await NftsPage.createFolderButton.click();
 });
 
@@ -206,6 +207,7 @@ Then(/^I can see "Add NFT" button active$/, async () => {
 When(
   /^I (left|right) click on the NFT folder with name "([^"]*)"$/,
   async (clickType: 'left' | 'right', folderName: string) => {
+    await NftsPage.scrollToTheTop();
     const nftFolder = await NftsPage.getFolder(folderName);
     await nftFolder.click({ button: clickType });
   }
