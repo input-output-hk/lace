@@ -308,26 +308,18 @@ export const extensionStorageStoresFactory: StoresFactory = {
   })
 };
 
-// Used for migrations to get feature flags, which are enabled per chainId
-// This is coupled with WalletManager implementation (getWalletStoreId function)
-const getNetworkMagic = (storeName: string) => Number.parseInt(storeName.split('-')[1]) as Cardano.NetworkMagic;
-
 const storesFactory: StoresFactory = {
   async create(props) {
-    const featureFlags = await getFeatureFlags(getNetworkMagic(props.name));
-    if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-      const extensionStores = await extensionStorageStoresFactory.create(props);
-      if (await shouldAttemptWalletStoresMigration(extensionStores)) {
-        const pouchdbStores = await pouchdbStoresFactory.create(props);
-        if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
-          // TODO: safe to destroy pouchdb stores on successful migration
-          // once EXTENSION_STORAGE experiment runs in production for some time
-          // and we are sure that it's working well
-        }
+    const extensionStores = await extensionStorageStoresFactory.create(props);
+    if (await shouldAttemptWalletStoresMigration(extensionStores)) {
+      const pouchdbStores = await pouchdbStoresFactory.create(props);
+      if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
+        // TODO: safe to destroy pouchdb stores on successful migration
+        // once EXTENSION_STORAGE experiment runs in production for some time
+        // and we are sure that it's working well
       }
-      return extensionStores;
     }
-    return pouchdbStoresFactory.create(props);
+    return extensionStores;
   }
 };
 
