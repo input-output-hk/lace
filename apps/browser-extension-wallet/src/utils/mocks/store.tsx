@@ -31,6 +31,8 @@ export const walletStoreMock = async (
 
   // TODO: If possible use real methods/states and mock only needed ones, like inMemoryWallet [LW-5454]
   return {
+    bitcoinWallet: undefined,
+    isBitcoinWallet: false,
     setIsDropdownMenuOpen: jest.fn(),
     setManageAccountsWallet: jest.fn(),
     manageAccountsWallet: undefined,

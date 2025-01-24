@@ -10,6 +10,10 @@ export interface PriceResult {
     price: number;
     priceVariationPercentage24h: number;
   };
+  bitcoin: {
+    price: number;
+    priceVariationPercentage24h: number;
+  };
   tokens: TokenPrices;
 }
 
@@ -25,8 +29,19 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
   const { coinPrices } = backgroundServices;
   const tokenPrices = useObservable(coinPrices.tokenPrices$);
   const adaPrices = useObservable(coinPrices.adaPrices$);
+  const bitcoinPrices = useObservable(coinPrices.bitcoinPrices$);
 
+  console.error(bitcoinPrices);
   const isAdaCurrency = fiatCurrency.code === CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet];
+
+  const bitcoinPrice = useMemo(
+    () => ({
+      price: bitcoinPrices?.prices?.[fiatCurrency.code.toLowerCase() as ADAPricesKeys],
+      priceVariationPercentage24h:
+        bitcoinPrices?.prices?.[`${fiatCurrency.code.toLowerCase()}_24h_change` as ADAPricesKeys] || 0
+    }),
+    [bitcoinPrices?.prices, fiatCurrency.code]
+  );
 
   const price = useMemo(
     () => ({
@@ -41,11 +56,12 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
     () => ({
       priceResult: {
         cardano: price,
+        bitcoin: bitcoinPrice,
         tokens: tokenPrices?.tokens
       },
       status: adaPrices?.status,
       timestamp: adaPrices?.timestamp
     }),
-    [tokenPrices, adaPrices, price]
+    [tokenPrices, adaPrices, price, bitcoinPrice]
   );
 };

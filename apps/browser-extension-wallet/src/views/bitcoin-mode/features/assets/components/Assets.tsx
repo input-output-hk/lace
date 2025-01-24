@@ -1,25 +1,33 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import React, { useMemo } from 'react';
 import { useObservable } from '@lace/common';
-import { useFetchCoinPrice } from '@hooks';
+import {useFetchCoinPrice, useWalletManager} from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { ContentLayout } from '@components/Layout';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import BitcoinLogo from '../../../../../assets/icons/browser-view/bitcoin-logo.svg';
 
+const SATS_IN_BTC = 100000000;
+
 // eslint-disable-next-line max-statements
 export const Assets = (): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const {
-    inMemoryWallet,
     walletUI: { appMode, areBalancesVisible, getHiddenBalancePlaceholder }
   } = useWalletStore();
 
-  const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
+  console.error(priceResult);
+  const { bitcoinWallet } = useWalletManager();
 
-  // Wallet's coin balance in ADA and converted to fiat, including available rewards
-  const utxoTotal = useObservable(inMemoryWallet.balance.utxo.total$);
-  const isLoadingFirstTime = !utxoTotal || !priceResult.cardano;
+  const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
+  const balance = useObservable(bitcoinWallet.balance$, BigInt(0));
+  const isLoadingFirstTime = !balance || !priceResult.bitcoin;
+  const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
+
+  const totalBalance = useMemo(() => {
+      return (Number(balance) / SATS_IN_BTC) * bitcoinPrice;
+    }
+  , [balance, bitcoinPrice]);
 
   const assets = useMemo(() => [
     {
@@ -28,12 +36,12 @@ export const Assets = (): React.ReactElement => {
       defaultLogo: BitcoinLogo,
       name: 'Bitcoin',
       ticker: 'BTC',
-      price: '100',
+      price: bitcoinPrice.toString(),
       variation: '',
-      balance: areBalancesVisible ? '500' : hiddenBalancePlaceholder,
-      fiatBalance: areBalancesVisible ? '500' : hiddenBalancePlaceholder
+      balance: areBalancesVisible ? (Number(balance) / SATS_IN_BTC).toString() : hiddenBalancePlaceholder,
+      fiatBalance: areBalancesVisible ? `${totalBalance.toString()} USD` : hiddenBalancePlaceholder
     }
-  ], [areBalancesVisible, hiddenBalancePlaceholder]);
+  ], [areBalancesVisible, hiddenBalancePlaceholder, bitcoinPrice, balance, totalBalance]);
 
   const assetsPortfolio = (
     <AssetsPortfolio
@@ -41,7 +49,7 @@ export const Assets = (): React.ReactElement => {
       assetList={assets}
       isBalanceLoading={false}
       isLoadingFirstTime={isLoadingFirstTime}
-      portfolioTotalBalance={'500'}
+      portfolioTotalBalance={totalBalance.toString()}
       onRowClick={() => {}}
       onTableScroll={() => {}}
       totalAssets={assets.length}
