@@ -63,7 +63,6 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       useDrepProviderOverrideActiveStatus: isExperimentEnabled(ExperimentName.USE_DREP_PROVIDER_OVERRIDE),
       useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API),
       useBlockfrostAssetProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_ASSET_PROVIDER),
-      // useBlockfrostChainHistoryProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER),
       useBlockfrostChainHistoryProvider: true,
       useBlockfrostNetworkInfoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER),
       useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
