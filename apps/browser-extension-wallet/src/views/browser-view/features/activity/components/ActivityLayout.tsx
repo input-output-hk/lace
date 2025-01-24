@@ -16,6 +16,7 @@ import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
@@ -95,7 +96,10 @@ export const ActivityLayout = (): ReactElement => {
           {walletActivities?.length > 0 ? (
             <GroupedAssetActivityList
               lists={walletActivities}
-              infiniteScrollProps={{ scrollableTarget: LACE_APP_ID }}
+              infiniteScrollProps={{
+                scrollableTarget: LACE_APP_ID,
+                endMessage: <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>
+              }}
             />
           ) : (
             <FundWalletBanner
