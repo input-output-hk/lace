@@ -68,8 +68,8 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
       useBlockfrostTxSubmitProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER),
       useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER),
-      useBlockfrostAddressDiscovery: isExperimentEnabled(ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY),
-      useBlockfrostInputResolver: isExperimentEnabled(ExperimentName.BLOCKFROST_INPUT_RESOLVER)
+      useBlockfrostAddressDiscovery: true,
+      useBlockfrostInputResolver: true
     }
   });
 };
