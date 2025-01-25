@@ -55,7 +55,7 @@ export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Wall
   { logger, runtime }
 );
 
-export const keyAgentFactory = createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger });
+export const keyAgentFactory = createKeyAgentFactory({ getBip32Ed25519: Wallet.getBip32Ed25519, logger });
 
 export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },

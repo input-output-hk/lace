@@ -142,9 +142,9 @@ Feature: Staking Page - Extended View
     Then I see 4 stake pool cards in a row
     When I resize the window to a width of: 1659 and a height of: 1080
     Then I see 3 stake pool cards in a row
-    When I resize the window to a width of: 669 and a height of: 1080
-    Then I see 3 stake pool cards in a row
     When I resize the window to a width of: 668 and a height of: 1080
+    Then I see 3 stake pool cards in a row
+    When I resize the window to a width of: 667 and a height of: 1080
     Then I see 2 stake pool cards in a row
 
   @LW-10141 @LW-10142 @Testnet @Mainnet

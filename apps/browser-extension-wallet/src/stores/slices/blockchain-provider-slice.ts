@@ -11,6 +11,7 @@ export interface IBlockchainProvider {
   networkInfoProvider: Wallet.NetworkInfoProvider;
   utxoProvider: Wallet.UtxoProvider;
   chainHistoryProvider: Wallet.ChainHistoryProvider;
+  rewardAccountInfoProvider: Wallet.RewardAccountInfoProvider;
   rewardsProvider: Wallet.RewardsProvider;
   drepProvider?: DRepProvider;
   inputResolver: Cardano.InputResolver;
@@ -25,6 +26,7 @@ export const IBlockchainProvider = {
     txSubmitProvider: providers?.txSubmitProvider,
     networkInfoProvider: providers?.networkInfoProvider,
     utxoProvider: providers?.utxoProvider,
+    rewardAccountInfoProvider: providers?.rewardAccountInfoProvider,
     rewardsProvider: providers?.rewardsProvider,
     chainHistoryProvider: providers?.chainHistoryProvider,
     drepProvider: providers?.drepProvider,
@@ -36,6 +38,7 @@ export const IBlockchainProvider = {
     stakePoolProvider: providers?.stakePoolProvider,
     networkInfoProvider: providers?.networkInfoProvider,
     utxoProvider: providers?.utxoProvider,
+    rewardAccountInfoProvider: providers?.rewardAccountInfoProvider,
     rewardsProvider: providers?.rewardsProvider,
     chainHistoryProvider: providers?.chainHistoryProvider,
     drepProvider: providers?.drepProvider,
