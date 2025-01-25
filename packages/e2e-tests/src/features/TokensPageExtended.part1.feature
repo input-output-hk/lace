@@ -37,12 +37,13 @@ Feature: LW: Tokens tab - extended view
 
   @LW-2337 @Smoke @Testnet
   Scenario Outline: "<token_name>" item click
-    When I click token with name: "<token_name>"
+    When I open wallet: "WalletSendBundlesTransactionE2E" in: extended mode
+    And I click token with name: "<token_name>"
     Then The Token details screen is displayed for token "<token_name>" with ticker "<token_ticker>" in extended mode
     Examples:
       | token_name | token_ticker |
       | Cardano    | tADA         |
-      | LaceCoin   | LaceCoin1    |
+      | LaceCoin2   | LaceCoin2   |
 
   @LW-2337 @Mainnet
   Scenario Outline: "<token_name>" item click

@@ -241,8 +241,9 @@ const pouchdbStoresFactory: StoresFactory = {
       inFlightTransactions: new storage.PouchDbInFlightTransactionsStore(docsDbName, 'transactionsInFlight_v3', logger),
       policyIds: new storage.PouchDbPolicyIdsStore(docsDbName, 'policyIds', logger),
       protocolParameters: new storage.PouchDbProtocolParametersStore(docsDbName, 'protocolParameters', logger),
-      rewardsBalances: new storage.PouchDbRewardsBalancesStore(`${baseDbName}RewardsBalances`, logger),
       rewardsHistory: new storage.PouchDbRewardsHistoryStore(`${baseDbName}RewardsHistory`, logger),
+      delegationPortfolio: new storage.PouchDbDelegationPortfolioStore(docsDbName, 'delegationPortfolio', logger),
+      rewardAccountInfo: new storage.PouchDbRewardAccountInfoStore(`${baseDbName}RewardAccountsInfo`, logger),
       stakePools: new storage.PouchDbStakePoolsStore(`${baseDbName}StakePools`, logger),
       signedTransactions: new storage.PouchDbSignedTransactionsStore(baseDbName, 'signedTransactions', logger),
       tip: new storage.PouchDbTipStore(docsDbName, 'tip', logger),
@@ -294,7 +295,8 @@ export const extensionStorageStoresFactory: StoresFactory = {
     inFlightTransactions: new ExtensionDocumentStore(`${name}_transactionsInFlight`, logger),
     policyIds: new ExtensionDocumentStore(`${name}_handlePolicyIds`, logger),
     protocolParameters: new ExtensionDocumentStore(`${name}_protocolParameters`, logger),
-    rewardsBalances: new ExtensionBlobKeyValueStore(`${name}_rewardsBalances`, logger),
+    delegationPortfolio: new ExtensionDocumentStore(`${name}_delegationPortfolio`, logger),
+    rewardAccountInfo: new ExtensionBlobKeyValueStore(`${name}_rewardAccountInfo`, logger),
     rewardsHistory: new ExtensionBlobKeyValueStore(`${name}_rewardsHistory`, logger),
     stakePools: new ExtensionBlobKeyValueStore(`${name}_stakePools`, logger),
     signedTransactions: new ExtensionDocumentStore(`${name}_signedTransactions`, logger),
@@ -306,26 +308,18 @@ export const extensionStorageStoresFactory: StoresFactory = {
   })
 };
 
-// Used for migrations to get feature flags, which are enabled per chainId
-// This is coupled with WalletManager implementation (getWalletStoreId function)
-const getNetworkMagic = (storeName: string) => Number.parseInt(storeName.split('-')[1]) as Cardano.NetworkMagic;
-
 const storesFactory: StoresFactory = {
   async create(props) {
-    const featureFlags = await getFeatureFlags(getNetworkMagic(props.name));
-    if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-      const extensionStores = await extensionStorageStoresFactory.create(props);
-      if (await shouldAttemptWalletStoresMigration(extensionStores)) {
-        const pouchdbStores = await pouchdbStoresFactory.create(props);
-        if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
-          // TODO: safe to destroy pouchdb stores on successful migration
-          // once EXTENSION_STORAGE experiment runs in production for some time
-          // and we are sure that it's working well
-        }
+    const extensionStores = await extensionStorageStoresFactory.create(props);
+    if (await shouldAttemptWalletStoresMigration(extensionStores)) {
+      const pouchdbStores = await pouchdbStoresFactory.create(props);
+      if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
+        // TODO: safe to destroy pouchdb stores on successful migration
+        // once EXTENSION_STORAGE experiment runs in production for some time
+        // and we are sure that it's working well
       }
-      return extensionStores;
     }
-    return pouchdbStoresFactory.create(props);
+    return extensionStores;
   }
 };
 

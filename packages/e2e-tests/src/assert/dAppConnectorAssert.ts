@@ -203,6 +203,17 @@ class DAppConnectorAssert {
     });
   }
 
+  async waitUntilAddressNotEmpty() {
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletChangeAddress.getText()) !== '', {
+      timeout: 6000,
+      timeoutMsg: 'failed while waiting for DApp wallet change address'
+    });
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
+      timeout: 6000,
+      timeoutMsg: 'failed while waiting for DApp wallet used address'
+    });
+  }
+
   async assertWalletFoundAndConnectedInTestDApp() {
     expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
     expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
@@ -219,6 +230,7 @@ class DAppConnectorAssert {
 
     expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 2);
 
+    await this.waitUntilAddressNotEmpty();
     expect(await ExampleDAppPage.walletChangeAddress.getText()).to.equal(
       getTestWallet(TestWalletName.TestAutomationWallet).accounts[0].address
     );

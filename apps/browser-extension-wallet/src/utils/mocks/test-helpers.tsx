@@ -117,6 +117,7 @@ export const mockInMemoryWallet = {
   transactions: {
     rollback$: EMPTY,
     history$: of(mockWalletState.transactions.history),
+    new$: EMPTY,
     outgoing: {
       submitting$: EMPTY,
       inFlight$: of([]),
