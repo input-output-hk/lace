@@ -11,6 +11,7 @@ import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
 import NftsCommon from '../elements/NFTs/nftsCommon';
+import { scrollToTheTop } from '../utils/scrollUtils';
 
 use(chaiSorted);
 
@@ -124,7 +125,7 @@ class NftAssert {
       await NftsPage.waitForNft(nftName);
     } catch {
       if (!shouldBeDisplayed) {
-        await NftsPage.scrollToTheTop();
+        await scrollToTheTop();
       }
     }
     const nftItem = await NftsPage.getNftContainer(nftName);

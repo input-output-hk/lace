@@ -19,21 +19,11 @@ export const scrollDownWithOffset = async (elements: WebdriverIO.ElementArray): 
   }
 };
 
-export const scrollToTheTop = async (elementsSelector: string): Promise<void> => {
-  let elements = await $$(elementsSelector);
-  let previousFirstElementName = elements.length > 0 ? await elements[0].getText() : 'not_found';
-
-  while (elements.length > 0) {
-    const firstContainer = elements[0];
-    await scrollToWithYOffset(firstContainer, -30);
-
-    elements = await $$(elementsSelector);
-    const currentFirstElementName = elements.length > 0 ? await elements[0].getText() : 'not_found';
-
-    if (currentFirstElementName === previousFirstElementName) {
-      break;
-    }
-
-    previousFirstElementName = currentFirstElementName;
-  }
+export const scrollToTheTop = async (parentSelector?: string): Promise<void> => {
+  const selector = parentSelector
+    ? `${parentSelector} [data-test-id="virtuoso-item-list"]`
+    : '[data-test-id="virtuoso-item-list"]';
+  const listComponent = await $(selector);
+  await listComponent.scrollIntoView({ block: 'start', inline: 'start' });
+  await browser.pause(500);
 };
