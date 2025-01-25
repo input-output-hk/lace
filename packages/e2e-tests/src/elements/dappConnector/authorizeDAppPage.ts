@@ -33,6 +33,11 @@ class AuthorizeDAppPage extends CommonDappPageElements {
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
+
+  async clickButton(button: 'Authorize' | 'Cancel'): Promise<void> {
+    await this.authorizeButton.waitForDisplayed();
+    button === 'Authorize' ? await this.authorizeButton.click() : await this.cancelButton.click();
+  }
 }
 
 export default new AuthorizeDAppPage();

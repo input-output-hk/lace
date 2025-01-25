@@ -27,6 +27,11 @@ class NoWalletModal {
   get createRestoreButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CREATE_RESTORE_BUTTON);
   }
+
+  async clickCreateRestoreButton(): Promise<void> {
+    await this.createRestoreButton.waitForClickable();
+    await this.createRestoreButton.click();
+  }
 }
 
 export default new NoWalletModal();
