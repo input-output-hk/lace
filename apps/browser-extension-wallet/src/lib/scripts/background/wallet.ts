@@ -339,8 +339,8 @@ const walletInfo = {
   derivationPath: 'm/84\'/1\'/0\'/0/0'
 };
 
-//const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
-const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();
+const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
+//const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();
 export const bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 30000, 20, walletInfo, BitcoinWallet.Network.Testnet);
 
 const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
