@@ -25,12 +25,12 @@ export const Activity = (): React.ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
     sendAnalytics,
     withLimitedRewardsHistory: true
   });
 
-  const layoutSideText = `(${activitiesCount})`;
+  const layoutSideText = `(${t('browserView.activity.titleSideText')})`;
   const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
   const hasActivities = walletActivities?.length > 0;
 

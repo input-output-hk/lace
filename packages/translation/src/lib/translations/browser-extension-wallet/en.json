@@ -89,6 +89,7 @@
   "browserView.activity.learnAbout.whatAreActivityDetails": "What are activity details?",
   "browserView.activity.learnAbout.whatIsAnUnconfirmedTransaction": "What is an unconfirmed transaction?",
   "browserView.activity.title": "Activity",
+  "browserView.activity.titleSideText": "Recent",
   "browserView.addFundsToStartYourCryptoJourney": "Add funds to start your crypto journey",
   "browserView.addressBook.addressDetail.btn.copy": "Copy",
   "browserView.addressBook.addressDetail.btn.delete": "Delete",

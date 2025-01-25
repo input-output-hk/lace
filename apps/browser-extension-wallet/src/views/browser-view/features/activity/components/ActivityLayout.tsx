@@ -26,7 +26,7 @@ export const ActivityLayout = (): ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
     sendAnalytics,
     withLimitedRewardsHistory: true
   });
@@ -78,7 +78,7 @@ export const ActivityLayout = (): ReactElement => {
       >
         <SectionTitle
           title={t('browserView.activity.title')}
-          sideText={activitiesCount ? `(${activitiesCount})` : ''}
+          sideText={`(${t('browserView.activity.titleSideText')})`}
         />
         <Drawer
           visible={!!activityDetail}
