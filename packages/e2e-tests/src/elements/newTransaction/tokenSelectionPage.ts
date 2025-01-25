@@ -4,7 +4,7 @@ import testContext from '../../utils/testContext';
 import { generateRandomString } from '../../utils/textUtils';
 import { TokenSearchResult } from './tokenSearchResult';
 import { browser } from '@wdio/globals';
-import { scrollDownWithOffset, scrollToTheTop } from '../../utils/scrollUtils';
+import { scrollDownWithOffset } from '../../utils/scrollUtils';
 import { ChainablePromiseElement } from 'webdriverio';
 
 class TokenSelectionPage extends CommonDrawerElements {
@@ -186,15 +186,6 @@ class TokenSelectionPage extends CommonDrawerElements {
     return tokenInfo;
   };
 
-  getNftNames = async () => {
-    const nftInfo = [];
-    const numberOfNFTs = await this.nftNames.length;
-    for (let i = 0; i < numberOfNFTs; i++) {
-      nftInfo.push(await this.nftNames[i].getText());
-    }
-    return nftInfo;
-  };
-
   searchAsset = async (assetName: string) => {
     if (assetName === 'random characters') {
       assetName = await generateRandomString(10);
@@ -250,10 +241,6 @@ class TokenSelectionPage extends CommonDrawerElements {
         await scrollDownWithOffset(nfts);
       }
     }
-  }
-
-  async scrollToTheTop() {
-    await scrollToTheTop(`${this.ASSET_SELECTOR_CONTAINER} ${this.NFT_CONTAINER}`);
   }
 }
 

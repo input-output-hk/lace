@@ -13,6 +13,7 @@ import NftsFolderPage from '../elements/NFTs/nftsFolderPage';
 import adaHandleAssert from './adaHandleAssert';
 import { browser } from '@wdio/globals';
 import NftsCommon from '../elements/NFTs/nftsCommon';
+import { scrollToTheTop } from '../utils/scrollUtils';
 
 class NftCreateFolderAssert {
   async assertSeeCreateFolderButton(shouldSee: boolean, mode: 'extended' | 'popup') {
@@ -100,7 +101,7 @@ class NftCreateFolderAssert {
   async verifySeeAllOwnedNfts() {
     const ownedNftNames = testContext.load('ownedNfts');
 
-    await TokenSelectionPage.scrollToTheTop(); // make sure we are starting from the top
+    await scrollToTheTop(TokenSelectionPage.ASSET_SELECTOR_CONTAINER); // make sure we are starting from the top
 
     const displayedNftNames = await NftsCommon.getAllNftNamesWithScroll(
       `${TokenSelectionPage.ASSET_SELECTOR_CONTAINER} ${TokenSelectionPage.NFT_CONTAINER}`
