@@ -39,7 +39,6 @@ import {
 } from '../types';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { rewardHistoryTransformer } from '@src/views/browser-view/features/activity/helpers/reward-history-transformer';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
@@ -131,11 +130,13 @@ const mapWalletActivities = memoize(
       cardanoCoin,
       setRewardsActivityDetail,
       setTransactionActivityDetail,
-      isSharedWallet
+      isSharedWallet,
+      inputResolver
     }: Pick<UISlice['walletUI'], 'cardanoCoin'> &
       Pick<ActivityDetailSlice, 'setRewardsActivityDetail' | 'setTransactionActivityDetail'> &
       Pick<AssetDetailsSlice, 'assetDetails'> &
       Pick<IBlockchainProvider, 'assetProvider'> &
+      Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
@@ -167,7 +168,6 @@ const mapWalletActivities = memoize(
       };
     };
 
-    const inputResolver = createHistoricalOwnInputResolver({ addresses, transactions });
     const resolveInput = inputResolver.resolveInput;
 
     // eslint-disable-next-line unicorn/no-array-callback-reference
@@ -423,7 +423,7 @@ const getWalletActivities = async ({
     setTransactionActivityDetail,
     setRewardsActivityDetail,
     assetDetails,
-    blockchainProvider: { assetProvider },
+    blockchainProvider: { assetProvider, inputResolver },
     isSharedWallet
   } = get();
   if (!walletState) {
@@ -440,7 +440,8 @@ const getWalletActivities = async ({
       setRewardsActivityDetail,
       setTransactionActivityDetail,
       assetDetails,
-      isSharedWallet
+      isSharedWallet,
+      inputResolver
     }
   );
 
