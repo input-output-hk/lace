@@ -26,7 +26,10 @@ export const ActivityLayout = (): ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
+  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({
+    sendAnalytics,
+    withLimitedRewardsHistory: true
+  });
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
 
   const titles = {

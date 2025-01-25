@@ -48,6 +48,7 @@ export interface FetchWalletActivitiesProps {
   cardanoFiatPrice: number;
   assetId?: Wallet.Cardano.AssetId; // Allows to filter historicals tx by asset
   sendAnalytics?: () => void;
+  withLimitedRewardsHistory?: boolean;
 }
 
 interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProps {
@@ -123,7 +124,7 @@ const mapWalletActivities = memoize(
       assetInfo,
       delegation: { rewardsHistory }
     }: ObservableWalletState,
-    { fiatCurrency, cardanoFiatPrice, sendAnalytics }: FetchWalletActivitiesProps,
+    { fiatCurrency, cardanoFiatPrice, sendAnalytics, withLimitedRewardsHistory = false }: FetchWalletActivitiesProps,
     {
       assetDetails,
       assetProvider,
@@ -298,19 +299,25 @@ const mapWalletActivities = memoize(
     /**
      * Sanitizes historical rewards data
      */
-    const getRewardsHistory = () =>
+    const getRewardsHistory = (oldestHistoricalTxDate?: Date) =>
       Object.entries(groupBy(rewardsHistory.all, ({ epoch }) => epoch.toString()))
         .map(([epoch, rewards]) => epochRewardsMapper(Number(epoch) as Wallet.Cardano.EpochNo, rewards))
-        .filter((reward) => reward.date.getTime() < Date.now());
+        .filter(
+          (reward) =>
+            reward.date.getTime() < Date.now() &&
+            (!oldestHistoricalTxDate || reward.date.getTime() >= oldestHistoricalTxDate.getTime())
+        );
 
     /**
      * Emits the lists combined and sets current state for Zustand
      */
-    const [historicalTransactions, pendingTransactions, rewards] = await Promise.all([
+    const [historicalTransactions, pendingTransactions] = await Promise.all([
       getHistoricalTransactions(),
-      getPendingTransactions(),
-      assetDetails ? [] : getRewardsHistory()
+      getPendingTransactions()
     ]);
+
+    const oldestHistoricalTxDate = withLimitedRewardsHistory ? historicalTransactions[0]?.date : undefined;
+    const rewards = assetDetails ? [] : getRewardsHistory(oldestHistoricalTxDate);
 
     const confirmedTxs = historicalTransactions;
     const pendingTxs = pendingTransactions;
@@ -462,7 +469,21 @@ export const walletActivitiesSlice: SliceCreator<
   WalletInfoSlice & WalletActivitiesSlice & ActivityDetailSlice & AssetDetailsSlice & UISlice & BlockchainProviderSlice,
   WalletActivitiesSlice
 > = ({ set, get }) => ({
-  getWalletActivities: ({ fiatCurrency, cardanoFiatPrice, assetId, sendAnalytics }: FetchWalletActivitiesProps) =>
-    getWalletActivities({ fiatCurrency, cardanoFiatPrice, assetId, sendAnalytics, set, get }),
+  getWalletActivities: ({
+    fiatCurrency,
+    cardanoFiatPrice,
+    assetId,
+    sendAnalytics,
+    withLimitedRewardsHistory
+  }: FetchWalletActivitiesProps) =>
+    getWalletActivities({
+      fiatCurrency,
+      cardanoFiatPrice,
+      assetId,
+      sendAnalytics,
+      withLimitedRewardsHistory,
+      set,
+      get
+    }),
   ...initialState
 });
