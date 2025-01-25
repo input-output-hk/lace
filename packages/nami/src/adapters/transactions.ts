@@ -515,7 +515,7 @@ export const useWalletTxs = () => {
     transactions,
     protocolParameters,
     assetInfo,
-    createHistoricalOwnInputResolver,
+    inputResolver,
   } = useOutsideHandles();
   const [txs, setTxs] = useState<(TxInfo | undefined)[]>();
   const rewardAccounts = useObservable(
@@ -523,21 +523,12 @@ export const useWalletTxs = () => {
   );
   const addresses = useObservable(inMemoryWallet.addresses$);
 
-  const { resolveInput } = useMemo(
-    () =>
-      createHistoricalOwnInputResolver({
-        addresses,
-        transactions: transactions ?? { history: [] },
-      }),
-    [addresses, transactions],
-  );
-
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) => {
       const resolvedInputs = new Array<Wallet.Cardano.Utxo>();
 
       for (const input of inputs) {
-        const output = await resolveInput(input);
+        const output = await inputResolver.resolveInput(input);
         output &&
           resolvedInputs.push([{ address: output.address, ...input }, output]);
       }
@@ -551,7 +542,7 @@ export const useWalletTxs = () => {
         };
       });
     },
-    [resolveInput],
+    [inputResolver],
   );
 
   const fetchWalletActivities = useCallback(async () => {
