@@ -16,6 +16,7 @@ import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
@@ -25,7 +26,10 @@ export const ActivityLayout = (): ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
+    sendAnalytics,
+    withLimitedRewardsHistory: true
+  });
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
 
   const titles = {
@@ -74,7 +78,7 @@ export const ActivityLayout = (): ReactElement => {
       >
         <SectionTitle
           title={t('browserView.activity.title')}
-          sideText={activitiesCount ? `(${activitiesCount})` : ''}
+          sideText={`(${t('browserView.activity.titleSideText')})`}
         />
         <Drawer
           visible={!!activityDetail}
@@ -95,7 +99,10 @@ export const ActivityLayout = (): ReactElement => {
           {walletActivities?.length > 0 ? (
             <GroupedAssetActivityList
               lists={walletActivities}
-              infiniteScrollProps={{ scrollableTarget: LACE_APP_ID }}
+              infiniteScrollProps={{
+                scrollableTarget: LACE_APP_ID,
+                endMessage: <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>
+              }}
             />
           ) : (
             <FundWalletBanner

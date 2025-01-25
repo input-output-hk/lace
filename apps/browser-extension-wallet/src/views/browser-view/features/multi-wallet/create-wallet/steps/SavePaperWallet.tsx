@@ -33,7 +33,7 @@ const deriveAccountFromMnemonic = async (
       accountIndex: 0
     },
     {
-      bip32Ed25519: Wallet.bip32Ed25519,
+      bip32Ed25519: await Wallet.getBip32Ed25519(),
       logger
     }
   );

@@ -19,6 +19,7 @@ import testContext from '../utils/testContext';
 import MenuHeader from '../elements/menuHeader';
 import ToastMessage from '../elements/toastMessage';
 import { visit } from '../utils/pageUtils';
+import { scrollToTheTop } from '../utils/scrollUtils';
 
 Given(/^all NFT folders are removed$/, async () => {
   await IndexedDB.clearNFTFolders();
@@ -207,7 +208,7 @@ Then(/^I can see "Add NFT" button active$/, async () => {
 When(
   /^I (left|right) click on the NFT folder with name "([^"]*)"$/,
   async (clickType: 'left' | 'right', folderName: string) => {
-    await NftsPage.scrollToTheTop();
+    await scrollToTheTop();
     const nftFolder = await NftsPage.getFolder(folderName);
     await nftFolder.click({ button: clickType });
   }

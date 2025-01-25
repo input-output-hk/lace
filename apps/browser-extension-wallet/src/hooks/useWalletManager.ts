@@ -167,13 +167,14 @@ const getExtendedAccountPublicKey = async (
         passphrase
       );
       const rootPrivateKeyBuffer = Buffer.from(rootPrivateKeyBytes);
+      const bip32Ed25519 = await Wallet.getBip32Ed25519();
       const accountPrivateKey = await Wallet.KeyManagement.util.deriveAccountPrivateKey({
-        bip32Ed25519: Wallet.bip32Ed25519,
+        bip32Ed25519,
         accountIndex,
         rootPrivateKey: Wallet.Crypto.Bip32PrivateKeyHex(rootPrivateKeyBuffer.toString('hex')),
         purpose
       });
-      const accountPublicKey = await Wallet.bip32Ed25519.getBip32PublicKey(accountPrivateKey);
+      const accountPublicKey = bip32Ed25519.getBip32PublicKey(accountPrivateKey);
       clearBytes(passphrase);
       clearBytes(rootPrivateKeyBytes);
       clearBytes(rootPrivateKeyBuffer);
@@ -631,7 +632,7 @@ export const useWalletManager = (): UseWalletManager => {
         purpose: KeyManagement.KeyPurpose.STANDARD
       },
       {
-        bip32Ed25519: Wallet.bip32Ed25519,
+        bip32Ed25519: await Wallet.getBip32Ed25519(),
         logger
       }
     );
