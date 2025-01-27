@@ -69,7 +69,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     And I see selected pools counter is showing "1"
     And I see "Remove pool from portfolio" button is enabled for pool "1"
 
-  @LW-9509
+  @LW-9509 @Pending @issue=LW-12160
   Scenario: Extended View - Staking - Manage staking 'Confirm new portfolio' button not visible
     When I navigate to Staking extended page
     And I open Overview tab
