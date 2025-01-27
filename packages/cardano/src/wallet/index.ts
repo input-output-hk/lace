@@ -63,17 +63,14 @@ export { InputSelectionError } from '@cardano-sdk/input-selection';
 
 export {
   CardanoWallet,
-  CreateStores,
   WalletProvidersDependencies,
   validateWalletMnemonic,
-  validateWalletPassword,
-  restoreWallet,
-  createKeyAgent,
   getBip32Ed25519,
   WalletMetadata,
   AccountMetadata
 } from '@wallet/lib/cardano-wallet';
 
+export * from '@wallet/lib/tx-history-loader';
 export * from '@wallet/lib/hardware-wallet';
 export * from '@wallet/lib/build-delegation';
 export * from '@wallet/lib/build-transaction';

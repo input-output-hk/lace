@@ -17,6 +17,8 @@ const activityItem: AssetActivityItemProps = {
 
 describe('Testing GroupedAssetActivityList component', () => {
   const props: GroupedAssetActivityListProps = {
+    hasMore: false,
+    loadMore: async () => await void 0,
     lists: [
       {
         title: 'Today',

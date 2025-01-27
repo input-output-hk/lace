@@ -45,9 +45,8 @@ class TransactionsPageAssert {
     });
   };
 
-  assertSeeTitleWithCounter = async () => {
+  assertSeeTitle = async () => {
     await TransactionsPage.title.waitForDisplayed();
-    await TransactionsPage.counter.waitForDisplayed();
     expect(await TransactionsPage.title.getText()).to.equal(await t('browserView.activity.title'));
     expect(await TransactionsPage.counter.getText()).to.equal(`(${await t('browserView.activity.titleSideText')})`);
   };
