@@ -140,6 +140,8 @@ const mapWalletActivities = memoize(
       Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
+    const TX_LIMIT_SIZE = 10;
+    const txHistorySlice = transactions.history.slice(-TX_LIMIT_SIZE);
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
       const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
       const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
@@ -276,8 +278,8 @@ const mapWalletActivities = memoize(
     const getHistoricalTransactions = async () => {
       const filtered =
         !assetDetails || assetDetails?.id === cardanoCoin.id
-          ? transactions.history.map((tx) => ({ tx }))
-          : await filterTransactionByAssetId(transactions.history);
+          ? txHistorySlice.map((tx) => ({ tx }))
+          : await filterTransactionByAssetId(txHistorySlice);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 
