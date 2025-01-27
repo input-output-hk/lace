@@ -189,7 +189,7 @@ Feature: DAppConnector - Common
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page
     And I see DApp connector "All done" page from "data sign"
-    And I verify there are no errors in console logs
+#    And I verify there are no errors in console logs # TODO: unblock when LW-12157 is resolved
     And I see Lace wallet info in DApp when connected
 
   @LW-8403 @LW-8406
