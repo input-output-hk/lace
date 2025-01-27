@@ -12,6 +12,8 @@ import type {
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { useSecrets } from '@lace/core';
+import type { Observable } from 'rxjs';
+
 export interface IAssetDetails {
   id: string;
   logo: string;
@@ -129,20 +131,15 @@ export interface OutsideHandlesContextValue {
   chainHistoryProvider: Wallet.ChainHistoryProvider;
   protocolParameters: Wallet.Cardano.ProtocolParameters;
   assetInfo: Wallet.Assets;
-  createHistoricalOwnInputResolver: (
-    props: Readonly<{
-      transactions: {
-        history: Wallet.Cardano.HydratedTx[];
-        outgoing: {
-          inFlight: Wallet.TxInFlight[];
-          signed: Wallet.KeyManagement.WitnessedTx[];
-        };
-      };
-      addresses: Wallet.WalletAddress[];
-    }>,
-  ) => Wallet.Cardano.InputResolver;
   inputResolver: Wallet.Cardano.InputResolver;
   lockedStakeRewards: bigint;
   redirectToStaking: () => void;
   govToolsUrl: string;
+  txHistoryLoader: {
+    loadMore: () => void;
+    loadedHistory$: Observable<{
+      transactions: Wallet.Cardano.HydratedTx[];
+      mightHaveMore: boolean;
+    }>;
+  };
 }

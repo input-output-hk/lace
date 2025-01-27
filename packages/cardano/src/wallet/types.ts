@@ -40,44 +40,10 @@ export enum TransactionStatus {
   AWAITING_COSIGNATURES = 'awaiting_cosignatures'
 }
 
-export enum Cip30TxType {
-  Send = 'Send',
-  Mint = 'Mint',
-  Burn = 'Burn',
-  DRepRegistration = 'DRepRegistration',
-  DRepRetirement = 'DRepRetirement',
-  DRepUpdate = 'DRepUpdate',
-  VoteDelegation = 'VoteDelegation',
-  VotingProcedures = 'VotingProcedures',
-  VoteRegistrationDelegation = 'VoteRegistrationDelegation',
-  StakeRegistrationDelegation = 'StakeRegistrationDelegation',
-  StakeVoteDelegationRegistration = 'StakeVoteDelegationRegistration',
-  StakeVoteDelegation = 'StakeVoteDelegation',
-  ProposalProcedures = 'ProposalProcedures'
-}
-
-export type Cip30SignTxOutput = {
-  coins: string;
-  recipient: string;
-  assets?: Cip30SignTxAssetItem[];
-};
-
-export type Cip30SignTxSummary = {
-  fee: string;
-  outputs: Cip30SignTxOutput[];
-  type: Cip30TxType;
-  mintedAssets?: Cip30SignTxAssetItem[];
-  burnedAssets?: Cip30SignTxAssetItem[];
-  collateral?: string;
-};
-
 export type Cip30SignTxAssetItem = {
   name: string;
   amount: string;
   ticker?: string;
 };
-export enum WalletManagerProviderTypes {
-  CARDANO_SERVICES_PROVIDER = 'cardano-services-provider'
-}
 
 export type ChainName = keyof typeof Cardano.ChainIds;

@@ -8,7 +8,7 @@ import { Sections } from '../types';
 import { SectionConfig } from '@src/views/browser-view/stores';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { WalletType } from '@cardano-sdk/web-extension';
-import { useSecrets } from '@src/../../../packages/core/dist/ui/hooks';
+import { useSecrets } from '@lace/core';
 
 interface CollateralFooterProps {
   onClose: () => void;

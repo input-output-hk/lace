@@ -13,7 +13,7 @@ import {
   NetworkConnectionStates,
   CurrencyInfo
 } from '../types';
-import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainProvider } from './slices';
+import { FetchWalletActivitiesProps, IBlockchainProvider } from './slices';
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { AnyBip32Wallet, WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
@@ -59,10 +59,9 @@ export type SliceCreator<
 
 export interface WalletActivitiesSlice {
   walletActivities?: AssetActivityListProps[];
-  firstDelegationTxId?: string;
   activitiesCount: number;
   walletActivitiesStatus: StateStatus;
-  getWalletActivities: (payload: FetchWalletActivitiesProps) => Promise<FetchWalletActivitiesReturn>;
+  getWalletActivities: (payload: FetchWalletActivitiesProps) => Promise<void>;
 }
 
 export interface NetworkSlice {

@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CommonOutsideHandlesProvider, Main as Nami, OutsideHandlesProvider } from '@lace/nami';
 import { useWalletStore } from '@src/stores';
 import { config } from '@src/config';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import {
   useBackgroundServiceAPIContext,
   useCurrencyStore,
@@ -27,7 +26,7 @@ import { useAnalytics } from './hooks';
 import { useDappContext, withDappContext } from '@src/features/dapp/context';
 import { localDappService } from '../browser-view/features/dapp/components/DappList/localDappService';
 import { isValidURL } from '@src/utils/is-valid-url';
-import { CARDANO_COIN_SYMBOL } from './constants';
+import { BATCH, CARDANO_COIN_SYMBOL } from './constants';
 import { useDelegationTransaction, useRewardAccountsData } from '../browser-view/features/staking/hooks';
 import { useSecrets } from '@lace/core';
 import { useDelegationStore } from '@src/features/delegation/stores';
@@ -46,6 +45,7 @@ import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { useNetworkError } from '@hooks/useNetworkError';
 import { walletRoutePaths } from '@routes';
 import { StakingErrorType } from '@views/browser/features/staking/types';
+import { useTxHistoryLoader } from '@hooks/useTxHistoryLoader';
 
 const { AVAILABLE_CHAINS, DEFAULT_SUBMIT_API, GOV_TOOLS_URLS } = config();
 
@@ -188,6 +188,8 @@ export const NamiView = withDappContext((): React.ReactElement => {
 
   const redirectToStaking = useRedirection(walletRoutePaths.earn);
 
+  const txHistoryLoader = useTxHistoryLoader(BATCH);
+
   return (
     <OutsideHandlesProvider
       {...{
@@ -220,7 +222,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         availableChains: AVAILABLE_CHAINS,
         enableCustomNode,
         getCustomSubmitApiForNetwork,
-        createHistoricalOwnInputResolver,
         defaultSubmitApi: DEFAULT_SUBMIT_API,
         isValidURL,
         buildDelegation,
@@ -241,6 +242,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
         openExternalLink,
         walletAddresses,
         transactions: walletState?.transactions,
+        txHistoryLoader,
         eraSummaries: walletState?.eraSummaries,
         certificateInspectorFactory,
         connectHW,

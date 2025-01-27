@@ -505,7 +505,15 @@ export const mapWalletActivities = memoize(
     _${assetInfo.size}_${rewardAccounts.length}_${addresses[0]}`,
 );
 
-export const useWalletTxs = () => {
+const TX_HISTORY_LOADING = {
+  transactions: undefined as unknown as Wallet.Cardano.HydratedTx[],
+  mightHaveMore: false,
+};
+
+export const useWalletTxs = (): {
+  txs: (TxInfo | undefined)[] | undefined;
+  isFinal?: boolean;
+} => {
   const { inMemoryWallet } = useCommonOutsideHandles();
   const {
     eraSummaries,
@@ -513,6 +521,7 @@ export const useWalletTxs = () => {
     walletAddresses,
     certificateInspectorFactory,
     transactions,
+    txHistoryLoader,
     protocolParameters,
     assetInfo,
     inputResolver,
@@ -522,6 +531,12 @@ export const useWalletTxs = () => {
     inMemoryWallet.delegation.rewardAccounts$,
   );
   const addresses = useObservable(inMemoryWallet.addresses$);
+  const loadedHistory = useObservable(
+    txHistoryLoader.loadedHistory$,
+    TX_HISTORY_LOADING,
+  );
+
+  const { resolveInput } = inputResolver;
 
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) => {
@@ -548,7 +563,10 @@ export const useWalletTxs = () => {
   const fetchWalletActivities = useCallback(async () => {
     setTxs(
       await mapWalletActivities({
-        transactions,
+        transactions: {
+          ...transactions,
+          history: loadedHistory?.transactions,
+        },
         chainHistoryProvider,
         getTxInputsValueAndAddress,
         eraSummaries,
@@ -560,7 +578,7 @@ export const useWalletTxs = () => {
       }),
     );
   }, [
-    transactions,
+    loadedHistory?.transactions,
     chainHistoryProvider,
     getTxInputsValueAndAddress,
     eraSummaries,
@@ -572,18 +590,23 @@ export const useWalletTxs = () => {
   ]);
 
   useEffect(() => {
-    if (!rewardAccounts || !transactions || !addresses) return;
+    if (
+      !rewardAccounts ||
+      loadedHistory?.transactions === undefined ||
+      !transactions ||
+      !addresses
+    )
+      return;
     fetchWalletActivities();
   }, [
     fetchWalletActivities,
-    transactions?.history,
+    loadedHistory?.transactions,
     transactions?.outgoing.inFlight,
-    transactions?.outgoing.signed,
     walletAddresses,
     assetInfo,
     rewardAccounts,
     eraSummaries,
   ]);
 
-  return txs;
+  return { txs, isFinal: !loadedHistory?.mightHaveMore };
 };
