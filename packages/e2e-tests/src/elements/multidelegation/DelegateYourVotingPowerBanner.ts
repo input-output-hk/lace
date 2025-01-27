@@ -33,6 +33,7 @@ class DelegateYourVotingPowerBanner {
   }
 
   async clickRegisterButton(): Promise<void> {
+    await this.registerButton.waitForClickable();
     await this.registerButton.click();
   }
 }
