@@ -50,6 +50,7 @@ class TransactionsDetailsAssert {
   }
 
   async assertSeeActivityDetails(expectedActivityDetails: ExpectedActivityDetails) {
+    await TransactionDetailsPage.transactionDetailsDescription.waitForStable();
     await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
 
     expect(await TransactionDetailsPage.transactionDetailsDescription.getText()).contains(
