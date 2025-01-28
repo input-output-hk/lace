@@ -15,7 +15,6 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
-import type { DRepInfo } from '@cardano-sdk/core';
 
 import {
   CardanoWsClient,
@@ -86,15 +85,6 @@ interface ProvidersConfig {
   logger?: Logger;
   experiments: {
     useWebSocket?: boolean;
-    useBlockfrostAssetProvider?: boolean;
-    useDrepProviderOverrideActiveStatus?: boolean;
-    useBlockfrostChainHistoryProvider?: boolean;
-    useBlockfrostNetworkInfoProvider?: boolean;
-    useBlockfrostRewardsProvider?: boolean;
-    useBlockfrostTxSubmitProvider?: boolean;
-    useBlockfrostUtxoProvider?: boolean;
-    useBlockfrostAddressDiscovery?: boolean;
-    useBlockfrostInputResolver?: boolean;
   };
 }
 
@@ -108,7 +98,7 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useDrepProviderOverrideActiveStatus, useWebSocket }
+  experiments: { useWebSocket }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
@@ -136,34 +126,6 @@ export const createProviders = ({
 
   const inputResolver = new BlockfrostInputResolver(blockfrostClient, logger);
 
-  // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
-  const drepProviderOverrideActiveStatus = new Proxy(dRepProvider, {
-    get(target, property, receiver) {
-      const original = Reflect.get(target, property, receiver);
-      if (property === 'getDRepInfo') {
-        return async function (...args: any[]) {
-          const response: DRepInfo = await original.apply(target, args);
-          return {
-            ...response,
-            active: true
-          };
-        };
-      }
-
-      if (property === 'getDRepsInfo') {
-        return async function (...args: any[]) {
-          const response: DRepInfo[] = await original.apply(target, args);
-          return response.map((drepInfo) => ({
-            ...drepInfo,
-            active: true
-          }));
-        };
-      }
-
-      return original;
-    }
-  });
-
   if (useWebSocket) {
     const url = new URL(baseUrl);
 
@@ -188,7 +150,7 @@ export const createProviders = ({
       wsProvider,
       addressDiscovery,
       inputResolver,
-      drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : dRepProvider
+      drepProvider: dRepProvider
     };
   }
 
@@ -205,7 +167,7 @@ export const createProviders = ({
     rewardsProvider,
     addressDiscovery,
     inputResolver,
-    drepProvider: useDrepProviderOverrideActiveStatus ? drepProviderOverrideActiveStatus : dRepProvider
+    drepProvider: dRepProvider
   };
 };
 

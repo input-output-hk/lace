@@ -11,7 +11,6 @@ export enum ExperimentName {
   USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets',
   WEBSOCKET_API = 'websocket-api',
-  USE_DREP_PROVIDER_OVERRIDE = 'use-drep-provider-override',
   DAPP_EXPLORER = 'dapp-explorer'
 }
 

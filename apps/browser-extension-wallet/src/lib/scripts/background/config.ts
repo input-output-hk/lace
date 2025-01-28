@@ -60,7 +60,6 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
     },
     logger,
     experiments: {
-      useDrepProviderOverrideActiveStatus: isExperimentEnabled(ExperimentName.USE_DREP_PROVIDER_OVERRIDE),
       useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API)
     }
   });
