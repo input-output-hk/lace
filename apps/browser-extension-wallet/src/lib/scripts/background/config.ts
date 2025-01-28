@@ -30,7 +30,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   unhandledError$: RemoteApiPropertyType.HotObservable
 };
 
-const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
+const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG, SESSION_TIMEOUT } = config();
 // Important to use the same rateLimiter object for all networks,
 // because Blockfrost rate limit is per IP address, not per project id
 export const rateLimiter: RateLimiter = new Bottleneck({
@@ -84,3 +84,5 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise,
   generateWalletBasedUserId: RemoteApiPropertyType.MethodReturningPromise
 };
+
+export { SESSION_TIMEOUT };

@@ -2,7 +2,7 @@ import { cip30 as walletCip30 } from '@cardano-sdk/wallet';
 import { ensureUiIsOpenAndLoaded } from './util';
 import { userPromptService } from './services/dappService';
 import { authenticator } from './authenticator';
-import { wallet$ } from './wallet';
+import { wallet$, dAppConnectorActivity$ } from './wallet';
 import { runtime, Tabs, tabs } from 'webextension-polyfill';
 import { exposeApi, RemoteApiPropertyType, cip30 } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
@@ -14,6 +14,7 @@ import pDebounce from 'p-debounce';
 import { dappInfo$ } from './requestAccess';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { getBackgroundStorage } from './storage';
+import { notifyOnHaveAccessCall } from './session';
 
 const DEBOUNCE_THROTTLE = 500;
 
@@ -108,7 +109,12 @@ const walletApi = walletCip30.createWalletApi(
 
 cip30.initializeBackgroundScript(
   { walletName: process.env.WALLET_NAME },
-  { authenticator, logger: console, runtime, walletApi }
+  {
+    authenticator: notifyOnHaveAccessCall(authenticator, dAppConnectorActivity$.next.bind(dAppConnectorActivity$)),
+    logger: console,
+    runtime,
+    walletApi
+  }
 );
 
 exposeApi<DappDataService>(
