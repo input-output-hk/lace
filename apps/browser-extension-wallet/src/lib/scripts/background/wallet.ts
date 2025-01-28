@@ -77,19 +77,13 @@ type StoredWallet = AnyWallet<Wallet.WalletMetadata, Wallet.WalletMetadata>;
 const createWalletRepositoryStore = (): Observable<storage.CollectionStore<StoredWallet>> =>
   from(
     (async () => {
-      // wallet repository is always using feature flag of 'mainnet', because it has to be the same for all networks
-      const featureFlags = await getFeatureFlags(Wallet.Cardano.ChainIds.Mainnet.networkMagic);
-      if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-        const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
-        const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
-        if (!wallets) {
-          const pouchdbStore = createPouchdbWalletRepositoryStore();
-          await migrateCollectionStore(pouchdbStore, extensionStore, logger);
-        }
-        return extensionStore;
+      const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
+      const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
+      if (!wallets) {
+        const pouchdbStore = createPouchdbWalletRepositoryStore();
+        await migrateCollectionStore(pouchdbStore, extensionStore, logger);
       }
-
-      return createPouchdbWalletRepositoryStore();
+      return extensionStore;
     })()
   );
 
