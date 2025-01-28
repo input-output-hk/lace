@@ -6,12 +6,6 @@ export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.USE_SWITCH_TO_NAMI_MODE]: false,
   [ExperimentName.SHARED_WALLETS]: false,
   [ExperimentName.WEBSOCKET_API]: false,
-  [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: false,
-  [ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER]: false,
-  [ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER]: false,
-  [ExperimentName.BLOCKFROST_REWARDS_PROVIDER]: false,
-  [ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER]: false,
-  [ExperimentName.BLOCKFROST_UTXO_PROVIDER]: false,
   [ExperimentName.BLOCKFROST_ADDRESS_DISCOVERY]: false,
   [ExperimentName.BLOCKFROST_INPUT_RESOLVER]: false,
   [ExperimentName.EXTENSION_STORAGE]: false,
@@ -37,30 +31,6 @@ export const experiments: ExperimentsConfig = {
     default: false
   },
   [ExperimentName.WEBSOCKET_API]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_ASSET_PROVIDER]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_CHAIN_HISTORY_PROVIDER]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_REWARDS_PROVIDER]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER]: {
-    value: false,
-    default: false
-  },
-  [ExperimentName.BLOCKFROST_UTXO_PROVIDER]: {
     value: false,
     default: false
   },
