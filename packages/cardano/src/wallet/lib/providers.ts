@@ -36,7 +36,6 @@ import {
 } from '@cardano-sdk/cardano-services-client';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
-import { DEFAULT_LOOK_AHEAD_SEARCH, HDSequentialDiscovery } from '@cardano-sdk/wallet';
 import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
 
@@ -109,12 +108,7 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: {
-    useDrepProviderOverrideActiveStatus,
-    useBlockfrostAddressDiscovery,
-    useBlockfrostInputResolver,
-    useWebSocket
-  }
+  experiments: { useDrepProviderOverrideActiveStatus, useWebSocket }
 }: ProvidersConfig): WalletProvidersDependencies => {
   if (!logger) logger = console;
 
@@ -131,9 +125,7 @@ export const createProviders = ({
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
-  const addressDiscovery = useBlockfrostAddressDiscovery
-    ? new BlockfrostAddressDiscovery(blockfrostClient, logger)
-    : new HDSequentialDiscovery(chainHistoryProvider, DEFAULT_LOOK_AHEAD_SEARCH);
+  const addressDiscovery = new BlockfrostAddressDiscovery(blockfrostClient, logger);
 
   const rewardAccountInfoProvider = new BlockfrostRewardAccountInfoProvider({
     client: blockfrostClient,
@@ -142,7 +134,7 @@ export const createProviders = ({
     stakePoolProvider
   });
 
-  const inputResolver = useBlockfrostInputResolver ? new BlockfrostInputResolver(blockfrostClient, logger) : undefined;
+  const inputResolver = new BlockfrostInputResolver(blockfrostClient, logger);
 
   // Temporary proxy for drepProvider to overwrite the 'active' property to always be true
   const drepProviderOverrideActiveStatus = new Proxy(dRepProvider, {
