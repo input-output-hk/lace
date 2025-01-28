@@ -1,7 +1,19 @@
 /* eslint-disable unicorn/no-null */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
-import { getProviders } from './config';
+import {
+  of,
+  combineLatest,
+  map,
+  EMPTY,
+  BehaviorSubject,
+  Observable,
+  from,
+  firstValueFrom,
+  defaultIfEmpty,
+  Subject,
+  tap
+} from 'rxjs';
+import { getProviders, SESSION_TIMEOUT } from './config';
 import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
@@ -36,6 +48,15 @@ import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
+import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
+import { TrackerSubject } from '@cardano-sdk/util-rxjs';
+
+export const dAppConnectorActivity$ = new Subject<void>();
+const pollController$ = new TrackerSubject(
+  createUserSessionTracker(isLacePopupOpen$, isLaceTabActive$, dAppConnectorActivity$, SESSION_TIMEOUT).pipe(
+    tap((isActive) => logger.debug('Session active:', isActive))
+  )
+);
 
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
@@ -77,19 +98,13 @@ type StoredWallet = AnyWallet<Wallet.WalletMetadata, Wallet.WalletMetadata>;
 const createWalletRepositoryStore = (): Observable<storage.CollectionStore<StoredWallet>> =>
   from(
     (async () => {
-      // wallet repository is always using feature flag of 'mainnet', because it has to be the same for all networks
-      const featureFlags = await getFeatureFlags(Wallet.Cardano.ChainIds.Mainnet.networkMagic);
-      if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-        const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
-        const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
-        if (!wallets) {
-          const pouchdbStore = createPouchdbWalletRepositoryStore();
-          await migrateCollectionStore(pouchdbStore, extensionStore, logger);
-        }
-        return extensionStore;
+      const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
+      const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
+      if (!wallets) {
+        const pouchdbStore = createPouchdbWalletRepositoryStore();
+        await migrateCollectionStore(pouchdbStore, extensionStore, logger);
       }
-
-      return createPouchdbWalletRepositoryStore();
+      return extensionStore;
     })()
   );
 
@@ -149,6 +164,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
               })
             : noopHandleResolver,
           stores,
+          pollController$,
           witnesser
         }
       );
@@ -196,6 +212,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
             })
           : noopHandleResolver,
         witnesser,
+        pollController$,
         bip32Account
       }
     );

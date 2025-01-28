@@ -30,7 +30,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   unhandledError$: RemoteApiPropertyType.HotObservable
 };
 
-const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG } = config();
+const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG, SESSION_TIMEOUT } = config();
 // Important to use the same rateLimiter object for all networks,
 // because Blockfrost rate limit is per IP address, not per project id
 export const rateLimiter: RateLimiter = new Bottleneck({
@@ -60,16 +60,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
     },
     logger,
     experiments: {
-      useDrepProviderOverrideActiveStatus: isExperimentEnabled(ExperimentName.USE_DREP_PROVIDER_OVERRIDE),
-      useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API),
-      useBlockfrostAssetProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_ASSET_PROVIDER),
-      useBlockfrostChainHistoryProvider: true,
-      useBlockfrostNetworkInfoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_NETWORK_INFO_PROVIDER),
-      useBlockfrostRewardsProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_REWARDS_PROVIDER),
-      useBlockfrostTxSubmitProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_TX_SUBMIT_PROVIDER),
-      useBlockfrostUtxoProvider: isExperimentEnabled(ExperimentName.BLOCKFROST_UTXO_PROVIDER),
-      useBlockfrostAddressDiscovery: true,
-      useBlockfrostInputResolver: true
+      useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API)
     }
   });
 };
@@ -93,3 +84,5 @@ export const userIdServiceProperties: RemoteApiProperties<UserIdServiceInterface
   resetToDefaultValues: RemoteApiPropertyType.MethodReturningPromise,
   generateWalletBasedUserId: RemoteApiPropertyType.MethodReturningPromise
 };
+
+export { SESSION_TIMEOUT };
