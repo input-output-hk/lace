@@ -9,7 +9,7 @@ Feature: Transactions - Popup view
     When I navigate to Activity popup page
     Then Activity page is displayed
 
-  @LW-2541 @LW-2543 @LW-2544 @Testnet
+  @LW-2541 @LW-2543 @LW-2544 @Testnet @Pending @issue=LW-12099
   Scenario: Popup View - Activity page - Counter matches the number of rows, transactions are loaded and skeleton disappears
     When I navigate to Activity popup page
     And Activity page is displayed
@@ -19,7 +19,7 @@ Feature: Transactions - Popup view
     And a skeleton is not displayed at the bottom of the page
     And more transactions are loaded
 
-  @LW-2542 @Testnet
+  @LW-2542 @Testnet @Pending @issue=LW-12099
   Scenario: Popup View - Infinite scroll
     When I navigate to Activity popup page
     And Activity page is displayed

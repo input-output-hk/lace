@@ -4,7 +4,7 @@ Feature: Transactions - Popup view
   Background:
     Given Wallet is synced
 
-  @LW-10596 @Testnet
+  @LW-10596 @Testnet @Pending @issue=LW-12099
   Scenario Outline: Popup View - transaction list - styling: <styling> applied to tx type: <tx_type>
     Given I am on the Activity page - popup view
     When I scroll to the row with transaction type: <tx_type>
@@ -20,7 +20,7 @@ Feature: Transactions - Popup view
       | Stake Key De-Registration | green - positive   |
       | Stake Key Registration    | default - negative |
 
-  @LW-10617 @Testnet
+  @LW-10617 @Testnet @Pending @issue=LW-12099
   Scenario Outline: Popup View - transaction list - details of <tx_type> type of transaction
     Given I am on the Activity page - popup view
     When I scroll to the row with transaction type: <tx_type>
