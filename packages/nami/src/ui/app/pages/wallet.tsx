@@ -105,6 +105,7 @@ export type Props = Pick<
 > & {
   activeAddress: string;
   removeAccount: UseAccount['removeAccount'];
+  removeWallet: UseAccount['removeWallet'];
   activateAccount: UseAccount['activateAccount'];
   addAccount: UseAccount['addAccount'];
   currency: CurrencyCode;
@@ -133,6 +134,7 @@ const Wallet = ({
   addAccount,
   activateAccount,
   removeAccount,
+  removeWallet,
   assets,
   nfts,
   setAvatar,
@@ -158,10 +160,6 @@ const Wallet = ({
     [accounts, activeAccount],
   );
 
-  const inMemoryWallet = useMemo(
-    () => accounts.find(a => a.type === WalletType.InMemory),
-    [accounts],
-  );
   const onAccountClick = useCallback(
     async (account: Readonly<Account>) => {
       if (
@@ -287,7 +285,7 @@ const Wallet = ({
                 </MenuGroup>
                 <MenuDivider />
 
-                {!!inMemoryWallet && (
+                {activeAccount.type === WalletType.InMemory && (
                   <MenuItem
                     icon={<AddIcon />}
                     onClick={() => {
@@ -598,11 +596,11 @@ const Wallet = ({
           </TabPanels>
         </Tabs>
       </Box>
-      {inMemoryWallet?.walletId && (
+      {activeAccount?.type === WalletType.InMemory && (
         <NewAccountModal
           ref={newAccountRef}
           accounts={accounts}
-          walletId={inMemoryWallet?.walletId}
+          walletId={activeAccount?.walletId}
           addAccount={addAccount}
         />
       )}
@@ -610,6 +608,7 @@ const Wallet = ({
         ref={deleteAccountRef}
         activateAccount={activateAccount}
         removeAccount={removeAccount}
+        removeWallet={removeWallet}
         accounts={accounts}
         activeAccount={activeAccount}
       />
@@ -758,99 +757,115 @@ const DeleteAccountModal = React.forwardRef<
   {
     activateAccount: UseAccount['activateAccount'];
     removeAccount: UseAccount['removeAccount'];
+    removeWallet: UseAccount['removeWallet'];
     accounts: UseAccount['allAccounts'];
     activeAccount: UseAccount['activeAccount'];
   }
->(({ activateAccount, removeAccount, accounts, activeAccount }, ref) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [isLoading, setIsLoading] = React.useState(false);
-  const cancelRef = React.useRef(null);
-  const capture = useCaptureEvent();
+>(
+  (
+    { activateAccount, removeAccount, accounts, activeAccount, removeWallet },
+    ref,
+  ) => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [isLoading, setIsLoading] = React.useState(false);
+    const cancelRef = React.useRef(null);
+    const capture = useCaptureEvent();
 
-  React.useImperativeHandle(ref, () => ({
-    openModal: () => {
-      onOpen();
-    },
-  }));
+    React.useImperativeHandle(ref, () => ({
+      openModal: () => {
+        onOpen();
+      },
+    }));
 
-  const nextAccount = useMemo(
-    () =>
-      accounts.find(
+    const nextAccount: Account | undefined = useMemo(
+      () =>
+        accounts.find(
+          a =>
+            a.index !== activeAccount.index &&
+            a.walletId === activeAccount.walletId,
+        ) ??
+        accounts.find(
+          a => a.type !== WalletType.Ledger && a.type !== WalletType.Trezor,
+        ),
+      [accounts, activeAccount],
+    );
+
+    const deleteAccount = useCallback(async () => {
+      setIsLoading(true);
+      const isLastAccont = !accounts.some(
         a =>
-          a.index !== activeAccount.index &&
-          a.walletId === activeAccount.walletId,
-      ) ??
-      accounts.find(
-        a => a.type !== WalletType.Ledger && a.type !== WalletType.Trezor,
-      ),
-    [accounts, activeAccount],
-  );
+          a.walletId === activeAccount.walletId &&
+          a.index !== activeAccount.index,
+      );
 
-  const deleteAccount = useCallback(async () => {
-    setIsLoading(true);
-    if (nextAccount) {
-      await activateAccount({
-        accountIndex: nextAccount?.index,
-        walletId: nextAccount?.walletId,
-        force: true,
-      });
-    }
-    setTimeout(async () => {
-      await removeAccount({
-        walletId: activeAccount.walletId,
-        accountIndex: activeAccount.index,
-      });
-    }, 500);
-    capture(Events.AccountDeleteConfirmClick);
-    onClose();
-    setIsLoading(false);
-  }, [
-    setIsLoading,
-    activateAccount,
-    removeAccount,
-    capture,
-    onClose,
-    nextAccount,
-  ]);
+      if (isLastAccont) {
+        await removeWallet({
+          nextWalletId: nextAccount?.walletId,
+        });
+      } else if (nextAccount) {
+        await activateAccount({
+          accountIndex: nextAccount?.index,
+          walletId: nextAccount?.walletId,
+          force: true,
+        });
+        setTimeout(async () => {
+          await removeAccount({
+            walletId: activeAccount.walletId,
+            accountIndex: activeAccount.index,
+          });
+        }, 500);
+      }
+      capture(Events.AccountDeleteConfirmClick);
+      onClose();
+      setIsLoading(false);
+    }, [
+      setIsLoading,
+      activateAccount,
+      removeAccount,
+      capture,
+      onClose,
+      nextAccount,
+    ]);
 
-  return (
-    <AlertDialog
-      size="xs"
-      isOpen={isOpen}
-      leastDestructiveRef={cancelRef}
-      onClose={onClose}
-      isCentered
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent>
-          <AlertDialogHeader fontSize="md" fontWeight="bold">
-            Delete current account
-          </AlertDialogHeader>
+    return (
+      <AlertDialog
+        size="xs"
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isCentered
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="md" fontWeight="bold">
+              Delete current account
+            </AlertDialogHeader>
 
-          <AlertDialogBody>
-            <Text fontSize="sm">
-              Are you sure you want to delete <b>{activeAccount.name}</b>?
-            </Text>
-          </AlertDialogBody>
+            <AlertDialogBody>
+              <Text fontSize="sm">
+                Are you sure you want to delete <b>{activeAccount.name}</b>?
+              </Text>
+            </AlertDialogBody>
 
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose} mr={3}>
-              Cancel
-            </Button>
-            <Button
-              isDisabled={isLoading}
-              isLoading={isLoading}
-              colorScheme="red"
-              onClick={deleteAccount}
-            >
-              Delete
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
-  );
-});
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose} mr={3}>
+                Cancel
+              </Button>
+              <Button
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                colorScheme="red"
+                onClick={deleteAccount}
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    );
+  },
+);
 
 DeleteAccountModal.displayName = 'DeleteAccountModal';
 
