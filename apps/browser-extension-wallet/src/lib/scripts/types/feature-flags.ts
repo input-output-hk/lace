@@ -94,4 +94,5 @@ type FeatureFlagCustomPayloads = {
 
 export type FeatureFlagPayloads = {
   [key in FeatureFlag]: FeatureFlagPayload;
-} & FeatureFlagCustomPayloads;
+} &
+  FeatureFlagCustomPayloads;
