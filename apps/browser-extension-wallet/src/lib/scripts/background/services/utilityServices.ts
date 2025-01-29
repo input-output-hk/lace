@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers */
 import { runtime, tabs, storage as webStorage } from 'webextension-polyfill';
 import {
   BackgroundService,
@@ -109,11 +110,20 @@ const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
 
 const handleOpenPopup = async () => {
   if (typeof chrome.action.openPopup !== 'function') return;
-  await closeAllLaceWindows();
-  // behaves inconsistently if executed without setTimeout
-  setTimeout(async () => {
-    await chrome.action.openPopup();
-  });
+  try {
+    const [currentWindow] = await tabs.query({ currentWindow: true, title: 'Lace' });
+    await closeAllLaceWindows();
+    // behaves inconsistently if executed without setTimeout
+    setTimeout(async () => {
+      if (currentWindow?.windowId) {
+        await chrome.windows.update(currentWindow.windowId, { focused: true });
+        await chrome.action.openPopup();
+      }
+    }, 30);
+  } catch (error) {
+    // unable to programatically open the popup again
+    console.error(error);
+  }
 };
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
