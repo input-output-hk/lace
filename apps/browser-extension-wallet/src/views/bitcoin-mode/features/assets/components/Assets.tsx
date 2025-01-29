@@ -16,7 +16,6 @@ export const Assets = (): React.ReactElement => {
     walletUI: { appMode, areBalancesVisible, getHiddenBalancePlaceholder }
   } = useWalletStore();
 
-  console.error(priceResult);
   const { bitcoinWallet } = useWalletManager();
 
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();

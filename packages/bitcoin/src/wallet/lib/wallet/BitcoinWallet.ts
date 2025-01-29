@@ -10,6 +10,7 @@ import {
 import * as bitcoin from 'bitcoinjs-lib';
 import { Signer } from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
+import isEqual from 'lodash/isEqual';
 
 bitcoin.initEccLib(ecc);
 
@@ -235,11 +236,19 @@ export class BitcoinWallet {
   private async updateState(latestBlockInfo: BlockInfo): Promise<void> {
     this.lastKnownBlock = latestBlockInfo;
 
-    this.transactionHistory = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
-    this.transactionHistory$.next(this.transactionHistory);
+    const newTxs = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
 
-    const utxos = await this.provider.getUTxOs(this.address.address);
-    this.utxos$.next(utxos);
+    if (!isEqual(newTxs, this.transactionHistory)) {
+      this.transactionHistory = newTxs;
+      this.transactionHistory$.next(this.transactionHistory);
+    }
+
+    const newUtxos = await this.provider.getUTxOs(this.address.address);
+
+    if (!isEqual(newUtxos, this.utxos$.value)) {
+      this.utxos$.next(newUtxos);
+    }
+
     this.lastKnownBlock = latestBlockInfo;
   }
 }

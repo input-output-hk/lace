@@ -1,54 +1,74 @@
-import React, { useCallback } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import { ContentLayout } from '@src/components/Layout';
 import { useTranslation } from 'react-i18next';
-import { StateStatus, useWalletStore } from '@src/stores';
-import { useFetchCoinPrice, useRedirection } from '@hooks';
-import { Drawer, DrawerNavigation } from '@lace/common';
-import { GroupedAssetActivityList } from '@lace/core';
-import { ActivityDetail } from '@src/views/browser-view/features/activity';
+import {useWalletManager} from '@hooks';
+import { GroupedAssetActivityList } from './GroupedAssetActivityList';
+import { ActivityStatus, TransactionActivityType } from './AssetActivityItem';
 import styles from './Activity.module.scss';
 import { FundWalletBanner } from '@src/views/browser-view/components';
-import { walletRoutePaths } from '@routes';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useAnalyticsContext } from '@providers';
-import { useWalletActivities } from '@hooks/useWalletActivities';
+import { useObservable } from "@lace/common";
+import { BitcoinWallet } from "@lace/bitcoin/";
 
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
-  const { priceResult } = useFetchCoinPrice();
-  const { walletInfo, activityDetail, resetActivityState } = useWalletStore();
+ // const { priceResult } = useFetchCoinPrice();
+  //const bitcoinPrice = useMemo(() => 0, []);
   const layoutTitle = `${t('browserView.activity.title')}`;
-  const redirectToAssets = useRedirection(walletRoutePaths.assets);
-  const analytics = useAnalyticsContext();
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  const sendAnalytics = useCallback(() => {
-    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
-  }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
+  console.error('re-render');
+  const { bitcoinWallet } = useWalletManager();
+  const recentTransactions = useObservable(bitcoinWallet.transactionHistory$, []);
+  //const recentTransactions = useMemo(() => [...rawTransactions], []);
 
-  const layoutSideText = `(${activitiesCount})`;
-  const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
-  const hasActivities = walletActivities?.length > 0;
+  const walletActivities = useMemo(() => {
+    if (!walletAddress) return [];
 
+    const items = recentTransactions.map((transaction) => {
+      const outgoing = transaction.inputs
+        .filter((input) => input.address === walletAddress)
+        .reduce((acc, input) => acc + BigInt(input.satoshis), BigInt(0));
+
+      const incoming = transaction.outputs
+        .filter((output) => output.address === walletAddress)
+        .reduce((acc, output) => acc + BigInt(output.satoshis), BigInt(0));
+
+      const net = incoming - outgoing;
+
+      return {
+        id: transaction.transactionHash,
+        formattedTimestamp: transaction.timestamp.toString(),
+        amount: net.toString(),
+        fiatAmount: '0',
+        status: transaction.status === BitcoinWallet.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
+        type: net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing,
+      };
+    });
+
+    return [{ popupView: true, items }];
+  }, [recentTransactions, walletAddress]);
+
+  const fetchWalletAddress = useCallback(async () => {
+    try {
+      const address = await bitcoinWallet.getAddress();
+      console.error(`address: ${address.address}`);
+      setWalletAddress(address.address);
+    } catch (error) {
+      console.error('Failed to fetch wallet address:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWalletAddress();
+  }, []);
+
+  const layoutSideText = `(0)`;
+  const hasActivities = useMemo(() => walletActivities.length > 0, [walletActivities]);
+  const isLoading = false;
+
+  console.error('walletActivities', walletActivities);
   return (
     <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={isLoading}>
-      <Drawer
-        visible={!!activityDetail}
-        onClose={resetActivityState}
-        navigation={
-          <DrawerNavigation
-            onArrowIconClick={resetActivityState}
-            onCloseIconClick={() => {
-              analytics.sendEventToPostHog(PostHogAction.ActivityActivityDetailXClick);
-              resetActivityState();
-              redirectToAssets();
-            }}
-          />
-        }
-        popupView
-      >
-        {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
-      </Drawer>
       <div className={styles.activitiesContainer}>
         {hasActivities ? (
           <GroupedAssetActivityList
@@ -61,7 +81,7 @@ export const Activity = (): React.ReactElement => {
               title={t('browserView.assets.welcome')}
               subtitle={t('browserView.activity.fundWalletBanner.title')}
               prompt={t('browserView.fundWalletBanner.prompt')}
-              walletAddress={walletInfo.addresses[0].address.toString()}
+              walletAddress={walletAddress}
             />
           </div>
         )}
