@@ -1,4 +1,5 @@
-import { ExperimentName, ExperimentsConfig, FallbackConfiguration } from './types';
+import { ExperimentName } from '@lib/scripts/types/feature-flags';
+import { ExperimentsConfig, FallbackConfiguration } from './types';
 
 export const getDefaultFeatureFlags = (): FallbackConfiguration => ({
   [ExperimentName.CREATE_PAPER_WALLET]: false,

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
-import { ExperimentName, ExperimentsConfigStatus } from './types';
+import { ExperimentsConfigStatus } from './types';
+import { ExperimentName } from '@lib/scripts/types/feature-flags';
 
 type ExperimentsContext = {
   areExperimentsLoading: boolean;
