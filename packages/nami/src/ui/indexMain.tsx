@@ -63,7 +63,7 @@ const App = () => {
     defaultSubmitApi,
     isValidURL,
     setAvatar,
-    removeWallet,
+    removeWallet: removeWalletUtil,
     setDeletingWallet,
   } = useOutsideHandles();
 
@@ -112,11 +112,12 @@ const App = () => {
     activateAccount,
     removeAccount,
     updateAccountMetadata,
+    removeWallet,
   } = useAccountUtil({
     chainId: currentChain,
     addAccount: addLaceAccount,
     removeAccount: async props => walletRepository.removeAccount(props),
-    removeWallet,
+    removeWallet: removeWalletUtil,
     activateAccount: async (props, force) =>
       walletManager.activate(props, force),
     wallets$: walletRepository.wallets$,
@@ -260,6 +261,7 @@ const App = () => {
             addAccount={addAccount}
             activateAccount={activateAccount}
             removeAccount={removeAccount}
+            removeWallet={removeWallet}
             assets={assets}
             nfts={nfts}
             setAvatar={setAvatar}
