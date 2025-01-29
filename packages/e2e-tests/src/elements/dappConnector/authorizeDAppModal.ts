@@ -31,7 +31,7 @@ class AuthorizeDAppModal {
 
   async clickButton(button: 'Always' | 'Only once'): Promise<void> {
     await browser.pause(500);
-    await this.alwaysButton.waitForDisplayed();
+    await this.alwaysButton.waitForClickable();
     button === 'Always' ? await this.alwaysButton.click() : await this.onceButton.click();
   }
 }

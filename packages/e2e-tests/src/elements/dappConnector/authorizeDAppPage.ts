@@ -35,7 +35,7 @@ class AuthorizeDAppPage extends CommonDappPageElements {
   }
 
   async clickButton(button: 'Authorize' | 'Cancel'): Promise<void> {
-    await this.authorizeButton.waitForDisplayed();
+    await this.authorizeButton.waitForClickable();
     button === 'Authorize' ? await this.authorizeButton.click() : await this.cancelButton.click();
   }
 }
