@@ -37,7 +37,8 @@ export class StubBitcoinDataProvider implements BlockchainDataProvider {
         transactionHash: 'd528068a1156d135430c815573c79faa7d45b3f395728e92322f3db1ad99da30',
         confirmations: 10,
         status: TransactionStatus.Confirmed,
-        blockHeight: 999
+        blockHeight: 999,
+        timestamp: (new Date()).getUTCSeconds()
       }
     ];
   }

@@ -71,6 +71,7 @@ export type TransactionHistoryEntry = {
   readonly confirmations: number;
   readonly status: TransactionStatus;
   readonly blockHeight: number;
+  readonly timestamp: number;
 };
 
 /**
