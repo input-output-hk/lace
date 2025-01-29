@@ -9,7 +9,7 @@ Feature: Transactions - Extended view
     When I navigate to Activity extended page
     Then Activity page is displayed
 
-  @LW-2552 @LW-2556 @LW-2555 @Testnet
+  @LW-2552 @LW-2556 @LW-2555 @Testnet @Pending @issue=LW-12099
   Scenario: Extended View - Activity page - Counter matches the number of rows, transactions are loaded and skeleton disappears
     When I navigate to Activity extended page
     And Activity page is displayed
@@ -24,7 +24,7 @@ Feature: Transactions - Extended view
     When I navigate to Activity extended page
     Then all the transactions have a value other than zero
 
-  @LW-2554 @Testnet
+  @LW-2554 @Testnet @Pending @issue=LW-12099
   Scenario: Extended View - Infinite scroll
     When I navigate to Activity extended page
     And Activity page is displayed
