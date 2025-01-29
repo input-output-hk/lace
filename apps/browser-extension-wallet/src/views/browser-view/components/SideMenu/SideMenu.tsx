@@ -8,8 +8,8 @@ import { sideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useWalletStore } from '@stores';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { ExperimentName } from '@lib/scripts/types/feature-flags';
 
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
@@ -21,7 +21,7 @@ export const SideMenu = (): React.ReactElement => {
   } = useHistory();
   const analytics = useAnalyticsContext();
   const posthog = usePostHogClientContext();
-  const isDappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
+  const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
 
   const { isSharedWallet } = useWalletStore();
 

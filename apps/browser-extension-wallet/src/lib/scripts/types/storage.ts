@@ -1,7 +1,7 @@
 import { AuthorizedDappStorage } from '@src/types/dappConnector';
 import type { Message } from './background-service';
 import { ADAPrices } from './prices';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
+import { FeatureFlagPayloads, GroupedFeatureFlags } from '@lib/scripts/types/feature-flags';
 
 export interface PendingMigrationState {
   from: string;
@@ -29,7 +29,8 @@ export interface BackgroundStorage {
   fiatPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;
-  featureFlags?: Record<number, Record<ExperimentName, string | boolean>>;
+  featureFlags?: GroupedFeatureFlags;
+  featureFlagPayloads?: FeatureFlagPayloads;
   customSubmitTxUrl?: string;
   namiMigration?: {
     completed: boolean;

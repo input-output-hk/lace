@@ -1,6 +1,25 @@
 import { z, ZodIssueCode } from 'zod';
 import { DeepRequired } from 'utility-types';
 
+export enum ExperimentName {
+  CREATE_PAPER_WALLET = 'create-paper-wallet',
+  RESTORE_PAPER_WALLET = 'restore-paper-wallet',
+  USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
+  SHARED_WALLETS = 'shared-wallets',
+  WEBSOCKET_API = 'websocket-api',
+  DAPP_EXPLORER = 'dapp-explorer'
+}
+
+export type FeatureFlag = `${ExperimentName}`;
+
+type FeatureFlags = {
+  [key in FeatureFlag]: boolean;
+};
+
+export type GroupedFeatureFlags = {
+  [number: number]: FeatureFlags;
+};
+
 const parseJsonPreprocessor = (value: unknown, ctx: z.RefinementCtx) => {
   if (typeof value === 'string') {
     try {
@@ -59,3 +78,20 @@ export const featureFlagSchema = {
   common: z.preprocess(parseJsonPreprocessor, commonSchema),
   dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema)
 };
+
+type FeatureFlagCommonPayload = {
+  allowedNetworks: ('preview' | 'preprod' | 'mainnet' | 'sanchonet')[];
+};
+
+// Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
+// strict null checks enabled so `false` is a replacement for `undefined` in this case
+// eslint-disable-next-line @typescript-eslint/ban-types
+type FeatureFlagPayload<T extends Record<string, unknown> = {}> = (FeatureFlagCommonPayload & T) | false;
+
+type FeatureFlagCustomPayloads = {
+  [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<FeatureFlagDappExplorerSchema>;
+};
+
+export type FeatureFlagPayloads = {
+  [key in FeatureFlag]: FeatureFlagPayload;
+} & FeatureFlagCustomPayloads;
