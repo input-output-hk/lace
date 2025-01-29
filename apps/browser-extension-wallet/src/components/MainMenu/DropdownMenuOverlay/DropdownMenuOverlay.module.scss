@@ -91,20 +91,20 @@
           width: size_unit(5.5);
         }
 
-        .ant-switch>div.ant-switch-handle {
+        .ant-switch > div.ant-switch-handle {
           height: size_unit(2.5);
           width: size_unit(2.5);
         }
 
-        .ant-switch>span.ant-switch-inner svg {
+        .ant-switch > span.ant-switch-inner svg {
           margin-top: 1px;
         }
 
-        .ant-switch.ant-switch-checked>span.ant-switch-inner {
+        .ant-switch.ant-switch-checked > span.ant-switch-inner {
           margin: 0 size_unit(35) 0 size_unit(0.5);
         }
 
-        .ant-switch.ant-switch-checked>div.ant-switch-handle {
+        .ant-switch.ant-switch-checked > div.ant-switch-handle {
           left: calc(100% - 20px - 2px);
         }
       }
@@ -210,4 +210,16 @@
 
 .extendedContainer {
   max-height: 600px;
+}
+
+.namiModeSwitch {
+  &:global(.ant-switch) {
+    background: var(--light-mode-mid-grey, var(--dark-mode-dark-grey)) !important;
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+  &:global(.ant-switch-checked) {
+    background: var(--switch-checked-bg-color) !important;
+  }
 }
