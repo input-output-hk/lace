@@ -2,7 +2,7 @@ import { DataTable, Then, When } from '@cucumber/cucumber';
 import CIP95TestDApp from '../elements/CIP95TestDApp';
 import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
 import CIP95StaticMethodsAssert from '../assert/CIP95StaticMethodsAssert';
-import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
+import DAppConnectorUtils from '../utils/DAppConnectorUtils';
 import { browser } from '@wdio/globals';
 
 const testDAppDetails: ExpectedDAppDetails = {
@@ -16,7 +16,7 @@ When(/^I open CIP-95 test DApp$/, async () => {
 });
 
 Then(/^I see CIP-95 test DApp authorization window$/, async () => {
-  await DAppConnectorPageObject.waitAndSwitchToDAppConnectorWindow(3);
+  await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
