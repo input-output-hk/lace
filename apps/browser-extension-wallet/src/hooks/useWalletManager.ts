@@ -662,7 +662,10 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const deleteWallet = useCallback(
     // eslint-disable-next-line max-statements
-    async (isForgotPasswordFlow = false): Promise<WalletManagerActivateProps | undefined> => {
+    async (
+      isForgotPasswordFlow = false,
+      nextWallet?: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+    ): Promise<WalletManagerActivateProps | undefined> => {
       let walletToDelete: Pick<WalletManagerActivateProps, 'walletId'> = await firstValueFrom(
         walletManager.activeWalletId$
       );
@@ -685,7 +688,7 @@ export const useWalletManager = (): UseWalletManager => {
       }
       await walletRepository.removeWallet(walletToDelete.walletId);
 
-      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const wallets = nextWallet ? [nextWallet] : await firstValueFrom(walletRepository.wallets$);
       if (wallets.length > 0) {
         const activateProps = {
           walletId: wallets[0].walletId,
