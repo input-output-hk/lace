@@ -10,6 +10,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { currencyCode } from '@providers/currency/constants';
 import { Switch } from '@lace/common';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 
 const { Title } = Typography;
 
@@ -20,6 +21,7 @@ interface SettingsPreferencesProps {
 export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const [isCurrrencyChoiceDrawerOpen, setIsCurrrencyChoiceDrawerOpen] = useState(false);
+  const [isLoggingEnabled, setIsLoggingEnabled] = useState(false);
   const { t } = useTranslation();
   const { fiatCurrency } = useCurrencyStore();
   const posthog = usePostHogClientContext();
@@ -30,10 +32,23 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
       setIsOptInBeta(optInStatus);
     });
 
+    (async () => {
+      const backgroundStorage = await getBackgroundStorage();
+      setIsLoggingEnabled(backgroundStorage.logLevel === 'debug');
+    })();
+
     return () => {
       subscription.unsubscribe();
     };
   }, [posthog]);
+
+  const handleLoggingOnChange = async () => {
+    await setBackgroundStorage({ logLevel: isLoggingEnabled ? 'info' : 'debug' });
+    setIsLoggingEnabled(!isLoggingEnabled);
+    void analytics.sendEventToPostHog(
+      isLoggingEnabled ? PostHogAction.SettingsDebuggingOffClick : PostHogAction.SettingsDebuggingOnClick
+    );
+  };
 
   const handleOpenCurrencyDrawer = () => {
     setIsCurrrencyChoiceDrawerOpen(true);
@@ -97,6 +112,21 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
           data-testid="settings-beta-program-section"
         >
           {t('browserView.settings.preferences.betaProgram.title')}
+        </SettingsLink>
+        <SettingsLink
+          onClick={handleLoggingOnChange}
+          description={t('browserView.settings.preferences.debugging.description')}
+          addon={
+            <Switch
+              testId="settings-logging-switch"
+              checked={isLoggingEnabled}
+              onChange={() => setIsLoggingEnabled(!isLoggingEnabled)}
+              className={styles.analyticsSwitch}
+            />
+          }
+          data-testid="settings-logging-level-section"
+        >
+          {t('browserView.settings.preferences.debugging.title')}
         </SettingsLink>
       </SettingsCard>
     </>

@@ -765,7 +765,7 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const switchNetwork = useCallback(
     async (chainName: Wallet.ChainName): Promise<void> => {
-      console.info('Switching chain to', chainName, AVAILABLE_CHAINS);
+      logger.debug('Switching chain to', chainName, AVAILABLE_CHAINS);
 
       const chainId = chainIdFromName(chainName);
       await walletManager.switchNetwork(chainId);

@@ -622,7 +622,7 @@ describe('Testing useWalletManager hook', () => {
     });
 
     test('puts a log in the console', async () => {
-      jest.spyOn(console, 'info');
+      jest.spyOn(console, 'debug');
       const {
         result: {
           current: { switchNetwork }
@@ -634,8 +634,8 @@ describe('Testing useWalletManager hook', () => {
         await switchNetwork('incorrect' as any);
         // eslint-disable-next-line no-empty
       } catch {}
-      expect(console.info).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
-      (console.info as unknown as SpyInstance).mockRestore();
+      expect(console.debug).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
+      (console.debug as unknown as SpyInstance).mockRestore();
     });
 
     test('should throw in case the chain is not supported', async () => {
