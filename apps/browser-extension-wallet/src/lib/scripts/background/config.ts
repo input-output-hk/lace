@@ -4,11 +4,11 @@ import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-ext
 import { getBaseUrlForChain, getMagicForChain } from '@src/utils/chain';
 import { BackgroundService, UserIdService as UserIdServiceInterface } from '../types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { logger } from '@lace/common';
 import { config } from '@src/config';
 import Bottleneck from 'bottleneck';
 import { RateLimiter } from '@cardano-sdk/cardano-services-client';
+import { ExperimentName } from '../types/feature-flags';
 
 export const backgroundServiceProperties: RemoteApiProperties<BackgroundService> = {
   requestMessage$: RemoteApiPropertyType.HotObservable,

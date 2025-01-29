@@ -21,46 +21,21 @@ import {
 } from './config';
 import { BackgroundService, UserIdService } from '@lib/scripts/types';
 import { experiments, getDefaultFeatureFlags } from '@providers/ExperimentsProvider/config';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 import {
+  ExperimentName,
+  FeatureFlag,
   FeatureFlagCommonSchema,
   FeatureFlagDappExplorerSchema,
+  FeatureFlagPayloads,
   featureFlagSchema,
-  networksEnumSchema,
-  NetworksEnumSchema
-} from './featureFlagPayloadsSchema';
-
-type FeatureFlag = `${ExperimentName}`;
+  GroupedFeatureFlags,
+  NetworksEnumSchema,
+  networksEnumSchema
+} from '@lib/scripts/types/feature-flags';
 
 const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
-
-type FeatureFlags = {
-  [key in FeatureFlag]: boolean;
-};
-
-type GroupedFeatureFlags = {
-  [number: number]: FeatureFlags;
-};
-
-type FeatureFlagCommonPayload = {
-  allowedNetworks: ('preview' | 'preprod' | 'mainnet' | 'sanchonet')[];
-};
-
-// Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
-// strict null checks enabled so `false` is a replacement for `undefined` in this case
-// eslint-disable-next-line @typescript-eslint/ban-types
-type FeatureFlagPayload<T extends Record<string, unknown> = {}> = (FeatureFlagCommonPayload & T) | false;
-
-type FeatureFlagCustomPayloads = {
-  [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<FeatureFlagDappExplorerSchema>;
-};
-
-type FeatureFlagPayloads = {
-  [key in FeatureFlag]: FeatureFlagPayload;
-} &
-  FeatureFlagCustomPayloads;
 
 /**
  * PostHog API reference:
@@ -94,6 +69,12 @@ export class PostHogClient<Action extends string = string> {
       .getBackgroundStorage()
       .then((storage) => {
         this.optedInBeta$.next(storage?.optedInBeta ?? false);
+        if (storage.featureFlags) {
+          this.featureFlags = storage.featureFlags;
+        }
+        if (storage.featureFlagPayloads) {
+          this.featureFlagPayloads = storage.featureFlagPayloads;
+        }
 
         this.initSuccess = this.userIdService
           .getUserId(chain.networkMagic)
@@ -140,6 +121,10 @@ export class PostHogClient<Action extends string = string> {
       [Wallet.Cardano.NetworkMagics.Preview]: getDefaultFeatureFlags(),
       [Wallet.Cardano.NetworkMagics.Sanchonet]: getDefaultFeatureFlags()
     };
+    this.featureFlagPayloads = Object.values(ExperimentName).reduce((payloads, featureFlagName) => {
+      payloads[featureFlagName] = false;
+      return payloads;
+    }, {} as FeatureFlagPayloads);
   }
 
   static getInstance(
@@ -284,7 +269,7 @@ export class PostHogClient<Action extends string = string> {
     // if the variant does not exist, we need to check for out cache
     if (!variant) {
       const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-      return (backgroundStorage?.featureFlags?.[this.chain.networkMagic][key] as string) || experiments[key].default;
+      return backgroundStorage?.featureFlags?.[this.chain.networkMagic][key] || experiments[key].default;
     }
 
     return variant;
@@ -330,7 +315,8 @@ export class PostHogClient<Action extends string = string> {
       if (!PostHogClient.areAllFeatureFlagsEmpty(this.featureFlags)) {
         // save current posthog config in background storage
         await this.backgroundServiceUtils.setBackgroundStorage({
-          featureFlags: this.featureFlags
+          featureFlags: this.featureFlags,
+          featureFlagPayloads: this.featureFlagPayloads
         });
       }
 

@@ -41,7 +41,6 @@ import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { requestMessage$ } from './services/utilityServices';
 import { BackgroundStorage, MessageTypes } from '../types';
 import { ExtensionDocumentStore } from './storage/extension-document-store';
@@ -50,6 +49,7 @@ import { ExtensionBlobCollectionStore } from './storage/extension-blob-collectio
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
 import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
+import { ExperimentName } from '../types/feature-flags';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(

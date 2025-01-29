@@ -25,9 +25,9 @@ import styles from './MainFooter.module.scss';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletStore } from '@stores';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { ExperimentName } from '@lib/scripts/types/feature-flags';
 
 const includesCoin = /coin/i;
 
@@ -40,7 +40,7 @@ export const MainFooter = (): React.ReactElement => {
   const posthog = usePostHogClientContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
-  const isDappExplorerEnabled = posthog.isFeatureEnabled(ExperimentName.DAPP_EXPLORER);
+  const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
   const currentLocation = location?.pathname;
   const isWalletIconActive =
     currentLocation === walletRoutePaths.assets || includesCoin.test(currentLocation) || currentLocation === '/';
