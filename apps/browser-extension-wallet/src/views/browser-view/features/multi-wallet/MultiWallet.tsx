@@ -50,7 +50,7 @@ export const MultiWallet = (): JSX.Element => {
               renderHome={() => <Home />}
               setFormDirty={(dirty) => shouldShowDialog$.next(dirty)}
               urlPath={walletRoutePaths.newWallet}
-              flowsEnabled={!!posthogClient.featureFlags}
+              flowsEnabled={!!posthogClient.featureFlagsByNetwork}
             />
           </Modal>
         )}

@@ -26,7 +26,6 @@ import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
-import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
 
@@ -39,25 +38,23 @@ const App = (): React.ReactElement => (
             <HashRouter>
               <BackgroundPageProvider>
                 <PostHogClientProvider>
-                  <ExperimentsProvider>
-                    <AnalyticsProvider>
-                      <ThemeProvider>
-                        <UIThemeProvider>
-                          <ExternalLinkOpenerProvider>
-                            <MigrationContainer appMode={APP_MODE_BROWSER}>
-                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                <AddressesDiscoveryOverlay>
-                                  <NamiMigrationGuard>
-                                    <BrowserViewRoutes />
-                                  </NamiMigrationGuard>
-                                </AddressesDiscoveryOverlay>
-                              </DataCheckContainer>
-                            </MigrationContainer>
-                          </ExternalLinkOpenerProvider>
-                        </UIThemeProvider>
-                      </ThemeProvider>
-                    </AnalyticsProvider>
-                  </ExperimentsProvider>
+                  <AnalyticsProvider>
+                    <ThemeProvider>
+                      <UIThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_BROWSER}>
+                            <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                              <AddressesDiscoveryOverlay>
+                                <NamiMigrationGuard>
+                                  <BrowserViewRoutes />
+                                </NamiMigrationGuard>
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </UIThemeProvider>
+                    </ThemeProvider>
+                  </AnalyticsProvider>
                 </PostHogClientProvider>
               </BackgroundPageProvider>
             </HashRouter>

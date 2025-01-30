@@ -19,7 +19,6 @@ import { APP_MODE_POPUP, TRACK_POPUP_CHANNEL } from './utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
-import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiPopup } from './views/nami-mode';
@@ -58,25 +57,23 @@ const App = (): React.ReactElement => {
             <CurrencyStoreProvider>
               <HashRouter>
                 <PostHogClientProvider>
-                  <ExperimentsProvider>
-                    <AnalyticsProvider>
-                      <ThemeProvider>
-                        <ExternalLinkOpenerProvider>
-                          <MigrationContainer appMode={APP_MODE_POPUP}>
-                            <DataCheckContainer appMode={APP_MODE_POPUP}>
-                              <AddressesDiscoveryOverlay>
-                                <NamiMigrationGuard>
-                                  <BackgroundPageProvider>
-                                    {mode === 'nami' ? <NamiPopup /> : <PopupView />}
-                                  </BackgroundPageProvider>
-                                </NamiMigrationGuard>
-                              </AddressesDiscoveryOverlay>
-                            </DataCheckContainer>
-                          </MigrationContainer>
-                        </ExternalLinkOpenerProvider>
-                      </ThemeProvider>
-                    </AnalyticsProvider>
-                  </ExperimentsProvider>
+                  <AnalyticsProvider>
+                    <ThemeProvider>
+                      <ExternalLinkOpenerProvider>
+                        <MigrationContainer appMode={APP_MODE_POPUP}>
+                          <DataCheckContainer appMode={APP_MODE_POPUP}>
+                            <AddressesDiscoveryOverlay>
+                              <NamiMigrationGuard>
+                                <BackgroundPageProvider>
+                                  {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                </BackgroundPageProvider>
+                              </NamiMigrationGuard>
+                            </AddressesDiscoveryOverlay>
+                          </DataCheckContainer>
+                        </MigrationContainer>
+                      </ExternalLinkOpenerProvider>
+                    </ThemeProvider>
+                  </AnalyticsProvider>
                 </PostHogClientProvider>
               </HashRouter>
             </CurrencyStoreProvider>

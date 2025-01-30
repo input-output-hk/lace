@@ -91,7 +91,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   };
 
   const availableChains = isSharedWallet
-    ? AVAILABLE_CHAINS.filter((chain) => posthog?.featureFlags[cardanoNetworkMap[chain]]['shared-wallets'])
+    ? AVAILABLE_CHAINS.filter((chain) => posthog?.featureFlagsByNetwork[cardanoNetworkMap[chain]]['shared-wallets'])
     : AVAILABLE_CHAINS;
 
   return (

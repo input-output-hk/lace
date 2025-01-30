@@ -28,7 +28,6 @@ import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
-import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
 import { useBackgroundServiceAPIContext } from '@providers';
@@ -39,6 +38,7 @@ import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/Crash';
+import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -118,10 +118,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     isSharedWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
-  const { areExperimentsLoading } = useExperimentsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
   const { t } = useTranslation();
+  const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
 
   const availableRoutes = routesMap.filter((route) => {
@@ -203,17 +203,17 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   });
 
   const isLoaded = useMemo(
-    () => !areExperimentsLoading && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted,
-    [areExperimentsLoading, isLoadingWalletInfo, walletInfo, walletState, initialHdDiscoveryCompleted]
+    () => posthogClientInitialized && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted,
+    [posthogClientInitialized, isLoadingWalletInfo, walletInfo, walletState, initialHdDiscoveryCompleted]
   );
 
   const isOnboarding = useMemo(
     () =>
-      !areExperimentsLoading &&
+      posthogClientInitialized &&
       !isLoadingWalletInfo &&
       !deletingWallet &&
       (cardanoWallet === null || stayOnAllDonePage),
-    [areExperimentsLoading, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
+    [posthogClientInitialized, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
   );
 
   const isInNamiMode = useMemo(

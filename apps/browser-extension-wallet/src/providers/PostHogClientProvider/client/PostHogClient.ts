@@ -9,18 +9,19 @@ import {
   UserTrackingType
 } from '@providers/AnalyticsProvider/analyticsTracker';
 import {
+  allFeatureFlags,
   DEV_POSTHOG_PROJECT_ID,
   DEV_POSTHOG_TOKEN,
+  featureFlagPayloadsInitialValue,
+  featureFlagsByNetworkInitialValue,
   NETWORK_MAGIC_TO_NETWORK_NAME,
-  NETWORK_NAME_TO_NETWORK_MAGIC,
   POSTHOG_ENABLED,
   POSTHOG_HOST,
   PRODUCTION_POSTHOG_PROJECT_ID,
   PRODUCTION_POSTHOG_TOKEN,
   PRODUCTION_TRACKING_MODE_ENABLED
 } from './config';
-import { BackgroundService, UserIdService } from '@lib/scripts/types';
-import { experiments, getDefaultFeatureFlags } from '@providers/ExperimentsProvider/config';
+import { BackgroundService, BackgroundStorage, UserIdService } from '@lib/scripts/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
 import { PostHogAction, PostHogProperties } from '@lace/common';
 import {
@@ -30,9 +31,11 @@ import {
   FeatureFlagDappExplorerSchema,
   FeatureFlagPayloads,
   featureFlagSchema,
-  GroupedFeatureFlags,
+  FeatureFlagsByNetwork,
   NetworksEnumSchema,
-  networksEnumSchema
+  networksEnumSchema,
+  FeatureFlags,
+  RawFeatureFlagPayloads
 } from '@lib/scripts/types/feature-flags';
 
 const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
@@ -45,13 +48,13 @@ export class PostHogClient<Action extends string = string> {
   protected static postHogClientInstance: PostHogClient;
   private userTrackingType: UserTrackingType;
   private currentUserTrackingType?: UserTrackingType;
-  private hasPostHogInitialized$: BehaviorSubject<boolean>;
   private subscription: Subscription;
-  private initSuccess: Promise<boolean>;
-  private readonly optedInBeta$: BehaviorSubject<boolean>;
+  private readonly optedInBeta$ = new BehaviorSubject(false);
   private updatePersonaProperties = false;
-  featureFlags: GroupedFeatureFlags;
-  featureFlagPayloads: FeatureFlagPayloads;
+  hasPostHogInitialized$ = new BehaviorSubject(false);
+  featureFlagsByNetwork: FeatureFlagsByNetwork = featureFlagsByNetworkInitialValue;
+  featureFlagPayloads: FeatureFlagPayloads = featureFlagPayloadsInitialValue;
+
   constructor(
     private chain: Wallet.Cardano.ChainId,
     private userIdService: UserIdService,
@@ -60,71 +63,54 @@ export class PostHogClient<Action extends string = string> {
     private postHogHost: string = POSTHOG_HOST
   ) {
     if (!this.postHogHost) throw new Error('POSTHOG_HOST url has not been provided');
+    void this.initialize();
+  }
+
+  private async initialize() {
+    const [storage, userId] = await Promise.all([
+      this.backgroundServiceUtils.getBackgroundStorage(),
+      this.userIdService.getUserId(this.chain.networkMagic)
+    ]);
+    this.optedInBeta$.next(storage?.optedInBeta ?? false);
+
+    this.initializePosthogClient(userId, storage);
+    this.subscribeToDistinctIdUpdate();
+    this.loadFeatureFlags();
+
+    this.hasPostHogInitialized$.next(true);
+  }
+
+  private initializePosthogClient(userId: string, storage: BackgroundStorage): void {
     const token = this.getApiToken();
     if (!token) throw new Error(`posthog token has not been provided for chain: ${this.chain.networkId}`);
-    this.hasPostHogInitialized$ = new BehaviorSubject(false);
-    this.optedInBeta$ = new BehaviorSubject(false);
 
-    this.backgroundServiceUtils
-      .getBackgroundStorage()
-      .then((storage) => {
-        this.optedInBeta$.next(storage?.optedInBeta ?? false);
-        if (storage.featureFlags) {
-          this.featureFlags = storage.featureFlags;
-        }
-        if (storage.featureFlagPayloads) {
-          this.featureFlagPayloads = storage.featureFlagPayloads;
-        }
-
-        this.initSuccess = this.userIdService
-          .getUserId(chain.networkMagic)
-          .then((id) => {
-            posthog.init(token, {
-              request_batching: false,
-              api_host: this.postHogHost,
-              autocapture: false,
-              opt_out_useragent_filter: true,
-              disable_compression: true,
-              disable_session_recording: true,
-              capture_pageview: false,
-              capture_pageleave: false,
-              // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
-              disable_persistence: true,
-              disable_cookie: true,
-              persistence: 'memory',
-              bootstrap: {
-                distinctID: id,
-                isIdentifiedID: true
-              },
-              property_blacklist: [
-                '$autocapture_disabled_server_side',
-                '$console_log_recording_enabled_server_side',
-                '$device_id',
-                '$session_recording_recorder_version_server_side',
-                '$time'
-              ]
-            });
-          })
-          .then(() => true);
-
-        this.subscribeToDistinctIdUpdate();
-        this.loadExperiments();
-      })
-      .catch(() => {
-        console.warn('Analytics failed');
-        return false;
-      });
-
-    this.featureFlags = {
-      [Wallet.Cardano.NetworkMagics.Mainnet]: getDefaultFeatureFlags(),
-      [Wallet.Cardano.NetworkMagics.Preprod]: getDefaultFeatureFlags(),
-      [Wallet.Cardano.NetworkMagics.Preview]: getDefaultFeatureFlags(),
-      [Wallet.Cardano.NetworkMagics.Sanchonet]: getDefaultFeatureFlags()
-    };
-    this.featureFlagPayloads = Object.values(ExperimentName).reduce((payloads, featureFlagName) => {
-      payloads[featureFlagName] = false;
-      return payloads;
-    }, {} as FeatureFlagPayloads);
+    posthog.init(token, {
+      request_batching: false,
+      api_host: this.postHogHost,
+      autocapture: false,
+      opt_out_useragent_filter: true,
+      disable_compression: true,
+      disable_session_recording: true,
+      capture_pageview: false,
+      capture_pageleave: false,
+      // Disables PostHog user ID persistence - we manage ID ourselves with userIdService
+      disable_persistence: true,
+      disable_cookie: true,
+      persistence: 'memory',
+      bootstrap: {
+        distinctID: userId,
+        isIdentifiedID: true,
+        featureFlags: storage?.initialPosthogFeatureFlags,
+        featureFlagPayloads: storage?.initialPosthogFeatureFlagPayloads
+      },
+      property_blacklist: [
+        '$autocapture_disabled_server_side',
+        '$console_log_recording_enabled_server_side',
+        '$device_id',
+        '$session_recording_recorder_version_server_side',
+        '$time'
+      ]
+    });
   }
 
   static getInstance(
@@ -156,12 +142,9 @@ export class PostHogClient<Action extends string = string> {
   subscribeToDistinctIdUpdate(): void {
     this.subscription = this.userIdService.userId$.subscribe(async ({ id, type }) => {
       this.currentUserTrackingType = type;
-      // register must be called after posthog.init resolves
-      if (await this.initSuccess) {
-        posthog.register({
-          distinct_id: id
-        });
-      }
+      posthog.register({
+        distinct_id: id
+      });
     });
   }
 
@@ -240,97 +223,48 @@ export class PostHogClient<Action extends string = string> {
     console.debug('[ANALYTICS] Changing Opted In Beta', optedInBeta);
   }
 
-  isFeatureFlagEnabled(feature: string): boolean {
-    return this.featureFlags[this.chain.networkMagic]?.[feature as FeatureFlag] || false;
+  isFeatureFlagEnabled(feature: FeatureFlag): boolean {
+    const currentNetworkFeatureFlags =
+      this.featureFlagsByNetwork[this.chain.networkMagic as Wallet.Cardano.NetworkMagics];
+    return currentNetworkFeatureFlags[feature] || false;
   }
 
   getFeatureFlagPayload<T extends FeatureFlag>(featureFlag: T): FeatureFlagPayloads[T] {
     return this.featureFlagPayloads[featureFlag];
   }
 
-  subscribeToInitializationProcess(callback: (params: boolean) => void): Subscription {
-    return this.hasPostHogInitialized$.subscribe(callback);
-  }
+  protected loadFeatureFlags(): void {
+    posthog.onFeatureFlags((_, loadedFeatureFlags) => {
+      const loadedFeatureFlagPayloads = posthog.featureFlags.getFlagPayloads() as RawFeatureFlagPayloads;
+      this.featureFlagPayloads = PostHogClient.parseFeaturePayloads(loadedFeatureFlagPayloads);
 
-  overrideFeatureFlags(flags: boolean | string[] | Record<string, string | boolean>): void {
-    posthog.featureFlags.override(flags);
-  }
+      for (const [networkMagic, networkName] of NETWORK_MAGIC_TO_NETWORK_NAME.entries()) {
+        if (!isNetworkOfExpectedSchema(networkName)) return;
 
-  async getExperimentVariant(key: ExperimentName): Promise<string | boolean> {
-    const variant = posthog?.getFeatureFlag(key, {
-      send_event: false
-    });
+        for (const flagName of allFeatureFlags) {
+          const isFeatureEnabled = !!loadedFeatureFlags[flagName];
+          const payload = this.featureFlagPayloads[flagName];
+          const allowedNetworks = payload ? payload.allowedNetworks : [];
+          const enabledForGivenNetwork = allowedNetworks.includes(networkName);
 
-    // if we get a type of boolean means that the experiment is not running, so we return the fallback variant
-    if (typeof variant === 'boolean') {
-      return experiments[key].default;
-    }
-
-    // if the variant does not exist, we need to check for out cache
-    if (!variant) {
-      const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-      return backgroundStorage?.featureFlags?.[this.chain.networkMagic][key] || experiments[key].default;
-    }
-
-    return variant;
-  }
-
-  isFeatureEnabled(key: ExperimentName | string): boolean {
-    try {
-      const isEnabled = posthog.isFeatureEnabled(key);
-      return isEnabled || false;
-    } catch {
-      return false;
-    }
-  }
-
-  protected loadExperiments(): void {
-    posthog.onFeatureFlags(async () => {
-      const featureFlags: Record<ExperimentName, string | boolean> = posthog.featureFlags.getFlagVariants();
-      const featureFlagPayloads = posthog.featureFlags.getFlagPayloads();
-      const payloadsByFeature = PostHogClient.getFeaturePayloads(featureFlagPayloads);
-
-      this.featureFlagPayloads = payloadsByFeature;
-
-      for (const networkName in NETWORK_NAME_TO_NETWORK_MAGIC) {
-        if (!isNetworkOfExpectedSchema(networkName)) continue;
-
-        if (NETWORK_NAME_TO_NETWORK_MAGIC.hasOwnProperty(networkName)) {
-          const networkMagic = NETWORK_NAME_TO_NETWORK_MAGIC[networkName];
-
-          for (const feature in featureFlags) {
-            if (featureFlags.hasOwnProperty(feature)) {
-              const isFeatureEnabled = featureFlags[feature as FeatureFlag];
-              const flags = this.featureFlags[networkMagic];
-              const payload = payloadsByFeature[feature as FeatureFlag];
-              const allowedNetworks = payload ? payload.allowedNetworks : [];
-              flags[feature as FeatureFlag] = isFeatureEnabled && allowedNetworks.includes(networkName);
+          this.featureFlagsByNetwork = {
+            ...this.featureFlagsByNetwork,
+            [networkMagic]: {
+              ...this.featureFlagsByNetwork[networkMagic as Wallet.Cardano.NetworkMagics],
+              [flagName]: isFeatureEnabled && enabledForGivenNetwork
             }
-          }
+          };
         }
       }
 
-      const backgroundStorage = await this.backgroundServiceUtils.getBackgroundStorage();
-
-      if (!PostHogClient.areAllFeatureFlagsEmpty(this.featureFlags)) {
-        // save current posthog config in background storage
-        await this.backgroundServiceUtils.setBackgroundStorage({
-          featureFlags: this.featureFlags,
-          featureFlagPayloads: this.featureFlagPayloads
-        });
-      }
-
-      // if we were not able to retrieve posthog experiment config, use local config
-      if (PostHogClient.areAllFeatureFlagsEmpty(this.featureFlags)) {
-        // override posthog experiment config with local
-        posthog.featureFlags.override(
-          backgroundStorage?.featureFlags[this.chain.networkMagic] || getDefaultFeatureFlags()
-        );
-      }
-
-      this.optedInBeta$.next(backgroundStorage?.optedInBeta);
+      // save current posthog config in background storage
+      void this.backgroundServiceUtils.setBackgroundStorage({
+        featureFlags: this.featureFlagsByNetwork,
+        featureFlagPayloads: this.featureFlagPayloads,
+        initialPosthogFeatureFlags: loadedFeatureFlags as FeatureFlags,
+        initialPosthogFeatureFlagPayloads: loadedFeatureFlagPayloads
+      });
     });
-    this.hasPostHogInitialized$.next(true);
   }
 
   protected getApiToken(): string {
@@ -347,7 +281,7 @@ export class PostHogClient<Action extends string = string> {
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
       posthog_project_id: this.getProjectId(),
-      network: NETWORK_MAGIC_TO_NETWORK_NAME[this.chain.networkMagic],
+      network: NETWORK_MAGIC_TO_NETWORK_NAME.get(this.chain.networkMagic),
       ...(await this.getPersonProperties())
     };
   }
@@ -368,14 +302,8 @@ export class PostHogClient<Action extends string = string> {
     return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
   }
 
-  static getFeaturePayloads(payloads: Record<string, JsonType>): FeatureFlagPayloads {
-    const payloadsByFeature: FeatureFlagPayloads = Object.values(ExperimentName).reduce(
-      (payloadsByFeatureTotal, featureFlagName) => {
-        payloadsByFeatureTotal[featureFlagName] = false;
-        return payloadsByFeatureTotal;
-      },
-      {} as FeatureFlagPayloads
-    );
+  static parseFeaturePayloads(payloads: RawFeatureFlagPayloads): FeatureFlagPayloads {
+    const payloadsByFeature: FeatureFlagPayloads = featureFlagPayloadsInitialValue;
 
     for (const [featureFlag, payload] of Object.entries(payloads) as [ExperimentName, JsonType][]) {
       try {
@@ -395,9 +323,5 @@ export class PostHogClient<Action extends string = string> {
     }
 
     return payloadsByFeature;
-  }
-
-  static areAllFeatureFlagsEmpty(featureFlags: GroupedFeatureFlags): boolean {
-    return Object.values(featureFlags).every((flags) => Object.keys(flags).length === 0);
   }
 }

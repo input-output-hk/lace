@@ -1,5 +1,7 @@
+import { Cardano } from '@cardano-sdk/core';
 import { z, ZodIssueCode } from 'zod';
 import { DeepRequired } from 'utility-types';
+import { JsonType } from 'posthog-js';
 
 export enum ExperimentName {
   CREATE_PAPER_WALLET = 'create-paper-wallet',
@@ -12,13 +14,11 @@ export enum ExperimentName {
 
 export type FeatureFlag = `${ExperimentName}`;
 
-type FeatureFlags = {
+export type FeatureFlags = {
   [key in FeatureFlag]: boolean;
 };
 
-export type GroupedFeatureFlags = {
-  [number: number]: FeatureFlags;
-};
+export type FeatureFlagsByNetwork = Record<Cardano.NetworkMagics, FeatureFlags>;
 
 const parseJsonPreprocessor = (value: unknown, ctx: z.RefinementCtx) => {
   if (typeof value === 'string') {
@@ -38,7 +38,14 @@ const parseJsonPreprocessor = (value: unknown, ctx: z.RefinementCtx) => {
 // currently schema.parse() method returns partially valid type - all properties are optional
 // so we use extra types with DeepRequired, these types can be removed after Lace uses strict null checks
 
-export const networksEnumSchema = z.enum(['preview', 'preprod', 'mainnet', 'sanchonet']);
+export enum NetworkName {
+  preview = 'preview',
+  preprod = 'preprod',
+  mainnet = 'mainnet',
+  sanchonet = 'sanchonet'
+}
+
+export const networksEnumSchema = z.enum(Object.values(NetworkName) as [NetworkName, ...NetworkName[]]);
 export type NetworksEnumSchema = z.infer<typeof networksEnumSchema>;
 
 const commonSchema = z.object({
@@ -94,5 +101,6 @@ type FeatureFlagCustomPayloads = {
 
 export type FeatureFlagPayloads = {
   [key in FeatureFlag]: FeatureFlagPayload;
-} &
-  FeatureFlagCustomPayloads;
+} & FeatureFlagCustomPayloads;
+
+export type RawFeatureFlagPayloads = Record<ExperimentName, JsonType>;
