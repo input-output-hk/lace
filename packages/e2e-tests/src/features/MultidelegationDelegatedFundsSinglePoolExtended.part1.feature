@@ -37,12 +37,12 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
       | total rewards |
       | last reward   |
 
-  @LW-8432 @LW-8433
+  @LW-8432 @LW-8433 @Pending @issue=LW-12193
   Scenario: Extended View - Staking - Delegation card displays correct data
     When I navigate to Staking extended page
     And I open Overview tab
     Then I see Delegation card displaying correct data
-    And I see Delegation pool cards are displayed
+    And Delegation pool cards with rewards assigned are displayed in extended view
 
   @LW-8636
   Scenario: Extended View - Staking - Manage button works
