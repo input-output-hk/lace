@@ -34,7 +34,7 @@ export const RewardsHistory = ({ groupedRewardsActivities, walletActivitiesStatu
           hasMore={paginatedLists.length < groupedRewardsActivities.length}
           loadMore={loadMoreData}
           lists={paginatedLists}
-          infiniteScrollProps={{ scrollableTarget: LACE_APP_ID }}
+          scrollableTarget={LACE_APP_ID}
           loadFirstChunk
         />
       </Skeleton>

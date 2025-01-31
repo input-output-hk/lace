@@ -1,7 +1,7 @@
 import { List, Skeleton, Typography, Button } from 'antd';
 import cn from 'classnames';
-import React, { useState, useCallback, useEffect } from 'react';
-import InfiniteScroll, { Props as InfiniteScrollProps } from 'react-infinite-scroll-component';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { AssetActivityList, AssetActivityListProps } from './AssetActivityList';
 import styles from './AssetActivityList.module.scss';
 import isNumber from 'lodash/isNumber';
@@ -22,7 +22,9 @@ export const useGroupedActivitiesPageSize = (): number => {
 
 export interface GroupedAssetActivityListProps {
   lists: AssetActivityListProps[];
-  infiniteScrollProps?: Partial<InfiniteScrollProps>;
+  scrollableTarget: string;
+  endMessage?: React.ReactNode;
+  dataLength?: number;
   withTitle?: {
     title: string;
     onClick?: () => void;
@@ -35,7 +37,9 @@ export interface GroupedAssetActivityListProps {
 }
 export const GroupedAssetActivityList = ({
   lists,
-  infiniteScrollProps,
+  scrollableTarget,
+  endMessage,
+  dataLength,
   withTitle,
   isDrawerView,
   loadMore,
@@ -51,17 +55,23 @@ export const GroupedAssetActivityList = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const loader = useMemo(
+    () => (
+      <div data-testid="infinite-scroll-skeleton">
+        <Skeleton active avatar />
+      </div>
+    ),
+    []
+  );
+
   return (
     <InfiniteScroll
-      dataLength={lists.length}
+      dataLength={dataLength || 0}
+      endMessage={endMessage}
+      scrollableTarget={scrollableTarget}
       next={next}
       hasMore={hasMore}
-      loader={
-        <div data-testid="infinite-scroll-skeleton">
-          <Skeleton active avatar />
-        </div>
-      }
-      {...infiniteScrollProps}
+      loader={loader}
       className={cn(styles.infitineScroll, { [styles.isDrawerView]: isDrawerView })}
     >
       {!isNumber(lists.length) ? (
