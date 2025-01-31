@@ -1,4 +1,5 @@
-import React, { ReactElement, useEffect, useCallback } from 'react';
+import React, { ReactElement, useEffect, useCallback, useMemo } from 'react';
+import debounce from 'lodash/debounce';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import { GroupedAssetActivityList } from '@lace/core';
@@ -17,6 +18,8 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
+
+const loadMoreDebounce = 300;
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
@@ -70,6 +73,10 @@ export const ActivityLayout = (): ReactElement => {
 
   const isLoadingFirstTime = isNil(total);
 
+  const endMessage = useMemo(() => <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>, [t]);
+
+  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
+
   return (
     <Layout>
       <SectionLayout
@@ -98,13 +105,11 @@ export const ActivityLayout = (): ReactElement => {
           {walletActivities?.length > 0 && (
             <GroupedAssetActivityList
               hasMore={mightHaveMore}
-              loadMore={loadMore}
+              loadMore={debouncedLoadMore}
               lists={walletActivities}
-              infiniteScrollProps={{
-                scrollableTarget: LACE_APP_ID,
-                endMessage: <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>,
-                dataLength: loadedTxLength
-              }}
+              scrollableTarget={LACE_APP_ID}
+              endMessage={endMessage}
+              dataLength={loadedTxLength}
             />
           )}
           {walletActivities?.length === 0 && (

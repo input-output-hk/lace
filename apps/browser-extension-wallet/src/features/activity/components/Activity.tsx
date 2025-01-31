@@ -1,4 +1,5 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import debounce from 'lodash/debounce';
 import { ContentLayout } from '@src/components/Layout';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
@@ -14,6 +15,8 @@ import { useAnalyticsContext } from '@providers';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
 
+const loadMoreDebounce = 300;
+
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
   const { priceResult } = useFetchCoinPrice();
@@ -28,6 +31,17 @@ export const Activity = (): React.ReactElement => {
 
   const layoutSideText = `(${t('browserView.activity.titleSideText')})`;
   const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
+
+  const endMessage = useMemo(
+    () => (
+      <Flex justifyContent="center">
+        <Text.Label>{t('walletActivity.endMessage')}</Text.Label>
+      </Flex>
+    ),
+    [t]
+  );
+
+  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
   return (
     <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={walletActivities === undefined}>
@@ -52,17 +66,11 @@ export const Activity = (): React.ReactElement => {
         {walletActivities?.length > 0 && (
           <GroupedAssetActivityList
             hasMore={mightHaveMore}
-            loadMore={loadMore}
+            loadMore={debouncedLoadMore}
             lists={walletActivities}
-            infiniteScrollProps={{
-              scrollableTarget: 'contentLayout',
-              endMessage: (
-                <Flex justifyContent="center">
-                  <Text.Label>{t('walletActivity.endMessage')}</Text.Label>
-                </Flex>
-              ),
-              dataLength: loadedTxLength
-            }}
+            scrollableTarget="contentLayout"
+            endMessage={endMessage}
+            dataLength={loadedTxLength}
           />
         )}
         {walletActivities?.length === 0 && (

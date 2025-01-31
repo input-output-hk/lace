@@ -42,7 +42,6 @@ import { rewardHistoryTransformer } from '@src/views/browser-view/features/activ
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
-import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
@@ -147,7 +146,6 @@ export const mapWalletActivities = memoize(
       Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
-    const txHistorySlice = transactions.history.slice(-TX_HISTORY_LIMIT_SIZE);
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
       const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
       const rewardSpendableDate = getRewardSpendableDate(spendableEpoch, eraSummaries);
@@ -282,8 +280,8 @@ export const mapWalletActivities = memoize(
     const getHistoricalTransactions = async () => {
       const filtered =
         !assetDetails || assetDetails?.id === cardanoCoin.id
-          ? txHistorySlice.map((tx) => ({ tx }))
-          : await filterTransactionByAssetId(txHistorySlice);
+          ? transactions.history.map((tx) => ({ tx }))
+          : await filterTransactionByAssetId(transactions.history);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 
