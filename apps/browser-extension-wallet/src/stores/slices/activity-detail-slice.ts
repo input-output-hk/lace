@@ -162,10 +162,8 @@ const buildGetActivityDetail =
 
     if (activityDetail.type === TransactionActivityType.rewards) {
       const { activity, status, type } = activityDetail;
-      const poolInfos = await getPoolInfos(
-        activity.rewards.map(({ poolId }) => poolId),
-        stakePoolProvider
-      );
+      const poolIds = activity.rewards.map(({ poolId }) => poolId).filter((poolId) => !!poolId);
+      const poolInfos = await getPoolInfos(poolIds, stakePoolProvider);
       set({ fetchingActivityInfo: false });
 
       return {
