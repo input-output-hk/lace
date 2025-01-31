@@ -71,11 +71,11 @@ class MultidelegationPageAssert {
     expect(await MultidelegationPage.delegationCardChartSlices.length).to.equal(poolsCount);
   };
 
-  assertSeeDelegatedPoolCards = async () => {
+  assertSeeDelegatedPoolCards = async (hasRewards: boolean, isPopupView: boolean) => {
     const poolsCount = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     for (let i = 0; i < poolsCount; i++) {
       await this.assertSeeDelegatedPoolDetailsInfo(i);
-      await this.assertSeeDelegatedPoolFundsInfo(i);
+      await this.assertSeeDelegatedPoolFundsInfo(i, hasRewards, isPopupView);
     }
   };
 
@@ -103,19 +103,41 @@ class MultidelegationPageAssert {
     );
   };
 
-  assertSeeDelegatedPoolFundsInfo = async (index: number) => {
-    expect(await MultidelegationPage.delegatedPoolStakedTitle(index).getText()).to.equal(
-      await t('overview.stakingInfoCard.totalStaked', 'staking')
+  assertSeeDelegatedPoolFundsInfo = async (index: number, hasRewards: boolean, isPopupView: boolean) => {
+    // Total staked
+    expect(await MultidelegationPage.delegatedPoolTotalStakedTitle(index).getText()).to.equal(
+      await t('overview.stakingInfoCard.totalStaked')
     );
-    const stakedValueNumber = (await MultidelegationPage.delegatedPoolStakedValue(index).getText()).split('tADA')[0];
-    expect(stakedValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+    const totalStakedValueText = await MultidelegationPage.delegatedPoolTotalStakedValue(index).getText();
+    expect(totalStakedValueText).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    const totalStakedValue = Number(totalStakedValueText.split('\n')[0]);
+    hasRewards
+      ? expect(totalStakedValue, 'Total staked not greater than 0!').to.be.greaterThan(0)
+      : expect(totalStakedValue, 'Total staked not equal to 0!').to.equal(0);
+
+    // Last reward
     expect(await MultidelegationPage.delegatedPoolLastRewardsTitle(index).getText()).to.equal(
-      await t('overview.stakingInfoCard.lastReward', 'staking')
+      await t('overview.stakingInfoCard.lastReward')
     );
-    const lastRewardsValueNumber = (await MultidelegationPage.delegatedPoolLastRewardsValue(index).getText()).split(
-      'tADA'
-    )[0];
-    expect(lastRewardsValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
+    const lastRewardsValueText = await MultidelegationPage.delegatedPoolLastRewardsValue(index).getText();
+    expect(lastRewardsValueText).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    const lastRewardsValue = Number(lastRewardsValueText.split('\n')[0]);
+    hasRewards
+      ? expect(lastRewardsValue, 'Last reward not greater than 0!').to.be.greaterThan(0)
+      : expect(lastRewardsValue, 'Last reward not equal to 0!').to.equal(0);
+
+    // Total rewards (extended view only!)
+    if (!isPopupView) {
+      expect(await MultidelegationPage.delegatedPoolTotalRewardsTitle(index).getText()).to.equal(
+        await t('overview.stakingInfoCard.totalRewards')
+      );
+      const totalRewardsValueText = await MultidelegationPage.delegatedPoolTotalRewardsValue(index).getText();
+      expect(totalRewardsValueText).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+      const totalRewardsValue = Number(totalRewardsValueText.split('\n')[0]);
+      hasRewards
+        ? expect(totalRewardsValue, 'Total reward not greater than 0!').to.be.greaterThan(0)
+        : expect(totalRewardsValue, 'Total rewards not equal to 0!').to.equal(0);
+    }
   };
 
   assertSeeStakingPoolOnYourPoolsList = async (poolName: string) => {
