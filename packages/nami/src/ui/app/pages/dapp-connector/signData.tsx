@@ -1,5 +1,5 @@
 /* eslint-disable functional/prefer-immutable-types */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   Box,
@@ -32,7 +32,7 @@ interface Props {
 
 export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   const capture = useCaptureEvent();
-  const { secretsUtil } = useDappOutsideHandles();
+  const { secretsUtil, useOnUnload } = useDappOutsideHandles();
   const ref = React.useRef();
   const [payload, setPayload] = React.useState('');
   const [address, setAddress] = React.useState('');
@@ -99,6 +99,14 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   React.useEffect(() => {
     loadData();
   }, []);
+
+  const cancelTransaction = useCallback(async () => {
+    await request?.reject(() => void 0);
+    window.close();
+  }, [request]);
+
+  useOnUnload(cancelTransaction);
+
   return (
     <>
       {isLoading ? (

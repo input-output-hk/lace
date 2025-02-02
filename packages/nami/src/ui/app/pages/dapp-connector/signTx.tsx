@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
-import type { RefObject } from 'react';
+import { RefObject, useCallback } from 'react';
 import React from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
@@ -86,7 +86,7 @@ export const SignTx = ({
     dappConnector: { txWitnessRequest },
   } = useDappOutsideHandles();
 
-  const { secretsUtil } = useDappOutsideHandles();
+  const { secretsUtil, useOnUnload } = useDappOutsideHandles();
   const ref = React.useRef();
   const [fee, setFee] = React.useState('0');
   const [value, setValue] = React.useState<TransactionValue | null>(null);
@@ -275,6 +275,13 @@ export const SignTx = ({
   React.useEffect(() => {
     getInfo();
   }, [txWitnessRequest]);
+
+  const cancelTransaction = useCallback(async () => {
+    await request?.reject(() => void 0);
+    window.close();
+  }, [request]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <>
