@@ -10,7 +10,7 @@ const mockConfirmTransactionContent = jest.fn(() => <span data-testid="ConfirmTr
 const mockUseDisallowSignTx = jest.fn();
 const mockUseViewsFlowContext = jest.fn();
 const mockUseSignWithHardwareWallet = jest.fn();
-const mockUseOnBeforeUnload = jest.fn();
+const mockUseOnUnload = jest.fn();
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
 const mockUseTxWitnessRequest = jest.fn().mockReturnValue({});
 const mockCreateTxInspector = jest.fn().mockReturnValue(() => ({ minted: [] as any, burned: [] as any }));
@@ -95,7 +95,7 @@ jest.mock('../hooks.ts', () => {
     ...original,
     useDisallowSignTx: mockUseDisallowSignTx,
     useSignWithHardwareWallet: mockUseSignWithHardwareWallet,
-    useOnBeforeUnload: mockUseOnBeforeUnload
+    useOnUnload: mockUseOnUnload
   };
 });
 
@@ -215,7 +215,7 @@ describe('Testing ConfirmTransaction component', () => {
       }));
     });
 
-    expect(mockUseOnBeforeUnload).toHaveBeenCalledWith(disallowSignTx);
+    expect(mockUseOnUnload).toHaveBeenCalledWith(disallowSignTx);
     expect(queryByTestId(testIds.dappTransactionConfirm)).toHaveTextContent('Confirm');
     expect(queryByTestId(testIds.dappTransactionConfirm)).not.toBeDisabled();
     expect(queryByTestId(testIds.dappTransactionCancel)).toHaveTextContent('Cancel');

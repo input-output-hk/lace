@@ -151,7 +151,7 @@ export const useCreateMintedAssetList = ({
 
 export const useDisallowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): ((close?: boolean) => void) => useCallback((close) => disallowSignTx(req, close), [req]);
+): ((close?: boolean) => Promise<void>) => useCallback(async (close) => await disallowSignTx(req, close), [req]);
 
 export const useAllowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
@@ -184,11 +184,11 @@ export const useSignWithHardwareWallet = (
   return { isConfirmingTx, signWithHardwareWallet };
 };
 
-export const useOnBeforeUnload = (callBack: () => void): void => {
+export const useOnUnload = (callBack: () => void): void => {
   useEffect(() => {
-    window.addEventListener('beforeunload', callBack);
+    window.addEventListener('unload', callBack);
     return () => {
-      window.removeEventListener('beforeunload', callBack);
+      window.removeEventListener('unload', callBack);
     };
   }, [callBack]);
 };
