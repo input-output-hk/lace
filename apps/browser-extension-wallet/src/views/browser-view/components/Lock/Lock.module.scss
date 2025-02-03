@@ -80,6 +80,7 @@ $header-height: size_unit(11);
       @include text-body-medium;
       letter-spacing: -0.015em;
       color: var(--text-color-secondary);
+      text-align: center;
     }
   }
 }
