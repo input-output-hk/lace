@@ -23,6 +23,23 @@ import { Wallet } from '@lace/cardano';
 import { getWrapper } from '../testing.utils';
 import * as UseComputeTxCollateral from '@hooks/useComputeTxCollateral';
 
+const _listeners: { type: string; listener: EventListenerOrEventListenerObject }[] = [];
+
+const addEventListenerOriginal = window.addEventListener;
+
+const patchAddEventListener = () => {
+  window.addEventListener = (type: any, listener: any) => {
+    _listeners.push({ type, listener });
+    addEventListenerOriginal.call(window, type, listener);
+  };
+};
+
+const removeEventListeners = () => {
+  for (const { type, listener } of _listeners) {
+    window.removeEventListener(type, listener);
+  }
+};
+
 const assetInfo$ = new BehaviorSubject(new Map());
 const available$ = new BehaviorSubject([]);
 
@@ -215,7 +232,7 @@ describe('Testing ConfirmTransaction component', () => {
       }));
     });
 
-    expect(mockUseOnUnload).toHaveBeenCalledWith(disallowSignTx);
+    expect(disallowSignTx).not.toHaveBeenCalled();
     expect(queryByTestId(testIds.dappTransactionConfirm)).toHaveTextContent('Confirm');
     expect(queryByTestId(testIds.dappTransactionConfirm)).not.toBeDisabled();
     expect(queryByTestId(testIds.dappTransactionCancel)).toHaveTextContent('Cancel');
@@ -231,6 +248,67 @@ describe('Testing ConfirmTransaction component', () => {
     });
 
     expect(setNextViewMock).toHaveBeenCalled();
+  });
+
+  test('Should reject transaction if unmonted', async () => {
+    patchAddEventListener();
+    mockGetKeyAgentType.mockReset();
+    mockUseOnUnload.mockReset();
+    mockUseOnUnload.mockImplementation(jest.requireActual('../hooks.ts').useOnUnload);
+    mockGetKeyAgentType.mockReturnValue(Wallet.KeyManagement.KeyAgentType.InMemory);
+    mockUseWalletStore.mockReset();
+    mockUseWalletStore.mockImplementation(() => ({
+      getKeyAgentType: mockGetKeyAgentType,
+      inMemoryWallet,
+      walletUI: {},
+      walletInfo: {
+        addresses: []
+      },
+      blockchainProvider: { assetProvider }
+    }));
+
+    const signTxData = { tx: { id: 'test-tx-id' } };
+    const disallowSignTx = jest.fn();
+    mockUseDisallowSignTx.mockReset();
+    mockUseDisallowSignTx.mockReturnValue(disallowSignTx);
+    const setNextViewMock = jest.fn();
+    mockUseViewsFlowContext.mockReset();
+    mockUseViewsFlowContext.mockReturnValue({
+      utils: { setNextView: setNextViewMock },
+      setDappInfo: jest.fn(),
+      signTxRequest: {
+        request: {
+          transaction: {
+            getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            toCore: jest.fn().mockReturnValue(signTxData.tx)
+          }
+        },
+        set: jest.fn()
+      }
+    });
+    mockUseTxWitnessRequest.mockReset();
+    mockUseTxWitnessRequest.mockReturnValue({
+      signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
+      transaction: {
+        getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        toCore: jest.fn().mockReturnValue(signTxData.tx)
+      }
+    });
+
+    await act(async () => {
+      render(<ConfirmTransaction />, {
+        wrapper: getWrapper()
+      });
+    });
+
+    expect(disallowSignTx).not.toHaveBeenCalled();
+
+    await act(async () => {
+      window.dispatchEvent(new Event('unload'));
+    });
+
+    expect(disallowSignTx).toHaveBeenCalledWith(true);
+    removeEventListeners();
   });
 
   test('Should render proper state for hardware wallet', async () => {

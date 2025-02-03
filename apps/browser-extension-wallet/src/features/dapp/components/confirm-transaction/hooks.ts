@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import isPlainObject from 'lodash/isPlainObject';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AssetProvider, AssetsMintedInspection, MintedAsset } from '@cardano-sdk/core';

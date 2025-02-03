@@ -79,7 +79,11 @@ export const SignTransaction = (): React.ReactElement => {
     [onConfirm, confirmIsDisabled]
   );
 
-  useOnUnload(() => disallowSignTx(true));
+  const cancelTransaction = useCallback(() => {
+    disallowSignTx(true);
+  }, [disallowSignTx]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <Layout title={undefined}>

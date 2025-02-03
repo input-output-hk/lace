@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -82,7 +82,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
     disallowSignTx(true);
   };
 
-  useOnUnload(() => disallowSignTx(true));
+  const cancelTransaction = useCallback(() => {
+    disallowSignTx(true);
+  }, [disallowSignTx]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
