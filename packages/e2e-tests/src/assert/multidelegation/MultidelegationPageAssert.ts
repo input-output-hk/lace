@@ -301,7 +301,7 @@ class MultidelegationPageAssert {
   };
 
   assertSeeStakePoolRows = async () => {
-    const rowsNumber = await MultidelegationPage.getNumberOfPoolsFromCounter();
+    const rowsNumber = await MultidelegationPage.displayedPools.length;
 
     for (let i = 0; i < rowsNumber; i++) {
       await this.assertSeeStakePoolRow(i);
