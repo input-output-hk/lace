@@ -4,9 +4,9 @@
 .content {
   display: flex;
   flex-direction: column;
-  width: 100%;
   gap: size_unit(2);
   margin-top: -#{size_unit(1)};
+  flex: 1;
 }
 
 .amount {

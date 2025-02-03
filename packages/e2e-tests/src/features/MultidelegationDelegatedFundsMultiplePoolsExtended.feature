@@ -4,12 +4,12 @@ Feature: Staking Page - Delegated funds - Multiple pools - Extended View
   Background:
     Given Lace is ready for test
 
-  @LW-8432 @LW-8433
+  @LW-8432 @LW-8433 @Pending @issue=LW-12193
   Scenario: Extended View - Staking - Delegation card displays correct data
     When I navigate to Staking extended page
     And I open Overview tab
     Then I see Delegation card displaying correct data
-    And I see Delegation pool cards are displayed
+    And Delegation pool cards with rewards assigned are displayed in extended view
 
   @LW-9447
   Scenario: Extended-view - Staking - Manage staking only one pool is expanded by default

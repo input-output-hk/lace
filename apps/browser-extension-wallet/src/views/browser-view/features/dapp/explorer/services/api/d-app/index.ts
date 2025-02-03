@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 
 const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
@@ -42,9 +43,16 @@ type DAppRadarDappItem = {
   }>;
 };
 
-const mapResponse = (dapps: DAppRadarDappItem[], disallowedDappIds: Set<number>): ISectionCardItem[] =>
+const mapResponse = (
+  dapps: DAppRadarDappItem[],
+  disallowedDappIds: Set<number>,
+  disallowedDappCategories: Set<string>
+): ISectionCardItem[] =>
   dapps
-    .filter(({ dappId }) => !disallowedDappIds.has(dappId))
+    .filter(
+      ({ dappId, categories }) =>
+        !disallowedDappIds.has(dappId) && !categories.some((category) => disallowedDappCategories.has(category))
+    )
     .map((dapp) => ({
       id: String(dapp.dappId),
       categories: dapp.categories,
@@ -84,16 +92,22 @@ const useDAppFetcher = ({
   const [loading, setLoading] = useState(true);
   const dappExplorerFeaturePayload = usePostHogClientContext().getFeatureFlagPayload('dapp-explorer');
 
-  const disallowedDappIds = useMemo(
-    () =>
-      dappExplorerFeaturePayload
-        ? new Set<number>([
-            ...dappExplorerFeaturePayload.disallowedDapps.legalIssues,
-            ...dappExplorerFeaturePayload.disallowedDapps.connectivityIssues
-          ])
-        : new Set<number>(),
-    [dappExplorerFeaturePayload]
-  );
+  const { disallowedDappIds, disallowedDappCategories } = useMemo(() => {
+    if (!dappExplorerFeaturePayload) {
+      return {
+        disallowedDappIds: new Set<number>(),
+        disallowedDappCategories: new Set<string>()
+      };
+    }
+
+    return {
+      disallowedDappIds: new Set<number>([
+        ...dappExplorerFeaturePayload.disallowedDapps.legalIssues,
+        ...dappExplorerFeaturePayload.disallowedDapps.connectivityIssues
+      ]),
+      disallowedDappCategories: new Set<string>(dappExplorerFeaturePayload.disallowedCategories.legalIssues)
+    };
+  }, [dappExplorerFeaturePayload]);
 
   useEffect(() => {
     (async () => {
@@ -112,25 +126,30 @@ const useDAppFetcher = ({
         searchParams.set('category', category);
       }
 
+      let results: DAppRadarDappItem[] = [];
+      const url = `${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`;
       try {
-        const response = await window.fetch(`${dappRadarApiUrl}/v2/dapps/top/uaw?${searchParams.toString()}`, {
-          headers: {
-            Accept: 'application/json',
-            'x-api-key': dappRadarApiKey
-          }
-        });
+        results = await cacheRequest(url, async () => {
+          const response = await window.fetch(url, {
+            headers: {
+              Accept: 'application/json',
+              'x-api-key': dappRadarApiKey
+            }
+          });
 
-        let results: DAppRadarDappItem[] = [];
-        if (response.ok) {
+          if (!response.ok) {
+            throw new Error('Unexpected response');
+          }
+
           const parsedResponse = (await response.json()) as { results: DAppRadarDappItem[] };
-          results = parsedResponse.results;
-        }
-        setData(results);
-      } catch {
-        console.error('Failed to fetch dapp list.');
-      } finally {
-        setLoading(false);
+          return parsedResponse.results;
+        });
+      } catch (error) {
+        console.error('Failed to fetch dapp list.', error);
       }
+
+      setData(results);
+      setLoading(false);
     })();
   }, [category, limit]);
 
@@ -139,7 +158,12 @@ const useDAppFetcher = ({
     console.error('Pagination not implemented!');
   };
 
-  return { loading, data: mapResponse(data, disallowedDappIds), fetchMore, hasNextPage: false };
+  return {
+    loading,
+    data: mapResponse(data, disallowedDappIds, disallowedDappCategories),
+    fetchMore,
+    hasNextPage: false
+  };
 };
 
 export { useDAppFetcher };

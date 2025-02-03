@@ -80,9 +80,16 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     };
   }, [connectedUsbDevice, connection]);
 
-  const closeConnection = useCallback(() => {
+  const closeConnection = useCallback(async () => {
     if (connection.type === WalletType.Ledger) {
-      void connection.value.transport.close();
+      try {
+        await connection.value.transport.close();
+      } catch (error) {
+        // hw-transport-webusb also adds a disconnect event listener while creating a Ledger transport,
+        // so calling close() method will throw an error, since the device is already disconnected
+        if (error instanceof Error && error.message.includes('The device was disconnected.')) return;
+        throw error;
+      }
     }
   }, [connection]);
 

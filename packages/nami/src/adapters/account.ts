@@ -35,7 +35,12 @@ interface AccountsProps {
   removeAccount: (
     props: Readonly<RemoveAccountProps>,
   ) => Promise<RemoveAccountProps>;
-  removeWallet: (isChangePasswordFlow?: boolean) => Promise<void>;
+  removeWallet: (
+    isChangePasswordFlow?: boolean,
+    nextWallet?: Readonly<
+      AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+    >,
+  ) => Promise<void>;
   updateAccountMetadata: (
     props: Readonly<UpdateAccountMetadataProps<Wallet.AccountMetadata>>,
   ) => Promise<UpdateAccountMetadataProps<Wallet.AccountMetadata>>;
@@ -49,7 +54,7 @@ export interface Account {
   balance?: Partial<Record<Wallet.ChainName, string>>;
   address?: Partial<Record<Wallet.ChainName, string>>;
   recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
-  type?: WalletType;
+  type: WalletType;
 }
 
 export interface UseAccount {
@@ -75,6 +80,11 @@ export interface UseAccount {
     props: Readonly<{
       accountIndex: number;
       walletId?: WalletId;
+    }>,
+  ) => Promise<void>;
+  removeWallet: (
+    props: Readonly<{
+      nextWalletId?: WalletId;
     }>,
   ) => Promise<void>;
   updateAccountMetadata: (
@@ -260,20 +270,26 @@ export const useAccountUtil = ({
       },
       [wallets, addAccount],
     ),
+    removeWallet: useCallback(
+      async ({ nextWalletId }) => {
+        if (walletId === undefined) {
+          return;
+        }
+
+        const wallet = wallets?.find(elm => elm.walletId === nextWalletId);
+        await removeWallet(false, wallet);
+      },
+      [removeWallet, walletId, wallets],
+    ),
     removeAccount: useCallback(
       async ({ accountIndex, walletId }) => {
         if (walletId === undefined) {
           return;
         }
-        const isLastAccount = !allAccountsSorted.some(
-          a => a.walletId === walletId && a.index !== accountIndex,
-        );
 
-        await (isLastAccount
-          ? removeWallet()
-          : removeAccount({ accountIndex, walletId }));
+        await removeAccount({ accountIndex, walletId });
       },
-      [removeAccount, walletId, allAccountsSorted],
+      [removeAccount, walletId],
     ),
     activateAccount: useCallback(
       async props => {

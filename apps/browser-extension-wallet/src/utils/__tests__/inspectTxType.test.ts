@@ -8,7 +8,6 @@ import { mockConwayCertificates } from '../mocks/certificates';
 import { Wallet } from '@lace/cardano';
 import { TxDirections } from '@src/types';
 import { Cardano } from '@cardano-sdk/core';
-import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { TransactionActivityType, ActivityType } from '@lace/core';
 import * as Core from '@cardano-sdk/core';
 const ADDRESS_1 = Wallet.Cardano.PaymentAddress(
@@ -126,7 +125,7 @@ describe('testing tx-inspection utils', () => {
           {
             __typename: Wallet.Cardano.CertificateType.StakeDelegation,
             stakeCredential: {
-              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              hash: STAKE_KEY_HASH,
               type: Wallet.Cardano.CredentialType.KeyHash
             },
             poolId: POOL_ID
@@ -186,7 +185,7 @@ describe('testing tx-inspection utils', () => {
           {
             __typename: Wallet.Cardano.CertificateType.StakeRegistration,
             stakeCredential: {
-              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              hash: STAKE_KEY_HASH,
               type: Wallet.Cardano.CredentialType.KeyHash
             }
           }
@@ -211,7 +210,7 @@ describe('testing tx-inspection utils', () => {
           {
             __typename: Wallet.Cardano.CertificateType.StakeDeregistration,
             stakeCredential: {
-              hash: Hash28ByteBase16.fromEd25519KeyHashHex(STAKE_KEY_HASH),
+              hash: STAKE_KEY_HASH,
               type: Wallet.Cardano.CredentialType.KeyHash
             }
           }

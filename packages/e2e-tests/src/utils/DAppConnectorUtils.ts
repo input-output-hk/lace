@@ -1,21 +1,18 @@
 import { browser } from '@wdio/globals';
-import { waitUntilExpectedNumberOfHandles } from '../utils/window';
+import { waitUntilExpectedNumberOfHandles } from './window';
 import AuthorizeDappPage from '../elements/dappConnector/authorizeDAppPage';
 import AuthorizeDappModal from '../elements/dappConnector/authorizeDAppModal';
 import extendedView from '../page/extendedView';
-import settingsExtendedPageObject from './settingsExtendedPageObject';
+import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import AuthorizedDappsPage from '../elements/dappConnector/authorizedDAppsPage';
 import popupView from '../page/popupView';
 import ToastMessage from '../elements/toastMessage';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
-import testContext from '../utils/testContext';
-import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
-import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
 import { Logger } from '../support/logger';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
 
-class DAppConnectorPageObject {
+class DAppConnectorUtils {
   TEST_DAPP_URL = this.getTestDAppUrl();
   TEST_DAPP_NAME = 'React App';
   DAPP_CONNECTOR_WINDOW_HANDLE = 'dappConnector.html';
@@ -51,29 +48,6 @@ class DAppConnectorPageObject {
     await browser.switchWindow(this.TEST_DAPP_NAME);
   }
 
-  async clickButtonInDAppAuthorizationWindow(button: 'Authorize' | 'Cancel') {
-    await AuthorizeDappPage.authorizeButton.waitForDisplayed();
-    button === 'Authorize'
-      ? await AuthorizeDappPage.authorizeButton.click()
-      : await AuthorizeDappPage.cancelButton.click();
-  }
-
-  async clickButtonInDAppAuthorizationModal(button: 'Always' | 'Only once') {
-    await browser.pause(500);
-    await AuthorizeDappModal.alwaysButton.waitForDisplayed();
-    button === 'Always' ? await AuthorizeDappModal.alwaysButton.click() : await AuthorizeDappModal.onceButton.click();
-  }
-
-  async clickButtonInDAppRemovalConfirmationModal(button: 'Back' | 'Disconnect DApp') {
-    await RemoveDAppModal.cancelButton.waitForDisplayed();
-    button === 'Back' ? await RemoveDAppModal.cancelButton.click() : await RemoveDAppModal.confirmButton.click();
-  }
-
-  async clickCreateRestoreButtonInDAppNoWalletModal() {
-    await NoWalletModal.createRestoreButton.waitForDisplayed();
-    await NoWalletModal.createRestoreButton.click();
-  }
-
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
     await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
@@ -101,16 +75,11 @@ class DAppConnectorPageObject {
     }
   }
 
-  async saveDappTransactionFeeValue() {
-    const [feeValue] = (await ConfirmTransactionPage.transactionFeeValueAda.getText()).split(' ');
-    await testContext.save('feeValueDAppTx', feeValue);
-  }
-
   async switchToDappConnectorPopupAndAuthorize(testDAppDetails: ExpectedDAppDetails, mode: 'Always' | 'Only once') {
     await this.waitAndSwitchToDAppConnectorWindow(3);
     await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-    await this.clickButtonInDAppAuthorizationWindow('Authorize');
-    await this.clickButtonInDAppAuthorizationModal(mode);
+    await AuthorizeDappPage.clickButton('Authorize');
+    await AuthorizeDappModal.clickButton(mode);
     await this.switchToTestDAppWindow();
     await DAppConnectorAssert.waitUntilBalanceNotEmpty();
   }
@@ -140,4 +109,4 @@ class DAppConnectorPageObject {
   }
 }
 
-export default new DAppConnectorPageObject();
+export default new DAppConnectorUtils();

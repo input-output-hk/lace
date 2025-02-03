@@ -6,12 +6,14 @@ import noop from 'lodash/noop';
 
 type UseWalletActivitiesProps = {
   sendAnalytics: () => void;
+  withLimitedRewardsHistory?: boolean;
 };
 const noAnalyticsProps = { sendAnalytics: noop };
 type WalletActivities = Omit<WalletActivitiesSlice, 'getWalletActivities'>;
 
 export const useWalletActivities = ({
-  sendAnalytics
+  sendAnalytics,
+  withLimitedRewardsHistory
 }: UseWalletActivitiesProps = noAnalyticsProps): WalletActivities => {
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
@@ -26,9 +28,10 @@ export const useWalletActivities = ({
       getWalletActivities({
         fiatCurrency,
         cardanoFiatPrice,
-        sendAnalytics
+        sendAnalytics,
+        withLimitedRewardsHistory
       });
-  }, [fiatCurrency, cardanoFiatPrice, getWalletActivities, sendAnalytics]);
+  }, [fiatCurrency, cardanoFiatPrice, getWalletActivities, withLimitedRewardsHistory, sendAnalytics]);
 
   useEffect(() => {
     fetchWalletActivities();

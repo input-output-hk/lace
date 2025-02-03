@@ -20,8 +20,8 @@ import { browser } from '@wdio/globals';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 import ErrorDAppModal from '../elements/dappConnector/errorDAppModal';
 import { getTextFromElementArray } from '../utils/getTextFromArray';
-import DAppConnectorPageObject from '../pageobject/dAppConnectorPageObject';
-import { parseDappCucumberAssetList } from '../utils/dappConnectorUtils';
+import DAppConnectorPageObject from '../utils/DAppConnectorUtils';
+import { parseDAppCucumberAssetList } from '../utils/cucumberDataHelper';
 
 export type ExpectedDAppDetails = {
   hasLogo: boolean;
@@ -203,6 +203,17 @@ class DAppConnectorAssert {
     });
   }
 
+  async waitUntilAddressNotEmpty() {
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletChangeAddress.getText()) !== '', {
+      timeout: 6000,
+      timeoutMsg: 'failed while waiting for DApp wallet change address'
+    });
+    await browser.waitUntil(async () => (await ExampleDAppPage.walletUsedAddress.getText()) !== '', {
+      timeout: 6000,
+      timeoutMsg: 'failed while waiting for DApp wallet used address'
+    });
+  }
+
   async assertWalletFoundAndConnectedInTestDApp() {
     expect(await ExampleDAppPage.walletItem.getAttribute('value')).to.equal('lace');
     expect(await ExampleDAppPage.walletFound.getText()).to.equal('true');
@@ -219,6 +230,7 @@ class DAppConnectorAssert {
 
     expect(dAppWalletLovelaceBalance).to.be.closeTo(actualWalletLovelaceBalance, 2);
 
+    await this.waitUntilAddressNotEmpty();
     expect(await ExampleDAppPage.walletChangeAddress.getText()).to.equal(
       getTestWallet(TestWalletName.TestAutomationWallet).accounts[0].address
     );
@@ -289,7 +301,7 @@ class DAppConnectorAssert {
     );
     await ConfirmTransactionPage.transactionFeeValueAda.waitForDisplayed();
 
-    const parsedAssetsList = await parseDappCucumberAssetList(assetsDetails);
+    const parsedAssetsList = await parseDAppCucumberAssetList(assetsDetails);
     expect(await getTextFromElementArray(await ConfirmTransactionPage.transactionSummaryAssetsRows)).to.deep.equal(
       parsedAssetsList
     );
@@ -311,7 +323,7 @@ class DAppConnectorAssert {
   }
 
   async assertSeeConfirmFromAddressTransactionPage(section: 'To address' | 'From address', assets: string[]) {
-    const adjustedAssetsList = await parseDappCucumberAssetList(assets);
+    const adjustedAssetsList = await parseDAppCucumberAssetList(assets);
     const expectedAssets =
       section === 'To address'
         ? await ConfirmTransactionPage.getAssetsToAddressSection()

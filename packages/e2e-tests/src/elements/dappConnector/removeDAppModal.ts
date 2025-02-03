@@ -27,6 +27,11 @@ class RemoveDAppModal {
   get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
+
+  async clickButton(button: 'Back' | 'Disconnect DApp'): Promise<void> {
+    await this.cancelButton.waitForClickable();
+    button === 'Back' ? await this.cancelButton.click() : await this.confirmButton.click();
+  }
 }
 
 export default new RemoveDAppModal();

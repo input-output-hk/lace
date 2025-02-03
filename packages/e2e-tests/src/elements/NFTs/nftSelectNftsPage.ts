@@ -4,6 +4,7 @@ import SearchInput from '../searchInput';
 import { browser } from '@wdio/globals';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { ChainablePromiseElement } from 'webdriverio';
+import { scrollDownWithOffset } from '../../utils/scrollUtils';
 
 class NftSelectNftsPage extends CommonDrawerElements {
   private COUNTER = '[data-testid="assets-counter"]';
@@ -61,16 +62,48 @@ class NftSelectNftsPage extends CommonDrawerElements {
   }
 
   async waitForNft(nftName: string) {
-    await browser.waitUntil(async () => (await this.getNftByName(nftName)) !== undefined, {
-      timeout: 3000,
-      timeoutMsg: `failed while waiting for nft: ${nftName}`
-    });
+    await browser.waitUntil(
+      async () => {
+        const nft = await this.getNftByName(nftName);
+
+        if (nft !== undefined) {
+          return true;
+        }
+
+        await scrollDownWithOffset(await this.nfts);
+        return false;
+      },
+      {
+        timeout: 3000,
+        timeoutMsg: `Failed while waiting for NFT: ${nftName}`
+      }
+    );
   }
 
   async selectNFTs(numberOfNFTs: number) {
-    for (let i = 0; i < numberOfNFTs; i++) {
-      await this.nfts[i].waitForClickable();
-      await this.nfts[i].click();
+    let selectedCount = 0;
+
+    while (selectedCount < numberOfNFTs) {
+      const nfts = await this.nfts;
+
+      for (const nft of nfts) {
+        const isSelected = await nft.$(this.NFT_ITEM_SELECTED_CHECKMARK).isExisting();
+        if (isSelected) {
+          continue;
+        }
+
+        await nft.waitForClickable();
+        await nft.click();
+        selectedCount++;
+
+        if (selectedCount >= numberOfNFTs) {
+          return;
+        }
+      }
+
+      if (selectedCount < numberOfNFTs) {
+        await scrollDownWithOffset(nfts);
+      }
     }
   }
 

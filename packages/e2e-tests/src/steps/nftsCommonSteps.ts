@@ -132,7 +132,7 @@ Then(/^A gallery view showing my NFTs is displayed$/, async () => {
 });
 
 Then(/^Verify that "([^"]*)" (contains|doesn't contain) fallback image$/, async (nftName: string, contains: string) => {
-  await NftsPage.nftContainer.waitForDisplayed({ timeout: 15_000 });
+  await NftsPage.waitForNft(nftName);
   await nftAssert.assertNftFallbackImage(nftName, contains === 'contains');
 });
 

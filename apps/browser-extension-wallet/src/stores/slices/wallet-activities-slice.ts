@@ -39,7 +39,6 @@ import {
 } from '../types';
 import { getAssetsInformation } from '@src/utils/get-assets-information';
 import { rewardHistoryTransformer } from '@src/views/browser-view/features/activity/helpers/reward-history-transformer';
-import { createHistoricalOwnInputResolver } from '@src/utils/own-input-resolver';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
@@ -49,6 +48,7 @@ export interface FetchWalletActivitiesProps {
   cardanoFiatPrice: number;
   assetId?: Wallet.Cardano.AssetId; // Allows to filter historicals tx by asset
   sendAnalytics?: () => void;
+  withLimitedRewardsHistory?: boolean;
 }
 
 interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProps {
@@ -124,20 +124,24 @@ const mapWalletActivities = memoize(
       assetInfo,
       delegation: { rewardsHistory }
     }: ObservableWalletState,
-    { fiatCurrency, cardanoFiatPrice, sendAnalytics }: FetchWalletActivitiesProps,
+    { fiatCurrency, cardanoFiatPrice, sendAnalytics, withLimitedRewardsHistory = false }: FetchWalletActivitiesProps,
     {
       assetDetails,
       assetProvider,
       cardanoCoin,
       setRewardsActivityDetail,
       setTransactionActivityDetail,
-      isSharedWallet
+      isSharedWallet,
+      inputResolver
     }: Pick<UISlice['walletUI'], 'cardanoCoin'> &
       Pick<ActivityDetailSlice, 'setRewardsActivityDetail' | 'setTransactionActivityDetail'> &
       Pick<AssetDetailsSlice, 'assetDetails'> &
       Pick<IBlockchainProvider, 'assetProvider'> &
+      Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
+    const TX_LIMIT_SIZE = 10;
+    const txHistorySlice = transactions.history.slice(-TX_LIMIT_SIZE);
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
       const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
       const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
@@ -167,7 +171,6 @@ const mapWalletActivities = memoize(
       };
     };
 
-    const inputResolver = createHistoricalOwnInputResolver({ addresses, transactions });
     const resolveInput = inputResolver.resolveInput;
 
     // eslint-disable-next-line unicorn/no-array-callback-reference
@@ -275,8 +278,8 @@ const mapWalletActivities = memoize(
     const getHistoricalTransactions = async () => {
       const filtered =
         !assetDetails || assetDetails?.id === cardanoCoin.id
-          ? transactions.history.map((tx) => ({ tx }))
-          : await filterTransactionByAssetId(transactions.history);
+          ? txHistorySlice.map((tx) => ({ tx }))
+          : await filterTransactionByAssetId(txHistorySlice);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 
@@ -298,19 +301,25 @@ const mapWalletActivities = memoize(
     /**
      * Sanitizes historical rewards data
      */
-    const getRewardsHistory = () =>
+    const getRewardsHistory = (oldestHistoricalTxDate?: Date) =>
       Object.entries(groupBy(rewardsHistory.all, ({ epoch }) => epoch.toString()))
         .map(([epoch, rewards]) => epochRewardsMapper(Number(epoch) as Wallet.Cardano.EpochNo, rewards))
-        .filter((reward) => reward.date.getTime() < Date.now());
+        .filter(
+          (reward) =>
+            reward.date.getTime() < Date.now() &&
+            (!oldestHistoricalTxDate || reward.date.getTime() >= oldestHistoricalTxDate.getTime())
+        );
 
     /**
      * Emits the lists combined and sets current state for Zustand
      */
-    const [historicalTransactions, pendingTransactions, rewards] = await Promise.all([
+    const [historicalTransactions, pendingTransactions] = await Promise.all([
       getHistoricalTransactions(),
-      getPendingTransactions(),
-      assetDetails ? [] : getRewardsHistory()
+      getPendingTransactions()
     ]);
+
+    const oldestHistoricalTxDate = withLimitedRewardsHistory ? historicalTransactions[0]?.date : undefined;
+    const rewards = assetDetails ? [] : getRewardsHistory(oldestHistoricalTxDate);
 
     const confirmedTxs = historicalTransactions;
     const pendingTxs = pendingTransactions;
@@ -423,7 +432,7 @@ const getWalletActivities = async ({
     setTransactionActivityDetail,
     setRewardsActivityDetail,
     assetDetails,
-    blockchainProvider: { assetProvider },
+    blockchainProvider: { assetProvider, inputResolver },
     isSharedWallet
   } = get();
   if (!walletState) {
@@ -440,7 +449,8 @@ const getWalletActivities = async ({
       setRewardsActivityDetail,
       setTransactionActivityDetail,
       assetDetails,
-      isSharedWallet
+      isSharedWallet,
+      inputResolver
     }
   );
 
@@ -461,7 +471,21 @@ export const walletActivitiesSlice: SliceCreator<
   WalletInfoSlice & WalletActivitiesSlice & ActivityDetailSlice & AssetDetailsSlice & UISlice & BlockchainProviderSlice,
   WalletActivitiesSlice
 > = ({ set, get }) => ({
-  getWalletActivities: ({ fiatCurrency, cardanoFiatPrice, assetId, sendAnalytics }: FetchWalletActivitiesProps) =>
-    getWalletActivities({ fiatCurrency, cardanoFiatPrice, assetId, sendAnalytics, set, get }),
+  getWalletActivities: ({
+    fiatCurrency,
+    cardanoFiatPrice,
+    assetId,
+    sendAnalytics,
+    withLimitedRewardsHistory
+  }: FetchWalletActivitiesProps) =>
+    getWalletActivities({
+      fiatCurrency,
+      cardanoFiatPrice,
+      assetId,
+      sendAnalytics,
+      withLimitedRewardsHistory,
+      set,
+      get
+    }),
   ...initialState
 });

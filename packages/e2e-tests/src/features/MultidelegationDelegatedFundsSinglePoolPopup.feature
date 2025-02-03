@@ -10,10 +10,10 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
     Then I see Delegation title displayed for multidelegation
     And I see Delegation card displaying correct data
 
-  @LW-8338
+  @LW-8338 @Pending @issue=LW-12193
   Scenario: Popup View - Delegated pools cards are present
     When I navigate to Staking popup page
-    And I see Delegation pool cards are displayed
+    And Delegation pool cards with rewards assigned are displayed in popup view
 
   @LW-8480
   Scenario Outline: Popup View - Staking - Hover over currently staking element: <element>

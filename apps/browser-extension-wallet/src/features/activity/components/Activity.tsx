@@ -12,6 +12,7 @@ import { walletRoutePaths } from '@routes';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletActivities } from '@hooks/useWalletActivities';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -24,9 +25,12 @@ export const Activity = (): React.ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus, activitiesCount } = useWalletActivities({ sendAnalytics });
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
+    sendAnalytics,
+    withLimitedRewardsHistory: true
+  });
 
-  const layoutSideText = `(${activitiesCount})`;
+  const layoutSideText = `(${t('browserView.activity.titleSideText')})`;
   const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
   const hasActivities = walletActivities?.length > 0;
 
@@ -53,7 +57,14 @@ export const Activity = (): React.ReactElement => {
         {hasActivities ? (
           <GroupedAssetActivityList
             lists={walletActivities}
-            infiniteScrollProps={{ scrollableTarget: 'contentLayout' }}
+            infiniteScrollProps={{
+              scrollableTarget: 'contentLayout',
+              endMessage: (
+                <Flex justifyContent="center">
+                  <Text.Label>{t('walletActivity.endMessage')}</Text.Label>
+                </Flex>
+              )
+            }}
           />
         ) : (
           <div className={styles.emptyState}>

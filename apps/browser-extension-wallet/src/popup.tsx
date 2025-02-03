@@ -15,7 +15,7 @@ import 'normalize.css';
 import '@lace/staking/index.css';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
-import { APP_MODE_POPUP } from './utils/constants';
+import { APP_MODE_POPUP, TRACK_POPUP_CHANNEL } from './utils/constants';
 import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
@@ -24,8 +24,10 @@ import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { storage } from 'webextension-polyfill';
+import { runtime, storage } from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
+import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
+import { logger } from '@lib/wallet-api-ui';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -87,3 +89,6 @@ const App = (): React.ReactElement => {
 
 const mountNode = document.querySelector('#lace-popup');
 ReactDOM.render(<App />, mountNode);
+
+// not exposing any API; used to keep track of connection with SW to determine whether popup is open
+createNonBackgroundMessenger({ baseChannel: TRACK_POPUP_CHANNEL }, { logger, runtime });

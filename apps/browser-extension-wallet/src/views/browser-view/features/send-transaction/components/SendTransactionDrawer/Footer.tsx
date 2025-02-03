@@ -41,6 +41,7 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
 import { exportMultisigTransaction, PasswordObj, useSecrets } from '@lace/core';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -275,6 +276,8 @@ export const Footer = withAddressBookContext(
     );
 
     useEffect(() => {
+      const isHardwareWallet = [WalletType.Ledger, WalletType.Trezor].includes(walletType);
+      if (!isHardwareWallet || typeof navigator?.hid?.addEventListener !== 'function') return () => void 0;
       const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
         if (event.device.opened) {
           setSection({ currentSection: Sections.FAIL_TX });
@@ -287,7 +290,7 @@ export const Footer = withAddressBookContext(
       return () => {
         navigator.hid.removeEventListener('disconnect', onHardwareWalletDisconnect);
       };
-    }, [setSection, setSubmitingTxState, isPopupView]);
+    }, [setSection, setSubmitingTxState, isPopupView, walletType]);
 
     const onConfirm = useCallback(
       (passphrase: Partial<PasswordObj>) => {

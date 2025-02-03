@@ -1,7 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 import { InitializeTxProps } from '@cardano-sdk/tx-construction';
-import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { firstValueFrom } from 'rxjs';
 const {
   CertificateType,
@@ -19,7 +18,7 @@ const buildDelegationCertificates = (
 
   const stakeKeyHash = RewardAccount.toHash(rewardAccount);
   const stakeCredential = {
-    hash: Hash28ByteBase16.fromEd25519KeyHashHex(stakeKeyHash),
+    hash: stakeKeyHash,
     type: KeyHash
   };
 

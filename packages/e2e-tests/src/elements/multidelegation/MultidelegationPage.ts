@@ -55,8 +55,10 @@ class MultidelegationPage {
   private DELEGATED_POOL_FEE_VALUE = '[data-testid="stats-fee-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_MARGIN_TITLE = '[data-testid="stats-margin-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_MARGIN_VALUE = '[data-testid="stats-margin-container"] [data-testid="stats-value"]';
-  private DELEGATED_POOL_STAKED_TITLE = '[data-testid="stats-total-staked-container"] [data-testid="stats-title"]';
-  private DELEGATED_POOL_STAKED_VALUE = '[data-testid="stats-total-staked-container"] [data-testid="stats-value"]';
+  private DELEGATED_POOL_TOTAL_STAKED_TITLE =
+    '[data-testid="stats-total-staked-container"] [data-testid="stats-title"]';
+  private DELEGATED_POOL_TOTAL_STAKED_VALUE =
+    '[data-testid="stats-total-staked-container"] [data-testid="stats-value"]';
   private DELEGATED_POOL_TOTAL_REWARDS_TITLE =
     '[data-testid="stats-total-rewards-container"] [data-testid="stats-title"]';
   private DELEGATED_POOL_TOTAL_REWARDS_VALUE =
@@ -267,12 +269,12 @@ class MultidelegationPage {
     return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_MARGIN_VALUE);
   }
 
-  delegatedPoolStakedTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
-    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_STAKED_TITLE);
+  delegatedPoolTotalStakedTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_TOTAL_STAKED_TITLE);
   }
 
-  delegatedPoolStakedValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
-    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_STAKED_VALUE);
+  delegatedPoolTotalStakedValue(index: number): ChainablePromiseElement<WebdriverIO.Element> {
+    return $$(this.DELEGATED_POOL_ITEM)[index].$(this.DELEGATED_POOL_TOTAL_STAKED_VALUE);
   }
 
   delegatedPoolTotalRewardsTitle(index: number): ChainablePromiseElement<WebdriverIO.Element> {

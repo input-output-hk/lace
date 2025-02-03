@@ -111,9 +111,12 @@ Then(/^I see Delegation title displayed for multidelegation$/, async () => {
   await MultidelegationPageAssert.assertSeeTitle();
 });
 
-Then(/^I see Delegation pool cards are displayed$/, async () => {
-  await MultidelegationPageAssert.assertSeeDelegatedPoolCards();
-});
+Then(
+  /^Delegation pool cards (with|without) rewards assigned are displayed in (extended|popup) view$/,
+  async (shouldHaveRewards: 'with' | 'without', view: 'extended' | 'popup') => {
+    await MultidelegationPageAssert.assertSeeDelegatedPoolCards(shouldHaveRewards === 'with', view === 'popup');
+  }
+);
 
 When(/^I save identifiers of stake pools currently in use$/, async () => {
   await MultidelegationPage.saveIDsOfStakePoolsInUse();

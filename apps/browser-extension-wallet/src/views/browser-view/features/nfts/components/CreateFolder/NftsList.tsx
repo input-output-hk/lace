@@ -1,16 +1,16 @@
 /* eslint-disable max-params */
 import React, { useMemo } from 'react';
-import { NftFolderItemProps, NftList, NftsItemsTypes, PlaceholderItem } from '@lace/core';
+import { NftFolderItemProps, NftGrid, NftsItemsTypes, PlaceholderItem } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import { NFT, getTokenList } from '@src/utils/get-token-list';
 import AddNft from '@assets/icons/add-nft-icon.component.svg';
 import { useWalletStore } from '../../../../../../stores';
 import styles from './CreateFolderDrawer.module.scss';
 import { useCurrencyStore } from '@providers';
-import { useObservable } from '@lace/common';
+import { useObservable, VirtualisedGridColumns } from '@lace/common';
 import { useAssetInfo } from '@hooks';
 
-const nftsPerRow = {
+const nftsPerRow: Record<'popupView' | 'browserView', VirtualisedGridColumns> = {
   popupView: 2,
   browserView: 3
 };
@@ -73,7 +73,11 @@ export const NftsList = ({
 
   return (
     <div className={styles.assetsSelectorWrapper}>
-      <NftList items={list} rows={isPopupView ? nftsPerRow.popupView : nftsPerRow.browserView} />
+      <NftGrid
+        columns={isPopupView ? nftsPerRow.popupView : nftsPerRow.browserView}
+        scrollableTargetId={'drawer-scrollable-content'}
+        items={list ?? []}
+      />
     </div>
   );
 };

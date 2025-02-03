@@ -28,6 +28,7 @@ export * from '@ui/components/Switch';
 export * from '@ui/components/Loader';
 export * from '@ui/components/Radio';
 export * from '@ui/components/Timeline';
+export * from '@ui/components/VirtualisedGrid';
 
 export * from '@analytics/index';
 

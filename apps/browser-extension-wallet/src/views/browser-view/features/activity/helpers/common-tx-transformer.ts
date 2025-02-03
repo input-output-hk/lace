@@ -14,7 +14,7 @@ import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@cardano-sdk/core';
 
 // eslint-disable-next-line no-magic-numbers
-const TIMEOUT = 1000 as Milliseconds;
+const TIMEOUT = 2000 as Milliseconds;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx | Wallet.KeyManagement.WitnessedTx;

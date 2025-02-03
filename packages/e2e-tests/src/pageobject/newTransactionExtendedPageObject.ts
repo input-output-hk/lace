@@ -5,6 +5,8 @@ import extensionUtils from '../utils/utils';
 import { byron, shelley } from '../data/AddressData';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import { AddressInput } from '../elements/AddressInput';
+import NftsCommon from '../elements/NFTs/nftsCommon';
+import { scrollToTheTop } from '../utils/scrollUtils';
 
 export default new (class NewTransactionExtendedPageObject {
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
@@ -77,7 +79,10 @@ export default new (class NewTransactionExtendedPageObject {
   async addAllAvailableNftTypes(bundleIndex: number) {
     await new AssetInput(bundleIndex).clickAddAssetButton();
     await TokenSelectionPage.clickNFTsButton();
-    const nftNames = await TokenSelectionPage.getNftNames();
+    const nftNames = await NftsCommon.getAllNftNamesWithScroll(
+      `${TokenSelectionPage.ASSET_SELECTOR_CONTAINER} ${TokenSelectionPage.NFT_CONTAINER}`
+    );
+    await scrollToTheTop();
     let nftsCount = nftNames.length;
     for (const nftName of nftNames) {
       nftsCount--;

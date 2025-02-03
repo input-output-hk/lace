@@ -49,7 +49,7 @@ class TransactionsPageAssert {
     await TransactionsPage.title.waitForDisplayed();
     await TransactionsPage.counter.waitForDisplayed();
     expect(await TransactionsPage.title.getText()).to.equal(await t('browserView.activity.title'));
-    expect(await TransactionsPage.counter.getText()).to.match(TestnetPatterns.COUNTER_REGEX);
+    expect(await TransactionsPage.counter.getText()).to.equal(`(${await t('browserView.activity.titleSideText')})`);
   };
 
   assertCounterNumberMatchesWalletTransactions = async () => {
@@ -136,9 +136,9 @@ class TransactionsPageAssert {
 
     await browser.waitUntil(
       async () =>
-        (
-          await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()
-        ).includes(expectedTransactionRowAssetDetails.tokensAmount),
+        (await TransactionsPage.transactionsTableItemTokensAmount(rowIndex).getText()).includes(
+          expectedTransactionRowAssetDetails.tokensAmount
+        ),
       {
         timeout: 8000,
         interval: 1000,

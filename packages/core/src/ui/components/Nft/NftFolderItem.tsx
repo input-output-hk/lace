@@ -2,10 +2,11 @@
 /* eslint-disable unicorn/numeric-separators-style */
 import React from 'react';
 import cn from 'classnames';
-import { NftImage, NftImageProps } from './NftImage';
+import { NftImage } from './NftImage';
 import styles from './NftItem.module.scss';
 import { Tooltip } from 'antd';
 import NftFolderContextMenu from './NftFolderContextMenu';
+import { NftItemProps } from './NftItem';
 
 export enum NftsItemsTypes {
   FOLDER = 'folder',
@@ -13,13 +14,18 @@ export enum NftsItemsTypes {
   PLACEHOLDER = 'placeholder'
 }
 
-export interface NftFolderItemProps {
-  nfts?: Array<NftImageProps & { assetId?: string }>;
+export type NftFolderItemProps = {
+  nfts?: Array<NftItemProps>;
   name: string;
   id?: number;
   onClick?: () => void;
   type: NftsItemsTypes.FOLDER;
   contextMenuItems?: Array<{ label: string; onClick: () => void }>;
+};
+
+export interface NftListProps {
+  items: Array<NftItemProps | NftFolderItemProps | PlaceholderItem>;
+  rows?: number;
 }
 
 const numberOfNftsToShow = 4;
@@ -31,7 +37,21 @@ const initialContextMenu = {
   y: 0
 };
 
-const contextMenuWidth = 200;
+const CONTEXT_MENU_WIDTH = 240;
+
+export const getContextMenuPoints = <T extends HTMLElement>(
+  e: React.MouseEvent<T>,
+  contextMenuWidth = CONTEXT_MENU_WIDTH
+): { x: number; y: number } => {
+  const bounds = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - bounds.left;
+  const y = e.clientY - bounds.top;
+
+  return {
+    x: e.clientX + contextMenuWidth > window.innerWidth ? x - (e.clientX + contextMenuWidth - window.innerWidth) : x,
+    y
+  };
+};
 
 export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFolderItemProps): React.ReactElement => {
   const restOfNfts = (nfts?.length ?? 0) - numberOfNftsToShow + 1;
@@ -51,14 +71,13 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const { pageX, pageY } = e;
-    return pageX < window.innerWidth - contextMenuWidth
-      ? setContextMenu({ show: true, x: pageX, y: pageY })
-      : setContextMenu({ show: true, x: pageX - contextMenuWidth, y: pageY });
+    const points = getContextMenuPoints(e);
+
+    setContextMenu({ show: true, ...points });
   };
 
   return (
-    <div onContextMenu={handleContextMenu}>
+    <div className={styles.folderContainer} onContextMenu={handleContextMenu}>
       {contextMenu.show && contextMenuItems && (
         <NftFolderContextMenu
           x={contextMenu.x}
@@ -70,11 +89,13 @@ export const NftFolderItem = ({ name, onClick, nfts, contextMenuItems }: NftFold
 
       <a onClick={onClick} data-testid="folder-item" className={styles.nftItem}>
         <div className={styles.folderWrapper}>
-          {nfts?.slice(0, numberOfNftsToShow).map(({ image }, index) =>
+          {nfts?.slice(0, numberOfNftsToShow).map(({ image, assetId }, index) =>
             index === numberOfNftsToShow - 1 && nfts.length > numberOfNftsToShow ? (
-              <div className={styles.restOfNfts}>{restOfNftsContent}</div>
+              <div key="rest-of-nfts-placeholder" className={styles.restOfNfts}>
+                {restOfNftsContent}
+              </div>
             ) : (
-              <div data-testid="nft-item-img-container" key={image} className={styles.imageWrapper}>
+              <div data-testid="nft-item-img-container" key={assetId} className={styles.imageWrapper}>
                 <NftImage image={image} />
               </div>
             )

@@ -36,7 +36,7 @@ const genWallet = (
     walletId,
     type,
     accounts: [acc0, acc1, acc2],
-  }) as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  }) as unknown as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
 const wallet1 = genWallet('wallet1', 'InMemory');
 const wallet2 = genWallet('wallet2', 'InMemory');
@@ -318,7 +318,10 @@ describe('useAccount', () => {
               },
             },
           ],
-        } as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+        } as unknown as AnyWallet<
+          Wallet.WalletMetadata,
+          Wallet.AccountMetadata
+        >,
       ]);
     });
 
@@ -364,7 +367,7 @@ describe('useAccount', () => {
       {
         walletId: 'wallet',
         accounts: [acc1],
-      } as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+      } as unknown as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
     ]) as Wallets$;
     const activeWalletId$ = of({
       walletId: 'wallet',
@@ -383,12 +386,82 @@ describe('useAccount', () => {
       }),
     );
 
-    await result.current.removeAccount({
+    const accountToRemove = {
       accountIndex: 1,
       walletId: 'wallet',
+    };
+
+    await result.current.removeAccount(accountToRemove);
+
+    expect(mockRemoveWallet).not.toHaveBeenCalled();
+
+    expect(mockRemoveAccount).toHaveBeenCalledWith(accountToRemove);
+  });
+
+  it('should call removeWallet with correct arguments (no next wallet)', async () => {
+    const activeWallet = {
+      walletId: 'wallet',
+      accounts: [acc1],
+    } as unknown as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+    const wallets$ = of([activeWallet]) as Wallets$;
+    const activeWalletId$ = of({
+      walletId: 'wallet',
+      accountIndex: 1,
+    }) as unknown as WalletManagerApi['activeWalletId$'];
+
+    const { result } = renderHook(() =>
+      useAccountUtil({
+        wallets$,
+        activeWalletId$,
+        updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
+        removeWallet: mockRemoveWallet,
+      }),
+    );
+
+    await result.current.removeWallet({
+      nextWalletId: 'wallet1',
     });
 
-    expect(mockRemoveWallet).toHaveBeenCalledWith();
+    expect(mockRemoveWallet).toHaveBeenCalledWith(false, undefined);
+
+    expect(mockRemoveAccount).not.toHaveBeenCalled();
+  });
+
+  it('should call removeWallet with correct arguments', async () => {
+    const activeWallet = {
+      walletId: 'wallet',
+      accounts: [acc1],
+    } as unknown as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+    const nextWallet = {
+      walletId: 'wallet1',
+      accounts: [acc0],
+    } as unknown as AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+    const wallets$ = of([activeWallet, nextWallet]) as Wallets$;
+    const activeWalletId$ = of({
+      walletId: 'wallet',
+      accountIndex: 1,
+    }) as unknown as WalletManagerApi['activeWalletId$'];
+
+    const { result } = renderHook(() =>
+      useAccountUtil({
+        wallets$,
+        activeWalletId$,
+        updateAccountMetadata: mockUpdateAccountMetadata,
+        activateAccount: mockActivateAccount,
+        addAccount: mockAddAccount,
+        removeAccount: mockRemoveAccount,
+        removeWallet: mockRemoveWallet,
+      }),
+    );
+
+    await result.current.removeWallet({
+      nextWalletId: 'wallet1',
+    });
+
+    expect(mockRemoveWallet).toHaveBeenCalledWith(false, nextWallet);
 
     expect(mockRemoveAccount).not.toHaveBeenCalled();
   });

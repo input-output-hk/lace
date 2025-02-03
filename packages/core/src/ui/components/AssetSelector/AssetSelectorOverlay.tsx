@@ -1,9 +1,9 @@
-/* eslint-disable react/no-multi-comp */
+/* eslint-disable complexity */
 import React, { useCallback, useEffect, useState } from 'react';
 import cn from 'classnames';
 import { Radio, RadioChangeEvent } from 'antd';
-import { Search } from '@lace/common';
-import { NftList, NftItemProps } from '../Nft';
+import { getTypedColumn, Search, VirtualisedGridColumns } from '@lace/common';
+import { NftItemProps, NftGrid } from '../Nft';
 import { TokenItem, TokenItemProps } from '../Token';
 
 import styles from './AssetSelectorOverlay.module.scss';
@@ -63,52 +63,11 @@ const getTokensContent = (
   }
 };
 
-const getNftsContent = (
-  params: {
-    nfts?: Array<NftItemProps & { id: string }>;
-    hasUsedAllNFTs?: boolean;
-    hasNFTs?: boolean;
-    selectedTokenList?: Array<string>;
-    nftListConfig?: { rows?: number };
-  },
-  t: TFunction,
-  removeTokenFromList: (id: string) => void,
-  handleTokenClick: (id: string) => void
-) => {
-  if (!params.hasNFTs)
-    return (
-      <ListEmptyState
-        message={
-          <>
-            {t('core.assetSelectorOverlay.noNFTs')}
-            <br /> {t('core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
-          </>
-        }
-        icon="sad-face"
-      />
-    );
-
-  const nftList = params.nfts?.map(({ id, ...item }) => ({
-    ...item,
-    onClick: params.selectedTokenList?.includes(id) ? () => removeTokenFromList(id) : () => handleTokenClick(id),
-    selected: params.selectedTokenList?.includes(id)
-  }));
-
-  switch (true) {
-    case (!nftList || nftList.length === 0) && !params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />;
-    case params.hasUsedAllNFTs:
-      return <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />;
-    default:
-      return <NftList {...params.nftListConfig} items={nftList ?? []} />;
-  }
-};
-
 export interface AssetSelectorOverlayProps {
   translations: TranslationsFor<'assetSelection' | 'tokens' | 'nfts'>;
   nfts?: Array<NftItemProps & { id: string }>;
   tokens?: Array<DropdownList>;
-  nftListConfig?: { rows?: number };
+  nftListConfig: { rows: VirtualisedGridColumns };
   onClick?: (id: string) => void;
   intialSection?: ASSET_COMPONENTS;
   hasUsedAllTokens?: boolean;
@@ -176,6 +135,12 @@ export const AssetSelectorOverlay = ({
     filterAssets();
   }, [filterAssets]);
 
+  const nftList = searchResult?.nfts?.map(({ id, ...item }) => ({
+    ...item,
+    onClick: selectedTokenList?.includes(id) ? () => removeTokenFromList(id) : () => handleTokenClick(id),
+    selected: selectedTokenList?.includes(id)
+  }));
+
   return (
     <div data-testid="asset-selector" className={cn(styles.assetsContainer, className && { [className]: className })}>
       {groups.length > 1 && (
@@ -229,18 +194,28 @@ export const AssetSelectorOverlay = ({
       )}
       {section === ASSET_COMPONENTS.NFTS && (
         <div className={styles.listBox}>
-          {getNftsContent(
-            {
-              nfts: searchResult?.nfts,
-              nftListConfig,
-              hasNFTs,
-              hasUsedAllNFTs,
-              selectedTokenList
-            },
-            t,
-            removeTokenFromList,
-            handleTokenClick
+          {!hasNFTs && (
+            <ListEmptyState
+              message={
+                <>
+                  {t('core.assetSelectorOverlay.noNFTs')}
+                  <br /> {t('core.assetSelectorOverlay.addFundsToStartYourWeb3Journey')}
+                </>
+              }
+              icon="sad-face"
+            />
           )}
+          {(!nftList || nftList?.length === 0) && !hasUsedAllNFTs && hasNFTs && (
+            <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+          )}
+          {hasNFTs && hasUsedAllNFTs && (
+            <ListEmptyState message={t('core.assetSelectorOverlay.usedAllAssets')} icon="neutral-face" />
+          )}
+          <NftGrid
+            columns={getTypedColumn(nftListConfig?.rows)}
+            scrollableTargetId={'drawer-scrollable-content'}
+            items={nftList ?? []}
+          />
         </div>
       )}
     </div>

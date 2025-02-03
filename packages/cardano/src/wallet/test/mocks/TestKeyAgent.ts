@@ -8,7 +8,7 @@ interface TestKeyAgentProps {
   chainId?: Cardano.ChainId;
 }
 
-export const testKeyAgent = ({
+export const testKeyAgent = async ({
   password = 'password',
   mnemonicWords,
   chainId = Cardano.ChainIds.Preprod
@@ -21,6 +21,6 @@ export const testKeyAgent = ({
     },
     {
       logger: console,
-      bip32Ed25519: new Crypto.SodiumBip32Ed25519()
+      bip32Ed25519: await Crypto.SodiumBip32Ed25519.create()
     }
   );

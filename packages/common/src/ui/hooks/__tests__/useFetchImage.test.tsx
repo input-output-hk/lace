@@ -2,10 +2,11 @@
 /* eslint-disable unicorn/prefer-add-event-listener */
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent } from '@testing-library/react';
-import { IMAGE_FETCH_STATUS, useFetchImage } from '../useFetchImage';
+import { useFetchImage } from '../useFetchImage';
 
 const OriginalImage = Image;
 const mockImage = new Image();
+const IMAGE_LOAD_TIME = 1;
 
 describe('useFetchImage', () => {
   const imageEventMock = jest.fn(() => {
@@ -15,10 +16,11 @@ describe('useFetchImage', () => {
   beforeAll(() => {
     global.Image = class {
       constructor() {
-        setTimeout(() => imageEventMock(), 100);
+        setTimeout(() => imageEventMock(), IMAGE_LOAD_TIME);
         return mockImage;
       }
     } as typeof Image;
+    process.env.BLOCKFROST_IPFS_URL = 'https://ipfs.blockfrost.dev';
   });
 
   afterEach(() => {
@@ -29,20 +31,59 @@ describe('useFetchImage', () => {
     global.Image = OriginalImage;
   });
 
-  test('return loading status and fallback image before calling load function', () => {
-    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallback: 'fallbackImage' }));
-    const [response, handleLoad] = result.current;
-    expect(response).toEqual({ status: IMAGE_FETCH_STATUS.LOADING, src: 'fallbackImage' });
-    expect(typeof handleLoad).toEqual('function');
+  test('return loading status', () => {
+    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallbackImage: 'fallbackImage' }));
+    const response = result.current;
+    expect(response).toEqual({ status: 'loading' });
   });
 
-  test('return loaded status and actual image when load event is fired', async () => {
-    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallback: 'fallbackImage' }));
-    const [initialResponse, handleLoad] = result.current;
-    expect(initialResponse).toEqual({ status: IMAGE_FETCH_STATUS.LOADING, src: 'fallbackImage' });
+  test('return loaded status and image url', async () => {
+    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallbackImage: 'fallbackImage' }));
+    const initialResponse = result.current;
+    expect(initialResponse).toEqual({ status: 'loading' });
     await act(async () => {
-      await handleLoad();
-      expect(result.current[0]).toEqual({ status: IMAGE_FETCH_STATUS.LOADED, src: 'testImage' });
+      await new Promise((resolve) => {
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
+      });
+      expect(result.current).toEqual({ status: 'loaded', imageSrc: 'testImage' });
+    });
+  });
+
+  test('return loaded status and actual image dataUrl', async () => {
+    const { result } = renderHook(() =>
+      useFetchImage({
+        url: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
+        fallbackImage: 'fallbackImage'
+      })
+    );
+    const initialResponse = result.current;
+    expect(initialResponse).toEqual({ status: 'loading' });
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
+      });
+      expect(result.current).toEqual({
+        status: 'loaded',
+        imageSrc: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='
+      });
+    });
+  });
+
+  test('return error for malformed dataUrl', async () => {
+    imageEventMock.mockImplementationOnce(() => {
+      fireEvent.error(mockImage);
+    });
+
+    const { result } = renderHook(() =>
+      useFetchImage({ url: 'data:image/unknown;undefined', fallbackImage: 'fallbackImage' })
+    );
+    const initialResponse = result.current;
+    expect(initialResponse).toEqual({ status: 'loading' });
+    await act(async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
+      });
+      expect(result.current).toEqual({ status: 'error', imageSrc: 'fallbackImage' });
     });
   });
 
@@ -50,12 +91,15 @@ describe('useFetchImage', () => {
     imageEventMock.mockImplementationOnce(() => {
       fireEvent.error(mockImage);
     });
-    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallback: 'fallbackImage' }));
-    const [initialResponse, handleLoad] = result.current;
-    expect(initialResponse).toEqual({ status: IMAGE_FETCH_STATUS.LOADING, src: 'fallbackImage' });
+    const { result } = renderHook(() => useFetchImage({ url: 'testImage', fallbackImage: 'fallbackImage' }));
+    const initialResponse = result.current;
+    expect(initialResponse).toEqual({ status: 'loading' });
+    // eslint-disable-next-line sonarjs/no-identical-functions
     await act(async () => {
-      await handleLoad();
-      expect(result.current[0]).toEqual({ status: IMAGE_FETCH_STATUS.ERROR, src: 'fallbackImage' });
+      await new Promise((resolve) => {
+        setTimeout(resolve, IMAGE_LOAD_TIME + 1);
+      });
+      expect(result.current).toEqual({ status: 'error', imageSrc: 'fallbackImage' });
     });
   });
 });

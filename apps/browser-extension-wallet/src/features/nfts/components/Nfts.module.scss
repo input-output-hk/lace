@@ -11,6 +11,7 @@
 .nfts {
   display: flex;
   flex-direction: column;
+  flex: 1;
   .content {
     flex: 1;
     padding-bottom:size_unit(2);

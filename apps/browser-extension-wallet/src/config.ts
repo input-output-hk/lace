@@ -33,11 +33,14 @@ export type Config = {
   SAVED_PRICE_DURATION: number;
   DEFAULT_SUBMIT_API: string;
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
+  SESSION_TIMEOUT: Milliseconds;
 };
 
 // eslint-disable-next-line complexity
 const envChecks = (chosenChain: Wallet.ChainName): void => {
   if (
+    !process.env.BLOCKFROST_IPFS_CONCURRENT_REQUESTS ||
+    !process.env.BLOCKFROST_IPFS_URL ||
     !process.env.CARDANO_SERVICES_URL_MAINNET ||
     !process.env.CARDANO_SERVICES_URL_PREPROD ||
     !process.env.CARDANO_SERVICES_URL_PREVIEW ||
@@ -141,6 +144,12 @@ export const config = (): Config => {
       Preprod: `${process.env.GOV_TOOLS_URL_PREPROD}`,
       Preview: `${process.env.GOV_TOOLS_URL_PREVIEW}`,
       Sanchonet: `${process.env.GOV_TOOLS_URL_SANCHONET}`
-    }
+    },
+    // eslint-disable-next-line new-cap
+    SESSION_TIMEOUT: Milliseconds(
+      !Number.isNaN(Number.parseInt(process.env.SESSION_TIMEOUT))
+        ? Number.parseInt(process.env.SESSION_TIMEOUT)
+        : 1000 * 60 * 5
+    )
   };
 };

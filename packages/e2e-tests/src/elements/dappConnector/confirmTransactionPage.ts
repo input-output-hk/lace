@@ -2,6 +2,8 @@
 import CommonDappPageElements from './commonDappPageElements';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { getTextFromElementArray } from '../../utils/getTextFromArray';
+import testContext from '../../utils/testContext';
+import { ChainablePromiseElement } from 'webdriverio';
 
 class ConfirmTransactionPage extends CommonDappPageElements {
   private TRANSACTION_TYPE_TITLE = '[data-testid="dapp-transaction-title"]';
@@ -33,71 +35,71 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     '[data-testid="dapp-transaction-from-section-expander"] [data-testid="address-tag"]';
   private ADDRESS_TAG_TO_SECTION = '[data-testid="dapp-transaction-to-section-expander"] [data-testid="address-tag"]';
 
-  get transactionOrigin() {
+  get transactionOrigin(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_ORIGIN);
   }
 
-  get transactionOriginLabel() {
+  get transactionOriginLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_ORIGIN_LABEL);
   }
 
-  get transactionFeeTitle() {
+  get transactionFeeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_TITLE);
   }
 
-  get transactionFeeValueAda() {
+  get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_ADA);
   }
 
-  get transactionDepositTitle() {
+  get transactionDepositTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DEPOSIT_TITLE);
   }
 
-  get transactionDepositValueAda() {
+  get transactionDepositValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_DEPOSIT_ADA);
   }
 
-  get transactionReturnedDepositValueAda() {
+  get transactionReturnedDepositValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_RETURNED_DEPOSIT_ADA);
   }
 
-  get transactionReturnedDepositTitle() {
+  get transactionReturnedDepositTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_RETURNED_DEPOSIT_TITLE);
   }
 
-  get transactionTypeTitle() {
+  get transactionTypeTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_TYPE_TITLE);
   }
 
-  get transactionType() {
+  get transactionType(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_TYPE);
   }
 
-  get confirmButton() {
+  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
 
-  get transactionToSectionExpanderButton() {
+  get transactionToSectionExpanderButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_TO_SECTION_EXPANDER_BUTTON);
   }
 
-  get transactionToSectionExpanderLabel() {
+  get transactionToSectionExpanderLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_TO_SECTION_EXPANDER_LABEL);
   }
 
-  get transactionFromSectionExpanderButton() {
+  get transactionFromSectionExpanderButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FROM_SECTION_EXPANDER_BUTTON);
   }
 
-  get transactionFromSectionExpanderLabel() {
+  get transactionFromSectionExpanderLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FROM_SECTION_EXPANDER_LABEL);
   }
 
-  get transactionOriginSectionExpanderButton() {
+  get transactionOriginSectionExpanderButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_ORIGIN_EXPANDER_BUTTON);
   }
 
@@ -113,11 +115,11 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     return $$(this.TRANSACTION_TO_ROW);
   }
 
-  get addressTagToSection() {
+  get addressTagToSection(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_TAG_TO_SECTION);
   }
 
-  get addressTagFromSection() {
+  get addressTagFromSection(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_TAG_FROM_SECTION);
   }
 
@@ -147,6 +149,11 @@ class ConfirmTransactionPage extends CommonDappPageElements {
       default:
         throw new Error(`Unsupported section name: ${section}`);
     }
+  }
+
+  async saveDAppTransactionFeeValue() {
+    const [feeValue] = (await this.transactionFeeValueAda.getText()).split(' ');
+    await testContext.save('feeValueDAppTx', feeValue);
   }
 }
 

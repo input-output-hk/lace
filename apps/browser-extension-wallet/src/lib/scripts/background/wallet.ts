@@ -1,7 +1,19 @@
 /* eslint-disable unicorn/no-null */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import { of, combineLatest, map, EMPTY, BehaviorSubject, Observable, from, firstValueFrom, defaultIfEmpty } from 'rxjs';
-import { getProviders } from './config';
+import {
+  of,
+  combineLatest,
+  map,
+  EMPTY,
+  BehaviorSubject,
+  Observable,
+  from,
+  firstValueFrom,
+  defaultIfEmpty,
+  Subject,
+  tap
+} from 'rxjs';
+import { getProviders, SESSION_TIMEOUT } from './config';
 import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
 import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
@@ -29,13 +41,22 @@ import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { ExperimentName } from '@providers/ExperimentsProvider/types';
 import { requestMessage$ } from './services/utilityServices';
 import { BackgroundStorage, MessageTypes } from '../types';
 import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
+import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
+import { TrackerSubject } from '@cardano-sdk/util-rxjs';
+import { ExperimentName } from '../types/feature-flags';
+
+export const dAppConnectorActivity$ = new Subject<void>();
+const pollController$ = new TrackerSubject(
+  createUserSessionTracker(isLacePopupOpen$, isLaceTabActive$, dAppConnectorActivity$, SESSION_TIMEOUT).pipe(
+    tap((isActive) => logger.debug('Session active:', isActive))
+  )
+);
 
 // In chrome, the background.js runs in a service worker, so window will be defined.
 // Firefox background.js runs in a hidden web page, because firefox does not support service workers.
@@ -80,19 +101,13 @@ type StoredWallet = AnyWallet<Wallet.WalletMetadata, Wallet.WalletMetadata>;
 const createWalletRepositoryStore = (): Observable<storage.CollectionStore<StoredWallet>> =>
   from(
     (async () => {
-      // wallet repository is always using feature flag of 'mainnet', because it has to be the same for all networks
-      const featureFlags = await getFeatureFlags(Wallet.Cardano.ChainIds.Mainnet.networkMagic);
-      if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-        const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
-        const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
-        if (!wallets) {
-          const pouchdbStore = createPouchdbWalletRepositoryStore();
-          await migrateCollectionStore(pouchdbStore, extensionStore, logger);
-        }
-        return extensionStore;
+      const extensionStore = new ExtensionBlobCollectionStore<StoredWallet>('walletRepository', logger);
+      const wallets = await firstValueFrom(extensionStore.getAll().pipe(defaultIfEmpty(null)));
+      if (!wallets) {
+        const pouchdbStore = createPouchdbWalletRepositoryStore();
+        await migrateCollectionStore(pouchdbStore, extensionStore, logger);
       }
-
-      return createPouchdbWalletRepositoryStore();
+      return extensionStore;
     })()
   );
 
@@ -152,6 +167,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
               })
             : noopHandleResolver,
           stores,
+          pollController$,
           witnesser
         }
       );
@@ -199,6 +215,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
             })
           : noopHandleResolver,
         witnesser,
+        pollController$,
         bip32Account
       }
     );
@@ -244,8 +261,9 @@ const pouchdbStoresFactory: StoresFactory = {
       inFlightTransactions: new storage.PouchDbInFlightTransactionsStore(docsDbName, 'transactionsInFlight_v3', logger),
       policyIds: new storage.PouchDbPolicyIdsStore(docsDbName, 'policyIds', logger),
       protocolParameters: new storage.PouchDbProtocolParametersStore(docsDbName, 'protocolParameters', logger),
-      rewardsBalances: new storage.PouchDbRewardsBalancesStore(`${baseDbName}RewardsBalances`, logger),
       rewardsHistory: new storage.PouchDbRewardsHistoryStore(`${baseDbName}RewardsHistory`, logger),
+      delegationPortfolio: new storage.PouchDbDelegationPortfolioStore(docsDbName, 'delegationPortfolio', logger),
+      rewardAccountInfo: new storage.PouchDbRewardAccountInfoStore(`${baseDbName}RewardAccountsInfo`, logger),
       stakePools: new storage.PouchDbStakePoolsStore(`${baseDbName}StakePools`, logger),
       signedTransactions: new storage.PouchDbSignedTransactionsStore(baseDbName, 'signedTransactions', logger),
       tip: new storage.PouchDbTipStore(docsDbName, 'tip', logger),
@@ -297,7 +315,8 @@ export const extensionStorageStoresFactory: StoresFactory = {
     inFlightTransactions: new ExtensionDocumentStore(`${name}_transactionsInFlight`, logger),
     policyIds: new ExtensionDocumentStore(`${name}_handlePolicyIds`, logger),
     protocolParameters: new ExtensionDocumentStore(`${name}_protocolParameters`, logger),
-    rewardsBalances: new ExtensionBlobKeyValueStore(`${name}_rewardsBalances`, logger),
+    delegationPortfolio: new ExtensionDocumentStore(`${name}_delegationPortfolio`, logger),
+    rewardAccountInfo: new ExtensionBlobKeyValueStore(`${name}_rewardAccountInfo`, logger),
     rewardsHistory: new ExtensionBlobKeyValueStore(`${name}_rewardsHistory`, logger),
     stakePools: new ExtensionBlobKeyValueStore(`${name}_stakePools`, logger),
     signedTransactions: new ExtensionDocumentStore(`${name}_signedTransactions`, logger),
@@ -309,26 +328,18 @@ export const extensionStorageStoresFactory: StoresFactory = {
   })
 };
 
-// Used for migrations to get feature flags, which are enabled per chainId
-// This is coupled with WalletManager implementation (getWalletStoreId function)
-const getNetworkMagic = (storeName: string) => Number.parseInt(storeName.split('-')[1]) as Cardano.NetworkMagic;
-
 const storesFactory: StoresFactory = {
   async create(props) {
-    const featureFlags = await getFeatureFlags(getNetworkMagic(props.name));
-    if (isExperimentEnabled(featureFlags, ExperimentName.EXTENSION_STORAGE)) {
-      const extensionStores = await extensionStorageStoresFactory.create(props);
-      if (await shouldAttemptWalletStoresMigration(extensionStores)) {
-        const pouchdbStores = await pouchdbStoresFactory.create(props);
-        if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
-          // TODO: safe to destroy pouchdb stores on successful migration
-          // once EXTENSION_STORAGE experiment runs in production for some time
-          // and we are sure that it's working well
-        }
+    const extensionStores = await extensionStorageStoresFactory.create(props);
+    if (await shouldAttemptWalletStoresMigration(extensionStores)) {
+      const pouchdbStores = await pouchdbStoresFactory.create(props);
+      if (await migrateWalletStores(pouchdbStores, extensionStores, logger)) {
+        // TODO: safe to destroy pouchdb stores on successful migration
+        // once EXTENSION_STORAGE experiment runs in production for some time
+        // and we are sure that it's working well
       }
-      return extensionStores;
     }
-    return pouchdbStoresFactory.create(props);
+    return extensionStores;
   }
 };
 

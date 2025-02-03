@@ -46,12 +46,16 @@ export const mockRewardsProvider = (): Wallet.RewardsProvider => Wallet.mockUtil
  */
 export const mockChainHistoryProvider = (): Wallet.ChainHistoryProvider => Wallet.mockUtils.chainHistoryProviderStub();
 
+export const mockRewardAccountInfoProvider = (): Wallet.RewardAccountInfoProvider =>
+  Wallet.mockUtils.rewardAccountInfoProviderStub();
+
 export const mockBlockchainProviders = (blockchainProviders?: Partial<IBlockchainProvider>): IBlockchainProvider => ({
   assetProvider: mockAssetProvider(),
   networkInfoProvider: mockNetworkInfoProvider(),
   stakePoolProvider: mockStakePoolSearchProvider(),
   txSubmitProvider: Wallet.mockUtils.TxSubmitProviderFake.make(),
   utxoProvider: mockUtxoProvider(),
+  rewardAccountInfoProvider: mockRewardAccountInfoProvider(),
   rewardsProvider: mockRewardsProvider(),
   chainHistoryProvider: mockChainHistoryProvider(),
   inputResolver: {

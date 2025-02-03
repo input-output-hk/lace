@@ -1,7 +1,7 @@
 @Staking-initial-E2E @E2E @Testnet
 Feature: Delegating funds to new pool E2E
 
-  @LW-2685 @Smoke @memory-snapshot
+  @LW-2685 @Smoke @memory-snapshot @Pending @issue=LW-12158
   Scenario: Extended view - Staking - Delegating funds to new pool (if not staked yet) E2E.
     Given I create new wallet and save wallet information
     And Wallet is synced
