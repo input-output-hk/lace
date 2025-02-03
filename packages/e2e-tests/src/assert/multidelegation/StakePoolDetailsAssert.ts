@@ -104,7 +104,9 @@ class StakePoolDetailsAssert {
     await StakePoolDetails.pledgeTitle.waitForDisplayed();
     expect(await StakePoolDetails.pledgeTitle.getText()).to.equal(await t('drawer.details.metrics.pledge', 'staking'));
     await StakePoolDetails.pledgeValue.waitForDisplayed();
-    expect((await StakePoolDetails.pledgeValue.getText()).replace('\n', '')).to.match(TestnetPatterns.PLEDGE_REGEX);
+    expect((await StakePoolDetails.pledgeValue.getText()).replace('\n', '')).to.match(
+      TestnetPatterns.ABBREVIATED_NUMBER_REGEX
+    );
   }
 
   private async assertSeeCostPerEpoch() {
@@ -113,7 +115,9 @@ class StakePoolDetailsAssert {
       await t('drawer.details.metrics.cost', 'staking')
     );
     await StakePoolDetails.costPerEpochValue.waitForDisplayed();
-    expect(await StakePoolDetails.costPerEpochValue.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    expect((await StakePoolDetails.costPerEpochValue.getText()).replace('\n', '')).to.match(
+      TestnetPatterns.ABBREVIATED_NUMBER_REGEX
+    );
   }
 
   private async assertSeeBlocks() {

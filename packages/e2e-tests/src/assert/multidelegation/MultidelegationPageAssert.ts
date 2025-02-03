@@ -41,33 +41,33 @@ class MultidelegationPageAssert {
 
   assertSeeTabs = async () => {
     await MultidelegationPage.overviewTab.waitForDisplayed();
-    expect(await MultidelegationPage.overviewTab.getText()).to.equal(await t('root.nav.overviewTitle', 'staking'));
+    expect(await MultidelegationPage.overviewTab.getText()).to.equal(await t('root.nav.overviewTitle'));
     await MultidelegationPage.browseTab.waitForDisplayed();
-    expect(await MultidelegationPage.browseTab.getText()).to.equal(await t('root.nav.browsePoolsTitle', 'staking'));
+    expect(await MultidelegationPage.browseTab.getText()).to.equal(await t('root.nav.browsePoolsTitle'));
     await MultidelegationPage.activityTab.waitForDisplayed();
-    expect(await MultidelegationPage.activityTab.getText()).to.equal(await t('root.nav.activityTitle', 'staking'));
+    expect(await MultidelegationPage.activityTab.getText()).to.equal(await t('root.nav.activityTitle'));
   };
 
   assertSeeDelegationCardDetailsInfo = async () => {
     expect(await MultidelegationPage.delegationCardBalanceLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.balance', 'staking')
+      await t('overview.delegationCard.label.balance')
     );
     const adaValue = Number(
       (await MultidelegationPage.delegationCardBalanceValue.getText()).split(' ')[0].replace(',', '')
     );
     expect(adaValue).to.be.greaterThan(0);
     expect(await MultidelegationPage.delegationCardPoolsLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.pools', 'staking')
+      await t('overview.delegationCard.label.pools')
     );
     const poolsCount = Number(await MultidelegationPage.delegationCardPoolsValue.getText());
     expect(poolsCount).to.be.greaterThan(0);
     expect(await MultidelegationPage.delegationCardStatusLabel.getText()).to.equal(
-      await t('overview.delegationCard.label.status', 'staking')
+      await t('overview.delegationCard.label.status')
     );
     const statusValue = await MultidelegationPage.delegationCardStatusValue.getText();
     poolsCount === 1
-      ? expect(statusValue).to.equal(await t('overview.delegationCard.statuses.simpleDelegation', 'staking'))
-      : expect(statusValue).to.equal(await t('overview.delegationCard.statuses.multiDelegation', 'staking'));
+      ? expect(statusValue).to.equal(await t('overview.delegationCard.statuses.simpleDelegation'))
+      : expect(statusValue).to.equal(await t('overview.delegationCard.statuses.multiDelegation'));
     expect(await MultidelegationPage.delegationCardChartSlices.length).to.equal(poolsCount);
   };
 
@@ -84,19 +84,19 @@ class MultidelegationPageAssert {
     await MultidelegationPage.delegatedPoolName(index).waitForClickable();
     await MultidelegationPage.delegatedPoolTicker(index).waitForClickable();
     expect(await MultidelegationPage.delegatedPoolRosTitle(index).getText()).to.equal(
-      await t('overview.stakingInfoCard.ros', 'staking')
+      await t('overview.stakingInfoCard.ros')
     );
     const rosValue = await MultidelegationPage.delegatedPoolRosValue(index).getText();
     if (rosValue !== '-') {
       expect(rosValue).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     }
     expect(await MultidelegationPage.delegatedPoolFeeTitle(index).getText()).to.equal(
-      await t('overview.stakingInfoCard.fee', 'staking')
+      await t('overview.stakingInfoCard.fee')
     );
     const feeValueNumber = (await MultidelegationPage.delegatedPoolFeeValue(index).getText()).split('tADA')[0];
     expect(feeValueNumber).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
     expect(await MultidelegationPage.delegatedPoolMarginTitle(index).getText()).to.equal(
-      await t('overview.stakingInfoCard.margin', 'staking')
+      await t('overview.stakingInfoCard.margin')
     );
     expect(await MultidelegationPage.delegatedPoolMarginValue(index).getText()).to.match(
       TestnetPatterns.PERCENT_DOUBLE_REGEX
@@ -185,7 +185,7 @@ class MultidelegationPageAssert {
     await MultidelegationPage.searchIcon.waitForDisplayed();
     await MultidelegationPage.stakingPageSearchInput.waitForDisplayed();
     expect(await MultidelegationPage.stakingPageSearchInput.getAttribute('placeholder')).to.equal(
-      await t('browsePools.stakePoolTableBrowser.searchInputPlaceholder', 'staking')
+      await t('browsePools.stakePoolTableBrowser.searchInputPlaceholder')
     );
   };
 
@@ -199,7 +199,7 @@ class MultidelegationPageAssert {
     await MultidelegationPage.emptySearchResultsMessage.waitForDisplayed({ reverse: expectedResultsCount > 0 });
     if (expectedResultsCount === 0) {
       expect(await MultidelegationPage.emptySearchResultsMessage.getText()).to.equal(
-        await t('browsePools.stakePoolTableBrowser.emptyMessage', 'staking')
+        await t('browsePools.stakePoolTableBrowser.emptyMessage')
       );
     } else {
       for (let index = 0; index < expectedResultsCount; index++) {
@@ -244,28 +244,28 @@ class MultidelegationPageAssert {
     let expectedTooltipText: string;
     switch (column) {
       case StakePoolListColumn.Ticker:
-        expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ticker');
         break;
       case StakePoolListColumn.Saturation:
-        expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.saturation');
         break;
       case StakePoolListColumn.ROS:
-        expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ros');
         break;
       case StakePoolListColumn.Cost:
-        expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.cost');
         break;
       case StakePoolListColumn.Margin:
-        expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.margin');
         break;
       case StakePoolListColumn.Blocks:
-        expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.blocks');
         break;
       case StakePoolListColumn.Pledge:
-        expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.pledge');
         break;
       case StakePoolListColumn.LiveStake:
-        expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.liveStake');
         break;
       default:
         throw new Error(`Unsupported column name: ${column}`);
@@ -289,19 +289,19 @@ class MultidelegationPageAssert {
       expect(await stakePoolListItem.ros.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     }
     await stakePoolListItem.cost.waitForDisplayed();
-    expect(await stakePoolListItem.cost.getText()).to.match(TestnetPatterns.NUMBER_REGEX);
+    expect(await stakePoolListItem.cost.getText()).to.match(TestnetPatterns.ABBREVIATED_NUMBER_REGEX);
     await stakePoolListItem.margin.waitForDisplayed();
     expect(await stakePoolListItem.margin.getText()).to.match(TestnetPatterns.PERCENT_DOUBLE_REGEX);
     await stakePoolListItem.blocks.waitForDisplayed();
     expect((await stakePoolListItem.blocks.getText()).replaceAll(',', '')).to.match(TestnetPatterns.BLOCKS_REGEX);
     await stakePoolListItem.pledge.waitForDisplayed();
-    expect(await stakePoolListItem.pledge.getText()).to.match(TestnetPatterns.PLEDGE_REGEX);
+    expect(await stakePoolListItem.pledge.getText()).to.match(TestnetPatterns.ABBREVIATED_NUMBER_REGEX);
     await stakePoolListItem.liveStake.waitForDisplayed();
     expect((await stakePoolListItem.liveStake.getText()).slice(0, -1)).to.match(TestnetPatterns.NUMBER_DOUBLE_REGEX);
   };
 
   assertSeeStakePoolRows = async () => {
-    const rowsNumber = (await MultidelegationPage.displayedPools).length; // TODO: update to use pools counter when LW-9726 is resolved
+    const rowsNumber = await MultidelegationPage.getNumberOfPoolsFromCounter();
 
     for (let i = 0; i < rowsNumber; i++) {
       await this.assertSeeStakePoolRow(i);
@@ -406,28 +406,28 @@ class MultidelegationPageAssert {
     let expectedTooltipText;
     switch (sortingOption) {
       case StakePoolSortingOption.Ticker:
-        expectedTooltipText = await t('browsePools.tooltips.ticker', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ticker');
         break;
       case StakePoolSortingOption.Saturation:
-        expectedTooltipText = await t('browsePools.tooltips.saturation', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.saturation');
         break;
       case StakePoolSortingOption.ROS:
-        expectedTooltipText = await t('browsePools.tooltips.ros', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.ros');
         break;
       case StakePoolSortingOption.Cost:
-        expectedTooltipText = await t('browsePools.tooltips.cost', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.cost');
         break;
       case StakePoolSortingOption.Margin:
-        expectedTooltipText = await t('browsePools.tooltips.margin', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.margin');
         break;
       case StakePoolSortingOption.ProducedBlocks:
-        expectedTooltipText = await t('browsePools.tooltips.blocks', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.blocks');
         break;
       case StakePoolSortingOption.Pledge:
-        expectedTooltipText = await t('browsePools.tooltips.pledge', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.pledge');
         break;
       case StakePoolSortingOption.LiveStake:
-        expectedTooltipText = await t('browsePools.tooltips.liveStake', 'staking');
+        expectedTooltipText = await t('browsePools.tooltips.liveStake');
         break;
       default:
         throw new Error(`Unsupported column name: ${sortingOption}`);
