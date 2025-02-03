@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-params */
 /* eslint-disable unicorn/no-null */
-import { RefObject, useCallback } from 'react';
-import React from 'react';
+import type { RefObject } from 'react';
+import React, { useCallback } from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
 import { toSerializableObject } from '@cardano-sdk/util';
