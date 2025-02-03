@@ -14,7 +14,7 @@ const COUNTER_REGEX = /\(\d+\)/;
 const PERCENT_DOUBLE_REGEX = /(\d*\.)?\d+\s?%|-%/;
 const STAKE_POOL_LIST_COST_REGEX = /(\d*\.)?\d+\s?%(\s\+\s\d*ADA)?/;
 const TIMESTAMP_REGEX = /\d{2}:\d{2}:\d{2}/;
-const PLEDGE_REGEX = /^\d{1,3}(\.\d{0,2})?[BKM]?$/;
+const ABBREVIATED_NUMBER_REGEX = /^\d{1,3}(\.\d{0,2})?[BKM]?$/;
 const BLOCKS_REGEX = /^(-|\d*)$/;
 const TOKEN_VALUE_FIAT_REGEX = /^([\d+,.])+\.\d+\s\D{2,3}$/;
 const TOKEN_VALUE_ADA_REGEX = /^\d+\.\d+$/;
@@ -37,7 +37,7 @@ export const TestnetPatterns = {
   NUMBER_DOUBLE_REGEX,
   STAKE_POOL_LIST_COST_REGEX,
   TIMESTAMP_REGEX,
-  PLEDGE_REGEX,
+  ABBREVIATED_NUMBER_REGEX,
   BLOCKS_REGEX,
   TOKEN_VALUE_FIAT_REGEX,
   TOKEN_VALUE_ADA_REGEX,
