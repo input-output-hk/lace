@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@lace/common';
+import { Button, logger } from '@lace/common';
 import { ResultMessage } from '@components/ResultMessage';
 import { Sections } from '../../types';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
@@ -60,7 +60,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       setSection(sectionsConfig[Sections.SUCCESS_TX]);
       clearSecrets();
     } catch (error) {
-      console.error('failed to sign or submit tx due to:', error);
+      logger.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);
     }
   };

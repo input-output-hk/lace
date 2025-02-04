@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import {
   DappTransaction,
   TxDetailsCertificates,
@@ -26,7 +26,7 @@ import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { Skeleton } from 'antd';
 
 import { useCurrencyStore } from '@providers';
-import { logger, walletRepository } from '@lib/wallet-api-ui';
+import { walletRepository } from '@lib/wallet-api-ui';
 import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { AddressBookSchema, useDbStateValue } from '@lib/storage';
@@ -124,7 +124,7 @@ export const DappTransactionContainer = withAddressBookContext(
               logger
             }),
             timeout: TIMEOUT,
-            logger: console
+            logger
           }),
           summary: transactionSummaryInspector({
             addresses: userAddresses,
@@ -138,7 +138,7 @@ export const DappTransactionContainer = withAddressBookContext(
               logger
             }),
             timeout: TIMEOUT,
-            logger: console
+            logger
           })
         });
 

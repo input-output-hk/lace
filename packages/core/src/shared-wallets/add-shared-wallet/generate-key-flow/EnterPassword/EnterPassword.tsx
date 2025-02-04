@@ -5,6 +5,7 @@ import {
   Text,
   UncontrolledPasswordBox,
 } from '@input-output-hk/lace-ui-toolkit';
+import { logger } from '@lace/common';
 import { useSecrets } from '@src/ui/hooks';
 import cn from 'classnames';
 import React, { ReactElement, VFC } from 'react';
@@ -45,7 +46,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
 
   const next = () => {
     if (!password.value) {
-      console.error('Password is undefined');
+      logger.error('Password is undefined');
       return;
     }
 

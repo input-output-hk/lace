@@ -45,8 +45,9 @@ import { of } from 'rxjs';
 import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { PasswordObj as Password } from '@lace/core';
+import { logger } from '@lace/common';
 
-(walletApiUi as any).logger = console;
+(walletApiUi as any).logger = logger;
 
 jest.mock('@providers/AppSettings', () => ({
   ...jest.requireActual<any>('@providers/AppSettings'),
@@ -622,7 +623,7 @@ describe('Testing useWalletManager hook', () => {
     });
 
     test('puts a log in the console', async () => {
-      jest.spyOn(console, 'debug');
+      jest.spyOn(logger, 'debug');
       const {
         result: {
           current: { switchNetwork }
@@ -634,8 +635,8 @@ describe('Testing useWalletManager hook', () => {
         await switchNetwork('incorrect' as any);
         // eslint-disable-next-line no-empty
       } catch {}
-      expect(console.debug).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
-      (console.debug as unknown as SpyInstance).mockRestore();
+      expect(logger.debug).toHaveBeenCalledWith('Switching chain to', 'incorrect', expect.any(Array));
+      (logger.debug as unknown as SpyInstance).mockRestore();
     });
 
     test('should throw in case the chain is not supported', async () => {

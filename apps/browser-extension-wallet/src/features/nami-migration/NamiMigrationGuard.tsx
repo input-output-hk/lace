@@ -11,6 +11,7 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections, NamiMigrationChannels } from '@lib/scripts/types';
 import { NamiMigration } from './NamiMigration';
+import { logger } from '@lace/common';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'checkMigrationStatus' | 'abortMigration'>>(
   {
@@ -21,7 +22,7 @@ const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'checkMig
     }
   },
   {
-    logger: console,
+    logger,
     runtime
   }
 );

@@ -28,6 +28,7 @@ import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from
 import { getCollateral } from '@cardano-sdk/core';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 import { eraSlotDateTime } from '@utils/era-slot-datetime';
+import { logger } from '@lace/common';
 
 /**
  * validates if the transaction is confirmed
@@ -290,7 +291,7 @@ const buildGetActivityDetail =
       );
 
       if (pools.length === 0) {
-        console.error('Stake pool was not found for delegation tx');
+        logger.error('Stake pool was not found for delegation tx');
       } else {
         transaction = {
           ...transaction,

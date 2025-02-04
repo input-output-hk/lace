@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import { useCallback, useMemo, useState } from 'react';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
@@ -85,7 +85,7 @@ export const useCollateral = (): UseCollateralReturn => {
     } catch (error) {
       // redirect to tx fail screen in case of hw
       if (!isInMemoryWallet) {
-        console.error('submitCollateralTx fails with:', error?.message);
+        logger.error('submitCollateralTx fails with:', error?.message);
         setBuiltTxData({
           uiTx: undefined,
           error: error.message

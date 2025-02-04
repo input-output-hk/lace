@@ -23,7 +23,7 @@ import styles from './ScanShieldedMessage.module.scss';
 import cn from 'classnames';
 import { useAnalyticsContext } from '@providers';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
-import { Loader } from '@lace/common';
+import { Loader, logger } from '@lace/common';
 
 interface Validation {
   error?: {
@@ -136,7 +136,7 @@ export const ScanShieldedMessage: VFC = () => {
         const localVideoDevices = allDevices.filter((device) => device.kind === 'videoinput');
         setVideoDevices(localVideoDevices);
       } catch (error) {
-        console.error('Error enumerating devices:', error);
+        logger.error('Error enumerating devices:', error);
       }
     };
     enumerateDevices();

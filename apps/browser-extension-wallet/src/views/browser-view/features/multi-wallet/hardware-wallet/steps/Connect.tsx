@@ -9,6 +9,7 @@ import { useAnalyticsContext } from '@providers';
 import { useHardwareWallet } from '../context';
 import { isTimeoutError } from '../useWrapWithTimeout';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { logger } from '@lace/common';
 
 export const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
@@ -92,7 +93,7 @@ export const Connect: VFC = () => {
         next();
       } catch (error) {
         setDiscoveryState(DiscoveryState.Idle);
-        console.error('ERROR connecting hardware wallet', error);
+        logger.error('ERROR connecting hardware wallet', error);
         setConnectionError(parseConnectionError(error));
       }
     })();

@@ -7,6 +7,7 @@ import { runtime, storage as webStorage } from 'webextension-polyfill';
 import { authenticator } from '../authenticator';
 import { Wallet } from '@lace/cardano';
 import { AUTHORIZED_DAPPS_KEY } from '@lib/scripts/types';
+import { logger } from '@lace/common';
 
 const getAuthorizedDappListFromStorage = async () => {
   const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
@@ -19,7 +20,7 @@ const authorizedDappsApi: AuthorizedDappService = {
   authorizedDappsList,
   removeAuthorizedDapp: async (origin: Origin): Promise<boolean> => {
     const originUrl = new URL(origin).origin;
-    console.debug(`revoking access for ${originUrl}`);
+    logger.debug(`revoking access for ${originUrl}`);
     const accessRevoked = await authenticator.revokeAccess({ url: originUrl });
     if (accessRevoked) {
       const { authorizedDapps }: AuthorizedDappStorage = await webStorage.local.get(AUTHORIZED_DAPPS_KEY);
@@ -42,7 +43,7 @@ exposeApi<AuthorizedDappService>(
     baseChannel: DAPP_CHANNELS.authorizedDapps,
     properties: dappServiceProperties
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
 export interface UserPromptService {
@@ -62,7 +63,7 @@ export const userPromptService = consumeRemoteApi<UserPromptService>(
       getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise
     }
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
 try {
@@ -74,5 +75,5 @@ try {
       throw new Error(error);
     });
 } catch (error) {
-  console.error(error);
+  logger.error(error);
 }

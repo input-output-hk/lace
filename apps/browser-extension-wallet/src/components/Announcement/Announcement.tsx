@@ -1,8 +1,7 @@
-/* eslint-disable no-console */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Typography } from 'antd';
-import { Button } from '@lace/common';
+import { Button, logger } from '@lace/common';
 import styles from './Announcement.module.scss';
 import { ExtensionUpdateData } from '@lib/scripts/types';
 import { fetchNotes } from './ReleaseNotes';
@@ -26,7 +25,7 @@ export const Announcement = ({ visible, onConfirm, version, reason }: Announceme
       try {
         notes = await fetchNotes(version);
       } catch (error) {
-        console.log(error);
+        logger.info(error);
       }
     }
     setReleaseNotes(notes);

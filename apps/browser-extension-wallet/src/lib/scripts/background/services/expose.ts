@@ -6,6 +6,7 @@ import { USER_ID_SERVICE_BASE_CHANNEL, UserIdService as UserIdServiceInterface }
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 import * as laceMigrationClient from '@src/features/nami-migration/migration-tool/cross-extension-messaging/lace-migration-client.extension';
+import { logger } from '@lace/common';
 
 // This was hoisted from userIdService.ts so that it's not being exposed while running the unit tests of the class itself.
 // It might be a good idea to follow the pattern and hoist all exposeApi calls to this file.
@@ -16,9 +17,8 @@ exposeApi<UserIdServiceInterface>(
     baseChannel: USER_ID_SERVICE_BASE_CHANNEL,
     properties: userIdServiceProperties
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
-// eslint-disable-next-line no-console
-console.log('[NAMI MIGRATION] handling nami requests');
+logger.info('[NAMI MIGRATION] handling nami requests');
 laceMigrationClient.handleNamiRequests();

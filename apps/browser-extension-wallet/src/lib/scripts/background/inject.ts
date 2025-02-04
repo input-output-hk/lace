@@ -4,6 +4,7 @@ import { cip30, injectedRuntime, MessengerDependencies } from '@cardano-sdk/web-
 import { consumeRemoteAuthenticatorApi, consumeRemoteWalletApi } from './api-consumers';
 import { getWalletMode, isCachedWalletModeResult } from './injectUtil';
 import { WalletMode } from '../types';
+import { logger as appLogger } from '@lace/common';
 
 const cip30WalletProperties: WalletProperties = {
   // eslint-disable-next-line max-len
@@ -85,7 +86,7 @@ export const initializeInjectedScript = async ({ logger }: cip30.InitializeInjec
 };
 
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
-  console.info('injecting content script');
+  appLogger.info('injecting content script');
   // Disable logging in production for performance & security measures
-  initializeInjectedScript({ logger: console });
+  initializeInjectedScript({ logger: appLogger });
 }

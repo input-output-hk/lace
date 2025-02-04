@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import cn from 'classnames';
-import { Button, PostHogAction } from '@lace/common';
+import { Button, logger, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
@@ -66,7 +66,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
           baseChannel: DAPP_CHANNELS.userPrompt,
           properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
         },
-        { logger: console, runtime }
+        { logger, runtime }
       );
 
       return () => {

@@ -16,6 +16,7 @@ import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService'
 import { UserIdService } from '@lib/scripts/types';
 import { PostHogMultiWalletAction, PostHogOnboardingAction, PostHogNamiMigrationAction } from './events';
 import { NamiModeActions } from '@lace/nami';
+import { logger } from '@lace/common';
 
 export type Action =
   | PostHogAction
@@ -66,7 +67,7 @@ export class AnalyticsTracker implements IAnalyticsTracker<Action> {
 
   private async checkNewSessionStarted(): Promise<void> {
     if (!this.postHogClient) {
-      console.debug('[ANALYTICS] no posthog client');
+      logger.debug('[ANALYTICS] no posthog client');
       return;
     }
     if (await this.userIdService.isNewSession()) {

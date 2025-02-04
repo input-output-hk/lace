@@ -27,7 +27,7 @@ import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
 import { isNFT } from '@src/utils/is-nft';
-import { useObservable, VirtualisedGridColumns } from '@lace/common';
+import { logger, useObservable, VirtualisedGridColumns } from '@lace/common';
 import { searchToken } from '../../assets/components/AssetsPortfolio/AssetPortfolioContent';
 import { searchNft } from '@hooks/useNftSearch';
 
@@ -152,7 +152,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
     if (selectedTokenList.length > 0) {
       isTokenBundleSizeExceedingLimit(selectedTokenList, inMemoryWallet)
         .then((res) => setExceededLimit(res))
-        .catch((error) => console.error(error));
+        .catch((error) => logger.error(error));
     }
   }, [selectedTokenList, inMemoryWallet]);
 

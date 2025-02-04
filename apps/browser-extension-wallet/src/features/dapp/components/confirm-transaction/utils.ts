@@ -6,6 +6,7 @@ import type { UserPromptService } from '@lib/scripts/background/services';
 import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
+import { logger } from '@lace/common';
 
 const { CertificateType } = Wallet.Cardano;
 
@@ -20,7 +21,7 @@ export const readyToSign = (): void => {
       baseChannel: DAPP_CHANNELS.userPrompt,
       properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
     },
-    { logger: console, runtime }
+    { logger, runtime }
   );
 };
 

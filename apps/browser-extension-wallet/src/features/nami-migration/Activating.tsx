@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-
 import { NamiMigrationUpdatingYourWallet } from '@lace/core';
 import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import type { NamiMigrationAPI } from '@lib/scripts/background/nami-migration';
@@ -10,6 +9,7 @@ import { useCurrencyStore } from '@providers/currency';
 import { MigrationState } from './migration-tool/migrator/migration-state.data';
 import { useTheme } from '@providers/ThemeProvider/context';
 import { NamiMigrationChannels } from '@lib/scripts/types';
+import { logger } from '@lace/common';
 
 const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMigration' | 'checkMigrationStatus'>>(
   {
@@ -20,7 +20,7 @@ const namiMigrationRemoteApi = consumeRemoteApi<Pick<NamiMigrationAPI, 'startMig
     }
   },
   {
-    logger: console,
+    logger,
     runtime
   }
 );

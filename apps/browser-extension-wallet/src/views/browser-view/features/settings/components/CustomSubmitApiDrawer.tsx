@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Drawer, DrawerHeader, DrawerNavigation, PostHogAction, toast } from '@lace/common';
+import { Drawer, DrawerHeader, DrawerNavigation, logger, PostHogAction, toast } from '@lace/common';
 import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +47,7 @@ export const CustomSubmitApiDrawer = ({
       .then((storage) => {
         setCustomSubmitTxUrl(storage.customSubmitTxUrl || DEFAULT_SUBMIT_API);
       })
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
 
   const handleCustomTxSubmitEndpoint = async (enable: boolean) => {
@@ -71,7 +71,7 @@ export const CustomSubmitApiDrawer = ({
         void analytics.sendEventToPostHog(PostHogAction.SettingsCustomSubmitApiEnableClick);
       }
     } catch (error) {
-      console.error('Error switching TxSubmit endpoint', error);
+      logger.error('Error switching TxSubmit endpoint', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
     }
   };

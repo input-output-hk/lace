@@ -12,6 +12,7 @@ import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@cardano-sdk/core';
+import { logger } from '@lace/common';
 
 // eslint-disable-next-line no-magic-numbers
 const TIMEOUT = 2000 as Milliseconds;
@@ -183,7 +184,7 @@ export const txTransformer = async ({
         healthCheck: () => Promise.resolve({ ok: true })
       },
       timeout: TIMEOUT,
-      logger: console
+      logger
     })
   });
 

@@ -26,6 +26,7 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import type { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 import { useOnUnload } from '@src/features/dapp/components/confirm-transaction/hooks';
+import { logger } from '@lace/common';
 
 const DAPP_TOAST_DURATION = 100;
 const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> = {
@@ -37,7 +38,7 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> =
           getDappInfo: RemoteApiPropertyType.MethodReturningPromise
         }
       },
-      { logger: console, runtime }
+      { logger, runtime }
     );
     return dappDataService.getDappInfo();
   },
@@ -57,7 +58,7 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> =
         baseChannel: DAPP_CHANNELS.userPrompt,
         properties: { allowOrigin: RemoteApiPropertyType.MethodReturningPromise }
       },
-      { logger: console, runtime }
+      { logger, runtime }
     );
 
     setTimeout(() => {
@@ -92,7 +93,7 @@ const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> =
         baseChannel: DAPP_CHANNELS.userPrompt,
         properties: { readyToSignData: RemoteApiPropertyType.MethodReturningPromise }
       },
-      { logger: console, runtime }
+      { logger, runtime }
     );
 
     return firstValueFrom(
@@ -160,7 +161,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
           assetProvider,
           assetInfo$: inMemoryWallet.assetInfo$,
           tx,
-          logger: console
+          logger
         }),
         // eslint-disable-next-line no-magic-numbers, new-cap
         timeout: Milliseconds(6000)
@@ -186,7 +187,7 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
 
   const switchWalletMode = useCallback(async () => {

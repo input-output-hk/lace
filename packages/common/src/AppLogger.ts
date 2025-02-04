@@ -13,7 +13,7 @@ enum LogLevel {
 
 export type LogLevelString = keyof typeof LogLevel;
 
-class StringifyLogger implements Logger {
+class AppLogger implements Logger {
   private logLevel: LogLevel;
 
   constructor(logLevel: LogLevelString = 'info') {
@@ -66,4 +66,4 @@ class StringifyLogger implements Logger {
   }
 }
 
-export const logger = new StringifyLogger();
+export const logger = new AppLogger();

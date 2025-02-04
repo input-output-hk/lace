@@ -11,7 +11,6 @@ import {
 import { Wallet } from '@lace/cardano';
 import { PaperWalletInfoCard, WalletSetupStepLayoutRevamp, WalletTimelineSteps } from '@lace/core';
 import { i18n } from '@lace/translation';
-import { logger } from '@lib/wallet-api-ui';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { config } from '@src/config';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
@@ -20,6 +19,7 @@ import { generatePaperWalletPdf } from '@src/utils/PaperWallet';
 import { PaperWalletPDF } from '@src/types';
 import { replaceWhitespace } from '@src/utils/format-string';
 import styles from './SavePaperWallet.module.scss';
+import { logger } from '@lace/common';
 const deriveAccountFromMnemonic = async (
   createWalletData: CreateWalletParams,
   chain: keyof typeof Wallet.Cardano.ChainIds

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Form } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
-import { Input, Button, Search } from '@lace/common';
+import { Input, Button, Search, logger } from '@lace/common';
 import { ReactComponent as PlusIcon } from '../../assets/icons/plus.component.svg';
 import { ReactComponent as PlusIconDisabled } from '../../assets/icons/plus-disabled.component.svg';
 import styles from './AddressForm.module.scss';
@@ -49,7 +49,7 @@ export const AddressFormBrowserView = ({
       form.resetFields();
       if (onClose) onClose();
     } catch (error) {
-      console.error('Error while submitting new address', error);
+      logger.error('Error while submitting new address', error);
     }
   };
   const Plus = PlusIcon ? <PlusIcon className={styles.icon} /> : <PlusCircleOutlined />;

@@ -7,6 +7,7 @@ import { DAPP_CHANNELS } from '@src/utils/constants';
 import { Subject } from 'rxjs';
 import { requestAccessDebounced } from './requestAccess';
 import { storage as webStorage } from 'webextension-polyfill';
+import { logger } from '@lace/common';
 
 const createStorage = (_storage: PersistentAuthenticatorStorage) => {
   const origins$ = new Subject<string[]>();
@@ -31,5 +32,5 @@ const authenticatorStorage = createPersistentAuthenticatorStorage(DAPP_CHANNELS.
 const internalStorage = createStorage(authenticatorStorage);
 export const authenticator = new PersistentAuthenticator(
   { requestAccess: requestAccessDebounced },
-  { logger: console, storage: internalStorage }
+  { logger, storage: internalStorage }
 );

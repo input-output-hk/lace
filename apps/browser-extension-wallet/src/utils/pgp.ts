@@ -3,6 +3,7 @@ import { createMessage, decrypt, encrypt, readKey, readMessage, readPrivateKey, 
 import type { Key, MaybeArray, Message, PartialConfig, PrivateKey, PublicKey } from 'openpgp';
 import { i18n } from '@lace/translation';
 import type { PublicPgpKeyData } from '@src/types';
+import { logger } from '@lace/common';
 
 export const WEAK_KEY_REGEX = new RegExp(/RSA keys shorter than 2047 bits are considered too weak./);
 export const NO_ENCRYPTION_PACKET_REGEX = new RegExp(/Could not find valid encryption key packet in key/);
@@ -201,7 +202,7 @@ export const pgpPublicKeyVerification =
       } else if (error.message === 'PGP key is not public') {
         setPgpValidation({ error: i18n.t('pgp.error.privateKeySuppliedInsteadOfPublic') });
       } else {
-        console.error(error);
+        logger.error(error);
         // Default fallback
         setPgpValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
       }

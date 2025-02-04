@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { runtime, tabs } from 'webextension-polyfill';
 import { State as MigrationData } from '../migrator/migration-data.data';
 import { MigrationState } from '../migrator/migration-state.data';
@@ -7,6 +6,7 @@ import { createLaceMigrationPingListener } from './lace/create-lace-migration-pi
 import { NAMI_EXTENSION_ID } from './lace/environment';
 import { createLaceMigrationOpenListener } from './lace/create-lace-migration-open-listener';
 import { LACE_EXTENSION_ID } from './nami/environment';
+import { logger } from '@lace/common';
 
 type CheckMigrationStatus = () => Promise<MigrationState>;
 
@@ -38,9 +38,9 @@ export const completeMigration: CompleteMigration = () => {
 };
 
 export const handleNamiRequests = (): void => {
-  console.log('[NAMI MIGRATION] createLaceMigrationPingListener');
+  logger.info('[NAMI MIGRATION] createLaceMigrationPingListener');
   runtime.onMessageExternal.addListener(createLaceMigrationPingListener(NAMI_EXTENSION_ID));
-  console.log('[NAMI MIGRATION] createLaceMigrationOpenListener');
+  logger.info('[NAMI MIGRATION] createLaceMigrationOpenListener');
   runtime.onMessageExternal.addListener(
     createLaceMigrationOpenListener(NAMI_EXTENSION_ID, LACE_EXTENSION_ID, tabs.create)
   );

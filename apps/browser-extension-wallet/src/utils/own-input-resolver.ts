@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/no-null */
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { Wallet } from '@lace/cardano';
+import { logger } from '@lace/common';
 
 export type HistoricalOwnInputResolverArgs = Pick<ObservableWalletState, 'addresses'> & {
   transactions: Pick<ObservableWalletState['transactions'], 'history'>;
@@ -18,7 +19,7 @@ export const createHistoricalOwnInputResolver = ({
       const output = tx.body.outputs[index];
 
       if (!output) {
-        console.error('Resolving utxo with invalid index', txId, index);
+        logger.error('Resolving utxo with invalid index', txId, index);
         return null;
       }
       if (addresses.some(({ address }) => address === output.address)) {

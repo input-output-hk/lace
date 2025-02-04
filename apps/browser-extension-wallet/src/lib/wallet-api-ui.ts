@@ -18,8 +18,7 @@ import { firstValueFrom, from, of } from 'rxjs';
 import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 import { Password } from '@input-output-hk/lace-ui-toolkit';
-
-export const logger = console;
+import { logger } from '@lace/common';
 
 export const walletManager = consumeRemoteApi(
   { baseChannel: walletManagerChannel(process.env.WALLET_NAME), properties: walletManagerProperties },

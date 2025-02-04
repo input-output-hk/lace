@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { toast } from '@lace/common';
+import { logger, toast } from '@lace/common';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Radio, RadioChangeEvent } from 'antd';
@@ -84,7 +84,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
       const eventByNetworkName = section === 'settings' ? settingsEventByNetworkName : walletProfileEventByNetworkName;
       await analytics.sendEventToPostHog(eventByNetworkName[event.target.value as Wallet.ChainName]);
     } catch (error) {
-      console.error('Error switching networks', error);
+      logger.error('Error switching networks', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
     }
     return event;

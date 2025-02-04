@@ -3,7 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { ValidationResult } from '@types';
 import { AddressBookSchema } from '@lib/storage';
 import { AddressRecordParams } from '@src/features/address-book/context';
-import { ToastProps } from '@lace/common';
+import { logger, ToastProps } from '@lace/common';
 import { addressErrorMessage, nameErrorMessage } from '@lib/storage/helpers';
 import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import ErrorIcon from '@assets/icons/address-error-icon.component.svg';
@@ -62,7 +62,7 @@ export const isValidAddress = (address: string): boolean => {
   try {
     isValid = Wallet.Cardano.isAddress(address);
   } catch (error) {
-    console.error(error.message);
+    logger.error(error.message);
     isValid = false;
   }
   return isValid;
