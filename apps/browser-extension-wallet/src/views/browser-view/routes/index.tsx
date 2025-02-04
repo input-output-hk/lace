@@ -31,10 +31,11 @@ import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-a
 import { useExperimentsContext } from '@providers/ExperimentsProvider';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
+import LaceLogoMark from '@src/assets/branding/lace-logo-mark.svg';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 import { useFatalError } from '@hooks/useFatalError';
@@ -237,7 +238,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     return (
       <Lock
         message={t('general.lock.namiMode.message')}
-        description={t('general.lock.namiMode.description')}
+        description={
+          <Trans
+            i18nKey="general.lock.namiMode.description"
+            components={[<img key="lace-logo" src={LaceLogoMark} width="22" />]}
+          />
+        }
         icon={warningIcon}
       />
     );

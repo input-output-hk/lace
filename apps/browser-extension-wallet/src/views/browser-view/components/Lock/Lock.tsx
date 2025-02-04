@@ -13,7 +13,7 @@ const { Text } = Typography;
 
 type Props = {
   message?: string;
-  description?: string;
+  description?: React.ReactNode;
   icon?: string;
 };
 
