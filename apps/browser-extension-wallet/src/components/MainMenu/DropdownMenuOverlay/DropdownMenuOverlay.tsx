@@ -6,6 +6,7 @@ import {
   Links,
   LockWallet,
   NetworkChoise,
+  RenameWalletDrawer,
   Separator,
   SettingsLink,
   SignMessageLink,
@@ -21,7 +22,7 @@ import { WalletAccounts } from './components/WalletAccounts';
 import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
 import { useWalletStore } from '@stores';
 import classNames from 'classnames';
-import type { AnyBip32Wallet } from '@cardano-sdk/web-extension';
+import type { AnyBip32Wallet, AnyWallet } from '@cardano-sdk/web-extension';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
@@ -52,9 +53,11 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isHardwareWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, setManageAnyWallet, walletType, isSharedWallet, isHardwareWallet } =
+    useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
+  const [isRenamingWallet, setIsRenamingWallet] = useState(false);
   const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   useEffect(() => {
@@ -75,7 +78,15 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
 
-  topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
+  topSection = topSection ?? (
+    <UserInfo
+      onOpenWalletAccounts={openWalletAccounts}
+      onOpenEditWallet={(wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
+        setManageAnyWallet(wallet);
+        setIsRenamingWallet(true);
+      }}
+    />
+  );
 
   const getSignMessageLink = () => (
     <>
@@ -174,6 +185,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={goBackToMainSection} />}
       {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={goBackToMainSection} isPopup={isPopup} />}
+      {isRenamingWallet && (
+        <RenameWalletDrawer open={isRenamingWallet} popupView={isPopup} onClose={() => setIsRenamingWallet(false)} />
+      )}
     </Menu>
   );
 };

@@ -34,6 +34,8 @@ export const walletStoreMock = async (
     setIsDropdownMenuOpen: jest.fn(),
     setManageAccountsWallet: jest.fn(),
     manageAccountsWallet: undefined,
+    manageAnyWallet: undefined,
+    setManageAnyWallet: jest.fn(),
     walletState: undefined,
     setWalletState: jest.fn(),
     fetchNetworkInfo: jest.fn(),

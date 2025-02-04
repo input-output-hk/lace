@@ -17,6 +17,8 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   setManageAccountsWallet: (manageAccountsWallet) => set({ manageAccountsWallet }),
   // Loaded wallet
   manageAccountsWallet: undefined,
+  manageAnyWallet: undefined,
+  setManageAnyWallet: (manageAnyWallet) => set({ manageAnyWallet }),
   inMemoryWallet: undefined,
   cardanoWallet: undefined,
   walletState: undefined,

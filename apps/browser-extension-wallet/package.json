@@ -51,7 +51,7 @@
     "@cardano-sdk/wallet": "0.51.9",
     "@cardano-sdk/web-extension": "0.38.10",
     "@emurgo/cip14-js": "~3.0.1",
-    "@input-output-hk/lace-ui-toolkit": "1.21.0",
+    "@input-output-hk/lace-ui-toolkit": "3.2.1",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",

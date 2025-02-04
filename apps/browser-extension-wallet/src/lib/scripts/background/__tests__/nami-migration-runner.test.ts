@@ -85,13 +85,13 @@ test('fresh install', async () => {
     accounts: [
       {
         accountIndex: 0,
-        metadata: { name: 'Account #0' },
+        metadata: { name: 'Nami' },
         extendedAccountPublicKey:
           'a5f18f73dde7b6f11df448913d60a86bbb397a435269e5024193b293f28892fd33d1225d468aac8f5a9d3cfedceacabe80192fcf0beb5c5c9b7988151f3353cc'
       },
       {
         accountIndex: 1,
-        metadata: { name: 'Account #1' },
+        metadata: { name: 'xxx' },
         extendedAccountPublicKey:
           '5280ef1287dfa35605891eb788590dbfe43b59682ada939ee111f8667d4a0847b43c08b5dce7aab937e860626e95f05ef6cc12758fa9ee16a4fc394bd9f684e4'
       }
@@ -213,13 +213,13 @@ test('lace already installed and has no conflict', async () => {
     accounts: [
       {
         accountIndex: 0,
-        metadata: { name: 'Account #0' },
+        metadata: { name: 'Nami' },
         extendedAccountPublicKey:
           'a5f18f73dde7b6f11df448913d60a86bbb397a435269e5024193b293f28892fd33d1225d468aac8f5a9d3cfedceacabe80192fcf0beb5c5c9b7988151f3353cc'
       },
       {
         accountIndex: 1,
-        metadata: { name: 'Account #1' },
+        metadata: { name: 'xxx' },
         extendedAccountPublicKey:
           '5280ef1287dfa35605891eb788590dbfe43b59682ada939ee111f8667d4a0847b43c08b5dce7aab937e860626e95f05ef6cc12758fa9ee16a4fc394bd9f684e4'
       }
@@ -444,7 +444,7 @@ test('LW-12135 one conflicting hw wallet and one new in-memory wallet', async ()
     accounts: [
       {
         accountIndex: 0,
-        metadata: { name: 'Account #0' },
+        metadata: { name: 'Nami' },
         extendedAccountPublicKey:
           'a5f18f73dde7b6f11df448913d60a86bbb397a435269e5024193b293f28892fd33d1225d468aac8f5a9d3cfedceacabe80192fcf0beb5c5c9b7988151f3353cc'
       }
