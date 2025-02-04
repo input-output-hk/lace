@@ -24,7 +24,7 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   return url;
 };
 
-export const getMagicForChain = (chainName: Wallet.ChainName): number => {
+export const getMagicForChain = (chainName: Wallet.ChainName): Wallet.Cardano.NetworkMagics => {
   const { AVAILABLE_CHAINS } = config();
   let magic = 0;
   switch (chainName) {

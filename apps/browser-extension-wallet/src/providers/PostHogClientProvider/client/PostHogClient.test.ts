@@ -2,12 +2,18 @@ import { Wallet } from '@lace/cardano';
 import dayjs from 'dayjs';
 import { UserId } from '@lib/scripts/types';
 import { ExtensionViews, PostHogAction, UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
-import { DEV_POSTHOG_TOKEN } from '@providers/PostHogClientProvider/client/config';
+import {
+  DEV_POSTHOG_TOKEN,
+  featureFlagPayloadsInitialValue,
+  featureFlagsByNetworkInitialValue
+} from '@providers/PostHogClientProvider/client/config';
 import { PostHogClient } from './PostHogClient';
 import { userIdServiceMock } from '@src/utils/mocks/test-helpers';
 import posthog from 'posthog-js';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
+import { setTimeout } from 'node:timers/promises';
+import { ExperimentName, FeatureFlagsByNetwork } from '@lib/scripts/types/feature-flags';
 
 const mockSentDate = new Date('2023-07-25T15:31:10.275000+00:00');
 const mockBackgroundStorageUtil = {
@@ -203,6 +209,8 @@ describe('PostHogClient', () => {
       type: UserTrackingType.Enhanced,
       id: userId
     });
+
+    await setTimeout(0);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -232,6 +240,7 @@ describe('PostHogClient', () => {
       posthogHost
     );
 
+    await setTimeout(0);
     await client.sendEvent(event);
     expect(posthog.capture).toHaveBeenCalledWith(
       event,
@@ -261,5 +270,84 @@ describe('PostHogClient', () => {
       })
     );
     client.shutdown();
+  });
+
+  describe('Feature Flags', () => {
+    const initialFeatureFlags = {
+      [ExperimentName.SHARED_WALLETS]: true
+    };
+    const initialFeatureFlagPayloads = {
+      [ExperimentName.SHARED_WALLETS]: JSON.stringify({
+        allowedNetworks: ['mainnet']
+      })
+    };
+
+    it('initializes posthog with FFs and payloads from from background storage', async () => {
+      mockBackgroundStorageUtil.getBackgroundStorage.mockResolvedValueOnce({
+        initialPosthogFeatureFlags: initialFeatureFlags,
+        initialPosthogFeatureFlagPayloads: initialFeatureFlagPayloads
+      });
+
+      // eslint-disable-next-line no-new
+      new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
+      await setTimeout(0);
+
+      expect(posthog.init).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          bootstrap: expect.objectContaining({
+            featureFlags: initialFeatureFlags,
+            featureFlagPayloads: initialFeatureFlagPayloads
+          })
+        })
+      );
+    });
+
+    it('notifies when initialisation completed', async () => {
+      const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
+      await setTimeout(0);
+
+      expect(client.hasPostHogInitialized$.value).toEqual(true);
+    });
+
+    describe('when received feature flags from posthog', () => {
+      const expectedFeatureFlags: FeatureFlagsByNetwork = {
+        ...featureFlagsByNetworkInitialValue,
+        [Wallet.Cardano.NetworkMagics.Mainnet]: {
+          ...featureFlagsByNetworkInitialValue[Wallet.Cardano.NetworkMagics.Mainnet],
+          ...initialFeatureFlags
+        }
+      };
+      const expectedFeatureFlagPayloads = {
+        ...featureFlagPayloadsInitialValue,
+        [ExperimentName.SHARED_WALLETS]: JSON.parse(initialFeatureFlagPayloads[ExperimentName.SHARED_WALLETS])
+      };
+
+      beforeEach(() => {
+        (posthog.featureFlags.getFlagPayloads as jest.Mock).mockReturnValue(initialFeatureFlagPayloads);
+        (posthog.onFeatureFlags as jest.Mock).mockImplementation((cb) => cb('ignored', initialFeatureFlags));
+      });
+
+      it('consumes received FFs and payloads', async () => {
+        const client = new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
+        await setTimeout(0);
+
+        expect(client.featureFlagsByNetwork).toEqual(expectedFeatureFlags);
+        expect(client.featureFlagPayloads).toEqual(expectedFeatureFlagPayloads);
+      });
+
+      it('stores received FFs in background storage', async () => {
+        // eslint-disable-next-line no-new
+        new PostHogClient(chain, mockUserIdService, mockBackgroundStorageUtil, undefined, posthogHost);
+        await setTimeout(0);
+
+        expect(mockBackgroundStorageUtil.setBackgroundStorage).toHaveBeenCalledWith({
+          featureFlags: expectedFeatureFlags,
+          featureFlagPayloads: expectedFeatureFlagPayloads,
+          initialPosthogFeatureFlags: initialFeatureFlags,
+          initialPosthogFeatureFlagPayloads: initialFeatureFlagPayloads
+        });
+      });
+    });
   });
 });

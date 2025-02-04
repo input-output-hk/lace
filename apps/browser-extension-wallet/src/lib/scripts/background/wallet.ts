@@ -42,14 +42,14 @@ import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { requestMessage$ } from './services/utilityServices';
-import { BackgroundStorage, MessageTypes } from '../types';
+import { MessageTypes } from '../types';
 import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
 import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
-import { ExperimentName } from '../types/feature-flags';
+import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -77,7 +77,6 @@ const networkMagicToChainName = (networkMagic: Cardano.NetworkMagic): Wallet.Cha
   }
 };
 
-type FeatureFlags = BackgroundStorage['featureFlags'][0];
 const isExperimentEnabled = (featureFlags: FeatureFlags, experimentName: ExperimentName) =>
   !!(featureFlags?.[experimentName] ?? false);
 

@@ -13,7 +13,6 @@ import { UIThemeProvider } from '@providers/UIThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { APP_MODE_POPUP, POPUP_WINDOW_NAMI_TITLE } from './utils/constants';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
-import { ExperimentsProvider } from '@providers/ExperimentsProvider/context';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { useEffect, useState } from 'react';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
@@ -52,21 +51,19 @@ const App = (): React.ReactElement => {
             <CurrencyStoreProvider>
               <HashRouter>
                 <PostHogClientProvider>
-                  <ExperimentsProvider>
-                    <AnalyticsProvider>
-                      <ThemeProvider>
-                        <ExternalLinkOpenerProvider>
-                          <AddressesDiscoveryOverlay>
-                            <UIThemeProvider>
-                              <TxWitnessRequestProvider>
-                                {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
-                              </TxWitnessRequestProvider>
-                            </UIThemeProvider>
-                          </AddressesDiscoveryOverlay>
-                        </ExternalLinkOpenerProvider>
-                      </ThemeProvider>
-                    </AnalyticsProvider>
-                  </ExperimentsProvider>
+                  <AnalyticsProvider>
+                    <ThemeProvider>
+                      <ExternalLinkOpenerProvider>
+                        <AddressesDiscoveryOverlay>
+                          <UIThemeProvider>
+                            <TxWitnessRequestProvider>
+                              {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                            </TxWitnessRequestProvider>
+                          </UIThemeProvider>
+                        </AddressesDiscoveryOverlay>
+                      </ExternalLinkOpenerProvider>
+                    </ThemeProvider>
+                  </AnalyticsProvider>
                 </PostHogClientProvider>
               </HashRouter>
             </CurrencyStoreProvider>

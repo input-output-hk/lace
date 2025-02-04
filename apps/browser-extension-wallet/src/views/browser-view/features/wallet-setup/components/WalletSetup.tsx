@@ -42,7 +42,9 @@ export const WalletSetup = (): React.ReactElement => {
       <WalletSetupLayout>
         <WalletOnboardingFlows
           aliasEventRequired
-          flowsEnabled={enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.NotSet && !!posthogClient.featureFlags}
+          flowsEnabled={
+            enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.NotSet && !!posthogClient.featureFlagsByNetwork
+          }
           forgotPasswordFlowActive={isForgotPasswordFlow}
           postHogActions={{
             ...postHogOnboardingActions,
