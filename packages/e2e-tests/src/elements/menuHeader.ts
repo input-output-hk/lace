@@ -24,6 +24,8 @@ export class MenuHeader {
   private MENU_WALLET_STATUS = '//p[@data-testid="header-wallet-status"]';
   private EXPAND_BUTTON = '[data-testid="expand-button"]';
   private EXPAND_BUTTON_TOOLTIP = '.ant-tooltip-inner';
+  private MENU_NAMI_MODE_ITEM = '.ant-dropdown-menu [data-testid="header-menu-nami-mode-switcher"]';
+  private MENU_NAMI_MODE_SWITCH = '.ant-dropdown-menu [data-testid="settings-nami-mode-switch"]';
   private MENU_THEME_LABEL = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"]';
   private MENU_THEME_SWITCHER = '.ant-dropdown-menu [data-testid="header-menu-theme-switcher"] button';
   private MENU_NETWORK_LABEL = '[data-testid="header-menu-network-choice-label"]';
@@ -114,6 +116,14 @@ export class MenuHeader {
 
   get menuWalletStatus(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MENU_WALLET_STATUS);
+  }
+
+  get menuNamiModeItem(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_NAMI_MODE_ITEM);
+  }
+
+  get menuNamiModeSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_NAMI_MODE_SWITCH);
   }
 
   get menuThemeSwitcher(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -227,6 +237,11 @@ export class MenuHeader {
       await this.menuThemeSwitcher.waitForClickable();
       await this.menuThemeSwitcher.click();
     }
+  }
+
+  async activateNamiMode(): Promise<void> {
+    await this.menuNamiModeSwitch.waitForClickable();
+    await this.menuNamiModeSwitch.click();
   }
 
   async clickRightSidePanelButton(): Promise<void> {

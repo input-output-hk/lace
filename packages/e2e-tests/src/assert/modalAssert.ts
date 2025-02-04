@@ -58,6 +58,18 @@ class ModalAssert {
       await this.assertSeeModalContainer(false);
     }
   }
+
+  async assertSeeSwitchToNamiModeModal(shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      const title = await t('browserView.settings.legacyMode.confirmation.title');
+      const description = await t('browserView.settings.legacyMode.confirmation.description');
+      const cancelButtonLabel = await t('browserView.settings.legacyMode.confirmation.cancel');
+      const confirmButtonLabel = await t('browserView.settings.legacyMode.confirmation.confirm');
+      await this.assertSeeModal(title, description, cancelButtonLabel, confirmButtonLabel);
+    } else {
+      await this.assertSeeModalContainer(false);
+    }
+  }
 }
 
 export default new ModalAssert();

@@ -86,7 +86,7 @@ export const config: WebdriverIO.Config = {
       './src/features/SettingsPagePopup*.feature',
       './src/features/WalletAddressPageExtended.feature'
     ],
-    batch14: ['./src/features/Transactions*.feature'],
+    batch14: ['./src/features/Transactions*.feature', './src/features/NamiMode*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
     batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
