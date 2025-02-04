@@ -288,13 +288,13 @@ describe('Testing hooks', () => {
     const hook = renderHook(() => useOnUnload(cb));
 
     await hook.waitFor(() => {
-      window.dispatchEvent(new Event('beforeunload'));
+      window.dispatchEvent(new Event('unload'));
       expect(cb).toHaveBeenCalledTimes(1);
     });
 
     hook.unmount();
 
-    window.dispatchEvent(new Event('beforeunload'));
+    window.dispatchEvent(new Event('unload'));
     expect(cb).toHaveBeenCalledTimes(1);
 
     removeEventListeners();

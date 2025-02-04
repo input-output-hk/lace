@@ -250,7 +250,7 @@ describe('Testing ConfirmTransaction component', () => {
     expect(setNextViewMock).toHaveBeenCalled();
   });
 
-  test('Should reject transaction if unmonted', async () => {
+  test('Should reject transaction if unmounted', async () => {
     patchAddEventListener();
     mockGetKeyAgentType.mockReset();
     mockUseOnUnload.mockReset();
