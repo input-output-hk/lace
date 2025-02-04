@@ -16,7 +16,6 @@ import Video from '@assets/icons/video.svg';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
 
 const loadMoreDebounce = 300;
@@ -73,8 +72,6 @@ export const ActivityLayout = (): ReactElement => {
 
   const isLoadingFirstTime = isNil(total);
 
-  const endMessage = useMemo(() => <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>, [t]);
-
   const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
   return (
@@ -82,10 +79,7 @@ export const ActivityLayout = (): ReactElement => {
       <SectionLayout
         sidePanelContent={<EducationalList items={educationalList} title={t('browserView.sidePanel.learnAbout')} />}
       >
-        <SectionTitle
-          title={t('browserView.activity.title')}
-          sideText={`(${t('browserView.activity.titleSideText')})`}
-        />
+        <SectionTitle title={t('browserView.activity.title')} />
         <Drawer
           open={!!activityDetail}
           onClose={resetActivityState}
@@ -108,7 +102,6 @@ export const ActivityLayout = (): ReactElement => {
               loadMore={debouncedLoadMore}
               lists={walletActivities}
               scrollableTarget={LACE_APP_ID}
-              endMessage={endMessage}
               dataLength={loadedTxLength}
             />
           )}

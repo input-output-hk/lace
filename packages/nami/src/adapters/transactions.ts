@@ -536,8 +536,6 @@ export const useWalletTxs = (): {
     TX_HISTORY_LOADING,
   );
 
-  const { resolveInput } = inputResolver;
-
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) => {
       const resolvedInputs = new Array<Wallet.Cardano.Utxo>();

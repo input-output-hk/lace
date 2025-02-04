@@ -63,7 +63,6 @@ export const createTxHistoryLoader = (
   { addresses$, syncStatus: { isSettled$ }, transactions: { history$ } }: TxHistoryLoaderObservableWallet,
   minimumPageSize: number
 ): TxHistoryLoader => {
-  provider;
   const requestMore$ = new Subject<void>();
   let mightHaveMore = false;
   let fullLocalHistory: Cardano.HydratedTx[];

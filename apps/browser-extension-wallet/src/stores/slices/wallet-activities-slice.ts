@@ -143,7 +143,6 @@ export const mapWalletActivities = memoize(
       Pick<AssetDetailsSlice, 'assetDetails'> &
       Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<IBlockchainProvider, 'assetProvider'> &
-      Pick<IBlockchainProvider, 'inputResolver'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
