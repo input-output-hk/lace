@@ -5,7 +5,10 @@ type AddSharedWalletMainPageFlowProps = SharedWalletEntrySharedProps & {
   sharedWalletKey?: string;
 };
 
-export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowProps> = ({ sharedWalletKey, ...restProps }) =>
+export const AddSharedWalletMainPageFlow: VFC<AddSharedWalletMainPageFlowProps> = ({
+  sharedWalletKey,
+  ...restProps
+}) =>
   sharedWalletKey ? (
     <SharedWalletEntry
       sharedWalletKeyMode="copy"

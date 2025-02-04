@@ -33,8 +33,8 @@ export const cardanoTransformer = (params: {
     balance.fiatBalance === '-'
       ? balance.fiatBalance
       : isNumeric(balance.fiatBalance)
-      ? formatLocaleNumber(balance.fiatBalance)
-      : '?';
+        ? formatLocaleNumber(balance.fiatBalance)
+        : '?';
 
   return {
     id: cardanoCoin.id,

@@ -5,21 +5,23 @@ import { initMigrationState } from './storage';
 
 type UpdateType = 'downgrade' | 'update';
 
-// migrations
+// Migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
   if (details.reason === 'update' || details.reason === 'install') {
     // Initialize migration state with not-loaded
     await initMigrationState();
     // Set migration state to up-to-date on install or check migrations on update
-    !details.previousVersion
-      ? await storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState })
-      : await checkMigrations(details.previousVersion);
+    if (!details.previousVersion) {
+      await storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
+    } else {
+      await checkMigrations(details.previousVersion);
+    }
   }
 };
 
 const compareVersions = (v1 = '', v2 = '') => v1.localeCompare(v2, undefined, { numeric: true, sensitivity: 'base' });
 
-// extension updates announcements
+// Extension updates announcements
 const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetailsType) => {
   const { version: currentVersion } = runtime.getManifest();
 
@@ -50,10 +52,10 @@ const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) 
   runtime.reload();
 };
 
-if (!runtime.onUpdateAvailable.hasListener(updateToVersionCallback))
-  // fires when the new .crx file has been downloaded and the new version is ready to be installed
+if (!runtime.onUpdateAvailable.hasListener(updateToVersionCallback)) {
+  // Fires when the new .xpi file has been downloaded and the new version is ready to be installed
   runtime.onUpdateAvailable.addListener(updateToVersionCallback);
+}
 
-// extensions will not auto-update while a background page is in use (which effectively means waiting until a browser restart
-// forces the browser to check if your add-on has an update, rather than relying on the existing, automated check for updates
-runtime.requestUpdateCheck();
+// Removed the line below as Firefox does not support runtime.requestUpdateCheck()
+// runtime.requestUpdateCheck();

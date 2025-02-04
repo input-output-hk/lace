@@ -57,7 +57,7 @@ export const StakePoolsListHeader = ({ setActiveSort, activeSort }: StakePoolsLi
         tooltipText: t('browsePools.tooltips.ticker'),
       },
     }),
-    [t]
+    [t],
   );
 
   const { analytics, isSharedWallet } = useOutsideHandles();

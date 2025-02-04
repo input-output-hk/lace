@@ -73,7 +73,7 @@ export const StakePoolsList = ({
       ) : (
         <StakePoolsListRowSkeleton index={index} columns={config.columns} withSelection={!isSharedWallet} />
       ),
-    [isSharedWallet]
+    [isSharedWallet],
   );
 
   return (

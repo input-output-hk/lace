@@ -68,7 +68,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
       const pool = draftPortfolio[0]?.stakePool.id;
       return txBuilder.delegateFirstStakeCredential(pool || null);
     },
-    [draftPortfolio]
+    [draftPortfolio],
   );
 
   const delegatePortfolio = useCallback(
@@ -76,12 +76,12 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
       const pools = draftPortfolio.map((pool) => ({ id: pool.id, weight: pool.sliderIntegerPercentage }));
       return txBuilder.delegatePortfolio(pools.length > 0 ? { pools } : null);
     },
-    [draftPortfolio]
+    [draftPortfolio],
   );
 
   const delegate = useCallback(
     (txBuilder: TxBuilder) => (isSharedWallet ? delegateFirstStakeCredential(txBuilder) : delegatePortfolio(txBuilder)),
-    [isSharedWallet, delegateFirstStakeCredential, delegatePortfolio]
+    [isSharedWallet, delegateFirstStakeCredential, delegatePortfolio],
   );
 
   useEffect(() => {
@@ -150,7 +150,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
         ...signer,
         signed: false,
       })) || [],
-    [coSigners]
+    [coSigners],
   );
 
   return (

@@ -18,7 +18,7 @@ export const StakingView = () => {
 
   const stepsWithBackBtn = useMemo(() => {
     const steps = [!isSharedWallet && DrawerManagementStep.Confirmation, DrawerManagementStep.Sign].filter(
-      (el): el is DrawerManagementStep => typeof el === 'string'
+      (el): el is DrawerManagementStep => typeof el === 'string',
     );
     return new Set<DrawerStep>(steps);
   }, [isSharedWallet]);

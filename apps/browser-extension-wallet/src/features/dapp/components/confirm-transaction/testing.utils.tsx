@@ -28,23 +28,22 @@ const backgroundService = {
 
 export const getWrapper =
   () =>
-  ({ children }: { children: React.ReactNode }): React.ReactElement =>
-    (
-      <BackgroundServiceAPIProvider value={backgroundService}>
-        <AppSettingsProvider>
-          <CurrencyStoreProvider>
-            <DatabaseProvider>
-              <StoreProvider appMode={APP_MODE_BROWSER}>
-                <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                  <AnalyticsProvider analyticsDisabled>
-                    <I18nextProvider i18n={i18n}>
-                      <ViewFlowProvider viewStates={sendViewsFlowState}>{children}</ViewFlowProvider>
-                    </I18nextProvider>
-                  </AnalyticsProvider>
-                </PostHogClientProvider>
-              </StoreProvider>
-            </DatabaseProvider>
-          </CurrencyStoreProvider>
-        </AppSettingsProvider>
-      </BackgroundServiceAPIProvider>
-    );
+  ({ children }: { children: React.ReactNode }): React.ReactElement => (
+    <BackgroundServiceAPIProvider value={backgroundService}>
+      <AppSettingsProvider>
+        <CurrencyStoreProvider>
+          <DatabaseProvider>
+            <StoreProvider appMode={APP_MODE_BROWSER}>
+              <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                <AnalyticsProvider analyticsDisabled>
+                  <I18nextProvider i18n={i18n}>
+                    <ViewFlowProvider viewStates={sendViewsFlowState}>{children}</ViewFlowProvider>
+                  </I18nextProvider>
+                </AnalyticsProvider>
+              </PostHogClientProvider>
+            </StoreProvider>
+          </DatabaseProvider>
+        </CurrencyStoreProvider>
+      </AppSettingsProvider>
+    </BackgroundServiceAPIProvider>
+  );

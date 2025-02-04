@@ -53,10 +53,13 @@ export class ExtensionBlobKeyValueStore<K extends string | OpaqueString<any>, V 
 
   setAll(docs: sdkStorage.KeyValueCollection<K, V>[]): Observable<void> {
     return this.set(
-      docs.reduce((collection, { key, value }) => {
-        collection[key] = value;
-        return collection;
-      }, {} as Record<K, V>)
+      docs.reduce(
+        (collection, { key, value }) => {
+          collection[key] = value;
+          return collection;
+        },
+        {} as Record<K, V>
+      )
     );
   }
 }

@@ -196,7 +196,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
               <div className={styles.social} data-testid="stake-pool-details-social-icons">
                 {socialNetworks.map(
                   ({ type, href }) =>
-                    href && <SocialNetworkIcon key={type} name={type} href={href} onClick={openExternalLink} />
+                    href && <SocialNetworkIcon key={type} name={type} href={href} onClick={openExternalLink} />,
                 )}
               </div>
             </div>
@@ -216,7 +216,7 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
           </div>
           <div className={styles.row} style={{ marginBottom: '40px' }} data-testid="stake-pool-details-owners">
             <div className={styles.title} data-testid="stake-pool-details-owners-title">{`${t(
-              'drawer.details.owners'
+              'drawer.details.owners',
             )} (${owners.length})`}</div>
             {owners.map((address) => (
               <div key={address.toString()} className={styles.owner} data-testid="stake-pool-details-owner">
@@ -276,7 +276,7 @@ const makeActionButtons = (
     selectForMultiStaking,
     stakeOnThisPool,
     unselectPool,
-  }: Record<ButtonNames, boolean | Partial<ActionButtonSpec>>
+  }: Record<ButtonNames, boolean | Partial<ActionButtonSpec>>,
 ): ActionButtonSpec[] =>
   (
     [
@@ -407,7 +407,7 @@ export const StakePoolDetailFooter = ({ popupView }: StakePoolDetailFooterProps)
       onStakeOnThisPool,
       poolSelected,
       onUnselectClick,
-    ]
+    ],
   );
 
   if (actionButtons.length === 0) return <></>;

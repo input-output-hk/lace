@@ -96,7 +96,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
       sliderIntegerPercentage,
       stakeValue: balancesBalance
         ? compactNumber(
-            (sliderIntegerPercentage / PERCENTAGE_SCALE_MAX) * Number(balancesBalance.available.coinBalance)
+            (sliderIntegerPercentage / PERCENTAGE_SCALE_MAX) * Number(balancesBalance.available.coinBalance),
           )
         : '-',
     };
@@ -164,7 +164,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
           {displayData.map(
             (
               { color, id, name, stakeValue, onChainPercentage, savedIntegerPercentage, sliderIntegerPercentage },
-              idx
+              idx,
             ) => (
               <PoolDetailsCard
                 key={id}
@@ -184,7 +184,7 @@ export const StepPreferencesContent = ({ popupView }: StepPreferencesContentProp
                   });
                 }}
               />
-            )
+            ),
           )}
         </Flex>
       </Flex>

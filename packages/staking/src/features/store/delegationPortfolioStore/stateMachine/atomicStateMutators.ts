@@ -33,7 +33,7 @@ export const atomicStateMutators = {
     // RESPONSIBLITY: If all new pools have 0 percentages (just added pools), rebalance equally
     let targetDraftPortfolio;
     const allPoolsHaveZeroPercentages = selections.every(
-      ({ sliderIntegerPercentage }) => sliderIntegerPercentage === 0
+      ({ sliderIntegerPercentage }) => sliderIntegerPercentage === 0,
     );
 
     if (allPoolsHaveZeroPercentages) {
@@ -70,7 +70,7 @@ export const atomicStateMutators = {
   },
   selectPools: ({ stakePools, state }: { stakePools: Wallet.Cardano.StakePool[]; state: State }) => {
     const newPools = stakePools.map((pool: Wallet.Cardano.StakePool) =>
-      initializeDraftPortfolioPool({ initialPercentage: 0, stakePool: pool, state })
+      initializeDraftPortfolioPool({ initialPercentage: 0, stakePool: pool, state }),
     );
 
     return {
@@ -88,7 +88,7 @@ export const atomicStateMutators = {
       activeDrawerStep: undefined,
       pendingSelectedPortfolio,
       viewedStakePool: undefined,
-    } as const),
+    }) as const,
   showPoolDetails: <F extends DelegationFlow.CurrentPoolDetails | DelegationFlow.PoolDetails>({
     pool,
     targetFlow,
@@ -100,11 +100,11 @@ export const atomicStateMutators = {
       activeDelegationFlow: targetFlow,
       activeDrawerStep: DrawerDefaultStep.PoolDetails,
       viewedStakePool: pool,
-    } as const),
+    }) as const,
   unselectPool: ({ id, state }: { id: Wallet.Cardano.PoolIdHex; state: State }) =>
     ({
       selectedPortfolio: state.selectedPortfolio.filter((pool) => pool.id !== id),
-    } as const),
+    }) as const,
   updateStakePercentage: ({
     id,
     newSliderPercentage,
@@ -117,7 +117,7 @@ export const atomicStateMutators = {
     if (!state.draftPortfolio) throw new Error(missingDraftPortfolioErrorMessage);
     return {
       draftPortfolio: state.draftPortfolio.map((pool) =>
-        pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool
+        pool.id === id ? { ...pool, sliderIntegerPercentage: newSliderPercentage } : pool,
       ),
     } as const;
   },

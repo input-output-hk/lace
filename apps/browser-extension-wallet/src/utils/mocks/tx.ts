@@ -84,4 +84,4 @@ export const buildMockTx = (
     },
     id: Wallet.Cardano.TransactionId('e3a443363eb6ee3d67c5e75ec10b931603787581a948d68fa3b2cd3ff2e0d2ad'),
     index: 0
-  } as Wallet.Cardano.HydratedTx);
+  }) as Wallet.Cardano.HydratedTx;
