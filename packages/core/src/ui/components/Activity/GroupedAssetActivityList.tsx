@@ -66,7 +66,7 @@ export const GroupedAssetActivityList = ({
 
   return (
     <InfiniteScroll
-      dataLength={dataLength || 0}
+      dataLength={dataLength ?? 0}
       endMessage={endMessage}
       scrollableTarget={scrollableTarget}
       next={next}

@@ -63,7 +63,6 @@ export const useWalletActivities = ({
   };
 };
 
-export type UseWalletActivitiesPaginatedProps = UseWalletActivitiesProps;
 export type WalletActivitiesPaginated = Pick<WalletActivities, 'walletActivities'> & {
   loadMore: () => void;
   mightHaveMore: boolean;
@@ -72,8 +71,9 @@ export type WalletActivitiesPaginated = Pick<WalletActivities, 'walletActivities
 
 export const useWalletActivitiesPaginated = ({
   sendAnalytics
-}: UseWalletActivitiesPaginatedProps = noAnalyticsProps): WalletActivitiesPaginated => {
+}: UseWalletActivitiesProps = noAnalyticsProps): WalletActivitiesPaginated => {
   const [walletActivities, setWalletActivities] = useState<AssetActivityListProps[] | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
   const {
@@ -90,7 +90,7 @@ export const useWalletActivitiesPaginated = ({
 
   const pageSize = useGroupedActivitiesPageSize();
 
-  const { loadMore, loadedHistory$ } = useTxHistoryLoader(pageSize);
+  const { loadMore: txHistoryLoaderLoadMore, loadedHistory$ } = useTxHistoryLoader(pageSize);
 
   const loadedHistory = useObservable(loadedHistory$, TX_HISTORY_LOADING);
 
@@ -125,35 +125,53 @@ export const useWalletActivitiesPaginated = ({
     ]
   );
 
-  useEffect(() => {
-    (async () => {
-      if (loadedHistory?.transactions === undefined || !fiatCurrency || !cardanoFiatPrice) return;
+  const mapActivities = useCallback(
+    async (history: Wallet.Cardano.HydratedTx[]) => {
       const { transactions } = walletState;
 
-      const activities = await mapWalletActivities(
+      return await mapWalletActivities(
         {
           ...walletState,
-          transactions: { ...transactions, history: loadedHistory.transactions }
+          transactions: { ...transactions, history }
         },
         fetchActivitiesProps,
         fetchActivitiesDeps
       );
+    },
+    [fetchActivitiesDeps, fetchActivitiesProps, walletState]
+  );
+
+  useEffect(() => {
+    (async () => {
+      if (loadedHistory?.transactions === undefined || !fiatCurrency || !cardanoFiatPrice) return;
+
+      const activities = await mapActivities(loadedHistory.transactions.slice(0, currentPage * pageSize));
 
       setWalletActivities(activities.walletActivities);
     })();
   }, [
     cardanoFiatPrice,
+    currentPage,
     fetchActivitiesDeps,
     fetchActivitiesProps,
     fiatCurrency,
-    loadedHistory.transactions,
+    loadedHistory?.transactions,
+    mapActivities,
+    pageSize,
     walletState
   ]);
+
+  const loadMore = useCallback(() => {
+    if (currentPage * pageSize >= (loadedHistory?.transactions?.length ?? 0)) {
+      txHistoryLoaderLoadMore();
+    }
+    setCurrentPage((prevPage) => prevPage + 1);
+  }, [currentPage, loadedHistory?.transactions?.length, pageSize, txHistoryLoaderLoadMore]);
 
   return {
     walletActivities,
     mightHaveMore: loadedHistory?.mightHaveMore,
-    loadedTxLength: loadedHistory?.transactions?.length,
+    loadedTxLength: loadedHistory?.transactions?.slice(0, currentPage * pageSize).length,
     loadMore
   };
 };

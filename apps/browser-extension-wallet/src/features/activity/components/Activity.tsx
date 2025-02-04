@@ -12,7 +12,6 @@ import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
-import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
 
 const loadMoreDebounce = 300;
@@ -29,22 +28,12 @@ export const Activity = (): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
 
-  const layoutSideText = `(${t('browserView.activity.titleSideText')})`;
   const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
-
-  const endMessage = useMemo(
-    () => (
-      <Flex justifyContent="center">
-        <Text.Label>{t('walletActivity.endMessage')}</Text.Label>
-      </Flex>
-    ),
-    [t]
-  );
 
   const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
   return (
-    <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={walletActivities === undefined}>
+    <ContentLayout title={layoutTitle} isLoading={walletActivities === undefined}>
       <Drawer
         open={!!activityDetail}
         onClose={resetActivityState}
@@ -69,7 +58,6 @@ export const Activity = (): React.ReactElement => {
             loadMore={debouncedLoadMore}
             lists={walletActivities}
             scrollableTarget="contentLayout"
-            endMessage={endMessage}
             dataLength={loadedTxLength}
           />
         )}
