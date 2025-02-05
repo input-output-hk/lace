@@ -108,6 +108,7 @@ export type BackgroundService = {
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;
   resetStorage: () => Promise<void>;
+  getAppVersion: () => Promise<string>;
   backendFailures$: BehaviorSubject<number>;
   unhandledError$: Observable<UnhandledError>;
 };

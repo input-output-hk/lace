@@ -65,7 +65,7 @@ const App = (): React.ReactElement => {
                             <AddressesDiscoveryOverlay>
                               <NamiMigrationGuard>
                                 <BackgroundPageProvider>
-                                  {mode === 'nami' ? <NamiPopup /> : <PopupView />}
+                                  <AppVersionGuard>{mode === 'nami' ? <NamiPopup /> : <PopupView />}</AppVersionGuard>
                                 </BackgroundPageProvider>
                               </NamiMigrationGuard>
                             </AddressesDiscoveryOverlay>

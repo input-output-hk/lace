@@ -231,6 +231,8 @@ const unhandledError$ = merge(
   )
 );
 
+const getAppVersion = async () => await runtime.getManifest().version;
+
 exposeApi<BackgroundService>(
   {
     api$: of({
@@ -249,6 +251,7 @@ exposeApi<BackgroundService>(
         await clearBackgroundStorage();
         await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
       },
+      getAppVersion,
       backendFailures$,
       unhandledError$
     }),
