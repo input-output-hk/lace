@@ -6,6 +6,7 @@ import { config as baseConfig } from './wdio.conf.base';
 const chromeConfig = {
   capabilities: [
     {
+      webSocketUrl: false,
       maxInstances: 1,
       browserName: 'chrome',
       browserVersion: '132',

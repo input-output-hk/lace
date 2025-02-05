@@ -14,7 +14,7 @@ export const getBackgroundStorage: any = async () => {
   await verifyBrowserStorageSupport();
 
   try {
-    return await browser.execute(
+    return await browser.executeScript(
       'const response = await chrome.storage.local.get("BACKGROUND_STORAGE"); return response.BACKGROUND_STORAGE;',
       []
     );
@@ -31,7 +31,7 @@ export const getBackgroundStorageItem: any = async (key: string) => {
 export const setMigrationState = async (): Promise<void> => {
   await verifyBrowserStorageSupport();
   try {
-    await browser.execute("await chrome.storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } })", []);
+    await browser.executeScript("await chrome.storage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } })", []);
   } catch (error) {
     throw new Error(`Setting browser storage failed: ${error}`);
   }
@@ -43,7 +43,7 @@ export const setBackgroundStorage = async (data: Record<string, unknown>): Promi
   const backgroundStorage = await getBackgroundStorage();
   const updatedBackgroundStorage = { ...backgroundStorage, ...data };
   try {
-    await browser.execute(
+    await browser.executeScript(
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(updatedBackgroundStorage)}})`,
       []
     );
@@ -59,7 +59,7 @@ export const setUsePersistentUserId = async (): Promise<void> => {
   const backgroundStorage = await getBackgroundStorage();
   backgroundStorage.usePersistentUserId = true;
   try {
-    await browser.execute(
+    await browser.executeScript(
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
       []
     );
@@ -72,7 +72,7 @@ export const cleanBrowserStorage: any = async (): Promise<void> => {
   await verifyBrowserStorageSupport();
 
   try {
-    await browser.execute('await chrome.storage.local.clear();', []);
+    await browser.executeScript('await chrome.storage.local.clear();', []);
   } catch (error) {
     throw new Error(`Clearing browser storage failed: ${error}`);
   }
@@ -81,7 +81,7 @@ export const cleanBrowserStorage: any = async (): Promise<void> => {
 export const clearBackgroundStorageKey: any = async (): Promise<void> => {
   await verifyBrowserStorageSupport();
   try {
-    await browser.execute('await chrome.storage.local.remove("BACKGROUND_STORAGE");', []);
+    await browser.executeScript('await chrome.storage.local.remove("BACKGROUND_STORAGE");', []);
   } catch (error) {
     Logger.warn(`Clearing background storage key failed: ${error}`);
   }
@@ -91,7 +91,7 @@ export const shiftBackFiatPriceFetchedTimeInBrowserStorage = async (seconds: num
   const backgroundStorage = await getBackgroundStorage();
   backgroundStorage.fiatPrices.timestamp -= seconds * 1000;
   try {
-    await browser.execute(
+    await browser.executeScript(
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
       []
     );
@@ -104,7 +104,7 @@ export const deleteFiatPriceTimestampFromBackgroundStorage = async (): Promise<v
   const backgroundStorage = await getBackgroundStorage();
   delete backgroundStorage.fiatPrices.timestamp;
   try {
-    await browser.execute(
+    await browser.executeScript(
       `await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(backgroundStorage)}})`,
       []
     );

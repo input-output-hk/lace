@@ -4,17 +4,21 @@ import { switchToWindowWithLace } from '../utils/window';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 
 export const getNumWalletsInRepository = async (): Promise<number> =>
-  await browser.execute(`
+  await browser.executeScript(
+    `
     return (async () => {
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
       return wallets.length;
     })()
-  `);
+  `,
+    []
+  );
 
 export const clearWalletRepository = async (): Promise<void> => {
   Logger.log('Removing wallets');
   await switchToWindowWithLace(0);
-  await browser.execute(`
+  await browser.executeScript(
+    `
     return (async () => {
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
       // reversing in order to delete shared wallets before dependent wallets
@@ -24,28 +28,34 @@ export const clearWalletRepository = async (): Promise<void> => {
       await window.walletManager.deactivate();
       return JSON.stringify(wallets);
     })()
-  `);
+  `,
+    []
+  );
 };
 
 export const getWalletsFromRepository = async (): Promise<any[]> =>
-  await browser.execute(`
+  await browser.executeScript(
+    `
       const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
       return wallets;
-  `);
+  `,
+    []
+  );
 
 const addWalletInRepository = async (wallet: string): Promise<void> => {
-  await browser.execute(
+  await browser.executeScript(
     `
       return (async () => {
         let walletsObj = JSON.parse('${wallet}');
         await walletRepository.addWallet(walletsObj[0]);
       })()
-    `
+    `,
+    []
   );
 };
 
 export const addAndActivateWalletInRepository = async (wallet: string): Promise<void> =>
-  await browser.execute(
+  await browser.executeScript(
     `
       return (async () => {
         let walletsObj = JSON.parse('${wallet}');
@@ -60,7 +70,8 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
           chainId: { networkId: 0, networkMagic: 1 }
         });
       })()
-  `
+  `,
+    []
   );
 
 export const addAndActivateWalletsInRepository = async (wallets: TestWalletName[]): Promise<void> => {
