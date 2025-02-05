@@ -25,6 +25,7 @@ import { useSecrets } from '@lace/core';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import type { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { useOnUnload } from '@src/features/dapp/components/confirm-transaction/hooks';
 
 const DAPP_TOAST_DURATION = 100;
 const dappConnector: Omit<DappConnector, 'getAssetInfos' | 'txWitnessRequest'> = {
@@ -213,7 +214,8 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
         environmentName,
         dappConnector: { ...dappConnector, txWitnessRequest, getAssetInfos },
         switchWalletMode,
-        secretsUtil
+        secretsUtil,
+        useOnUnload
       }}
     >
       <CommonOutsideHandlesProvider

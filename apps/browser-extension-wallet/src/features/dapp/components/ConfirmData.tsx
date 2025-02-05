@@ -21,9 +21,9 @@ import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { useOnUnload } from './confirm-transaction/hooks';
 
 const INDENT_SPACING = 2;
-const DAPP_TOAST_DURATION = 50;
 
 const fromHex = (hexBlob: HexBlob): string => Buffer.from(hexBlob, 'hex').toString();
 
@@ -58,10 +58,10 @@ export const DappConfirmData = (): React.ReactElement => {
 
   const cancelTransaction = useCallback(async () => {
     await req.reject('User rejected to sign');
-    setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+    window.close();
   }, [req]);
 
-  window.addEventListener('beforeunload', cancelTransaction);
+  useOnUnload(cancelTransaction);
 
   useEffect(() => {
     const subscription = signingCoordinator.signDataRequest$.pipe(take(1)).subscribe(async (r) => {

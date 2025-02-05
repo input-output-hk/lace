@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import cn from 'classnames';
 import { Button, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,7 @@ import { Layout } from '../Layout';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './ConfirmTransaction.module.scss';
 import { useWalletStore } from '@stores';
-import { useDisallowSignTx, useSignWithHardwareWallet, useOnBeforeUnload } from './hooks';
+import { useDisallowSignTx, useSignWithHardwareWallet, useOnUnload } from './hooks';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
@@ -82,7 +82,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
     disallowSignTx(true);
   };
 
-  useOnBeforeUnload(disallowSignTx);
+  const cancelTransaction = useCallback(() => {
+    disallowSignTx(true);
+  }, [disallowSignTx]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>

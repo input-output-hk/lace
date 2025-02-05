@@ -12,6 +12,7 @@ import { useViewsFlowContext } from '@providers/ViewFlowProvider';
 import styles from './SignTransaction.module.scss';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { createPassphrase } from '@lib/wallet-api-ui';
+import { useOnUnload } from './confirm-transaction/hooks';
 
 export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -63,6 +64,13 @@ export const SignData = (): React.ReactElement => {
     },
     [onConfirm, confirmIsDisabled]
   );
+
+  const cancelTransaction = useCallback(async () => {
+    await request.reject('User rejected to sign');
+    window.close();
+  }, [request]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <Layout title={undefined}>

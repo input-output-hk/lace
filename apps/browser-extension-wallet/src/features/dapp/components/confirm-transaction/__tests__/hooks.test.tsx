@@ -14,7 +14,7 @@ const mockCalculateAssetBalance = jest.fn();
 const mockLovelacesToAdaString = jest.fn();
 const mockUseWalletStore = jest.fn();
 import { act, cleanup } from '@testing-library/react';
-import { useCreateAssetList, useGetOwnPubDRepKeyHash, useOnBeforeUnload, useSignWithHardwareWallet } from '../hooks';
+import { useCreateAssetList, useGetOwnPubDRepKeyHash, useOnUnload, useSignWithHardwareWallet } from '../hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import { Wallet } from '@lace/cardano';
 import * as hooks from '@hooks';
@@ -282,19 +282,19 @@ describe('Testing hooks', () => {
     });
   });
 
-  test('useOnBeforeUnload', async () => {
+  test('useOnUnload', async () => {
     patchAddEventListener();
     const cb = jest.fn();
-    const hook = renderHook(() => useOnBeforeUnload(cb));
+    const hook = renderHook(() => useOnUnload(cb));
 
     await hook.waitFor(() => {
-      window.dispatchEvent(new Event('beforeunload'));
+      window.dispatchEvent(new Event('unload'));
       expect(cb).toHaveBeenCalledTimes(1);
     });
 
     hook.unmount();
 
-    window.dispatchEvent(new Event('beforeunload'));
+    window.dispatchEvent(new Event('unload'));
     expect(cb).toHaveBeenCalledTimes(1);
 
     removeEventListeners();

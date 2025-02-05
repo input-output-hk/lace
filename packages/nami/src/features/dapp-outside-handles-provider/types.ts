@@ -69,4 +69,5 @@ export interface DappOutsideHandlesContextValue {
   dappConnector: DappConnector;
   switchWalletMode: () => Promise<void>;
   secretsUtil: ReturnType<typeof useSecrets>;
+  useOnUnload: (callback: () => void) => void;
 }
