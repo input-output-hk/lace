@@ -6,8 +6,8 @@ import {
   RemoteApiProperties,
   RemoteApiPropertyType
 } from '@cardano-sdk/web-extension';
-import { logger } from '@lace/common';
 
+const logger = console;
 const WALLET_MODE_STORAGE_KEY = 'lace-wallet-mode';
 
 export const LACE_FEATURES_CHANNEL = 'lace-features';
