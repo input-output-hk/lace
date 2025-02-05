@@ -9,8 +9,6 @@ import { of } from 'rxjs';
 
 const { CertificateType } = Wallet.Cardano;
 
-const DAPP_TOAST_DURATION = 50;
-
 export const readyToSign = (): void => {
   exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
     {
@@ -30,8 +28,11 @@ export const disallowSignTx = async (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
   close = false
 ): Promise<void> => {
-  await req.reject('User declined to sign');
-  close && setTimeout(() => window.close(), DAPP_TOAST_DURATION);
+  try {
+    await req?.reject('User declined to sign');
+  } finally {
+    close && window.close();
+  }
 };
 
 export const allowSignTx = async (

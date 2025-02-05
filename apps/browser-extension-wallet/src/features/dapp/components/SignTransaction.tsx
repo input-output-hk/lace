@@ -13,11 +13,13 @@ import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { createPassphrase } from '@lib/wallet-api-ui';
+import { useDisallowSignTx, useOnUnload } from './confirm-transaction/hooks';
 
 export const SignTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
-    utils: { setPreviousView }
+    utils: { setPreviousView },
+    signTxRequest: { request }
   } = useViewsFlowContext();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
@@ -25,10 +27,7 @@ export const SignTransaction = (): React.ReactElement => {
   const { password, setPassword, clearSecrets } = useSecrets();
   const [validPassword, setValidPassword] = useState<boolean>();
   const analytics = useAnalyticsContext();
-
-  const {
-    signTxRequest: { request }
-  } = useViewsFlowContext();
+  const disallowSignTx = useDisallowSignTx(request);
 
   const onConfirm = useCallback(
     async (spendingPassphrase) => {
@@ -79,6 +78,12 @@ export const SignTransaction = (): React.ReactElement => {
     },
     [onConfirm, confirmIsDisabled]
   );
+
+  const cancelTransaction = useCallback(() => {
+    disallowSignTx(true);
+  }, [disallowSignTx]);
+
+  useOnUnload(cancelTransaction);
 
   return (
     <Layout title={undefined}>

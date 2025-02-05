@@ -8,7 +8,7 @@ const chromeConfig = {
     {
       maxInstances: 1,
       browserName: 'chrome',
-      browserVersion: 'stable',
+      browserVersion: '132',
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { port: 4444 }),
       'goog:chromeOptions': {
