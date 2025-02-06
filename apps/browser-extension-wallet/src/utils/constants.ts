@@ -9,6 +9,8 @@ export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbol
   [Wallet.Cardano.NetworkId.Testnet]: 'tADA'
 };
 
+export const TX_HISTORY_LIMIT_SIZE = 10;
+
 export const cardanoCoin: Wallet.CoinId = {
   id: '1',
   name: 'Cardano',
