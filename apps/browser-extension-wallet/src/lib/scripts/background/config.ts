@@ -26,6 +26,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
+  getAppVersion: RemoteApiPropertyType.MethodReturningPromise,
   backendFailures$: RemoteApiPropertyType.HotObservable,
   unhandledError$: RemoteApiPropertyType.HotObservable
 };
