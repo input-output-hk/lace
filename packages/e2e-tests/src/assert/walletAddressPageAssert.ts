@@ -33,9 +33,6 @@ class WalletAddressPageAssert {
     await WalletAddressPage.qrCode.waitForDisplayed();
     await WalletAddressPage.walletName.waitForDisplayed();
     await WalletAddressPage.walletAddress.waitForDisplayed();
-    // LW-6604 copy button visible after hovering over address card
-    await WalletAddressPage.drawerHeaderTitle.moveTo(); // step introduced to avoid situation when WebdriverIO keeps cursor in the middle of the Lace popup by default
-    await WalletAddressPage.copyButton.waitForDisplayed({ reverse: true });
     await WalletAddressPage.addressCard.moveTo();
     await WalletAddressPage.copyButton.waitForDisplayed();
   }

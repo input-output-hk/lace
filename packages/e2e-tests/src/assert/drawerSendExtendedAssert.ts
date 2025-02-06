@@ -254,6 +254,7 @@ class DrawerSendExtendedAssert {
       if (assetType === 'Tokens') {
         const tokenTooltip = await new CoinConfigure().tooltip;
         await tokenTooltip.waitForDisplayed();
+        await tokenTooltip.waitForStable();
         const textInTooltip = await tokenTooltip.getText();
         if (savedTicker.startsWith('asset1')) {
           const assetFirstSection = savedTicker.slice(0, 10);
@@ -266,6 +267,7 @@ class DrawerSendExtendedAssert {
       } else if (assetType === 'NFTs' && savedTicker.length > 10) {
         const nftTooltip = await new CoinConfigure().tooltip;
         await nftTooltip.waitForDisplayed();
+        await nftTooltip.waitForStable();
         expect(await nftTooltip.getText()).to.equal(savedTicker);
       }
     } else {
@@ -277,6 +279,7 @@ class DrawerSendExtendedAssert {
     const coinConfigure = new CoinConfigure();
     await coinConfigure.tooltip.waitForDisplayed({ reverse: !isVisible });
     if (isVisible) {
+      await coinConfigure.tooltip.waitForStable();
       expect(await coinConfigure.tooltip.getText()).to.equal(expectedValue);
     }
   }

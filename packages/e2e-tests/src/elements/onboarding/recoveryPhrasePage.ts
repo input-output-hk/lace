@@ -129,7 +129,10 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   }
 
   async getMnemonicAutocompleteOptionsValues(): Promise<string[]> {
-    return this.mnemonicAutocompleteOptions.map(async (option) => await option.getText());
+    return this.mnemonicAutocompleteOptions.map(async (option: WebdriverIO.Element) => {
+      await option.waitForStable();
+      return await option.getText();
+    });
   }
 
   async getMnemonicWordTexts(): Promise<string[]> {

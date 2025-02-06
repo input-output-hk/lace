@@ -19,6 +19,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
 
   async assertSeeMnemonicAutocompleteOptions(expectedOptions: string[]) {
     await recoveryPhrasePage.mnemonicAutocompleteDropdown.waitForDisplayed();
+    await recoveryPhrasePage.mnemonicAutocompleteDropdown.waitForStable();
     const actualOptions = await recoveryPhrasePage.getMnemonicAutocompleteOptionsValues();
     expect(actualOptions).to.deep.equal(expectedOptions);
   }
@@ -43,6 +44,7 @@ class OnboardingRecoveryPhrasePageAssert extends OnboardingCommonAssert {
 
   async assertSeeClipboardTooltip() {
     await recoveryPhrasePage.clipboardTooltip.waitForDisplayed();
+    await recoveryPhrasePage.clipboardTooltip.waitForStable();
     await recoveryPhrasePage.clipboardTooltipLink.waitForDisplayed();
     expect(await recoveryPhrasePage.clipboardTooltip.getText()).to.equal(
       (await t('core.walletSetupMnemonicStepRevamp.copyPasteTooltipText')).replace('<a>', '').replace('</a>', '')
