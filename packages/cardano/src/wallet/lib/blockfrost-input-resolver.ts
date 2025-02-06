@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/no-null, @typescript-eslint/no-non-null-assertion */
 import { Cardano } from '@cardano-sdk/core';
 import { BlockfrostClient, BlockfrostError, BlockfrostToCore } from '@cardano-sdk/cardano-services-client';
+import type { Cache } from '@cardano-sdk/util';
 import { Logger } from 'ts-log';
 import { Responses } from '@blockfrost/blockfrost-js';
 
@@ -14,21 +15,29 @@ const NOT_FOUND_STATUS = 404;
  */
 const txInToId = (txIn: Cardano.TxIn): string => `${txIn.txId}#${txIn.index}`;
 
+type BlockfrostInputResolverDependencies = {
+  cache: Cache<Cardano.TxOut>;
+  client: BlockfrostClient;
+  logger: Logger;
+};
+
 /**
  * A resolver class to fetch and resolve transaction inputs using Blockfrost API.
  */
 export class BlockfrostInputResolver implements Cardano.InputResolver {
   readonly #logger: Logger;
   readonly #client: BlockfrostClient;
-  readonly #txCache = new Map<string, Cardano.TxOut>();
+  readonly #txCache: Cache<Cardano.TxOut>;
 
   /**
    * Constructs a new BlockfrostInputResolver.
    *
+   * @param cache - A caching interface.
    * @param client - The Blockfrost client instance to interact with the Blockfrost API.
    * @param logger - The logger instance to log messages to.
    */
-  constructor(client: BlockfrostClient, logger: Logger) {
+  constructor({ cache, client, logger }: BlockfrostInputResolverDependencies) {
+    this.#txCache = cache;
     this.#client = client;
     this.#logger = logger;
   }
@@ -44,9 +53,10 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
   public async resolveInput(input: Cardano.TxIn, options?: Cardano.ResolveOptions): Promise<Cardano.TxOut | null> {
     this.#logger.debug(`Resolving input ${input.txId}#${input.index}`);
 
-    if (this.#txCache.has(txInToId(input))) {
+    const cached = await this.#txCache.get(txInToId(input));
+    if (cached) {
       this.#logger.debug(`Resolved input ${input.txId}#${input.index} from cache`);
-      return this.#txCache.get(txInToId(input))!;
+      return cached;
     }
 
     const resolved = this.resolveFromHints(input, options);
@@ -69,7 +79,7 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
       for (const hint of options.hints.transactions) {
         if (input.txId === hint.id && hint.body.outputs.length > input.index) {
           this.#logger.debug(`Resolved input ${input.txId}#${input.index} from hint`);
-          this.#txCache.set(txInToId(input), hint.body.outputs[input.index]);
+          void this.#txCache.set(txInToId(input), hint.body.outputs[input.index]);
 
           return hint.body.outputs[input.index];
         }
@@ -80,7 +90,7 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
       for (const utxo of options.hints.utxos) {
         if (input.txId === utxo[0].txId && input.index === utxo[0].index) {
           this.#logger.debug(`Resolved input ${input.txId}#${input.index} from hint`);
-          this.#txCache.set(txInToId(input), utxo[1]);
+          void this.#txCache.set(txInToId(input), utxo[1]);
 
           return utxo[1];
         }
@@ -119,7 +129,7 @@ export class BlockfrostInputResolver implements Cardano.InputResolver {
 
       const coreTxOut = BlockfrostToCore.txOut(blockfrostUTxO);
 
-      this.#txCache.set(txInToId(txIn), coreTxOut);
+      void this.#txCache.set(txInToId(txIn), coreTxOut);
 
       this.#logger.debug(`Resolved input ${txIn.txId}#${txIn.index} from Blockfrost`);
       return coreTxOut;

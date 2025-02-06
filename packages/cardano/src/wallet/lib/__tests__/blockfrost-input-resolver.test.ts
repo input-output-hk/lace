@@ -22,7 +22,25 @@ describe('BlockfrostInputResolver', () => {
       warn: jest.fn()
     } as unknown as jest.Mocked<Logger>;
 
-    resolver = new BlockfrostInputResolver(clientMock, loggerMock);
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const createProviderCache = () => {
+      const cache = new Map();
+      return {
+        async get(key: string) {
+          return cache.get(key);
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        async set(key: string, val: any) {
+          cache.set(key, val);
+        }
+      };
+    };
+
+    resolver = new BlockfrostInputResolver({
+      cache: createProviderCache(),
+      client: clientMock,
+      logger: loggerMock
+    });
   });
 
   afterEach(() => {
