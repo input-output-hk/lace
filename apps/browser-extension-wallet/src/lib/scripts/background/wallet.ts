@@ -50,6 +50,7 @@ import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresM
 import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
+import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -343,6 +344,13 @@ const storesFactory: StoresFactory = {
         // and we are sure that it's working well
       }
     }
+
+    const transactions = await firstValueFrom(extensionStores.transactions.getAll().pipe(defaultIfEmpty([])));
+
+    if (transactions.length > TX_HISTORY_LIMIT_SIZE) {
+      await firstValueFrom(extensionStores.transactions.setAll(transactions.slice(-TX_HISTORY_LIMIT_SIZE)));
+    }
+
     return extensionStores;
   }
 };
