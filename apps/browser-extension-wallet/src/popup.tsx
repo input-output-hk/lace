@@ -27,6 +27,7 @@ import { runtime, storage } from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
 import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
+import { AppVersionGuard } from './utils/AppVersionGuard';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
