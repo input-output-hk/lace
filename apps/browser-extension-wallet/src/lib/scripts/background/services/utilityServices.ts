@@ -231,7 +231,7 @@ const unhandledError$ = merge(
   )
 );
 
-const getAppVersion = async () => await runtime.getManifest().version;
+const getAppVersion = async () => await process.env.APP_VERSION;
 
 exposeApi<BackgroundService>(
   {
