@@ -150,3 +150,7 @@ Then(/^I (see|do not see) a button to open the right side panel$/, async (should
 When(/^I click on right side panel icon$/, async () => {
   await MenuHeader.clickRightSidePanelButton();
 });
+
+When(/^I click on "Nami mode" switch$/, async () => {
+  await MenuHeader.activateNamiMode();
+});

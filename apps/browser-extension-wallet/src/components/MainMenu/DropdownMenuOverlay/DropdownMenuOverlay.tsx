@@ -154,7 +154,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {shouldShowSignMessage && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             {useSwitchToNamiMode && !isSharedWallet && (
-              <div className={styles.menuItemTheme}>
+              <div className={styles.menuItemTheme} data-testid="header-menu-nami-mode-switcher">
                 {t('browserView.settings.legacyMode.section')}
                 <Switch
                   testId="settings-nami-mode-switch"

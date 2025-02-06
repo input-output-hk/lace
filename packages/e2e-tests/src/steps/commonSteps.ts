@@ -449,3 +449,7 @@ Then(
     await commonAssert.assertPasswordIsNotPresentInMemorySnapshot(password);
   }
 );
+
+When(/^I open empty tab$/, async () => {
+  await browser.newWindow('');
+});

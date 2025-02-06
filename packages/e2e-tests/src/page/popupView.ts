@@ -73,6 +73,11 @@ class PopupView extends LaceView implements Page {
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
+
+  async visitNamiMode() {
+    await browser.url(`${this.basePopupUrl}`);
+    await this.setPopupWindowSize();
+  }
 }
 
 export default new PopupView();
