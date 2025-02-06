@@ -22,6 +22,7 @@ import { ERROR } from '../../../config/config';
 
 import type { PasswordObj as Password } from '@lace/core';
 import { NamiPassword } from './namiPassword';
+import {logger} from "@lace/common";
 
 interface Props {
   ready?: boolean;
@@ -274,7 +275,7 @@ const ConfirmModalHw = ({
         await props.sign();
         await props.onConfirm(true);
       } catch (error_) {
-        console.error(error_);
+        logger.error(error_);
         if (error_ === ERROR.submit) props.onConfirm(false, error_);
         else setError('An error occured');
       }

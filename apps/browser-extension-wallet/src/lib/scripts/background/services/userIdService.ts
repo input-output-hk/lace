@@ -7,6 +7,7 @@ import randomBytes from 'randombytes';
 import { UserTrackingType } from '@providers/AnalyticsProvider/analyticsTracker';
 import isUndefined from 'lodash/isUndefined';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
+import { logger } from '@lace/common';
 
 export type UserIdServiceStorage = {
   get: typeof getBackgroundStorage;
@@ -53,12 +54,12 @@ export class UserIdService implements UserIdServiceInterface {
 
   async init(): Promise<void> {
     if (!this.userIdRestored) {
-      console.debug('[ANALYTICS] Restoring user ID...');
+      logger.debug('[ANALYTICS] Restoring user ID...');
       await this.restoreUserId();
     }
 
     if (!this.randomizedUserId) {
-      console.debug('[ANALYTICS] User ID not found - generating new one');
+      logger.debug('[ANALYTICS] User ID not found - generating new one');
       this.randomizedUserId = randomBytes(USER_ID_BYTE_SIZE).toString('hex');
     }
   }
@@ -87,7 +88,7 @@ export class UserIdService implements UserIdServiceInterface {
         this.userTrackingType$.next(UserTrackingType.Enhanced);
       }
     }
-    console.debug(`[ANALYTICS] getwalletBasedUserId() called (current Wallet Based ID: ${this.walletBasedUserId})`);
+    logger.debug(`[ANALYTICS] getwalletBasedUserId() called (current Wallet Based ID: ${this.walletBasedUserId})`);
     // eslint-disable-next-line consistent-return
     return this.walletBasedUserId;
   }
@@ -96,7 +97,7 @@ export class UserIdService implements UserIdServiceInterface {
   async getRandomizedUserId(): Promise<string> {
     await this.init();
 
-    console.debug(`[ANALYTICS] getId() called (current ID: ${this.randomizedUserId})`);
+    logger.debug(`[ANALYTICS] getId() called (current ID: ${this.randomizedUserId})`);
     return this.randomizedUserId;
   }
 
@@ -125,7 +126,7 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async clearId(): Promise<void> {
-    console.debug('[ANALYTICS] clearId() called');
+    logger.debug('[ANALYTICS] clearId() called');
     this.randomizedUserId = undefined;
     this.walletBasedUserId = undefined;
     this.clearSessionTimeout();
@@ -135,7 +136,7 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async makePersistent(): Promise<void> {
-    console.debug('[ANALYTICS] Converting user ID into persistent');
+    logger.debug('[ANALYTICS] Converting user ID into persistent');
     this.clearSessionTimeout();
     this.setSessionTimeout();
     const userId = await this.getRandomizedUserId();
@@ -148,14 +149,14 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   async makeTemporary(): Promise<void> {
-    console.debug('[ANALYTICS] Converting user ID into temporary');
+    logger.debug('[ANALYTICS] Converting user ID into temporary');
     await this.storage.set({ usePersistentUserId: false, userId: undefined });
     this.setSessionTimeout();
     this.userTrackingType$.next(UserTrackingType.Basic);
   }
 
   async extendLifespan(): Promise<void> {
-    console.debug('[ANALYTICS] Extending temporary ID lifespan');
+    logger.debug('[ANALYTICS] Extending temporary ID lifespan');
     this.clearSessionTimeout();
     this.setSessionTimeout();
   }
@@ -164,7 +165,7 @@ export class UserIdService implements UserIdServiceInterface {
     const { userId, usePersistentUserId } = await this.storage.get();
 
     if (usePersistentUserId) {
-      console.debug('[ANALYTICS] Restoring user ID from extension storage');
+      logger.debug('[ANALYTICS] Restoring user ID from extension storage');
       this.randomizedUserId = userId;
     }
 
@@ -193,7 +194,7 @@ export class UserIdService implements UserIdServiceInterface {
   }
 
   generateWalletBasedUserId(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): string {
-    console.debug('[ANALYTICS] Wallet based ID not found - generating new one');
+    logger.debug('[ANALYTICS] Wallet based ID not found - generating new one');
     // by requirement, we want to hash the extended account public key twice
     const hash = hashExtendedAccountPublicKey(extendedAccountPublicKey);
     return hashExtendedAccountPublicKey(hash);

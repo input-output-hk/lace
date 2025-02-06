@@ -8,6 +8,7 @@ import '@testing-library/jest-dom';
 import { i18n } from '../../../../lib/i18n';
 import { mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
 import { ThemeProvider } from '@providers/ThemeProvider';
+import { logger } from '@lace/common';
 
 jest.mock('@providers', () => ({
   ...jest.requireActual<any>('@providers'),
@@ -25,8 +26,8 @@ describe('Testing ReceiveInfo component', () => {
   beforeAll(() => {
     // qrcode.react lib is printing these warning in development mode only:
     // https://github.com/zpao/qrcode.react/issues/134
-    jest.spyOn(console, 'warn').mockImplementation(jest.fn());
-    jest.spyOn(console, 'error').mockImplementation(jest.fn());
+    jest.spyOn(logger, 'warn').mockImplementation(jest.fn());
+    jest.spyOn(logger, 'error').mockImplementation(jest.fn());
   });
   afterAll(() => {
     jest.restoreAllMocks();

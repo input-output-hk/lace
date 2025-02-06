@@ -279,6 +279,8 @@
   "browserView.settings.preferences.title": "Preferences",
   "browserView.settings.preferences.betaProgram.description": "Test out new features and help us improve the product experience",
   "browserView.settings.preferences.betaProgram.title": "Beta Program",
+  "browserView.settings.preferences.debugging.title": "Debugging",
+  "browserView.settings.preferences.debugging.description": "Enable verbose console logging",
   "browserView.settings.security.2fa": "2-Factor authentication",
   "browserView.settings.security.analytics.description": "We'll collect anonymous analytics info from your browser extension to help us improve the quality and performance of Lace",
   "browserView.settings.security.analytics.title": "Analytics",

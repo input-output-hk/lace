@@ -1,6 +1,7 @@
 import { Milliseconds, TimeoutError } from '@cardano-sdk/core';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
+import { logger } from '@lace/common';
 export const isNamiWallet = (wallet?: Wallet.CardanoWallet): boolean => {
   if (!wallet || wallet.source.wallet.type !== WalletType.InMemory) return false;
 
@@ -44,7 +45,7 @@ export const tryGetAssetInfos = async ({ assetIds, assetProvider, timeout }: Try
       timeout
     );
   } catch (error) {
-    console.error('Error: Failed to retrieve assets', error);
+    logger.error('Error: Failed to retrieve assets', error);
 
     return assetIds.map<Wallet.Asset.AssetInfo>((assetId) => {
       const policyId = Wallet.Cardano.AssetId.getPolicyId(assetId);

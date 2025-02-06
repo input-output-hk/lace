@@ -32,4 +32,4 @@ export * from '@ui/components/VirtualisedGrid';
 
 export * from '@analytics/index';
 
-export * from './stringifyLogger';
+export * from './AppLogger';

@@ -40,6 +40,7 @@ import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/D
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/Crash';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
+import { logger } from '@lace/common';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -136,7 +137,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
 
   useEffect(() => {

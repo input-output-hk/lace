@@ -15,6 +15,7 @@ import { dappInfo$ } from './requestAccess';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { getBackgroundStorage } from './storage';
 import { notifyOnHaveAccessCall } from './session';
+import { logger } from '@lace/common';
 
 const DEBOUNCE_THROTTLE = 500;
 
@@ -53,7 +54,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
         if (!ready) return false;
         return cancelOnTabClose(tab);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
       }
     },
@@ -68,7 +69,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
         if (!ready) return false;
         return cancelOnTabClose(tab);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         // eslint-disable-next-line unicorn/no-useless-undefined
         return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign data'));
       }
@@ -104,14 +105,14 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 const walletApi = walletCip30.createWalletApi(
   wallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
   confirmationCallback,
-  { logger: console }
+  { logger }
 );
 
 cip30.initializeBackgroundScript(
   { walletName: process.env.WALLET_NAME },
   {
     authenticator: notifyOnHaveAccessCall(authenticator, dAppConnectorActivity$.next.bind(dAppConnectorActivity$)),
-    logger: console,
+    logger,
     runtime,
     walletApi
   }
@@ -129,5 +130,5 @@ exposeApi<DappDataService>(
       getDappInfo: () => Promise.resolve(dappInfo$.value)
     })
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );

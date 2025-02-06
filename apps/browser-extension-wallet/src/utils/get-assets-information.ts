@@ -1,5 +1,6 @@
 import { Wallet } from '@lace/cardano';
 import chunk from 'lodash/chunk';
+import { logger } from '@lace/common';
 
 export type TokenInfo = Map<Wallet.Cardano.AssetId, Wallet.Asset.AssetInfo>;
 interface AssetExtraData {
@@ -33,7 +34,7 @@ export const getAssetsInformation = async (
         fetchedAssets.push(...fetched);
       } catch (error) {
         // If an error occurs fetching from the provider then just skip this chunk
-        console.error('Error fetching assets info', { error: error.message });
+        logger.error('Error fetching assets info', { error: error.message });
       }
     }
     assetsInformation.push(...fetchedAssets);

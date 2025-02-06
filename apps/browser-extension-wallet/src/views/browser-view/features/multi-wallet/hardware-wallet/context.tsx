@@ -12,6 +12,7 @@ import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { firstValueFrom } from 'rxjs';
 import { isHdWallet } from '../isHdWallet';
 import { useWalletOnboarding } from '../walletOnboardingContext';
+import { logger } from '@lace/common';
 
 type WalletData = {
   accountIndex: number;
@@ -181,7 +182,7 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
         accountIndexes: [walletData.accountIndex]
       });
     } catch (error) {
-      console.error('ERROR creating hardware wallet', { error });
+      logger.error('ERROR creating hardware wallet', { error });
 
       const walletDuplicatedError = error instanceof WalletConflictError;
       if (!walletDuplicatedError) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
-import { Button, PostHogAction } from '@lace/common';
+import { Button, logger, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
 import { sectionTitle, DAPP_VIEWS } from '../config';
@@ -79,7 +79,7 @@ export const DappConfirmData = (): React.ReactElement => {
         baseChannel: DAPP_CHANNELS.userPrompt,
         properties: { readyToSignData: RemoteApiPropertyType.MethodReturningPromise }
       },
-      { logger: console, runtime }
+      { logger, runtime }
     );
 
     return () => {
@@ -110,7 +110,7 @@ export const DappConfirmData = (): React.ReactElement => {
       await req.sign();
       redirectToSignSuccess();
     } catch (error) {
-      console.error('error', error);
+      logger.error('error', error);
       cancelTransaction();
       redirectToSignFailure();
     }

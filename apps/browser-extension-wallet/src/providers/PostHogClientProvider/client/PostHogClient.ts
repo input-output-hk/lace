@@ -23,7 +23,7 @@ import {
 } from './config';
 import { BackgroundService, BackgroundStorage, UserIdService } from '@lib/scripts/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
-import { PostHogAction, PostHogProperties } from '@lace/common';
+import { logger, PostHogAction, PostHogProperties } from '@lace/common';
 import {
   ExperimentName,
   FeatureFlag,
@@ -149,14 +149,14 @@ export class PostHogClient<Action extends string = string> {
   }
 
   async sendSessionStartEvent(): Promise<void> {
-    console.debug('[ANALYTICS] Logging Session Start Event');
+    logger.debug('[ANALYTICS] Logging Session Start Event');
     posthog.capture(String(PostHogAction.WalletSessionStartPageview), {
       ...(await this.getEventMetadata())
     });
   }
 
   async sendPageNavigationEvent(): Promise<void> {
-    console.debug('[ANALYTICS] Logging page navigation event to PostHog');
+    logger.debug('[ANALYTICS] Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
@@ -167,10 +167,10 @@ export class PostHogClient<Action extends string = string> {
     const { id, alias } = await this.userIdService.getAliasProperties(this.chain.networkMagic);
     // If one of this does not exist, should not send the alias event
     if (!alias || !id) {
-      console.debug('[ANALYTICS] IDs were not found');
+      logger.debug('[ANALYTICS] IDs were not found');
       return;
     }
-    console.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
+    logger.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
     posthog.alias(alias, id);
   }
 
@@ -179,11 +179,11 @@ export class PostHogClient<Action extends string = string> {
   async sendMergeEvent(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> {
     const id = await this.userIdService.generateWalletBasedUserId(extendedAccountPublicKey);
     if (!id) {
-      console.debug('[ANALYTICS] Wallet-based ID not found');
+      logger.debug('[ANALYTICS] Wallet-based ID not found');
       return;
     }
 
-    console.debug('[ANALYTICS] Merging wallet-based ID into current user');
+    logger.debug('[ANALYTICS] Merging wallet-based ID into current user');
     posthog.capture('$merge_dangerously', {
       alias: id
     });
@@ -195,14 +195,14 @@ export class PostHogClient<Action extends string = string> {
       ...properties
     };
 
-    console.debug('[ANALYTICS] Logging event to PostHog', action, payload);
+    logger.debug('[ANALYTICS] Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken();
     this.chain = chain;
-    console.debug('[ANALYTICS] Changing PostHog API token', token);
+    logger.debug('[ANALYTICS] Changing PostHog API token', token);
     posthog.set_config({
       token
     });
@@ -220,7 +220,7 @@ export class PostHogClient<Action extends string = string> {
     this.updatePersonaProperties = true;
     this.optedInBeta$.next(optedInBeta);
 
-    console.debug('[ANALYTICS] Changing Opted In Beta', optedInBeta);
+    logger.debug('[ANALYTICS] Changing Opted In Beta', optedInBeta);
   }
 
   isFeatureFlagEnabled(feature: FeatureFlag): boolean {
@@ -318,7 +318,7 @@ export class PostHogClient<Action extends string = string> {
         // type-casting can be removed after Lace uses strict null checks
         payloadsByFeature[featureFlag] = featureFlagSchema.common.parse(payload) as FeatureFlagCommonSchema;
       } catch (error) {
-        console.error(`Failed to parse payload for ${featureFlag}:`, error);
+        logger.error(`Failed to parse payload for ${featureFlag}:`, error);
       }
     }
 

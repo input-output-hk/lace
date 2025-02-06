@@ -2,6 +2,7 @@
 import { WebRequest, webRequest, runtime } from 'webextension-polyfill';
 import { MessageTypes } from '../types';
 import { backendFailures$, requestMessage$ } from './services';
+import { logger } from '@lace/common';
 
 const INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
 const GATEWAY_TIMEOUT_STATUS_CODE = 503;
@@ -45,7 +46,7 @@ const handleConnectionIssues = async (error: WebRequest.OnErrorOccurredDetailsTy
   )
     return;
 
-  console.error('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
+  logger.error('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
 
   requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: false } });
   if (!webRequest.onCompleted.hasListener(handleRequests)) {

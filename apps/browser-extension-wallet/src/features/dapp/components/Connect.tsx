@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useEffect, useState } from 'react';
-import { Banner, Button } from '@lace/common';
+import { Banner, Button, logger } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Layout } from './Layout';
@@ -80,7 +80,7 @@ const authorize = (authorization: 'deny' | 'just-once' | 'allow', url: string) =
       baseChannel: DAPP_CHANNELS.userPrompt,
       properties: { allowOrigin: RemoteApiPropertyType.MethodReturningPromise }
     },
-    { logger: console, runtime }
+    { logger, runtime }
   );
 
   setTimeout(() => {
@@ -96,7 +96,7 @@ const dappDataApi = consumeRemoteApi<Pick<DappDataService, 'getDappInfo'>>(
       getDappInfo: RemoteApiPropertyType.MethodReturningPromise
     }
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
 export const Connect = (): React.ReactElement => {
@@ -116,7 +116,7 @@ export const Connect = (): React.ReactElement => {
         }
       })
       .catch((error) => {
-        console.error(error);
+        logger.error(error);
       });
   }, []);
 

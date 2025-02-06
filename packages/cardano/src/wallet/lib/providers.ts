@@ -97,11 +97,9 @@ let wsProvider: CardanoWsClient;
 export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
-  logger,
+  logger = console,
   experiments: { useWebSocket }
 }: ProvidersConfig): WalletProvidersDependencies => {
-  if (!logger) logger = console;
-
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
 
   const blockfrostClient = new BlockfrostClient(blockfrostConfig, {

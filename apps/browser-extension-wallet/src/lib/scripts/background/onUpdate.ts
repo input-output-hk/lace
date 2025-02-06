@@ -2,6 +2,7 @@ import { Runtime, runtime, storage } from 'webextension-polyfill';
 import { checkMigrations } from '../migrations';
 import { ABOUT_EXTENSION_KEY, ExtensionUpdateData, MigrationState } from '../types';
 import { initMigrationState } from './storage';
+import { logger } from '@lace/common';
 
 type UpdateType = 'downgrade' | 'update';
 
@@ -33,7 +34,7 @@ const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetail
       [ABOUT_EXTENSION_KEY]: { version: currentVersion, acknowledged: false, reason: updateType } as ExtensionUpdateData
     });
 
-    console.info('extension got updated due to reason:', updateType);
+    logger.info('extension got updated due to reason:', updateType);
   }
 };
 
@@ -43,7 +44,7 @@ if (!runtime.onInstalled.hasListener(displayReleaseAnnouncements))
 if (!runtime.onInstalled.hasListener(checkMigrationsOnUpdate)) runtime.onInstalled.addListener(checkMigrationsOnUpdate);
 
 const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) => {
-  console.info(`updating to version ${details.version}`);
+  logger.info(`updating to version ${details.version}`);
   if (runtime.onUpdateAvailable.hasListener(updateToVersionCallback)) {
     runtime.onUpdateAvailable.removeListener(updateToVersionCallback);
   }

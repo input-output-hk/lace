@@ -12,7 +12,7 @@ import {
   ThemeSwitcher,
   UserInfo
 } from './components';
-import { Switch } from '@lace/common';
+import { logger, Switch } from '@lace/common';
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
 import { Sections } from './types';
@@ -60,7 +60,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
 
   const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
@@ -112,8 +112,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
       try {
         await backgroundServices.handleOpenPopup();
       } catch (error) {
-        // improve logging
-        console.warn(error);
+        logger.warn(error);
       }
     } else {
       window.location.reload();

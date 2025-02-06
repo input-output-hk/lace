@@ -9,11 +9,12 @@ import { exposeApi, getWalletStoreId, RemoteApiPropertyType } from '@cardano-sdk
 import { storage } from '@cardano-sdk/wallet';
 import { of } from 'rxjs';
 import { NamiMigrationChannels } from '@lib/scripts/types';
+import { logger } from '@lace/common';
 
 const collateralRepository: CollateralRepository = async ({ utxo, chainId, walletId, accountIndex }) => {
   const walletStoreId = getWalletStoreId(walletId, chainId, accountIndex);
   const baseDbName = getBaseDbName(walletStoreId);
-  const db = new storage.PouchDbUtxoStore({ dbName: `${baseDbName}UnspendableUtxo` }, console);
+  const db = new storage.PouchDbUtxoStore({ dbName: `${baseDbName}UnspendableUtxo` }, logger);
   db.setAll([utxo]);
 };
 
@@ -56,5 +57,5 @@ exposeApi<NamiMigrationAPI>(
       abortMigration: RemoteApiPropertyType.MethodReturningPromise
     }
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );

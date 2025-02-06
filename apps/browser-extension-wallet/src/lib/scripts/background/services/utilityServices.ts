@@ -27,6 +27,7 @@ import { currencies as currenciesMap, currencyCode } from '@providers/currency/c
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
 import { getErrorMessage } from '@src/utils/get-error-message';
+import { logger } from '@lace/common';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -101,11 +102,11 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
       break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
-  await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => console.error(error));
+  await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => logger.error(error));
 };
 
 const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
-  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => console.error(error));
+  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => logger.error(error));
 };
 
 const handleOpenPopup = async () => {
@@ -122,7 +123,7 @@ const handleOpenPopup = async () => {
     }, 30);
   } catch (error) {
     // unable to programatically open the popup again
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -151,7 +152,7 @@ const fetchTokenPrices = () => {
       coinPrices.tokenPrices$.next({ tokens: tokenPrices, status: 'fetched' });
     })
     .catch((error) => {
-      console.error('Error fetching coin prices:', error);
+      logger.error('Error fetching coin prices:', error);
       coinPrices.tokenPrices$.next({ ...coinPrices.tokenPrices$.value, status: 'error' });
     });
 };
@@ -177,7 +178,7 @@ const fetchAdaPrice = () => {
       });
     })
     .catch(async (error) => {
-      console.error('Error fetching coin prices:', error);
+      logger.error('Error fetching coin prices:', error);
       // If for some reason we couldn't fetch the ada price, get it from background store
       const adaPrice = await getADAPriceFromBackgroundStorage();
       if (!adaPrice) return coinPrices.adaPrices$.next({ prices: {}, status: 'error', timestamp: undefined });
@@ -216,7 +217,7 @@ exposeApi<LaceFeaturesApi>(
     baseChannel: LACE_FEATURES_CHANNEL,
     properties: laceFeaturesApiProperties
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
 const toUnhandledError = (error: unknown, type: UnhandledError['type']): UnhandledError => ({
@@ -254,5 +255,5 @@ exposeApi<BackgroundService>(
     baseChannel: BaseChannels.BACKGROUND_ACTIONS,
     properties: backgroundServiceProperties
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );

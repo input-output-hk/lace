@@ -18,7 +18,7 @@ import { CreateCollateral } from './CreateCollateral';
 import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 
 enum ReturnResponse {
   resolve = 'resolve',
@@ -51,12 +51,12 @@ const collateralRequestResponse = (action: RejectResponse | ResolveResponse) => 
         properties: { getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise }
       },
       {
-        logger: console,
+        logger,
         runtime
       }
     );
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -98,7 +98,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
         collateralRequestResponse({ response: ReturnResponse.resolve, utxos });
         redirectToCreateSuccess();
       } catch (error) {
-        console.error(error);
+        logger.error(error);
         redirectToCreateFailure();
       }
     },
@@ -115,7 +115,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
             getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise
           }
         },
-        { logger: console, runtime }
+        { logger, runtime }
       )
         .getCollateralRequest()
         .then(({ dappInfo: requestDappInfo, collateralRequest }) => {
@@ -157,7 +157,7 @@ export const DappCollateralContainer = (): React.ReactElement => {
           setIsCalculatingCollateral(false);
         });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       redirectToCreateFailure();
     }
   }, [redirectToCreateFailure, balance, availableRewards]);

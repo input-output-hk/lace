@@ -4,6 +4,7 @@ import pRetry from 'p-retry';
 import { MigrationState } from '../types';
 import { compareVersions, isVersionNewerThan, isVersionOlderThanOrEqual } from './util';
 import * as versions from './versions';
+import { logger } from '@lace/common';
 
 const MIGRATIONS_RETRIES = 4; // 5 attempts = first attempt + 4 retries
 
@@ -73,7 +74,7 @@ export const applyMigrations = async (
     for (const migration of upgradeMigrationsToApply) {
       await pRetry(
         async (attemptNumber) => {
-          console.info(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
+          logger.info(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
           const shouldSkip = await migration.shouldSkip?.();
           if (shouldSkip) return;
           const { prepare, assert, persist, rollback } = await migration.upgrade(password);
@@ -96,7 +97,7 @@ export const applyMigrations = async (
           minTimeout: 0,
           retries: MIGRATIONS_RETRIES,
           onFailedAttempt: (error) =>
-            console.error(
+            logger.error(
               `Migration attempt ${error.attemptNumber} for ${migration.version} upgrade failed. There are ${error.retriesLeft} retries left.`
             )
         }
@@ -107,7 +108,7 @@ export const applyMigrations = async (
     // Reload app states with updated storage
     window.location.reload();
   } catch (error) {
-    console.error('Error applying migrations:', error);
+    logger.error('Error applying migrations:', error);
     await storage.local.set({
       MIGRATION_STATE: { ...migrationState, state: 'error' } as MigrationState
     });

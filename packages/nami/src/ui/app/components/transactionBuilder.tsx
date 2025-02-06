@@ -46,7 +46,7 @@ import UnitDisplay from './unitDisplay';
 
 import type { ConfirmModalRef } from './confirmModal';
 import { StakingErrorType } from '../../../features/outside-handles-provider';
-import { Ellipsis } from '@lace/common';
+import {Ellipsis, logger} from '@lace/common';
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -376,7 +376,7 @@ const TransactionBuilder = (undefined, ref) => {
 
             await signAndSubmitTransaction();
           } catch (error) {
-            console.error(error);
+            logger.error(error);
             throw error;
           }
         }}
@@ -591,7 +591,7 @@ const TransactionBuilder = (undefined, ref) => {
 
             await signAndSubmitTransaction();
           } catch (error) {
-            console.error(error);
+            logger.error(error);
             throw error;
           }
         }}

@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-useless-undefined */
 import { Dialog, FileUpload, Text } from '@input-output-hk/lace-ui-toolkit';
+import { logger } from '@lace/common';
 import React, { VFC, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { FileErrorMessage, FileValidationError } from '../../../shared-wallets/types';
@@ -68,7 +69,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
       cosignerData && onRestoreSharedWallet(cosignerData);
       navigateToAppHome();
     } catch (error_) {
-      console.error(error_);
+      logger.error(error_);
     }
   };
 

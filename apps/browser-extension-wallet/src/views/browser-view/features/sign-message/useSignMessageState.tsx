@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@stores';
-import { PostHogAction, useObservable } from '@lace/common';
+import { logger, PostHogAction, useObservable } from '@lace/common';
 import { withSignDataConfirmation } from '@lib/wallet-api-ui';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import { Wallet } from '@lace/cardano';
@@ -62,7 +62,7 @@ export const useSignMessageState = (): SignMessageState => {
 
         setSignature(signatureGenerated);
       } catch (signingError: unknown) {
-        console.error('Error signing message:', signingError);
+        logger.error('Error signing message:', signingError);
         if (
           isHardwareWallet &&
           typeof signingError === 'object' &&

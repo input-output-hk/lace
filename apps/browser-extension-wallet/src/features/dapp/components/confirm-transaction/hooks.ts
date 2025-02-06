@@ -11,6 +11,7 @@ import { getTransactionAssetsId } from '@src/stores/slices';
 import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
 import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
+import { logger } from '@lace/common';
 
 export const useCreateAssetList = ({
   assets,
@@ -32,7 +33,7 @@ export const useCreateAssetList = ({
       })
         .then((result) => setAssetsInfo(result))
         .catch((error) => {
-          console.error(error);
+          logger.error(error);
         });
     }
   }, [assetIds, assetProvider, assets]);
@@ -119,7 +120,7 @@ export const useCreateMintedAssetList = ({
       })
         .then((result) => setAssetsInfo(result))
         .catch((error) => {
-          console.error(error);
+          logger.error(error);
         });
     }
   }, [assetIds, assetProvider, assets]);
@@ -175,7 +176,7 @@ export const useSignWithHardwareWallet = (
       await req.sign();
       redirectToSignSuccess();
     } catch (error) {
-      console.error('signWithHardwareWallet error', error);
+      logger.error('signWithHardwareWallet error', error);
       disallow(false);
       redirectToSignFailure();
     }

@@ -35,7 +35,7 @@ import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 import { getPoolInfos, getProviders } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
-import { PostHogAction, useObservable } from '@lace/common';
+import { logger, PostHogAction, useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
 import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
@@ -102,7 +102,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   useEffect(() => {
     getBackgroundStorage()
       .then(({ dappInjectCompatibilityMode }) => setIsCompatibilityMode(dappInjectCompatibilityMode))
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
   const handleCompatibilityModeChoice = async (newCompatMode: boolean) => {
     await setBackgroundStorage({ dappInjectCompatibilityMode: newCompatMode });
@@ -148,7 +148,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(console.error);
+      .catch(logger.error);
   }, []);
 
   const switchWalletMode = useCallback(async () => {

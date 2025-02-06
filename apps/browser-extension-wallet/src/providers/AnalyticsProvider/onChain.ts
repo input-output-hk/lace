@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers, @typescript-eslint/no-empty-function */
 import { useEffect } from 'react';
 import { PostHogAction, PostHogProperties, TX_CREATION_TYPE_KEY } from './analyticsTracker';
@@ -6,6 +5,7 @@ import { getValueFromLocalStorage, saveValueInLocalStorage } from '@src/utils/lo
 import { ILocalStorage, UnconfirmedTransaction, UnconfirmedTransactions } from '@src/types';
 import { EMPTY, Observable, Subject, filter, map, merge, take } from 'rxjs';
 import { ObservableWallet } from '@cardano-sdk/wallet';
+import { logger } from '@lace/common';
 
 const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 
@@ -110,7 +110,7 @@ export const sendConfirmedTransactionAnalytics = async ({
 
     saveUnconfirmedTransactionsFn(unconfirmedAndFreshTransactions);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 

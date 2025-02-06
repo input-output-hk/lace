@@ -7,6 +7,7 @@ import { consumeRemoteApi, RemoteApiPropertyType } from '@cardano-sdk/web-extens
 import { runtime } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import isEqual from 'lodash/isEqual';
+import { logger } from '@lace/common';
 
 interface DappProviderProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ export const DappProvider = ({ children, initialState }: DappProviderProps): Rea
           authorizedDappsList: RemoteApiPropertyType.HotObservable
         }
       },
-      { logger: console, runtime }
+      { logger, runtime }
     );
 
     authorizedDappService?.authorizedDappsList.subscribe((dapps) => {

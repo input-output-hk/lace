@@ -3,7 +3,7 @@ import { useEffect, useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { BuiltTxData, OutputsMap } from '../views/browser-view/features/send-transaction/types';
 import { useSpentBalances } from '../views/browser-view/features/send-transaction/store';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-transaction/helpers';
 import { useWalletStore } from '@src/stores';
 import { UseTranslationResponse } from 'react-i18next';
@@ -103,7 +103,7 @@ export const useInitializeTx = (
           reachedMaxAmountList: []
         });
       } catch (error) {
-        console.error('error initializing transaction:', { error });
+        logger.error('error initializing transaction:', { error });
         setBuiltTxData({
           uiTx: undefined,
           tx: undefined,

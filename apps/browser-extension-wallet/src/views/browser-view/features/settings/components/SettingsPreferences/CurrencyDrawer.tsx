@@ -2,7 +2,7 @@ import React from 'react';
 import { Radio, RadioChangeEvent, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
-import { Drawer, DrawerHeader, DrawerNavigation, toast } from '@lace/common';
+import { Drawer, DrawerHeader, DrawerNavigation, logger, toast } from '@lace/common';
 import SwithIcon from '@src/assets/icons/edit.component.svg';
 import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import styles from '../SettingsLayout.module.scss';
@@ -40,7 +40,7 @@ export const CurrencyDrawer = ({
         sendCurrencyChangeEvent(event.target.value);
       }
     } catch (error) {
-      console.error('Error updating currency', error);
+      logger.error('Error updating currency', error);
       toast.notify({ text: t('general.errors.somethingWentWrong'), icon: ErrorIcon });
     }
     return event;

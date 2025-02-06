@@ -3,6 +3,7 @@ import { Wallet } from '@lace/cardano';
 import { consumeRemoteApi } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
 import { Cardano, DRepProvider } from '@cardano-sdk/core';
+import { logger } from '@lace/common';
 
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
@@ -51,7 +52,7 @@ const providers = consumeRemoteApi<Wallet.WalletProvidersDependencies>(
     baseChannel: Wallet.walletProvidersChannel(process.env.WALLET_NAME),
     properties: Wallet.walletProvidersProperties
   },
-  { logger: console, runtime }
+  { logger, runtime }
 );
 
 export const getProviders: BlockchainProviderFactory = () => IBlockchainProvider.fromWalletProviders(providers);

@@ -12,6 +12,7 @@ import { FailedMigration } from './FailedMigration';
 import { MigrationInProgress } from './MigrationInProgress';
 import { useSecrets } from '@lace/core';
 import type { OnPasswordChange } from '@lace/core';
+import { logger } from '@lace/common';
 
 export interface MigrationContainerProps {
   children: React.ReactNode;
@@ -85,7 +86,7 @@ export const MigrationContainer = ({ children, appMode }: MigrationContainerProp
         setIsLoadingFirstTime(true);
         setMigrationState(value.MIGRATION_STATE as MigrationState);
       })
-      .catch((error) => console.error('Error fetching initial migration state:', error));
+      .catch((error) => logger.error('Error fetching initial migration state:', error));
 
     // Observe changes to MIGRATION_STATE in storage
     const observeMigrationState = async (changes: Record<string, Storage.StorageChange>) => {

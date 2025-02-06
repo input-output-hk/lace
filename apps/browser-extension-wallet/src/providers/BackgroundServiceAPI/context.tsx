@@ -4,6 +4,7 @@ import { backgroundServiceProperties } from '@lib/scripts/background/config';
 import { BackgroundService, BaseChannels } from '@lib/scripts/types';
 import React, { createContext, useContext } from 'react';
 import { runtime } from 'webextension-polyfill';
+import { logger } from '@lace/common';
 
 export interface BackgroundServiceAPIProviderProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ const backgroundServices = consumeRemoteApi<BackgroundService>(
     baseChannel: BaseChannels.BACKGROUND_ACTIONS,
     properties: backgroundServiceProperties
   },
-  { runtime, logger: console }
+  { runtime, logger }
 );
 
 const BackgroundServiceAPIContext = createContext<typeof backgroundServices>(backgroundServices);

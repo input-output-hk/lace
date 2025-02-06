@@ -6,7 +6,7 @@ import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { logger, observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
+import { observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
 import {
   bufferReviver,
   clearLocalStorage,
@@ -50,6 +50,7 @@ import {
   makeGenerateSharedWalletKey,
   useSecrets
 } from '@lace/core';
+import { logger } from '@lace/common';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
@@ -480,7 +481,7 @@ export const useWalletManager = (): UseWalletManager => {
       // Synchronize active wallet UI state with service worker
       const activeWallet = wallets.find((w) => w.walletId === activeWalletProps.walletId);
       if (!activeWallet) {
-        console.error('Active wallet not found', activeWallet, wallets);
+        logger.error('Active wallet not found', activeWallet, wallets);
         return;
       }
       const activeAccount =
@@ -765,7 +766,7 @@ export const useWalletManager = (): UseWalletManager => {
    */
   const switchNetwork = useCallback(
     async (chainName: Wallet.ChainName): Promise<void> => {
-      console.info('Switching chain to', chainName, AVAILABLE_CHAINS);
+      logger.debug('Switching chain to', chainName, AVAILABLE_CHAINS);
 
       const chainId = chainIdFromName(chainName);
       await walletManager.switchNetwork(chainId);

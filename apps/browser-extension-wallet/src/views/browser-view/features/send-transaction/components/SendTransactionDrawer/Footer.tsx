@@ -6,7 +6,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@lace/common';
+import { Button, logger } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from './Footer.module.scss';
 import EditIcon from '@assets/icons/edit.component.svg';
@@ -205,7 +205,7 @@ export const Footer = withAddressBookContext(
             sharedWalletTx = Serialization.Transaction.fromCore(signedTx);
           }
         } catch (error) {
-          console.error('Shared wallet TX sign error', error);
+          logger.error('Shared wallet TX sign error', error);
           throw error;
         }
 
@@ -217,7 +217,7 @@ export const Footer = withAddressBookContext(
           try {
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
           } catch (error) {
-            console.error('Shared wallet TX submit error', error);
+            logger.error('Shared wallet TX submit error', error);
             throw error;
           }
         } else {
@@ -235,7 +235,7 @@ export const Footer = withAddressBookContext(
         try {
           await inMemoryWallet.submitTx(signedTx);
         } catch (error) {
-          console.error('TX submit error', error);
+          logger.error('TX submit error', error);
           throw error;
         }
         txSubmitted$.next({
