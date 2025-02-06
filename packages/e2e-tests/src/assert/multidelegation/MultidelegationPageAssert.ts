@@ -310,6 +310,7 @@ class MultidelegationPageAssert {
 
   assertSeeCurrentlyStakingTooltip = async (currencyCode = 'USD') => {
     await Tooltip.component.waitForDisplayed();
+    await Tooltip.component.waitForStable();
     expect(await Tooltip.label.getText()).contains(`${currencyCode} Value`);
     expect(await Tooltip.value.getText()).to.match(TestnetPatterns.USD_VALUE_NO_SUFFIX_REGEX); // TODO: update when LW-8935 is resolved
   };

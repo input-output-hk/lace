@@ -169,6 +169,7 @@ class TopNavigationAssert {
     if (withTooltip) {
       const expandButtonTooltip = MenuHeader.expandButtonTooltip;
       await expandButtonTooltip.waitForDisplayed();
+      await expandButtonTooltip.waitForStable();
       expect(await expandButtonTooltip.getText()).to.equal(await t('expandPopup'));
     }
   }

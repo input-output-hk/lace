@@ -179,6 +179,7 @@ class NftCreateFolderAssert {
     await YoullHaveToStartAgainModal.container.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       await YoullHaveToStartAgainModal.title.waitForDisplayed();
+      await YoullHaveToStartAgainModal.title.waitForStable();
       expect(await YoullHaveToStartAgainModal.title.getText()).to.equal(await t('browserView.nfts.exitModal.header'));
 
       await YoullHaveToStartAgainModal.description.waitForDisplayed();

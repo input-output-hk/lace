@@ -5,6 +5,7 @@ import { t } from '../utils/translationService';
 class ModalAssert {
   async assertSeeModalContainer(shouldSee: boolean) {
     await Modal.container.waitForDisplayed({ reverse: !shouldSee });
+    await Modal.container.waitForStable({ reverse: !shouldSee });
   }
 
   async assertSeeTitle(expectedTitle: string) {

@@ -7,6 +7,7 @@ class MultidelegationDAppIssueModalAssert {
     await MultidelegationDAppIssueModal.container.waitForDisplayed({ reverse: !shouldSee });
     if (shouldSee) {
       await MultidelegationDAppIssueModal.title.waitForDisplayed();
+      await MultidelegationDAppIssueModal.title.waitForStable();
       expect(await MultidelegationDAppIssueModal.title.getText()).to.equal(await t('modals.dapp.title'));
       await MultidelegationDAppIssueModal.description.waitForDisplayed();
       const descriptionTranslation = await t('modals.dapp.description');
