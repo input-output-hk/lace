@@ -172,9 +172,19 @@ export const createObservableTransactionsByAddressesProvider =
           throw new Error("assertion failed: provider supports only {order: 'desc', startAt: 0}");
         }
         const response = await provider.transactionsByAddresses(args);
-        const transactions = response.pageResults;
-        if (transactions.length === 0) return transactions;
-        const lastBlockHeight = transactions[transactions.length - 1].blockHeader.blockNo;
+        const fetchedTransactions = response.pageResults;
+        const transactionsToEmit = fetchedTransactions.slice(0, args.pagination.limit);
+        if (transactionsToEmit.length === 0) return transactionsToEmit;
+        const lastBlockHeight = transactionsToEmit[transactionsToEmit.length - 1].blockHeader.blockNo;
+        // add transactions from the same block as last tx in the slice that we're going to emit
+        const droppedTransactions = fetchedTransactions.slice(args.pagination.limit);
+        for (const tx of droppedTransactions) {
+          if (tx.blockHeader.blockNo >= lastBlockHeight) {
+            transactionsToEmit.push(tx);
+          } else {
+            break;
+          }
+        }
         // PERF: this could be optimized to not re-fetch last tx details
         const lastTxBlockTransactions = await provider.transactionsByAddresses({
           ...args,
@@ -190,8 +200,10 @@ export const createObservableTransactionsByAddressesProvider =
           }
         });
         return [
-          ...transactions,
-          ...lastTxBlockTransactions.pageResults.filter((extraTx) => !transactions.some((tx) => tx.id === extraTx.id))
+          ...transactionsToEmit,
+          ...lastTxBlockTransactions.pageResults.filter(
+            (extraTx) => !transactionsToEmit.some((tx) => tx.id === extraTx.id)
+          )
         ];
       }
     });
