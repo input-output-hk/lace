@@ -141,6 +141,7 @@ class DAppConnectorAssert {
   async assertSeeDAppConnectionModal() {
     await AuthorizeDAppModal.container.waitForDisplayed();
     await AuthorizeDAppModal.title.waitForDisplayed();
+    await AuthorizeDAppModal.title.waitForStable();
     expect(await AuthorizeDAppModal.title.getText()).to.equal(await t('dapp.connect.modal.header'));
 
     await AuthorizeDAppModal.description.waitForDisplayed();
@@ -171,6 +172,7 @@ class DAppConnectorAssert {
   async assertSeeDAppRemovalConfirmationModal() {
     await RemoveDAppModal.container.waitForDisplayed();
     await RemoveDAppModal.title.waitForDisplayed();
+    await RemoveDAppModal.title.waitForStable();
     expect(await RemoveDAppModal.title.getText()).to.equal(await t('dapp.delete.title'));
 
     await RemoveDAppModal.description.waitForDisplayed();

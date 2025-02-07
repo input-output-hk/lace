@@ -289,6 +289,8 @@ class DrawerSendExtendedAssert {
   }
 
   async assertSeeAddressErrorBanner() {
+    await Banner.description.waitForDisplayed();
+    await Banner.description.waitForStable();
     const text = await Banner.description.getText();
     expect(text).to.equal(await t('general.errors.wrongNetworkAddress'));
   }
