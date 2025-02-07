@@ -13519,7 +13519,6 @@ __metadata:
     "@types/react-lottie": ^1.2.6
     "@types/react-portal": 4.0.7
     "@types/text-encoding-utf-8": ^1
-    "@types/uuid": ^8.3.4
     "@types/w3c-web-hid": ^1.0.3
     "@types/webextension-polyfill": 0.10.0
     antd: ^4.24.10
@@ -13676,7 +13675,7 @@ __metadata:
     "@tsconfig/create-react-app": ^1.0.3
     "@types/babel__preset-env": ^7
     "@types/debounce-promise": ^3.1.6
-    "@types/uuid": ^8
+    "@types/uuid": ^8.3.4
     ajv: ^8.16.0
     antd: ^4.24.10
     classnames: ^2.3.1
@@ -13696,7 +13695,6 @@ __metadata:
     storybook-addon-pseudo-states: ^1.15.2
     tsconfig-paths-webpack-plugin: 3.5.2
     typescript: ^4.9.5
-    uuid: ^8.3.2
     zod: ^3.23.8
     zxcvbn: ^4.4.2
   peerDependencies:
@@ -13859,6 +13857,7 @@ __metadata:
     "@svgr/plugin-jsx": ^8.0.1
     "@testing-library/react-hooks": ^8.0.1
     "@tsconfig/create-react-app": ^1.0.3
+    "@types/uuid": ^8.3.4
     "@vanilla-extract/css": ^1.11.1
     "@vanilla-extract/esbuild-plugin": ^2.2.2
     "@vanilla-extract/recipes": ^0.5.1
@@ -13893,7 +13892,6 @@ __metadata:
     typescript: ^4.9.5
     use-resize-observer: ^9.1.0
     utility-types: ^3.10.0
-    uuid: ^8.3.2
     vite-plugin-commonjs: ^0.10.1
     vite-plugin-node-polyfills: ^0.19.0
     vite-plugin-svgr: ^4.2.0
@@ -25104,7 +25102,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:8.3.4, @types/uuid@npm:^8, @types/uuid@npm:^8.3.4":
+"@types/uuid@npm:8.3.4, @types/uuid@npm:^8.3.4":
   version: 8.3.4
   resolution: "@types/uuid@npm:8.3.4"
   checksum: 6f11f3ff70f30210edaa8071422d405e9c1d4e53abbe50fdce365150d3c698fe7bbff65c1e71ae080cbfb8fded860dbb5e174da96fdbbdfcaa3fb3daa474d20f
@@ -43940,6 +43938,7 @@ __metadata:
     "@types/react-dom": 17.0.9
     "@types/react-router-dom": 5.1.8
     "@types/storybook-react-router": ^1.0.2
+    "@types/uuid": ^8.3.4
     "@types/zxcvbn": ^4.4.1
     "@typescript-eslint/eslint-plugin": ^4.29.0
     "@typescript-eslint/parser": ^4.29.0
@@ -44016,6 +44015,7 @@ __metadata:
     typescript: ^4.9.5
     typescript-transform-paths: 3.3.1
     utility-types: ^3.11.0
+    uuid: ^8.3.2
     webpack: 5.91.0
     webpack-cli: 4.7.2
     webpack-dev-server: ^4.9.3

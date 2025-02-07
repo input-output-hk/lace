@@ -115,7 +115,6 @@
     "@types/react-lottie": "^1.2.6",
     "@types/react-portal": "4.0.7",
     "@types/text-encoding-utf-8": "^1",
-    "@types/uuid": "^8.3.4",
     "@types/w3c-web-hid": "^1.0.3",
     "@types/webextension-polyfill": "0.10.0",
     "dotenv-defaults": "5.0.2",
