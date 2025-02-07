@@ -1,13 +1,16 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { Button, PostHogAction } from '@lace/common';
+import { Button, PostHogAction, useAutoFocus } from '@lace/common';
 import { Password } from '@lace/core';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
 import styles from './SignConfirmation.module.scss';
+
+const inputId = `id-${uuidv4()}`;
 
 interface SignConfirmationProps {
   popupView?: boolean;
@@ -22,6 +25,8 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
     isSharedWallet,
     walletName,
   } = useOutsideHandles();
+
+  useAutoFocus(inputId, true);
 
   return (
     <>
@@ -61,6 +66,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
             error={isPasswordValid === false}
             errorMessage={t('drawer.sign.error.invalidPassword')}
             label={t('drawer.sign.passwordPlaceholder')}
+            id={inputId}
             autoFocus
           />
         </div>

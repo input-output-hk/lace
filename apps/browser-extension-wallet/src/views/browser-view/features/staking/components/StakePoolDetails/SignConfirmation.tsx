@@ -1,8 +1,9 @@
 /* eslint-disable react/no-multi-comp */
 import React, { ReactElement, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
-import { Button, useObservable } from '@lace/common';
+import { Button, useObservable, useAutoFocus } from '@lace/common';
 import { Password, OnPasswordChange, useSecrets } from '@lace/core';
 import { useStakePoolDetails, sectionsConfig } from '../../store';
 import { Sections } from '../../types';
@@ -14,6 +15,8 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useWalletStore } from '@src/stores';
 
+const inputId = `id-${uuidv4()}`;
+
 type SignConfirmationProps = {
   popupView?: boolean;
 };
@@ -24,6 +27,8 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
   const { isPasswordValid } = useSubmitingState();
 
   const handleChange: OnPasswordChange = (target) => setPassword(target);
+
+  useAutoFocus(inputId, true);
 
   return (
     <>
@@ -43,6 +48,7 @@ export const SignConfirmation = ({ popupView }: SignConfirmationProps): React.Re
             error={isPasswordValid === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
             label={t('browserView.transaction.send.password.placeholder')}
+            id={inputId}
             autoFocus
           />
         </div>

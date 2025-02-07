@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Spin } from 'antd';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
-import { Button, PostHogAction } from '@lace/common';
+import { Button, PostHogAction, useAutoFocus } from '@lace/common';
 import { Password, useSecrets } from '@lace/core';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
@@ -14,6 +15,8 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { WalletType } from '@cardano-sdk/web-extension';
 import { createPassphrase } from '@lib/wallet-api-ui';
 import { useDisallowSignTx, useOnUnload } from './confirm-transaction/hooks';
+
+const inputId = `id-${uuidv4()}`;
 
 export const SignTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -85,6 +88,8 @@ export const SignTransaction = (): React.ReactElement => {
 
   useOnUnload(cancelTransaction);
 
+  useAutoFocus(inputId, true);
+
   return (
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
@@ -97,6 +102,7 @@ export const SignTransaction = (): React.ReactElement => {
             onSubmit={(e) => handleSubmit(e, password)}
             error={validPassword === false}
             errorMessage={t('browserView.transaction.send.error.invalidPassword')}
+            id={inputId}
             autoFocus
           />
         </Spin>

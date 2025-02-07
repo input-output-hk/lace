@@ -5,14 +5,17 @@ import {
   Text,
   UncontrolledPasswordBox,
 } from '@input-output-hk/lace-ui-toolkit';
-import { logger } from '@lace/common';
+import { logger, useAutoFocus } from '@lace/common';
 import { useSecrets } from '@src/ui/hooks';
 import cn from 'classnames';
 import React, { ReactElement, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
 import { keyGenerationTimelineSteps } from '../timelineSteps';
 import styles from './EnterPassword.module.scss';
+
+const inputId = `id-${uuidv4()}`;
 
 export type WalletKind = 'hot' | 'cold';
 
@@ -64,6 +67,8 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
     passwordErrorMessage = t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordErrorMessage.generic');
   }
 
+  useAutoFocus(inputId, true);
+
   return (
     <SharedWalletLayout
       title={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.title')}
@@ -104,6 +109,8 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             next();
           }}
           errorMessage={passwordErrorMessage}
+          id={inputId}
+          autoFocus
         />
       </Flex>
     </SharedWalletLayout>

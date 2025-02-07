@@ -285,7 +285,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       the password is not stored in the component state */}
       {enableAccountPasswordDialog.isOpen && (
         <EnableAccountPasswordPrompt
-          open
+          open={enableAccountPasswordDialog.isOpen}
           isPopup={isPopup}
           wasPasswordIncorrect={enableAccountPasswordDialog.data?.wasPasswordIncorrect}
           onCancel={enableAccountPasswordDialog.hide}
