@@ -252,6 +252,7 @@ class WalletAddressPageAssert {
 
   async assertSeeAdvancedModeToggleTooltip() {
     await WalletAddressPage.tooltip.waitForDisplayed();
+    await WalletAddressPage.tooltip.waitForStable();
     expect(await WalletAddressPage.tooltip.getText()).to.equal(await t('qrInfo.advancedMode.toggle.description'));
   }
 

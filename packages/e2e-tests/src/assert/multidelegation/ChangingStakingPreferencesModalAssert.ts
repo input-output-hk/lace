@@ -6,6 +6,7 @@ class ChangingStakingPreferencesModalAssert {
   assertSeeModal = async () => {
     await ChangingStakingPreferencesModal.container.waitForDisplayed();
     await ChangingStakingPreferencesModal.title.waitForDisplayed();
+    await ChangingStakingPreferencesModal.title.waitForStable();
     expect(await ChangingStakingPreferencesModal.title.getText()).to.equal(
       await t('modals.changingPreferences.title', 'staking')
     );
