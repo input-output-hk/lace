@@ -74,7 +74,7 @@ export const applyMigrations = async (
     for (const migration of upgradeMigrationsToApply) {
       await pRetry(
         async (attemptNumber) => {
-          logger.info(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
+          logger.debug(`Applying migration for version ${migration.version} (attempt: ${attemptNumber})`);
           const shouldSkip = await migration.shouldSkip?.();
           if (shouldSkip) return;
           const { prepare, assert, persist, rollback } = await migration.upgrade(password);

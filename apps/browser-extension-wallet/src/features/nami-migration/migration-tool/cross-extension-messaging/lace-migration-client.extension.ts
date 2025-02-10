@@ -38,9 +38,9 @@ export const completeMigration: CompleteMigration = () => {
 };
 
 export const handleNamiRequests = (): void => {
-  logger.info('[NAMI MIGRATION] createLaceMigrationPingListener');
+  logger.debug('[NAMI MIGRATION] createLaceMigrationPingListener');
   runtime.onMessageExternal.addListener(createLaceMigrationPingListener(NAMI_EXTENSION_ID));
-  logger.info('[NAMI MIGRATION] createLaceMigrationOpenListener');
+  logger.debug('[NAMI MIGRATION] createLaceMigrationOpenListener');
   runtime.onMessageExternal.addListener(
     createLaceMigrationOpenListener(NAMI_EXTENSION_ID, LACE_EXTENSION_ID, tabs.create)
   );

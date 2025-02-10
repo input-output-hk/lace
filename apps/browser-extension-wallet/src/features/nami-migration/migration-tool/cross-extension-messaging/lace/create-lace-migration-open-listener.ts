@@ -5,7 +5,7 @@ import { logger } from '@lace/common';
 export const createLaceMigrationOpenListener =
   (namiExtensionId: string, laceExtensionId: string, createTab: ({ url }: { url: string }) => void) =>
   async (message: NamiMessages, sender: MessageSender): Promise<void> => {
-    logger.info('[NAMI MIGRATION] createLaceMigrationOpenListener', message, sender);
+    logger.debug('[NAMI MIGRATION] createLaceMigrationOpenListener', message, sender);
     if (message === NamiMessages.open && sender.id === namiExtensionId) {
       // First close all open lace tabs
       await closeAllLaceWindows();

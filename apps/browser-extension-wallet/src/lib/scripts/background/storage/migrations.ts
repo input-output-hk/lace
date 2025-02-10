@@ -24,7 +24,7 @@ const migrateStore = async <T, Store>(
     return false;
   }
   await firstValueFrom(set(toStore, fromValue));
-  logger.info('Migrated store');
+  logger.debug('Migrated store');
   return true;
 };
 

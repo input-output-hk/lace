@@ -86,7 +86,7 @@ export const initializeInjectedScript = async ({ logger }: cip30.InitializeInjec
 };
 
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
-  appLogger.info('injecting content script');
+  appLogger.debug('injecting content script');
   // Disable logging in production for performance & security measures
   initializeInjectedScript({ logger: appLogger });
 }
