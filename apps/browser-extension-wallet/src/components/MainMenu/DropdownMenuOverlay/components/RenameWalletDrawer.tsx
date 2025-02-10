@@ -13,7 +13,6 @@ const getDerivationPath = (accountIndex: number) =>
   `m/${KeyManagement.KeyPurpose.STANDARD}'/${KeyManagement.CardanoKeyConst.COIN_TYPE}'/${accountIndex}'`;
 
 const MAX_CHARACTER_LENGTH = 20;
-const isValidInputLength = (name: string): boolean => name.length <= MAX_CHARACTER_LENGTH;
 
 interface RenameWalletDrawerProps {
   open: boolean;
@@ -36,7 +35,7 @@ const getStandardAccountsInitValues = (accounts: Bip32WalletAccount<Wallet.Accou
           name: account.metadata.name
         }
       },
-      hasError: false
+      errorMessage: ''
     }));
 
 export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDrawerProps): ReactElement => {
@@ -46,17 +45,22 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
   const { walletRepository } = useWalletManager();
   const [newWalletName, setNewWalletName] = useState({
     value: wallet.metadata.name,
-    hasError: false
+    errorMessage: ''
   });
   const [accountsData, setAccountsData] = useState(
     isAnyBip32Wallet(wallet) ? getStandardAccountsInitValues(wallet.accounts) : []
   );
 
-  const errorMessage = `${t('browserView.renameWalletDrawer.inputLengthError', { length: MAX_CHARACTER_LENGTH })}`;
+  const isInputValid = (name: string): string => {
+    if (!name.trim()) return t('browserView.renameWalletDrawer.inputEmptyError');
+    if (name.length > MAX_CHARACTER_LENGTH)
+      return `${t('browserView.renameWalletDrawer.inputLengthError', { length: MAX_CHARACTER_LENGTH })}`;
+    return '';
+  };
 
   const isSaveButtonDisabled = useMemo(
-    () => newWalletName.hasError || accountsData.some((account) => account.hasError),
-    [accountsData, newWalletName.hasError]
+    () => !!newWalletName.errorMessage || !!accountsData.some((account) => account.errorMessage),
+    [accountsData, newWalletName.errorMessage]
   );
 
   const renameWallet = async () => {
@@ -97,7 +101,7 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
     setAccountsData((prev) => {
       const currentAccountData = [...prev];
       currentAccountData[index].value.metadata.name = event.target.value;
-      currentAccountData[index].hasError = !isValidInputLength(event.target.value);
+      currentAccountData[index].errorMessage = isInputValid(event.target.value);
       return currentAccountData;
     });
   };
@@ -140,9 +144,15 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
           <TextBox
             label={t('browserView.renameWalletDrawer.walletName')}
             value={newWalletName.value}
-            onChange={(e) => setNewWalletName({ value: e.target.value, hasError: !isValidInputLength(e.target.value) })}
+            onChange={(e) => {
+              const errorMessage = isInputValid(e.target.value);
+              setNewWalletName({
+                value: e.target.value,
+                errorMessage
+              });
+            }}
             w="$fill"
-            errorMessage={newWalletName.hasError ? errorMessage : undefined}
+            errorMessage={newWalletName.errorMessage}
           />
         </Box>
 
@@ -159,7 +169,7 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
                   <TextBox
                     label={getDerivationPath(account.value.accountIndex)}
                     value={accountsData[index]?.value.metadata.name}
-                    errorMessage={accountsData[index]?.hasError ? errorMessage : undefined}
+                    errorMessage={accountsData[index]?.errorMessage}
                     w="$fill"
                     onChange={(e) => handleOnChangeAccountData(e, index)}
                   />

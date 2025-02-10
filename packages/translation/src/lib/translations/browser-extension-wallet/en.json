@@ -579,6 +579,7 @@
   "browserView.renameWalletDrawer.renameSuccessful": "Wallet renamed successfully",
   "browserView.renameWalletDrawer.renameFailed": "Failed to rename wallet",
   "browserView.renameWalletDrawer.inputLengthError": "Max {{length}} characters",
+  "browserView.renameWalletDrawer.inputEmptyError": "Name cannot be empty",
   "browserView.renameWalletDrawer.save": "Save",
   "browserView.renameWalletDrawer.cancel": "Cancel",
   "corruptedData.actionDescription": "You will need to restore your wallet again with your recovery phrase.",
