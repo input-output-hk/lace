@@ -31,7 +31,10 @@ const getStandardAccountsInitValues = (accounts: Bip32WalletAccount<Wallet.Accou
     .map((account) => ({
       value: {
         accountIndex: account.accountIndex,
-        metadata: account.metadata
+        metadata: {
+          ...account.metadata,
+          name: account.metadata.name
+        }
       },
       hasError: false
     }));
