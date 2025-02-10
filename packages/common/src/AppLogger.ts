@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from 'ts-log';
 import { stringifyWithFallback } from '@src/ui/lib';
+import * as Sentry from '@sentry/react';
 
 enum LogLevel {
   error = 0,
@@ -27,7 +28,13 @@ class AppLogger implements Logger {
     return params.map((param) => {
       const [value, error] = stringifyWithFallback(param);
       if (error) {
-        console.error('AppLogger: Failed to stringify the log param', { error, param });
+        Sentry.captureMessage('AppLogger: Failed to stringify the log param', {
+          level: 'error',
+          extra: {
+            error,
+            param
+          }
+        });
       }
 
       return value;
