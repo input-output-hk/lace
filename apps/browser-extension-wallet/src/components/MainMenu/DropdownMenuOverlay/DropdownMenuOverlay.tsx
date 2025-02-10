@@ -22,7 +22,7 @@ import { WalletAccounts } from './components/WalletAccounts';
 import { AddSharedWalletLink } from '@components/MainMenu/DropdownMenuOverlay/components/AddSharedWalletLink';
 import { useWalletStore } from '@stores';
 import classNames from 'classnames';
-import type { AnyBip32Wallet, AnyWallet } from '@cardano-sdk/web-extension';
+import type { AnyBip32Wallet } from '@cardano-sdk/web-extension';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
@@ -53,8 +53,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, setManageAnyWallet, walletType, isSharedWallet, isHardwareWallet } =
-    useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isHardwareWallet } = useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
@@ -81,8 +80,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   topSection = topSection ?? (
     <UserInfo
       onOpenWalletAccounts={openWalletAccounts}
-      onOpenEditWallet={(wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
-        setManageAnyWallet(wallet);
+      onOpenEditWallet={(wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
+        setManageAccountsWallet(wallet);
         setIsRenamingWallet(true);
       }}
     />

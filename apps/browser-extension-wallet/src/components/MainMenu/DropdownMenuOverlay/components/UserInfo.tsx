@@ -32,7 +32,7 @@ const overlayInnerStyle = {
 interface UserInfoProps {
   avatarVisible?: boolean;
   onOpenWalletAccounts?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
-  onOpenEditWallet?: (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
+  onOpenEditWallet?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
 }
 
 interface RenderWalletOptionsParams {
@@ -132,9 +132,9 @@ export const UserInfo = ({
               : undefined
           }
           {...(wallet.type !== WalletType.Script && {
-            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
+            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
+            onOpenEditWallet: () => onOpenEditWallet(wallet)
           })}
-          onOpenEditWallet={() => onOpenEditWallet(wallet)}
         />
       );
     },

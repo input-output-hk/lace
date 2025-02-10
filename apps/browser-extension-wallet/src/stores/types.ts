@@ -16,7 +16,7 @@ import {
 import { FetchWalletActivitiesProps, FetchWalletActivitiesReturn, IBlockchainProvider } from './slices';
 import { IAssetDetails } from '@src/views/browser-view/features/assets/types';
 import { TokenInfo } from '@src/utils/get-assets-information';
-import { AnyBip32Wallet, AnyWallet, WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, WalletManagerApi, WalletType } from '@cardano-sdk/web-extension';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { Cardano, Reward } from '@cardano-sdk/core';
 import { StakePoolSortOptions } from '@lace/staking';
@@ -98,8 +98,6 @@ export type EnvironmentTypes = Wallet.ChainName;
 export interface WalletInfoSlice {
   manageAccountsWallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined;
   setManageAccountsWallet: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
-  manageAnyWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined;
-  setManageAnyWallet: (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
   walletInfo?: WalletInfo | undefined;
   setWalletInfo: (info?: WalletInfo) => void;
   inMemoryWallet: Wallet.ObservableWallet | undefined;

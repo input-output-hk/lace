@@ -4,7 +4,7 @@ import { Drawer, DrawerHeader, DrawerNavigation, logger, PostHogAction, toast } 
 import { Box, Button, Flex, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletStore } from '@stores';
 import { TOAST_DEFAULT_DURATION, useWalletManager } from '@hooks';
-import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount } from '@cardano-sdk/web-extension';
+import { Bip32WalletAccount } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
@@ -19,10 +19,6 @@ interface RenameWalletDrawerProps {
   popupView: boolean;
   onClose: () => void;
 }
-
-const isAnyBip32Wallet = (
-  wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): wallet is AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> => 'accounts' in wallet;
 
 const getStandardAccountsInitValues = (accounts: Bip32WalletAccount<Wallet.AccountMetadata>[]) =>
   accounts
@@ -41,15 +37,13 @@ const getStandardAccountsInitValues = (accounts: Bip32WalletAccount<Wallet.Accou
 export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDrawerProps): ReactElement => {
   const posthog = usePostHogClientContext();
   const { t } = useTranslation();
-  const { manageAnyWallet: wallet } = useWalletStore();
+  const { manageAccountsWallet: wallet } = useWalletStore();
   const { walletRepository } = useWalletManager();
   const [newWalletName, setNewWalletName] = useState({
     value: wallet.metadata.name,
     errorMessage: ''
   });
-  const [accountsData, setAccountsData] = useState(
-    isAnyBip32Wallet(wallet) ? getStandardAccountsInitValues(wallet.accounts) : []
-  );
+  const [accountsData, setAccountsData] = useState(getStandardAccountsInitValues(wallet.accounts));
 
   const isInputValid = (name: string): string => {
     if (!name.trim()) return t('browserView.renameWalletDrawer.inputEmptyError');
@@ -155,29 +149,26 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
             errorMessage={newWalletName.errorMessage}
           />
         </Box>
-
-        {isAnyBip32Wallet(wallet) && (
-          <Box mt="$60" mb="$16">
-            <Box mb="$24">
-              <Text.Body.Large color="secondary">
-                {t('browserView.renameWalletDrawer.renameEnabledAccounts')}
-              </Text.Body.Large>
-            </Box>
-            <Flex flexDirection="column" gap="$16">
-              {accountsData.map((account, index: number) => (
-                <Box key={account.value.accountIndex} w="$fill">
-                  <TextBox
-                    label={getDerivationPath(account.value.accountIndex)}
-                    value={accountsData[index]?.value.metadata.name}
-                    errorMessage={accountsData[index]?.errorMessage}
-                    w="$fill"
-                    onChange={(e) => handleOnChangeAccountData(e, index)}
-                  />
-                </Box>
-              ))}
-            </Flex>
+        <Box mt="$60" mb="$16">
+          <Box mb="$24">
+            <Text.Body.Large color="secondary">
+              {t('browserView.renameWalletDrawer.renameEnabledAccounts')}
+            </Text.Body.Large>
           </Box>
-        )}
+          <Flex flexDirection="column" gap="$16">
+            {accountsData.map((account, index: number) => (
+              <Box key={account.value.accountIndex} w="$fill">
+                <TextBox
+                  label={getDerivationPath(account.value.accountIndex)}
+                  value={accountsData[index]?.value.metadata.name}
+                  errorMessage={accountsData[index]?.errorMessage}
+                  w="$fill"
+                  onChange={(e) => handleOnChangeAccountData(e, index)}
+                />
+              </Box>
+            ))}
+          </Flex>
+        </Box>
       </>
     </Drawer>
   );
