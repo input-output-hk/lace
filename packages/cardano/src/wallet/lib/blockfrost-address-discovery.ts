@@ -224,7 +224,7 @@ export class BlockfrostAddressDiscovery implements AddressDiscovery {
   }
 
   public async discover(manager: Bip32Account): Promise<GroupedAddress[]> {
-    this.#logger.info('Discovering addresses using Blockfrost...');
+    this.#logger.debug('Discovering addresses using Blockfrost...');
 
     const firstAddress = await manager.deriveAddress({ index: 0, type: AddressType.External }, 0);
 

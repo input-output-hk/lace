@@ -6,7 +6,7 @@ import { LACE_FEATURES_CHANNEL, laceFeaturesApiProperties } from './injectUtil';
 const logger = console;
 // Disable logging in production for performance & security measures
 if (process.env.USE_DAPP_CONNECTOR === 'true') {
-  logger.info('initializing content script');
+  logger.debug('initializing content script');
 
   const initializeContentScript = (walletName: string, dependencies: MessengerDependencies) => {
     const apis = [

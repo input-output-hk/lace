@@ -44,7 +44,7 @@ const createTxSubmitProvider = (
   customSubmitTxUrl?: string
 ): TxSubmitProvider => {
   if (customSubmitTxUrl) {
-    httpProviderConfig.logger.info(`Using custom TxSubmit api URL ${customSubmitTxUrl}`);
+    httpProviderConfig.logger.debug(`Using custom TxSubmit api URL ${customSubmitTxUrl}`);
 
     const url = new URL(customSubmitTxUrl);
 

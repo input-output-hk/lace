@@ -20,5 +20,5 @@ exposeApi<UserIdServiceInterface>(
   { logger, runtime }
 );
 
-logger.info('[NAMI MIGRATION] handling nami requests');
+logger.debug('[NAMI MIGRATION] handling nami requests');
 laceMigrationClient.handleNamiRequests();

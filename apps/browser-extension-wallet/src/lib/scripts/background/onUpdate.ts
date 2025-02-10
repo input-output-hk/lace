@@ -8,7 +8,7 @@ type UpdateType = 'downgrade' | 'update';
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
-  logger.info('[onUpdate] checking migration state:', details.reason, details.previousVersion);
+  logger.debug('[onUpdate] checking migration state:', details.reason, details.previousVersion);
   if (details.reason === 'update' || details.reason === 'install') {
     // Initialize migration state with not-loaded
     await initMigrationState();
@@ -23,13 +23,13 @@ const compareVersions = (v1 = '', v2 = '') => v1.localeCompare(v2, undefined, { 
 
 // extension updates announcements
 const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetailsType) => {
-  logger.info('[onUpdate] checking for updates:', reason);
+  logger.debug('[onUpdate] checking for updates:', reason);
   const { version: currentVersion } = runtime.getManifest();
 
   const { aboutExtension } = (await storage.local.get(ABOUT_EXTENSION_KEY)) || {};
   const previousVersion = aboutExtension?.version;
 
-  logger.info('[onUpdate] checking for updates:', previousVersion, currentVersion);
+  logger.debug('[onUpdate] checking for updates:', previousVersion, currentVersion);
   if (reason === 'update' && currentVersion !== previousVersion) {
     const updateType: UpdateType = compareVersions(currentVersion, previousVersion) < 0 ? 'downgrade' : 'update';
 
@@ -37,7 +37,7 @@ const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetail
       [ABOUT_EXTENSION_KEY]: { version: currentVersion, acknowledged: false, reason: updateType } as ExtensionUpdateData
     });
 
-    logger.info('[onUpdate] extension got updated due to reason:', updateType);
+    logger.debug('[onUpdate] extension got updated due to reason:', updateType);
   }
 };
 
@@ -47,7 +47,7 @@ if (!runtime.onInstalled.hasListener(displayReleaseAnnouncements))
 if (!runtime.onInstalled.hasListener(checkMigrationsOnUpdate)) runtime.onInstalled.addListener(checkMigrationsOnUpdate);
 
 const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) => {
-  logger.info(`[onUpdate] updating to version ${details.version}`);
+  logger.debug(`[onUpdate] updating to version ${details.version}`);
   if (runtime.onUpdateAvailable.hasListener(updateToVersionCallback)) {
     runtime.onUpdateAvailable.removeListener(updateToVersionCallback);
   }
