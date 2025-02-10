@@ -1,5 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { DappCreateCollateralProps } from './types';
 import {
   OnPasswordChange,
@@ -17,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks';
 import { Layout } from '../Layout';
-import { Banner, Button, useObservable } from '@lace/common';
+import { Banner, Button, useAutoFocus, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { isNotNil } from '@cardano-sdk/util';
@@ -28,6 +29,8 @@ import styles from './styles.module.scss';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 const { Text } = Typography;
+
+const inputId = `id-${uuidv4()}`;
 
 export const CreateCollateral = ({
   dappInfo,
@@ -108,6 +111,8 @@ export const CreateCollateral = ({
     return t('browserView.settings.wallet.collateral.confirmWithDevice', { hardwareWallet: walletType });
   }, [isInMemoryWallet, walletType, t]);
 
+  useAutoFocus(inputId, true);
+
   return (
     <Layout
       pageClassname={styles.spaceBetween}
@@ -128,6 +133,7 @@ export const CreateCollateral = ({
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}
+                  id={inputId}
                   autoFocus
                 />
               </Spin>

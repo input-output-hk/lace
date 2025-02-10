@@ -1,7 +1,8 @@
 import { Spin, Typography } from 'antd';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Banner } from '@lace/common';
+import { Banner, useAutoFocus } from '@lace/common';
 import { OnPasswordChange, Password, renderAmountInfo, renderLabel, RowContainer } from '@lace/core';
 import { Wallet } from '@lace/cardano';
 import styles from '../../SettingsLayout.module.scss';
@@ -11,6 +12,8 @@ import collateralStyles from '../Collateral.module.scss';
 import SadFaceIcon from '@lace/core/src/ui/assets/icons/sad-face.component.svg';
 import { useCurrencyStore } from '@providers';
 import { Cardano } from '@cardano-sdk/core';
+
+const inputId = `id-${uuidv4()}`;
 
 const { Text } = Typography;
 
@@ -41,6 +44,8 @@ export const CollateralStepSend = ({
   const { priceResult } = useFetchCoinPrice();
   const { fiatCurrency } = useCurrencyStore();
 
+  useAutoFocus(inputId, true);
+
   return (
     <div
       data-testid="collateral-send"
@@ -65,6 +70,7 @@ export const CollateralStepSend = ({
                   error={isPasswordValid === false}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}
+                  id={inputId}
                   autoFocus
                 />
               </Spin>

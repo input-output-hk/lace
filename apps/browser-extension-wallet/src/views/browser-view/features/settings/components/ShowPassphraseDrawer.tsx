@@ -1,12 +1,24 @@
+/* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-nested-ternary */
 import React, { ReactElement, useCallback, useState } from 'react';
-import { Button, Drawer, DrawerHeader, DrawerNavigation, Banner, useKeyboardShortcut } from '@lace/common';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  Button,
+  Drawer,
+  DrawerHeader,
+  DrawerNavigation,
+  Banner,
+  useKeyboardShortcut,
+  useAutoFocus
+} from '@lace/common';
 import { Password, OnPasswordChange, MnemonicWordsWritedown, useSecrets } from '@lace/core';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
 import { Typography } from 'antd';
 import { useWalletManager } from '@hooks';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+
+const inputId = `id-${uuidv4()}`;
 
 const { Text } = Typography;
 
@@ -111,6 +123,8 @@ export const ShowPassphraseDrawer = ({
 
   useKeyboardShortcut(['Escape'], () => handleOnClose());
 
+  useAutoFocus(inputId, !isPassphraseVisible && visible);
+
   return (
     <Drawer
       visible={visible}
@@ -169,6 +183,7 @@ export const ShowPassphraseDrawer = ({
                   error={!isPasswordValid}
                   errorMessage={t('browserView.transaction.send.error.invalidPassword')}
                   label={t('browserView.transaction.send.password.placeholder')}
+                  id={inputId}
                   autoFocus
                 />
               </div>

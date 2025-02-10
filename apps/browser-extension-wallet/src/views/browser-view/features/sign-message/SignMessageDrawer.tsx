@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
 import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets, shortenWalletOwnAddress } from '@lace/core';
-import { TextArea, PostHogAction, toast } from '@lace/common';
+import { TextArea, PostHogAction, toast, useAutoFocus } from '@lace/common';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
@@ -10,6 +11,8 @@ import styles from './SignMessageDrawer.module.scss';
 import { MainLoader } from '@components/MainLoader';
 import { ResultMessage } from '@components/ResultMessage';
 import CheckSuccessImg from '@assets/icons/circle-check-gradient.svg';
+
+const inputId = `id-${uuidv4()}`;
 
 export const SignMessageDrawer: React.FC = () => {
   const { t } = useTranslation();
@@ -131,6 +134,7 @@ export const SignMessageDrawer: React.FC = () => {
         error={!!error}
         errorMessage={error}
         wrapperClassName={styles.passwordWrapper}
+        id={inputId}
       />
     </>
   );
@@ -189,6 +193,8 @@ export const SignMessageDrawer: React.FC = () => {
       />
     </Flex>
   );
+
+  useAutoFocus(inputId, shouldShowPasswordPrompt);
 
   const renderContent = () => {
     if (isSigningInProgress) {

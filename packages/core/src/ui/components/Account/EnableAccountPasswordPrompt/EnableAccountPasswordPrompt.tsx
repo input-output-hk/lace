@@ -1,12 +1,16 @@
+/* eslint-disable react/no-multi-comp */
 import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Box, Button, Flex, Text, UncontrolledPasswordBox } from '@input-output-hk/lace-ui-toolkit';
-import { Drawer, DrawerNavigation } from '@lace/common';
+import { Drawer, DrawerNavigation, useAutoFocus } from '@lace/common';
 import styles from './EnableAccountPasswordPrompt.module.scss';
 import { useSecrets } from '@src/ui/hooks';
 
+const inputId = `id-${uuidv4()}`;
+
 interface Props {
   open: boolean;
-  wasPasswordIncorrect: boolean;
+  isPasswordIncorrect: boolean;
   translations: {
     title: string;
     headline: string;
@@ -21,22 +25,47 @@ interface Props {
   isPopup: boolean;
 }
 
+const EnableAccountPassword = ({
+  isPasswordIncorrect,
+  onConfirm,
+  translations
+}: Pick<Props, 'isPasswordIncorrect' | 'onConfirm' | 'translations'>) => {
+  const { setPassword } = useSecrets();
+
+  useAutoFocus(inputId, true);
+
+  return (
+    <UncontrolledPasswordBox
+      label={translations.passwordPlaceholder}
+      data-testid="enable-account-password-input"
+      onChange={setPassword}
+      onSubmit={(event): void => {
+        event.preventDefault();
+        onConfirm();
+      }}
+      errorMessage={isPasswordIncorrect ? translations.wrongPassword : undefined}
+      rootStyle={{ width: '100%' }}
+      id={inputId}
+      autoFocus
+    />
+  );
+};
+
 export const EnableAccountPasswordPrompt = ({
   open,
-  wasPasswordIncorrect,
   isPopup,
   onConfirm,
   onCancel,
+  isPasswordIncorrect,
   translations
 }: Props): JSX.Element => {
-  const { password, setPassword, clearSecrets } = useSecrets();
+  const { password, clearSecrets } = useSecrets();
 
   const handleClose = () => {
     clearSecrets();
     // wait for propogation before executing onCancel
     setTimeout(onCancel, 0);
   };
-
   return (
     <Drawer
       zIndex={1100}
@@ -81,17 +110,13 @@ export const EnableAccountPasswordPrompt = ({
           justifyContent={isPopup ? undefined : 'center'}
           className={isPopup ? styles.passwordPopUpLayout : styles.passwordExtendedLayout}
         >
-          <UncontrolledPasswordBox
-            label={translations.passwordPlaceholder}
-            data-testid="enable-account-password-input"
-            onChange={setPassword}
-            onSubmit={(event): void => {
-              event.preventDefault();
-              onConfirm();
-            }}
-            errorMessage={wasPasswordIncorrect ? translations.wrongPassword : undefined}
-            rootStyle={{ width: '100%' }}
-          />
+          {open && (
+            <EnableAccountPassword
+              isPasswordIncorrect={isPasswordIncorrect}
+              onConfirm={onConfirm}
+              translations={translations}
+            />
+          )}
         </Flex>
       </Flex>
     </Drawer>
