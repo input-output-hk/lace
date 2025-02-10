@@ -1,12 +1,12 @@
 import { InputRef } from 'antd';
 import { RefObject, useEffect } from 'react';
 
-const autoFocusMS = 0;
+const AUTO_FOCUS_MS = 0;
 
 export const useAutoFocus = <T extends HTMLInputElement | InputRef>(
   inputRefOrId: RefObject<T> | string,
   autoFocus?: boolean,
-  ms = autoFocusMS
+  ms = AUTO_FOCUS_MS
 ): void => {
   useEffect(() => {
     const element =

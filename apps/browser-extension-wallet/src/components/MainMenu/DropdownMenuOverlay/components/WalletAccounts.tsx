@@ -32,7 +32,7 @@ const HW_CONNECT_TIMEOUT_MS = 30_000;
 
 type EnableAccountPasswordDialogData = {
   accountIndex: number;
-  wasPasswordIncorrect?: boolean;
+  isPasswordIncorrect?: boolean;
 };
 
 type EnableAccountHWSigningDialogData = {
@@ -220,7 +220,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
       enableAccountPasswordDialog.hide();
       closeDropdownAndShowAccountActivated(name);
     } catch {
-      enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, wasPasswordIncorrect: true });
+      enableAccountPasswordDialog.setData({ ...enableAccountPasswordDialog.data, isPasswordIncorrect: true });
     } finally {
       passphrase.fill(0);
       secretsUtil.clearSecrets();
@@ -287,7 +287,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         <EnableAccountPasswordPrompt
           open={enableAccountPasswordDialog.isOpen}
           isPopup={isPopup}
-          wasPasswordIncorrect={enableAccountPasswordDialog.data?.wasPasswordIncorrect}
+          isPasswordIncorrect={enableAccountPasswordDialog.data?.isPasswordIncorrect}
           onCancel={enableAccountPasswordDialog.hide}
           onConfirm={unlockInMemoryWalletAccountWithPassword}
           translations={{

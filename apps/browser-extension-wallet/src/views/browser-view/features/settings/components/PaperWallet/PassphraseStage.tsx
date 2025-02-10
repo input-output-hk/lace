@@ -32,6 +32,7 @@ export const PassphraseStage = ({
               error={!isPasswordValid}
               errorMessage={i18n.t('browserView.transaction.send.error.invalidPassword')}
               label={i18n.t('browserView.transaction.send.password.placeholder')}
+              id={inputId}
               autoFocus
               onSubmit={null}
             />

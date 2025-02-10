@@ -25,7 +25,7 @@ const data: ComponentProps<typeof EnableAccountPasswordPrompt> = {
     cancel: 'Cancel',
     confirm: 'Confirm'
   },
-  wasPasswordIncorrect: false,
+  isPasswordIncorrect: false,
   onConfirm: () => void 0,
   onCancel: () => void 0,
   open: true,
@@ -58,7 +58,7 @@ export const PopUp: Story = {
 export const IncorrectPassword: Story = {
   args: {
     ...data,
-    wasPasswordIncorrect: true
+    isPasswordIncorrect: true
   },
   parameters: {
     decorators: {

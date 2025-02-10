@@ -10,7 +10,7 @@ const inputId = `id-${uuidv4()}`;
 
 interface Props {
   open: boolean;
-  wasPasswordIncorrect: boolean;
+  isPasswordIncorrect: boolean;
   translations: {
     title: string;
     headline: string;
@@ -26,10 +26,10 @@ interface Props {
 }
 
 const EnableAccountPassword = ({
-  wasPasswordIncorrect,
+  isPasswordIncorrect,
   onConfirm,
   translations
-}: Pick<Props, 'wasPasswordIncorrect' | 'onConfirm' | 'translations'>) => {
+}: Pick<Props, 'isPasswordIncorrect' | 'onConfirm' | 'translations'>) => {
   const { setPassword } = useSecrets();
 
   useAutoFocus(inputId, true);
@@ -43,7 +43,7 @@ const EnableAccountPassword = ({
         event.preventDefault();
         onConfirm();
       }}
-      errorMessage={wasPasswordIncorrect ? translations.wrongPassword : undefined}
+      errorMessage={isPasswordIncorrect ? translations.wrongPassword : undefined}
       rootStyle={{ width: '100%' }}
       id={inputId}
       autoFocus
@@ -56,7 +56,7 @@ export const EnableAccountPasswordPrompt = ({
   isPopup,
   onConfirm,
   onCancel,
-  wasPasswordIncorrect,
+  isPasswordIncorrect,
   translations
 }: Props): JSX.Element => {
   const { password, clearSecrets } = useSecrets();
@@ -112,7 +112,7 @@ export const EnableAccountPasswordPrompt = ({
         >
           {open && (
             <EnableAccountPassword
-              wasPasswordIncorrect={wasPasswordIncorrect}
+              isPasswordIncorrect={isPasswordIncorrect}
               onConfirm={onConfirm}
               translations={translations}
             />
