@@ -13,6 +13,16 @@ enum LogLevel {
 
 export type LogLevelString = keyof typeof LogLevel;
 
+// toSerializableObj will try to make the object serializable,
+// but it can still fail if object has some unsupported shape
+const tryStringify = (obj: unknown) => {
+  try {
+    return JSON.stringify(toSerializableObject(obj));
+  } catch {
+    return '<failed-to-stringify>';
+  }
+};
+
 class AppLogger implements Logger {
   private logLevel: LogLevel;
 
@@ -25,7 +35,7 @@ class AppLogger implements Logger {
 
   private convertParams(params: any[]) {
     return params.map((param) =>
-      param && typeof param === 'object' ? JSON.stringify(toSerializableObject(param)) : param
+      typeof param === 'object' && param !== null ? tryStringify(param) : toSerializableObject(param)
     );
   }
 
