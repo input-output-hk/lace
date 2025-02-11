@@ -1,7 +1,8 @@
 /* eslint-disable no-console, no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from 'ts-log';
-import { toSerializableObject } from '@cardano-sdk/util';
+import { stringifyWithFallback } from '@src/ui/lib';
+import * as Sentry from '@sentry/react';
 
 enum LogLevel {
   error = 0,
@@ -12,16 +13,6 @@ enum LogLevel {
 }
 
 export type LogLevelString = keyof typeof LogLevel;
-
-// toSerializableObj will try to make the object serializable,
-// but it can still fail if object has some unsupported shape
-const tryStringify = (obj: unknown) => {
-  try {
-    return JSON.stringify(toSerializableObject(obj));
-  } catch {
-    return '<failed-to-stringify>';
-  }
-};
 
 class AppLogger implements Logger {
   private logLevel: LogLevel;
@@ -34,9 +25,20 @@ class AppLogger implements Logger {
   }
 
   private convertParams(params: any[]) {
-    return params.map((param) =>
-      typeof param === 'object' && param !== null ? tryStringify(param) : toSerializableObject(param)
-    );
+    return params.map((param) => {
+      const [value, error] = stringifyWithFallback(param);
+      if (error) {
+        Sentry.captureMessage('AppLogger: Failed to stringify the log param', {
+          level: 'error',
+          extra: {
+            error,
+            param
+          }
+        });
+      }
+
+      return value;
+    });
   }
 
   private shouldLog(level: LogLevel) {
