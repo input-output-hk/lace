@@ -4,7 +4,7 @@ Feature: Send - Multiple selection for Popup View
   Background:
     Given Wallet is synced
 
-  @LW-5044 @Pending
+  @LW-5044
   @issue=LW-12151
   Scenario Outline: Popup view - Send - Multiple tokens selection - <assetsType> - happy path
     And I click "Send" button on Tokens page in popup mode
@@ -27,7 +27,7 @@ Feature: Send - Multiple selection for Popup View
       | Tokens     |
       | NFTs       |
 
-  @LW-5045 @Pending
+  @LW-5045
   @issue=LW-12151
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - clear and cancel
     And I click "Send" button on Tokens page in popup mode
@@ -54,7 +54,7 @@ Feature: Send - Multiple selection for Popup View
       | Tokens     |
       | NFTs       |
 
-  @LW-5268 @Pending
+  @LW-5268
   @issue=LW-12151
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - Maximum amount to select is 30
     And I click "Send" button on Tokens page in popup mode

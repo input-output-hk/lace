@@ -4,7 +4,7 @@ Feature: Send - Multiple selection for Extended Browser View
   Background:
     Given Wallet is synced
 
-  @LW-5043 @Pending
+  @LW-5043
   @issue=LW-12151
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - happy path
     And I click "Send" button on page header
@@ -66,7 +66,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | Tokens     |
       | NFTs       |
 
-  @LW-5046 @Pending
+  @LW-5046
   @issue=LW-12151
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - clear and cancel
     And I click "Send" button on page header
@@ -93,7 +93,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | Tokens     |
       | NFTs       |
 
-  @LW-5267 @Pending
+  @LW-5267
   @issue=LW-12151
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - Maximum amount to select is 30
     And I click "Send" button on page header
