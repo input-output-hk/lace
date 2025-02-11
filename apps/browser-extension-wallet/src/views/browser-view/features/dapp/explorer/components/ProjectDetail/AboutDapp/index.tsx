@@ -16,22 +16,24 @@ export const AboutDapp: React.FC = () => {
     <>
       <Box my="$24">
         <Box mb="$12">
-          <Text.SubHeading>{'Summary'}</Text.SubHeading>
+          <Text.SubHeading data-testid={'dapp-short-description-label'}>{'Summary'}</Text.SubHeading>
         </Box>
-        <Text.Body.Normal>{data?.shortDescription}</Text.Body.Normal>
+        <Text.Body.Normal data-testid={'dapp-short-description-text'}>{data?.shortDescription}</Text.Body.Normal>
       </Box>
       <Box my="$24">
         <Box mb="$12">
-          <Text.SubHeading>{'DApp Description'}</Text.SubHeading>
+          <Text.SubHeading data-testid={'dapp-long-description-label'}>{'DApp Description'}</Text.SubHeading>
         </Box>
-        <Text.Body.Normal>
+        <Text.Body.Normal data-testid={'dapp-long-description-text'}>
           <div dangerouslySetInnerHTML={{ __html: data?.longDescription }} />
         </Text.Body.Normal>
       </Box>
       {data?.screenshots && (
         <Box mb="$16">
           <Box mb="$24">
-            <Text.Body.Large weight="$bold">{t('dappdiscovery.side_panel.gallery')}</Text.Body.Large>
+            <Text.Body.Large weight="$bold" data-testid={'dapp-gallery-label'}>
+              {t('dappdiscovery.side_panel.gallery')}
+            </Text.Body.Large>
           </Box>
           <IogSlider
             data={data.screenshots}
