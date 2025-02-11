@@ -21,6 +21,11 @@ import StakingIconActive from '@assets/icons/active-database-icon.component.svg'
 import DappExplorerIconDefault from '@assets/icons/tiles-outlined.component.svg';
 import DappExplorerIconHover from '@assets/icons/tiles-outlined-gradient.component.svg';
 import DappExplorerIconActive from '@assets/icons/tiles-solid-gradient.component.svg';
+
+import VotingIconDefault from '@assets/icons/voting-icon.component.svg';
+import VotingIconActive from '@assets/icons/active-voting-icon.component.svg';
+import VotingIconHover from '@assets/icons/hover-voting-icon.component.svg';
+
 import { SideMenuItemConfig } from '@types';
 
 export const sideMenuConfig: SideMenuItemConfig[] = [
@@ -69,5 +74,14 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     regularIcon: DappExplorerIconDefault,
     hoverIcon: DappExplorerIconHover,
     activeIcon: DappExplorerIconActive
+  },
+  {
+    id: MenuItemList.VOTING,
+    label: 'browserView.sideMenu.links.voting',
+    testId: 'item-voting',
+    path: routes.voting,
+    regularIcon: VotingIconDefault,
+    hoverIcon: VotingIconHover,
+    activeIcon: VotingIconActive
   }
 ];

@@ -1,0 +1,11 @@
+@import '../../../styles/utils/functions.scss';
+
+.activitiesContainer {
+  :global(.infinite-scroll-component) {
+    padding: 0 size_unit(1);
+  }
+}
+.emptyState {
+  padding-bottom: size_unit(3.5);
+  padding-top: size_unit(1);
+}
