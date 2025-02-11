@@ -255,10 +255,9 @@ export const EnterPgpPrivateKey: VFC = () => {
               <PasswordBox
                 onChange={async (e) => {
                   setValidation({ error: null, success: null });
-                  setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.target.value });
+                  setPgpInfo({ ...pgpInfo, pgpKeyPassphrase: e.value });
                 }}
                 label={i18n.t('core.paperWallet.privatePgpKeyPassphraseLabel')}
-                value={pgpInfo.pgpKeyPassphrase || ''}
                 onSubmit={(event) => {
                   event.preventDefault();
                 }}

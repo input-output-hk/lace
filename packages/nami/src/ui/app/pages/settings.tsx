@@ -49,6 +49,11 @@ import type { ChangePasswordModalComponentRef } from '../components/changePasswo
 import type { Wallet } from '@lace/cardano';
 import type { CommonOutsideHandlesContextValue } from '../../../features/common-outside-handles-provider';
 
+const MAX_CHARACTER_LENGTH = 20;
+const isWalletNameValid = (value: string) => {
+  return value.length > 0 && value.length <= MAX_CHARACTER_LENGTH;
+};
+
 type Props = Pick<
   OutsideHandlesContextValue,
   | 'availableChains'
@@ -332,7 +337,11 @@ const GeneralSettings = ({
       <InputGroup size="md" width="210px">
         <Input
           onKeyDown={e => {
-            if (e.key == 'Enter' && name.length > 0 && name != originalName)
+            if (
+              e.key == 'Enter' &&
+              isWalletNameValid(name) &&
+              name != originalName
+            )
               nameHandler();
           }}
           placeholder="Change name"
@@ -341,13 +350,14 @@ const GeneralSettings = ({
             setName(e.target.value);
           }}
           pr="4.5rem"
+          isInvalid={!isWalletNameValid(name)}
         />
         <InputRightElement width="4.5rem">
           {name == originalName ? (
             <Icon mr="-4" as={MdModeEdit} />
           ) : (
             <Button
-              isDisabled={name.length <= 0}
+              isDisabled={!isWalletNameValid(name)}
               h="1.75rem"
               size="sm"
               onClick={nameHandler}
@@ -357,6 +367,11 @@ const GeneralSettings = ({
           )}
         </InputRightElement>
       </InputGroup>
+      <Box mt="1">
+        {name.length > MAX_CHARACTER_LENGTH && (
+          <Text color="red.500">Max {MAX_CHARACTER_LENGTH} characters</Text>
+        )}
+      </Box>
       <Box height="6" />
       <Box display="flex" alignItems="center">
         <Box width="65px" height="65px">

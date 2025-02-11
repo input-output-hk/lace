@@ -10,3 +10,4 @@ export * from './UserAvatar';
 export * from './NetworkChoise';
 export * from './NetworkInfo';
 export * from './AddNewWalletLink';
+export * from './RenameWalletDrawer';

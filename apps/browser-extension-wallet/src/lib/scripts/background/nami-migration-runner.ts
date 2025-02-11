@@ -90,7 +90,7 @@ const freshInstall: FreshInstall = async ({
     },
     accounts: accounts.map((account) => ({
       accountIndex: account.index,
-      metadata: { name: accountName(account) },
+      metadata: { name: account.name ?? accountName(account) },
       extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex(account.extendedAccountPublicKey)
     })),
     type: Extension.WalletType.InMemory

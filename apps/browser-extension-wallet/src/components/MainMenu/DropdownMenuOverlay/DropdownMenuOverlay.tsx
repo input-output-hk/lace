@@ -6,6 +6,7 @@ import {
   Links,
   LockWallet,
   NetworkChoise,
+  RenameWalletDrawer,
   Separator,
   SettingsLink,
   SignMessageLink,
@@ -55,6 +56,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isHardwareWallet } = useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
+  const [isRenamingWallet, setIsRenamingWallet] = useState(false);
   const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
 
   useEffect(() => {
@@ -75,7 +77,15 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
 
-  topSection = topSection ?? <UserInfo onOpenWalletAccounts={openWalletAccounts} />;
+  topSection = topSection ?? (
+    <UserInfo
+      onOpenWalletAccounts={openWalletAccounts}
+      onOpenEditWallet={(wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
+        setManageAccountsWallet(wallet);
+        setIsRenamingWallet(true);
+      }}
+    />
+  );
 
   const getSignMessageLink = () => (
     <>
@@ -174,6 +184,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={goBackToMainSection} />}
       {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={goBackToMainSection} isPopup={isPopup} />}
+      {isRenamingWallet && (
+        <RenameWalletDrawer open={isRenamingWallet} popupView={isPopup} onClose={() => setIsRenamingWallet(false)} />
+      )}
     </Menu>
   );
 };

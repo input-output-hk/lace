@@ -32,6 +32,7 @@ const overlayInnerStyle = {
 interface UserInfoProps {
   avatarVisible?: boolean;
   onOpenWalletAccounts?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
+  onOpenEditWallet?: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
 }
 
 interface RenderWalletOptionsParams {
@@ -44,7 +45,11 @@ const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [
 const shortenWalletName = (text: string, length: number) =>
   text.length > length ? `${text.slice(0, length)}...` : text;
 
-export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
+export const UserInfo = ({
+  onOpenWalletAccounts,
+  avatarVisible = true,
+  onOpenEditWallet
+}: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
   const { activateWallet, walletRepository } = useWalletManager();
@@ -105,7 +110,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
             if (activeWalletId === wallet.walletId) {
               return;
             }
-            analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+            void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
 
             await activateWallet({
               walletId: wallet.walletId,
@@ -127,7 +132,8 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
               : undefined
           }
           {...(wallet.type !== WalletType.Script && {
-            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet)
+            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
+            onOpenEditWallet: () => onOpenEditWallet(wallet)
           })}
         />
       );
@@ -138,6 +144,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
       analytics,
       fullWalletName,
       getAvatar,
+      onOpenEditWallet,
       onOpenWalletAccounts,
       setIsDropdownMenuOpen,
       t

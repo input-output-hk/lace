@@ -317,7 +317,10 @@ export enum PostHogAction {
   // dapp explorer
   DappExplorerCategoryClick = 'dapp explorer | category | click',
   DappExplorerDappTileClick = 'dapp explorer | dapp tile | click',
-  DappExplorerDetailDrawerRedirectClick = 'dapp explorer | detail drawer | redirect | click'
+  DappExplorerDetailDrawerRedirectClick = 'dapp explorer | detail drawer | redirect | click',
+  // rename wallet
+  RenameWalletSaveClick = 'rename wallet | save | click',
+  RenameWalletCancelClick = 'rename wallet | cancel | click'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
