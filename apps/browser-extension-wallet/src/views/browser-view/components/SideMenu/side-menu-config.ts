@@ -67,15 +67,6 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     activeIcon: StakingIconActive
   },
   {
-    id: MenuItemList.DAPPS,
-    label: 'browserView.sideMenu.links.dappExplorer',
-    testId: 'item-dapps',
-    path: routes.dapps,
-    regularIcon: DappExplorerIconDefault,
-    hoverIcon: DappExplorerIconHover,
-    activeIcon: DappExplorerIconActive
-  },
-  {
     id: MenuItemList.VOTING,
     label: 'browserView.sideMenu.links.voting',
     testId: 'item-voting',
@@ -83,5 +74,14 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     regularIcon: VotingIconDefault,
     hoverIcon: VotingIconHover,
     activeIcon: VotingIconActive
+  },
+  {
+    id: MenuItemList.DAPPS,
+    label: 'browserView.sideMenu.links.dappExplorer',
+    testId: 'item-dapps',
+    path: routes.dapps,
+    regularIcon: DappExplorerIconDefault,
+    hoverIcon: DappExplorerIconHover,
+    activeIcon: DappExplorerIconActive
   }
 ];

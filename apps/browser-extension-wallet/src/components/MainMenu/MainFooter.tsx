@@ -49,7 +49,7 @@ export const MainFooter = (): React.ReactElement => {
   const backgroundServices = useBackgroundServiceAPIContext();
 
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
-  const isVotingBetaEnabled = !!GOV_TOOLS_URLS[environmentName];
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
   const currentLocation = location?.pathname;
   const isWalletIconActive =
     currentLocation === walletRoutePaths.assets || includesCoin.test(currentLocation) || currentLocation === '/';
@@ -90,11 +90,11 @@ export const MainFooter = (): React.ReactElement => {
       case walletRoutePaths.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
         break;
+      case walletRoutePaths.voting:
+        sendAnalytics(PostHogAction.VotingClick);
+        break;
       case walletRoutePaths.dapps:
         // TODO: LW-11885 send proper dapp explorer event
-        break;
-      case walletRoutePaths.voting:
-        // TODO: LW-12231 send proper voting page event
         break;
     }
 
@@ -155,17 +155,7 @@ export const MainFooter = (): React.ReactElement => {
             )}
           </button>
         )}
-        {isDappExplorerEnabled && (
-          <button
-            onMouseEnter={() => onMouseEnterItem(MenuItemList.DAPPS)}
-            onMouseLeave={onMouseLeaveItem}
-            data-testid="main-footer-dapp-explorer"
-            onClick={() => handleNavigation(walletRoutePaths.dapps)}
-          >
-            <DappExplorerIcon className={styles.icon} />
-          </button>
-        )}
-        {isVotingBetaEnabled && (
+        {isVotingCenterEnabled && (
           <button
             onMouseEnter={() => onMouseEnterItem(MenuItemList.VOTING)}
             onMouseLeave={onMouseLeaveItem}
@@ -177,6 +167,16 @@ export const MainFooter = (): React.ReactElement => {
             ) : (
               <VotingIcon className={styles.icon} />
             )}
+          </button>
+        )}
+        {isDappExplorerEnabled && (
+          <button
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.DAPPS)}
+            onMouseLeave={onMouseLeaveItem}
+            data-testid="main-footer-dapp-explorer"
+            onClick={() => handleNavigation(walletRoutePaths.dapps)}
+          >
+            <DappExplorerIcon className={styles.icon} />
           </button>
         )}
       </div>

@@ -10,7 +10,7 @@ import styles from './VotingCenterBanner.module.scss';
 type props = {
   popupView?: boolean;
   openExternalLink: (url: string) => void;
-  govToolUrl?: string;
+  govToolUrl: string;
 };
 
 export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: props): React.ReactElement => {
@@ -39,7 +39,7 @@ export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: 
         <Box w={btnWidth} mt="$20" h="$48">
           <Button.CallToAction
             w={btnWidth}
-            onClick={() => govToolUrl && openExternalLink(govToolUrl)}
+            onClick={() => openExternalLink(govToolUrl)}
             data-testid="register-now-at-gov-tool-button"
             label={t('browserView.voting-beta.modal.cta')}
           />

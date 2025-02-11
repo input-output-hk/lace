@@ -131,10 +131,11 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { t } = useTranslation();
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
-    if (route.path === routes.voting && !GOV_TOOLS_URLS[environmentName]) return false;
+    if (route.path === routes.voting && !isVotingCenterEnabled) return false;
     return true;
   });
 

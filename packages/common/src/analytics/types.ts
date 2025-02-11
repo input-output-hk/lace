@@ -320,7 +320,10 @@ export enum PostHogAction {
   DappExplorerDetailDrawerRedirectClick = 'dapp explorer | detail drawer | redirect | click',
   // rename wallet
   RenameWalletSaveClick = 'rename wallet | save | click',
-  RenameWalletCancelClick = 'rename wallet | cancel | click'
+  RenameWalletCancelClick = 'rename wallet | cancel | click',
+  // Voting Center
+  VotingClick = 'voting | voting | click',
+  VotingBannerButtonClick = 'voting | voting | banner | button | click'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
