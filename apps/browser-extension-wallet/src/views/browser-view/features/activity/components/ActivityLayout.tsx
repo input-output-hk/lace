@@ -7,7 +7,13 @@ import { StateStatus, useWalletStore } from '../../../../../stores';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { ActivityDetail } from './ActivityDetail';
 import { useTranslation } from 'react-i18next';
-import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
+import {
+  FundWalletBanner,
+  EducationalList,
+  SectionLayout,
+  Layout,
+  EducationalListRowProps
+} from '@src/views/browser-view/components';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
@@ -17,28 +23,15 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
+import { TFunction } from 'i18next';
 
-export const ActivityLayout = (): ReactElement => {
-  const { t } = useTranslation();
-  const { priceResult } = useFetchCoinPrice();
-  const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
-  const analytics = useAnalyticsContext();
-  const sendAnalytics = useCallback(() => {
-    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
-  }, [analytics]);
-  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
-    sendAnalytics,
-    withLimitedRewardsHistory: true
-  });
-  const total = useObservable(inMemoryWallet.balance.utxo.total$);
-
+export const getEducationalList = (t: TFunction): EducationalListRowProps[] => {
   const titles = {
     glossary: t('educationalBanners.title.glossary'),
     faq: t('educationalBanners.title.faq'),
     video: t('educationalBanners.title.video')
   };
-
-  const educationalList = [
+  return [
     {
       title: titles.glossary,
       subtitle: t('browserView.activity.learnAbout.whatAreActivityDetails'),
@@ -64,6 +57,23 @@ export const ActivityLayout = (): ReactElement => {
       link: `${process.env.WEBSITE_URL}/learn?video=lace-introduces-transaction-bundles`
     }
   ];
+};
+
+export const ActivityLayout = (): ReactElement => {
+  const { t } = useTranslation();
+  const { priceResult } = useFetchCoinPrice();
+  const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
+  const analytics = useAnalyticsContext();
+  const sendAnalytics = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
+  }, [analytics]);
+  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
+    sendAnalytics,
+    withLimitedRewardsHistory: true
+  });
+  const total = useObservable(inMemoryWallet.balance.utxo.total$);
+
+  const educationalList = getEducationalList(t);
 
   // Reset current transaction details and close drawer if network (blockchainProvider) has changed
   useEffect(() => {
