@@ -1,4 +1,4 @@
-import { validateWalletMnemonic, validateWalletPassword } from '@wallet/lib/cardano-wallet';
+import { validateWalletMnemonic } from '@wallet/lib/cardano-wallet';
 import { testKeyAgent } from '@wallet/test/mocks/TestKeyAgent';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { mockObservableWallet } from '@src/wallet/test/mocks';
@@ -44,17 +44,6 @@ describe('Testing cardano-wallet2234', () => {
 
   beforeAll(async () => {
     keyAgent = await testKeyAgent({ mnemonicWords, password });
-  });
-
-  describe('validateWalletPassword', () => {
-    test('should return true if the password for the key agent is correct', async () => {
-      const valid = await validateWalletPassword(keyAgent.serializableData, password);
-      expect(valid).toEqual(true);
-    });
-    test('should return false if the password for the key agent is wrong', async () => {
-      const valid = await validateWalletPassword(keyAgent.serializableData, 'wrong_pass');
-      expect(valid).toEqual(false);
-    });
   });
 
   describe('validateWalletMnemonic', () => {

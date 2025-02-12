@@ -17,6 +17,9 @@ const activityItem: AssetActivityItemProps = {
 
 describe('Testing GroupedAssetActivityList component', () => {
   const props: GroupedAssetActivityListProps = {
+    hasMore: false,
+    scrollableTarget: 'scrollableTarget',
+    loadMore: async () => await void 0,
     lists: [
       {
         title: 'Today',

@@ -6,3 +6,5 @@ export const CARDANO_COIN_SYMBOL: { [key in Wallet.Cardano.NetworkId]: ADASymbol
   [Wallet.Cardano.NetworkId.Mainnet]: '₳',
   [Wallet.Cardano.NetworkId.Testnet]: 't₳'
 };
+
+export const BATCH = 5;

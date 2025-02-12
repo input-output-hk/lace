@@ -24,11 +24,11 @@ import {
 } from '@lace/core';
 import type { ActivityType } from '@lace/core';
 import { formatDate, formatTime } from '@src/utils/format-date';
-import { createHistoricalOwnInputResolver, HistoricalOwnInputResolverArgs } from '@src/utils/own-input-resolver';
-import { getCollateral } from '@cardano-sdk/core';
+import { Cardano, getCollateral } from '@cardano-sdk/core';
 import { hasPhase2ValidationFailed } from '@src/utils/phase2-validation';
 import { eraSlotDateTime } from '@utils/era-slot-datetime';
 import { logger } from '@lace/common';
+import { ObservableWalletState } from '@hooks/useWalletState';
 
 /**
  * validates if the transaction is confirmed
@@ -124,20 +124,15 @@ export const getPoolInfos = async (
 };
 
 const computeCollateral = async (
-  { addresses, transactions }: HistoricalOwnInputResolverArgs,
-  tx?: Wallet.Cardano.Tx
-): Promise<bigint> => {
-  const inputResolver = createHistoricalOwnInputResolver({
-    addresses,
-    transactions
-  });
-
-  return await getCollateral(
+  { addresses }: Pick<ObservableWalletState, 'addresses'>,
+  tx: Wallet.Cardano.Tx,
+  inputResolver: Cardano.InputResolver
+): Promise<bigint> =>
+  await getCollateral(
     tx,
     inputResolver,
     addresses.map((addr) => addr.address)
   );
-};
 
 /**
  * fetches asset information
@@ -152,7 +147,7 @@ const buildGetActivityDetail =
   // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   async ({ coinPrices, fiatCurrency }) => {
     const {
-      blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider },
+      blockchainProvider: { chainHistoryProvider, stakePoolProvider, assetProvider, inputResolver },
       inMemoryWallet: wallet,
       activityDetail,
       walletInfo,
@@ -248,7 +243,7 @@ const buildGetActivityDetail =
         ? Wallet.util.lovelacesToAdaString(depositReclaimValue.toString())
         : undefined;
     const feeInAda = Wallet.util.lovelacesToAdaString(tx.body.fee.toString());
-    const collateral = await computeCollateral(walletState, tx);
+    const collateral = await computeCollateral(walletState, tx, inputResolver);
     const collateralInAda = collateral > 0 ? Wallet.util.lovelacesToAdaString(collateral.toString()) : undefined;
 
     // Delegation tx additional data (LW-3324)

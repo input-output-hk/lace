@@ -1,31 +1,14 @@
 import { List, Skeleton, Typography, Button } from 'antd';
 import cn from 'classnames';
-import React, { useState, useEffect } from 'react';
-import InfiniteScroll, { Props as InfiniteScrollProps } from 'react-infinite-scroll-component';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { AssetActivityList, AssetActivityListProps } from './AssetActivityList';
 import styles from './AssetActivityList.module.scss';
-import take from 'lodash/take';
 import isNumber from 'lodash/isNumber';
 
 const { Text } = Typography;
 
-export interface GroupedAssetActivityListProps {
-  lists: AssetActivityListProps[];
-  infiniteScrollProps?: Partial<InfiniteScrollProps>;
-  withTitle?: {
-    title: string;
-    onClick?: () => void;
-    clickLabel?: string;
-  };
-  isDrawerView?: boolean;
-}
-
-export const GroupedAssetActivityList = ({
-  lists,
-  infiniteScrollProps,
-  withTitle,
-  isDrawerView
-}: GroupedAssetActivityListProps): React.ReactElement => {
+export const useGroupedActivitiesPageSize = (): number => {
   // workaround for bug in react-infinite-scroll-component
   // related to not loading more elements if the height of the container is less than the height of the window
   // see: https://github.com/ankeetmaini/react-infinite-scroll-component/issues/380
@@ -34,34 +17,61 @@ export const GroupedAssetActivityList = ({
   const [initialWindowHeight] = useState(window.innerHeight);
   const ESTIMATED_MIN_GROUP_HEIGHT = 100;
   // eslint-disable-next-line no-magic-numbers
-  const pageSize = Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_MIN_GROUP_HEIGHT));
+  return Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_MIN_GROUP_HEIGHT));
+};
 
-  const FAKE_LOAD_TIMEOUT = 1000;
-  const [skip, setSkip] = useState(0);
-  const [paginatedLists, setPaginatedLists] = useState(take(lists, skip + pageSize));
-
-  const loadMoreData = () => {
-    setTimeout(() => {
-      setSkip(skip + pageSize);
-    }, FAKE_LOAD_TIMEOUT);
+export interface GroupedAssetActivityListProps {
+  lists: AssetActivityListProps[];
+  scrollableTarget: string;
+  endMessage?: React.ReactNode;
+  dataLength?: number;
+  withTitle?: {
+    title: string;
+    onClick?: () => void;
+    clickLabel?: string;
   };
+  isDrawerView?: boolean;
+  loadMore: () => void;
+  hasMore: boolean;
+  loadFirstChunk?: boolean;
+}
+export const GroupedAssetActivityList = ({
+  lists,
+  scrollableTarget,
+  endMessage,
+  dataLength,
+  withTitle,
+  isDrawerView,
+  loadMore,
+  hasMore,
+  loadFirstChunk
+}: GroupedAssetActivityListProps): React.ReactElement => {
+  const next = useCallback(() => {
+    loadMore();
+  }, [loadMore]);
 
   useEffect(() => {
-    if (lists.length === 0) return;
-    setPaginatedLists(take(lists, skip + pageSize));
-  }, [skip, lists, pageSize]);
+    if (loadFirstChunk) loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loader = useMemo(
+    () => (
+      <div data-testid="infinite-scroll-skeleton">
+        <Skeleton active avatar />
+      </div>
+    ),
+    []
+  );
 
   return (
     <InfiniteScroll
-      dataLength={paginatedLists.length}
-      next={loadMoreData}
-      hasMore={paginatedLists.length < lists.length}
-      loader={
-        <div data-testid="infinite-scroll-skeleton">
-          <Skeleton active avatar />
-        </div>
-      }
-      {...infiniteScrollProps}
+      dataLength={dataLength ?? 0}
+      endMessage={endMessage}
+      scrollableTarget={scrollableTarget}
+      next={next}
+      hasMore={hasMore}
+      loader={loader}
       className={cn(styles.infitineScroll, { [styles.isDrawerView]: isDrawerView })}
     >
       {!isNumber(lists.length) ? (
@@ -71,7 +81,7 @@ export const GroupedAssetActivityList = ({
           className={cn(styles.activityContainer, { [styles.isDrawerView]: isDrawerView })}
           data-testid="grouped-asset-activity-list"
           itemLayout="horizontal"
-          dataSource={paginatedLists}
+          dataSource={lists}
           header={
             withTitle ? (
               <div className={styles.listHeader}>

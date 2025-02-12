@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import { Box, Text, Spinner, Accordion, Button } from '@chakra-ui/react';
@@ -13,37 +13,18 @@ import { useOutsideHandles } from '../../../features/outside-handles-provider/us
 
 import Transaction from './transaction';
 
-import type { TxInfo } from '../../../adapters/transactions';
-
-const BATCH = 5;
-
 const HistoryViewer = () => {
+  const [isLoadingNext, setIsLoadingNext] = useState(false);
   const capture = useCaptureEvent();
-  const { environmentName, openExternalLink } = useOutsideHandles();
-
-  const transactions = useWalletTxs();
-
+  const { environmentName, openExternalLink, txHistoryLoader } = useOutsideHandles();
   const { cardanoCoin } = useCommonOutsideHandles();
-  const [historySlice, setHistorySlice] = React.useState<
-    (TxInfo | undefined)[] | undefined
-  >();
-  const [page, setPage] = React.useState(1);
-  const [isFinal, setIsFinal] = React.useState(false);
+  const { txs: transactions, isFinal } = useWalletTxs();
 
-  const getTxs = () => {
-    if (!transactions) return;
-    const slice = transactions.slice(0, page * BATCH);
-    if (slice.length < page * BATCH) setIsFinal(true);
-    setHistorySlice(slice);
-  };
-
-  React.useEffect(() => {
-    getTxs();
-  }, [page, transactions]);
+  useEffect(() => setIsLoadingNext(false), [transactions?.length, isFinal])
 
   const history = useMemo(
     () =>
-      historySlice && historySlice.length <= 0 ? (
+      transactions && transactions.length <= 0 ? (
         <Box
           mt="16"
           display="flex"
@@ -67,7 +48,7 @@ const HistoryViewer = () => {
               void capture(Events.ActivityActivityActivityRowClick);
             }}
           >
-            {historySlice?.map((tx, key) => (
+            {transactions?.map((tx, key) => (
               <MemoizedTransaction
                 key={tx?.txHash.toString() ?? key}
                 tx={tx}
@@ -91,9 +72,8 @@ const HistoryViewer = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setTimeout(() => {
-                    setPage(page + 1);
-                  });
+                  setIsLoadingNext(true);
+                  txHistoryLoader.loadMore();
                 }}
                 colorScheme="orange"
                 aria-label="More"
@@ -101,18 +81,19 @@ const HistoryViewer = () => {
                 w="50%"
                 h="30px"
                 rounded="xl"
+                disabled={isLoadingNext}
               >
-                <ChevronDownIcon fontSize="30px" />
+                {isLoadingNext ? '...' : <ChevronDownIcon fontSize="30px" />}
               </Button>
             </Box>
           )}
         </>
       ),
-    [historySlice, page, openExternalLink],
+    [transactions, openExternalLink, isLoadingNext],
   );
 
   return (
-    <Box position="relative">{historySlice ? history : <HistorySpinner />}</Box>
+    <Box position="relative">{transactions ? history : <HistorySpinner />}</Box>
   );
 };
 
