@@ -14,7 +14,7 @@ concurrency:
 jobs:
   check-if-should-run:
     if: ${{ github.event.pull_request.draft == false }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
     steps:
@@ -34,7 +34,7 @@ jobs:
   chromatic-deployment:
     name: Chromatic Core
     needs: check-if-should-run
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
         if: ${{ needs.check-if-should-run.outputs.requireChromaticCheck == 1 }}
