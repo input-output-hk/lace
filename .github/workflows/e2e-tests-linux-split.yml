@@ -32,7 +32,6 @@ on:
         options:
           - self-hosted
           - ubuntu-22.04
-          - ubuntu-20.04
           - ubuntu-latest
       smoke_only:
         type: boolean
