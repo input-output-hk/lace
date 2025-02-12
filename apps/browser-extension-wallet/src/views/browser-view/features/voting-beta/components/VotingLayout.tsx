@@ -6,7 +6,7 @@ import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { config } from '@src/config';
 import { useWalletStore } from '@src/stores';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { getEducationalList } from '../../activity';
+import { getEducationalList } from '../../assets/components/AssetEducationalList/AssetEducationalList';
 
 export const VotingLayout = (): ReactElement => {
   const { t } = useTranslation();
