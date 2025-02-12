@@ -20,6 +20,10 @@ import DappExplorerIconHover from '../../assets/icons/tiles-outlined-gradient.co
 import TransactionsIconDefault from '../../assets/icons/transactions-icon.component.svg';
 import TransactionsIconActive from '../../assets/icons/active-transactions-icon.component.svg';
 import TransactionsIconHover from '../../assets/icons/hover-transactions-icon.component.svg';
+
+import VotingIconDefault from '../../assets/icons/voting-icon.component.svg';
+import VotingIconHover from '../../assets/icons/hover-voting-icon.component.svg';
+
 import { MenuItemList } from '@src/utils/constants';
 import styles from './MainFooter.module.scss';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
@@ -28,6 +32,9 @@ import { useWalletStore } from '@stores';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
+import { config } from '@src/config';
+
+const { GOV_TOOLS_URLS } = config();
 
 const includesCoin = /coin/i;
 
@@ -36,11 +43,12 @@ export const MainFooter = (): React.ReactElement => {
   const location = useLocation<{ pathname: string }>();
   const history = useHistory();
   const analytics = useAnalyticsContext();
-  const { isSharedWallet } = useWalletStore();
+  const { isSharedWallet, environmentName } = useWalletStore();
   const posthog = usePostHogClientContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
   const currentLocation = location?.pathname;
   const isWalletIconActive =
     currentLocation === walletRoutePaths.assets || includesCoin.test(currentLocation) || currentLocation === '/';
@@ -59,6 +67,7 @@ export const MainFooter = (): React.ReactElement => {
     currentHoveredItem === MenuItemList.TRANSACTIONS ? TransactionsIconHover : TransactionsIconDefault;
   const StakingIcon = currentHoveredItem === MenuItemList.STAKING ? StakingIconHover : StakingIconDefault;
   const DappExplorerIcon = currentHoveredItem === MenuItemList.DAPPS ? DappExplorerIconHover : DappExplorerIconDefault;
+  const VotingIcon = currentHoveredItem === MenuItemList.VOTING ? VotingIconHover : VotingIconDefault;
 
   const sendAnalytics = (postHogAction?: PostHogAction) => {
     if (postHogAction) {
@@ -80,8 +89,12 @@ export const MainFooter = (): React.ReactElement => {
       case walletRoutePaths.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
         break;
+      case walletRoutePaths.voting:
+        sendAnalytics(PostHogAction.VotingClick);
+        break;
       case walletRoutePaths.dapps:
-      // TODO: LW-11885 send proper dapp explorer event
+        // TODO: LW-11885 send proper dapp explorer event
+        break;
     }
 
     if (path === walletRoutePaths.dapps) {
@@ -138,6 +151,20 @@ export const MainFooter = (): React.ReactElement => {
               <StakingIconActive className={styles.icon} />
             ) : (
               <StakingIcon className={styles.icon} />
+            )}
+          </button>
+        )}
+        {isVotingCenterEnabled && (
+          <button
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.VOTING)}
+            onMouseLeave={onMouseLeaveItem}
+            data-testid="main-footer-voting"
+            onClick={() => handleNavigation(walletRoutePaths.voting)}
+          >
+            {currentLocation === walletRoutePaths.voting ? (
+              <VotingIconHover className={styles.icon} />
+            ) : (
+              <VotingIcon className={styles.icon} />
             )}
           </button>
         )}

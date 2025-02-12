@@ -10,6 +10,9 @@ import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useWalletStore } from '@stores';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
+import { config } from '@src/config';
+
+const { GOV_TOOLS_URLS } = config();
 
 const isPathAvailable = (path: string) => Object.values(routes).includes(path);
 
@@ -22,8 +25,9 @@ export const SideMenu = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const posthog = usePostHogClientContext();
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
+  const { isSharedWallet, environmentName } = useWalletStore();
 
-  const { isSharedWallet } = useWalletStore();
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
 
   const [currentHoveredItem, setCurrentHoveredItem] = useState<MenuItemList | undefined>();
 
@@ -54,8 +58,12 @@ export const SideMenu = (): React.ReactElement => {
       case routes.activity:
         sendAnalytics(PostHogAction.ActivityActivityClick);
         break;
+      case routes.voting:
+        sendAnalytics(PostHogAction.VotingClick);
+        break;
       case routes.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
+        break;
     }
     push(field.key);
   };
@@ -73,6 +81,9 @@ export const SideMenu = (): React.ReactElement => {
   }
   if (!isDappExplorerEnabled) {
     excludeItems.push(MenuItemList.DAPPS);
+  }
+  if (!isVotingCenterEnabled) {
+    excludeItems.push(MenuItemList.VOTING);
   }
   const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
   return (
