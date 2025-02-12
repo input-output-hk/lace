@@ -319,7 +319,9 @@ export const mapWalletActivities = memoize(
       getPendingTransactions()
     ]);
 
-    const oldestHistoricalTxDate = withLimitedRewardsHistory ? historicalTransactions[0]?.date : undefined;
+    const oldestHistoricalTxDate = withLimitedRewardsHistory
+      ? historicalTransactions[historicalTransactions.length - 1]?.date
+      : undefined;
     const rewards = assetDetails ? [] : getRewardsHistory(oldestHistoricalTxDate);
 
     const confirmedTxs = historicalTransactions;
