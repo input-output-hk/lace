@@ -22,7 +22,7 @@ env:
 jobs:
   prepare:
     name: Prepare
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -79,7 +79,7 @@ jobs:
 
   unitTests:
     name: Unit tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: prepare
 
     steps:
@@ -138,7 +138,7 @@ jobs:
 
   release-pkg:
     name: Release package
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: prepare
 
     steps:
@@ -336,7 +336,7 @@ jobs:
   if-core-changed:
     name: When core changed
     if: ${{ github.event.pull_request.draft == false }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
     steps:
@@ -356,7 +356,7 @@ jobs:
   chromaticCore:
     name: >
       Run Chromatic check: Core
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs:
       - prepare
       - if-core-changed
@@ -419,7 +419,7 @@ jobs:
   if-staking-changed:
     name: When staking change
     if: ${{ github.event.pull_request.draft == false }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
     steps:
@@ -439,7 +439,7 @@ jobs:
   chromaticStaking:
     name: >
       Run Chromatic check: Staking
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs:
       - prepare
       - if-staking-changed
