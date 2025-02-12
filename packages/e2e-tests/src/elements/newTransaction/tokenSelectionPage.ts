@@ -6,6 +6,7 @@ import { TokenSearchResult } from './tokenSearchResult';
 import { browser } from '@wdio/globals';
 import { scrollDownWithOffset } from '../../utils/scrollUtils';
 import { ChainablePromiseElement } from 'webdriverio';
+import { getVirtualizedListElementAtIndex, scanVirtualizedList } from '../../utils/virtualizedListUtils';
 
 class TokenSelectionPage extends CommonDrawerElements {
   private TOKENS_BUTTON = '//input[@data-testid="asset-selector-button-tokens"]';
@@ -67,22 +68,31 @@ class TokenSelectionPage extends CommonDrawerElements {
     return this.assetSelectorContainer.$$(this.NFT_ITEM_NAME);
   }
 
+  getNftAtIndex = (index: number) =>
+    getVirtualizedListElementAtIndex(
+      index,
+      () => this.nftContainers,
+      (nft) => this.getNftName(nft)
+    );
+
   getNftContainer = async (name: string) =>
     (await this.nftContainers.find(
       async (item) => (await item.$(this.NFT_ITEM_NAME).getText()) === name
     )) as WebdriverIO.Element;
 
-  getNftName = async (name: string) => {
+  getNftNameElement = async (name: string) => {
     const nftContainer = await this.getNftContainer(name);
     return nftContainer.$(this.NFT_ITEM_NAME);
   };
 
-  grayedOutNFT(index: number) {
-    return this.nftContainers[index].$(this.NFT_ITEM_OVERLAY);
+  getNftName = async (nft: WebdriverIO.Element) => nft.$(this.NFT_ITEM_NAME).getText();
+
+  grayedOutNFT(nft: WebdriverIO.Element): ChainablePromiseElement<WebdriverIO.Element> {
+    return nft.$(this.NFT_ITEM_OVERLAY);
   }
 
-  checkmarkInSelectedNFT(index: number) {
-    return this.nftContainers[index].$(this.NFT_ITEM_SELECTED_CHECKMARK);
+  checkmarkInSelectedNFT(nft: WebdriverIO.Element): ChainablePromiseElement<WebdriverIO.Element> {
+    return nft.$(this.NFT_ITEM_SELECTED_CHECKMARK);
   }
 
   get assetsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -119,7 +129,7 @@ class TokenSelectionPage extends CommonDrawerElements {
 
   clickNftItemInAssetSelector = async (nftName: string) => {
     await this.waitForNft(nftName);
-    const nftNameElement = await this.getNftName(nftName);
+    const nftNameElement = await this.getNftNameElement(nftName);
     await nftNameElement.waitForClickable();
     await nftNameElement.click();
   };
@@ -144,26 +154,39 @@ class TokenSelectionPage extends CommonDrawerElements {
     }
   };
 
-  deselectToken = async (assetType: string, index: number) => {
-    assetType === 'Tokens' ? await this.tokenItem(Number(index)).container.click() : await this.nftNames[index].click();
+  deselectAsset = (assetType: string, index: number) =>
+    assetType === 'Tokens' ? this.tokenItem(Number(index)).container.click() : this.deselectNFTAtIndex(index);
+
+  deselectNFTAtIndex = async (index: number): Promise<void> => {
+    const nft = await this.getNftAtIndex(index);
+    if (!nft) return Promise.reject(new Error(`No NFT at index ${index} found`));
+    await nft.waitForClickable();
+    return nft.click();
   };
 
   saveSelectedTokens = async (assetType: string, bundle: number) => {
     const amountOfAssets = Number(await this.assetsCounter.getText());
     testContext.save(`amountOfAssetsInBundle${String(bundle)}`, amountOfAssets);
 
-    for (let i = 1; i <= amountOfAssets; i++) {
-      if (assetType === 'Tokens') {
+    if (assetType === 'Tokens') {
+      for (let i = 1; i <= amountOfAssets; i++) {
         const tokenName = String(await this.tokenItem(i).name.getText()).slice(0, 6);
         const asset =
           tokenName === 'asset1'
             ? String(await this.tokenItem(i).name.getText()).slice(0, 10)
             : String(await this.tokenItem(i).ticker.getText()).slice(0, 10);
         testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
-      } else {
-        const asset = String(await this.nftNames[i].getText()).slice(0, 10);
-        testContext.save(`bundle${String(bundle)}asset${String(i)}`, asset);
       }
+    } else {
+      await scanVirtualizedList(
+        amountOfAssets,
+        () => this.nftContainers,
+        (nft) => this.getNftName(nft),
+        async (_, index, nftName) => {
+          const asset = String(nftName).slice(0, 10);
+          testContext.save(`bundle${String(bundle)}asset${String(index)}`, asset);
+        }
+      );
     }
   };
 
@@ -217,30 +240,17 @@ class TokenSelectionPage extends CommonDrawerElements {
   }
 
   async selectNFTs(numberOfNFTs: number) {
-    let selectedCount = 0;
-
-    while (selectedCount < numberOfNFTs) {
-      const nfts = await this.nftContainers;
-
-      for (const nft of nfts) {
+    await scanVirtualizedList(
+      numberOfNFTs,
+      () => this.nftContainers,
+      (nft) => this.getNftName(nft),
+      async (nft) => {
         const isSelected = await nft.$(this.NFT_ITEM_SELECTED_CHECKMARK).isExisting();
-        if (isSelected) {
-          continue;
-        }
-
+        if (isSelected) return;
         await nft.waitForClickable();
         await nft.click();
-        selectedCount++;
-
-        if (selectedCount >= numberOfNFTs) {
-          return;
-        }
       }
-
-      if (selectedCount < numberOfNFTs) {
-        await scrollDownWithOffset(nfts);
-      }
-    }
+    );
   }
 }
 

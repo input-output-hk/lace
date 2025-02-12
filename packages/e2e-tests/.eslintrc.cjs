@@ -9,7 +9,9 @@ module.exports = exports = {
     'new-cap': ['error', { capIsNew: false }],
     'no-magic-numbers': ['off'],
     'wdio/no-pause': ['off'],
-    '@typescript-eslint/no-explicit-any': ['off']
+    '@typescript-eslint/no-explicit-any': ['off'],
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': 'error'
   },
   'env': {
     'node': true

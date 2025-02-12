@@ -1,35 +1,58 @@
+/* global WebdriverIO */
 import TokenSelectionPage from '../../elements/newTransaction/tokenSelectionPage';
 import { TokenSearchResult } from '../../elements/newTransaction/tokenSearchResult';
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
+import { scanVirtualizedList } from '../../utils/virtualizedListUtils';
 
 class TransactionAssetSelectionAssert {
   async assertAssetIsPresentInTokenList(assetName: string, shouldBeDisplayed: boolean) {
     await new TokenSearchResult(assetName).container.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 
-  async assertAssetsAreSelected(shouldBeSelected: boolean, amount: number, assetType: string) {
-    for (let i = 1; i <= amount; i++) {
-      await this.assertSpecificAssetSelected(shouldBeSelected, assetType, i);
+  async assertAssetsAreSelected(shouldBeSelected: boolean, expectedAmount: number, assetType: 'Tokens' | 'NFTs') {
+    await (assetType === 'Tokens'
+      ? this.assertTokensSelected(shouldBeSelected, expectedAmount)
+      : this.assertNFTsSelected(shouldBeSelected, expectedAmount));
+  }
+
+  async assertTokensSelected(shouldBeSelected: boolean, expectedAmount: number) {
+    for (let i = 1; i <= expectedAmount; i++) {
+      await this.assertTokenSelectedAtIndex(shouldBeSelected, i);
     }
   }
 
-  async assertSpecificAssetSelected(shouldBeSelected: boolean, assetType: string, index: number) {
-    if (assetType === 'Tokens') {
-      await TokenSelectionPage.tokenItem(index).grayedOutTokenIcon.waitForDisplayed({
-        reverse: !shouldBeSelected
-      });
-      await TokenSelectionPage.tokenItem(index).checkmarkInSelectedToken.waitForDisplayed({
-        reverse: !shouldBeSelected
-      });
-    } else {
-      await TokenSelectionPage.grayedOutNFT(index).waitForDisplayed({
-        reverse: !shouldBeSelected
-      });
-      await TokenSelectionPage.checkmarkInSelectedNFT(index).waitForDisplayed({
-        reverse: !shouldBeSelected
-      });
-    }
+  async assertTokenSelectedAtIndex(shouldBeSelected: boolean, index: number) {
+    await TokenSelectionPage.tokenItem(index).grayedOutTokenIcon.waitForDisplayed({
+      reverse: !shouldBeSelected
+    });
+    await TokenSelectionPage.tokenItem(index).checkmarkInSelectedToken.waitForDisplayed({
+      reverse: !shouldBeSelected
+    });
+  }
+
+  assertNFTsSelected(shouldBeSelected: boolean, expectedAmount: number) {
+    return scanVirtualizedList(
+      expectedAmount,
+      () => TokenSelectionPage.nftContainers,
+      (nft) => TokenSelectionPage.getNftName(nft),
+      (nextNFT) => this.assertNFTSelected(shouldBeSelected, nextNFT)
+    );
+  }
+
+  async assertNFTSelected(shouldBeSelected: boolean, nft: WebdriverIO.Element) {
+    await TokenSelectionPage.grayedOutNFT(nft).waitForDisplayed({
+      reverse: !shouldBeSelected
+    });
+    await TokenSelectionPage.checkmarkInSelectedNFT(nft).waitForDisplayed({
+      reverse: !shouldBeSelected
+    });
+  }
+
+  async assertNFTSelectedAtIndex(shouldBeSelected: boolean, index: number) {
+    const nft = await TokenSelectionPage.getNftAtIndex(index);
+    if (!nft) return Promise.reject(new Error(`NFT at index ${index} not found`));
+    return await this.assertNFTSelected(shouldBeSelected, nft);
   }
 
   async assertSelectedAssetsCounter(shouldBeDisplayed: boolean, amount: number) {

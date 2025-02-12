@@ -147,7 +147,7 @@ When(/^I select amount: (\d*) of asset type: (Tokens|NFTs)$/, async (amount: num
 });
 
 When(/^I deselect (Tokens|NFTs) (\d*)$/, async (assetType: 'Tokens' | 'NFTs', index: number) => {
-  await TokenSelectionPage.deselectToken(assetType, index);
+  await TokenSelectionPage.deselectAsset(assetType, index);
 });
 
 When(/^I save selected (Tokens|NFTs) in bundle (\d*)$/, async (assetType: 'Tokens' | 'NFTs', bundle: number) => {
@@ -533,7 +533,9 @@ Then(
   /^(Tokens|NFTs) (\d*) (is|is not) selected$/,
   async (assetType: 'Tokens' | 'NFTs', index: number, selected: string) => {
     const shouldBeSelected: boolean = selected === 'are';
-    await TransactionAssetSelectionAssert.assertSpecificAssetSelected(shouldBeSelected, assetType, index);
+    assetType === 'Tokens'
+      ? await TransactionAssetSelectionAssert.assertTokenSelectedAtIndex(shouldBeSelected, index)
+      : await TransactionAssetSelectionAssert.assertNFTSelectedAtIndex(shouldBeSelected, index);
   }
 );
 

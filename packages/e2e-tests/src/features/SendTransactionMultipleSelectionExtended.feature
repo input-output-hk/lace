@@ -4,8 +4,7 @@ Feature: Send - Multiple selection for Extended Browser View
   Background:
     Given Wallet is synced
 
-  @LW-5043 @Pending
-  @issue=LW-12151
+  @LW-5043
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - happy path
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -66,8 +65,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | Tokens     |
       | NFTs       |
 
-  @LW-5046 @Pending
-  @issue=LW-12151
+  @LW-5046
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - clear and cancel
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
@@ -93,8 +91,7 @@ Feature: Send - Multiple selection for Extended Browser View
       | Tokens     |
       | NFTs       |
 
-  @LW-5267 @Pending
-  @issue=LW-12151
+  @LW-5267
   Scenario Outline: Extended view - Send - Multiple tokens selection - <assetsType> - Maximum amount to select is 30
     And I click "Send" button on page header
     When I enter a valid "shelley" address in the bundle 1 recipient's address
