@@ -55,5 +55,14 @@ export const useFatalError = (): FatalError | undefined => {
   const { cardanoWallet } = useWalletStore();
   const walletError$ = useMemo(() => anyError(cardanoWallet?.wallet), [cardanoWallet?.wallet]);
   const walletError = useObservable(walletError$);
+
+  if (unhandledServiceWorkerError) {
+    console.error('useFatalError (service worker):', unhandledServiceWorkerError);
+  }
+
+  if (walletError) {
+    console.error('useFatalError (wallet):', walletError);
+  }
+
   return unhandledServiceWorkerError || walletError;
 };

@@ -4,7 +4,12 @@ import { storage } from 'webextension-polyfill';
 Sentry.init({
   environment: process.env.SENTRY_ENVIRONMENT,
   dsn: process.env.SENTRY_DSN,
-  integrations: [Sentry.browserTracingIntegration(), Sentry.browserProfilingIntegration(), Sentry.replayIntegration()],
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.browserProfilingIntegration(),
+    Sentry.replayIntegration(),
+    Sentry.captureConsoleIntegration({ levels: ['error'] })
+  ],
   // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
   tracePropagationTargets: ['localhost', 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk'],
   // .5%
