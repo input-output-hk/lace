@@ -1,3 +1,4 @@
+import { storage } from 'webextension-polyfill';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
@@ -62,7 +63,8 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
     logger,
     experiments: {
       useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API)
-    }
+    },
+    extensionLocalStorage: storage.local
   });
 };
 
