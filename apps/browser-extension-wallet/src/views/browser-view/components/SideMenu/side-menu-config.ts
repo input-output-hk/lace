@@ -23,7 +23,6 @@ import DappExplorerIconHover from '@assets/icons/tiles-outlined-gradient.compone
 import DappExplorerIconActive from '@assets/icons/tiles-solid-gradient.component.svg';
 
 import VotingIconDefault from '@assets/icons/voting-icon.component.svg';
-import VotingIconActive from '@assets/icons/active-voting-icon.component.svg';
 import VotingIconHover from '@assets/icons/hover-voting-icon.component.svg';
 
 import { SideMenuItemConfig } from '@types';
@@ -73,7 +72,7 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     path: routes.voting,
     regularIcon: VotingIconDefault,
     hoverIcon: VotingIconHover,
-    activeIcon: VotingIconActive
+    activeIcon: VotingIconHover
   },
   {
     id: MenuItemList.DAPPS,

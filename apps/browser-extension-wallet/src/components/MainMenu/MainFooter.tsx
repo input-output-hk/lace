@@ -22,7 +22,6 @@ import TransactionsIconActive from '../../assets/icons/active-transactions-icon.
 import TransactionsIconHover from '../../assets/icons/hover-transactions-icon.component.svg';
 
 import VotingIconDefault from '../../assets/icons/voting-icon.component.svg';
-import VotingIconActive from '../../assets/icons/active-voting-icon.component.svg';
 import VotingIconHover from '../../assets/icons/hover-voting-icon.component.svg';
 
 import { MenuItemList } from '@src/utils/constants';
@@ -163,7 +162,7 @@ export const MainFooter = (): React.ReactElement => {
             onClick={() => handleNavigation(walletRoutePaths.voting)}
           >
             {currentLocation === walletRoutePaths.voting ? (
-              <VotingIconActive className={styles.icon} />
+              <VotingIconHover className={styles.icon} />
             ) : (
               <VotingIcon className={styles.icon} />
             )}
