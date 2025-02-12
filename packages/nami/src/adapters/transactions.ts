@@ -78,9 +78,10 @@ const getTxType = ({
 };
 
 const dateFromUnix = (
-  slot: Wallet.Cardano.Slot,
   eraSummaries: OutsideHandlesContextValue['eraSummaries'],
+  slot?: Wallet.Cardano.Slot,
 ) => {
+  if (!slot) return new Date();
   const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
   const date = slotTimeCalc(slot);
 
@@ -242,7 +243,7 @@ const getExtra = async ({
 }: GetExtraProps): Promise<Extra[]> => {
   const extra: Extra[] = [];
 
-  if (tx.witness.redeemers?.length) {
+  if (tx.witness?.redeemers?.length) {
     extra.push('contract');
   } else if (txType === 'multisig') {
     extra.push('multisig');
@@ -305,6 +306,7 @@ export type TxInfo = Pick<TransactionDetail, 'metadata'> &
     lovelace: bigint;
     assets: NamiAsset[];
     refund: string;
+    pending: boolean;
   };
 
 export interface EncodeToCborArgs {
@@ -369,31 +371,38 @@ export const getTxInfo = async ({
   protocolParameters: Wallet.Cardano.ProtocolParameters;
   assetInfo: Wallet.Assets;
   rewardAccounts: Wallet.Cardano.RewardAccountInfo[];
-}): Promise<TxInfo | undefined> => {
+}): Promise<TxInfo> => {
   const rewardAccountsAddresses = new Set(rewardAccounts?.map(a => a.address));
   const currentAddress = addresses[0];
 
-  if (!protocolParameters || !('blockHeader' in tx)) return undefined;
   const implicitCoin = Wallet.Cardano.util.computeImplicitCoin(
     protocolParameters,
     tx.body,
   );
   const uTxOList = {
-    inputs: tx.body.inputs,
+    inputs: tx.body.inputs as unknown as Wallet.Cardano.HydratedTxIn[],
     outputs: tx.body.outputs,
-    collaterals: tx.body.collaterals,
+    collaterals: tx.body
+      .collaterals as unknown as Wallet.Cardano.HydratedTxIn[],
   };
   const type = getTxType({
     currentAddress,
     addresses: addresses,
     uTxOList,
   });
-  const date = dateFromUnix(tx.blockHeader.slot, eraSummaries);
+  let date = new Date();
+  if ('blockHeader' in tx) {
+    date = dateFromUnix(eraSummaries, tx.blockHeader.slot);
+  } else if ('submittedAt' in tx) {
+    date = dateFromUnix(eraSummaries, tx.submittedAt);
+  }
   const txInputs = await getTxInputsValueAndAddress(tx.body.inputs);
   const amounts = calculateAmount({
     currentAddress,
     uTxOList: { ...uTxOList, inputs: txInputs },
-    validContract: tx.inputSource === Wallet.Cardano.InputSource.inputs,
+    validContract:
+      'inputSource' in tx &&
+      tx.inputSource === Wallet.Cardano.InputSource.inputs,
   });
   const assets = amounts.filter(amount => amount.unit !== 'lovelace');
   const lovelaceAsset = amounts.find(amount => amount.unit === 'lovelace');
@@ -408,21 +417,23 @@ export const getTxInfo = async ({
   });
 
   const info: TxInfo = {
+    pending: !('blockHeader' in tx),
     txHash: tx.id.toString(),
     fees: tx.body.fee.toString(),
     deposit: implicitCoin.deposit?.toString() ?? '',
     refund: implicitCoin.reclaimDeposit?.toString() ?? '',
-    metadata: [...(tx.auxiliaryData?.blob?.entries() ?? [])].map(
-      ([key, value]) => ({
-        label: key.toString(),
-        json_metadata: Wallet.cardanoMetadatumToObj(value),
-      }),
-    ),
+    metadata: [
+      ...(('auxiliaryData' in tx ? tx.auxiliaryData?.blob?.entries() : []) ??
+        []),
+    ].map(([key, value]) => ({
+      label: key.toString(),
+      json_metadata: Wallet.cardanoMetadatumToObj(value),
+    })),
     date,
     timestamp: getTimestamp(date),
     type,
     extra: await getExtra({
-      tx,
+      tx: tx as unknown as Wallet.Cardano.HydratedTx,
       txType: type,
       certificateInspectorFactory,
       rewardAccountsAddresses,
@@ -483,6 +494,8 @@ export const mapWalletActivities = memoize(
     return await Promise.all(
       [
         ...transactions.outgoing.inFlight,
+        // TODO: track signed tx
+        // ...transactions.outgoing.signed,
         ...transactions.history.sort(
           (tx1, tx2) => tx2.blockHeader.slot - tx1.blockHeader.slot,
         ),
@@ -517,7 +530,7 @@ export const useWalletTxs = () => {
     assetInfo,
     inputResolver,
   } = useOutsideHandles();
-  const [txs, setTxs] = useState<(TxInfo | undefined)[]>();
+  const [txs, setTxs] = useState<TxInfo[]>();
   const rewardAccounts = useObservable(
     inMemoryWallet.delegation.rewardAccounts$,
   );
