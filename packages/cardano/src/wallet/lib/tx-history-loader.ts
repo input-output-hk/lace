@@ -1,5 +1,5 @@
 import { Cardano, ChainHistoryProvider, TransactionsByAddressesArgs } from '@cardano-sdk/core';
-import { ObservableWallet, pollProvider, PollProviderProps } from '@cardano-sdk/wallet';
+import { ObservableWallet, pollProvider, PollProviderProps, txEquals } from '@cardano-sdk/wallet';
 import { toEmpty } from '@cardano-sdk/util-rxjs';
 import {
   concat,
@@ -58,6 +58,46 @@ const findIntersection = (storedHistory: Cardano.HydratedTx[], localHistory: Car
   }
 };
 
+/* TODO: Copied from SDK. Should be refactored to be imported from SDK.
+ * Initial page is sliced to hardcoded 10 in Lace storage initialization.
+ * Either update to slice in whole blocks or remove the slice altogether.
+ */
+
+/**
+ * Sorts the given HydratedTx by slot.
+ *
+ * @param lhs The left-hand side of the comparison operation.
+ * @param rhs The left-hand side of the comparison operation.
+ */
+const compareTxOrder = (lhs: Cardano.HydratedTx, rhs: Cardano.HydratedTx) =>
+  lhs.blockHeader.slot - rhs.blockHeader.slot || lhs.index - rhs.index;
+
+/**
+ * Deduplicates the given array of HydratedTx.
+ * Copied from SDK. Should be refactored to be imported from SDK
+ *
+ * @param arr The array of HydratedTx to deduplicate.
+ * @param isEqual The equality function to use to determine if two HydratedTx are equal.
+ */
+const deduplicateSortedArray = (
+  arr: Cardano.HydratedTx[],
+  isEqual: (a: Cardano.HydratedTx, b: Cardano.HydratedTx) => boolean
+) => {
+  if (arr.length === 0) {
+    return [];
+  }
+
+  const result = [arr[0]];
+
+  for (let i = 1; i < arr.length; ++i) {
+    if (!isEqual(arr[i], arr[i - 1])) {
+      result.push(arr[i]);
+    }
+  }
+
+  return result;
+};
+
 export const createTxHistoryLoader = (
   provider: ObservableTransactionsByAddressesProvider,
   { addresses$, syncStatus: { isSettled$ }, transactions: { history$ } }: TxHistoryLoaderObservableWallet,
@@ -67,10 +107,12 @@ export const createTxHistoryLoader = (
   let mightHaveMore = false;
   let fullLocalHistory: Cardano.HydratedTx[];
   let emittedHistory: Cardano.HydratedTx[];
+  let isFirstFetch = true;
 
   const initialPage = (storedHistory: Cardano.HydratedTx[]): LoadedTxHistory => {
     fullLocalHistory = [...storedHistory].reverse();
-    mightHaveMore = fullLocalHistory.length > minimumPageSize;
+    // Always try to fetch more for the first page. The first page is limited to 10 elements and the viewPort height might fit more
+    mightHaveMore = true;
     emittedHistory = fullLocalHistory.slice(0, minimumPageSize);
     return {
       transactions: emittedHistory,
@@ -90,7 +132,7 @@ export const createTxHistoryLoader = (
     }
     const nextPageStartAt = lastEmittedTxIndex + 1;
     const moreLocalTxs = fullLocalHistory.slice(nextPageStartAt, nextPageStartAt + minimumPageSize);
-    const missingNumberOfTxs = minimumPageSize - moreLocalTxs.length;
+    let missingNumberOfTxs = minimumPageSize - moreLocalTxs.length;
     if (missingNumberOfTxs === 0) {
       emittedHistory = [...emittedHistory, ...moreLocalTxs];
       return of({
@@ -99,13 +141,26 @@ export const createTxHistoryLoader = (
       });
     }
     const lastTx = moreLocalTxs[moreLocalTxs.length - 1] || emittedHistory[emittedHistory.length - 1];
+    let upperBound = Cardano.BlockNo(lastTx.blockHeader.blockNo - 1);
+    if (isFirstFetch) {
+      upperBound = Cardano.BlockNo(lastTx.blockHeader.blockNo);
+      missingNumberOfTxs += fullLocalHistory.filter(
+        (tx) => tx.blockHeader.blockNo === lastTx.blockHeader.blockNo
+      ).length;
+    }
+
     return provider({
       addresses,
       pagination: { startAt: 0, limit: missingNumberOfTxs, order: 'desc' },
-      blockRange: { upperBound: Cardano.BlockNo(lastTx.blockHeader.blockNo - 1) }
+      blockRange: { upperBound }
     }).pipe(
       map((fetchedTxs) => {
-        emittedHistory = fullLocalHistory = [...emittedHistory, ...moreLocalTxs, ...fetchedTxs];
+        fullLocalHistory = [...emittedHistory, ...moreLocalTxs, ...fetchedTxs];
+        if (isFirstFetch) {
+          isFirstFetch = false;
+          fullLocalHistory = deduplicateSortedArray(fullLocalHistory.sort(compareTxOrder).reverse(), txEquals);
+        }
+        emittedHistory = fullLocalHistory;
         mightHaveMore = fetchedTxs.length >= missingNumberOfTxs;
         return {
           transactions: emittedHistory,
