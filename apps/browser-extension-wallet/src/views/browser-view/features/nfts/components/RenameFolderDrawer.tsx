@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Button, Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import styles from './RenameFolderDrawer.module.scss';
 import { NameForm } from '@views/browser/features/nfts/components/CreateFolder/NameForm';
@@ -18,7 +18,7 @@ interface RenameFolderDrawerProps {
 
 export const RenameFolderDrawer = withNftsFoldersContext(
   ({ folderToRename, visible, onClose, isPopupView = false }: RenameFolderDrawerProps): ReactElement => {
-    const [name, setName] = useState('');
+    const [name, setName] = useState(folderToRename?.name || '');
     const {
       list: nftFolders,
       utils: { updateRecord }
@@ -51,6 +51,10 @@ export const RenameFolderDrawer = withNftsFoldersContext(
       setName('');
       setIsExitModalVisible(false);
     };
+
+    useEffect(() => {
+      setName(folderToRename?.name || '');
+    }, [folderToRename?.name]);
 
     const footer = (
       <div className={styles.actionButtons}>
@@ -93,7 +97,7 @@ export const RenameFolderDrawer = withNftsFoldersContext(
           <NameForm
             onSetIsFormValid={setIsFormValid}
             usedFolderNames={usedFolderNames}
-            name={name || folderToRename?.name}
+            name={name}
             onSetName={setName}
           />
         </Drawer>
