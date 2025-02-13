@@ -4,4 +4,3 @@ export * from './DappTransactionSuccess';
 export * from './DappTransactionFail';
 export * from './ConfirmData';
 export * from './SignDataFlowContainer';
-export * from './collateral';
