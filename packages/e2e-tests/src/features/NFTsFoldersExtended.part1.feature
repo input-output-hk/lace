@@ -50,8 +50,7 @@ Feature: NFT - Folders - Extended view
       | I close the drawer by clicking close button            |
       | I click outside the drawer                             |
 
-  @LW-7206 @Pending
-  @issue=LW-7632
+  @LW-7206
   Scenario: Extended-view - NFT Folders - Trying to rename folder using too long name
     Given the NFT folder with name "Sample NFT folder" and 1 NFT was created
     And I navigate to NFTs extended page
