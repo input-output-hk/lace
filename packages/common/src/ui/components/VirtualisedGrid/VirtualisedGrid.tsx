@@ -19,6 +19,7 @@ export type GridProps<T> = VirtuosoGridProps<T, null> & {
   testId?: string;
   tableReference?: React.Ref<HTMLDivElement>;
   columns?: VirtualisedGridColumns;
+  gridClassName?: string;
 };
 
 /**
@@ -66,6 +67,7 @@ export const VirtualisedGrid = <T extends Record<string, unknown> | undefined>({
   tableReference,
   testId,
   columns,
+  gridClassName,
   ...props
 }: GridProps<T>): React.ReactElement => {
   const [scrollableTargetReference] = useQuerySelectorRef(`#${scrollableTargetId}`);
@@ -73,7 +75,7 @@ export const VirtualisedGrid = <T extends Record<string, unknown> | undefined>({
   return (
     <div ref={tableReference} data-testid={testId}>
       <VirtuosoGrid<T>
-        listClassName={cn(styles.grid, { [styles[`grid-${columns}`]]: columns })}
+        listClassName={cn(styles.grid, gridClassName, { [styles[`grid-${columns}`]]: columns })}
         data={items}
         customScrollParent={scrollableTargetReference.current}
         totalCount={items.length}

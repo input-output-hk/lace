@@ -208,6 +208,7 @@ export const Nfts = withNftsFoldersContext((): React.ReactElement => {
               columns={2}
               scrollableTargetId={extensionScrollableContainerID}
               items={isLoadingFirstTime ? [] : nftstoDisplay}
+              gridClassName={styles.grid}
             />
           </div>
         </div>

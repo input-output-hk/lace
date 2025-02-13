@@ -12,6 +12,7 @@ import { NftItem, NftItemProps } from './NftItem';
 
 export type NftGridProps = Omit<GridProps<NftItemProps | NftFolderItemProps | PlaceholderItem>, 'itemContent'> & {
   isSearching?: boolean;
+  gridClassName?: string;
 };
 
 export const NftGrid = ({
