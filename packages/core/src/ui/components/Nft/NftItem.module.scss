@@ -19,7 +19,7 @@
     opacity: 0.24;
   }
   &:hover {
-    background: var(--light-mode-light-grey, var(--dark-mode-mid-grey));
+    background: var(--light-mode-light-grey, var(--dark-mode-grey));
   }
   &:active,
   &:focus {
@@ -123,11 +123,11 @@
 
 .folderContainer {
   position: relative;
+  height: 100%;
 }
 
 .folderWrapper {
-  border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
-  background-color: var(--light-mode-light-grey);
+  background-color: var(--light-mode-light-grey, var(--dark-mode-grey));
   border-radius: 11px;
   display: grid;
   flex: 1;
@@ -140,7 +140,7 @@
   @media (max-width: $breakpoint-popup) {
     width: 147px;
     height: 147px;
-    min-width: 147px;
+    max-width: 100%;
     min-height: 147px;
   }
 
