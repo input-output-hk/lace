@@ -10,7 +10,7 @@ import {
   TxHistoryLoaderObservableWallet
 } from '../lib/tx-history-loader';
 
-const stubTx = (blockNo: number) => ({ id: blockNo.toString(), blockHeader: { blockNo } }) as Cardano.HydratedTx;
+const stubTx = (blockNo: number) => ({ id: blockNo.toString(), blockHeader: { blockNo } } as Cardano.HydratedTx);
 
 describe('TxHistoryLoader', () => {
   const addresses$ = of([
