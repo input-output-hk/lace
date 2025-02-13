@@ -13,9 +13,15 @@ import { Settings } from '../features/settings';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { NftDetail, Nfts } from '@src/features/nfts';
 import { useWalletStore } from '@stores';
+import { config } from '@src/config';
+import { Voting } from '@src/features/voting-beta/components';
+
+const { GOV_TOOLS_URLS } = config();
 
 export const ExtensionRoutes = (): React.ReactElement => {
-  const { isSharedWallet } = useWalletStore();
+  const { isSharedWallet, environmentName } = useWalletStore();
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
+
   return (
     <MainLayout>
       <Switch>
@@ -29,6 +35,7 @@ export const ExtensionRoutes = (): React.ReactElement => {
         <Route exact path={walletRoutePaths.settings} component={Settings} />
         <Route exact path={walletRoutePaths.signMessage} component={SignMessageDrawer} />
         <Route exact path={walletRoutePaths.nfts} component={Nfts} />
+        {isVotingCenterEnabled && <Route exact path={walletRoutePaths.voting} component={Voting} />}
         <Route path="*" render={() => <Redirect to={walletRoutePaths.assets} />} />
       </Switch>
       {/* TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.*/}

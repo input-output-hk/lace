@@ -41,6 +41,7 @@ import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/Crash';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
 import { logger } from '@lace/common';
+import { VotingLayout } from '../features/voting-beta';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -64,6 +65,10 @@ export const defaultRoutes: RouteMap = [
     component: SignMessageDrawer
   },
   {
+    path: routes.voting,
+    component: VotingLayout
+  },
+  {
     path: routes.settings,
     component: SettingsLayout
   },
@@ -83,7 +88,7 @@ type RouteMap = {
   component: ComponentType<any>;
 }[];
 
-const { CHAIN } = config();
+const { CHAIN, GOV_TOOLS_URLS } = config();
 
 /**
  * Queries tabs through `webextension-polyfill` to discard other tabs than the one already focused.
@@ -117,7 +122,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     stayOnAllDonePage,
     cardanoWallet,
     initialHdDiscoveryCompleted,
-    isSharedWallet
+    isSharedWallet,
+    environmentName
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
@@ -125,9 +131,11 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const { t } = useTranslation();
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
+  const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
+    if (route.path === routes.voting && !isVotingCenterEnabled) return false;
     return true;
   });
 
