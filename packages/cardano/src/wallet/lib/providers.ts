@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-new, complexity, sonarjs/cognitive-complexity */
+import { Storage } from 'webextension-polyfill';
 import { AxiosAdapter } from 'axios';
 import { Logger } from 'ts-log';
 import {
@@ -33,7 +34,7 @@ import {
   BlockfrostNetworkInfoProvider,
   BlockfrostRewardAccountInfoProvider
 } from '@cardano-sdk/cardano-services-client';
-import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { RemoteApiProperties, RemoteApiPropertyType, createPersistentCacheStorage } from '@cardano-sdk/web-extension';
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
 import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
@@ -86,6 +87,7 @@ interface ProvidersConfig {
   experiments: {
     useWebSocket?: boolean;
   };
+  extensionLocalStorage: Storage.LocalStorageArea;
 }
 
 /**
@@ -94,11 +96,41 @@ interface ProvidersConfig {
  * If a new one needs to be created (ex. on network change) the previous instance needs to be closed. */
 let wsProvider: CardanoWsClient;
 
+enum CacheName {
+  chainHistoryProvider = 'chain-history-provider-cache',
+  inputResolver = 'input-resolver-cache',
+  utxoProvider = 'utxo-provider-cache'
+}
+
+// eslint-disable-next-line no-magic-numbers
+const sizeOf1mb = 1024 * 1024;
+
+// The count values have been calculated by filling the cache by impersonating a few
+// rich wallets and then getting the average size of a single item per each cache collection
+const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
+  [CacheName.chainHistoryProvider]: {
+    count: 5_180_160_021,
+    // eslint-disable-next-line no-magic-numbers
+    size: 30 * sizeOf1mb
+  },
+  [CacheName.inputResolver]: {
+    count: 65_529_512_340,
+    // eslint-disable-next-line no-magic-numbers
+    size: 30 * sizeOf1mb
+  },
+  [CacheName.utxoProvider]: {
+    count: 6_530_251_302,
+    // eslint-disable-next-line no-magic-numbers
+    size: 30 * sizeOf1mb
+  }
+};
+
 export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
   logger = console,
-  experiments: { useWebSocket }
+  experiments: { useWebSocket },
+  extensionLocalStorage
 }: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
 
@@ -107,7 +139,17 @@ export const createProviders = ({
   });
   const assetProvider = new BlockfrostAssetProvider(blockfrostClient, logger);
   const networkInfoProvider = new BlockfrostNetworkInfoProvider(blockfrostClient, logger);
-  const chainHistoryProvider = new BlockfrostChainHistoryProvider(blockfrostClient, networkInfoProvider, logger);
+  const chainHistoryProvider = new BlockfrostChainHistoryProvider({
+    client: blockfrostClient,
+    cache: createPersistentCacheStorage({
+      extensionLocalStorage,
+      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.chainHistoryProvider].count,
+      resourceName: CacheName.chainHistoryProvider,
+      quotaInBytes: cacheAssignment[CacheName.chainHistoryProvider].size
+    }),
+    networkInfoProvider,
+    logger
+  });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
@@ -122,7 +164,16 @@ export const createProviders = ({
     stakePoolProvider
   });
 
-  const inputResolver = new BlockfrostInputResolver(blockfrostClient, logger);
+  const inputResolver = new BlockfrostInputResolver({
+    cache: createPersistentCacheStorage({
+      extensionLocalStorage,
+      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.inputResolver].count,
+      resourceName: CacheName.inputResolver,
+      quotaInBytes: cacheAssignment[CacheName.inputResolver].size
+    }),
+    client: blockfrostClient,
+    logger
+  });
 
   if (useWebSocket) {
     const url = new URL(baseUrl);
@@ -152,7 +203,16 @@ export const createProviders = ({
     };
   }
 
-  const utxoProvider = new BlockfrostUtxoProvider(blockfrostClient, logger);
+  const utxoProvider = new BlockfrostUtxoProvider({
+    cache: createPersistentCacheStorage({
+      extensionLocalStorage,
+      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.utxoProvider].count,
+      resourceName: CacheName.utxoProvider,
+      quotaInBytes: cacheAssignment[CacheName.utxoProvider].size
+    }),
+    client: blockfrostClient,
+    logger
+  });
 
   return {
     assetProvider,
