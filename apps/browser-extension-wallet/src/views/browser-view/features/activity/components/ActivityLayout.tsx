@@ -1,19 +1,14 @@
-import React, { ReactElement, useEffect, useCallback } from 'react';
+import React, { ReactElement, useEffect, useCallback, useMemo } from 'react';
+import debounce from 'lodash/debounce';
 import { Skeleton } from 'antd';
 import isNil from 'lodash/isNil';
 import { GroupedAssetActivityList } from '@lace/core';
 import { useFetchCoinPrice } from '../../../../../hooks';
-import { StateStatus, useWalletStore } from '../../../../../stores';
+import { useWalletStore } from '../../../../../stores';
 import { Drawer, DrawerNavigation, useObservable } from '@lace/common';
 import { ActivityDetail } from './ActivityDetail';
 import { useTranslation } from 'react-i18next';
-import {
-  FundWalletBanner,
-  EducationalList,
-  SectionLayout,
-  Layout,
-  EducationalListRowProps
-} from '@src/views/browser-view/components';
+import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
@@ -21,17 +16,29 @@ import Video from '@assets/icons/video.svg';
 import { LACE_APP_ID } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useWalletActivities } from '@hooks/useWalletActivities';
-import { Flex } from '@input-output-hk/lace-ui-toolkit';
-import { TFunction } from 'i18next';
+import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
 
-export const getEducationalList = (t: TFunction): EducationalListRowProps[] => {
+const loadMoreDebounce = 300;
+
+export const ActivityLayout = (): ReactElement => {
+  const { t } = useTranslation();
+  const { priceResult } = useFetchCoinPrice();
+  const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
+  const analytics = useAnalyticsContext();
+  const sendAnalytics = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
+  }, [analytics]);
+
+  const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
+  const total = useObservable(inMemoryWallet.balance.utxo.total$);
+
   const titles = {
     glossary: t('educationalBanners.title.glossary'),
     faq: t('educationalBanners.title.faq'),
     video: t('educationalBanners.title.video')
   };
-  return [
+
+  const educationalList = [
     {
       title: titles.glossary,
       subtitle: t('browserView.activity.learnAbout.whatAreActivityDetails'),
@@ -57,41 +64,24 @@ export const getEducationalList = (t: TFunction): EducationalListRowProps[] => {
       link: `${process.env.WEBSITE_URL}/learn?video=lace-introduces-transaction-bundles`
     }
   ];
-};
-
-export const ActivityLayout = (): ReactElement => {
-  const { t } = useTranslation();
-  const { priceResult } = useFetchCoinPrice();
-  const { inMemoryWallet, walletInfo, activityDetail, resetActivityState, blockchainProvider } = useWalletStore();
-  const analytics = useAnalyticsContext();
-  const sendAnalytics = useCallback(() => {
-    analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
-  }, [analytics]);
-  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
-    sendAnalytics,
-    withLimitedRewardsHistory: true
-  });
-  const total = useObservable(inMemoryWallet.balance.utxo.total$);
-
-  const educationalList = getEducationalList(t);
 
   // Reset current transaction details and close drawer if network (blockchainProvider) has changed
   useEffect(() => {
     resetActivityState();
   }, [resetActivityState, blockchainProvider]);
+
   const isLoadingFirstTime = isNil(total);
+
+  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
   return (
     <Layout>
       <SectionLayout
         sidePanelContent={<EducationalList items={educationalList} title={t('browserView.sidePanel.learnAbout')} />}
       >
-        <SectionTitle
-          title={t('browserView.activity.title')}
-          sideText={`(${t('browserView.activity.titleSideText')})`}
-        />
+        <SectionTitle title={t('browserView.activity.title')} />
         <Drawer
-          visible={!!activityDetail}
+          open={!!activityDetail}
           onClose={resetActivityState}
           navigation={
             <DrawerNavigation
@@ -105,16 +95,17 @@ export const ActivityLayout = (): ReactElement => {
         >
           {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
         </Drawer>
-        <Skeleton loading={isLoadingFirstTime || walletActivitiesStatus !== StateStatus.LOADED}>
-          {walletActivities?.length > 0 ? (
+        <Skeleton loading={isLoadingFirstTime || walletActivities === undefined}>
+          {walletActivities?.length > 0 && (
             <GroupedAssetActivityList
+              hasMore={mightHaveMore}
+              loadMore={debouncedLoadMore}
               lists={walletActivities}
-              infiniteScrollProps={{
-                scrollableTarget: LACE_APP_ID,
-                endMessage: <Flex justifyContent="center">{t('walletActivity.endMessage')}</Flex>
-              }}
+              scrollableTarget={LACE_APP_ID}
+              dataLength={loadedTxLength}
             />
-          ) : (
+          )}
+          {walletActivities?.length === 0 && (
             <FundWalletBanner
               title={t('browserView.activity.fundWalletBanner.title')}
               subtitle={t('browserView.activity.fundWalletBanner.subtitle')}

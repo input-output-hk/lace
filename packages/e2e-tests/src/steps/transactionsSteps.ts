@@ -18,7 +18,7 @@ Given(/^I am on the Activity page - (extended|popup) view$/, async (mode: 'exten
 
 Then(/^Activity page is displayed$/, async () => {
   await transactionsPageAssert.assertTxsLoaded();
-  await transactionsPageAssert.assertSeeTitleWithCounter();
+  await transactionsPageAssert.assertSeeTitle();
 });
 
 Then(/^a transactions counter that sums up to the total number of all transactions is displayed$/, async () => {

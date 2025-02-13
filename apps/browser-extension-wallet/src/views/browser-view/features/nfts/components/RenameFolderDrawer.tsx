@@ -54,7 +54,7 @@ export const RenameFolderDrawer = withNftsFoldersContext(
 
     useEffect(() => {
       setName(folderToRename?.name || '');
-    }, [folderToRename?.name]);
+    }, [folderToRename?.name, visible]);
 
     const footer = (
       <div className={styles.actionButtons}>

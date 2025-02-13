@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import debounce from 'lodash/debounce';
 import { ContentLayout } from '@src/components/Layout';
 import { useTranslation } from 'react-i18next';
-import { StateStatus, useWalletStore } from '@src/stores';
+import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice, useRedirection } from '@hooks';
 import { Drawer, DrawerNavigation } from '@lace/common';
 import { GroupedAssetActivityList } from '@lace/core';
@@ -11,8 +12,9 @@ import { FundWalletBanner } from '@src/views/browser-view/components';
 import { walletRoutePaths } from '@routes';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
-import { useWalletActivities } from '@hooks/useWalletActivities';
-import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
+
+const loadMoreDebounce = 300;
 
 export const Activity = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -25,19 +27,15 @@ export const Activity = (): React.ReactElement => {
   const sendAnalytics = useCallback(() => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
-  const { walletActivities, walletActivitiesStatus } = useWalletActivities({
-    sendAnalytics,
-    withLimitedRewardsHistory: true
-  });
 
-  const layoutSideText = `(${t('browserView.activity.titleSideText')})`;
-  const isLoading = walletActivitiesStatus !== StateStatus.LOADED;
-  const hasActivities = walletActivities?.length > 0;
+  const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
+
+  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
   return (
-    <ContentLayout title={layoutTitle} titleSideText={layoutSideText} isLoading={isLoading}>
+    <ContentLayout title={layoutTitle} isLoading={walletActivities === undefined}>
       <Drawer
-        visible={!!activityDetail}
+        open={!!activityDetail}
         onClose={resetActivityState}
         navigation={
           <DrawerNavigation
@@ -54,19 +52,16 @@ export const Activity = (): React.ReactElement => {
         {activityDetail && priceResult && <ActivityDetail price={priceResult} />}
       </Drawer>
       <div className={styles.activitiesContainer}>
-        {hasActivities ? (
+        {walletActivities?.length > 0 && (
           <GroupedAssetActivityList
+            hasMore={mightHaveMore}
+            loadMore={debouncedLoadMore}
             lists={walletActivities}
-            infiniteScrollProps={{
-              scrollableTarget: 'contentLayout',
-              endMessage: (
-                <Flex justifyContent="center">
-                  <Text.Label>{t('walletActivity.endMessage')}</Text.Label>
-                </Flex>
-              )
-            }}
+            scrollableTarget="contentLayout"
+            dataLength={loadedTxLength}
           />
-        ) : (
+        )}
+        {walletActivities?.length === 0 && (
           <div className={styles.emptyState}>
             <FundWalletBanner
               title={t('browserView.assets.welcome')}

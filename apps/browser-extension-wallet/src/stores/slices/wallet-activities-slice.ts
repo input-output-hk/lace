@@ -42,12 +42,10 @@ import { rewardHistoryTransformer } from '@src/views/browser-view/features/activ
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { IBlockchainProvider } from './blockchain-provider-slice';
-import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 
 export interface FetchWalletActivitiesProps {
   fiatCurrency: CurrencyInfo;
   cardanoFiatPrice: number;
-  assetId?: Wallet.Cardano.AssetId; // Allows to filter historicals tx by asset
   sendAnalytics?: () => void;
   withLimitedRewardsHistory?: boolean;
 }
@@ -65,10 +63,6 @@ interface FetchWalletActivitiesPropsWithSetter extends FetchWalletActivitiesProp
 }
 
 type ExtendedActivityProps = TransformedActivity & AssetActivityItemProps;
-type MappedActivityListProps = Omit<AssetActivityListProps, 'items'> & {
-  items: ExtendedActivityProps[];
-};
-export type FetchWalletActivitiesReturn = MappedActivityListProps[];
 
 type extendedDelegationActivityType =
   | DelegationActivityType
@@ -109,13 +103,23 @@ const FIAT_PRICE_DECIMAL_PLACES = 2;
 const getFiatAmount = (amount: BigNumber, fiatPrice: number) =>
   fiatPrice ? amount.times(new BigNumber(fiatPrice)).toFormat(FIAT_PRICE_DECIMAL_PLACES) : '';
 
+export const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
+
+export const getRewardSpendableDate = (
+  spendableEpoch: Wallet.Cardano.EpochNo,
+  eraSummaries: Wallet.EraSummary[]
+): Date => {
+  const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
+  return slotTimeCalc(epochSlotsCalc(spendableEpoch, eraSummaries).firstSlot);
+};
+
 const initialState = {
   walletActivities: [] as AssetActivityListProps[],
   activitiesCount: 0,
   walletActivitiesStatus: StateStatus.IDLE
 };
 
-const mapWalletActivities = memoize(
+export const mapWalletActivities = memoize(
   async (
     {
       addresses,
@@ -137,16 +141,13 @@ const mapWalletActivities = memoize(
     }: Pick<UISlice['walletUI'], 'cardanoCoin'> &
       Pick<ActivityDetailSlice, 'setRewardsActivityDetail' | 'setTransactionActivityDetail'> &
       Pick<AssetDetailsSlice, 'assetDetails'> &
-      Pick<IBlockchainProvider, 'assetProvider'> &
       Pick<IBlockchainProvider, 'inputResolver'> &
+      Pick<IBlockchainProvider, 'assetProvider'> &
       Pick<WalletInfoSlice, 'isSharedWallet'>
   ) => {
-    const txHistorySlice = transactions.history.slice(-TX_HISTORY_LIMIT_SIZE);
     const epochRewardsMapper = (earnedEpoch: Wallet.Cardano.EpochNo, rewards: Reward[]): ExtendedActivityProps => {
-      const REWARD_SPENDABLE_DELAY_EPOCHS = 2;
       const spendableEpoch = (earnedEpoch + REWARD_SPENDABLE_DELAY_EPOCHS) as Wallet.Cardano.EpochNo;
-      const slotTimeCalc = Wallet.createSlotTimeCalc(eraSummaries);
-      const rewardSpendableDate = slotTimeCalc(epochSlotsCalc(spendableEpoch, eraSummaries).firstSlot);
+      const rewardSpendableDate = getRewardSpendableDate(spendableEpoch, eraSummaries);
 
       const transformedEpochRewards = rewardHistoryTransformer({
         rewards,
@@ -171,7 +172,7 @@ const mapWalletActivities = memoize(
       };
     };
 
-    const resolveInput = inputResolver.resolveInput;
+    const { resolveInput } = inputResolver;
 
     // eslint-disable-next-line unicorn/no-array-callback-reference
     const keyHashAddresses = addresses.filter(isKeyHashAddress);
@@ -278,8 +279,8 @@ const mapWalletActivities = memoize(
     const getHistoricalTransactions = async () => {
       const filtered =
         !assetDetails || assetDetails?.id === cardanoCoin.id
-          ? txHistorySlice.map((tx) => ({ tx }))
-          : await filterTransactionByAssetId(txHistorySlice);
+          ? transactions.history.map((tx) => ({ tx }))
+          : await filterTransactionByAssetId(transactions.history);
       return flatten(await Promise.all(filtered.map((tx) => historicTransactionMapper(tx))));
     };
 
@@ -318,7 +319,9 @@ const mapWalletActivities = memoize(
       getPendingTransactions()
     ]);
 
-    const oldestHistoricalTxDate = withLimitedRewardsHistory ? historicalTransactions[0]?.date : undefined;
+    const oldestHistoricalTxDate = withLimitedRewardsHistory
+      ? historicalTransactions[historicalTransactions.length - 1]?.date
+      : undefined;
     const rewards = assetDetails ? [] : getRewardsHistory(oldestHistoricalTxDate);
 
     const confirmedTxs = historicalTransactions;
@@ -329,8 +332,54 @@ const mapWalletActivities = memoize(
     const filteredPendingTxs = pendingTxs.filter((pending) =>
       confirmedTxs.some((confirmed) => confirmed?.id !== pending?.id)
     );
-    const allTransactions = groupBy(
-      [...filteredPendingTxs, ...confirmedTxs, ...rewards].sort((firstTx, secondTx) => {
+
+    const allTransactions = [...filteredPendingTxs, ...confirmedTxs, ...rewards];
+
+    const allAssetsIds = uniq(
+      flattenDeep(
+        allTransactions.map(({ assets }: AssetActivityItemProps) =>
+          assets.map(({ id }: ActivityAssetProp) => Wallet.Cardano.AssetId(id))
+        )
+      )
+    );
+
+    const assetsInfo = await getAssetsInformation(allAssetsIds, assetInfo, {
+      assetProvider,
+      extraData: {
+        nftMetadata: true,
+        tokenMetadata: true
+      }
+    });
+
+    const allTransactionsTransformed = allTransactions.map((activity) => ({
+      ...activity,
+      ...(isDelegationActivity(activity) && {
+        amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
+        fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
+      }),
+      assets: activity.assets.map((asset: ActivityAssetProp) => {
+        const assetId = Wallet.Cardano.AssetId(asset.id);
+        const token = assetsInfo.get(assetId);
+        const assetData = !token
+          ? undefined
+          : assetTransformer({
+              token,
+              key: assetId,
+              total: { coins: BigInt(0), assets: new Map([[assetId, BigInt(asset.val)]]) },
+              fiatCurrency
+            });
+        return {
+          id: asset.id,
+          val: Wallet.util.calculateAssetBalance(asset.val, token),
+          info: {
+            ticker: (assetData?.name !== '-' && assetData?.name) || assetData?.ticker
+          }
+        };
+      })
+    }));
+
+    const allTransactionsGrouped = groupBy(
+      allTransactionsTransformed.sort((firstTx, secondTx) => {
         // ensure txs that are awaiting cosignatures always come first
         if (
           firstTx.status === ActivityStatus.AWAITING_COSIGNATURES &&
@@ -352,70 +401,27 @@ const mapWalletActivities = memoize(
       }),
       'formattedDate'
     );
-    const allActivities = Object.entries(allTransactions).map(([listName, transactionsList]) => ({
+
+    const walletActivities = Object.entries(allTransactionsGrouped).map(([listName, transactionsList]) => ({
       title: listName,
       items: transactionsList
     }));
-    const flattenedActivities = flattenDeep(allActivities.map(({ items }: AssetActivityListProps) => items));
-    const allAssetsIds = uniq(
-      flattenDeep(
-        flattenedActivities.map(({ assets }: AssetActivityItemProps) =>
-          assets.map(({ id }: ActivityAssetProp) => Wallet.Cardano.AssetId(id))
-        )
-      )
-    );
-    const assetsInfo = await getAssetsInformation(allAssetsIds, assetInfo, {
-      assetProvider,
-      extraData: {
-        nftMetadata: true,
-        tokenMetadata: true
-      }
-    });
-    const walletActivities = allActivities.map((activityList) => ({
-      ...activityList,
-      items: activityList.items.map((activity) => ({
-        ...activity,
-        ...(isDelegationActivity(activity) && {
-          amount: `${getDelegationAmount(activity)} ${cardanoCoin.symbol}`,
-          fiatAmount: `${getFiatAmount(getDelegationAmount(activity), cardanoFiatPrice)} ${fiatCurrency.code}`
-        }),
-        assets: activity.assets.map((asset: ActivityAssetProp) => {
-          const assetId = Wallet.Cardano.AssetId(asset.id);
-          const token = assetsInfo.get(assetId);
-          const assetData = !token
-            ? undefined
-            : assetTransformer({
-                token,
-                key: assetId,
-                total: { coins: BigInt(0), assets: new Map([[assetId, BigInt(asset.val)]]) },
-                fiatCurrency
-              });
-          return {
-            id: asset.id,
-            val: Wallet.util.calculateAssetBalance(asset.val, token),
-            info: {
-              ticker: (assetData?.name !== '-' && assetData?.name) || assetData?.ticker
-            }
-          };
-        })
-      }))
-    }));
+
     return {
-      allActivities,
       walletActivities,
-      activitiesCount: allActivities.reduce((accumulator, currentList) => accumulator + currentList.items.length, 0)
+      activitiesCount: allTransactions.length
     };
   },
   (
     { addresses, transactions, assetInfo, delegation: { rewardsHistory } },
-    { cardanoFiatPrice, fiatCurrency, assetId },
+    { cardanoFiatPrice, fiatCurrency },
     { cardanoCoin, assetDetails, isSharedWallet }
   ) =>
-    `${transactions.history.length}_${transactions.outgoing.inFlight
+    `${transactions.history.map(({ id }) => id).join('')}_${transactions.outgoing.inFlight
       .map(({ id }) => id)
       .join('')}_${transactions.outgoing.signed?.map(({ tx: { id } }) => id).join('')}_${assetInfo.size}_${
       rewardsHistory.all.length
-    }_${cardanoFiatPrice}_${fiatCurrency.code}_${assetId || ''}_${cardanoCoin?.id}_${assetDetails?.id}_${
+    }_${cardanoFiatPrice}_${fiatCurrency.code}_${cardanoCoin?.id}_${assetDetails?.id}_${
       addresses[0]?.address
     }_${isSharedWallet}`
 );
@@ -424,7 +430,7 @@ const getWalletActivities = async ({
   set,
   get,
   ...fetchActivitiesProps
-}: FetchWalletActivitiesPropsWithSetter): Promise<MappedActivityListProps[] | undefined> => {
+}: FetchWalletActivitiesPropsWithSetter): Promise<void> => {
   set({ walletActivitiesStatus: StateStatus.LOADING });
   const {
     walletUI: { cardanoCoin },
@@ -440,28 +446,21 @@ const getWalletActivities = async ({
     return;
   }
 
-  const { allActivities, walletActivities, activitiesCount } = await mapWalletActivities(
-    walletState,
-    fetchActivitiesProps,
-    {
-      assetProvider,
-      cardanoCoin,
-      setRewardsActivityDetail,
-      setTransactionActivityDetail,
-      assetDetails,
-      isSharedWallet,
-      inputResolver
-    }
-  );
+  const { walletActivities, activitiesCount } = await mapWalletActivities(walletState, fetchActivitiesProps, {
+    assetProvider,
+    cardanoCoin,
+    setRewardsActivityDetail,
+    setTransactionActivityDetail,
+    assetDetails,
+    inputResolver,
+    isSharedWallet
+  });
 
   set({
     walletActivities,
     activitiesCount,
     walletActivitiesStatus: StateStatus.LOADED
   });
-
-  // eslint-disable-next-line consistent-return
-  return allActivities;
 };
 
 /**
@@ -474,14 +473,12 @@ export const walletActivitiesSlice: SliceCreator<
   getWalletActivities: ({
     fiatCurrency,
     cardanoFiatPrice,
-    assetId,
     sendAnalytics,
     withLimitedRewardsHistory
   }: FetchWalletActivitiesProps) =>
     getWalletActivities({
       fiatCurrency,
       cardanoFiatPrice,
-      assetId,
       sendAnalytics,
       withLimitedRewardsHistory,
       set,

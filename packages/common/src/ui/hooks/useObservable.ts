@@ -4,7 +4,7 @@ import { NEVER, Observable } from 'rxjs';
 
 /**
  * @param {Observable<T>} observable - Source observable to be used by the hook.
- * @param {T} [defaultValue] - Default value that will be used if the observable
+ * @param {T} [defaultValue] - Default value that will be used if the observable. USED AS HOOK DEPENDENCY - MAKE SURE IT'S CONSTANT WITH ===
  * has not emitted any values.
  *
  * @returns latest emitted value of the observable; undefined if observable is undefined or hasn't emitted yet
