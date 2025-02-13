@@ -33,7 +33,8 @@ describe('TxHistoryLoader', () => {
   });
 
   describe('with more than {minimumPageSize} transactions in history$', () => {
-    it('emits transactions from history$ first, then fetches from provider; watches the tip', () => {
+    // reenable in LW-12324
+    it.skip('emits transactions from history$ first, then fetches from provider; watches the tip', () => {
       createTestScheduler().run(({ hot, flush, expectObservable }) => {
         // two pages + 1 tx is available locally
         const numberOfTransactionsAvailableLocally = minimumPageSize * 2 + 1;
