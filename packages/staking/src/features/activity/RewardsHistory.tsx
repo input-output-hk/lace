@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { AssetActivityListProps, GroupedAssetActivityList, useGroupedActivitiesPageSize } from '@lace/core';
 import { Skeleton } from 'antd';
