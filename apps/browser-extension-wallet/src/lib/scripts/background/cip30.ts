@@ -2,27 +2,19 @@ import { cip30 as walletCip30 } from '@cardano-sdk/wallet';
 import { ensureUiIsOpenAndLoaded } from './util';
 import { userPromptService } from './services/dappService';
 import { authenticator } from './authenticator';
-import { wallet$, dAppConnectorActivity$ } from './wallet';
+import { dAppConnectorActivity$, wallet$ } from './wallet';
 import { runtime, Tabs, tabs } from 'webextension-polyfill';
-import { exposeApi, RemoteApiPropertyType, cip30 } from '@cardano-sdk/web-extension';
+import { cip30, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
-import { BehaviorSubject, map, Observable, of } from 'rxjs';
-import { APIErrorCode, ApiError } from '@cardano-sdk/dapp-connector';
-import { Wallet } from '@lace/cardano';
+import { map, Observable, of } from 'rxjs';
+import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
 import pDebounce from 'p-debounce';
 import { dappInfo$ } from './requestAccess';
-import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { getBackgroundStorage } from './storage';
 import { notifyOnHaveAccessCall } from './session';
 import { logger } from '@lace/common';
 
 const DEBOUNCE_THROTTLE = 500;
-
-const dappSetCollateral$ = new BehaviorSubject<{
-  dappInfo: Wallet.DappInfo;
-  collateralRequest: walletCip30.GetCollateralCallbackParams['data'];
-}>(undefined);
 
 const cancelOnTabClose = (tab: Tabs.Tab) => ({
   cancel$: new Observable<void>((subscriber) => {
@@ -76,29 +68,6 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
     },
     DEBOUNCE_THROTTLE,
     { before: true }
-  ),
-  getCollateral: pDebounce(
-    async (args) => {
-      try {
-        const { namiMigration } = await getBackgroundStorage();
-        if (namiMigration?.mode === 'nami') {
-          // User has to explicitly set collateral from the popup UI
-          return [];
-        }
-
-        const dappInfo = await senderToDappInfo(args.sender);
-        dappSetCollateral$.next({ dappInfo, collateralRequest: args.data });
-        await ensureUiIsOpenAndLoaded('#/dapp/set-collateral');
-
-        return userPromptService.getCollateralRequest();
-      } catch (error) {
-        // eslint-disable-next-line unicorn/no-useless-undefined
-        dappSetCollateral$.next(undefined);
-        throw new Error(error);
-      }
-    },
-    DEBOUNCE_THROTTLE,
-    { before: true }
   )
 };
 
@@ -122,11 +91,9 @@ exposeApi<DappDataService>(
   {
     baseChannel: DAPP_CHANNELS.dappData,
     properties: {
-      getCollateralRequest: RemoteApiPropertyType.MethodReturningPromise,
       getDappInfo: RemoteApiPropertyType.MethodReturningPromise
     },
     api$: of({
-      getCollateralRequest: () => Promise.resolve(dappSetCollateral$.value),
       getDappInfo: () => Promise.resolve(dappInfo$.value)
     })
   },

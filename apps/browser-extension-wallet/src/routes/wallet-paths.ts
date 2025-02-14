@@ -54,6 +54,5 @@ export const dAppRoutePaths = {
   dappSignTx: '/dapp/sign-tx',
   dappSubmitTx: '/dapp/submit-tx',
   dappSignData: '/dapp/sign-data',
-  dappNoWallet: '/dapp/no-wallet',
-  dappSetCollateral: '/dapp/set-collateral'
+  dappNoWallet: '/dapp/no-wallet'
 };
