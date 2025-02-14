@@ -6,7 +6,6 @@ import noop from 'lodash/noop';
 import { mapWalletActivities } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps, useGroupedActivitiesPageSize } from '@lace/core';
-import { useObservable } from '@lace/common';
 import { useTxHistoryLoader } from './useTxHistoryLoader';
 
 type UseWalletActivitiesProps = {
@@ -15,11 +14,6 @@ type UseWalletActivitiesProps = {
 };
 const noAnalyticsProps = { sendAnalytics: noop };
 type WalletActivities = Omit<WalletActivitiesSlice, 'getWalletActivities'>;
-
-const TX_HISTORY_LOADING = {
-  transactions: undefined as Wallet.Cardano.HydratedTx[],
-  mightHaveMore: false
-};
 
 export const useWalletActivities = ({
   sendAnalytics,
@@ -90,9 +84,7 @@ export const useWalletActivitiesPaginated = ({
 
   const pageSize = useGroupedActivitiesPageSize();
 
-  const { loadMore: txHistoryLoaderLoadMore, loadedHistory$ } = useTxHistoryLoader(pageSize);
-
-  const loadedHistory = useObservable(loadedHistory$, TX_HISTORY_LOADING);
+  const { loadMore: txHistoryLoaderLoadMore, loadedHistory } = useTxHistoryLoader(pageSize);
 
   const fetchActivitiesProps = useMemo(
     () => ({
