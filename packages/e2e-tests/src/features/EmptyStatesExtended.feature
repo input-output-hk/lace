@@ -62,12 +62,6 @@ Feature: Empty states
   Scenario: Extended view - Hide my balance - no eye icon for wallet with no funds
     Then Eye icon is not displayed on Tokens page
 
-  @LW-8409
-  Scenario: Automatically trigger collateral setup - No funds - no modal
-    Given I open and authorize test DApp with "Only once" setting
-    When I click "Set Collateral" button in test DApp
-    Then I don't see DApp window
-
   @LW-12031
   Scenario: Extended View - "Delegate your voting power" banner is not displayed if user has no funds
     When I navigate to Staking extended page

@@ -147,13 +147,10 @@ Before(
   async () => await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendAdaHandle2E2E])
 );
 
-Before(
-  { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended or @DAppConnectorLowFunds' },
-  async () => {
-    await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
-    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
-  }
-);
+Before({ tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});
 
 Before({ tags: '@Staking-NonDelegatedFunds-Extended or @CIP-95-Extended' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletNonDelegatedFunds]);
