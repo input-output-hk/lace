@@ -111,9 +111,9 @@ export const createTxHistoryLoader = (
 
   const initialPage = (storedHistory: Cardano.HydratedTx[]): LoadedTxHistory => {
     fullLocalHistory = [...storedHistory].reverse();
-    // Always try to fetch more for the first page (unless there are less items then minimumPageSize value).
+    // Always try to fetch more for the first page.
     // The first page is limited to 10 elements and the viewPort height might fit more
-    mightHaveMore = fullLocalHistory.length >= minimumPageSize;
+    mightHaveMore = true;
     emittedHistory = fullLocalHistory.slice(0, minimumPageSize);
     return {
       transactions: emittedHistory,

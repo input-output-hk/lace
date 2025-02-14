@@ -12,7 +12,6 @@ import type {
 } from '@cardano-sdk/web-extension';
 import type { Wallet } from '@lace/cardano';
 import type { useSecrets } from '@lace/core';
-import type { Observable } from 'rxjs';
 
 export interface IAssetDetails {
   id: string;
@@ -137,9 +136,9 @@ export interface OutsideHandlesContextValue {
   govToolsUrl: string;
   txHistoryLoader: {
     loadMore: () => void;
-    loadedHistory$: Observable<{
+    loadedHistory: {
       transactions: Wallet.Cardano.HydratedTx[];
       mightHaveMore: boolean;
-    }>;
+    };
   };
 }

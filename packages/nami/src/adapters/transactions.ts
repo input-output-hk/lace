@@ -521,7 +521,7 @@ export const useWalletTxs = (): {
     walletAddresses,
     certificateInspectorFactory,
     transactions,
-    txHistoryLoader,
+    txHistoryLoader: { loadedHistory },
     protocolParameters,
     assetInfo,
     inputResolver,
@@ -531,10 +531,6 @@ export const useWalletTxs = (): {
     inMemoryWallet.delegation.rewardAccounts$,
   );
   const addresses = useObservable(inMemoryWallet.addresses$);
-  const loadedHistory = useObservable(
-    txHistoryLoader.loadedHistory$,
-    TX_HISTORY_LOADING,
-  );
 
   const getTxInputsValueAndAddress = useCallback(
     async (inputs: Wallet.Cardano.HydratedTxIn[] | Wallet.Cardano.TxIn[]) => {
