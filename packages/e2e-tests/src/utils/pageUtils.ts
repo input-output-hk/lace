@@ -7,8 +7,9 @@ import MenuMainPopup from '../elements/menuMainPopup';
 
 // eslint-disable-next-line complexity
 const visitPageInExtendedMode = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
   viaURL = false
+  // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
   switch (page) {
     case 'Tokens':
@@ -29,8 +30,11 @@ const visitPageInExtendedMode = async (
     case 'Address Book':
       viaURL ? await ExtendedView.visitAddressBook() : await MenuHeader.openAddressBook();
       break;
-    case 'DApp Explorer':
-      viaURL ? await ExtendedView.visitDAppExplorer() : await MenuMainExtended.clickOnDAppExplorerButton();
+    case 'DApps':
+      viaURL ? await ExtendedView.visitDAppExplorer() : await MenuMainExtended.clickOnDAppsButton();
+      break;
+    case 'Voting':
+      viaURL ? await ExtendedView.visitVotingCenter() : await MenuMainExtended.clickOnVotingButton();
       break;
     default:
       throw new Error(`Unsupported targetPage: ${page}`);
@@ -39,8 +43,9 @@ const visitPageInExtendedMode = async (
 
 // eslint-disable-next-line complexity
 const visitPageInPopupMode = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
   viaURL = false
+  // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
   switch (page) {
     case 'Tokens':
@@ -61,8 +66,11 @@ const visitPageInPopupMode = async (
     case 'Address Book':
       viaURL ? await PopupView.visitAddressBook() : await MenuHeader.openAddressBook();
       break;
-    case 'DApp Explorer':
-      viaURL ? await PopupView.visitDAppExplorer() : await MenuMainPopup.clickOnDAppExplorerButton();
+    case 'DApps':
+      viaURL ? await PopupView.visitDAppExplorer() : await MenuMainPopup.clickOnDAppsButton();
+      break;
+    case 'Voting':
+      viaURL ? await PopupView.visitVotingCenter() : await MenuMainPopup.clickOnVotingButton();
       break;
     default:
       throw new Error(`Unsupported targetPage: ${page}`);
@@ -70,7 +78,7 @@ const visitPageInPopupMode = async (
 };
 
 export const visit = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
   mode: 'extended' | 'popup',
   viaURL = false
 ): Promise<void> => {

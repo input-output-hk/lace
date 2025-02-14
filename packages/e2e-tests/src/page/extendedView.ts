@@ -54,6 +54,11 @@ class ExtendedView extends LaceView implements Page {
     await browser.url(`${await this.getBaseUrl()}#/dapp-explorer`);
     await this.waitForPreloaderToDisappear();
   }
+
+  async visitVotingCenter() {
+    await browser.url(`${await this.getBaseUrl()}#/voting`);
+    await this.waitForPreloaderToDisappear();
+  }
 }
 
 export default new ExtendedView();

@@ -37,7 +37,9 @@ class CommonAssert {
       Activity: '/activity',
       Staking: '/staking',
       'Address Book': '/address-book',
-      Settings: '/settings'
+      Settings: '/settings',
+      Voting: '/voting',
+      DApps: '/dapp-explorer'
     };
 
     const pagePath = pagePathMap[expectedPage];
