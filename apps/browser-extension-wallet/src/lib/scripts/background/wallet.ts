@@ -26,6 +26,7 @@ import {
   WalletType,
   consumeSigningCoordinatorApi,
   exposeApi,
+  isBackgroundProcess,
   observableWalletProperties,
   repositoryChannel,
   walletChannel,
@@ -59,7 +60,10 @@ const pollController$ = new TrackerSubject(
   )
 );
 
-if (typeof window !== 'undefined') {
+// In chrome, the background.js runs in a service worker, so window will be defined.
+// Firefox background.js runs in a hidden web page, because firefox does not support service workers.
+// Use getBackgroundPage to determine if we're in background.js. It exists only in a background page.
+if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
 }
 
