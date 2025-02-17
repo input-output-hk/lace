@@ -15,7 +15,7 @@ import { createTxInspector, Milliseconds, transactionSummaryInspector } from '@c
 import { logger } from '@lace/common';
 
 // eslint-disable-next-line no-magic-numbers
-const TIMEOUT = 2000 as Milliseconds;
+const TIMEOUT = 10_000 as Milliseconds;
 
 export interface TxTransformerInput {
   tx: Wallet.TxInFlight | Wallet.Cardano.HydratedTx | Wallet.KeyManagement.WitnessedTx;
@@ -139,6 +139,20 @@ const getTxFormattedAmount: GetTxFormattedAmount = async ({ tx, cardanoCoin, fia
   };
 };
 
+const getFallbackAsset = (assetId: Wallet.Cardano.AssetId) => {
+  const policyId = Wallet.Cardano.AssetId.getPolicyId(assetId);
+  const name = Wallet.Cardano.AssetId.getAssetName(assetId);
+
+  return {
+    assetId,
+    fingerprint: Wallet.Cardano.AssetFingerprint.fromParts(policyId, name),
+    name,
+    policyId,
+    quantity: BigInt(0),
+    supply: BigInt(0)
+  };
+};
+
 /**
  Simplifies the transaction object to be used in the activity list
 
@@ -176,11 +190,13 @@ export const txTransformer = async ({
       inputResolver: { resolveInput },
       protocolParameters,
       // Using a dummy asset provider as we don't need to fetch assets for the summary
-      // On reject, the summary inspector will use the information it can extract from the assetId, and
-      // all we need here is the id and the amount
+      // We use the information we can extract from the assetId, and
+      // all we need here is the id and the amount.
+      // We don't want the transactionSummaryInspector to build a fallback asset on its own getAssets() failure,
+      // because it logs an error, and we don't want that as having a fallback asset is intentional.
       assetProvider: {
-        getAsset: () => Promise.reject({}),
-        getAssets: () => Promise.reject({}),
+        getAsset: async ({ assetId }) => getFallbackAsset(assetId),
+        getAssets: async ({ assetIds }) => assetIds.map((id) => getFallbackAsset(id)),
         healthCheck: () => Promise.resolve({ ok: true })
       },
       timeout: TIMEOUT,
