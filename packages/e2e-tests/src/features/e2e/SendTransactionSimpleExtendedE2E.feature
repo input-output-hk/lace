@@ -62,6 +62,8 @@ Feature: Send Simple Transactions - Extended view - E2E
     Then I see a toast with text: "Copied to clipboard"
     And I see 1 opened tab(s)
     When I wait for the transaction history to be loaded and all transactions to be confirmed
+    And I close the drawer by clicking close button
+    And I click on a transaction: 1
     And I click on a transaction hash and save hash information
     Then I see 2 opened tab(s)
     When I switch to last window

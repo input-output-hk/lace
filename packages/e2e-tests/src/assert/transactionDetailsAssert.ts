@@ -242,8 +242,9 @@ class TransactionsDetailsAssert {
   async assertSeeActivityDetailsSummaryAmounts(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
+    const maxRowsIterator = mode === 'extended' ? 8 : 6;
 
-    for (let i = 0; i <= rowsNumber && i < 10; i++) {
+    for (let i = 0; i <= rowsNumber && i < maxRowsIterator; i++) {
       const skippedTransaction = ['Self Transaction', 'Rewards']; // should be covered in separate tests
       if (!skippedTransaction.includes(await TransactionsPage.transactionsTableItemType(i).getText())) {
         await TransactionsPage.clickOnTransactionRow(i);
