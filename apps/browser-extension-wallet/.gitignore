@@ -8,3 +8,4 @@ node_modules
 # Do not ignore the following
 !src/typings/*
 !test/types/*
+/artifacts-firefox/
