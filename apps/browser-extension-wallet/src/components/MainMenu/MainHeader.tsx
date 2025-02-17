@@ -54,7 +54,11 @@ export const MainHeader = (): React.ReactElement => {
         <div className={styles.controls}>
           <ExpandButton
             label={t('expandPopup')}
-            onClick={() => backgroundServices.handleOpenBrowser({ section: locationBrowserSection[location.pathname] })}
+            onClick={() =>
+              backgroundServices
+                .handleOpenBrowser({ section: locationBrowserSection[location.pathname] })
+                .then(() => window.close())
+            }
           />
           <DropdownMenu isPopup />
         </div>

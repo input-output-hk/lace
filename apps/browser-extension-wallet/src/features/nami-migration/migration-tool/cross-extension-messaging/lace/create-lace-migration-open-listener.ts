@@ -9,6 +9,7 @@ export const createLaceMigrationOpenListener =
     if (message === NamiMessages.open && sender.id === namiExtensionId) {
       // First close all open lace tabs
       await closeAllLaceOrNamiTabs();
+      // Migrations will not run in Firefox, so no need to update this
       createTab({ url: `chrome-extension://${laceExtensionId}/app.html` });
     }
   };
