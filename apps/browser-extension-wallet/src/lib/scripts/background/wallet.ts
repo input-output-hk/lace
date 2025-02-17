@@ -51,6 +51,7 @@ import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
+import { isBackgroundProcess } from '@cardano-sdk/util';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -59,7 +60,10 @@ const pollController$ = new TrackerSubject(
   )
 );
 
-if (typeof window !== 'undefined') {
+// In chrome, the background.js runs in a service worker, so window will be defined.
+// Firefox background.js runs in a hidden web page, because firefox does not support service workers.
+// Use getBackgroundPage to determine if we're in background.js. It exists only in a background page.
+if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
 }
 
