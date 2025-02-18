@@ -65,6 +65,7 @@ const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> 
   utxos$: RemoteApiPropertyType.HotObservable,
   balance$: RemoteApiPropertyType.HotObservable,
   transactionHistory$: RemoteApiPropertyType.HotObservable,
+  addresses$: RemoteApiPropertyType.HotObservable,
 };
 
 export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
