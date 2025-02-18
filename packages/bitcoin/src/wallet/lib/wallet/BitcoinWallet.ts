@@ -117,6 +117,7 @@ export class BitcoinWallet {
   public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
   public utxos$: BehaviorSubject<UTxO[]> = new BehaviorSubject(new Array<UTxO>());
   public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
+  public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject([]);
 
   constructor(
     provider: BlockchainDataProvider,
@@ -142,6 +143,7 @@ export class BitcoinWallet {
         derivationPath: info.derivationPath
       };
 
+    this.addresses$.next([this.address]);
     this.startPolling();
 
     this.utxos$
