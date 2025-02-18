@@ -65,7 +65,7 @@ const HistoryViewer = () => {
               fontWeight="bold"
               color="gray.400"
             >
-              Use a Cardano explorer to see full transaction history.
+              ... nothing more
             </Box>
           ) : (
             <Box textAlign="center">
