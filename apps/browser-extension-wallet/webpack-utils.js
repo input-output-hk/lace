@@ -68,6 +68,7 @@ const transformManifest = (content, mode) => {
           }
         };
       }
+      manifest.permissions = [...manifest.permissions, 'clipboardRead'];
     } else if (process.env.BROWSER === 'chrome') {
       manifest.key = process.env.LACE_EXTENSION_KEY;
     }
