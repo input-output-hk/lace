@@ -42,6 +42,7 @@ import { Crash } from '@components/Crash';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
 import { logger } from '@lace/common';
 import { VotingLayout } from '../features/voting-beta';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -96,13 +97,18 @@ const { CHAIN, GOV_TOOLS_URLS } = config();
  * @param {number} currentTabId - Tab not to discard (freeze)
  */
 const discardStaleTabs = async (currentTabId: number) => {
-  const allTabs = await tabs.query({ title: 'Lace' });
-  const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
-  allTabs.push(...namiTabs);
+  const allTabs = [
+    ...(await catchAndBrandExtensionApiError(tabs.query({ title: 'Lace' }), 'Failed to query for stale lace tabs')),
+    ...(await catchAndBrandExtensionApiError(
+      tabs.query({ title: POPUP_WINDOW_NAMI_TITLE }),
+      'Failed to query for stale nami mode tabs'
+    ))
+  ];
   const isLaceOrigin = allTabs.find((tab) => tab.id === currentTabId);
   if (!isLaceOrigin) return;
-  allTabs.forEach(async (tab) => {
-    if (currentTabId !== tab.id) await tabs.discard(tab.id);
+  allTabs.forEach((tab) => {
+    if (currentTabId === tab.id) return;
+    void catchAndBrandExtensionApiError(tabs.discard(tab.id), 'Failed to discard stale tab');
   });
 };
 

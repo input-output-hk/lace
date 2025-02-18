@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Box, Dialog, Text, TextLink } from '@input-output-hk/lace-ui-toolkit';
 import styles from './TopUpWallet.module.scss';
 import { useTranslation } from 'react-i18next';
-import { tabs } from 'webextension-polyfill';
 import { BANXA_HOMEPAGE_URL } from './config';
+import { useExternalLinkOpener } from '@providers';
 
 interface TopUpWalletDialogProps {
   open: boolean;
@@ -18,9 +18,10 @@ export const TopUpWalletDialog = ({
   triggerRef
 }: TopUpWalletDialogProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleOpenTabBanxaHomepage = useCallback(() => {
-    tabs.create({ url: BANXA_HOMEPAGE_URL });
-  }, []);
+  const openExternalLink = useExternalLinkOpener();
+  const handleOpenTabBanxaHomepage = () => {
+    openExternalLink(BANXA_HOMEPAGE_URL);
+  };
 
   return (
     <Dialog.Root open={open} setOpen={onCancel} zIndex={1000} onCloseAutoFocusRef={triggerRef}>

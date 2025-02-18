@@ -65,8 +65,14 @@ export const DappConfirmData = (): React.ReactElement => {
 
   useEffect(() => {
     const subscription = signingCoordinator.signDataRequest$.pipe(take(1)).subscribe(async (r) => {
-      setDappInfo(await senderToDappInfo(r.signContext.sender));
       setSignDataRequest(r);
+      try {
+        setDappInfo(await senderToDappInfo(r.signContext.sender));
+      } catch (error) {
+        logger.error(error);
+        void r.reject('Could not get DApp info');
+        redirectToSignFailure();
+      }
     });
 
     const api = exposeApi<Pick<UserPromptService, 'readyToSignData'>>(
@@ -86,7 +92,7 @@ export const DappConfirmData = (): React.ReactElement => {
       subscription.unsubscribe();
       api.shutdown();
     };
-  }, [setSignDataRequest]);
+  }, [redirectToSignFailure, setSignDataRequest]);
 
   useEffect(() => {
     if (!req) return;
