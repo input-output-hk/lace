@@ -11,7 +11,7 @@ import { useCurrencyStore } from '@providers/currency';
 import { useWalletStore } from '@src/stores';
 import { useFetchCoinPrice } from '@hooks/useFetchCoinPrice';
 import { useRedirection } from '@hooks/useRedirection';
-import { walletRoutePaths } from '@routes/wallet-paths';
+import { walletRoutePaths } from '../../../../wallet-paths';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './AssetsPortfolio.module.scss';
