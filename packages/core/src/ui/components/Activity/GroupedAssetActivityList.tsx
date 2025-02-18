@@ -8,16 +8,17 @@ import isNumber from 'lodash/isNumber';
 
 const { Text } = Typography;
 
-export const useGroupedActivitiesPageSize = (): number => {
+const ESTIMATED_MIN_GROUP_HEIGHT = 100;
+
+export const useItemsPageSize = (estimatedItemHeight = ESTIMATED_MIN_GROUP_HEIGHT): number => {
   // workaround for bug in react-infinite-scroll-component
   // related to not loading more elements if the height of the container is less than the height of the window
   // see: https://github.com/ankeetmaini/react-infinite-scroll-component/issues/380
   // ticket for proper fix on our end: https://input-output.atlassian.net/browse/LW-8986
   // initialWindowHeight state needed to ensure that page size remains the same if window is resized
   const [initialWindowHeight] = useState(window.innerHeight);
-  const ESTIMATED_MIN_GROUP_HEIGHT = 100;
   // eslint-disable-next-line no-magic-numbers
-  return Math.max(5, Math.floor(initialWindowHeight / ESTIMATED_MIN_GROUP_HEIGHT));
+  return Math.max(5, Math.floor(initialWindowHeight / estimatedItemHeight));
 };
 
 export interface GroupedAssetActivityListProps {

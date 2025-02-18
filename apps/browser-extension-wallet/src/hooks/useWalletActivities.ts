@@ -5,7 +5,7 @@ import { WalletActivitiesSlice, useWalletStore } from '@src/stores';
 import noop from 'lodash/noop';
 import { mapWalletActivities } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
-import { AssetActivityListProps, useGroupedActivitiesPageSize } from '@lace/core';
+import { AssetActivityListProps, useItemsPageSize } from '@lace/core';
 import { useTxHistoryLoader } from './useTxHistoryLoader';
 
 type UseWalletActivitiesProps = {
@@ -82,7 +82,7 @@ export const useWalletActivitiesPaginated = ({
 
   const cardanoFiatPrice = priceResult?.cardano?.price;
 
-  const pageSize = useGroupedActivitiesPageSize();
+  const pageSize = useItemsPageSize();
 
   const { loadMore: txHistoryLoaderLoadMore, loadedHistory } = useTxHistoryLoader(pageSize);
 
