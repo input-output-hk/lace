@@ -6,6 +6,7 @@ import { useWalletStore } from '@src/stores';
 import { ContentLayout } from '@components/Layout';
 import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import BitcoinLogo from '../../../../../assets/icons/browser-view/bitcoin-logo.svg';
+import BigNumber from "bignumber.js";
 
 const SATS_IN_BTC = 100000000;
 
@@ -38,7 +39,7 @@ export const Assets = (): React.ReactElement => {
       price: bitcoinPrice.toString(),
       variation: '',
       balance: areBalancesVisible ? (Number(balance) / SATS_IN_BTC).toString() : hiddenBalancePlaceholder,
-      fiatBalance: areBalancesVisible ? `${totalBalance.toString()} USD` : hiddenBalancePlaceholder
+      fiatBalance: areBalancesVisible ? `${(new BigNumber(totalBalance.toString()).toFixed(2, BigNumber.ROUND_HALF_UP))} USD` : hiddenBalancePlaceholder
     }
   ], [areBalancesVisible, hiddenBalancePlaceholder, bitcoinPrice, balance, totalBalance]);
 

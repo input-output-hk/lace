@@ -2,7 +2,7 @@
 import { BlockfrostClientConfig } from '@cardano-sdk/cardano-services-client';
 import { Milliseconds } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { EnvironmentTypes } from '@stores';
+import {BitcoinNetworks, EnvironmentTypes} from '@stores';
 
 type ByNetwork<T> = {
   [key in Wallet.ChainName]: T;
@@ -33,6 +33,7 @@ export type Config = {
   SAVED_PRICE_DURATION: number;
   DEFAULT_SUBMIT_API: string;
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
+  MEMPOOL_URLS: Record<BitcoinNetworks, string>;
 };
 
 // eslint-disable-next-line complexity
@@ -141,6 +142,10 @@ export const config = (): Config => {
       Preprod: `${process.env.GOV_TOOLS_URL_PREPROD}`,
       Preview: `${process.env.GOV_TOOLS_URL_PREVIEW}`,
       Sanchonet: `${process.env.GOV_TOOLS_URL_SANCHONET}`
+    },
+    MEMPOOL_URLS: {
+      Mainnet: `${process.env.MEMPOOL_URL_MAINNET}`,
+      Testnet4: `${process.env.MEMPOOL_URL_TESTNET4}`
     }
   };
 };

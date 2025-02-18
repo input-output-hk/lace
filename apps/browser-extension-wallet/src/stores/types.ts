@@ -96,6 +96,8 @@ export interface StakePoolSearchSlice {
 // TODO: add support for custom nodes/environments [LW-3727]
 export type EnvironmentTypes = Wallet.ChainName;
 
+export type BitcoinNetworks = 'Mainnet' | 'Testnet4';
+
 export interface WalletInfoSlice {
   manageAccountsWallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined;
   setManageAccountsWallet: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
