@@ -47,7 +47,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
         return cancelOnTabClose(tab);
       } catch (error) {
         logger.error(error);
-        return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction'));
+        throw new ApiError(APIErrorCode.InternalError, 'Unable to sign transaction');
       }
     },
     DEBOUNCE_THROTTLE,
@@ -62,8 +62,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
         return cancelOnTabClose(tab);
       } catch (error) {
         logger.error(error);
-        // eslint-disable-next-line unicorn/no-useless-undefined
-        return Promise.reject(new ApiError(APIErrorCode.InternalError, 'Unable to sign data'));
+        throw new ApiError(APIErrorCode.InternalError, 'Unable to sign data');
       }
     },
     DEBOUNCE_THROTTLE,

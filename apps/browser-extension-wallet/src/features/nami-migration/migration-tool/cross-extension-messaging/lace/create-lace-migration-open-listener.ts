@@ -8,7 +8,11 @@ export const createLaceMigrationOpenListener =
     logger.debug('[NAMI MIGRATION] createLaceMigrationOpenListener', message, sender);
     if (message === NamiMessages.open && sender.id === namiExtensionId) {
       // First close all open lace tabs
-      await closeAllLaceOrNamiTabs();
+      try {
+        await closeAllLaceOrNamiTabs();
+      } catch (error) {
+        logger.error('[NAMI MIGRATION] createLaceMigrationOpenListener: failed to close all windows', error);
+      }
       createTab({ url: `chrome-extension://${laceExtensionId}/app.html` });
     }
   };

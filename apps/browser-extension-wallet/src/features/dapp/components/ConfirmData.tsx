@@ -56,16 +56,27 @@ export const DappConfirmData = (): React.ReactElement => {
     dataToSign: string;
   }>();
 
-  const cancelTransaction = useCallback(async () => {
-    await req.reject('User rejected to sign');
-    window.close();
-  }, [req]);
+  const cancelTransaction = useCallback(
+    async (reason = 'User rejected to sign') => {
+      await req.reject(reason);
+      window.close();
+    },
+    [req]
+  );
 
   useOnUnload(cancelTransaction);
 
   useEffect(() => {
     const subscription = signingCoordinator.signDataRequest$.pipe(take(1)).subscribe(async (r) => {
-      setDappInfo(await senderToDappInfo(r.signContext.sender));
+      try {
+        setDappInfo(await senderToDappInfo(r.signContext.sender));
+      } catch (error) {
+        logger.error(error);
+        void cancelTransaction('Could not get DApp info');
+        redirectToSignFailure();
+        return;
+      }
+
       setSignDataRequest(r);
     });
 
@@ -86,7 +97,7 @@ export const DappConfirmData = (): React.ReactElement => {
       subscription.unsubscribe();
       api.shutdown();
     };
-  }, [setSignDataRequest]);
+  }, [cancelTransaction, redirectToSignFailure, setSignDataRequest]);
 
   useEffect(() => {
     if (!req) return;

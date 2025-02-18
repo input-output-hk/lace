@@ -151,7 +151,8 @@ export const useCreateMintedAssetList = ({
 
 export const useDisallowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
-): ((close?: boolean) => Promise<void>) => useCallback(async (close) => await disallowSignTx(req, close), [req]);
+): ((close?: boolean, reason?: string) => Promise<void>) =>
+  useCallback(async (close, reason) => await disallowSignTx(req, close, reason), [req]);
 
 export const useAllowSignTx = (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>
