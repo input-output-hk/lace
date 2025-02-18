@@ -1,5 +1,5 @@
 import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
-import { AssetActivityListProps, GroupedAssetActivityList, useGroupedActivitiesPageSize } from '@lace/core';
+import { AssetActivityListProps, GroupedAssetActivityList, useItemsPageSize } from '@lace/core';
 import { Skeleton } from 'antd';
 import { StateStatus } from 'features/outside-handles-provider';
 import take from 'lodash/take';
@@ -16,7 +16,7 @@ type RewardsHistoryProps = {
 export const RewardsHistory = ({ groupedRewardsActivities, walletActivitiesStatus }: RewardsHistoryProps) => {
   const { t } = useTranslation();
 
-  const pageSize = useGroupedActivitiesPageSize();
+  const pageSize = useItemsPageSize();
   const [paginatedLists, setPaginatedLists] = useState<AssetActivityListProps[]>([]);
 
   const loadMoreData = useCallback(() => {

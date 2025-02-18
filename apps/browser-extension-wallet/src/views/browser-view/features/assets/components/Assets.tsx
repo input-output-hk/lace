@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNil from 'lodash/isNil';
 import { Wallet } from '@lace/cardano';
-import { AssetTableProps } from '@lace/core';
+import { AssetTableProps, useItemsPageSize } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
 import { useWalletStore } from '@src/stores';
@@ -34,7 +34,7 @@ import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan'
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { MidnightEventBanner } from './MidnightEventBanner';
 
-const LIST_CHUNK_SIZE = 12;
+const LIST_ITEM_HEIGHT = 80;
 const SEND_COIN_OUTPUT_ID = 'output1';
 const ASSETS_OTHER_THAN_ADA = 2;
 
@@ -69,8 +69,13 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
-  const [listItemsAmount, setListItemsAmount] = useState(LIST_CHUNK_SIZE);
+  const pageSize = useItemsPageSize(LIST_ITEM_HEIGHT);
+  const [listItemsAmount, setListItemsAmount] = useState(pageSize);
   const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
+
+  useEffect(() => {
+    setListItemsAmount(pageSize);
+  }, [pageSize]);
 
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
 
@@ -286,7 +291,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       isBalanceLoading={isBalanceLoading}
       isLoadingFirstTime={isLoadingFirstTime}
       onRowClick={onAssetRowClick}
-      onTableScroll={() => setListItemsAmount((prevState) => prevState + LIST_CHUNK_SIZE)}
+      onTableScroll={() => setListItemsAmount((prevState) => prevState + pageSize)}
       totalAssets={fullAssetList?.length ?? 0}
     />
   );
