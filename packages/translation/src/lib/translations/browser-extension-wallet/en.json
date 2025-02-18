@@ -837,7 +837,6 @@
   "unlock.input.placeholder": "Password",
   "unlock.sectionTitle": "Welcome back!",
   "walletActivity.sectionTitle": "Activity",
-  "walletActivity.endMessage": "Use a Cardano explorer to see full transaction history.",
   "walletSetup.backModal.iUnderstandGoBack": "Cancel",
   "walletSetup.backModal.ohOkLetsContinue": "Got it",
   "walletSetup.backModal.youllHaveToStartAgain": "You'll have to start again",
