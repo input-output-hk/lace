@@ -10,6 +10,7 @@ class SettingsPage extends CommonDrawerElements {
   private readonly SECURITY_HEADER = '[data-testid="security-settings-heading"]';
   private readonly SUPPORT_HEADER = '[data-testid="support-settings-heading"]';
   private readonly LEGAL_HEADER = '[data-testid="legal-settings-heading"]';
+  private readonly PREFERENCES_HEADER = '[data-testid="wallet-preferences-heading"]';
   private readonly MAIN_TITLE = '[data-testid="settings-page-title"]';
   private readonly REMOVE_WALLET_HEADER = '[data-testid="remove-wallet-heading"]';
   private readonly REMOVE_WALLET_DESCRIPTION = '[data-testid="remove-wallet-description"]';
@@ -39,6 +40,8 @@ class SettingsPage extends CommonDrawerElements {
   private readonly CURRENCY_LINK_TEST_ID = 'settings-wallet-currency-link';
   private readonly THEME_LINK_TEST_ID = 'settings-wallet-theme';
   private readonly BETA_PROGRAM_LINK_TEST_ID = 'settings-beta-program-section';
+  private readonly DEBUGGING_LINK_TEST_ID = 'settings-logging-level-section';
+  private readonly DEBUGGING_SWITCH_TEST_ID = '[data-testid="settings-logging-switch"]';
 
   get aboutLaceWidget(): typeof AboutLaceWidget {
     return AboutLaceWidget;
@@ -58,6 +61,10 @@ class SettingsPage extends CommonDrawerElements {
 
   get legalHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LEGAL_HEADER);
+  }
+
+  get preferencesHeader(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PREFERENCES_HEADER);
   }
 
   get removeWalletHeader(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -107,6 +114,10 @@ class SettingsPage extends CommonDrawerElements {
 
   get betaProgramLink() {
     return new SettingsLink(this.BETA_PROGRAM_LINK_TEST_ID);
+  }
+
+  get debuggingLink() {
+    return new SettingsLink(this.DEBUGGING_LINK_TEST_ID);
   }
 
   get customSubmitAPILink() {
@@ -163,6 +174,10 @@ class SettingsPage extends CommonDrawerElements {
 
   get betaProgramSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BETA_PROGRAM_SWITCH_TEST_ID);
+  }
+
+  get debuggingSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.DEBUGGING_SWITCH_TEST_ID);
   }
 
   get securitySettingsElements(): ChainablePromiseArray<WebdriverIO.ElementArray> {

@@ -182,9 +182,24 @@ When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
   await HelpDrawer.createASupportTicketButton.click();
 });
 
-Then(/I see analytics option with proper description and toggle/, async () => {
-  await settingsPageExtendedAssert.assertSeeAnalyticsSection();
-});
+Then(
+  /I see (Analytics|Beta Program|Debugging) option with proper description and toggle/,
+  async (optionName: 'Analytics' | 'Beta Program' | 'Debugging') => {
+    switch (optionName) {
+      case 'Analytics':
+        await settingsPageExtendedAssert.assertSeeAnalyticsSection();
+        break;
+      case 'Beta Program':
+        await settingsPageExtendedAssert.assertSeeBetaProgramSection(false);
+        break;
+      case 'Debugging':
+        await settingsPageExtendedAssert.assertSeeDebuggingSection(false);
+        break;
+      default:
+        throw new Error(`Unrecognised option name: ${optionName}`);
+    }
+  }
+);
 
 When(/Analytics toggle is enabled: (true|false)/, async (isEnabled: 'true' | 'false') => {
   await settingsExtendedPageObject.toggleAnalytics(isEnabled);
