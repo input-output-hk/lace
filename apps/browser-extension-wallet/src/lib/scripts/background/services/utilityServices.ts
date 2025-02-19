@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { runtime, tabs, storage as webStorage } from 'webextension-polyfill';
+import { runtime, tabs, storage as webStorage, windows, action, Tabs, Windows } from 'webextension-polyfill';
 import {
   BackgroundService,
   BaseChannels,
@@ -22,12 +22,13 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import { getADAPriceFromBackgroundStorage, closeAllLaceWindows } from '../util';
+import { getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
 import { getErrorMessage } from '@src/utils/get-error-message';
 import { logger } from '@lace/common';
+import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -109,18 +110,43 @@ const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
   await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => logger.error(error));
 };
 
-const handleOpenPopup = async () => {
-  if (typeof chrome.action.openPopup !== 'function') return;
+const enrichWithTabsDataIfMissing = (browserWindows: Windows.Window[]) => {
+  const promises = browserWindows.map(async (w) => ({
+    ...w,
+    tabs: w.tabs || (await tabs.query({ windowId: w.id }))
+  }));
+  return Promise.all(promises);
+};
+
+// Yes, Nami mode can be rendered as tab
+const isLaceOrNamiTab = (tab: Tabs.Tab) => ['Lace', POPUP_WINDOW_NAMI_TITLE].includes(tab.title);
+
+type WindowWithTabsNotOptional = Windows.Window & {
+  tabs: Tabs.Tab[];
+};
+const doesWindowHaveOtherTabs = (browserWindow: WindowWithTabsNotOptional) =>
+  browserWindow.tabs.some((t) => !isLaceOrNamiTab(t));
+
+const closeAllTabsAndOpenPopup = async () => {
   try {
-    const [currentWindow] = await tabs.query({ currentWindow: true, title: 'Lace' });
-    await closeAllLaceWindows();
-    // behaves inconsistently if executed without setTimeout
-    setTimeout(async () => {
-      if (currentWindow?.windowId) {
-        await chrome.windows.update(currentWindow.windowId, { focused: true });
-        await chrome.action.openPopup();
-      }
-    }, 30);
+    const allWindows = await enrichWithTabsDataIfMissing(await windows.getAll());
+    if (allWindows.length === 0) return;
+
+    const windowsWith3rdPartyTabs = allWindows.filter((w) => doesWindowHaveOtherTabs(w));
+    const candidateWindowsWithPreferenceForCurrentlyFocused = windowsWith3rdPartyTabs.sort(
+      (w1, w2) => Number(w2.focused) - Number(w1.focused)
+    );
+
+    let nextFocusedWindow = candidateWindowsWithPreferenceForCurrentlyFocused[0];
+    const noSingleWindowWith3rdPartyTabsOpen = !nextFocusedWindow;
+    if (noSingleWindowWith3rdPartyTabsOpen) {
+      nextFocusedWindow = allWindows[0];
+      await tabs.create({ active: true, windowId: nextFocusedWindow.id });
+    }
+
+    await windows.update(nextFocusedWindow.id, { focused: true });
+    await closeAllLaceOrNamiTabs();
+    await action.openPopup();
   } catch (error) {
     // unable to programatically open the popup again
     logger.error(error);
@@ -238,7 +264,7 @@ exposeApi<BackgroundService>(
     api$: of({
       handleOpenBrowser,
       handleOpenNamiBrowser,
-      handleOpenPopup,
+      closeAllTabsAndOpenPopup,
       requestMessage$,
       migrationState$,
       coinPrices,

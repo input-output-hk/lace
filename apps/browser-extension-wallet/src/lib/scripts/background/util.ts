@@ -124,7 +124,7 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
-export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
+export const closeAllLaceOrNamiTabs = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
   const openTabs = await tabs.query({ title: 'Lace' });
   const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
   openTabs.push(...namiTabs);
@@ -135,7 +135,7 @@ export const closeAllLaceWindows = async (shouldRemoveTab?: (url: string) => boo
 };
 
 export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
-  await closeAllLaceWindows((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
+  await closeAllLaceOrNamiTabs((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
 
   const tab = await launchCip30Popup(url);
 

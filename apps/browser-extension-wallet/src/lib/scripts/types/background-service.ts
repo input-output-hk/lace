@@ -97,7 +97,7 @@ export type UnhandledError = {
 
 export type BackgroundService = {
   handleOpenBrowser: (data: OpenBrowserData, urlSearchParams?: string) => Promise<void>;
-  handleOpenPopup: () => Promise<void>;
+  closeAllTabsAndOpenPopup: () => Promise<void>;
   handleOpenNamiBrowser: (data: OpenNamiBrowserData) => Promise<void>;
   requestMessage$: Subject<Message>;
   migrationState$: BehaviorSubject<MigrationState | undefined>;

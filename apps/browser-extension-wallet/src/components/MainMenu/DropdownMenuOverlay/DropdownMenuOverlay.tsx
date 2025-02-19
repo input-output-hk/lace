@@ -120,7 +120,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     if (activated) {
       await posthog.sendEvent(PostHogAction.SettingsSwitchToNamiClick);
       try {
-        await backgroundServices.handleOpenPopup();
+        await backgroundServices.closeAllTabsAndOpenPopup();
       } catch (error) {
         logger.warn(error);
       }
