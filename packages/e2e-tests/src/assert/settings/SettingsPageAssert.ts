@@ -35,8 +35,14 @@ class SettingsPageAssert {
     expect(await SettingsPage.betaProgramLink.getTitleText()).to.equal(
       await t('browserView.settings.preferences.betaProgram.title')
     );
+    expect(await SettingsPage.debuggingLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.debugging.title')
+    );
     expect(await SettingsPage.showRecoveryPhraseLink.getTitleText()).to.equal(
       await t('browserView.settings.security.showPassphrase.title')
+    );
+    expect(await SettingsPage.generatePaperWallet.getTitleText()).to.equal(
+      await t('browserView.settings.generatePaperWallet.title')
     );
     // TODO: temporarily disabled due to LW-2907
     // expect(await SettingsPage.passphraseVerificationLink.getTitleText()).to.equal(
@@ -89,8 +95,14 @@ class SettingsPageAssert {
     expect(await SettingsPage.betaProgramLink.getDescriptionText()).to.equal(
       await t('browserView.settings.preferences.betaProgram.description')
     );
+    expect(await SettingsPage.debuggingLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.debugging.description')
+    );
     expect(await SettingsPage.showRecoveryPhraseLink.getDescriptionText()).to.equal(
       await t('browserView.settings.security.showPassphrase.description')
+    );
+    expect(await SettingsPage.generatePaperWallet.getDescriptionText()).to.equal(
+      await t('browserView.settings.generatePaperWallet.description')
     );
     // TODO: temporarily disabled due to LW-2907
     // expect(await SettingsPage.passphraseVerificationLink.getDescriptionText()).to.equal(
@@ -126,6 +138,7 @@ class SettingsPageAssert {
 
   async assertSeeHeadings() {
     expect(await SettingsPage.walletHeader.getText()).to.equal(await t('browserView.settings.wallet.title'));
+    expect(await SettingsPage.preferencesHeader.getText()).to.equal(await t('browserView.settings.preferences.title'));
     expect(await SettingsPage.securityHeader.getText()).to.equal(await t('browserView.settings.security.title'));
     expect(await SettingsPage.supportHeader.getText()).to.equal(await t('browserView.settings.help.support.title'));
     expect(await SettingsPage.legalHeader.getText()).to.equal(await t('browserView.settings.legal.title'));
@@ -163,6 +176,32 @@ class SettingsPageAssert {
       await t('browserView.settings.security.analytics.description')
     );
     await SettingsPage.analyticsSwitch.waitForDisplayed();
+  }
+
+  async assertSeeBetaProgramSection(switchChecked: boolean) {
+    await SettingsPage.betaProgramLink.title.waitForDisplayed();
+    expect(await SettingsPage.betaProgramLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.betaProgram.title')
+    );
+    await SettingsPage.betaProgramLink.description.waitForDisplayed();
+    expect(await SettingsPage.betaProgramLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.betaProgram.description')
+    );
+    await SettingsPage.betaProgramSwitch.waitForDisplayed();
+    expect(await SettingsPage.betaProgramSwitch.getAttribute('aria-checked')).to.equal(String(switchChecked));
+  }
+
+  async assertSeeDebuggingSection(switchChecked: boolean) {
+    await SettingsPage.debuggingLink.title.waitForDisplayed();
+    expect(await SettingsPage.debuggingLink.getTitleText()).to.equal(
+      await t('browserView.settings.preferences.debugging.title')
+    );
+    await SettingsPage.debuggingLink.description.waitForDisplayed();
+    expect(await SettingsPage.debuggingLink.getDescriptionText()).to.equal(
+      await t('browserView.settings.preferences.debugging.description')
+    );
+    await SettingsPage.debuggingSwitch.waitForDisplayed();
+    expect(await SettingsPage.betaProgramSwitch.getAttribute('aria-checked')).to.equal(String(switchChecked));
   }
 
   async assertShowRecoveryPhraseIsDisplayedUnderSecuritySection() {

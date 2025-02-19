@@ -17,11 +17,15 @@ Feature: General Settings - Extended Browser View
     And I click on "FAQs" setting
     Then FAQ page is displayed
 
-
   @LW-3058 @Mainnet @Testnet
-  Scenario: Extended view - Settings - Analytics option displayed
+  Scenario Outline: Extended view - Settings - <option_name> option displayed
     When I open settings from header menu
-    Then I see analytics option with proper description and toggle
+    Then I see <option_name> option with proper description and toggle
+    Examples:
+      | option_name  |
+      | Analytics    |
+      | Beta Program |
+      | Debugging    |
 
   @LW-3869 @Mainnet @Testnet
   Scenario: Extended view - Settings - Show passphrase displayed above Analytics under the Security section in the Settings page
