@@ -6,7 +6,6 @@
 /* eslint-disable unicorn/no-new-array */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { RefObject } from 'react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import { Cardano, Serialization, ProviderUtil } from '@cardano-sdk/core';
@@ -88,6 +87,7 @@ import type { Asset as NamiAsset, AssetInput } from '../../../types/assets';
 import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
 import type { Wallet } from '@lace/cardano';
+import { CustomScrollbarsVirtualList } from '../components/CustomScrollbars';
 
 interface Props {
   activeAddress: string;
@@ -1132,43 +1132,6 @@ const AddressPopup = ({
     </Popover>
   );
 };
-
-// Asset Popup
-interface CustomScrollbarsProps {
-  onScroll?: React.UIEventHandler;
-  children?: React.ReactNode;
-  forwardedRef:
-    | React.ForwardedRef<unknown>
-    | ((ref: RefObject<any> | null) => void);
-  style?: React.CSSProperties;
-}
-
-const CustomScrollbars = ({
-  onScroll,
-  forwardedRef,
-  style,
-  children,
-}: Readonly<CustomScrollbarsProps>) => {
-  const refSetter = React.useCallback(scrollbarsRef => {
-    if (typeof forwardedRef === 'function') {
-      scrollbarsRef ? forwardedRef(scrollbarsRef.view) : forwardedRef(null);
-    }
-  }, []);
-
-  return (
-    <Scrollbars
-      ref={refSetter}
-      style={{ ...style, overflow: 'hidden', marginRight: 4 }}
-      onScroll={onScroll}
-    >
-      {children}
-    </Scrollbars>
-  );
-};
-
-const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
-  <CustomScrollbars {...props} forwardedRef={ref} />
-));
 
 const AssetsSelector = ({
   assets,

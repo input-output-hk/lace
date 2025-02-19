@@ -4,146 +4,133 @@ import { network } from './network.mock';
 
 import type { Account } from 'ui/app/pages/wallet.types';
 
-const assets = [
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743230',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743235',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '10',
-    unit: '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f4d657368546f6b656e',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: false,
-    quantity: '9',
-    unit: '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f54657374546f6b656e',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: '2660d5a40acd9d93945c5f44352d34867241826ffbc7bdcaa6a30bea574e4654',
-  },
-  {
-    decimals: 6,
-    has_nft_onchain_metadata: false,
-    quantity: '9000000',
-    unit: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198444149',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: false,
-    quantity: '10999999',
-    unit: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198446a6564',
-  },
-  {
-    decimals: 6,
-    has_nft_onchain_metadata: false,
-    quantity: '4000000',
-    unit: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19855534443',
-  },
-  {
-    decimals: 6,
-    has_nft_onchain_metadata: false,
-    quantity: '9000000',
-    unit: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19855534454',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: false,
-    quantity: '10999999',
-    unit: '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19869555344',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f31',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f313030',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3233',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3234',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3238',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3338',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3435',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3437',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'e517b38693b633f1bc0dd3eb69cb1ad0f0c198c67188405901ae63a3001bc28068616e646c65735f6e61747572652d6c616b65',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a000de1406b6c6f73',
-  },
-  {
-    decimals: null,
-    has_nft_onchain_metadata: true,
-    quantity: '1',
-    unit: 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a000de1406e69747069636b6572',
-  },
-  {
-    decimals: 0,
-    has_nft_onchain_metadata: false,
-    quantity: '101',
-    unit: 'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e374484f534b59',
-  },
-  {
-    decimals: 6,
-    has_nft_onchain_metadata: false,
-    quantity: '22471977',
-    unit: 'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e3744d494e',
-  },
+const getAsset = (
+  unit: string,
+  quantity: string,
+  has_nft_onchain_metadata: boolean = true,
+  decimals: number | null = null,
+) => ({
+  decimals,
+  has_nft_onchain_metadata,
+  quantity,
+  unit,
+});
+
+type AssetsSeed = [
+  unit: string,
+  quantity: string,
+  has_nft_onchain_metadata?: boolean,
+  decimals?: number | null,
 ];
+
+const assetsSeed: AssetsSeed[] = [
+  [
+    '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743230',
+    '1',
+  ],
+  [
+    '0b23996b05afb3a76cc802dcb1d854a2b3596b208bf775c162cec2d34e6f6e5371756172654e66743235',
+    '1',
+  ],
+  [
+    '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f4d657368546f6b656e',
+    '10',
+  ],
+  [
+    '212a16adbc2aec5cab350fc8e8a32defae6d766f7a774142d5ae995f54657374546f6b656e',
+    '9',
+    false,
+  ],
+  ['2660d5a40acd9d93945c5f44352d34867241826ffbc7bdcaa6a30bea574e4654', '1'],
+  [
+    '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198444149',
+    '9000000',
+    false,
+    6,
+  ],
+  [
+    '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff198446a6564',
+    '10999999',
+    false,
+  ],
+  [
+    '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19855534443',
+    '4000000',
+    false,
+    6,
+  ],
+  [
+    '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19855534454',
+    '9000000',
+    false,
+    6,
+  ],
+  [
+    '648823ffdad1610b4162f4dbc87bd47f6f9cf45d772ddef661eff19869555344',
+    '10999999',
+    false,
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f31',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f313030',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3233',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3234',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3238',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3338',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3435',
+    '1',
+  ],
+  [
+    'c4c0005b4e9ae69cd30bcfd8c3d2c953ac5d12f7255e319aba8f19ea546573744275647a50726570726f645f3437',
+    '1',
+  ],
+  [
+    'e517b38693b633f1bc0dd3eb69cb1ad0f0c198c67188405901ae63a3001bc28068616e646c65735f6e61747572652d6c616b65',
+    '1',
+  ],
+  [
+    'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a000de1406b6c6f73',
+    '1',
+  ],
+  [
+    'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a000de1406e69747069636b6572',
+    '1',
+  ],
+  [
+    'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e374484f534b59',
+    '101',
+    false,
+    0,
+  ],
+  [
+    'f6f49b186751e61f1fb8c64e7504e771f968cea9f4d11f5222b169e3744d494e',
+    '22471977',
+    false,
+    6,
+  ],
+];
+
+const assets = assetsSeed.map(data =>
+  getAsset(data[0], data[1], data[2], data[3]),
+);
 
 const testnet = {
   assets: [],
@@ -376,6 +363,88 @@ export const currentAccount = {
   rewardAddr: account[network.id].rewardAddr,
 };
 
+const acc2AssetsSeed: AssetsSeed[] = [
+  [
+    '093e1dd222241dabb60ec25e98026d68ff45bd4e7c6a86bca0f59d3853505f714a61653270',
+    '2',
+  ],
+  ['359289937f6cd0478f2c0737eed4ba879725c09d9d80caeeadf4a67f6261746d616e', '1'],
+  ['4298bc56195ebed886f2172eb0352a26611ce34f4482a3ee3cc0f39574657374', '1'],
+  [
+    '666816b289a3c7a6427333703dc6cfd4b9c544f97bd70dfd913a778a53505f4d464b497961',
+    '2',
+  ],
+  [
+    '6736988a80b3e42c1940e48d5ab2de52c626acb22d21c13b5ff5c86253505f47516674726f',
+    '2',
+  ],
+  [
+    'b2ab960cf45de24f65d7abe9ee6ac7ed03453a8953fe2421eba0d32553505f676471663775',
+    '2',
+  ],
+  [
+    'c82a4452eaebccb82aced501b3c94d3662cf6cd2915ad7148b459aec41584f',
+    '8704538763',
+  ],
+  [
+    'e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed724d494e',
+    '67280096',
+  ],
+  [
+    'fa39bd793aed73c0a2d30451e616e298320cb8ada00987370d2dcd0453505f464556484e4a',
+    '2',
+  ],
+  [
+    'fbaec8dd4d4405a4a42aec11ce5a0160c01e488f3918b082ccbab70544da9f788bef996b9adbefa7d3d9cbb616d7e8174a1ffaf320270db7bf561b05',
+    '2253633',
+  ],
+];
+
+const acc2Assets = acc2AssetsSeed.map(data =>
+  getAsset(data[0], data[1], data[2], data[3]),
+);
+
+const acc2PreprodAssetsSeed: AssetsSeed[] = [
+  [
+    '093e1dd222241dabb60ec25e98026d68ff45bd4e7c6a86bca0f59d3853505f714a61653270',
+    '2',
+  ],
+  ['359289937f6cd0478f2c0737eed4ba879725c09d9d80caeeadf4a67f6261746d616e', '1'],
+  ['4298bc56195ebed886f2172eb0352a26611ce34f4482a3ee3cc0f39574657374', '1'],
+  [
+    '666816b289a3c7a6427333703dc6cfd4b9c544f97bd70dfd913a778a53505f4d464b497961',
+    '2',
+  ],
+  [
+    '6736988a80b3e42c1940e48d5ab2de52c626acb22d21c13b5ff5c86253505f47516674726f',
+    '2',
+  ],
+  [
+    'b2ab960cf45de24f65d7abe9ee6ac7ed03453a8953fe2421eba0d32553505f676471663775',
+    '2',
+  ],
+  [
+    'c82a4452eaebccb82aced501b3c94d3662cf6cd2915ad7148b459aec41584f',
+    '8704538763',
+  ],
+  [
+    'e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed724d494e',
+    '67280096',
+  ],
+  [
+    'fa39bd793aed73c0a2d30451e616e298320cb8ada00987370d2dcd0453505f464556484e4a',
+    '2',
+  ],
+  [
+    'fbaec8dd4d4405a4a42aec11ce5a0160c01e488f3918b082ccbab70544da9f788bef996b9adbefa7d3d9cbb616d7e8174a1ffaf320270db7bf561b05',
+    '2253633',
+  ],
+];
+
+const acc2PreprodAssets = acc2PreprodAssetsSeed.map(data =>
+  getAsset(data[0], data[1], data[2], data[3]),
+);
+
 export const account2 = {
   avatar: '0.7267421825241898',
   index: 0,
@@ -383,68 +452,7 @@ export const account2 = {
   paymentKeyHash: '37f60ad7e24cf496ac02d30da7be208cb703e7474fd05096d70a744e',
   paymentKeyHashBech32:
     'addr_vkh1xlmq44lzfn6fdtqz6vx6003q3jms8e68flg9p9khpf6yu6uewvu',
-  assets: [
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2',
-      unit: '093e1dd222241dabb60ec25e98026d68ff45bd4e7c6a86bca0f59d3853505f714a61653270',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '1',
-      unit: '359289937f6cd0478f2c0737eed4ba879725c09d9d80caeeadf4a67f6261746d616e',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '1',
-      unit: '4298bc56195ebed886f2172eb0352a26611ce34f4482a3ee3cc0f39574657374',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2',
-      unit: '666816b289a3c7a6427333703dc6cfd4b9c544f97bd70dfd913a778a53505f4d464b497961',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2',
-      unit: '6736988a80b3e42c1940e48d5ab2de52c626acb22d21c13b5ff5c86253505f47516674726f',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2',
-      unit: 'b2ab960cf45de24f65d7abe9ee6ac7ed03453a8953fe2421eba0d32553505f676471663775',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '8704538763',
-      unit: 'c82a4452eaebccb82aced501b3c94d3662cf6cd2915ad7148b459aec41584f',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '67280096',
-      unit: 'e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed724d494e',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2',
-      unit: 'fa39bd793aed73c0a2d30451e616e298320cb8ada00987370d2dcd0453505f464556484e4a',
-    },
-    {
-      decimals: null,
-      has_nft_onchain_metadata: false,
-      quantity: '2253633',
-      unit: 'fbaec8dd4d4405a4a42aec11ce5a0160c01e488f3918b082ccbab70544da9f788bef996b9adbefa7d3d9cbb616d7e8174a1ffaf320270db7bf561b05',
-    },
-  ],
+  assets: acc2Assets,
   history: {
     confirmed: [
       'c79f37caa73e2db87367c8ca9a802d4c50032f21c7057757659f39ba3b68a224',
@@ -1270,68 +1278,7 @@ export const account2 = {
     },
   },
   preprod: {
-    assets: [
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2',
-        unit: '093e1dd222241dabb60ec25e98026d68ff45bd4e7c6a86bca0f59d3853505f714a61653270',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '1',
-        unit: '359289937f6cd0478f2c0737eed4ba879725c09d9d80caeeadf4a67f6261746d616e',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '1',
-        unit: '4298bc56195ebed886f2172eb0352a26611ce34f4482a3ee3cc0f39574657374',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2',
-        unit: '666816b289a3c7a6427333703dc6cfd4b9c544f97bd70dfd913a778a53505f4d464b497961',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2',
-        unit: '6736988a80b3e42c1940e48d5ab2de52c626acb22d21c13b5ff5c86253505f47516674726f',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2',
-        unit: 'b2ab960cf45de24f65d7abe9ee6ac7ed03453a8953fe2421eba0d32553505f676471663775',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '8704538763',
-        unit: 'c82a4452eaebccb82aced501b3c94d3662cf6cd2915ad7148b459aec41584f',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '67280096',
-        unit: 'e16c2dc8ae937e8d3790c7fd7168d7b994621ba14ca11415f39fed724d494e',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2',
-        unit: 'fa39bd793aed73c0a2d30451e616e298320cb8ada00987370d2dcd0453505f464556484e4a',
-      },
-      {
-        decimals: null,
-        has_nft_onchain_metadata: false,
-        quantity: '2253633',
-        unit: 'fbaec8dd4d4405a4a42aec11ce5a0160c01e488f3918b082ccbab70544da9f788bef996b9adbefa7d3d9cbb616d7e8174a1ffaf320270db7bf561b05',
-      },
-    ],
+    assets: acc2PreprodAssets,
     history: {
       confirmed: [
         'c79f37caa73e2db87367c8ca9a802d4c50032f21c7057757659f39ba3b68a224',

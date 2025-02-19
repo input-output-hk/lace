@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import React from 'react';
 
 import { ChevronDownIcon } from '@chakra-ui/icons';
@@ -20,46 +19,10 @@ import MiddleEllipsis from 'react-middle-ellipsis';
 import { FixedSizeList as List } from 'react-window';
 
 import { abs } from '../../utils';
-import { Scrollbars } from '../components/scrollbar';
 
 import Copy from './copy';
 import UnitDisplay from './unitDisplay';
-
-interface CustomScrollbarsProps {
-  onScroll?: React.UIEventHandler;
-  children?: React.ReactNode;
-  forwardedRef:
-  | React.ForwardedRef<unknown>
-  | ((ref: RefObject<any> | null) => void);
-  style?: React.CSSProperties;
-}
-
-const CustomScrollbars = ({
-  onScroll,
-  forwardedRef,
-  style,
-  children,
-}: Readonly<CustomScrollbarsProps>) => {
-  const refSetter = React.useCallback(scrollbarsRef => {
-    if (typeof forwardedRef === 'function') {
-      scrollbarsRef ? forwardedRef(scrollbarsRef.view) : forwardedRef(null);
-    }
-  }, []);
-
-  return (
-    <Scrollbars
-      ref={refSetter}
-      style={{ ...style, overflow: 'hidden', marginRight: 4 }}
-      onScroll={onScroll}
-    >
-      {children}
-    </Scrollbars>
-  );
-};
-
-const CustomScrollbarsVirtualList = React.forwardRef((props, ref) => (
-  <CustomScrollbars {...props} forwardedRef={ref} />
-));
+import { CustomScrollbarsVirtualList } from './CustomScrollbars';
 
 const AssetsPopover = ({ assets, isDifference }) => {
   return (
