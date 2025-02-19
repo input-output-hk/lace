@@ -25,7 +25,7 @@ export interface GroupedAssetActivityListProps {
   lists: AssetActivityListProps[];
   scrollableTarget: string;
   endMessage?: React.ReactNode;
-  dataLength?: number;
+  dataLength: number;
   withTitle?: {
     title: string;
     onClick?: () => void;
@@ -67,7 +67,7 @@ export const GroupedAssetActivityList = ({
 
   return (
     <InfiniteScroll
-      dataLength={dataLength ?? 0}
+      dataLength={dataLength}
       endMessage={endMessage}
       scrollableTarget={scrollableTarget}
       next={next}
