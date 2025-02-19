@@ -7,7 +7,8 @@ class MenuMainExtended {
   private NFTS_BUTTON = '//li[@data-testid="item-nfts"]';
   private TRANSACTIONS_BUTTON = '//li[@data-testid="item-transactions"]';
   private STAKING_BUTTON = '//li[@data-testid="item-staking"]';
-  private DAPP_EXPLORER_BUTTON = '//li[@data-testid="item-dapps"]';
+  private DAPPS_BUTTON = '//li[@data-testid="item-dapps"]';
+  private VOTING_BUTTON = '//li[@data-testid="item-voting"]';
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}`);
@@ -29,8 +30,12 @@ class MenuMainExtended {
     return $(`${this.CONTAINER}${this.STAKING_BUTTON}`);
   }
 
-  get dappExplorerButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.DAPP_EXPLORER_BUTTON}`);
+  get dappsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.DAPPS_BUTTON}`);
+  }
+
+  get votingButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.VOTING_BUTTON}`);
   }
 
   getIcon(menuItem: ChainablePromiseElement<WebdriverIO.Element>): ChainablePromiseElement<WebdriverIO.Element> {
@@ -61,9 +66,14 @@ class MenuMainExtended {
     await this.stakingButton.click();
   }
 
-  async clickOnDAppExplorerButton() {
-    await this.dappExplorerButton.waitForClickable();
-    await this.dappExplorerButton.click();
+  async clickOnDAppsButton() {
+    await this.dappsButton.waitForClickable();
+    await this.dappsButton.click();
+  }
+
+  async clickOnVotingButton() {
+    await this.votingButton.waitForClickable();
+    await this.votingButton.click();
   }
 }
 

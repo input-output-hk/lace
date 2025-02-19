@@ -103,10 +103,10 @@ Then(/^I expect wallet repository and local storage to (not be|be) empty$/, asyn
 });
 
 When(
-  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApp Explorer) (extended|popup) page$/,
+  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApps|Voting) (extended|popup) page$/,
   async (
     _ignored: string,
-    targetPage: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+    targetPage: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
     mode: 'extended' | 'popup'
   ) => {
     await visit(targetPage, mode, false);
@@ -114,9 +114,9 @@ When(
 );
 
 When(
-  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApp Explorer) page in (extended|popup) mode$/,
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApps|Voting) page in (extended|popup) mode$/,
   async (
-    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApp Explorer',
+    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
     mode: 'extended' | 'popup'
   ) => {
     await visit(page, mode, true);
@@ -249,7 +249,7 @@ When(/^I hover over "Expand" button$/, async () => {
 });
 
 Then(
-  /^the (Tokens|NFTs|Activity|Staking|Dapp Store|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
+  /^the (Tokens|NFTs|Activity|Staking|DApps|Voting|Address Book|Settings) page is displayed on a new tab in extended view$/,
   async (expectedPage: string) => {
     await commonAssert.assertSeePageInNewTab(expectedPage, 'extended');
   }

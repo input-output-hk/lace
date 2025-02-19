@@ -18,13 +18,13 @@ export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: 
   const btnWidth = popupView ? '$fill' : '$auto';
 
   return (
-    <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="register-as-drep-banner">
+    <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="voting-center-banner">
       <img className={styles.bg} src={popupView ? bgPopup : BG} />
       <Flex flexDirection="column" justifyContent="center" className={styles.content}>
-        <div className={styles.title} data-testid="register-as-drep-banner-title">
+        <div className={styles.title} data-testid="voting-center-banner-title">
           {t('browserView.voting-beta.modal.title')}
         </div>
-        <div className={styles.description} data-testid="register-as-drep-banner-description">
+        <div className={styles.description} data-testid="voting-center-banner-description">
           {!popupView ? (
             t('browserView.voting-beta.modal.description')
           ) : (
@@ -40,7 +40,7 @@ export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: 
           <Button.CallToAction
             w={btnWidth}
             onClick={() => openExternalLink(govToolUrl)}
-            data-testid="register-now-at-gov-tool-button"
+            data-testid="voting-center-gov-tool-button"
             label={t('browserView.voting-beta.modal.cta')}
           />
         </Box>
