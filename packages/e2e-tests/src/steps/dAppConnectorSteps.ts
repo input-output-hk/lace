@@ -71,6 +71,11 @@ Then(/^I see DApp connector "Confirm transaction" page in (dark|light) mode$/, a
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
+Then(/^I see DApp connector "Password" page in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
+  await DAppConnectorAssert.assertSeeSignTransactionPage();
+  await CommonAssert.assertSeeThemeMode(mode);
+});
+
 Then(/^I see DApp connector Sign data "Confirm transaction" page$/, async () => {
   await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
 });

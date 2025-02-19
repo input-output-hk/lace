@@ -341,6 +341,10 @@ class DAppConnectorAssert {
 
   async assertSeeSignTransactionPage() {
     await this.assertSeeHeader();
+    await SignTransactionPage.description.waitForDisplayed();
+    expect(await SignTransactionPage.description.getText()).to.equal(
+      await t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')
+    );
     await SignTransactionPage.passwordInput.container.waitForDisplayed();
     await SignTransactionPage.confirmButton.waitForDisplayed();
     expect(await SignTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
