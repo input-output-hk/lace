@@ -13,12 +13,13 @@ Feature: Top Navigation - Extended view
     When I navigate to <page> extended page
     Then all buttons and images in the top navigation are present
     Examples:
-      | page          |
-      | Tokens        |
-      | NFTs          |
-      | Activity      |
-      | Staking       |
-      | DApp Explorer |
+      | page     |
+      | Tokens   |
+      | NFTs     |
+      | Activity |
+      | Staking  |
+      | Voting   |
+      | DApps    |
 
   @LW-2320 @Mainnet @Testnet
   Scenario: Avatar dropdown displayed on click with content

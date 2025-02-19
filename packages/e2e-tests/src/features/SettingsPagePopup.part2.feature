@@ -105,9 +105,14 @@ Feature: General Settings - Popup View
     And Password field is empty
 
   @LW-3061 @Mainnet @Testnet
-  Scenario: Popup view - Settings - Analytics option displayed
-    Given I open settings from header menu
-    Then I see analytics option with proper description and toggle
+  Scenario Outline: Popup view - Settings -  <option_name> option displayed
+    When I open settings from header menu
+    Then I see <option_name> option with proper description and toggle
+    Examples:
+      | option_name  |
+      | Analytics    |
+      | Beta Program |
+      | Debugging    |
 
   @LW-11315 @Mainnet @Testnet
   Scenario: Popup View - Custom submit API - open drawer

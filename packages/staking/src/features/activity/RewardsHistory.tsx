@@ -35,6 +35,7 @@ export const RewardsHistory = ({ groupedRewardsActivities, walletActivitiesStatu
           loadMore={loadMoreData}
           lists={paginatedLists}
           scrollableTarget={LACE_APP_ID}
+          dataLength={paginatedLists.length}
           loadFirstChunk
         />
       </Skeleton>

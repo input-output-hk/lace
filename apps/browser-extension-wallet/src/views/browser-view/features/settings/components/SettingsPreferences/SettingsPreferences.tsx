@@ -81,7 +81,7 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
         sendCurrencyChangeEvent={handleSendCurrencyChangeEvent}
       />
       <SettingsCard>
-        <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
+        <Title level={5} className={styles.heading5} data-testid="wallet-preferences-heading">
           {t('browserView.settings.preferences.title')}
         </Title>
         <SettingsLink

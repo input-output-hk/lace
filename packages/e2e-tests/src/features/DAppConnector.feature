@@ -110,13 +110,10 @@ Feature: DAppConnector - Common
     Then I see DApp authorization window in <theme> mode
     And I click "Authorize" button in DApp authorization window
     And I click "Only once" button in DApp authorization window
-    When I click "Set Collateral" button in test DApp
-    Then I see DApp collateral window in <theme> mode
-    When I click "Confirm" button in DApp collateral window
-    Then I see DApp connector "All done" page in <theme> mode
-    And I click "Close" button on DApp "All done" page
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in <theme> mode
+    When I click "Confirm" button on "Confirm transaction" page
+    Then I see DApp connector "Password" page in <theme> mode
     Examples:
       | theme |
       | light |
@@ -134,13 +131,10 @@ Feature: DAppConnector - Common
     And I close all remaining tabs except current one
     And I set theme switcher to dark mode
     And I open and authorize test DApp with "Only once" setting
-    When I click "Set Collateral" button in test DApp
-    Then I see DApp collateral window in dark mode
-    And I click "Confirm" button in DApp collateral window
-    Then I see DApp connector "All done" page in dark mode
-    And I click "Close" button on DApp "All done" page
     When I click "Send ADA" "Run" button in test DApp
     Then I see DApp connector "Confirm transaction" page in dark mode
+    When I click "Confirm" button on "Confirm transaction" page
+    Then I see DApp connector "Password" page in dark mode
 
   @LW-4071
   Scenario: DApp remains authorised after choosing "Always" and removing & restoring a wallet
