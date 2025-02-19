@@ -81,7 +81,7 @@ export const SignData = (): React.ReactElement => {
     <Layout title={undefined}>
       <div className={styles.passwordContainer}>
         <Spin spinning={isLoading}>
-          <h5 className={styles.message}>
+          <h5 className={styles.message} data-testid="sign-transaction-description">
             {t('browserView.transaction.send.enterWalletPasswordToConfirmTransaction')}
           </h5>
           <Password
