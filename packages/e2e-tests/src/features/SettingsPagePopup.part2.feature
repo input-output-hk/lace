@@ -104,7 +104,7 @@ Feature: General Settings - Popup View
     Then Side drawer "Show 24-word passphrase" is displayed
     And Password field is empty
 
-  @LW-3061 @Mainnet @Testnet
+  @LW-3061 @LW-12252 @Mainnet @Testnet
   Scenario Outline: Popup view - Settings -  <option_name> option displayed
     When I open settings from header menu
     Then I see <option_name> option with proper description and toggle
@@ -150,6 +150,18 @@ Feature: General Settings - Popup View
     And I close a toast message
     When I close "Custom submit API" drawer
     Then "Custom submit API" is marked as disabled on Settings page
+
+  @LW-12254 @Mainnet @Testnet
+  Scenario Outline: Popup view - Settings - Debugging option enables verbose logging in console
+    Given I enable console logs collection
+    When I open settings from header menu
+    And Debugging toggle <debugging_enabled> enabled
+    And I navigate to NFTs popup page
+    Then I verify that logs <logs_collected> collected
+    Examples:
+      | debugging_enabled | logs_collected |
+      | is not            | are not        |
+      | is                | are            |
 
     # this test should be executed as the last one in this suite
   @LW-2708 @Mainnet @Testnet

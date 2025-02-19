@@ -41,9 +41,11 @@ class SettingsPageAssert {
     expect(await SettingsPage.showRecoveryPhraseLink.getTitleText()).to.equal(
       await t('browserView.settings.security.showPassphrase.title')
     );
-    expect(await SettingsPage.generatePaperWallet.getTitleText()).to.equal(
-      await t('browserView.settings.generatePaperWallet.title')
-    );
+    if (!popupView) {
+      expect(await SettingsPage.generatePaperWallet.getTitleText()).to.equal(
+        await t('browserView.settings.generatePaperWallet.title')
+      );
+    }
     // TODO: temporarily disabled due to LW-2907
     // expect(await SettingsPage.passphraseVerificationLink.getTitleText()).to.equal(
     //   await t('browserView.settings.security.passphrasePeriodicVerification.title')
@@ -101,9 +103,11 @@ class SettingsPageAssert {
     expect(await SettingsPage.showRecoveryPhraseLink.getDescriptionText()).to.equal(
       await t('browserView.settings.security.showPassphrase.description')
     );
-    expect(await SettingsPage.generatePaperWallet.getDescriptionText()).to.equal(
-      await t('browserView.settings.generatePaperWallet.description')
-    );
+    if (!popupView) {
+      expect(await SettingsPage.generatePaperWallet.getDescriptionText()).to.equal(
+        await t('browserView.settings.generatePaperWallet.description')
+      );
+    }
     // TODO: temporarily disabled due to LW-2907
     // expect(await SettingsPage.passphraseVerificationLink.getDescriptionText()).to.equal(
     //   await t('browserView.settings.security.passphrasePeriodicVerification.description')
