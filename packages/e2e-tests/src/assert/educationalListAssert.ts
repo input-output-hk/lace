@@ -99,6 +99,32 @@ class EducationalListAssert {
     await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
   }
 
+  async assertSeeVotingWidget() {
+    const faqTranslation = await t(this.faqTranslationPath);
+    const glossaryTranslation = await t(this.glossaryTranslationPath);
+    const videoTranslation = await t(this.videoTranslationPath);
+    const expectedTitle = await t('browserView.sidePanel.learnAbout');
+    const expectedTitles = [
+      glossaryTranslation,
+      faqTranslation,
+      videoTranslation,
+      videoTranslation,
+      faqTranslation,
+      faqTranslation,
+      faqTranslation
+    ];
+    const expectedSubtitles = [
+      await t('educationalBanners.subtitle.whatIsADigitalAsset'),
+      await t('educationalBanners.subtitle.howToSendReceiveFunds'),
+      await t('educationalBanners.subtitle.secureSelfCustody'),
+      await t('educationalBanners.subtitle.connectingDApps'),
+      await t('educationalBanners.subtitle.conwayEra'),
+      await t('educationalBanners.subtitle.governanceFeatures'),
+      await t('educationalBanners.subtitle.governanceActions')
+    ];
+    await this.assertSeeWidget(expectedTitle, expectedTitles, expectedSubtitles);
+  }
+
   async assertSeeGlossaryArticle(title: string) {
     const glossaryArticle = glossaryArticles[title];
     const expectedPath = `glossary?term=${glossaryArticle.term}`;

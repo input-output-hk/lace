@@ -7,7 +7,8 @@ class MenuMainPopup {
   private NFTS_BUTTON = '//button[@data-testid="main-footer-nfts"]';
   private TRANSACTIONS_BUTTON = '//button[@data-testid="main-footer-activity"]';
   private STAKING_BUTTON = '//button[@data-testid="main-footer-staking"]';
-  private DAPP_EXPLORER_BUTTON = '//button[@data-testid="main-footer-dapp-explorer"]';
+  private DAPPS_BUTTON = '//button[@data-testid="main-footer-dapp-explorer"]';
+  private VOTING_BUTTON = '//button[@data-testid="main-footer-voting"]';
 
   get tokensButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.TOKENS_BUTTON}`);
@@ -25,8 +26,12 @@ class MenuMainPopup {
     return $(`${this.CONTAINER}${this.STAKING_BUTTON}`);
   }
 
-  get dappExplorerButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.CONTAINER}${this.DAPP_EXPLORER_BUTTON}`);
+  get dappsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.DAPPS_BUTTON}`);
+  }
+
+  get votingButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.CONTAINER}${this.VOTING_BUTTON}`);
   }
 
   async clickOnTokensButton() {
@@ -49,9 +54,14 @@ class MenuMainPopup {
     await this.stakingButton.click();
   }
 
-  async clickOnDAppExplorerButton() {
-    await this.dappExplorerButton.waitForClickable();
-    await this.dappExplorerButton.click();
+  async clickOnDAppsButton() {
+    await this.dappsButton.waitForClickable();
+    await this.dappsButton.click();
+  }
+
+  async clickOnVotingButton() {
+    await this.votingButton.waitForClickable();
+    await this.votingButton.click();
   }
 }
 
