@@ -68,7 +68,7 @@ export const AssetPortfolioContent = ({
 
   return (
     <>
-      {assetList?.length > MIN_ASSETS_COUNT_FOR_SEARCH && (
+      {totalAssets > MIN_ASSETS_COUNT_FOR_SEARCH && (
         <div className={styles.searchBoxContainer}>
           <SearchBox
             placeholder={t('browserView.assets.searchPlaceholder')}
