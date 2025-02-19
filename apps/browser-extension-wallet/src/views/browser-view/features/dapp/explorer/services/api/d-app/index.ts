@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
+import { logger } from '@lace/common';
 
 const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
@@ -145,7 +146,7 @@ const useDAppFetcher = ({
           return parsedResponse.results;
         });
       } catch (error) {
-        console.error('Failed to fetch dapp list.', error);
+        logger.error('Failed to fetch dapp list.', error);
       }
 
       setData(results);
@@ -155,7 +156,7 @@ const useDAppFetcher = ({
 
   // eslint-disable-next-line unicorn/consistent-function-scoping
   const fetchMore = () => {
-    console.error('Pagination not implemented!');
+    logger.error('Pagination not implemented!');
   };
 
   return {

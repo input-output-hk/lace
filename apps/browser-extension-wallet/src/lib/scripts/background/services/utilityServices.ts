@@ -225,9 +225,9 @@ const toUnhandledError = (error: unknown, type: UnhandledError['type']): Unhandl
   message: getErrorMessage(error)
 });
 const unhandledError$ = merge(
-  fromEvent(globalThis, 'error').pipe(map((e: ErrorEvent): UnhandledError => toUnhandledError(e, 'error'))),
+  fromEvent(globalThis, 'error').pipe(map((e: ErrorEvent): UnhandledError => toUnhandledError(e.error, 'error'))),
   fromEvent(globalThis, 'unhandledrejection').pipe(
-    map((e: PromiseRejectionEvent): UnhandledError => toUnhandledError(e, 'unhandledrejection'))
+    map((e: PromiseRejectionEvent): UnhandledError => toUnhandledError(e.reason, 'unhandledrejection'))
   )
 );
 

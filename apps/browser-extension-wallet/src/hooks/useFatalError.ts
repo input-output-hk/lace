@@ -1,5 +1,5 @@
 import { ObservableWallet } from '@cardano-sdk/wallet';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { useWalletStore } from '@src/stores';
 import { useMemo } from 'react';
@@ -57,11 +57,11 @@ export const useFatalError = (): FatalError | undefined => {
   const walletError = useObservable(walletError$);
 
   if (unhandledServiceWorkerError) {
-    console.error('useFatalError (service worker):', unhandledServiceWorkerError);
+    logger.error('useFatalError (service worker):', unhandledServiceWorkerError);
   }
 
   if (walletError) {
-    console.error('useFatalError (wallet):', walletError);
+    logger.error('useFatalError (wallet):', walletError);
   }
 
   return unhandledServiceWorkerError || walletError;
