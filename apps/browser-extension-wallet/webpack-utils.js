@@ -68,7 +68,10 @@ const transformManifest = (content, mode) => {
           }
         };
       }
+      // Firefox: Reading text is only available for extensions with the Web Extension clipboardRead permission
       manifest.permissions = [...manifest.permissions, 'clipboardRead'];
+      // The background script in Firefox is a hidden DOM page
+      manifest.background = { scripts: ['./js/background.js'] };
     } else if (process.env.BROWSER === 'chrome') {
       manifest.key = process.env.LACE_EXTENSION_KEY;
     }
