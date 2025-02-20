@@ -22,28 +22,32 @@ import styles from './ChooseRecoveryMethod.module.scss';
 
 const FAQ_URL = process.env.FAQ_URL;
 
-export const ChooseRecoveryMethod: VFC = () => {
-  const { postHogActions } = useWalletOnboarding();
-  const { back, next, recoveryMethod, setRecoveryMethod } = useCreateWallet();
+type ChooseRecoveryMethodBaseProps = {
+  title: React.ReactNode;
+  description: React.ReactNode;
+  back: () => void;
+  handleNext: () => void;
+  recoveryMethod: RecoveryMethod;
+  setRecoveryMethod: (value: RecoveryMethod) => void;
+  flow: 'create' | 'restore';
+};
+
+export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
+  title,
+  description,
+  back,
+  handleNext,
+  recoveryMethod,
+  setRecoveryMethod,
+  flow
+}) => {
   const analytics = useAnalyticsContext();
-
-  const handleNext = () => {
-    void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_NEXT_CLICK);
-    next();
-  };
-
+  const { postHogActions } = useWalletOnboarding();
   return (
     <>
       <WalletSetupStepLayoutRevamp
-        title={i18n.t('paperWallet.chooseRecoveryMethod.title')}
-        description={
-          <Trans
-            i18nKey="paperWallet.chooseRecoveryMethod.description"
-            components={{
-              a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" data-testid="faq-what-is-paper-wallet" />
-            }}
-          />
-        }
+        title={title}
+        description={description}
         onBack={back}
         onNext={handleNext}
         currentTimelineStep={WalletTimelineSteps.CHOOSE_RECOVERY_METHOD}
@@ -60,7 +64,7 @@ export const ChooseRecoveryMethod: VFC = () => {
                 render: ({ optionElement, onOptionClick }) => (
                   <Card.Outlined
                     onClick={() => {
-                      void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK);
+                      void analytics.sendEventToPostHog(postHogActions[flow].CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK);
                       onOptionClick();
                     }}
                     className={cn({
@@ -94,7 +98,7 @@ export const ChooseRecoveryMethod: VFC = () => {
                 render: ({ optionElement, onOptionClick }) => (
                   <Card.Outlined
                     onClick={() => {
-                      void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_PAPER_CLICK);
+                      void analytics.sendEventToPostHog(postHogActions[flow].CHOOSE_RECOVERY_MODE_PAPER_CLICK);
                       onOptionClick();
                     }}
                     className={cn(styles.paperWalletRadioGroupItem, {
@@ -142,5 +146,35 @@ export const ChooseRecoveryMethod: VFC = () => {
         </Flex>
       </WalletSetupStepLayoutRevamp>
     </>
+  );
+};
+
+export const ChooseRecoveryMethod: VFC = () => {
+  const { postHogActions } = useWalletOnboarding();
+  const { back, next, recoveryMethod, setRecoveryMethod } = useCreateWallet();
+  const analytics = useAnalyticsContext();
+
+  const handleNext = () => {
+    void analytics.sendEventToPostHog(postHogActions.create.CHOOSE_RECOVERY_MODE_NEXT_CLICK);
+    next();
+  };
+
+  return (
+    <ChooseRecoveryMethodBase
+      title={i18n.t('paperWallet.chooseRecoveryMethod.title')}
+      description={
+        <Trans
+          i18nKey="paperWallet.chooseRecoveryMethod.description"
+          components={{
+            a: <a href={FAQ_URL} target="_blank" rel="noopener noreferrer" data-testid="faq-what-is-paper-wallet" />
+          }}
+        />
+      }
+      back={back}
+      handleNext={handleNext}
+      recoveryMethod={recoveryMethod}
+      setRecoveryMethod={setRecoveryMethod}
+      flow="create"
+    />
   );
 };
