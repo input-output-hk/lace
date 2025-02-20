@@ -15,23 +15,15 @@ import { SelectAccounts } from './select-account';
 import type { UseAccount } from '../../../adapters/account';
 import type { Wallet } from '@lace/cardano';
 
-export const HWConnectFlow = ({
-  accounts,
-  activateAccount,
-}: Readonly<{
-  accounts: UseAccount['allAccounts'];
-  activateAccount: UseAccount['activateAccount'];
-}>): ReactElement => {
-  const history = useHistory();
+export const HWFlowContainer = ({
+  children,
+}: Readonly<{ children: React.ReactNode }>) => {
   const Logo = useColorModeValue(LogoOriginal, LogoWhite);
   const cardColor = useColorModeValue('white', 'gray.900');
   const backgroundColor = useColorModeValue('gray.200', 'gray.800');
-  const [connection, setConnection] =
-    useState<Wallet.HardwareWalletConnection | null>(null);
 
   return (
     <Box
-      data-test-id="hw-connect-flow"
       display="flex"
       justifyContent="center"
       alignItems="center"
@@ -58,24 +50,42 @@ export const HWConnectFlow = ({
         background={cardColor}
         fontSize="sm"
       >
-        {!connection && (
-          <ConnectHW
-            onConfirm={(data): void => {
-              setConnection(data);
-            }}
-          />
-        )}
-        {connection && (
-          <SelectAccounts
-            accounts={accounts}
-            activateAccount={activateAccount}
-            connection={connection}
-            onConfirm={(): void => {
-              history.push('/hwTab/success');
-            }}
-          />
-        )}
+        {children}
       </Box>
     </Box>
+  );
+};
+
+export const HWConnectFlow = ({
+  accounts,
+  activateAccount,
+}: Readonly<{
+  accounts: UseAccount['allAccounts'];
+  activateAccount: UseAccount['activateAccount'];
+}>): ReactElement => {
+  const history = useHistory();
+  const [connection, setConnection] =
+    useState<Wallet.HardwareWalletConnection | null>(null);
+
+  return (
+    <HWFlowContainer>
+      {!connection && (
+        <ConnectHW
+          onConfirm={(data): void => {
+            setConnection(data);
+          }}
+        />
+      )}
+      {connection && (
+        <SelectAccounts
+          accounts={accounts}
+          activateAccount={activateAccount}
+          connection={connection}
+          onConfirm={(): void => {
+            history.push('/hwTab/success');
+          }}
+        />
+      )}
+    </HWFlowContainer>
   );
 };
