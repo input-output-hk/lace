@@ -1,0 +1,29 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  position: relative;
+  padding: size_unit(4.5) 0;
+}
+
+.subTitle {
+  button {
+    &:focus:not(:active) {
+      outline-color: unset;
+      outline-width: 0;
+      outline-style: none;
+    }
+
+    background-color: var(--dark-mode-light-grey, #c0c0c0);
+
+    &[data-state="checked"]:not(:disabled) {
+      background: var(--lace-gradient);
+    }
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
