@@ -20,7 +20,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   },
   handleOpenBrowser: RemoteApiPropertyType.MethodReturningPromise,
   handleOpenNamiBrowser: RemoteApiPropertyType.MethodReturningPromise,
-  handleOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
+  closeAllTabsAndOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeTheme: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeMode: RemoteApiPropertyType.MethodReturningPromise,
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,

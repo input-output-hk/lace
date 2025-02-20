@@ -1,4 +1,4 @@
-import { closeAllLaceWindows } from '@lib/scripts/background/util';
+import { closeAllLaceOrNamiTabs } from '@lib/scripts/background/util';
 import { MessageSender, NamiMessages } from '../shared/types';
 import { logger } from '@lace/common';
 
@@ -8,7 +8,7 @@ export const createLaceMigrationOpenListener =
     logger.debug('[NAMI MIGRATION] createLaceMigrationOpenListener', message, sender);
     if (message === NamiMessages.open && sender.id === namiExtensionId) {
       // First close all open lace tabs
-      await closeAllLaceWindows();
+      await closeAllLaceOrNamiTabs();
       createTab({ url: `chrome-extension://${laceExtensionId}/app.html` });
     }
   };

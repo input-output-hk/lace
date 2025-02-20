@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
+import { logger } from '@lace/common';
 
 type FetchCategoriesResult = {
   loading: boolean;
@@ -48,7 +49,7 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
           return result.categories;
         });
       } catch (error) {
-        console.error('Failed to fetch dapp categories.', error);
+        logger.error('Failed to fetch dapp categories.', error);
       }
 
       categories = categories.filter((category) => !disallowedDappCategories.has(category));
