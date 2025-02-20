@@ -25,13 +25,18 @@
     "README.md"
   ],
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.prod.js --progress & run -T webpack --config webpack.app.prod.js --progress",
-    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress & run -T webpack --config webpack.app.dev.js --progress",
+    "build": "yarn build:chrome",
+    "build:chrome": "cross-env BROWSER=chrome yarn build:common",
+    "build:common": "rm -rf dist && cross-env NODE_OPTIONS='--openssl-legacy-provider' run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress && cross-env NODE_OPTIONS='--openssl-legacy-provider' run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
+    "build:dev": "cross-env WEBPACK_ENV=dev yarn build:common",
+    "build:firefox": "cross-env BROWSER=firefox yarn build:common",
+    "build:firefox:dev": "cross-env WEBPACK_ENV=dev BROWSER=firefox yarn build:common",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
     "format-check": "echo \"@lace/browser-extension-wallet: no format-check command specified\"",
     "lint": "cd ../.. && yarn extension:lint",
     "prepack": "yarn build",
+    "pack:firefox": "rm -rf artifacts-firefox && web-ext build --source-dir=dist --artifacts-dir=artifacts-firefox",
     "prepare": "ts-patch install -s",
     "prettier": "run -T prettier --write .",
     "test": "run -T jest --config test/jest.config.js",
@@ -117,6 +122,7 @@
     "@types/text-encoding-utf-8": "^1",
     "@types/w3c-web-hid": "^1.0.3",
     "@types/webextension-polyfill": "0.10.0",
+    "cross-env": "^7.0.3",
     "dotenv-defaults": "5.0.2",
     "dotenv-webpack": "8.0.1",
     "eslint-plugin-prettier": "^4.0.0",
@@ -126,6 +132,7 @@
     "source-map-loader": "^5.0.0",
     "text-encoding-utf-8": "^1.0.2",
     "tsconfig-paths-webpack-plugin": "3.5.2",
+    "web-ext": "^8.2.0",
     "webassembly-loader-sw": "^1.1.0"
   }
 }

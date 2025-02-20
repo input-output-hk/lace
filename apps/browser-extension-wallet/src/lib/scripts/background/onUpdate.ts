@@ -58,6 +58,5 @@ if (!runtime.onUpdateAvailable.hasListener(updateToVersionCallback))
   // fires when the new .crx file has been downloaded and the new version is ready to be installed
   runtime.onUpdateAvailable.addListener(updateToVersionCallback);
 
-// extensions will not auto-update while a background page is in use (which effectively means waiting until a browser restart
-// forces the browser to check if your add-on has an update, rather than relying on the existing, automated check for updates
-runtime.requestUpdateCheck();
+// Removed the line below as Firefox does not support runtime.requestUpdateCheck()
+// runtime.requestUpdateCheck();
