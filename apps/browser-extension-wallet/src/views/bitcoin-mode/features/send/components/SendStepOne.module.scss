@@ -1,0 +1,61 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.errorParagraph {
+  color: var(--data-pink) !important;
+  font-size: var(--bodySmall);
+  font-weight: 500;
+  line-height: size_unit(2);
+  margin-left: size_unit(3);
+  padding: size_unit(1) 0;
+  text-align: left;
+}
+
+.infoParagraph {
+  color: var(--data-black) !important;
+  font-size: var(--bodyMedium);
+  font-weight: 500;
+  line-height: size_unit(2);
+  margin-left: size_unit(1);
+  margin-bottom: size_unit(1);
+  padding: size_unit(1) 0;
+  text-align: left;
+}
+
+.subtitle {
+  color: var(--data-grey) !important;
+  font-size: var(--bodySmall);
+  font-weight: 200;
+  line-height: size_unit(1);
+  margin-left: size_unit(0);
+  margin-bottom: size_unit(0);
+  padding: size_unit(0) 0;
+  text-align: left;
+}
+
+.container {
+  position: relative;
+  padding: size_unit(4.5) 0;
+}
+
+.subTitle {
+  button {
+    &:focus:not(:active) {
+      outline-color: unset;
+      outline-width: 0;
+      outline-style: none;
+    }
+
+    background-color: var(--dark-mode-light-grey, #c0c0c0);
+
+    &[data-state="checked"]:not(:disabled) {
+      background: var(--lace-gradient);
+    }
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
