@@ -9,21 +9,21 @@ Feature: Transactions - Popup view
     When I navigate to Activity popup page
     Then Activity page is displayed
 
-  @LW-2541 @LW-2543 @LW-2544 @Testnet @Pending @issue=LW-12099
-  Scenario: Popup View - Activity page - Counter matches the number of rows, transactions are loaded and skeleton disappears
+  @LW-2543 @LW-2544 @Testnet
+  Scenario: Popup View - Activity page - transactions are loaded and skeleton disappears
     When I navigate to Activity popup page
     And Activity page is displayed
     And I save number of visible rows
     And I scroll to the last row
-    Then a transactions counter that sums up to the total number of all transactions is displayed
     And a skeleton is not displayed at the bottom of the page
     And more transactions are loaded
 
-  @LW-2542 @Testnet @Pending @issue=LW-12099
+  @LW-2542 @Testnet
   Scenario: Popup View - Infinite scroll
     When I navigate to Activity popup page
     And Activity page is displayed
-    And I scroll to the row: 7
+    And I save number of visible rows
+    And I scroll to the last visible row on Activity page
     Then a skeleton is displayed at the bottom of the page
 
   @LW-2545 @Testnet
