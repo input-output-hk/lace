@@ -50,7 +50,7 @@ export const PopupView = (): React.ReactElement => {
       'isForgotPasswordFlow'
     );
     if (cardanoWallet === null && !isWalletLocked() && !isForgotPasswordFlow) {
-      backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
+      backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME }).then(() => window.close());
     }
     // TODO: Revise network switching with address discovery and refactor to make the process easier to maintain
     // chainName is not being used but it's needed here for this to work like the browser view when switching networks
