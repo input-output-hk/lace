@@ -32,6 +32,8 @@ export type TransactionData = {
 
 const stakeKeyRegistration = 'Stake Key Registration';
 const stakeKeyDeRegistration = 'Stake Key De-Registration';
+const selfTransaction = 'Self Transaction';
+
 class TransactionsDetailsAssert {
   waitForTransactionsLoaded = async () => {
     await browser.waitUntil(async () => (await TransactionsPage.rows).length > 1, {
@@ -115,6 +117,7 @@ class TransactionsDetailsAssert {
     expect(actualTickers).to.have.all.members(expectedTickers);
   }
 
+  // TODO: enhance validation for various TX types
   async assertSeeActivityDetailsUnfolded(mode: 'extended' | 'popup') {
     await this.waitForTransactionsLoaded();
     const rowsNumber = (await TransactionsPage.rows).length;
@@ -127,7 +130,7 @@ class TransactionsDetailsAssert {
         await TransactionDetailsPage.transactionDetailsFeeADA.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsFeeFiat.waitForDisplayed();
       }
-      if (txType.includes('Delegation')) {
+      if (txType === 'Delegation') {
         await TransactionDetailsPage.transactionDetailsStakepoolName.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakepoolTicker.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsStakePoolId.waitForDisplayed();
@@ -150,6 +153,7 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
+      await TransactionDetailsPage.transactionDetailsDescription.waitForStable();
       if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
         await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForStable();
         await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
@@ -176,6 +180,7 @@ class TransactionsDetailsAssert {
 
     for (let i = 0; i <= rowsNumber && i < 10; i++) {
       await TransactionsPage.clickOnTransactionRow(i);
+      await TransactionDetailsPage.transactionDetailsDescription.waitForStable();
       if ((await TransactionDetailsPage.transactionDetailsDescription.getText()) !== 'Rewards') {
         await TransactionDetailsPage.transactionDetailsInputsDropdown.waitForClickable();
         await TransactionDetailsPage.transactionDetailsInputsDropdown.click();
@@ -226,10 +231,15 @@ class TransactionsDetailsAssert {
       await TransactionsPage.clickOnTransactionRow(i);
       await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
       if (
-        // eslint-disable-next-line sonarjs/no-duplicate-string
-        !['Delegation', 'Stake Key De-Registration', 'Stake Key Registration', 'Self Transaction', 'Rewards'].includes(
-          transactionType
-        )
+        ![
+          'Delegation',
+          stakeKeyDeRegistration,
+          stakeKeyRegistration,
+          selfTransaction,
+          'Rewards',
+          'Vote Delegation',
+          'DRep Registration'
+        ].includes(transactionType)
       ) {
         await TransactionDetailsPage.transactionDetailsSent.waitForDisplayed();
         await TransactionDetailsPage.transactionDetailsToAddress(0).waitForDisplayed();
@@ -245,7 +255,7 @@ class TransactionsDetailsAssert {
     const maxRowsIterator = mode === 'extended' ? 8 : 6;
 
     for (let i = 0; i <= rowsNumber && i < maxRowsIterator; i++) {
-      const skippedTransaction = ['Self Transaction', 'Rewards']; // should be covered in separate tests
+      const skippedTransaction = [selfTransaction, 'Rewards']; // should be covered in separate tests
       if (!skippedTransaction.includes(await TransactionsPage.transactionsTableItemType(i).getText())) {
         await TransactionsPage.clickOnTransactionRow(i);
         await TransactionDetailsPage.transactionDetailsDescription.waitForClickable({ timeout: 15_000 });
@@ -579,7 +589,7 @@ class TransactionsDetailsAssert {
       case 'Received':
         await this.assertSeeSentReceivedSelfTransactionDetails('Received');
         break;
-      case 'Self Transaction':
+      case selfTransaction:
         await this.assertSeeSentReceivedSelfTransactionDetails('Self');
         break;
       case 'Delegation':

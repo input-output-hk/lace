@@ -1,4 +1,4 @@
-@Transactions-Extended
+@Activity-Extended
 Feature: Transactions - Extended view
 
   Background:
@@ -38,7 +38,7 @@ Feature: Transactions - Extended view
     When I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "addr_test1qp7vynpwhsyjsqvyw9n8r4uy3uj5hu2arfy94vynvng6556hhqrnhndmg2pntqazt36v700x6kryqjhe75p58v65v6kszx7h3j" address
 
-  @LW-9914 @Testnet @Pending @issue=LW-12099
+  @LW-9914 @Testnet
   Scenario Outline: Extended View - transaction list - styling: <styling> applied to tx type: <tx_type>
     Given I navigate to Activity extended page
     When I scroll to the row with transaction type: <tx_type>
@@ -48,13 +48,12 @@ Feature: Transactions - Extended view
       | Sent                      | default - negative |
       | Received                  | green - positive   |
       | Self Transaction          | default - negative |
-#      enable rewards type of transaction when it's available
-#      | Rewards                   | green - positive   |
+      | Rewards                   | green - positive   |
       | Delegation                | default - negative |
       | Stake Key De-Registration | green - positive   |
       | Stake Key Registration    | default - negative |
 
-  @LW-10616 @Testnet @Pending @issue=LW-12099
+  @LW-10616 @Testnet
   Scenario Outline: Extended View - transaction list - details of <tx_type> type of transaction
     Given I navigate to Activity extended page
     When I scroll to the row with transaction type: <tx_type>
@@ -65,8 +64,7 @@ Feature: Transactions - Extended view
       | Sent                      |
       | Received                  |
       | Self Transaction          |
-#      enable rewards type of transaction when it's available
-#      | Rewards                   |
+      | Rewards                   |
       | Delegation                |
       | Stake Key De-Registration |
       | Stake Key Registration    |

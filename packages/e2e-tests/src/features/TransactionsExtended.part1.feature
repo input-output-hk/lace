@@ -1,4 +1,4 @@
-@Transactions-Extended
+@Activity-Extended
 Feature: Transactions - Extended view
 
   Background:

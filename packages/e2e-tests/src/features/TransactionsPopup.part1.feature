@@ -1,4 +1,4 @@
-@Transactions-Popup
+@Activity-Popup
 Feature: Transactions - Popup view
 
   Background:
