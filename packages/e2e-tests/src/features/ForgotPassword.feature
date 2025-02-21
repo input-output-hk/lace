@@ -121,4 +121,4 @@ Feature: Forgot password
     Then header menu displays "TestAutomationWallet" as a wallet name
     When I close header menu
     And I navigate to Settings extended page
-    Then Analytics toggle is enabled: false
+    Then Analytics toggle is not enabled

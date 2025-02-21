@@ -148,11 +148,11 @@ Feature: Analytics - Settings - Extended View
   Scenario: Analytics - Extended View - Settings - Analytics
     When I open settings from header menu
     And I set up request interception for posthog analytics request(s)
-    And Analytics toggle is enabled: true
-    And Analytics toggle is enabled: false
+    And Analytics toggle is enabled
+    And Analytics toggle is not enabled
     Then I validate latest analytics single event "settings | analytics | skip | click"
     Then I validate that 1 analytics event(s) have been sent
-    And Analytics toggle is enabled: true
+    And Analytics toggle is enabled
 
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
