@@ -1,10 +1,11 @@
 /* eslint-disable no-undef */
 import SectionTitle from './sectionTitle';
-import { ChainablePromiseElement } from 'webdriverio';
+import type { ChainablePromiseElement } from 'webdriverio';
 import testContext from '../utils/testContext';
-import { ChainablePromiseArray } from 'webdriverio/build/types';
+import type { ChainablePromiseArray } from 'webdriverio/build/types';
 import { browser } from '@wdio/globals';
 import transactionsPageAssert from '../assert/transactionsPageAssert';
+import type { TransactionType } from '../types/transactionType';
 
 class TransactionsPage {
   private TRANSACTIONS_DATE = '[data-testid="transaction-date"]';
@@ -99,15 +100,46 @@ class TransactionsPage {
     if (tokensCounterValue > rowsCount.length) await transactionsPageAssert.assertSeeSkeleton(true);
   }
 
-  async scrollToTheLastRow() {
-    const tokensCounterValue = Number((await this.counter.getText()).slice(1, -1));
-    let rowsVisible = 0;
-    while (rowsVisible < tokensCounterValue && (await this.rows).length < tokensCounterValue) {
-      rowsVisible = (await this.rows).length;
-      await this.scrollToTheRow(rowsVisible);
-      await browser.pause(1000);
-    }
+  async scrollToTheBottomOfTheActivityList() {
+    await browser.waitUntil(
+      async () => {
+        if (await this.transactionsInfiniteScroll.isExisting()) {
+          await this.scrollToTheLastVisibleRow();
+        }
+        return !(await this.transactionsInfiniteScroll.isExisting());
+      },
+      {
+        timeout: 2 * 60 * 1000,
+        interval: 1000
+      }
+    );
   }
+
+  async scrollToTheLastVisibleRow() {
+    const visibleRows = await this.rows;
+    await visibleRows[visibleRows.length - 1].scrollIntoView();
+  }
+
+  async findRowByTransactionType(expectedTransactionType: TransactionType): Promise<WebdriverIO.Element | null> {
+    return await browser.waitUntil(
+      async () => {
+        const rows = await $$(this.TRANSACTIONS_TABLE_ROW);
+        for (const row of rows) {
+          const currentTransactionType = (await row.$(this.TRANSACTIONS_TABLE_ITEM_TYPE)).getText();
+          if ((await currentTransactionType) === expectedTransactionType) return row;
+        }
+
+        if (rows.length > 0) await rows[rows.length - 1].scrollIntoView();
+        /* eslint-disable-next-line unicorn/no-null */
+        return null;
+      },
+      {
+        timeout: 2 * 60 * 1000,
+        timeoutMsg: `Could not find row with transaction type: ${expectedTransactionType}`
+      }
+    );
+  }
+
   async getIndexOfTxTypeWithoutScroll(txType: string): Promise<number> {
     const txTypes: string[] = [];
     const tableItems = await $$(this.TRANSACTIONS_TABLE_ITEM_TYPE);
@@ -118,7 +150,7 @@ class TransactionsPage {
   }
 
   async getIndexOfTxTypeWithScroll(txType: string): Promise<number> {
-    await this.scrollToTheLastRow();
+    await this.scrollToTheBottomOfTheActivityList();
     await this.transactionsInfiniteScroll.waitForDisplayed({ reverse: true, timeout: 10_000 });
     return await this.getIndexOfTxTypeWithoutScroll(txType);
   }

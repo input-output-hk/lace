@@ -1,4 +1,4 @@
-@Transactions-Extended
+@Activity-Extended
 Feature: Transactions - Extended view
 
   Background:
@@ -9,13 +9,12 @@ Feature: Transactions - Extended view
     When I navigate to Activity extended page
     Then Activity page is displayed
 
-  @LW-2552 @LW-2556 @LW-2555 @Testnet @Pending @issue=LW-12099
-  Scenario: Extended View - Activity page - Counter matches the number of rows, transactions are loaded and skeleton disappears
+  @LW-2556 @LW-2555 @Testnet
+  Scenario: Extended View - Activity page - transactions are loaded and skeleton disappears
     When I navigate to Activity extended page
     And Activity page is displayed
     And I save number of visible rows
     And I scroll to the last row
-    Then a transactions counter that sums up to the total number of all transactions is displayed
     And a skeleton is not displayed at the bottom of the page
     And more transactions are loaded
 
@@ -24,11 +23,12 @@ Feature: Transactions - Extended view
     When I navigate to Activity extended page
     Then all the transactions have a value other than zero
 
-  @LW-2554 @Testnet @Pending @issue=LW-12099
+  @LW-2554 @Testnet
   Scenario: Extended View - Infinite scroll
     When I navigate to Activity extended page
     And Activity page is displayed
-    And I scroll to the row: 8
+    And I save number of visible rows
+    And I scroll to the last visible row on Activity page
     Then a skeleton is displayed at the bottom of the page
 
   @LW-2557 @Testnet

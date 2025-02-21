@@ -25,7 +25,7 @@ Feature: Own Tags - Extended View
     And I click "Review transaction" button on "Send" page
     And The Tx summary screen is displayed for bundles with correct own / foreign tags
 
-  @LW-10262 @Testnet @Pending @issue=LW-12099
+  @LW-10262 @Testnet
   Scenario: Extended View - Own Tags / Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
     When I navigate to Activity extended page
     And I save tx hash value "010403d479efd4824e7f216eabb8c39e7a748dfb80df4c7cc4d4036677affc07"

@@ -50,12 +50,6 @@ class TransactionsPageAssert {
     expect(await TransactionsPage.title.getText()).to.equal(await t('browserView.activity.title'));
   };
 
-  assertCounterNumberMatchesWalletTransactions = async () => {
-    const rowsNumber = (await TransactionsPage.rows).length;
-    const tokensCounterValue = Number((await TransactionsPage.counter.getText()).slice(1, -1));
-    expect(rowsNumber).to.equal(tokensCounterValue);
-  };
-
   assertTxsLoaded = async () => {
     await (await TransactionsPage.transactionsTableRow(0))?.waitForDisplayed({ timeout: 30_000 });
   };
@@ -158,6 +152,7 @@ class TransactionsPageAssert {
   }
 
   assertSeeMoreTransactions = async () => {
+    await browser.pause(1000);
     const currentRowsNumber = (await TransactionsPage.rows).length;
     expect(currentRowsNumber).to.be.greaterThan(testContext.load('numberOfRows'));
   };

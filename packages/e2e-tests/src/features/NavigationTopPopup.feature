@@ -81,10 +81,9 @@ Feature: Top Navigation - Popup view
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-4726 @LW-5254 @Mainnet @Testnet
-  @Pending @issue=LW-11786
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
     Given I close wallet synced toast
-    When I am in the offline network mode: true
+    When I am in the offline network mode
     Then I see network id with status: offline
     And I see a toast with text: "Network Error"
     When I click the menu button
