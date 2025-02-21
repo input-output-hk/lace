@@ -418,7 +418,8 @@ export const mapWalletActivities = memoize(
     { cardanoCoin, assetDetails, isSharedWallet }
   ) =>
     `${transactions.history.map(({ id }) => id).join('')}_${transactions.outgoing.inFlight
-      .map(({ id }) => id)
+      // eslint-disable-next-line sonarjs/no-nested-template-literals
+      .map(({ id, submittedAt }) => `${id}_${submittedAt}`)
       .join('')}_${transactions.outgoing.signed?.map(({ tx: { id } }) => id).join('')}_${assetInfo.size}_${
       rewardsHistory.all.length
     }_${cardanoFiatPrice}_${fiatCurrency.code}_${cardanoCoin?.id}_${assetDetails?.id}_${

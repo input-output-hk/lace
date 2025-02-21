@@ -1,3 +1,5 @@
+import { logger } from '@lace/common';
+
 type CacheEntry<Data> = {
   data: Data;
   timestamp: number;
@@ -25,7 +27,7 @@ const parseRawCacheRepo = (rawCacheRepo: string) => {
       cacheRepo = JSON.parse(rawCacheRepo);
     }
   } catch (error) {
-    console.error('Failed to parse dapp explorer data cache', error);
+    logger.error('Failed to parse dapp explorer data cache', error);
   }
   return cacheRepo;
 };
