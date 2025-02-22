@@ -4,11 +4,11 @@ import {renderLabel, RowContainer} from "@lace/core";
 import {Flex, Text} from "@input-output-hk/lace-ui-toolkit";
 import styles from "./ReviewTransaction.module.scss";
 import {Button} from "@lace/common";
+import {BitcoinWallet} from "@lace/bitcoin";
 
 interface ReviewTransactionProps {
-  amount: number;
-  usdValue: number;
-  address: string;
+  unsignedTransaction: BitcoinWallet.UnsignedTransaction;
+  btcToUsdRate: number;
   feeRate: number;
   estimatedTime: string;
   onConfirm: () => void;
@@ -16,17 +16,19 @@ interface ReviewTransactionProps {
 }
 
 export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
-                                                                      amount,
-                                                                      usdValue,
-                                                                      address,
+                                                                      unsignedTransaction,
+                                                                      btcToUsdRate,
                                                                       feeRate,
                                                                       estimatedTime,
                                                                       onConfirm,
                                                                       onBack
                                                                     }) => {
-  const estimatedTxSizeVBytes = 200;
-  const feeInBtc = (feeRate * estimatedTxSizeVBytes) / 1e8;
-  const totalSpend = amount + feeInBtc;
+
+  const amount = parseFloat(unsignedTransaction.amount.toString()) || 0;
+  const usdValue = amount * btcToUsdRate;
+
+  const feeInBtc = unsignedTransaction.fee;
+  const totalSpend = amount + Number(feeInBtc);
 
   return (
     <div>
@@ -40,7 +42,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
                 className={styles.address}
                 data-testid="output-summary-recipient-address"
               >
-                {address}
+                {unsignedTransaction.toAddress}
               </Text.Address>
             </Flex>
           </Flex>
@@ -103,7 +105,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat(feeInBtc.toFixed(8))} BTC ({feeRate} sats/vB)
+              {parseFloat(Number(feeInBtc).toFixed(8))} BTC ({feeRate} sats/vB)
             </Text.Address>
           </Flex>
         </RowContainer>

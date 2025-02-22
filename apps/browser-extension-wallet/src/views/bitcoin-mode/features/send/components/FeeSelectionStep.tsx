@@ -1,5 +1,6 @@
-import React, {useState} from "react";
-import {Button, Input} from "@lace/common";
+import React, { useState } from "react";
+import { Button, Input } from "@lace/common";
+import { BitcoinWallet } from "@lace/bitcoin/";
 // import styles from "./SendStepOne.module.scss";
 //import { Typography } from 'antd';
 
@@ -21,6 +22,7 @@ interface FeeSelectionProps {
   feeRate: number;
   onFeeRateChange: (value: number) => void;
   estimatedTime: string;
+  feeMarkets: BitcoinWallet.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
   onContinue: () => void;
   onBack: () => void;
@@ -28,11 +30,16 @@ interface FeeSelectionProps {
 
 export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
                                                                 feeRate,
+                                                                feeMarkets,
                                                                 onFeeRateChange,
                                                                 onEstimatedTimeChange,
                                                                 onContinue,
                                                                 onBack
                                                               }) => {
+  recommendedFees[0].feeRate = feeMarkets.fast.feeRate;
+  recommendedFees[1].feeRate = feeMarkets.standard.feeRate;
+  recommendedFees[2].feeRate = feeMarkets.slow.feeRate;
+
   const [activeTab, setActiveTab] = useState<'recommended' | 'custom'>('recommended');
   const [selectedFee, setSelectedFee] = useState<RecommendedFee | null>(
     recommendedFees.find((f) => f.feeRate === feeRate) || recommendedFees[1]

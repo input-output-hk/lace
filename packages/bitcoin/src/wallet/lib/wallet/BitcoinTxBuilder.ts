@@ -8,15 +8,37 @@ const INPUT_SIZE = 68;
 const OUTPUT_SIZE = 34;
 const TRANSACTION_OVERHEAD = 10;
 
+export type UnsignedTransaction = {
+  context: Psbt;
+  toAddress: string,
+  amount: bigint,
+  fee: bigint;
+  vBytes: number;
+};
+
+export type SignedTransaction = {
+  context: Psbt;
+  hex: string;
+}
+
+export const signTx = (unsignedTx: UnsignedTransaction, signer: BitcoinSigner): SignedTransaction => {
+  const psbt = unsignedTx.context;
+
+  psbt.signAllInputs(signer);
+  psbt.finalizeAllInputs();
+
+  return { context: psbt, hex: psbt.extractTransaction().toHex() }
+};
+
 export const buildTx = (
   toAddress: string,
   changeAddress: string,
   amount: bigint,
   feeRate: number,
   utxos: UTxO[],
-  signer: BitcoinSigner,
-  network: Network
-): string => {
+  network: Network,
+  publicKey: Uint8Array,
+): UnsignedTransaction => {
   const net = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
 
   try {
@@ -48,7 +70,6 @@ export const buildTx = (
       throw new Error('Insufficient funds to cover the transaction and fees.');
     }
 
-    const publicKey = signer.getPublicKey();
     const psbt = new Psbt({ network: net });
 
     selectedUTxOs.forEach((utxo) => {
@@ -56,7 +77,7 @@ export const buildTx = (
         hash: utxo.txId,
         index: utxo.index,
         witnessUtxo: {
-          script: payments.p2wpkh({ pubkey: publicKey, network: net }).output!,
+          script: payments.p2wpkh({ pubkey: Buffer.from(publicKey), network: net }).output!,
           value: Number(utxo.amount)
         }
       });
@@ -68,6 +89,7 @@ export const buildTx = (
     });
 
     const change = inputSum - amount - fee;
+
     if (change > BigInt(0)) {
       psbt.addOutput({
         address: changeAddress,
@@ -75,10 +97,7 @@ export const buildTx = (
       });
     }
 
-    psbt.signAllInputs(signer);
-    psbt.finalizeAllInputs();
-
-    return psbt.extractTransaction().toHex();
+    return { context: psbt, vBytes: estimatedSize, fee, toAddress, amount };
   } catch (error) {
     console.error('Failed to build transaction:', error);
     throw error;
