@@ -1,5 +1,9 @@
 
 import React, {useState} from "react";
+import cn from "classnames";
+import styles from "./PasswordInput.module.scss";
+import {Password} from "@lace/core";
+import {Button} from "@lace/common";
 
 interface PasswordInputProps {
   onSubmit: (password: string) => void;
@@ -10,54 +14,51 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ onSubmit, onBack }
   const [password, setPassword] = useState('');
 
   const handleConfirm = () => {
-    // Submit password to parent
     onSubmit(password);
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '400px', margin: '0 auto' }}>
-      <h2>Enter Password</h2>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>
-        Step 4: Confirm your transaction
-      </p>
+    <div>
+      <div className={cn(styles.container)}>
+        <div className={styles.password}>
+          <Password
+            onChange={(password) => setPassword(password.value)}
+            errorMessage='Invalid Password'
+            label='Enter your password'
+          />
+        </div>
+      </div>
 
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter your password"
-        style={{ width: '100%', padding: '0.5rem', margin: '1rem 0' }}
-      />
 
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
-          onClick={onBack}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#ccc',
-            color: '#000',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Back
-        </button>
-        <button
+      <div
+        style={{
+          position: 'absolute',
+          top: 325,
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: '1rem',
+          borderTop: '1px solid #E0E0E0',
+        }}
+      >
+        <Button
+          color="primary"
+          block
+          size="medium"
           onClick={handleConfirm}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          data-testid="continue-button"
         >
           Confirm
-        </button>
+        </Button>
+        <Button
+          color="secondary"
+          block
+          size="medium"
+          onClick={onBack}
+          data-testid="back-button"
+        >
+          Back
+        </Button>
       </div>
     </div>
   );
