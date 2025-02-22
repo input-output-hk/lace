@@ -1,10 +1,9 @@
-import { tabs } from 'webextension-polyfill';
 import { AdaComponentTransparent, Button } from '@input-output-hk/lace-ui-toolkit';
 import React, { useRef, useState } from 'react';
 import { TopUpWalletDialog } from './TopUpWalletDialog';
 import { useTranslation } from 'react-i18next';
 import { BANXA_LACE_URL } from './config';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { PostHogAction } from '@lace/common';
 
 export const TopUpWalletButton = (): React.ReactElement => {
@@ -12,6 +11,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
+  const openExternalLink = useExternalLinkOpener();
 
   return (
     <>
@@ -35,7 +35,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
         triggerRef={dialogTriggerReference}
         onConfirm={() => {
           analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerContinueClick);
-          tabs.create({ url: BANXA_LACE_URL });
+          openExternalLink(BANXA_LACE_URL);
           setOpen(false);
         }}
       />

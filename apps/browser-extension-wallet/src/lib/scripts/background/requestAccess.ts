@@ -10,15 +10,31 @@ import { AUTHORIZED_DAPPS_KEY } from '../types';
 import { Wallet } from '@lace/cardano';
 import { BehaviorSubject } from 'rxjs';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
+import { logger } from '@lace/common';
 
 const DEBOUNCE_THROTTLE = 500;
 
 export const dappInfo$ = new BehaviorSubject<Wallet.DappInfo>(undefined);
 
 export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender) => {
-  const { logo, name, url } = await senderToDappInfo(sender);
+  let dappInfo: Wallet.DappInfo;
+  try {
+    dappInfo = await senderToDappInfo(sender);
+  } catch (error) {
+    logger.error('Failed to get info of a DApp requesting access', error);
+    return false;
+  }
+
+  const { logo, name, url } = dappInfo;
   dappInfo$.next({ logo, name, url });
-  await ensureUiIsOpenAndLoaded('#/dapp/connect');
+
+  try {
+    await ensureUiIsOpenAndLoaded('#/dapp/connect');
+  } catch (error) {
+    logger.error('Failed to ensure DApp connection UI is loaded', error);
+    return false;
+  }
+
   const isAllowed = await userPromptService.allowOrigin(url);
   if (isAllowed === 'deny') return Promise.reject();
   if (isAllowed === 'allow') {
@@ -31,14 +47,16 @@ export const requestAccess: RequestAccess = async (sender: Runtime.MessageSender
       authorizedDappsList.next([{ logo, name, url }]);
     }
   } else {
-    tabs.onRemoved.addListener((t) => {
-      if (t === sender.tab.id) {
+    const onRemovedHandler = (tabId: number) => {
+      if (tabId === sender.tab.id) {
         authenticator.revokeAccess(sender);
-        tabs.onRemoved.removeListener(this);
+        tabs.onRemoved.removeListener(onRemovedHandler);
       }
-    });
+    };
+    tabs.onRemoved.addListener(onRemovedHandler);
   }
-  return Promise.resolve(true);
+
+  return true;
 };
 
 export const requestAccessDebounced = pDebounce(requestAccess, DEBOUNCE_THROTTLE, { before: true });

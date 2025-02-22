@@ -52,7 +52,7 @@ export const MainLayout = ({
     getAboutExtensionData();
   }, [getAboutExtensionData]);
 
-  const onUpdateAknowledge = useCallback(async () => {
+  const onUpdateAcknowledge = useCallback(async () => {
     const data = { version, acknowledged: true, reason };
     await storage.local.set({
       [ABOUT_EXTENSION_KEY]: data
@@ -72,7 +72,7 @@ export const MainLayout = ({
       </div>
       <Announcement
         visible={showAnnouncement && version && !acknowledged}
-        onConfirm={onUpdateAknowledge}
+        onConfirm={onUpdateAcknowledge}
         version={version}
         reason={reason}
       />

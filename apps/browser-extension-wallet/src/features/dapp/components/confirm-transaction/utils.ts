@@ -27,10 +27,11 @@ export const readyToSign = (): void => {
 
 export const disallowSignTx = async (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-  close = false
+  close = false,
+  reason = 'User declined to sign'
 ): Promise<void> => {
   try {
-    await req?.reject('User declined to sign');
+    await req?.reject(reason);
   } finally {
     close && window.close();
   }
