@@ -12,7 +12,7 @@ import { Network } from '../common';
 export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   private api: AxiosInstance;
 
-  constructor(token: string, private network: Network = Network.Mainnet) {
+  constructor(token: string, network: Network = Network.Mainnet) {
     this.api = axios.create({
       baseURL: `https://xbt-${network}.gomaestro-api.org/v0`,
       headers: {
@@ -178,11 +178,6 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
    */
   async estimateFee(blocks: number, mode: FeeEstimationMode): Promise<{ feeRate: number, blocks: number }> {
     try {
-      // For testnet always returns low feeRate
-      if (this.network === Network.Testnet) {
-        return { feeRate: 0.00002500, blocks };
-      }
-
       const response = await this.api.get(`/rpc/transaction/estimatefee/${blocks}?mode=${mode}`);
 
       if (response.status !== 200) {

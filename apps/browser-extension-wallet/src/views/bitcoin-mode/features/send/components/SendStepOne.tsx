@@ -9,6 +9,7 @@ interface SendStepOneProps {
   amount: string;
   onAmountChange: (value: string) => void;
   address: string;
+  availableBalance: number;
   onAddressChange: (value: string) => void;
   onContinue: () => void;
 }
@@ -18,9 +19,9 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                                                           onAmountChange,
                                                           address,
                                                           onAddressChange,
+                                                          availableBalance,
                                                           onContinue
                                                         }) => {
-  const availableBalance = 0.0009529; // Example
   const numericAmount = parseFloat(amount) || 0;
 
   const hasNoValue = numericAmount === 0;

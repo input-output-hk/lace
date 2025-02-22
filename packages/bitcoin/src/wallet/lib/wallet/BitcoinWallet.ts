@@ -172,6 +172,23 @@ export class BitcoinWallet {
    */
   public async getCurrentFeeMarket(): Promise<EstimatedFees> {
     try {
+      if (this.network === Network.Testnet) {
+        return {
+          fast: {
+            feeRate: 0.00002500,
+            targetConfirmationTime: 1
+          },
+          standard: {
+            feeRate: 0.00001500,
+            targetConfirmationTime: 3
+          },
+          slow: {
+            feeRate: 0.00000500,
+            targetConfirmationTime: 6
+          }
+        };
+      }
+
       const fastEstimate = await this.provider.estimateFee(1, FeeEstimationMode.Conservative);
       const standardEstimate = await this.provider.estimateFee(3, FeeEstimationMode.Conservative);
       const slowEstimate = await this.provider.estimateFee(6, FeeEstimationMode.Conservative);
@@ -179,15 +196,15 @@ export class BitcoinWallet {
       return {
         fast: {
           feeRate: fastEstimate.feeRate,
-          targetConfirmationTime: fastEstimate.blocks * 10 * 60 * 60
+          targetConfirmationTime: fastEstimate.blocks * 10 * 60
         },
         standard: {
           feeRate: standardEstimate.feeRate,
-          targetConfirmationTime: standardEstimate.blocks * 10 * 60 * 60
+          targetConfirmationTime: standardEstimate.blocks * 10 * 60
         },
         slow: {
           feeRate: slowEstimate.feeRate,
-          targetConfirmationTime: slowEstimate.blocks * 10 * 60 * 60
+          targetConfirmationTime: slowEstimate.blocks * 10 * 60
         }
       };
     } catch (error) {
