@@ -43,7 +43,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         onChange={(e) => onAddressChange(e.target.value)}
       />
 
-      <div style={{ paddingTop: 50 }}>
+      <div style={{paddingTop: 50}}>
         <Text className={styles.infoParagraph} data-testid="Amount">
           Available balance: {availableBalance.toFixed(7)} BTC
         </Text>
@@ -64,8 +64,18 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         </Text>
       )}
 
-      <div style={{paddingTop: 135}}>
-        <hr style={{border: '1px solid #E0E0E0'}}/>
+      <div
+        style={{
+          position: 'absolute',
+          top: 325,
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: '1rem',
+          borderTop: '1px solid #E0E0E0',
+          background: '#fff'
+        }}
+      >
         <Button
           disabled={hasNoValue || exceedsBalance || address.trim() === ''}
           color="primary"

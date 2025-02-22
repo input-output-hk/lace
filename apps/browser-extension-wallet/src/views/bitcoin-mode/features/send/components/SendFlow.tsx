@@ -3,13 +3,13 @@ import { SendStepOne } from "./SendStepOne";
 import { FeeSelectionStep } from "./FeeSelectionStep";
 import { ReviewTransaction } from "./ReviewTransaction";
 import { PasswordInput } from "./PasswordInput"
-import { AllDone } from "./AllDone"
+import { TransactionSuccess } from "./TransactionSuccess"
 import { TransactionFailed } from "./TransactionFailed";
+import { UnauthorizedTx } from "./UnauthorizedTx";
 
 interface SendFlowProps {
   updateSubtitle: (value: string) => void;
 }
-
 
 type Step =
   | 'AMOUNT'
@@ -17,6 +17,8 @@ type Step =
   | 'REVIEW'
   | 'PASSWORD'
   | 'DONE'
+  | 'UNAUTHORIZED'
+  | 'SUCCESS'
   | 'FAILED';
 
 export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
@@ -44,21 +46,13 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
     if (password === '1234') {
       setStep('DONE');
     } else {
-      setStep('FAILED');
+      setStep('UNAUTHORIZED');
     }
   };
 
   const backToAmount = () => setStep('AMOUNT');
   const backToFee = () => setStep('FEE');
   const backToReview = () => setStep('REVIEW');
-
-  const handleClose = () => {
-    setStep('AMOUNT');
-    setAmount('');
-    setAddress('');
-    setFeeRate(1);
-    setEstimatedTime('~30 min');
-  };
 
   if (step === 'AMOUNT') {
     updateSubtitle('Step 1: Enter amount and recipient address');
@@ -115,11 +109,8 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   if (step === 'DONE') {
     updateSubtitle('');
     return (
-      <AllDone
-        amount={numericAmount}
-        address={address}
-        feeRate={feeRate}
-        onClose={handleClose}
+      <TransactionSuccess
+        hash='ASD#@Q$EAFDASF@Q#R$QADSASDASDAS'
       />
     );
   }
@@ -127,7 +118,14 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   if (step === 'FAILED') {
     updateSubtitle('');
     return (
-      <TransactionFailed onClose={handleClose} />
+      <TransactionFailed />
+    );
+  }
+
+  if (step === 'UNAUTHORIZED') {
+    updateSubtitle('');
+    return (
+      <UnauthorizedTx />
     );
   }
 

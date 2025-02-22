@@ -1,5 +1,9 @@
-
 import React, {useState} from "react";
+import {Button, Input} from "@lace/common";
+// import styles from "./SendStepOne.module.scss";
+//import { Typography } from 'antd';
+
+// const { Text } = Typography;
 
 interface RecommendedFee {
   label: string;
@@ -47,19 +51,14 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '400px', margin: '0 auto' }}>
-      <h2>Send</h2>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>
-        Step 2: Pick fee market
-      </p>
-
-      <div style={{ display: 'flex', marginBottom: '1rem', cursor: 'pointer' }}>
+    <div style={{width: '100%'}}>
+      <div style={{display: 'flex', marginBottom: '1rem', cursor: 'pointer'}}>
         <div
           onClick={() => setActiveTab('recommended')}
           style={{
             flex: 1,
             textAlign: 'center',
-            borderBottom: activeTab === 'recommended' ? '2px solid black' : '1px solid #ccc',
+            borderBottom: activeTab === 'recommended' ? '2px solid #7f5af0' : '1px solid #ccc',
             padding: '0.5rem'
           }}
         >
@@ -70,7 +69,7 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
           style={{
             flex: 1,
             textAlign: 'center',
-            borderBottom: activeTab === 'custom' ? '2px solid black' : '1px solid #ccc',
+            borderBottom: activeTab === 'custom' ? '2px solid #7f5af0' : '1px solid #ccc',
             padding: '0.5rem'
           }}
         >
@@ -79,27 +78,28 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
       </div>
 
       {activeTab === 'recommended' && (
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{width: '100%', display: 'inline-block'}}>
           {recommendedFees.map((fee) => {
             const isSelected = fee.feeRate === selectedFee?.feeRate;
             return (
               <div
                 key={fee.label}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
+                  width: '100%',
                   marginBottom: '0.5rem',
                   padding: '0.5rem',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  backgroundColor: isSelected ? '#e6f7ff' : 'transparent',
-                  cursor: 'pointer',
+                  border: '1px solid #7f5af0',
+                  borderRadius: '10px',
+                  backgroundColor: isSelected ? 'rgba(127,90,240,0.25)' : 'transparent',
+                  cursor: 'pointer'
                 }}
                 onClick={() => setSelectedFee(fee)}
               >
-                <div>{fee.label}</div>
-                <div>{fee.feeRate} sats/vB</div>
-                <div>{fee.estimatedTime}</div>
+                <div style={{marginBottom: '0.2rem', fontWeight: 'bold'}}>{fee.label}</div>
+                <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                  <span>{fee.feeRate} sats/vB</span>
+                  <span>{fee.estimatedTime}</span>
+                </div>
               </div>
             );
           })}
@@ -107,49 +107,48 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
       )}
 
       {activeTab === 'custom' && (
-        <div style={{ marginBottom: '1rem' }}>
-          <p style={{ marginBottom: '0.5rem', color: '#666' }}>
-            Specify your own fee rate (sats/vB)
-          </p>
-          <input
+        <div style={{marginBottom: '1rem'}}>
+          <Input
             type="number"
-            min={1}
-            value={customFee}
+            disabled={false}
+            value={customFee.toString()}
+            data-testid="btc-add-custom-fee"
+            placeholder={'Specify your own fee rate (sats/vB)'}
+            bordered={false}
             onChange={(e) => setCustomFee(Number(e.target.value))}
-            style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }}
           />
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
-          onClick={onBack}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#ccc',
-            color: '#000',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Back
-        </button>
-        <button
+      <div
+        style={{
+          position: 'absolute',
+          top: 325,
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: '1rem',
+          borderTop: '1px solid #E0E0E0',
+        }}
+      >
+        <Button
+          color="primary"
+          block
+          size="medium"
           onClick={handleContinue}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          data-testid="continue-button"
         >
           Continue
-        </button>
+        </Button>
+        <Button
+          color="secondary"
+          block
+          size="medium"
+          onClick={onBack}
+          data-testid="back-button"
+        >
+          Back
+        </Button>
       </div>
     </div>
   );

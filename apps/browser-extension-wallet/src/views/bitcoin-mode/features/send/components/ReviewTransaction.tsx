@@ -1,5 +1,9 @@
 
 import React from "react";
+import {renderLabel, RowContainer} from "@lace/core";
+import {Flex, Text} from "@input-output-hk/lace-ui-toolkit";
+import styles from "./ReviewTransaction.module.scss";
+import {Button} from "@lace/common";
 
 interface ReviewTransactionProps {
   amount: number;
@@ -25,64 +29,137 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
   const totalSpend = amount + feeInBtc;
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '400px', margin: '0 auto' }}>
-      <h2>Review</h2>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>
-        Step 3: Review your transaction
-      </p>
-
-      <div style={{ fontSize: '1.5rem', margin: '1rem 0' }}>
-        {amount.toFixed(8)} BTC ~ ${usdValue.toFixed(2)} USD
+    <div>
+      <div style={{paddingBottom: '1.5rem'}}>
+        <RowContainer>
+          {renderLabel({label: 'To', dataTestId: 'output-summary-recipient-title'})}
+          <Flex className={styles.recipient} flexDirection="column">
+            <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+              <Text.Address
+                color={'secondary'}
+                className={styles.address}
+                data-testid="output-summary-recipient-address"
+              >
+                {address}
+              </Text.Address>
+            </Flex>
+          </Flex>
+        </RowContainer>
       </div>
 
-      <p style={{ wordBreak: 'break-all', marginBottom: '1rem' }}>
-        <strong>To</strong> {address}
-      </p>
-
-      <div style={{ marginBottom: '1rem' }}>
-        <div>
-          <strong>Total spend:</strong> {totalSpend.toFixed(8)} BTC
-        </div>
-        <div>
-          <strong>Sending:</strong> {amount.toFixed(8)} BTC
-        </div>
-        <div>
-          <strong>Fee:</strong> {feeInBtc.toFixed(8)} BTC ({feeRate} sats/vB)
-        </div>
-        <div>
-          <strong>Estimated confirmation time:</strong> {estimatedTime}
-        </div>
+      <div style={{paddingBottom: '1.5rem'}}>
+        <RowContainer>
+          {renderLabel({
+            label: 'Total',
+            dataTestId: 'summary-total-spend',
+            onTooltipHover: () => {
+            }
+          })}
+          <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+            <Text.Address
+              color={'secondary'}
+              className={styles.address}
+              data-testid="output-summary-recipient-address"
+            >
+              {parseFloat(totalSpend.toFixed(8))} BTC ({parseFloat(usdValue.toFixed(2))} USD)
+            </Text.Address>
+          </Flex>
+        </RowContainer>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
+      <div style={{paddingBottom: '1.5rem'}}>
+        <RowContainer>
+          {renderLabel({
+            label: 'Sending',
+            dataTestId: 'summary-sending',
+            onTooltipHover: () => {
+            }
+          })}
+          <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+            <Text.Address
+              color={'secondary'}
+              className={styles.address}
+              data-testid="output-summary-recipient-address"
+            >
+              {parseFloat(amount.toFixed(8))} BTC
+            </Text.Address>
+          </Flex>
+        </RowContainer>
+      </div>
+
+      <div style={{paddingBottom: '1.5rem'}}>
+        <RowContainer>
+          {renderLabel({
+            label: 'Fee',
+            tooltipContent: 'fee',
+            dataTestId: 'summary-fee',
+            onTooltipHover: () => {
+            }
+          })}
+
+          <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+            <Text.Address
+              color={'secondary'}
+              className={styles.address}
+              data-testid="output-summary-recipient-address"
+            >
+              {parseFloat(feeInBtc.toFixed(8))} BTC ({feeRate} sats/vB)
+            </Text.Address>
+          </Flex>
+        </RowContainer>
+      </div>
+
+      <div style={{paddingBottom: '1.5rem'}}>
+        <RowContainer>
+          {renderLabel({
+            label: 'Time',
+            tooltipContent: 'Estimated Confirmation Time',
+            dataTestId: 'summary-estimated-confirmation-time',
+            onTooltipHover: () => {
+            }
+          })}
+
+          <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+            <Text.Address
+              color={'secondary'}
+              className={styles.address}
+              data-testid="output-summary-recipient-address"
+            >
+              {estimatedTime}
+            </Text.Address>
+          </Flex>
+        </RowContainer>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          top: 325,
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          padding: '1rem',
+          borderTop: '1px solid #E0E0E0',
+        }}
+      >
+        <Button
+          color="primary"
+          block
+          size="medium"
+          onClick={onConfirm}
+          data-testid="continue-button"
+        >
+          Confirm
+        </Button>
+        <Button
+          color="secondary"
+          block
+          size="medium"
           onClick={onBack}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#ccc',
-            color: '#000',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          data-testid="back-button"
         >
           Back
-        </button>
-        <button
-          onClick={onConfirm}
-          style={{
-            padding: '0.75rem',
-            fontSize: '1rem',
-            backgroundColor: '#007bff',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Confirm and send transaction
-        </button>
+        </Button>
       </div>
     </div>
   );
