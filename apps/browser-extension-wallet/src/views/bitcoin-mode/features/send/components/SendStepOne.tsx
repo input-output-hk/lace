@@ -3,6 +3,8 @@ import { Input, Button } from "@lace/common";
 import styles from "./SendStepOne.module.scss";
 import { Typography } from 'antd';
 
+const SATS_IN_BTC = 100000000;
+
 const { Text } = Typography;
 
 interface SendStepOneProps {
@@ -46,7 +48,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
       <div style={{paddingTop: 50}}>
         <Text className={styles.infoParagraph} data-testid="Amount">
-          Available balance: {availableBalance.toFixed(7)} BTC
+          Available balance: {(availableBalance / SATS_IN_BTC).toFixed(8)} BTC
         </Text>
         <Input
           type="number"
