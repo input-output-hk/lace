@@ -6,6 +6,8 @@ import styles from "./ReviewTransaction.module.scss";
 import {Button} from "@lace/common";
 import {BitcoinWallet} from "@lace/bitcoin";
 
+const SATS_IN_BTC = 100000000;
+
 interface ReviewTransactionProps {
   unsignedTransaction: BitcoinWallet.UnsignedTransaction;
   btcToUsdRate: number;
@@ -24,12 +26,16 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
                                                                       onBack
                                                                     }) => {
 
-  const amount = parseFloat(unsignedTransaction.amount.toString()) || 0;
-  const usdValue = amount * btcToUsdRate;
+  const amount = Number(unsignedTransaction.amount);
+  const usdValue = (amount / SATS_IN_BTC) * btcToUsdRate;
 
   const feeInBtc = unsignedTransaction.fee;
   const totalSpend = amount + Number(feeInBtc);
 
+  console.error('unsignedTransaction', unsignedTransaction);
+  console.error('unsignedTransaction.amount', unsignedTransaction.amount);
+  console.error('unsignedTransaction.fee', unsignedTransaction.fee);
+  console.error('unsignedTransaction.total', unsignedTransaction.amount + unsignedTransaction.fee);
   return (
     <div>
       <div style={{paddingBottom: '1.5rem'}}>
@@ -63,7 +69,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat(totalSpend.toFixed(8))} BTC ({parseFloat(usdValue.toFixed(2))} USD)
+              {parseFloat((totalSpend / SATS_IN_BTC).toFixed(8))} BTC ({parseFloat(usdValue.toFixed(2))} USD)
             </Text.Address>
           </Flex>
         </RowContainer>
@@ -83,7 +89,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat(amount.toFixed(8))} BTC
+              {(amount / SATS_IN_BTC).toFixed(8)} BTC
             </Text.Address>
           </Flex>
         </RowContainer>
@@ -105,7 +111,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat(Number(feeInBtc).toFixed(8))} BTC ({feeRate} sats/vB)
+              {parseFloat((Number(feeInBtc) / SATS_IN_BTC).toFixed(8))} BTC ({(feeRate * SATS_IN_BTC) / 1000} sats/vB)
             </Text.Address>
           </Flex>
         </RowContainer>

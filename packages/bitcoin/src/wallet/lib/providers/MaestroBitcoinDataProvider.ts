@@ -67,10 +67,7 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
             })),
             transactionHash: tx.tx_hash,
             confirmations: details.confirmations,
-            status:
-              details.confirmations > 0
-                ? TransactionStatus.Confirmed
-                : TransactionStatus.Pending,
+            status: TransactionStatus.Confirmed,
             blockHeight: details.height,
             timestamp: details.unix_timestamp
           };

@@ -12,6 +12,8 @@ interface RecommendedFee {
   estimatedTime: string;  // e.g. "~10 min"
 }
 
+const SATS_IN_BTC = 100000000;
+
 const recommendedFees: RecommendedFee[] = [
   { label: 'Fast', feeRate: 10, estimatedTime: '~10 min' },
   { label: 'Average', feeRate: 5, estimatedTime: '~30 min' },
@@ -104,7 +106,7 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
               >
                 <div style={{marginBottom: '0.2rem', fontWeight: 'bold'}}>{fee.label}</div>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                  <span>{fee.feeRate} sats/vB</span>
+                  <span>{(fee.feeRate * SATS_IN_BTC) / 1_000} sats/vB</span>
                   <span>{fee.estimatedTime}</span>
                 </div>
               </div>

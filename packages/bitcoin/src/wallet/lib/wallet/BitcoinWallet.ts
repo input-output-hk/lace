@@ -183,7 +183,7 @@ export class BitcoinWallet {
             targetConfirmationTime: 3
           },
           slow: {
-            feeRate: 0.00000500,
+            feeRate: 0.00001000,
             targetConfirmationTime: 6
           }
         };
