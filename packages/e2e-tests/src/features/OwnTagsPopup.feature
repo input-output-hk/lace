@@ -19,7 +19,7 @@ Feature: Own Tags - Popup View
       | MultiWallet2                      | main               | own     |
       | WalletReceiveSimpleTransactionE2E | main               | foreign |
 
-  @LW-10263 @Testnet @Pending @issue=LW-12099
+  @LW-10263 @Testnet
   Scenario: Popup View - Own Tags / Transaction details - all senders/recipients within the (active account|different account|different wallet) are flagged as: own or foreign
     When I navigate to Activity popup page
     And I save tx hash value "010403d479efd4824e7f216eabb8c39e7a748dfb80df4c7cc4d4036677affc07"

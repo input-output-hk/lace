@@ -278,3 +278,27 @@ Before(
     await localStorageInitializer.disableShowPinExtension();
   }
 );
+
+Before(
+  {
+    tags: '@Activity-Extended'
+  },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.ActivityWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);
+
+Before(
+  {
+    tags: '@Activity-Popup'
+  },
+  async () => {
+    await popupViewRepositoryWalletInitialization([TestWalletName.ActivityWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);

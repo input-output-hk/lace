@@ -21,11 +21,6 @@ Then(/^Activity page is displayed$/, async () => {
   await transactionsPageAssert.assertSeeTitle();
 });
 
-Then(/^a transactions counter that sums up to the total number of all transactions is displayed$/, async () => {
-  await transactionsPageAssert.assertTxsLoaded();
-  await transactionsPageAssert.assertCounterNumberMatchesWalletTransactions();
-});
-
 Then(/^all transactions are grouped by date$/, async () => {
   await transactionsPageAssert.assertTxsLoaded();
   await transactionsPageAssert.assertSeeDateGroups();
@@ -158,16 +153,18 @@ When(/^I scroll to the row: (\d*)$/, async (index: number) => {
 });
 
 When(/^I scroll to the last row$/, async () => {
-  await TransactionsPage.scrollToTheLastRow();
+  await TransactionsPage.scrollToTheBottomOfTheActivityList();
+});
+
+When(/^I scroll to the last visible row on Activity page$/, async () => {
+  await TransactionsPage.scrollToTheLastVisibleRow();
 });
 
 When(
   /^I scroll to the row with transaction type: (Sent|Received|Self Transaction|Rewards|Delegation|Stake Key Registration|Stake Key De-Registration)$/,
   async (txType: TransactionType) => {
-    const index = await TransactionsPage.getIndexOfTxType(txType);
-    if (index > 0) {
-      await TransactionsPage.scrollToTheRow(index);
-    }
+    const row = await TransactionsPage.findRowByTransactionType(txType);
+    if (row) await row.scrollIntoView();
   }
 );
 

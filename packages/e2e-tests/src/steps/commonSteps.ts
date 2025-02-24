@@ -213,13 +213,14 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await visit('Tokens', mode);
 });
 
-When(/^I am in the offline network mode: (true|false)$/, async (offline: 'true' | 'false') => {
+When(/^I am in the (offline|online) network mode$/, async (networkMode: 'offline' | 'online') => {
   await browser.throttleNetwork({
-    offline: offline === 'true',
+    offline: networkMode === 'offline',
     latency: 0,
     downloadThroughput: 0,
     uploadThroughput: 0
   });
+  await browser.refresh();
 });
 
 When(/^I am in the slow network mode$/, async () => {
