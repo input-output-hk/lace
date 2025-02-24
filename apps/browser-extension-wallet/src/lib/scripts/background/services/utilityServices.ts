@@ -178,7 +178,7 @@ const fetchTokenPrices = () => {
       coinPrices.tokenPrices$.next({ tokens: tokenPrices, status: 'fetched' });
     })
     .catch((error) => {
-      logger.error('Error fetching coin prices:', error);
+      logger.debug('Error fetching token prices:', error);
       coinPrices.tokenPrices$.next({ ...coinPrices.tokenPrices$.value, status: 'error' });
     });
 };
@@ -204,7 +204,7 @@ const fetchAdaPrice = () => {
       });
     })
     .catch(async (error) => {
-      logger.error('Error fetching coin prices:', error);
+      logger.debug('Error fetching coin prices:', error);
       // If for some reason we couldn't fetch the ada price, get it from background store
       const adaPrice = await getADAPriceFromBackgroundStorage();
       if (!adaPrice) return coinPrices.adaPrices$.next({ prices: {}, status: 'error', timestamp: undefined });
