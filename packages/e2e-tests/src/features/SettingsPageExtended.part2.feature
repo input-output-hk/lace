@@ -17,7 +17,7 @@ Feature: General Settings - Extended Browser View
     And I click on "FAQs" setting
     Then FAQ page is displayed
 
-  @LW-3058 @Mainnet @Testnet
+  @LW-3058 @LW-12253 @Mainnet @Testnet
   Scenario Outline: Extended view - Settings - <option_name> option displayed
     When I open settings from header menu
     Then I see <option_name> option with proper description and toggle
@@ -208,6 +208,18 @@ Feature: General Settings - Extended Browser View
     And I close a toast message
     When I close "Custom submit API" drawer
     Then "Custom submit API" is marked as disabled on Settings page
+
+  @LW-12255 @Mainnet @Testnet
+  Scenario Outline: Extended view - Settings - Debugging option enables verbose logging in console
+    Given I enable console logs collection
+    When I open settings from header menu
+    And Debugging toggle <debugging_enabled> enabled
+    And I navigate to NFTs extended page
+    Then I verify that logs <logs_collected> collected
+    Examples:
+      | debugging_enabled | logs_collected |
+      | is not            | are not        |
+      | is                | are            |
 
   # this test should be executed as the last one in this suite
   @LW-2521 @LW-9113 @Mainnet @Testnet

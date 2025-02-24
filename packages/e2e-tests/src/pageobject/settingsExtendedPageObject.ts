@@ -11,6 +11,8 @@ import { expect } from 'chai';
 import MainLoader from '../elements/MainLoader';
 import MenuHeader from '../elements/menuHeader';
 
+const toggleEnabledAttribute = 'aria-checked';
+
 class SettingsExtendedPageObject {
   clickOnAbout = async () => {
     await SettingsPage.aboutLink.element.click();
@@ -75,9 +77,14 @@ class SettingsExtendedPageObject {
     }
   };
 
-  toggleAnalytics = async (isEnabled: 'true' | 'false') => {
-    (await SettingsPage.analyticsSwitch.getAttribute('aria-checked')) !== isEnabled &&
+  toggleAnalytics = async (isEnabled: boolean) => {
+    (await SettingsPage.analyticsSwitch.getAttribute(toggleEnabledAttribute)) !== String(isEnabled) &&
       (await SettingsPage.analyticsSwitch.click());
+  };
+
+  toggleDebugging = async (isEnabled: boolean) => {
+    (await SettingsPage.debuggingSwitch.getAttribute(toggleEnabledAttribute)) !== String(isEnabled) &&
+      (await SettingsPage.debuggingSwitch.click());
   };
 
   // eslint-disable-next-line complexity

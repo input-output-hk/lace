@@ -68,7 +68,7 @@ Feature: Onboarding - Restore wallet
     Then I see LW homepage
     When I confirm multi-address discovery modal
     And I open settings from header menu
-    Then Analytics toggle is enabled: true
+    Then Analytics toggle is enabled
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
@@ -79,7 +79,7 @@ Feature: Onboarding - Restore wallet
     Then I see LW homepage
     When I confirm multi-address discovery modal
     And I open settings from header menu
-    Then Analytics toggle is enabled: false
+    Then Analytics toggle is not enabled
 
   @LW-2628
   Scenario: Restore Wallet - autofill words

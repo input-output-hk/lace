@@ -379,6 +379,10 @@ Then(/^I verify there are no errors in console logs$/, async () => {
   await consoleAssert.assertNoErrorsInConsole();
 });
 
+Then(/^I verify that logs (are|are not) collected$/, async (logsCollected: 'are' | 'are not') => {
+  await consoleAssert.assertLogsAreCollected(logsCollected === 'are');
+});
+
 Then(/^I wait (\d*) milliseconds$/, async (delay: 1000) => {
   await browser.pause(delay);
 });

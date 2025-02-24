@@ -201,9 +201,14 @@ Then(
   }
 );
 
-When(/Analytics toggle is enabled: (true|false)/, async (isEnabled: 'true' | 'false') => {
-  await settingsExtendedPageObject.toggleAnalytics(isEnabled);
-});
+When(
+  /^(Analytics|Debugging) toggle (is|is not) enabled$/,
+  async (option: 'Analytics' | 'Debugging', isEnabled: 'is' | 'is not') => {
+    option === 'Analytics'
+      ? await settingsExtendedPageObject.toggleAnalytics(isEnabled === 'is')
+      : await settingsExtendedPageObject.toggleDebugging(isEnabled === 'is');
+  }
+);
 
 Then(/^Side drawer "Show 24-word passphrase" is displayed$/, async () => {
   await passphraseDrawerAssert.assertSeeDrawerTitle(
