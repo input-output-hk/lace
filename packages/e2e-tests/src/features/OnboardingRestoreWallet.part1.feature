@@ -52,12 +52,14 @@ Feature: Onboarding - Restore wallet
       | N_8J@bne87  |               | empty                                                                   | 3               | empty                                        |
       | N_8J@bne87A | N_8J@bne87    | empty                                                                   | 4               | core.walletSetupRegisterStep.noMatchPassword |
 
-  @LW-2464 @memory-snapshot
+  @LW-2464 @LW-10208 @memory-snapshot
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
+    And "Pin the wallet extension" notification is displayed
+    And "Pin the wallet extension" notification disappears after 5 seconds
     And valid password is not in snapshot
 
   @LW-3063

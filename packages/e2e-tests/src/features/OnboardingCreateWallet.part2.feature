@@ -28,12 +28,14 @@ Feature: Onboarding - Create wallet
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
-  @LW-2445 @Smoke
+  @LW-2445 @LW-10208 @Smoke
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
+    And "Pin the wallet extension" notification is displayed
+    And "Pin the wallet extension" notification disappears after 5 seconds
 
   @LW-3060 @memory-snapshot
   Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet

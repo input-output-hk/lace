@@ -14,15 +14,16 @@ export const PinExtension = (): React.ReactElement => {
     <div
       className={styles.pinExtension}
       onClick={() => analytics.sendEventToPostHog(postHogOnboardingActions.onboarding.PIN_EXTENSION_CLICK)}
+      data-testid="pin-extension-component"
     >
-      <LaceLogoMark className={styles.logo} />
+      <LaceLogoMark className={styles.logo} data-testid="pin-extension-logo" />
       <div className={styles.content}>
-        <h5>{t('browserView.pinExtension.title')}</h5>
-        <p>
+        <h5 data-testid="pin-extension-title">{t('browserView.pinExtension.title')}</h5>
+        <p data-testid="pin-extension-prompt">
           <Trans
             i18nKey="browserView.pinExtension.prompt"
             components={{
-              icon: <ExtensionIcon />
+              icon: <ExtensionIcon data-testid="pin-extension-icon" />
             }}
           />
         </p>
