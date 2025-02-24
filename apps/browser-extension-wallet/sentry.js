@@ -8,7 +8,8 @@ Sentry.init({
     Sentry.browserTracingIntegration(),
     Sentry.browserProfilingIntegration(),
     Sentry.replayIntegration(),
-    Sentry.captureConsoleIntegration({ levels: ['error'] })
+    // TODO: re-enable once we've reviewed provider logging
+    Sentry.captureConsoleIntegration({ levels: process.env.SENTRY_ENVIRONMENT === 'production' ? [] : ['error'] })
   ],
   // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
   tracePropagationTargets: ['localhost', 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk'],

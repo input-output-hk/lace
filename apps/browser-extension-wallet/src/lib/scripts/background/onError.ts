@@ -46,7 +46,7 @@ const handleConnectionIssues = async (error: WebRequest.OnErrorOccurredDetailsTy
   )
     return;
 
-  logger.error('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
+  logger.debug('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
 
   requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: false } });
   if (!webRequest.onCompleted.hasListener(handleRequests)) {
