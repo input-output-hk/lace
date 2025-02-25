@@ -35,6 +35,7 @@ import SecureYourPaperWalletPage from '../elements/onboarding/SecureYourPaperWal
 import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWalletPageAssert';
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
+import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -549,3 +550,11 @@ Then(
     await ScanYourPrivateQrCodePageAssert.assertSeeScanYourPrivateQrCodePage(permission);
   }
 );
+
+Then(/^"Pin the wallet extension" notification is displayed$/, async () => {
+  await PinWalletExtensionNotificationAssert.assertSeeNotification();
+});
+
+Then(/^"Pin the wallet extension" notification disappears after 5 seconds$/, async () => {
+  await PinWalletExtensionNotificationAssert.assertDoNotSeeNotificationAfter(5);
+});
