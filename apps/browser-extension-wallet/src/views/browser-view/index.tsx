@@ -29,43 +29,46 @@ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
 import { AppVersionGuard } from '@src/utils/AppVersionGuard';
+import { ErrorBoundary } from '@components/ErrorBoundary';
 
 const App = (): React.ReactElement => (
-  <BackgroundServiceAPIProvider>
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_BROWSER}>
-          <CurrencyStoreProvider>
-            <HashRouter>
-              <BackgroundPageProvider>
-                <PostHogClientProvider>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <UIThemeProvider>
-                        <ExternalLinkOpenerProvider>
-                          <MigrationContainer appMode={APP_MODE_BROWSER}>
-                            <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                              <AddressesDiscoveryOverlay>
-                                <NamiMigrationGuard>
-                                  <AppVersionGuard>
-                                    <BrowserViewRoutes />
-                                  </AppVersionGuard>
-                                </NamiMigrationGuard>
-                              </AddressesDiscoveryOverlay>
-                            </DataCheckContainer>
-                          </MigrationContainer>
-                        </ExternalLinkOpenerProvider>
-                      </UIThemeProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
-                </PostHogClientProvider>
-              </BackgroundPageProvider>
-            </HashRouter>
-          </CurrencyStoreProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  </BackgroundServiceAPIProvider>
+  <ErrorBoundary>
+    <BackgroundServiceAPIProvider>
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <CurrencyStoreProvider>
+              <HashRouter>
+                <BackgroundPageProvider>
+                  <PostHogClientProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <UIThemeProvider>
+                          <ExternalLinkOpenerProvider>
+                            <MigrationContainer appMode={APP_MODE_BROWSER}>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <AddressesDiscoveryOverlay>
+                                  <NamiMigrationGuard>
+                                    <AppVersionGuard>
+                                      <BrowserViewRoutes />
+                                    </AppVersionGuard>
+                                  </NamiMigrationGuard>
+                                </AddressesDiscoveryOverlay>
+                              </DataCheckContainer>
+                            </MigrationContainer>
+                          </ExternalLinkOpenerProvider>
+                        </UIThemeProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
+                </BackgroundPageProvider>
+              </HashRouter>
+            </CurrencyStoreProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    </BackgroundServiceAPIProvider>
+  </ErrorBoundary>
 );
 
 const mountNode = document.querySelector('#lace-app');

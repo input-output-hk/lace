@@ -10,7 +10,7 @@ import { Portal } from '@views/browser/features/wallet-setup/components/Portal';
 import { useAnalyticsContext } from '@providers';
 import { postHogNamiMigrationActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useFatalError } from '@hooks/useFatalError';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
 
 const urlPath = walletRoutePaths.namiMigration;
 

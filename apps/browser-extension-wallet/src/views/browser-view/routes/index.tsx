@@ -38,11 +38,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 import { useFatalError } from '@hooks/useFatalError';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
 import { logger } from '@lace/common';
 import { VotingLayout } from '../features/voting-beta';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
+import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -241,7 +242,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
 
   useEffect(() => {
     if (isLoaded || isOnboarding || isInNamiMode || fatalError) {
-      document.querySelector('#preloader')?.remove();
+      removePreloaderIfExists();
     }
   }, [isLoaded, isOnboarding, isInNamiMode, fatalError]);
 
