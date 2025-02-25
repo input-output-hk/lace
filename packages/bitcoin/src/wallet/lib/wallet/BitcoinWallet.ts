@@ -1,14 +1,9 @@
-import { BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO } from './../providers';
-import { BehaviorSubject, interval, of, startWith } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import {
-  AddressType, BitcoinWalletInfo,
-  deriveAddressByType,
-  DerivedAddress,
-  KeyPair, Network
-} from '../common';
+import {BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO} from './../providers';
+import {BehaviorSubject, interval, of, startWith} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {AddressType, BitcoinWalletInfo, deriveAddressByType, DerivedAddress, KeyPair, Network} from '../common';
 import * as bitcoin from 'bitcoinjs-lib';
-import { Signer } from 'bitcoinjs-lib';
+import {Signer} from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import isEqual from 'lodash/isEqual';
 
@@ -115,6 +110,7 @@ export class BitcoinWallet {
   private address: DerivedAddress;
 
   public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
+  public pendingTransactions$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
   public utxos$: BehaviorSubject<UTxO[]> = new BehaviorSubject(new Array<UTxO>());
   public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
   public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject([]);
@@ -148,7 +144,7 @@ export class BitcoinWallet {
 
     this.utxos$
       .pipe(
-        map((utxos) => utxos.reduce((total, utxo) => total + utxo.amount, BigInt(0)))
+        map((utxos) => utxos.reduce((total, utxo) => total + utxo.satoshis, BigInt(0)))
       )
       .subscribe((balance) => {
         this.balance$.next(balance);
@@ -245,8 +241,37 @@ export class BitcoinWallet {
 
         if (!this.lastKnownBlock || this.lastKnownBlock.hash !== latestBlockInfo.hash) {
           await this.updateState(latestBlockInfo);
+        } else {
+          await this.updatePendingTransactions();
         }
       });
+  }
+
+  private async updateTransactions() {
+    const newTxs = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
+
+    if (!isEqual(newTxs, this.transactionHistory)) {
+      this.transactionHistory = newTxs;
+      this.transactionHistory$.next(this.transactionHistory);
+    }
+  }
+
+  private async updatePendingTransactions() {
+    const pendingTxs = await this.provider.getTransactionsInMempool(this.address.address);
+
+    const newPendingTxs = pendingTxs.filter((tx) => !this.transactionHistory.find((historyTx) => historyTx.transactionHash === tx.transactionHash));
+
+    if (!isEqual(newPendingTxs, this.pendingTransactions$.value)) {
+      this.pendingTransactions$.next(newPendingTxs);
+    }
+  }
+
+  private async updateUtxos() {
+    const newUtxos = await this.provider.getUTxOs(this.address.address);
+
+    if (!isEqual(newUtxos, this.utxos$.value)) {
+      this.utxos$.next(newUtxos);
+    }
   }
 
   /**
@@ -255,18 +280,9 @@ export class BitcoinWallet {
   private async updateState(latestBlockInfo: BlockInfo): Promise<void> {
     this.lastKnownBlock = latestBlockInfo;
 
-    const newTxs = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
-
-    if (!isEqual(newTxs, this.transactionHistory)) {
-      this.transactionHistory = newTxs;
-      this.transactionHistory$.next(this.transactionHistory);
-    }
-
-    const newUtxos = await this.provider.getUTxOs(this.address.address);
-
-    if (!isEqual(newUtxos, this.utxos$.value)) {
-      this.utxos$.next(newUtxos);
-    }
+    await this.updateTransactions();
+    await this.updatePendingTransactions();
+    await this.updateUtxos();
 
     this.lastKnownBlock = latestBlockInfo;
   }

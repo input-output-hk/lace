@@ -52,10 +52,41 @@ export enum TransactionStatus {
 }
 
 /**
+ * Represents an unspent transaction output (UTxO) in the Bitcoin blockchain.
+ *
+ * @property {string} txId - The unique identifier (transaction hash) of the transaction that created this output.
+ * @property {number} index - The output index within the transaction.
+ * @property {bigint} satoshis - The value of this output in satoshis.
+ * @property {string} address - The common associated with this UTxO. This is the recipient of the funds in this output.
+ */
+export type UTxO = {
+  readonly txId: string;
+  readonly index: number;
+  readonly satoshis: bigint;
+  readonly address: string;
+};
+
+/**
+ * Represents a single input of a transaction.
+ */
+export type InputEntry = UTxO;
+
+/**
+ * Represents a single output of a transaction.
+ *
+ * @property {string} address - The address involved in the transaction input or output.
+ * @property {bigint} satoshis - The amount in satoshis for this input or output.
+ */
+export type OutputEntry = {
+  readonly address: string;
+  readonly satoshis: bigint;
+};
+
+/**
  * Represents a single entry in the transaction history of an address.
  *
- * @property {InputOutputEntry[]} inputs - The inputs of the transaction, detailing the source of funds.
- * @property {InputOutputEntry[]} outputs - The outputs of the transaction, detailing the destination of funds.
+ * @property {InputEntry[]} inputs - The inputs of the transaction, detailing the source of funds.
+ * @property {OutputEntry[]} outputs - The outputs of the transaction, detailing the destination of funds.
  * @property {string} transactionHash - The unique identifier (hash) of the transaction.
  * @property {number} confirmations - The number of confirmations for the transaction.
  *                                    More confirmations indicate higher confidence that the transaction is finalized.
@@ -63,41 +94,16 @@ export enum TransactionStatus {
  *                                              'Pending' indicates the transaction is not yet confirmed,
  *                                              while 'Confirmed' indicates it has been included in a block.
  * @property {number} blockHeight - The height of the block containing this transaction.
+ * @property {UTxO[]} spentUtxos - The list of spent utxos.
  */
 export type TransactionHistoryEntry = {
-  readonly inputs: InputOutputEntry[];
-  readonly outputs: InputOutputEntry[];
+  readonly inputs: InputEntry[];
+  readonly outputs: OutputEntry[];
   readonly transactionHash: string;
   readonly confirmations: number;
   readonly status: TransactionStatus;
   readonly blockHeight: number;
   readonly timestamp: number;
-};
-
-/**
- * Represents a single input or output of a transaction.
- *
- * @property {string} address - The address involved in the transaction input or output.
- * @property {bigint} satoshis - The amount in satoshis for this input or output.
- */
-export type InputOutputEntry = {
-  readonly address: string;
-  readonly satoshis: bigint;
-};
-
-/**
- * Represents an unspent transaction output (UTxO) in the Bitcoin blockchain.
- *
- * @property {string} txId - The unique identifier (transaction hash) of the transaction that created this output.
- * @property {number} index - The output index within the transaction.
- * @property {bigint} amount - The value of this output in satoshis.
- * @property {string} address - The common associated with this UTxO. This is the recipient of the funds in this output.
- */
-export type UTxO = {
-  readonly txId: string;
-  readonly index: number;
-  readonly amount: bigint;
-  readonly address: string;
 };
 
 /**
@@ -127,6 +133,19 @@ export interface BlockchainDataProvider {
     limit?: number,
     offset?: number
   ): Promise<TransactionHistoryEntry[]>;
+
+  /**
+   * Retrieves unconfirmed transactions (as transaction history entries) from the mempool for a given Bitcoin address.
+   *
+   * This function queries pending transactions associated with the specified Bitcoin address.
+   * It returns an array of transaction history entries representing UTXOs that are currently unconfirmed.
+   * Optionally, you can filter transactions to only include those observed after a specified block height.
+   *
+   * @param {string} address - The Bitcoin address or script pubkey to query for pending transactions.
+   * @param {number} [afterBlockHeight] - Optional. Only include transactions observed after this block height.
+   * @returns {Promise<TransactionHistoryEntry[]>} A promise that resolves to an array of transaction history entries from the mempool.
+   */
+  getTransactionsInMempool(address: string, afterBlockHeight?: number): Promise<TransactionHistoryEntry[]>;
 
   /**
    * Fetches the unspent transaction outputs (UTxOs) associated with a specified common.
