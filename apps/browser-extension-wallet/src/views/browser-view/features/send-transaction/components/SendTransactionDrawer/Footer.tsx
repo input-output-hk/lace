@@ -206,6 +206,10 @@ export const Footer = withAddressBookContext(
           }
         } catch (error) {
           logger.error('Shared wallet TX sign error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: error instanceof Error ? error?.message : (error ?? '').toString()
+          });
           throw error;
         }
 
@@ -218,6 +222,10 @@ export const Footer = withAddressBookContext(
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
           } catch (error) {
             logger.error('Shared wallet TX submit error', error);
+            setBuiltTxData({
+              ...builtTxData,
+              error: error instanceof Error ? error?.message : (error ?? '').toString()
+            });
             throw error;
           }
         } else {

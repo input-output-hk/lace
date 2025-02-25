@@ -133,7 +133,12 @@ export const SignConfirmationFooter = (): ReactElement => {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
         cleanPasswordInput();
-        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
+        portfolioMutators.executeCommand({
+          data: {
+            error: error instanceof Error ? error.message : (error || '').toString(),
+          },
+          type: 'DrawerFailure',
+        });
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }

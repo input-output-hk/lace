@@ -4,7 +4,7 @@ import { ResultMessage } from '@components/ResultMessage';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction, TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import styles from './TransactionSuccessView.module.scss';
-import { useAnalyticsSendFlowTriggerPoint } from '../store';
+import { useAnalyticsSendFlowTriggerPoint, useBuiltTxState } from '../store';
 import { WarningBanner } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 
@@ -17,6 +17,7 @@ export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFail
   const analytics = useAnalyticsContext();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const { isSharedWallet } = useWalletStore();
+  const { builtTxData } = useBuiltTxState();
 
   useEffect(() => {
     analytics.sendEventToPostHog(
@@ -42,7 +43,7 @@ export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFail
         description={
           <>
             <div data-testid="send-error-description">
-              {t('browserView.transaction.fail.problemSubmittingYourTransaction')}
+              {builtTxData?.error || t('browserView.transaction.fail.problemSubmittingYourTransaction')}
             </div>
             <div data-testid="send-error-description2" className={styles.message}>
               {t('browserView.transaction.fail.clickBackAndTryAgain')}
