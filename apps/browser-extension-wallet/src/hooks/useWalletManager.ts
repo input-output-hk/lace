@@ -6,7 +6,7 @@ import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { logger, observableWallet, signingCoordinator, walletManager, walletRepository, bitcoinWallet } from '@src/lib/wallet-api-ui';
+import { observableWallet, signingCoordinator, walletManager, walletRepository, bitcoinWallet } from '@src/lib/wallet-api-ui';
 import {
   bufferReviver,
   clearLocalStorage,

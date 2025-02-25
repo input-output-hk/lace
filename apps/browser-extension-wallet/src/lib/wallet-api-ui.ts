@@ -21,8 +21,6 @@ import { Password } from '@input-output-hk/lace-ui-toolkit';
 import { logger } from '@lace/common';
 import { BitcoinWallet } from '@lace/bitcoin';
 
-export const logger = console;
-
 export const walletManager = consumeRemoteApi(
   { baseChannel: walletManagerChannel(process.env.WALLET_NAME), properties: walletManagerProperties },
   { logger, runtime }
@@ -79,7 +77,7 @@ export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
   { logger, runtime }
 );
 
-export const keyAgentFactory = createKeyAgentFactory({ bip32Ed25519: Wallet.bip32Ed25519, logger });
+export const keyAgentFactory = createKeyAgentFactory({ getBip32Ed25519: Wallet.getBip32Ed25519, logger });
 
 export const signingCoordinator = new SigningCoordinator<Wallet.WalletMetadata, Wallet.AccountMetadata>(
   { hwOptions: { manifest: Wallet.manifest, communicationType: Wallet.KeyManagement.CommunicationType.Web } },

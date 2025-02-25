@@ -151,7 +151,7 @@ export const config = (): Config => {
       !Number.isNaN(Number.parseInt(process.env.SESSION_TIMEOUT))
         ? Number.parseInt(process.env.SESSION_TIMEOUT)
         : 1000 * 60 * 5
-    )
+    ),
     MEMPOOL_URLS: {
       Mainnet: `${process.env.MEMPOOL_URL_MAINNET}`,
       Testnet4: `${process.env.MEMPOOL_URL_TESTNET4}`

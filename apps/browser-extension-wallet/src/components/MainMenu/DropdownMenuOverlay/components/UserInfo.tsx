@@ -9,14 +9,13 @@ import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
-import {useAnalyticsContext, useBackgroundServiceAPIContext} from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
-import { BitcoinWallet } from '@lace/bitcoin';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -47,16 +46,15 @@ const shortenWalletName = (text: string, length: number) =>
   text.length > length ? `${text.slice(0, length)}...` : text;
 
 export const UserInfo = ({
-  onOpenWalletAccounts,
-  avatarVisible = true,
-  onOpenEditWallet
-}: UserInfoProps): React.ReactElement => {
+                           onOpenWalletAccounts,
+                           avatarVisible = true,
+                           onOpenEditWallet
+                         }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository, bitcoinWallet } = useWalletManager();
+  const { activateWallet, walletRepository } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
-  const bitcoinBalance = useObservable(bitcoinWallet.balance$, BigInt(0));
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
@@ -114,55 +112,41 @@ export const UserInfo = ({
               return;
             }
             void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
-        <div>
-          <ProfileDropdown.WalletOption
-            key={wallet.walletId}
-            title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
-            subtitle={shortenWalletName(
-              lastActiveAccount?.metadata.name || t('sharedWallets.userInfo.label'),
-              WALLET_OPTION_NAME_MAX_LENGTH
-            )}
-            id={`wallet-option-${wallet.walletId}`}
-            onClick={async () => {
-              if (activeWalletId === wallet.walletId) {
-                return;
-              }
-              void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
 
-              await activateWallet({
-                walletId: wallet.walletId,
-                ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
+            await activateWallet({
+              walletId: wallet.walletId,
+              ...(lastActiveAccount && { accountIndex: lastActiveAccount.accountIndex })
+            });
+            setIsDropdownMenuOpen(false);
+            toast.notify({
+              duration: TOAST_DEFAULT_DURATION,
+              text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
+            });
+
+
+            const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
+
+            if (activeBlockchain !== 'cardano') {
+              await backgroundServices.setBackgroundStorage({
+                activeBlockchain: 'cardano'
               });
-              setIsDropdownMenuOpen(false);
-              toast.notify({
-                duration: TOAST_DEFAULT_DURATION,
-                text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
-              });
-
-              const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
-
-              if (activeBlockchain !== 'cardano') {
-                await backgroundServices.setBackgroundStorage({
-                  activeBlockchain: 'cardano'
-                });
-                window.location.reload();
-              }
-            }}
-            type={getUiWalletType(wallet.type)}
-            profile={
-              walletAvatar
-                ? {
-                    fallbackText: fullWalletName,
-                    imageSrc: walletAvatar
-                  }
-                : undefined
+              window.location.reload();
             }
-           {...(wallet.type !== WalletType.Script && {
+          }}
+          type={getUiWalletType(wallet.type)}
+          profile={
+            walletAvatar
+              ? {
+                fallbackText: fullWalletName,
+                imageSrc: walletAvatar
+              }
+              : undefined
+          }
+          {...(wallet.type !== WalletType.Script && {
             onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
             onOpenEditWallet: () => onOpenEditWallet(wallet)
           })}
-          />
-        </div>
+        />
       );
     },
     [
@@ -174,7 +158,6 @@ export const UserInfo = ({
       onOpenEditWallet,
       onOpenWalletAccounts,
       setIsDropdownMenuOpen,
-      backgroundServices,
       t
     ]
   );
@@ -205,61 +188,6 @@ export const UserInfo = ({
     [renderScriptWallet, renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
   );
 
-  const renderBitcoinWalletOption = useCallback(() => {
-      const walletAvatar = getAvatar('Bitcoin');
-
-      return (
-        <div>
-          <ProfileDropdown.WalletOption
-            key={'Bitcoin'}
-            title={shortenWalletName('Bitcoin', WALLET_OPTION_NAME_MAX_LENGTH)}
-            subtitle={shortenWalletName('Account #0', WALLET_OPTION_NAME_MAX_LENGTH)}
-            id={`wallet-option-bitcoin`}
-            onClick={async () => {
-              setIsDropdownMenuOpen(false);
-              await backgroundServices.setBackgroundStorage({
-                activeBlockchain: 'bitcoin'
-              });
-
-              toast.notify({
-                duration: TOAST_DEFAULT_DURATION,
-                text: `Switched to Bitcoin wallet: ${bitcoinBalance.toString()} satoshis`
-              });
-
-              window.location.reload();
-            }}
-            type={getUiWalletType(WalletType.InMemory)}
-            profile={
-              walletAvatar
-                ? {
-                  fallbackText: fullWalletName,
-                  imageSrc: walletAvatar
-                }
-                : undefined
-            }
-          />
-        </div>
-      );
-    },
-    [
-      bitcoinBalance,
-      fullWalletName,
-      getAvatar,
-      setIsDropdownMenuOpen,
-      backgroundServices
-    ]
-  );
-
-  const renderBitcoinWallet = useCallback(
-    (_wallet: BitcoinWallet.BitcoinWallet, isLast: boolean) => (
-      <div key={'Bitcoin'}>
-        {renderBitcoinWalletOption()}
-        {isLast ? undefined : <Separator />}
-      </div>
-    ),
-    [renderBitcoinWalletOption]
-  );
-
   return (
     <Menu.ItemGroup className={classnames(styles.menuItem, styles.borderBottom)} data-testid="header-menu-user-info">
       <div
@@ -269,14 +197,7 @@ export const UserInfo = ({
         })}
       >
         {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>
-            <div>
-              {wallets.map((wallet) => renderWallet(wallet, true))}
-            </div>
-            <div>
-              {renderBitcoinWallet(bitcoinWallet, false)}
-            </div>
-          </div>
+          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
         ) : (
           <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip

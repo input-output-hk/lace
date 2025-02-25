@@ -23,11 +23,10 @@ import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { runtime, storage } from 'webextension-polyfill';
+import {runtime, Storage, storage} from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
 import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
-import { AppVersionGuard } from './utils/AppVersionGuard';
 import { BitcoinPopupView } from "@src/views/bitcoin-mode";
 
 const CARDANO_LACE = 'lace';
