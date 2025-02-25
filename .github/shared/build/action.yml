@@ -92,6 +92,10 @@ inputs:
     description: 'Polling interval for the wallet'
     required: false
     default: 45
+  BROWSER_TARGET:
+    description: 'Browser target to build for. Default is "chrome", which will build for Chromium browsers. Other options are "firefox"'
+    required: false
+    default: 'chrome'
 runs:
   using: 'composite'
   steps:
@@ -162,4 +166,6 @@ runs:
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
+        BROWSER: ${{ inputs.BROWSER_TARGET }}
+        WALLET_MANIFEST_FIREFOX_ID: 'lace-wallet-ext'
       run: yarn browser build
