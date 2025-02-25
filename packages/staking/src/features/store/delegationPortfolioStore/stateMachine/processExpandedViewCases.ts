@@ -307,11 +307,13 @@ export const processExpandedViewCases: Handler = (params) =>
               AddStakePools: handler<AddStakePools, StatePortfolioManagement, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.addPoolsFromPreferences({ state }),
+                txError: undefined,
               })),
               CancelDrawer: handler<CancelDrawer, StatePortfolioManagement, StateOverview>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
@@ -346,6 +348,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
                 ...state,
@@ -385,6 +388,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
                 ...state,
@@ -397,9 +401,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 })
               ),
               DrawerFailure: handler<DrawerFailure, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
+                  txError: data.error,
                 })
               ),
             },
@@ -412,6 +417,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
             },
             params.command.type,
@@ -423,6 +429,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
@@ -447,6 +454,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.Overview }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StatePortfolioManagement, StatePortfolioManagement>(({ state }) => ({
                 ...state,
@@ -478,6 +486,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 selections: state.pendingSelectedPortfolio,
               }),
               pendingSelectedPortfolio: undefined,
+              txError: undefined,
             };
           }),
           DiscardChangingPreferences: handler<DiscardChangingPreferences, StateChangingPreferences, StateBrowsePools>(
@@ -485,6 +494,7 @@ export const processExpandedViewCases: Handler = (params) =>
               ...state,
               activeDelegationFlow: DelegationFlow.BrowsePools,
               pendingSelectedPortfolio: undefined,
+              txError: undefined,
             })
           ),
         },
@@ -498,11 +508,13 @@ export const processExpandedViewCases: Handler = (params) =>
               AddStakePools: handler<AddStakePools, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.addPoolsFromPreferences({ state }),
+                txError: undefined,
               })),
               CancelDrawer: handler<CancelDrawer, StateNewPortfolio, StateBrowsePools>(({ state }) => ({
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -534,6 +546,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -567,6 +580,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -576,10 +590,13 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Success,
               })),
-              DrawerFailure: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
-                ...state,
-                activeDrawerStep: DrawerManagementStep.Failure,
-              })),
+              DrawerFailure: handler<DrawerFailure, StateNewPortfolio, StateNewPortfolio>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                  txError: data.error,
+                })
+              ),
             },
             params.command.type,
             DrawerManagementStep.Sign
@@ -591,6 +608,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
                 selectedPortfolio: [],
+                txError: undefined,
               })),
             },
             params.command.type,
@@ -602,6 +620,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerContinue: handler<DrawerContinue, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -624,6 +643,7 @@ export const processExpandedViewCases: Handler = (params) =>
                 ...state,
                 ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
                 draftPortfolio: undefined,
+                txError: undefined,
               })),
               DrawerBack: handler<DrawerBack, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,

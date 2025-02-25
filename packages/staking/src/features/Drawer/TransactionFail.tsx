@@ -17,6 +17,9 @@ type TransactionFailProps = {
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const { t } = useTranslation();
   const { isCustomSubmitApiEnabled } = useOutsideHandles();
+  const { txError } = useDelegationPortfolioStore((store) => ({
+    txError: store.txError,
+  }));
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -27,7 +30,7 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
           title={t('drawer.failure.title')}
           description={
             <>
-              <div>{t('drawer.failure.subTitle')}</div>
+              <div>{txError || t('drawer.failure.subTitle')}</div>
               {isCustomSubmitApiEnabled && (
                 <Box mt="$32">
                   <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />

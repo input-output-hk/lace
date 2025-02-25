@@ -90,6 +90,7 @@ export type StateOverview = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  txError: undefined;
 }>;
 
 export type StateActivity = MakeState<{
@@ -98,6 +99,7 @@ export type StateActivity = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  txError: undefined;
 }>;
 
 export type StateCurrentPoolDetails = MakeState<{
@@ -106,6 +108,7 @@ export type StateCurrentPoolDetails = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
+  txError: undefined;
 }>;
 
 export type StatePortfolioManagement = MakeState<{
@@ -114,6 +117,7 @@ export type StatePortfolioManagement = MakeState<{
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  txError?: string;
 }>;
 
 export type StateBrowsePools = MakeState<{
@@ -122,6 +126,7 @@ export type StateBrowsePools = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  txError: undefined;
 }>;
 
 export type StatePoolDetails = MakeState<{
@@ -130,6 +135,7 @@ export type StatePoolDetails = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: undefined;
   viewedStakePool: StakePoolWithLogo;
+  txError: undefined;
 }>;
 
 export type StateNewPortfolio = MakeState<{
@@ -138,6 +144,7 @@ export type StateNewPortfolio = MakeState<{
   draftPortfolio: DraftPortfolioStakePool[];
   pendingSelectedPortfolio: undefined;
   viewedStakePool: undefined;
+  txError?: string;
 }>;
 
 export type StateChangingPreferences = MakeState<{
@@ -146,6 +153,7 @@ export type StateChangingPreferences = MakeState<{
   draftPortfolio: undefined;
   pendingSelectedPortfolio: DraftPortfolioStakePool[];
   viewedStakePool: undefined;
+  txError?: string;
 }>;
 
 export type State =
