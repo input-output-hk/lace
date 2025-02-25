@@ -55,7 +55,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I navigate to Activity extended page
     Then I can see transaction 1 with type "Delegation"
     When I click on a transaction: 1
-#    Then The Tx details are displayed for Staking with metadata # TODO: uncomment when LW-12226 is resolved
+    Then The Tx details are displayed for Staking with metadata
 
   @LW-8435 @Testnet
   Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
@@ -81,7 +81,7 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I save identifiers of stake pools currently in use
     And I navigate to Activity extended page
     When I click on a transaction: 1
-#    Then The Tx details are displayed for Staking without metadata #TODO: uncomment when LW-12226 is resolved
+    Then The Tx details are displayed for Staking without metadata
 
   @LW-8437 @Testnet
   @Pending # due to issues with Fetch.enable

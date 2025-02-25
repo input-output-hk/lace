@@ -7,6 +7,7 @@ import { mapWalletActivities } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps, useItemsPageSize } from '@lace/core';
 import { useTxHistoryLoader } from './useTxHistoryLoader';
+import { useAsyncSwitchMap } from '@hooks/useAsyncSwitchMap';
 
 type UseWalletActivitiesProps = {
   sendAnalytics: () => void;
@@ -121,25 +122,27 @@ export const useWalletActivitiesPaginated = ({
     async (history: Wallet.Cardano.HydratedTx[]) => {
       const { transactions } = walletState;
 
-      return await mapWalletActivities(
-        {
-          ...walletState,
-          transactions: { ...transactions, history }
-        },
-        fetchActivitiesProps,
-        fetchActivitiesDeps
-      );
+      return (
+        await mapWalletActivities(
+          {
+            ...walletState,
+            transactions: { ...transactions, history }
+          },
+          fetchActivitiesProps,
+          fetchActivitiesDeps
+        )
+      ).walletActivities;
     },
     [fetchActivitiesDeps, fetchActivitiesProps, walletState]
   );
+
+  const handleUpdateWalletActivities = useAsyncSwitchMap(mapActivities, setWalletActivities);
 
   useEffect(() => {
     (async () => {
       if (loadedHistory?.transactions === undefined || !fiatCurrency || !cardanoFiatPrice) return;
 
-      const activities = await mapActivities(loadedHistory.transactions.slice(0, currentPage * pageSize));
-
-      setWalletActivities(activities.walletActivities);
+      handleUpdateWalletActivities(loadedHistory.transactions.slice(0, currentPage * pageSize));
     })();
   }, [
     cardanoFiatPrice,
@@ -147,6 +150,7 @@ export const useWalletActivitiesPaginated = ({
     fetchActivitiesDeps,
     fetchActivitiesProps,
     fiatCurrency,
+    handleUpdateWalletActivities,
     loadedHistory?.transactions,
     mapActivities,
     pageSize,
