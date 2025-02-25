@@ -27,7 +27,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const numericAmount = parseFloat(amount) || 0;
 
   const hasNoValue = numericAmount === 0;
-  const exceedsBalance = numericAmount > availableBalance;
+  const exceedsBalance = numericAmount > (availableBalance / SATS_IN_BTC);
 
   const handleNext = () => {
     if (!hasNoValue && !exceedsBalance && address.trim() !== '') {
@@ -75,8 +75,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           left: 0,
           width: '100%',
           padding: '1rem',
-          borderTop: '1px solid #E0E0E0',
-          background: '#fff'
+          borderTop: '1px solid #E0E0E0'
         }}
       >
         <Button

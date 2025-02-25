@@ -34,6 +34,7 @@ export const Activity = (): React.ReactElement => {
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
 
   const [recentTransactions, setRecentTransactions] = useState<BitcoinWallet.TransactionHistoryEntry[]>([]);
+  const [pendingTransaction, setPendingTransaction] = useState<BitcoinWallet.TransactionHistoryEntry[]>([]);
   const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
   const [explorerBaseUrl, setExplorerBaseUrl] = useState<string>('');
 
@@ -58,6 +59,15 @@ export const Activity = (): React.ReactElement => {
   }, [bitcoinWallet]);
 
   useEffect(() => {
+    const subscription = bitcoinWallet.pendingTransactions$.subscribe((pendingTransactions) => {
+      setPendingTransaction((prev) =>
+        isEqual(prev, pendingTransactions) ? prev : pendingTransactions
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, [bitcoinWallet]);
+
+  useEffect(() => {
     const subscription = bitcoinWallet.addresses$.subscribe((newAddresses) => {
       setAddresses((prev) =>
         isEqual(prev, newAddresses) ? prev : newAddresses
@@ -67,12 +77,12 @@ export const Activity = (): React.ReactElement => {
   }, [bitcoinWallet]);
 
   const walletActivities = useMemo(() => {
-    if (addresses.length === 0 || recentTransactions.length === 0) return [];
+    if (addresses.length === 0 || (recentTransactions.length === 0 && pendingTransaction.length === 0)) return [];
 
     const walletAddress = addresses[0].address;
 
-    const groups = recentTransactions.reduce((acc, transaction) => {
-      const dateKey = formattedDate(new Date(transaction.timestamp * 1000));
+    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
+      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
       if (!acc[dateKey]) {
         acc[dateKey] = [];
       }
@@ -80,7 +90,15 @@ export const Activity = (): React.ReactElement => {
       return acc;
     }, {} as { [date: string]: BitcoinWallet.TransactionHistoryEntry[] });
 
-    const sortedDates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+    const sortedDates = Object.keys(groups).sort((a, b) => {
+      if (a === 'Pending') return -1;
+      if (b === 'Pending') return 1;
+
+      if (a === 'Today') return -1;
+      if (b === 'Today') return 1;
+
+      return (new Date(b)).getUTCSeconds() - (new Date(a)).getUTCSeconds();
+    });
 
     return sortedDates.map((dateKey) => {
       const transactionsForDay = groups[dateKey];

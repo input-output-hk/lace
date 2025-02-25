@@ -54,7 +54,7 @@ export const buildTx = (
 
     for (const utxo of utxos) {
       selectedUTxOs.push(utxo);
-      inputSum += utxo.amount;
+      inputSum += utxo.satoshis;
 
       const estimatedSize = (selectedUTxOs.length * INPUT_SIZE) + (2 * OUTPUT_SIZE) + TRANSACTION_OVERHEAD;
       const fee = BigInt(Math.ceil(estimatedSize * feeRateSatoshis));
@@ -78,7 +78,7 @@ export const buildTx = (
         index: utxo.index,
         witnessUtxo: {
           script: payments.p2wpkh({ pubkey: Buffer.from(publicKey), network: net }).output!,
-          value: Number(utxo.amount)
+          value: Number(utxo.satoshis)
         }
       });
     });

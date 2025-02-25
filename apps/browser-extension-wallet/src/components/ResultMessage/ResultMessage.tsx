@@ -1,13 +1,15 @@
 import React from 'react';
 import errorImg from '../../assets/icons/exclamation-circle.svg';
 import successImg from '../../assets/icons/clock-icon.svg';
+import infoImg from '../../assets/icons/info.component.svg';
 import styles from './ResultMessage.module.scss';
 
-type Status = 'success' | 'error';
+type Status = 'success' | 'error' | 'info';
 
 const bgImg: Record<Status, string> = {
   success: successImg,
-  error: errorImg
+  error: errorImg,
+  info: infoImg
 };
 
 export interface ResultMessageProps {

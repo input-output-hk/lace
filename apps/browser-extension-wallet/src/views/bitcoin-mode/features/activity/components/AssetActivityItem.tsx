@@ -6,10 +6,7 @@ import React, { useMemo, useRef, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import { Image, Tooltip } from 'antd';
 import cn from 'classnames';
-import Icon from '@ant-design/icons';
 import { getTextWidth } from '@lace/common';
-import { ReactComponent as PendingIcon } from './icons/pending.component.svg';
-import { ReactComponent as ErrorIcon } from './icons/error.component.svg';
 import pluralize from 'pluralize';
 import styles from './AssetActivityItem.module.scss';
 import { ActivityTypeIcon } from '@lace/core';
@@ -33,6 +30,7 @@ export enum TransactionActivityType {
   'incoming' = 'incoming',
   'self' = 'self',
   'rewards' = 'rewards',
+  'pending' = 'pending',
   'awaitingCosignatures' = 'awaitingCosignatures'
 }
 
@@ -93,17 +91,13 @@ type ActivityStatusIconProps = ActivityStatusRequiringType | ActivityStatusNotRe
 const offsetMargin = 10;
 
 const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
-  const iconStyle = { fontSize: txIconSize() };
   switch (status) {
     case ActivityStatus.SUCCESS:
       return <ActivityTypeIcon type={type} />;
     case ActivityStatus.SPENDABLE:
       return <ActivityTypeIcon type={TransactionActivityType.rewards} />;
     case ActivityStatus.PENDING:
-      return <Icon component={PendingIcon} style={iconStyle} data-testid="activity-status" />;
-    case ActivityStatus.ERROR:
-    default:
-      return <Icon component={ErrorIcon} style={iconStyle} data-testid="activity-status" />;
+      return <ActivityTypeIcon type={TransactionActivityType.pending} />;
   }
 };
 

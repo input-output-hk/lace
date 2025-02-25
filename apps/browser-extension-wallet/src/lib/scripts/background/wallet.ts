@@ -367,7 +367,7 @@ const walletInfo = {
 
 const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
 //const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();
-export const bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 30000, 20, walletInfo, BitcoinWallet.Network.Testnet);
+export const bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 10000, 20, walletInfo, BitcoinWallet.Network.Testnet);
 
 const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
   getInfo: RemoteApiPropertyType.MethodReturningPromise,
@@ -378,6 +378,7 @@ const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> 
   utxos$: RemoteApiPropertyType.HotObservable,
   balance$: RemoteApiPropertyType.HotObservable,
   transactionHistory$: RemoteApiPropertyType.HotObservable,
+  pendingTransactions$: RemoteApiPropertyType.HotObservable,
   addresses$: RemoteApiPropertyType.HotObservable,
 };
 

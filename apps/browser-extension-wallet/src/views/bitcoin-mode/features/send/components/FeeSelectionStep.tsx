@@ -106,7 +106,7 @@ export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
               >
                 <div style={{marginBottom: '0.2rem', fontWeight: 'bold'}}>{fee.label}</div>
                 <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                  <span>{(fee.feeRate * SATS_IN_BTC) / 1_000} sats/vB</span>
+                  <span>{((fee.feeRate * SATS_IN_BTC) / 1_000).toFixed(2)} sats/vB</span>
                   <span>{fee.estimatedTime}</span>
                 </div>
               </div>
