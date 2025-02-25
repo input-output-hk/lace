@@ -50,7 +50,7 @@ export const generatePaperWalletPdf = async ({
 
     const paperWalletPdf = await paperWallet({
       pgpRef: pgpInfo.pgpKeyReference,
-      creationDate: new Date().toLocaleDateString(navigator.language ?? 'en-US', {
+      creationDate: new Date().toLocaleDateString(navigator.language, {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
