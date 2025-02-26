@@ -61,9 +61,9 @@ inputs:
     required: false
     default: ''
   BROWSER_TARGET:
-    description: 'Browser target to build for. Default is "chrome", which will build for Chromium browsers. Other options are "firefox"'
+    description: 'Browser target to build for. Options are [firefox | chromium]'
     required: false
-    default: 'chrome'
+    default: 'chromium'
 
 runs:
   using: 'composite'
