@@ -94,7 +94,6 @@ runs:
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
-        WALLET_MANIFEST_FIREFOX_ID: 'lace-wallet-ext'
 
     - name: Upload artifact
       if: ${{ inputs.BROWSER_TARGET != 'firefox' }}

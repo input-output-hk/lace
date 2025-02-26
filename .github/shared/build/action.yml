@@ -167,5 +167,4 @@ runs:
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
-        WALLET_MANIFEST_FIREFOX_ID: 'lace-wallet-ext'
       run: yarn browser build
