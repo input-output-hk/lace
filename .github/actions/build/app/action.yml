@@ -60,6 +60,10 @@ inputs:
     description: 'Project environment for Sentry, used to differentiate issue sources'
     required: false
     default: ''
+  BROWSER_TARGET:
+    description: 'Browser target to build for. Options are [firefox | chromium]'
+    required: false
+    default: 'chromium'
 
 runs:
   using: 'composite'
@@ -89,9 +93,25 @@ runs:
         SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
+        BROWSER: ${{ inputs.BROWSER_TARGET }}
+        WALLET_MANIFEST_FIREFOX_ID: 'lace-wallet-ext'
 
     - name: Upload artifact
+      if: ${{ inputs.BROWSER_TARGET != 'firefox' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.NAME }}
         path: ${{ inputs.DIR }}/dist
+    
+    - name: Pack Firefox
+      if: ${{ inputs.BROWSER_TARGET == 'firefox' }}
+      run: yarn pack:firefox
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+      
+    - name: Upload Firefox artifact
+      if: ${{ inputs.BROWSER_TARGET == 'firefox' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.NAME }}
+        path: ${{ inputs.DIR }}/artifacts-firefox
