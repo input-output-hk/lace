@@ -55,14 +55,13 @@ const transformManifest = (content, mode) => {
       .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL);
 
     if (process.env.BROWSER === 'firefox') {
-      if (process.env.WALLET_MANIFEST_FIREFOX_ID) {
-        manifest.browser_specific_settings = {
-          gecko: {
-            id: process.env.WALLET_MANIFEST_FIREFOX_ID + '@lace.io',
-            strict_min_version: '91.0'
-          }
-        };
-      }
+      manifest.browser_specific_settings = {
+        gecko: {
+          id: 'lace-wallet-ext@lace.io',
+          strict_min_version: '134.0'
+        }
+      };
+
       // Firefox: Reading text is only available for extensions with the Web Extension clipboardRead permission
       manifest.permissions = [...manifest.permissions, 'clipboardRead'];
       // The background script in Firefox is a hidden DOM page
