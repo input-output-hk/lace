@@ -1,3 +1,4 @@
+import { dummyLogger } from 'ts-log';
 import type { LaceFeaturesApi, WalletMode } from '../types';
 
 import {
@@ -7,7 +8,7 @@ import {
   RemoteApiPropertyType
 } from '@cardano-sdk/web-extension';
 
-const logger = console;
+const logger = process.env.NODE_ENV === 'development' ? console : dummyLogger;
 const WALLET_MODE_STORAGE_KEY = 'lace-wallet-mode';
 
 export const LACE_FEATURES_CHANNEL = 'lace-features';
