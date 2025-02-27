@@ -2,7 +2,9 @@ import React from 'react';
 import type { ReactElement } from 'react';
 
 import { Serialization } from '@cardano-sdk/core';
+import { contextLogger } from '@cardano-sdk/util';
 import { Box, Image, useColorModeValue, useToast } from '@chakra-ui/react';
+import { logger as commonLogger } from '@lace/common';
 import { Events } from 'features/analytics/events';
 import { useCaptureEvent } from 'features/analytics/hooks';
 import { useParams } from 'react-router-dom';
@@ -13,6 +15,8 @@ import LogoOriginal from '../../../assets/img/logo.svg';
 import LogoWhite from '../../../assets/img/logoWhite.svg';
 import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
 import { useStoreActions } from '../../../ui/store';
+
+const logger = contextLogger(commonLogger, 'Nami:TrezorTx');
 
 export const TrezorTx = (): ReactElement => {
   const capture = useCaptureEvent();
@@ -74,7 +78,7 @@ export const TrezorTx = (): ReactElement => {
           });
         }
       } catch (error) {
-        console.error(error);
+        logger.warn('Transaction failed', error);
         toast({
           title: 'Transaction failed',
           status: 'error',
