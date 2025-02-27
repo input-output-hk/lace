@@ -9,6 +9,15 @@ const GATEWAY_TIMEOUT_STATUS_CODE = 503;
 const UNAUTHORIZED_STATUS_CODE = 401;
 const NOT_FOUND_STATUS_CODE = 404;
 
+// eslint-disable-next-line unicorn/no-null
+let sentryUrl: string | null = '';
+const sentryUrlExtractionRegex = /https:\/\/[^@]+@([^/]+).*/;
+if (sentryUrlExtractionRegex.test(process.env.SENTRY_DSN)) {
+  sentryUrl = process.env.SENTRY_DSN.replace(sentryUrlExtractionRegex, 'https://$1');
+}
+
+const isSentryRequest = (url: string) => !!sentryUrl && url.startsWith(sentryUrl);
+
 const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => {
   if (data?.type === 'xmlhttprequest' && runtime.getURL('').startsWith(data.initiator)) {
     const statusCodeQualifiedAsFailure =
@@ -46,7 +55,9 @@ const handleConnectionIssues = async (error: WebRequest.OnErrorOccurredDetailsTy
   )
     return;
 
-  logger.debug('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
+  if (!isSentryRequest(error.url)) {
+    logger.error('xmlhttprequest:net::ERR_INTERNET_DISCONNECTED', error);
+  }
 
   requestMessage$.next({ type: MessageTypes.HTTP_CONNECTION, data: { connected: false } });
   if (!webRequest.onCompleted.hasListener(handleRequests)) {

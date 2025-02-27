@@ -24,9 +24,10 @@ import { tabs } from 'webextension-polyfill';
 import { useTranslation } from 'react-i18next';
 import { DappSignDataSuccess } from '@src/features/dapp/components/DappSignDataSuccess';
 import { DappSignDataFail } from '@src/features/dapp/components/DappSignDataFail';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
 import { useFatalError } from '@hooks/useFatalError';
 import { POPUP_WINDOW } from '@src/utils/constants';
+import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 
 dayjs.extend(duration);
 
@@ -71,7 +72,7 @@ export const DappConnectorView = (): React.ReactElement => {
   const fatalError = useFatalError();
   useEffect(() => {
     if (!isLoading || fatalError) {
-      document.querySelector('#preloader')?.remove();
+      removePreloaderIfExists();
     }
   }, [isLoading, fatalError]);
 

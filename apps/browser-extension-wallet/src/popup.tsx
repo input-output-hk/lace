@@ -28,6 +28,7 @@ import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard
 import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
 import { AppVersionGuard } from './utils/AppVersionGuard';
+import { ErrorBoundary } from '@components/ErrorBoundary';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami'>();
@@ -51,37 +52,39 @@ const App = (): React.ReactElement => {
   }, [mode]);
 
   return (
-    <BackgroundServiceAPIProvider>
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_POPUP}>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <PostHogClientProvider>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <MigrationContainer appMode={APP_MODE_POPUP}>
-                          <DataCheckContainer appMode={APP_MODE_POPUP}>
-                            <AddressesDiscoveryOverlay>
-                              <NamiMigrationGuard>
-                                <BackgroundPageProvider>
-                                  <AppVersionGuard>{mode === 'nami' ? <NamiPopup /> : <PopupView />}</AppVersionGuard>
-                                </BackgroundPageProvider>
-                              </NamiMigrationGuard>
-                            </AddressesDiscoveryOverlay>
-                          </DataCheckContainer>
-                        </MigrationContainer>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
-                </PostHogClientProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    </BackgroundServiceAPIProvider>
+    <ErrorBoundary>
+      <BackgroundServiceAPIProvider>
+        <AppSettingsProvider>
+          <DatabaseProvider>
+            <StoreProvider appMode={APP_MODE_POPUP}>
+              <CurrencyStoreProvider>
+                <HashRouter>
+                  <PostHogClientProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <MigrationContainer appMode={APP_MODE_POPUP}>
+                            <DataCheckContainer appMode={APP_MODE_POPUP}>
+                              <AddressesDiscoveryOverlay>
+                                <NamiMigrationGuard>
+                                  <BackgroundPageProvider>
+                                    <AppVersionGuard>{mode === 'nami' ? <NamiPopup /> : <PopupView />}</AppVersionGuard>
+                                  </BackgroundPageProvider>
+                                </NamiMigrationGuard>
+                              </AddressesDiscoveryOverlay>
+                            </DataCheckContainer>
+                          </MigrationContainer>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
+                </HashRouter>
+              </CurrencyStoreProvider>
+            </StoreProvider>
+          </DatabaseProvider>
+        </AppSettingsProvider>
+      </BackgroundServiceAPIProvider>
+    </ErrorBoundary>
   );
 };
 

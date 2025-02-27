@@ -8,8 +8,9 @@ import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
 import { useFatalError } from '@hooks/useFatalError';
+import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 
 export const NamiPopup = withDappContext((): React.ReactElement => {
   const {
@@ -30,7 +31,7 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
   const fatalError = useFatalError();
   useEffect(() => {
     if (isLoaded || fatalError) {
-      document.querySelector('#preloader')?.remove();
+      removePreloaderIfExists();
     }
   }, [isLoaded, fatalError]);
 

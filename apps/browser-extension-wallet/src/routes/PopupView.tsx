@@ -13,7 +13,8 @@ import { MainLoader } from '@components/MainLoader';
 import { useAppInit } from '@hooks';
 import { ILocalStorage } from '@src/types';
 import { useFatalError } from '@hooks/useFatalError';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
+import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 
 dayjs.extend(duration);
 
@@ -64,7 +65,7 @@ export const PopupView = (): React.ReactElement => {
   );
   useEffect(() => {
     if (isLoaded || fatalError) {
-      document.querySelector('#preloader')?.remove();
+      removePreloaderIfExists();
     }
   }, [isLoaded, fatalError]);
 
