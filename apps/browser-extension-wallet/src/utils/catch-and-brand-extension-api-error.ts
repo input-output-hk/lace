@@ -1,10 +1,13 @@
-import { logger } from '@lace/common';
+import { logger as commonLogger } from '@lace/common';
+import { contextLogger } from '@cardano-sdk/util';
 
 class ExtensionApiError extends Error {}
 
 type CatchAndBrandExtensionApiErrorOptions = {
   reThrow?: boolean;
 };
+
+const logger = contextLogger(commonLogger, 'WebExtension:ApiError');
 
 export const catchAndBrandExtensionApiError = async <T>(
   promise: Promise<T>,
@@ -15,8 +18,7 @@ export const catchAndBrandExtensionApiError = async <T>(
   try {
     return await promise;
   } catch (error) {
-    const message = `${errorMessage} due to: ${error}`;
-    logger.error(`[WebExtension API error] ${message}`);
+    logger.error(errorMessage, error);
     if (reThrow) {
       throw new ExtensionApiError(errorMessage);
     }

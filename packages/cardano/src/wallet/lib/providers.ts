@@ -83,7 +83,7 @@ interface ProvidersConfig {
     customSubmitTxUrl?: string;
     blockfrostConfig: BlockfrostClientConfig & { rateLimiter: RateLimiter };
   };
-  logger?: Logger;
+  logger: Logger;
   experiments: {
     useWebSocket?: boolean;
   };
@@ -128,7 +128,7 @@ const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
 export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
-  logger = console,
+  logger,
   experiments: { useWebSocket },
   extensionLocalStorage
 }: ProvidersConfig): WalletProvidersDependencies => {
@@ -183,7 +183,7 @@ export const createProviders = ({
 
     // On network change this logs an error line as follows but it is expected as long as this function is called twice
     // 'Async error from WebSocket client' 'not-connected'
-    if (wsProvider) wsProvider.close().catch((error) => console.error(error, 'While closing wsProvider'));
+    if (wsProvider) wsProvider.close().catch((error) => logger.warn(error, 'While closing wsProvider'));
 
     wsProvider = new CardanoWsClient({ chainHistoryProvider, logger }, { url });
 

@@ -8,6 +8,8 @@ import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
 
 import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import { logger as commonLogger } from '@lace/common';
+import { contextLogger } from '@cardano-sdk/util';
 
 interface Props {
   dappConnector: DappConnector;
@@ -19,6 +21,8 @@ interface Props {
   accountName: string;
   accountAvatar?: string;
 }
+
+const logger = contextLogger(commonLogger, 'Nami:DappConnector:Enable');
 
 export const Enable = ({
   dappConnector,
@@ -43,7 +47,7 @@ export const Enable = ({
         setDappInfo({ logo, name, url, domain: url.split('//')[1] });
       })
       .catch(error => {
-        console.error(error);
+        logger.warn('Could not fetch DApp info', error);
       });
   }, []);
 
