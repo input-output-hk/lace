@@ -16,6 +16,7 @@ export type LogLevelString = keyof typeof LogLevel;
 
 class AppLogger implements Logger {
   private logLevel: LogLevel;
+  private sentryIntegrationEnabled = false;
 
   constructor(logLevel: LogLevelString = 'info') {
     if (!(logLevel in LogLevel)) {
@@ -24,16 +25,22 @@ class AppLogger implements Logger {
     this.logLevel = LogLevel[logLevel];
   }
 
+  private captureError(errorMessage: string, extra: Record<string, any> = {}) {
+    if (!this.sentryIntegrationEnabled) return;
+
+    Sentry.captureException(errorMessage, {
+      level: 'error',
+      extra
+    });
+  }
+
   private convertParams(params: any[]) {
     return params.map((param) => {
       const [value, error] = stringifyWithFallback(param);
       if (error) {
-        Sentry.captureMessage('AppLogger: Failed to stringify the log param', {
-          level: 'error',
-          extra: {
-            error,
-            param
-          }
+        this.captureError('AppLogger: Failed to stringify the log param', {
+          error,
+          param
         });
       }
 
@@ -47,6 +54,10 @@ class AppLogger implements Logger {
 
   setLogLevel(logLevel: LogLevelString) {
     this.logLevel = LogLevel[logLevel];
+  }
+
+  setSentryIntegrationEnabled(enableSentryIntegration: boolean): void {
+    this.sentryIntegrationEnabled = enableSentryIntegration;
   }
 
   trace(...params: any[]): void {
@@ -81,11 +92,7 @@ class AppLogger implements Logger {
     const stringifiedParams = this.convertParams(params);
 
     if (!error) {
-      Sentry.captureMessage(message || '[UNKNOWN ERROR]', {
-        level: 'error',
-        extra: { error: stringifiedParams }
-      });
-
+      this.captureError(message || '[UNKNOWN ERROR]', { error: stringifiedParams });
       console.error(...stringifiedParams);
       return;
     }
@@ -95,11 +102,7 @@ class AppLogger implements Logger {
       return;
     }
 
-    Sentry.captureMessage(message || error.message, {
-      level: 'error',
-      extra: { error: stringifiedParams }
-    });
-
+    this.captureError(message || error.message, { error: stringifiedParams });
     console.error(...stringifiedParams);
   }
 }

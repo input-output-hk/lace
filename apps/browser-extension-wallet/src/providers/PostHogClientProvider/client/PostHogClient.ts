@@ -257,6 +257,7 @@ export class PostHogClient<Action extends string = string> {
         }
       }
 
+      console.log('XXX setting background storage');
       // save current posthog config in background storage
       void this.backgroundServiceUtils.setBackgroundStorage({
         featureFlags: this.featureFlagsByNetwork,

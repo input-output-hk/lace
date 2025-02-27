@@ -51,6 +51,8 @@ import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
+import isEqual from 'lodash/isEqual';
+import reduce from 'lodash/reduce';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -123,11 +125,53 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
+    console.log('XXX webStorage.onChanged.addListener');
     webStorage.onChanged.addListener((changes) => {
       const oldLogLevelValue = changes.BACKGROUND_STORAGE?.oldValue?.logLevel;
       const newLogLevelValue = changes.BACKGROUND_STORAGE?.newValue?.logLevel;
       if (oldLogLevelValue !== newLogLevelValue) {
         logger.setLogLevel(newLogLevelValue);
+      }
+
+      const oldLoggerSentryIntegrationEnabled =
+        changes?.BACKGROUND_STORAGE?.oldValue?.featureFlags?.[chainId.networkMagic]?.['send-console-errors-to-sentry'];
+      const newLoggerSentryIntegrationEnabled =
+        changes?.BACKGROUND_STORAGE?.newValue?.featureFlags?.[chainId.networkMagic]?.['send-console-errors-to-sentry'];
+
+      const getDifferences = (obj1: any, obj2: any) =>
+        reduce(
+          obj1,
+          (result, value, key) => {
+            if (!isEqual(value, obj2[key])) {
+              // @ts-expect-error asd
+              result[key] = { old: value, new: obj2[key] };
+            }
+            return result;
+          },
+          {}
+        );
+      console.log('XXX CHANGES', { changes });
+      if (
+        changes.BACKGROUND_STORAGE &&
+        !isEqual(changes.BACKGROUND_STORAGE.oldValue?.featureFlags, changes.BACKGROUND_STORAGE.newValue?.featureFlags)
+      ) {
+        console.log(
+          'XXX DIFF',
+          getDifferences(
+            changes.BACKGROUND_STORAGE.oldValue?.featureFlags,
+            changes.BACKGROUND_STORAGE.newValue?.featureFlags
+          )
+        );
+        console.log('XXX DESIRED CHANGES', {
+          oldSentryEnabled: oldLoggerSentryIntegrationEnabled,
+          newSentryEnabled: newLoggerSentryIntegrationEnabled,
+          newBGStorageFF: changes.BACKGROUND_STORAGE?.newValue?.featureFlags?.[chainId.networkMagic],
+          oldBGStorageFF: changes.BACKGROUND_STORAGE?.oldValue?.featureFlags?.[chainId.networkMagic]
+        });
+      }
+      if (oldLoggerSentryIntegrationEnabled !== newLoggerSentryIntegrationEnabled) {
+        console.log('XXX changed!', newLoggerSentryIntegrationEnabled);
+        // logger.setSentryIntegrationEnabled(newLoggerSentryIntegrationEnabled);
       }
     });
 
