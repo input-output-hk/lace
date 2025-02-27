@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
-import { Button, WarningBanner } from '@lace/common';
+import { Button, WarningBanner, logger } from '@lace/common';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -102,11 +102,13 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       clearSecrets();
     } catch (error: unknown) {
-      console.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);
 
       if (error instanceof Error && error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        logger.warn('Staking::Transaction: Multi-delegation is not supported by the device.', error);
         portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+      } else {
+        logger.error('Staking::Transaction: Failed to sign or submit tx', error);
       }
     }
   };

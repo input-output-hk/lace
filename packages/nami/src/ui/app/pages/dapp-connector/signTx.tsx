@@ -131,7 +131,12 @@ export const SignTx = ({
         try {
           metadataJson[key.toString()] = metadatum.metadatumToJson(value);
         } catch (error) {
-          console.error(`error parsing tx ${tx.id} metadatum`, { error });
+          logger.warn(
+            `Nami::DappConnector:signTx Cannot parse metadatum (key: ${key.toString()}) for transaction with id: ${
+              tx.id
+            }`,
+            error,
+          );
         }
       }
       metadataJson = JSON.stringify(

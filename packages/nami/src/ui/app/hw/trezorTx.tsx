@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 
 import { Serialization } from '@cardano-sdk/core';
 import { Box, Image, useColorModeValue, useToast } from '@chakra-ui/react';
+import { logger } from '@lace/common';
 import { Events } from 'features/analytics/events';
 import { useCaptureEvent } from 'features/analytics/hooks';
 import { useParams } from 'react-router-dom';
@@ -74,7 +75,7 @@ export const TrezorTx = (): ReactElement => {
           });
         }
       } catch (error) {
-        console.error(error);
+        logger.warn('Nami::TrezorTx: Transaction failed.', error);
         toast({
           title: 'Transaction failed',
           status: 'error',

@@ -38,7 +38,7 @@ import {
   useToast,
   Icon,
 } from '@chakra-ui/react';
-import { useObservable } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import debouncePromise from 'debounce-promise';
 import debounce from 'lodash/debounce';
 import latest from 'promise-latest';
@@ -797,7 +797,10 @@ const Send = ({
               inMemoryWallet,
             });
           } catch (error) {
-            console.error('Failed to sign and submit transaction', error);
+            logger.warn(
+              'Nami::Send: Failed to sign and submit transaction',
+              error,
+            );
             throw error;
           } finally {
             secretsUtil.clearSecrets();

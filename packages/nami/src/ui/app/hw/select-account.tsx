@@ -6,6 +6,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import { Box, Button, Checkbox, Text } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
+import { logger } from '@lace/common';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
@@ -101,8 +102,8 @@ export const SelectAccounts = ({
         numAccounts: accountIndexes.length.toString(),
       });
     } catch (error_) {
-      console.error(error_);
-      setError('An error occured');
+      logger.warn('Nami::SelectAccounts: an error occurred.', error_);
+      setError('An error occurred');
     } finally {
       setIsLoading(false);
     }

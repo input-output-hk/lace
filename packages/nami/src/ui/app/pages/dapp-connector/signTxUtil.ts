@@ -17,6 +17,7 @@ import groupBy from 'lodash/groupBy';
 import type { Asset, CardanoAsset } from '../../../../types/assets';
 import type { AssetInfoWithAmount } from '@cardano-sdk/core';
 import type { DappConnector } from 'features/dapp-outside-handles-provider';
+import { logger } from '@lace/common';
 
 const isNFT = (asset: AssetInfoWithAmount) =>
   asset.assetInfo.supply === BigInt(1);
@@ -230,8 +231,8 @@ export interface TransactionValue {
 export const isScriptAddress = (address: Cardano.PaymentAddress) => {
   const addressObj = Cardano.Address.fromString(address);
   if (!addressObj) {
-    console.error(
-      `Failed to parse address: ${address} while calculating external outputs`,
+    logger.warn(
+      `Nami::DappConnector: Failed to parse address: ${address} while calculating external outputs`,
     );
     return false;
   }

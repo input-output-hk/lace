@@ -1,3 +1,4 @@
+import { logger } from '@lace/common';
 import { Command } from './commands';
 import { Handler, State } from './types';
 
@@ -6,7 +7,7 @@ export const cases =
   (params) => {
     const handler = definition[discriminator];
     if (!handler) {
-      console.error(`Invalid discriminator ${discriminator} in ${parentName} handlers`);
+      logger.error(`Staking::stateMachine: Invalid discriminator ${discriminator} in ${parentName} handlers`);
       return params.state;
     }
     return handler(params);
@@ -14,7 +15,7 @@ export const cases =
 
 export const handler =
   <C extends Command, CurrentState extends State, TargetState extends State>(
-    handlerBody: Handler<C, CurrentState, TargetState>
+    handlerBody: Handler<C, CurrentState, TargetState>,
   ): Handler<C, CurrentState, TargetState> =>
   (params) =>
     handlerBody(params);

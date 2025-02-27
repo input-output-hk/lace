@@ -1,4 +1,5 @@
 import { Wallet } from '@lace/cardano';
+import { logger } from '@lace/common';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect, useMemo } from 'react';
@@ -17,7 +18,7 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
   }));
   const selectedPoolIds = useMemo(
     () => selectedPortfolio.map(({ stakePool }) => stakePool.id.toString()),
-    [selectedPortfolio]
+    [selectedPortfolio],
   );
 
   // LocalStorage -> Store (hydration)
@@ -32,8 +33,8 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
         stakePoolProvider,
         view,
       });
-    } catch {
-      console.error('error during store hydration');
+    } catch (error) {
+      logger.error('Staking::useBrowsePoolsPersistence: store hydration failed', error);
     }
   }, [
     hydrated,

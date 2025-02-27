@@ -8,6 +8,7 @@ import { useCaptureEvent } from '../../../../features/analytics/hooks';
 import Account from '../../components/account';
 
 import type { DappConnector } from '../../../../features/dapp-outside-handles-provider';
+import { logger } from '@lace/common';
 
 interface Props {
   dappConnector: DappConnector;
@@ -43,7 +44,7 @@ export const Enable = ({
         setDappInfo({ logo, name, url, domain: url.split('//')[1] });
       })
       .catch(error => {
-        console.error(error);
+        logger.warn('Nami::DappConnector: Could not fetch DApp info.', error);
       });
   }, []);
 

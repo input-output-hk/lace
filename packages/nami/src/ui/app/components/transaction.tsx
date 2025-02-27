@@ -48,6 +48,7 @@ import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
 import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
+import { logger } from '@lace/common';
 
 TimeAgo.addDefaultLocale(en);
 
@@ -371,7 +372,7 @@ const TxDetail = ({
                   try {
                     openExternalLink(`${getExplorerUrl(network)}${tx.txHash}`);
                   } catch {
-                    console.error('cannot open an external url');
+                    logger.warn('Nami::TxDetail: Cannot open cardano explorer URL');
                   }
                 })();
               }}
