@@ -29,6 +29,7 @@ import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil'
 import { getErrorMessage } from '@src/utils/get-error-message';
 import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -103,17 +104,26 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
       break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';
-  await tabs.create({ url: `app.html#${path}${params}` }).catch((error) => logger.error(error));
+  const url = `app.html#${path}${params}`;
+  await catchAndBrandExtensionApiError(tabs.create({ url }), `Failed to open expanded view with url: ${url}`).catch(
+    (error) => logger.error(error)
+  );
 };
 
 const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
-  await tabs.create({ url: `popup.html#${data.path}` }).catch((error) => logger.error(error));
+  const url = `popup.html#${data.path}`;
+  await catchAndBrandExtensionApiError(
+    tabs.create({ url }),
+    `Failed to open nami mode extended with url: ${url}`
+  ).catch((error) => logger.error(error));
 };
 
 const enrichWithTabsDataIfMissing = (browserWindows: Windows.Window[]) => {
   const promises = browserWindows.map(async (w) => ({
     ...w,
-    tabs: w.tabs || (await tabs.query({ windowId: w.id }))
+    tabs:
+      w.tabs ||
+      (await catchAndBrandExtensionApiError(tabs.query({ windowId: w.id }), 'Failed to query tabs of a window'))
   }));
   return Promise.all(promises);
 };
@@ -129,7 +139,8 @@ const doesWindowHaveOtherTabs = (browserWindow: WindowWithTabsNotOptional) =>
 
 const closeAllTabsAndOpenPopup = async () => {
   try {
-    const allWindows = await enrichWithTabsDataIfMissing(await windows.getAll());
+    const allWindowsRaw = await catchAndBrandExtensionApiError(windows.getAll(), 'Failed to query all browser windows');
+    const allWindows = await enrichWithTabsDataIfMissing(allWindowsRaw);
     if (allWindows.length === 0) return;
 
     const windowsWith3rdPartyTabs = allWindows.filter((w) => doesWindowHaveOtherTabs(w));
@@ -141,14 +152,19 @@ const closeAllTabsAndOpenPopup = async () => {
     const noSingleWindowWith3rdPartyTabsOpen = !nextFocusedWindow;
     if (noSingleWindowWith3rdPartyTabsOpen) {
       nextFocusedWindow = allWindows[0];
-      await tabs.create({ active: true, windowId: nextFocusedWindow.id });
+      await catchAndBrandExtensionApiError(
+        tabs.create({ active: true, windowId: nextFocusedWindow.id }),
+        'Failed to open empty tab to prevent window from closing'
+      );
     }
 
-    await windows.update(nextFocusedWindow.id, { focused: true });
+    await catchAndBrandExtensionApiError(
+      windows.update(nextFocusedWindow.id, { focused: true }),
+      'Failed to focus window'
+    );
     await closeAllLaceOrNamiTabs();
-    await action.openPopup();
+    await catchAndBrandExtensionApiError(action.openPopup(), 'Failed to open popup');
   } catch (error) {
-    // unable to programatically open the popup again
     logger.error(error);
   }
 };

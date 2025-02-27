@@ -51,6 +51,7 @@ import type { DappConnector } from '../../../../features/dapp-outside-handles-pr
 import type { Asset as NamiAsset } from '../../../../types/assets';
 import type { AssetsModalRef } from '../../components/assetsModal';
 import type { Cardano } from '@cardano-sdk/core';
+import { logger } from '@lace/common';
 
 interface Props {
   dappConnector: DappConnector;
@@ -231,10 +232,29 @@ export const SignTx = ({
     }
   };
 
+  const cancelTransaction = useCallback(async () => {
+    await request?.reject(() => void 0);
+    window.close();
+  }, [request]);
+
+  useOnUnload(cancelTransaction);
+
   const getInfo = async () => {
     if (!txWitnessRequest) return;
-    const { dappInfo, request } =
-      await dappConnector.getSignTxRequest(txWitnessRequest);
+
+    let signTxRequestData: Awaited<
+      ReturnType<typeof dappConnector.getSignTxRequest>
+    >;
+    try {
+      signTxRequestData =
+        await dappConnector.getSignTxRequest(txWitnessRequest);
+    } catch (error) {
+      logger.error('Failed to get SignTx request data', error);
+      void cancelTransaction();
+      return;
+    }
+
+    const { dappInfo, request } = signTxRequestData;
     setRequest(request);
     setDappInfo(dappInfo);
 
@@ -275,13 +295,6 @@ export const SignTx = ({
   React.useEffect(() => {
     getInfo();
   }, [txWitnessRequest]);
-
-  const cancelTransaction = useCallback(async () => {
-    await request?.reject(() => void 0);
-    window.close();
-  }, [request]);
-
-  useOnUnload(cancelTransaction);
 
   return (
     <>
