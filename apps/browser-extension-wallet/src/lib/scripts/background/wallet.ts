@@ -123,17 +123,8 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    webStorage.onChanged.addListener((changes) => {
-      const oldLogLevelValue = changes.BACKGROUND_STORAGE?.oldValue?.logLevel;
-      const newLogLevelValue = changes.BACKGROUND_STORAGE?.newValue?.logLevel;
-      if (oldLogLevelValue !== newLogLevelValue) {
-        logger.setLogLevel(newLogLevelValue);
-      }
-    });
-
-    let providers = await getProviders(chainName);
-
     const baseUrl = getBaseUrlForChain(chainName);
+    let providers = await getProviders(chainName);
 
     // Sanchonet does not have a handle provider
     const supportsHandleResolver = chainName !== 'Sanchonet';
