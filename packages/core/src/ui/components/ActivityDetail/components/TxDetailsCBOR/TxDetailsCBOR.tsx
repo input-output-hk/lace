@@ -22,9 +22,9 @@ export const TxDetailsCBOR = ({ cbor }: TxDetailsCBORProps): React.ReactElement 
   }, [t]);
 
   return (
-    <TxDetailsGroup title={t('core.activityDetails.CBOR')} testId="cbor" withSeparatorLine>
+    <TxDetailsGroup title={t('core.activityDetails.CBOR')} testId="cbor-detail" withSeparatorLine>
       <CopyToClipboard text={cbor}>
-        <div onClick={doToast}>
+        <div data-testid="cbor" onClick={doToast}>
           <Flex className={styles.container} flexDirection="column" gap="$20">
             <Flex className={styles.copyButtonContainer}>
               <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" />

@@ -20,7 +20,7 @@ const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: '
 const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
 const mockUseComputeTxCollateral = jest.fn().mockReturnValue(BigInt(1_000_000));
 import * as React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, render, fireEvent } from '@testing-library/react';
 import { DappTransactionContainer } from '../DappTransactionContainer';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
@@ -287,6 +287,7 @@ describe('Testing DappTransactionContainer component', () => {
 
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(buildMockTx({ certificates: [drepRegistrationcertificate] }))
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -416,11 +417,41 @@ describe('Testing DappTransactionContainer component', () => {
     );
   });
 
+  it('should display raw transaction section', async () => {
+    let queryByTestId: any;
+    const request = {
+      transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
+        toCore: jest.fn().mockReturnValue(buildMockTx())
+      } as any
+    } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signTxRequest: { request, set: jest.fn() },
+      dappInfo
+    }));
+
+    await act(async () => {
+      ({ queryByTestId } = render(<DappTransactionContainer />, {
+        wrapper: getWrapper()
+      }));
+    });
+
+    expect(queryByTestId('cbor-detail')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(queryByTestId('cbor-detail_toggle'));
+    });
+
+    expect(queryByTestId('cbor')).toHaveTextContent('cbor');
+  });
+
   it('should display drep registration certificate', async () => {
     let queryByTestId: any;
     const drepRegistrationTx = buildMockTx({ certificates: [drepRegistrationcertificate] });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(drepRegistrationTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -445,6 +476,7 @@ describe('Testing DappTransactionContainer component', () => {
     const drepRetirementCertificateTx = buildMockTx({ certificates: [drepRetirementCertificate] });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(drepRetirementCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -468,6 +500,7 @@ describe('Testing DappTransactionContainer component', () => {
     const drepUpdateCertificateTx = buildMockTx({ certificates: [drepUpdateCertificate] });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(drepUpdateCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -494,6 +527,7 @@ describe('Testing DappTransactionContainer component', () => {
     });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(stakeRegistrationDelegationCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -518,6 +552,7 @@ describe('Testing DappTransactionContainer component', () => {
     const stakeVoteDelegationCertificateTx = buildMockTx({ certificates: [stakeVoteDelegationCertificate] });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(stakeVoteDelegationCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -543,6 +578,7 @@ describe('Testing DappTransactionContainer component', () => {
     });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(stakeVoteRegistrationDelegationCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -566,6 +602,7 @@ describe('Testing DappTransactionContainer component', () => {
     const voteDelegationCertificateTx = buildMockTx({ certificates: [voteDelegationCertificate] });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(voteDelegationCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -591,6 +628,7 @@ describe('Testing DappTransactionContainer component', () => {
     });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(voteRegistrationDelegationCertificateTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -641,6 +679,7 @@ describe('Testing DappTransactionContainer component', () => {
     });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(votingTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
@@ -682,6 +721,7 @@ describe('Testing DappTransactionContainer component', () => {
     });
     const request = {
       transaction: {
+        toCbor: jest.fn().mockReturnValue('transaction-cbor'),
         toCore: jest.fn().mockReturnValue(proposalProceduresTx)
       } as any
     } as TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
