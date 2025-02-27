@@ -13,6 +13,25 @@
 
 .copyButton {
   color: var(--dark-mode-mid-grey, var(--light-mode-light-grey));
-  cursor: pointer;
   font-size: 26px;
+  opacity: 0.5;
+}
+
+.container {
+  position: relative;
+  cursor: pointer;
+
+  .copyButtonContainer {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-radius: 8px;
+    background: var(--bg-color-body);
+  }
+
+  &:hover {
+    .copyButton {
+      opacity: 1;
+    }
+  }
 }

@@ -22,18 +22,19 @@ export const TxDetailsCBOR = ({ cbor }: TxDetailsCBORProps): React.ReactElement 
   }, [t]);
 
   return (
-    <TxDetailsGroup title={t('core.activityDetails.CBOR.header')} testId="cbor" withSeparatorLine>
-      <Flex flexDirection="column" gap="$20">
-        <Flex w="$fill" justifyContent="space-between">
-          <Text.Body.Normal weight="$semibold">{t('core.activityDetails.CBOR.title')}</Text.Body.Normal>
-          <CopyToClipboard text={cbor}>
-            <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" onClick={doToast} />
-          </CopyToClipboard>
-        </Flex>
-        <Text.Body.Normal className={styles.cbor} weight="$medium">
-          {cbor}
-        </Text.Body.Normal>
-      </Flex>
+    <TxDetailsGroup title={t('core.activityDetails.CBOR')} testId="cbor" withSeparatorLine>
+      <CopyToClipboard text={cbor}>
+        <div onClick={doToast}>
+          <Flex className={styles.container} flexDirection="column" gap="$20">
+            <Flex className={styles.copyButtonContainer}>
+              <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" />
+            </Flex>
+            <Text.Body.Normal className={styles.cbor} weight="$medium">
+              {cbor}
+            </Text.Body.Normal>
+          </Flex>
+        </div>
+      </CopyToClipboard>
     </TxDetailsGroup>
   );
 };
