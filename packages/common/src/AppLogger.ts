@@ -1,7 +1,7 @@
 /* eslint-disable no-console, no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from 'ts-log';
-import { stringifyWithFallback } from '@src/ui/lib';
+import { isNetworkError, stringifyWithFallback } from '@src/ui/lib';
 import * as Sentry from '@sentry/react';
 
 enum LogLevel {
@@ -74,7 +74,33 @@ class AppLogger implements Logger {
   }
 
   error(...params: any[]): void {
-    console.error(...this.convertParams(params));
+    if (params.length === 0) return;
+
+    const error = params.find((param) => param instanceof Error);
+    const message = params.find((param) => typeof param === 'string');
+    const stringifiedParams = this.convertParams(params);
+
+    if (!error) {
+      Sentry.captureMessage(message || '[UNKNOWN ERROR]', {
+        level: 'error',
+        extra: { error: stringifiedParams }
+      });
+
+      console.error(...stringifiedParams);
+      return;
+    }
+
+    if (isNetworkError(error)) {
+      console.error('[NETWORK CONNECTION ERROR]', stringifiedParams);
+      return;
+    }
+
+    Sentry.captureMessage(message || error.message, {
+      level: 'error',
+      extra: { error: stringifiedParams }
+    });
+
+    console.error(...stringifiedParams);
   }
 }
 
