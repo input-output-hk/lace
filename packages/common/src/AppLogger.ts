@@ -16,6 +16,7 @@ export type LogLevelString = keyof typeof LogLevel;
 
 class AppLogger implements Logger {
   private logLevel: LogLevel;
+  private sentryIntegrationEnabled = false;
 
   constructor(logLevel: LogLevelString = 'info') {
     if (!(logLevel in LogLevel)) {
@@ -53,6 +54,10 @@ class AppLogger implements Logger {
 
   setLogLevel(logLevel: LogLevelString) {
     this.logLevel = LogLevel[logLevel];
+  }
+
+  setSentryIntegrationEnabled(enableSentryIntegration: boolean): void {
+    this.sentryIntegrationEnabled = enableSentryIntegration;
   }
 
   trace(...params: any[]): void {
