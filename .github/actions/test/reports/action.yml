@@ -1,0 +1,81 @@
+name: process-smoke-reports
+
+inputs:
+  BROWSER:
+    description: 'browser'
+    required: true
+    type: string
+    default: chrome
+  SMOKE_TESTS_RESULT:
+    required: true
+    type: string
+  GH_TOKEN:
+    description: 'Github token'
+    required: true
+  E2E_AWS_ACCESS_KEY_ID:
+    required: true
+  E2E_AWS_SECRET_ACCESS_KEY:
+    required: true
+  E2E_REPORTS_USER:
+    required: true
+  E2E_REPORTS_PASSWORD:
+    required: true
+  E2E_REPORTS_URL:
+    required: true
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Download all smoke tests artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: .
+        pattern: 'runner-artifacts-*'
+        merge-multiple: true
+
+    - name: Create allure properties
+      shell: bash
+      if: always()
+      working-directory: ./reports/allure/results
+      run: |
+        echo "
+        branch=${{ github.ref_name }}
+        browser= ${{ inputs.BROWSER }}
+        tags= '@Smoke'
+        platform=Linux
+        " > environment.properties
+
+    - name: Publish allure report to S3
+      uses: andrcuns/allure-publish-action@v2.9.0
+      if: always()
+      env:
+        GITHUB_AUTH_TOKEN: ${{ inputs.GH_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.E2E_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.E2E_AWS_SECRET_ACCESS_KEY }}
+      with:
+        storageType: s3
+        resultsGlob: './reports/allure/results'
+        bucket: lace-e2e-test-results
+        prefix: 'smoke/linux/${{ inputs.BROWSER }}/${{ github.run_number }}'
+        copyLatest: true
+        ignoreMissingResults: true
+        updatePr: comment
+        baseUrl: 'https://${{ inputs.E2E_REPORTS_USER }}:${{ inputs.E2E_REPORTS_PASSWORD }}@${{ inputs.E2E_REPORTS_URL }}'
+
+    - name: Publish artifacts (logs, reports, screenshots)
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-artifacts
+        path: |
+          ./packages/e2e-tests/screenshots
+          ./packages/e2e-tests/logs
+          ./packages/e2e-tests/reports
+        retention-days: 5
+
+    - run: |
+        if [[ "${{ inputs.SMOKE_TESTS_RESULT }}" == "success" ]]; then
+          exit 0
+        else
+          exit 1
+        fi

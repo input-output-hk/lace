@@ -10,6 +10,7 @@ import consoleManager from '../utils/consoleManager';
 
 import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 import allure from '@wdio/allure-reporter';
+import extensionUtils from '../utils/utils';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -18,11 +19,13 @@ Before(async () => {
   }
 });
 
-After({ tags: 'not @Pending and not @pending' }, async () => {
+After({ tags: 'not @Pending and not @pending and not @SkipFirefox' }, async () => {
   await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();
-  await browser.disableInterceptor();
+  if ((await extensionUtils.getBrowser()) !== 'firefox') {
+    await browser.disableInterceptor();
+  }
   testContext.clearContext();
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
   await localStorageManager.cleanLocalStorage();

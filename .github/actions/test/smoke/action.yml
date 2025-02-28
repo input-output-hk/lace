@@ -1,0 +1,60 @@
+name: run-smoke-e2e
+
+inputs:
+  BROWSER:
+    description: 'browser'
+    required: true
+    type: string
+    default: 'chrome'
+  BATCH:
+    description: 'Tests batch'
+    required: true
+    type: number
+  WALLET_PASSWORD:
+    description: 'Test wallet password'
+    required: true
+  GH_TOKEN:
+    description: 'Github token'
+    required: true
+  TEST_DAPP_URL:
+    description: 'Test DApp Url'
+    required: true
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Setup Node.js and install dependencies
+      uses: ./.github/actions/install
+      with:
+        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+        GITHUB_TOKEN: ${{ inputs.GH_TOKEN }}
+
+    - name: Download Lace build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: '${{ env.BUILD_ARTIFACT_NAME }}-${{ inputs.BROWSER }}'
+        path: ./apps/browser-extension-wallet/dist
+
+    - name: Setup Firefox Developer Edition
+      id: setup-firefox
+      uses: browser-actions/setup-firefox@v1
+      with:
+        firefox-version: 'latest-devedition'
+      if: inputs.BROWSER == 'firefox'
+
+    - name: Verify Firefox Installation
+      if: inputs.BROWSER == 'firefox'
+      shell: bash
+      run: |
+        echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
+        ${{ steps.setup-firefox.outputs.firefox-path }} --version
+
+    - name: Execute E2E tests for ${{ inputs.BROWSER }}
+      uses: ./.github/actions/test/e2e
+      with:
+        BATCH: ${{ inputs.BATCH }}
+        SMOKE_ONLY: true
+        TEST_DAPP_URL: ${{ inputs.TEST_DAPP_URL }}
+        WALLET_PASSWORD: ${{ inputs.WALLET_PASSWORD }}
+        SERVICE_WORKER_LOGS: true
