@@ -18,7 +18,7 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletActivitiesPaginated } from '@hooks/useWalletActivities';
 
-const loadMoreDebounce = 300;
+const loadMoreDebounceTime = 300;
 
 export const ActivityLayout = (): ReactElement => {
   const { t } = useTranslation();
@@ -72,7 +72,7 @@ export const ActivityLayout = (): ReactElement => {
 
   const isLoadingFirstTime = isNil(total);
 
-  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
+  const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounceTime), [loadMore]);
 
   return (
     <Layout>

@@ -24,6 +24,7 @@ import {
   DappConnector,
   useDappOutsideHandles,
 } from '../../../../features/dapp-outside-handles-provider';
+import { logger } from '@lace/common';
 
 interface Props {
   dappConnector: DappConnector;
@@ -87,23 +88,28 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
     }
   };
 
+  const cancelTransaction = useCallback(async () => {
+    await request?.reject(() => void 0);
+    window.close();
+  }, [request]);
+
   const loadData = async () => {
-    const { dappInfo, request } = await dappConnector.getSignDataRequest();
-    getPayload(request.data.payload);
-    getAddress(request.data.address);
-    setDappInfo(dappInfo);
-    setRequest(request);
-    setIsLoading(false);
+    try {
+      const { dappInfo, request } = await dappConnector.getSignDataRequest();
+      getPayload(request.data.payload);
+      getAddress(request.data.address);
+      setDappInfo(dappInfo);
+      setRequest(request);
+      setIsLoading(false);
+    } catch (error) {
+      logger.error('Failed to get SignData request data', error);
+      void cancelTransaction();
+    }
   };
 
   React.useEffect(() => {
     loadData();
   }, []);
-
-  const cancelTransaction = useCallback(async () => {
-    await request?.reject(() => void 0);
-    window.close();
-  }, [request]);
 
   useOnUnload(cancelTransaction);
 

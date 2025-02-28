@@ -19,6 +19,8 @@ import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
 import { DappTransactionContainer } from './DappTransactionContainer';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
+import { useRedirection } from '@hooks';
+import { dAppRoutePaths } from '@routes';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -28,6 +30,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
     signTxRequest: { request: req, set: setSignTxRequest }
   } = useViewsFlowContext();
   const { walletType, isHardwareWallet, walletInfo, inMemoryWallet } = useWalletStore();
+  const redirectToDappTxSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const analytics = useAnalyticsContext();
   const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
@@ -49,11 +52,26 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
   const txWitnessRequest = useTxWitnessRequest();
 
+  const cancelTransaction = useCallback(() => {
+    disallowSignTx(true);
+  }, [disallowSignTx]);
+
+  useOnUnload(cancelTransaction);
+
   useEffect(() => {
     (async () => {
-      if (!txWitnessRequest) return (): (() => void) => void 0;
+      const emptyFn = (): void => void 0;
+      if (!txWitnessRequest) return emptyFn;
 
-      setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
+      try {
+        setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
+      } catch (error) {
+        logger.error(error);
+        void disallowSignTx(true, 'Could not get DApp info');
+        redirectToDappTxSignFailure();
+        return emptyFn;
+      }
+
       setSignTxRequest(txWitnessRequest);
 
       const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
@@ -73,7 +91,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
         api.shutdown();
       };
     })();
-  }, [setSignTxRequest, setDappInfo, txWitnessRequest]);
+  }, [setSignTxRequest, setDappInfo, txWitnessRequest, redirectToDappTxSignFailure, disallowSignTx]);
 
   const onCancelTransaction = () => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
@@ -81,12 +99,6 @@ export const ConfirmTransaction = (): React.ReactElement => {
     });
     disallowSignTx(true);
   };
-
-  const cancelTransaction = useCallback(() => {
-    disallowSignTx(true);
-  }, [disallowSignTx]);
-
-  useOnUnload(cancelTransaction);
 
   return (
     <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>

@@ -6,6 +6,10 @@
     flex-direction: column;
   }
 
+  &.isOpen {
+    padding-bottom: 20px;
+  }
+
   .expanderHeader {
     display: flex;
     justify-content: space-between;
@@ -23,6 +27,10 @@
       .bracket {
         color: var(--text-color-primary);
       }
+    }
+
+    &.separatorLine {
+      margin-bottom: 20px;
     }
   }
 

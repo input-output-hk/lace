@@ -7,7 +7,8 @@ import { NamiDappConnectorView } from './NamiDappConnectorView';
 import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
 import { useFatalError } from '@hooks/useFatalError';
-import { Crash } from '@components/Crash';
+import { Crash } from '@components/ErrorBoundary';
+import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 
 export const NamiDappConnector = withDappContext((): React.ReactElement => {
   const { hdDiscoveryStatus } = useWalletStore();
@@ -16,7 +17,7 @@ export const NamiDappConnector = withDappContext((): React.ReactElement => {
   const fatalError = useFatalError();
   useEffect(() => {
     if (isLoaded) {
-      document.querySelector('#preloader')?.remove();
+      removePreloaderIfExists();
     }
   }, [isLoaded]);
 

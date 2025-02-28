@@ -159,7 +159,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       const paymentScript = wallet.paymentScript as SharedWalletScriptKind;
 
       const sharedWallet = createSharedWallet(
-        { name: wallet.metadata.name },
+        { name: 'Shared' },
         {
           ...providers,
           logger,
@@ -203,7 +203,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
 
     const personalWallet = createPersonalWallet(
       {
-        name: walletAccount.metadata.name,
+        name: 'Personal',
         polling: {
           ...DEFAULT_POLLING_CONFIG,
           interval: useWebSocket ? DEFAULT_POLLING_CONFIG.pollInterval : localPollingIntervalConfig

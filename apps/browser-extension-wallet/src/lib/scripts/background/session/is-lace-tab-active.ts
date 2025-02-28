@@ -1,5 +1,6 @@
 import { distinctUntilChanged, from, fromEventPattern, map, merge, share, startWith, switchMap } from 'rxjs';
 import { runtime, Tabs, tabs, windows } from 'webextension-polyfill';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 type WindowId = number;
 
@@ -32,10 +33,13 @@ const getExtensionTabUrlPattern = () => {
 export const isLaceTabActive$ = merge(windowRemoved$, tabUpdated$, tabActivated$).pipe(
   switchMap(() =>
     from(
-      tabs.query({
-        active: true,
-        url: getExtensionTabUrlPattern()
-      })
+      catchAndBrandExtensionApiError(
+        tabs.query({
+          active: true,
+          url: getExtensionTabUrlPattern()
+        }),
+        'Failed to query for currently active lace tab'
+      )
     )
   ),
   map((activeLaceTabs) => activeLaceTabs.length > 0),

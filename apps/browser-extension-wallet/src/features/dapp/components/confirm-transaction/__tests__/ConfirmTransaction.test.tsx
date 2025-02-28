@@ -160,6 +160,7 @@ describe('Testing ConfirmTransaction component', () => {
         request: {
           transaction: {
             toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            toCbor: jest.fn().mockReturnValue('cbor'),
             getId: jest.fn().mockReturnValue({ id: 'test-tx-id' })
           }
         },
@@ -171,6 +172,7 @@ describe('Testing ConfirmTransaction component', () => {
       signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
       transaction: {
         toCore: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        toCbor: jest.fn().mockReturnValue('cbor'),
         getId: jest.fn().mockReturnValue({ id: 'test-tx-id' })
       }
     });
@@ -211,6 +213,7 @@ describe('Testing ConfirmTransaction component', () => {
         request: {
           transaction: {
             getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            toCbor: jest.fn().mockReturnValue('cbor'),
             toCore: jest.fn().mockReturnValue(signTxData.tx)
           }
         },
@@ -222,6 +225,7 @@ describe('Testing ConfirmTransaction component', () => {
       signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
       transaction: {
         getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        toCbor: jest.fn().mockReturnValue('cbor'),
         toCore: jest.fn().mockReturnValue(signTxData.tx)
       }
     });
@@ -280,6 +284,7 @@ describe('Testing ConfirmTransaction component', () => {
         request: {
           transaction: {
             getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+            toCbor: jest.fn().mockReturnValue('cbor'),
             toCore: jest.fn().mockReturnValue(signTxData.tx)
           }
         },
@@ -291,6 +296,7 @@ describe('Testing ConfirmTransaction component', () => {
       signContext: { sender: { tab: { id: 'tabid', favIconUrl: 'favIconUrl' } } },
       transaction: {
         getId: jest.fn().mockReturnValue({ id: 'test-tx-id' }),
+        toCbor: jest.fn().mockReturnValue('cbor'),
         toCore: jest.fn().mockReturnValue(signTxData.tx)
       }
     });

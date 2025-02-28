@@ -19,6 +19,7 @@ import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { NamiDappConnector } from './views/nami-mode/indexInternal';
 import { storage } from 'webextension-polyfill';
 import { TxWitnessRequestProvider } from '@providers/TxWitnessRequestProvider';
+import { ErrorBoundary } from '@components/ErrorBoundary';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'nami' | undefined>();
@@ -44,33 +45,35 @@ const App = (): React.ReactElement => {
   }, []);
 
   return (
-    <BackgroundServiceAPIProvider>
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_POPUP}>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <PostHogClientProvider>
-                  <AnalyticsProvider>
-                    <ThemeProvider>
-                      <ExternalLinkOpenerProvider>
-                        <AddressesDiscoveryOverlay>
-                          <UIThemeProvider>
-                            <TxWitnessRequestProvider>
-                              {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
-                            </TxWitnessRequestProvider>
-                          </UIThemeProvider>
-                        </AddressesDiscoveryOverlay>
-                      </ExternalLinkOpenerProvider>
-                    </ThemeProvider>
-                  </AnalyticsProvider>
-                </PostHogClientProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    </BackgroundServiceAPIProvider>
+    <ErrorBoundary>
+      <BackgroundServiceAPIProvider>
+        <AppSettingsProvider>
+          <DatabaseProvider>
+            <StoreProvider appMode={APP_MODE_POPUP}>
+              <CurrencyStoreProvider>
+                <HashRouter>
+                  <PostHogClientProvider>
+                    <AnalyticsProvider>
+                      <ThemeProvider>
+                        <ExternalLinkOpenerProvider>
+                          <AddressesDiscoveryOverlay>
+                            <UIThemeProvider>
+                              <TxWitnessRequestProvider>
+                                {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
+                              </TxWitnessRequestProvider>
+                            </UIThemeProvider>
+                          </AddressesDiscoveryOverlay>
+                        </ExternalLinkOpenerProvider>
+                      </ThemeProvider>
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
+                </HashRouter>
+              </CurrencyStoreProvider>
+            </StoreProvider>
+          </DatabaseProvider>
+        </AppSettingsProvider>
+      </BackgroundServiceAPIProvider>
+    </ErrorBoundary>
   );
 };
 

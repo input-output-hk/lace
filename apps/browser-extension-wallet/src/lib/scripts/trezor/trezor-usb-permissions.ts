@@ -1,27 +1,47 @@
 import { runtime, tabs } from 'webextension-polyfill';
 import { AllowedOrigins } from './types';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
+import { logger } from '@lace/common';
+
+const contextualMessage = (msg: string) => `[trezor-usb-permissions] ${msg}`;
 
 /* Handling messages from usb permissions iframe */
 const switchToPopupTab = async (event?: BeforeUnloadEvent) => {
   window.removeEventListener('beforeunload', switchToPopupTab);
 
-  if (!event) {
-    // triggered from 'usb-permissions-close' message
-    // close current tab
-    const currentTabs = await tabs.query({
-      currentWindow: true,
-      active: true
-    });
-    if (currentTabs.length < 0) return;
-    await tabs.remove(currentTabs[0].id);
-  }
+  try {
+    if (!event) {
+      // triggered from 'usb-permissions-close' message
+      // close current tab
+      const currentTabs = await catchAndBrandExtensionApiError(
+        tabs.query({
+          currentWindow: true,
+          active: true
+        }),
+        contextualMessage('Failed to query for current tab when switching to popup')
+      );
+      if (currentTabs.length < 0) return;
+      await catchAndBrandExtensionApiError(
+        tabs.remove(currentTabs[0].id),
+        contextualMessage('Failed to remove current tab when switching to popup')
+      );
+    }
 
-  // find tab by popup pattern and switch to it
-  const currentTabs = await tabs.query({
-    url: `${AllowedOrigins.TREZOR_CONNECT_POPUP_BASE_URL}/popup.html`
-  });
-  if (currentTabs.length < 0) return;
-  tabs.update(currentTabs[0].id, { active: true });
+    // find tab by popup pattern and switch to it
+    const currentTabs = await catchAndBrandExtensionApiError(
+      tabs.query({
+        url: `${AllowedOrigins.TREZOR_CONNECT_POPUP_BASE_URL}/popup.html`
+      }),
+      contextualMessage('Failed to query TREZOR_CONNECT_POPUP tab')
+    );
+    if (currentTabs.length < 0) return;
+    void catchAndBrandExtensionApiError(
+      tabs.update(currentTabs[0].id, { active: true }),
+      contextualMessage('Failed to switch to the TREZOR_CONNECT_POPUP tab')
+    );
+  } catch (error) {
+    logger.error(error);
+  }
 };
 
 window.addEventListener('message', async (event) => {

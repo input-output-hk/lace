@@ -12,6 +12,7 @@ import {
   WalletType
 } from '@cardano-sdk/web-extension';
 import { getBackgroundStorage } from './storage';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 const { blake2b } = Wallet.Crypto;
 const DAPP_CONNECTOR_REGEX = new RegExp(/dappconnector/i);
@@ -47,13 +48,6 @@ const calculatePopupWindowPositionAndSize = (
   ...popup
 });
 
-const createTab = async (url: string, active = false) =>
-  tabs.create({
-    url: runtime.getURL(url),
-    active,
-    pinned: true
-  });
-
 const createWindow = (
   tabId: number,
   windowSize: WindowSizeAndPositionProps,
@@ -74,7 +68,14 @@ const createWindow = (
  */
 export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
   const currentWindow = await windows.getCurrent();
-  const tab = await createTab(`../dappConnector.html${url}`, false);
+  const tab = await catchAndBrandExtensionApiError(
+    tabs.create({
+      url: runtime.getURL(`../dappConnector.html${url}`),
+      active: false,
+      pinned: true
+    }),
+    'Failed to launch cip30 popup'
+  );
   const { namiMigration } = await getBackgroundStorage();
   const windowSize = namiMigration?.mode === 'nami' ? POPUP_WINDOW_NAMI : POPUP_WINDOW;
 
@@ -125,12 +126,18 @@ export const getActiveWallet = async ({
 };
 
 export const closeAllLaceOrNamiTabs = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
-  const openTabs = await tabs.query({ title: 'Lace' });
-  const namiTabs = await tabs.query({ title: POPUP_WINDOW_NAMI_TITLE });
-  openTabs.push(...namiTabs);
+  const openTabs = [
+    ...(await catchAndBrandExtensionApiError(tabs.query({ title: 'Lace' }), 'Failed to query lace tabs for closing')),
+    ...(await catchAndBrandExtensionApiError(
+      tabs.query({ title: POPUP_WINDOW_NAMI_TITLE }),
+      'Failed to query nami mode tabs for closing'
+    ))
+  ];
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
-    if (!shouldRemoveTab || shouldRemoveTab(tab.url)) await tabs.remove(tab.id);
+    if (!shouldRemoveTab || shouldRemoveTab(tab.url)) {
+      await catchAndBrandExtensionApiError(tabs.remove(tab.id), `Failed to close tab with url ${tab.url}`);
+    }
   }
 };
 

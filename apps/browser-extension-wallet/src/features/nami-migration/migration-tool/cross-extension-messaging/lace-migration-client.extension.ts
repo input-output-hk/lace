@@ -7,6 +7,7 @@ import { NAMI_EXTENSION_ID } from './lace/environment';
 import { createLaceMigrationOpenListener } from './lace/create-lace-migration-open-listener';
 import { LACE_EXTENSION_ID } from './nami/environment';
 import { logger } from '@lace/common';
+import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 type CheckMigrationStatus = () => Promise<MigrationState>;
 
@@ -42,6 +43,14 @@ export const handleNamiRequests = (): void => {
   runtime.onMessageExternal.addListener(createLaceMigrationPingListener(NAMI_EXTENSION_ID));
   logger.debug('[NAMI MIGRATION] createLaceMigrationOpenListener');
   runtime.onMessageExternal.addListener(
-    createLaceMigrationOpenListener(NAMI_EXTENSION_ID, LACE_EXTENSION_ID, tabs.create)
+    createLaceMigrationOpenListener(NAMI_EXTENSION_ID, LACE_EXTENSION_ID, ({ url }) =>
+      catchAndBrandExtensionApiError(
+        tabs.create({ url }),
+        `[NAMI MIGRATION] laceMigrationOpenListener failed to create tab with url ${url}`,
+        {
+          reThrow: false
+        }
+      )
+    )
   );
 };

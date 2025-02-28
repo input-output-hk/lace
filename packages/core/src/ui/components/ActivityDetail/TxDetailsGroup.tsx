@@ -6,7 +6,7 @@ import { DownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button } from '@lace/common';
 import { ReactComponent as BracketDown } from '../../assets/icons/bracket-down.component.svg';
 import styles from './TransactionInputOutput.module.scss';
-import { Text } from '@input-output-hk/lace-ui-toolkit';
+import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
 interface TxDetailsGroupProps {
   testId: string;
@@ -37,16 +37,19 @@ export const TxDetailsGroup = ({
   );
 
   return (
-    <div data-testid={testId} className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine })}>
+    <div
+      data-testid={testId}
+      className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine, [styles.isOpen]: isVisible })}
+    >
       <div className={styles.expanderHeader}>
-        <div className={styles.title}>
-          <Text.Body.Large weight="$bold">{title}</Text.Body.Large>
+        <Flex alignItems="center" className={styles.title}>
+          <Text.Body.Normal weight="$semibold">{title}</Text.Body.Normal>
           {tooltipContent && (
             <Tooltip title={tooltipContent}>
               <InfoCircleOutlined className={styles.infoIcon} />
             </Tooltip>
           )}
-        </div>
+        </Flex>
 
         <Button
           variant="outlined"
