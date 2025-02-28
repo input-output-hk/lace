@@ -10,7 +10,6 @@ import ArrowChartUp from '../../../../../../../../../assets/icons/arrow-chart-up
 import ArrowsOppositeDirection from '../../../../../../../../../assets/icons/arrows-opposite-direction.component.svg';
 import Ticket from '../../../../../../../../../assets/icons/ticket-icon.component.svg';
 import Persons from '../../../../../../../../../assets/icons/persons.component.svg';
-import { dappCategoriesEnumSchema } from '@lib/scripts/types/feature-flags';
 
 const mapOfCategoryToIcon: Record<DefaultCategory, React.ComponentType> = {
   [DefaultCategory.All]: ShowAll,
@@ -26,7 +25,7 @@ const mapOfCategoryToIcon: Record<DefaultCategory, React.ComponentType> = {
 };
 
 const isOneOfDefaultCategories = (category: string): category is DefaultCategory =>
-  dappCategoriesEnumSchema.safeParse(category).success || category === DefaultCategory.All;
+  Object.keys(mapOfCategoryToIcon).includes(category) || category === DefaultCategory.All;
 
 export const mapCategory = (category: string): React.ReactNode => {
   // eslint-disable-next-line unicorn/no-null
