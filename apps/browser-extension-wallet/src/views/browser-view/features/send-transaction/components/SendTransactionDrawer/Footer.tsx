@@ -244,6 +244,10 @@ export const Footer = withAddressBookContext(
           await inMemoryWallet.submitTx(signedTx);
         } catch (error) {
           logger.error('TX submit error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: error instanceof Error ? error?.message : (error ?? '').toString()
+          });
           throw error;
         }
         txSubmitted$.next({
