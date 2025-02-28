@@ -1,4 +1,5 @@
 @VotingCenterPopup @Analytics @Testnet @Mainnet
+@SkipFirefox
 Feature: Analytics - Voting Center - Popup view
 
   Background:

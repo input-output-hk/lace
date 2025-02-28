@@ -1,4 +1,5 @@
 @Staking-NonDelegatedFunds-Extended @Analytics @Testnet
+@SkipFirefox
 Feature: Analytics - PostHog - Staking - Extended View
 
   Background:

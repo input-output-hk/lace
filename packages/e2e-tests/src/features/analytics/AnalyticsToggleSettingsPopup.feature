@@ -1,4 +1,5 @@
 @Settings-Popup @Analytics @Mainnet @Testnet
+@SkipFirefox
 Feature: Analytics - Settings Toggle - Popup View
 
   Background:

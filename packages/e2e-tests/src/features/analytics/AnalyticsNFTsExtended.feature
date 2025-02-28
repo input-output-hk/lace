@@ -1,4 +1,5 @@
 @NFT-Folders-Extended @Analytics @Testnet @Mainnet
+@SkipFirefox
 Feature: Analytics - Posthog - NFTs - Extended view
 
   Background:

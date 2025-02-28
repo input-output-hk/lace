@@ -9,6 +9,7 @@ UI-mapped gherkin tests for the Lace browser extension
     with [selenium-standalone](https://github.com/webdriverio/selenium-standalone/blob/main/docs/java-versions.md)
   - On macOS, you can install it easily with homebrew: `brew install openjdk`
 - gpg
+- Firefox Developer Edition (for running tests on Firefox locally)
 
 ## Running tests locally
 
@@ -32,6 +33,7 @@ UI-mapped gherkin tests for the Lace browser extension
 - Run tests (from the `packages/e2e-tests` directory)
   - `yarn test:local:chrome`
   - `yarn test:local:edge`
+  - `yarn test:local:firefox`
 
 ## Selective gherkin scenario runs by tag matching
 
@@ -43,11 +45,15 @@ UI-mapped gherkin tests for the Lace browser extension
 
 - chrome
 - edge
+- firefox
+  - does not support network interception or console log collection, so some tests/features are disabled (using the @SkipFirefox tag)
+  - works only with Firefox Developer Edition, as the regular version does not allow the use of extensions
+  - does not support device emulation, so popup mode is simulated by simply resizing the window, which is not an ideal method of simulation
 
 ## Supported params
 
 - `STANDALONE_DRIVER=true|false` default = false (optional)
-  - true = use already running chromedriver on port 4444
+  - true = use already running chromedriver/geckodriver on port 4444
   - false = use webdriver manager
 - `ENV=(mainnet|preprod|preview)`default = preprod (optional)
   - determines default network used for tests
@@ -58,6 +64,7 @@ UI-mapped gherkin tests for the Lace browser extension
   - url for test DApp (only for DApp Connector tests)
 - `SERVICE_WORKER_LOGS=true|false` default=false (optional)
   - enables service worker logs collection
+  - not supported for Firefox
 
 ## Run single feature file with params
 
