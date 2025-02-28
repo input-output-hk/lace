@@ -1,6 +1,5 @@
-import { LACE_EXTENSION_ID } from '@src/features/nami-migration/migration-tool/cross-extension-messaging/nami/environment';
 import { distinctUntilChanged, from, fromEventPattern, map, merge, share, startWith, switchMap } from 'rxjs';
-import { Tabs, tabs, windows } from 'webextension-polyfill';
+import { runtime, Tabs, tabs, windows } from 'webextension-polyfill';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
 type WindowId = number;
@@ -19,13 +18,25 @@ const tabActivated$ = fromEventPattern<Tabs.OnActivatedActiveInfoType>(
   (handler) => tabs.onActivated.removeListener(handler)
 );
 
+/**
+ * Get the extension tab pattern url.
+ * For Chrome, it will be 'chrome-extension://<extension-id>/*'
+ * and for Firefox, it will be 'moz-extension://<internal-uuid>/*'
+ *
+ * @returns {string} extension tab pattern url
+ */
+const getExtensionTabUrlPattern = () => {
+  const url = new URL(runtime.getURL(''));
+  return `${url.origin}/*`;
+};
+
 export const isLaceTabActive$ = merge(windowRemoved$, tabUpdated$, tabActivated$).pipe(
   switchMap(() =>
     from(
       catchAndBrandExtensionApiError(
         tabs.query({
           active: true,
-          url: `chrome-extension://${LACE_EXTENSION_ID}/*`
+          url: getExtensionTabUrlPattern()
         }),
         'Failed to query for currently active lace tab'
       )
