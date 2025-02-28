@@ -41,7 +41,7 @@ export const TxDetailsGroup = ({
       data-testid={testId}
       className={cn(styles.transactionInOut, { [styles.separatorLine]: withSeparatorLine, [styles.isOpen]: isVisible })}
     >
-      <div className={cn(styles.expanderHeader, { [styles.separatorLine]: isVisible })}>
+      <div className={styles.expanderHeader}>
         <Flex alignItems="center" className={styles.title}>
           <Text.Body.Normal weight="$semibold">{title}</Text.Body.Normal>
           {tooltipContent && (
