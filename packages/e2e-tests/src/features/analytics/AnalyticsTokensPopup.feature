@@ -1,4 +1,5 @@
 @Tokens-popup @Analytics @Testnet @Mainnet
+@SkipFirefox
 Feature: Analytics - Tokens tab - Popup view
 
   Background:

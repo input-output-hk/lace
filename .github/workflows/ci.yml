@@ -230,7 +230,7 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
-      
+
   build:
     name: Build Lace
     runs-on: ubuntu-22.04
@@ -239,9 +239,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Lace artifact
+      - name: Build Lace chrome artifact
         uses: ./.github/shared/build
         with:
+          BROWSER_TARGET: 'chromium'
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
@@ -255,104 +256,120 @@ jobs:
           SENTRY_ENVIRONMENT: 'smoke-tests'
           WALLET_POLLING_INTERVAL_IN_SEC: 5
 
-      - name: Upload build artifact
+      - name: Upload chrome artifact
         uses: actions/upload-artifact@v4
         with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          name: '${{ env.BUILD_ARTIFACT_NAME }}-chrome'
           path: ./apps/browser-extension-wallet/dist
 
-  smokeTests:
-    name: Smoke e2e tests
+      - name: Build Lace firefox artifact
+        uses: ./.github/shared/build
+        with:
+          BROWSER_TARGET: 'firefox'
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'smoke-tests'
+          WALLET_POLLING_INTERVAL_IN_SEC: 5
+
+      - name: Upload firefox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}-firefox'
+          path: ./apps/browser-extension-wallet/dist
+
+  smokeTests-chrome:
+    name: Smoke e2e tests - Chrome
     runs-on: ubuntu-22.04
     needs: build
     strategy:
       fail-fast: false
       matrix:
         batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
+      - name: Execute E2E tests - Chrome
+        uses: ./.github/actions/test/smoke
         with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Download Lace build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
-
-      - name: Execute E2E tests
-        uses: ./.github/actions/test/e2e
-        with:
+          BROWSER: "chrome"
           BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: true
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          SERVICE_WORKER_LOGS: true
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-  processReports:
-    name: Process smoke e2e test reports
+  processReports-chrome:
+    name: Process smoke e2e test reports - Chrome
     runs-on: ubuntu-22.04
-    needs: smokeTests
+    needs: smokeTests-chrome
     if: always()
     steps:
-      - name: Download all smoke tests artifacts
-        uses: actions/download-artifact@v4
+      - name: Checkout repository
+      - uses: actions/checkout@v4
+
+      - name: Run reports processing - Chrome
+        uses: ./.github/actions/test/reports
         with:
-          path: .
-          pattern: 'runner-artifacts-*'
-          merge-multiple: true
+          BROWSER: 'chrome'
+          SMOKE_TESTS_RESULT: ${{ needs.smokeTests-chrome.result }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+          E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
+          E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
+          E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
 
-      - name: Create allure properties
-        shell: bash
-        if: always()
-        working-directory: ./reports/allure/results
-        run: |
-          echo "
-          branch=${{ github.ref_name }}
-          browser= 'Chrome'
-          tags= '@Smoke'
-          platform=Linux
-          " > environment.properties
+  smokeTests-firefox:
+    name: Smoke e2e tests - Firefox
+    runs-on: ubuntu-22.04
+    needs: smokeTests-chrome
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ]
 
-      - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.9.0
-        if: always()
-        env:
-          GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Execute E2E tests - Firefox
+        uses: ./.github/actions/test/smoke
         with:
-          storageType: s3
-          resultsGlob: './reports/allure/results'
-          bucket: lace-e2e-test-results
-          prefix: 'smoke/linux/chrome/${{ github.run_number }}'
-          copyLatest: true
-          ignoreMissingResults: true
-          updatePr: comment
-          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+          BROWSER: 'firefox'
+          BATCH: ${{ matrix.batch }}
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Publish artifacts (logs, reports, screenshots)
-        uses: actions/upload-artifact@v4
-        if: always()
+  processReports-firefox:
+    name: Process smoke e2e test reports - Firefox
+    runs-on: ubuntu-22.04
+    needs: smokeTests-firefox
+    if: always()
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@v4
+
+      - name: Run reports processing - Firefox
+        uses: ./.github/actions/test/reports
         with:
-          name: test-artifacts
-          path: |
-            ./packages/e2e-tests/screenshots
-            ./packages/e2e-tests/logs
-            ./packages/e2e-tests/reports
-          retention-days: 5
-
-      - run: |
-          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
+          BROWSER: 'firefox'
+          SMOKE_TESTS_RESULT: ${{ needs.smokeTests-firefox.result }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          E2E_AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          E2E_AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+          E2E_REPORTS_USER: ${{ secrets.E2E_REPORTS_USER }}
+          E2E_REPORTS_PASSWORD: ${{ secrets.E2E_REPORTS_PASSWORD }}
+          E2E_REPORTS_URL: ${{ secrets.E2E_REPORTS_URL }}
 
   if-core-changed:
     name: When core changed

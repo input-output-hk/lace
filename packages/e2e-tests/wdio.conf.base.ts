@@ -6,7 +6,7 @@ import { Logger } from './src/support/logger';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+  specs: [['./src/features/**/*.feature']],
   suites: {
     batch1: [
       './src/features/Onboarding*.feature',
@@ -146,7 +146,7 @@ export const config: WebdriverIO.Config = {
     tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
     tagsInTitle: true,
     timeout: 200_000,
-    retry: 1,
+    retry: 0,
     noStrictFlaky: true
   } as WebdriverIO.CucumberOpts,
   async onPrepare() {

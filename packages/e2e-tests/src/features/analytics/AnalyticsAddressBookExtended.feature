@@ -1,4 +1,5 @@
 @AddressBook-extended @Analytics @Testnet @Mainnet
+@SkipFirefox
 Feature: Analytics - Posthog - Address book - Extended view
 
   Background:
