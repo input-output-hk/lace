@@ -3,9 +3,9 @@ import {
   ExperimentName,
   FeatureFlagPayloads,
   FeatureFlags,
-  FeatureFlagsByNetwork,
-  NetworkName
+  FeatureFlagsByNetwork
 } from '@lib/scripts/types/feature-flags';
+import { NetworkName } from '@providers/PostHogClientProvider/schema';
 
 export const POSTHOG_ENABLED = process.env.USE_POSTHOG_ANALYTICS === 'true';
 export const POSTHOG_OPTED_OUT_EVENTS_DISABLED = process.env.USE_POSTHOG_ANALYTICS_FOR_OPTED_OUT === 'false';

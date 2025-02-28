@@ -30,13 +30,11 @@ import {
   FeatureFlagCommonSchema,
   FeatureFlagDappExplorerSchema,
   FeatureFlagPayloads,
-  featureFlagSchema,
   FeatureFlagsByNetwork,
-  NetworksEnumSchema,
-  networksEnumSchema,
   FeatureFlags,
   RawFeatureFlagPayloads
 } from '@lib/scripts/types/feature-flags';
+import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
 
 const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
 
