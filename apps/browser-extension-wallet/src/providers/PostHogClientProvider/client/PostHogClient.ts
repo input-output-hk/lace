@@ -34,8 +34,11 @@ import {
   FeatureFlags,
   RawFeatureFlagPayloads
 } from '@lib/scripts/types/feature-flags';
+import { config } from '@src/config';
 import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
 
+// eslint-disable-next-line no-magic-numbers
+const FEATURE_FLAG_CHECK_INTERVAL = config().POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS * 1000;
 const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
 
 /**
@@ -232,6 +235,15 @@ export class PostHogClient<Action extends string = string> {
   }
 
   protected loadFeatureFlags(): void {
+    // posthog.onFeatureFlags is not triggered on change, so we need to poll for changes
+    setInterval(() => {
+      try {
+        posthog.reloadFeatureFlags();
+      } catch (error) {
+        logger.error('Failed to reload feature flags:', error);
+      }
+    }, FEATURE_FLAG_CHECK_INTERVAL);
+
     posthog.onFeatureFlags((_, loadedFeatureFlags) => {
       const loadedFeatureFlagPayloads = posthog.featureFlags.getFlagPayloads() as RawFeatureFlagPayloads;
       this.featureFlagPayloads = PostHogClient.parseFeaturePayloads(loadedFeatureFlagPayloads);
