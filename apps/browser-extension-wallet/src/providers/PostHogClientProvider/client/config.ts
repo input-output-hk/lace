@@ -34,7 +34,8 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.USE_SWITCH_TO_NAMI_MODE]: false,
   [ExperimentName.SHARED_WALLETS]: false,
   [ExperimentName.WEBSOCKET_API]: false,
-  [ExperimentName.DAPP_EXPLORER]: false
+  [ExperimentName.DAPP_EXPLORER]: false,
+  [ExperimentName.BITCOIN_WALLETS]: false
 };
 
 export const featureFlagsByNetworkInitialValue: FeatureFlagsByNetwork = {
