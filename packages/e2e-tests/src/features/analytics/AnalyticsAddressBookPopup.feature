@@ -1,5 +1,4 @@
 @AddressBook-popup @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Analytics - Posthog - Address book - Popup view
 
   Background:

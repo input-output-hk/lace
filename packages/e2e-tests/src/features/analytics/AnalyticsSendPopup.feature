@@ -1,5 +1,4 @@
 @Analytics-SendSimpleTransaction-Popup-E2E @Analytics @Testnet
-@SkipFirefox
 Feature: Analytics - Posthog - Sending - Popup View
 
   Background:

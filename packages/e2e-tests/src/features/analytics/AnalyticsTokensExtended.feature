@@ -1,5 +1,4 @@
 @Tokens-extended @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Analytics - Tokens tab - extended view
 
   Background:

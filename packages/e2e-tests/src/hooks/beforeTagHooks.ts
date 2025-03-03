@@ -27,16 +27,6 @@ const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletNa
 
 Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
-Before(({ pickle }) => {
-  const scenarioTags = pickle.tags.map((tag) => tag.name);
-  const browserName = (browser.capabilities as Record<string, any>).browserName;
-
-  if (scenarioTags.includes('@SkipFirefox') && browserName === 'firefox') {
-    return 'skipped';
-  }
-  return pickle;
-});
-
 Before(
   {
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet or @OnboardingRestorePaperWallet'

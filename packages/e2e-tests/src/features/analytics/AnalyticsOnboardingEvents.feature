@@ -1,5 +1,4 @@
 @OnboardingCreateWallet @Analytics @Testnet
-@SkipFirefox
 Feature: Analytics - Posthog - Onboarding - Extended View
 
   @LW-8311

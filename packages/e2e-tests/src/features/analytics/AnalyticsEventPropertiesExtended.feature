@@ -1,5 +1,4 @@
 @NFTs-Extended @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Analytics - Posthog - Event properties
 
   Background:

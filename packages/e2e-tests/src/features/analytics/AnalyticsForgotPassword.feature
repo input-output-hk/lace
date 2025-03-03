@@ -1,5 +1,4 @@
 @ForgotPassword @Analytics @Mainnet @Testnet @Pending
-@SkipFirefox
 Feature: Analytics - Forgot Password
 
   Background:

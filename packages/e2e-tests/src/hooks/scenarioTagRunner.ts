@@ -19,7 +19,7 @@ Before(async () => {
   }
 });
 
-After({ tags: 'not @Pending and not @pending and not @SkipFirefox' }, async () => {
+After({ tags: 'not @Pending and not @pending' }, async () => {
   await clearWalletRepository();
   await networkManager.closeOpenedCdpSessions();
   await consoleManager.closeOpenedCdpSessions();

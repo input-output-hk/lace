@@ -1,5 +1,4 @@
 @AddNewWalletConnect @Testnet @Mainnet
-@SkipFirefox
 Feature: Add new wallet - Connect hardware wallet
 
   @LW-9358

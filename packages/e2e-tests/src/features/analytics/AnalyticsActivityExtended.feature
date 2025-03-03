@@ -1,5 +1,4 @@
 @Transactions-Extended @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Transactions - Extended view
 
   Background:

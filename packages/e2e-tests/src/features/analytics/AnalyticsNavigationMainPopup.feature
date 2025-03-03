@@ -1,5 +1,4 @@
 @MainNavigation-Popup @Analytics @Mainnet @Testnet
-@SkipFirefox
 Feature: Analytics - Main Navigation - Popup view
 
   Background:

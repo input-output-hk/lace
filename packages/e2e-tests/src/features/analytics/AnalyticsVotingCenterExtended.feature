@@ -1,5 +1,4 @@
 @VotingCenterExtended @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Analytics - Voting Center - Extended view
 
   Background:

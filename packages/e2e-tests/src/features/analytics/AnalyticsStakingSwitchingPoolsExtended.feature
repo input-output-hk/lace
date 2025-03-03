@@ -1,5 +1,4 @@
 @Analytics-Staking-SwitchingPools-Extended-E2E @Analytics @Testnet @Pending @E2E
-@SkipFirefox
 Feature: Analytics - Posthog - Switching pools - Extended View
 
   Background:

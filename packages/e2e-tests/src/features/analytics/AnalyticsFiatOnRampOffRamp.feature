@@ -1,5 +1,4 @@
 @Analytics @Banxa-Extended @Testnet
-@SkipFirefox
 Feature: Analytics - Fiat On Ramp & Off Ramp - Banxa
 
   Background:

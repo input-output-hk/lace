@@ -1,5 +1,4 @@
 @OnboardingHardwareWallet @Onboarding @Testnet @Mainnet
-@SkipFirefox
 Feature: Onboarding - Hardware wallet
 
   @LW-3367

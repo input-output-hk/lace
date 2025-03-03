@@ -1,5 +1,4 @@
 @Settings-Extended @Analytics @Testnet
-@SkipFirefox
 Feature: Analytics - Settings Toggle - Extended View
 
   Background:

@@ -1,5 +1,4 @@
 @MainNavigation-Extended @Analytics @Mainnet @Testnet
-@SkipFirefox
 Feature: Analytics - Main Navigation - Extended view
 
   Background:

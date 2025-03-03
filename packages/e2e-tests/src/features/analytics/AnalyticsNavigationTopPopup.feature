@@ -1,5 +1,4 @@
 @Top-Navigation-Popup @Analytics @Mainnet @Testnet
-@SkipFirefox
 Feature: Analytics - Top Navigation - Popup view
 
   Background:

@@ -1,5 +1,4 @@
 @Analytics-SendSimpleTransaction-Extended-E2E @Analytics @Testnet
-@SkipFirefox
 Feature: Analytics - Posthog - Sending - Extended View
 
   Background:

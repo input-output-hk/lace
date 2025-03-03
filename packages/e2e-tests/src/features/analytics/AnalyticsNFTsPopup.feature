@@ -1,5 +1,4 @@
 @NFTs-Popup @Analytics @Testnet @Mainnet
-@SkipFirefox
 Feature: Analytics - Posthog - NFTs - Popup view
 
   Background:
