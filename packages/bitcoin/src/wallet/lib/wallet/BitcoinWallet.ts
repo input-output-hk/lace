@@ -1,60 +1,19 @@
 import {BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO} from './../providers';
 import {BehaviorSubject, interval, of, startWith} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
-import {AddressType, BitcoinWalletInfo, deriveAddressByType, DerivedAddress, KeyPair, Network} from '../common';
+import {
+  AddressType,
+  BitcoinWalletInfo, ChainType,
+  deriveAddressByType,
+  deriveChildPublicKey,
+  DerivedAddress, getNetworkKeys,
+  Network
+} from '../common';
 import * as bitcoin from 'bitcoinjs-lib';
-import {Signer} from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import isEqual from 'lodash/isEqual';
 
 bitcoin.initEccLib(ecc);
-
-export class CustomSigner implements Signer {
-  publicKey: Buffer;
-
-  /**
-   * Creates a new CustomSigner instance.
-   * @param keyPair - The key pair to use for signing.
-   */
-  constructor(private keyPair: KeyPair) {
-    if (!keyPair.privateKey) {
-      throw new Error('Private key is required to sign transactions.');
-    }
-    this.publicKey = keyPair.publicKey;
-  }
-
-  /**
-   * Signs a hash using tiny-secp256k1's sign function.
-   * @param {Buffer} hash - The hash to sign (must be 32 bytes).
-   * @param {boolean} _lowR - Optional flag for lowR signatures (ignored here).
-   * @returns {Buffer} The signature as a buffer.
-   */
-  sign(hash: Buffer, _lowR: boolean = false): Buffer {
-    if (hash.length !== 32) {
-      throw new Error('Hash must be 32 bytes.');
-    }
-
-    const signature = ecc.sign(new Uint8Array(hash), new Uint8Array(this.keyPair.privateKey));
-    return Buffer.from(signature);
-  }
-
-  /**
-   * Returns the public key.
-   * @returns {Buffer} The public key as a buffer.
-   */
-  getPublicKey(): Buffer {
-    return this.publicKey;
-  }
-
-  /**
-   * Clears the private key from memory.
-   *
-   * This is a security measure to prevent the private key from being exposed in memory.
-   */
-  clearSecrets() {
-    this.keyPair.privateKey.fill(0);
-  }
-}
 
 /**
  * Represents the fee market for estimating transaction fees.
@@ -129,15 +88,17 @@ export class BitcoinWallet {
     this.provider = provider;
     this.info = info;
 
-    const pubKey = Buffer.from(info.publicKeyHex, 'hex');
+    const networkIndex = network === Network.Mainnet ? 0 : 1;
+    const networkKeys = getNetworkKeys(info, network);
+    const extendedAccountPubKey = Buffer.from(networkKeys.extendedAccountPublicKeys.nativeSegWitHex, 'hex');
+    const pubKey = deriveChildPublicKey(extendedAccountPubKey, ChainType.External, 0);
     const address = deriveAddressByType(pubKey, AddressType.NativeSegWit, bitcoinNetwork);
 
-    this.address =
-      {
-        address,
-        addressType: AddressType.NativeSegWit,
-        derivationPath: info.derivationPath
-      };
+    this.address = {
+      address,
+      addressType: AddressType.NativeSegWit,
+      derivationPath: `m/84'/${networkIndex}'/${info.accountIndex}'/0/0`
+    };
 
     this.addresses$.next([this.address]);
     this.startPolling();

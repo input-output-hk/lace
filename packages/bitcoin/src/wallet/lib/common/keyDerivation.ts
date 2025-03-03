@@ -3,8 +3,17 @@ import { HDKey } from '@scure/bip32';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { AddressType } from './address';
+import { Network } from './network';
 
 bitcoin.initEccLib(ecc);
+
+const ADDRESS_TYPE_TO_PURPOSE: Record<AddressType, number> = {
+  [AddressType.Legacy]: 44,
+  [AddressType.SegWit]: 49,
+  [AddressType.NativeSegWit]: 84,
+  [AddressType.Taproot]: 86,
+  [AddressType.ElectrumNativeSegWit]: 0,
+};
 
 /**
  * Enum representing the type of address chain in hierarchical deterministic wallets.
@@ -26,50 +35,6 @@ export enum ChainType {
    */
   Internal = 'internal',
 }
-
-/**
- * Represents the derivation paths for different Bitcoin address types.
- *
- * Hierarchical deterministic wallets (HD wallets) use standardized derivation paths
- * to organize keys and addresses in a predictable way. These paths follow specific
- * BIPs (Bitcoin Improvement Proposals) for compatibility across wallets.
- *
- * Key Standards:
- * - **BIP-44**: Legacy addresses (P2PKH).
- * - **BIP-49**: SegWit-compatible addresses (P2SH-P2WPKH).
- * - **BIP-84**: Native SegWit addresses (P2WPKH).
- * - **BIP-86**: Taproot addresses (P2TR).
- * - **Electrum**: Custom path `m/0'` for Native SegWit in Electrum wallets.
- */
-const derivationPaths = {
-  NativeSegWit: 'm/84\'/0\'/0\'',
-  SegWit: 'm/49\'/0\'/0\'',
-  Legacy: 'm/44\'/0\'/0\'',
-  Taproot: 'm/86\'/0\'/0\'',
-  ElectrumNativeSegWit: 'm/0\''
-};
-
-/**
- * Represents the derivation paths for different Bitcoin address types.
- *
- * Hierarchical deterministic wallets (HD wallets) use standardized derivation paths
- * to organize keys and addresses in a predictable way. These paths follow specific
- * BIPs (Bitcoin Improvement Proposals) for compatibility across wallets.
- *
- * Key Standards:
- * - **BIP-44**: Legacy addresses (P2PKH).
- * - **BIP-49**: SegWit-compatible addresses (P2SH-P2WPKH).
- * - **BIP-84**: Native SegWit addresses (P2WPKH).
- * - **BIP-86**: Taproot addresses (P2TR).
- * - **Electrum**: Custom path `m/0'` for Native SegWit in Electrum wallets.
- */
-const testnetDerivationPaths = {
-  NativeSegWit: 'm/84\'/1\'/0\'',
-  SegWit: 'm/49\'/1\'/0\'',
-  Legacy: 'm/44\'/1\'/0\'',
-  Taproot: 'm/86\'/1\'/0\'',
-  ElectrumNativeSegWit: 'm/0\''
-};
 
 /**
  * Derives a BIP-39-compatible seed from the given mnemonic and optional passphrase.
@@ -120,86 +85,107 @@ export type KeyPair = {
 };
 
 /**
- * Derives the key pair (public and private keys) for the specified address type, chain, and index.
+ * Derives the account-level (root) key pair from the given master seed.
  *
- * This function generates a hierarchical deterministic (HD) key pair based on the specified derivation path,
- * which follows Bitcoin standards (BIP-44, BIP-49, BIP-84, BIP-86) or Electrum's custom derivation scheme.
+ * This function derives the account-level using the derivation path:
  *
- * @param {Buffer} seed - The master seed derived from the mnemonic phrase.
- * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit).
- * @param {ChainType} chain - The chain type (`external` for receiving addresses, `internal` for change addresses).
- * @param {number} index - The index of the address to derive (e.g., 0 for the first address).
- * @returns {KeyPair} An object containing the derived public key and private key.
+ *    m / purpose' / coin_type' / account'
  *
- * @throws {Error} If the private key cannot be derived (e.g., for a hardened path).
+ * where:
+ * - `purpose` is determined by the address type (e.g., 84 for NativeSegWit, 49 for SegWit, 44 for Legacy, etc.)
+ * - `coin_type` comes from the network object (0 for mainnet and 1 for testnet).
+ * - `account` is the account index.
+ *
+ * For example, for a Native SegWit wallet on Bitcoin mainnet with account 0, the derivation path would be:
+ *    m/84'/0'/0'
+ *
+ * @param {Buffer} seed - The master seed derived from the mnemonic.
+ * @param {AddressType} addressType - The address type (e.g., Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit).
+ * @param {Network} network - The network (mainnet or testnet).
+ * @param {number} account - The account index.
+ * @returns {{ pair: KeyPair, path: string }} An object containing the derived account-level key pair and the derivation path.
+ * @throws {Error} If the account-level private or public key cannot be derived.
  */
-export const deriveKeyPair = (
-  seed: Buffer,
-  addressType: AddressType,
-  chain: ChainType,
-  index: number
-): { pair: KeyPair, path: string } => {
+export const deriveRootKeyPair = (seed: Buffer, addressType: AddressType, network: Network, account: number) => {
   const root = HDKey.fromMasterSeed(seed);
+  const networkIndex = network === Network.Mainnet ? 0 : 1;
+  const accountPath = `m/${ADDRESS_TYPE_TO_PURPOSE[addressType]}'/${networkIndex}'/${account}'`;
+  const accountNode = root.derive(accountPath);
 
-  const chainPath = chain === ChainType.External ? `0` : `1`;
+  if (!accountNode.privateKey) {
+    throw new Error('Failed to derive account-level private key');
+  }
 
-  const paths = bitcoin.networks.testnet ? testnetDerivationPaths : derivationPaths;
-  const path = `${paths[addressType]}/${chainPath}/${index}`;
-
-  const childNode = root.derive(path);
-
-  if (!childNode.privateKey) {
-    throw new Error('Failed to derive private key');
+  if (!accountNode.publicKey) {
+    throw new Error('Failed to derive account-level public key');
   }
 
   return {
     pair: {
-      publicKey: Buffer.from(childNode.publicKey as any),
-      privateKey: Buffer.from(childNode.privateKey as any)
-    }, path
+      publicKey: Buffer.from(accountNode.publicKey),
+      privateKey: Buffer.from(accountNode.privateKey)
+    },
+    path: accountPath
   };
 };
 
 /**
- * Derives the public key for the specified address type, chain, and index.
+ * Derives a child key pair from the account-level HD key.
  *
- * This function uses hierarchical deterministic (HD) derivation paths based on the Bitcoin standards
- * (BIP-44, BIP-49, BIP-84, BIP-86) and Electrum's custom derivation scheme.
+ * This function derives a child key for a specific chain (external for receiving or internal for change)
+ * and index, based on the account-level extended key. The chain is determined by using '0' for external addresses and
+ * '1' for internal addresses.
  *
- * @param {Buffer} seed - The master seed derived from the mnemonic phrase.
- * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit).
- * @param {ChainType} chain - The chain type (`external` for receiving addresses or `internal` for change addresses).
- * @param {number} index - The index of the address to derive (e.g., 0 for the first address).
- * @returns The derived public key and the derivation path.
+ * @param {Buffer} accountKey - The account-level extended key (HDKey) as a Buffer.
+ * @param {ChainType} chain - The chain type (external for receiving, internal for change).
+ * @param {number} index - The index of the child key to derive.
+ * @returns {{ pair: KeyPair, path: string }} An object containing the derived child key pair and its derivation path.
+ * @throws {Error} If the child private key cannot be derived.
  */
-export const derivePublicKey = (
-  seed: Buffer,
-  addressType: AddressType,
-  chain: ChainType,
-  index: number
-): { pubkey: Buffer, path: string } => {
-  const result = deriveKeyPair(seed, addressType, chain, index);
-  return { pubkey: result.pair.publicKey, path: result.path };
+export const deriveChildKeyPair = (accountKey: Buffer, chain: ChainType, index: number) => {
+  const hdAccountKey = HDKey.fromExtendedKey(accountKey.toString('hex'));
+  const chainPath = chain === ChainType.External ? '0' : '1';
+  const fullPath = `${chainPath}/${index}`;
+  const childNode = hdAccountKey.derive(fullPath);
+  if (!childNode.privateKey) {
+    throw new Error('Failed to derive child private key');
+  }
+
+  if (!childNode.publicKey) {
+    throw new Error('Failed to derive child public key');
+  }
+
+  return {
+    pair: {
+      publicKey: Buffer.from(childNode.publicKey),
+      privateKey: Buffer.from(childNode.privateKey)
+    },
+    path: fullPath
+  };
 };
 
 /**
- * Derives the private key for the specified address type, chain, and index.
+ * Derives a child public key from a given extended public key using non-hardened derivation.
  *
- * This function generates a hierarchical deterministic (HD) private key based on the specified
- * derivation path, which follows Bitcoin standards (BIP-44, BIP-49, BIP-84, BIP-86) or Electrum's custom derivation scheme.
+ * This function allows deriving a child public key without requiring the private key.
+ * It accepts an extended public key (as a Buffer) and a relative derivation path (e.g. "0/0")
+ * for non-hardened derivation. If derivation is successful, it returns the child public key.
  *
- * @param {Buffer} seed - The master seed derived from the mnemonic phrase.
- * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit).
- * @param {ChainType} chain - The chain type (`external` for receiving addresses, `internal` for change addresses).
- * @param {number} index - The index of the address to derive (e.g., 0 for the first address).
- * @returns The derived private key and the derivation path.
+ * @param {Buffer} extendedPublicKey - The extended public key as a Buffer.
+ * @param {ChainType} chain - The chain type (external for receiving, internal for change).
+ * @param {number} index - The index of the child key to derive.
+ * @returns {Buffer} The derived child public key.
+ * @throws {Error} If the child public key cannot be derived.
  */
-export const derivePrivateKey = (
-  seed: Buffer,
-  addressType: AddressType,
-  chain: ChainType,
-  index: number
-): { privateKey: Buffer, path: string } => {
-  const keyPair = deriveKeyPair(seed, addressType, chain, index);
-  return { privateKey: keyPair.pair.privateKey, path: keyPair.path };
+export const deriveChildPublicKey = (extendedPublicKey: Buffer, chain: ChainType, index: number): Buffer => {
+  const hdKey = HDKey.fromExtendedKey(extendedPublicKey.toString('hex'));
+  const chainPath = chain === ChainType.External ? '0' : '1';
+  const relativePath = `${chainPath}/${index}`;
+  const childNode = hdKey.derive(relativePath);
+
+  if (!childNode.publicKey) {
+    throw new Error('Failed to derive child public key');
+  }
+
+  return Buffer.from(childNode.publicKey);
 };
