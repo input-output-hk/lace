@@ -60,4 +60,8 @@ if (!runtime.onUpdateAvailable.hasListener(updateToVersionCallback))
 
 // extensions will not auto-update while a background page is in use (which effectively means waiting until a browser restart
 // forces the browser to check if your add-on has an update, rather than relying on the existing, automated check for updates
-runtime.requestUpdateCheck();
+try {
+  runtime.requestUpdateCheck();
+} catch {
+  // Firefox does not support this API
+}

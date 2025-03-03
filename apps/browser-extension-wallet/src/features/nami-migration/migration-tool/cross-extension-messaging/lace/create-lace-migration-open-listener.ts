@@ -13,6 +13,7 @@ export const createLaceMigrationOpenListener =
       } catch (error) {
         logger.error('[NAMI MIGRATION] createLaceMigrationOpenListener: failed to close all windows', error);
       }
+      // Migrations will not run in Firefox, so no need to update this
       createTab({ url: `chrome-extension://${laceExtensionId}/app.html` });
     }
   };
