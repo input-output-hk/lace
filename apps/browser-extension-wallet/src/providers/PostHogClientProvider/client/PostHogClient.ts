@@ -23,7 +23,7 @@ import {
 } from './config';
 import { BackgroundService, BackgroundStorage, UserIdService } from '@lib/scripts/types';
 import { BehaviorSubject, distinctUntilChanged, Observable, Subscription } from 'rxjs';
-import { logger, PostHogAction, PostHogProperties } from '@lace/common';
+import { logger as commonLogger, PostHogAction, PostHogProperties } from '@lace/common';
 import {
   ExperimentName,
   FeatureFlag,
@@ -36,10 +36,13 @@ import {
 } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
 import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
+import { contextLogger } from '@cardano-sdk/util';
 
 // eslint-disable-next-line no-magic-numbers
 const FEATURE_FLAG_CHECK_INTERVAL = config().POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS * 1000;
 const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networksEnumSchema.safeParse(n).success;
+
+const logger = contextLogger(commonLogger, 'PostHogClient');
 
 /**
  * PostHog API reference:
@@ -68,6 +71,7 @@ export class PostHogClient<Action extends string = string> {
   }
 
   private async initialize() {
+    logger.warn('TESTING this :)');
     const [storage, userId] = await Promise.all([
       this.backgroundServiceUtils.getBackgroundStorage(),
       this.userIdService.getUserId(this.chain.networkMagic)
@@ -150,14 +154,14 @@ export class PostHogClient<Action extends string = string> {
   }
 
   async sendSessionStartEvent(): Promise<void> {
-    logger.debug('[ANALYTICS] Logging Session Start Event');
+    logger.debug('Logging Session Start Event');
     posthog.capture(String(PostHogAction.WalletSessionStartPageview), {
       ...(await this.getEventMetadata())
     });
   }
 
   async sendPageNavigationEvent(): Promise<void> {
-    logger.debug('[ANALYTICS] Logging page navigation event to PostHog');
+    logger.debug('Logging page navigation event to PostHog');
 
     posthog.capture('$pageview', {
       ...(await this.getEventMetadata())
@@ -168,10 +172,10 @@ export class PostHogClient<Action extends string = string> {
     const { id, alias } = await this.userIdService.getAliasProperties(this.chain.networkMagic);
     // If one of this does not exist, should not send the alias event
     if (!alias || !id) {
-      logger.debug('[ANALYTICS] IDs were not found');
+      logger.debug('IDs were not found');
       return;
     }
-    logger.debug('[ANALYTICS] Linking randomized ID with wallet-based ID');
+    logger.debug('Linking randomized ID with wallet-based ID');
     posthog.alias(alias, id);
   }
 
@@ -180,7 +184,7 @@ export class PostHogClient<Action extends string = string> {
   async sendMergeEvent(extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> {
     const id = await this.userIdService.generateWalletBasedUserId(extendedAccountPublicKey);
     if (!id) {
-      logger.debug('[ANALYTICS] Wallet-based ID not found');
+      logger.debug('Wallet-based ID not found');
       return;
     }
 
@@ -196,14 +200,14 @@ export class PostHogClient<Action extends string = string> {
       ...properties
     };
 
-    logger.debug('[ANALYTICS] Logging event to PostHog', action, payload);
+    logger.debug('Logging event to PostHog', action, payload);
     posthog.capture(String(action), payload);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken();
     this.chain = chain;
-    logger.debug('[ANALYTICS] Changing PostHog API token', token);
+    logger.debug('Changing PostHog API token', token);
     posthog.set_config({
       token
     });
@@ -221,7 +225,7 @@ export class PostHogClient<Action extends string = string> {
     this.updatePersonaProperties = true;
     this.optedInBeta$.next(optedInBeta);
 
-    logger.debug('[ANALYTICS] Changing Opted In Beta', optedInBeta);
+    logger.debug('Changing Opted In Beta', optedInBeta);
   }
 
   isFeatureFlagEnabled(feature: FeatureFlag): boolean {
