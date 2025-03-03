@@ -106,7 +106,7 @@ export type DiscardChangingPreferences = {
 export type DrawerFailure = {
   type: 'DrawerFailure';
   data: {
-    error: string;
+    error: Error;
   };
 };
 

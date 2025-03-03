@@ -23,6 +23,7 @@ import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { SignPolicy, useSecrets } from '@lace/core';
 import { useRewardAccountsData } from '../hooks';
 import { config } from '@src/config';
+import { parseError } from '@src/utils/parse-error';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -150,7 +151,8 @@ export const StakingContainer = (): React.ReactElement => {
           sharedWalletKey,
           coSigners,
           useRewardAccountsData,
-          govToolUrl: GOV_TOOLS_URLS[environmentName]
+          govToolUrl: GOV_TOOLS_URLS[environmentName],
+          parseError
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

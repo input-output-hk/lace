@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
-import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Button, WarningBanner } from '@lace/common';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
@@ -28,12 +28,23 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
         <ResultMessage
           status="error"
           title={t('drawer.failure.title')}
+          fullWidth
           description={
             <>
-              <div>{txError || t('drawer.failure.subTitle')}</div>
+              <div>{t('drawer.failure.subTitle')}</div>
               {isCustomSubmitApiEnabled && (
                 <Box mt="$32">
                   <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
+                </Box>
+              )}
+              {typeof txError === 'object' && txError.message && (
+                <Box w="$fill">
+                  <SummaryExpander title={t('browserView.transaction.fail.error-details.label')} plain>
+                    <TransactionSummary.Other
+                      label={txError.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
+                      text={txError.message}
+                    />
+                  </SummaryExpander>
                 </Box>
               )}
             </>
