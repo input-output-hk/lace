@@ -66,6 +66,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     walletStoreInMemoryWallet: inMemoryWallet,
     walletManagerExecuteWithPassword: executeWithPassword,
     isMultidelegationSupportedByDevice,
+    parseError,
   } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
@@ -120,7 +121,12 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       setIsLoading(false);
 
       if (error instanceof Error && error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
-        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+        portfolioMutators.executeCommand({
+          data: {
+            error: parseError(error),
+          },
+          type: 'HwSkipToDeviceFailure',
+        });
       }
     }
   };

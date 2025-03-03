@@ -361,15 +361,17 @@ export const processExpandedViewCases: Handler = (params) =>
                 })
               ),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                  txError: data.error,
                 })
               ),
               HwSkipToFailure: handler<HwSkipToFailure, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
+                  txError: data.error,
                 })
               ),
               HwSkipToSuccess: handler<HwSkipToSuccess, StatePortfolioManagement, StatePortfolioManagement>(
@@ -438,9 +440,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 })
               ),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                  txError: data.error,
                 })
               ),
             },
@@ -557,15 +560,19 @@ export const processExpandedViewCases: Handler = (params) =>
                 activeDrawerStep: DrawerManagementStep.Sign,
               })),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StateNewPortfolio, StateNewPortfolio>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                  txError: data.error,
                 })
               ),
-              HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
-                ...state,
-                activeDrawerStep: DrawerManagementStep.Failure,
-              })),
+              HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(
+                ({ state, command: { data } }) => ({
+                  ...state,
+                  activeDrawerStep: DrawerManagementStep.Failure,
+                  txError: data.error,
+                })
+              ),
               HwSkipToSuccess: handler<HwSkipToSuccess, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
                 activeDrawerStep: DrawerManagementStep.Success,
@@ -627,9 +634,10 @@ export const processExpandedViewCases: Handler = (params) =>
                 activeDrawerStep: DrawerManagementStep.Success,
               })),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
-                ({ state }) => ({
+                ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
+                  txError: data.error,
                 })
               ),
             },

@@ -1,4 +1,5 @@
 /* eslint-disable react/no-multi-comp */
+import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Button } from '@lace/common';
 import cn from 'classnames';
 import React from 'react';
@@ -14,15 +15,33 @@ type HwDeviceFailProps = {
 
 export const HwDeviceFail = ({ popupView }: HwDeviceFailProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { txError } = useDelegationPortfolioStore((store) => ({
+    txError: store.txError,
+  }));
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     <div className={cn(styles.container, styles.fail, { [styles.popupView!]: popupView })}>
       <div className={cn(styles.containerFail, styles.staking)}>
         <ResultMessage
+          fullWidth
           status="error"
           title={t('drawer.failure.deviceUpdate.title')}
-          description={t('drawer.failure.deviceUpdate.subTitle')}
+          description={
+            <>
+              {t('drawer.failure.deviceUpdate.subTitle')}
+              {typeof txError === 'object' && txError.message && (
+                <Box w="$fill">
+                  <SummaryExpander title={t('browserView.transaction.fail.error-details.label')} plain>
+                    <TransactionSummary.Other
+                      label={txError.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
+                      text={txError.message}
+                    />
+                  </SummaryExpander>
+                </Box>
+              )}
+            </>
+          }
         />
       </div>
     </div>

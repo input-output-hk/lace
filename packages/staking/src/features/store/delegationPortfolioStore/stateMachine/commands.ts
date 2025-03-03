@@ -120,10 +120,16 @@ export type HwSkipToSuccess = {
 
 export type HwSkipToFailure = {
   type: 'HwSkipToFailure';
+  data: {
+    error: Error;
+  };
 };
 
 export type HwSkipToDeviceFailure = {
   type: 'HwSkipToDeviceFailure';
+  data: {
+    error: Error;
+  };
 };
 
 export type SetSort = {

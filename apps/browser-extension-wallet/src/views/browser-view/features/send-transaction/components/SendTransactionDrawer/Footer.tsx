@@ -239,9 +239,10 @@ export const Footer = withAddressBookContext(
 
         setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
       } else {
-        const signedTx = await builtTxData.tx.sign();
+        let signedTx;
 
         try {
+          signedTx = await builtTxData.tx.sign();
           await inMemoryWallet.submitTx(signedTx);
         } catch (error) {
           logger.error('TX submit error', error);
