@@ -31,6 +31,7 @@ const defaultState: DelegationPortfolioState = {
   selectedPortfolio: [],
   sortField: DEFAULT_SORT_OPTIONS.field,
   sortOrder: DEFAULT_SORT_OPTIONS.order,
+  txError: undefined,
   view: undefined,
   viewedStakePool: undefined,
 };

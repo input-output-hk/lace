@@ -42,6 +42,7 @@ import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
 import { exportMultisigTransaction, PasswordObj, useSecrets } from '@lace/core';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { parseError } from '@src/utils/parse-error';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -206,6 +207,10 @@ export const Footer = withAddressBookContext(
           }
         } catch (error) {
           logger.error('Shared wallet TX sign error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: parseError(error)
+          });
           throw error;
         }
 
@@ -218,6 +223,10 @@ export const Footer = withAddressBookContext(
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
           } catch (error) {
             logger.error('Shared wallet TX submit error', error);
+            setBuiltTxData({
+              ...builtTxData,
+              error: parseError(error)
+            });
             throw error;
           }
         } else {
@@ -230,12 +239,17 @@ export const Footer = withAddressBookContext(
 
         setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
       } else {
-        const signedTx = await builtTxData.tx.sign();
+        let signedTx;
 
         try {
+          signedTx = await builtTxData.tx.sign();
           await inMemoryWallet.submitTx(signedTx);
         } catch (error) {
           logger.error('TX submit error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: parseError(error)
+          });
           throw error;
         }
         txSubmitted$.next({
