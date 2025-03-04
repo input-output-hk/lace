@@ -26,9 +26,15 @@ UI-mapped gherkin tests for the Lace browser extension
 
   - `yarn install`
 
-- Build the extension (from the project root)
+- Build the extension for Chromium-based browsers (from the project root)
 
   - `yarn build`
+
+- Build the extension for Firefox (from the project root)
+
+  - `yarn build`
+  - `cd apps/browser-extension-wallet`
+  - `yarn build:firefox`
 
 - Run tests (from the `packages/e2e-tests` directory)
   - `yarn test:local:chrome`
@@ -46,7 +52,7 @@ UI-mapped gherkin tests for the Lace browser extension
 - chrome
 - edge
 - firefox
-  - does not support network interception or console log collection, so some tests/features are disabled (using the @SkipFirefox tag)
+  - does not support network interception or console log collection, so some tests/features are disabled (using `@skip(browserName="firefox")` tag)
   - works only with Firefox Developer Edition, as the regular version does not allow the use of extensions
   - does not support device emulation, so popup mode is simulated by simply resizing the window, which is not an ideal method of simulation
 
@@ -65,6 +71,8 @@ UI-mapped gherkin tests for the Lace browser extension
 - `SERVICE_WORKER_LOGS=true|false` default=false (optional)
   - enables service worker logs collection
   - not supported for Firefox
+- `FIREFOX_BINARY=/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox` (required for Firefox)
+  - default path to Firefox Developer Edition binary on MacOS, please adjust to your local setup
 
 ## Run single feature file with params
 
