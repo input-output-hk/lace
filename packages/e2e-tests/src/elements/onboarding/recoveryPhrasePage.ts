@@ -9,6 +9,7 @@ import { browser } from '@wdio/globals';
 import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils';
 import clipboard from 'clipboardy';
 import ChooseRecoveryMethodPage from './ChooseRecoveryMethodPage';
+import utils from '../../utils/utils';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -166,7 +167,10 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   }
 
   async clickOnPasteFromClipboardButton(): Promise<void> {
-    await setClipboardReadPermission('granted');
+    // Not supported in Firefox, handled by special prefs set in wdio.firefox.conf.ts
+    if ((await utils.getBrowser()) !== 'firefox') {
+      await setClipboardReadPermission('granted');
+    }
     await this.pasteFromClipboardButton.waitForClickable();
     await this.pasteFromClipboardButton.click();
   }

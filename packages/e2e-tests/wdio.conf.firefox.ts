@@ -94,7 +94,12 @@ const firefoxConfig = {
       'moz:debuggerAddress': true,
       'moz:firefoxOptions': {
         binary: process.env.FIREFOX_BINARY,
-        args: ['--width=1920', '--height=1080']
+        args: ['--width=1920', '--height=1080'],
+        prefs: {
+          'dom.events.testing.asyncClipboard': true, // Enables clipboard access in tests
+          'clipboard.autocopy': true, // Allows copying to the clipboard
+          'permissions.default.clipboard': 1 // Grants clipboard permissions
+        }
       }
     }
   ],
