@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ResultMessage } from '@components/ResultMessage';
 import { useAnalyticsContext } from '@providers';
@@ -14,6 +14,7 @@ interface TransactionFailProps {
 }
 
 export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFailProps): React.ReactElement => {
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
   const { triggerPoint } = useAnalyticsSendFlowTriggerPoint();
@@ -50,7 +51,12 @@ export const TransactionFail = ({ showCustomApiBanner = false }: TransactionFail
             {showCustomApiBanner && <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />}
             {typeof error === 'object' && error.message && (
               <Box w="$fill">
-                <SummaryExpander title={t('browserView.transaction.fail.error-details.label')} plain>
+                <SummaryExpander
+                  onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+                  open={isSummaryOpen}
+                  title={t('browserView.transaction.fail.error-details.label')}
+                  plain
+                >
                   <TransactionSummary.Other
                     label={error.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
                     text={error.message}

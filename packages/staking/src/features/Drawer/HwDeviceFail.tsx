@@ -2,7 +2,7 @@
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Button } from '@lace/common';
 import cn from 'classnames';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -14,6 +14,7 @@ type HwDeviceFailProps = {
 };
 
 export const HwDeviceFail = ({ popupView }: HwDeviceFailProps): React.ReactElement => {
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const { t } = useTranslation();
   const { txError } = useDelegationPortfolioStore((store) => ({
     txError: store.txError,
@@ -32,7 +33,12 @@ export const HwDeviceFail = ({ popupView }: HwDeviceFailProps): React.ReactEleme
               {t('drawer.failure.deviceUpdate.subTitle')}
               {typeof txError === 'object' && txError.message && (
                 <Box w="$fill">
-                  <SummaryExpander title={t('browserView.transaction.fail.error-details.label')} plain>
+                  <SummaryExpander
+                    onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+                    open={isSummaryOpen}
+                    title={t('browserView.transaction.fail.error-details.label')}
+                    plain
+                  >
                     <TransactionSummary.Other
                       label={txError.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
                       text={txError.message}

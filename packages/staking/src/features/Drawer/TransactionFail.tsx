@@ -15,6 +15,7 @@ type TransactionFailProps = {
 };
 
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const { t } = useTranslation();
   const { isCustomSubmitApiEnabled } = useOutsideHandles();
   const { txError } = useDelegationPortfolioStore((store) => ({
@@ -39,7 +40,12 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
               )}
               {typeof txError === 'object' && txError.message && (
                 <Box w="$fill">
-                  <SummaryExpander title={t('browserView.transaction.fail.error-details.label')} plain>
+                  <SummaryExpander
+                    onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+                    open={isSummaryOpen}
+                    title={t('browserView.transaction.fail.error-details.label')}
+                    plain
+                  >
                     <TransactionSummary.Other
                       label={txError.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
                       text={txError.message}
