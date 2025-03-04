@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { logger, useObservable } from '@lace/common';
 import {
   DappTransaction,
+  TxDetailsCBOR,
   TxDetailsCertificates,
   TxDetailsProposalProcedures,
   TxDetailsVotingProcedures
@@ -82,6 +83,7 @@ export const DappTransactionContainer = withAddressBookContext(
     const { inputResolver } = getProviders();
 
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
+    const txCBOR = useMemo(() => req?.transaction.toCbor(), [req?.transaction]);
 
     useEffect(() => {
       if (userAckNonRegisteredState || !tx?.body?.votingProcedures) return () => void 0;
@@ -188,6 +190,7 @@ export const DappTransactionContainer = withAddressBookContext(
               ownAddresses={allWalletsAddresses.length > 0 ? allWalletsAddresses : ownAddresses}
               addressToNameMap={addressToNameMap}
             />
+            <TxDetailsCBOR cbor={txCBOR} />
             {tx?.body?.certificates?.length > 0 && (
               <TxDetailsCertificates
                 cardanoCoin={cardanoCoin}
