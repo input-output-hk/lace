@@ -216,6 +216,14 @@ Then(
   }
 );
 
+Then(
+  /^I verify network magic is (1|2|764824073) for (Preprod|Preview|Mainnet)$/,
+  // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+  async (magic: '1' | '2' | '764824073', _ignored: 'Preprod' | 'Preview' | 'Mainnet') => {
+    await DAppConnectorAssert.assertSeeValidNetworkMagic(magic);
+  }
+);
+
 Then(/^I am able to access all window.cardano.lace properties$/, async () => {
   await DAppConnectorAssert.assertSeeWindowCardanoLaceProperties();
 });
