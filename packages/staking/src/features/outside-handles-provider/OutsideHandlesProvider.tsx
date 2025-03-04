@@ -2,7 +2,7 @@ import { PropsWithChildren, useMemo } from 'react';
 import { Provider } from './context';
 import { OutsideHandlesContextValue } from './types';
 
-type OutsideHandlesProviderProps = PropsWithChildren<OutsideHandlesContextValue>;
+export type OutsideHandlesProviderProps = PropsWithChildren<OutsideHandlesContextValue>;
 
 export const OutsideHandlesProvider = ({ children, ...props }: OutsideHandlesProviderProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
