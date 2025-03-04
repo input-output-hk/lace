@@ -6,6 +6,8 @@ import { Wallet } from '@lace/cardano';
 import { Banner, useObservable } from '@lace/common';
 import { CoSignersListItem, CosignersList, InfoBar, RowContainer, renderLabel } from '@lace/core';
 import { Skeleton } from 'antd';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import isNil from 'lodash/isNil';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -18,7 +20,9 @@ import { StakePoolConfirmationBody } from './StakePoolConfirmationBody';
 import styles from './StakePoolConfirmationContent.module.scss';
 import { StakePoolDepositReclaimDetails } from './StakePoolDepositReclaimDetails';
 
-const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
+dayjs.extend(relativeTime);
+
+const SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS;
 
 const ERROR_MESSAGES = {
   [InputSelectionFailure.UtxoFullyDepleted]: StakingErrorType.UTXO_FULLY_DEPLETED,
@@ -153,6 +157,11 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     [coSigners]
   );
 
+  const invalidIn = useMemo(
+    () => dayjs().add(Number(SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS), 'h').toNow(true),
+    []
+  );
+
   return (
     <>
       <div className={styles.header}>
@@ -186,9 +195,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
                 {isSharedWallet && (
                   <RowContainer>
                     <TransactionSummary.Amount
-                      amount={t('drawer.confirmation.validityPeriod.value', {
-                        hours: SHARED_WALLET_TX_VALIDITY_INTERVAL,
-                      })}
+                      amount={invalidIn}
                       label={t('drawer.confirmation.validityPeriod.title')}
                       tooltip={t('drawer.confirmation.validityPeriod.tooltip')}
                       data-testid="validity-period"
