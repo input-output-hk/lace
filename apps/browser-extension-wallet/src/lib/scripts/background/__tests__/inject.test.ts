@@ -38,7 +38,7 @@ describe('initializeInjectedScript', () => {
       expect(injectGlobal).toHaveBeenCalledTimes(1);
       expect(injectGlobal).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+        expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
         expect.anything()
       );
     });
@@ -52,7 +52,7 @@ describe('initializeInjectedScript', () => {
       expect(injectGlobal).toHaveBeenCalledTimes(1);
       expect(injectGlobal).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+        expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
         expect.anything()
       );
     });
@@ -66,13 +66,13 @@ describe('initializeInjectedScript', () => {
       expect(injectGlobal).toHaveBeenCalledTimes(2);
       expect(injectGlobal).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+        expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
         expect.anything()
       );
 
       expect(injectGlobal).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ supportedExtensions: [] }),
+        expect.objectContaining({ supportedExtensions: [{ cip: 142 }] }),
         expect.anything(),
         'nami'
       );
@@ -91,7 +91,7 @@ describe('initializeInjectedScript', () => {
         expect(injectGlobal).toHaveBeenCalledTimes(1);
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
           expect.anything()
         );
       });
@@ -107,12 +107,12 @@ describe('initializeInjectedScript', () => {
 
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
           expect.anything()
         );
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 142 }] }),
           expect.anything(),
           'nami'
         );
@@ -127,12 +127,12 @@ describe('initializeInjectedScript', () => {
 
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [{ cip: 95 }] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 95 }, { cip: 142 }] }),
           expect.anything()
         );
         expect(injectGlobal).toHaveBeenCalledWith(
           expect.anything(),
-          expect.objectContaining({ supportedExtensions: [] }),
+          expect.objectContaining({ supportedExtensions: [{ cip: 142 }] }),
           expect.anything(),
           'nami'
         );
