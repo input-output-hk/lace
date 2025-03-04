@@ -25,7 +25,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSharedWalletData } from '@hooks';
+import { useHandleResolver, useNetwork, useSharedWalletData, useSignPolicy } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -89,7 +89,8 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
-    const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
+    const { sharedWalletKey } = useSharedWalletData();
+    const policy = useSignPolicy('payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -209,9 +210,8 @@ export const Footer = withAddressBookContext(
           throw error;
         }
 
-        const policy = await getSignPolicy('payment');
         const collectedEnoughSharedWalletTxSignatures =
-          policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
+          policy?.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
 
         if (collectedEnoughSharedWalletTxSignatures) {
           try {
@@ -244,7 +244,15 @@ export const Footer = withAddressBookContext(
           creationType: TxCreationType.Internal
         });
       }
-    }, [builtTxData, currentChain, getSignPolicy, inMemoryWallet, isSharedWallet, setBuiltTxData, sharedWalletKey]);
+    }, [
+      builtTxData,
+      currentChain,
+      inMemoryWallet,
+      isSharedWallet,
+      policy?.requiredCosigners,
+      setBuiltTxData,
+      sharedWalletKey
+    ]);
 
     const handleVerifyPass = useCallback(
       async (passphrase: Partial<PasswordObj>) => {

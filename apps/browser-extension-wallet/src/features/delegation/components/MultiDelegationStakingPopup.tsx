@@ -26,8 +26,8 @@ import {
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
-import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { SignPolicy, useSecrets } from '@lace/core';
+import { useSharedWalletData, useSignPolicy } from '@hooks/useSharedWalletData';
+import { useSecrets } from '@lace/core';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 import { config } from '@src/config';
 
@@ -72,15 +72,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     environmentName: state.environmentName,
     isSharedWallet: state.isSharedWallet
   }));
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
-
-  useEffect(() => {
-    (async () => {
-      const policy = await getSignPolicy('staking');
-      setSignPolicy(policy);
-    })();
-  }, [getSignPolicy]);
+  const { sharedWalletKey, coSigners } = useSharedWalletData();
+  const signPolicy = useSignPolicy('staking');
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow

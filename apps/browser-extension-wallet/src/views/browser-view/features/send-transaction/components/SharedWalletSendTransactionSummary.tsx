@@ -4,13 +4,12 @@ import {
   OutputSummaryProps,
   SharedWalletTransactionDetails,
   CoSignersListItem,
-  SignPolicy,
   hasSigned
 } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
-import { useFetchCoinPrice, useSharedWalletData } from '@hooks';
+import { useFetchCoinPrice, useSharedWalletData, useSignPolicy } from '@hooks';
 import { useBuiltTxState } from '@views/browser/features/send-transaction';
 
 interface SharedWalletSendTransactionSummaryProps {
@@ -24,16 +23,13 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+  const { sharedWalletKey, coSigners } = useSharedWalletData();
+  const signPolicy = useSignPolicy('payment');
   const { builtTxData } = useBuiltTxState();
   const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
 
   useEffect(() => {
     (async () => {
-      const policy = await getSignPolicy('payment');
-      setSignPolicy(policy);
-
       let currentCoSigners: CoSignersListItem[];
       if (builtTxData.importedSharedWalletTx) {
         const signatures = builtTxData.importedSharedWalletTx.toCore().witness.signatures;
@@ -52,7 +48,7 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
       }
       setTransactionCosigners(currentCoSigners);
     })();
-  }, [builtTxData.importedSharedWalletTx, coSigners, getSignPolicy]);
+  }, [builtTxData.importedSharedWalletTx, coSigners]);
 
   const amountTransformer = (ada: string) =>
     `${Wallet.util.convertAdaToFiat({ ada, fiat: priceResult?.cardano?.price })} ${fiatCurrency?.code}`;

@@ -15,35 +15,41 @@ import { useWalletStore } from '@stores';
 import { AnyWallet } from '@cardano-sdk/web-extension';
 import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 
+export const useCurrentWallet = (): AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined => {
+  const { walletRepository } = useWalletManager();
+  const { cardanoWallet } = useWalletStore();
+  const wallets = useObservable(walletRepository.wallets$);
+
+  const activeWalletId = cardanoWallet.source.wallet.walletId;
+  return wallets?.find(({ walletId }) => walletId === activeWalletId);
+};
+
 type SigningPolicyType = 'payment' | 'staking';
 
 type Cosigner = { sharedWalletKey: Bip32PublicKeyHex; name: string };
 
 type UseSharedWalletData = {
-  getSignPolicy: (type: SigningPolicyType) => Promise<SignPolicy | undefined>;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex | undefined;
   coSigners: Cosigner[];
   name: string;
 };
 
 export const useSharedWalletData = (): UseSharedWalletData => {
-  const [activeWallet, setActiveWallet] = useState<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>>();
-  const [metadata, setMetadata] = useState<Wallet.WalletMetadata>();
-  const { walletRepository } = useWalletManager();
-  const { cardanoWallet } = useWalletStore();
-  const wallets = useObservable(walletRepository.wallets$);
+  const currentWallet = useCurrentWallet();
 
-  useEffect(() => {
-    (async () => {
-      const activeWalletId = cardanoWallet.source.wallet.walletId;
-      const currentWallet = wallets?.find(({ walletId }) => walletId === activeWalletId);
-      setActiveWallet(currentWallet);
-      setMetadata(currentWallet?.metadata);
-    })();
-  }, [cardanoWallet.source.wallet.walletId, wallets]);
+  return {
+    sharedWalletKey: currentWallet?.metadata?.multiSigExtendedPublicKey,
+    coSigners: currentWallet?.metadata?.coSigners,
+    name: currentWallet?.metadata?.name
+  };
+};
+
+export const useSignPolicy = (type: SigningPolicyType): SignPolicy | undefined => {
+  const [signPolicy, setSignPolicy] = useState<SignPolicy | undefined>();
+  const currentWallet = useCurrentWallet();
 
   const getSignPolicy = useCallback(
-    async (type: SigningPolicyType): Promise<SignPolicy | undefined> => {
+    async (activeWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>): Promise<SignPolicy | undefined> => {
       if (!isScriptWallet(activeWallet)) return;
 
       const script = type === 'payment' ? activeWallet.paymentScript : activeWallet.stakingScript;
@@ -64,13 +70,14 @@ export const useSharedWalletData = (): UseSharedWalletData => {
         }))
       };
     },
-    [activeWallet]
+    [type]
   );
 
-  return {
-    getSignPolicy,
-    sharedWalletKey: metadata?.multiSigExtendedPublicKey,
-    coSigners: metadata?.coSigners,
-    name: metadata?.name
-  };
+  useEffect(() => {
+    (async () => {
+      setSignPolicy(await getSignPolicy(currentWallet));
+    })();
+  }, [currentWallet, getSignPolicy]);
+
+  return signPolicy;
 };
