@@ -1,15 +1,17 @@
 /* eslint-disable no-undef */
+/* eslint-disable unicorn/prefer-module */
 
-import extensionUtils from './src/utils/utils';
-import fs from 'fs';
-import { Logger } from './src/support/logger';
+import { config as baseConfig } from './wdio.conf.base';
 
-export const config: WebdriverIO.Config = {
-  runner: 'local',
-  specs: ['./src/features/**/*.feature'],
+if (!process.env.FIREFOX_BINARY) {
+  throw new Error('Environment variable FIREFOX_BINARY is not set. Please set it before running tests.');
+}
+
+const firefoxConfig = {
   suites: {
     batch1: [
-      './src/features/Onboarding*.feature',
+      './src/features/OnboardingCreate*.feature',
+      './src/features/OnboardingRestore*.feature',
       './src/features/SettingsPageExtended*.feature',
       './src/features/SendTransactionMetadata*.feature',
       './src/features/SendTransactionMultipleSelection*.feature'
@@ -19,18 +21,7 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionSimpleExtended.part3.feature',
       './src/features/governance/CIP95StaticMethods.feature'
     ],
-    batch3: [
-      './src/features/analytics/AnalyticsActivity*.feature',
-      './src/features/analytics/AnalyticsAddress*.feature',
-      './src/features/analytics/AnalyticsEventProperties*.feature',
-      './src/features/analytics/AnalyticsFiatOnRampOffRamp.feature',
-      './src/features/analytics/AnalyticsForgotPassword.feature',
-      './src/features/analytics/AnalyticsNavigation*.feature',
-      './src/features/analytics/AnalyticsNFTs*.feature',
-      './src/features/analytics/AnalyticsOnboardingEvents.feature',
-      './src/features/SettingsGeneratePaperWallet.feature',
-      './src/features/e2e/SendTransactionDappE2E.feature'
-    ],
+    batch3: ['./src/features/SettingsGeneratePaperWallet.feature', './src/features/e2e/SendTransactionDappE2E.feature'],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
       './src/features/e2e/SendNft*.feature',
@@ -76,7 +67,7 @@ export const config: WebdriverIO.Config = {
     batch12: [
       './src/features/AdaHandleExtended.feature',
       './src/features/AdaHandlePopup.feature',
-      './src/features/AddNewWallet*.feature',
+      './src/features/AddNewWalletCreate*.feature',
       './src/features/e2e/SendTransactionBundlesE2E.feature'
     ],
     batch13: [
@@ -94,66 +85,41 @@ export const config: WebdriverIO.Config = {
     batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
     batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
-  automationProtocol: 'webdriver',
-  exclude: [],
-  maxInstances: 1,
-  maxInstancesPerCapability: 1,
-  path: '/',
-  logLevel: 'error',
-  outputDir: 'logs',
-  bail: 0,
-  baseUrl: '',
-  capabilities: [],
-  injectGlobals: true,
-  waitforTimeout: 6000,
-  connectionRetryTimeout: 16_000,
-  connectionRetryCount: 3,
-  framework: 'cucumber',
-  reporters: [
-    [
-      'spec',
-      {
-        realtimeReporting: true
+  capabilities: [
+    {
+      maxInstances: 1,
+      browserName: 'firefox',
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
+      ...(String(process.env.STANDALONE_DRIVER) === 'true' && { port: 4444 }),
+      'moz:debuggerAddress': true,
+      'moz:firefoxOptions': {
+        binary: process.env.FIREFOX_BINARY,
+        args: ['--width=1920', '--height=1080'],
+        prefs: {
+          'dom.events.testing.asyncClipboard': true, // Enables clipboard access in tests
+          'clipboard.autocopy': true, // Allows copying to the clipboard
+          'permissions.default.clipboard': 1 // Grants clipboard permissions
+        }
       }
-    ],
+    }
+  ],
+  services: [
     [
-      'allure',
+      'firefox-profile',
       {
-        outputDir: './reports/allure/results',
-        disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: false,
-        issueLinkTemplate: 'https://input-output.atlassian.net/browse/{}',
-        useCucumberStepReporter: true,
-        addConsoleLogs: true
+        extensions: [`${import.meta.dirname}/../../apps/browser-extension-wallet/dist`],
+        'xpinstall.signatures.required': false
       }
     ]
-  ],
-  cucumberOpts: {
-    backtrace: true,
-    requireModule: [],
-    failAmbiguousDefinitions: true,
-    failFast: false,
-    ignoreUndefinedDefinitions: false,
-    names: [],
-    snippets: true,
-    source: true,
-    profile: [],
-    require: ['./src/steps/*.ts', './src/hooks/*.ts'],
-    // scenarioLevelReporter: true,
-    order: 'defined',
-    snippetSyntax: undefined,
-    strict: true,
-    tags: extensionUtils.isMainnet() ? '@Mainnet' : '@Testnet',
-    tagsInTitle: true,
-    timeout: 200_000,
-    retry: 1,
-    noStrictFlaky: true
-  } as WebdriverIO.CucumberOpts,
-  async onPrepare() {
-    if (!fs.existsSync('./src/support/walletConfiguration.ts')) {
-      Logger.log('walletConfiguration.ts is missing, decrypt the file first!');
-      // eslint-disable-next-line unicorn/no-process-exit
-      process.exit(1);
-    }
-  }
+  ]
 };
+
+if (String(process.env.STANDALONE_DRIVER) === 'true') {
+  fetch('http://127.0.0.1:4444/wd/hub').catch(() => {
+    throw new Error("geckodriver doesn't seem to be running, please start it first");
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export const config: WebdriverIO.Config = { ...baseConfig, ...firefoxConfig };
