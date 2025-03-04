@@ -1,15 +1,16 @@
 import React from 'react';
-import { InfoWallet } from '@lace/core';
+import { InfoWallet, useSharedWalletData } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
 import { useWalletStore } from '../../../../stores';
 import { useTranslation } from 'react-i18next';
 import styles from './QRPublicKeyDrawer.module.scss';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useSharedWalletData } from '@hooks';
+import { useCurrentWallet } from '@hooks';
 
 const useWalletInformation = () => {
-  const { sharedWalletKey } = useSharedWalletData();
+  const wallet = useCurrentWallet();
+  const { sharedWalletKey } = useSharedWalletData(wallet);
   return useWalletStore((state) => ({
     name: state?.walletInfo?.name,
     publicKey: state?.isSharedWallet ? sharedWalletKey : state?.cardanoWallet.source.account.extendedAccountPublicKey
