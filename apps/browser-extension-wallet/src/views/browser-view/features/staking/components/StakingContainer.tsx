@@ -11,14 +11,7 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import {
-  useBalances,
-  useCustomSubmitApi,
-  useFetchCoinPrice,
-  useLocalStorage,
-  useSharedWalletData,
-  useSignPolicy
-} from '@hooks';
+import { useBalances, useCurrentWallet, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -27,7 +20,7 @@ import {
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
-import { useSecrets } from '@lace/core';
+import { useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '../hooks';
 import { config } from '@src/config';
 
@@ -100,8 +93,9 @@ export const StakingContainer = (): React.ReactElement => {
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
-  const { sharedWalletKey, coSigners } = useSharedWalletData();
-  const signPolicy = useSignPolicy('staking');
+  const wallet = useCurrentWallet();
+  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+  const signPolicy = useSignPolicy(wallet, 'staking');
   const { GOV_TOOLS_URLS } = config();
 
   return (

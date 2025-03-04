@@ -1,8 +1,16 @@
-import { ActivityStatus, CoSignersListItem, hasSigned, SharedWalletTransactionDetails, TxSummary } from '@lace/core';
+import {
+  ActivityStatus,
+  CoSignersListItem,
+  hasSigned,
+  SharedWalletTransactionDetails,
+  TxSummary,
+  useSharedWalletData,
+  useSignPolicy
+} from '@lace/core';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { Wallet } from '@lace/cardano';
-import { useSharedWalletData, useSignPolicy } from '@hooks';
+import { useCurrentWallet } from '@hooks';
 import { AddressListType, getTransactionData } from '@views/browser/features/activity';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
@@ -44,8 +52,9 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
       walletInfo,
       activityDetail
     } = useWalletStore();
-    const { sharedWalletKey, coSigners } = useSharedWalletData();
-    const signPolicy = useSignPolicy('payment');
+    const wallet = useCurrentWallet();
+    const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+    const signPolicy = useSignPolicy(wallet, 'payment');
 
     const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const { list: addressList } = useAddressBookContext();

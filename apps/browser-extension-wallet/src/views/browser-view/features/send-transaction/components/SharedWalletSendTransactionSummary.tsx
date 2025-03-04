@@ -4,12 +4,14 @@ import {
   OutputSummaryProps,
   SharedWalletTransactionDetails,
   CoSignersListItem,
-  hasSigned
+  hasSigned,
+  useSharedWalletData,
+  useSignPolicy
 } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
-import { useFetchCoinPrice, useSharedWalletData, useSignPolicy } from '@hooks';
+import { useCurrentWallet, useFetchCoinPrice } from '@hooks';
 import { useBuiltTxState } from '@views/browser/features/send-transaction';
 
 interface SharedWalletSendTransactionSummaryProps {
@@ -23,8 +25,9 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
-  const { sharedWalletKey, coSigners } = useSharedWalletData();
-  const signPolicy = useSignPolicy('payment');
+  const wallet = useCurrentWallet();
+  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+  const signPolicy = useSignPolicy(wallet, 'payment');
   const { builtTxData } = useBuiltTxState();
   const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
 

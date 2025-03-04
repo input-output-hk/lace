@@ -25,7 +25,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSharedWalletData, useSignPolicy } from '@hooks';
+import { useCurrentWallet, useHandleResolver, useNetwork } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -40,7 +40,7 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, PasswordObj, useSecrets } from '@lace/core';
+import { exportMultisigTransaction, PasswordObj, useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
 import { WalletType } from '@cardano-sdk/web-extension';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
@@ -89,8 +89,9 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
-    const { sharedWalletKey } = useSharedWalletData();
-    const policy = useSignPolicy('payment');
+    const wallet = useCurrentWallet();
+    const { sharedWalletKey } = useSharedWalletData(wallet);
+    const policy = useSignPolicy(wallet, 'payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
