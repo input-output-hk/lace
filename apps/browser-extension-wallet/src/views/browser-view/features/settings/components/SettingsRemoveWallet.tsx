@@ -15,6 +15,7 @@ import cn from 'classnames';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { Wallet } from '@lace/cardano';
 import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
+import * as KeyManagement from '@cardano-sdk/key-management';
 
 const { Title, Text } = Typography;
 
@@ -23,7 +24,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet, walletRepository, walletManager } = useWalletManager();
-  const { walletInfo, setDeletingWallet, isSharedWallet } = useWalletStore();
+  const { walletInfo, setDeletingWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
@@ -34,11 +35,10 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   );
 
   const hasAssociatedSharedWallet =
-    !isSharedWallet &&
-    wallets?.some(
-      ({ type, metadata }) =>
-        type === WalletType.Script &&
-        metadata.multiSigExtendedPublicKey === activeWallet?.metadata.multiSigExtendedPublicKey
+    activeWallet &&
+    activeWallet.type !== WalletType.Script &&
+    activeWallet.accounts.some(
+      ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
     );
 
   const toggleRemoveWalletAlert = () => {

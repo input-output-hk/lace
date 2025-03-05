@@ -5,14 +5,15 @@ import {
   SharedWalletTransactionDetails,
   CoSignersListItem,
   hasSigned,
-  useSharedWalletData,
   useSignPolicy
 } from '@lace/core';
 import { useWalletStore } from '@stores';
 import { useCurrencyStore } from '@providers';
 import { Wallet } from '@lace/cardano';
-import { useCurrentWallet, useFetchCoinPrice } from '@hooks';
+import { useCurrentWallet, useFetchCoinPrice, useWalletManager } from '@hooks';
 import { useBuiltTxState } from '@views/browser/features/send-transaction';
+import { useObservable } from '@lace/common';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 
 interface SharedWalletSendTransactionSummaryProps {
   rows: OutputSummaryProps[];
@@ -25,8 +26,15 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   } = useWalletStore();
   const { fiatCurrency } = useCurrencyStore();
   const { priceResult } = useFetchCoinPrice();
+  const { walletRepository } = useWalletManager();
+  const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
-  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+
+  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const sharedWalletKey = parentWalletCIP1854Account?.extendedAccountPublicKey;
+
+  const coSigners = wallet?.metadata?.coSigners;
+
   const signPolicy = useSignPolicy(wallet, 'payment');
   const { builtTxData } = useBuiltTxState();
   const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);

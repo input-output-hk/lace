@@ -1,6 +1,8 @@
+/* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
@@ -46,8 +48,6 @@ import {
   QuorumRadioOption,
   ScriptKind,
   stakingScriptKeyPath,
-  GenerateSharedWalletKeyFn,
-  makeGenerateSharedWalletKey,
   useSecrets
 } from '@lace/core';
 import { logger } from '@lace/common';
@@ -141,10 +141,8 @@ export interface UseWalletManager {
   reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
-  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  getSharedWalletExtendedPublicKey: () => Wallet.Crypto.Bip32PublicKeyHex;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
-  generateSharedWalletKey: GenerateSharedWalletKeyFn;
-  saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -667,7 +665,9 @@ export const useWalletManager = (): UseWalletManager => {
       isForgotPasswordFlow = false,
       nextWallet?: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
     ): Promise<WalletManagerActivateProps | undefined> => {
-      let walletToDelete: Pick<WalletManagerActivateProps, 'walletId'> = await firstValueFrom(
+      let walletToDelete:
+        | Pick<WalletManagerActivateProps, 'walletId'>
+        | AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> = await firstValueFrom(
         walletManager.activeWalletId$
       );
       if (walletToDelete) {
@@ -687,7 +687,25 @@ export const useWalletManager = (): UseWalletManager => {
           return;
         }
       }
+
+      let parentWalletIdToDelete;
+      if (!('type' in walletToDelete)) {
+        const wallets = await firstValueFrom(walletRepository.wallets$);
+        const wallet = wallets.find(({ walletId }) => walletId === walletToDelete.walletId);
+        parentWalletIdToDelete = wallet?.type === WalletType.Script && wallet.ownSigners[0].walletId;
+      } else {
+        parentWalletIdToDelete = walletToDelete.type === WalletType.Script && walletToDelete.ownSigners[0].walletId;
+      }
+
       await walletRepository.removeWallet(walletToDelete.walletId);
+
+      if (parentWalletIdToDelete) {
+        await walletRepository.removeAccount({
+          walletId: parentWalletIdToDelete,
+          accountIndex: 0,
+          purpose: KeyManagement.KeyPurpose.MULTI_SIG
+        });
+      }
 
       const wallets = nextWallet ? [nextWallet] : await firstValueFrom(walletRepository.wallets$);
       if (wallets.length > 0) {
@@ -859,47 +877,13 @@ export const useWalletManager = (): UseWalletManager => {
     [cardanoWallet]
   );
 
-  const getSharedWalletExtendedPublicKey = useCallback(
-    (passphrase: Uint8Array) => {
-      const { wallet } = cardanoWallet.source;
-      if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
+  const getSharedWalletExtendedPublicKey = useCallback(() => {
+    const { wallet } = cardanoWallet.source;
+    if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
-      const accountIndex = 0;
-      return getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
-    },
-    [cardanoWallet]
-  );
-
-  const generateSharedWalletKey = useMemo(
-    () =>
-      makeGenerateSharedWalletKey({
-        getSharedWalletExtendedPublicKey
-      }),
-    [getSharedWalletExtendedPublicKey]
-  );
-
-  const saveSharedWalletKey = useCallback<UseWalletManager['saveSharedWalletKey']>(
-    async (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> => {
-      if (!cardanoWallet) {
-        throw new Error('Active wallet data not available');
-      }
-      const { walletId } = cardanoWallet.source.wallet;
-      const [wallets] = await firstValueFrom(combineLatest([walletRepository.wallets$, walletManager.activeWalletId$]));
-      const activeWallet = wallets.find(({ walletId: id }) => id === walletId);
-      if (!activeWallet) {
-        throw new Error('Failed to identify an active wallet data');
-      }
-
-      await walletRepository.updateWalletMetadata({
-        walletId,
-        metadata: {
-          ...activeWallet.metadata,
-          multiSigExtendedPublicKey: sharedWalletKey
-        }
-      });
-    },
-    [cardanoWallet]
-  );
+    const accountIndex = 0;
+    return wallet.accounts[accountIndex].extendedAccountPublicKey;
+  }, [cardanoWallet]);
 
   const createInMemorySharedWallet = useCallback(
     async ({
@@ -940,9 +924,7 @@ export const useWalletManager = (): UseWalletManager => {
           coSigners: coSigners.map((signer) => ({
             name: signer.name,
             sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
-          })),
-          // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
-          multiSigExtendedPublicKey: sharedWalletKey
+          }))
         },
         ownSigners: [
           {
@@ -1037,8 +1019,6 @@ export const useWalletManager = (): UseWalletManager => {
     walletRepository,
     getMnemonic,
     enableCustomNode,
-    generateSharedWalletKey,
-    saveSharedWalletKey,
     getSharedWalletExtendedPublicKey
   };
 };

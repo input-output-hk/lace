@@ -14,7 +14,8 @@ import {
   useCustomSubmitApi,
   useFetchCoinPrice,
   useLocalStorage,
-  useStakingRewards
+  useStakingRewards,
+  useWalletManager
 } from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
@@ -33,10 +34,12 @@ import {
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
-import { useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
+import { useSecrets, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 import { config } from '@src/config';
 import { parseError } from '@src/utils/parse-error';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { useObservable } from '@lace/common';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -49,6 +52,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { priceResult } = useFetchCoinPrice();
   const { balance } = useBalances(priceResult?.cardano?.price);
   const stakingRewards = useStakingRewards();
+  const { walletRepository } = useWalletManager();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const {
     walletType,
@@ -80,7 +84,9 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     isSharedWallet: state.isSharedWallet
   }));
   const wallet = useCurrentWallet();
-  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+  const wallets = useObservable(walletRepository.wallets$);
+
+  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
   const signPolicy = useSignPolicy(wallet, 'staking');
 
   const sendAnalytics = useCallback(() => {
@@ -166,8 +172,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedWalletKey,
-        coSigners,
+        sharedWalletKey: parentWalletCIP1854Account?.extendedAccountPublicKey,
+        coSigners: wallet?.metadata?.coSigners,
         useRewardAccountsData,
         govToolUrl: GOV_TOOLS_URLS[environmentName],
         parseError

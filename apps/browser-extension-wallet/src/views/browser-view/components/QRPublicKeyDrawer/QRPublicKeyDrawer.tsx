@@ -1,19 +1,27 @@
 import React from 'react';
-import { InfoWallet, useSharedWalletData } from '@lace/core';
+import { InfoWallet } from '@lace/core';
 import { useTheme } from '@providers/ThemeProvider';
 import { useWalletStore } from '../../../../stores';
 import { useTranslation } from 'react-i18next';
 import styles from './QRPublicKeyDrawer.module.scss';
 import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useCurrentWallet } from '@hooks';
+import { useCurrentWallet, useWalletManager } from '@hooks';
+import { useObservable } from '@lace/common';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 
 const useWalletInformation = () => {
+  const { walletRepository } = useWalletManager();
+  const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
-  const { sharedWalletKey } = useSharedWalletData(wallet);
+
+  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+
   return useWalletStore((state) => ({
     name: state?.walletInfo?.name,
-    publicKey: state?.isSharedWallet ? sharedWalletKey : state?.cardanoWallet.source.account.extendedAccountPublicKey
+    publicKey: state?.isSharedWallet
+      ? parentWalletCIP1854Account?.extendedAccountPublicKey
+      : state?.cardanoWallet.source.account.extendedAccountPublicKey
   }));
 };
 
