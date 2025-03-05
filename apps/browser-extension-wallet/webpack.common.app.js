@@ -10,6 +10,12 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
+const getVersion = () => {
+  const version = require('./manifest.json').version;
+  const commitHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
+  return `${version}-${commitHash}`;
+};
+
 const withMaybeSentry = (p, hasSentryReleaseConfig) =>
   hasSentryReleaseConfig ? [path.join(__dirname, 'sentry.js'), p] : p;
 
@@ -94,6 +100,9 @@ module.exports = (hasSentryReleaseConfig) =>
               sourcemaps: {
                 filesToDeleteAfterUpload: ['**/*.js.map'],
                 assets: ['**/*.js.map']
+              },
+              release: {
+                name: getVersion()
               },
               telemetry: false,
               url: 'https://sentry.io/'
