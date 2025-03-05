@@ -1,6 +1,6 @@
 /* eslint-disable react/no-multi-comp */
 import { WalletType } from '@cardano-sdk/web-extension';
-import { Box } from '@input-output-hk/lace-ui-toolkit';
+import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Button, WarningBanner } from '@lace/common';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
@@ -15,8 +15,12 @@ type TransactionFailProps = {
 };
 
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const { t } = useTranslation();
   const { isCustomSubmitApiEnabled } = useOutsideHandles();
+  const { txError } = useDelegationPortfolioStore((store) => ({
+    txError: store.txError,
+  }));
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -25,12 +29,28 @@ export const TransactionFail = ({ popupView }: TransactionFailProps): React.Reac
         <ResultMessage
           status="error"
           title={t('drawer.failure.title')}
+          fullWidth
           description={
             <>
               <div>{t('drawer.failure.subTitle')}</div>
               {isCustomSubmitApiEnabled && (
                 <Box mt="$32">
                   <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
+                </Box>
+              )}
+              {typeof txError === 'object' && txError.message && (
+                <Box w="$fill">
+                  <SummaryExpander
+                    onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+                    open={isSummaryOpen}
+                    title={t('browserView.transaction.fail.error-details.label')}
+                    plain
+                  >
+                    <TransactionSummary.Other
+                      label={txError.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
+                      text={txError.message}
+                    />
+                  </SummaryExpander>
                 </Box>
               )}
             </>
@@ -52,6 +72,7 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
     walletStoreInMemoryWallet: inMemoryWallet,
     walletManagerExecuteWithPassword: executeWithPassword,
     isMultidelegationSupportedByDevice,
+    parseError,
   } = useOutsideHandles();
   // TODO implement analytics for the new flow
   const analytics = {
@@ -106,7 +127,12 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       setIsLoading(false);
 
       if (error instanceof Error && error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
-        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+        portfolioMutators.executeCommand({
+          data: {
+            error: parseError(error),
+          },
+          type: 'HwSkipToDeviceFailure',
+        });
       }
     }
   };

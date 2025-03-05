@@ -85,6 +85,7 @@ export const SignConfirmationFooter = (): ReactElement => {
     isSharedWallet,
     sharedWalletKey,
     signPolicy,
+    parseError,
   } = useOutsideHandles();
   const { currentPortfolio, portfolioMutators } = useDelegationPortfolioStore((store) => ({
     currentPortfolio: store.currentPortfolio,
@@ -133,18 +134,24 @@ export const SignConfirmationFooter = (): ReactElement => {
         setSubmitingTxState({ isPasswordValid: false, isSubmitingTx: false });
       } else {
         cleanPasswordInput();
-        portfolioMutators.executeCommand({ type: 'DrawerFailure' });
+        portfolioMutators.executeCommand({
+          data: {
+            error: parseError(error),
+          },
+          type: 'DrawerFailure',
+        });
         setSubmitingTxState({ isSubmitingTx: false });
       }
     }
   }, [
+    analytics,
     setSubmitingTxState,
     signAndSubmitTransaction,
     cleanPasswordInput,
-    analytics,
     setIsRestaking,
     currentPortfolio.length,
     portfolioMutators,
+    parseError,
   ]);
 
   return (

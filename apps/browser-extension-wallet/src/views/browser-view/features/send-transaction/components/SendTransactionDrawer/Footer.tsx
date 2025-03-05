@@ -25,7 +25,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useHandleResolver, useNetwork, useSharedWalletData } from '@hooks';
+import { useCurrentWallet, useHandleResolver, useNetwork } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -40,8 +40,9 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, PasswordObj, useSecrets } from '@lace/core';
+import { exportMultisigTransaction, PasswordObj, useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { parseError } from '@src/utils/parse-error';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -89,7 +90,9 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
-    const { sharedWalletKey, getSignPolicy } = useSharedWalletData();
+    const wallet = useCurrentWallet();
+    const { sharedWalletKey } = useSharedWalletData(wallet);
+    const policy = useSignPolicy(wallet, 'payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
 
@@ -206,18 +209,25 @@ export const Footer = withAddressBookContext(
           }
         } catch (error) {
           logger.error('Shared wallet TX sign error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: parseError(error)
+          });
           throw error;
         }
 
-        const policy = await getSignPolicy('payment');
         const collectedEnoughSharedWalletTxSignatures =
-          policy.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
+          policy?.requiredCosigners === sharedWalletTx.toCore().witness.signatures.size;
 
         if (collectedEnoughSharedWalletTxSignatures) {
           try {
             await inMemoryWallet.submitTx(sharedWalletTx.toCbor());
           } catch (error) {
             logger.error('Shared wallet TX submit error', error);
+            setBuiltTxData({
+              ...builtTxData,
+              error: parseError(error)
+            });
             throw error;
           }
         } else {
@@ -230,12 +240,17 @@ export const Footer = withAddressBookContext(
 
         setBuiltTxData({ ...builtTxData, collectedEnoughSharedWalletTxSignatures });
       } else {
-        const signedTx = await builtTxData.tx.sign();
+        let signedTx;
 
         try {
+          signedTx = await builtTxData.tx.sign();
           await inMemoryWallet.submitTx(signedTx);
         } catch (error) {
           logger.error('TX submit error', error);
+          setBuiltTxData({
+            ...builtTxData,
+            error: parseError(error)
+          });
           throw error;
         }
         txSubmitted$.next({
@@ -244,7 +259,15 @@ export const Footer = withAddressBookContext(
           creationType: TxCreationType.Internal
         });
       }
-    }, [builtTxData, currentChain, getSignPolicy, inMemoryWallet, isSharedWallet, setBuiltTxData, sharedWalletKey]);
+    }, [
+      builtTxData,
+      currentChain,
+      inMemoryWallet,
+      isSharedWallet,
+      policy?.requiredCosigners,
+      setBuiltTxData,
+      sharedWalletKey
+    ]);
 
     const handleVerifyPass = useCallback(
       async (passphrase: Partial<PasswordObj>) => {

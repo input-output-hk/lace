@@ -193,3 +193,16 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
       | -3.00 tADA - FEE |
+
+  @LW-12422  @Mainnet
+  Scenario Outline: CIP-0142 getNetworkMagic returns <magic> when network is <network>
+    Given I open and authorize test DApp with "Only once" setting
+    And I switch to window with Lace
+    And I switch network to: "<network>" in extended mode
+    And I switch to window with DApp
+    Then I verify network magic is <magic> for <network>
+    Examples:
+      | magic     | network |
+      | 1         | Preprod |
+      | 2         | Preview |
+      | 764824073 | Mainnet |

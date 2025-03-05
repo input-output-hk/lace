@@ -26,6 +26,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
     delegationStoreDelegationTxBuilder: delegationTxBuilder,
     isMultidelegationSupportedByDevice,
     walletManagerExecuteWithPassword,
+    parseError,
   } = useOutsideHandles();
   const { isBuildingTx, stakingError } = useStakingStore();
   const [isConfirmingTx, setIsConfirmingTx] = useState(false);
@@ -76,15 +77,26 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
       portfolioMutators.executeCommand({ type: 'HwSkipToSuccess' });
     } catch (error: any) {
       if (error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
-        portfolioMutators.executeCommand({ type: 'HwSkipToDeviceFailure' });
+        portfolioMutators.executeCommand({
+          data: {
+            error: parseError(error),
+          },
+          type: 'HwSkipToDeviceFailure',
+        });
       }
-      portfolioMutators.executeCommand({ type: 'HwSkipToFailure' });
+      portfolioMutators.executeCommand({
+        data: {
+          error: parseError(error),
+        },
+        type: 'HwSkipToFailure',
+      });
     } finally {
       setIsConfirmingTx(false);
     }
   }, [
     currentPortfolio.length,
     isHardwareWallet,
+    parseError,
     portfolioMutators,
     setIsRestaking,
     signAndSubmitTransaction,

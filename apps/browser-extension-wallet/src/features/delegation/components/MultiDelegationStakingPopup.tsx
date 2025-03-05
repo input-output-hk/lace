@@ -1,6 +1,6 @@
 /* eslint-disable max-statements */
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider, StakingPopup } from '@lace/staking';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   useAnalyticsContext,
   useBackgroundServiceAPIContext,
@@ -8,7 +8,14 @@ import {
   useExternalLinkOpener,
   useTheme
 } from '@providers';
-import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useStakingRewards } from '@hooks';
+import {
+  useBalances,
+  useCurrentWallet,
+  useCustomSubmitApi,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useStakingRewards
+} from '@hooks';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { networkInfoStatusSelector, useWalletStore } from '@stores';
@@ -26,10 +33,10 @@ import {
 } from '@utils/constants';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
-import { useSharedWalletData } from '@hooks/useSharedWalletData';
-import { SignPolicy, useSecrets } from '@lace/core';
+import { useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 import { config } from '@src/config';
+import { parseError } from '@src/utils/parse-error';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -72,15 +79,9 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     environmentName: state.environmentName,
     isSharedWallet: state.isSharedWallet
   }));
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
-
-  useEffect(() => {
-    (async () => {
-      const policy = await getSignPolicy('staking');
-      setSignPolicy(policy);
-    })();
-  }, [getSignPolicy]);
+  const wallet = useCurrentWallet();
+  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+  const signPolicy = useSignPolicy(wallet, 'staking');
 
   const sendAnalytics = useCallback(() => {
     // TODO implement analytics for the new flow
@@ -168,7 +169,8 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         sharedWalletKey,
         coSigners,
         useRewardAccountsData,
-        govToolUrl: GOV_TOOLS_URLS[environmentName]
+        govToolUrl: GOV_TOOLS_URLS[environmentName],
+        parseError
       }}
     >
       <ContentLayout

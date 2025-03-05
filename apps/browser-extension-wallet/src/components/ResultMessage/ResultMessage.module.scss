@@ -57,4 +57,15 @@
       width: size_unit(11);
     }
   }
+
+  &.fullWidth {
+    width: 100%;
+    .description {
+      max-width: 100%;
+      width: 100%;
+    }
+    .vertical {
+      width: 100%;
+    }
+  }
 }

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import cn from 'classnames';
 import React from 'react';
 import ExclamationSmall from './exclamation-circle-small.svg';
 import Exclamation from './exclamation-circle.svg';
@@ -22,6 +24,7 @@ export interface ResultMessageProps {
   title: React.ReactNode;
   description: React.ReactNode;
   popupView?: boolean;
+  fullWidth?: boolean;
 }
 
 export const ResultMessage = ({
@@ -29,11 +32,12 @@ export const ResultMessage = ({
   title,
   description,
   popupView,
+  fullWidth,
 }: ResultMessageProps): React.ReactElement => {
   const Icon = popupView ? popupViewIconByStatus[status] : iconByStatus[status];
 
   return (
-    <div className={styles.content} data-testid="result-message-content">
+    <div className={cn(styles.content, { [styles.fullWidth!]: fullWidth })} data-testid="result-message-content">
       <Icon className={styles.img} data-testid="result-message-img" />
       <div className={styles.vertical}>
         <h4 className={styles.title} data-testid="result-message-title">
