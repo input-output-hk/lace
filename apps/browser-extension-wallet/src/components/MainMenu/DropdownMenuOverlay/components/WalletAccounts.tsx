@@ -69,7 +69,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
   const disableUnlock = useMemo(
     () =>
       isPopup &&
-      (wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor) && {
+      Wallet.AVAILABLE_WALLETS.includes(wallet.type as Wallet.HardwareWallets) && {
         reason: (
           <Trans
             i18nKey="multiWallet.popupHwAccountEnable"

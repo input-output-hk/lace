@@ -8,14 +8,14 @@ import { getQRCodeOptions } from '@src/utils/qrCodeHelpers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useCurrentWallet, useWalletManager } from '@hooks';
 import { useObservable } from '@lace/common';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
 
 const useWalletInformation = () => {
   const { walletRepository } = useWalletManager();
   const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
 
-  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account;
 
   return useWalletStore((state) => ({
     name: state?.walletInfo?.name,
