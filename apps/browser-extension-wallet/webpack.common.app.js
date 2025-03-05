@@ -3,24 +3,28 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const { merge } = require('webpack-merge');
+const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 const commonConfig = require('./webpack.common');
+
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
-const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirname, 'sentry.js'), p] : p);
+const withMaybeSentry = (p, hasSentryReleaseConfig) =>
+  hasSentryReleaseConfig ? [path.join(__dirname, 'sentry.js'), p] : p;
 
-module.exports = () =>
+module.exports = (hasSentryReleaseConfig) =>
   merge(commonConfig(), {
     entry: {
-      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx')),
-      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx')),
-      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx')),
+      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx'), hasSentryReleaseConfig),
+      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx'), hasSentryReleaseConfig),
+      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx'), hasSentryReleaseConfig),
       ['trezor-content-script']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-content-script.ts'),
       ['trezor-usb-permissions']: withMaybeSentry(
-        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
+        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts'),
+        hasSentryReleaseConfig
       )
     },
     experiments: {
@@ -83,6 +87,21 @@ module.exports = () =>
       ]
     },
     plugins: [
+      ...(hasSentryReleaseConfig
+        ? [
+            sentryWebpackPlugin({
+              authToken: process.env.SENTRY_AUTH_TOKEN,
+              org: process.env.SENTRY_ORG,
+              project: process.env.SENTRY_PROJECT,
+              sourcemaps: {
+                filesToDeleteAfterUpload: ['**/*.js.map'],
+                assets: ['**/*.js.map']
+              },
+              telemetry: false,
+              url: 'https://sentry.io/'
+            })
+          ]
+        : []),
       new CopyPlugin({
         patterns: [
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
