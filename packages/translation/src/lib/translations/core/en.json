@@ -1,4 +1,6 @@
 {
+  "core.activity.loaderError.message": "Failed to load more activity",
+  "core.activity.loaderError.buttonLabel": "Retry",
   "core.activityDetails.address": "Address",
   "core.activityDetails.AuthorizeCommitteeHotCertificate": "Authorize Committee",
   "core.activityDetails.certificate": "Certificate",
