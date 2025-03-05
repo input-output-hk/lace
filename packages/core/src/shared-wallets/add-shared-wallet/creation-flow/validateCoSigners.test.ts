@@ -2,7 +2,7 @@ import { CoSignerError, CoSignerErrorKeys, CoSignerErrorName } from './AddCoSign
 import { validateCoSigners } from './validateCoSigners';
 
 const fakeSharedKey =
-  '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
+  'acct_shared_xvk1q395kywke7mufrysg33nsm6ggjxswu4g8q8ag7ks9kdyaczchtemd5d2armrfstfa32lamhxfl3sskgcmxm4zdhtvut362796ez4ecqx6vnht';
 
 describe('validateCoSigners', () => {
   test('name duplicated', () => {

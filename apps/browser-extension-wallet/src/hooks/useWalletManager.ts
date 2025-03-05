@@ -146,7 +146,7 @@ export interface UseWalletManager {
   reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
-  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
   createMultiSigAccount: (props: CreateMultiSigAccountParams) => Promise<void>;
@@ -869,12 +869,18 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
-    async (passphrase?: Uint8Array) => {
+    async (passphrase?: Uint8Array): Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey> => {
       const { wallet } = cardanoWallet.source;
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
-      return await getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
+      const bip32AccountPublicKey = await getExtendedAccountPublicKey(
+        wallet,
+        accountIndex,
+        passphrase,
+        KeyManagement.KeyPurpose.MULTI_SIG
+      );
+      return Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(bip32AccountPublicKey);
     },
     [cardanoWallet]
   );
@@ -909,7 +915,14 @@ export const useWalletManager = (): UseWalletManager => {
       quorumRules,
       coSigners
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
-      const publicKeys = coSigners.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
+      const coSignersInBip32Hex = coSigners.map((c) => ({
+        ...c,
+        sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(
+          Wallet.Cardano.Cip1854ExtendedAccountPublicKey(c.sharedWalletKey)
+        )
+      }));
+
+      const publicKeys = coSignersInBip32Hex.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
 
       let scriptKind: ScriptKind;
       if (quorumRules.option === QuorumRadioOption.AllAddresses) {
@@ -935,7 +948,7 @@ export const useWalletManager = (): UseWalletManager => {
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: {
           name,
-          coSigners: coSigners.map((signer) => ({
+          coSigners: coSignersInBip32Hex.map((signer) => ({
             name: signer.name,
             sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
           }))

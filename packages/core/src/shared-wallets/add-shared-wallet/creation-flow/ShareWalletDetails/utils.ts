@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { logger } from '@lace/common';
 import type {
   NativeScript,
@@ -14,10 +15,15 @@ export const FILENAME = 'shared-wallet-config.json';
 
 const getScriptsFromCosigners = async (coSigners: CoSigner[]) =>
   await Promise.all(
-    coSigners.map(async (coSigner) => ({
-      pubkey: await getHashFromPublicKey(coSigner.sharedWalletKey, paymentScriptKeyPath),
-      tag: 'pubkey',
-    })),
+    coSigners.map(async (coSigner) => {
+      const publicKeyHex = Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(
+        Wallet.Cardano.Cip1854ExtendedAccountPublicKey(coSigner.sharedWalletKey),
+      );
+      return {
+        pubkey: await getHashFromPublicKey(publicKeyHex, paymentScriptKeyPath),
+        tag: 'pubkey',
+      };
+    }),
   );
 
 // Function to map CreationFlowState to the schema JSON structure

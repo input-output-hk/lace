@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useCallback, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
@@ -14,7 +13,7 @@ import {
 } from '@lace/core';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
-import { useWalletManager } from '@hooks';
+import { useCurrentWallet, useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
 import { WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
@@ -22,6 +21,7 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { WalletConflictModal } from './components/NonRegisteredUserModal/WalletConflictModal';
+import { Cardano } from '@cardano-sdk/core';
 
 type CreateWalletParams = {
   coSigners: CoSigner[];
@@ -37,27 +37,25 @@ export const SharedWallet = (): JSX.Element => {
   const { walletInfo, cardanoWallet, environmentName, isHardwareWallet, isSharedWallet } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
-  const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+  const [sharedWalletKey, setSharedWalletKey] = useState<Cardano.Cip1854ExtendedAccountPublicKey>();
   const [initialWalletName, setInitialWalletName] = useState('');
   const [isWalletConflictModalVisible, setIsWalletConflictModalVisible] = useState(false);
-  const [activeWalletType, setActiveWalletType] = useState<LinkedWalletType>();
+  const activeWallet = useCurrentWallet();
 
   useEffect(() => {
     (async () => {
       const wallets = await firstValueFrom(walletRepository.wallets$);
       setInitialWalletName(`Wallet ${wallets.length + 1}`);
 
-      const activeWalletId = cardanoWallet.source.wallet.walletId;
-      const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
       const parentMultiSigAccount = activeWallet.accounts.find(
         ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
       );
-      setSharedWalletKey(parentMultiSigAccount?.extendedAccountPublicKey);
-      setActiveWalletType(activeWallet.type);
+      setSharedWalletKey(
+        Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(parentMultiSigAccount?.extendedAccountPublicKey)
+      );
     })();
-  }, [cardanoWallet.source.wallet.walletId, walletRepository]);
+  }, [activeWallet, cardanoWallet.source.wallet.walletId, walletRepository]);
 
   useEffect(() => {
     if (isSharedWallet) setBackgroundPage();
@@ -87,9 +85,10 @@ export const SharedWallet = (): JSX.Element => {
       if (sharedWalletKey) return sharedWalletKey;
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const key = await generateSharedWalletKey(enteredPassword);
+      const keyInBip32 = Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(key);
       await createMultiSigAccount({
         ownSignerWalletId: activeWalletId,
-        sharedWalletKey: key
+        sharedWalletKey: keyInBip32
       });
       setSharedWalletKey(key);
       return key;
@@ -114,7 +113,7 @@ export const SharedWallet = (): JSX.Element => {
             render={() => (
               <GenerateSharedWalletKeyFlow
                 activeWalletName={walletInfo?.name || ''}
-                activeWalletType={activeWalletType}
+                activeWalletType={activeWallet.type as LinkedWalletType}
                 generateKey={generateKey}
                 onGenerateKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)}
                 onCopyKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)}
