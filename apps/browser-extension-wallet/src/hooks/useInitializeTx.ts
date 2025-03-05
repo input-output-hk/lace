@@ -8,8 +8,10 @@ import { getReachedMaxAmountList } from '@src/views/browser-view/features/send-t
 import { useWalletStore } from '@src/stores';
 import { UseTranslationResponse } from 'react-i18next';
 import type { TranslationKey } from '@lace/translation';
+import { firstValueFrom } from 'rxjs';
+import { invalidHereafter as sharedWalletTxInvalidHereafter } from '@lace/core';
 
-const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins } = Wallet;
+const { buildTransactionProps, setMissingCoins, getTotalMinimumCoins, Cardano } = Wallet;
 
 export enum COIN_SELECTION_ERRORS {
   BALANCE_INSUFFICIENT_ERROR = 'UTxO Balance Insufficient',
@@ -49,7 +51,8 @@ export const useInitializeTx = (
   txProps: { outputs: OutputsMap; metadata?: string; hasInvalidOutputs?: boolean }
 ): void => {
   const {
-    walletUI: { cardanoCoin }
+    walletUI: { cardanoCoin },
+    isSharedWallet
   } = useWalletStore();
   const { outputs, metadata, hasInvalidOutputs } = txProps;
   const assetsInfo = useObservable(inMemoryWallet.assetInfo$);
@@ -82,6 +85,13 @@ export const useInitializeTx = (
         const totalMinimumCoins = getTotalMinimumCoins(minimumCoinQuantities);
         const outputsWithMissingCoins = setMissingCoins(minimumCoinQuantities, partialTxProps.outputs);
         const txBuilder = inMemoryWallet.createTxBuilder();
+        const tip = await firstValueFrom(inMemoryWallet.tip$);
+
+        if (isSharedWallet) {
+          txBuilder.setValidityInterval({
+            invalidHereafter: Cardano.Slot(tip.slot + sharedWalletTxInvalidHereafter)
+          });
+        }
 
         outputsWithMissingCoins.outputs.forEach((output) => txBuilder.addOutput(output));
         if (partialTxProps?.auxiliaryData?.blob) {
@@ -122,7 +132,8 @@ export const useInitializeTx = (
     setBuiltTxData,
     metadata,
     outputs,
-    inMemoryWallet
+    inMemoryWallet,
+    isSharedWallet
   ]);
 
   useEffect(() => {

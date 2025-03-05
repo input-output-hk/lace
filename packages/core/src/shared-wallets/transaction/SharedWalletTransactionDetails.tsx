@@ -1,7 +1,9 @@
 /* eslint-disable complexity */
 import { Box, SummaryExpander, Text, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
-import React, { useState } from 'react';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { OutputSummary, OutputSummaryProps } from '../../ui/components/OutputSummary';
 import { ActivityStatus, Transaction, TransactionFee } from '../../ui/components/Transaction';
@@ -10,7 +12,9 @@ import { InfoBar } from './InfoBar';
 import styles from './SharedWalletTransactionDetails.module.scss';
 import { CoSignersListItem, SignPolicy } from './types';
 
-const SHARED_WALLET_TX_VALIDITY_INTERVAL = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL;
+dayjs.extend(relativeTime);
+
+const SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS = process.env.SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS;
 
 export interface SharedWalletTransactionDetailsProps {
   amountTransformer: (amount: string) => string;
@@ -54,6 +58,11 @@ export const SharedWalletTransactionDetails = ({
     sending: t('core.outputSummaryList.sending'),
   };
 
+  const invalidIn = useMemo(
+    () => dayjs().add(Number(SHARED_WALLET_TX_VALIDITY_INTERVAL_IN_HOURS), 'h').toNow(true),
+    [],
+  );
+
   return (
     <Transaction.Content>
       <Transaction.ActivityDetailHeader
@@ -84,9 +93,7 @@ export const SharedWalletTransactionDetails = ({
             detail={`${status.charAt(0).toUpperCase()}${status.slice(1)}`}
           />
           <TransactionSummary.Amount
-            amount={t('sharedWallets.transaction.summary.validityPeriod.value', {
-              hours: SHARED_WALLET_TX_VALIDITY_INTERVAL,
-            })}
+            amount={invalidIn}
             label={t('sharedWallets.transaction.summary.validityPeriod.title')}
             tooltip={t('sharedWallets.transaction.summary.validityPeriod.tooltip')}
             data-testid="validity-period"

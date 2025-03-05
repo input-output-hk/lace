@@ -1,10 +1,12 @@
 /* eslint-disable react/no-multi-comp */
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Wallet } from '@lace/cardano';
 import { Button, PostHogAction, useAutoFocus } from '@lace/common';
-import { Password } from '@lace/core';
+import { Password, invalidHereafter as sharedWalletTxInvalidHereafter } from '@lace/core';
 import cn from 'classnames';
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { useOutsideHandles } from '../outside-handles-provider';
 import { useDelegationPortfolioStore } from '../store';
@@ -105,6 +107,11 @@ export const SignConfirmationFooter = (): ReactElement => {
     if (!delegationTxBuilder) throw new Error('Unable to submit transaction. The delegationTxBuilder not available');
 
     if (isSharedWallet && sharedWalletKey) {
+      const tip = await firstValueFrom(inMemoryWallet.tip$);
+      delegationTxBuilder.setValidityInterval({
+        invalidHereafter: Wallet.Cardano.Slot(tip.slot + sharedWalletTxInvalidHereafter),
+      });
+
       // TODO: integrate with tx summary drawer LW-10970
       const tx = await delegationTxBuilder.build().inspect();
 
