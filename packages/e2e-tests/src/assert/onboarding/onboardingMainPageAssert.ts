@@ -3,7 +3,6 @@ import OnboardingCommonAssert from '../onboarding/onboardingCommonAssert';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import OnboardingAnalyticsBannerAssert from './onboardingAnalyticsBannerAssert';
-import extensionUtils from '../../utils/utils';
 
 class OnboardingMainPageAssert extends OnboardingCommonAssert {
   async assertSeeLogo() {
@@ -98,7 +97,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await this.assertSeeSubtitle();
     await this.assertSeeCreateWalletOption();
     // Lack of support for hardware wallets on Firefox
-    await this.assertSeeHardwareWalletOption((await extensionUtils.getBrowser()) !== 'firefox');
+    await this.assertSeeHardwareWalletOption(!browser.isFirefox);
     await this.assertSeeRestoreWalletOption();
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();
