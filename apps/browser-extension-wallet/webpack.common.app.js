@@ -1,7 +1,5 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const { merge } = require('webpack-merge');
 const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 const commonConfig = require('./webpack.common');
