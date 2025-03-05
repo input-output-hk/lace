@@ -41,9 +41,9 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
 import { exportMultisigTransaction, PasswordObj, useSecrets, useSignPolicy } from '@lace/core';
-import { WalletType } from '@cardano-sdk/web-extension';
 import { parseError } from '@src/utils/parse-error';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -95,8 +95,9 @@ export const Footer = withAddressBookContext(
     const wallets = useObservable(walletRepository.wallets$);
     const wallet = useCurrentWallet();
 
-    const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
-    const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
+    const parentWallet = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet });
+    const parentWalletType = parentWallet?.wallet?.type;
+    const sharedWalletKey = parentWallet?.account?.extendedAccountPublicKey;
     const policy = useSignPolicy(wallet, 'payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;
@@ -190,7 +191,8 @@ export const Footer = withAddressBookContext(
       onHandleChangeConfirm(action);
     };
 
-    const isHwSummary = isSummaryStep && !isInMemoryWallet && !isSharedWallet;
+    const isParentWalletInMemoryWallet = parentWalletType === WalletType.InMemory;
+    const isHwSummary = isSummaryStep && !isInMemoryWallet && !isParentWalletInMemoryWallet;
 
     const signAndSubmitTransaction = useCallback(async () => {
       if (isSharedWallet) {
@@ -304,7 +306,7 @@ export const Footer = withAddressBookContext(
     );
 
     useEffect(() => {
-      const isHardwareWallet = [WalletType.Ledger, WalletType.Trezor].includes(walletType);
+      const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(walletType as Wallet.HardwareWallets);
       if (!isHardwareWallet || typeof navigator?.hid?.addEventListener !== 'function') return () => void 0;
       const onHardwareWalletDisconnect = (event: HIDConnectionEvent) => {
         if (event.device.opened) {
@@ -338,7 +340,7 @@ export const Footer = withAddressBookContext(
           case isReviewingAddress: {
             return handleReviewAddress('UPDATE');
           }
-          case isSummaryStep && !isInMemoryWallet && !isSharedWallet: {
+          case isSummaryStep && !isInMemoryWallet && !isParentWalletInMemoryWallet: {
             if (isPopupView) {
               return openContinueDialog();
             }
@@ -365,8 +367,8 @@ export const Footer = withAddressBookContext(
         handleReviewAddress,
         handleVerifyPass,
         isInMemoryWallet,
+        isParentWalletInMemoryWallet,
         isPopupView,
-        isSharedWallet,
         isSummaryStep,
         onCloseSubmitedTransaction,
         openContinueDialog,
@@ -424,7 +426,9 @@ export const Footer = withAddressBookContext(
       if (isHwSummary) {
         const staleLabels = isPopupView
           ? t('browserView.transaction.send.footer.continueInAdvancedView')
-          : t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType });
+          : t('browserView.transaction.send.footer.confirmWithDevice', {
+              hardwareWallet: parentWalletType || walletType
+            });
         return isSubmitingTx ? t('browserView.transaction.send.footer.signing') : staleLabels;
       }
 
@@ -433,7 +437,16 @@ export const Footer = withAddressBookContext(
       }
 
       return t(nextStepBtnLabels[currentSection.currentSection]);
-    }, [isHwSummary, isSharedWallet, currentSection.currentSection, t, isPopupView, walletType, isSubmitingTx]);
+    }, [
+      isHwSummary,
+      isSharedWallet,
+      currentSection.currentSection,
+      t,
+      isPopupView,
+      parentWalletType,
+      walletType,
+      isSubmitingTx
+    ]);
 
     const cancelButtonLabel = useMemo(() => {
       if (currentSection.currentSection === Sections.SUCCESS_TX) {

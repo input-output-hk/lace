@@ -114,22 +114,30 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
  * @param activeWallet
  * @returns {Bip32WalletAccount<Wallet.AccountMetadata>} | undefined
  */
-export const getParentWalletCIP1854Account = ({
+export const getParentWalletForCIP1854Account = ({
   wallets,
   activeWallet
 }: {
   wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[];
   activeWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
-}): Bip32WalletAccount<Wallet.AccountMetadata> | undefined => {
+}):
+  | {
+      wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+      account: Bip32WalletAccount<Wallet.AccountMetadata>;
+    }
+  | undefined => {
   if (activeWallet?.type !== WalletType.Script) return;
 
   const parentWallet = wallets.find(({ walletId }) => walletId === activeWallet.ownSigners[0].walletId);
 
   if (parentWallet.type !== WalletType.Script) {
     // eslint-disable-next-line consistent-return
-    return parentWallet.accounts.find(
-      ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
-    );
+    return {
+      wallet: parentWallet,
+      account: parentWallet.accounts.find(
+        ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
+      )
+    };
   }
 };
 
@@ -151,7 +159,7 @@ export const getActiveWallet = async ({
   if (!wallet) return;
   const account =
     wallet.type === WalletType.Script
-      ? getParentWalletCIP1854Account({ wallets, activeWallet: wallet })
+      ? getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account
       : wallet.accounts.find((acc) => activeWallet.accountIndex === acc.accountIndex);
   // eslint-disable-next-line consistent-return
   return { wallet, account };

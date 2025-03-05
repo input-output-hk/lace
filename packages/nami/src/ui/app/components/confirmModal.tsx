@@ -22,7 +22,8 @@ import { ERROR } from '../../../config/config';
 
 import type { PasswordObj as Password } from '@lace/core';
 import { NamiPassword } from './namiPassword';
-import {logger} from "@lace/common";
+import { logger } from "@lace/common";
+import { Wallet as CardanoWallet } from "@lace/cardano";
 
 interface Props {
   ready?: boolean;
@@ -89,8 +90,9 @@ const ConfirmModal = (
   React.useImperativeHandle(ref, () => ({
     openModal: () => {
       if (
-        walletType === WalletType.Ledger ||
-        walletType === WalletType.Trezor
+        CardanoWallet.AVAILABLE_WALLETS.includes(
+          walletType as CardanoWallet.HardwareWallets,
+        )
       ) {
         onOpenHW();
       } else {
