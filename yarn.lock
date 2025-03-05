@@ -13496,15 +13496,18 @@ __metadata:
     "@bitcoinerlab/secp256k1": ^1.2.0
     "@lace/common": 0.1.0
     "@scure/bip32": ^1.6.0
+    "@types/bn.js": ^5.1.6
     "@types/pbkdf2": ^3
     "@types/webextension-polyfill": 0.10.0
     axios: ^1.7.4
     bip39: ^3.1.0
     bitcoinjs-lib: ^6.1.7
+    bn.js: ^5.2.1
     buffer: 6.0.3
     classnames: 2.3.1
     dayjs: 1.10.7
     hash.js: ^1.1.7
+    js-sha256: ^0.11.0
     lodash: 4.17.21
     pbkdf2: ^3.1.2
     randombytes: 2.1.0
@@ -23760,6 +23763,15 @@ __metadata:
   dependencies:
     "@babel/types": ^7.20.7
   checksum: 608e0ab4fc31cd47011d98942e6241b34d461608c0c0e153377c5fd822c436c475f1ded76a56bfa76a1adf8d9266b727bbf9bfac90c4cb152c97f30dadc5b7e8
+  languageName: node
+  linkType: hard
+
+"@types/bn.js@npm:^5.1.6":
+  version: 5.1.6
+  resolution: "@types/bn.js@npm:5.1.6"
+  dependencies:
+    "@types/node": "*"
+  checksum: 887411126d40e3d28aef2df8075cda2832db2b0e926bb4046039bbb026f2e3cfbcf1a3ce90bd935be0fcc039f8009e32026dfbb84a11c1f5d051cd7f8194ba23
   languageName: node
   linkType: hard
 
@@ -43478,6 +43490,13 @@ __metadata:
   version: 4.2.0
   resolution: "js-sdsl@npm:4.2.0"
   checksum: 2cd0885f7212afb355929d72ca105cb37de7e95ad6031e6a32619eaefa46735a7d0fb682641a0ba666e1519cb138fe76abc1eea8a34e224140c9d94c995171f1
+  languageName: node
+  linkType: hard
+
+"js-sha256@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "js-sha256@npm:0.11.0"
+  checksum: 742d34a0c6eb15247309f1c74889b5a51df01a96e4307375b420fbe973f2f25585012b4d3c8fa52a1b18546153d12587e6463bb725dc1bc58686da03e892c334
   languageName: node
   linkType: hard
 

@@ -1,5 +1,8 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
+import { Network } from './network';
+import { ChainType } from './keyDerivation';
+import { tweakTaprootPubKey } from './taproot';
 
 bitcoin.initEccLib(ecc);
 
@@ -113,9 +116,10 @@ export const deriveAddressByType = (
      * The first byte (prefix) of the compressed public key is removed.
      */
     case AddressType.Taproot: {
-      // Convert compressed public key to x-only public key (strip the first byte)
-      const xOnlyPubKey = pubkeyBuffer.slice(1); // Remove the first byte (0x02 or 0x03)
-      return bitcoin.payments.p2tr({ pubkey: xOnlyPubKey, network }).address!;
+      // Convert the compressed public key to an x‑only public key by removing the first byte.
+      const internalXOnlyPubKey = pubkeyBuffer.slice(1);
+      const tweakedPubKey = tweakTaprootPubKey(internalXOnlyPubKey);
+      return bitcoin.payments.p2tr({ pubkey: tweakedPubKey, network }).address!;
     }
 
     default:
@@ -124,19 +128,51 @@ export const deriveAddressByType = (
 };
 
 /**
- * Represents a Bitcoin address and its corresponding derivation path.
+ * Represents a Bitcoin address and its corresponding derivation path details.
  *
  * In hierarchical deterministic (HD) wallets, Bitcoin addresses are derived
  * systematically using derivation paths. Each path uniquely identifies a specific
- * address in the wallet's key hierarchy.
+ * address in the wallet's key hierarchy, allowing for organized management of keys.
  */
 export type DerivedAddress = {
-  /** The derived Bitcoin address, e.g., 'bc1qxyz...' or '1A1zP1e...' */
+  /**
+   * The derived Bitcoin address.
+   */
   address: string;
 
-  /** The address type used to derive the address, e.g., 'NativeSegWit' or 'Legacy' */
+  /**
+   * The type of address used to derive the address.
+   */
   addressType: AddressType;
 
-  /** The derivation path used to derive the address, e.g., "m/84'/0'/0'/0/0" */
-  derivationPath: string;
+  /**
+   * The Bitcoin network to which this address belongs.
+   */
+  network: Network;
+
+  /**
+   * The account number in the derivation path.
+   *
+   * This number represents the account index within the wallet's key hierarchy.
+   */
+  account: number;
+
+  /**
+   * The chain type used in the derivation path.
+   *
+   * This distinguishes between external (receiving) and internal (change).
+   */
+  chain: ChainType;
+
+  /**
+   * The index number in the derivation path.
+   *
+   * This indicates the sequential order of the address within the specified chain.
+   */
+  index: number;
+
+  /**
+   * The public key for this address.
+   */
+  publicKeyHex: string;
 };

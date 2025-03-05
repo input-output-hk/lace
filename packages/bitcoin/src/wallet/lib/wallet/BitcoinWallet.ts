@@ -6,7 +6,8 @@ import {
   BitcoinWalletInfo, ChainType,
   deriveAddressByType,
   deriveChildPublicKey,
-  DerivedAddress, getNetworkKeys,
+  DerivedAddress,
+  getNetworkKeys,
   Network
 } from '../common';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -72,7 +73,7 @@ export class BitcoinWallet {
   public pendingTransactions$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(new Array<TransactionHistoryEntry>());
   public utxos$: BehaviorSubject<UTxO[]> = new BehaviorSubject(new Array<UTxO>());
   public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
-  public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject([]);
+  public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject(new Array<DerivedAddress>());
 
   constructor(
     provider: BlockchainDataProvider,
@@ -88,16 +89,19 @@ export class BitcoinWallet {
     this.provider = provider;
     this.info = info;
 
-    const networkIndex = network === Network.Mainnet ? 0 : 1;
     const networkKeys = getNetworkKeys(info, network);
-    const extendedAccountPubKey = Buffer.from(networkKeys.extendedAccountPublicKeys.nativeSegWitHex, 'hex');
+    const extendedAccountPubKey = networkKeys.nativeSegWit;
     const pubKey = deriveChildPublicKey(extendedAccountPubKey, ChainType.External, 0);
     const address = deriveAddressByType(pubKey, AddressType.NativeSegWit, bitcoinNetwork);
 
     this.address = {
       address,
       addressType: AddressType.NativeSegWit,
-      derivationPath: `m/84'/${networkIndex}'/${info.accountIndex}'/0/0`
+      network,
+      account: this.info.accountIndex,
+      chain: ChainType.External,
+      index: 0,
+      publicKeyHex: Buffer.from(pubKey).toString('hex')
     };
 
     this.addresses$.next([this.address]);

@@ -1,7 +1,7 @@
 import { UTxO } from '../providers';
 import { BitcoinSigner } from './BitcoinSigner';
 import { payments, Psbt } from 'bitcoinjs-lib';
-import { Network } from '../common';
+import { DerivedAddress, Network } from '../common';
 import * as bitcoin from 'bitcoinjs-lib';
 
 const INPUT_SIZE = 68;
@@ -14,6 +14,7 @@ export type UnsignedTransaction = {
   amount: bigint,
   fee: bigint;
   vBytes: number;
+  signers: DerivedAddress[]
 };
 
 export type SignedTransaction = {
@@ -21,13 +22,29 @@ export type SignedTransaction = {
   hex: string;
 }
 
-export const signTx = (unsignedTx: UnsignedTransaction, signer: BitcoinSigner): SignedTransaction => {
+/**
+ * Signs a PSBT transaction with multiple Bitcoin signers, each corresponding to a specific input.
+ *
+ * @param unsignedTx - The PSBT transaction to sign.
+ * @param signers - An array of BitcoinSigner instances, where each signer is used for the respective input.
+ * @returns The signed transaction containing the signed PSBT and its hexadecimal representation.
+ */
+export const signTx = (
+  unsignedTx: UnsignedTransaction,
+  signers: BitcoinSigner[]
+): SignedTransaction => {
   const psbt = unsignedTx.context;
 
-  psbt.signAllInputs(signer);
+  signers.forEach((signer, index) => {
+    psbt.signInput(index, signer);
+  });
+
   psbt.finalizeAllInputs();
 
-  return { context: psbt, hex: psbt.extractTransaction().toHex() }
+  return {
+    context: psbt,
+    hex: psbt.extractTransaction().toHex()
+  };
 };
 
 export const buildTx = (
@@ -37,7 +54,7 @@ export const buildTx = (
   feeRate: number,
   utxos: UTxO[],
   network: Network,
-  publicKey: Uint8Array,
+  knownAddresses: DerivedAddress[],
 ): UnsignedTransaction => {
   const net = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
 
@@ -72,12 +89,18 @@ export const buildTx = (
 
     const psbt = new Psbt({ network: net });
 
+    const signers = new Array<DerivedAddress>();
     selectedUTxOs.forEach((utxo) => {
+      const knownAddr = knownAddresses.find((address) => address.address === utxo.address);
+      if (!knownAddr) throw new Error('Unknown address in UTXO set.');
+
+      signers.push(knownAddr);
+
       psbt.addInput({
         hash: utxo.txId,
         index: utxo.index,
         witnessUtxo: {
-          script: payments.p2wpkh({ pubkey: Buffer.from(publicKey), network: net }).output!,
+          script: payments.p2wpkh({ pubkey: Buffer.from(knownAddr.publicKeyHex, 'hex'), network: net }).output!,
           value: Number(utxo.satoshis)
         }
       });
@@ -97,7 +120,7 @@ export const buildTx = (
       });
     }
 
-    return { context: psbt, vBytes: estimatedSize, fee, toAddress, amount };
+    return { context: psbt, vBytes: estimatedSize, fee, toAddress, amount, signers };
   } catch (error) {
     console.error('Failed to build transaction:', error);
     throw error;

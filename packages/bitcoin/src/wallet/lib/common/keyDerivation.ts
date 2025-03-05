@@ -1,9 +1,10 @@
 import { pbkdf2Sync } from 'pbkdf2';
 import { HDKey } from '@scure/bip32';
 import * as bitcoin from 'bitcoinjs-lib';
-import * as ecc from '@bitcoinerlab/secp256k1';
 import { AddressType } from './address';
 import { Network } from './network';
+import { ExtendedAccountPublicKeys } from './info';
+import * as ecc from '@bitcoinerlab/secp256k1';
 
 bitcoin.initEccLib(ecc);
 
@@ -13,6 +14,19 @@ const ADDRESS_TYPE_TO_PURPOSE: Record<AddressType, number> = {
   [AddressType.NativeSegWit]: 84,
   [AddressType.Taproot]: 86,
   [AddressType.ElectrumNativeSegWit]: 0,
+};
+
+/**
+ * Mapping from AddressType enum values to keys used in ExtendedAccountPublicKeys.
+ *
+ * This mapping handles differences in capitalization between the enum values and the keys in the structure.
+ */
+const ADDRESS_TYPE_TO_KEY: Record<AddressType, keyof ExtendedAccountPublicKeys> = {
+  [AddressType.Legacy]: 'legacy',
+  [AddressType.SegWit]: 'segWit',
+  [AddressType.NativeSegWit]: 'nativeSegWit',
+  [AddressType.Taproot]: 'taproot',
+  [AddressType.ElectrumNativeSegWit]: 'electrumNativeSegWit',
 };
 
 /**
@@ -106,24 +120,24 @@ export type KeyPair = {
  * @returns {{ pair: KeyPair, path: string }} An object containing the derived account-level key pair and the derivation path.
  * @throws {Error} If the account-level private or public key cannot be derived.
  */
-export const deriveRootKeyPair = (seed: Buffer, addressType: AddressType, network: Network, account: number) => {
+export const deriveAccountRootKeyPair = (seed: Buffer, addressType: AddressType, network: Network, account: number) => {
   const root = HDKey.fromMasterSeed(seed);
   const networkIndex = network === Network.Mainnet ? 0 : 1;
   const accountPath = `m/${ADDRESS_TYPE_TO_PURPOSE[addressType]}'/${networkIndex}'/${account}'`;
   const accountNode = root.derive(accountPath);
 
-  if (!accountNode.privateKey) {
+  if (!accountNode.privateExtendedKey) {
     throw new Error('Failed to derive account-level private key');
   }
 
-  if (!accountNode.publicKey) {
+  if (!accountNode.publicExtendedKey) {
     throw new Error('Failed to derive account-level public key');
   }
 
   return {
     pair: {
-      publicKey: Buffer.from(accountNode.publicKey),
-      privateKey: Buffer.from(accountNode.privateKey)
+      publicKey: accountNode.publicExtendedKey,
+      privateKey: accountNode.privateExtendedKey
     },
     path: accountPath
   };
@@ -136,16 +150,16 @@ export const deriveRootKeyPair = (seed: Buffer, addressType: AddressType, networ
  * and index, based on the account-level extended key. The chain is determined by using '0' for external addresses and
  * '1' for internal addresses.
  *
- * @param {Buffer} accountKey - The account-level extended key (HDKey) as a Buffer.
+ * @param {string} accountKey - The account-level extended key (HDKey).
  * @param {ChainType} chain - The chain type (external for receiving, internal for change).
  * @param {number} index - The index of the child key to derive.
  * @returns {{ pair: KeyPair, path: string }} An object containing the derived child key pair and its derivation path.
  * @throws {Error} If the child private key cannot be derived.
  */
-export const deriveChildKeyPair = (accountKey: Buffer, chain: ChainType, index: number) => {
-  const hdAccountKey = HDKey.fromExtendedKey(accountKey.toString('hex'));
+export const deriveChildKeyPair = (accountKey: string, chain: ChainType, index: number) => {
+  const hdAccountKey = HDKey.fromExtendedKey(accountKey);
   const chainPath = chain === ChainType.External ? '0' : '1';
-  const fullPath = `${chainPath}/${index}`;
+  const fullPath = `m/${chainPath}/${index}`;
   const childNode = hdAccountKey.derive(fullPath);
   if (!childNode.privateKey) {
     throw new Error('Failed to derive child private key');
@@ -177,10 +191,10 @@ export const deriveChildKeyPair = (accountKey: Buffer, chain: ChainType, index: 
  * @returns {Buffer} The derived child public key.
  * @throws {Error} If the child public key cannot be derived.
  */
-export const deriveChildPublicKey = (extendedPublicKey: Buffer, chain: ChainType, index: number): Buffer => {
-  const hdKey = HDKey.fromExtendedKey(extendedPublicKey.toString('hex'));
+export const deriveChildPublicKey = (extendedPublicKey: string, chain: ChainType, index: number): Buffer => {
+  const hdKey = HDKey.fromExtendedKey(extendedPublicKey);
   const chainPath = chain === ChainType.External ? '0' : '1';
-  const relativePath = `${chainPath}/${index}`;
+  const relativePath = `m/${chainPath}/${index}`;
   const childNode = hdKey.derive(relativePath);
 
   if (!childNode.publicKey) {
@@ -188,4 +202,58 @@ export const deriveChildPublicKey = (extendedPublicKey: Buffer, chain: ChainType
   }
 
   return Buffer.from(childNode.publicKey);
+};
+
+/**
+ * Derives the extended account public keys for all supported address types and networks.
+ *
+ * Given a master seed and an account index, this function derives the account-level extended public key
+ * (xpub) for each address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit) on both Mainnet and Testnet.
+ * The returned structure maps each network to its corresponding extended keys.
+ *
+ * @param {Buffer} seed - The master seed derived from the mnemonic.
+ * @param {number} account - The account index.
+ * @returns An object containing the extended account public keys for mainnet and testnet.
+ */
+export const getExtendedPubKeys = (seed: Buffer, account: number): { mainnet: ExtendedAccountPublicKeys, testnet: ExtendedAccountPublicKeys } => {
+  const addressTypes: AddressType[] = [
+    AddressType.NativeSegWit,
+    AddressType.Legacy,
+    AddressType.Taproot,
+    AddressType.SegWit,
+    AddressType.ElectrumNativeSegWit,
+  ];
+  const networks: Network[] = [Network.Mainnet, Network.Testnet];
+
+  const extendedAccountPublicKeys: { mainnet: ExtendedAccountPublicKeys, testnet: ExtendedAccountPublicKeys } = {
+    mainnet: {
+      legacy: '',
+      segWit: '',
+      nativeSegWit: '',
+      taproot: '',
+      electrumNativeSegWit: ''
+    },
+    testnet: {
+      legacy: '',
+      segWit: '',
+      nativeSegWit: '',
+      taproot: '',
+      electrumNativeSegWit: ''
+    }
+  };
+
+  for (const network of networks) {
+    for (const addressType of addressTypes) {
+      const keyPair = deriveAccountRootKeyPair(seed, addressType, network, account);
+      const extendedKeyStr = keyPair.pair.publicKey;
+
+      if (network === Network.Mainnet) {
+        extendedAccountPublicKeys.mainnet[ADDRESS_TYPE_TO_KEY[addressType]] = extendedKeyStr;
+      } else {
+        extendedAccountPublicKeys.testnet[ADDRESS_TYPE_TO_KEY[addressType]] = extendedKeyStr;
+      }
+    }
+  }
+
+  return extendedAccountPublicKeys;
 };

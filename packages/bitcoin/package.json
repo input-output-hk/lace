@@ -46,10 +46,12 @@
     "axios": "^1.7.9",
     "bip39": "^3.1.0",
     "bitcoinjs-lib": "^6.1.7",
+    "bn.js": "^5.2.1",
     "buffer": "6.0.3",
     "classnames": "2.3.1",
     "dayjs": "1.10.7",
     "hash.js": "^1.1.7",
+    "js-sha256": "^0.11.0",
     "lodash": "4.17.21",
     "pbkdf2": "^3.1.2",
     "randombytes": "2.1.0",
@@ -60,6 +62,7 @@
     "webextension-polyfill": "0.10.0"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.1.6",
     "@types/pbkdf2": "^3",
     "@types/webextension-polyfill": "0.10.0",
     "axios": "^1.7.4",

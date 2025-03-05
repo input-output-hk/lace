@@ -358,12 +358,30 @@ const storesFactory: StoresFactory = {
 };
 
 const walletInfo = {
-  walletName: 'Bitcoin Wallet 1',
-  publicKeyHex: '029bb34ca00cb77ec4ee55d08096ef3e615915841c1f2add83f4444ecea848c9f9',
-  encryptedPrivateKeyHex: 'b2be18c1d5ab2e4c247e4e9047f6a27f40e5944d6ce03dfbffa6883b759ca1ef9269088b685afa050f12feb2100daaa2f2964b1d129cd9eb0fbd9e42c37a954b81cf692f8799ececeba035915a3802ed80a70a6a38c93c4a6c9a6f91',
-  encryptedMnemonicsHex: 'd30980b9e9a0d2df3be5a060d5c153ad653125035df329c59044a642c30db4f28191e2d55d015cf28439c41e66cc2684464a8ed2cdfc953850d0b39bb4e356d501b9faea753af0dcbc0e626cbaa23bce1b3b7c662c373e785780c05584f245f9838c4ac6de49d02859f3e39592bd75612770242aead6c46a5a691c3d02dde5150c8364440b938706f486fcf396caa5a5ae3a7eb396f7892801c03a70b2337ae8d93f881bfecef3212352c9c64cd0bcb37a38e49aebb8775ecbb7cb020d458c83381f7d2116a6218e44995e1672655939785120ddc82bf9912af531b4',
-  derivationPath: 'm/84\'/1\'/0\'/0/0'
-};
+  walletName: "Bitcoin Wallet 1",
+  accountIndex: 0,
+  encryptedSecrets: {
+    mnemonics: "6300f91cde4e7048badf22c2ee76a47103f932e3d4c26a72e67593bafce415ca4dfbda026f86bf063a1b950e0f9938c7051b5a7cfbc80a616794b49c9e1b358839375a0b751486a118c659b73eae61fcd34944981a500503c25522510bf51cab5ef31a7929bc2d78e8f81a35ad7597dcf20ac0c3b6affa25dc48ca6f86fcba9d5f2c656ceb53e7f0d0bfa91932fbbfb48971f53076b37afddd8dc7afe81abfcfeb40b1c760cafef03b246f8e23fd218b6639691605771c64d4a1a76619756732d207cbb35fe539837dcffe0a382261082b71155ca95e5f3659c25b5b",
+    seed: "17c59e55ea15fb107a922cd20e11a98ebf36a247544686793d4dbcf8c2ee8e155e2fba6b388533ed519a918011dd99947819e1f1350e3d0475dd9d16cb7b816e75a38dc3db20b8e269a1031152fea8dd65a433d18578e44314137a655828aca699fade2b13bbe35add766db4870c78d6cc6fa12a00bd37f921c94b39"
+  },
+  extendedAccountPublicKeys: {
+    mainnet: {
+      legacy: "xpub6CXqm3qd33LhU2AMmUnKjsgZuBZQfNPZ6ww3tbVpBNYZjbcPLTU43beBUvmMpMGsLQ2SKisS38FgQdKS5WtVy8fa46GokjgBVeUkwVzApTR",
+      segWit: "xpub6DWj4HZsHB273iZThWdcBwvCxvDRWQkwSi3SjPQje5RvVbrKc61GoqVaHtkN2ha3sJCHEaFXSjsFNFgTfDMrFmHD848QRUtL9ZcRYtymKN6",
+      nativeSegWit: "xpub6DQVZkr4QyJR5RiBtTqSZg2WTHxo9D1jcexG4WjFCwQfwy9XUQ7vM8QFeXeBcGUuCXeBsPCZ525WGuhm6dE6tcyU9aUiGm9EotXYvfTwBqt",
+      taproot: "xpub6DSS1V32GwHMqZihBK9JaZgd6xnVugkEkPaSkbZgAYbzZC41nbUqcuH2N3tgeFMWudvJuYfX8kqWsKUd4oj3H3cUR6mPySGPL3PV6yzu7ko",
+      electrumNativeSegWit: "xpub6D3Tc2KGUuhyTv5EdgR5eUmgG4Ai7DzYrsRCimRC9vYZLXcuKsFVkWySGPrsdqUsvpLDyiXeRJ9kKzTZVrtTWm8BUc539mQ2VGEnQwkiKox"
+    },
+    testnet: {
+      legacy: "xpub6CLkFqDprtawP8VB21Hzgy5jhwgg7FhDDfJeeNn8Afv5supgd2V38x3E3R5om1ZN7avQiL6gcpYAQX71391WvmfymybGeyxEnHzEWBFQMrY",
+      segWit: "xpub6C99JbTvGxYtBXEHUG7HMe8hJq9GFFRaAw5JsHprckQGmQCbqzDbRiznL3Shc8fsAxAa1GVhKdFYL4pFsgKh5hhS9Ddg5Ni6NSUgMzFprqF",
+      nativeSegWit: "xpub6CrzGDoCVV56RUEdoKWVVXCA5JUJr9PQMQvXaUiGKjfBzZgwkJtKtHfvz3rCDnVL4qriaeZixHARX5MifcSDzZMnwBGVng5AqLZrsE1sUg1",
+      taproot: "xpub6CZnCLkMMgC8aDH1yMeQeZnLGk7qeRxSG8pwHQvb2dkbXAuRopV57RoZLBUqBWMmiqxCaDDwpVWFCfLLAAJkWW4NCy4CKB4U2UUx95hnTYN",
+      electrumNativeSegWit: "xpub6Bju9NoEG4m4x95tv1uX5fu7cCKf3ormkGbV3qtsvnwRqUmqcmCrej8RGQGmxWJRN23gfpZstUZ1uMnxUgkHju5udzPXqrJqDsq719UwXHj"
+    }
+  }
+}
+
 
 const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
 //const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();

@@ -1,14 +1,14 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {SendStepOne} from "./SendStepOne";
-import {FeeSelectionStep} from "./FeeSelectionStep";
-import {ReviewTransaction} from "./ReviewTransaction";
-import {PasswordInput} from "./PasswordInput"
-import {TransactionSuccess} from "./TransactionSuccess"
-import {TransactionFailed} from "./TransactionFailed";
-import {UnauthorizedTx} from "./UnauthorizedTx";
-import {useFetchCoinPrice, useWalletManager} from "@hooks";
-import {useObservable} from "@lace/common";
-import {BitcoinWallet} from "@lace/bitcoin";
+import React, { useEffect, useMemo, useState } from 'react';
+import { SendStepOne } from "./SendStepOne";
+import { FeeSelectionStep } from "./FeeSelectionStep";
+import { ReviewTransaction } from "./ReviewTransaction";
+import { PasswordInput } from "./PasswordInput"
+import { TransactionSuccess } from "./TransactionSuccess"
+import { TransactionFailed } from "./TransactionFailed";
+import { UnauthorizedTx } from "./UnauthorizedTx";
+import { useFetchCoinPrice, useWalletManager } from "@hooks";
+import { useObservable } from "@lace/common";
+import { BitcoinWallet } from "@lace/bitcoin";
 import { Wallet as Cardano } from "@lace/cardano";
 
 const SATS_IN_BTC = 100000000;
@@ -27,23 +27,56 @@ type Step =
   | 'SUCCESS'
   | 'FAILED';
 
-const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, publicKey: Buffer, encryptedPrivateKey: Uint8Array, password: Uint8Array) => {
-  const privateKey = Buffer.from(await Cardano.KeyManagement.emip3decrypt(encryptedPrivateKey, password));
+const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, seed: string, password: Uint8Array) => {
+  const encryptedSeed = Buffer.from(seed, 'hex');
+  const rootPrivateKey = Buffer.from(await Cardano.KeyManagement.emip3decrypt(encryptedSeed, password));
+  const signingKeys = tx.signers;
+  const signers = [];
 
-  const keyPair = { publicKey, privateKey };
-  const signer = new BitcoinWallet.BitcoinSigner(keyPair);
+  for (const signingKey of signingKeys) {
+    const rootKeyPair = BitcoinWallet.deriveAccountRootKeyPair(
+      rootPrivateKey,
+      signingKey.addressType,
+      signingKey.network,
+      signingKey.account
+    );
 
-  const signedTx = BitcoinWallet.signTx(tx, signer);
+    const keyPair = BitcoinWallet.deriveChildKeyPair(
+      rootKeyPair.pair.privateKey,
+      signingKey.chain,
+      signingKey.index
+    );
 
-  signer.clearSecrets();
+    let finalKeyPair = keyPair.pair;
+
+    if (signingKey.addressType === BitcoinWallet.AddressType.Taproot) {
+      // Extract the internal x‑only public key (remove first byte of compressed pubkey)
+      const internalXOnlyPubKey = keyPair.pair.publicKey.slice(1);
+      const tweakedPrivateKey = BitcoinWallet.tweakTaprootPrivateKey(keyPair.pair.privateKey, internalXOnlyPubKey);
+
+      finalKeyPair = {
+        publicKey: keyPair.pair.publicKey,
+        privateKey: Buffer.from(tweakedPrivateKey)
+      };
+    }
+
+    const signer = new BitcoinWallet.BitcoinSigner(finalKeyPair);
+    signers.push(signer);
+  }
+
+  const signedTx = BitcoinWallet.signTx(tx, signers);
+
+  for (const signer of signers) {
+    signer.clearSecrets();
+  }
   password.fill(0);
-  privateKey.fill(0);
+  rootPrivateKey.fill(0);
 
   return signedTx;
 }
 
-const buildTransaction = (publicKey: Uint8Array, changeAddress: string, recipientAddress: string, feeRate: number, amount: bigint, utxos: BitcoinWallet.UTxO[], network: BitcoinWallet.Network): BitcoinWallet.UnsignedTransaction => {
-  return BitcoinWallet.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, publicKey);
+const buildTransaction = (knownAddresses: BitcoinWallet.DerivedAddress[], changeAddress: string, recipientAddress: string, feeRate: number, amount: bigint, utxos: BitcoinWallet.UTxO[], network: BitcoinWallet.Network): BitcoinWallet.UnsignedTransaction => {
+  return BitcoinWallet.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, knownAddresses);
 };
 
 const btcStringToSatoshisBigint = (btcString: string): bigint => {
@@ -67,6 +100,7 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
 
   const [feeMarkets, setFreeMarkets] = useState<BitcoinWallet.EstimatedFees | null>(null);
   const [utxos, setUtxos] = useState<BitcoinWallet.UTxO[] | null>(null);
+  const [knownAddresses, setKnownAddresses] = useState<BitcoinWallet.DerivedAddress[] | null>(null);
   const [walletInfo, setWalletInfo] = useState<BitcoinWallet.BitcoinWalletInfo | null>(null);
   const [network, setWalletNetwork] = useState<BitcoinWallet.Network | null>(null);
   const [confirmationHash, setConfirmationHash] = useState<string>('');
@@ -91,6 +125,13 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
     });
   }, [bitcoinWallet]);
 
+
+  useEffect( () => {
+    bitcoinWallet.addresses$.subscribe((addresses) => {
+      setKnownAddresses(addresses);
+    });
+  }, [bitcoinWallet]);
+
   useEffect( () => {
     bitcoinWallet.utxos$.subscribe((utxos) => {
       setUtxos(utxos);
@@ -107,8 +148,7 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   const goToFeeSelection = () => setStep('FEE');
   // Step 2 -> 3
   const goToReview = () => {
-    const pubKey = Buffer.from(walletInfo!.publicKeyHex, 'hex');
-    const unsignedTransaction = buildTransaction(pubKey, address, address, feeRate, btcStringToSatoshisBigint(amount), utxos, network!);
+    const unsignedTransaction = buildTransaction(knownAddresses, address, address, feeRate, btcStringToSatoshisBigint(amount), utxos, network!);
     setUnsignedTransaction(unsignedTransaction);
     setStep('REVIEW')
   };
@@ -118,8 +158,7 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   const handlePasswordSubmit = (password: string) => {
     signTransaction(
       unsignedTransaction!,
-      Buffer.from(walletInfo!.publicKeyHex, 'hex'),
-      Buffer.from(walletInfo!.encryptedPrivateKeyHex, 'hex'),
+      walletInfo!.encryptedSecrets.seed,
       Buffer.from(password))
     .then((signedTx) => {
       console.log('Signed transaction:', signedTx.hex);
