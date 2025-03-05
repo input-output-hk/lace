@@ -83,7 +83,7 @@ interface CreateSharedWalletParams {
   coSigners: CoSigner[];
   ownSignerWalletId: WalletId;
   quorumRules: QuorumOptionValue;
-  sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
+  sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey;
 }
 
 export interface CreateHardwareWallet {
@@ -141,10 +141,10 @@ export interface UseWalletManager {
   reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
-  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
-  saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
+  saveSharedWalletKey: (sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey) => Promise<void>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -860,12 +860,18 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
-    (passphrase: Uint8Array) => {
+    async (passphrase: Uint8Array) => {
       const { wallet } = cardanoWallet.source;
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
-      return getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
+      const sharedWalletKey = await getExtendedAccountPublicKey(
+        wallet,
+        accountIndex,
+        passphrase,
+        KeyManagement.KeyPurpose.MULTI_SIG
+      );
+      return Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(sharedWalletKey);
     },
     [cardanoWallet]
   );
@@ -879,7 +885,7 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const saveSharedWalletKey = useCallback<UseWalletManager['saveSharedWalletKey']>(
-    async (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> => {
+    async (sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey): Promise<void> => {
       if (!cardanoWallet) {
         throw new Error('Active wallet data not available');
       }
@@ -890,11 +896,14 @@ export const useWalletManager = (): UseWalletManager => {
         throw new Error('Failed to identify an active wallet data');
       }
 
+      const sharedWalletKeyInBip32 =
+        Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(sharedWalletKey);
+
       await walletRepository.updateWalletMetadata({
         walletId,
         metadata: {
           ...activeWallet.metadata,
-          multiSigExtendedPublicKey: sharedWalletKey
+          multiSigExtendedPublicKey: sharedWalletKeyInBip32
         }
       });
     },
@@ -911,7 +920,14 @@ export const useWalletManager = (): UseWalletManager => {
       coSigners,
       sharedWalletKey
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
-      const publicKeys = coSigners.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
+      const coSignersWithPublicKeys = coSigners.map((signer: CoSigner) => ({
+        name: signer.name,
+        sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(
+          Wallet.Cardano.Cip1854ExtendedAccountPublicKey(signer.sharedWalletKey)
+        )
+      }));
+      const sharedWalletPublicKeyHex =
+        Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(sharedWalletKey);
 
       let scriptKind: ScriptKind;
       if (quorumRules.option === QuorumRadioOption.AllAddresses) {
@@ -923,13 +939,13 @@ export const useWalletManager = (): UseWalletManager => {
       }
 
       const paymentScript = await buildSharedWalletScript({
-        expectedSigners: publicKeys,
+        expectedSigners: coSignersWithPublicKeys.map((c) => c.sharedWalletKey),
         derivationPath: paymentScriptKeyPath,
         kindInfo: scriptKind
       });
 
       const stakingScript = await buildSharedWalletScript({
-        expectedSigners: publicKeys,
+        expectedSigners: coSignersWithPublicKeys.map((c) => c.sharedWalletKey),
         derivationPath: stakingScriptKeyPath,
         kindInfo: scriptKind
       });
@@ -937,12 +953,9 @@ export const useWalletManager = (): UseWalletManager => {
       const createScriptWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
         metadata: {
           name,
-          coSigners: coSigners.map((signer) => ({
-            name: signer.name,
-            sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
-          })),
+          coSigners: coSignersWithPublicKeys,
           // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
-          multiSigExtendedPublicKey: sharedWalletKey
+          multiSigExtendedPublicKey: sharedWalletPublicKeyHex
         },
         ownSigners: [
           {
@@ -962,7 +975,7 @@ export const useWalletManager = (): UseWalletManager => {
 
       await walletRepository.addAccount({
         accountIndex,
-        extendedAccountPublicKey: sharedWalletKey,
+        extendedAccountPublicKey: sharedWalletPublicKeyHex,
         metadata: { name: defaultAccountName(accountIndex) },
         purpose: KeyManagement.KeyPurpose.MULTI_SIG,
         walletId: ownSignerWalletId

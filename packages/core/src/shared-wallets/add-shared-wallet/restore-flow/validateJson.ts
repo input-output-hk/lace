@@ -1,4 +1,5 @@
 /* eslint-disable unicorn/consistent-destructuring */
+import { Wallet } from '@lace/cardano';
 import { v1 as uuid } from 'uuid';
 import { z } from 'zod';
 import { FileErrorMessage, FileValidationError, PubkeyScript } from '../../../shared-wallets/types';
@@ -31,7 +32,10 @@ export const validateJson = (
         }
         const { scripts } = nativeScript;
 
-        const ownHash = await getHashFromPublicKey(sharedKey, paymentScriptKeyPath);
+        const sharedKeyInBip32PublicKeyHex = Wallet.Cardano.Cip1854ExtendedAccountPublicKey.toBip32PublicKeyHex(
+          Wallet.Cardano.Cip1854ExtendedAccountPublicKey(sharedKey),
+        );
+        const ownHash = await getHashFromPublicKey(sharedKeyInBip32PublicKeyHex, paymentScriptKeyPath);
 
         const matchedCosigner = scripts.find((script: PubkeyScript) => script.pubkey === ownHash);
 
