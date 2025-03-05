@@ -13,9 +13,7 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import cn from 'classnames';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
-import { Wallet } from '@lace/cardano';
-import { AnyWallet, WalletType } from '@cardano-sdk/web-extension';
-import * as KeyManagement from '@cardano-sdk/key-management';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { Title, Text } = Typography;
 
@@ -24,21 +22,17 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
   const { deleteWallet, walletRepository, walletManager } = useWalletManager();
-  const { walletInfo, setDeletingWallet } = useWalletStore();
+  const { walletInfo, setDeletingWallet, isSharedWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
-  const activeWallet = wallets?.find(
-    (w: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => w.walletId === activeWalletId?.walletId
-  );
 
   const hasAssociatedSharedWallet =
-    activeWallet &&
-    activeWallet.type !== WalletType.Script &&
-    activeWallet.accounts.some(
-      ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
+    !isSharedWallet &&
+    wallets?.some(
+      (wallet) => wallet.type === WalletType.Script && wallet.ownSigners[0].walletId === activeWalletId?.walletId
     );
 
   const toggleRemoveWalletAlert = () => {

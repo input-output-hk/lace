@@ -19,6 +19,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import * as KeyManagement from '@cardano-sdk/key-management';
 
 type CreateWalletParams = {
   coSigners: CoSigner[];
@@ -29,7 +30,7 @@ type CreateWalletParams = {
 export const SharedWallet = (): JSX.Element => {
   const analytics = useAnalyticsContext();
   const history = useHistory();
-  const { walletRepository, generateSharedWalletKey, saveSharedWalletKey, createInMemorySharedWallet } =
+  const { walletRepository, generateSharedWalletKey, createCIP1854Account, createInMemorySharedWallet } =
     useWalletManager();
   const { walletInfo, cardanoWallet, environmentName } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
@@ -45,8 +46,12 @@ export const SharedWallet = (): JSX.Element => {
 
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-      setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
+
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
+      const parentWalletCIP1854Account = activeWallet.accounts.find(
+        ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
+      );
+      setSharedWalletKey(parentWalletCIP1854Account?.extendedAccountPublicKey);
       setActiveWalletType(activeWallet.type);
     })();
   }, [cardanoWallet.source.wallet.walletId, walletRepository]);
@@ -59,15 +64,18 @@ export const SharedWallet = (): JSX.Element => {
       chainId: Wallet.Cardano.ChainIds[environmentName],
       ownSignerWalletId: activeWalletId,
       quorumRules: data.quorumRules,
-      coSigners: data.coSigners,
-      sharedWalletKey
+      coSigners: data.coSigners
     });
   };
 
   const generateKey = async (enteredPassword: string) => {
     if (sharedWalletKey) return sharedWalletKey;
+    const activeWalletId = cardanoWallet.source.wallet.walletId;
     const key = await generateSharedWalletKey(enteredPassword);
-    await saveSharedWalletKey(key);
+    await createCIP1854Account({
+      ownSignerWalletId: activeWalletId,
+      sharedWalletKey: key
+    });
     setSharedWalletKey(key);
     return key;
   };
