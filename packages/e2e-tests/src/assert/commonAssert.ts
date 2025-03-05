@@ -1,7 +1,7 @@
 import { Logger } from '../support/logger';
 import clipboard from 'clipboardy';
 import { expect } from 'chai';
-import { getNumberOfOpenedTabs, switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
+import { getNumberOfOpenedTabs, switchToLastWindow, switchToWindowWithUrl } from '../utils/window';
 import testContext from '../utils/testContext';
 import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
@@ -17,8 +17,7 @@ class CommonAssert {
   }
 
   async assertSeeTabWithUrl(urlPart: string) {
-    await waitUntilExpectedNumberOfHandles(2);
-    await browser.switchWindow(urlPart);
+    await switchToWindowWithUrl(urlPart, true);
     expect(await browser.getUrl()).to.contain(urlPart);
   }
 
