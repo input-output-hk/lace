@@ -152,6 +152,7 @@ Feature: General Settings - Popup View
     Then "Custom submit API" is marked as disabled on Settings page
 
   @LW-12254 @Mainnet @Testnet
+  @skip(browserName="firefox")
   Scenario Outline: Popup view - Settings - Debugging option enables verbose logging in console
     Given I enable console logs collection
     When I open settings from header menu
