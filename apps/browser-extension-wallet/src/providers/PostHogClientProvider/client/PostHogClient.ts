@@ -71,7 +71,6 @@ export class PostHogClient<Action extends string = string> {
   }
 
   private async initialize() {
-    logger.warn('TESTING this :)');
     const [storage, userId] = await Promise.all([
       this.backgroundServiceUtils.getBackgroundStorage(),
       this.userIdService.getUserId(this.chain.networkMagic)
