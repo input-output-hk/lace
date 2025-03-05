@@ -2,7 +2,7 @@ import { When, Then } from '@cucumber/cucumber';
 import EducationalList from '../elements/educationalList';
 import educationalListAssert from '../assert/educationalListAssert';
 import faqPageAssert from '../assert/faqPageAssert';
-import { closeAllTabsExceptOriginalOne, switchToLastWindow } from '../utils/window';
+import { closeAllTabsExceptOriginalOne, switchToWindowWithUrl } from '../utils/window';
 
 Then(/^I see Address Book "About your wallet" widget with all relevant items$/, async () => {
   await educationalListAssert.assertSeeAddressBookWidget();
@@ -25,15 +25,15 @@ When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (typ
     throw new Error(`Unrecognised article type: ${subTitle}`);
   }
   if (type === 'FAQ') {
-    await switchToLastWindow();
+    await switchToWindowWithUrl('https://www.lace.io/faq', true);
     await faqPageAssert.assertSeeFaqArticle(subTitle);
   }
   if (type === 'Glossary') {
-    await switchToLastWindow();
+    await switchToWindowWithUrl('https://www.lace.io/glossary');
     await educationalListAssert.assertSeeGlossaryArticle(subTitle);
   }
   if (type === 'Video') {
-    await switchToLastWindow();
+    await switchToWindowWithUrl('https://www.lace.io/learn?video');
     await educationalListAssert.assertSeeVideoArticle(subTitle);
   }
   await closeAllTabsExceptOriginalOne();
