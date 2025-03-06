@@ -150,6 +150,7 @@ Feature: ADA handle - extended view
     And the corresponding custom images are displayed
 
   @LW-5025 @LW-5028 @LW-5030
+  @skip(browserName="firefox")
   Scenario: Extended View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on page header
     And I am in the slow network mode
@@ -159,6 +160,7 @@ Feature: ADA handle - extended view
     And "Add address" button is enabled in the bundle 1 recipient's address input
 
   @LW-5026 @LW-5032
+  @skip(browserName="firefox")
   Scenario: Extended View - Send flow - Enter ADA handle and confirm invalid
     When I click "Send" button on page header
     And I am in the slow network mode

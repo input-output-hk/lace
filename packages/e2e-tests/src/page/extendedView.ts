@@ -1,7 +1,7 @@
 import { LaceView, Page } from './page';
 import { browser } from '@wdio/globals';
-
-const EXTENSION_URL = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/app.html';
+import extensionUtils from '../utils/utils';
+import { getExtensionUUID } from '../utils/firefoxUtils';
 
 class ExtendedView extends LaceView implements Page {
   async waitForPreloaderToDisappear() {
@@ -12,7 +12,10 @@ class ExtendedView extends LaceView implements Page {
   }
 
   async getBaseUrl() {
-    return EXTENSION_URL;
+    if ((await extensionUtils.getBrowser()) !== 'firefox') {
+      return 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/app.html';
+    }
+    return `moz-extension://${await getExtensionUUID()}/app.html`;
   }
 
   async visit() {

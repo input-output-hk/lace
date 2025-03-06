@@ -1,9 +1,9 @@
 import { LaceView, Page } from './page';
 import extensionUtils from '../utils/utils';
 import { browser } from '@wdio/globals';
+import { getExtensionUUID } from '../utils/firefoxUtils';
 
 class PopupView extends LaceView implements Page {
-  basePopupUrl = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/popup.html';
   popupWidth = 360;
   popupHeight = 600;
 
@@ -21,67 +21,76 @@ class PopupView extends LaceView implements Page {
         },
         userAgent: `${ua}`
       });
+    } else {
+      await browser.setWindowSize(this.popupWidth, this.popupHeight + 150);
     }
+  }
+
+  async getBaseUrl() {
+    if ((await extensionUtils.getBrowser()) !== 'firefox') {
+      return 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/popup.html';
+    }
+    return `moz-extension://${await getExtensionUUID()}/popup.html`;
   }
 
   async visit(resize = true) {
     if (resize) {
       await this.setPopupWindowSize();
     }
-    await browser.url(this.basePopupUrl);
+    await browser.url(await this.getBaseUrl());
     await this.waitForPreloaderToDisappear();
   }
 
   async visitTokensPage() {
-    await browser.url(`${this.basePopupUrl}#/assets`);
+    await browser.url(`${await this.getBaseUrl()}#/assets`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitNFTsPage() {
-    await browser.url(`${this.basePopupUrl}#/nfts`);
+    await browser.url(`${await this.getBaseUrl()}#/nfts`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitActivityPage() {
-    await browser.url(`${this.basePopupUrl}#/activity`);
+    await browser.url(`${await this.getBaseUrl()}#/activity`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitStakingPage() {
-    await browser.url(`${this.basePopupUrl}#/staking`);
+    await browser.url(`${await this.getBaseUrl()}#/staking`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitSettings() {
-    await browser.url(`${this.basePopupUrl}#/settings`);
+    await browser.url(`${await this.getBaseUrl()}#/settings`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitAddressBook() {
-    await browser.url(`${this.basePopupUrl}#/address-book`);
+    await browser.url(`${await this.getBaseUrl()}#/address-book`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitDAppExplorer() {
-    await browser.url(`${this.basePopupUrl}#/dapp-explorer`);
+    await browser.url(`${await this.getBaseUrl()}#/dapp-explorer`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitVotingCenter() {
-    await browser.url(`${this.basePopupUrl}#/voting`);
+    await browser.url(`${await this.getBaseUrl()}#/voting`);
     await this.setPopupWindowSize();
     await this.waitForPreloaderToDisappear();
   }
 
   async visitNamiMode() {
-    await browser.url(`${this.basePopupUrl}`);
+    await browser.url(`${await this.getBaseUrl()}`);
     await this.setPopupWindowSize();
   }
 }

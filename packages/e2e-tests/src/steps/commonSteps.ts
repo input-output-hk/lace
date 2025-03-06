@@ -224,7 +224,9 @@ When(/^I am in the (offline|online) network mode$/, async (networkMode: 'offline
 });
 
 When(/^I am in the slow network mode$/, async () => {
-  await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
+  if ((await extensionUtils.getBrowser()) !== 'firefox') {
+    await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
+  }
 });
 
 When(/^I click outside the drawer$/, async () => {

@@ -7,6 +7,7 @@ import { browser } from '@wdio/globals';
 import TopNavigationAssert from './topNavigationAssert';
 import { getTestWallet } from '../support/walletConfiguration';
 import { findNeedleInJSONKeyOrValue } from '../utils/textUtils';
+import extensionUtils from '../utils/utils';
 
 class CommonAssert {
   async assertClipboardContains(text: string) {
@@ -89,24 +90,28 @@ class CommonAssert {
   }
 
   async assertPasswordIsNotPresentInMemorySnapshot(password: string) {
-    await browser.cdp('HeapProfiler', 'collectGarbage');
-    const snapshot = await browser.takeHeapSnapshot();
+    if ((await extensionUtils.getBrowser()) !== 'firefox') {
+      await browser.cdp('HeapProfiler', 'collectGarbage');
+      const snapshot = await browser.takeHeapSnapshot();
 
-    let needle = '';
-    switch (password) {
-      case 'valid':
-        needle = String(process.env.WALLET_1_PASSWORD);
-        break;
-      case 'invalid':
-        needle = 'somePassword';
-        break;
-      case 'N_8J@bne87A':
-        needle = 'N_8J@bne87A';
-        break;
+      let needle = '';
+      switch (password) {
+        case 'valid':
+          needle = String(process.env.WALLET_1_PASSWORD);
+          break;
+        case 'invalid':
+          needle = 'somePassword';
+          break;
+        case 'N_8J@bne87A':
+          needle = 'N_8J@bne87A';
+          break;
+      }
+      const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
+
+      expect(needlesFound.length).to.equal(0);
+    } else {
+      Logger.log('skipping check for password in memory snapshot, not supported in Firefox');
     }
-    const needlesFound = findNeedleInJSONKeyOrValue(snapshot, needle);
-
-    expect(needlesFound.length).to.equal(0);
   }
 }
 

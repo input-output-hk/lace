@@ -147,6 +147,7 @@ Feature: ADA handle - popup view
     And the corresponding custom images are displayed
 
   @LW-5023 @LW-5029 @LW-5033
+  @skip(browserName="firefox")
   Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on Tokens page in popup mode
     And I am in the slow network mode
@@ -156,6 +157,7 @@ Feature: ADA handle - popup view
     And "Add address" button is enabled in the bundle 1 recipient's address input
 
   @LW-5024 @LW-5031
+  @skip(browserName="firefox")
   Scenario: Popup View - Send flow - Enter ADA handle and confirm invalid
     When I click "Send" button on Tokens page in popup mode
     And I am in the slow network mode
