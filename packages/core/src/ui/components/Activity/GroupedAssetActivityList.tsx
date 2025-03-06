@@ -5,6 +5,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { AssetActivityList, AssetActivityListProps } from './AssetActivityList';
 import styles from './AssetActivityList.module.scss';
 import isNumber from 'lodash/isNumber';
+import * as UIToolkit from '@input-output-hk/lace-ui-toolkit';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -35,6 +37,8 @@ export interface GroupedAssetActivityListProps {
   loadMore: () => void;
   hasMore: boolean;
   loadFirstChunk?: boolean;
+  loadingError?: Error | null;
+  retryLoading?: () => void;
 }
 export const GroupedAssetActivityList = ({
   lists,
@@ -45,8 +49,11 @@ export const GroupedAssetActivityList = ({
   isDrawerView,
   loadMore,
   hasMore,
-  loadFirstChunk
+  loadFirstChunk,
+  loadingError,
+  retryLoading
 }: GroupedAssetActivityListProps): React.ReactElement => {
+  const { t } = useTranslation();
   const next = useCallback(() => {
     loadMore();
   }, [loadMore]);
@@ -57,12 +64,18 @@ export const GroupedAssetActivityList = ({
   }, []);
 
   const loader = useMemo(
-    () => (
-      <div data-testid="infinite-scroll-skeleton">
-        <Skeleton active avatar />
-      </div>
-    ),
-    []
+    () =>
+      loadingError ? (
+        <UIToolkit.Flex mb="$32" gap="$8" flexDirection="column" alignItems="center" testId="next-page-loading-error">
+          <UIToolkit.Text.Body.Large>{t('core.activity.loaderError.message')}</UIToolkit.Text.Body.Large>
+          <UIToolkit.Button.CallToAction label={t('core.activity.loaderError.buttonLabel')} onClick={retryLoading} />
+        </UIToolkit.Flex>
+      ) : (
+        <div data-testid="infinite-scroll-skeleton">
+          <Skeleton active avatar />
+        </div>
+      ),
+    [loadingError, retryLoading, t]
   );
 
   return (

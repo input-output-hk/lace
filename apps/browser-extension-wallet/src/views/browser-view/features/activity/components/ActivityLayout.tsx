@@ -29,7 +29,9 @@ export const ActivityLayout = (): ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
 
-  const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
+  const { walletActivities, mightHaveMore, loadedTxLength, loadMore, retry, error } = useWalletActivitiesPaginated({
+    sendAnalytics
+  });
   const total = useObservable(inMemoryWallet.balance.utxo.total$);
 
   const titles = {
@@ -103,6 +105,8 @@ export const ActivityLayout = (): ReactElement => {
               lists={walletActivities}
               scrollableTarget={LACE_APP_ID}
               dataLength={loadedTxLength}
+              loadingError={error}
+              retryLoading={retry}
             />
           )}
           {walletActivities?.length === 0 && (

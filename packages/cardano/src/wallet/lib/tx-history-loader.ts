@@ -2,6 +2,7 @@ import { Cardano, ChainHistoryProvider, TransactionsByAddressesArgs } from '@car
 import { ObservableWallet, pollProvider, PollProviderProps, txEquals } from '@cardano-sdk/wallet';
 import { toEmpty } from '@cardano-sdk/util-rxjs';
 import {
+  catchError,
   concat,
   EMPTY,
   exhaustMap,
@@ -33,6 +34,8 @@ type LoadedTxHistory = {
 
 type TxHistoryLoader = {
   loadMore: () => void;
+  retry: () => void;
+  error$: Observable<Error | null>;
   loadedHistory$: Observable<LoadedTxHistory>;
 };
 
@@ -104,6 +107,7 @@ export const createTxHistoryLoader = (
   minimumPageSize: number
 ): TxHistoryLoader => {
   const requestMore$ = new Subject<void>();
+  const error$ = new Subject<Error | null>();
   let mightHaveMore = false;
   let fullLocalHistory: Cardano.HydratedTx[];
   let emittedHistory: Cardano.HydratedTx[];
@@ -167,6 +171,10 @@ export const createTxHistoryLoader = (
           transactions: emittedHistory,
           mightHaveMore
         };
+      }),
+      catchError((error) => {
+        error$.next(error);
+        return of();
       })
     );
   };
@@ -200,6 +208,11 @@ export const createTxHistoryLoader = (
     })
   );
 
+  const triggerLoadingMore = () => {
+    if (!mightHaveMore) return;
+    requestMore$.next();
+  };
+
   return {
     loadedHistory$: addresses$.pipe(
       switchMap((addresses) =>
@@ -209,7 +222,13 @@ export const createTxHistoryLoader = (
         )
       )
     ),
-    loadMore: () => mightHaveMore && requestMore$.next()
+    error$,
+    retry: () => {
+      // eslint-disable-next-line unicorn/no-null
+      error$.next(null);
+      triggerLoadingMore();
+    },
+    loadMore: triggerLoadingMore
   };
 };
 
