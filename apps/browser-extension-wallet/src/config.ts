@@ -34,6 +34,7 @@ export type Config = {
   DEFAULT_SUBMIT_API: string;
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
   SESSION_TIMEOUT: Milliseconds;
+  POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS: number;
 };
 
 // eslint-disable-next-line complexity
@@ -150,6 +151,11 @@ export const config = (): Config => {
       !Number.isNaN(Number.parseInt(process.env.SESSION_TIMEOUT))
         ? Number.parseInt(process.env.SESSION_TIMEOUT)
         : 1000 * 60 * 5
+    ),
+    POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS: !Number.isNaN(
+      Number(process.env.POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS)
     )
+      ? Number.parseInt(process.env.POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS)
+      : 10
   };
 };

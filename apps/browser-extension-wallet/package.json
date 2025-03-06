@@ -1,6 +1,6 @@
 {
   "name": "@lace/browser-extension-wallet",
-  "version": "1.20.1",
+  "version": "1.21.0",
   "description": "A fully capable wallet packaged as browser extensions for Chrome, Firefox, and Edge",
   "homepage": "https://github.com/input-output-hk/lace/blob/master/apps/browser-extension-wallet/README.md",
   "bugs": {
@@ -25,7 +25,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress & run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist && run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress && run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
     "build:dev": "WEBPACK_ENV=dev yarn build",
     "build:firefox": "BROWSER=firefox yarn build",
     "build:firefox:dev": "WEBPACK_ENV=dev yarn build:firefox",
@@ -44,17 +44,17 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
-    "@cardano-sdk/cardano-services-client": "0.26.6",
-    "@cardano-sdk/core": "0.45.4",
-    "@cardano-sdk/dapp-connector": "0.13.7",
-    "@cardano-sdk/input-selection": "0.14.5",
-    "@cardano-sdk/tx-construction": "0.26.4",
+    "@cardano-sdk/cardano-services-client": "0.26.8",
+    "@cardano-sdk/core": "0.45.5",
+    "@cardano-sdk/dapp-connector": "0.13.8",
+    "@cardano-sdk/input-selection": "0.14.7",
+    "@cardano-sdk/tx-construction": "0.26.6",
     "@cardano-sdk/util": "0.16.0",
-    "@cardano-sdk/util-rxjs": "0.9.8",
-    "@cardano-sdk/wallet": "0.52.0",
-    "@cardano-sdk/web-extension": "0.39.0",
+    "@cardano-sdk/util-rxjs": "0.9.10",
+    "@cardano-sdk/wallet": "0.52.2",
+    "@cardano-sdk/web-extension": "0.39.2",
     "@emurgo/cip14-js": "~3.0.1",
-    "@input-output-hk/lace-ui-toolkit": "3.2.1",
+    "@input-output-hk/lace-ui-toolkit": "3.2.7",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
@@ -107,7 +107,7 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
-    "@cardano-sdk/hardware-ledger": "0.15.5",
+    "@cardano-sdk/hardware-ledger": "0.15.7",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@openpgp/web-stream-tools": "0.0.11-patch-0",
     "@pdfme/common": "^4.0.2",

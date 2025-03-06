@@ -2,6 +2,7 @@ import React from 'react';
 import errorImg from '../../assets/icons/exclamation-circle.svg';
 import successImg from '../../assets/icons/clock-icon.svg';
 import styles from './ResultMessage.module.scss';
+import cn from 'classnames';
 
 type Status = 'success' | 'error';
 
@@ -15,15 +16,17 @@ export interface ResultMessageProps {
   title?: React.ReactNode;
   description?: React.ReactNode;
   customBgImg?: string;
+  fullWidth?: boolean;
 }
 
 export const ResultMessage = ({
   status = 'success',
   title,
   description,
-  customBgImg
+  customBgImg,
+  fullWidth
 }: ResultMessageProps): React.ReactElement => (
-  <div className={styles.content} data-testid="result-message-content">
+  <div className={cn(styles.content, { [styles.fullWidth]: fullWidth })} data-testid="result-message-content">
     <img
       className={styles.img}
       src={customBgImg ?? bgImg[status]}

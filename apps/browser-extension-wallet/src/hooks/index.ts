@@ -24,5 +24,5 @@ export * from './useAppInit';
 export * from './useWalletAvatar';
 export * from './useActionExecution';
 export * from './useCustomSubmitApi';
-export * from './useSharedWalletData';
+export * from './useCurrentWallet';
 export * from './useHasEnoughCollateral';

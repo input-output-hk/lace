@@ -105,6 +105,9 @@ export type DiscardChangingPreferences = {
 
 export type DrawerFailure = {
   type: 'DrawerFailure';
+  data: {
+    error: Error;
+  };
 };
 
 export type ManageDelegationFromDetails = {
@@ -117,10 +120,16 @@ export type HwSkipToSuccess = {
 
 export type HwSkipToFailure = {
   type: 'HwSkipToFailure';
+  data: {
+    error: Error;
+  };
 };
 
 export type HwSkipToDeviceFailure = {
   type: 'HwSkipToDeviceFailure';
+  data: {
+    error: Error;
+  };
 };
 
 export type SetSort = {

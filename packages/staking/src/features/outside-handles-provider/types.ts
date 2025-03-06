@@ -112,4 +112,5 @@ export type OutsideHandlesContextValue = {
     poolIdToRewardAccountsMap: Map<string, Wallet.Cardano.RewardAccountInfo[]>;
   };
   govToolUrl: string;
+  parseError: (maybeError: unknown) => Error;
 };
