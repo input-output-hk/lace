@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Layout } from '@src/views/browser-view/components';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { StakingSkeleton } from './StakingSkeleton';
 import { useMultiDelegationEnabled } from '@hooks/useMultiDelegationEnabled';
 import { MultiDelegationStaking } from './MultiDelegationStaking';
@@ -11,7 +11,7 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import { useBalances, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage, useSharedWalletData } from '@hooks';
+import { useBalances, useCurrentWallet, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -20,9 +20,10 @@ import {
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
-import { SignPolicy, useSecrets } from '@lace/core';
+import { useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '../hooks';
 import { config } from '@src/config';
+import { parseError } from '@src/utils/parse-error';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -59,7 +60,6 @@ export const StakingContainer = (): React.ReactElement => {
   const password = useSecrets();
   const submittingState = useSubmitingState();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
-  const [signPolicy, setSignPolicy] = useState<SignPolicy>();
 
   const {
     walletInfo,
@@ -94,14 +94,9 @@ export const StakingContainer = (): React.ReactElement => {
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
-  const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-
-  useEffect(() => {
-    (async () => {
-      const policy = await getSignPolicy('staking');
-      setSignPolicy(policy);
-    })();
-  }, [getSignPolicy]);
+  const wallet = useCurrentWallet();
+  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+  const signPolicy = useSignPolicy(wallet, 'staking');
   const { GOV_TOOLS_URLS } = config();
 
   return (
@@ -150,7 +145,8 @@ export const StakingContainer = (): React.ReactElement => {
           sharedWalletKey,
           coSigners,
           useRewardAccountsData,
-          govToolUrl: GOV_TOOLS_URLS[environmentName]
+          govToolUrl: GOV_TOOLS_URLS[environmentName],
+          parseError
         }}
       >
         <StakingSkeleton multiDelegationEnabled={multiDelegationEnabled}>

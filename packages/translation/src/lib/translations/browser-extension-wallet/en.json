@@ -471,6 +471,8 @@
   "browserView.topNavigationBar.walletStatus.walletSyncing": "Wallet syncing",
   "browserView.transaction.fail.clickBackAndTryAgain": "Click \"Back\" and try again.",
   "browserView.transaction.fail.oopsSomethingWentWrong": "Oops! Something went wrong",
+  "browserView.transaction.fail.error-details.label": "Show issue details",
+  "browserView.transaction.fail.error-details.error-name-fallback": "Error",
   "browserView.transaction.fail.problemSubmittingYourTransaction": "There was a problem submitting your transaction.",
   "browserView.transaction.fail.theTransactionHasNotBeenProceedPleasetryagain": "There was a problem submitting your transaction. Click 'Back to transaction summary' and try again",
   "browserView.transaction.fail.unauthorizedTransaction": "The transaction was not authorized.",

@@ -10,24 +10,23 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await OnboardingMainPage.logo.waitForDisplayed();
   }
 
-  // ToDo LW-10073 - add reading copy from translations
   async assertSeeAgreementText() {
     await OnboardingMainPage.agreementText.waitForDisplayed();
-    expect(await OnboardingMainPage.agreementText.getText()).to.equal(
-      'By clicking the Create, Connect or Restore button above, you agree with Lace’s Terms of Service and Privacy Policy'
-    );
+    const expectedText = (await t('core.walletSetupOptionsStep.agreementText'))
+      .replace('<a1>', '')
+      .replace('</a1>', '')
+      .replace('<a2>', '')
+      .replace('</a2>', '');
+    // assertion below covers whole text including "Terms of Service" and "Privacy Policy"
+    expect(await OnboardingMainPage.agreementText.getText()).to.equal(expectedText);
   }
 
-  // ToDo LW-10073 - add reading copy from translations
   async assertSeeTermsOfServiceLink() {
     await OnboardingMainPage.agreementTermsOfServiceLink.waitForDisplayed();
-    expect(await OnboardingMainPage.agreementTermsOfServiceLink.getText()).to.equal('Terms of Service');
   }
 
-  // ToDo LW-10073 - add reading copy from translations
   async assertSeePrivacyPolicyLink() {
     await OnboardingMainPage.agreementPrivacyPolicyLink.waitForDisplayed();
-    expect(await OnboardingMainPage.agreementPrivacyPolicyLink.getText()).to.equal('Privacy Policy');
   }
 
   async assertSeeTitle() {

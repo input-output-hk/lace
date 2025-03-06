@@ -3,13 +3,14 @@ import {
   CoSignersListItem,
   hasSigned,
   SharedWalletTransactionDetails,
-  SignPolicy,
-  TxSummary
+  TxSummary,
+  useSharedWalletData,
+  useSignPolicy
 } from '@lace/core';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { Wallet } from '@lace/cardano';
-import { useSharedWalletData } from '@hooks';
+import { useCurrentWallet } from '@hooks';
 import { AddressListType, getTransactionData } from '@views/browser/features/activity';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
@@ -51,16 +52,15 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
       walletInfo,
       activityDetail
     } = useWalletStore();
-    const { sharedWalletKey, getSignPolicy, coSigners } = useSharedWalletData();
-    const [signPolicy, setSignPolicy] = useState<SignPolicy>();
+    const wallet = useCurrentWallet();
+    const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+    const signPolicy = useSignPolicy(wallet, 'payment');
+
     const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);
     const { list: addressList } = useAddressBookContext();
 
     useEffect(() => {
       (async () => {
-        const policy = await getSignPolicy('payment');
-        setSignPolicy(policy);
-
         if (!coSigners) return;
 
         const currentTransactionDetail = activityDetail.activity as Wallet.Cardano.Tx;
@@ -75,7 +75,7 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
         );
         setTransactionCosigners(cosignersWithSignStatus);
       })();
-    }, [activityDetail.activity, coSigners, getSignPolicy, sharedWalletKey]);
+    }, [activityDetail.activity, coSigners, sharedWalletKey]);
 
     const addressToNameMap = useMemo(
       () => new Map<string, string>(addressList?.map((item: AddressListType) => [item.address, item.name])),

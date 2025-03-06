@@ -99,7 +99,7 @@ export const useSelectedCoins = ({
         return COIN_SELECTION_ERRORS.BUNDLE_AMOUNT_IS_EMPTY;
       }
       // Display an error with the tx itself
-      if (builtTxError) return builtTxError;
+      if (builtTxError) return builtTxError instanceof Error ? builtTxError.message : builtTxError;
       // eslint-disable-next-line consistent-return
       return undefined;
     },

@@ -415,6 +415,16 @@ class DAppConnectorAssert {
     const enable = await browser.execute(() => window.cardano.lace.enable());
     expect(enable).not.to.be.empty;
   }
+
+  async assertSeeValidNetworkMagic(magic: '1' | '2' | '764824073') {
+    const result = await browser.execute(`
+      return (async () => {
+        const api = await cardano.lace.enable({ extensions: [{cip: 142}]});
+        return await api.cip142.getNetworkMagic();
+      })()
+      `);
+    expect(String(result)).to.equal(magic);
+  }
 }
 
 export default new DAppConnectorAssert();

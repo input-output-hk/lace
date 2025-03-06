@@ -100,16 +100,6 @@ const ActivityStatusIcon = ({ status, type }: ActivityStatusIconProps) => {
   }
 };
 
-const negativeBalanceStyling: Set<Partial<ActivityType>> = new Set([
-  TransactionActivityType.outgoing,
-  DelegationActivityType.delegationRegistration,
-  ConwayEraCertificatesTypes.Registration,
-  ConwayEraCertificatesTypes.RegisterDelegateRepresentative,
-  TransactionActivityType.self,
-  DelegationActivityType.delegation,
-  TransactionActivityType.awaitingCosignatures
-]);
-
 // TODO: Handle pluralization and i18n of assetsNumber when we will have more than Ada.
 export const AssetActivityItem = ({
   amount,
@@ -200,7 +190,7 @@ export const AssetActivityItem = ({
     assetAmountContent
   );
 
-  const isNegativeBalance = type && negativeBalanceStyling.has(type);
+  const isNegativeBalance = amount.startsWith('-');
 
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
@@ -249,9 +239,11 @@ export const AssetActivityItem = ({
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
-                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
-                    ))}
+                    {assets
+                      ?.slice(assetsToShow, assets.length)
+                      .map(({ id, val, info }) => (
+                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                      ))}
                   </>
                 }
               >

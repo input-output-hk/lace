@@ -2,34 +2,17 @@ const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const { transformManifest } = require('./webpack-utils');
 const Dotenv = require('dotenv-webpack');
-const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
+
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
-const hasSentryReleaseConfig =
-  !!process.env.SENTRY_AUTH_TOKEN && !!process.env.SENTRY_ORG && !!process.env.SENTRY_PROJECT;
-
 module.exports = () => ({
   mode: 'production',
   devtool: 'source-map',
   plugins: [
-    ...(hasSentryReleaseConfig
-      ? [
-          sentryWebpackPlugin({
-            authToken: process.env.SENTRY_AUTH_TOKEN,
-            org: process.env.SENTRY_ORG,
-            project: process.env.SENTRY_PROJECT,
-            sourcemaps: {
-              filesToDeleteAfterUpload: ['**/*.js.map']
-            },
-            telemetry: false,
-            url: 'https://sentry.io/'
-          })
-        ]
-      : []),
     new Dotenv({
       path: '.env',
       safe: false,

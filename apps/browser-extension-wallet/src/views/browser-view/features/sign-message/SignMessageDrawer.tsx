@@ -4,7 +4,7 @@ import { useSignMessageState } from './useSignMessageState';
 import { useDrawerConfiguration } from './useDrawerConfiguration';
 import { WalletOwnAddressDropdown, Password as PasswordInput, useSecrets, shortenWalletOwnAddress } from '@lace/core';
 import { TextArea, PostHogAction, toast, useAutoFocus } from '@lace/common';
-import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Flex, SummaryExpander, Text, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import styles from './SignMessageDrawer.module.scss';
@@ -22,6 +22,7 @@ export const SignMessageDrawer: React.FC = () => {
     isSigningInProgress,
     signatureObject,
     error,
+    errorObj,
     hardwareWalletError,
     isHardwareWallet,
     performSigning,
@@ -32,6 +33,7 @@ export const SignMessageDrawer: React.FC = () => {
   const [message, setMessage] = useState('');
   const [shouldShowPasswordPrompt, setShouldShowPasswordPrompt] = useState(false);
   const [showHardwareSigningError, setShowHardwareSigningError] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   // Create a ref to access password without creating dependencies
   const passwordRef = useRef(password);
   passwordRef.current = password;
@@ -176,6 +178,7 @@ export const SignMessageDrawer: React.FC = () => {
       className={styles.hardwareErrorContainer}
     >
       <ResultMessage
+        fullWidth
         status="error"
         title={
           <div data-testid="sign-message-error-title">{t('browserView.transaction.fail.oopsSomethingWentWrong')}</div>
@@ -188,6 +191,21 @@ export const SignMessageDrawer: React.FC = () => {
             <div data-testid="sign-message-error-description2" className={styles.message}>
               {t('browserView.transaction.fail.clickBackAndTryAgain')}
             </div>
+            {typeof errorObj === 'object' && errorObj.message && (
+              <Box w="$fill">
+                <SummaryExpander
+                  onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+                  open={isSummaryOpen}
+                  title={t('browserView.transaction.fail.error-details.label')}
+                  plain
+                >
+                  <TransactionSummary.Other
+                    label={errorObj.name || t('browserView.transaction.fail.error-details.error-name-fallback')}
+                    text={errorObj.message}
+                  />
+                </SummaryExpander>
+              </Box>
+            )}
           </>
         }
       />

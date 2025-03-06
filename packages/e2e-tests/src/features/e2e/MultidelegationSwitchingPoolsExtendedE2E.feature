@@ -101,5 +101,4 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     And I enter correct wallet password and confirm staking
     Then the staking error screen is displayed
     When I close the drawer by clicking close button
-#   bug LW-10100
-#   Then Staking exit modal is displayed
+    Then Staking exit modal is displayed
