@@ -1,6 +1,6 @@
+import { Wallet } from '@lace/cardano';
 import { CoSigner, CoSignerError, CoSignerErrorKeys, CoSignerErrorName, maxCoSignerNameLength } from './AddCoSigners';
 
-const keyRegex = /^[\dA-Fa-f]{128}$/;
 export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
   let coSignersErrors: CoSignerError[] = [];
 
@@ -8,11 +8,16 @@ export const validateCoSigners = (coSigners: CoSigner[]): CoSignerError[] => {
     let keyError: CoSignerErrorKeys | undefined;
     let nameError: CoSignerErrorName | undefined;
 
-    const keyValidationResult = keyRegex.exec(sharedWalletKey);
     if (!sharedWalletKey) keyError = CoSignerErrorKeys.Required;
-    else if (!keyValidationResult) keyError = CoSignerErrorKeys.Invalid;
-    else if (coSigners.some((coSigner) => coSigner.id !== id && coSigner.sharedWalletKey === sharedWalletKey)) {
-      keyError = CoSignerErrorKeys.Duplicated;
+    else {
+      try {
+        Wallet.Cardano.Cip1854ExtendedAccountPublicKey(sharedWalletKey);
+        if (coSigners.some((coSigner) => coSigner.id !== id && coSigner.sharedWalletKey === sharedWalletKey)) {
+          keyError = CoSignerErrorKeys.Duplicated;
+        }
+      } catch {
+        keyError = CoSignerErrorKeys.Invalid;
+      }
     }
 
     if (!name) nameError = CoSignerErrorName.Required;

@@ -19,6 +19,7 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { Cardano } from '@cardano-sdk/core';
 
 type CreateWalletParams = {
   coSigners: CoSigner[];
@@ -34,7 +35,7 @@ export const SharedWallet = (): JSX.Element => {
   const { walletInfo, cardanoWallet, environmentName } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
-  const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
+  const [sharedWalletKey, setSharedWalletKey] = useState<Cardano.Cip1854ExtendedAccountPublicKey>();
   const [initialWalletName, setInitialWalletName] = useState('');
   const [activeWalletType, setActiveWalletType] = useState<LinkedWalletType>();
 
@@ -45,7 +46,10 @@ export const SharedWallet = (): JSX.Element => {
 
       const activeWalletId = cardanoWallet.source.wallet.walletId;
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
-      setSharedWalletKey(activeWallet.metadata.multiSigExtendedPublicKey);
+      activeWallet.metadata.multiSigExtendedPublicKey &&
+        setSharedWalletKey(
+          Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(activeWallet.metadata.multiSigExtendedPublicKey)
+        );
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
       setActiveWalletType(activeWallet.type);
     })();
