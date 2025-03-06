@@ -382,10 +382,19 @@ const walletInfo = {
   }
 }
 
-
 const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
-//const maestroProvider = new BitcoinWallet.StubBitcoinDataProvider();
-export const bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 10000, 20, walletInfo, BitcoinWallet.Network.Testnet);
+export let bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 10000, 20, walletInfo, BitcoinWallet.Network.Testnet);
+
+export const deactivateBitcoinWallet = async () => {
+  // top polling
+  bitcoinWallet = undefined;
+};
+
+export const activateBitcoinWallet = async () => {
+};
+
+export const switchBitcoinNetwork = async () => {
+};
 
 const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
   getInfo: RemoteApiPropertyType.MethodReturningPromise,

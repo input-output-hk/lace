@@ -51,11 +51,20 @@ import {
   useSecrets
 } from '@lace/core';
 import { logger } from '@lace/common';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { BitcoinWallet as BtcWallet } from '@lace/bitcoin';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
+
+export interface BitcoinWallet {
+  name: string;
+  wallet: BtcWallet.BitcoinWallet;
+  source: {
+    wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+    account?: Bip32WalletAccount<Wallet.AccountMetadata>;
+  };
+}
 
 export interface CreateWalletParams {
   name: string;
@@ -75,6 +84,30 @@ export type CreateWalletParamsBase = {
   metadata: Wallet.WalletMetadata;
   encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;
+};
+
+export type CreateBitcoinWalletParams = {
+  name: string;
+  passphrase?: Buffer;
+  metadata: Wallet.WalletMetadata;
+  encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
+  accountIndex: number;
+  extendedAccountPublicKeys: {
+    mainnet: {
+      legacy: string;
+      segWit: string;
+      nativeSegWit: string;
+      taproot: string;
+      electrumNativeSegWit: string;
+    },
+    testnet: {
+      legacy: string;
+      segWit: string;
+      nativeSegWit: string;
+      taproot: string;
+      electrumNativeSegWit: string;
+    }
+  }
 };
 
 interface CreateSharedWalletParams {
@@ -112,7 +145,7 @@ type CreateHardwareWalletRevampedParams = {
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
 
 export interface UseWalletManager {
-  bitcoinWallet: BitcoinWallet.BitcoinWallet;
+  bitcoinWallet: BtcWallet.BitcoinWallet;
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
@@ -121,6 +154,10 @@ export interface UseWalletManager {
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
+  createBitcoinWallet: (args: CreateBitcoinWalletParams) => Promise<BitcoinWallet>;
+  //   addBitcoinAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
+  //   activateBitcoinWallet: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
+  //   switchBitcoinNetwork: (args: Omit<WalletManagerActivateProps, 'chainId'>) => Promise<void>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
   createWalletFromPrivateKey: (args: CreateWalletFromPrivateKeyParams) => Promise<Wallet.CardanoWallet>;
   createInMemorySharedWallet: (args: CreateSharedWalletParams) => Promise<Wallet.CardanoWallet>;
@@ -604,6 +641,62 @@ export const useWalletManager = (): UseWalletManager => {
     [getCurrentChainId, clearSecrets]
   );
 
+  /**
+   * Creates or restores a new bitcoin in-memory wallet and saves it in wallet repository
+   */
+  const createBitcoinWallet = useCallback(
+    async ({
+             name,
+             passphrase,
+             metadata,
+             encryptedSecrets,
+             accountIndex,
+             extendedAccountPublicKeys
+           }: CreateBitcoinWalletParams): Promise<BitcoinWallet> => {
+      const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata,
+        encryptedSecrets,
+        accounts: [
+          {
+            accountIndex,
+            metadata: { name: defaultAccountName(accountIndex), bitcoin: { extendedAccountPublicKeys } },
+            extendedAccountPublicKey: ('' as unknown as Wallet.Crypto.Bip32PublicKeyHex)
+          }
+        ],
+        type: WalletType.InMemory
+      };
+
+      const walletId = await walletRepository.addWallet(addWalletProps);
+
+      /*
+      await walletManager.activate({
+        walletId,
+        chainId,
+        accountIndex
+      });*/
+
+      // Needed for reset password flow
+      saveValueInLocalStorage({ key: 'wallet', value: { name } });
+
+      // Clear passphrase
+      if (passphrase) passphrase.fill(0);
+      clearSecrets();
+
+      return {
+        name,
+        wallet: bitcoinWallet,
+        source: {
+          wallet: {
+            ...addWalletProps,
+            walletId
+          },
+          account: addWalletProps.accounts[0]
+        }
+      };
+    },
+    [clearSecrets]
+  );
+
   const createWalletFromPrivateKey = useCallback(
     async ({ name, rootPrivateKeyBytes, extendedAccountPublicKey }: CreateWalletFromPrivateKeyParams) =>
       createWallet({
@@ -1042,6 +1135,7 @@ export const useWalletManager = (): UseWalletManager => {
     enableCustomNode,
     generateSharedWalletKey,
     saveSharedWalletKey,
-    getSharedWalletExtendedPublicKey
+    getSharedWalletExtendedPublicKey,
+    createBitcoinWallet
   };
 };

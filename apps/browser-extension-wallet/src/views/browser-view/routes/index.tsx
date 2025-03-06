@@ -294,6 +294,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
         {page && (
           <Switch>
             <Route path={routes.newWallet.root} component={MultiWallet} />
+            <Route path={routes.newBitcoinWallet.root} component={MultiWallet} />
             <Route path={routes.sharedWallet.root} component={SharedWallet} />
           </Switch>
         )}
