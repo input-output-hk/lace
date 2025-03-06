@@ -57,14 +57,7 @@ const firefoxConfig = {
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
     batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
-    batch11: [
-      // Currently not supported by Firefox and Webdriver.io v8
-      // './src/features/analytics/AnalyticsSend*.feature',
-      // './src/features/analytics/AnalyticsSetting*.feature',
-      // './src/features/analytics/AnalyticsStaking*.feature',
-      // './src/features/analytics/AnalyticsToggle*.feature',
-      // './src/features/analytics/AnalyticsToken*.feature'
-    ],
+    batch11: ['./src/features/e2e/StakingInitialFundsE2E.feature'],
     batch12: [
       './src/features/AdaHandleExtended.feature',
       './src/features/AdaHandlePopup.feature',
@@ -73,7 +66,6 @@ const firefoxConfig = {
     ],
     batch13: [
       './src/features/e2e/SendTransactionSimple*.feature',
-      './src/features/e2e/StakingInitialFundsE2E.feature',
       './src/features/e2e/StakingSwitchingPools*.feature',
       './src/features/SettingsPagePopup*.feature',
       './src/features/WalletAddressPageExtended.feature'
