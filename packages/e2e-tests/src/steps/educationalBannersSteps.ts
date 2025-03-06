@@ -29,11 +29,11 @@ When(/^I see a "(FAQ|Glossary|Video)" article with title "([^"]*)"$/, async (typ
     await faqPageAssert.assertSeeFaqArticle(subTitle);
   }
   if (type === 'Glossary') {
-    await switchToWindowWithUrl('https://www.lace.io/glossary');
+    await switchToWindowWithUrl('https://www.lace.io/glossary', true);
     await educationalListAssert.assertSeeGlossaryArticle(subTitle);
   }
   if (type === 'Video') {
-    await switchToWindowWithUrl('https://www.lace.io/learn?video');
+    await switchToWindowWithUrl('https://www.lace.io/learn?video', true);
     await educationalListAssert.assertSeeVideoArticle(subTitle);
   }
   await closeAllTabsExceptOriginalOne();
