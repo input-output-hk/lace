@@ -175,5 +175,5 @@ export type Handler<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CurrentState extends State = any,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TargetState extends State = any,
+  TargetState extends State = any
 > = (params: { command: C; executeCommand: ExecuteCommand; state: CurrentState }) => TargetState;

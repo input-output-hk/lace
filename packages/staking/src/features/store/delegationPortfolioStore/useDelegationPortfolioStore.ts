@@ -150,7 +150,7 @@ export const useDelegationPortfolioStore = create(
       }) => {
         const lastNonVolatileEpoch = currentEpoch.epochNo.valueOf() - LAST_STABLE_EPOCH;
         const confirmedRewardHistory = delegationRewardsHistory.all.filter(
-          ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch,
+          ({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch
         );
 
         const mapOfPoolIdsToSavedPercentages = makeMapOfSavedPercentages(delegationPortfolio?.pools);
@@ -173,7 +173,7 @@ export const useDelegationPortfolioStore = create(
               stakePool,
               value: stake,
             };
-          },
+          }
         );
 
         currentPortfolio = sanitizePercentages({
@@ -191,5 +191,5 @@ export const useDelegationPortfolioStore = create(
           state.view = view;
         }),
     },
-  })),
+  }))
 );

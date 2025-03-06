@@ -106,23 +106,23 @@ export const processExpandedViewCases: Handler = (params) =>
                 stakePools: data,
                 state,
               }),
-            }),
+            })
           ),
           SetBrowsePoolsView: handler<SetBrowsePoolsView, StateOverview, StateOverview>(
             ({ state, command: { data } }) => ({
               ...state,
               browsePoolsView: data,
-            }),
+            })
           ),
           ShowDelegatedPoolDetails: handler<ShowDelegatedPoolDetails, StateOverview, StateCurrentPoolDetails>(
             ({ state, command: { data } }) => ({
               ...state,
               ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: DelegationFlow.CurrentPoolDetails }),
-            }),
+            })
           ),
         },
         params.command.type,
-        DelegationFlow.Overview,
+        DelegationFlow.Overview
       ),
       [DelegationFlow.Activity]: cases<ActivityCommand['type']>(
         {
@@ -143,7 +143,7 @@ export const processExpandedViewCases: Handler = (params) =>
           })),
         },
         params.command.type,
-        DelegationFlow.Activity,
+        DelegationFlow.Activity
       ),
       [DelegationFlow.BrowsePools]: cases<BrowsePoolsCommand['type']>(
         {
@@ -185,13 +185,13 @@ export const processExpandedViewCases: Handler = (params) =>
                 stakePools: data,
                 state,
               }),
-            }),
+            })
           ),
           SetBrowsePoolsView: handler<SetBrowsePoolsView, StateBrowsePools, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
               browsePoolsView: data,
-            }),
+            })
           ),
           SetSearchQuery: handler<SetSearchQuery, StateBrowsePools, StateBrowsePools>(
             ({ state, command: { data } }) => ({
@@ -199,7 +199,7 @@ export const processExpandedViewCases: Handler = (params) =>
               searchQuery: data,
               sortField: undefined,
               sortOrder: undefined,
-            }),
+            })
           ),
           SetSort: handler<SetSort, StateBrowsePools, StateBrowsePools>(({ state, command: { data } }) => ({
             ...state,
@@ -210,17 +210,17 @@ export const processExpandedViewCases: Handler = (params) =>
             ({ state, command: { data } }) => ({
               ...state,
               ...atomicStateMutators.showPoolDetails({ pool: data, targetFlow: DelegationFlow.PoolDetails }),
-            }),
+            })
           ),
           UnselectPoolFromList: handler<UnselectPoolFromList, StateBrowsePools, StateBrowsePools>(
             ({ state, command: { data } }) => ({
               ...state,
               ...atomicStateMutators.unselectPool({ id: data, state }),
-            }),
+            })
           ),
         },
         params.command.type,
-        DelegationFlow.BrowsePools,
+        DelegationFlow.BrowsePools
       ),
       [DelegationFlow.CurrentPoolDetails]: cases<CurrentPoolDetailsCommand['type']>(
         {
@@ -231,7 +231,7 @@ export const processExpandedViewCases: Handler = (params) =>
           })),
         },
         params.command.type,
-        DelegationFlow.CurrentPoolDetails,
+        DelegationFlow.CurrentPoolDetails
       ),
       [DelegationFlow.PoolDetails]: cases<PoolDetailsCommand['type']>(
         {
@@ -278,7 +278,7 @@ export const processExpandedViewCases: Handler = (params) =>
               activeDrawerStep: DrawerManagementStep.Preferences,
               draftPortfolio: currentPortfolioToDraft(state.currentPortfolio),
               viewedStakePool: undefined,
-            }),
+            })
           ),
           SelectPoolFromDetails: handler<SelectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
@@ -286,7 +286,7 @@ export const processExpandedViewCases: Handler = (params) =>
               ...atomicStateMutators.selectPools({ stakePools: [data], state }),
               ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
               viewedStakePool: undefined,
-            }),
+            })
           ),
           UnselectPoolFromDetails: handler<UnselectPoolFromDetails, StatePoolDetails, StateBrowsePools>(
             ({ state, command: { data } }) => ({
@@ -294,11 +294,11 @@ export const processExpandedViewCases: Handler = (params) =>
               ...atomicStateMutators.unselectPool({ id: data, state }),
               ...atomicStateMutators.cancelDrawer({ state, targetFlow: DelegationFlow.BrowsePools }),
               viewedStakePool: undefined,
-            }),
+            })
           ),
         },
         params.command.type,
-        DelegationFlow.PoolDetails,
+        DelegationFlow.PoolDetails
       ),
       [DelegationFlow.PortfolioManagement]: cases<DrawerManagementStep>(
         {
@@ -319,14 +319,14 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Confirmation,
-                }),
+                })
               ),
               RemoveStakePool: handler<RemoveStakePool, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
                   ...atomicStateMutators.unselectPool({ id: data, state }),
-                }),
+                })
               ),
 
               UpdateStakePercentage: handler<UpdateStakePercentage, StatePortfolioManagement, StatePortfolioManagement>(
@@ -336,11 +336,11 @@ export const processExpandedViewCases: Handler = (params) =>
                     ...data,
                     state,
                   }),
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Preferences,
+            DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<PortfolioManagementConfirmationCommand['type']>(
             {
@@ -358,31 +358,31 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Sign,
-                }),
+                })
               ),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
                   txError: data.error,
-                }),
+                })
               ),
               HwSkipToFailure: handler<HwSkipToFailure, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
                   txError: data.error,
-                }),
+                })
               ),
               HwSkipToSuccess: handler<HwSkipToSuccess, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Success,
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Confirmation,
+            DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<PortfolioManagementSignCommand['type']>(
             {
@@ -400,18 +400,18 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Success,
-                }),
+                })
               ),
               DrawerFailure: handler<DrawerFailure, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
                   txError: data.error,
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Sign,
+            DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<PortfolioManagementSuccessCommand['type']>(
             {
@@ -423,7 +423,7 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
             },
             params.command.type,
-            DrawerManagementStep.Success,
+            DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<PortfolioManagementFailureCommand['type']>(
             {
@@ -437,18 +437,18 @@ export const processExpandedViewCases: Handler = (params) =>
                 ({ state }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Success,
-                }),
+                })
               ),
               HwSkipToDeviceFailure: handler<HwSkipToDeviceFailure, StatePortfolioManagement, StatePortfolioManagement>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
                   txError: data.error,
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Failure,
+            DrawerManagementStep.Failure
           ),
           [DrawerManagementStep.HwDeviceFailure]: cases<PortfolioManagementHwFailureCommand['type']>(
             {
@@ -465,11 +465,11 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
             },
             params.command.type,
-            DrawerManagementStep.HwDeviceFailure,
+            DrawerManagementStep.HwDeviceFailure
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,
-        DelegationFlow.PortfolioManagement,
+        DelegationFlow.PortfolioManagement
       ),
       // TODO: reconsider this approach. Maybe it would be better to have just a boolean state for opening the modal
       //  instead of having a separate flow. It might feel more like a part of new portfolio creation step rather
@@ -498,11 +498,11 @@ export const processExpandedViewCases: Handler = (params) =>
               activeDelegationFlow: DelegationFlow.BrowsePools,
               pendingSelectedPortfolio: undefined,
               txError: undefined,
-            }),
+            })
           ),
         },
         params.command.type,
-        DelegationFlow.ChangingPreferences,
+        DelegationFlow.ChangingPreferences
       ),
       [DelegationFlow.NewPortfolio]: cases<DrawerManagementStep>(
         {
@@ -528,7 +528,7 @@ export const processExpandedViewCases: Handler = (params) =>
                   ...state,
                   ...atomicStateMutators.removePoolFromPreferences({ id: data, state }),
                   ...atomicStateMutators.unselectPool({ id: data, state }),
-                }),
+                })
               ),
               UpdateStakePercentage: handler<UpdateStakePercentage, StateNewPortfolio, StateNewPortfolio>(
                 ({ state, command: { data } }) => ({
@@ -537,11 +537,11 @@ export const processExpandedViewCases: Handler = (params) =>
                     ...data,
                     state,
                   }),
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Preferences,
+            DrawerManagementStep.Preferences
           ),
           [DrawerManagementStep.Confirmation]: cases<NewPortfolioConfirmationCommand['type']>(
             {
@@ -564,14 +564,14 @@ export const processExpandedViewCases: Handler = (params) =>
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
                   txError: data.error,
-                }),
+                })
               ),
               HwSkipToFailure: handler<HwSkipToFailure, StateNewPortfolio, StateNewPortfolio>(
                 ({ state, command: { data } }) => ({
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
                   txError: data.error,
-                }),
+                })
               ),
               HwSkipToSuccess: handler<HwSkipToSuccess, StateNewPortfolio, StateNewPortfolio>(({ state }) => ({
                 ...state,
@@ -579,7 +579,7 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
             },
             params.command.type,
-            DrawerManagementStep.Confirmation,
+            DrawerManagementStep.Confirmation
           ),
           [DrawerManagementStep.Sign]: cases<NewPortfolioSignCommand['type']>(
             {
@@ -602,11 +602,11 @@ export const processExpandedViewCases: Handler = (params) =>
                   ...state,
                   activeDrawerStep: DrawerManagementStep.Failure,
                   txError: data.error,
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Sign,
+            DrawerManagementStep.Sign
           ),
           [DrawerManagementStep.Success]: cases<NewPortfolioSuccessCommand['type']>(
             {
@@ -619,7 +619,7 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
             },
             params.command.type,
-            DrawerManagementStep.Success,
+            DrawerManagementStep.Success
           ),
           [DrawerManagementStep.Failure]: cases<NewPortfolioFailureCommand['type']>(
             {
@@ -638,11 +638,11 @@ export const processExpandedViewCases: Handler = (params) =>
                   ...state,
                   activeDrawerStep: DrawerManagementStep.HwDeviceFailure,
                   txError: data.error,
-                }),
+                })
               ),
             },
             params.command.type,
-            DrawerManagementStep.Failure,
+            DrawerManagementStep.Failure
           ),
           [DrawerManagementStep.HwDeviceFailure]: cases<NewPortfolioHwFailureCommand['type']>(
             {
@@ -659,13 +659,13 @@ export const processExpandedViewCases: Handler = (params) =>
               })),
             },
             params.command.type,
-            DrawerManagementStep.HwDeviceFailure,
+            DrawerManagementStep.HwDeviceFailure
           ),
         },
         params.state.activeDrawerStep as DrawerManagementStep,
-        DelegationFlow.NewPortfolio,
+        DelegationFlow.NewPortfolio
       ),
     },
     params.state.activeDelegationFlow,
-    'root',
+    'root'
   )(params);
