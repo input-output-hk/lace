@@ -12687,9 +12687,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:3.2.1":
-  version: 3.2.1
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.2.1::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.2.1%2Fe3c8d3272991d20eb16cb908aae26a5f7fd09ae7"
+"@input-output-hk/lace-ui-toolkit@npm:3.2.7":
+  version: 3.2.7
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.2.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.2.7%2F280f224676d16b7a53c9b722ed5d43dc7b41f9b9"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -12721,7 +12721,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: a80c782a109293f085f51206d217dec6f6d1f5a1b8af53c870a187ea81994ccb5189bc5d1e18e1cbc0faf05f60a9b0583ebc478bf978ca5a7491b113a4555bcc
+  checksum: 0b9c6fdef5a28d4ebef58faf21514d165824b401ab64ec340c1f14f8cc7238d612aec2843e31a1069641c422d96b90adb5f654b85229a6b0c637ae85d8c93ddc
   languageName: node
   linkType: hard
 
@@ -13593,7 +13593,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.39.2
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 3.2.1
+    "@input-output-hk/lace-ui-toolkit": 3.2.7
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
@@ -44857,7 +44857,7 @@ __metadata:
     "@babel/runtime": 7.15.3
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 3.2.1
+    "@input-output-hk/lace-ui-toolkit": 3.2.7
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0
