@@ -92,7 +92,7 @@ export const downloadWalletData = async (state: CreationFlowState): Promise<void
     logger.debug(`JSON file downloaded and saved as ${FILENAME}`);
   } catch (error) {
     if (error instanceof Error) {
-      logger.error(`Failed to download JSON file: ${error.message}`);
+      logger.error('Failed to download JSON file.', error);
     }
   }
 };

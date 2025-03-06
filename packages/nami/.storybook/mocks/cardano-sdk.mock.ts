@@ -41,3 +41,5 @@ export const ProviderUtil = {
 export const Ed25519KeyHashHex = fn().mockName('Ed25519KeyHashHex');
 
 export const handleHttpProvider = fn().mockName('handleHttpProvider');
+
+export const contextLogger = fn().mockName('contextLogger');
