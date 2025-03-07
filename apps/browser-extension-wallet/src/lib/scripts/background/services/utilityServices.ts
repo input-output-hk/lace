@@ -91,6 +91,9 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.FORGOT_PASSWORD:
       path = walletRoutePaths.setup.restore;
       break;
+    case BrowserViewSections.NEW_BITCOIN_WALLET:
+      path = walletRoutePaths.newBitcoinWallet.root;
+      break;
     case BrowserViewSections.NEW_WALLET:
       path = walletRoutePaths.newWallet.root;
       break;

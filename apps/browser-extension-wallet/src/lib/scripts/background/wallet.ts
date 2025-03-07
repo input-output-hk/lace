@@ -1,56 +1,64 @@
 /* eslint-disable unicorn/no-null */
-import { runtime, storage as webStorage } from 'webextension-polyfill';
+import {runtime, storage as webStorage} from 'webextension-polyfill';
 import {
-  of,
-  combineLatest,
-  map,
-  EMPTY,
   BehaviorSubject,
-  Observable,
-  from,
-  firstValueFrom,
+  combineLatest,
   defaultIfEmpty,
+  EMPTY,
+  firstValueFrom,
+  from,
+  map,
+  Observable,
+  of,
   Subject,
   tap
 } from 'rxjs';
-import { getProviders, SESSION_TIMEOUT } from './config';
-import { DEFAULT_POLLING_CONFIG, createPersonalWallet, storage, createSharedWallet } from '@cardano-sdk/wallet';
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
-import { Cardano, HandleProvider } from '@cardano-sdk/core';
+import {getProviders, SESSION_TIMEOUT} from './config';
+import {createPersonalWallet, createSharedWallet, DEFAULT_POLLING_CONFIG, storage} from '@cardano-sdk/wallet';
+import {handleHttpProvider} from '@cardano-sdk/cardano-services-client';
+import {Cardano, HandleProvider} from '@cardano-sdk/core';
 import {
   AnyWallet,
-  StoresFactory,
-  WalletFactory,
-  WalletManager,
-  WalletRepository,
-  WalletType,
   consumeSigningCoordinatorApi,
   exposeApi,
   observableWalletProperties,
   repositoryChannel,
+  StoresFactory,
   walletChannel,
+  WalletFactory,
+  WalletManager,
   walletManagerChannel,
   walletManagerProperties,
-  walletRepositoryProperties, RemoteApiPropertyType
+  WalletRepository,
+  walletRepositoryProperties,
+  WalletType
 } from '@cardano-sdk/web-extension';
-import { Wallet } from '@lace/cardano';
-import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
+import {Wallet} from '@lace/cardano';
+import {cacheActivatedWalletAddressSubscription} from './cache-wallets-address';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
-import { SharedWalletScriptKind } from '@lace/core';
-import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
-import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
-import { logger } from '@lace/common';
-import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { requestMessage$ } from './services/utilityServices';
-import { MessageTypes } from '../types';
-import { ExtensionDocumentStore } from './storage/extension-document-store';
-import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
-import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
-import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
-import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './session';
-import { TrackerSubject } from '@cardano-sdk/util-rxjs';
-import { ExperimentName, FeatureFlags } from '../types/feature-flags';
-import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
+import {SharedWalletScriptKind} from '@lace/core';
+import {getBaseUrlForChain, getMagicForChain} from '@utils/chain';
+import {cacheNamiMetadataSubscription} from './cache-nami-metadata';
+import {logger} from '@lace/common';
+import {getBackgroundStorage} from '@lib/scripts/background/storage';
+import {requestMessage$} from './services/utilityServices';
+import {MessageTypes} from '../types';
+import {ExtensionDocumentStore} from './storage/extension-document-store';
+import {ExtensionBlobKeyValueStore} from './storage/extension-blob-key-value-store';
+import {ExtensionBlobCollectionStore} from './storage/extension-blob-collection-store';
+import {migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration} from './storage/migrations';
+import {createUserSessionTracker, isLacePopupOpen$, isLaceTabActive$} from './session';
+import {TrackerSubject} from '@cardano-sdk/util-rxjs';
+import {ExperimentName, FeatureFlags} from '../types/feature-flags';
+import {TX_HISTORY_LIMIT_SIZE} from '@utils/constants';
+import {BitcoinWallet} from '@lace/bitcoin';
+import {
+  bitcoinProviderProperties,
+  BitcoinWalletFactory,
+  BitcoinWalletManager,
+  bitcoinWalletManagerProperties,
+  bitcoinWalletProperties
+} from './bitcoinWalletManager';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -58,8 +66,6 @@ const pollController$ = new TrackerSubject(
     tap((isActive) => logger.debug('Session active:', isActive))
   )
 );
-import { BitcoinWallet } from '@lace/bitcoin';
-import { RemoteApiProperties } from '@cardano-sdk/web-extension';
 
 if (typeof window !== 'undefined') {
   throw new TypeError('This module should only be imported in service worker');
@@ -120,6 +126,7 @@ export const walletRepository = new WalletRepository({
 
 // eslint-disable-next-line unicorn/no-null
 const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
+const currentBitcoinWalletProvider$ = new BehaviorSubject<BitcoinWallet.BlockchainDataProvider | null>(null);
 
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   // eslint-disable-next-line complexity, max-statements
@@ -232,6 +239,57 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     currentWalletProviders$.next(providers);
 
     return personalWallet;
+  }
+};
+
+const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+  create: async ({ network, accountIndex }, wallet) => {
+    if (wallet.type !== WalletType.InMemory) {
+      throw new Error('Unsupported wallet type for Bitcoin');
+    }
+
+    if (wallet.blockchainName !== 'Bitcoin') {
+      throw new Error('Trying to activate a Cardano wallet as a Bitcoin wallet.');
+    }
+
+    const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
+
+    if (!walletAccount) {
+      throw new Error('Wallet account not found');
+    }
+
+    let provider;
+    if (network === BitcoinWallet.Network.Testnet) {
+      provider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
+    }
+    else
+    {
+      provider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_MAINNET, BitcoinWallet.Network.Mainnet);
+    }
+
+    if (!walletAccount.metadata.bitcoin) {
+      throw new Error('Bitcoin metadata not found');
+    }
+
+    const { extendedAccountPublicKeys } = walletAccount.metadata.bitcoin;
+
+    const walletInfo = {
+      walletName: wallet.metadata.name,
+      accountIndex: accountIndex,
+      encryptedSecrets: {
+        mnemonics: wallet.encryptedSecrets.keyMaterial,
+        seed: wallet.encryptedSecrets.rootPrivateKeyBytes
+      },
+      extendedAccountPublicKeys
+    }
+
+    const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))
+      ? // eslint-disable-next-line no-magic-numbers
+      Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC) * 1000
+      : 10000;
+
+    currentBitcoinWalletProvider$.next(provider);
+    return new BitcoinWallet.BitcoinWallet(provider, localPollingIntervalConfig, 20, walletInfo, network);
   }
 };
 
@@ -357,65 +415,16 @@ const storesFactory: StoresFactory = {
   }
 };
 
-const walletInfo = {
-  walletName: "Bitcoin Wallet 1",
-  accountIndex: 0,
-  encryptedSecrets: {
-    mnemonics: "6300f91cde4e7048badf22c2ee76a47103f932e3d4c26a72e67593bafce415ca4dfbda026f86bf063a1b950e0f9938c7051b5a7cfbc80a616794b49c9e1b358839375a0b751486a118c659b73eae61fcd34944981a500503c25522510bf51cab5ef31a7929bc2d78e8f81a35ad7597dcf20ac0c3b6affa25dc48ca6f86fcba9d5f2c656ceb53e7f0d0bfa91932fbbfb48971f53076b37afddd8dc7afe81abfcfeb40b1c760cafef03b246f8e23fd218b6639691605771c64d4a1a76619756732d207cbb35fe539837dcffe0a382261082b71155ca95e5f3659c25b5b",
-    seed: "17c59e55ea15fb107a922cd20e11a98ebf36a247544686793d4dbcf8c2ee8e155e2fba6b388533ed519a918011dd99947819e1f1350e3d0475dd9d16cb7b816e75a38dc3db20b8e269a1031152fea8dd65a433d18578e44314137a655828aca699fade2b13bbe35add766db4870c78d6cc6fa12a00bd37f921c94b39"
-  },
-  extendedAccountPublicKeys: {
-    mainnet: {
-      legacy: "xpub6CXqm3qd33LhU2AMmUnKjsgZuBZQfNPZ6ww3tbVpBNYZjbcPLTU43beBUvmMpMGsLQ2SKisS38FgQdKS5WtVy8fa46GokjgBVeUkwVzApTR",
-      segWit: "xpub6DWj4HZsHB273iZThWdcBwvCxvDRWQkwSi3SjPQje5RvVbrKc61GoqVaHtkN2ha3sJCHEaFXSjsFNFgTfDMrFmHD848QRUtL9ZcRYtymKN6",
-      nativeSegWit: "xpub6DQVZkr4QyJR5RiBtTqSZg2WTHxo9D1jcexG4WjFCwQfwy9XUQ7vM8QFeXeBcGUuCXeBsPCZ525WGuhm6dE6tcyU9aUiGm9EotXYvfTwBqt",
-      taproot: "xpub6DSS1V32GwHMqZihBK9JaZgd6xnVugkEkPaSkbZgAYbzZC41nbUqcuH2N3tgeFMWudvJuYfX8kqWsKUd4oj3H3cUR6mPySGPL3PV6yzu7ko",
-      electrumNativeSegWit: "xpub6D3Tc2KGUuhyTv5EdgR5eUmgG4Ai7DzYrsRCimRC9vYZLXcuKsFVkWySGPrsdqUsvpLDyiXeRJ9kKzTZVrtTWm8BUc539mQ2VGEnQwkiKox"
-    },
-    testnet: {
-      legacy: "xpub6CLkFqDprtawP8VB21Hzgy5jhwgg7FhDDfJeeNn8Afv5supgd2V38x3E3R5om1ZN7avQiL6gcpYAQX71391WvmfymybGeyxEnHzEWBFQMrY",
-      segWit: "xpub6C99JbTvGxYtBXEHUG7HMe8hJq9GFFRaAw5JsHprckQGmQCbqzDbRiznL3Shc8fsAxAa1GVhKdFYL4pFsgKh5hhS9Ddg5Ni6NSUgMzFprqF",
-      nativeSegWit: "xpub6CrzGDoCVV56RUEdoKWVVXCA5JUJr9PQMQvXaUiGKjfBzZgwkJtKtHfvz3rCDnVL4qriaeZixHARX5MifcSDzZMnwBGVng5AqLZrsE1sUg1",
-      taproot: "xpub6CZnCLkMMgC8aDH1yMeQeZnLGk7qeRxSG8pwHQvb2dkbXAuRopV57RoZLBUqBWMmiqxCaDDwpVWFCfLLAAJkWW4NCy4CKB4U2UUx95hnTYN",
-      electrumNativeSegWit: "xpub6Bju9NoEG4m4x95tv1uX5fu7cCKf3ormkGbV3qtsvnwRqUmqcmCrej8RGQGmxWJRN23gfpZstUZ1uMnxUgkHju5udzPXqrJqDsq719UwXHj"
-    }
-  }
-}
-
-const maestroProvider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
-export let bitcoinWallet: BitcoinWallet.BitcoinWallet | undefined = new BitcoinWallet.BitcoinWallet(maestroProvider, 10000, 20, walletInfo, BitcoinWallet.Network.Testnet);
-
-export const deactivateBitcoinWallet = async () => {
-  // top polling
-  bitcoinWallet = undefined;
-};
-
-export const activateBitcoinWallet = async () => {
-};
-
-export const switchBitcoinNetwork = async () => {
-};
-
-const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
-  getInfo: RemoteApiPropertyType.MethodReturningPromise,
-  getNetwork: RemoteApiPropertyType.MethodReturningPromise,
-  getAddress: RemoteApiPropertyType.MethodReturningPromise,
-  getCurrentFeeMarket: RemoteApiPropertyType.MethodReturningPromise,
-  submitTransaction: RemoteApiPropertyType.MethodReturningPromise,
-  utxos$: RemoteApiPropertyType.HotObservable,
-  balance$: RemoteApiPropertyType.HotObservable,
-  transactionHistory$: RemoteApiPropertyType.HotObservable,
-  pendingTransactions$: RemoteApiPropertyType.HotObservable,
-  addresses$: RemoteApiPropertyType.HotObservable,
-};
-
-exposeApi(
+export const bitcoinWalletManager = new BitcoinWalletManager(
+  { name: `${process.env.WALLET_NAME}-bitcoin` },
   {
-    api$: of(bitcoinWallet),
-    baseChannel: repositoryChannel('bitcoin-wallet'),
-    properties: bitcoinWalletProperties
-  },
-  { logger, runtime }
+    walletRepository,
+    logger,
+    runtime,
+    storesFactory,
+    walletFactory: bitcoinWalletFactory,
+    managerStorage: webStorage.local
+  }
 );
 
 const signingCoordinatorApi = consumeSigningCoordinatorApi({ logger, runtime });
@@ -469,6 +478,35 @@ walletManager
       },
       { logger, runtime }
     );
+
+    bitcoinWalletManager.initialize().then(() => {
+      exposeApi(
+        {
+          api$: of(bitcoinWalletManager),
+          baseChannel: 'bitcoin-wallet-manager',
+          properties: bitcoinWalletManagerProperties
+        },
+        { logger, runtime }
+      );
+
+      exposeApi(
+        {
+          api$: bitcoinWalletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.wallet || undefined)),
+          baseChannel: 'bitcoin-wallet',
+          properties: bitcoinWalletProperties
+        },
+        { logger, runtime }
+      );
+
+      exposeApi(
+        {
+          api$: currentBitcoinWalletProvider$,
+          baseChannel: 'bitcoin-wallet-providers',
+          properties: bitcoinProviderProperties
+        },
+        { logger, runtime }
+      );
+    });
   })
   .catch((error) => {
     logger.error('Failed to initialize wallet manager', error);
@@ -479,3 +517,4 @@ cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
 cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;
+export const bitcoinWallet$ = bitcoinWalletManager.activeWallet$;

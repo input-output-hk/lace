@@ -1,5 +1,5 @@
 import {BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO} from './../providers';
-import {BehaviorSubject, interval, of, startWith} from 'rxjs';
+import {BehaviorSubject, interval, of, startWith, Subscription} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {
   AddressType,
@@ -60,6 +60,7 @@ export type EstimatedFees = {
 };
 
 export class BitcoinWallet {
+  private pollSubscription: Subscription | null = null;
   private lastKnownBlock: BlockInfo | null = null;
   private transactionHistory: TransactionHistoryEntry[] = [];
   private readonly pollInterval: number;
@@ -77,7 +78,7 @@ export class BitcoinWallet {
 
   constructor(
     provider: BlockchainDataProvider,
-    pollInterval: number = 300000,
+    pollInterval: number = 30000,
     historyDepth: number = 20,
     info: BitcoinWalletInfo,
     network: Network = Network.Testnet
@@ -189,10 +190,20 @@ export class BitcoinWallet {
   }
 
   /**
+   * Stop polling by unsubscribing from the subscription
+   */
+  public shutdown() {
+    if (this.pollSubscription) {
+      this.pollSubscription.unsubscribe();
+      this.pollSubscription = null;
+    }
+  }
+
+  /**
    * Starts polling for new blocks and updating wallet state.
    */
   private startPolling() {
-    interval(this.pollInterval)
+    this.pollSubscription = interval(this.pollInterval)
       .pipe(
         startWith(0),
         switchMap(() => this.provider.getLastKnownBlock()),

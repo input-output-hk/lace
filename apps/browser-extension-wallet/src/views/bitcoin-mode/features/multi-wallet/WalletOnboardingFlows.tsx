@@ -1,7 +1,6 @@
 import { useKeyboardShortcut } from '@lace/common';
 import { Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
 import { CreateWallet } from './create-wallet';
-import { HardwareWallet } from './hardware-wallet';
 import { RestoreWallet } from './restore-wallet';
 import React, { ReactNode, VFC } from 'react';
 import { Flows, WalletOnboardingPostHogActions, SetFormDirty } from './types';
@@ -50,7 +49,6 @@ export const WalletOnboardingFlows: VFC<WalletOnboardingProps> = ({
         {flowsEnabled && (
           <>
             <Route path={urlPath.create} component={CreateWallet} />
-            <Route path={urlPath.hardware} component={HardwareWallet} />
             <Route path={urlPath.restore} component={RestoreWallet} />
           </>
         )}

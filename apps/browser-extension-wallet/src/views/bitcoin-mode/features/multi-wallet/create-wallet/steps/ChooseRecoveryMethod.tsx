@@ -19,7 +19,6 @@ import { RecoveryMethod } from '../../types';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useCreateWallet } from '../context';
 import styles from './ChooseRecoveryMethod.module.scss';
-import {usePostHogClientContext} from "@providers/PostHogClientProvider";
 
 const FAQ_URL = process.env.FAQ_URL;
 
@@ -44,8 +43,6 @@ export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
 }) => {
   const analytics = useAnalyticsContext();
   const { postHogActions } = useWalletOnboarding();
-  const posthog = usePostHogClientContext();
-  const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
 
   // @ts-ignore
   // @ts-ignore
@@ -146,46 +143,7 @@ export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
                     </Flex>
                   </Card.Outlined>
                 )
-              },
-              ...(bitcoinWalletsEnabled
-                ? [
-                  {
-                    value: 'mnemonic-bitcoin',
-                    label: `${i18n.t('core.walletSetupStep.recoveryPhrase')} - Bitcoin`,
-                    // @ts-ignore
-                    render: ({ optionElement, onOptionClick }) => (
-                      <Card.Outlined
-                        onClick={() => {
-                          void analytics.sendEventToPostHog(postHogActions[flow].CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK);
-                          onOptionClick();
-                        }}
-                        className={cn({
-                          [styles.selectedRestoreMethod]: recoveryMethod === 'mnemonic',
-                          [styles.optionCard]: recoveryMethod !== 'mnemonic'
-                        })}
-                      >
-                        <Flex p="$16" gap="$24" justifyContent="space-between" className={styles.pointer}>
-                          <Flex flexDirection="column">
-                            <Flex mb="$8">
-                              <Text.Body.Normal weight="$medium" color="primary" data-testid="mnemonic-bitcoin-label">
-                                {optionElement}
-                              </Text.Body.Normal>
-                            </Flex>
-                            <Box pl="$40">
-                              <Text.Body.Normal weight="$medium" color="secondary" data-testid="mnemonic-bitcoin-description">
-                                {i18n.t('paperWallet.chooseRecoveryMethod.mnemonicDescription')}
-                              </Text.Body.Normal>
-                            </Box>
-                          </Flex>
-                          <Flex>
-                            <MnemonicWordsIcon className={styles.restoreIcon} data-testid="mnemonic-bitcoin-icon" />
-                          </Flex>
-                        </Flex>
-                      </Card.Outlined>
-                    )
-                  }
-                ]
-                : [])
+              }
             ]}
           />
         </Flex>

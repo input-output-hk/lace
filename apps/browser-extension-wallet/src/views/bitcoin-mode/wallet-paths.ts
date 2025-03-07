@@ -23,9 +23,9 @@ export const walletRoutePaths = {
     restore: '/bitcoin-setup/restore'
   },
   newWallet: {
-    root: '/bitcoin-new-wallet',
-    create: '/bitcoin-new-wallet/create',
-    hardware: '/bitcoin-new-wallet/hardware',
-    restore: '/bitcoin-new-wallet/restore'
+    root: '/new-bitcoin-wallet',
+    create: '/new-bitcoin-wallet/create',
+    hardware: '/new-bitcoin-wallet/hardware',
+    restore: '/new-bitcoin-wallet/restore'
   },
 };
