@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import {
@@ -68,17 +68,22 @@ export const SharedWallet = (): JSX.Element => {
     });
   };
 
-  const generateKey = async (enteredPassword: string) => {
-    if (sharedWalletKey) return sharedWalletKey;
-    const activeWalletId = cardanoWallet.source.wallet.walletId;
-    const key = await generateSharedWalletKey(enteredPassword);
-    await createMultiSigAccount({
-      ownSignerWalletId: activeWalletId,
-      sharedWalletKey: key
-    });
-    setSharedWalletKey(key);
-    return key;
-  };
+  const generateKey = useCallback(
+    async (enteredPassword?: string) => {
+      if (sharedWalletKey) return sharedWalletKey;
+      const activeWalletId = cardanoWallet.source.wallet.walletId;
+      const key = await generateSharedWalletKey(enteredPassword);
+      await createMultiSigAccount({
+        ownSignerWalletId: activeWalletId,
+        sharedWalletKey: key
+      });
+      setSharedWalletKey(key);
+      return key;
+    },
+    [cardanoWallet.source.wallet.walletId, createMultiSigAccount, generateSharedWalletKey, sharedWalletKey]
+  );
+
+  const navigateToRoot = useCallback(() => history.push(walletRoutePaths.sharedWallet.root), [history]);
 
   return (
     <AddSharedWalletModal
@@ -99,7 +104,7 @@ export const SharedWallet = (): JSX.Element => {
               onGenerateKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)}
               onCopyKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)}
               onClose={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCloseClick)}
-              navigateToParentFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
+              navigateToParentFlow={navigateToRoot}
             />
           )}
         />
@@ -112,7 +117,7 @@ export const SharedWallet = (): JSX.Element => {
                 activeWalletName={walletInfo?.name || ''}
                 initialWalletName={initialWalletName}
                 navigateToAppHome={() => setBackgroundPage()}
-                exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
+                exitTheFlow={navigateToRoot}
                 sharedWalletKey={sharedWalletKey}
                 onCreateSharedWallet={handleCreateWallet}
                 onWalletNameNextClick={() => {
@@ -153,7 +158,7 @@ export const SharedWallet = (): JSX.Element => {
                   await handleCreateWallet(data);
                 }}
                 sharedKeys={sharedWalletKey}
-                exitTheFlow={() => history.push(walletRoutePaths.sharedWallet.root)}
+                exitTheFlow={navigateToRoot}
                 navigateToAppHome={() => setBackgroundPage()}
                 onImportJsonError={async () =>
                   await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletImportJsonError)

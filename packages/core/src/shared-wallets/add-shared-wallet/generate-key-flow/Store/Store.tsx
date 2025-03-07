@@ -1,8 +1,6 @@
-import { Dispatch, FC, ReactElement, useReducer } from 'react';
+import { Dispatch, FC, ReactElement, useMemo, useReducer } from 'react';
 import { makeInitialStateProvider } from '../../../initial-state-provider';
-import { PasswordErrorType } from '../EnterPassword';
-import { GenerateSharedWalletKeyFn, SharedWalletKeyGenerationAuthError } from '../generate-shared-wallet-key';
-import { Action, ActionType, Handler, makeStateMachine } from './machine';
+import { Action, Handler, makeStateMachine } from './machine';
 import { GenerateSharedWalletKeyState, GenerateSharedWalletKeyStep, stateEnterPassword } from './state';
 
 const { InitialStateProvider, useInitialState } = makeInitialStateProvider<GenerateSharedWalletKeyState>();
@@ -15,12 +13,19 @@ type GenerateSharedWalletKeyStoreValue = {
 };
 
 export type StoreSharedProps = {
-  generateKey: GenerateSharedWalletKeyFn;
   navigateToParentFlow: () => void;
 };
 
 type StoreProps = StoreSharedProps & {
   children: (store: GenerateSharedWalletKeyStoreValue) => ReactElement;
+};
+
+const getReducer = (navigateToParentFlow: () => void) => (prevState: GenerateSharedWalletKeyState, action: Action) => {
+  const stateMachine = makeStateMachine({
+    navigateToParentFlow,
+  });
+  const handler = stateMachine[prevState.step] as Handler<GenerateSharedWalletKeyState>;
+  return handler(prevState, action);
 };
 
 export const makeInitialState = () =>
@@ -31,24 +36,10 @@ export const makeInitialState = () =>
     step: GenerateSharedWalletKeyStep.EnterPassword,
   });
 
-export const Store: FC<StoreProps> = ({ children, generateKey, navigateToParentFlow }) => {
+export const Store: FC<StoreProps> = ({ children, navigateToParentFlow }) => {
   const initialState = useInitialState(makeInitialState());
-  const [state, dispatch] = useReducer((prevState: GenerateSharedWalletKeyState, action: Action) => {
-    const stateMachine = makeStateMachine({
-      navigateToParentFlow,
-      triggerKeysGeneration: (password) => {
-        generateKey(password)
-          .then((sharedWalletKey) => dispatch({ sharedWalletKey, type: ActionType.KeysGenerationCompleted }))
-          .catch((error) => {
-            const errorType: PasswordErrorType =
-              error instanceof SharedWalletKeyGenerationAuthError ? 'invalid-password' : 'generic';
-            dispatch({ errorType, type: ActionType.KeysGenerationFailed });
-          });
-      },
-    });
-    const handler = stateMachine[prevState.step] as Handler<GenerateSharedWalletKeyState>;
-    return handler(prevState, action);
-  }, initialState);
+  const reducer = useMemo(() => getReducer(navigateToParentFlow), [navigateToParentFlow]);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   return children({ dispatch, state });
 };

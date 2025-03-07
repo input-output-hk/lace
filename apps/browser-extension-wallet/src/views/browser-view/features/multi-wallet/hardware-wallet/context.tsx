@@ -6,7 +6,7 @@ import { useWalletManager } from '@hooks';
 import { ErrorDialogCode, WalletConnectStep } from './types';
 import { WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { walletRoutePaths } from '@routes';
-import { useWrapWithTimeout } from './useWrapWithTimeout';
+import { useWrapWithTimeout } from '@lace/core';
 import { useAnalyticsContext } from '@providers';
 import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { firstValueFrom } from 'rxjs';

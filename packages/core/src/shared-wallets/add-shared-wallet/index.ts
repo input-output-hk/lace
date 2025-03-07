@@ -7,6 +7,5 @@ export {
   GenerateSharedWalletKeyFn,
   makeGenerateSharedWalletKey,
 } from './generate-key-flow';
-export type { LinkedWalletType } from './generate-key-flow';
 export { AddSharedWalletMainPageFlow, SharedWalletEntry } from './main-page-flow';
 export { SharedWalletRestorationFlow } from './restore-flow';

@@ -19,7 +19,7 @@ export enum ActionType {
 
 export type Action =
   | { type: ActionType.Back }
-  | { password: string; type: ActionType.KeysGenerationTriggered }
+  | { password?: string; type: ActionType.KeysGenerationTriggered }
   | { sharedWalletKey: string; type: ActionType.KeysGenerationCompleted }
   | { errorType: PasswordErrorType; type: ActionType.KeysGenerationFailed }
   | { type: ActionType.CloseFlow };
@@ -37,13 +37,9 @@ type StateMachine = {
 
 type MakeStateMachineParams = {
   navigateToParentFlow: () => void;
-  triggerKeysGeneration: (password: string) => void;
 };
 
-export const makeStateMachine = ({
-  navigateToParentFlow,
-  triggerKeysGeneration,
-}: MakeStateMachineParams): StateMachine => ({
+export const makeStateMachine = ({ navigateToParentFlow }: MakeStateMachineParams): StateMachine => ({
   [GenerateSharedWalletKeyStep.EnterPassword]: (prevState, action) => {
     if (action.type === ActionType.Back) {
       navigateToParentFlow();
@@ -51,7 +47,6 @@ export const makeStateMachine = ({
     }
 
     if (action.type === ActionType.KeysGenerationTriggered) {
-      triggerKeysGeneration(action.password);
       return stateEnterPassword({
         ...prevState,
         loading: true,
