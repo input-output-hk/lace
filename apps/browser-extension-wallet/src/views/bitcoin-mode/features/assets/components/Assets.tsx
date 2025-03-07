@@ -21,7 +21,7 @@ export const Assets = (): React.ReactElement => {
 
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const balance = useObservable(bitcoinWallet.balance$, BigInt(0));
-  const isLoadingFirstTime = !balance || !priceResult.bitcoin;
+  const isLoadingFirstTime = !priceResult.bitcoin;
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
 
   const totalBalance = useMemo(() => {
@@ -30,7 +30,7 @@ export const Assets = (): React.ReactElement => {
   , [balance, bitcoinPrice]);
 
   const assets = useMemo(() => [
-    {
+  ...(balance > 0 ? [{
       id: 'btc',
       logo: BitcoinLogo,
       defaultLogo: BitcoinLogo,
@@ -40,7 +40,7 @@ export const Assets = (): React.ReactElement => {
       variation: '',
       balance: areBalancesVisible ? (Number(balance) / SATS_IN_BTC).toString() : hiddenBalancePlaceholder,
       fiatBalance: areBalancesVisible ? `${(new BigNumber(totalBalance.toString()).toFixed(2, BigNumber.ROUND_HALF_UP))} USD` : hiddenBalancePlaceholder
-    }
+    }] : [])
   ], [areBalancesVisible, hiddenBalancePlaceholder, bitcoinPrice, balance, totalBalance]);
 
   const assetsPortfolio = (

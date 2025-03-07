@@ -31,7 +31,6 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
   const adaPrices = useObservable(coinPrices.adaPrices$);
   const bitcoinPrices = useObservable(coinPrices.bitcoinPrices$);
 
-  console.error(bitcoinPrices);
   const isAdaCurrency = fiatCurrency.code === CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet];
 
   const bitcoinPrice = useMemo(

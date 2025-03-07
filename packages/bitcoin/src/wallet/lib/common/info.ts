@@ -1,4 +1,4 @@
-import { Network } from '../common';
+import { Network } from './network';
 
 /**
  * Extended account public keys for a Bitcoin wallet.

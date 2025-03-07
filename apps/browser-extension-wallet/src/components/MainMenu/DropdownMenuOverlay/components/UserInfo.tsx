@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
 import { Menu, Tooltip as AntdTooltip } from 'antd';
@@ -9,7 +9,7 @@ import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
-import {useAnalyticsContext, useBackgroundServiceAPIContext} from '@providers';
+import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
@@ -51,21 +51,36 @@ export const UserInfo = ({
                            onOpenEditWallet
                          }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository, bitcoinWalletManager } = useWalletManager();
+  const { walletInfo, setIsDropdownMenuOpen } = useWalletStore();
+  const { activateWallet, walletRepository, getActiveWalletId, getActiveWalletName, getActiveWalletAccount } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
-  const fullWalletName = cardanoWallet.source.wallet.metadata.name || '';
-  const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
+  const [fullWalletName, setFullWalletName] = useState<string>('');
+  const [activeWalletName, setActiveWalletName] = useState<string>('');
+  const [activeWalletId, setActiveWalletId] = useState<string>('');
+  const [lastActiveAccount, setLastActiveAccount] = useState<number>(0);
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
-  const backgroundServices = useBackgroundServiceAPIContext();
-  const activeBitcoinWallet = useObservable(bitcoinWalletManager.activeWalletId$);
 
   const handleName = handle?.nftMetadata?.name;
-  const activeWalletId = cardanoWallet.source.wallet.walletId;
+
+  useEffect(() => {
+    getActiveWalletName().then((name) => {
+      setFullWalletName(name);
+      setActiveWalletName(addEllipsis(name, WALLET_NAME_MAX_LENGTH, 0));
+    })}, [getActiveWalletName]);
+
+  useEffect(() => {
+    getActiveWalletId().then((id) => {
+      setActiveWalletId(id);
+    })}, [getActiveWalletId]);
+
+  useEffect(() => {
+    getActiveWalletAccount().then((account) => {
+      setLastActiveAccount(account ? account.accountIndex : 0);
+    })}, [getActiveWalletAccount]);
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
@@ -77,9 +92,9 @@ export const UserInfo = ({
       wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
     ): Bip32WalletAccount<Wallet.AccountMetadata> => {
       if (wallet.accounts.length === 1) return wallet.accounts[0];
-      if (wallet.walletId === cardanoWallet?.source.wallet.walletId) {
+      if (wallet.walletId === activeWalletId) {
         const currentlyActiveAccount = wallet.accounts.find(
-          ({ accountIndex }) => accountIndex === cardanoWallet.source.account?.accountIndex
+          ({ accountIndex }) => accountIndex === lastActiveAccount
         );
         if (currentlyActiveAccount) return currentlyActiveAccount;
       }
@@ -92,7 +107,7 @@ export const UserInfo = ({
       // If last active account is deleted, fall back to any (1st) account
       return wallet.accounts[0];
     },
-    [cardanoWallet]
+    [lastActiveAccount]
   );
 
   const renderWalletOption = useCallback(
@@ -109,18 +124,10 @@ export const UserInfo = ({
           )}
           id={`wallet-option-${wallet.walletId}`}
           onClick={async () => {
-            const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
-            console.error(activeBlockchain);
-            console.error(activeBitcoinWallet?.walletId);
-            console.error(cardanoWallet.source.wallet.walletId);
-            const activeWalletId = activeBlockchain === 'bitcoin' ? activeBitcoinWallet?.walletId : cardanoWallet.source.wallet.walletId;
-
-            console.error(activeWalletId);
             if (activeWalletId === wallet.walletId) {
               return;
             }
 
-            console.error('PASSS');
             void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
 
             await activateWallet({
@@ -152,7 +159,6 @@ export const UserInfo = ({
     },
     [
       activateWallet,
-      activeWalletId,
       analytics,
       fullWalletName,
       getAvatar,
@@ -178,7 +184,7 @@ export const UserInfo = ({
     (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, isLast: boolean) => (
       <div key={wallet.walletId}>
         {wallet.type === WalletType.Script ? renderScriptWallet(wallet) : renderBip32Wallet(wallet)}
-        {wallet.walletId === cardanoWallet?.source.wallet.walletId ? (
+        {wallet.walletId === activeWalletId ? (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
           </div>
@@ -186,7 +192,7 @@ export const UserInfo = ({
         {isLast ? undefined : <Separator />}
       </div>
     ),
-    [renderScriptWallet, renderBip32Wallet, cardanoWallet?.source.wallet.walletId]
+    [renderScriptWallet, renderBip32Wallet, activeWalletId]
   );
 
   return (

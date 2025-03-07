@@ -491,7 +491,8 @@ walletManager
 
       exposeApi(
         {
-          api$: bitcoinWalletManager.activeWallet$.pipe(map((activeWallet) => activeWallet?.wallet || undefined)),
+          api$: bitcoinWalletManager.activeWallet$.pipe(
+            map((activeWallet) => activeWallet?.wallet || undefined)),
           baseChannel: 'bitcoin-wallet',
           properties: bitcoinWalletProperties
         },

@@ -1,12 +1,19 @@
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
-import { useCallback, useMemo } from 'react';
-import { Wallet } from '@lace/cardano';
-import { EnvironmentTypes, useWalletStore } from '@stores';
-import { useAppSettingsContext } from '@providers/AppSettings';
-import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
-import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { observableWallet, signingCoordinator, walletManager, walletRepository, bitcoinWallet, bitcoinWalletManager } from '@src/lib/wallet-api-ui';
+import {useCallback, useMemo} from 'react';
+import {Wallet} from '@lace/cardano';
+import {EnvironmentTypes, useWalletStore} from '@stores';
+import {useAppSettingsContext} from '@providers/AppSettings';
+import {useBackgroundServiceAPIContext} from '@providers/BackgroundServiceAPI';
+import {AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState} from '@src/lib/storage';
+import {
+  bitcoinWallet,
+  bitcoinWalletManager,
+  observableWallet,
+  signingCoordinator,
+  walletManager,
+  walletRepository
+} from '@src/lib/wallet-api-ui';
 import {
   bufferReviver,
   clearLocalStorage,
@@ -14,12 +21,12 @@ import {
   getValueFromLocalStorage,
   saveValueInLocalStorage
 } from '@src/utils/local-storage';
-import { config } from '@src/config';
-import { getWalletFromStorage } from '@src/utils/get-wallet-from-storage';
-import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
-import { ILocalStorage } from '@src/types';
-import { combineLatest, firstValueFrom } from 'rxjs';
+import {config} from '@src/config';
+import {getWalletFromStorage} from '@src/utils/get-wallet-from-storage';
+import {getUserIdService} from '@providers/AnalyticsProvider/getUserIdService';
+import {ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY} from '@providers/AnalyticsProvider/config';
+import {ILocalStorage} from '@src/types';
+import {combineLatest, firstValueFrom} from 'rxjs';
 import {
   AddWalletProps,
   AnyBip32Wallet,
@@ -31,27 +38,27 @@ import {
   WalletRepositoryApi,
   WalletType
 } from '@cardano-sdk/web-extension';
-import { deepEquals, HexBlob } from '@cardano-sdk/util';
-import { BackgroundService } from '@lib/scripts/types';
-import { getChainName } from '@src/utils/get-chain-name';
-import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
-import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import {deepEquals, HexBlob} from '@cardano-sdk/util';
+import {BackgroundService} from '@lib/scripts/types';
+import {getChainName} from '@src/utils/get-chain-name';
+import {useCustomSubmitApi} from '@hooks/useCustomSubmitApi';
+import {setBackgroundStorage} from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
-import { Buffer } from 'buffer';
+import {Buffer} from 'buffer';
 import {
   buildSharedWalletScript,
   CoSigner,
+  GenerateSharedWalletKeyFn,
+  makeGenerateSharedWalletKey,
   paymentScriptKeyPath,
   QuorumOptionValue,
   QuorumRadioOption,
   ScriptKind,
   stakingScriptKeyPath,
-  GenerateSharedWalletKeyFn,
-  makeGenerateSharedWalletKey,
   useSecrets
 } from '@lace/core';
-import { logger } from '@lace/common';
-import { BitcoinWallet as BtcWallet } from '@lace/bitcoin';
+import {logger} from '@lace/common';
+import {BitcoinWallet as BtcWallet} from '@lace/bitcoin';
 import {BitcoinWalletManagerApi} from "@lib/scripts/background/bitcoinWalletManager";
 import * as bip39 from 'bip39';
 
@@ -185,7 +192,21 @@ export interface UseWalletManager {
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
   saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
+  // TODO: Unify 4 props in a single getter.
+  getActiveWalletId: () => Promise<string>;
+  getActiveWalletName: () => Promise<string>;
+  getActiveWalletAccount: () => Promise<Bip32WalletAccount<Wallet.AccountMetadata> | undefined>;
+  getActiveWalletType: () => Promise<WalletType>;
 }
+
+/**
+ * Checks if the wallet is a bip32 wallet.
+ *
+ * @param wallet The wallet to check.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isAnyBip32Wallet = (wallet: AnyWallet<any, any>): wallet is AnyBip32Wallet<any, any> =>
+  wallet.type === WalletType.InMemory || wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor;
 
 /**
  * The wallet repository uses the extended public key as ID, for bitcoin we dont have 1 but many extended keys
@@ -475,6 +496,76 @@ export const useWalletManager = (): UseWalletManager => {
     return firstValueFrom(walletRepository.wallets$);
   }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock, getCurrentChainId]);
 
+  const getActiveWalletId = useCallback(async (): Promise<string> => {
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+      );
+
+      if (activeBlockchain === 'bitcoin') {
+          return bitcoinActiveWallet?.walletId;
+      }
+
+      return activeWallet?.walletId;
+    },
+    [getCurrentChainId]
+  );
+
+  const getActiveWalletName = useCallback(async (): Promise<string> => {
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+      );
+
+      const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const wallet = wallets.find((w) => w.walletId === walletId);
+
+      if (!wallet) return '';
+
+      return wallet.metadata.name || '';
+    },
+    []
+  );
+
+  const getActiveWalletType = useCallback(async (): Promise<WalletType> => {
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+      );
+
+      const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const wallet = wallets.find((w) => w.walletId === walletId);
+
+      if (!wallet) return WalletType.InMemory;
+
+      return wallet.type;
+    },
+    []
+  );
+
+  const getActiveWalletAccount = useCallback(async (): Promise<Bip32WalletAccount<Wallet.AccountMetadata> | undefined> => {
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+      );
+
+      const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+      const wallets = await firstValueFrom(walletRepository.wallets$);
+      const wallet = wallets.find((w) => w.walletId === walletId);
+
+      if (!wallet || !isAnyBip32Wallet(wallet)) return undefined;
+
+      return wallet.accounts.find((a) => a.accountIndex === wallet.metadata.lastActiveAccountIndex);
+    },
+    []
+  );
+
   const activateWallet = useCallback(
     async (props: ActivateWalletProps): Promise<void> => {
       const { activeBlockchain } = await backgroundService.getBackgroundStorage();
@@ -485,12 +576,12 @@ export const useWalletManager = (): UseWalletManager => {
 
       if (activeBlockchain === 'bitcoin') {
         if (bitcoinActiveWallet?.walletId === props.walletId && bitcoinActiveWallet?.accountIndex === props.accountIndex) {
-          logger.debug('Wallet is already active');
+          logger.error('Wallet is already active');
           return;
         }
       } else {
         if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
-          logger.debug('Wallet is already active');
+          logger.error('Wallet is already active');
           return;
         }
       }
@@ -1229,6 +1320,10 @@ export const useWalletManager = (): UseWalletManager => {
     generateSharedWalletKey,
     saveSharedWalletKey,
     getSharedWalletExtendedPublicKey,
-    createBitcoinWallet: createBitcoinWalletFromMnemonic
+    createBitcoinWallet: createBitcoinWalletFromMnemonic,
+    getActiveWalletId,
+    getActiveWalletName,
+    getActiveWalletAccount,
+    getActiveWalletType
   };
 };

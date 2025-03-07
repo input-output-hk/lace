@@ -7,8 +7,10 @@ import { CONTENT_LAYOUT_ID } from '@components/Layout';
 import { LACE_APP_ID } from '@utils/constants';
 import { IAssetDetails, TokenInformation } from '@views/browser/features/assets/types';
 import { useTranslation } from 'react-i18next';
-import { useWalletStore } from '@stores';
 import styles from './AssetsPortfolio.module.scss';
+import {BitcoinWallet} from "@lace/bitcoin";
+import isEqual from "lodash/isEqual";
+import {useWalletManager} from "@hooks";
 
 const MIN_ASSETS_COUNT_FOR_SEARCH = 10;
 
@@ -48,7 +50,17 @@ export const AssetPortfolioContent = ({
     data: assetList,
     total: totalAssets
   });
-  const { walletInfo } = useWalletStore();
+  const { bitcoinWallet } = useWalletManager();
+  const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
+
+  useEffect(() => {
+    const subscription = bitcoinWallet.addresses$.subscribe((newAddresses) => {
+      setAddresses((prev) =>
+        isEqual(prev, newAddresses) ? prev : newAddresses
+      );
+    });
+    return () => subscription.unsubscribe();
+  }, [bitcoinWallet]);
 
   useEffect(() => {
     setCurrentAssets({
@@ -65,6 +77,8 @@ export const AssetPortfolioContent = ({
     },
     [assetList]
   );
+
+  const isLoading = addresses.length === 0;
 
   return (
     <>
@@ -85,7 +99,7 @@ export const AssetPortfolioContent = ({
           title={t('browserView.assets.welcome')}
           subtitle={t('browserView.assets.startYourWeb3Journey')}
           prompt={t('browserView.fundWalletBanner.prompt')}
-          walletAddress={walletInfo.addresses[0].address.toString()}
+          walletAddress={isLoading ? '' : addresses[0].address}
         />
       )}
       {

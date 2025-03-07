@@ -63,7 +63,7 @@ export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Wall
 
 export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
   {
-    baseChannel: repositoryChannel('bitcoin-wallet'),
+    baseChannel: 'bitcoin-wallet',
     properties: bitcoinWalletProperties,
     errorTypes: [Error]
   },
