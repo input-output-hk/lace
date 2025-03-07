@@ -91,8 +91,7 @@ const firefoxConfig = {
         prefs: {
           'dom.events.testing.asyncClipboard': true, // Enables clipboard access in tests
           'clipboard.autocopy': true, // Allows copying to the clipboard
-          'permissions.default.clipboard': 1, // Grants clipboard permissions
-          'pdfjs.disabled': true // Disables automatically opening downloaded PDF files
+          'permissions.default.clipboard': 1 // Grants clipboard permissions
         }
       }
     }
