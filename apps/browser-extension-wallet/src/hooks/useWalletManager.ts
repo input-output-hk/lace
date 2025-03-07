@@ -85,7 +85,7 @@ interface CreateSharedWalletParams {
   quorumRules: QuorumOptionValue;
 }
 
-interface CreateCIP1854AccountParams {
+interface CreateMultiSigAccountParams {
   accountIndex?: number;
   ownSignerWalletId: WalletId;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
@@ -149,7 +149,7 @@ export interface UseWalletManager {
   getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
-  createCIP1854Account: (props: CreateCIP1854AccountParams) => Promise<void>;
+  createMultiSigAccount: (props: CreateMultiSigAccountParams) => Promise<void>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -883,8 +883,8 @@ export const useWalletManager = (): UseWalletManager => {
     [getSharedWalletExtendedPublicKey]
   );
 
-  const createCIP1854Account = useCallback<UseWalletManager['createCIP1854Account']>(
-    async ({ accountIndex = 0, ownSignerWalletId, sharedWalletKey }: CreateCIP1854AccountParams): Promise<void> => {
+  const createMultiSigAccount = useCallback<UseWalletManager['createMultiSigAccount']>(
+    async ({ accountIndex = 0, ownSignerWalletId, sharedWalletKey }: CreateMultiSigAccountParams): Promise<void> => {
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey: sharedWalletKey,
@@ -1022,7 +1022,7 @@ export const useWalletManager = (): UseWalletManager => {
     getMnemonic,
     enableCustomNode,
     generateSharedWalletKey,
-    createCIP1854Account,
+    createMultiSigAccount,
     getSharedWalletExtendedPublicKey
   };
 };

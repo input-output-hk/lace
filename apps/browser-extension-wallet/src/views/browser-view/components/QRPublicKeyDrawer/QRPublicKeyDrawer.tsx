@@ -15,12 +15,12 @@ const useWalletInformation = () => {
   const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
 
-  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
 
   return useWalletStore((state) => ({
     name: state?.walletInfo?.name,
     publicKey: state?.isSharedWallet
-      ? parentWalletCIP1854Account?.extendedAccountPublicKey
+      ? parentMultiSigAccount?.extendedAccountPublicKey
       : state?.cardanoWallet.source.account.extendedAccountPublicKey
   }));
 };

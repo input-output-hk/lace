@@ -86,7 +86,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const wallet = useCurrentWallet();
   const wallets = useObservable(walletRepository.wallets$);
 
-  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
   const signPolicy = useSignPolicy(wallet, 'staking');
 
   const sendAnalytics = useCallback(() => {
@@ -172,7 +172,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         isCustomSubmitApiEnabled: getCustomSubmitApiForNetwork(environmentName).status,
         isSharedWallet,
         signPolicy,
-        sharedWalletKey: parentWalletCIP1854Account?.extendedAccountPublicKey,
+        sharedWalletKey: parentMultiSigAccount?.extendedAccountPublicKey,
         coSigners: wallet?.metadata?.coSigners,
         useRewardAccountsData,
         govToolUrl: GOV_TOOLS_URLS[environmentName],

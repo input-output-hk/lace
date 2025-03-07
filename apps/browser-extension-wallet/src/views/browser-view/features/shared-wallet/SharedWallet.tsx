@@ -48,10 +48,10 @@ export const SharedWallet = (): JSX.Element => {
       const activeWallet = wallets.find(({ walletId }) => walletId === activeWalletId);
 
       if (!activeWallet || activeWallet.type === WalletType.Script) return;
-      const parentWalletCIP1854Account = activeWallet.accounts.find(
+      const parentMultiSigAccount = activeWallet.accounts.find(
         ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
       );
-      setSharedWalletKey(parentWalletCIP1854Account?.extendedAccountPublicKey);
+      setSharedWalletKey(parentMultiSigAccount?.extendedAccountPublicKey);
       setActiveWalletType(activeWallet.type);
     })();
   }, [cardanoWallet.source.wallet.walletId, walletRepository]);

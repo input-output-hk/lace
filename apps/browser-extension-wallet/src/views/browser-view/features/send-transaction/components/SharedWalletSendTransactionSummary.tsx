@@ -30,8 +30,8 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
 
-  const parentWalletCIP1854Account = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
-  const sharedWalletKey = parentWalletCIP1854Account?.extendedAccountPublicKey;
+  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
 
   const coSigners = wallet?.metadata?.coSigners;
 
