@@ -4,16 +4,17 @@ import {
   hasSigned,
   SharedWalletTransactionDetails,
   TxSummary,
-  useSharedWalletData,
   useSignPolicy
 } from '@lace/core';
 import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useWalletStore } from '@stores';
 import { Wallet } from '@lace/cardano';
-import { useCurrentWallet } from '@hooks';
+import { useCurrentWallet, useWalletManager } from '@hooks';
 import { AddressListType, getTransactionData } from '@views/browser/features/activity';
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
+import { useObservable } from '@lace/common';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 
 interface SharedWalletTransactionDetailsProxyProps {
   amountTransformer: (amount: string) => string;
@@ -52,8 +53,14 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
       walletInfo,
       activityDetail
     } = useWalletStore();
+    const { walletRepository } = useWalletManager();
+    const wallets = useObservable(walletRepository.wallets$);
     const wallet = useCurrentWallet();
-    const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+
+    const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+    const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
+
+    const coSigners = wallet?.metadata?.coSigners;
     const signPolicy = useSignPolicy(wallet, 'payment');
 
     const [transactionCosigners, setTransactionCosigners] = useState<CoSignersListItem[]>([]);

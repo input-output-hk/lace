@@ -1,4 +1,4 @@
-import { WalletManagerApi, WalletRepositoryApi, WalletType } from '@cardano-sdk/web-extension';
+import { WalletManagerApi, WalletRepositoryApi } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { BehaviorSubject, ReplaySubject, combineLatest, distinctUntilChanged } from 'rxjs';
 import { getActiveWallet, hashExtendedAccountPublicKey } from '@lib/scripts/background/util';
@@ -78,11 +78,7 @@ export class UserIdService implements UserIdServiceInterface {
     }
 
     if (!this.walletBasedUserId) {
-      const extendedAccountPublicKey =
-        active.wallet.type === WalletType.Script
-          ? active.wallet.metadata.multiSigExtendedPublicKey
-          : active.account.extendedAccountPublicKey;
-      this.walletBasedUserId = this.generateWalletBasedUserId(extendedAccountPublicKey);
+      this.walletBasedUserId = this.generateWalletBasedUserId(active.account.extendedAccountPublicKey);
 
       if (this.userTrackingType$.value !== UserTrackingType.Enhanced) {
         this.userTrackingType$.next(UserTrackingType.Enhanced);

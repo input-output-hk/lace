@@ -1,4 +1,3 @@
-import { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import { AnyWallet } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 
@@ -13,22 +12,6 @@ import {
 } from '../utils';
 
 type SigningPolicyType = 'payment' | 'staking';
-
-type Cosigner = { name: string; sharedWalletKey: Bip32PublicKeyHex };
-
-type UseSharedWalletData = {
-  coSigners?: Cosigner[];
-  name?: string;
-  sharedWalletKey?: Wallet.Crypto.Bip32PublicKeyHex | undefined;
-};
-
-export const useSharedWalletData = (
-  wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-): UseSharedWalletData => ({
-  coSigners: wallet?.metadata?.coSigners,
-  name: wallet?.metadata?.name,
-  sharedWalletKey: wallet?.metadata?.multiSigExtendedPublicKey,
-});
 
 export const useSignPolicy = (
   wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,

@@ -6,7 +6,7 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, logger } from '@lace/common';
+import { Button, logger, useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import styles from './Footer.module.scss';
 import EditIcon from '@assets/icons/edit.component.svg';
@@ -25,7 +25,7 @@ import { useHandleClose } from './Header';
 import { useWalletStore } from '@src/stores';
 import { AddressFormFooter } from './AddressFormFooter';
 import { METADATA_MAX_LENGTH, sectionsConfig } from '../../constants';
-import { useCurrentWallet, useHandleResolver, useNetwork } from '@hooks';
+import { useCurrentWallet, useHandleResolver, useNetwork, useWalletManager } from '@hooks';
 import { PostHogAction, TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { AssetPickerFooter } from './AssetPickerFooter';
@@ -40,9 +40,10 @@ import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import type { TranslationKey } from '@lace/translation';
 import { Serialization } from '@cardano-sdk/core';
-import { exportMultisigTransaction, PasswordObj, useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
+import { exportMultisigTransaction, PasswordObj, useSecrets, useSignPolicy } from '@lace/core';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { parseError } from '@src/utils/parse-error';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 
 export const nextStepBtnLabels: Partial<Record<Sections, TranslationKey>> = {
   [Sections.FORM]: 'browserView.transaction.send.footer.review',
@@ -90,8 +91,12 @@ export const Footer = withAddressBookContext(
     const { list: addressList, utils } = useAddressBookContext();
     const { updateRecord: updateAddress, deleteRecord: deleteAddress } = utils;
     const handleResolver = useHandleResolver();
+    const { walletRepository } = useWalletManager();
+    const wallets = useObservable(walletRepository.wallets$);
     const wallet = useCurrentWallet();
-    const { sharedWalletKey } = useSharedWalletData(wallet);
+
+    const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+    const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
     const policy = useSignPolicy(wallet, 'payment');
 
     const isSummaryStep = currentSection.currentSection === Sections.SUMMARY;

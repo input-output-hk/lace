@@ -83,6 +83,11 @@ interface CreateSharedWalletParams {
   coSigners: CoSigner[];
   ownSignerWalletId: WalletId;
   quorumRules: QuorumOptionValue;
+}
+
+interface CreateMultiSigAccountParams {
+  accountIndex?: number;
+  ownSignerWalletId: WalletId;
   sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
@@ -144,7 +149,7 @@ export interface UseWalletManager {
   getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
-  saveSharedWalletKey: (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex) => Promise<void>;
+  createMultiSigAccount: (props: CreateMultiSigAccountParams) => Promise<void>;
 }
 
 const clearBytes = (bytes: Uint8Array) => {
@@ -878,27 +883,17 @@ export const useWalletManager = (): UseWalletManager => {
     [getSharedWalletExtendedPublicKey]
   );
 
-  const saveSharedWalletKey = useCallback<UseWalletManager['saveSharedWalletKey']>(
-    async (sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex): Promise<void> => {
-      if (!cardanoWallet) {
-        throw new Error('Active wallet data not available');
-      }
-      const { walletId } = cardanoWallet.source.wallet;
-      const [wallets] = await firstValueFrom(combineLatest([walletRepository.wallets$, walletManager.activeWalletId$]));
-      const activeWallet = wallets.find(({ walletId: id }) => id === walletId);
-      if (!activeWallet) {
-        throw new Error('Failed to identify an active wallet data');
-      }
-
-      await walletRepository.updateWalletMetadata({
-        walletId,
-        metadata: {
-          ...activeWallet.metadata,
-          multiSigExtendedPublicKey: sharedWalletKey
-        }
+  const createMultiSigAccount = useCallback<UseWalletManager['createMultiSigAccount']>(
+    async ({ accountIndex = 0, ownSignerWalletId, sharedWalletKey }: CreateMultiSigAccountParams): Promise<void> => {
+      await walletRepository.addAccount({
+        accountIndex,
+        extendedAccountPublicKey: sharedWalletKey,
+        metadata: { name: defaultAccountName(accountIndex) },
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+        walletId: ownSignerWalletId
       });
     },
-    [cardanoWallet]
+    []
   );
 
   const createInMemorySharedWallet = useCallback(
@@ -908,8 +903,7 @@ export const useWalletManager = (): UseWalletManager => {
       chainId = getCurrentChainId(),
       ownSignerWalletId,
       quorumRules,
-      coSigners,
-      sharedWalletKey
+      coSigners
     }: CreateSharedWalletParams): Promise<Wallet.CardanoWallet> => {
       const publicKeys = coSigners.map((c: CoSigner) => Wallet.Crypto.Bip32PublicKeyHex(c.sharedWalletKey));
 
@@ -940,9 +934,7 @@ export const useWalletManager = (): UseWalletManager => {
           coSigners: coSigners.map((signer) => ({
             name: signer.name,
             sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex(signer.sharedWalletKey)
-          })),
-          // TODO: LW-11069 multiSigExtendedPublicKey can be removed from wallet metadata and this key fetched from accounts since addAccount is called
-          multiSigExtendedPublicKey: sharedWalletKey
+          }))
         },
         ownSigners: [
           {
@@ -959,14 +951,6 @@ export const useWalletManager = (): UseWalletManager => {
       };
 
       const scriptWalletId = await walletRepository.addWallet(createScriptWalletProps);
-
-      await walletRepository.addAccount({
-        accountIndex,
-        extendedAccountPublicKey: sharedWalletKey,
-        metadata: { name: defaultAccountName(accountIndex) },
-        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
-        walletId: ownSignerWalletId
-      });
 
       await walletManager.activate({
         walletId: scriptWalletId,
@@ -1038,7 +1022,7 @@ export const useWalletManager = (): UseWalletManager => {
     getMnemonic,
     enableCustomNode,
     generateSharedWalletKey,
-    saveSharedWalletKey,
+    createMultiSigAccount,
     getSharedWalletExtendedPublicKey
   };
 };

@@ -11,7 +11,14 @@ import { isMultidelegationSupportedByDevice } from '@views/browser/features/stak
 import { useWalletStore } from '@stores';
 import { useAnalyticsContext, useCurrencyStore, useExternalLinkOpener } from '@providers';
 import { DEFAULT_STAKING_BROWSER_PREFERENCES, OutsideHandlesProvider } from '@lace/staking';
-import { useBalances, useCurrentWallet, useCustomSubmitApi, useFetchCoinPrice, useLocalStorage } from '@hooks';
+import {
+  useBalances,
+  useCurrentWallet,
+  useCustomSubmitApi,
+  useFetchCoinPrice,
+  useLocalStorage,
+  useWalletManager
+} from '@hooks';
 import {
   MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY,
   MULTIDELEGATION_FIRST_VISIT_LS_KEY,
@@ -20,10 +27,12 @@ import {
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useWalletActivities } from '@hooks/useWalletActivities';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
-import { useSecrets, useSharedWalletData, useSignPolicy } from '@lace/core';
+import { useSecrets, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '../hooks';
 import { config } from '@src/config';
 import { parseError } from '@src/utils/parse-error';
+import { useObservable } from '@lace/common';
+import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -94,8 +103,13 @@ export const StakingContainer = (): React.ReactElement => {
   }));
   const walletAddress = walletInfo.addresses?.[0].address?.toString();
   const walletName = walletInfo.name;
+  const { walletRepository } = useWalletManager();
+  const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
-  const { sharedWalletKey, coSigners } = useSharedWalletData(wallet);
+
+  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
+  const coSigners = wallet?.metadata?.coSigners;
   const signPolicy = useSignPolicy(wallet, 'staking');
   const { GOV_TOOLS_URLS } = config();
 
