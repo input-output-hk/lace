@@ -27,6 +27,16 @@ class AnalyticsBanner {
   get learnMore(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER}${this.LEARN_MORE}`);
   }
+
+  async clickOnAgreeButton(): Promise<void> {
+    await this.agreeButton.waitForClickable();
+    await this.agreeButton.click();
+  }
+
+  async clickOnRejectButton(): Promise<void> {
+    await this.rejectButton.waitForClickable();
+    await this.rejectButton.click();
+  }
 }
 
 export default new AnalyticsBanner();

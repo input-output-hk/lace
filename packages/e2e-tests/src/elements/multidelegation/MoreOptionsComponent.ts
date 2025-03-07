@@ -1,5 +1,6 @@
 import { SortingOption } from './SortingOption';
 import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
+import { scrollToTheTop } from '../../utils/scrollUtils';
 
 class MoreOptionsComponent {
   private MORE_OPTIONS_LABEL = '[data-testid="stake-pools-more-options-label"]';
@@ -165,6 +166,7 @@ class MoreOptionsComponent {
   }
 
   async clickOnOrderButtonForSortingOption(order: 'ascending' | 'descending', sortingOption: StakePoolSortingOption) {
+    if (browser.isFirefox) await scrollToTheTop();
     const selector = this.getSortingOptionButtonSelector(sortingOption, order);
     await $(selector).moveTo();
     await $(selector).click();

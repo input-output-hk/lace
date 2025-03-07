@@ -96,6 +96,7 @@ Feature: NFT - Folders - Extended view
     And I navigate to NFTs extended page
     And I right click on the NFT folder with name "Sample NFT folder"
     When I click "Delete" option in NFT folder context menu
+    And I click "Cancel" button in delete folder modal
     Then I do not see delete folder modal
     And A gallery view showing my NFTs is displayed
     And I see folder with name "Sample NFT folder" on the NFTs page

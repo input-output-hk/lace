@@ -17,6 +17,7 @@ class NftsPage {
   protected FOLDER_CONTAINER = '[data-testid="folder-item"]';
   public NFT_ITEM_IMG_CONTAINER = '[data-testid="nft-item-img-container"]';
   public REST_OF_NFTS = '[data-testid="rest-of-nfts"]';
+  public NFT_PLACEHOLDER = '[data-testid="placeholder-item"]';
 
   get title(): typeof SectionTitle.sectionTitle {
     return SectionTitle.sectionTitle;
@@ -48,6 +49,10 @@ class NftsPage {
 
   get folderContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.listContainer.$$(this.FOLDER_CONTAINER);
+  }
+
+  get nftPlaceholder(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.NFT_PLACEHOLDER);
   }
 
   async getNftContainer(name: string): Promise<WebdriverIO.Element> {

@@ -131,11 +131,11 @@ When(/^I close header menu$/, async () => {
 When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive' | 'Send') => {
   switch (button) {
     case 'Receive':
-      await MenuHeader.receiveButton.waitForDisplayed();
+      await MenuHeader.receiveButton.waitForClickable();
       await MenuHeader.receiveButton.click();
       break;
     case 'Send':
-      await MenuHeader.sendButton.waitForDisplayed();
+      await MenuHeader.sendButton.waitForClickable();
       await MenuHeader.sendButton.click();
       break;
     default:

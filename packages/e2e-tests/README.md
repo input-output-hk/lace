@@ -71,7 +71,7 @@ UI-mapped gherkin tests for the Lace browser extension
 - `SERVICE_WORKER_LOGS=true|false` default=false (optional)
   - enables service worker logs collection
   - not supported for Firefox
-- `FIREFOX_BINARY=/Applications/Firefox Developer Edition.app/Contents/MacOS/firefox` (required for Firefox)
+- `FIREFOX_BINARY=/Applications/Firefox\ Developer\ Edition.app/Contents/MacOS/firefox` (required for Firefox)
   - default path to Firefox Developer Edition binary on MacOS, please adjust to your local setup
 
 ## Run single feature file with params

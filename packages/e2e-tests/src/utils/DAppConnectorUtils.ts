@@ -45,6 +45,7 @@ class DAppConnectorUtils {
   }
 
   async switchToTestDAppWindow() {
+    await browser.pause(1000);
     await browser.switchWindow(this.TEST_DAPP_NAME);
   }
 
