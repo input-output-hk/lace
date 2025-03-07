@@ -98,6 +98,7 @@ import type { CardanoAsset, Asset as NamiAsset } from '../../../types/assets';
 import type { AboutRef } from '../components/about';
 import type { TransactionBuilderRef } from '../components/transactionBuilder';
 import { NamiPassword } from '../components/namiPassword';
+import { Wallet as CardanoWallet } from '@lace/cardano';
 
 export type Props = Pick<
   CommonOutsideHandlesContextValue,
@@ -154,8 +155,9 @@ const Wallet = ({
 
   const canDeleteAccount = useMemo(
     () =>
-      activeAccount.type === WalletType.Ledger ||
-      activeAccount.type === WalletType.Trezor ||
+      CardanoWallet.AVAILABLE_WALLETS.includes(
+        activeAccount.type as CardanoWallet.HardwareWallets,
+      ) ||
       accounts.filter(a => a.walletId === activeAccount.walletId).length > 1,
     [accounts, activeAccount],
   );
@@ -275,10 +277,9 @@ const Wallet = ({
                           account.walletId === activeAccount.walletId
                         }
                         cardanoCoin={cardanoCoin}
-                        isHW={
-                          account.type === WalletType.Ledger ||
-                          account.type === WalletType.Trezor
-                        }
+                        isHW={CardanoWallet.AVAILABLE_WALLETS.includes(
+                          account.type as CardanoWallet.HardwareWallets,
+                        )}
                       />
                     ))}
                   </Scrollbars>
