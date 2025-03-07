@@ -35,7 +35,6 @@ const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
 const App = (): React.ReactElement => {
-  console.error("RE-RENDER");
   const [mode, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
 
   useEffect(() => {
@@ -44,9 +43,6 @@ const App = (): React.ReactElement => {
       const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
       const activeBlockchainOldValue = changes.BACKGROUND_STORAGE?.oldValue?.activeBlockchain;
       const activeBlockchainNewValue = changes.BACKGROUND_STORAGE?.newValue?.activeBlockchain;
-
-      console.error("STORAGE CHANGED");
-      console.error(changes);
 
       if (activeBlockchainOldValue?.activeBlockchain !== activeBlockchainNewValue?.activeBlockchain) {
         const isCardano = activeBlockchainNewValue?.activeBlockchain === 'cardano';

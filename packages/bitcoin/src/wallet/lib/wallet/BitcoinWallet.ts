@@ -113,7 +113,6 @@ export class BitcoinWallet {
         map((utxos) => utxos.reduce((total, utxo) => total + utxo.satoshis, BigInt(0)))
       )
       .subscribe((balance) => {
-        console.error(`Balance ${balance}`);
         this.balance$.next(balance);
       });
   }
@@ -215,8 +214,6 @@ export class BitcoinWallet {
       )
       .subscribe(async (latestBlockInfo: BlockInfo | null) => {
         if (!latestBlockInfo) return;
-
-        await this.updateState(latestBlockInfo);
 
         if (!this.lastKnownBlock || this.lastKnownBlock.hash !== latestBlockInfo.hash) {
           await this.updateState(latestBlockInfo);

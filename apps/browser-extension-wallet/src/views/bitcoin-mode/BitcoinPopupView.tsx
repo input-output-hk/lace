@@ -36,7 +36,6 @@ export const BitcoinPopupView = (): React.ReactElement => {
     initialHdDiscoveryCompleted
   } = useWalletStore();
 
-  console.error("LOADING BitcoinPopupView");
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
@@ -86,7 +85,6 @@ export const BitcoinPopupView = (): React.ReactElement => {
   }
 
   if (isLoaded) {
-    console.error('XXXXXXXXXXXXX');
     return <ExtensionRoutes />;
   }
 

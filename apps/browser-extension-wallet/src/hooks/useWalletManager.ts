@@ -576,12 +576,10 @@ export const useWalletManager = (): UseWalletManager => {
 
       if (activeBlockchain === 'bitcoin') {
         if (bitcoinActiveWallet?.walletId === props.walletId && bitcoinActiveWallet?.accountIndex === props.accountIndex) {
-          logger.error('Wallet is already active');
           return;
         }
       } else {
         if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
-          logger.error('Wallet is already active');
           return;
         }
       }

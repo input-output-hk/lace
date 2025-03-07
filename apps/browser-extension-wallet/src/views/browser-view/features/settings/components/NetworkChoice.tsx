@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, {useCallback, useState} from 'react';
 import { logger, toast } from '@lace/common';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +9,7 @@ import SwithIcon from '@src/assets/icons/switch.component.svg';
 import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import { config } from '@src/config';
 import { useWalletManager } from '@hooks';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
@@ -54,6 +54,14 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   const { environmentName, isSharedWallet } = useWalletStore();
   const { switchNetwork } = useWalletManager();
   const analytics = useAnalyticsContext();
+
+  const [blockchain, setBlockchain] = useState<string>('cardano');
+  const backgroundService = useBackgroundServiceAPIContext();
+
+  backgroundService.getBackgroundStorage().then((storage) => {
+    const { activeBlockchain } = storage;
+    setBlockchain(activeBlockchain);
+  });
 
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
@@ -101,17 +109,40 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
       value={environmentName}
       data-testid={'network-choice-radio-group'}
     >
-      {availableChains.map((network) => (
-        <a className={styles.radio} key={network}>
-          <Radio
-            value={network}
-            className={styles.radioLabel}
-            data-testid={`network-${network.toLowerCase()}-radio-button`}
-          >
-            {getNetworkName(network as Wallet.ChainName)}
-          </Radio>
-        </a>
-      ))}
+      {
+        blockchain === 'cardano' ?
+          availableChains.map((network) => (
+            <a className={styles.radio} key={network}>
+              <Radio
+                value={network}
+                className={styles.radioLabel}
+                data-testid={`network-${network.toLowerCase()}-radio-button`}
+              >
+                {getNetworkName(network as Wallet.ChainName)}
+              </Radio>
+            </a>
+          )) :
+          <>
+            <a className={styles.radio} key='Preprod'>
+              <Radio
+                value='Preprod'
+                className={styles.radioLabel}
+                data-testid={`network-preprod-radio-button`}
+              >
+                Testnet4
+              </Radio>
+            </a>
+            <a className={styles.radio} key='Mainnet'>
+              <Radio
+                value='Mainnet'
+                className={styles.radioLabel}
+                data-testid={`network-mainnet-radio-button`}
+              >
+                Mainnet
+              </Radio>
+            </a>
+          </>
+      }
     </Radio.Group>
   );
 };
