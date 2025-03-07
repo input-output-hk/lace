@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { Buffer } from 'buffer';
 
-export type GenerateSharedWalletKeyFn = (password: string) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+export type GenerateSharedWalletKeyFn = (password?: string) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
 
 export class SharedWalletKeyGenerationAuthError extends Error {
   constructor() {
@@ -10,15 +10,18 @@ export class SharedWalletKeyGenerationAuthError extends Error {
 }
 
 type GenerateSharedWalletKeyDependencies = {
-  getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  getSharedWalletExtendedPublicKey: (passphrase?: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
 };
 
 export const makeGenerateSharedWalletKey =
   ({ getSharedWalletExtendedPublicKey }: GenerateSharedWalletKeyDependencies): GenerateSharedWalletKeyFn =>
   async (password) => {
-    const passphrase = Buffer.from(password, 'utf8');
-    // Intentionally erasing password string for the security purpose
-    password = '';
+    let passphrase;
+    if (password) {
+      passphrase = Buffer.from(password, 'utf8');
+      // Intentionally erasing password string for the security purpose
+      password = '';
+    }
     try {
       return await getSharedWalletExtendedPublicKey(passphrase);
     } catch (error: unknown) {
@@ -28,6 +31,6 @@ export const makeGenerateSharedWalletKey =
       throw error;
     } finally {
       // Clear any sensitive data from memory if possible
-      passphrase.fill(0);
+      passphrase?.fill(0);
     }
   };

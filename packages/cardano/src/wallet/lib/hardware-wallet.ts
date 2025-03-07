@@ -78,7 +78,7 @@ export const getHwExtendedAccountPublicKey = async (
   ledgerConnection?: LedgerConnection
 ): Promise<Bip32PublicKeyHex> => {
   if (walletType === WalletType.Ledger) {
-    return HardwareLedger.LedgerKeyAgent.getXpub({
+    return await HardwareLedger.LedgerKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       deviceConnection: ledgerConnection,
       accountIndex,
@@ -86,7 +86,7 @@ export const getHwExtendedAccountPublicKey = async (
     });
   }
   if (isTrezorHWSupported() && walletType === WalletType.Trezor) {
-    return HardwareTrezor.TrezorKeyAgent.getXpub({
+    return await HardwareTrezor.TrezorKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       accountIndex,
       purpose: KeyManagement.KeyPurpose.STANDARD

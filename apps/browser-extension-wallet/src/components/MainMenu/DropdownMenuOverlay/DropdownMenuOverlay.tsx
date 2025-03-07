@@ -53,7 +53,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isHardwareWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
@@ -102,7 +102,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
-  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !isHardwareWallet;
+  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';

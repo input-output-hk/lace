@@ -16,12 +16,12 @@ import {
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState } from '../add-shared-wallet/creation-flow/state-and-types';
 import { GenerateSharedWalletKeyFlow } from '../add-shared-wallet/generate-key-flow';
-import { LinkedWalletType } from '../add-shared-wallet/generate-key-flow/GenerateSharedWalletKeyFlow';
 import { GenerateSharedWalletKeyState } from '../add-shared-wallet/generate-key-flow/Store';
 import {
   GenerateSharedWalletKeyInitialStateProvider,
   makeInitialState as makeGenerateSharedWalletKeyInitialState,
 } from '../add-shared-wallet/generate-key-flow/Store/Store';
+import { LinkedWalletType } from '../types';
 
 export enum AddSharedWalletFlowType {
   Creation = 'Creation',
