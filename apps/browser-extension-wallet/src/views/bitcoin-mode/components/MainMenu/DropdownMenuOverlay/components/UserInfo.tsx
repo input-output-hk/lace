@@ -48,9 +48,10 @@ const shortenWalletName = (text: string, length: number) =>
 export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository, bitcoinWallet } = useWalletManager();
+  const { activateWallet, walletRepository, bitcoinWallet, bitcoinWalletManager } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
+  const activeBitcoinWallet = useObservable(bitcoinWalletManager.activeWalletId$);
   const bitcoinBalance = useObservable(bitcoinWallet.balance$, BigInt(0));
   const walletAddress = walletInfo.addresses[0].address.toString();
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
@@ -59,9 +60,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
   const backgroundServices = useBackgroundServiceAPIContext();
-
   const handleName = handle?.nftMetadata?.name;
-  const activeWalletId = cardanoWallet.source.wallet.walletId;
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
@@ -106,6 +105,9 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
             )}
             id={`wallet-option-${wallet.walletId}`}
             onClick={async () => {
+              const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
+              const activeWalletId = activeBlockchain === 'bitcoin' ? activeBitcoinWallet.walletId : cardanoWallet.source.wallet.walletId;
+
               if (activeWalletId === wallet.walletId) {
                 return;
               }
@@ -121,14 +123,7 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
                 text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
               });
 
-              const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
-
-              if (activeBlockchain !== 'cardano') {
-                await backgroundServices.setBackgroundStorage({
-                  activeBlockchain: 'cardano'
-                });
-                window.location.reload();
-              }
+              window.location.reload();
             }}
             type={getUiWalletType(wallet.type)}
             profile={
@@ -148,7 +143,6 @@ export const UserInfo = ({ onOpenWalletAccounts, avatarVisible = true }: UserInf
     },
     [
       activateWallet,
-      activeWalletId,
       analytics,
       fullWalletName,
       getAvatar,

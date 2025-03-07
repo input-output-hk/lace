@@ -9,7 +9,7 @@ import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
-import { useAnalyticsContext } from '@providers';
+import {useAnalyticsContext, useBackgroundServiceAPIContext} from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
@@ -52,7 +52,7 @@ export const UserInfo = ({
                          }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, cardanoWallet, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository } = useWalletManager();
+  const { activateWallet, walletRepository, bitcoinWalletManager } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const walletAddress = walletInfo.addresses[0].address.toString();
@@ -61,6 +61,8 @@ export const UserInfo = ({
   const activeWalletName = addEllipsis(fullWalletName, WALLET_NAME_MAX_LENGTH, 0);
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
+  const backgroundServices = useBackgroundServiceAPIContext();
+  const activeBitcoinWallet = useObservable(bitcoinWalletManager.activeWalletId$);
 
   const handleName = handle?.nftMetadata?.name;
   const activeWalletId = cardanoWallet.source.wallet.walletId;
@@ -107,9 +109,18 @@ export const UserInfo = ({
           )}
           id={`wallet-option-${wallet.walletId}`}
           onClick={async () => {
+            const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
+            console.error(activeBlockchain);
+            console.error(activeBitcoinWallet?.walletId);
+            console.error(cardanoWallet.source.wallet.walletId);
+            const activeWalletId = activeBlockchain === 'bitcoin' ? activeBitcoinWallet?.walletId : cardanoWallet.source.wallet.walletId;
+
+            console.error(activeWalletId);
             if (activeWalletId === wallet.walletId) {
               return;
             }
+
+            console.error('PASSS');
             void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
 
             await activateWallet({
@@ -121,6 +132,7 @@ export const UserInfo = ({
               duration: TOAST_DEFAULT_DURATION,
               text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
+            window.location.reload();
           }}
           type={getUiWalletType(wallet.type)}
           profile={

@@ -2,7 +2,7 @@ import React from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 import { ReceiveInfoContainer } from './features/receive-info/components';
 import { Activity } from './features/activity/components';
-import { MainLayout } from './components/Layout';
+import { MainLayout } from '../../components/Layout/MainLayout';
 import { PopupAssets } from './features/assets';
 import { SendContainer } from './features/send/components';
 import { walletRoutePaths } from './wallet-paths';

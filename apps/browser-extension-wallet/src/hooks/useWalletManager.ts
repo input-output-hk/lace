@@ -347,7 +347,6 @@ export const useWalletManager = (): UseWalletManager => {
   const userIdService = getUserIdService();
   const { getCustomSubmitApiForNetwork, updateCustomSubmitApi } = useCustomSubmitApi();
   const { password, clearSecrets } = useSecrets();
-  const backgroundServices = useBackgroundServiceAPIContext();
   const getCurrentChainId = useCallback(() => {
     if (currentChain) return currentChain;
     // reading stored chain name to preserve network for forgot password flow, or when migrating a locked wallet
@@ -478,7 +477,7 @@ export const useWalletManager = (): UseWalletManager => {
 
   const activateWallet = useCallback(
     async (props: ActivateWalletProps): Promise<void> => {
-      const { activeBlockchain } = await backgroundServices.getBackgroundStorage();
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
 
       const [wallets, activeWallet, bitcoinActiveWallet] = await firstValueFrom(
         combineLatest([walletRepository.wallets$, walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
@@ -514,17 +513,18 @@ export const useWalletManager = (): UseWalletManager => {
           ...props,
           network
         });
-        await backgroundServices.setBackgroundStorage({
+
+        await backgroundService.setBackgroundStorage({
           activeBlockchain: 'bitcoin'
         });
       } else {
-        await backgroundServices.setBackgroundStorage({
-          activeBlockchain: 'cardano'
-        });
-
         await walletManager.activate({
           ...props,
           chainId
+        });
+
+        await backgroundService.setBackgroundStorage({
+          activeBlockchain: 'cardano'
         });
       }
     },
