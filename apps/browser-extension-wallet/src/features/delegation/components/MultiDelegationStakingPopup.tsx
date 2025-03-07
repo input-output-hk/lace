@@ -38,7 +38,7 @@ import { useSecrets, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
 import { config } from '@src/config';
 import { parseError } from '@src/utils/parse-error';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
 import { useObservable } from '@lace/common';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
@@ -86,7 +86,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
   const wallet = useCurrentWallet();
   const wallets = useObservable(walletRepository.wallets$);
 
-  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account;
   const signPolicy = useSignPolicy(wallet, 'staking');
 
   const sendAnalytics = useCallback(() => {
