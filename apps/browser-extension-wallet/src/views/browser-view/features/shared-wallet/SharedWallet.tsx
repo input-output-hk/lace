@@ -30,7 +30,7 @@ type CreateWalletParams = {
 export const SharedWallet = (): JSX.Element => {
   const analytics = useAnalyticsContext();
   const history = useHistory();
-  const { walletRepository, generateSharedWalletKey, createCIP1854Account, createInMemorySharedWallet } =
+  const { walletRepository, generateSharedWalletKey, createMultiSigAccount, createInMemorySharedWallet } =
     useWalletManager();
   const { walletInfo, cardanoWallet, environmentName } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
@@ -72,7 +72,7 @@ export const SharedWallet = (): JSX.Element => {
     if (sharedWalletKey) return sharedWalletKey;
     const activeWalletId = cardanoWallet.source.wallet.walletId;
     const key = await generateSharedWalletKey(enteredPassword);
-    await createCIP1854Account({
+    await createMultiSigAccount({
       ownSignerWalletId: activeWalletId,
       sharedWalletKey: key
     });
