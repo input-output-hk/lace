@@ -72,24 +72,30 @@ export const connectDeviceRevamped = async (usbDevice: USBDevice): Promise<Hardw
 
 const invalidDeviceError = new Error('Invalid device type');
 
-export const getHwExtendedAccountPublicKey = async (
-  walletType: HardwareWallets,
-  accountIndex: number,
-  ledgerConnection?: LedgerConnection
-): Promise<Bip32PublicKeyHex> => {
+export const getHwExtendedAccountPublicKey = async ({
+  walletType,
+  accountIndex,
+  ledgerConnection,
+  purpose = KeyManagement.KeyPurpose.STANDARD
+}: {
+  walletType: HardwareWallets;
+  accountIndex: number;
+  ledgerConnection?: LedgerConnection;
+  purpose?: KeyManagement.KeyPurpose;
+}): Promise<Bip32PublicKeyHex> => {
   if (walletType === WalletType.Ledger) {
     return await HardwareLedger.LedgerKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       deviceConnection: ledgerConnection,
       accountIndex,
-      purpose: KeyManagement.KeyPurpose.STANDARD
+      purpose
     });
   }
   if (isTrezorHWSupported() && walletType === WalletType.Trezor) {
     return await HardwareTrezor.TrezorKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       accountIndex,
-      purpose: KeyManagement.KeyPurpose.STANDARD
+      purpose
     });
   }
   throw invalidDeviceError;

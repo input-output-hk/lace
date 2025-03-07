@@ -134,7 +134,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             <img
               src={ExclamationCircleIcon}
               className={styles.errorImage}
-              alt="hardware wallet connection error image"
+              alt="hardware wallet connection error"
               data-testid="error-image"
             />
             <Banner message={passwordErrorMessage} />

@@ -72,13 +72,14 @@ export const SelectAccounts = ({
           await walletRepository.addAccount({
             accountIndex,
             extendedAccountPublicKey:
-              await Wallet.getHwExtendedAccountPublicKey(
-                connection.type,
+              await Wallet.getHwExtendedAccountPublicKey({
+                walletType: connection.type,
                 accountIndex,
-                connection.type === WalletType.Ledger
-                  ? connection.value
-                  : undefined,
-              ),
+                ledgerConnection:
+                  connection.type === WalletType.Ledger
+                    ? connection.value
+                    : undefined,
+              }),
             metadata: {
               name: defaultAccountName(accountIndex),
               namiMode: { avatar: Math.random().toString() },

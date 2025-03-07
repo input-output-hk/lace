@@ -188,7 +188,11 @@ const getExtendedAccountPublicKey = async (
     }
     case WalletType.Ledger:
     case WalletType.Trezor:
-      return await Wallet.getHwExtendedAccountPublicKey(wallet.type, accountIndex);
+      return await Wallet.getHwExtendedAccountPublicKey({
+        walletType: wallet.type,
+        accountIndex,
+        purpose
+      });
   }
 };
 
@@ -299,11 +303,11 @@ export const useWalletManager = (): UseWalletManager => {
       for (const accountIndex of accountIndexes) {
         let extendedAccountPublicKey;
         try {
-          extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
-            connection.type,
+          extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey({
+            walletType: connection.type,
             accountIndex,
-            connection.type === WalletType.Ledger ? connection.value : undefined
-          );
+            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined
+          });
         } catch (error: unknown) {
           throw error;
         }
