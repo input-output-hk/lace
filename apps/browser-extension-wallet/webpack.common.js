@@ -75,7 +75,8 @@ module.exports = () => {
         dns: false,
         tls: false,
         process: false,
-        child_process: false
+        child_process: false,
+        vm: require.resolve('vm-browserify')
       },
       plugins: [new TsconfigPathsPlugin({ configFile: 'src/tsconfig.json' })]
     },
