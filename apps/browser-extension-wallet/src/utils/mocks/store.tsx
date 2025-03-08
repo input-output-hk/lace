@@ -33,6 +33,7 @@ export const walletStoreMock = async (
   return {
     bitcoinWallet: undefined,
     isBitcoinWallet: false,
+    setIsBitcoinWallet: jest.fn(),
     setIsDropdownMenuOpen: jest.fn(),
     setManageAccountsWallet: jest.fn(),
     manageAccountsWallet: undefined,

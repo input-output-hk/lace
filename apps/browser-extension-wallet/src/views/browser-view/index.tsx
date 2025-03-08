@@ -34,12 +34,14 @@ import { ErrorBoundary } from '@components/ErrorBoundary';
 import { storage, Storage } from "webextension-polyfill";
 import { walletRoutePaths } from "@routes";
 import {getBackgroundStorage } from "@lib/scripts/background/storage";
+import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './../../multichain/BlockchainProvider';
 
 const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
 const App = (): React.ReactElement => {
   const [mode, setMode] = useState<'lace' | 'lace-bitcoin'>('lace');
+  const { setBlockchain } = useCurrentBlockchain();
 
   useEffect(() => {
     const handleStorageChange = async (changes: Record<string, Storage.StorageChange>) => {
@@ -48,10 +50,10 @@ const App = (): React.ReactElement => {
       const activeBlockchainOldValue = changes.BACKGROUND_STORAGE?.oldValue?.activeBlockchain;
       const activeBlockchainNewValue = changes.BACKGROUND_STORAGE?.newValue?.activeBlockchain;
 
-      if (activeBlockchainOldValue?.activeBlockchain !== activeBlockchainNewValue?.activeBlockchain) {
-        const isCardano = activeBlockchainNewValue?.activeBlockchain === 'cardano';
+      if (activeBlockchainOldValue !== activeBlockchainNewValue) {
+        const isCardano = !activeBlockchainNewValue || activeBlockchainNewValue === 'cardano';
         setMode(isCardano ? CARDANO_LACE : BITCOIN_LACE);
-        window.location.hash = '#';
+        setBlockchain(isCardano ? Blockchain.Cardano : Blockchain.Bitcoin);
         return;
       }
 
@@ -70,8 +72,10 @@ const App = (): React.ReactElement => {
       const { activeBlockchain } = await getBackgroundStorage();
       if (activeBlockchain === 'cardano') {
         setMode(CARDANO_LACE);
+        setBlockchain(Blockchain.Cardano);
       } else {
         setMode(BITCOIN_LACE);
+        setBlockchain(Blockchain.Bitcoin);
       }
     };
 
@@ -124,4 +128,10 @@ const App = (): React.ReactElement => {
 };
 
 const mountNode = document.querySelector('#lace-app');
-ReactDOM.render(<App />, mountNode);
+ReactDOM.render(
+  <BlockchainProvider>
+    <App />
+  </BlockchainProvider>,
+  mountNode
+);
+

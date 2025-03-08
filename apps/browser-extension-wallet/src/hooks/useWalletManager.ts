@@ -349,6 +349,7 @@ export const useWalletManager = (): UseWalletManager => {
     setWalletLock,
     cardanoWallet,
     setCardanoWallet,
+    setIsBitcoinWallet,
     resetWalletLock,
     currentChain,
     setCurrentChain,
@@ -606,6 +607,8 @@ export const useWalletManager = (): UseWalletManager => {
         await backgroundService.setBackgroundStorage({
           activeBlockchain: 'bitcoin'
         });
+
+        setIsBitcoinWallet(true);
       } else {
         await walletManager.activate({
           ...props,
@@ -615,6 +618,8 @@ export const useWalletManager = (): UseWalletManager => {
         await backgroundService.setBackgroundStorage({
           activeBlockchain: 'cardano'
         });
+
+        setIsBitcoinWallet(false);
       }
     },
     [getCurrentChainId]

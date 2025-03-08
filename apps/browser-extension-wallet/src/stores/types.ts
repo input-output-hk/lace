@@ -113,6 +113,7 @@ export interface WalletInfoSlice {
   hdDiscoveryStatus: AddressesDiscoveryStatus | null;
   setHdDiscoveryStatus: (AddressesDiscoveryStatus: AddressesDiscoveryStatus) => void;
   setCardanoWallet: (wallet?: Wallet.CardanoWallet | null) => void;
+  setIsBitcoinWallet: (isBitcoinWallet: boolean) => void;
   currentChain?: Wallet.Cardano.ChainId;
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;

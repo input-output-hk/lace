@@ -1,11 +1,11 @@
-import React, {ReactElement, useMemo, useState} from 'react';
+import React, {ReactElement, useMemo } from 'react';
 import classnames from 'classnames';
 import styles from './NetworkPill.module.scss';
 import { useWalletStore } from '@src/stores';
 import { useNetwork } from '@hooks';
 import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 interface NetworkPillProp {
   isExpandable?: boolean;
@@ -16,14 +16,9 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
   const { isOnline, isBackendFailing } = useNetwork();
-  const [blockchain, setBlockchain] = useState<string>('cardano');
-  const backgroundService = useBackgroundServiceAPIContext();
+  const { blockchain } = useCurrentBlockchain();
 
-  backgroundService.getBackgroundStorage().then((storage) => {
-    const { activeBlockchain } = storage;
-    setBlockchain(activeBlockchain);
-  });
-
+  console.error('NetworkPill blockchain', blockchain);
   return useMemo(() => {
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
@@ -39,7 +34,7 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
               [styles.networkPillText]: isExpandable
             })}
           >
-            {blockchain === 'cardano' ? environmentName : 'Testnet4'}
+            {blockchain === Blockchain.Cardano ? environmentName : 'Testnet4'}
           </span>
         </div>
       );

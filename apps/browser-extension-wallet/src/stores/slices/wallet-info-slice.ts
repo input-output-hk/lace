@@ -50,7 +50,11 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   setBitcoinWallet: (wallet?: BitcoinWallet.BitcoinWallet) =>
     set({
       bitcoinWallet: wallet,
-      isBitcoinWallet: true,
+      isBitcoinWallet: !!wallet,
+    }),
+  setIsBitcoinWallet: (isBitcoinWallet: boolean) =>
+    set({
+      isBitcoinWallet,
     }),
   setCurrentChain: (chain: Wallet.ChainName) => {
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });

@@ -180,7 +180,6 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
 
     const { walletId, network, accountIndex } = props;
 
-    console.error(`activating wallet ${walletId} on network ${network} with account index ${accountIndex}`);
     const wallets = await firstValueFrom(this.#walletRepository.wallets$);
     const activeWallet = wallets.find((wallet) => wallet.walletId === walletId);
 
@@ -202,11 +201,7 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
       })
     ]);
 
-    console.error(`activated wallet ${walletId} on network ${network} with account index ${accountIndex}`);
     this.activeWallet$.next({ wallet, props });
-
-    console.error(wallet);
-    console.error(props);
 
     this.activeWalletId$.next(props);
   }

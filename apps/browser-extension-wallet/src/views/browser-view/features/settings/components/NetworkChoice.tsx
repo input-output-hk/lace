@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, { useCallback } from 'react';
 import { logger, toast } from '@lace/common';
 import styles from './SettingsLayout.module.scss';
 import { useTranslation } from 'react-i18next';
@@ -9,9 +9,10 @@ import SwithIcon from '@src/assets/icons/switch.component.svg';
 import ErrorIcon from '@src/assets/icons/address-error-icon.component.svg';
 import { config } from '@src/config';
 import { useWalletManager } from '@hooks';
-import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 const { AVAILABLE_CHAINS } = config();
 
@@ -54,14 +55,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   const { environmentName, isSharedWallet } = useWalletStore();
   const { switchNetwork } = useWalletManager();
   const analytics = useAnalyticsContext();
-
-  const [blockchain, setBlockchain] = useState<string>('cardano');
-  const backgroundService = useBackgroundServiceAPIContext();
-
-  backgroundService.getBackgroundStorage().then((storage) => {
-    const { activeBlockchain } = storage;
-    setBlockchain(activeBlockchain);
-  });
+  const { blockchain } = useCurrentBlockchain();
 
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
@@ -110,7 +104,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
       data-testid={'network-choice-radio-group'}
     >
       {
-        blockchain === 'cardano' ?
+        blockchain === Blockchain.Cardano ?
           availableChains.map((network) => (
             <a className={styles.radio} key={network}>
               <Radio
