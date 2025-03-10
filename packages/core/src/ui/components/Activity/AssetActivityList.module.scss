@@ -104,3 +104,11 @@
     margin-bottom: size_unit(0.5);
   }
 }
+
+// strengthening the selector specificity
+.retryButtonIcon.retryButtonIcon.retryButtonIcon {
+  path {
+    fill: none;
+    stroke: currentColor;
+  }
+}
