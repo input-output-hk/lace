@@ -73,34 +73,28 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsToken*.feature'
     ],
     batch12: [
-      './src/features/AdaHandleExtended.feature'
-    ],
-    batch13: [
-      './src/features/AdaHandlePopup.feature'
-    ],
-    batch14: [
-      './src/features/AddNewWallet*.feature'
-    ],
-    batch15: [
+      './src/features/AdaHandleExtended.feature',
+      './src/features/AdaHandlePopup.feature',
+      './src/features/AddNewWallet*.feature',
       './src/features/e2e/SendTransactionDappE2E.feature'
     ],
-    batch16: [
+    batch13: [
       './src/features/e2e/SendTransactionBundlesE2E.feature'
     ],
-    batch17: [
+    batch14: [
       './src/features/e2e/SendTransactionSimple*.feature',
       './src/features/e2e/StakingInitialFundsE2E.feature',
       './src/features/e2e/StakingSwitchingPools*.feature',
       './src/features/SettingsPagePopup*.feature',
       './src/features/WalletAddressPageExtended.feature'
     ],
-    batch18: [
+    batch15: [
       './src/features/Transactions*.feature',
       './src/features/NamiMode*.feature',
       './src/features/VotingCenter*.feature'
     ],
-    batch19: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
-    batch20: ['./src/features/SendTransactionBundlesExtended*.feature']
+    batch16: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
+    batch17: ['./src/features/SendTransactionBundlesExtended*.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
