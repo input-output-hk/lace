@@ -12,6 +12,7 @@ import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
 import NftsCommon from '../elements/NFTs/nftsCommon';
 import { scrollToTheTop } from '../utils/scrollUtils';
+import { getExtensionUUID } from '../utils/firefoxUtils';
 
 use(chaiSorted);
 
@@ -204,6 +205,10 @@ class NftAssert {
     const srcValues: string[] = [];
     for (const thumbnail of thumbnails) {
       srcValues.push(await thumbnail.$('img').getAttribute('src'));
+    }
+
+    if (browser.isFirefox) {
+      adaHandleAssert.customHandleSrcValues.push(`blob:moz-extension://${await getExtensionUUID()}/`);
     }
 
     expect(

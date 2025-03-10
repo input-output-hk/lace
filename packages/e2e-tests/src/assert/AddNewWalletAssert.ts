@@ -17,7 +17,7 @@ class AddNewWalletAssert {
     await OnboardingMainPageAssert.assertSeeTitle();
     await OnboardingMainPageAssert.assertSeeSubtitle();
     await OnboardingMainPageAssert.assertSeeCreateWalletOption();
-    await OnboardingMainPageAssert.assertSeeHardwareWalletOption();
+    await OnboardingMainPageAssert.assertSeeHardwareWalletOption(!browser.isFirefox);
     await OnboardingMainPageAssert.assertSeeRestoreWalletOption();
   }
 

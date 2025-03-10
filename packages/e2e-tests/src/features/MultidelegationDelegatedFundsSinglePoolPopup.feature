@@ -37,7 +37,7 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
       | back         |
 #      | close        | @issue=LW-9152
 
-  @LW-8934 @LW-8472
+  @LW-8934 @LW-8472 @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Start Staking - Delegated to single pool - "Expanded view" button click
     Given I navigate to Staking popup page
     And I see Expanded View banner

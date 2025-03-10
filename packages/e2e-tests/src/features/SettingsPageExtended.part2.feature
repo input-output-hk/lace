@@ -210,6 +210,7 @@ Feature: General Settings - Extended Browser View
     Then "Custom submit API" is marked as disabled on Settings page
 
   @LW-12255 @Mainnet @Testnet
+  @skip(browserName="firefox")
   Scenario Outline: Extended view - Settings - Debugging option enables verbose logging in console
     Given I enable console logs collection
     When I open settings from header menu

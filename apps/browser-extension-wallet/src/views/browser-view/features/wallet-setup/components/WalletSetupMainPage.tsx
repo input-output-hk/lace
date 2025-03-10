@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { WarningModal } from '@views/browser/components';
-import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStepRevamp } from '@lace/core';
+import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStep } from '@lace/core';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { walletRoutePaths } from '@routes';
 import {
@@ -39,7 +39,8 @@ export const WalletSetupMainPage = (): ReactElement => {
     hardwareWallet: {
       title: translate('core.walletSetupOptionsStep.hardwareWallet.title'),
       description: translate('core.walletSetupOptionsStep.hardwareWallet.description'),
-      button: translate('core.walletSetupOptionsStep.hardwareWallet.button')
+      button: translate('core.walletSetupOptionsStep.hardwareWallet.button'),
+      tooltip: translate('core.walletSetupOptionsStep.hardwareWallet.tooltip')
     },
     restoreWallet: {
       title: translate('core.walletSetupOptionsStep.restoreWallet.title'),
@@ -108,11 +109,12 @@ export const WalletSetupMainPage = (): ReactElement => {
 
   return (
     <>
-      <WalletSetupOptionsStepRevamp
+      <WalletSetupOptionsStep
         onNewWalletRequest={handleCreateNewWallet}
         onHardwareWalletRequest={handleStartHardwareOnboarding}
         onRestoreWalletRequest={handleRestoreWallet}
         translations={walletSetupOptionsStepTranslations}
+        withAgreement
       />
       <AnalyticsConfirmationBanner
         message={

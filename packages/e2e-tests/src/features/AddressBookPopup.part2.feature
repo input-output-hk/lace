@@ -4,7 +4,7 @@ Feature: Address book - popup view
   Background:
     Given Lace is ready for test
 
-  @LW-4479
+  @LW-4479 @skip(browserName='firefox') @issue=LW-12440
   Scenario Outline: Popup-view - Address Book - Add new address <wallet_name>
     Given I don't have any addresses added to my address book in popup mode
     When I click "Add address" button on address book page

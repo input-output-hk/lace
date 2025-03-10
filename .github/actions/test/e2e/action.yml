@@ -32,6 +32,9 @@ inputs:
     description: 'Collect service worker logs'
     required: false
     default: 'false'
+  FIREFOX_BINARY:
+    description: 'Location of the Firefox binary'
+    required: false
 
 runs:
   using: 'composite'
@@ -56,6 +59,7 @@ runs:
         DISPLAY: ${{ inputs.DISPLAY }}
         BATCH: ${{ inputs.BATCH }}
         SERVICE_WORKER_LOGS: ${{ inputs.SERVICE_WORKER_LOGS }}
+        FIREFOX_BINARY:  ${{ inputs.FIREFOX_BINARY }}
       run: |
         commonTags="@Testnet and not @Pending"
         tagsToRun="'${commonTags}'"

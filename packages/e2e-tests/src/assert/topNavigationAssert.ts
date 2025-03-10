@@ -7,6 +7,7 @@ import extensionUtils from '../utils/utils';
 import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import { browser } from '@wdio/globals';
 import WalletOption from '../elements/WalletOption';
+import CrashScreen from '../elements/CrashScreen';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -101,6 +102,9 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
+    if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
+      throw new Error('Crash screen occurred!');
+    }
     await settingsExtendedPageObject.waitUntilHdWalletSynced();
     await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });

@@ -137,9 +137,11 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     await this.transactionOriginSectionExpanderButton.waitForDisplayed();
     switch (section) {
       case 'Origin':
+        await this.transactionOriginSectionExpanderButton.scrollIntoView();
         await this.transactionOriginSectionExpanderButton.click();
         break;
       case 'From address':
+        await this.transactionFromSectionExpanderButton.scrollIntoView();
         await this.transactionFromSectionExpanderButton.click();
         break;
       case 'To address':

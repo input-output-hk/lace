@@ -10,7 +10,7 @@ Feature: Staking Page - Popup View
     When I navigate to Staking popup page
     Then I see Start Staking page in popup mode
 
-  @LW-8934 @LW-8472 @Testnet
+  @LW-8934 @LW-8472 @Testnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Start Staking - Empty state - "Expanded view" button click
     Given I am on Start Staking page in popup mode
     And I see Expanded View banner

@@ -109,6 +109,7 @@ Feature: Top Navigation - Extended view
     And Local storage appSettings contains info about network: "Preview"
 
   @LW-1717 @LW-5255 @Mainnet @Testnet
+  @skip(browserName="firefox")
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
     Given I close wallet synced toast
     When I am in the offline network mode

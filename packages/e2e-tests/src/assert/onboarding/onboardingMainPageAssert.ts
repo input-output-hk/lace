@@ -55,7 +55,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await OnboardingMainPage.createWalletButton.waitForClickable();
   }
 
-  async assertSeeHardwareWalletOption() {
+  async assertSeeHardwareWalletOption(isEnabled = true) {
     await OnboardingMainPage.hardwareWalletIcon.waitForDisplayed();
     await OnboardingMainPage.hardwareWalletTitle.waitForDisplayed();
     expect(await OnboardingMainPage.hardwareWalletTitle.getText()).to.equal(
@@ -69,7 +69,7 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     expect(await OnboardingMainPage.hardwareWalletButton.getText()).to.equal(
       await t('core.walletSetupOptionsStep.hardwareWallet.button')
     );
-    await OnboardingMainPage.hardwareWalletButton.waitForClickable();
+    await OnboardingMainPage.hardwareWalletButton.waitForEnabled({ reverse: !isEnabled });
   }
 
   async assertSeeRestoreWalletOption() {
@@ -95,7 +95,8 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await this.assertSeeTitle();
     await this.assertSeeSubtitle();
     await this.assertSeeCreateWalletOption();
-    await this.assertSeeHardwareWalletOption();
+    // Lack of support for hardware wallets on Firefox
+    await this.assertSeeHardwareWalletOption(!browser.isFirefox);
     await this.assertSeeRestoreWalletOption();
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();

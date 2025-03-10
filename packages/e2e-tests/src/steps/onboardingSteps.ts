@@ -36,6 +36,7 @@ import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWal
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
+import { switchToWindowWithLace } from '../utils/window';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -117,7 +118,10 @@ Then(/^"Get started" page is displayed$/, async () => {
 });
 
 Then(/^I (accept|reject) analytics banner on "Get started" page$/, async (action: 'accept' | 'reject') => {
-  action === 'accept' ? await analyticsBanner.agreeButton.click() : await analyticsBanner.rejectButton.click();
+  if (browser.isFirefox) {
+    await switchToWindowWithLace();
+  }
+  action === 'accept' ? await analyticsBanner.clickOnAgreeButton() : await analyticsBanner.clickOnRejectButton();
 });
 
 Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {

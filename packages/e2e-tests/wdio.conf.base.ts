@@ -28,7 +28,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsNavigation*.feature',
       './src/features/analytics/AnalyticsNFTs*.feature',
       './src/features/analytics/AnalyticsOnboardingEvents.feature',
-      './src/features/SettingsGeneratePaperWallet.feature'
+      './src/features/SettingsGeneratePaperWallet.feature',
+      './src/features/e2e/SendTransactionDappE2E.feature'
     ],
     batch4: [
       './src/features/e2e/MultidelegationSwitchingPoolsExtendedE2E.feature',
@@ -76,7 +77,6 @@ export const config: WebdriverIO.Config = {
       './src/features/AdaHandleExtended.feature',
       './src/features/AdaHandlePopup.feature',
       './src/features/AddNewWallet*.feature',
-      './src/features/e2e/SendTransactionDappE2E.feature',
       './src/features/e2e/SendTransactionBundlesE2E.feature'
     ],
     batch13: [

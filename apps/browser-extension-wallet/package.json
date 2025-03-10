@@ -25,13 +25,16 @@
     "README.md"
   ],
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist && run -T webpack --config webpack.sw.prod.js --progress && run -T webpack --config webpack.app.prod.js --progress",
-    "build:dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress & run -T webpack --config webpack.app.dev.js --progress",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist && run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress && run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
+    "build:dev": "WEBPACK_ENV=dev yarn build",
+    "build:firefox": "BROWSER=firefox yarn build",
+    "build:firefox:dev": "WEBPACK_ENV=dev yarn build:firefox",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
     "format-check": "echo \"@lace/browser-extension-wallet: no format-check command specified\"",
     "lint": "cd ../.. && yarn extension:lint",
     "prepack": "yarn build",
+    "pack:firefox": "rm -rf artifacts-firefox && web-ext build --source-dir=dist --artifacts-dir=artifacts-firefox",
     "prepare": "ts-patch install -s",
     "prettier": "run -T prettier --write .",
     "test": "run -T jest --config test/jest.config.js",
@@ -51,7 +54,7 @@
     "@cardano-sdk/wallet": "0.52.2",
     "@cardano-sdk/web-extension": "0.39.2",
     "@emurgo/cip14-js": "~3.0.1",
-    "@input-output-hk/lace-ui-toolkit": "3.2.1",
+    "@input-output-hk/lace-ui-toolkit": "3.2.7",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
@@ -126,6 +129,7 @@
     "source-map-loader": "^5.0.0",
     "text-encoding-utf-8": "^1.0.2",
     "tsconfig-paths-webpack-plugin": "3.5.2",
+    "web-ext": "^8.2.0",
     "webassembly-loader-sw": "^1.1.0"
   }
 }

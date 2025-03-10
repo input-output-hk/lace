@@ -51,8 +51,12 @@ import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 import extensionUtils from '../utils/utils';
+import CrashScreen from '../elements/CrashScreen';
 
 Given(/^Lace is ready for test$/, async () => {
+  if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
+    throw new Error('Crash screen occurred!');
+  }
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.multiAddressModalConfirm();
@@ -209,6 +213,9 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await closeAllTabsExceptOriginalOne();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
   await settingsExtendedPageObject.closeWalletSyncedToast();
+  if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
+    throw new Error('Crash screen occurred!');
+  }
   await topNavigationAssert.assertLogoPresent();
   await visit('Tokens', mode);
 });
@@ -224,7 +231,9 @@ When(/^I am in the (offline|online) network mode$/, async (networkMode: 'offline
 });
 
 When(/^I am in the slow network mode$/, async () => {
-  await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
+  if ((await extensionUtils.getBrowser()) !== 'firefox') {
+    await browser.throttleNetwork({ offline: false, latency: 0, downloadThroughput: 1000, uploadThroughput: 1000 });
+  }
 });
 
 When(/^I click outside the drawer$/, async () => {
