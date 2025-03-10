@@ -22,7 +22,7 @@ Feature: General Settings - Popup View
     And I click on "Cookie policy" setting
     Then "Cookie policy" is displayed in new tab
 
-  @LW-2790 @Mainnet @Testnet
+  @LW-2790 @Mainnet @Testnet @skip(browserName="firefox") @issue=LW-12440
   Scenario: Popup View - Settings - Visibility of Help drawer
     When I open settings from header menu
     When I click on "Help" setting
@@ -114,7 +114,7 @@ Feature: General Settings - Popup View
       | Beta Program |
       | Debugging    |
 
-  @LW-11315 @Mainnet @Testnet
+  @LW-11315 @Mainnet @Testnet @skip(browserName="firefox") @issue=LW-12440
   Scenario: Popup View - Custom submit API - open drawer
     When I open settings from header menu
     And I click on "Custom Submit API" setting

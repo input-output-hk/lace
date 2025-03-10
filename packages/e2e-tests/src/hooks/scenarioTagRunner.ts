@@ -30,7 +30,6 @@ After({ tags: 'not @Pending and not @pending' }, async () => {
   await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
   await localStorageManager.cleanLocalStorage();
   await closeAllTabsExceptOriginalOne();
-  await browser.pause(500);
 });
 
 AfterStep(async (scenario) => {
