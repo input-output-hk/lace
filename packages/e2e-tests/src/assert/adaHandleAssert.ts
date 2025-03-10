@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 
 import { browser } from '@wdio/globals';
+import { getExtensionUUID } from '../utils/firefoxUtils';
 
 class AdaHandleAssert {
   public customHandleSrcValues = [
@@ -11,6 +12,9 @@ class AdaHandleAssert {
   async assertSeeCustomImage(imageElement: WebdriverIO.Element) {
     await imageElement.scrollIntoView();
     await imageElement.waitForStable();
+    if (browser.isFirefox) {
+      this.customHandleSrcValues.push(`blob:moz-extension://${await getExtensionUUID()}/`);
+    }
     await browser.waitUntil(
       async () => {
         const src = await imageElement.getAttribute('src');
