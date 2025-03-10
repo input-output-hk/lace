@@ -11,6 +11,7 @@ import {
   WalletRepositoryApi,
   WalletType
 } from '@cardano-sdk/web-extension';
+import * as KeyManagement from '@cardano-sdk/key-management';
 import { getBackgroundStorage } from './storage';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
@@ -101,6 +102,31 @@ const waitForTabLoad = (tab: Tabs.Tab) =>
     tabs.onUpdated.addListener(listener);
   });
 
+/**
+ * get parent wallet CIP1854 account for given script wallet own signer wallet id
+ * @param wallets
+ * @param activeWallet
+ * @returns {Bip32WalletAccount<Wallet.AccountMetadata>} | undefined
+ */
+export const getParentWalletCIP1854Account = ({
+  wallets,
+  activeWallet
+}: {
+  wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[];
+  activeWallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+}): Bip32WalletAccount<Wallet.AccountMetadata> | undefined => {
+  if (activeWallet?.type !== WalletType.Script) return;
+
+  const parentWallet = wallets.find(({ walletId }) => walletId === activeWallet.ownSigners[0].walletId);
+
+  if (parentWallet.type !== WalletType.Script) {
+    // eslint-disable-next-line consistent-return
+    return parentWallet.accounts.find(
+      ({ accountIndex, purpose }) => accountIndex === 0 && purpose === KeyManagement.KeyPurpose.MULTI_SIG
+    );
+  }
+};
+
 export const getActiveWallet = async ({
   walletManager,
   walletRepository
@@ -119,7 +145,7 @@ export const getActiveWallet = async ({
   if (!wallet) return;
   const account =
     wallet.type === WalletType.Script
-      ? undefined
+      ? getParentWalletCIP1854Account({ wallets, activeWallet: wallet })
       : wallet.accounts.find((acc) => activeWallet.accountIndex === acc.accountIndex);
   // eslint-disable-next-line consistent-return
   return { wallet, account };
