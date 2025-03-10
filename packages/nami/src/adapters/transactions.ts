@@ -11,7 +11,7 @@ import {
   Serialization,
 } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { useObservable } from '@lace/common';
+import { useObservable, logger } from '@lace/common';
 import memoize from 'lodash/memoize';
 
 import { useCommonOutsideHandles } from '../features/common-outside-handles-provider';
@@ -135,7 +135,8 @@ const getAddressCredentials = (
       addr.getProps().paymentPart?.hash,
       addr.getProps().delegationPart?.hash,
     ];
-  } catch (error) {
+  } catch (bech32Error) {
+    let base58Error;
     // try casting as byron address
     try {
       const addr = Wallet.Cardano.Address.fromBase58(address);
@@ -144,9 +145,12 @@ const getAddressCredentials = (
         addr.getProps().delegationPart?.hash,
       ];
     } catch (error) {
-      console.error(error);
+      base58Error = error;
     }
-    console.error(error);
+    logger.warn('getAddressCredentials: Incorrect address provided.', {
+      bech32Error,
+      base58Error,
+    });
     return [undefined, undefined];
   }
 };
@@ -438,7 +442,7 @@ export const getTxInfo = async ({
       .map(asset => {
         const info = assetInfo?.get(Wallet.Cardano.AssetId(asset.unit));
         if (!info) {
-          console.error(`No asset info found for ${asset.unit}`);
+          logger.warn(`No asset info found for ${asset.unit}`);
         }
         return info ? toAsset(info, asset.quantity) : undefined;
       })
@@ -501,7 +505,9 @@ export const mapWalletActivities = memoize(
     );
   },
   ({ addresses, transactions, assetInfo, rewardAccounts }) =>
-    `${transactions.history.length}_${transactions.outgoing.inFlight.map(({ id }) => id).join('')}
+    `${transactions.history.length}_${transactions.outgoing.inFlight
+      .map(({ id }) => id)
+      .join('')}
     _${assetInfo.size}_${rewardAccounts.length}_${addresses[0]}`,
 );
 

@@ -10,7 +10,8 @@ export enum ExperimentName {
   USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets',
   WEBSOCKET_API = 'websocket-api',
-  DAPP_EXPLORER = 'dapp-explorer'
+  DAPP_EXPLORER = 'dapp-explorer',
+  SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry'
 }
 
 export type FeatureFlag = `${ExperimentName}`;

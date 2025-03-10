@@ -54,9 +54,9 @@ The following code snippets show how to validate using Zod.
 ```js
 try {
   const result = sharedWalletJsonSchema.parse(<my json schema>);
-  console.log("Schema is valid.")
+  logger.log("Schema is valid.")
 } catch (e) {
-  console.error("Validation error:", e.errors);
+  logger.error("Validation error:", e.errors);
 }
 ```
 
@@ -69,13 +69,13 @@ try {
   const result = sharedWalletJsonSchema.safeParse(<my json schema>);
 
   if (result.errors) {
-    console.log("Schema has errors: ", errors);
+    logger.log("Schema has errors: ", errors);
   }
 
-  console.log("Schema is valid.");
+  logger.log("Schema is valid.");
   return result.data;
 } catch (e) {
-  console.error("Other potential errors:", e.errors);
+  logger.error("Other potential errors:", e.errors);
 }
 ```
 

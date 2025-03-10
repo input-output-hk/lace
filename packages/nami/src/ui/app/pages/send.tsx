@@ -38,7 +38,7 @@ import {
   useToast,
   Icon,
 } from '@chakra-ui/react';
-import { useObservable } from '@lace/common';
+import { logger as commonLogger, useObservable } from '@lace/common';
 import debouncePromise from 'debounce-promise';
 import debounce from 'lodash/debounce';
 import latest from 'promise-latest';
@@ -88,6 +88,7 @@ import type { AssetsModalRef } from '../components/assetsModal';
 import type { ConfirmModalRef } from '../components/confirmModal';
 import type { Wallet } from '@lace/cardano';
 import { CustomScrollbarsVirtualList } from '../components/CustomScrollbars';
+import { contextLogger } from '@cardano-sdk/util';
 
 interface Props {
   activeAddress: string;
@@ -102,6 +103,8 @@ interface Props {
   ) => Promise<T>;
   environmentName: OutsideHandlesContextValue['environmentName'];
 }
+
+const logger = contextLogger(commonLogger, 'Nami:Send');
 
 const useIsMounted = () => {
   const isMounted = React.useRef(false);
@@ -797,7 +800,7 @@ const Send = ({
               inMemoryWallet,
             });
           } catch (error) {
-            console.error('Failed to sign and submit transaction', error);
+            logger.warn('Failed to sign and submit transaction', error);
             throw error;
           } finally {
             secretsUtil.clearSecrets();
