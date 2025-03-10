@@ -7,6 +7,7 @@ import styles from './AssetActivityList.module.scss';
 import isNumber from 'lodash/isNumber';
 import * as UIToolkit from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from 'react-i18next';
+import { ReactComponent as RefreshIcon } from '../../assets/icons/refresh.component.svg';
 
 const { Text } = Typography;
 
@@ -66,9 +67,22 @@ export const GroupedAssetActivityList = ({
   const loader = useMemo(
     () =>
       loadingError ? (
-        <UIToolkit.Flex mb="$32" gap="$8" flexDirection="column" alignItems="center" testId="next-page-loading-error">
-          <UIToolkit.Text.Body.Large>{t('core.activity.loaderError.message')}</UIToolkit.Text.Body.Large>
-          <UIToolkit.Button.CallToAction label={t('core.activity.loaderError.buttonLabel')} onClick={retryLoading} />
+        <UIToolkit.Flex
+          mb="$96"
+          mt="$32"
+          gap="$24"
+          flexDirection="column"
+          alignItems="center"
+          testId="next-page-loading-error"
+        >
+          <UIToolkit.Text.Body.Normal weight="$medium">
+            {t('core.activity.loaderError.message')}
+          </UIToolkit.Text.Body.Normal>
+          <UIToolkit.Button.Secondary
+            icon={<RefreshIcon className={styles.retryButtonIcon} />}
+            label={t('core.activity.loaderError.buttonLabel')}
+            onClick={retryLoading}
+          />
         </UIToolkit.Flex>
       ) : (
         <div data-testid="infinite-scroll-skeleton">
