@@ -14,6 +14,12 @@ interface CoSignerItemProps {
 
 export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) => {
   const { t } = useTranslation();
+  const ownSharedKeyInCip5 =
+    ownSharedKey && Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(ownSharedKey);
+  const listWithCip5Keys = list.map((item) => ({
+    ...item,
+    sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(item.sharedWalletKey),
+  }));
 
   return (
     <Box testId="cosigner-list" mt="$24">
@@ -21,7 +27,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
         <div data-testid="cosigner-list-header" className={styles.cosignersListHeader}>
           {title}
         </div>
-        {list.map(({ sharedWalletKey, name: cosignerName, signed }) => (
+        {listWithCip5Keys.map(({ sharedWalletKey, name: cosignerName, signed }) => (
           <Flex
             py="$0"
             px="$24"
@@ -43,7 +49,7 @@ export const CosignersList = ({ list, title, ownSharedKey }: CoSignerItemProps) 
               </div>
               <div className={styles.cosignersListItemContent}>
                 <Box w="$fill" className={styles.cosignersListItemName}>
-                  {sharedWalletKey === ownSharedKey
+                  {sharedWalletKey === ownSharedKeyInCip5
                     ? t('sharedWallets.transaction.cosignerList.you')
                     : cosignerName ?? '...'}
                 </Box>

@@ -7,6 +7,8 @@ import {
 import {
   AddSharedWalletMainPageFlow,
   AddSharedWalletModal,
+  GenerateSharedWalletKeyFlow,
+  LinkedWalletType,
   SharedWalletCreationFlow,
   SharedWalletRestorationFlow,
 } from '../add-shared-wallet';
@@ -15,8 +17,6 @@ import {
   makeInitialState as makeSharedWalletCreationInitialState,
 } from '../add-shared-wallet/creation-flow/SharedWalletCreationStore';
 import { CreationFlowState } from '../add-shared-wallet/creation-flow/state-and-types';
-import { GenerateSharedWalletKeyFlow } from '../add-shared-wallet/generate-key-flow';
-import { LinkedWalletType } from '../add-shared-wallet/generate-key-flow/GenerateSharedWalletKeyFlow';
 import { GenerateSharedWalletKeyState } from '../add-shared-wallet/generate-key-flow/Store';
 import {
   GenerateSharedWalletKeyInitialStateProvider,
@@ -41,10 +41,10 @@ type AddSharedWalletFlowProps = {
 };
 
 export const sharedWalletKey =
-  '979693650bb44f26010e9f7b3b550b0602c748d1d00981747bac5c34cf5b945fe01a39317b9b701e58ee16b5ed16aa4444704b98cc997bdd6c5a9502a8b7d70d';
+  'acct_shared_xvk1q395kywke7mufrysg33nsm6ggjxswu4g8q8ag7ks9kdyaczchtemd5d2armrfstfa32lamhxfl3sskgcmxm4zdhtvut362796ez4ecqx6vnht';
 
 const generateSharedWalletKey = makeGenerateSharedWalletKey({
-  getSharedWalletExtendedPublicKey: async () => Wallet.Crypto.Bip32PublicKeyHex(sharedWalletKey),
+  getSharedWalletExtendedPublicKey: async () => Wallet.Cardano.Cip1854ExtendedAccountPublicKey(sharedWalletKey),
 });
 
 export const activeWalletName = 'My wallet';

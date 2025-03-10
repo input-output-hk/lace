@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { StateType, defineStateShape } from '../../../state-utils';
 import { PasswordErrorType } from '../EnterPassword';
 
@@ -28,7 +29,7 @@ export type StateEnterPassword = StateType<typeof stateEnterPassword>;
 export const stateCopyKey = makeState<{
   loading: undefined;
   passwordErrorType: undefined;
-  sharedWalletKey: string;
+  sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey;
   step: GenerateSharedWalletKeyStep.CopyKey;
 }>();
 export type StateCopyKey = StateType<typeof stateCopyKey>;
