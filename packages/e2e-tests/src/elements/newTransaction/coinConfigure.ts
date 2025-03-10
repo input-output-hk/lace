@@ -108,6 +108,7 @@ export class CoinConfigure {
     await this.input.waitForClickable();
     await this.input.clearValue();
     await this.input.moveTo();
+    await this.assetMaxButton.waitForClickable();
     await this.assetMaxButton.click();
   };
 

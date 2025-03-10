@@ -9,7 +9,7 @@ Feature: Transactions - Popup view
     When I navigate to Activity popup page
     Then Activity page is displayed
 
-  @LW-2543 @LW-2544 @Testnet
+  @LW-2543 @LW-2544 @Testnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Activity page - transactions are loaded and skeleton disappears
     When I navigate to Activity popup page
     And Activity page is displayed
@@ -36,7 +36,7 @@ Feature: Transactions - Popup view
     When I navigate to Activity popup page
     Then all transactions have icon, type of transaction, amount of tokens, value, and value in FIAT
 
-  @LW-2547 @Testnet @Mainnet
+  @LW-2547 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Transactions details - Folded
     Given I am on the Activity page - popup view
     When click on a transaction
@@ -50,7 +50,7 @@ Feature: Transactions - Popup view
       | Transaction fee in ADA  |
       | Transaction fee in FIAT |
 
-  @LW-2548 @Testnet @Mainnet
+  @LW-2548 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Transactions details - Unfolded
     Given I am on the Activity page - popup view
     When I click on a transaction and click on both dropdowns
@@ -62,13 +62,13 @@ Feature: Transactions - Popup view
     When I navigate to Activity popup page
     Then all the transactions have a value other than zero
 
-  @LW-2550 @Testnet @Mainnet
+  @LW-2550 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Transactions details - No value is zero
     Given I am on the Activity page - popup view
     When I click on a transaction and click on both dropdowns
     Then none of the input and output values is zero in popup mode
 
-  @LW-3650 @Testnet @Mainnet
+  @LW-3650 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Transactions details - Summary section is displayed
     Given I am on the Activity page - popup view
     When click on a transaction

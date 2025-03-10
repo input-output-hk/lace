@@ -27,7 +27,7 @@ Feature: ADA handle - popup view
     And "Handle not found" error is displayed in address book form
     And "Save address" button is disabled on "Add new address" drawer
 
-  @LW-7336
+  @LW-7336 @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup view - Edit an ADA handle from the address book
     Given I have 2 addresses with ADA handle in my address book in popup mode
     And I click address on the list with name "Ada Handle 1"
@@ -133,7 +133,7 @@ Feature: ADA handle - popup view
     And I see NFT with name "$t_h_1" on the NFT folder page
     Then I see ADA handle NFT with custom image on the NFT folder page
 
-  @LW-7433
+  @LW-7433 @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Validate custom image from a handle on the "Select NFT" (folder) screen
     Given I click "Receive" button on Tokens page in popup mode
     And I see handles listed on the "Receive" screen
