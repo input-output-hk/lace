@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { truncate, addEllipsis } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { Cardano, AssetInfoWithAmount } from '@cardano-sdk/core';
@@ -126,11 +126,18 @@ export const DappAddressSection = ({
   addressToNameMap
 }: DappAddressSectionProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
   const itemsCountCopy = t('core.dappTransaction.items');
 
   return (
-    <SummaryExpander title={title} disabled={!isEnabled} testId={`dapp-transaction-${addressType}-section-expander`}>
+    <SummaryExpander
+      onClick={() => setIsSummaryOpen(!isSummaryOpen)}
+      open={isSummaryOpen}
+      title={title}
+      disabled={!isEnabled}
+      testId={`dapp-transaction-${addressType}-section-expander`}
+    >
       {[...groupedAddresses.entries()].map(([address, addressData]) => {
         const addressName = addressToNameMap?.get(address);
 
