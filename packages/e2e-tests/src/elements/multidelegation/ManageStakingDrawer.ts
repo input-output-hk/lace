@@ -3,6 +3,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 import { ChainablePromiseElement } from 'webdriverio';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 import { browser } from '@wdio/globals';
+import { clearInputFieldValue } from '../../utils/inputFieldUtils';
 
 class ManageStakingDrawer extends CommonDrawerElements {
   private CONTAINER = '[data-testid="custom-drawer"]';
@@ -231,8 +232,10 @@ class ManageStakingDrawer extends CommonDrawerElements {
   }
 
   async inputRatioForPool(ratio: number, poolNo: number) {
-    await this.poolDetailsRatioInput(poolNo - 1).waitForClickable();
-    await this.poolDetailsRatioInput(poolNo - 1).setValue(ratio.toString());
+    const ratioInputField = await this.poolDetailsRatioInput(poolNo - 1);
+    await ratioInputField.waitForClickable();
+    await clearInputFieldValue(ratioInputField);
+    await ratioInputField.setValue(String(ratio));
     await browser.keys('Return');
   }
 

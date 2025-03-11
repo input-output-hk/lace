@@ -11,7 +11,7 @@ Feature: DAppConnector - Popup view
     When I click on "Authorized DApps" setting
     Then I see "Authorized DApps" section empty state in popup mode
 
-  @LW-6686 @Testnet @Mainnet
+  @LW-6686 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup view - Authorized DApp is displayed in Lace Authorized DApps section after clicking "Always"
     Given I open and authorize test DApp with "Always" setting
     And I switch to window with Lace
@@ -19,7 +19,7 @@ Feature: DAppConnector - Popup view
     When I click on "Authorized DApps" setting
     Then I see test DApp on the Authorized DApps list
 
-  @LW-6687 @Testnet @Mainnet
+  @LW-6687 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Authorized DApp is not displayed in Lace Authorized DApps section after clicking "Once"
     Given I open and authorize test DApp with "Only once" setting
     And I switch to window with Lace

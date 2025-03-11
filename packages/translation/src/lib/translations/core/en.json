@@ -596,6 +596,7 @@
   "core.walletSetupMnemonicVerificationStep.enterPassphrase": "Enter your secret passphrase",
   "core.walletSetupMnemonicVerificationStepRevamp.enterPassphrase": "Enter your recovery phrase",
   "core.walletSetupOptionsStep.hardwareWallet.button": "Connect",
+  "core.walletSetupOptionsStep.hardwareWallet.tooltip": "Hardware wallets are not supported due to Firefox limitations",
   "core.walletSetupOptionsStep.hardwareWallet.description": "Connect your hardware wallet to Lace",
   "core.walletSetupOptionsStep.hardwareWallet.title": "Hardware wallet",
   "core.walletSetupOptionsStep.newWallet.button": "Create",
