@@ -13,7 +13,7 @@ import {
   ThemeSwitcher,
   UserInfo
 } from './components';
-import { logger, Switch } from '@lace/common';
+import { logger, Switch, useObservable } from '@lace/common';
 import styles from './DropdownMenuOverlay.module.scss';
 import { NetworkInfo } from './components/NetworkInfo';
 import { Sections } from './types';
@@ -31,6 +31,7 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { useBackgroundServiceAPIContext } from '@providers';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
+import { useCurrentWallet, useWalletManager } from '@hooks';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -50,6 +51,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const { t } = useTranslation();
   const posthog = usePostHogClientContext();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const { walletRepository } = useWalletManager();
+  const currentWallet = useCurrentWallet();
+  const wallets = useObservable(walletRepository.wallets$);
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
@@ -102,7 +106,10 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
-  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet;
+  const hasLinkedSharedWallet = wallets?.some(
+    (w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet.walletId
+  );
+  const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';
