@@ -7,7 +7,7 @@ Feature: DApp Explorer - extended view
 
   @LW-12105
   Scenario: Extended View - DApp Explorer - open
-    When I navigate to DApp Explorer extended page
+    When I navigate to DApps extended page
     Then I see DApp Explorer page
     And I see the list of categories on DApp Explorer page
     And I see cards with DApps on DApp Explorer page
