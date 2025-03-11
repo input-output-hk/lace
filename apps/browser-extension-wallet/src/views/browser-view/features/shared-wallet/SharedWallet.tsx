@@ -32,7 +32,7 @@ export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
   const { walletRepository, generateSharedWalletKey, createMultiSigAccount, createInMemorySharedWallet } =
     useWalletManager();
-  const { walletInfo, cardanoWallet, environmentName } = useWalletStore();
+  const { walletInfo, cardanoWallet, environmentName, isHardwareWallet } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
   const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
@@ -114,6 +114,7 @@ export const SharedWallet = (): JSX.Element => {
             path={walletRoutePaths.sharedWallet.create}
             render={() => (
               <SharedWalletCreationFlow
+                walletKind={isHardwareWallet ? 'cold' : 'hot'}
                 activeWalletName={walletInfo?.name || ''}
                 initialWalletName={initialWalletName}
                 navigateToAppHome={() => setBackgroundPage()}
