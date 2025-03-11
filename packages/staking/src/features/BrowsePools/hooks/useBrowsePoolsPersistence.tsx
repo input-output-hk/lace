@@ -1,7 +1,11 @@
+import { contextLogger } from '@cardano-sdk/util';
 import { Wallet } from '@lace/cardano';
+import { logger as commonLogger } from '@lace/common';
 import { useOutsideHandles } from 'features/outside-handles-provider';
 import { useDelegationPortfolioStore } from 'features/store';
 import { useEffect, useMemo } from 'react';
+
+const logger = contextLogger(commonLogger, 'Staking:useBrowsePoolsPersistence');
 
 export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
   const {
@@ -32,8 +36,8 @@ export const useBrowsePoolsPersistence = (view: 'popup' | 'expanded') => {
         stakePoolProvider,
         view,
       });
-    } catch {
-      console.error('error during store hydration');
+    } catch (error) {
+      logger.error('Store hydration failed', error);
     }
   }, [
     hydrated,

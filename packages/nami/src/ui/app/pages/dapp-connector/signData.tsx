@@ -76,7 +76,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
   ) => {
     const addressObj = Wallet.Cardano.Address.fromString(address);
     if (!addressObj) {
-      console.error('SignData: Invalid address', address);
+      logger.warn('SignData: Invalid address', address);
       setAddress('unknown');
       return;
     }
