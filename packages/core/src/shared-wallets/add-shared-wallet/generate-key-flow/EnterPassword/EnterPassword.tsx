@@ -16,7 +16,7 @@ import { LinkedWalletType } from '@src/shared-wallets/types';
 import { ConnectionError } from '@src/ui/utils';
 import ExclamationCircleIcon from '../../../../ui/assets/icons/exclamation-circle.svg';
 import { SharedWalletLayout } from '../../SharedWalletLayout';
-import { keyGenerationTimelineSteps } from '../timelineSteps';
+import { keyGenerationHWTimelineSteps, keyGenerationTimelineSteps } from '../timelineSteps';
 import styles from './EnterPassword.module.scss';
 
 const inputId = `id-${uuidv4()}`;
@@ -88,7 +88,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
     <SharedWalletLayout
       title={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.title')}
       description={description}
-      timelineSteps={keyGenerationTimelineSteps}
+      timelineSteps={isHW ? keyGenerationHWTimelineSteps : keyGenerationTimelineSteps}
       timelineCurrentStep="enter-password"
       onBack={onBack}
       onNext={next}
