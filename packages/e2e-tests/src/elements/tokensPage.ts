@@ -167,7 +167,10 @@ class TokensPage {
   }
 
   async clickTokenWithName(tokenName: string) {
-    await this.tokensTableItemWithName(tokenName).click();
+    // Webdriver.io complains about table row element not being interactable on Firefox, need to click on one of nested elements to override that issue
+    await (browser.isFirefox
+      ? this.tokensTableItemWithName(tokenName).$(this.TOKEN_NAME).click()
+      : this.tokensTableItemWithName(tokenName).click());
   }
 
   async waitUntilHeadersLoaded() {

@@ -28,7 +28,9 @@ export const Activity = (): React.ReactElement => {
     analytics.sendEventToPostHog(PostHogAction.ActivityActivityActivityRowClick);
   }, [analytics]);
 
-  const { walletActivities, mightHaveMore, loadedTxLength, loadMore } = useWalletActivitiesPaginated({ sendAnalytics });
+  const { walletActivities, mightHaveMore, loadedTxLength, loadMore, retry, error } = useWalletActivitiesPaginated({
+    sendAnalytics
+  });
 
   const debouncedLoadMore = useMemo(() => debounce(loadMore, loadMoreDebounce), [loadMore]);
 
@@ -59,6 +61,8 @@ export const Activity = (): React.ReactElement => {
             lists={walletActivities}
             scrollableTarget="contentLayout"
             dataLength={loadedTxLength}
+            loadingError={error}
+            retryLoading={retry}
           />
         )}
         {walletActivities?.length === 0 && (

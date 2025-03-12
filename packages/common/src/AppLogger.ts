@@ -1,7 +1,7 @@
 /* eslint-disable no-console, no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from 'ts-log';
-import { stringifyWithFallback } from '@src/ui/lib';
+import { isNetworkError, stringifyWithFallback } from '@src/ui/lib';
 import * as Sentry from '@sentry/react';
 
 enum LogLevel {
@@ -16,6 +16,7 @@ export type LogLevelString = keyof typeof LogLevel;
 
 class AppLogger implements Logger {
   private logLevel: LogLevel;
+  private sentryIntegrationEnabled = false;
 
   constructor(logLevel: LogLevelString = 'info') {
     if (!(logLevel in LogLevel)) {
@@ -24,16 +25,22 @@ class AppLogger implements Logger {
     this.logLevel = LogLevel[logLevel];
   }
 
+  private captureError(error: Error, extra: Record<string, any> = {}) {
+    if (!this.sentryIntegrationEnabled) return;
+
+    Sentry.captureException(error, {
+      level: 'error',
+      extra
+    });
+  }
+
   private convertParams(params: any[]) {
     return params.map((param) => {
       const [value, error] = stringifyWithFallback(param);
       if (error) {
-        Sentry.captureMessage('AppLogger: Failed to stringify the log param', {
-          level: 'error',
-          extra: {
-            error,
-            param
-          }
+        this.captureError(new Error('AppLogger: Failed to stringify the log param'), {
+          error,
+          param
         });
       }
 
@@ -47,6 +54,10 @@ class AppLogger implements Logger {
 
   setLogLevel(logLevel: LogLevelString) {
     this.logLevel = LogLevel[logLevel];
+  }
+
+  setSentryIntegrationEnabled(enableSentryIntegration: boolean): void {
+    this.sentryIntegrationEnabled = enableSentryIntegration;
   }
 
   trace(...params: any[]): void {
@@ -74,7 +85,25 @@ class AppLogger implements Logger {
   }
 
   error(...params: any[]): void {
-    console.error(...this.convertParams(params));
+    if (params.length === 0) return;
+
+    const error = params.find((param) => param instanceof Error);
+    const message = params.find((param) => typeof param === 'string');
+    const stringifiedParams = this.convertParams(params);
+
+    if (!error) {
+      this.captureError(new Error(message || '[UNKNOWN ERROR]'), { error: stringifiedParams });
+      console.error(...stringifiedParams);
+      return;
+    }
+
+    if (isNetworkError(error)) {
+      console.error('[NETWORK CONNECTION ERROR]', ...stringifiedParams);
+      return;
+    }
+
+    this.captureError(error, { error: stringifiedParams });
+    console.error(...stringifiedParams);
   }
 }
 

@@ -43,7 +43,7 @@ Feature: LW: Tokens tab - extended view
     Examples:
       | token_name | token_ticker |
       | Cardano    | tADA         |
-      | LaceCoin2   | LaceCoin2   |
+      | LaceCoin2  | LaceCoin2    |
 
   @LW-2337 @Mainnet
   Scenario Outline: "<token_name>" item click

@@ -4,7 +4,7 @@ Feature: LW: Tokens tab - popup view
   Background:
     Given Wallet is synced
 
-  @LW-2343 @Testnet @Mainnet
+  @LW-2343 @Testnet @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario: Tokens title and counter
     When I see Tokens counter with total number of tokens displayed
     Then Tokens counter matches the number of wallet tokens
@@ -35,7 +35,7 @@ Feature: LW: Tokens tab - popup view
     When I click "Send" button on Tokens page in popup mode
     Then the 'Send' screen is displayed in popup mode
 
-  @LW-2349 @Testnet
+  @LW-2349 @Testnet @skip(browserName='firefox') @issue=LW-12440
   Scenario Outline: "<token_name>" item click
     When I open wallet: "WalletSendBundlesTransactionE2E" in: popup mode
     And I click token with name: "<token_name>"
@@ -45,7 +45,7 @@ Feature: LW: Tokens tab - popup view
       | Cardano    | tADA         |
       | LaceCoin2  | LaceCoin2    |
 
-  @LW-2349 @Mainnet
+  @LW-2349 @Mainnet @skip(browserName='firefox') @issue=LW-12440
   Scenario Outline: "<token_name>" item click
     When I click token with name: "<token_name>"
     Then The Token details screen is displayed for token "<token_name>" with ticker "<token_ticker>" in popup mode
