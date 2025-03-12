@@ -1,4 +1,5 @@
 import LocalStorageManager from './localStorageManager';
+import { DAppCategories } from '../types/dappCategories';
 
 const STORAGE_KEY = 'dapp-explorer-data-cache';
 // Values taken from PostHog
@@ -32,7 +33,14 @@ export const getDAppsFromLocalStorage = async (targetKey: string, limit: number)
   }
 };
 
-export const getDAppNamesFromLocalStorage = async (targetKey: string, limit: number): Promise<string[]> => {
-  const dapps = await getDAppsFromLocalStorage(targetKey, limit);
+export const getAllDAppNamesFromLocalStorage = async (): Promise<string[]> => {
+  const targetKey = 'https://apis.dappradar.com/v2/dapps/top/uaw?chain=cardano&range=30d&top=100';
+  const dapps = await getDAppsFromLocalStorage(targetKey, 30);
+  return dapps.map((dapp) => String(dapp?.name));
+};
+
+export const getDAppNamesFromLocalStorageByCategory = async (category: DAppCategories): Promise<string[]> => {
+  const targetKey = `https://apis.dappradar.com/v2/dapps/top/uaw?chain=cardano&range=30d&top=100&category=${category.toLowerCase()}`;
+  const dapps = await getDAppsFromLocalStorage(targetKey, 30);
   return dapps.map((dapp) => String(dapp?.name));
 };

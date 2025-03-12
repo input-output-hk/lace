@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import type { ChainablePromiseElement, ElementArray } from 'webdriverio';
 import type { ChainablePromiseArray } from 'webdriverio/build/types';
+import type { DAppCategories } from '../../types/dappCategories';
 
 class DAppExplorerPage {
   private readonly PAGE_TITLE = '[data-testid="page-title"]';
@@ -18,6 +19,10 @@ class DAppExplorerPage {
   private readonly SCROLL_NEXT_BUTTON = '[data-testid="scroll-next"]';
   private readonly DAPP_CARD_CONTAINER = '.card-container';
   private readonly SKELETON = '[data-testid="skeleton"]';
+  private readonly EMPTY_STATE_IMAGE = '[data-testid="empty-state-image"]';
+  private readonly EMPTY_STATE_HEADER = '[data-testid="empty-state-header"]';
+  private readonly EMPTY_STATE_TEXT = '[data-testid="empty-state-text"]';
+  private readonly EMPTY_STATE_TEXT_2 = '[data-testid="empty-state-text-2"]';
 
   get pageTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PAGE_TITLE);
@@ -79,9 +84,64 @@ class DAppExplorerPage {
     return $(this.SKELETON);
   }
 
+  get emptyStateImage(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.EMPTY_STATE_IMAGE);
+  }
+
+  get emptyStateHeader(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.EMPTY_STATE_HEADER);
+  }
+
+  get emptyStateText(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.EMPTY_STATE_TEXT);
+  }
+
+  get emptyStateText2(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.EMPTY_STATE_TEXT_2);
+  }
+
   async hoverOverInfoIcon() {
     await this.infoIcon.scrollIntoView();
     await this.infoIcon.moveTo();
+  }
+
+  async clickOnCategoryButton(category: DAppCategories | 'Show All'): Promise<void> {
+    switch (category) {
+      case 'Show All':
+        await this.categoryShowAll.scrollIntoView();
+        await this.categoryShowAll.click();
+        break;
+      case 'Games':
+        await this.categoryGames.scrollIntoView();
+        await this.categoryGames.click();
+        break;
+      case 'Defi':
+        await this.categoryDefi.scrollIntoView();
+        await this.categoryDefi.click();
+        break;
+      case 'Collectibles':
+        await this.categoryCollectibles.scrollIntoView();
+        await this.categoryCollectibles.click();
+        break;
+      case 'Marketplaces':
+        await this.categoryMarketplaces.scrollIntoView();
+        await this.categoryMarketplaces.click();
+        break;
+      case 'Exchanges':
+        await this.categoryExchanges.scrollIntoView();
+        await this.categoryExchanges.click();
+        break;
+      case 'Social':
+        await this.categorySocial.scrollIntoView();
+        await this.categorySocial.click();
+        break;
+      case 'Other':
+        await this.categoryOther.scrollIntoView();
+        await this.categoryOther.click();
+        break;
+      default:
+        throw new Error(`Unsupported category: ${category}`);
+    }
   }
 }
 
