@@ -1,6 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs';
 import image from '@rollup/plugin-image';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
 import svgr from '@svgr/rollup';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
@@ -22,7 +22,7 @@ export default ({
   external: [/node_modules/],
   input,
   plugins: [
-    nodeResolve({
+    resolve({
       preferBuiltins: false,
     }),
     typescript({

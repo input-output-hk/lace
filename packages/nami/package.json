@@ -39,7 +39,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "rm -rf dist && run -T rollup -c rollup.config.js --strictDeprecations --bundleConfigAsCjs",
+    "build": "rm -rf dist && run -T rollup -c rollup.config.js",
     "build-storybook": "storybook build",
     "chromatic": "echo \"@lace/nami: no chromatic command specified\"",
     "cleanup": "yarn exec rm -rf dist node_modules",

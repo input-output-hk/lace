@@ -26,7 +26,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "run -T rollup -c rollup.config.js --strictDeprecations --bundleConfigAsCjs",
+    "build": "run -T rollup -c rollup.config.js",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format-check": "echo \"@lace/cardano: no format-check command specified\"",
     "lint": "cd ../.. && yarn cardano:lint",
