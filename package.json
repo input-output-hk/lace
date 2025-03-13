@@ -64,6 +64,7 @@
   },
   "resolutions": {
     "@babel/core": "^7.23.2",
+    "@babel/traverse": "^7.23.2",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.f9c48c0.0",
     "ansi-regex": "^5.0.1",
     "async": "^3.2.2",
