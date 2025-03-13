@@ -1,7 +1,11 @@
 import { logger as commonLogger } from '@lace/common';
-import { contextLogger } from '@cardano-sdk/util';
+import { ComposableError, contextLogger } from '@cardano-sdk/util';
 
-class ExtensionApiError extends Error {}
+class ExtensionApiError extends ComposableError {
+  constructor(message: string, originalError: unknown) {
+    super(message, originalError);
+  }
+}
 
 type CatchAndBrandExtensionApiErrorOptions = {
   reThrow?: boolean;
@@ -18,9 +22,9 @@ export const catchAndBrandExtensionApiError = async <T>(
   try {
     return await promise;
   } catch (error) {
-    logger.error(errorMessage, error);
+    logger.warn(errorMessage, error);
     if (reThrow) {
-      throw new ExtensionApiError(errorMessage);
+      throw new ExtensionApiError(errorMessage, error);
     }
   }
 };
