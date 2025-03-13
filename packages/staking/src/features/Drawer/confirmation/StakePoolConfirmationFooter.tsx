@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { WalletType } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 import { Button, PostHogAction } from '@lace/common';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,7 +38,7 @@ export const StakePoolConfirmationFooter = ({ popupView }: StakePoolConfirmation
   const [openPoolsManagementConfirmationModal, setOpenPoolsManagementConfirmationModal] =
     useState<PoolsManagementModalType | null>(null);
 
-  const isHardwareWallet = walletType === WalletType.Trezor || walletType === WalletType.Ledger;
+  const isHardwareWallet = Wallet.AVAILABLE_WALLETS.includes(walletType as Wallet.HardwareWallets);
 
   // TODO unify
   const signAndSubmitTransaction = useCallback(async () => {
