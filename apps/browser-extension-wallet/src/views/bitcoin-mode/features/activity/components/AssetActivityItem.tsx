@@ -197,11 +197,7 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx &&
-            type &&
-            type !== TransactionActivityType.self
-              ? t('core.assetActivityItem.entry.name.sending')
-              : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
+            {t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
           </h6>
           {(
             descriptionContent

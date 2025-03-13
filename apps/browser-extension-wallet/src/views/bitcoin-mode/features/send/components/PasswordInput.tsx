@@ -18,7 +18,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ onSubmit, onBack }
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <div className={cn(styles.container)}>
         <div className={styles.password}>
           <Password
@@ -32,10 +32,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ onSubmit, onBack }
 
       <div
         style={{
-          position: 'absolute',
-          top: 325,
-          bottom: 0,
-          left: 0,
+          marginTop: 'auto',
           width: '100%',
           padding: '1rem',
           borderTop: '1px solid #E0E0E0',

@@ -90,6 +90,7 @@ export const buildTx = (
     const psbt = new Psbt({ network: net });
 
     const signers = new Array<DerivedAddress>();
+
     selectedUTxOs.forEach((utxo) => {
       const knownAddr = knownAddresses.find((address) => address.address === utxo.address);
       if (!knownAddr) throw new Error('Unknown address in UTXO set.');

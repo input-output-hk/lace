@@ -24,7 +24,9 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: size_unit(3);
+  min-height: 60vh;
+  padding: 1rem;
+  width: 100%;
 }
 
 .rowContent {
@@ -58,4 +60,21 @@
 .address {
   word-break: break-all;
   line-height: 17px;
+}
+
+.reviewContainer {
+  position: relative;
+  padding: 1rem;
+  width: 100%;
+}
+
+.section {
+  padding-bottom: 1.2rem;
+}
+
+.buttonContainer {
+  margin-top: auto;
+  width: 100%;
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
 }

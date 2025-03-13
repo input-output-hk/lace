@@ -46,6 +46,7 @@ export const Home = (): JSX.Element => {
         history.push(walletRoutePaths.newWallet.restore);
       }}
       translations={walletSetupOptionsStepTranslations}
+      isHardwareWalletEnabled={true}
     />
   );
 };

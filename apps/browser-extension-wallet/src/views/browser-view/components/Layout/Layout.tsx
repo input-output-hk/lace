@@ -16,6 +16,8 @@ import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 import { useOpenTransactionDrawer } from '@views/browser/features/send-transaction';
 import { useOpenReceiveDrawer } from '../TransactionCTAsBox/useOpenReceiveDrawer';
+import { useBitcoinSendDrawer } from "../TransactionCTAsBox/useBitcoinSendDrawer";
+import { useCurrentBlockchain, Blockchain } from "@src/multichain";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,11 +34,13 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
   const backgroundServices = useBackgroundServiceAPIContext();
   const { walletState } = useWalletStore();
   const openReceiveDrawer = useOpenReceiveDrawer();
+  const { blockchain } = useCurrentBlockchain();
 
-  const openTransactionDrawer = useOpenTransactionDrawer({
+  const openTransactionDrawer = blockchain === Blockchain.Cardano ?
+    useOpenTransactionDrawer({
     content: DrawerContent.SEND_TRANSACTION,
     config: { options: { isAdvancedFlow: true } }
-  });
+  }) : useBitcoinSendDrawer();
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
   const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);
@@ -49,12 +53,13 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
         backgroundStorage.message?.type === MessageTypes.OPEN_BROWSER_VIEW &&
         backgroundStorage.message?.data.section === BrowserViewSections.SEND_ADVANCED
       ) {
+        console.error('Pening tx send');
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openTransactionDrawer();
       }
       if (
         backgroundStorage.message?.type === MessageTypes.OPEN_BROWSER_VIEW &&
-        backgroundStorage.message?.data.section === BrowserViewSections.RECEIVE_ADVANCED
+        (backgroundStorage.message?.data.section === BrowserViewSections.RECEIVE_ADVANCED)
       ) {
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openReceiveDrawer();

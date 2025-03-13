@@ -13,6 +13,7 @@ export interface WalletSetupOptionsStepProps {
   onNewWalletRequest: () => void;
   onHardwareWalletRequest: () => void;
   onRestoreWalletRequest: () => void;
+  isHardwareWalletEnabled: boolean;
   translations: {
     title: string;
     subTitle: string;
@@ -26,7 +27,8 @@ export const WalletSetupOptionsStep = ({
   onNewWalletRequest,
   onHardwareWalletRequest,
   onRestoreWalletRequest,
-  translations
+  translations,
+  isHardwareWalletEnabled
 }: WalletSetupOptionsStepProps): React.ReactElement => (
   <div className={styles.walletSetupOptionsStep} data-testid="wallet-setup-options-container">
     <div className={styles.content} data-testid="wallet-setup-options-content">
@@ -46,17 +48,22 @@ export const WalletSetupOptionsStep = ({
           onClick={onNewWalletRequest}
           testId="create-wallet"
         />
-        <div className={styles.separator} />
-        <WalletSetupOption
-          copies={translations.hardwareWallet}
-          icon={HardwareWalletIcon}
-          onClick={onHardwareWalletRequest}
-          testId="hardware-wallet"
-        />
-        <div className={styles.separator} />
-        <WalletSetupOption
-          icon={RestoreWalletIcon}
-          copies={translations.restoreWallet}
+        {
+          isHardwareWalletEnabled && (
+            <>
+              <div className={styles.separator}/>
+              <WalletSetupOption
+                  copies={translations.hardwareWallet}
+                icon={HardwareWalletIcon}
+                onClick={onHardwareWalletRequest}
+                testId="hardware-wallet"
+              />
+            </>
+      )}
+      <div className={styles.separator}/>
+      <WalletSetupOption
+        icon={RestoreWalletIcon}
+        copies={translations.restoreWallet}
           onClick={onRestoreWalletRequest}
           testId="restore-wallet"
         />

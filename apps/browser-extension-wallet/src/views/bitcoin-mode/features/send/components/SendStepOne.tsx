@@ -1,10 +1,9 @@
 import React from "react";
 import { Input, Button } from "@lace/common";
 import styles from "./SendStepOne.module.scss";
-import { Typography } from 'antd';
+import { Typography } from "antd";
 
 const SATS_IN_BTC = 100000000;
-
 const { Text } = Typography;
 
 interface SendStepOneProps {
@@ -22,64 +21,55 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                                                           address,
                                                           onAddressChange,
                                                           availableBalance,
-                                                          onContinue
+                                                          onContinue,
                                                         }) => {
   const numericAmount = parseFloat(amount) || 0;
-
   const hasNoValue = numericAmount === 0;
-  const exceedsBalance = numericAmount > (availableBalance / SATS_IN_BTC);
+  const exceedsBalance = numericAmount > availableBalance / SATS_IN_BTC;
 
   const handleNext = () => {
-    if (!hasNoValue && !exceedsBalance && address.trim() !== '') {
+    if (!hasNoValue && !exceedsBalance && address.trim() !== "") {
       onContinue();
     }
   };
 
   return (
-    <div>
-      <Input
-        disabled={false}
-        value={address}
-        data-testid="btc-address-input"
-        placeholder={'Enter recipient address'}
-        bordered={false}
-        onChange={(e) => onAddressChange(e.target.value)}
-      />
-
-      <div style={{paddingTop: 50}}>
-        <Text className={styles.infoParagraph} data-testid="Amount">
-          Available balance: {(availableBalance / SATS_IN_BTC).toFixed(8)} BTC
-        </Text>
+    <div className={styles.container}>
+      <div className={styles.content}>
         <Input
-          type="number"
           disabled={false}
-          value={amount}
+          value={address}
           data-testid="btc-address-input"
-          placeholder={'Enter amount (BTC)'}
+          placeholder="Enter recipient address"
           bordered={false}
-          onChange={(e) => onAmountChange(e.target.value)}
+          onChange={(e) => onAddressChange(e.target.value)}
         />
+
+        <div className={styles.amountSection}>
+          <Text className={styles.infoParagraph} data-testid="Amount">
+            Available balance: {(availableBalance / SATS_IN_BTC).toFixed(8)} BTC
+          </Text>
+          <Input
+            type="number"
+            disabled={false}
+            value={amount}
+            data-testid="btc-amount-input"
+            placeholder="Enter amount (BTC)"
+            bordered={false}
+            onChange={(e) => onAmountChange(e.target.value)}
+          />
+        </div>
+
+        {exceedsBalance && (
+          <Text className={styles.errorParagraph} data-testid="no-val-warning">
+            Amount exceeds available balance
+          </Text>
+        )}
       </div>
 
-      {exceedsBalance && (
-        <Text className={styles.errorParagraph} data-testid="no-val-warning">
-          Amount exceeds available balance
-        </Text>
-      )}
-
-      <div
-        style={{
-          position: 'absolute',
-          top: 325,
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          padding: '1rem',
-          borderTop: '1px solid #E0E0E0'
-        }}
-      >
+      <div className={styles.buttons}>
         <Button
-          disabled={hasNoValue || exceedsBalance || address.trim() === ''}
+          disabled={hasNoValue || exceedsBalance || address.trim() === ""}
           color="primary"
           block
           size="medium"

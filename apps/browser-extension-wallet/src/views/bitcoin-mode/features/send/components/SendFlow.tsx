@@ -148,7 +148,7 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   const goToFeeSelection = () => setStep('FEE');
   // Step 2 -> 3
   const goToReview = () => {
-    const unsignedTransaction = buildTransaction(knownAddresses, address, address, feeRate, btcStringToSatoshisBigint(amount), utxos, network!);
+    const unsignedTransaction = buildTransaction(knownAddresses, knownAddresses[0].address, address, feeRate, btcStringToSatoshisBigint(amount), utxos, network!);
     setUnsignedTransaction(unsignedTransaction);
     setStep('REVIEW')
   };

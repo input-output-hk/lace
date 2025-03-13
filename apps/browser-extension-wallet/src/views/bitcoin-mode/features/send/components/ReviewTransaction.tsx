@@ -1,10 +1,9 @@
-
 import React from "react";
-import {renderLabel, RowContainer} from "@lace/core";
-import {Flex, Text} from "@input-output-hk/lace-ui-toolkit";
+import { renderLabel, RowContainer } from "@lace/core";
+import { Flex, Text } from "@input-output-hk/lace-ui-toolkit";
 import styles from "./ReviewTransaction.module.scss";
-import {Button} from "@lace/common";
-import {BitcoinWallet} from "@lace/bitcoin";
+import { Button } from "@lace/common";
+import { BitcoinWallet } from "@lace/bitcoin";
 
 const SATS_IN_BTC = 100000000;
 
@@ -23,28 +22,27 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
                                                                       feeRate,
                                                                       estimatedTime,
                                                                       onConfirm,
-                                                                      onBack
+                                                                      onBack,
                                                                     }) => {
-
   const amount = Number(unsignedTransaction.amount);
   const usdValue = (amount / SATS_IN_BTC) * btcToUsdRate;
-
   const feeInBtc = unsignedTransaction.fee;
   const totalSpend = amount + Number(feeInBtc);
 
-  console.error('unsignedTransaction', unsignedTransaction);
-  console.error('unsignedTransaction.amount', unsignedTransaction.amount);
-  console.error('unsignedTransaction.fee', unsignedTransaction.fee);
-  console.error('unsignedTransaction.total', unsignedTransaction.amount + unsignedTransaction.fee);
+  console.error("unsignedTransaction", unsignedTransaction);
+  console.error("unsignedTransaction.amount", unsignedTransaction.amount);
+  console.error("unsignedTransaction.fee", unsignedTransaction.fee);
+  console.error("unsignedTransaction.total", unsignedTransaction.amount + unsignedTransaction.fee);
+
   return (
-    <div>
-      <div style={{paddingBottom: '1.5rem'}}>
+    <div className={styles.reviewContainer}>
+      <div className={styles.section}>
         <RowContainer>
-          {renderLabel({label: 'To', dataTestId: 'output-summary-recipient-title'})}
+          {renderLabel({ label: "To", dataTestId: "output-summary-recipient-title" })}
           <Flex className={styles.recipient} flexDirection="column">
             <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
               <Text.Address
-                color={'secondary'}
+                color="secondary"
                 className={styles.address}
                 data-testid="output-summary-recipient-address"
               >
@@ -55,37 +53,36 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
         </RowContainer>
       </div>
 
-      <div style={{paddingBottom: '1.5rem'}}>
+      <div className={styles.section}>
         <RowContainer>
           {renderLabel({
-            label: 'Total',
-            dataTestId: 'summary-total-spend',
-            onTooltipHover: () => {
-            }
+            label: "Total",
+            dataTestId: "summary-total-spend",
+            onTooltipHover: () => {},
           })}
           <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
             <Text.Address
-              color={'secondary'}
+              color="secondary"
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat((totalSpend / SATS_IN_BTC).toFixed(8))} BTC ({parseFloat(usdValue.toFixed(2))} USD)
+              {parseFloat((totalSpend / SATS_IN_BTC).toFixed(8))} BTC (
+              {parseFloat(usdValue.toFixed(2))} USD)
             </Text.Address>
           </Flex>
         </RowContainer>
       </div>
 
-      <div style={{paddingBottom: '1.5rem'}}>
+      <div className={styles.section}>
         <RowContainer>
           {renderLabel({
-            label: 'Sending',
-            dataTestId: 'summary-sending',
-            onTooltipHover: () => {
-            }
+            label: "Sending",
+            dataTestId: "summary-sending",
+            onTooltipHover: () => {},
           })}
           <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
             <Text.Address
-              color={'secondary'}
+              color="secondary"
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
@@ -95,41 +92,38 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
         </RowContainer>
       </div>
 
-      <div style={{paddingBottom: '1.5rem'}}>
+      <div className={styles.section}>
         <RowContainer>
           {renderLabel({
-            label: 'Fee',
-            tooltipContent: 'fee',
-            dataTestId: 'summary-fee',
-            onTooltipHover: () => {
-            }
+            label: "Fee",
+            tooltipContent: "fee",
+            dataTestId: "summary-fee",
+            onTooltipHover: () => {},
           })}
-
           <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
             <Text.Address
-              color={'secondary'}
+              color="secondary"
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
-              {parseFloat((Number(feeInBtc) / SATS_IN_BTC).toFixed(8))} BTC ({(feeRate * SATS_IN_BTC) / 1000} sats/vB)
+              {parseFloat((Number(feeInBtc) / SATS_IN_BTC).toFixed(8))} BTC (
+              {(feeRate * SATS_IN_BTC) / 1000} sats/vB)
             </Text.Address>
           </Flex>
         </RowContainer>
       </div>
 
-      <div style={{paddingBottom: '1.5rem'}}>
+      <div className={styles.section}>
         <RowContainer>
           {renderLabel({
-            label: 'Time',
-            tooltipContent: 'Estimated Confirmation Time',
-            dataTestId: 'summary-estimated-confirmation-time',
-            onTooltipHover: () => {
-            }
+            label: "Time",
+            tooltipContent: "Estimated Confirmation Time",
+            dataTestId: "summary-estimated-confirmation-time",
+            onTooltipHover: () => {},
           })}
-
           <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
             <Text.Address
-              color={'secondary'}
+              color="secondary"
               className={styles.address}
               data-testid="output-summary-recipient-address"
             >
@@ -139,17 +133,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
         </RowContainer>
       </div>
 
-      <div
-        style={{
-          position: 'absolute',
-          top: 325,
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          padding: '1rem',
-          borderTop: '1px solid #E0E0E0',
-        }}
-      >
+      <div className={styles.buttonContainer}>
         <Button
           color="primary"
           block

@@ -7,13 +7,17 @@ import { QRInfoWalletDrawer } from '../QRInfoWalletDrawer';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import { WalletUsedAddressesDrawer } from '../WalletUsedAddressesDrawer';
 import { Skeleton } from 'antd';
+import { BitcoinSendDrawer } from '@src/views/bitcoin-mode/features/send/components/BitcoinSendDrawer';
+import { BitcoinQRInfoWalletDrawer } from '@src/views/bitcoin-mode/features/receive-info/components/BitcoinQRInfoWalletDrawer';
 
 export enum DrawerContent {
   SEND_TRANSACTION = 'send-transaction',
   CO_SIGN_TRANSACTION = 'co-sign-transaction',
   RECEIVE_TRANSACTION = 'receive-transaction',
   SHOW_USED_ADDRESSES = 'show-used-addresses',
-  SIGN_MESSAGE = 'sign-message-addresses'
+  SIGN_MESSAGE = 'sign-message-addresses',
+  SEND_BITCOIN_TRANSACTION = 'send-bitcoin-transaction',
+  RECEIVE_BITCOIN_TRANSACTION = 'receive-bitcoin-transaction',
 }
 
 export interface DrawerConfig {
@@ -27,6 +31,7 @@ export interface DrawerConfig {
 }
 
 const renderDrawerContent = (content?: DrawerContent) => {
+  console.error('renderDrawerContent', content);
   switch (content) {
     case DrawerContent.SEND_TRANSACTION:
       return <Transaction flow="send" />;
@@ -38,6 +43,10 @@ const renderDrawerContent = (content?: DrawerContent) => {
       return <WalletUsedAddressesDrawer />;
     case DrawerContent.SIGN_MESSAGE:
       return <SignMessageDrawer />;
+    case DrawerContent.SEND_BITCOIN_TRANSACTION:
+      return <BitcoinSendDrawer/>;
+    case DrawerContent.RECEIVE_BITCOIN_TRANSACTION:
+      return <BitcoinQRInfoWalletDrawer/>;
     default:
       return <Skeleton />;
   }
