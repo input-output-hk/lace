@@ -15,7 +15,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Popup View
     When I navigate to Staking popup page
     And Delegation pool cards with rewards assigned are displayed in popup view
 
-  @LW-8934 @LW-8472
+  @LW-8934 @LW-8472 @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Start Staking - Delegated to multiple pools - "Expanded view" button click
     Given I navigate to Staking popup page
     And I see Expanded View banner

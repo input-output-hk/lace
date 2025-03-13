@@ -1,5 +1,4 @@
 export { WalletSetupSelectAccountsStepRevamp } from './WalletSetupSelectAccountsStepRevamp';
-export { WalletSetupOptionsStepRevamp } from './WalletSetupOptionsStepRevamp';
 export { MnemonicVideoPopupContent } from './MnemonicVideoPopupContent';
 export {
   RecoveryPhraseLength,

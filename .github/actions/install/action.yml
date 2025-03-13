@@ -9,7 +9,6 @@ inputs:
     description: 'GitHub Token'
     required: true
 
-
 runs:
   using: 'composite'
   steps:
@@ -21,10 +20,24 @@ runs:
 
     - name: Configure Yarn to use GitHub Packages
       run: |
-        echo "npmScopes:" >> ~/.yarnrc.yml
-        echo "  input-output-hk:" >> ~/.yarnrc.yml
-        echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> ~/.yarnrc.yml
-        echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> ~/.yarnrc.yml
+        SCOPE="input-output-hk"
+        FILE="$HOME/.yarnrc.yml"
+        if grep -q "npmScopes:" "$FILE"; then
+          if ! grep -q "$SCOPE:" "$FILE"; then
+            echo "  $SCOPE:" >> "$FILE"
+            echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> "$FILE"
+            echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
+            echo "Added $SCOPE to $FILE"
+          else
+            echo "$SCOPE already present in $FILE"
+          fi
+        else
+          echo "npmScopes:" >> "$FILE"
+          echo "  $SCOPE:" >> "$FILE"
+          echo "    npmRegistryServer: \"https://npm.pkg.github.com\"" >> "$FILE"
+          echo "    npmAuthToken: \"${{ inputs.GITHUB_TOKEN }}\"" >> "$FILE"
+          echo "Added npmScopes and $SCOPE to $FILE"
+        fi
       shell: bash
 
     - name: Node modules cache

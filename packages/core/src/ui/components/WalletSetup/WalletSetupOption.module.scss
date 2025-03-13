@@ -26,6 +26,22 @@
     font-size: var(--subHeading);
     transform: scale(1.2);
   }
+
+  &.disabled {
+    .title {
+      color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    }
+    .description {
+      color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    }
+    .icon {
+      color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    }
+    .button {
+      color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+      border-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey));
+    }
+  }
 }
 
 .ContainerWordsConfirm {

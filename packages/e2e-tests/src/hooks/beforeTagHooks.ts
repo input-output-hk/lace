@@ -205,10 +205,10 @@ Before(
   async () => await extendedViewRepositoryWalletInitialization([TestWalletName.HdWalletReadOnly1])
 );
 
-Before(
-  { tags: '@SendNftHdWallet-Extended-E2E' },
-  async () => await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendNftHdWalletE2E])
-);
+Before({ tags: '@SendNftHdWallet-Extended-E2E' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendNftHdWalletE2E]);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});
 
 Before({ tags: '@Multidelegation-DelegatedFunds-SinglePool-Popup' }, async () => {
   await popupViewRepositoryWalletInitialization([TestWalletName.MultidelegationDelegatedSingle]);

@@ -3,21 +3,26 @@ import { useWalletStore } from '@src/stores';
 import { Wallet } from '@lace/cardano';
 import { DEFAULT_POLLING_CONFIG } from '@cardano-sdk/wallet';
 import { useObservable } from '@lace/common';
+import { ObservedValueOf } from 'rxjs';
 
 const TX_HISTORY_LOADING = {
   transactions: undefined as Wallet.Cardano.HydratedTx[],
   mightHaveMore: false
 };
 
-export const useTxHistoryLoader = (
-  pageSize: number
-): {
-  loadMore: ReturnType<typeof Wallet.createTxHistoryLoader>['loadMore'];
+type TxHistoryLoader = ReturnType<typeof Wallet.createTxHistoryLoader>;
+
+export type UseTxHistoryLoader = {
+  loadMore: TxHistoryLoader['loadMore'];
+  retry: TxHistoryLoader['retry'];
+  error: ObservedValueOf<TxHistoryLoader['error$']>;
   loadedHistory: {
     transactions: Wallet.Cardano.HydratedTx[];
     mightHaveMore: boolean;
   };
-} => {
+};
+
+export const useTxHistoryLoader = (pageSize: number): UseTxHistoryLoader => {
   const {
     blockchainProvider: { chainHistoryProvider },
     cardanoWallet
@@ -43,6 +48,9 @@ export const useTxHistoryLoader = (
 
   const loadedHistory = useObservable(txHistoryLoader.loadedHistory$, TX_HISTORY_LOADING);
 
+  // eslint-disable-next-line unicorn/no-null
+  const error = useObservable(txHistoryLoader.error$, null);
+
   useEffect(() => {
     if (
       loadedHistory.transactions?.length &&
@@ -56,8 +64,10 @@ export const useTxHistoryLoader = (
   return useMemo(
     () => ({
       loadMore: txHistoryLoader.loadMore,
-      loadedHistory
+      retry: txHistoryLoader.retry,
+      loadedHistory,
+      error
     }),
-    [loadedHistory, txHistoryLoader.loadMore]
+    [loadedHistory, error, txHistoryLoader.loadMore, txHistoryLoader.retry]
   );
 };

@@ -1,7 +1,8 @@
 /* eslint-disable react/no-multi-comp */
+import { contextLogger } from '@cardano-sdk/util';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Box, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
-import { Button, WarningBanner } from '@lace/common';
+import { Button, WarningBanner, logger as commonLogger } from '@lace/common';
 import cn from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +14,8 @@ import styles from './TransactionComplete.module.scss';
 type TransactionFailProps = {
   popupView?: boolean;
 };
+
+const logger = contextLogger(commonLogger, 'Staking:TransactionFail');
 
 export const TransactionFail = ({ popupView }: TransactionFailProps): React.ReactElement => {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
@@ -123,16 +126,19 @@ export const TransactionFailFooter = ({ popupView }: TransactionFailProps): Reac
       portfolioMutators.executeCommand({ type: 'DrawerContinue' });
       clearSecrets();
     } catch (error: unknown) {
-      console.error('failed to sign or submit tx due to:', error);
       setIsLoading(false);
 
       if (error instanceof Error && error.message === 'MULTIDELEGATION_NOT_SUPPORTED') {
+        const parsedError = parseError(error);
+        logger.warn('Multi-delegation is not supported by the device.', parsedError);
         portfolioMutators.executeCommand({
           data: {
-            error: parseError(error),
+            error: parsedError,
           },
           type: 'HwSkipToDeviceFailure',
         });
+      } else {
+        logger.error('Failed to sign or submit tx', error);
       }
     }
   };

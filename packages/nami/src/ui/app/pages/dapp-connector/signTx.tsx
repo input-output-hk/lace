@@ -6,7 +6,7 @@ import type { RefObject } from 'react';
 import React, { useCallback } from 'react';
 
 import { metadatum, Serialization } from '@cardano-sdk/core';
-import { toSerializableObject } from '@cardano-sdk/util';
+import { contextLogger, toSerializableObject } from '@cardano-sdk/util';
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -51,7 +51,7 @@ import type { DappConnector } from '../../../../features/dapp-outside-handles-pr
 import type { Asset as NamiAsset } from '../../../../types/assets';
 import type { AssetsModalRef } from '../../components/assetsModal';
 import type { Cardano } from '@cardano-sdk/core';
-import { logger } from '@lace/common';
+import { logger as commonLogger } from '@lace/common';
 
 interface Props {
   dappConnector: DappConnector;
@@ -68,6 +68,8 @@ interface Property {
   contract: boolean;
   datum: boolean;
 }
+
+const logger = contextLogger(commonLogger, 'Nami:DappConnector:SignTx');
 
 export const SignTx = ({
   inMemoryWallet,
@@ -131,7 +133,11 @@ export const SignTx = ({
         try {
           metadataJson[key.toString()] = metadatum.metadatumToJson(value);
         } catch (error) {
-          console.error(`error parsing tx ${tx.id} metadatum`, { error });
+          logger.warn(`Cannot parse metadatum for transaction`, {
+            txId: tx.id,
+            metadatumKey: key.toString(),
+            error,
+          });
         }
       }
       metadataJson = JSON.stringify(

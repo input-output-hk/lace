@@ -6,7 +6,7 @@ import noop from 'lodash/noop';
 import { mapWalletActivities } from '@src/stores/slices';
 import { Wallet } from '@lace/cardano';
 import { AssetActivityListProps, useItemsPageSize } from '@lace/core';
-import { useTxHistoryLoader } from './useTxHistoryLoader';
+import { UseTxHistoryLoader, useTxHistoryLoader } from './useTxHistoryLoader';
 import { useAsyncSwitchMap } from '@hooks/useAsyncSwitchMap';
 
 type UseWalletActivitiesProps = {
@@ -58,11 +58,12 @@ export const useWalletActivities = ({
   };
 };
 
-export type WalletActivitiesPaginated = Pick<WalletActivities, 'walletActivities'> & {
-  loadMore: () => void;
-  mightHaveMore: boolean;
-  loadedTxLength?: number;
-};
+export type WalletActivitiesPaginated = Pick<WalletActivities, 'walletActivities'> &
+  Pick<UseTxHistoryLoader, 'error' | 'retry'> & {
+    loadMore: () => void;
+    mightHaveMore: boolean;
+    loadedTxLength?: number;
+  };
 
 export const useWalletActivitiesPaginated = ({
   sendAnalytics
@@ -85,7 +86,7 @@ export const useWalletActivitiesPaginated = ({
 
   const pageSize = useItemsPageSize();
 
-  const { loadMore: txHistoryLoaderLoadMore, loadedHistory } = useTxHistoryLoader(pageSize);
+  const { loadMore: txHistoryLoaderLoadMore, retry, error, loadedHistory } = useTxHistoryLoader(pageSize);
 
   const fetchActivitiesProps = useMemo(
     () => ({
@@ -168,6 +169,8 @@ export const useWalletActivitiesPaginated = ({
     walletActivities,
     mightHaveMore: loadedHistory?.mightHaveMore,
     loadedTxLength: loadedHistory?.transactions?.slice(0, currentPage * pageSize).length,
-    loadMore
+    loadMore,
+    retry,
+    error
   };
 };

@@ -21,7 +21,7 @@ import {
   Image,
   Input,
   InputGroup,
-  InputRightElement,
+  Tooltip,
   Menu,
   MenuButton,
   MenuDivider,
@@ -53,7 +53,6 @@ import {
   Tab,
   TabPanels,
   TabPanel,
-  Tooltip,
   useColorModeValue,
   Flex,
 } from '@chakra-ui/react';
@@ -308,17 +307,28 @@ const Wallet = ({
                     Delete Account
                   </MenuItem>
                 )}
-                <MenuItem
-                  icon={<Icon as={GiUsbKey} w={3} h={3} />}
-                  onClick={(): void => {
-                    void (async () => {
-                      await capture(Events.HWConnectClick);
-                      openHWFlow(TAB.hw);
-                    })();
-                  }}
+                <Tooltip
+                  shouldWrapChildren
+                  isDisabled={process.env.BROWSER !== 'firefox'}
+                  label={
+                    'Hardware wallets are not supported due to Firefox limitations'
+                  }
+                  fontSize="sm"
+                  hasArrow
                 >
-                  Connect Hardware Wallet
-                </MenuItem>
+                  <MenuItem
+                    isDisabled={process.env.BROWSER === 'firefox'}
+                    icon={<Icon as={GiUsbKey} w={3} h={3} />}
+                    onClick={(): void => {
+                      void (async () => {
+                        await capture(Events.HWConnectClick);
+                        openHWFlow(TAB.hw);
+                      })();
+                    }}
+                  >
+                    Connect Hardware Wallet
+                  </MenuItem>
+                </Tooltip>
                 <MenuDivider />
                 <MenuItem
                   icon={<Icon as={FaRegFileCode} w={3} h={3} />}

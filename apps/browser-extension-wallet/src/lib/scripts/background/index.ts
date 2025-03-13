@@ -6,3 +6,4 @@ import './services/expose';
 import './keep-alive-sw';
 import './onUninstall';
 import './nami-migration';
+import './onStorageChange';

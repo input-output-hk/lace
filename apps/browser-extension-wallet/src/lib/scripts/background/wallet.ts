@@ -51,6 +51,7 @@ import { isLacePopupOpen$, createUserSessionTracker, isLaceTabActive$ } from './
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
+import { isBackgroundProcess } from '@cardano-sdk/util';
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(
@@ -59,7 +60,7 @@ const pollController$ = new TrackerSubject(
   )
 );
 
-if (typeof window !== 'undefined') {
+if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
 }
 
@@ -123,17 +124,8 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    webStorage.onChanged.addListener((changes) => {
-      const oldLogLevelValue = changes.BACKGROUND_STORAGE?.oldValue?.logLevel;
-      const newLogLevelValue = changes.BACKGROUND_STORAGE?.newValue?.logLevel;
-      if (oldLogLevelValue !== newLogLevelValue) {
-        logger.setLogLevel(newLogLevelValue);
-      }
-    });
-
-    let providers = await getProviders(chainName);
-
     const baseUrl = getBaseUrlForChain(chainName);
+    let providers = await getProviders(chainName);
 
     // Sanchonet does not have a handle provider
     const supportsHandleResolver = chainName !== 'Sanchonet';

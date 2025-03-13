@@ -1,6 +1,7 @@
 import { browser } from '@wdio/globals';
 
 export const switchToLastWindow = async (): Promise<void> => {
+  await browser.pause(1000);
   const windowHandles = await browser.getWindowHandles();
   await browser.switchToWindow(windowHandles[windowHandles.length - 1]);
 };
@@ -33,11 +34,32 @@ export const waitUntilExpectedNumberOfHandles = async (expectedNumberOfHandles: 
   await browser.waitUntil(async () => (await browser.getWindowHandles()).length === expectedNumberOfHandles, {
     timeout: 20_000,
     timeoutMsg: `failed while waiting for ${expectedNumberOfHandles} window handles. Actual number of handles ${
-      (
-        await browser.getWindowHandles()
-      ).length
+      (await browser.getWindowHandles()).length
     }`
   });
+};
+
+export const switchToWindowWithUrl = async (urlPattern: string, isPartialMatch = false): Promise<void> => {
+  await browser.waitUntil(
+    async () => {
+      const handles = await browser.getWindowHandles();
+      for (const handle of handles) {
+        await browser.switchToWindow(handle);
+        const currentUrl = await browser.getUrl();
+
+        if (isPartialMatch ? currentUrl.includes(urlPattern) : currentUrl === urlPattern) {
+          return true;
+        }
+      }
+      return false;
+    },
+    {
+      timeout: 10_000,
+      timeoutMsg: `Failed to switch to page with URL: ${urlPattern}`
+    }
+  );
+
+  await browser.switchWindow(urlPattern);
 };
 
 export const switchToWindowWithLace = async (delay = 1000): Promise<void> => {
