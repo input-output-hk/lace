@@ -31,6 +31,17 @@ Feature: DApp Explorer - extended view
       | Other        |
       | Show All     |
 
+  @LW-12109 @LW-12110
+  Scenario Outline: Extended View - DApp Explorer - open DApp details
+    When I navigate to DApps extended page
+    And I click on "<dapp_name>" DApp card
+    Then "<dapp_name>" DApp details drawer is displayed
+    When I click on DApp URL button
+    Then New tab with url containing "<dapp_url>" is opened
+    Examples:
+      | dapp_name | dapp_url                  |
+      | DexHunter | https://app.dexhunter.io/ |
+
   @LW-12320
   Scenario: Extended View - "No DApps available" when no connection with DApp Radar
     When I am in the offline network mode

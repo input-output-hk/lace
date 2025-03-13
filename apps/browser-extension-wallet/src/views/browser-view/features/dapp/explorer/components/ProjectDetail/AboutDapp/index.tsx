@@ -16,13 +16,17 @@ export const AboutDapp: React.FC = () => {
     <>
       <Box my="$24">
         <Box mb="$12">
-          <Text.SubHeading data-testid={'dapp-short-description-label'}>{'Summary'}</Text.SubHeading>
+          <Text.SubHeading data-testid={'dapp-short-description-label'}>
+            {t('dappdiscovery.side_panel.summary')}
+          </Text.SubHeading>
         </Box>
         <Text.Body.Normal data-testid={'dapp-short-description-text'}>{data?.shortDescription}</Text.Body.Normal>
       </Box>
       <Box my="$24">
         <Box mb="$12">
-          <Text.SubHeading data-testid={'dapp-long-description-label'}>{'DApp Description'}</Text.SubHeading>
+          <Text.SubHeading data-testid={'dapp-long-description-label'}>
+            {t('dappdiscovery.side_panel.dapp_description')}
+          </Text.SubHeading>
         </Box>
         <Text.Body.Normal data-testid={'dapp-long-description-text'}>
           <div dangerouslySetInnerHTML={{ __html: data?.longDescription }} />

@@ -2,6 +2,9 @@ import { Then, When } from '@cucumber/cucumber';
 import DAppExplorerPageAssert from '../assert/DAppExplorer/DAppExplorerPageAssert';
 import DAppExplorerPage from '../elements/DAppExplorer/DAppExplorerPage';
 import { DAppCategories } from '../types/dappCategories';
+import { DAppCard } from '../elements/DAppExplorer/DAppCard';
+import DAppInfoDrawer from '../elements/DAppExplorer/DAppInfoDrawer';
+import DAppInfoDrawerAssert from '../assert/DAppExplorer/DAppInfoDrawerAssert';
 
 Then(/^I see DApp Explorer page$/, async () => {
   await DAppExplorerPageAssert.assertSeeDAppExplorerPage();
@@ -46,4 +49,19 @@ Then(
 
 Then(/^"No DApps available" message is displayed$/, async () => {
   await DAppExplorerPageAssert.assertSeeNoDAppsMessage();
+});
+
+When(/^I click on "([^"]*)" DApp card$/, async (dappName: string) => {
+  const dapp = new DAppCard(dappName);
+  await dapp.container.waitForClickable();
+  await dapp.container.click();
+});
+
+Then(/^"([^"]*)" DApp details drawer is displayed$/, async (dappName: string) => {
+  await DAppInfoDrawerAssert.assertSeeDAppInfoDrawer(dappName);
+});
+
+When(/^I click on DApp URL button$/, async () => {
+  await DAppInfoDrawer.dappOpenButton.waitForClickable();
+  await DAppInfoDrawer.dappOpenButton.click();
 });

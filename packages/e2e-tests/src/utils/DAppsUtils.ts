@@ -1,5 +1,6 @@
 import LocalStorageManager from './localStorageManager';
 import { DAppCategories } from '../types/dappCategories';
+import { browser } from '@wdio/globals';
 
 const STORAGE_KEY = 'dapp-explorer-data-cache';
 // Values taken from PostHog
@@ -7,6 +8,7 @@ const DAppWithConnectivityIssues = new Set([27_302, 19_473, 19_796, 19_717, 18_8
 const disallowedCategories = ['gambling', 'high-risk'];
 
 export const getDAppsFromLocalStorage = async (targetKey: string, limit: number): Promise<any[]> => {
+  await browser.pause(1000);
   const rawData = await LocalStorageManager.getItem(STORAGE_KEY);
   if (!rawData) throw new Error(`No data found in localStorage for key: ${STORAGE_KEY}`);
 
@@ -35,12 +37,12 @@ export const getDAppsFromLocalStorage = async (targetKey: string, limit: number)
 
 export const getAllDAppNamesFromLocalStorage = async (): Promise<string[]> => {
   const targetKey = 'https://apis.dappradar.com/v2/dapps/top/uaw?chain=cardano&range=30d&top=100';
-  const dapps = await getDAppsFromLocalStorage(targetKey, 30);
+  const dapps = await getDAppsFromLocalStorage(targetKey, 100);
   return dapps.map((dapp) => String(dapp?.name));
 };
 
 export const getDAppNamesFromLocalStorageByCategory = async (category: DAppCategories): Promise<string[]> => {
   const targetKey = `https://apis.dappradar.com/v2/dapps/top/uaw?chain=cardano&range=30d&top=100&category=${category.toLowerCase()}`;
-  const dapps = await getDAppsFromLocalStorage(targetKey, 30);
+  const dapps = await getDAppsFromLocalStorage(targetKey, 100);
   return dapps.map((dapp) => String(dapp?.name));
 };

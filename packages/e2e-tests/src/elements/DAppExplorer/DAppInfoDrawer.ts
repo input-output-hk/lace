@@ -1,5 +1,6 @@
-/* eslint-disable no-undef */
-import { ChainablePromiseElement } from 'webdriverio';
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+import type { ChainablePromiseArray } from 'webdriverio/build/types';
 import CommonDrawerElements from '../CommonDrawerElements';
 
 class DAppInfoDrawer extends CommonDrawerElements {
@@ -12,6 +13,7 @@ class DAppInfoDrawer extends CommonDrawerElements {
   private readonly SUMMARY_TEXT = '[data-testid="dapp-short-description-text"]';
   private readonly DESCRIPTION_LABEL = '[data-testid="dapp-long-description-label"]';
   private readonly DESCRIPTION_TEXT = '[data-testid="dapp-long-description-text"]';
+  private readonly CONTACT_ITEM = '[data-testid="contact-item"]';
   private readonly OPEN_BUTTON = '[data-testid="open-dapp-url-button"]';
 
   get icon(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -48,6 +50,10 @@ class DAppInfoDrawer extends CommonDrawerElements {
 
   get descriptionText(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DESCRIPTION_TEXT);
+  }
+
+  get contactItems(): ChainablePromiseArray<WebdriverIO.ElementArray> {
+    return $$(this.CONTACT_ITEM);
   }
 
   get dappOpenButton(): ChainablePromiseElement<WebdriverIO.Element> {

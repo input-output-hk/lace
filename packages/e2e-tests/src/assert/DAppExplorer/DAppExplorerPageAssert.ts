@@ -78,7 +78,7 @@ class DAppExplorerPageAssert {
         ? await getAllDAppNamesFromLocalStorage()
         : await getDAppNamesFromLocalStorageByCategory(category);
     expect(dappNamesFromLocalStorage.length).to.be.greaterThan(0);
-    expect(dappNamesFromLocalStorage.length).to.be.lessThanOrEqual(30);
+    expect(dappNamesFromLocalStorage.length).to.be.lessThanOrEqual(100);
     const displayedDApps = await DAppExplorerPage.dappCards;
     expect(displayedDApps.length).to.equal(dappNamesFromLocalStorage.length);
     for (const dappName of dappNamesFromLocalStorage) {
