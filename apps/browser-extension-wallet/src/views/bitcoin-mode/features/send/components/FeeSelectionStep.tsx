@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input } from "@lace/common";
-import { BitcoinWallet } from "@lace/bitcoin/";
+import { Bitcoin } from "@lace/bitcoin/";
 import styles from "./FeeSelectionStep.module.scss";
 
 interface RecommendedFee {
@@ -21,20 +21,20 @@ interface FeeSelectionProps {
   feeRate: number;
   onFeeRateChange: (value: number) => void;
   estimatedTime: string;
-  feeMarkets: BitcoinWallet.EstimatedFees | null;
+  feeMarkets: Bitcoin.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
   onContinue: () => void;
   onBack: () => void;
 }
 
 export const FeeSelectionStep: React.FC<FeeSelectionProps> = ({
-                                                                feeRate,
-                                                                feeMarkets,
-                                                                onFeeRateChange,
-                                                                onEstimatedTimeChange,
-                                                                onContinue,
-                                                                onBack,
-                                                              }) => {
+  feeRate,
+  feeMarkets,
+  onFeeRateChange,
+  onEstimatedTimeChange,
+  onContinue,
+  onBack,
+}) => {
   if (feeMarkets) {
     recommendedFees[0].feeRate = feeMarkets.fast.feeRate;
     recommendedFees[1].feeRate = feeMarkets.standard.feeRate;

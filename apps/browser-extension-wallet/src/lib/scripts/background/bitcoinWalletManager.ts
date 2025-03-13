@@ -12,7 +12,7 @@ import { Logger } from 'ts-log';
 import {
   storage
 } from '@cardano-sdk/wallet';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 import { BehaviorSubject, firstValueFrom, lastValueFrom, Observable, ReplaySubject } from "rxjs";
 import { Storage } from "webextension-polyfill";
 import { InvalidArgumentError } from '@cardano-sdk/util';
@@ -23,7 +23,7 @@ export interface BitcoinWalletManagerProps {
 export interface BitcoinWalletManagerActivateProps {
   walletId: WalletId;
   accountIndex?: number;
-  network: BitcoinWallet.Network;
+  network: Bitcoin.Network;
 }
 
 export interface BitcoinWalletManagerApi {
@@ -40,7 +40,7 @@ export interface BitcoinWalletManagerApi {
    *
    * @param network The network to switch to.
    */
-  switchNetwork(network: BitcoinWallet.Network): Promise<void>;
+  switchNetwork(network: Bitcoin.Network): Promise<void>;
 
   /**
    * Deactivate wallet. Wallet observable properties will emit only after a new wallet is activated.
@@ -56,7 +56,7 @@ export interface BitcoinWalletManagerApi {
    * @param walletId The walletId of the wallet to destroy.
    * @param network The chainId of the network to destroy the wallet in.
    */
-  destroyData(walletId: WalletId, network: BitcoinWallet.Network): Promise<void>;
+  destroyData(walletId: WalletId, network: Bitcoin.Network): Promise<void>;
 }
 
 export interface BitcoinWalletFactory<WalletMetadata extends { name: string }, AccountMetadata extends { name: string }> {
@@ -64,7 +64,7 @@ export interface BitcoinWalletFactory<WalletMetadata extends { name: string }, A
     props: BitcoinWalletManagerActivateProps,
     wallet: AnyWallet<WalletMetadata, AccountMetadata>,
     dependencies: { stores: storage.WalletStores }
-  ) => Promise<BitcoinWallet.BitcoinWallet>;
+  ) => Promise<Bitcoin.BitcoinWallet>;
 }
 
 export interface StoresFactory {
@@ -80,7 +80,7 @@ export interface StoresFactory {
 const isAnyBip32Wallet = (wallet: AnyWallet<any, any>): wallet is AnyBip32Wallet<any, any> =>
   wallet.type === WalletType.InMemory || wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor;
 
-export const getWalletStoreId = (walletId: WalletId, network: BitcoinWallet.Network, accountIndex?: number): string => {
+export const getWalletStoreId = (walletId: WalletId, network: Bitcoin.Network, accountIndex?: number): string => {
   return `${network}-${walletId}-${accountIndex}`;
 };
 
@@ -95,7 +95,7 @@ export interface BitcoinWalletManagerDependencies<
 }
 
 export interface BitcoinActiveWallet {
-  wallet: BitcoinWallet.BitcoinWallet;
+  wallet: Bitcoin.BitcoinWallet;
   props: BitcoinWalletManagerActivateProps;
 }
 
@@ -143,7 +143,7 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
    *
    * @param network The network id to switch to.
    */
-  switchNetwork(network: BitcoinWallet.Network): Promise<void> {
+  switchNetwork(network: Bitcoin.Network): Promise<void> {
     if (!this.#hasBitcoinActiveWallet()) return Promise.resolve();
 
     const props = { ...this.#activeWalletProps!, network };
@@ -224,7 +224,7 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
    * @param walletId The walletId of the wallet to destroy.
    * @param network The network of the wallet to destroy.
    */
-  async destroyData(walletId: WalletId, network: BitcoinWallet.Network): Promise<void> {
+  async destroyData(walletId: WalletId, network: Bitcoin.Network): Promise<void> {
     await this.#destroyWalletStores(walletId, network);
   }
 
@@ -261,7 +261,7 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
    * @param network The chain id to destroy.
    * @private
    */
-  async #destroyWalletStores(walletId: WalletId, network: BitcoinWallet.Network): Promise<void> {
+  async #destroyWalletStores(walletId: WalletId, network: Bitcoin.Network): Promise<void> {
     if (this.#activeWalletProps?.walletId === walletId)
       throw new InvalidArgumentError('walletId', 'Cannot destroy active wallet');
 
@@ -328,12 +328,12 @@ export class BitcoinWalletManager<WalletMetadata extends { name: string }, Accou
 export interface BitcoinWalletManagerApi {
   activeWalletId$: Observable<BitcoinWalletManagerActivateProps | null>;
   activate(props: BitcoinWalletManagerActivateProps, force?: boolean): Promise<void>;
-  switchNetwork(network: BitcoinWallet.Network): Promise<void>;
+  switchNetwork(network: Bitcoin.Network): Promise<void>;
   deactivate(): Promise<void>;
-  destroyData(walletId: WalletId, network: BitcoinWallet.Network): Promise<void>;
+  destroyData(walletId: WalletId, network: Bitcoin.Network): Promise<void>;
 }
 
-export const bitcoinWalletProperties: RemoteApiProperties<BitcoinWallet.BitcoinWallet> = {
+export const bitcoinWalletProperties: RemoteApiProperties<Bitcoin.BitcoinWallet> = {
   getInfo: RemoteApiPropertyType.MethodReturningPromise,
   getNetwork: RemoteApiPropertyType.MethodReturningPromise,
   getAddress: RemoteApiPropertyType.MethodReturningPromise,
@@ -354,7 +354,7 @@ export const bitcoinWalletManagerProperties: RemoteApiProperties<BitcoinWalletMa
   switchNetwork: RemoteApiPropertyType.MethodReturningPromise
 };
 
-export const bitcoinProviderProperties: RemoteApiProperties<BitcoinWallet.BlockchainDataProvider> = {
+export const bitcoinProviderProperties: RemoteApiProperties<Bitcoin.BlockchainDataProvider> = {
   getLastKnownBlock: RemoteApiPropertyType.MethodReturningPromise,
   getTransactions: RemoteApiPropertyType.MethodReturningPromise,
   getTransactionsInMempool: RemoteApiPropertyType.MethodReturningPromise,

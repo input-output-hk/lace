@@ -11,14 +11,14 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletManager} from '@hooks';
 import isEqual from "lodash/isEqual";
-import { BitcoinWallet } from "@lace/bitcoin";
+import { Bitcoin } from "@lace/bitcoin";
 
 export const BitcoinQRInfoWalletDrawer = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const { theme } = useTheme();
   const [, closeDrawer] = useDrawer();
   const { bitcoinWallet } = useWalletManager();
-  const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
+  const [addresses, setAddresses] = useState<Bitcoin.DerivedAddress[]>([]);
   const [activeWalletName, setActiveWalletName] = useState<string>('');
   const { getActiveWalletName } = useWalletManager();
 

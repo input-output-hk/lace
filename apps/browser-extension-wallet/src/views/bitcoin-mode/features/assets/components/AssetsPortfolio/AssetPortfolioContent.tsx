@@ -8,7 +8,7 @@ import { LACE_APP_ID } from '@utils/constants';
 import { IAssetDetails, TokenInformation } from '@views/browser/features/assets/types';
 import { useTranslation } from 'react-i18next';
 import styles from './AssetsPortfolio.module.scss';
-import {BitcoinWallet} from "@lace/bitcoin";
+import {Bitcoin} from "@lace/bitcoin";
 import isEqual from "lodash/isEqual";
 import {useWalletManager} from "@hooks";
 
@@ -51,7 +51,7 @@ export const AssetPortfolioContent = ({
     total: totalAssets
   });
   const { bitcoinWallet } = useWalletManager();
-  const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
+  const [addresses, setAddresses] = useState<Bitcoin.DerivedAddress[]>([]);
 
   useEffect(() => {
     const subscription = bitcoinWallet.addresses$.subscribe((newAddresses) => {

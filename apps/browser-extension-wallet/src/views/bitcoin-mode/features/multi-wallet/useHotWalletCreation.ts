@@ -6,7 +6,7 @@ import { getWalletAccountsQtyString } from '@utils/get-wallet-count-string';
 import { useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { useWalletOnboarding } from './walletOnboardingContext';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 
 type UseSoftwareWalletCreationParams = {
   initialMnemonic: string[];
@@ -16,7 +16,7 @@ type SendPostWalletAddAnalyticsParams = {
   extendedAccountPublicKey: Bip32PublicKeyHex;
   postHogActionHdWallet?: PostHogMultiWalletAction | PostHogOnboardingAction;
   postHogActionWalletAdded: PostHogMultiWalletAction | PostHogOnboardingAction;
-  wallet?: BitcoinWallet.BitcoinWallet;
+  wallet?: Bitcoin.BitcoinWallet;
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

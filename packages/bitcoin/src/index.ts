@@ -1,1 +1,1 @@
-export * as BitcoinWallet from '@wallet';
+export * as Bitcoin from '@wallet';

@@ -52,7 +52,7 @@ import {createUserSessionTracker, isLacePopupOpen$, isLaceTabActive$} from './se
 import {TrackerSubject} from '@cardano-sdk/util-rxjs';
 import {ExperimentName, FeatureFlags} from '../types/feature-flags';
 import {TX_HISTORY_LIMIT_SIZE} from '@utils/constants';
-import {BitcoinWallet} from '@lace/bitcoin';
+import {Bitcoin} from '@lace/bitcoin';
 import {
   bitcoinProviderProperties,
   BitcoinWalletFactory,
@@ -127,7 +127,7 @@ export const walletRepository = new WalletRepository({
 
 // eslint-disable-next-line unicorn/no-null
 const currentWalletProviders$ = new BehaviorSubject<Wallet.WalletProvidersDependencies | null>(null);
-const currentBitcoinWalletProvider$ = new BehaviorSubject<BitcoinWallet.BlockchainDataProvider | null>(null);
+const currentBitcoinWalletProvider$ = new BehaviorSubject<Bitcoin.BlockchainDataProvider | null>(null);
 
 const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   // eslint-disable-next-line complexity, max-statements
@@ -251,12 +251,12 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
     }
 
     let provider;
-    if (network === BitcoinWallet.Network.Testnet) {
-      provider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, BitcoinWallet.Network.Testnet);
+    if (network === Bitcoin.Network.Testnet) {
+      provider = new Bitcoin.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, Bitcoin.Network.Testnet);
     }
     else
     {
-      provider = new BitcoinWallet.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_MAINNET, BitcoinWallet.Network.Mainnet);
+      provider = new Bitcoin.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_MAINNET, Bitcoin.Network.Mainnet);
     }
 
     if (!walletAccount.metadata.bitcoin) {
@@ -281,7 +281,7 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
       : 10000;
 
     currentBitcoinWalletProvider$.next(provider);
-    return new BitcoinWallet.BitcoinWallet(provider, localPollingIntervalConfig, 20, walletInfo, network);
+    return new Bitcoin.BitcoinWallet(provider, localPollingIntervalConfig, 20, walletInfo, network);
   }
 };
 

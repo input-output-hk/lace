@@ -19,7 +19,7 @@ import { mergeMap, map, finalize } from 'rxjs/operators';
 import { runtime } from 'webextension-polyfill';
 import { Password } from '@input-output-hk/lace-ui-toolkit';
 import { logger } from '@lace/common';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 import { bitcoinWalletManagerProperties, bitcoinWalletProperties } from "@lib/scripts/background/bitcoinWalletManager";
 
 export const walletManager = consumeRemoteApi(
@@ -61,7 +61,7 @@ export const walletRepository = consumeRemoteApi<WalletRepositoryApi<Wallet.Wall
   { logger, runtime }
 );
 
-export const bitcoinWallet = consumeRemoteApi<BitcoinWallet.BitcoinWallet>(
+export const bitcoinWallet = consumeRemoteApi<Bitcoin.BitcoinWallet>(
   {
     baseChannel: 'bitcoin-wallet',
     properties: bitcoinWalletProperties,

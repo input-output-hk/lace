@@ -3,12 +3,12 @@ import { renderLabel, RowContainer } from "@lace/core";
 import { Flex, Text } from "@input-output-hk/lace-ui-toolkit";
 import styles from "./ReviewTransaction.module.scss";
 import { Button } from "@lace/common";
-import { BitcoinWallet } from "@lace/bitcoin";
+import { Bitcoin } from "@lace/bitcoin";
 
 const SATS_IN_BTC = 100000000;
 
 interface ReviewTransactionProps {
-  unsignedTransaction: BitcoinWallet.UnsignedTransaction;
+  unsignedTransaction: Bitcoin.UnsignedTransaction;
   btcToUsdRate: number;
   feeRate: number;
   estimatedTime: string;
@@ -17,13 +17,13 @@ interface ReviewTransactionProps {
 }
 
 export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
-                                                                      unsignedTransaction,
-                                                                      btcToUsdRate,
-                                                                      feeRate,
-                                                                      estimatedTime,
-                                                                      onConfirm,
-                                                                      onBack,
-                                                                    }) => {
+  unsignedTransaction,
+  btcToUsdRate,
+  feeRate,
+  estimatedTime,
+  onConfirm,
+  onBack,
+}) => {
   const amount = Number(unsignedTransaction.amount);
   const usdValue = (amount / SATS_IN_BTC) * btcToUsdRate;
   const feeInBtc = unsignedTransaction.fee;

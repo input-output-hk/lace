@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useRedirection, useWalletManager } from '@hooks';
 import { walletRoutePaths } from '../../../wallet-paths';
 import { ReceiveInfo } from './ReceiveInfo';
-import { BitcoinWallet } from "@lace/bitcoin";
+import { Bitcoin } from "@lace/bitcoin";
 import isEqual from "lodash/isEqual";
 
 export const ReceiveInfoContainer = (): React.ReactElement => {
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const { bitcoinWallet } = useWalletManager();
-  const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
+  const [addresses, setAddresses] = useState<Bitcoin.DerivedAddress[]>([]);
   const [activeWalletName, setActiveWalletName] = useState<string>('');
   const { getActiveWalletName } = useWalletManager();
 

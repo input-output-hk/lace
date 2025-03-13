@@ -5,7 +5,7 @@ import { GroupedAssetActivityList } from './GroupedAssetActivityList';
 import { ActivityStatus, TransactionActivityType } from './AssetActivityItem';
 import styles from './Activity.module.scss';
 import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
-import { BitcoinWallet } from '@lace/bitcoin/';
+import { Bitcoin } from '@lace/bitcoin/';
 import isEqual from 'lodash/isEqual';
 import dayjs from "dayjs";
 import { formatDate, formatTime } from "@utils/format-date";
@@ -34,15 +34,15 @@ export const ActivityLayout = (): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
 
-  const [recentTransactions, setRecentTransactions] = useState<BitcoinWallet.TransactionHistoryEntry[]>([]);
-  const [pendingTransaction, setPendingTransaction] = useState<BitcoinWallet.TransactionHistoryEntry[]>([]);
-  const [addresses, setAddresses] = useState<BitcoinWallet.DerivedAddress[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
+  const [pendingTransaction, setPendingTransaction] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
+  const [addresses, setAddresses] = useState<Bitcoin.DerivedAddress[]>([]);
   const [explorerBaseUrl, setExplorerBaseUrl] = useState<string>('');
 
   useEffect( () => {
     // TODO: Make into an observable
     bitcoinWallet.getNetwork().then((network) => {
-      if (network === BitcoinWallet.Network.Mainnet) {
+      if (network === Bitcoin.Network.Mainnet) {
         setExplorerBaseUrl(MEMPOOL_URLS.Mainnet);
       } else {
         setExplorerBaseUrl(MEMPOOL_URLS.Testnet4);
@@ -89,7 +89,7 @@ export const ActivityLayout = (): React.ReactElement => {
       }
       acc[dateKey].push(transaction);
       return acc;
-    }, {} as { [date: string]: BitcoinWallet.TransactionHistoryEntry[] });
+    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;
@@ -117,13 +117,13 @@ export const ActivityLayout = (): React.ReactElement => {
 
         return {
           id: transaction.transactionHash,
-          formattedTimestamp: transaction.status === BitcoinWallet.TransactionStatus.Pending
+          formattedTimestamp: transaction.status === Bitcoin.TransactionStatus.Pending
           ? 'PENDING'
           : formattedTimestamp(new Date(transaction.timestamp * 1000)),
           amount: `${new BigNumber(net.toString()).dividedBy(100000000).toFixed(8, BigNumber.ROUND_HALF_UP)} BTC`,
           fiatAmount: `${(new BigNumber((Number(net) / SATS_IN_BTC) * bitcoinPrice).toFixed(2, BigNumber.ROUND_HALF_UP))} USD`,
           status:
-            transaction.status === BitcoinWallet.TransactionStatus.Pending
+            transaction.status === Bitcoin.TransactionStatus.Pending
               ? ActivityStatus.PENDING
               : ActivityStatus.SUCCESS,
           type:

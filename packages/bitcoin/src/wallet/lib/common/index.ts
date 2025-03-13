@@ -3,7 +3,8 @@ export * from './keyDerivation';
 export * from './network';
 export * from './info';
 export * from './taproot';
+export * from './constants';
 
-export const toUint8Array = (input: string) => {
+export const toUint8Array = (input: string): Uint8Array => {
   return new Uint8Array(Buffer.from(input, 'utf-8'));
 };

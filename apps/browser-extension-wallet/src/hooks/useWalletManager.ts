@@ -58,7 +58,7 @@ import {
   useSecrets
 } from '@lace/core';
 import {logger} from '@lace/common';
-import {BitcoinWallet as BtcWallet} from '@lace/bitcoin';
+import {Bitcoin as BtcWallet} from '@lace/bitcoin';
 import {BitcoinWalletManagerApi} from "@lib/scripts/background/bitcoinWalletManager";
 import * as bip39 from 'bip39';
 

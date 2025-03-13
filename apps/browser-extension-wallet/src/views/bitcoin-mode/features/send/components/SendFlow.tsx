@@ -8,7 +8,7 @@ import { TransactionFailed } from "./TransactionFailed";
 import { UnauthorizedTx } from "./UnauthorizedTx";
 import { useFetchCoinPrice, useWalletManager } from "@hooks";
 import { useObservable } from "@lace/common";
-import { BitcoinWallet } from "@lace/bitcoin";
+import { Bitcoin } from "@lace/bitcoin";
 import { Wallet as Cardano } from "@lace/cardano";
 
 const SATS_IN_BTC = 100000000;
@@ -27,21 +27,21 @@ type Step =
   | 'SUCCESS'
   | 'FAILED';
 
-const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, seed: string, password: Uint8Array) => {
+const signTransaction = async (tx: Bitcoin.UnsignedTransaction, seed: string, password: Uint8Array) => {
   const encryptedSeed = Buffer.from(seed, 'hex');
   const rootPrivateKey = Buffer.from(await Cardano.KeyManagement.emip3decrypt(encryptedSeed, password));
   const signingKeys = tx.signers;
   const signers = [];
 
   for (const signingKey of signingKeys) {
-    const rootKeyPair = BitcoinWallet.deriveAccountRootKeyPair(
+    const rootKeyPair = Bitcoin.deriveAccountRootKeyPair(
       rootPrivateKey,
       signingKey.addressType,
       signingKey.network,
       signingKey.account
     );
 
-    const keyPair = BitcoinWallet.deriveChildKeyPair(
+    const keyPair = Bitcoin.deriveChildKeyPair(
       rootKeyPair.pair.privateKey,
       signingKey.chain,
       signingKey.index
@@ -49,10 +49,10 @@ const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, seed: stri
 
     let finalKeyPair = keyPair.pair;
 
-    if (signingKey.addressType === BitcoinWallet.AddressType.Taproot) {
+    if (signingKey.addressType === Bitcoin.AddressType.Taproot) {
       // Extract the internal x‑only public key (remove first byte of compressed pubkey)
       const internalXOnlyPubKey = keyPair.pair.publicKey.slice(1);
-      const tweakedPrivateKey = BitcoinWallet.tweakTaprootPrivateKey(keyPair.pair.privateKey, internalXOnlyPubKey);
+      const tweakedPrivateKey = Bitcoin.tweakTaprootPrivateKey(keyPair.pair.privateKey, internalXOnlyPubKey);
 
       finalKeyPair = {
         publicKey: keyPair.pair.publicKey,
@@ -60,11 +60,11 @@ const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, seed: stri
       };
     }
 
-    const signer = new BitcoinWallet.BitcoinSigner(finalKeyPair);
+    const signer = new Bitcoin.BitcoinSigner(finalKeyPair);
     signers.push(signer);
   }
 
-  const signedTx = BitcoinWallet.signTx(tx, signers);
+  const signedTx = Bitcoin.signTx(tx, signers);
 
   for (const signer of signers) {
     signer.clearSecrets();
@@ -75,8 +75,8 @@ const signTransaction = async (tx: BitcoinWallet.UnsignedTransaction, seed: stri
   return signedTx;
 }
 
-const buildTransaction = (knownAddresses: BitcoinWallet.DerivedAddress[], changeAddress: string, recipientAddress: string, feeRate: number, amount: bigint, utxos: BitcoinWallet.UTxO[], network: BitcoinWallet.Network): BitcoinWallet.UnsignedTransaction => {
-  return BitcoinWallet.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, knownAddresses);
+const buildTransaction = (knownAddresses: Bitcoin.DerivedAddress[], changeAddress: string, recipientAddress: string, feeRate: number, amount: bigint, utxos: Bitcoin.UTxO[], network: Bitcoin.Network): Bitcoin.UnsignedTransaction => {
+  return Bitcoin.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, knownAddresses);
 };
 
 const btcStringToSatoshisBigint = (btcString: string): bigint => {
@@ -94,15 +94,15 @@ export const  SendFlow: React.FC<SendFlowProps> = ({ updateSubtitle }) => {
   const [amount, setAmount] = useState<string>('');
   const [address, setAddress] = useState<string>('');
 
-  const [unsignedTransaction, setUnsignedTransaction] = useState<BitcoinWallet.UnsignedTransaction | null>(null);
+  const [unsignedTransaction, setUnsignedTransaction] = useState<Bitcoin.UnsignedTransaction | null>(null);
   const [feeRate, setFeeRate] = useState<number>(1);
   const [estimatedTime, setEstimatedTime] = useState<string>('~30 min');
 
-  const [feeMarkets, setFreeMarkets] = useState<BitcoinWallet.EstimatedFees | null>(null);
-  const [utxos, setUtxos] = useState<BitcoinWallet.UTxO[] | null>(null);
-  const [knownAddresses, setKnownAddresses] = useState<BitcoinWallet.DerivedAddress[] | null>(null);
-  const [walletInfo, setWalletInfo] = useState<BitcoinWallet.BitcoinWalletInfo | null>(null);
-  const [network, setWalletNetwork] = useState<BitcoinWallet.Network | null>(null);
+  const [feeMarkets, setFreeMarkets] = useState<Bitcoin.EstimatedFees | null>(null);
+  const [utxos, setUtxos] = useState<Bitcoin.UTxO[] | null>(null);
+  const [knownAddresses, setKnownAddresses] = useState<Bitcoin.DerivedAddress[] | null>(null);
+  const [walletInfo, setWalletInfo] = useState<Bitcoin.BitcoinWalletInfo | null>(null);
+  const [network, setWalletNetwork] = useState<Bitcoin.Network | null>(null);
   const [confirmationHash, setConfirmationHash] = useState<string>('');
 
   const { priceResult } = useFetchCoinPrice();
