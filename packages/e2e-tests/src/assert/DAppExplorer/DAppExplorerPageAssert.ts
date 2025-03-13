@@ -50,7 +50,7 @@ class DAppExplorerPageAssert {
     await DAppExplorerPage.categoryDefi.scrollIntoView();
     await DAppExplorerPage.categoryDefi.waitForDisplayed();
     expect(await DAppExplorerPage.categoryDefi.getText()).to.equal('Defi');
-    await DAppExplorerPage.categoryCollectibles.waitForDisplayed();
+    await DAppExplorerPage.categoryCollectibles.scrollIntoView();
     await DAppExplorerPage.categoryCollectibles.waitForDisplayed();
     expect(await DAppExplorerPage.categoryCollectibles.getText()).to.equal('Collectibles');
     await DAppExplorerPage.categoryMarketplaces.scrollIntoView();
