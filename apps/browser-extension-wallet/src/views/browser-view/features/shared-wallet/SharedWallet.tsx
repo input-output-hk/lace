@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useCallback, useEffect, useState } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
@@ -15,11 +16,12 @@ import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { walletRoutePaths } from '@routes';
 import { useWalletManager } from '@hooks';
 import { useWalletStore } from '@stores';
-import { WalletType } from '@cardano-sdk/web-extension';
+import { WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import * as KeyManagement from '@cardano-sdk/key-management';
+import { WalletConflictModal } from './components/NonRegisteredUserModal/WalletConflictModal';
 
 type CreateWalletParams = {
   coSigners: CoSigner[];
@@ -32,11 +34,12 @@ export const SharedWallet = (): JSX.Element => {
   const history = useHistory();
   const { walletRepository, generateSharedWalletKey, createMultiSigAccount, createInMemorySharedWallet } =
     useWalletManager();
-  const { walletInfo, cardanoWallet, environmentName, isHardwareWallet } = useWalletStore();
+  const { walletInfo, cardanoWallet, environmentName, isHardwareWallet, isSharedWallet } = useWalletStore();
   const { page, setBackgroundPage } = useBackgroundPage();
 
   const [sharedWalletKey, setSharedWalletKey] = useState<Wallet.Crypto.Bip32PublicKeyHex>();
   const [initialWalletName, setInitialWalletName] = useState('');
+  const [isWalletConflictModalVisible, setIsWalletConflictModalVisible] = useState(false);
   const [activeWalletType, setActiveWalletType] = useState<LinkedWalletType>();
 
   useEffect(() => {
@@ -56,16 +59,27 @@ export const SharedWallet = (): JSX.Element => {
     })();
   }, [cardanoWallet.source.wallet.walletId, walletRepository]);
 
+  useEffect(() => {
+    if (isSharedWallet) setBackgroundPage();
+  }, [isSharedWallet, setBackgroundPage]);
+
   const handleCreateWallet = async (data: CreateWalletParams) => {
     const activeWalletId = cardanoWallet.source.wallet.walletId;
 
-    await createInMemorySharedWallet({
-      name: data.name,
-      chainId: Wallet.Cardano.ChainIds[environmentName],
-      ownSignerWalletId: activeWalletId,
-      quorumRules: data.quorumRules,
-      coSigners: data.coSigners
-    });
+    try {
+      await createInMemorySharedWallet({
+        name: data.name,
+        chainId: Wallet.Cardano.ChainIds[environmentName],
+        ownSignerWalletId: activeWalletId,
+        quorumRules: data.quorumRules,
+        coSigners: data.coSigners
+      });
+    } catch (error: unknown) {
+      if (error instanceof WalletConflictError) {
+        setIsWalletConflictModalVisible(true);
+      }
+      throw error;
+    }
   };
 
   const generateKey = useCallback(
@@ -86,111 +100,120 @@ export const SharedWallet = (): JSX.Element => {
   const navigateToRoot = useCallback(() => history.push(walletRoutePaths.sharedWallet.root), [history]);
 
   return (
-    <AddSharedWalletModal
-      onClose={() => {
-        setBackgroundPage();
-        history.push(page);
-      }}
-    >
-      <Switch>
-        <Route
-          exact
-          path={walletRoutePaths.sharedWallet.generateKeys}
-          render={() => (
-            <GenerateSharedWalletKeyFlow
-              activeWalletName={walletInfo?.name || ''}
-              activeWalletType={activeWalletType}
-              generateKey={generateKey}
-              onGenerateKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)}
-              onCopyKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)}
-              onClose={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCloseClick)}
-              navigateToParentFlow={navigateToRoot}
-            />
-          )}
-        />
-        {sharedWalletKey && (
+    <>
+      <AddSharedWalletModal
+        onClose={() => {
+          setBackgroundPage();
+          history.push(page);
+        }}
+      >
+        <Switch>
           <Route
             exact
-            path={walletRoutePaths.sharedWallet.create}
+            path={walletRoutePaths.sharedWallet.generateKeys}
             render={() => (
-              <SharedWalletCreationFlow
-                walletKind={isHardwareWallet ? 'cold' : 'hot'}
+              <GenerateSharedWalletKeyFlow
                 activeWalletName={walletInfo?.name || ''}
-                initialWalletName={initialWalletName}
-                navigateToAppHome={() => setBackgroundPage()}
-                exitTheFlow={navigateToRoot}
-                sharedWalletKey={sharedWalletKey}
-                onCreateSharedWallet={handleCreateWallet}
-                onWalletNameNextClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateWalletNameNextClick);
-                }}
-                onAddCosignersNextClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateAddCosignersNextClick);
-                }}
-                onImportantInfoNextClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoContinueClick);
-                }}
-                onImportantInfoBackClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoBackClick);
-                }}
-                onDefineQuorumNextClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumNextClick);
-                }}
-                onDefineQuorumDownloadClick={() => {
-                  analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumDownloadClick);
-                }}
-                onOpenSharedWalletClick={() => {
-                  analytics.sendEventToPostHog(
-                    PostHogAction.SharedWalletsCreateShareWalletDetailsOpenSharedWalletClick
-                  );
-                }}
+                activeWalletType={activeWalletType}
+                generateKey={generateKey}
+                onGenerateKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateKeyClick)}
+                onCopyKeys={() => analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCopyKeyClick)}
+                onClose={async () => await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateCloseClick)}
+                navigateToParentFlow={navigateToRoot}
               />
             )}
           />
-        )}
-        {sharedWalletKey && (
-          <Route
-            exact
-            path={walletRoutePaths.sharedWallet.import}
-            render={() => (
-              <SharedWalletRestorationFlow
-                onRestoreSharedWallet={async (data: CreateWalletParams) => {
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletOpenWalletClick);
-                  await handleCreateWallet(data);
-                }}
-                sharedKeys={sharedWalletKey}
-                exitTheFlow={navigateToRoot}
-                navigateToAppHome={() => setBackgroundPage()}
-                onImportJsonError={async () =>
-                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletImportJsonError)
-                }
-              />
-            )}
-          />
-        )}
-        <Route
-          exact
-          path={walletRoutePaths.sharedWallet.root}
-          render={() => (
-            <AddSharedWalletMainPageFlow
-              onCreateSharedWalletClick={async () => {
-                await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateClick);
-                history.push(walletRoutePaths.sharedWallet.create);
-              }}
-              onImportSharedWalletClick={async () => {
-                await analytics.sendEventToPostHog(PostHogAction.SharedWalletsConnectClick);
-                history.push(walletRoutePaths.sharedWallet.import);
-              }}
-              onKeysGenerateClick={async () => {
-                await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateClick);
-                history.push(walletRoutePaths.sharedWallet.generateKeys);
-              }}
-              sharedWalletKey={sharedWalletKey}
+          {sharedWalletKey && (
+            <Route
+              exact
+              path={walletRoutePaths.sharedWallet.create}
+              render={() => (
+                <SharedWalletCreationFlow
+                  walletKind={isHardwareWallet ? 'cold' : 'hot'}
+                  activeWalletName={walletInfo?.name || ''}
+                  initialWalletName={initialWalletName}
+                  navigateToAppHome={() => setBackgroundPage()}
+                  exitTheFlow={navigateToRoot}
+                  sharedWalletKey={sharedWalletKey}
+                  onCreateSharedWallet={handleCreateWallet}
+                  onWalletNameNextClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateWalletNameNextClick);
+                  }}
+                  onAddCosignersNextClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateAddCosignersNextClick);
+                  }}
+                  onImportantInfoNextClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoContinueClick);
+                  }}
+                  onImportantInfoBackClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateImportantInfoBackClick);
+                  }}
+                  onDefineQuorumNextClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumNextClick);
+                  }}
+                  onDefineQuorumDownloadClick={() => {
+                    analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateDefineQuorumDownloadClick);
+                  }}
+                  onOpenSharedWalletClick={() => {
+                    analytics.sendEventToPostHog(
+                      PostHogAction.SharedWalletsCreateShareWalletDetailsOpenSharedWalletClick
+                    );
+                  }}
+                />
+              )}
             />
           )}
-        />
-        <Redirect from="/" to={walletRoutePaths.sharedWallet.root} />
-      </Switch>
-    </AddSharedWalletModal>
+          {sharedWalletKey && (
+            <Route
+              exact
+              path={walletRoutePaths.sharedWallet.import}
+              render={() => (
+                <SharedWalletRestorationFlow
+                  onRestoreSharedWallet={async (data: CreateWalletParams) => {
+                    await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletOpenWalletClick);
+                    await handleCreateWallet(data);
+                  }}
+                  sharedKeys={sharedWalletKey}
+                  exitTheFlow={navigateToRoot}
+                  navigateToAppHome={() => setBackgroundPage()}
+                  onImportJsonError={async () =>
+                    await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletImportJsonError)
+                  }
+                />
+              )}
+            />
+          )}
+          <Route
+            exact
+            path={walletRoutePaths.sharedWallet.root}
+            render={() => (
+              <AddSharedWalletMainPageFlow
+                onCreateSharedWalletClick={async () => {
+                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsCreateClick);
+                  history.push(walletRoutePaths.sharedWallet.create);
+                }}
+                onImportSharedWalletClick={async () => {
+                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsConnectClick);
+                  history.push(walletRoutePaths.sharedWallet.import);
+                }}
+                onKeysGenerateClick={async () => {
+                  await analytics.sendEventToPostHog(PostHogAction.SharedWalletsGenerateClick);
+                  history.push(walletRoutePaths.sharedWallet.generateKeys);
+                }}
+                sharedWalletKey={sharedWalletKey}
+              />
+            )}
+          />
+          <Redirect from="/" to={walletRoutePaths.sharedWallet.root} />
+        </Switch>
+      </AddSharedWalletModal>
+      <WalletConflictModal
+        visible={isWalletConflictModalVisible}
+        onConfirm={() => {
+          setIsWalletConflictModalVisible(false);
+          navigateToRoot();
+        }}
+      />
+    </>
   );
 };

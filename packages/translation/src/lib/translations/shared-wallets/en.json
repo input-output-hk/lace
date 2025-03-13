@@ -81,6 +81,8 @@
   "sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordInputLabel": "Password",
   "sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordErrorMessage.invalidPassword": "Invalid password",
   "sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordErrorMessage.generic": "Something went wrong",
+  "sharedWallets.addSharedWallet.WalletConflictModal.description": "A shared wallet with the same co-signers already exists. Currently, you cannot create another shared wallet with the same co-signers. As a workaround, you can install Lace in another browser and create a new shared wallet there",
+  "sharedWallets.addSharedWallet.WalletConflictModal.cta.ok": "Ok",
   "sharedWallets.addSharedWallet.keyGeneration.hw.enterPassword.passwordErrorMessage.unauthorizedTransaction": "The transaction was not authorized.",
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.toastText": "Shared wallet key copied to clipboard",
   "sharedWallets.addSharedWallet.keyGeneration.copyKeys.title": "Copy shared wallet key",
