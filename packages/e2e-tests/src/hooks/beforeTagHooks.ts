@@ -147,13 +147,10 @@ Before(
   async () => await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendAdaHandle2E2E])
 );
 
-Before(
-  { tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended or @DAppConnectorLowFunds' },
-  async () => {
-    await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
-    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
-  }
-);
+Before({ tags: '@Staking-DelegatedFunds-Extended or @NetworkSwitching-extended' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});
 
 Before({ tags: '@Staking-NonDelegatedFunds-Extended or @CIP-95-Extended' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.TAWalletNonDelegatedFunds]);
@@ -276,6 +273,30 @@ Before(
   { tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet' },
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);
+
+Before(
+  {
+    tags: '@Activity-Extended'
+  },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.ActivityWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);
+
+Before(
+  {
+    tags: '@Activity-Popup'
+  },
+  async () => {
+    await popupViewRepositoryWalletInitialization([TestWalletName.ActivityWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
     await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
     await localStorageInitializer.disableShowPinExtension();
