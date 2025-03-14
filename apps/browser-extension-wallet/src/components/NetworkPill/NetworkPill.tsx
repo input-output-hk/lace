@@ -18,7 +18,6 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
   const { isOnline, isBackendFailing } = useNetwork();
   const { blockchain } = useCurrentBlockchain();
 
-  console.error('NetworkPill blockchain', blockchain);
   return useMemo(() => {
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
