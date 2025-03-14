@@ -11,16 +11,12 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { of } from 'rxjs';
-import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
 import { DappTransactionContainer } from './DappTransactionContainer';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
+import { readyToSign } from '@src/features/dapp/components/confirm-transaction/utils';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -74,18 +70,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
 
       setSignTxRequest(txWitnessRequest);
 
-      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-        {
-          api$: of({
-            async readyToSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger, runtime }
-      );
+      const api = readyToSign();
 
       return () => {
         api.shutdown();
