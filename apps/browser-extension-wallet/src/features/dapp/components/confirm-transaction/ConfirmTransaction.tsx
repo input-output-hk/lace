@@ -17,6 +17,7 @@ import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
 import { readyToSign } from '@src/features/dapp/components/confirm-transaction/utils';
+import { Shutdown } from '@cardano-sdk/util';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -33,9 +34,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
 
   const onConfirmTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
-      [TX_CREATION_TYPE_KEY]: TxCreationType.External
-    });
+    if (!req) return;
 
     txSubmitted$.next({
       id: req.transaction.getId().toString(),
@@ -44,6 +43,10 @@ export const ConfirmTransaction = (): React.ReactElement => {
     });
 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
+
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
   };
 
   const txWitnessRequest = useTxWitnessRequest();
@@ -55,27 +58,28 @@ export const ConfirmTransaction = (): React.ReactElement => {
   useOnUnload(cancelTransaction);
 
   useEffect(() => {
+    let api: Shutdown | undefined;
+
     (async () => {
-      const emptyFn = (): void => void 0;
-      if (!txWitnessRequest) return emptyFn;
+      if (!txWitnessRequest) return;
 
       try {
         setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
       } catch (error) {
-        logger.error(error);
+        logger.error('Could not get DApp info', error);
         void disallowSignTx(true, 'Could not get DApp info');
         redirectToDappTxSignFailure();
-        return emptyFn;
+        return;
       }
 
       setSignTxRequest(txWitnessRequest);
 
-      const api = readyToSign();
-
-      return () => {
-        api.shutdown();
-      };
+      api = readyToSign();
     })();
+
+    return () => {
+      api?.shutdown();
+    };
   }, [setSignTxRequest, setDappInfo, txWitnessRequest, redirectToDappTxSignFailure, disallowSignTx]);
 
   const onCancelTransaction = () => {
@@ -92,7 +96,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
         <div className={styles.actions}>
           <Button
             onClick={onConfirmTransaction}
-            loading={isHardwareWallet && isConfirmingTx}
+            loading={!req || (isHardwareWallet && isConfirmingTx)}
             data-testid="dapp-transaction-confirm"
             className={styles.actionBtn}
           >
