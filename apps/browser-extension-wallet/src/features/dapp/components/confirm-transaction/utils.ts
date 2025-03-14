@@ -7,10 +7,11 @@ import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { logger } from '@lace/common';
+import { Shutdown } from '@cardano-sdk/util';
 
 const { CertificateType } = Wallet.Cardano;
 
-export const readyToSign = (): void => {
+export const readyToSign = (): Shutdown =>
   exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
     {
       api$: of({
@@ -23,7 +24,6 @@ export const readyToSign = (): void => {
     },
     { logger, runtime }
   );
-};
 
 export const disallowSignTx = async (
   req: TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>,

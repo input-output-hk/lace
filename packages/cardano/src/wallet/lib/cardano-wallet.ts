@@ -19,6 +19,7 @@ import * as Crypto from '@cardano-sdk/crypto';
 import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
 import { WsProvider } from '@cardano-sdk/cardano-services-client';
+import { logger } from '@lace/common';
 
 let bip32Ed25519: Promise<Crypto.SodiumBip32Ed25519> | undefined;
 
@@ -85,7 +86,7 @@ export const validateWalletMnemonic = async (
       getPassphrase: async () => Buffer.from('doesnt matter')
     },
     {
-      logger: console,
+      logger,
       bip32Ed25519: await getBip32Ed25519()
     }
   );

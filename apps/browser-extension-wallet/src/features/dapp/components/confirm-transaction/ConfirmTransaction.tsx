@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import cn from 'classnames';
+import React, { useCallback, useEffect } from 'react';
 import { Button, logger, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -11,16 +10,13 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { txSubmitted$ } from '@providers/AnalyticsProvider/onChain';
 import { useAnalyticsContext } from '@providers';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { of } from 'rxjs';
-import { runtime } from 'webextension-polyfill';
 import { Skeleton } from 'antd';
 import { DappTransactionContainer } from './DappTransactionContainer';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
 import { useRedirection } from '@hooks';
 import { dAppRoutePaths } from '@routes';
+import { readyToSign } from '@src/features/dapp/components/confirm-transaction/utils';
+import { Shutdown } from '@cardano-sdk/util';
 
 export const ConfirmTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -32,14 +28,11 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { walletType, isHardwareWallet, walletInfo, inMemoryWallet } = useWalletStore();
   const redirectToDappTxSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const analytics = useAnalyticsContext();
-  const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
 
-  const onConfirmTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
-      [TX_CREATION_TYPE_KEY]: TxCreationType.External
-    });
+  const handleConfirmTransaction = () => {
+    if (!req) return;
 
     txSubmitted$.next({
       id: req.transaction.getId().toString(),
@@ -48,6 +41,10 @@ export const ConfirmTransaction = (): React.ReactElement => {
     });
 
     isHardwareWallet ? signWithHardwareWallet() : setNextView();
+
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
   };
 
   const txWitnessRequest = useTxWitnessRequest();
@@ -56,75 +53,64 @@ export const ConfirmTransaction = (): React.ReactElement => {
     disallowSignTx(true);
   }, [disallowSignTx]);
 
+  const handleCancelTransaction = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    cancelTransaction();
+  };
+
   useOnUnload(cancelTransaction);
 
   useEffect(() => {
+    let api: Shutdown | undefined;
+
     (async () => {
-      const emptyFn = (): void => void 0;
-      if (!txWitnessRequest) return emptyFn;
+      if (!txWitnessRequest) return;
 
       try {
         setDappInfo(await senderToDappInfo(txWitnessRequest.signContext.sender));
       } catch (error) {
-        logger.error(error);
+        logger.error('Could not get DApp info', error);
         void disallowSignTx(true, 'Could not get DApp info');
         redirectToDappTxSignFailure();
-        return emptyFn;
+        return;
       }
 
       setSignTxRequest(txWitnessRequest);
 
-      const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-        {
-          api$: of({
-            async readyToSignTx(): Promise<boolean> {
-              return Promise.resolve(true);
-            }
-          }),
-          baseChannel: DAPP_CHANNELS.userPrompt,
-          properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-        },
-        { logger, runtime }
-      );
-
-      return () => {
-        api.shutdown();
-      };
+      api = readyToSign();
     })();
+
+    return () => {
+      api?.shutdown();
+    };
   }, [setSignTxRequest, setDappInfo, txWitnessRequest, redirectToDappTxSignFailure, disallowSignTx]);
 
-  const onCancelTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
-      [TX_CREATION_TYPE_KEY]: TxCreationType.External
-    });
-    disallowSignTx(true);
-  };
-
   return (
-    <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
+    <Layout pageClassname={styles.spaceBetween}>
       {req && walletInfo && inMemoryWallet ? <DappTransactionContainer /> : <Skeleton loading />}
-      {!confirmTransactionError && (
-        <div className={styles.actions}>
-          <Button
-            onClick={onConfirmTransaction}
-            loading={isHardwareWallet && isConfirmingTx}
-            data-testid="dapp-transaction-confirm"
-            className={styles.actionBtn}
-          >
-            {isHardwareWallet
-              ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
-              : t('dapp.confirm.btn.confirm')}
-          </Button>
-          <Button
-            color="secondary"
-            data-testid="dapp-transaction-cancel"
-            onClick={onCancelTransaction}
-            className={styles.actionBtn}
-          >
-            {t('dapp.confirm.btn.cancel')}
-          </Button>
-        </div>
-      )}
+      <div className={styles.actions}>
+        <Button
+          onClick={handleConfirmTransaction}
+          loading={!req || (isHardwareWallet && isConfirmingTx)}
+          data-testid="dapp-transaction-confirm"
+          className={styles.actionBtn}
+        >
+          {isHardwareWallet
+            ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
+            : t('dapp.confirm.btn.confirm')}
+        </Button>
+        <Button
+          color="secondary"
+          data-testid="dapp-transaction-cancel"
+          onClick={handleCancelTransaction}
+          className={styles.actionBtn}
+        >
+          {t('dapp.confirm.btn.cancel')}
+        </Button>
+      </div>
+      )
     </Layout>
   );
 };

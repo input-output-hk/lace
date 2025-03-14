@@ -26,6 +26,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       data-color={color}
       type={htmlType}
+      disabled={loading}
       className={cn(
         styles.btn,
         styles[variant],
