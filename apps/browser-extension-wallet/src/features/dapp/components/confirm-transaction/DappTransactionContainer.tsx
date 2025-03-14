@@ -32,8 +32,11 @@ import { useComputeTxCollateral } from '@hooks/useComputeTxCollateral';
 import { eraSlotDateTime } from '@src/utils/era-slot-datetime';
 import { AddressBookSchema, useDbStateValue } from '@lib/storage';
 import { getAllWalletsAddresses } from '@src/utils/get-all-wallets-addresses';
-import { useCexplorerBaseUrl, useDisallowSignTx } from './hooks';
-import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
+import {
+  useCexplorerBaseUrl
+  // useDisallowSignTx
+} from './hooks';
+// import { NonRegisteredUserModal } from './NonRegisteredUserModal/NonRegisteredUserModal';
 import { getProviders } from '@stores/slices';
 
 interface DappTransactionContainerProps {
@@ -58,9 +61,9 @@ export const DappTransactionContainer = withAddressBookContext(
       walletState,
       currentChain
     } = useWalletStore();
-    const [isNonRegisteredUserModalVisible, setIsNonRegisteredUserModalVisible] = useState<boolean>(false);
-    const [userAckNonRegisteredState, setUserAckNonRegisteredState] = useState<boolean>(false);
-    const disallowSignTx = useDisallowSignTx(req);
+    // const [isNonRegisteredUserModalVisible, setIsNonRegisteredUserModalVisible] = useState<boolean>(false);
+    // const [userAckNonRegisteredState, setUserAckNonRegisteredState] = useState<boolean>(false);
+    // const disallowSignTx = useDisallowSignTx(req);
     const explorerBaseUrl = useCexplorerBaseUrl();
 
     const ownAddresses = useObservable(inMemoryWallet.addresses$)?.map((a) => a.address);
@@ -85,16 +88,17 @@ export const DappTransactionContainer = withAddressBookContext(
     const tx = useMemo(() => req?.transaction.toCore(), [req?.transaction]);
     const txCBOR = useMemo(() => req?.transaction.toCbor(), [req?.transaction]);
 
-    useEffect(() => {
-      if (userAckNonRegisteredState || !tx?.body?.votingProcedures) return () => void 0;
-      const subscription = inMemoryWallet?.governance?.isRegisteredAsDRep$?.subscribe(
-        (hasValidDrepRegistration): void => {
-          setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration);
-        }
-      );
+    // FIXME: commented out since isRegisteredAsDRep does not emit proper value due to limitet txs history
+    // useEffect(() => {
+    //   if (userAckNonRegisteredState || !tx?.body?.votingProcedures) return () => void 0;
+    //   const subscription = inMemoryWallet?.governance?.isRegisteredAsDRep$?.subscribe(
+    //     (hasValidDrepRegistration): void => {
+    //       setIsNonRegisteredUserModalVisible(!hasValidDrepRegistration);
+    //     }
+    //   );
 
-      return () => subscription?.unsubscribe();
-    }, [inMemoryWallet?.governance?.isRegisteredAsDRep$, userAckNonRegisteredState, tx]);
+    //   return () => subscription?.unsubscribe();
+    // }, [inMemoryWallet?.governance?.isRegisteredAsDRep$, userAckNonRegisteredState, tx]);
 
     const txCollateral = useComputeTxCollateral(inputResolver, walletState, tx);
 
@@ -166,14 +170,14 @@ export const DappTransactionContainer = withAddressBookContext(
 
     return (
       <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch">
-        <NonRegisteredUserModal
+        {/* <NonRegisteredUserModal
           visible={isNonRegisteredUserModalVisible}
           onConfirm={() => {
             setUserAckNonRegisteredState(true);
             setIsNonRegisteredUserModalVisible(false);
           }}
           onClose={() => disallowSignTx(true)}
-        />
+        /> */}
         {req && transactionInspectionDetails && dappInfo ? (
           <>
             <DappTransaction
