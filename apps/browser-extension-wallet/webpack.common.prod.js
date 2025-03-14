@@ -75,6 +75,19 @@ module.exports = () => ({
           }
         }
       })
-    ]
+    ],
+    splitChunks: {
+      chunks: 'all',
+      maxSize: 3000000, // 3MB
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendor',
+          chunks: 'all',
+          priority: 1,
+          reuseExistingChunk: true
+        }
+      }
+    }
   }
 });
