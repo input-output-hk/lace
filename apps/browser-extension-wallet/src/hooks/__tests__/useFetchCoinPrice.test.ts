@@ -38,6 +38,10 @@ describe('Testing useFetchCoinPrice hook', () => {
           price: 1,
           priceVariationPercentage24h: 0
         },
+        bitcoin: {
+          price: undefined,
+          priceVariationPercentage24h: 0
+        },
         tokens: undefined
       },
       status: undefined,

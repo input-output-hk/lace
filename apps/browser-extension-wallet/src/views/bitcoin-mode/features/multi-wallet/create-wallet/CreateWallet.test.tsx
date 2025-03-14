@@ -9,6 +9,13 @@ jest.doMock('@hooks/useWalletManager', () => ({
         }
       }
     }) as UseWalletManager['createWallet'],
+    createBitcoinWallet: jest.fn().mockResolvedValue({
+      source: {
+        account: {
+          extendedAccountPublicKey: ''
+        }
+      }
+    }) as UseWalletManager['createBitcoinWallet'],
     walletRepository: {
       wallets$: of([])
     } as UseWalletManager['walletRepository']
