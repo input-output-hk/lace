@@ -76,7 +76,7 @@ const SimpleViewContent: React.FC<ISimpleViewContent> = ({ selectedCategory, sea
     <div className="iog-simple-view-content-container">
       <div className="iog-section-card-grid">{renderCards(dapps)}</div>
       {(loading || hasNextPage) && (
-        <Box mt={'$24'} ref={infiniteScrollRef}>
+        <Box mt={'$24'} ref={infiniteScrollRef} data-testid="skeleton">
           <Skeleton />
         </Box>
       )}

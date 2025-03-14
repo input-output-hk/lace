@@ -8,7 +8,9 @@ export const DappListTitle = ({ title, count }: { title: string; count?: number 
   <Flex alignItems="flex-end">
     <Flex justifyContent="center" alignItems="center" gap="$4">
       <Text.Heading>
-        <span style={{ textTransform: 'capitalize' }}>{title}</span>
+        <span style={{ textTransform: 'capitalize' }} data-testid="page-title">
+          {title}
+        </span>
       </Text.Heading>
       <Tooltip
         label={
@@ -32,7 +34,7 @@ export const DappListTitle = ({ title, count }: { title: string; count?: number 
         align="start"
         side="top"
       >
-        <InfoComponent className={styles.icon} />
+        <InfoComponent className={styles.icon} data-testid="info-icon" />
       </Tooltip>
     </Flex>
     {count !== undefined ? (
