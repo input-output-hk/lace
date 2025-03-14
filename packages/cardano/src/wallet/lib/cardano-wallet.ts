@@ -49,16 +49,16 @@ export interface AccountMetadata {
         nativeSegWit: string;
         taproot: string;
         electrumNativeSegWit: string;
-      },
+      };
       testnet: {
         legacy: string;
         segWit: string;
         nativeSegWit: string;
         taproot: string;
         electrumNativeSegWit: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 
 export interface CardanoWallet {
