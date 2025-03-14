@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import cn from 'classnames';
+import React, { useCallback, useEffect } from 'react';
 import { Button, logger, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -29,11 +28,10 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const { walletType, isHardwareWallet, walletInfo, inMemoryWallet } = useWalletStore();
   const redirectToDappTxSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const analytics = useAnalyticsContext();
-  const [confirmTransactionError] = useState(false);
   const disallowSignTx = useDisallowSignTx(req);
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
 
-  const onConfirmTransaction = () => {
+  const handleConfirmTransaction = () => {
     if (!req) return;
 
     txSubmitted$.next({
@@ -54,6 +52,13 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const cancelTransaction = useCallback(() => {
     disallowSignTx(true);
   }, [disallowSignTx]);
+
+  const handleCancelTransaction = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
+      [TX_CREATION_TYPE_KEY]: TxCreationType.External
+    });
+    cancelTransaction();
+  };
 
   useOnUnload(cancelTransaction);
 
@@ -82,38 +87,30 @@ export const ConfirmTransaction = (): React.ReactElement => {
     };
   }, [setSignTxRequest, setDappInfo, txWitnessRequest, redirectToDappTxSignFailure, disallowSignTx]);
 
-  const onCancelTransaction = () => {
-    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryCancelClick, {
-      [TX_CREATION_TYPE_KEY]: TxCreationType.External
-    });
-    disallowSignTx(true);
-  };
-
   return (
-    <Layout layoutClassname={cn(confirmTransactionError && styles.layoutError)} pageClassname={styles.spaceBetween}>
+    <Layout pageClassname={styles.spaceBetween}>
       {req && walletInfo && inMemoryWallet ? <DappTransactionContainer /> : <Skeleton loading />}
-      {!confirmTransactionError && (
-        <div className={styles.actions}>
-          <Button
-            onClick={onConfirmTransaction}
-            loading={!req || (isHardwareWallet && isConfirmingTx)}
-            data-testid="dapp-transaction-confirm"
-            className={styles.actionBtn}
-          >
-            {isHardwareWallet
-              ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
-              : t('dapp.confirm.btn.confirm')}
-          </Button>
-          <Button
-            color="secondary"
-            data-testid="dapp-transaction-cancel"
-            onClick={onCancelTransaction}
-            className={styles.actionBtn}
-          >
-            {t('dapp.confirm.btn.cancel')}
-          </Button>
-        </div>
-      )}
+      <div className={styles.actions}>
+        <Button
+          onClick={handleConfirmTransaction}
+          loading={!req || (isHardwareWallet && isConfirmingTx)}
+          data-testid="dapp-transaction-confirm"
+          className={styles.actionBtn}
+        >
+          {isHardwareWallet
+            ? t('browserView.transaction.send.footer.confirmWithDevice', { hardwareWallet: walletType })
+            : t('dapp.confirm.btn.confirm')}
+        </Button>
+        <Button
+          color="secondary"
+          data-testid="dapp-transaction-cancel"
+          onClick={handleCancelTransaction}
+          className={styles.actionBtn}
+        >
+          {t('dapp.confirm.btn.cancel')}
+        </Button>
+      </div>
+      )
     </Layout>
   );
 };
