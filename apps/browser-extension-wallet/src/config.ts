@@ -2,7 +2,7 @@
 import { BlockfrostClientConfig } from '@cardano-sdk/cardano-services-client';
 import { Milliseconds } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
-import { EnvironmentTypes } from '@stores';
+import {BitcoinNetworks, EnvironmentTypes} from '@stores';
 
 type ByNetwork<T> = {
   [key in Wallet.ChainName]: T;
@@ -35,6 +35,7 @@ export type Config = {
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
   SESSION_TIMEOUT: Milliseconds;
   POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS: number;
+  MEMPOOL_URLS: Record<BitcoinNetworks, string>;
 };
 
 // eslint-disable-next-line complexity
@@ -156,6 +157,10 @@ export const config = (): Config => {
       Number(process.env.POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS)
     )
       ? Number.parseInt(process.env.POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS)
-      : 10
+      : 10,
+    MEMPOOL_URLS: {
+      Mainnet: `${process.env.MEMPOOL_URL_MAINNET}`,
+      Testnet4: `${process.env.MEMPOOL_URL_TESTNET4}`
+    }
   };
 };

@@ -43,6 +43,9 @@ export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
 }) => {
   const analytics = useAnalyticsContext();
   const { postHogActions } = useWalletOnboarding();
+
+  // @ts-ignore
+  // @ts-ignore
   return (
     <>
       <WalletSetupStepLayoutRevamp
@@ -140,7 +143,7 @@ export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
                     </Flex>
                   </Card.Outlined>
                 )
-              }
+              },
             ]}
           />
         </Flex>

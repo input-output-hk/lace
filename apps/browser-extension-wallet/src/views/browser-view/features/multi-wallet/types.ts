@@ -8,4 +8,4 @@ export type WalletOnboardingPostHogActions =
   | PostHogMultiWalletActions
   | (Pick<PostHogOnboardingActions, 'create' | 'restore'> & Record<'hardware', PostHogOnboardingActions['hw']>);
 
-export type RecoveryMethod = 'paper' | 'mnemonic';
+export type RecoveryMethod = 'paper' | 'mnemonic' | 'mnemonic-bitcoin';

@@ -27,6 +27,10 @@
       "@views/browser/*": ["views/browser-view/*"]
     }
   },
-  "references": [{ "path": "../../../packages/core/src" }, { "path": "../../../packages/cardano/src" }],
+  "references": [
+    { "path": "../../../packages/core/src" },
+    { "path": "../../../packages/cardano/src" },
+    { "path": "../../../packages/bitcoin/src" }
+  ],
   "include": ["**/*", "../test/types/*.d.ts", "**/*.json"]
 }

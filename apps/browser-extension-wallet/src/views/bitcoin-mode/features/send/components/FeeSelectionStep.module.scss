@@ -1,0 +1,100 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  position: relative;
+  padding: size_unit(4.5) 0;
+}
+
+.subTitle {
+  button {
+    &:focus:not(:active) {
+      outline-color: unset;
+      outline-width: 0;
+      outline-style: none;
+    }
+
+    background-color: var(--dark-mode-light-grey, #c0c0c0);
+
+    &[data-state="checked"]:not(:disabled) {
+      background: var(--lace-gradient);
+    }
+  }
+}
+
+.iconWrapper {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
+  padding: 1rem;
+  width: 100%;
+}
+
+.content {
+  flex: 1;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab.active {
+  border-bottom: 2px solid #7f5af0;
+}
+
+.feeList {
+  width: 100%;
+}
+
+.feeItem {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #7f5af0;
+  border-radius: 10px;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.feeItem.selected {
+  background-color: rgba(127, 90, 240, 0.25);
+}
+
+.feeLabel {
+  margin-bottom: 0.2rem;
+  font-weight: bold;
+}
+
+.feeDetails {
+  display: flex;
+  justify-content: space-between;
+}
+
+.customFee {
+  margin-bottom: 1rem;
+}
+
+.buttonContainer {
+  margin-top: auto;
+  padding: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.button {
+  margin-bottom: 0.5rem;
+}

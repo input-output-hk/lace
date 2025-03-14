@@ -18,6 +18,7 @@ export interface Status {
 }
 
 export type CoinPrices = {
+  bitcoinPrices$: BehaviorSubject<{ prices: Partial<ADAPrices> } & Status>;
   adaPrices$: BehaviorSubject<{ prices: Partial<ADAPrices> } & Status>;
   tokenPrices$: BehaviorSubject<{ tokens: TokenPrices } & Status>;
 };

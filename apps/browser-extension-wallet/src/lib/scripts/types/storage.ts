@@ -33,6 +33,7 @@ export interface BackgroundStorage {
   message?: Message;
   mnemonic?: string;
   fiatPrices?: { prices: ADAPrices; timestamp: number };
+  fiatBitcoinPrices?: { prices: ADAPrices; timestamp: number };
   userId?: string;
   usePersistentUserId?: boolean;
   featureFlags?: FeatureFlagsByNetwork;
@@ -44,6 +45,7 @@ export interface BackgroundStorage {
     completed: boolean;
     mode: 'lace' | 'nami';
   };
+  activeBlockchain?: 'cardano' | 'bitcoin';
   dappInjectCompatibilityMode?: boolean;
   optedInBeta?: boolean;
   logLevel?: LogLevelString;

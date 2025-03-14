@@ -1,0 +1,48 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.scanArea {
+  border-radius: size_unit(2);
+  overflow: hidden;
+  position: relative;
+  background-color: #f9f9f9;
+  flex: 1;
+}
+
+.mediaSelectContainer {
+  position: absolute;
+  top: size_unit(2);
+  right: size_unit(2);
+}
+
+.videoContainer {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.flipVideoScaleX {
+  transform: scaleX(-1);
+}
+
+.hidden {
+  display: none;
+}
+
+.loader {
+  height: size_unit(3);
+  width: size_unit(3);
+}

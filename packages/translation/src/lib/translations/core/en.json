@@ -86,6 +86,7 @@
   "core.activityDetails.rewardsDescription": "When available, your rewards will be withdrawn automatically every time you send Tokens.",
   "core.activityDetails.self": "Self",
   "core.activityDetails.sending": "Sending",
+  "core.activityDetails.pending": "Pending",
   "core.activityDetails.sent": "Sent",
   "core.activityDetails.awaitingCosignatures": "Awaiting co-signatures",
   "core.activityDetails.StakeRegistrationDelegateCertificate": "Stake Key Registration & Delgation",

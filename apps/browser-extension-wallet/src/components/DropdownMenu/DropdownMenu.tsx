@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import cn from 'classnames';
 import { Dropdown } from 'antd';
 import { Button } from '@lace/common';
@@ -11,9 +11,12 @@ import { UserAvatar } from '../MainMenu/DropdownMenuOverlay/components';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
-import { useWalletAvatar } from '@hooks';
+import {useWalletAvatar, useWalletManager} from '@hooks';
 import { getActiveWalletSubtitle } from '@src/utils/get-wallet-subtitle';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
+import { Bip32WalletAccount } from "@cardano-sdk/web-extension";
+import { WalletType } from '@cardano-sdk/web-extension';
+import { Wallet } from '@lace/cardano';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -25,10 +28,29 @@ const addEllipsis = (text: string, length: number) => (text.length > length ? `$
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const {
-    cardanoWallet,
     walletUI: { isDropdownMenuOpen = false },
     setIsDropdownMenuOpen
   } = useWalletStore();
+  const { getActiveWalletName, getActiveWalletAccount, getActiveWalletType } = useWalletManager();
+  const [fullWalletName, setFullWalletName] = useState<string>('');
+  const [lastActiveAccount, setLastActiveAccount] = useState<Bip32WalletAccount<Wallet.AccountMetadata> | undefined>(undefined);
+  const [activeWalletType, setActiveWalletType] = useState<WalletType>(WalletType.InMemory);
+
+  useEffect(() => {
+    getActiveWalletName().then((name) => {
+      setFullWalletName(name);
+    })}, [getActiveWalletName]);
+
+  useEffect(() => {
+    getActiveWalletAccount().then((account) => {
+      setLastActiveAccount(account);
+    })}, [getActiveWalletAccount]);
+
+  useEffect(() => {
+    getActiveWalletType().then((type) => {
+      setActiveWalletType(type);
+    })}, [getActiveWalletType]);
+
 
   const Chevron = isPopup ? ChevronSmall : ChevronNormal;
   const { activeWalletAvatar } = useWalletAvatar();
@@ -46,8 +68,6 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
 
   useEffect(() => () => setIsDropdownMenuOpen(false), [setIsDropdownMenuOpen]);
 
-  const walletName = cardanoWallet?.source?.wallet?.metadata?.name;
-
   return (
     <Dropdown
       overlayClassName={styles.overlay}
@@ -57,21 +77,21 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       placement="bottomRight"
       trigger={['click']}
     >
-      {process.env.USE_MULTI_WALLET === 'true' && walletName ? (
+      {process.env.USE_MULTI_WALLET === 'true' && fullWalletName ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
-            title={addEllipsis(walletName, titleCharBeforeEll)}
-            subtitle={addEllipsis(getActiveWalletSubtitle(cardanoWallet?.source.account), titleCharBeforeEll)}
+            title={addEllipsis(fullWalletName, titleCharBeforeEll)}
+            subtitle={addEllipsis(getActiveWalletSubtitle(lastActiveAccount), titleCharBeforeEll)}
             active={isDropdownMenuOpen}
             profile={
               activeWalletAvatar
                 ? {
-                    fallbackText: walletName,
+                    fallbackText: fullWalletName,
                     imageSrc: activeWalletAvatar
                   }
                 : undefined
             }
-            type={getUiWalletType(cardanoWallet.source.wallet.type)}
+            type={getUiWalletType(activeWalletType)}
             id="menu"
           />
         </div>
@@ -83,7 +103,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
           data-testid="header-menu-button"
         >
           <span className={cn(styles.content, { [styles.isPopup]: isPopup })}>
-            <UserAvatar walletName={walletName} isPopup={isPopup} avatar={activeWalletAvatar} />
+            <UserAvatar walletName={fullWalletName} isPopup={isPopup} avatar={activeWalletAvatar} />
             <Chevron
               className={cn(styles.chevron, { [styles.open]: isDropdownMenuOpen })}
               data-testid={`chevron-${isDropdownMenuOpen ? 'up' : 'down'}`}

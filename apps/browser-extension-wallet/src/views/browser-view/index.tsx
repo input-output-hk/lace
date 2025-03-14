@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { BrowserViewRoutes } from '@views/browser/routes';
+import { BitcoinBrowserViewRoutes } from '../bitcoin-mode/BitcoinBrowserViewRoutes';
 import {
   CurrencyStoreProvider,
   DatabaseProvider,
@@ -30,46 +31,107 @@ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay'
 import { NamiMigrationGuard } from '@src/features/nami-migration/NamiMigrationGuard';
 import { AppVersionGuard } from '@src/utils/AppVersionGuard';
 import { ErrorBoundary } from '@components/ErrorBoundary';
+import { storage, Storage } from "webextension-polyfill";
+import { walletRoutePaths } from "@routes";
+import {getBackgroundStorage } from "@lib/scripts/background/storage";
+import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './../../multichain/BlockchainProvider';
 
-const App = (): React.ReactElement => (
-  <ErrorBoundary>
-    <BackgroundServiceAPIProvider>
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_BROWSER}>
-            <CurrencyStoreProvider>
-              <HashRouter>
-                <BackgroundPageProvider>
-                  <PostHogClientProvider>
-                    <AnalyticsProvider>
-                      <ThemeProvider>
-                        <UIThemeProvider>
-                          <ExternalLinkOpenerProvider>
-                            <MigrationContainer appMode={APP_MODE_BROWSER}>
-                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                <AddressesDiscoveryOverlay>
-                                  <NamiMigrationGuard>
-                                    <AppVersionGuard>
-                                      <BrowserViewRoutes />
-                                    </AppVersionGuard>
-                                  </NamiMigrationGuard>
-                                </AddressesDiscoveryOverlay>
-                              </DataCheckContainer>
-                            </MigrationContainer>
-                          </ExternalLinkOpenerProvider>
-                        </UIThemeProvider>
-                      </ThemeProvider>
-                    </AnalyticsProvider>
-                  </PostHogClientProvider>
-                </BackgroundPageProvider>
-              </HashRouter>
-            </CurrencyStoreProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    </BackgroundServiceAPIProvider>
-  </ErrorBoundary>
-);
+const CARDANO_LACE = 'lace';
+const BITCOIN_LACE = 'lace-bitcoin';
+
+const App = (): React.ReactElement => {
+  const [mode, setMode] = useState<'lace' | 'lace-bitcoin'>('lace');
+  const { setBlockchain } = useCurrentBlockchain();
+
+  useEffect(() => {
+    const handleStorageChange = async (changes: Record<string, Storage.StorageChange>) => {
+      const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
+      const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
+      const activeBlockchainOldValue = changes.BACKGROUND_STORAGE?.oldValue?.activeBlockchain;
+      const activeBlockchainNewValue = changes.BACKGROUND_STORAGE?.newValue?.activeBlockchain;
+
+      if (activeBlockchainOldValue !== activeBlockchainNewValue) {
+        const isCardano = !activeBlockchainNewValue || activeBlockchainNewValue === 'cardano';
+        setMode(isCardano ? CARDANO_LACE : BITCOIN_LACE);
+        setBlockchain(isCardano ? Blockchain.Cardano : Blockchain.Bitcoin);
+        return;
+      }
+
+      if (oldModeValue?.mode !== newModeValue?.mode) {
+        setMode(newModeValue?.mode || CARDANO_LACE);
+        // Force back to original routing unless it is staking route
+        if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) {
+          window.location.hash = '#';
+        }
+      }
+    };
+
+    storage.onChanged.addListener(handleStorageChange);
+
+    const getWalletMode = async () => {
+      const { activeBlockchain } = await getBackgroundStorage();
+      if (activeBlockchain === 'cardano') {
+        setMode(CARDANO_LACE);
+        setBlockchain(Blockchain.Cardano);
+      } else {
+        setMode(BITCOIN_LACE);
+        setBlockchain(Blockchain.Bitcoin);
+      }
+    };
+
+    getWalletMode();
+
+    return () => {
+      storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <BackgroundServiceAPIProvider>
+        <AppSettingsProvider>
+          <DatabaseProvider>
+            <StoreProvider appMode={APP_MODE_BROWSER}>
+              <CurrencyStoreProvider>
+                <HashRouter>
+                  <BackgroundPageProvider>
+                    <PostHogClientProvider>
+                      <AnalyticsProvider>
+                        <ThemeProvider>
+                          <UIThemeProvider>
+                            <ExternalLinkOpenerProvider>
+                              <MigrationContainer appMode={APP_MODE_BROWSER}>
+                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                  <AddressesDiscoveryOverlay>
+                                    <NamiMigrationGuard>
+                                      <AppVersionGuard>
+                                        { mode === BITCOIN_LACE ? <BitcoinBrowserViewRoutes /> : <BrowserViewRoutes /> }
+                                      </AppVersionGuard>
+                                    </NamiMigrationGuard>
+                                  </AddressesDiscoveryOverlay>
+                                </DataCheckContainer>
+                              </MigrationContainer>
+                            </ExternalLinkOpenerProvider>
+                          </UIThemeProvider>
+                        </ThemeProvider>
+                      </AnalyticsProvider>
+                    </PostHogClientProvider>
+                  </BackgroundPageProvider>
+                </HashRouter>
+              </CurrencyStoreProvider>
+            </StoreProvider>
+          </DatabaseProvider>
+        </AppSettingsProvider>
+      </BackgroundServiceAPIProvider>
+    </ErrorBoundary>
+  );
+};
 
 const mountNode = document.querySelector('#lace-app');
-ReactDOM.render(<App />, mountNode);
+ReactDOM.render(
+  <BlockchainProvider>
+    <App />
+  </BlockchainProvider>,
+  mountNode
+);
+
