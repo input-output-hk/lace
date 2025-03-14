@@ -190,7 +190,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: 'e2e-tests'
           WALLET_POLLING_INTERVAL_IN_SEC: 5
-          BROWSER_TARGET: ${{ inputs.BROWSER }}
+          BROWSER_TARGET: ${{ env.BROWSER }}
 
       - name: Upload build artifact
         if: needs.setup.outputs.build_exists == 'false'
@@ -233,10 +233,10 @@ jobs:
         uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: 'latest-devedition'
-        if: inputs.BROWSER == 'firefox'
+        if: env.BROWSER == 'firefox'
 
       - name: Verify Firefox Installation
-        if: inputs.BROWSER == 'firefox'
+        if: env.BROWSER == 'firefox'
         shell: bash
         run: |
           echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
@@ -245,7 +245,7 @@ jobs:
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
-          BROWSER: ${{ inputs.BROWSER }}
+          BROWSER: ${{ env.BROWSER }}
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
           TAGS: ${{ needs.setup.outputs.tags }}
