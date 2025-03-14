@@ -11,8 +11,8 @@ export enum ExperimentName {
   SHARED_WALLETS = 'shared-wallets',
   WEBSOCKET_API = 'websocket-api',
   DAPP_EXPLORER = 'dapp-explorer',
-  SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry'
-  BITCOIN_WALLETS = 'bitcoin-wallets',
+  SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',
+  BITCOIN_WALLETS = 'bitcoin-wallets'
 }
 
 export type FeatureFlag = `${ExperimentName}`;
@@ -39,7 +39,6 @@ type FeatureFlagCustomPayloads = {
 
 export type FeatureFlagPayloads = {
   [key in FeatureFlag]: FeatureFlagPayload;
-} &
-  FeatureFlagCustomPayloads;
+} & FeatureFlagCustomPayloads;
 
 export type RawFeatureFlagPayloads = Record<ExperimentName, JsonType>;
