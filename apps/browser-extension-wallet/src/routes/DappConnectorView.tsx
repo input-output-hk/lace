@@ -8,15 +8,15 @@ import { Route, Switch } from 'react-router-dom';
 import { MainLayout } from '@components/Layout';
 import {
   Connect as DappConnect,
-  SignTxFlowContainer,
-  SignDataFlowContainer,
+  DappSignTx,
+  DappSignData,
   DappTransactionSuccess,
   DappTransactionFail
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
-import { useAppSettingsContext } from '@providers';
+import { useAppSettingsContext, ViewFlowProvider } from '@providers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { DappError } from '@src/features/dapp/components/DappError';
@@ -28,6 +28,7 @@ import { Crash } from '@components/ErrorBoundary';
 import { useFatalError } from '@hooks/useFatalError';
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { sendViewsFlowState, signDataViewsFlowState } from '@src/features/dapp/config';
 
 dayjs.extend(duration);
 
@@ -80,6 +81,32 @@ export const DappConnectorView = (): React.ReactElement => {
     tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
     window.close();
   }, []);
+
+  const dappSignTxRoutes = useMemo(
+    () => (
+      <ViewFlowProvider viewStates={sendViewsFlowState}>
+        <Switch>
+          <Route exact path={dAppRoutePaths.dappSignTx} component={DappSignTx} />
+          <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
+          <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+        </Switch>
+      </ViewFlowProvider>
+    ),
+    []
+  );
+
+  const dappSignDataRoutes = useMemo(
+    () => (
+      <ViewFlowProvider viewStates={signDataViewsFlowState}>
+        <Switch>
+          <Route exact path={dAppRoutePaths.dappSignData} component={DappSignData} />
+          <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+          <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+        </Switch>
+      </ViewFlowProvider>
+    ),
+    []
+  );
 
   if (fatalError) {
     return <Crash />;
@@ -137,12 +164,8 @@ export const DappConnectorView = (): React.ReactElement => {
     <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
       <Switch>
         <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
-        <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
-        <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
-        <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
-        <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
-        <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
-        <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+        {dappSignTxRoutes}
+        {dappSignDataRoutes}
       </Switch>
     </MainLayout>
   );

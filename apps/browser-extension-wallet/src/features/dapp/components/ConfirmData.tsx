@@ -22,6 +22,7 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
 import { useOnUnload } from './confirm-transaction/hooks';
+import { parseError } from '@src/utils/parse-error';
 
 const INDENT_SPACING = 2;
 
@@ -41,7 +42,8 @@ const hasJsonStructure = (str: string): boolean => {
 export const DappConfirmData = (): React.ReactElement => {
   const {
     utils: { setNextView },
-    signDataRequest: { request: req, set: setSignDataRequest }
+    signDataRequest: { request: req, set: setSignDataRequest },
+    signError
   } = useViewsFlowContext();
   const { isHardwareWallet } = useWalletStore();
   const { t } = useTranslation();
@@ -116,13 +118,14 @@ export const DappConfirmData = (): React.ReactElement => {
       await req.sign();
       redirectToSignSuccess();
     } catch (error) {
+      signError.set(parseError(error));
       logger.error('error', error);
       cancelTransaction();
       redirectToSignFailure();
     }
 
     setIsConfirmingTx(true);
-  }, [setIsConfirmingTx, redirectToSignFailure, redirectToSignSuccess, cancelTransaction, req]);
+  }, [req, redirectToSignSuccess, signError, cancelTransaction, redirectToSignFailure]);
 
   const confirmationCallback = useCallback(() => {
     analytics?.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick, {
