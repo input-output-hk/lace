@@ -67,6 +67,13 @@ export interface CreateWalletFromPrivateKeyParams {
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;
 }
 
+export type ExtendedAccountPublicKeyParams = {
+  wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+  accountIndex: number;
+  passphrase?: Uint8Array;
+  purpose?: KeyManagement.KeyPurpose;
+};
+
 export type CreateWalletParamsBase = {
   name: string;
   chainId?: Wallet.Cardano.ChainId;
@@ -158,12 +165,12 @@ const clearBytes = (bytes: Uint8Array) => {
   }
 };
 
-const getExtendedAccountPublicKey = async (
-  wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
-  accountIndex: number,
-  passphrase?: Uint8Array,
-  purpose: KeyManagement.KeyPurpose = KeyManagement.KeyPurpose.STANDARD
-) => {
+const getExtendedAccountPublicKey = async ({
+  wallet,
+  accountIndex,
+  passphrase,
+  purpose = KeyManagement.KeyPurpose.STANDARD
+}: ExtendedAccountPublicKeyParams) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
     case WalletType.InMemory: {
@@ -874,12 +881,12 @@ export const useWalletManager = (): UseWalletManager => {
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
-      const bip32AccountPublicKey = await getExtendedAccountPublicKey(
+      const bip32AccountPublicKey = await getExtendedAccountPublicKey({
         wallet,
         accountIndex,
         passphrase,
-        KeyManagement.KeyPurpose.MULTI_SIG
-      );
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG
+      });
       return Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(bip32AccountPublicKey);
     },
     [cardanoWallet]
@@ -992,7 +999,7 @@ export const useWalletManager = (): UseWalletManager => {
 
   const addAccount = useCallback(
     async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
-      const extendedAccountPublicKey = await getExtendedAccountPublicKey(wallet, accountIndex, passphrase);
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey({ wallet, accountIndex, passphrase });
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,
