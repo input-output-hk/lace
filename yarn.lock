@@ -7730,15 +7730,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:7.15.3, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
-  version: 7.15.3
-  resolution: "@babel/runtime@npm:7.15.3"
-  dependencies:
-    regenerator-runtime: ^0.13.4
-  checksum: 2f0b8d2d4e36035ab1d84af0ec26aafa098536870f27c8e07de0a0e398f7a394fdea68a88165535ffb52ded6a68912bdc3450bdf91f229eb132e1c89470789f5
-  languageName: node
-  linkType: hard
-
 "@babel/runtime@npm:7.24.7, @babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.8.7":
   version: 7.24.7
   resolution: "@babel/runtime@npm:7.24.7"
@@ -7754,6 +7745,15 @@ __metadata:
   dependencies:
     regenerator-runtime: ^0.13.2
   checksum: 4319b6a1771f2e0181de26a983ae2788f1af428dcac3c0225d459be8a50167cee5be0d66856306b8eab53c1b3e1cae68cb481ef1be5ca2259f997ce3b12557b7
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.9.2":
+  version: 7.15.3
+  resolution: "@babel/runtime@npm:7.15.3"
+  dependencies:
+    regenerator-runtime: ^0.13.4
+  checksum: 2f0b8d2d4e36035ab1d84af0ec26aafa098536870f27c8e07de0a0e398f7a394fdea68a88165535ffb52ded6a68912bdc3450bdf91f229eb132e1c89470789f5
   languageName: node
   linkType: hard
 
@@ -7808,6 +7808,15 @@ __metadata:
   dependencies:
     regenerator-runtime: ^0.14.0
   checksum: ee1a69d3ac7802803f5ee6a96e652b78b8addc28c6a38c725a4ad7d61a059d9e6cb9f6550ed2f63cce67a1bd82e0b1ef66a1079d895be6bfb536a5cfbd9ccc32
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.26.10":
+  version: 7.26.10
+  resolution: "@babel/runtime@npm:7.26.10"
+  dependencies:
+    regenerator-runtime: ^0.14.0
+  checksum: 22d2e0abb86e90de489ab16bb578db6fe2b63a88696db431198b24963749820c723f1982298cdbbea187f7b2b80fb4d98a514faf114ddb2fdc14a4b96277b955
   languageName: node
   linkType: hard
 
@@ -43187,7 +43196,7 @@ __metadata:
     "@babel/preset-env": 7.15.0
     "@babel/preset-react": 7.14.5
     "@babel/preset-typescript": 7.15.0
-    "@babel/runtime": 7.15.3
+    "@babel/runtime": ^7.26.10
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
     "@input-output-hk/lace-ui-toolkit": 3.2.7
