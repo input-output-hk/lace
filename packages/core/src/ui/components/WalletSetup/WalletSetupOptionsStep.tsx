@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styles from './WalletSetupOptionsStep.module.scss';
 import WalletLogo from '../../assets/icons/onboarding/logo/lace/isologo.png';
 import { ReactComponent as NewWalletIcon } from '../../assets/icons/onboarding/new-wallet.component.svg';
 import { ReactComponent as HardwareWalletIcon } from '../../assets/icons/onboarding/hardware-wallet.component.svg';
+import { ReactComponent as HardwareWalletDisabledIcon } from '../../assets/icons/onboarding/hardware-wallet-disabled.component.svg';
 import { ReactComponent as RestoreWalletIcon } from '../../assets/icons/onboarding/restore-wallet.component.svg';
 import { WalletSetupOption } from './WalletSetupOption';
 import { TranslationsFor } from '@ui/utils/types';
 
-type SetupoptionTranslatiions = TranslationsFor<'title' | 'description' | 'button'>;
+type SetupOptionTranslations = TranslationsFor<'title' | 'description' | 'button'>;
 
 export interface WalletSetupOptionsStepProps {
   onNewWalletRequest: () => void;
@@ -16,17 +17,22 @@ export interface WalletSetupOptionsStepProps {
   translations: {
     title: string;
     subTitle: string;
-    newWallet: SetupoptionTranslatiions;
-    hardwareWallet: SetupoptionTranslatiions;
-    restoreWallet: SetupoptionTranslatiions;
+    newWallet: SetupOptionTranslations;
+    hardwareWallet: SetupOptionTranslations & TranslationsFor<'tooltip'>;
+    restoreWallet: SetupOptionTranslations;
+    agreementText: ReactNode;
   };
+  withAgreement?: boolean;
 }
+
+const couldConnectHW = process.env.BROWSER !== 'firefox';
 
 export const WalletSetupOptionsStep = ({
   onNewWalletRequest,
   onHardwareWalletRequest,
   onRestoreWalletRequest,
-  translations
+  translations,
+  withAgreement
 }: WalletSetupOptionsStepProps): React.ReactElement => (
   <div className={styles.walletSetupOptionsStep} data-testid="wallet-setup-options-container">
     <div className={styles.content} data-testid="wallet-setup-options-content">
@@ -48,8 +54,9 @@ export const WalletSetupOptionsStep = ({
         />
         <div className={styles.separator} />
         <WalletSetupOption
+          disabled={!couldConnectHW}
           copies={translations.hardwareWallet}
-          icon={HardwareWalletIcon}
+          icon={!couldConnectHW ? HardwareWalletDisabledIcon : HardwareWalletIcon}
           onClick={onHardwareWalletRequest}
           testId="hardware-wallet"
         />
@@ -62,5 +69,10 @@ export const WalletSetupOptionsStep = ({
         />
       </div>
     </div>
+    {withAgreement && (
+      <div className={styles.legal} data-testid="agreement-text">
+        {translations.agreementText}
+      </div>
+    )}
   </div>
 );

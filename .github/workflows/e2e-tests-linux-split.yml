@@ -16,6 +16,7 @@ on:
         options:
           - chrome
           - edge
+          - firefox
       network:
         description: 'network to use'
         required: true
@@ -120,7 +121,7 @@ env:
   CARDANO_MAINNET_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-mainnet.lw.iog.io' || (github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io') }}
   CARDANO_PREPROD_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}
   CARDANO_PREVIEW_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preview.lw.iog.io' || (github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io') }}
-  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}
+  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}-${{ github.event.inputs.browser }}
 
 jobs:
   setup:
@@ -190,6 +191,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: 'e2e-tests'
           WALLET_POLLING_INTERVAL_IN_SEC: 5
+          BROWSER_TARGET: ${{ env.BROWSER }}
 
       - name: Upload build artifact
         if: needs.setup.outputs.build_exists == 'false'
@@ -227,15 +229,31 @@ jobs:
           unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
 
+      - name: Setup Firefox Developer Edition
+        id: setup-firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: 'latest-devedition'
+        if: env.BROWSER == 'firefox'
+
+      - name: Verify Firefox Installation
+        if: env.BROWSER == 'firefox'
+        shell: bash
+        run: |
+          echo Installed firefox versions: ${{ steps.setup-firefox.outputs.firefox-version }}
+          ${{ steps.setup-firefox.outputs.firefox-path }} --version
+
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
         with:
+          BROWSER: ${{ env.BROWSER }}
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
           TAGS: ${{ needs.setup.outputs.tags }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: ${{ needs.setup.outputs.service_worker_logs }}
+          FIREFOX_BINARY: ${{ steps.setup-firefox.outputs.firefox-path }}
 
   processReports:
     name: Process e2e test reports

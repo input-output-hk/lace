@@ -13,7 +13,7 @@ Feature: Nami mode - popup view
     Then "You're about to activate Nami mode." modal is not displayed
     And the user menu is displayed
 
-  @LW-12239
+  @LW-12239 @skip(browserName="firefox") @issue=LW-12397
   Scenario: Popup view - Nami mode - "You're about to activate Nami mode." modal - click "Continue" button
     When I open empty tab
     And I switch to window with Lace

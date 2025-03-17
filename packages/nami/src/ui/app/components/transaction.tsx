@@ -48,6 +48,8 @@ import type { Extra, TxInfo, Type } from '../../../adapters/transactions';
 import type { CommonOutsideHandlesContextValue } from 'features/common-outside-handles-provider';
 import type { OutsideHandlesContextValue } from 'features/outside-handles-provider';
 import type { TransactionDetail } from 'types';
+import { logger as commonLogger } from '@lace/common';
+import { contextLogger } from '@cardano-sdk/util';
 
 TimeAgo.addDefaultLocale(en);
 
@@ -342,6 +344,7 @@ const TxDetail = ({
   openExternalLink,
 }: Readonly<TxDetailProps>) => {
   const capture = useCaptureEvent();
+  const logger = contextLogger(commonLogger, 'Nami:TxDetail');
   const colorMode = {
     extraDetail: useColorModeValue('black', 'white'),
   };
@@ -371,7 +374,7 @@ const TxDetail = ({
                   try {
                     openExternalLink(`${getExplorerUrl(network)}${tx.txHash}`);
                   } catch {
-                    console.error('cannot open an external url');
+                    logger.warn('Cannot open cardano explorer URL');
                   }
                 })();
               }}

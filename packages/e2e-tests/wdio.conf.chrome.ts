@@ -25,7 +25,8 @@ const chromeConfig = {
           '--allow-file-access-from-files',
           '--disable-dev-shm-usage',
           '--remote-allow-origins=*',
-          '--disable-search-engine-choice-screen'
+          '--disable-search-engine-choice-screen',
+          '--disable-infobars'
         ]
       },
       'wdio:devtoolsOptions': {

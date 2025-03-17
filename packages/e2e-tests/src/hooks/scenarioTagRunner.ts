@@ -1,15 +1,10 @@
 import { Before } from '@cucumber/cucumber';
 import { After, AfterStep } from '@wdio/cucumber-framework';
-import localStorageManager from '../utils/localStorageManager';
-import testContext from '../utils/testContext';
-import { clearBackgroundStorageKey } from '../utils/browserStorage';
-import { closeAllTabsExceptOriginalOne } from '../utils/window';
-import networkManager from '../utils/networkManager';
 import { browser } from '@wdio/globals';
 import consoleManager from '../utils/consoleManager';
 
-import { clearWalletRepository } from '../fixture/walletRepositoryInitializer';
 import allure from '@wdio/allure-reporter';
+import testContext from '../utils/testContext';
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -19,14 +14,8 @@ Before(async () => {
 });
 
 After({ tags: 'not @Pending and not @pending' }, async () => {
-  await clearWalletRepository();
-  await networkManager.closeOpenedCdpSessions();
-  await consoleManager.closeOpenedCdpSessions();
-  await browser.disableInterceptor();
   testContext.clearContext();
-  await clearBackgroundStorageKey(); // FIXME: does not work for onboarding scenarios - error is thrown
-  await localStorageManager.cleanLocalStorage();
-  await closeAllTabsExceptOriginalOne();
+  await browser.reloadSession();
 });
 
 AfterStep(async (scenario) => {

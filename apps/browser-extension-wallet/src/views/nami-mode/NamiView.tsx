@@ -28,7 +28,7 @@ import { localDappService } from '../browser-view/features/dapp/components/DappL
 import { isValidURL } from '@src/utils/is-valid-url';
 import { BATCH, CARDANO_COIN_SYMBOL } from './constants';
 import { useDelegationTransaction, useRewardAccountsData } from '../browser-view/features/staking/hooks';
-import { useSecrets } from '@lace/core';
+import { useSecrets, useWrapWithTimeout } from '@lace/core';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { useStakePoolDetails } from '@src/features/stake-pool-details/store';
 import { getPoolInfos, getProviders } from '@src/stores/slices';
@@ -36,7 +36,6 @@ import { Wallet } from '@lace/cardano';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { logger, PostHogAction, useObservable } from '@lace/common';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
-import { useWrapWithTimeout } from '../browser-view/features/multi-wallet/hardware-wallet/useWrapWithTimeout';
 import { certificateInspectorFactory } from '@src/features/dapp/components/confirm-transaction/utils';
 import { useWalletState } from '@hooks/useWalletState';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';

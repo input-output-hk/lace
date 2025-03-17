@@ -16,21 +16,34 @@ const transformManifest = (content, mode) => {
       const date = new Date();
       manifest.version = `${manifest.version}.${date.getMonth()}${date.getDate()}`;
     }
+
+    const cardanoWsServicesUrls = [
+      process.env.CARDANO_WS_SERVER_URL_MAINNET,
+      process.env.CARDANO_WS_SERVER_URL_PREPROD,
+      process.env.CARDANO_WS_SERVER_URL_PREVIEW,
+      process.env.CARDANO_WS_SERVER_URL_SANCHONET
+    ].join(' ');
+
+    const cardanoServicesUrls = [
+      process.env.CARDANO_SERVICES_URL_MAINNET,
+      process.env.CARDANO_SERVICES_URL_PREPROD,
+      process.env.CARDANO_SERVICES_URL_PREVIEW,
+      process.env.CARDANO_SERVICES_URL_SANCHONET
+    ].join(' ');
+
+    const blockfrostUrls = [
+      process.env.BLOCKFROST_IPFS_URL,
+      process.env.BLOCKFROST_URL_MAINNET,
+      process.env.BLOCKFROST_URL_PREPROD,
+      process.env.BLOCKFROST_URL_PREVIEW,
+      process.env.BLOCKFROST_URL_SANCHONET
+    ].join(' ');
+
     manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
-      .replace(
-        '$CARDANO_WS_SERVER_URLS',
-        `${process.env.CARDANO_WS_SERVER_URL_MAINNET} ${process.env.CARDANO_WS_SERVER_URL_PREPROD} ${process.env.CARDANO_WS_SERVER_URL_PREVIEW} ${process.env.CARDANO_WS_SERVER_URL_SANCHONET}`
-      )
-      .replace(
-        '$CARDANO_SERVICES_URLS',
-        `${process.env.CARDANO_SERVICES_URL_MAINNET} ${process.env.CARDANO_SERVICES_URL_PREPROD} ${process.env.CARDANO_SERVICES_URL_PREVIEW} ${process.env.CARDANO_SERVICES_URL_SANCHONET}`
-      )
-      .replace(
-        '$BLOCKFROST_URLS',
-        `${process.env.BLOCKFROST_IPFS_URL} ${process.env.BLOCKFROST_URL_MAINNET} ${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_SANCHONET}`
-      )
+      .replace('$CARDANO_WS_SERVER_URLS', cardanoWsServicesUrls)
+      .replace('$CARDANO_SERVICES_URLS', cardanoServicesUrls)
+      .replace('$BLOCKFROST_URLS', blockfrostUrls)
       .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
-      .replace('$LOCALHOST_SCRIPT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace(
         '$LOCALHOST_CONNECT_SRC',
         mode === 'development'
@@ -41,11 +54,23 @@ const transformManifest = (content, mode) => {
       .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN))
       .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL);
 
-    if (process.env.LACE_EXTENSION_KEY) {
-      manifest.key = manifest.key.replace('$LACE_EXTENSION_KEY', process.env.LACE_EXTENSION_KEY);
+    if (process.env.BROWSER === 'firefox') {
+      manifest.browser_specific_settings = {
+        gecko: {
+          id: 'lace-wallet-ext@lace.io',
+          strict_min_version: '134.0'
+        }
+      };
+
+      // Firefox: Reading text is only available for extensions with the Web Extension clipboardRead permission
+      manifest.permissions = [...manifest.permissions, 'clipboardRead'];
+      // The background script in Firefox is a hidden DOM page
+      manifest.background = { scripts: ['./js/background.js'] };
     } else {
-      delete manifest.key;
+      // Chrome
+      manifest.key = process.env.LACE_EXTENSION_KEY;
     }
+
     return JSON.stringify(manifest);
   } catch (error) {
     throw new Error(error);

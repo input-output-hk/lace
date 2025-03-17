@@ -2,10 +2,12 @@
 import type { ReactElement } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
+import { contextLogger } from '@cardano-sdk/util';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { ChevronRightIcon } from '@chakra-ui/icons';
 import { Box, Button, Checkbox, Text } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
+import { logger as commonLogger } from '@lace/common';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
@@ -17,6 +19,7 @@ import type { UseAccount } from '../../../adapters/account';
 
 const accountsIndexes = Object.keys(Array.from({ length: 50 }));
 const defaultAccountName = (accountIndex: number) => `Account #${accountIndex}`;
+const logger = contextLogger(commonLogger, 'Nami:SelectAccounts');
 
 interface SelectAccountsProps {
   connection: Wallet.HardwareWalletConnection;
@@ -72,13 +75,14 @@ export const SelectAccounts = ({
           await walletRepository.addAccount({
             accountIndex,
             extendedAccountPublicKey:
-              await Wallet.getHwExtendedAccountPublicKey(
-                connection.type,
+              await Wallet.getHwExtendedAccountPublicKey({
+                walletType: connection.type,
                 accountIndex,
-                connection.type === WalletType.Ledger
-                  ? connection.value
-                  : undefined,
-              ),
+                ledgerConnection:
+                  connection.type === WalletType.Ledger
+                    ? connection.value
+                    : undefined,
+              }),
             metadata: {
               name: defaultAccountName(accountIndex),
               namiMode: { avatar: Math.random().toString() },
@@ -101,8 +105,8 @@ export const SelectAccounts = ({
         numAccounts: accountIndexes.length.toString(),
       });
     } catch (error_) {
-      console.error(error_);
-      setError('An error occured');
+      logger.warn('An error occurred.', error_);
+      setError('An error occurred');
     } finally {
       setIsLoading(false);
     }
