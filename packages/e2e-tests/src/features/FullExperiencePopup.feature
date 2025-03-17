@@ -10,7 +10,7 @@ Feature: Full experience - popup view
     When I hover over "Expand" button
     Then "Expand" button is displayed with tooltip
 
-  @LW-3446
+  @LW-3446 @Pending @issue=LW-12520
   Scenario Outline: Popup View - <page> opened - "Expand" button click
     And I am on <page> popup page
     When I click on "Expand" button
