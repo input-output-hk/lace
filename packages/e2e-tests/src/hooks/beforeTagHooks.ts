@@ -39,7 +39,7 @@ Before(
 
 Before(
   {
-    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended or @GeneratePaperWallet or @SignMessage-Extended or @WalletAddressPage-Extended or @NamiMode-Extended or @VotingCenterExtended'
+    tags: '@AddressBook-extended or @Transactions-Extended or @Tokens-extended or @Staking-Extended or @LockWallet-extended or @Top-Navigation-Extended or @NFTs-Extended or @NFT-Folders-Extended or @SendTx-Bundles-Extended or @SendTx-Simple-Extended or @MainNavigation-Extended or @Send-Transaction-Metadata-Extended or @Settings-Extended or @DAppConnector or @DAppConnector-Extended or @Analytics-Settings-Extended or @Banxa-Extended or @GeneratePaperWallet or @SignMessage-Extended or @WalletAddressPage-Extended or @NamiMode-Extended or @VotingCenterExtended or @DAppExplorer-Extended'
   },
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
@@ -49,11 +49,12 @@ Before(
 
 Before(
   {
-    tags: '@Tokens-popup or @Transactions-Popup or @Staking-Popup or @LockWallet-popup or @Top-Navigation-Popup or @AddressBook-popup or @Common-Popup or @SendTx-Simple-Popup or @MainNavigation-Popup or @Settings-Popup or @NFTs-Popup or @NFT-Folders-Popup or @Send-Transaction-Metadata-Popup or @ForgotPassword or @DAppConnector-Popup or @Analytics-Settings-Popup or @Banxa-Popup or @NamiMode-Popup or @VotingCenterPopup'
+    tags: '@Tokens-popup or @Transactions-Popup or @Staking-Popup or @LockWallet-popup or @Top-Navigation-Popup or @AddressBook-popup or @Common-Popup or @SendTx-Simple-Popup or @MainNavigation-Popup or @Settings-Popup or @NFTs-Popup or @NFT-Folders-Popup or @Send-Transaction-Metadata-Popup or @ForgotPassword or @DAppConnector-Popup or @Analytics-Settings-Popup or @Banxa-Popup or @NamiMode-Popup or @VotingCenterPopup or @DAppExplorer-Popup'
   },
   async () => {
     await popupViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   }
 );
 

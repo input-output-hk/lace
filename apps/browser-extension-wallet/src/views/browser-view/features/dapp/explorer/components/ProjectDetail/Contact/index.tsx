@@ -29,11 +29,19 @@ export const Contact: React.FC = () => {
           itemIcon={websiteIcon}
           itemTitle={t('dappdiscovery.side_panel.company_website')}
           itemData={data.companyWebsite}
+          testId="website"
         />
       )}
       {data.socialLinks.map(({ url, title }) => (
-        // eslint-disable-next-line unicorn/no-null
-        <ContactItem ofLinkType key={title} itemIcon={null} itemTitle={title} itemData={url} />
+        <ContactItem
+          ofLinkType
+          key={title}
+          // eslint-disable-next-line unicorn/no-null
+          itemIcon={null}
+          itemTitle={title}
+          itemData={url}
+          testId={title.toLowerCase()}
+        />
       ))}
     </Flex>
   );

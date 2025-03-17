@@ -2,6 +2,7 @@ import { Box, FlowCard, ProfileDropdown, Text } from '@input-output-hk/lace-ui-t
 import { addEllipsis } from '@lace/common';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { WalletKind } from '../../generate-key-flow/EnterPassword';
 import { LayoutNavigationProps, SharedWalletLayout } from '../../SharedWalletLayout';
 import { SharedWalletCreationStep } from '../state-and-types';
 import { creationTimelineSteps } from '../timelineSteps';
@@ -12,6 +13,7 @@ interface Props {
   activeWalletAddress: string;
   activeWalletName: string;
   onWalletNameChange: (name: string) => void;
+  walletKind?: WalletKind;
   walletName: string;
 }
 
@@ -31,6 +33,7 @@ export const SetupSharedWallet = ({
   onNext,
   onWalletNameChange,
   walletName,
+  walletKind = 'hot',
 }: Props & LayoutNavigationProps): JSX.Element => {
   const [walletNameDirty, setWalletNameDirty] = useState(false);
   const { t } = useTranslation();
@@ -85,7 +88,7 @@ export const SetupSharedWallet = ({
         <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
       </Box>
       <FlowCard.Card flowCardClassName={styles.walletCard ?? ''}>
-        <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type="hot" />} name={activeWalletName} />
+        <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type={walletKind} />} name={activeWalletName} />
         <FlowCard.Details
           subtitle={addEllipsis(activeWalletAddress, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)}
         />

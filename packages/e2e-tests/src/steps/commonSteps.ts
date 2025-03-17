@@ -467,3 +467,9 @@ Then(
 When(/^I open empty tab$/, async () => {
   await browser.newWindow('');
 });
+
+When(/^I click on "DApps" button$/, async () => {
+  const tabsCount = (await browser.getWindowHandles()).length;
+  testContext.save('tabsCount', tabsCount);
+  await visit('DApps', 'popup', false);
+});

@@ -1,4 +1,5 @@
 import React, { VFC } from 'react';
+import { WalletKind } from '../generate-key-flow/EnterPassword';
 import { AddCoSigners } from './AddCoSigners';
 import { ImportantInfoDialog } from './ImportantInfoDialog';
 import { QuorumOption } from './Quorum';
@@ -15,6 +16,7 @@ type SharedWalletCreationFlowProps = SharedWalletCreationStoreSharedProps & {
   onImportantInfoNextClick?: () => void;
   onOpenSharedWalletClick?: () => void;
   onWalletNameNextClick?: () => void;
+  walletKind?: WalletKind;
 };
 
 export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = ({
@@ -25,6 +27,7 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = ({
   onDefineQuorumNextClick,
   onDefineQuorumDownloadClick,
   onOpenSharedWalletClick,
+  walletKind,
   ...props
 }) => (
   <SharedWalletCreationStore {...props}>
@@ -32,6 +35,7 @@ export const SharedWalletCreationFlow: VFC<SharedWalletCreationFlowProps> = ({
       <>
         {state.step === SharedWalletCreationStep.Setup && (
           <SetupSharedWallet
+            walletKind={walletKind}
             activeWalletName={state.activeWalletName}
             walletName={state.walletName || ''}
             activeWalletAddress=""

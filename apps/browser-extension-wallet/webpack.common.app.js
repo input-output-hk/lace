@@ -10,25 +10,26 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
+const hasSentryReleaseConfig =
+  !!process.env.SENTRY_AUTH_TOKEN && !!process.env.SENTRY_ORG && !!process.env.SENTRY_PROJECT;
+
 const getVersion = () => {
   const version = require('./manifest.json').version;
   const commitHash = require('child_process').execSync('git rev-parse --short HEAD').toString().trim();
   return `${version}-${commitHash}`;
 };
 
-const withMaybeSentry = (p, hasSentryReleaseConfig) =>
-  hasSentryReleaseConfig ? [path.join(__dirname, 'sentry.js'), p] : p;
+const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirname, 'sentry.js'), p] : p);
 
-module.exports = (hasSentryReleaseConfig) =>
+module.exports = () =>
   merge(commonConfig(), {
     entry: {
-      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx'), hasSentryReleaseConfig),
-      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx'), hasSentryReleaseConfig),
-      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx'), hasSentryReleaseConfig),
+      popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx')),
+      options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx')),
+      dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx')),
       ['trezor-content-script']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-content-script.ts'),
       ['trezor-usb-permissions']: withMaybeSentry(
-        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts'),
-        hasSentryReleaseConfig
+        path.join(__dirname, 'src/lib/scripts/trezor/trezor-usb-permissions.ts')
       )
     },
     experiments: {

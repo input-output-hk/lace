@@ -65,7 +65,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedCategory }) => {
       }
       footer={
         <div>
-          <Button style={{ width: '100%' }} onClick={handleOpenUrl}>
+          <Button style={{ width: '100%' }} onClick={handleOpenUrl} data-testid="open-dapp-url-button">
             <Flex gap="$8" alignItems="center">
               <LinkIcon className="link-icon" />
               <div>{shortenURL(data?.link)}</div>
@@ -85,14 +85,14 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedCategory }) => {
                 alt={data?.image?.alt || 'Image'}
                 width={50}
                 height={50}
-                data-testid="dapp-info-modal-icon"
+                data-testid="dapp-info-drawer-icon"
               />
             )}
             <Flex flexDirection="column" gap="$4">
-              <Text.Body.Normal data-testid="dapp-info-modal-title" weight="$bold">
+              <Text.Body.Normal data-testid="dapp-info-drawer-title" weight="$bold">
                 {data?.title}
               </Text.Body.Normal>
-              <Text.Body.Small color="secondary" weight="$semibold">
+              <Text.Body.Small color="secondary" weight="$semibold" data-testid="dapp-info-drawer-categories">
                 {data.categories.map((c) => capitalize(c)).join(', ')}
               </Text.Body.Small>
             </Flex>
