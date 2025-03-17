@@ -1,13 +1,12 @@
 /* eslint-disable unicorn/no-null */
 import { Wallet } from '@lace/cardano';
-import { WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
+import { ConnectionError, parseConnectionError, WalletSetupConnectHardwareWalletStepRevamp } from '@lace/core';
 import { TranslationKey } from '@lace/translation';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAnalyticsContext } from '@providers';
 import { useHardwareWallet } from '../context';
-import { isTimeoutError } from '../useWrapWithTimeout';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { logger } from '@lace/common';
 
@@ -18,15 +17,7 @@ const requestHardwareWalletConnection = (): Promise<USBDevice> =>
     filters: isTrezorHWSupported() ? Wallet.supportedHwUsbDescriptors : Wallet.ledgerDescriptors
   });
 
-type ConnectionError =
-  | 'userGestureRequired'
-  | 'devicePickerRejected'
-  | 'deviceLocked'
-  | 'deviceBusy'
-  | 'cardanoAppNotOpen'
-  | 'generic';
-
-const connectionSubtitleErrorTranslationsMap: Record<ConnectionError, TranslationKey> = {
+const connectionSubtitleErrorTranslationsMap: Partial<Record<ConnectionError, TranslationKey>> = {
   cardanoAppNotOpen: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.cardanoAppNotOpen',
   deviceLocked: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceLocked',
   deviceBusy: 'core.walletSetupConnectHardwareWalletStepRevamp.errorMessage.deviceBusy',
@@ -43,19 +34,6 @@ const makeTranslations = ({ connectionError, t }: { connectionError: ConnectionE
   errorMessage: connectionError ? t(connectionSubtitleErrorTranslationsMap[connectionError]) : '',
   errorCta: t('core.walletSetupConnectHardwareWalletStepRevamp.errorCta')
 });
-
-const parseConnectionError = (error: Error): ConnectionError => {
-  if (error instanceof DOMException) {
-    if (error.message.includes('user gesture')) return 'userGestureRequired';
-    if (error.message.includes('No device selected')) return 'devicePickerRejected';
-  }
-  if (isTimeoutError(error)) return 'deviceBusy';
-  if (error.message.includes('Cannot communicate with Ledger Cardano App')) {
-    if (error.message.includes('General error 0x5515')) return 'deviceLocked';
-    if (error.message.includes('General error 0x6e01')) return 'cardanoAppNotOpen';
-  }
-  return 'generic';
-};
 
 enum DiscoveryState {
   Idle = 'Idle',

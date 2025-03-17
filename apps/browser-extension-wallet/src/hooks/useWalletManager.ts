@@ -188,7 +188,11 @@ const getExtendedAccountPublicKey = async (
     }
     case WalletType.Ledger:
     case WalletType.Trezor:
-      return Wallet.getHwExtendedAccountPublicKey(wallet.type, accountIndex);
+      return await Wallet.getHwExtendedAccountPublicKey({
+        walletType: wallet.type,
+        accountIndex,
+        purpose
+      });
   }
 };
 
@@ -299,11 +303,11 @@ export const useWalletManager = (): UseWalletManager => {
       for (const accountIndex of accountIndexes) {
         let extendedAccountPublicKey;
         try {
-          extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey(
-            connection.type,
+          extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey({
+            walletType: connection.type,
             accountIndex,
-            connection.type === WalletType.Ledger ? connection.value : undefined
-          );
+            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined
+          });
         } catch (error: unknown) {
           throw error;
         }
@@ -865,12 +869,12 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
-    (passphrase: Uint8Array) => {
+    async (passphrase?: Uint8Array) => {
       const { wallet } = cardanoWallet.source;
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
-      return getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
+      return await getExtendedAccountPublicKey(wallet, accountIndex, passphrase, KeyManagement.KeyPurpose.MULTI_SIG);
     },
     [cardanoWallet]
   );

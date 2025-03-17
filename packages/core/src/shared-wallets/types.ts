@@ -1,3 +1,4 @@
+import { WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { z } from 'zod';
 import { nativeScriptSchema, pubkeyScriptSchema, schema } from './docs/schema/shared-wallet.schema';
@@ -33,3 +34,4 @@ export interface FileValidationError extends Error {
 export type PubkeyScript = z.infer<typeof pubkeyScriptSchema>;
 export type NativeScript = z.infer<typeof nativeScriptSchema>;
 export type SharedWalletData = z.infer<typeof schema>;
+export type LinkedWalletType = Exclude<`${WalletType}`, `${WalletType.Script}`>;

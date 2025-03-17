@@ -54,6 +54,7 @@ Before(
   async () => {
     await popupViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   }
 );
 

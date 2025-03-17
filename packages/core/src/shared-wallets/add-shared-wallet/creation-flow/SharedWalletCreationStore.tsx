@@ -101,7 +101,11 @@ const makeStateMachine = ({
 }: {
   exitTheFlow: () => void;
   navigateToAppHome: () => void;
-  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
+  onCreateSharedWallet: (data: {
+    coSigners: CoSigner[];
+    name: string;
+    quorumRules: QuorumOptionValue;
+  }) => Promise<void>;
   sharedWalletKey: string;
 }): SharedWalletCreationStateMachine => ({
   [SharedWalletCreationStep.Setup]: (prevState, action) => {
@@ -234,12 +238,14 @@ const makeStateMachine = ({
   },
   [SharedWalletCreationStep.ShareDetails]: (prevState, action) => {
     if (action.type === SharedWalletCreationActionType.NEXT) {
+      // eslint-disable-next-line promise/catch-or-return
       onCreateSharedWallet({
         coSigners: prevState.coSigners,
         name: prevState.walletName,
         quorumRules: prevState.quorumRules,
+      }).then(() => {
+        navigateToAppHome();
       });
-      navigateToAppHome();
       return prevState;
     }
     return prevState;
@@ -251,7 +257,11 @@ export type SharedWalletCreationStoreSharedProps = {
   exitTheFlow: () => void;
   initialWalletName: string;
   navigateToAppHome: () => void;
-  onCreateSharedWallet: (data: { coSigners: CoSigner[]; name: string; quorumRules: QuorumOptionValue }) => void;
+  onCreateSharedWallet: (data: {
+    coSigners: CoSigner[];
+    name: string;
+    quorumRules: QuorumOptionValue;
+  }) => Promise<void>;
   sharedWalletKey: string;
 };
 
