@@ -3,7 +3,7 @@
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.button": "Create",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.description": "Create a new<br>shared wallet",
   "sharedWallets.addSharedWallet.getStarted.createSharedWalletOption.title": "New shared wallet",
-  "sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.button": "Connect",
+  "sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.button": "Import",
   "sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.description": "Upload a JSON file to<br>join a shared wallet",
   "sharedWallets.addSharedWallet.getStarted.importSharedWalletOption.title": "Import shared wallet",
   "sharedWallets.addSharedWallet.getStarted.keyOption.description": "Generate key to take<br>part in a shared wallet",
