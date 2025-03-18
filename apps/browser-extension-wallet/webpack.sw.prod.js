@@ -1,7 +1,12 @@
+const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const commonProdConfig = require('./webpack.common.prod');
 const commonSwConfig = require('./webpack.common.sw');
+const { cache } = require('react');
+
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',
@@ -9,19 +14,79 @@ require('dotenv-defaults').config({
 });
 
 module.exports = () =>
-  merge(
-    commonProdConfig(),
-    commonSwConfig(),
-    // Needed for the service worker to work with a production build
-    // TODO: after removing imports from dist/cjs, service worker no longer loads when built in production mode.
-    // It is likely that some optimization is triggering it, such as tree shaking.
-    {
-      mode: 'development',
-      optimization: {
-        moduleIds: 'named',
-        mangleExports: false,
-        // minimize mess up the source maps
-        minimize: false
-      }
-    }
-  );
+  merge(commonProdConfig(), commonSwConfig(), {
+    optimization: {
+      mangleExports: false,
+      minimize: true,
+      moduleIds: 'named',
+      splitChunks: {
+        maxSize: 3000000,
+        cacheGroups: {
+          cardano: {
+            test: /[/\\]node_modules[/\\]@cardano-sdk[\\/]/,
+            enforce: true,
+            name: () => 'cardano-sdk',
+            priority: -10,
+            chunks: 'all',
+            reuseExistingChunk: true
+          },
+          vendors: {
+            test: /[/\\]node_modules[/\\]/,
+            name: () => 'vendors',
+            enforce: true,
+            priority: -20,
+            chunks: 'all',
+            reuseExistingChunk: true
+          }
+        }
+      },
+      minimizer: [
+        new TerserPlugin({
+          exclude: /(node_modules)/,
+          minify: TerserPlugin.swcMinify,
+          // the following options are passed to SWC https://swc.rs/docs/configuration/minification
+          // Only enable what we need to speedup the build process
+          terserOptions: {
+            compress: {
+              drop_console: false,
+              drop_debugger: true,
+              unused: false,
+              arrows: false,
+              booleans: false,
+              collapse_vars: false,
+              comparisons: false,
+              computed_props: false,
+              conditionals: false,
+              defaults: false,
+              directives: false,
+              evaluate: false,
+              hoist_props: false,
+              if_return: false,
+              join_vars: false,
+              loops: false,
+              negate_iife: false,
+              properties: false,
+              sequences: false,
+              side_effects: false,
+              switches: false,
+              toplevel: false,
+              typeofs: false
+            },
+            mangle: {
+              keepFnNames: true,
+              // Required for extension messaging, as it ends up using different mangled
+              // class name for the same class in service worker and UI scripts
+              keep_classnames: true
+            }
+          }
+        })
+      ]
+    },
+    plugins: [
+      new BundleAnalyzerPlugin({
+        analyzerMode: 'static',
+        reportFilename: 'report.html',
+        openAnalyzer: false
+      })
+    ]
+  });

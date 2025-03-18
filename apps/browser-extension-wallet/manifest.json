@@ -10,7 +10,7 @@
     "128": "icon128.png"
   },
   "background": {
-    "service_worker": "./js/background.js"
+    "service_worker": "./sw/background.js"
   },
   "action": {
     "default_popup": "popup.html"
@@ -23,26 +23,26 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./js/inject.js"],
+      "js": ["./sw/inject.js"],
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
     },
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./js/content.js"],
+      "js": ["./sw/content.js"],
       "run_at": "document_start",
       "all_frames": true
     },
     {
       "matches": ["*://connect.trezor.io/*/popup.html*"],
-      "js": ["js/trezor-content-script.js"],
+      "js": ["./app/trezor-content-script.js"],
       "all_frames": true
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["/js/inject.js"],
+      "resources": ["/sw/inject.js", "/sw/*.js"],
       "matches": ["<all_urls>"]
     }
   ]
