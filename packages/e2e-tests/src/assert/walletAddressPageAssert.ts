@@ -6,6 +6,7 @@ import extensionUtils from '../utils/utils';
 import testContext from '../utils/testContext';
 import { Asset } from '../data/Asset';
 import adaHandleAssert from './adaHandleAssert';
+import { browser } from '@wdio/globals';
 
 class WalletAddressPageAssert {
   async assertSeeWalletAddressPage(mode: 'extended' | 'popup') {
@@ -115,7 +116,14 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeUnusedAddressCard(shouldSee: boolean, expectedUnusedAddress?: string) {
+    if (shouldSee) {
+      await browser.waitUntil(async () => (await $$(WalletAddressPage.ADDRESS_CARD_TITLE).length) === 2, {
+        timeout: 8000,
+        timeoutMsg: 'failed while waiting for unused address card'
+      });
+    }
     const addressCards = await WalletAddressPage.addressCards;
+
     const unusedAddressCard = addressCards[addressCards.length - 1]; // it should always be the last one
 
     const qrCodeElement = await unusedAddressCard.$(WalletAddressPage.QR_CODE);
