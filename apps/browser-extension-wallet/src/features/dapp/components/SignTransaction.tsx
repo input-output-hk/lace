@@ -15,6 +15,7 @@ import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvid
 import { WalletType } from '@cardano-sdk/web-extension';
 import { createPassphrase } from '@lib/wallet-api-ui';
 import { useDisallowSignTx, useOnUnload } from './confirm-transaction/hooks';
+import { parseError } from '@src/utils/parse-error';
 
 const inputId = `id-${uuidv4()}`;
 
@@ -22,7 +23,8 @@ export const SignTransaction = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     utils: { setPreviousView },
-    signTxRequest: { request }
+    signTxRequest: { request },
+    signError
   } = useViewsFlowContext();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
@@ -50,6 +52,7 @@ export const SignTransaction = (): React.ReactElement => {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           setValidPassword(false);
         } else {
+          signError.set(parseError(error));
           clearSecrets();
           passphrase.fill(0);
           redirectToSignFailure();
@@ -58,7 +61,7 @@ export const SignTransaction = (): React.ReactElement => {
         setIsLoading(false);
       }
     },
-    [analytics, redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
+    [analytics, request, clearSecrets, redirectToSignSuccess, signError, redirectToSignFailure]
   );
 
   const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password.value;

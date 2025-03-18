@@ -13,6 +13,7 @@ const mockGetAssetsInformation = jest.fn();
 const mockCalculateAssetBalance = jest.fn();
 const mockLovelacesToAdaString = jest.fn();
 const mockUseWalletStore = jest.fn();
+const mockUseViewsFlowContext = jest.fn();
 import { act, cleanup } from '@testing-library/react';
 import { useCreateAssetList, useGetOwnPubDRepKeyHash, useOnUnload, useSignWithHardwareWallet } from '../hooks';
 import { renderHook } from '@testing-library/react-hooks';
@@ -97,6 +98,11 @@ jest.mock('@lace/cardano', () => {
     }
   };
 });
+
+jest.mock('@providers/ViewFlowProvider', () => ({
+  ...jest.requireActual<any>('@providers/ViewFlowProvider'),
+  useViewsFlowContext: mockUseViewsFlowContext
+}));
 
 const _listeners: { type: string; listener: EventListenerOrEventListenerObject }[] = [];
 
@@ -231,6 +237,9 @@ describe('Testing hooks', () => {
   });
 
   test('useSignWithHardwareWallet', async () => {
+    mockUseViewsFlowContext.mockImplementation(() => ({
+      signError: { set: jest.fn() }
+    }));
     const redirectToSignFailure = jest.fn();
     const useRedirectionSpy = jest.spyOn(hooks, 'useRedirection').mockImplementation(() => redirectToSignFailure);
     mockEstablishDeviceConnection.mockReset();

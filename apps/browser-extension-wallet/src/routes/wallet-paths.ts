@@ -45,14 +45,15 @@ export const walletRoutePaths = {
 };
 
 export const dAppRoutePaths = {
-  dappConfirmTransaction: '/dapp/transaction',
   dappConnect: '/dapp/connect',
   dappTxSignFailure: '/dapp/transaction/failure',
   dappTxSignSuccess: '/dapp/transaction/success',
   dappDataSignFailure: '/dapp/data/failure',
   dappDataSignSuccess: '/dapp/data/success',
-  dappSignTx: '/dapp/sign-tx',
-  dappSubmitTx: '/dapp/submit-tx',
-  dappSignData: '/dapp/sign-data',
+  dappSignTxRoot: '/dapp/transaction',
+  dappSignDataRoot: '/dapp/data',
+  dappSignTx: '/dapp/transaction/sign-tx',
+  dappSubmitTx: '/dapp/transaction/submit-tx',
+  dappSignData: '/dapp/data/sign-data',
   dappNoWallet: '/dapp/no-wallet'
 };

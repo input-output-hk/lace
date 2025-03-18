@@ -12,6 +12,8 @@ import { allowSignTx, pubDRepKeyToHash, disallowSignTx } from './utils';
 import { useWalletStore } from '@stores';
 import { TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
+import { parseError } from '@src/utils/parse-error';
+import { useViewsFlowContext } from '@providers';
 
 export const useCreateAssetList = ({
   assets,
@@ -168,6 +170,7 @@ export const useSignWithHardwareWallet = (
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappTxSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappTxSignSuccess);
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>(false);
+  const { signError } = useViewsFlowContext();
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
     try {
@@ -178,10 +181,11 @@ export const useSignWithHardwareWallet = (
       redirectToSignSuccess();
     } catch (error) {
       logger.error('signWithHardwareWallet error', error);
+      signError.set(parseError(error));
       disallow(false);
       redirectToSignFailure();
     }
-  }, [disallow, redirectToSignFailure, redirectToSignSuccess, req]);
+  }, [disallow, redirectToSignFailure, redirectToSignSuccess, req, signError]);
   return { isConfirmingTx, signWithHardwareWallet };
 };
 

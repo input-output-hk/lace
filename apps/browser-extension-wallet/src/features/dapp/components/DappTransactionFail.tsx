@@ -8,6 +8,7 @@ import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useWalletStore } from '@stores';
 import { useCustomSubmitApi } from '@hooks';
+import { DappTransactionErrorSummary } from './DappTransactionErrorSummary';
 
 export const DappTransactionFail = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export const DappTransactionFail = (): React.ReactElement => {
         {getCustomSubmitApiForNetwork(environmentName).status && (
           <WarningBanner message={t('drawer.failure.customSubmitApiWarning')} />
         )}
+        <DappTransactionErrorSummary />
       </div>
       <div className={styles.footer}>
         <Button

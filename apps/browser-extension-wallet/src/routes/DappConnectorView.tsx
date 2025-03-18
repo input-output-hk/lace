@@ -1,22 +1,24 @@
+/* eslint-disable no-console */
+/* eslint-disable react/no-multi-comp */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useAppInit } from '@src/hooks';
 import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { MainLayout } from '@components/Layout';
 import {
   Connect as DappConnect,
-  SignTxFlowContainer,
-  SignDataFlowContainer,
+  DappSignTx,
+  DappSignData,
   DappTransactionSuccess,
   DappTransactionFail
 } from '../features/dapp';
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
-import { useAppSettingsContext } from '@providers';
+import { useAppSettingsContext, ViewFlowProvider } from '@providers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { DappError } from '@src/features/dapp/components/DappError';
@@ -28,8 +30,29 @@ import { Crash } from '@components/ErrorBoundary';
 import { useFatalError } from '@hooks/useFatalError';
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { sendViewsFlowState, signDataViewsFlowState } from '@src/features/dapp/config';
 
 dayjs.extend(duration);
+
+const DappSignTxRoutes = () => (
+  <ViewFlowProvider viewStates={sendViewsFlowState}>
+    <Switch>
+      <Route exact path={dAppRoutePaths.dappSignTx} component={DappSignTx} />
+      <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
+      <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+    </Switch>
+  </ViewFlowProvider>
+);
+
+const DappSignDataRoutes = () => (
+  <ViewFlowProvider viewStates={signDataViewsFlowState}>
+    <Switch>
+      <Route exact path={dAppRoutePaths.dappSignData} component={DappSignData} />
+      <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+      <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+    </Switch>
+  </ViewFlowProvider>
+);
 
 const isLastValidationExpired = (lastVerification: string, frequency: string): boolean => {
   const lastValidationDate = dayjs(Number(lastVerification));
@@ -40,6 +63,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const DappConnectorView = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation<{ pathname: string }>();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const { cardanoWallet, hdDiscoveryStatus } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
@@ -133,16 +157,17 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (isLoading) return <Loader className={styles.loader} />;
 
+  const matchSignTxRoutes = location.pathname.startsWith(dAppRoutePaths.dappSignTxRoot);
+  const matchSignDataRoutes = location.pathname.startsWith(dAppRoutePaths.dappSignDataRoot);
+
+  console.log(location);
+
   return (
     <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
       <Switch>
         <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
-        <Route exact path={dAppRoutePaths.dappSignTx} component={SignTxFlowContainer} />
-        <Route exact path={dAppRoutePaths.dappSignData} component={SignDataFlowContainer} />
-        <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
-        <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
-        <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
-        <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+        {matchSignTxRoutes && <DappSignTxRoutes />}
+        {matchSignDataRoutes && <DappSignDataRoutes />}
       </Switch>
     </MainLayout>
   );

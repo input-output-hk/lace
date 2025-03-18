@@ -36,6 +36,8 @@ const useViewsFlowState = (view: IViewState<DAPP_VIEWS>) => {
     setCurrentView(previousView);
   };
 
+  const [signError, setSignError] = useState<Error | undefined>();
+
   const setNextView = () => {
     const nextView = view.states[currentView].next;
     setCurrentView(nextView);
@@ -52,6 +54,10 @@ const useViewsFlowState = (view: IViewState<DAPP_VIEWS>) => {
     signDataRequest: {
       set: setSignDataRequest,
       request: signDataRequest
+    },
+    signError: {
+      set: setSignError,
+      error: signError
     }
   };
 };

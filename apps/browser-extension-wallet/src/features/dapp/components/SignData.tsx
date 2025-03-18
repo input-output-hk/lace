@@ -14,6 +14,7 @@ import styles from './SignTransaction.module.scss';
 import { WalletType } from '@cardano-sdk/web-extension';
 import { createPassphrase } from '@lib/wallet-api-ui';
 import { useOnUnload } from './confirm-transaction/hooks';
+import { parseError } from '@src/utils/parse-error';
 
 const inputId = `id-${uuidv4()}`;
 
@@ -21,7 +22,8 @@ export const SignData = (): React.ReactElement => {
   const { t } = useTranslation();
   const {
     utils: { setPreviousView },
-    signDataRequest: { request }
+    signDataRequest: { request },
+    signError
   } = useViewsFlowContext();
   const redirectToSignFailure = useRedirection(dAppRoutePaths.dappDataSignFailure);
   const redirectToSignSuccess = useRedirection(dAppRoutePaths.dappDataSignSuccess);
@@ -43,6 +45,7 @@ export const SignData = (): React.ReactElement => {
         if (error instanceof Wallet.KeyManagement.errors.AuthenticationError) {
           setValidPassword(false);
         } else {
+          signError.set(parseError(error));
           clearSecrets();
           passphrase.fill(0);
           redirectToSignFailure();
@@ -51,7 +54,7 @@ export const SignData = (): React.ReactElement => {
         setIsLoading(false);
       }
     },
-    [redirectToSignFailure, redirectToSignSuccess, request, clearSecrets]
+    [request, clearSecrets, redirectToSignSuccess, signError, redirectToSignFailure]
   );
 
   const confirmIsDisabled = request.walletType !== WalletType.InMemory || !password.value;
