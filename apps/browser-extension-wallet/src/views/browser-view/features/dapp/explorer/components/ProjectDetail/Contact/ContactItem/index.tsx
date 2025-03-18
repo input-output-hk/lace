@@ -9,9 +9,16 @@ interface ContactItemType {
   itemTitle: string;
   itemData: string;
   ofLinkType?: boolean;
+  testId?: string;
 }
 
-export const ContactItem: React.FC<ContactItemType> = ({ itemIcon, itemTitle, itemData, ofLinkType = false }) => {
+export const ContactItem: React.FC<ContactItemType> = ({
+  itemIcon,
+  itemTitle,
+  itemData,
+  ofLinkType = false,
+  testId
+}) => {
   const openExternalLink = useExternalLinkOpener();
   const onClick: React.MouseEventHandler = (event) => {
     event.preventDefault();
@@ -21,19 +28,27 @@ export const ContactItem: React.FC<ContactItemType> = ({ itemIcon, itemTitle, it
   return (
     <div className="iog-contact-item" data-testid="contact-item">
       {itemIcon && (
-        <span className="iog-contact-item-icon" data-testid="contact-icon">
+        <span className="iog-contact-item-icon" data-testid={testId ? `${testId}-icon` : 'contact-icon'}>
           {itemIcon}
         </span>
       )}
       <Flex flexDirection="column">
-        <Text.Body.Normal weight="$bold">{capitalize(itemTitle)}</Text.Body.Normal>
+        <Text.Body.Normal weight="$bold" data-testid={testId ? `${testId}-label` : 'contact-title'}>
+          {capitalize(itemTitle)}
+        </Text.Body.Normal>
         {ofLinkType && (
-          <a href={itemData} target="_blank" rel="noreferrer" onClick={onClick}>
+          <a
+            href={itemData}
+            target="_blank"
+            rel="noreferrer"
+            onClick={onClick}
+            data-testid={testId ? `${testId}-url` : 'contact-url'}
+          >
             {itemData}
           </a>
         )}
         {!ofLinkType && (
-          <span className="iog-contact-item-data" data-testid="contact-data">
+          <span className="iog-contact-item-data" data-testid={testId ? `${testId}-data` : 'contact-data'}>
             {itemData}
           </span>
         )}

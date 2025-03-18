@@ -23,14 +23,14 @@ export const IogCardClassic: React.FC<IogCardProps> = ({ onClick, ...props }) =>
             className="iog-card-box iog-card-box__image"
             data-testid="dappImage"
           >
-            <IogImage src={image.src} alt={image.alt} size={48} fit="cover" />
+            <IogImage src={image.src} alt={image.alt} size={48} fit="cover" data-testid="dapp-card-icon" />
           </Flex>
           <Flex className="iog-card-box__body" flexDirection="column">
-            <Text.Body.Normal weight="$semibold" data-testid="dappTitle">
+            <Text.Body.Normal weight="$semibold" data-testid="dapp-card-title">
               {title}
             </Text.Body.Normal>
             <Box w="$fill">
-              <Text.Body.Small weight="$semibold" color="secondary" data-testid="dappCategory">
+              <Text.Body.Small weight="$semibold" color="secondary" data-testid="dapp-card-category">
                 {categories.map((c) => capitalize(c)).join(', ')}
               </Text.Body.Small>
             </Box>

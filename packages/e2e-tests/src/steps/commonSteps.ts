@@ -197,6 +197,9 @@ Then(/^FAQ page is displayed$/, async () => {
 Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: string, mode: 'extended' | 'popup') => {
   await cleanBrowserStorage();
   await clearWalletRepository();
+  // Quick fix for: "no such window: no such window: target window already closed from unknown error: web view not found" thrown by next line of code
+  // TODO: recheck when LW-12520 (as it can be related)
+  await browser.switchWindow(/Lace/);
   await localStorageManager.cleanLocalStorage();
 
   await (walletName === 'newCreatedWallet'
@@ -466,4 +469,10 @@ Then(
 
 When(/^I open empty tab$/, async () => {
   await browser.newWindow('');
+});
+
+When(/^I click on "DApps" button$/, async () => {
+  const tabsCount = (await browser.getWindowHandles()).length;
+  testContext.save('tabsCount', tabsCount);
+  await visit('DApps', 'popup', false);
 });

@@ -166,7 +166,7 @@ class MoreOptionsComponent {
   }
 
   async clickOnOrderButtonForSortingOption(order: 'ascending' | 'descending', sortingOption: StakePoolSortingOption) {
-    if (browser.isFirefox) await scrollToTheTop();
+    await scrollToTheTop();
     const selector = this.getSortingOptionButtonSelector(sortingOption, order);
     await $(selector).moveTo();
     await $(selector).click();
