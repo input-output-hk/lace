@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
 import { Menu, Tooltip as AntdTooltip } from 'antd';
@@ -46,13 +46,14 @@ const shortenWalletName = (text: string, length: number) =>
   text.length > length ? `${text.slice(0, length)}...` : text;
 
 export const UserInfo = ({
-                           onOpenWalletAccounts,
-                           avatarVisible = true,
-                           onOpenEditWallet
-                         }: UserInfoProps): React.ReactElement => {
+  onOpenWalletAccounts,
+  avatarVisible = true,
+  onOpenEditWallet
+}: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
   const { walletInfo, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository, getActiveWalletId, getActiveWalletName, getActiveWalletAccount } = useWalletManager();
+  const { activateWallet, walletRepository, getActiveWalletId, getActiveWalletName, getActiveWalletAccount } =
+    useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const walletAddress = walletInfo.addresses[0].address.toString();
@@ -70,17 +71,20 @@ export const UserInfo = ({
     getActiveWalletName().then((name) => {
       setFullWalletName(name);
       setActiveWalletName(addEllipsis(name, WALLET_NAME_MAX_LENGTH, 0));
-    })}, [getActiveWalletName]);
+    });
+  }, [getActiveWalletName]);
 
   useEffect(() => {
     getActiveWalletId().then((id) => {
       setActiveWalletId(id);
-    })}, [getActiveWalletId]);
+    });
+  }, [getActiveWalletId]);
 
   useEffect(() => {
     getActiveWalletAccount().then((account) => {
       setLastActiveAccount(account ? account.accountIndex : 0);
-    })}, [getActiveWalletAccount]);
+    });
+  }, [getActiveWalletAccount]);
 
   const handleOnAddressCopy = () => {
     toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
@@ -93,9 +97,7 @@ export const UserInfo = ({
     ): Bip32WalletAccount<Wallet.AccountMetadata> => {
       if (wallet.accounts.length === 1) return wallet.accounts[0];
       if (wallet.walletId === activeWalletId) {
-        const currentlyActiveAccount = wallet.accounts.find(
-          ({ accountIndex }) => accountIndex === lastActiveAccount
-        );
+        const currentlyActiveAccount = wallet.accounts.find(({ accountIndex }) => accountIndex === lastActiveAccount);
         if (currentlyActiveAccount) return currentlyActiveAccount;
       }
       if (typeof wallet.metadata.lastActiveAccountIndex !== 'undefined') {
@@ -139,15 +141,14 @@ export const UserInfo = ({
               duration: TOAST_DEFAULT_DURATION,
               text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
-            window.location.reload();
           }}
           type={getUiWalletType(wallet.type)}
           profile={
             walletAvatar
               ? {
-                fallbackText: fullWalletName,
-                imageSrc: walletAvatar
-              }
+                  fallbackText: fullWalletName,
+                  imageSrc: walletAvatar
+                }
               : undefined
           }
           {...(wallet.type !== WalletType.Script && {
@@ -204,9 +205,7 @@ export const UserInfo = ({
         })}
       >
         {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>
-            {wallets.map((wallet) => renderWallet(wallet, true))}
-          </div>
+          <div>{wallets.map((wallet) => renderWallet(wallet, true))}</div>
         ) : (
           <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
