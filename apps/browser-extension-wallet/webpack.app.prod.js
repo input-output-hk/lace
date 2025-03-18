@@ -1,7 +1,7 @@
 const { merge } = require('webpack-merge');
 
-const prodConfig = require('./webpack.common.prod');
-const appConfig = require('./webpack.common.app');
+const commonProdConfig = require('./webpack.common.prod');
+const commonAppConfig = require('./webpack.common.app');
 
 require('dotenv-defaults').config({
   path: './.env',
@@ -9,4 +9,4 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
-module.exports = () => merge(prodConfig(), appConfig());
+module.exports = () => merge(commonProdConfig(), commonAppConfig());
