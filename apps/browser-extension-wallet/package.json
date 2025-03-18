@@ -25,10 +25,12 @@
     "README.md"
   ],
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist && run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress && run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
+    "build": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist && yarn build:sw && yarn build:app",
+    "build:app": "NODE_OPTIONS='--openssl-legacy-provider' run -T webpack --config webpack.app.${WEBPACK_ENV:-prod}.js --progress",
     "build:dev": "WEBPACK_ENV=dev yarn build",
     "build:firefox": "BROWSER=firefox yarn build",
     "build:firefox:dev": "WEBPACK_ENV=dev yarn build:firefox",
+    "build:sw": "NODE_OPTIONS='--openssl-legacy-provider' run -T webpack --config webpack.sw.${WEBPACK_ENV:-prod}.js --progress",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "dev": "NODE_OPTIONS='--openssl-legacy-provider' rm -rf dist & run -T webpack --config webpack.sw.dev.js --progress --watch & run -T webpack serve --config webpack.app.dev.js --env RUN_DEV_SERVER=true",
     "format-check": "echo \"@lace/browser-extension-wallet: no format-check command specified\"",
