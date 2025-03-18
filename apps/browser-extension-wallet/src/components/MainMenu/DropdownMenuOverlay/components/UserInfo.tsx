@@ -140,7 +140,6 @@ export const UserInfo = ({
               duration: TOAST_DEFAULT_DURATION,
               text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
-            window.location.reload();
           }}
           type={getUiWalletType(wallet.type)}
           profile={

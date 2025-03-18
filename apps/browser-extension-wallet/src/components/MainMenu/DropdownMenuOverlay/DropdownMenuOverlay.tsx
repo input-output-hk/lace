@@ -59,12 +59,11 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isBitcoinWallet } = useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
-  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
-
+  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode') && !isBitcoinWallet;
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
