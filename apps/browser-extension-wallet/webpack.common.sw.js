@@ -14,10 +14,19 @@ const withMaybeSentry = (p) => ('SENTRY_DSN' in process.env ? [path.join(__dirna
 module.exports = () =>
   merge(commonConfig(), {
     entry: {
-      background: withMaybeSentry(path.join(__dirname, 'src/lib/scripts/background/index.ts')),
+      background: path.join(__dirname, 'src/lib/scripts/background/index-sw.ts'),
       content: path.join(__dirname, 'src/lib/scripts/background/content.ts'),
       inject: path.join(__dirname, 'src/lib/scripts/background/inject.ts')
     },
+    output: {
+      path: path.join(__dirname, 'dist/sw'),
+      filename: '[name].js',
+      chunkFilename: '[name].chunk.js',
+      // the following setting is required for SRI to work:
+      crossOriginLoading: 'anonymous',
+      publicPath: './'
+    },
+    target: 'webworker',
     module: {
       // configuration regarding modules
       rules: [

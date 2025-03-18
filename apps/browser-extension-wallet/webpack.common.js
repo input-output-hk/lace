@@ -23,12 +23,6 @@ if ('SENTRY_ENVIRONMENT' in process.env) envsToExpose['SENTRY_ENVIRONMENT'] = pr
 
 module.exports = () => {
   return {
-    output: {
-      path: path.join(__dirname, 'dist/js'),
-      filename: '[name].js',
-      // the following setting is required for SRI to work:
-      crossOriginLoading: 'anonymous'
-    },
     module: {
       rules: [
         {
