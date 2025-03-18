@@ -31,6 +31,7 @@ Feature: ADA handle - extended view
     And I see "Are you sure" review address modal
     And I click "Proceed" button on "Are you sure" review address modal
     And I see a toast with text: "Edited successfully"
+    And I close a toast message
     And I close the drawer by clicking close button
     And I click "Agree" button on "You'll have to start again" modal
     And I navigate to Address Book extended page

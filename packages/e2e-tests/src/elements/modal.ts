@@ -3,11 +3,13 @@ import { ChainablePromiseElement } from 'webdriverio';
 import { browser } from '@wdio/globals';
 
 class Modal {
-  private CONTAINER = '.ant-modal-root .ant-modal-content';
+  private CONTAINER_FIREFOX = '.ant-modal-root .ant-modal-content';
+  private CONTAINER_CHROMIUM = '.ant-modal-wrap:not([style*="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
   private DESCRIPTION = '[data-testid="delete-address-modal-description"]';
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
   private CONFIRM_BUTTON = '[data-testid="delete-address-modal-confirm"]';
+  private CONTAINER = browser.isFirefox ? this.CONTAINER_FIREFOX : this.CONTAINER_CHROMIUM;
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
