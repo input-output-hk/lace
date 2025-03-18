@@ -1,10 +1,12 @@
+/* eslint-disable no-console */
+/* eslint-disable react/no-multi-comp */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
 import { useAppInit } from '@src/hooks';
 import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { MainLayout } from '@components/Layout';
 import {
   Connect as DappConnect,
@@ -32,6 +34,26 @@ import { sendViewsFlowState, signDataViewsFlowState } from '@src/features/dapp/c
 
 dayjs.extend(duration);
 
+const DappSignTxRoutes = () => (
+  <ViewFlowProvider viewStates={sendViewsFlowState}>
+    <Switch>
+      <Route exact path={dAppRoutePaths.dappSignTx} component={DappSignTx} />
+      <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
+      <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
+    </Switch>
+  </ViewFlowProvider>
+);
+
+const DappSignDataRoutes = () => (
+  <ViewFlowProvider viewStates={signDataViewsFlowState}>
+    <Switch>
+      <Route exact path={dAppRoutePaths.dappSignData} component={DappSignData} />
+      <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
+      <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
+    </Switch>
+  </ViewFlowProvider>
+);
+
 const isLastValidationExpired = (lastVerification: string, frequency: string): boolean => {
   const lastValidationDate = dayjs(Number(lastVerification));
   const expirationDate = lastValidationDate.add(dayjs.duration({ days: Number(frequency) }));
@@ -41,6 +63,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const DappConnectorView = (): React.ReactElement => {
   const { t } = useTranslation();
+  const location = useLocation<{ pathname: string }>();
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const { cardanoWallet, hdDiscoveryStatus } = useWalletStore();
   const { isWalletLocked, walletLock } = useWalletStore(lockWalletSelector);
@@ -81,32 +104,6 @@ export const DappConnectorView = (): React.ReactElement => {
     tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
     window.close();
   }, []);
-
-  const dappSignTxRoutes = useMemo(
-    () => (
-      <ViewFlowProvider viewStates={sendViewsFlowState}>
-        <Switch>
-          <Route exact path={dAppRoutePaths.dappSignTx} component={DappSignTx} />
-          <Route exact path={dAppRoutePaths.dappTxSignSuccess} component={DappTransactionSuccess} />
-          <Route exact path={dAppRoutePaths.dappTxSignFailure} component={DappTransactionFail} />
-        </Switch>
-      </ViewFlowProvider>
-    ),
-    []
-  );
-
-  const dappSignDataRoutes = useMemo(
-    () => (
-      <ViewFlowProvider viewStates={signDataViewsFlowState}>
-        <Switch>
-          <Route exact path={dAppRoutePaths.dappSignData} component={DappSignData} />
-          <Route exact path={dAppRoutePaths.dappDataSignSuccess} component={DappSignDataSuccess} />
-          <Route exact path={dAppRoutePaths.dappDataSignFailure} component={DappSignDataFail} />
-        </Switch>
-      </ViewFlowProvider>
-    ),
-    []
-  );
 
   if (fatalError) {
     return <Crash />;
@@ -160,12 +157,17 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (isLoading) return <Loader className={styles.loader} />;
 
+  const matchSignTxRoutes = location.pathname.startsWith(dAppRoutePaths.dappSignTxRoot);
+  const matchSignDataRoutes = location.pathname.startsWith(dAppRoutePaths.dappSignDataRoot);
+
+  console.log(location);
+
   return (
     <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
       <Switch>
         <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
-        {dappSignTxRoutes}
-        {dappSignDataRoutes}
+        {matchSignTxRoutes && <DappSignTxRoutes />}
+        {matchSignDataRoutes && <DappSignDataRoutes />}
       </Switch>
     </MainLayout>
   );

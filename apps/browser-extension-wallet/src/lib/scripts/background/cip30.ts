@@ -41,7 +41,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   signTx: pDebounce(
     async () => {
       try {
-        const tab = await ensureUiIsOpenAndLoaded('#/dapp/sign-tx');
+        const tab = await ensureUiIsOpenAndLoaded('#/dapp/transaction/sign-tx');
         const ready = await userPromptService.readyToSignTx();
         if (!ready) return false;
         return cancelOnTabClose(tab);
@@ -56,7 +56,7 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
   signData: pDebounce(
     async () => {
       try {
-        const tab = await ensureUiIsOpenAndLoaded('#/dapp/sign-data');
+        const tab = await ensureUiIsOpenAndLoaded('#/dapp/data/sign-data');
         const ready = await userPromptService.readyToSignData();
         if (!ready) return false;
         return cancelOnTabClose(tab);
