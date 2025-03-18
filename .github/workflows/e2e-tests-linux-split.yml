@@ -120,7 +120,7 @@ env:
   CARDANO_MAINNET_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-mainnet.lw.iog.io' || (github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io') }}
   CARDANO_PREPROD_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}
   CARDANO_PREVIEW_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preview.lw.iog.io' || (github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io') }}
-  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}-${{ github.event.inputs.browser }}
+  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}-${{ github.event.inputs.browser || 'chrome' }}
 
 jobs:
   setup:
