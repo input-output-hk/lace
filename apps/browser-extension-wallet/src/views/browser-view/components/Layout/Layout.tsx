@@ -36,13 +36,13 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
   const openReceiveDrawer = useOpenReceiveDrawer();
   const { blockchain } = useCurrentBlockchain();
 
-  const cardanoDrawer = useOpenTransactionDrawer({
+  const openCardanoSendDrawer = useOpenTransactionDrawer({
     content: DrawerContent.SEND_TRANSACTION,
     config: { options: { isAdvancedFlow: true } }
   });
-  const bitcoinDrawer = useBitcoinSendDrawer();
 
-  const openTransactionDrawer = blockchain === Blockchain.Cardano ? cardanoDrawer : bitcoinDrawer;
+  const openBitcoinSendDrawer = useBitcoinSendDrawer();
+  const openTransactionDrawer = blockchain === Blockchain.Cardano ? openCardanoSendDrawer : openBitcoinSendDrawer;
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
   const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);

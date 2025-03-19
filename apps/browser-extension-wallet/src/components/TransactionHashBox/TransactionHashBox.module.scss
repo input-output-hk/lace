@@ -1,53 +1,17 @@
 @import '../../../../../packages/common/src/ui/styles/theme.scss';
 
-.container {
-  cursor: pointer;
-  height: 106px;
-  width: 301px;
-  border-radius: size_unit(2);
-  padding: size_unit(2);
-  background-color: transparent;
+.transactionHashBox {
+  max-height: 128px;
+  word-break: break-all;
+  text-align: left;
+  overflow: auto;
+}
 
-  div.hash {
-    font-size: var(--bodySmall);
-    font-weight: 500;
-    line-height: 17px;
-    text-align: center;
-    color: var(--text-color-secondary, #212121);
-  }
+.button {
+  width: 175px;
+  max-width: 175px;
+}
 
-  .copyContainer {
-    margin-top: size_unit(1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-
-    span.copy {
-      font-size: var(--bodySmall);
-      font-weight: 500;
-      line-height: size_unit(3);
-      text-align: center;
-      color: var(--text-color-secondary, #878e9e);
-      @media (max-width: $breakpoint-popup) {
-        font-size: var(--bodyXS);
-        line-height: size_unit(3);
-        color: var(--text-color-secondary, #878e9e);
-      }
-    }
-  }
-
-  .copyIcon {
-    font-size: var(--body);
-    color: var(--text-color-secondary, #878e9e);
-  }
-
-  .checkIcon {
-    font-size: var(--bodyLarge);
-    color: var(--data-green, #878e9e);
-  }
-
-  &:hover {
-    background-color: var(--light-mode-light-grey, var(--dark-mode-mid-grey, #333333));
-  }
+.icon {
+  font-size: 16px;
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './TransactionFailed.module.scss';
+import styles from './SendFlow.module.scss';
 import { ResultMessage } from '@components/ResultMessage';
 import { useTranslation } from 'react-i18next';
 
@@ -7,7 +7,7 @@ export const UnauthorizedTx: React.FC = () => {
   const { t } = useTranslation();
   return (
     <div>
-      <div data-testid="tx-fail-container" className={styles.successTxContainer}>
+      <div data-testid="tx-fail-container" className={styles.container}>
         <ResultMessage
           status="error"
           title={

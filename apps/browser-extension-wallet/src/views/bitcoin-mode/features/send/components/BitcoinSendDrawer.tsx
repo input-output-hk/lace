@@ -1,19 +1,11 @@
 /* eslint-disable unicorn/no-null, consistent-return, sonarjs/cognitive-complexity */
-import React, { useState } from 'react';
-import styles from './BitcoinSendDrawer.module.scss';
+import React from 'react';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { SendFlow } from '@src/views/bitcoin-mode/features/send/components/SendFlow';
-import cn from 'classnames';
+import styles from './BitcoinSendDrawer.module.scss';
 
-export const BitcoinSendDrawer = (): React.ReactElement => {
-  const [subtitle, setSubtitle] = useState('');
-
-  return (
-    <Flex flexDirection="column" justifyContent="space-between" alignItems="center">
-      <div className={cn(styles.subtitle)} data-testid="drawer-header-subtitle">
-        {subtitle}
-      </div>
-      <SendFlow updateSubtitle={setSubtitle} />
-    </Flex>
-  );
-};
+export const BitcoinSendDrawer = (): React.ReactElement => (
+  <Flex className={styles.container} flexDirection="column" justifyContent="space-between" alignItems="center">
+    <SendFlow />
+  </Flex>
+);
