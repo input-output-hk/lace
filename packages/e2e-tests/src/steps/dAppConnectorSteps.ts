@@ -2,7 +2,7 @@ import { Then, When } from '@cucumber/cucumber';
 import DAppConnectorAssert, { ExpectedDAppDetails, ExpectedTransactionData } from '../assert/dAppConnectorAssert';
 import DAppConnectorUtils from '../utils/DAppConnectorUtils';
 import { browser } from '@wdio/globals';
-import { waitUntilExpectedNumberOfHandles } from '../utils/window';
+import { switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
 import { getTestWallet } from '../support/walletConfiguration';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
@@ -22,6 +22,8 @@ import NoWalletModal from '../elements/dappConnector/noWalletModal';
 import AuthorizeDAppPage from '../elements/dappConnector/authorizeDAppPage';
 import AuthorizeDAppModal from '../elements/dappConnector/authorizeDAppModal';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
+import ConfirmDataPage from '../elements/dappConnector/ConfirmDataPage';
+import ConfirmDataPageAssert from '../assert/ConfirmDataPageAssert';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -355,3 +357,30 @@ Then(
     await TestDAppPage.sendAdaAddressInput.setValue(parseWalletAddress(walletName, addressType));
   }
 );
+
+Then(/^I see DApp connector "Confirm data" page with correct address and data$/, async () => {
+  const expectedDAppData = {
+    name: testDAppDetails.name,
+    url: 'https://ljagiela.github.io'
+  };
+  const expectedTransaction = {
+    address:
+      'addr_test1qq4tcmpjf660ddnfu087qgcgmeulaa6vvt00hmdte00nqg5ss0u7v07wfhhz0ryludyvuj6pxrluy8vpwymxemnx46vqss2cn3',
+    data: 'fixed the bug'
+  };
+  await switchToLastWindow();
+  await ConfirmDataPageAssert.assertSeePage(expectedDAppData, expectedTransaction);
+});
+
+When(/^I click "(Confirm|Cancel)" button on "Confirm data" page$/, async (button: 'Confirm' | 'Cancel') => {
+  switch (button) {
+    case 'Confirm':
+      await ConfirmDataPage.clickConfirmButton();
+      break;
+    case 'Cancel':
+      await ConfirmDataPage.clickCancelButton();
+      break;
+    default:
+      throw new Error(`Unsupported button name: ${button}`);
+  }
+});

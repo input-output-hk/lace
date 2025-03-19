@@ -99,7 +99,7 @@ Before(
 );
 
 Before(
-  { tags: '@SendTransactionDapp-E2E' },
+  { tags: '@SendTransactionDapp-E2E or @SignDataDApp-E2E' },
   async () => await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendDappTransactionE2E])
 );
 

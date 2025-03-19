@@ -142,7 +142,7 @@ export const DappConfirmData = (): React.ReactElement => {
           <>
             <div className={styles.contentSection}>
               <p className={styles.heading} data-testid="dapp-transaction-recipient-address-title">
-                Address:
+                {t('dapp.confirm.address.title')}
               </p>
               <pre className={styles.pre} data-testid="dapp-transaction-recipient-address">
                 {formattedData.address}
@@ -150,7 +150,7 @@ export const DappConfirmData = (): React.ReactElement => {
             </div>
             <div className={styles.contentSection}>
               <p className={styles.heading} data-testid="dapp-transaction-data-title">
-                Data:
+                {t('dapp.confirm.data.title')}
               </p>
               <pre className={styles.pre} data-testid="dapp-transaction-data">
                 {formattedData.dataToSign}

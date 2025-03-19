@@ -609,6 +609,8 @@
   "dapp.confirm.details.recepient": "Recipient",
   "dapp.confirm.header": "Confirm transaction",
   "dapp.confirm.header.confirmData": "Confirm Data",
+  "dapp.confirm.address.title": "Address:",
+  "dapp.confirm.data.title": "Data:",
   "dapp.confirm.header.signData": "Sign Data",
   "dapp.connect.btn.accept": "Authorize",
   "dapp.connect.btn.cancel": "Cancel",
