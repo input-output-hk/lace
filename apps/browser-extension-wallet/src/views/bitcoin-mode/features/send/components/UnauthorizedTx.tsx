@@ -1,13 +1,13 @@
-import React from "react";
-import styles from "./TransactionFailed.module.scss";
-import { ResultMessage } from "@components/ResultMessage";
-import { useTranslation } from "react-i18next";
+import React from 'react';
+import styles from './SendFlow.module.scss';
+import { ResultMessage } from '@components/ResultMessage';
+import { useTranslation } from 'react-i18next';
 
 export const UnauthorizedTx: React.FC = () => {
   const { t } = useTranslation();
   return (
     <div>
-      <div data-testid="tx-fail-container" className={styles.successTxContainer}>
+      <div data-testid="tx-fail-container" className={styles.container}>
         <ResultMessage
           status="error"
           title={
@@ -17,7 +17,9 @@ export const UnauthorizedTx: React.FC = () => {
           }
           description={
             <>
-              <div data-testid="send-error-description">{t('browserView.transaction.fail.unauthorizedTransaction')}</div>
+              <div data-testid="send-error-description">
+                {t('browserView.transaction.fail.unauthorizedTransaction')}
+              </div>
               <div data-testid="send-error-description2">{t('browserView.transaction.fail.clickBackAndTryAgain')}</div>
             </>
           }

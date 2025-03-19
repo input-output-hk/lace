@@ -16,8 +16,8 @@ import { useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 import { useOpenTransactionDrawer } from '@views/browser/features/send-transaction';
 import { useOpenReceiveDrawer } from '../TransactionCTAsBox/useOpenReceiveDrawer';
-import { useBitcoinSendDrawer } from "../TransactionCTAsBox/useBitcoinSendDrawer";
-import { useCurrentBlockchain, Blockchain } from "@src/multichain";
+import { useBitcoinSendDrawer } from '../TransactionCTAsBox/useBitcoinSendDrawer';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -36,11 +36,13 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
   const openReceiveDrawer = useOpenReceiveDrawer();
   const { blockchain } = useCurrentBlockchain();
 
-  const openTransactionDrawer = blockchain === Blockchain.Cardano ?
-    useOpenTransactionDrawer({
+  const openCardanoSendDrawer = useOpenTransactionDrawer({
     content: DrawerContent.SEND_TRANSACTION,
     config: { options: { isAdvancedFlow: true } }
-  }) : useBitcoinSendDrawer();
+  });
+
+  const openBitcoinSendDrawer = useBitcoinSendDrawer();
+  const openTransactionDrawer = blockchain === Blockchain.Cardano ? openCardanoSendDrawer : openBitcoinSendDrawer;
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
   const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);
@@ -59,7 +61,7 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
       }
       if (
         backgroundStorage.message?.type === MessageTypes.OPEN_BROWSER_VIEW &&
-        (backgroundStorage.message?.data.section === BrowserViewSections.RECEIVE_ADVANCED)
+        backgroundStorage.message?.data.section === BrowserViewSections.RECEIVE_ADVANCED
       ) {
         await backgroundServices.clearBackgroundStorage({ keys: ['message'] });
         openReceiveDrawer();

@@ -17,7 +17,7 @@ export enum DrawerContent {
   SHOW_USED_ADDRESSES = 'show-used-addresses',
   SIGN_MESSAGE = 'sign-message-addresses',
   SEND_BITCOIN_TRANSACTION = 'send-bitcoin-transaction',
-  RECEIVE_BITCOIN_TRANSACTION = 'receive-bitcoin-transaction',
+  RECEIVE_BITCOIN_TRANSACTION = 'receive-bitcoin-transaction'
 }
 
 export interface DrawerConfig {
@@ -44,9 +44,9 @@ const renderDrawerContent = (content?: DrawerContent) => {
     case DrawerContent.SIGN_MESSAGE:
       return <SignMessageDrawer />;
     case DrawerContent.SEND_BITCOIN_TRANSACTION:
-      return <BitcoinSendDrawer/>;
+      return <BitcoinSendDrawer />;
     case DrawerContent.RECEIVE_BITCOIN_TRANSACTION:
-      return <BitcoinQRInfoWalletDrawer/>;
+      return <BitcoinQRInfoWalletDrawer />;
     default:
       return <Skeleton />;
   }
