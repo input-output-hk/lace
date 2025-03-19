@@ -8,26 +8,22 @@ import styles from './SendFlow.module.scss';
 
 export const SendContainer = (): React.ReactElement => {
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
-  const [subtitle, setSubtitle] = useState('');
 
   return (
-    <>
-      <Drawer
-        open
-        onClose={redirectToOverview}
-        title={
-          <DrawerHeader
-            title={'Send Bitcoin'} // TODO: Add i18n
-            subtitle={subtitle}
-          />
-        }
-        navigation={<DrawerNavigation onCloseIconClick={redirectToOverview} />}
-        popupView
-      >
-        <Flex className={styles.container} testId="btc-send" flexDirection="column" gap="$16">
-          <SendFlow updateSubtitle={setSubtitle} />
-        </Flex>
-      </Drawer>
-    </>
+    <Drawer
+      open
+      onClose={redirectToOverview}
+      title={
+        <DrawerHeader
+          title={'Send Bitcoin'} // TODO: Add i18n
+        />
+      }
+      navigation={<DrawerNavigation onCloseIconClick={redirectToOverview} />}
+      popupView
+    >
+      <Flex className={styles.container} data-testid="btc-send" flexDirection="column" gap="$16">
+        <SendFlow />
+      </Flex>
+    </Drawer>
   );
 };

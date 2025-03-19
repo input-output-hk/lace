@@ -211,7 +211,7 @@ export const AssetInput = ({
           <Tooltip title={coin?.shortTicker && coin.ticker}>
             <span className={styles.ticker}>{coin?.shortTicker ?? coin?.ticker}</span>
           </Tooltip>
-          <Chevron className={styles.icon} />
+          {!!onNameClick && <Chevron className={styles.icon} />}
         </div>
 
         <div className={styles.amountContainer}>

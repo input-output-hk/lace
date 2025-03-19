@@ -270,6 +270,7 @@
   "core.dappTransaction.transactionSummary": "Transaction Summary",
   "core.dappTransaction.transactionSummaryTooltip": "This summary includes all assets entering or leaving your wallet as part of this transaction, including fees, deposits.",
   "core.dappTransaction.tryingToUseAssetNotInWallet": "This DApp is trying to use token not held in your wallet.",
+  "core.destinationAddressInput.recipientAddressOnly": "Recipient's address",
   "core.destinationAddressInput.recipientAddress": "Recipient's address or $handle",
   "core.DRepRegistration.depositPaid": "Deposit paid",
   "core.DRepRegistration.drepId": "DRep ID",
