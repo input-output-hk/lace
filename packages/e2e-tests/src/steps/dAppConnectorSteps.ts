@@ -3,7 +3,7 @@ import DAppConnectorAssert, { ExpectedDAppDetails, ExpectedTransactionData } fro
 import DAppConnectorUtils from '../utils/DAppConnectorUtils';
 import { browser } from '@wdio/globals';
 import { switchToLastWindow, waitUntilExpectedNumberOfHandles } from '../utils/window';
-import { getTestWallet } from '../support/walletConfiguration';
+import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import AllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
@@ -24,6 +24,7 @@ import AuthorizeDAppModal from '../elements/dappConnector/authorizeDAppModal';
 import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import ConfirmDataPage from '../elements/dappConnector/ConfirmDataPage';
 import ConfirmDataPageAssert from '../assert/ConfirmDataPageAssert';
+import extensionUtils from '../utils/utils';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -360,12 +361,13 @@ Then(
 
 Then(/^I see DApp connector "Confirm data" page with correct address and data$/, async () => {
   const expectedDAppData = {
-    name: testDAppDetails.name,
-    url: 'https://ljagiela.github.io'
+    name: DAppConnectorUtils.TEST_DAPP_NAME,
+    url: new URL(DAppConnectorUtils.TEST_DAPP_URL).origin
   };
   const expectedTransaction = {
-    address:
-      'addr_test1qq4tcmpjf660ddnfu087qgcgmeulaa6vvt00hmdte00nqg5ss0u7v07wfhhz0ryludyvuj6pxrluy8vpwymxemnx46vqss2cn3',
+    address: extensionUtils.isMainnet()
+      ? getTestWallet(TestWalletName.WalletSendDappTransactionE2E).accounts[0].mainnetAddress
+      : getTestWallet(TestWalletName.WalletSendDappTransactionE2E).accounts[0].address,
     data: 'fixed the bug'
   };
   await switchToLastWindow();
