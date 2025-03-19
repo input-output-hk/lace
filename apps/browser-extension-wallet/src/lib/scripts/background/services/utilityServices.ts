@@ -14,7 +14,8 @@ import {
   CoinPrices,
   ChangeModeData,
   LaceFeaturesApi,
-  UnhandledError
+  UnhandledError,
+  WalletMode
 } from '../../types';
 import { Subject, of, BehaviorSubject, merge, map, fromEvent } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
@@ -22,7 +23,7 @@ import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
-import {getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs, getBtcPriceFromBackgroundStorage} from '../util';
+import { getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs, getBtcPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
 import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
@@ -305,8 +306,14 @@ exposeApi<LaceFeaturesApi>(
   {
     api$: of({
       getMode: async () => {
-        const { namiMigration, dappInjectCompatibilityMode } = await getBackgroundStorage();
-        return { mode: namiMigration?.mode || 'lace', dappInjectCompatibilityMode: !!dappInjectCompatibilityMode };
+        const { namiMigration, dappInjectCompatibilityMode, activeBlockchain } = await getBackgroundStorage();
+        if (activeBlockchain === 'bitcoin') {
+          return { mode: 'bitcoin', dappInjectCompatibilityMode: !!dappInjectCompatibilityMode } as WalletMode;
+        }
+        return {
+          mode: namiMigration?.mode || 'lace',
+          dappInjectCompatibilityMode: !!dappInjectCompatibilityMode
+        } as WalletMode;
       }
     }),
     baseChannel: LACE_FEATURES_CHANNEL,
