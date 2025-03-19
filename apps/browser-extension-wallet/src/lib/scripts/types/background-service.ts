@@ -115,7 +115,7 @@ export type BackgroundService = {
 };
 
 export type WalletMode = {
-  mode: BackgroundStorage['namiMigration']['mode'];
+  mode: BackgroundStorage['namiMigration']['mode'] | Extract<BackgroundStorage['activeBlockchain'], 'bitcoin'>;
   dappInjectCompatibilityMode: BackgroundStorage['dappInjectCompatibilityMode'];
 };
 
