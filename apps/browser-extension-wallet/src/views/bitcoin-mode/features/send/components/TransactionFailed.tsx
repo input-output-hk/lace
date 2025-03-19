@@ -4,16 +4,16 @@ import styles from './SendFlow.module.scss';
 import { ResultMessage } from '@components/ResultMessage';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex, SummaryExpander, TransactionSummary } from '@input-output-hk/lace-ui-toolkit';
-import { useDrawer } from '@src/views/browser-view/stores';
 
 interface TransactionFailedProps {
   txError?: Error;
   onBack: () => void;
+  isPopupView: boolean;
+  onClose: () => void;
 }
 
-export const TransactionFailed: React.FC<TransactionFailedProps> = ({ txError, onBack }) => {
+export const TransactionFailed: React.FC<TransactionFailedProps> = ({ txError, onBack, isPopupView, onClose }) => {
   const { t } = useTranslation();
-  const [config, clearContent] = useDrawer();
 
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
 
@@ -31,11 +31,15 @@ export const TransactionFailed: React.FC<TransactionFailedProps> = ({ txError, o
           status="error"
           title={<div data-testid="send-error-title">{t('browserView.transaction.fail.oopsSomethingWentWrong')}</div>}
           description={
-            <>
-              <div data-testid="send-error-description">
-                {t('browserView.transaction.fail.problemSubmittingYourTransaction')}
-              </div>
-              <div data-testid="send-error-description2">{t('browserView.transaction.fail.clickBackAndTryAgain')}</div>
+            <Flex flexDirection="column" gap="$60">
+              <Box w="$fill">
+                <div data-testid="send-error-description">
+                  {t('browserView.transaction.fail.problemSubmittingYourTransaction')}
+                </div>
+                <div data-testid="send-error-description2">
+                  {t('browserView.transaction.fail.clickBackAndTryAgain')}
+                </div>
+              </Box>
               {typeof txError === 'object' && txError.message && (
                 <Box w="$fill">
                   <SummaryExpander
@@ -48,21 +52,23 @@ export const TransactionFailed: React.FC<TransactionFailedProps> = ({ txError, o
                   </SummaryExpander>
                 </Box>
               )}
-            </>
+            </Flex>
           }
         />
       </Flex>
-      <Flex w="$fill" py="$24" px="$40" flexDirection="column" gap="$16" className={styles.buttons}>
+      <Flex
+        w="$fill"
+        py="$24"
+        pb={isPopupView ? '$0' : '$24'}
+        px="$40"
+        flexDirection="column"
+        gap={isPopupView ? '$8' : '$16'}
+        className={styles.buttons}
+      >
         <Button color="primary" block size="medium" onClick={onBack} data-testid="continue-button">
           {t('browserView.transaction.send.footer.fail')}
         </Button>
-        <Button
-          color="secondary"
-          block
-          size="medium"
-          onClick={() => (config?.onClose ? config?.onClose() : clearContent())}
-          data-testid="back-button"
-        >
+        <Button color="secondary" block size="medium" onClick={onClose} data-testid="back-button">
           {t('browserView.transaction.send.footer.cancel')}
         </Button>
       </Flex>
