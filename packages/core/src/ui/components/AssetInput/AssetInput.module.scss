@@ -10,7 +10,8 @@
   height: 66px;
 
   @media (max-width: $breakpoint-popup) {
-    max-height: 60px;
+    max-height: none;
+    height: auto;
     gap: 0px;
   }
 

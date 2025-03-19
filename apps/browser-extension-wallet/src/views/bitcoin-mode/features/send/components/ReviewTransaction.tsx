@@ -1,13 +1,13 @@
+/* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import { renderLabel, RowContainer } from '@lace/core';
 import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import styles from './ReviewTransaction.module.scss';
 import mainStyles from './SendFlow.module.scss';
-import { Button } from '@lace/common';
+import { addEllipsis, Button } from '@lace/common';
 import { BitcoinWallet } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
-import { useDrawer } from '@src/views/browser-view/stores';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -17,6 +17,8 @@ interface ReviewTransactionProps {
   feeRate: number;
   estimatedTime: string;
   onConfirm: () => void;
+  onClose: () => void;
+  isPopupView: boolean;
 }
 
 export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
@@ -24,9 +26,10 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
   btcToUsdRate,
   feeRate,
   estimatedTime,
-  onConfirm
+  onConfirm,
+  isPopupView,
+  onClose
 }) => {
-  const [config, clearContent] = useDrawer();
   const { t } = useTranslation();
   const amount = Number(unsignedTransaction.amount);
   const usdValue = (amount / SATS_IN_BTC) * btcToUsdRate;
@@ -35,30 +38,41 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
   return (
     <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
       <Flex className={mainStyles.container} flexDirection="column" w="$fill">
-        <Text.SubHeading weight="$bold">{t('browserView.transaction.send.drawer.transactionSummary')}</Text.SubHeading>
-        <Box mt="$4">
+        {isPopupView ? (
+          <Text.Heading weight="$bold">{t('browserView.transaction.send.drawer.transactionSummary')}</Text.Heading>
+        ) : (
+          <Text.SubHeading weight="$bold">
+            {t('browserView.transaction.send.drawer.transactionSummary')}
+          </Text.SubHeading>
+        )}
+
+        <Box mt={isPopupView ? '$48' : '$4'}>
           <Text.Body.Normal color="secondary" weight="$medium">
             {t('browserView.transaction.send.drawer.breakdownOfYourTransactionCost')}
           </Text.Body.Normal>
         </Box>
-        <Box w="$fill" mt="$96">
+        <Box w="$fill" mt={isPopupView ? '$40' : '$96'}>
           <RowContainer>
             {renderLabel({
               label: t('browserView.activity.entry.name.sending'),
               dataTestId: 'summary-total-spend'
             })}
             <Flex flexDirection="column" w="$fill" alignItems="flex-end">
-              <Text.Body.Normal weight="$semibold" data-testid="output-summary-amount">
+              <Text.Body.Normal weight={isPopupView ? '$medium' : '$semibold'} data-testid="output-summary-amount">
                 {Number.parseFloat((amount / SATS_IN_BTC).toFixed(8))} BTC
               </Text.Body.Normal>
-              <Text.Body.Normal color="secondary" weight="$semibold" data-testid="output-summary-amount-fiat">
+              <Text.Body.Normal
+                color="secondary"
+                weight={isPopupView ? '$medium' : '$semibold'}
+                data-testid="output-summary-amount-fiat"
+              >
                 {Number.parseFloat(usdValue.toFixed(2))} USD
               </Text.Body.Normal>
             </Flex>
           </RowContainer>
         </Box>
 
-        <Box w="$fill" mt="$32">
+        <Box w="$fill" mt={isPopupView ? '$24' : '$32'}>
           <RowContainer>
             {renderLabel({
               label: t('core.outputSummaryList.recipientAddress'),
@@ -67,14 +81,16 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
             <Flex flexDirection="column">
               <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
                 <Text.Address className={styles.address} data-testid="output-summary-recipient-address">
-                  {unsignedTransaction.toAddress}
+                  {isPopupView ? addEllipsis(unsignedTransaction.toAddress, 12, 5) : unsignedTransaction.toAddress}
                 </Text.Address>
               </Flex>
             </Flex>
           </RowContainer>
         </Box>
 
-        <Box w="$fill" mt="$32">
+        <Box w="$fill" mt={isPopupView ? '$32' : '$40'} mb="$8" className={styles.divider} />
+
+        <Box w="$fill" mt={isPopupView ? '$24' : '$32'}>
           <RowContainer>
             {renderLabel({
               label: t('browserView.transaction.send.transactionFee'),
@@ -91,9 +107,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
           </RowContainer>
         </Box>
 
-        <Box w="$fill" mt="$40" mb="$8" className={styles.divider} />
-
-        <Box w="$fill" mt="$32">
+        <Box w="$fill" mt={isPopupView ? '$24' : '$32'}>
           <RowContainer>
             {renderLabel({
               label: t('browserView.transaction.btc.send.time'),
@@ -107,17 +121,19 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
           </RowContainer>
         </Box>
       </Flex>
-      <Flex w="$fill" py="$24" px="$40" flexDirection="column" gap="$16" className={mainStyles.buttons}>
+      <Flex
+        w="$fill"
+        py="$24"
+        pb={isPopupView ? '$0' : '$24'}
+        px="$40"
+        flexDirection="column"
+        gap={isPopupView ? '$8' : '$16'}
+        className={mainStyles.buttons}
+      >
         <Button color="primary" block size="medium" onClick={onConfirm} data-testid="continue-button">
           {t('browserView.transaction.send.footer.confirm')}
         </Button>
-        <Button
-          color="secondary"
-          block
-          size="medium"
-          onClick={() => (config?.onClose ? config?.onClose() : clearContent())}
-          data-testid="back-button"
-        >
+        <Button color="secondary" block size="medium" onClick={onClose} data-testid="back-button">
           {t('browserView.transaction.send.footer.cancel')}
         </Button>
       </Flex>
