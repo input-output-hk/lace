@@ -41,6 +41,7 @@ interface SendStepOneProps {
   onContinue: () => void;
   isPopupView: boolean;
   onClose: () => void;
+  network: BitcoinWallet.Network | null;
 }
 
 export const SendStepOne: React.FC<SendStepOneProps> = ({
@@ -55,7 +56,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   onEstimatedTimeChange,
   onContinue,
   isPopupView,
-  onClose
+  onClose,
+  network
 }) => {
   const { t } = useTranslation();
   const numericAmount = Number.parseFloat(amount) || 0;
@@ -80,6 +82,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     [recommendedFees, selectedFeeKey]
   );
   const [customFee, setCustomFee] = useState<number>(feeRate);
+  const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
 
   useEffect(() => {
     setRecommendedFees(getFees());
@@ -105,6 +108,18 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
   const fiatValue = `${new BigNumber(enteredAmount.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} USD`;
 
+  const handleChangeAddress = useCallback(
+    (value: string) => {
+      onAddressChange(value);
+      if (BitcoinWallet.isValidBitcoinAddress(value, network)) {
+        setIsValidAddress(true);
+      } else {
+        setIsValidAddress(false);
+      }
+    },
+    [network, onAddressChange]
+  );
+
   return (
     <Flex className={mainStyles.container} flexDirection="column" w="$fill">
       <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
@@ -114,9 +129,19 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           value={address}
           data-testid="btc-address-input"
           label={t('core.destinationAddressInput.recipientAddressOnly')}
-          onChange={(value) => onAddressChange(value)}
+          onChange={(value) => handleChangeAddress(value)}
           style={{ width: '100%' }}
         />
+
+        {!isValidAddress && !!address?.length && (
+          <Box style={{ position: 'relative' }} w="$fill">
+            <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24">
+              <Text.Label color="error" weight="$medium" data-testid="address-input-error">
+                {t('general.errors.incorrectAddress')}
+              </Text.Label>
+            </Box>
+          </Box>
+        )}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$20'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
