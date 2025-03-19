@@ -219,6 +219,7 @@ export const SendFlow: React.FC = () => {
         onFeeRateChange={setFeeRate}
         onEstimatedTimeChange={setEstimatedTime}
         onContinue={goToReview}
+        network={network}
       />
     );
   }

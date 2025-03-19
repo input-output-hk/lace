@@ -53,7 +53,7 @@ export enum AddressType {
    *
    * Starts with `bc1q` (similar to Native SegWit).
    */
-  ElectrumNativeSegWit = 'ElectrumNativeSegWit',
+  ElectrumNativeSegWit = 'ElectrumNativeSegWit'
 }
 
 /**
@@ -175,4 +175,20 @@ export type DerivedAddress = {
    * The public key for this address.
    */
   publicKeyHex: string;
+};
+
+/**
+ * Cheks if the given Bitcoin address is valid for the specified network.
+ * @param {string} address - The Bitcoin address to validate.
+ * @param {Network} network - The Bitcoin network (mainnet or testnet).
+ * @returns {boolean}
+ */
+export const isValidBitcoinAddress = (address: string, network: Network): boolean => {
+  const bitcoinNetwork = network === Network.Testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
+  try {
+    bitcoin.address.toOutputScript(address, bitcoinNetwork);
+    return true;
+  } catch {
+    return false;
+  }
 };
