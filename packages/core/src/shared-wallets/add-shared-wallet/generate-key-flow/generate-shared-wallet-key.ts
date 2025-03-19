@@ -1,7 +1,7 @@
 import { Wallet } from '@lace/cardano';
 import { Buffer } from 'buffer';
 
-export type GenerateSharedWalletKeyFn = (password?: string) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+export type GenerateSharedWalletKeyFn = (password?: string) => Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey>;
 
 export class SharedWalletKeyGenerationAuthError extends Error {
   constructor() {
@@ -10,7 +10,9 @@ export class SharedWalletKeyGenerationAuthError extends Error {
 }
 
 type GenerateSharedWalletKeyDependencies = {
-  getSharedWalletExtendedPublicKey: (passphrase?: Uint8Array) => Promise<Wallet.Crypto.Bip32PublicKeyHex>;
+  getSharedWalletExtendedPublicKey: (
+    passphrase?: Uint8Array,
+  ) => Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey>;
 };
 
 export const makeGenerateSharedWalletKey =

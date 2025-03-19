@@ -1,3 +1,4 @@
+import { Wallet } from '@lace/cardano';
 import { TransitionHandler } from '../../../state-utils';
 import { PasswordErrorType } from '../EnterPassword';
 import {
@@ -65,7 +66,7 @@ export const makeStateMachine = ({ navigateToParentFlow }: MakeStateMachineParam
       return stateCopyKey({
         loading: undefined,
         passwordErrorType: undefined,
-        sharedWalletKey: action.sharedWalletKey,
+        sharedWalletKey: Wallet.Cardano.Cip1854ExtendedAccountPublicKey(action.sharedWalletKey),
         step: GenerateSharedWalletKeyStep.CopyKey,
       });
     }
