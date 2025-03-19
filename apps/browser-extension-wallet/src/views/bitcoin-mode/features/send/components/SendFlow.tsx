@@ -15,6 +15,8 @@ import { BitcoinWallet } from '@lace/bitcoin';
 import { Wallet as Cardano } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
 import { useDrawer } from '@src/views/browser-view/stores';
+import { useWalletStore } from '@src/stores';
+import { APP_MODE_POPUP } from '@src/utils/constants';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -118,8 +120,15 @@ export const SendFlow: React.FC = () => {
   const btcToUsdRate = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
   const balance = useObservable(bitcoinWallet.balance$, BigInt(0));
 
-  const [, setIsDrawerVisible] = useDrawer();
+  const [config, clearContent] = useDrawer();
+
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
+  const redirectToOverview = useRedirection(walletRoutePaths.assets);
+
+  const {
+    walletUI: { appMode }
+  } = useWalletStore();
+  const isPopupView = appMode === APP_MODE_POPUP;
 
   useEffect(() => {
     // TODO: Make into an observable
@@ -186,11 +195,20 @@ export const SendFlow: React.FC = () => {
     }
   };
 
+  const onClose = useCallback(() => {
+    if (isPopupView) redirectToOverview();
+    else {
+      config?.onClose ? config?.onClose() : clearContent();
+    }
+  }, [clearContent, config, isPopupView, redirectToOverview]);
+
   const backToReview = () => setStep('REVIEW');
 
   if (step === 'AMOUNT') {
     return (
       <SendStepOne
+        onClose={onClose}
+        isPopupView={isPopupView}
         amount={amount}
         onAmountChange={setAmount}
         address={address}
@@ -199,7 +217,6 @@ export const SendFlow: React.FC = () => {
         feeRate={feeRate}
         feeMarkets={feeMarkets}
         onFeeRateChange={setFeeRate}
-        estimatedTime={estimatedTime}
         onEstimatedTimeChange={setEstimatedTime}
         onContinue={goToReview}
       />
@@ -209,6 +226,8 @@ export const SendFlow: React.FC = () => {
   if (step === 'REVIEW') {
     return (
       <ReviewTransaction
+        onClose={onClose}
+        isPopupView={isPopupView}
         unsignedTransaction={unsignedTransaction}
         btcToUsdRate={btcToUsdRate}
         feeRate={feeRate}
@@ -219,14 +238,23 @@ export const SendFlow: React.FC = () => {
   }
 
   if (step === 'PASSWORD') {
-    return <PasswordInput onSubmit={handleSubmitTx} signTransaction={handleSignTransaction} />;
+    return (
+      <PasswordInput
+        onClose={onClose}
+        isPopupView={isPopupView}
+        onSubmit={handleSubmitTx}
+        signTransaction={handleSignTransaction}
+      />
+    );
   }
 
   if (step === 'DONE') {
     return (
       <TransactionSuccess
+        onClose={onClose}
+        isPopupView={isPopupView}
         onViewTransaction={() => {
-          setIsDrawerVisible();
+          clearContent();
           redirectToTransactions();
         }}
         hash={confirmationHash}
@@ -235,7 +263,7 @@ export const SendFlow: React.FC = () => {
   }
 
   if (step === 'FAILED') {
-    return <TransactionFailed onBack={backToReview} txError={txError} />;
+    return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
   }
 
   if (step === 'UNAUTHORIZED') {

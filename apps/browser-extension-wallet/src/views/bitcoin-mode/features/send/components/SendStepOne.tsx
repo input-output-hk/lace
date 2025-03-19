@@ -1,18 +1,15 @@
-/* eslint-disable no-console */
+/* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Search } from '@lace/common';
 import styles from './SendStepOne.module.scss';
 import mainStyles from './SendFlow.module.scss';
 import { AssetInput } from '@lace/core';
-import { useWalletStore } from '@src/stores';
-import { APP_MODE_POPUP } from '@src/utils/constants';
 import BigNumber from 'bignumber.js';
 import { useFetchCoinPrice } from '@hooks';
 import { CoreTranslationKey } from '@lace/translation';
 import { Box, Flex, Text, ToggleButtonGroup } from '@input-output-hk/lace-ui-toolkit';
 import { BitcoinWallet } from '@lace/bitcoin';
-import { useDrawer } from '@src/views/browser-view/stores';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
@@ -39,10 +36,11 @@ interface SendStepOneProps {
   onAddressChange: (value: string) => void;
   feeRate: number;
   onFeeRateChange: (value: number) => void;
-  estimatedTime: string;
   feeMarkets: BitcoinWallet.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
   onContinue: () => void;
+  isPopupView: boolean;
+  onClose: () => void;
 }
 
 export const SendStepOne: React.FC<SendStepOneProps> = ({
@@ -55,14 +53,11 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   onFeeRateChange,
   feeMarkets,
   onEstimatedTimeChange,
-  onContinue
+  onContinue,
+  isPopupView,
+  onClose
 }) => {
   const { t } = useTranslation();
-  const [config, clearContent] = useDrawer();
-  const {
-    walletUI: { appMode }
-  } = useWalletStore();
-  const isPopupView = appMode === APP_MODE_POPUP;
   const numericAmount = Number.parseFloat(amount) || 0;
   const hasNoValue = numericAmount === 0;
   const exceedsBalance = numericAmount > availableBalance / SATS_IN_BTC;
@@ -113,6 +108,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   return (
     <Flex className={mainStyles.container} flexDirection="column" w="$fill">
       <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
+        {isPopupView && <Text.Heading weight="$bold">{t('browserView.transaction.send.title')}</Text.Heading>}
         <Search
           disabled={false}
           value={address}
@@ -122,7 +118,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           style={{ width: '100%' }}
         />
 
-        <Box w="$fill" mt="$20" py="$24" px="$32" className={styles.amountSection}>
+        <Box w="$fill" mt={isPopupView ? '$16' : '$20'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
             inputId="BTC"
             coin={coin}
@@ -137,11 +133,15 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           />
         </Box>
 
-        <Box mt="$32">
-          <Text.SubHeading weight="$bold">{t('browserView.transaction.btc.send.feeRate')}</Text.SubHeading>
+        <Box mt={isPopupView ? '$24' : '$32'}>
+          {isPopupView ? (
+            <Text.Body.Large weight="$bold">{t('browserView.transaction.btc.send.feeRate')}</Text.Body.Large>
+          ) : (
+            <Text.SubHeading weight="$bold">{t('browserView.transaction.btc.send.feeRate')}</Text.SubHeading>
+          )}
         </Box>
 
-        <Flex mt="$32" w="$fill">
+        <Flex mt={isPopupView ? '$16' : '$32'} w="$fill">
           <ToggleButtonGroup.Root
             onValueChange={(feeKey: RecommendedFee['key']) => {
               setSelectedFeeKey(feeKey);
@@ -155,7 +155,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
             ))}
           </ToggleButtonGroup.Root>
         </Flex>
-        <Flex w="$fill" mt="$32" justifyContent="space-between">
+        <Flex w="$fill" mt={isPopupView ? '$16' : '$32'} justifyContent="space-between">
           <Text.Body.Normal weight="$semibold">{t('browserView.transaction.send.transactionFee')}</Text.Body.Normal>
           {selectedFeeKey !== 'custom' ? (
             <Flex flexDirection="column" alignItems="flex-end">
@@ -167,7 +167,11 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           ) : (
             <Box className={styles.customFee}>
               <Input
-                label={t('browserView.transaction.btc.send.feeRateCustom')}
+                label={
+                  isPopupView
+                    ? t('browserView.transaction.btc.popup.send.feeRateCustom')
+                    : t('browserView.transaction.btc.send.feeRateCustom')
+                }
                 type="number"
                 disabled={false}
                 value={customFee.toString()}
@@ -180,7 +184,15 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         </Flex>
       </Flex>
 
-      <Flex w="$fill" py="$24" px="$40" flexDirection="column" gap="$16" className={mainStyles.buttons}>
+      <Flex
+        w="$fill"
+        py="$24"
+        pb={isPopupView ? '$0' : '$24'}
+        px="$40"
+        flexDirection="column"
+        gap={isPopupView ? '$8' : '$16'}
+        className={mainStyles.buttons}
+      >
         <Button
           disabled={hasNoValue || exceedsBalance || address.trim() === ''}
           color="primary"
@@ -191,13 +203,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         >
           {t('browserView.transaction.send.footer.review')}
         </Button>
-        <Button
-          color="secondary"
-          block
-          size="medium"
-          onClick={() => (config?.onClose ? config?.onClose() : clearContent())}
-          data-testid="back-button"
-        >
+        <Button color="secondary" block size="medium" onClick={onClose} data-testid="back-button">
           {t('browserView.transaction.send.footer.cancel')}
         </Button>
       </Flex>
