@@ -13,7 +13,6 @@ import CommonAssert from '../assert/commonAssert';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import { Logger } from '../support/logger';
-import collateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import InsufficientFundsDAppPage from '../elements/dappConnector/insufficientFundsDAppPage';
 import { dataTableAsStringArray } from '../utils/cucumberDataHelper';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
@@ -41,11 +40,6 @@ Then(/^I see DApp authorization window$/, async () => {
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
 });
 
-Then(/^I see DApp collateral window$/, async () => {
-  await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeCollateralDAppPage(testDAppDetails);
-});
-
 Then(/^I see DApp insufficient funds window$/, async () => {
   await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeInsufficientFundsDAppPage();
@@ -54,12 +48,6 @@ Then(/^I see DApp insufficient funds window$/, async () => {
 Then(/^I see DApp authorization window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
   await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
   await DAppConnectorAssert.assertSeeAuthorizeDAppPage(testDAppDetails);
-  await CommonAssert.assertSeeThemeMode(mode);
-});
-
-Then(/^I see DApp collateral window in (dark|light) mode$/, async (mode: 'dark' | 'light') => {
-  await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
-  await DAppConnectorAssert.assertSeeCollateralDAppPage(testDAppDetails);
   await CommonAssert.assertSeeThemeMode(mode);
 });
 
@@ -183,11 +171,6 @@ Then(/^I click "(Always|Only once)" button in DApp authorization window$/, async
   await AuthorizeDAppModal.clickButton(button);
 });
 
-Then(/^I click "(Confirm|Cancel)" button in DApp collateral window/, async (button: 'Confirm' | 'Cancel') => {
-  await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);
-  await (button === 'Confirm' ? collateralDAppPage.clickAcceptButton() : collateralDAppPage.clickCancelButton());
-});
-
 Then(
   /^I click "(Add funds|Cancel)" button in DApp insufficient funds window/,
   async (button: 'Add funds' | 'Cancel') => {
@@ -258,19 +241,9 @@ Then(/^I de-authorize test DApp in (extended|popup) mode$/, async (mode: 'extend
   await DAppConnectorUtils.deauthorizeDApp(DAppConnectorUtils.TEST_DAPP_NAME, mode);
 });
 
-When(/^I click "(Set Collateral|Sign data)" button in test DApp$/, async (button: 'Set Collateral' | 'Sign data') => {
+When(/^I click "Sign data" button in test DApp$/, async () => {
   await DAppConnectorUtils.switchToTestDAppWindow();
-  await browser.pause(1000);
-  switch (button) {
-    case 'Set Collateral':
-      await TestDAppPage.setCollateralButton.click();
-      break;
-    case 'Sign data':
-      await TestDAppPage.signDataButton.click();
-      break;
-    default:
-      throw new Error(`Unsupported button: ${button}`);
-  }
+  await TestDAppPage.clickOnSignDataButton();
 });
 
 Then(/^I click "(Send ADA|Send Token)" "Run" button in test DApp$/, async (runButton: 'Send ADA' | 'Send Token') => {

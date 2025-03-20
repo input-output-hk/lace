@@ -1,13 +1,11 @@
 import React, { createContext, FC, useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { signingCoordinator } from '@lib/wallet-api-ui';
-import { exposeApi, RemoteApiPropertyType, TransactionWitnessRequest } from '@cardano-sdk/web-extension';
+import { TransactionWitnessRequest } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
-import { of, take } from 'rxjs';
-import { DAPP_CHANNELS } from '@src/utils/constants';
-import { runtime } from 'webextension-polyfill';
-import { UserPromptService } from '@lib/scripts/background/services';
+import { take } from 'rxjs';
 import { dAppRoutePaths } from '@routes';
+import { readyToSign } from '@src/features/dapp/components/confirm-transaction/utils';
 
 export type TxWitnessRequestContextType = TransactionWitnessRequest<Wallet.WalletMetadata, Wallet.AccountMetadata>;
 
@@ -33,18 +31,7 @@ export const TxWitnessRequestProvider: FC = ({ children }) => {
       setRequest(r);
     });
 
-    const api = exposeApi<Pick<UserPromptService, 'readyToSignTx'>>(
-      {
-        api$: of({
-          async readyToSignTx(): Promise<boolean> {
-            return Promise.resolve(true);
-          }
-        }),
-        baseChannel: DAPP_CHANNELS.userPrompt,
-        properties: { readyToSignTx: RemoteApiPropertyType.MethodReturningPromise }
-      },
-      { logger: console, runtime }
-    );
+    const api = readyToSign();
 
     return () => {
       subscription.unsubscribe();
