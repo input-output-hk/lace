@@ -8,5 +8,10 @@
     "baseUrl": ".",
     "rootDir": ".."
   },
+  "references": [
+    { "path": "../../../packages/core/src" },
+    { "path": "../../../packages/cardano/src" },
+    { "path": "../../../packages/bitcoin/src" }
+  ],
   "include": ["../src/*", "../src/typings"]
 }

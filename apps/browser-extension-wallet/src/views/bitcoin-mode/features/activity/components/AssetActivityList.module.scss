@@ -1,0 +1,106 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.infitineScroll {
+  margin-left: -#{size_unit(1)};
+  margin-right: -#{size_unit(1)};
+  padding: size_unit(1);
+  background: var(--bg-color-body, #ffffff);
+  &.isDrawerView {
+    background: var(--bg-color-modal, #ffffff);
+  }
+  &::-webkit-scrollbar {
+    width: 0 !important;
+  }
+}
+.activityContainer {
+  background: var(--bg-color-body, #ffffff);
+  &.isDrawerView {
+    background: var(--bg-color-modal, #ffffff);
+  }
+  padding: 0 !important;
+  border-radius: 12px;
+  margin-bottom: 30px !important;
+  @media (max-width: $breakpoint-popup) {
+    margin-bottom: 0;
+  }
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: var(--bodySmall);
+  line-height: 19px;
+  color: var(--text-color-secondary);
+  p {
+    margin-bottom: size_unit(3);
+
+    @media (max-width: $breakpoint-popup) {
+      margin-bottom: size_unit(2);
+    }
+  }
+}
+
+:global(.ant-list-header) {
+  border: none !important;
+  padding: 0 !important;
+}
+
+.listItem {
+  border-bottom: none !important;
+
+  &:first-child {
+    padding-top: 0 !important;
+  }
+}
+
+:global(.ant-list-split) :local(.listItemWrapper) {
+  border-bottom: none !important;
+  padding: size_unit(2) size_unit(1);
+  margin-left: -#{size_unit(1)};
+  margin-right: -#{size_unit(1)};
+  &:hover {
+    background: var(--dark-mode-mid-grey, var(--data-light-grey, #f9f9f9));
+    border-radius: 16px;
+  }
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  button.viewAll {
+    font-size: var(--bodyLarge, 18px);
+    font-weight: 500;
+    line-height: size_unit(3);
+    letter-spacing: -0.015em;
+    text-align: right;
+    color: var(--primary-default, #7f5af0);
+
+    &:active,
+    &:hover,
+    &:focus {
+      color: var(--primary-active, #702bed);
+    }
+  }
+
+  .listTitle {
+    color: var(--text-color-primary);
+    font-size: var(--subHeading, 25px);
+    font-weight: 700;
+    line-height: size_unit(4);
+    text-align: left;
+
+    @media (max-width: $breakpoint-popup) {
+      font-size: var(--bodyLarge, 18px);
+      font-weight: 600;
+      line-height: size_unit(3);
+      text-align: left;
+    }
+  }
+
+  @media (max-width: $breakpoint-popup) {
+    margin-bottom: size_unit(0.5);
+  }
+}

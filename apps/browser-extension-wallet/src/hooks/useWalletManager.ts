@@ -6,7 +6,14 @@ import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { AddressBookSchema, addressBookSchema, NftFoldersSchema, nftFoldersSchema, useDbState } from '@src/lib/storage';
-import { observableWallet, signingCoordinator, walletManager, walletRepository } from '@src/lib/wallet-api-ui';
+import {
+  bitcoinWallet,
+  bitcoinWalletManager,
+  observableWallet,
+  signingCoordinator,
+  walletManager,
+  walletRepository
+} from '@src/lib/wallet-api-ui';
 import {
   bufferReviver,
   clearLocalStorage,
@@ -41,26 +48,39 @@ import { Buffer } from 'buffer';
 import {
   buildSharedWalletScript,
   CoSigner,
+  GenerateSharedWalletKeyFn,
+  makeGenerateSharedWalletKey,
   paymentScriptKeyPath,
   QuorumOptionValue,
   QuorumRadioOption,
   ScriptKind,
   stakingScriptKeyPath,
-  GenerateSharedWalletKeyFn,
-  makeGenerateSharedWalletKey,
   useSecrets
 } from '@lace/core';
 import { logger } from '@lace/common';
+import { Bitcoin as BtcWallet } from '@lace/bitcoin';
+import { BitcoinWalletManagerApi } from '@lib/scripts/background/bitcoinWalletManager';
+import * as bip39 from 'bip39';
 
 const { AVAILABLE_CHAINS, CHAIN } = config();
 const DEFAULT_CHAIN_ID = Wallet.Cardano.ChainIds[CHAIN];
 export const LOCK_VALUE = Buffer.from(JSON.stringify({ lock: 'lock' }), 'utf8');
+
+export interface BitcoinWallet {
+  name: string;
+  wallet: BtcWallet.BitcoinWallet;
+  source: {
+    wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+    account?: Bip32WalletAccount<Wallet.AccountMetadata>;
+  };
+}
 
 export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
   chainId?: Wallet.Cardano.ChainId;
 }
+
 export interface CreateWalletFromPrivateKeyParams {
   name: string;
   rootPrivateKeyBytes: HexBlob;
@@ -81,6 +101,30 @@ export type CreateWalletParamsBase = {
   metadata: Wallet.WalletMetadata;
   encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
   extendedAccountPublicKey: Wallet.Crypto.Bip32PublicKeyHex;
+};
+
+export type CreateBitcoinWalletParams = {
+  name: string;
+  passphrase?: Buffer;
+  metadata: Wallet.WalletMetadata;
+  encryptedSecrets: { keyMaterial: HexBlob; rootPrivateKeyBytes: HexBlob };
+  accountIndex: number;
+  extendedAccountPublicKeys: {
+    mainnet: {
+      legacy: string;
+      segWit: string;
+      nativeSegWit: string;
+      taproot: string;
+      electrumNativeSegWit: string;
+    };
+    testnet: {
+      legacy: string;
+      segWit: string;
+      nativeSegWit: string;
+      taproot: string;
+      electrumNativeSegWit: string;
+    };
+  };
 };
 
 interface CreateSharedWalletParams {
@@ -123,6 +167,8 @@ type CreateHardwareWalletRevampedParams = {
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
 
 export interface UseWalletManager {
+  bitcoinWallet: BtcWallet.BitcoinWallet;
+  bitcoinWalletManager: BitcoinWalletManagerApi;
   walletManager: WalletManagerApi;
   walletRepository: WalletRepositoryApi<Wallet.WalletMetadata, Wallet.AccountMetadata>;
   lockWallet: () => void;
@@ -131,6 +177,7 @@ export interface UseWalletManager {
     wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
     activeWalletProps: WalletManagerActivateProps | null
   ) => Promise<Wallet.CardanoWallet | null>;
+  createBitcoinWallet: (args: CreateWalletParams) => Promise<BitcoinWallet>;
   createWallet: (args: CreateWalletParams) => Promise<Wallet.CardanoWallet>;
   createWalletFromPrivateKey: (args: CreateWalletFromPrivateKeyParams) => Promise<Wallet.CardanoWallet>;
   createInMemorySharedWallet: (args: CreateSharedWalletParams) => Promise<Wallet.CardanoWallet>;
@@ -157,7 +204,40 @@ export interface UseWalletManager {
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
   createMultiSigAccount: (props: CreateMultiSigAccountParams) => Promise<void>;
+  // TODO: Unify 4 props in a single getter.
+  getActiveWalletId: () => Promise<string>;
+  getActiveWalletName: () => Promise<string>;
+  getActiveWalletAccount: () => Promise<Bip32WalletAccount<Wallet.AccountMetadata> | undefined>;
+  getActiveWalletType: () => Promise<WalletType>;
 }
+
+/**
+ * Checks if the wallet is a bip32 wallet.
+ *
+ * @param wallet The wallet to check.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isAnyBip32Wallet = (wallet: AnyWallet<any, any>): wallet is AnyBip32Wallet<any, any> =>
+  wallet.type === WalletType.InMemory || wallet.type === WalletType.Ledger || wallet.type === WalletType.Trezor;
+
+/**
+ * The wallet repository uses the extended public key as ID, for bitcoin we dont have 1 but many extended keys
+ * (we have one for each network and address format). So lets take the first 64 bytes of the key and use that as id.
+ */
+const first64AsciiBytesToHex = (input: string): string => {
+  const desiredLength = 64;
+  const inputBuffer = Buffer.from(input, 'ascii');
+
+  let resultBuffer: Buffer;
+  if (inputBuffer.length >= desiredLength) {
+    resultBuffer = inputBuffer.slice(0, desiredLength);
+  } else {
+    const padding = Buffer.alloc(desiredLength - inputBuffer.length);
+    resultBuffer = Buffer.concat([inputBuffer, padding]);
+  }
+
+  return resultBuffer.toString('hex');
+};
 
 const clearBytes = (bytes: Uint8Array) => {
   for (let i = 0; i < bytes.length; i++) {
@@ -262,6 +342,11 @@ const encryptMnemonic = async (mnemonic: string[], passphrase: Uint8Array) => {
   return HexBlob.fromBytes(walletEncrypted);
 };
 
+const encryptBitcoinSeed = async (seed: Buffer, passphrase: Uint8Array) => {
+  const seedEncrypted = await Wallet.KeyManagement.emip3encrypt(seed, passphrase);
+  return HexBlob.fromBytes(seedEncrypted);
+};
+
 /** Connects a hardware wallet device */
 export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Promise<Wallet.DeviceConnection> =>
   await Wallet.connectDevice(model);
@@ -277,6 +362,7 @@ export const useWalletManager = (): UseWalletManager => {
     setWalletLock,
     cardanoWallet,
     setCardanoWallet,
+    setIsBitcoinWallet,
     resetWalletLock,
     currentChain,
     setCurrentChain,
@@ -296,7 +382,6 @@ export const useWalletManager = (): UseWalletManager => {
   const userIdService = getUserIdService();
   const { getCustomSubmitApiForNetwork, updateCustomSubmitApi } = useCustomSubmitApi();
   const { password, clearSecrets } = useSecrets();
-
   const getCurrentChainId = useCallback(() => {
     if (currentChain) return currentChain;
     // reading stored chain name to preserve network for forgot password flow, or when migrating a locked wallet
@@ -425,29 +510,134 @@ export const useWalletManager = (): UseWalletManager => {
     return firstValueFrom(walletRepository.wallets$);
   }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock, getCurrentChainId]);
 
+  const getActiveWalletId = useCallback(async (): Promise<string> => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+    const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+      combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+    );
+
+    if (activeBlockchain === 'bitcoin') {
+      return bitcoinActiveWallet?.walletId;
+    }
+
+    return activeWallet?.walletId;
+  }, [backgroundService]);
+
+  const getActiveWalletName = useCallback(async (): Promise<string> => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+    const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+      combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+    );
+
+    const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+    const wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallet = wallets.find((w) => w.walletId === walletId);
+
+    if (!wallet) return '';
+
+    return wallet.metadata.name || '';
+  }, [backgroundService]);
+
+  const getActiveWalletType = useCallback(async (): Promise<WalletType> => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+    const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+      combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+    );
+
+    const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+    const wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallet = wallets.find((w) => w.walletId === walletId);
+
+    if (!wallet) return WalletType.InMemory;
+
+    return wallet.type;
+  }, [backgroundService]);
+
+  const getActiveWalletAccount = useCallback(async (): Promise<
+    Bip32WalletAccount<Wallet.AccountMetadata> | undefined
+  > => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+    const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+      combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+    );
+
+    const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+    const wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallet = wallets.find((w) => w.walletId === walletId);
+
+    if (!wallet || !isAnyBip32Wallet(wallet)) return undefined;
+
+    return wallet.accounts.find((a) => a.accountIndex === wallet.metadata.lastActiveAccountIndex);
+  }, [backgroundService]);
+
   const activateWallet = useCallback(
     async (props: ActivateWalletProps): Promise<void> => {
-      const [wallets, activeWallet] = await firstValueFrom(
-        combineLatest([walletRepository.wallets$, walletManager.activeWalletId$])
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [wallets, activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletRepository.wallets$, walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
       );
-      if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
-        logger.debug('Wallet is already active');
+
+      if (activeBlockchain === 'bitcoin') {
+        if (
+          bitcoinActiveWallet?.walletId === props.walletId &&
+          bitcoinActiveWallet?.accountIndex === props.accountIndex
+        ) {
+          return;
+        }
+      } else if (activeWallet?.walletId === props.walletId && activeWallet?.accountIndex === props.accountIndex) {
         return;
       }
+
+      const walletToActivate = wallets.find(({ walletId }) => walletId === props.walletId);
       const updateWalletMetadataProps = {
         walletId: props.walletId,
         metadata: {
-          ...wallets.find(({ walletId }) => walletId === props.walletId).metadata,
+          ...walletToActivate.metadata,
           lastActiveAccountIndex: props.accountIndex
         }
       };
       await walletRepository.updateWalletMetadata(updateWalletMetadataProps);
-      await walletManager.activate({
-        ...props,
-        chainId: getCurrentChainId()
-      });
+
+      const chainId = getCurrentChainId();
+      if (
+        walletToActivate.type === WalletType.InMemory &&
+        walletToActivate.blockchainName &&
+        walletToActivate.blockchainName === 'Bitcoin'
+      ) {
+        const network =
+          chainId.networkId === Wallet.Cardano.NetworkId.Mainnet
+            ? BtcWallet.Network.Mainnet
+            : BtcWallet.Network.Testnet;
+
+        await bitcoinWalletManager.activate({
+          ...props,
+          network
+        });
+
+        await backgroundService.setBackgroundStorage({
+          activeBlockchain: 'bitcoin'
+        });
+
+        setIsBitcoinWallet(true);
+      } else {
+        await walletManager.activate({
+          ...props,
+          chainId
+        });
+
+        await backgroundService.setBackgroundStorage({
+          activeBlockchain: 'cardano'
+        });
+
+        setIsBitcoinWallet(false);
+      }
     },
-    [getCurrentChainId]
+    [getCurrentChainId, backgroundService, setIsBitcoinWallet]
   );
 
   const activateAnyWallet = useCallback(
@@ -618,6 +808,71 @@ export const useWalletManager = (): UseWalletManager => {
     [getCurrentChainId, clearSecrets]
   );
 
+  /**
+   * Creates or restores a new bitcoin in-memory wallet and saves it in wallet repository
+   */
+  const createBitcoinWallet = useCallback(
+    async ({
+      name,
+      passphrase,
+      metadata,
+      encryptedSecrets,
+      accountIndex,
+      extendedAccountPublicKeys
+    }: CreateBitcoinWalletParams): Promise<BitcoinWallet> => {
+      const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
+        metadata,
+        encryptedSecrets,
+        accounts: [
+          {
+            accountIndex,
+            metadata: { name: defaultAccountName(accountIndex), bitcoin: { extendedAccountPublicKeys } },
+            // For ID purposes only, we dont use this field as a key for bitcoin. We use the keys inside the metadata field
+            extendedAccountPublicKey: first64AsciiBytesToHex(
+              extendedAccountPublicKeys.mainnet.nativeSegWit
+            ) as unknown as Wallet.Crypto.Bip32PublicKeyHex
+          }
+        ],
+        type: WalletType.InMemory,
+        blockchainName: 'Bitcoin'
+      };
+
+      const walletId = await walletRepository.addWallet(addWalletProps);
+
+      const cardanoChainId = getCurrentChainId();
+      const network =
+        cardanoChainId.networkId === Wallet.Cardano.NetworkId.Mainnet
+          ? BtcWallet.Network.Mainnet
+          : BtcWallet.Network.Testnet;
+
+      await bitcoinWalletManager.activate({
+        walletId,
+        network,
+        accountIndex
+      });
+
+      // Needed for reset password flow
+      saveValueInLocalStorage({ key: 'wallet', value: { name } });
+
+      // Clear passphrase
+      if (passphrase) passphrase.fill(0);
+      clearSecrets();
+
+      return {
+        name,
+        wallet: bitcoinWallet,
+        source: {
+          wallet: {
+            ...addWalletProps,
+            walletId
+          },
+          account: addWalletProps.accounts[0]
+        }
+      };
+    },
+    [clearSecrets, getCurrentChainId]
+  );
+
   const createWalletFromPrivateKey = useCallback(
     async ({ name, rootPrivateKeyBytes, extendedAccountPublicKey }: CreateWalletFromPrivateKeyParams) =>
       createWallet({
@@ -670,6 +925,37 @@ export const useWalletManager = (): UseWalletManager => {
     const extendedAccountPublicKey = keyAgent.extendedAccountPublicKey;
 
     return createWallet({ name, passphrase, metadata, encryptedSecrets, extendedAccountPublicKey });
+  };
+
+  const createBitcoinWalletFromMnemonic = async ({ name, mnemonic }: CreateWalletParams): Promise<BitcoinWallet> => {
+    const accountIndex = 0;
+    const passphrase = Buffer.from(password.value, 'utf8');
+    const lockValue = HexBlob.fromBytes(await Wallet.KeyManagement.emip3encrypt(LOCK_VALUE, passphrase));
+
+    const seed = bip39.mnemonicToSeedSync(mnemonic.join(' '));
+    const extendedAccountPublicKeys = BtcWallet.getExtendedPubKeys(seed, 0);
+
+    const metadata = {
+      name,
+      lastActiveAccountIndex: accountIndex,
+      lockValue,
+      extendedAccountPublicKeys
+    };
+    const encryptedSecrets = {
+      keyMaterial: await encryptMnemonic(mnemonic, passphrase),
+      rootPrivateKeyBytes: await encryptBitcoinSeed(seed, passphrase)
+    };
+
+    seed.fill(0);
+
+    return createBitcoinWallet({
+      name,
+      passphrase,
+      metadata,
+      encryptedSecrets,
+      extendedAccountPublicKeys,
+      accountIndex
+    });
   };
 
   /**
@@ -785,7 +1071,11 @@ export const useWalletManager = (): UseWalletManager => {
       logger.debug('Switching chain to', chainName, AVAILABLE_CHAINS);
 
       const chainId = chainIdFromName(chainName);
+      const network =
+        chainId.networkId === Wallet.Cardano.NetworkId.Mainnet ? BtcWallet.Network.Mainnet : BtcWallet.Network.Testnet;
+
       await walletManager.switchNetwork(chainId);
+      await bitcoinWalletManager.switchNetwork(network);
 
       setAddressesDiscoveryCompleted(false);
       updateAppSettings({ ...settings, chainName });
@@ -1043,10 +1333,17 @@ export const useWalletManager = (): UseWalletManager => {
     switchNetwork,
     walletManager,
     walletRepository,
+    bitcoinWalletManager,
+    bitcoinWallet,
     getMnemonic,
     enableCustomNode,
     generateSharedWalletKey,
     createMultiSigAccount,
-    getSharedWalletExtendedPublicKey
+    getSharedWalletExtendedPublicKey,
+    createBitcoinWallet: createBitcoinWalletFromMnemonic,
+    getActiveWalletId,
+    getActiveWalletName,
+    getActiveWalletAccount,
+    getActiveWalletType
   };
 };

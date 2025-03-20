@@ -4,13 +4,14 @@ import { useHistory } from 'react-router-dom';
 import { MenuItemList } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { sideMenuConfig } from './side-menu-config';
+import { sideMenuConfig, bitcoinsideMenuConfig } from './side-menu-config';
 import { SideMenuContent } from './SideMenuContent';
 import { walletRoutePaths as routes } from '@routes/wallet-paths';
 import { useWalletStore } from '@stores';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 const { GOV_TOOLS_URLS } = config();
 
@@ -26,6 +27,7 @@ export const SideMenu = (): React.ReactElement => {
   const posthog = usePostHogClientContext();
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
   const { isSharedWallet, environmentName } = useWalletStore();
+  const { blockchain } = useCurrentBlockchain();
 
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
 
@@ -86,9 +88,10 @@ export const SideMenu = (): React.ReactElement => {
     excludeItems.push(MenuItemList.VOTING);
   }
   const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
+
   return (
     <SideMenuContent
-      menuItems={menuItems}
+      menuItems={blockchain === Blockchain.Cardano ? menuItems : bitcoinsideMenuConfig}
       activeItemId={tab}
       hoveredItemId={currentHoveredItem}
       onClick={handleRedirection}

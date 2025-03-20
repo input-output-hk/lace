@@ -143,8 +143,7 @@ export const mockWalletUI = {
 
 export const getSendStoreContext =
   (): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) =>
-    <SendStoreProvider>{children}</SendStoreProvider>;
+  ({ children }: { children?: React.ReactNode }) => <SendStoreProvider>{children}</SendStoreProvider>;
 
 export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
@@ -613,6 +612,10 @@ export const mockAssetDetails = {
 
 export const mockPrices: PriceResult = {
   cardano: {
+    price: 0.4,
+    priceVariationPercentage24h: 1.293
+  },
+  bitcoin: {
     price: 0.4,
     priceVariationPercentage24h: 1.293
   },

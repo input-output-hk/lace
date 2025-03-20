@@ -3,6 +3,7 @@ import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
   AddressBookLink,
+  AddNewBitcoinWalletLink,
   Links,
   LockWallet,
   NetworkChoise,
@@ -56,6 +57,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const wallets = useObservable(walletRepository.wallets$);
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
+  const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
@@ -110,6 +112,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     (w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet.walletId
   );
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
+  const showAddBitcoinWalletLink = bitcoinWalletsEnabled;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';
@@ -164,6 +167,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
             {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
+            {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
             <AddressBookLink />
             <SettingsLink />
             <Separator />
