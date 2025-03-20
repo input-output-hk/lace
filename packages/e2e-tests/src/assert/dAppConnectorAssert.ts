@@ -6,7 +6,6 @@ import AuthorizeDAppModal from '../elements/dappConnector/authorizeDAppModal';
 import ExampleDAppPage from '../elements/dappConnector/testDAppPage';
 import ConfirmTransactionPage from '../elements/dappConnector/confirmTransactionPage';
 import CommonDappPageElements from '../elements/dappConnector/commonDappPageElements';
-import CollateralDAppPage from '../elements/dappConnector/collateralDAppPage';
 import SignTransactionPage from '../elements/dappConnector/signTransactionPage';
 import DAppTransactionAllDonePage from '../elements/dappConnector/dAppTransactionAllDonePage';
 import { Logger } from '../support/logger';
@@ -65,38 +64,6 @@ class DAppConnectorAssert {
     expect(await AuthorizeDAppPage.authorizeButton.getText()).to.equal(await t('dapp.connect.btn.accept'));
     await AuthorizeDAppPage.cancelButton.waitForDisplayed();
     expect(await AuthorizeDAppPage.cancelButton.getText()).to.equal(await t('dapp.connect.btn.cancel'));
-  }
-
-  async assertSeeCollateralDAppPage(expectedDappDetails: ExpectedDAppDetails) {
-    await this.assertSeeHeader();
-
-    await CollateralDAppPage.modalDescription.waitForDisplayed();
-    const currentDAppUrl = new URL(expectedDappDetails.url);
-
-    const valuePlaceholder = 'valuePlaceholder';
-    const currentModalText = (await CollateralDAppPage.modalDescription.getText()).replaceAll(
-      /(\d+(?:\.\d*)?|\.\d+)/g,
-      valuePlaceholder
-    );
-    const expectedModalText = (await t('dapp.collateral.request'))
-      .replaceAll('{{symbol}}', 'tADA')
-      .replace('{{dapp}}', `${currentDAppUrl.protocol}//${currentDAppUrl.host}`)
-      .replace('{{requestedAmount}}', valuePlaceholder)
-      .replace('{{lockableAmount}}', valuePlaceholder);
-
-    expect(currentModalText).to.equal(expectedModalText);
-
-    await CollateralDAppPage.banner.container.waitForDisplayed();
-    await CollateralDAppPage.banner.icon.waitForDisplayed();
-    await CollateralDAppPage.banner.description.waitForDisplayed();
-    expect(await CollateralDAppPage.banner.description.getText()).to.equal(await t('dapp.collateral.amountSeparated'));
-
-    await CollateralDAppPage.acceptButton.waitForDisplayed();
-    expect(await CollateralDAppPage.acceptButton.getText()).to.equal(
-      await t('browserView.settings.wallet.collateral.confirm')
-    );
-    await CollateralDAppPage.cancelButton.waitForDisplayed();
-    expect(await CollateralDAppPage.cancelButton.getText()).to.equal(await t('general.button.cancel'));
   }
 
   async assertSeeInsufficientFundsDAppPage() {
