@@ -143,7 +143,8 @@ export const mockWalletUI = {
 
 export const getSendStoreContext =
   (): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) => <SendStoreProvider>{children}</SendStoreProvider>;
+  ({ children }: { children?: React.ReactNode }) =>
+    <SendStoreProvider>{children}</SendStoreProvider>;
 
 export const mockPersonalWallet = {
   addresses$: createSignal<any>()[0],
