@@ -1,37 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Typography } from 'antd';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import Copy from '../../assets/icons/copy.component.svg';
-import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { Button, toast } from '@lace/common';
+import Check from '../../assets/icons/check-success.component.svg';
 import styles from './TransactionHashBox.module.scss';
-import { useTranslation } from 'react-i18next';
 
 export interface TransactionHashBoxProps {
   hash: string;
 }
 
+const { Text, Paragraph } = Typography;
+
 export const TransactionHashBox = ({ hash }: TransactionHashBoxProps): React.ReactElement => {
   const { t } = useTranslation();
+  const [hasMouseEnter, setHasMouseEnter] = useState(false);
+  const [hasBeenCopied, setHasBeenCopied] = useState(false);
 
-  const handleCopy = () => {
-    toast.notify({
-      text: t('general.clipboard.copiedToClipboard')
-    });
+  const handleMouseEnter = () => {
+    setHasMouseEnter(true);
+  };
+  const hadnelMouseLeave = () => {
+    setHasMouseEnter(false);
+    setHasBeenCopied(false);
   };
 
+  const handleCopy = (_text: string, result: boolean) => {
+    setHasBeenCopied(result);
+  };
+
+  const copyText = hasBeenCopied ? 'general.button.copied' : 'general.button.copy';
+
   return (
-    <Flex w="$fill" alignItems="center" flexDirection="column" gap="$12">
-      <Box w="$fill" className={styles.transactionHashBox}>
-        <Text.Body.Normal weight="$medium">{hash}</Text.Body.Normal>
-      </Box>
-      <CopyToClipboard onCopy={handleCopy} text={hash}>
-        <Button className={styles.button} color="secondary" size="medium" data-testid="back-button">
-          <Flex alignItems="center" justifyContent="center" gap="$4">
-            <Copy className={styles.icon} />
-            <Text.Button weight="$semibold">Copy</Text.Button>
-          </Flex>
-        </Button>
-      </CopyToClipboard>
-    </Flex>
+    <CopyToClipboard onCopy={handleCopy} text={hash}>
+      <div className={styles.container} onMouseEnter={handleMouseEnter} onMouseLeave={hadnelMouseLeave}>
+        <Paragraph className={styles.hash} data-testid="transaction-hash">
+          {hash}
+        </Paragraph>
+        {hasMouseEnter && (
+          <div className={styles.copyContainer} data-testid="transaction-hash-copy-container">
+            {hasBeenCopied ? <Check className={styles.checkIcon} /> : <Copy className={styles.copyIcon} />}
+            <Text className={styles.copy} data-testid="transaction-hash-copy-text">
+              {t(copyText)}{' '}
+            </Text>
+          </div>
+        )}
+      </div>
+    </CopyToClipboard>
   );
 };
