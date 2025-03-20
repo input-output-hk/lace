@@ -94,7 +94,7 @@ export const config: WebdriverIO.Config = {
       './src/features/VotingCenter*.feature'
     ],
     batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
-    batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
+    batch16: ['./src/features/SendTransactionBundlesExtended*.feature', './src/features/e2e/SignDataDAppE2E.feature']
   },
   automationProtocol: 'webdriver',
   exclude: [],
