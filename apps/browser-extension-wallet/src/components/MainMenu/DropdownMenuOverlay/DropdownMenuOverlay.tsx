@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { ReactNode, useCallback, useState, VFC, useMemo, useEffect } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
@@ -33,6 +34,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
 import { useCurrentWallet, useWalletManager } from '@hooks';
+import { useCurrentBlockchain } from '@src/multichain';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -59,7 +61,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
-  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet, isBitcoinWallet } = useWalletStore();
+  const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoinWallet = blockchain === 'bitcoin';
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
@@ -167,7 +171,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             )}
             {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
             {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
-            <AddressBookLink />
+            {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />
             <Separator />
             {shouldShowSignMessage && getSignMessageLink()}
