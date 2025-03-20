@@ -4,15 +4,15 @@ import styles from './SendFlow.module.scss';
 import { Password, PasswordObj, useSecrets } from '@lace/core';
 import { Button, useAutoFocus } from '@lace/common';
 import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 import { createPassphrase } from '@lib/wallet-api-ui';
 import { useTranslation } from 'react-i18next';
 
 const inputId = `id-${uuidv4()}`;
 
 interface PasswordInputProps {
-  signTransaction: (password: Buffer) => Promise<BitcoinWallet.SignedTransaction> | undefined;
-  onSubmit: (signedTx: BitcoinWallet.SignedTransaction) => Promise<void>;
+  signTransaction: (password: Buffer) => Promise<Bitcoin.SignedTransaction> | undefined;
+  onSubmit: (signedTx: Bitcoin.SignedTransaction) => Promise<void>;
   isPopupView: boolean;
   onClose: () => void;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRedirection } from '@hooks';
 import { walletRoutePaths } from '../../../wallet-paths';
 import { SendFlow } from './SendFlow';
