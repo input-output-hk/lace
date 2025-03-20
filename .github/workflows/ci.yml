@@ -199,6 +199,12 @@ jobs:
           name: packages-nami
           path: packages/nami/dist
 
+      - name: Download packages-bitcoin
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-bitcoin
+          path: packages/bitcoin/dist
+
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
         with:

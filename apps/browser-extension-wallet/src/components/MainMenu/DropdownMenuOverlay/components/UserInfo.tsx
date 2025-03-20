@@ -158,7 +158,6 @@ export const UserInfo = ({
       );
     },
     [
-      lastActiveAccount,
       activateWallet,
       analytics,
       fullWalletName,
