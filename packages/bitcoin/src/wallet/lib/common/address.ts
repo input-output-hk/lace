@@ -179,7 +179,7 @@ export type DerivedAddress = {
 };
 
 /**
- * Cheks if the given Bitcoin address is valid for the specified network.
+ * Checks if the given Bitcoin address is valid for the specified network.
  * @param {string} address - The Bitcoin address to validate.
  * @param {Network} network - The Bitcoin network (mainnet or testnet).
  * @returns {boolean}

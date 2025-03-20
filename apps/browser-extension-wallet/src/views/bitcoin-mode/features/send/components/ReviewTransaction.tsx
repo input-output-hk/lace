@@ -6,7 +6,7 @@ import { Box, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import styles from './ReviewTransaction.module.scss';
 import mainStyles from './SendFlow.module.scss';
 import { addEllipsis, Button } from '@lace/common';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;

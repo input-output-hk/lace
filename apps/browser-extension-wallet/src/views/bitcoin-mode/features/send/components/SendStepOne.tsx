@@ -9,13 +9,13 @@ import BigNumber from 'bignumber.js';
 import { useFetchCoinPrice } from '@hooks';
 import { CoreTranslationKey } from '@lace/translation';
 import { Box, Flex, Text, ToggleButtonGroup } from '@input-output-hk/lace-ui-toolkit';
-import { BitcoinWallet } from '@lace/bitcoin';
+import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
 
 interface RecommendedFee {
-  key?: keyof BitcoinWallet.EstimatedFees | 'custom';
+  key?: keyof Bitcoin.EstimatedFees | 'custom';
   label: string;
   feeRate?: number; // sats/vB
   estimatedTime: string; // e.g. "~10 min"
@@ -36,12 +36,12 @@ interface SendStepOneProps {
   onAddressChange: (value: string) => void;
   feeRate: number;
   onFeeRateChange: (value: number) => void;
-  feeMarkets: BitcoinWallet.EstimatedFees | null;
+  feeMarkets: Bitcoin.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
   onContinue: () => void;
   isPopupView: boolean;
   onClose: () => void;
-  network: BitcoinWallet.Network | null;
+  network: Bitcoin.Network | null;
 }
 
 export const SendStepOne: React.FC<SendStepOneProps> = ({
@@ -111,7 +111,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleChangeAddress = useCallback(
     (value: string) => {
       onAddressChange(value);
-      if (BitcoinWallet.isValidBitcoinAddress(value, network)) {
+      if (Bitcoin.isValidBitcoinAddress(value, network)) {
         setIsValidAddress(true);
       } else {
         setIsValidAddress(false);
