@@ -10,6 +10,7 @@ import { useLocalStorage } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 const useAdvancedReceived = process.env.USE_ADVANCED_RECEIVE === 'true';
 
@@ -21,6 +22,7 @@ export const useOpenReceiveDrawer = (): (() => void) => {
     'isReceiveInAdvancedMode',
     false
   );
+  const { blockchain } = useCurrentBlockchain();
 
   const handleReceiveCloseIconClick = useCallback(() => {
     const onClose = config?.onClose || (() => setDrawerConfig());
@@ -30,13 +32,16 @@ export const useOpenReceiveDrawer = (): (() => void) => {
 
   return useCallback(() => {
     setDrawerConfig({
-      content: DrawerContent.RECEIVE_TRANSACTION,
+      content:
+        blockchain === Blockchain.Cardano
+          ? DrawerContent.RECEIVE_TRANSACTION
+          : DrawerContent.RECEIVE_BITCOIN_TRANSACTION,
       renderTitle: () => (
         <Flex justifyContent="space-between" alignItems="center" className={styles.title}>
           <Box>
             <DrawerHeader title={t('qrInfo.title')} subtitle={t('qrInfo.scanQRCodeToConnectWallet')} />
           </Box>
-          {useAdvancedReceived && (
+          {useAdvancedReceived && blockchain === Blockchain.Cardano && (
             <ToggleSwitch
               icon={
                 <Tooltip title={t('qrInfo.advancedMode.toggle.description')}>
@@ -58,5 +63,12 @@ export const useOpenReceiveDrawer = (): (() => void) => {
         />
       )
     });
-  }, [handleReceiveCloseIconClick, isReceiveInAdvancedMode, setDrawerConfig, setIsReceiveInAdvancedMode, t]);
+  }, [
+    handleReceiveCloseIconClick,
+    isReceiveInAdvancedMode,
+    setDrawerConfig,
+    setIsReceiveInAdvancedMode,
+    blockchain,
+    t
+  ]);
 };

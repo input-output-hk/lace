@@ -118,18 +118,23 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  );
 
 const render = () =>
   renderHook(() => useWalletManager(), {
-    wrapper: getWrapper({})
+    wrapper: getWrapper({
+      backgroundService: {
+        clearBackgroundStorage: jest.fn(),
+        getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
+        setBackgroundStorage: jest.fn()
+      } as unknown as BackgroundServiceAPIProviderProps['value']
+    })
   }).result.current;
 
 describe('Testing useWalletManager hook', () => {
@@ -526,6 +531,8 @@ describe('Testing useWalletManager hook', () => {
   describe('deleteWallet', () => {
     const walletId = 'walletId';
     let clearBackgroundStorage: jest.Mock;
+    const getBackgroundStorage: jest.Mock = jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' });
+    let setBackgroundStorage: jest.Mock;
     let clearLocalStorage: jest.Mock;
     let resetWalletLock: jest.Mock;
     let setCardanoWallet: jest.Mock;
@@ -533,6 +540,7 @@ describe('Testing useWalletManager hook', () => {
 
     beforeEach(() => {
       (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
+      (walletApiUi.bitcoinWalletManager as any).activeWalletId$ = of(null);
       (walletApiUi.walletManager as any).deactivate = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
@@ -560,7 +568,9 @@ describe('Testing useWalletManager hook', () => {
       } = renderHook(() => useWalletManager(), {
         wrapper: getWrapper({
           backgroundService: {
-            clearBackgroundStorage
+            clearBackgroundStorage,
+            getBackgroundStorage,
+            setBackgroundStorage
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
       }));
@@ -613,6 +623,7 @@ describe('Testing useWalletManager hook', () => {
   describe('switchNetwork', () => {
     beforeEach(() => {
       (walletApiUi.walletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
         settings: {},
@@ -785,6 +796,12 @@ describe('Testing useWalletManager hook', () => {
         any,
         any
       >);
+      walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+
+      const setIsBitcoinWallet = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setIsBitcoinWallet
+      }));
 
       const { activateWallet } = render();
       await activateWallet({ walletId, accountIndex });
@@ -796,6 +813,12 @@ describe('Testing useWalletManager hook', () => {
 
     it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
       walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
+      walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+
+      const setIsBitcoinWallet = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setIsBitcoinWallet
+      }));
 
       const { activateWallet } = render();
       await activateWallet({ walletId, accountIndex });

@@ -79,6 +79,7 @@
   "browserView.activity.entry.name.outgoing": "Sent",
   "browserView.activity.entry.name.self": "Self Transaction",
   "browserView.activity.entry.name.sending": "Sending",
+  "browserView.activity.entry.name.pending": "Pending",
   "browserView.activity.entry.name.withdrawal": "Withdrawal",
   "browserView.activity.entry.staking": "Staking",
   "browserView.activity.entry.token": "token",

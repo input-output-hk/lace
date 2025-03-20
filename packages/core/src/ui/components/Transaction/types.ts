@@ -13,6 +13,7 @@ export enum TransactionActivityType {
   'incoming' = 'incoming',
   'self' = 'self',
   'rewards' = 'rewards',
+  'pending' = 'pending',
   'awaitingCosignatures' = 'awaitingCosignatures'
 }
 

@@ -77,6 +77,12 @@ jobs:
           DIR: packages/nami
           NAME: packages-nami
 
+      - name: Build bitcoin
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/bitcoin
+          NAME: packages-bitcoin
+
   unitTests:
     name: Unit tests
     runs-on: ubuntu-22.04
@@ -127,6 +133,12 @@ jobs:
         with:
           name: packages-nami
           path: packages/nami/dist
+
+      - name: Download packages-bitcoin
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-bitcoin
+          path: packages/bitcoin/dist
 
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -230,7 +242,7 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
-      
+
   build:
     name: Build Lace
     runs-on: ubuntu-22.04

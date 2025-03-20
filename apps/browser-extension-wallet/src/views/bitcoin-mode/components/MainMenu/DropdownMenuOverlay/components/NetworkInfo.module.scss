@@ -1,0 +1,37 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: size_unit(3) size_unit(4) size_unit(3) 22px;
+  width: 16.25rem !important;
+}
+
+.titleSection {
+  color: var(--text-color-primary) !important;
+  display: flex;
+  flex-direction: column;
+  gap: size_unit(2);
+  margin-top: size_unit(3);
+  .title {
+    @include text-body-semi-bold;
+    color: var(--text-color-primary) !important;
+  }
+  .subTitle {
+    @include text-body-medium;
+    color: var(--text-color-secondary) !important;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  margin-top: size_unit(4);
+}
+
+.iconClassName {
+  @media (max-width: $breakpoint-popup) {
+    font-size: 14px !important;
+  }
+}

@@ -1,0 +1,137 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.title,
+.description {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.description {
+  @include text-body-medium;
+  color: var(--text-color-secondary);
+  margin: 0;
+
+  @media (max-width: 406px) {
+    @include text-bodySmall-medium;
+    margin-top: 0;
+  }
+}
+
+.title {
+  @include text-bodyLarge-semi-bold;
+  color: var(--text-color-primary);
+  margin: 0;
+  white-space: nowrap;
+  width: 100%;
+
+  @media (max-width: $breakpoint-popup) {
+    @include text-body-semi-bold;
+  }
+}
+
+.assetActivityItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  justify-content: space-between;
+  gap: 20px;
+  height: size_unit(6);
+
+  .leftSide {
+    display: flex;
+    flex: 1;
+    gap: size_unit(3);
+    align-items: center;
+    min-width: 0;
+
+    @media (max-width: $breakpoint-popup) {
+      gap: size_unit(2);
+    }
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: size_unit(0.5);
+    flex: 1;
+    min-width: 0;
+
+    @media (max-width: 406px) {
+      gap: 0;
+    }
+  }
+
+  .rightSide {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: size_unit(0.5);
+    margin-right: size_unit(1);
+    flex: 1;
+    min-width: 0;
+
+    h6 .title,
+    p .description {
+      text-align: right;
+    }
+
+    .title {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 406px) {
+      gap: 0;
+    }
+  }
+}
+
+.iconWrapper {
+  position: relative;
+
+  .statusIconWrapper {
+    position: absolute;
+    right: -#{size_unit(0.5)};
+    top: -#{size_unit(0.5)};
+  }
+
+  .icon {
+    height: size_unit(6);
+    width: size_unit(6);
+    border-radius: 100px;
+
+    @media (max-width: $breakpoint-popup) {
+      height: size_unit(5);
+      width: size_unit(5);
+    }
+  }
+}
+
+.tooltip {
+  &:global(.ant-tooltip) {
+    max-width: initial;
+  }
+
+  .tooltipItem {
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: var(--bodySmall);
+    line-height: size_unit(3);
+  }
+}
+
+.pendingNegativeBalance {
+  color: var(--data-orange);
+}
+
+.positiveBalance {
+  color: var(--data-green);
+}
+
+.negativeBalance {
+  color: var(--text-color-primary);
+}
