@@ -245,7 +245,6 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
     }
 
     const walletAccount = wallet.accounts.find((acc) => acc.accountIndex === accountIndex);
-
     if (!walletAccount) {
       throw new Error('Wallet account not found');
     }

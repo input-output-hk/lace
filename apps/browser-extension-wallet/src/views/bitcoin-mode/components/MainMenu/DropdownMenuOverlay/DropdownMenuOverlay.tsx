@@ -2,7 +2,6 @@ import React, { ReactNode, useCallback, useState, VFC, useMemo } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
-  AddressBookLink,
   Links,
   LockWallet,
   NetworkChoise,
@@ -91,7 +90,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
             {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
-            <AddressBookLink />
             <SettingsLink />
             <Separator />
             {shouldShowSignMessage && getSignMessageLink()}

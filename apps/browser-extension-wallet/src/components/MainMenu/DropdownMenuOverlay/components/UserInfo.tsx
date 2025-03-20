@@ -133,7 +133,7 @@ export const UserInfo = ({
 
             await activateWallet({
               walletId: wallet.walletId,
-              ...(lastActiveAccount && { accountIndex: acc.accountIndex })
+              ...(acc && { accountIndex: acc.accountIndex })
             });
             setIsDropdownMenuOpen(false);
             toast.notify({
