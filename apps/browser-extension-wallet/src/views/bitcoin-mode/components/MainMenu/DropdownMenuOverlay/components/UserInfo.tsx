@@ -151,10 +151,11 @@ export const UserInfo = ({
                 }
               : undefined
           }
-          {...(wallet.type !== WalletType.Script && {
-            onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
-            onOpenEditWallet: () => onOpenEditWallet(wallet)
-          })}
+          {...(wallet.type !== WalletType.Script &&
+            wallet.blockchainName !== 'Bitcoin' && {
+              onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
+              onOpenEditWallet: () => onOpenEditWallet(wallet)
+            })}
         />
       );
     },
