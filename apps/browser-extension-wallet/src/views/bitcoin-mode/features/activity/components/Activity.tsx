@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import { formatDate, formatTime } from '@utils/format-date';
 import BigNumber from 'bignumber.js';
 import { config } from '@src/config';
+import { useCurrencyStore } from '@providers';
 
 const formattedDate = (date: Date) =>
   dayjs().isSame(date, 'day') ? 'Today' : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
@@ -32,6 +33,8 @@ export const Activity = (): React.ReactElement => {
   const { MEMPOOL_URLS } = config();
   const { bitcoinWallet } = useWalletManager();
   const { priceResult } = useFetchCoinPrice();
+  const { fiatCurrency } = useCurrencyStore();
+
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
 
   const [recentTransactions, setRecentTransactions] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
@@ -76,14 +79,17 @@ export const Activity = (): React.ReactElement => {
 
     const walletAddress = addresses[0].address;
 
-    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
-      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(transaction);
-      return acc;
-    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
+    const groups = [...recentTransactions, ...pendingTransaction].reduce(
+      (acc, transaction) => {
+        const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+      },
+      {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] }
+    );
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;
@@ -119,7 +125,7 @@ export const Activity = (): React.ReactElement => {
           fiatAmount: `${new BigNumber((Number(net) / SATS_IN_BTC) * bitcoinPrice).toFixed(
             2,
             BigNumber.ROUND_HALF_UP
-          )} USD`,
+          )} ${fiatCurrency.code}`,
           status:
             transaction.status === Bitcoin.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
           type: net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing,
@@ -135,7 +141,7 @@ export const Activity = (): React.ReactElement => {
         items
       };
     });
-  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction]);
+  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency]);
 
   const isLoading = addresses.length === 0 || explorerBaseUrl.length === 0;
   const hasActivities = walletActivities.length > 0;
