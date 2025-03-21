@@ -16,6 +16,7 @@ import { SectionTitle } from '@components/Layout/SectionTitle';
 import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
+import { useCurrencyStore } from '@providers';
 
 const formattedDate = (date: Date) =>
   dayjs().isSame(date, 'day') ? 'Today' : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
@@ -34,6 +35,7 @@ export const ActivityLayout = (): React.ReactElement => {
   const { bitcoinWallet } = useWalletManager();
   const { priceResult } = useFetchCoinPrice();
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
+  const { fiatCurrency } = useCurrencyStore();
 
   const [recentTransactions, setRecentTransactions] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
   const [pendingTransaction, setPendingTransaction] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
@@ -77,14 +79,17 @@ export const ActivityLayout = (): React.ReactElement => {
 
     const walletAddress = addresses[0].address;
 
-    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
-      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(transaction);
-      return acc;
-    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
+    const groups = [...recentTransactions, ...pendingTransaction].reduce(
+      (acc, transaction) => {
+        const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+      },
+      {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] }
+    );
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;
@@ -120,7 +125,7 @@ export const ActivityLayout = (): React.ReactElement => {
           fiatAmount: `${new BigNumber((Number(net) / SATS_IN_BTC) * bitcoinPrice).toFixed(
             2,
             BigNumber.ROUND_HALF_UP
-          )} USD`,
+          )} ${fiatCurrency.code}`,
           status:
             transaction.status === Bitcoin.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
           type: net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing,
@@ -136,7 +141,7 @@ export const ActivityLayout = (): React.ReactElement => {
         items
       };
     });
-  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction]);
+  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency]);
 
   const isLoading = addresses.length === 0 || explorerBaseUrl.length === 0;
   const hasActivities = walletActivities.length > 0;
