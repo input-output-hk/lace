@@ -78,7 +78,7 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
   }, [backgroundServices, setTheme]);
 
   useEffect(() => {
-    if (showMultiAddressModal && walletState.addresses.length > 1) return;
+    if (showMultiAddressModal && walletState?.addresses?.length > 1) return;
 
     const timer = window.setTimeout(() => {
       setShowPinExtension(false);
@@ -86,7 +86,7 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
 
     // eslint-disable-next-line consistent-return
     return () => window.clearTimeout(timer);
-  }, [setShowPinExtension, showMultiAddressModal, walletState.addresses.length]);
+  }, [setShowPinExtension, showMultiAddressModal, walletState?.addresses?.length]);
 
   const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
   const showNetworkError = useCallback(

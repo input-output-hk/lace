@@ -88,8 +88,18 @@ const transformSyncStatusObservables = (
   );
 };
 
+// TODO: Dummy sync status, implement and use BitcoinWallet sync status
+const dummySyncStatus = {
+  isAnyRequestPending$: of(false),
+  isUpToDate$: of(true),
+  isSettled$: of(true),
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  shutdown: () => {}
+};
 export const useSyncStatus = (): Observable<WalletStatusProps> => {
-  const syncStatus = useWalletStore((state) => state.inMemoryWallet.syncStatus);
+  const syncStatus = useWalletStore((state) =>
+    state.inMemoryWallet ? state.inMemoryWallet.syncStatus : dummySyncStatus
+  );
   const networkConnection = useWalletStore((state) => state.walletUI.networkConnection);
   return useMemo(() => transformSyncStatusObservables(syncStatus, networkConnection), [syncStatus, networkConnection]);
 };

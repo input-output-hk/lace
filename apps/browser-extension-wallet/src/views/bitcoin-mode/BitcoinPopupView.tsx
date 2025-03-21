@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+/* eslint-disable promise/catch-or-return */
+import React, { useEffect, useMemo, useState } from 'react';
 import { ExtensionRoutes } from './ExtensionRoutes';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useWalletStore } from '@stores';
@@ -10,7 +11,7 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit } from '@hooks';
+import { useAppInit, useWalletManager } from '@hooks';
 import { ILocalStorage } from '@src/types';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/ErrorBoundary';
@@ -25,43 +26,34 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const BitcoinPopupView = (): React.ReactElement => {
-  const {
-    cardanoWallet,
-    inMemoryWallet,
-    currentChain,
-    walletInfo,
-    isWalletLocked,
-    walletLock,
-    walletState,
-    initialHdDiscoveryCompleted
-  } = useWalletStore();
+  const { isWalletLocked, walletLock } = useWalletStore();
+  const { getActiveWalletId } = useWalletManager();
+  const [activeWalletId, setActiveWalletId] = useState<string>('');
 
-  const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
+  const [{ lastMnemonicVerification, mnemonicVerificationFrequency }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
   useAppInit();
   useEnterKeyPress();
 
   useEffect(() => {
-    // try to get wallet data from storage if exist and initialize state
-    // if no wallet is found and the wallet is not locked open setup flow
-    // all the related data is cleared for the forgot password flow as well, so do not react in this case
-    const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>(
-      'isForgotPasswordFlow'
-    );
-    if (cardanoWallet === null && !isWalletLocked() && !isForgotPasswordFlow) {
-      backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
-    }
-    // TODO: Revise network switching with address discovery and refactor to make the process easier to maintain
-    // chainName is not being used but it's needed here for this to work like the browser view when switching networks
-    // (see useEffect in browser-view routes index)
-  }, [isWalletLocked, backgroundServices, currentChain, chainName, cardanoWallet]);
+    getActiveWalletId().then((id) => {
+      setActiveWalletId(id);
+
+      // try to get wallet data from storage if exist and initialize state
+      // if no wallet is found and the wallet is not locked open setup flow
+      // all the related data is cleared for the forgot password flow as well, so do not react in this case
+      const isForgotPasswordFlow = getValueFromLocalStorage<ILocalStorage, 'isForgotPasswordFlow'>(
+        'isForgotPasswordFlow'
+      );
+      if (!id && !isWalletLocked() && !isForgotPasswordFlow) {
+        backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
+      }
+    });
+  }, [getActiveWalletId, backgroundServices]);
 
   const fatalError = useFatalError();
-  const isLoaded = useMemo(
-    () => !!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted,
-    [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted]
-  );
+  const isLoaded = useMemo(() => activeWalletId !== '', [activeWalletId]);
   useEffect(() => {
     if (isLoaded || fatalError) {
       document.querySelector('#preloader')?.remove();

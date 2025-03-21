@@ -1,5 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable unicorn/no-null */
+/* eslint-disable complexity */
+/* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useMemo } from 'react';
 import { Wallet } from '@lace/cardano';
 import { EnvironmentTypes, useWalletStore } from '@stores';
@@ -876,7 +878,7 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [clearSecrets, getCurrentChainId]
+    [backgroundService, clearSecrets, getCurrentChainId]
   );
 
   const createWalletFromPrivateKey = useCallback(
@@ -975,11 +977,17 @@ export const useWalletManager = (): UseWalletManager => {
       isForgotPasswordFlow = false,
       nextWallet?: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
     ): Promise<WalletManagerActivateProps | undefined> => {
-      let walletToDelete: Pick<WalletManagerActivateProps, 'walletId'> = await firstValueFrom(
-        walletManager.activeWalletId$
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
       );
+
+      let walletToDelete: Pick<WalletManagerActivateProps, 'walletId'> =
+        activeBlockchain === 'bitcoin' ? bitcoinActiveWallet : activeWallet;
+
       if (walletToDelete) {
-        await walletManager.deactivate();
+        await (activeBlockchain === 'bitcoin' ? bitcoinWalletManager.deactivate() : walletManager.deactivate());
       } else {
         const wallets = await firstValueFrom(walletRepository.wallets$);
         if (wallets.length > 0) {
@@ -998,14 +1006,47 @@ export const useWalletManager = (): UseWalletManager => {
       await walletRepository.removeWallet(walletToDelete.walletId);
 
       const wallets = nextWallet ? [nextWallet] : await firstValueFrom(walletRepository.wallets$);
+
       if (wallets.length > 0) {
-        const activateProps = {
+        const isBitcoinWallet = wallets[0].type === WalletType.InMemory && wallets[0].blockchainName === 'Bitcoin';
+
+        if (!isBitcoinWallet) {
+          const activateProps = {
+            walletId: wallets[0].walletId,
+            chainId: getCurrentChainId(),
+            accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0].accountIndex
+          };
+          await walletManager.activate(activateProps);
+
+          await backgroundService.setBackgroundStorage({
+            activeBlockchain: 'cardano'
+          });
+
+          setIsBitcoinWallet(false);
+
+          return activateProps;
+        }
+        const network =
+          getCurrentChainId().networkId === Wallet.Cardano.NetworkId.Mainnet
+            ? BtcWallet.Network.Mainnet
+            : BtcWallet.Network.Testnet;
+
+        await bitcoinWalletManager.activate({
+          walletId: wallets[0].walletId,
+          accountIndex: 0,
+          network
+        });
+
+        await backgroundService.setBackgroundStorage({
+          activeBlockchain: 'bitcoin'
+        });
+
+        setIsBitcoinWallet(true);
+        return {
           walletId: wallets[0].walletId,
           chainId: getCurrentChainId(),
-          accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0].accountIndex
+          accountIndex: 0
         };
-        await walletManager.activate(activateProps);
-        return activateProps;
       }
 
       // deleting last wallet clears all data
@@ -1051,8 +1092,13 @@ export const useWalletManager = (): UseWalletManager => {
       for (const chainName of AVAILABLE_CHAINS) {
         await walletManager.destroyData(walletToDelete.walletId, chainIdFromName(chainName));
       }
+
+      for (const network of [BtcWallet.Network.Mainnet, BtcWallet.Network.Testnet]) {
+        await bitcoinWalletManager.destroyData(walletToDelete.walletId, network);
+      }
     },
     [
+      setIsBitcoinWallet,
       resetWalletLock,
       setCardanoWallet,
       backgroundService,
@@ -1064,10 +1110,18 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const reloadWallet = useCallback(async (): Promise<void> => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+    const activeBitcoinWallet = await firstValueFrom(bitcoinWalletManager.activeWalletId$);
     const activeWallet = await firstValueFrom(walletManager.activeWalletId$);
 
-    await walletManager.activate(activeWallet, true);
-  }, []);
+    if (activeBlockchain === 'bitcoin') {
+      if (activeBitcoinWallet) {
+        await bitcoinWalletManager.activate(activeBitcoinWallet, true);
+      }
+    } else if (activeWallet) {
+      await walletManager.activate(activeWallet, true);
+    }
+  }, [backgroundService]);
 
   /**
    * Deactivates current wallet and activates it again with the new network

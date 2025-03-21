@@ -109,7 +109,8 @@ export interface BitcoinActiveWallet {
  * Keeps track of created stores and reuses them when a wallet is reactivated.
  */
 export class BitcoinWalletManager<WalletMetadata extends { name: string }, AccountMetadata extends { name: string }>
-  implements BitcoinWalletManagerApi {
+  implements BitcoinWalletManagerApi
+{
   activeWalletId$ = new ReplaySubject<BitcoinWalletManagerActivateProps | null>(1);
   activeWallet$ = new BehaviorSubject<BitcoinActiveWallet | null>(null);
   #activeWalletProps: BitcoinWalletManagerActivateProps | null = null;
@@ -336,7 +337,12 @@ export const bitcoinWalletProperties: RemoteApiProperties<Bitcoin.BitcoinWallet>
   balance$: RemoteApiPropertyType.HotObservable,
   transactionHistory$: RemoteApiPropertyType.HotObservable,
   pendingTransactions$: RemoteApiPropertyType.HotObservable,
-  addresses$: RemoteApiPropertyType.HotObservable
+  addresses$: RemoteApiPropertyType.HotObservable,
+  syncStatus: {
+    isAnyRequestPending$: RemoteApiPropertyType.HotObservable,
+    isSettled$: RemoteApiPropertyType.HotObservable,
+    isUpToDate$: RemoteApiPropertyType.HotObservable
+  }
 };
 
 export const bitcoinWalletManagerProperties: RemoteApiProperties<BitcoinWalletManagerApi> = {

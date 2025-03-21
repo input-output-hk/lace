@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers, unicorn/no-null, unicorn/prefer-array-some, @typescript-eslint/explicit-module-boundary-types */
 import { BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO } from './../providers';
-import { BehaviorSubject, interval, of, startWith, Subscription } from 'rxjs';
+import { BehaviorSubject, interval, Observable, of, startWith, Subscription } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   AddressType,
@@ -61,6 +61,13 @@ export type EstimatedFees = {
   slow: FeeMarket;
 };
 
+export interface SyncStatus {
+  isAnyRequestPending$: Observable<boolean>;
+  isUpToDate$: Observable<boolean>;
+  isSettled$: Observable<boolean>;
+  shutdown(): void;
+}
+
 export class BitcoinWallet {
   private pollSubscription: Subscription | null = null;
   private lastKnownBlock: BlockInfo | null = null;
@@ -71,6 +78,7 @@ export class BitcoinWallet {
   private info: BitcoinWalletInfo;
   private network: Network;
   private address: DerivedAddress;
+  public syncStatus: SyncStatus;
 
   public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(
     new Array<TransactionHistoryEntry>()
@@ -95,6 +103,14 @@ export class BitcoinWallet {
     this.historyDepth = historyDepth;
     this.provider = provider;
     this.info = info;
+    this.syncStatus = {
+      // TODO: Track actual sync status
+      isAnyRequestPending$: of(false),
+      isUpToDate$: of(true),
+      isSettled$: of(true),
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      shutdown: () => {}
+    };
 
     const networkKeys = getNetworkKeys(info, network);
     const extendedAccountPubKey = networkKeys.nativeSegWit;

@@ -31,7 +31,6 @@ export interface DrawerConfig {
 }
 
 const renderDrawerContent = (content?: DrawerContent) => {
-  console.error('renderDrawerContent', content);
   switch (content) {
     case DrawerContent.SEND_TRANSACTION:
       return <Transaction flow="send" />;
