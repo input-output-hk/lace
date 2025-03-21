@@ -169,12 +169,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
+            {!isBitcoinWallet && showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
             {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
             {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />
             <Separator />
-            {shouldShowSignMessage && getSignMessageLink()}
+            {!isBitcoinWallet && shouldShowSignMessage && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             {useSwitchToNamiMode && !isSharedWallet && (
               <div className={styles.menuItemTheme} data-testid="header-menu-nami-mode-switcher">
