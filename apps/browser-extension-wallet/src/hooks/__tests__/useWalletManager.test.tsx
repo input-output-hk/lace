@@ -118,14 +118,13 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  );
 
 const render = () =>
   renderHook(() => useWalletManager(), {
@@ -532,11 +531,12 @@ describe('Testing useWalletManager hook', () => {
   describe('deleteWallet', () => {
     const walletId = 'walletId';
     let clearBackgroundStorage: jest.Mock;
-    const getBackgroundStorage: jest.Mock = jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' });
+    let getBackgroundStorage: jest.Mock;
     let setBackgroundStorage: jest.Mock;
     let clearLocalStorage: jest.Mock;
     let resetWalletLock: jest.Mock;
     let setCardanoWallet: jest.Mock;
+    let setIsBitcoinWallet: jest.Mock;
     let deleteWallet: UseWalletManager['deleteWallet'];
 
     beforeEach(() => {
@@ -544,6 +544,7 @@ describe('Testing useWalletManager hook', () => {
       (walletApiUi.bitcoinWalletManager as any).activeWalletId$ = of(null);
       (walletApiUi.walletManager as any).deactivate = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
@@ -553,14 +554,18 @@ describe('Testing useWalletManager hook', () => {
         setAddressesDiscoveryCompleted: () => {}
       }));
       clearBackgroundStorage = jest.fn();
+      setBackgroundStorage = jest.fn();
+      getBackgroundStorage = jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' });
       clearLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
       resetWalletLock = jest.fn();
       setCardanoWallet = jest.fn();
+      setIsBitcoinWallet = jest.fn();
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         resetWalletLock,
-        setCardanoWallet
+        setCardanoWallet,
+        setIsBitcoinWallet
       }));
       ({
         result: {
@@ -622,9 +627,13 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('switchNetwork', () => {
+    const walletId = 'walletId';
     beforeEach(() => {
       (walletApiUi.walletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.bitcoinWalletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).activeWalletId$ = of(null);
+      (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
+      (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
         settings: {},
@@ -682,7 +691,11 @@ describe('Testing useWalletManager hook', () => {
           current: { switchNetwork }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({})
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
       });
       expect(switchNetwork).toBeDefined();
       await switchNetwork(chainName);
