@@ -37,11 +37,16 @@ import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/
 import { logger } from '@lace/common';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { SettingsLayout } from '../../features/settings';
 
 export const defaultRoutes: RouteMap = [
   {
     path: routes.assets,
     component: AssetsView
+  },
+  {
+    path: routes.settings,
+    component: SettingsLayout
   },
   {
     path: routes.activity,
@@ -262,6 +267,7 @@ export const BitcoinBrowserViewRoutes = ({
             <Route path={routes.newWallet.root} component={MultiWallet} />
             <Route path={routes.newBitcoinWallet.root} component={BitcoinMultiWallet} />
             <Route path={routes.sharedWallet.root} component={SharedWallet} />
+            <Route exact path={routes.settings} component={SettingsLayout} />
           </Switch>
         )}
         <MultiAddressBalanceVisibleModal />
