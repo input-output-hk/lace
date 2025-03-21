@@ -162,13 +162,13 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     switch (step) {
       case WalletRestoreStep.ChooseRecoveryMethod: {
         setFormDirty(false);
-        history.push(walletRoutePaths.newWallet.root);
+        history.push(walletRoutePaths.newBitcoinWallet.root);
         break;
       }
       case WalletRestoreStep.RecoveryPhrase: {
         paperWalletEnabled
           ? setStep(WalletRestoreStep.ChooseRecoveryMethod)
-          : history.push(walletRoutePaths.newWallet.root);
+          : history.push(walletRoutePaths.newBitcoinWallet.root);
         break;
       }
       case WalletRestoreStep.ScanQrCode: {

@@ -142,13 +142,13 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const back = useCallback(() => {
     switch (step) {
       case WalletCreateStep.ChooseRecoveryMethod: {
-        history.push(walletRoutePaths.newWallet.root);
+        history.push(walletRoutePaths.newBitcoinWallet.root);
         break;
       }
       case WalletCreateStep.RecoveryPhraseWriteDown: {
         paperWalletEnabled
           ? setStep(WalletCreateStep.ChooseRecoveryMethod)
-          : history.push(walletRoutePaths.newWallet.root);
+          : history.push(walletRoutePaths.newBitcoinWallet.root);
         break;
       }
       case WalletCreateStep.SecurePaperWallet: {
