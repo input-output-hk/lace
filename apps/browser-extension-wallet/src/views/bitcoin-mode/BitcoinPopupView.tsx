@@ -50,7 +50,7 @@ export const BitcoinPopupView = (): React.ReactElement => {
         backgroundServices?.handleOpenBrowser({ section: BrowserViewSections.HOME });
       }
     });
-  }, [getActiveWalletId, backgroundServices]);
+  }, [getActiveWalletId, backgroundServices, isWalletLocked]);
 
   const fatalError = useFatalError();
   const isLoaded = useMemo(() => activeWalletId !== '', [activeWalletId]);
