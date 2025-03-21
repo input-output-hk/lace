@@ -851,6 +851,12 @@ export const useWalletManager = (): UseWalletManager => {
         accountIndex
       });
 
+      await backgroundService.setBackgroundStorage({
+        activeBlockchain: 'bitcoin'
+      });
+
+      setIsBitcoinWallet(true);
+
       // Needed for reset password flow
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
