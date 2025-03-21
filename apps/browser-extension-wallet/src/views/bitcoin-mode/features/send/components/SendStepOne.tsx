@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/cognitive-complexity */
+/* eslint-disable react/no-multi-comp */
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -44,6 +46,16 @@ interface SendStepOneProps {
   network: Bitcoin.Network | null;
 }
 
+const InputError = ({ error }: { error: string }) => (
+  <Box style={{ position: 'relative' }} w="$fill">
+    <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24">
+      <Text.Label color="error" weight="$medium" data-testid="address-input-error">
+        {error}
+      </Text.Label>
+    </Box>
+  </Box>
+);
+
 export const SendStepOne: React.FC<SendStepOneProps> = ({
   amount,
   onAmountChange,
@@ -81,8 +93,23 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     () => recommendedFees.find((f) => f.key === selectedFeeKey),
     [recommendedFees, selectedFeeKey]
   );
-  const [customFee, setCustomFee] = useState<number>(feeRate);
+  const [customFee, setCustomFee] = useState<string>('0');
+  const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    setCustomFeeError(undefined);
+    if (selectedFeeKey !== 'custom' || !feeMarkets) return;
+
+    if (Number.parseFloat(customFee) < Number.parseFloat(((feeMarkets.slow.feeRate * SATS_IN_BTC) / 1000).toFixed(2))) {
+      setCustomFeeError(t('browserView.transaction.btc.send.error.feeTooLow'));
+    } else if (
+      Number.parseFloat(customFee) > Number.parseFloat(((feeMarkets.fast.feeRate * SATS_IN_BTC) / 1000).toFixed(2))
+    ) {
+      setCustomFeeError(t('browserView.transaction.btc.send.error.feeTooHigh'));
+    }
+  }, [customFee, feeMarkets, selectedFeeKey, t]);
 
   useEffect(() => {
     setRecommendedFees(getFees());
@@ -91,7 +118,11 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleNext = () => {
     if (hasNoValue || exceedsBalance || address.trim() === '') return;
 
-    onFeeRateChange(selectedFeeKey === 'custom' ? customFee : selectedFee?.feeRate);
+    onFeeRateChange(
+      selectedFeeKey === 'custom'
+        ? Number.parseFloat(((Number.parseFloat(customFee) / SATS_IN_BTC) * 1000).toFixed(8))
+        : selectedFee?.feeRate
+    );
     onEstimatedTimeChange(selectedFee?.estimatedTime);
     onContinue();
   };
@@ -133,15 +164,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           style={{ width: '100%' }}
         />
 
-        {!isValidAddress && !!address?.length && (
-          <Box style={{ position: 'relative' }} w="$fill">
-            <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24">
-              <Text.Label color="error" weight="$medium" data-testid="address-input-error">
-                {t('general.errors.incorrectAddress')}
-              </Text.Label>
-            </Box>
-          </Box>
-        )}
+        {!isValidAddress && !!address?.length && <InputError error={t('general.errors.incorrectAddress')} />}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$20'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
@@ -181,29 +204,36 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           </ToggleButtonGroup.Root>
         </Flex>
         <Flex w="$fill" mt={isPopupView ? '$16' : '$32'} justifyContent="space-between">
-          <Text.Body.Normal weight="$semibold">{t('browserView.transaction.send.transactionFee')}</Text.Body.Normal>
           {selectedFeeKey !== 'custom' ? (
-            <Flex flexDirection="column" alignItems="flex-end">
-              <Text.Body.Normal weight="$medium">
-                {((selectedFee.feeRate * SATS_IN_BTC) / 1000).toFixed(2)} sats/vB
-              </Text.Body.Normal>
-              <Text.Body.Normal weight="$medium">{selectedFee.estimatedTime}</Text.Body.Normal>
-            </Flex>
+            <>
+              <Text.Body.Normal weight="$semibold">{t('browserView.transaction.send.transactionFee')}</Text.Body.Normal>
+              <Flex flexDirection="column" alignItems="flex-end">
+                <Text.Body.Normal weight="$medium">
+                  {((selectedFee.feeRate * SATS_IN_BTC) / 1000).toFixed(2)} sats/vB
+                </Text.Body.Normal>
+                <Text.Body.Normal weight="$medium">{selectedFee.estimatedTime}</Text.Body.Normal>
+              </Flex>
+            </>
           ) : (
-            <Box className={styles.customFee}>
+            <Box w="$fill">
               <Input
+                className={styles.feeInput}
+                step="0.1"
+                type="number"
                 label={
                   isPopupView
                     ? t('browserView.transaction.btc.popup.send.feeRateCustom')
                     : t('browserView.transaction.btc.send.feeRateCustom')
                 }
-                type="number"
                 disabled={false}
-                value={customFee.toString()}
+                value={customFee}
                 data-testid="btc-add-custom-fee"
                 bordered={false}
-                onChange={(e) => setCustomFee(Number(e.target.value))}
+                onChange={(e) => {
+                  setCustomFee(e.target.value);
+                }}
               />
+              {customFeeError && <InputError error={customFeeError} />}
             </Box>
           )}
         </Flex>
