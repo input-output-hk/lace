@@ -57,7 +57,7 @@ export const UserInfo = ({
     useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
-  const walletAddress = walletInfo.addresses[0].address.toString();
+  const walletAddress = walletInfo ? walletInfo.addresses[0].address.toString() : '';
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const [fullWalletName, setFullWalletName] = useState<string>('');
   const [activeWalletName, setActiveWalletName] = useState<string>('');

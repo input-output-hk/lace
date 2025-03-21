@@ -1,6 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
+/* eslint-disable promise/catch-or-return */
 import React, { useEffect, useState, ComponentType, useMemo } from 'react';
 import { Location } from 'history';
 import { Wallet } from '@lace/cardano';
@@ -21,7 +22,7 @@ import { Portal } from '../browser-view/features/wallet-setup/components/Portal'
 import { MultiWallet } from '../browser-view/features/multi-wallet';
 import { MultiWallet as BitcoinMultiWallet } from './features/multi-wallet/MultiWallet';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit } from '@hooks';
+import { useAppInit, useWalletManager } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
@@ -92,17 +93,14 @@ export const BitcoinBrowserViewRoutes = ({
   routesMap?: RouteMap;
 }): React.ReactElement => {
   const {
-    walletInfo,
     isWalletLocked,
     setCardanoCoin,
     currentChain,
     setCurrentChain,
-    walletState,
     walletType,
     deletingWallet,
     stayOnAllDonePage,
     cardanoWallet,
-    initialHdDiscoveryCompleted,
     isSharedWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
@@ -111,6 +109,8 @@ export const BitcoinBrowserViewRoutes = ({
   const { t } = useTranslation();
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
+  const { getActiveWalletId } = useWalletManager();
+  const [activeWalletId, setActiveWalletId] = useState<string>('');
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
@@ -153,6 +153,12 @@ export const BitcoinBrowserViewRoutes = ({
     }
   }, [location, page, setBackgroundPage]);
 
+  useEffect(() => {
+    getActiveWalletId().then((id) => {
+      setActiveWalletId(id);
+    });
+  }, [getActiveWalletId]);
+
   useAppInit();
   useEnterKeyPress();
 
@@ -191,8 +197,8 @@ export const BitcoinBrowserViewRoutes = ({
   });
 
   const isLoaded = useMemo(
-    () => posthogClientInitialized && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted,
-    [posthogClientInitialized, isLoadingWalletInfo, walletInfo, walletState, initialHdDiscoveryCompleted]
+    () => posthogClientInitialized && activeWalletId !== '',
+    [posthogClientInitialized, activeWalletId]
   );
 
   const isOnboarding = useMemo(

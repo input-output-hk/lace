@@ -2,14 +2,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classnames from 'classnames';
 import { useWalletStore } from '@src/stores';
-import { Menu, Tooltip as AntdTooltip } from 'antd';
+import { Menu } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styles from '../DropdownMenuOverlay.module.scss';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { addEllipsis, toast, useObservable } from '@lace/common';
+import { toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
-import { UserAvatar } from './UserAvatar';
-import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
+import { useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
@@ -18,17 +16,8 @@ import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 
-const ADRESS_FIRST_PART_LENGTH = 10;
-const ADRESS_LAST_PART_LENGTH = 5;
-const WALLET_NAME_MAX_LENGTH = 16;
 const WALLET_OPTION_NAME_MAX_LENGTH = 12;
 const TOAST_DEFAULT_DURATION = 3;
-
-const overlayInnerStyle = {
-  padding: '8px 16px',
-  borderRadius: '12px',
-  boxShadow: 'box-shadow: 0px 0px 16px rgba(167, 143, 160, 0.2)'
-};
 
 interface UserInfoProps {
   avatarVisible?: boolean;
@@ -46,34 +35,16 @@ const NO_WALLETS: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] = [
 const shortenWalletName = (text: string, length: number) =>
   text.length > length ? `${text.slice(0, length)}...` : text;
 
-export const UserInfo = ({
-  onOpenWalletAccounts,
-  avatarVisible = true,
-  onOpenEditWallet
-}: UserInfoProps): React.ReactElement => {
+export const UserInfo = ({ onOpenWalletAccounts, onOpenEditWallet }: UserInfoProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { walletInfo, setIsDropdownMenuOpen } = useWalletStore();
-  const { activateWallet, walletRepository, getActiveWalletId, getActiveWalletName, getActiveWalletAccount } =
-    useWalletManager();
+  const { setIsDropdownMenuOpen } = useWalletStore();
+  const { activateWallet, walletRepository, getActiveWalletId, getActiveWalletAccount } = useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
-  const walletAddress = walletInfo.addresses[0].address.toString();
-  const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
-  const [fullWalletName, setFullWalletName] = useState<string>('');
-  const [activeWalletName, setActiveWalletName] = useState<string>('');
+  const [fullWalletName] = useState<string>('');
   const [activeWalletId, setActiveWalletId] = useState<string>('');
   const [lastActiveAccount, setLastActiveAccount] = useState<number>(0);
-  const [handle] = useGetHandles();
-  const { activeWalletAvatar, getAvatar } = useWalletAvatar();
-
-  const handleName = handle?.nftMetadata?.name;
-
-  useEffect(() => {
-    getActiveWalletName().then((name) => {
-      setFullWalletName(name);
-      setActiveWalletName(addEllipsis(name, WALLET_NAME_MAX_LENGTH, 0));
-    });
-  }, [getActiveWalletName]);
+  const { getAvatar } = useWalletAvatar();
 
   useEffect(() => {
     getActiveWalletId().then((id) => {
@@ -86,11 +57,6 @@ export const UserInfo = ({
       setLastActiveAccount(account ? account.accountIndex : 0);
     });
   }, [getActiveWalletAccount]);
-
-  const handleOnAddressCopy = () => {
-    toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') });
-    analytics.sendEventToPostHog(PostHogAction.UserWalletProfileWalletAddressClick);
-  };
 
   const getLastActiveAccount = useCallback(
     (
@@ -206,33 +172,7 @@ export const UserInfo = ({
           [styles.multiWalletWrapper]: process.env.USE_MULTI_WALLET === 'true'
         })}
       >
-        {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>{wallets.map((wallet) => renderWallet(wallet, true))}</div>
-        ) : (
-          <CopyToClipboard text={handleName || walletAddress}>
-            <AntdTooltip
-              overlayInnerStyle={overlayInnerStyle}
-              placement="top"
-              title={
-                <span className={styles.tooltip}>
-                  {handleName ? t('settings.copyHandle') : t('settings.copyAddress')}
-                </span>
-              }
-            >
-              <div className={styles.userInfo} onClick={handleOnAddressCopy}>
-                {avatarVisible && <UserAvatar walletName={activeWalletName} avatar={activeWalletAvatar} />}
-                <div className={styles.userMeta} data-testid="header-menu-user-details">
-                  <p className={styles.walletName} data-testid="header-menu-wallet-name">
-                    {activeWalletName}
-                  </p>
-                  <p className={styles.walletAddress} data-testid="header-menu-wallet-address">
-                    {handleName || shortenedWalletAddress}
-                  </p>
-                </div>
-              </div>
-            </AntdTooltip>
-          </CopyToClipboard>
-        )}
+        <div>{wallets.map((wallet) => renderWallet(wallet, true))}</div>
         {process.env.USE_MULTI_WALLET === 'true' ? undefined : (
           <div className={styles.walletStatusInfo}>
             <WalletStatusContainer />
