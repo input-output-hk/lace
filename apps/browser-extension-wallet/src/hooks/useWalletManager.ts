@@ -878,7 +878,7 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [backgroundService, clearSecrets, getCurrentChainId]
+    [backgroundService, clearSecrets, getCurrentChainId, setIsBitcoinWallet]
   );
 
   const createWalletFromPrivateKey = useCallback(
