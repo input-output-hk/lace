@@ -20,6 +20,15 @@ const SATS_IN_BTC = 100_000_000;
 interface AssetsProps {
   topSection?: React.ReactNode;
 }
+
+const computeBalance = (totalBalance: number, fiatCurrency: string, bitcoinPrice: number): string => {
+  if (fiatCurrency === 'ADA') {
+    return totalBalance.toFixed(8);
+  }
+
+  return new BigNumber((totalBalance * bitcoinPrice).toString()).toFixed(2, BigNumber.ROUND_HALF_UP);
+};
+
 // eslint-disable-next-line max-statements
 export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
@@ -36,8 +45,12 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     () => priceResult.bitcoin?.priceVariationPercentage24h ?? 0,
     [priceResult.bitcoin]
   );
-  const totalBalance = useMemo(() => (Number(balance) / SATS_IN_BTC) * bitcoinPrice, [balance, bitcoinPrice]);
   const { fiatCurrency } = useCurrencyStore();
+  const currencyCode = fiatCurrency.code === 'ADA' ? 'BTC' : fiatCurrency.code;
+  const totalBalance = useMemo(
+    () => (currencyCode === 'BTC' ? Number(balance) / SATS_IN_BTC : (Number(balance) / SATS_IN_BTC) * bitcoinPrice),
+    [balance, bitcoinPrice, currencyCode]
+  );
 
   const assets = useMemo(
     () => [
@@ -49,17 +62,30 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
               defaultLogo: BitcoinLogo,
               name: 'Bitcoin',
               ticker: 'BTC',
-              price: compactNumberWithUnit(bitcoinPrice).toString(),
-              variation: `${bitcoinPriceVariation.toFixed(2)}`,
+              price: currencyCode === 'BTC' ? '1.000' : compactNumberWithUnit(bitcoinPrice).toString(),
+              variation: currencyCode === 'BTC' ? '-' : `${bitcoinPriceVariation.toFixed(2)}`,
               balance: areBalancesVisible ? (Number(balance) / SATS_IN_BTC).toString() : hiddenBalancePlaceholder,
               fiatBalance: areBalancesVisible
-                ? `${new BigNumber(totalBalance.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} ${fiatCurrency.code}`
+                ? `${computeBalance(totalBalance, fiatCurrency.code, 1)} ${currencyCode}`
                 : hiddenBalancePlaceholder
             }
           ]
         : [])
     ],
-    [areBalancesVisible, hiddenBalancePlaceholder, bitcoinPrice, balance, totalBalance, fiatCurrency]
+    [
+      areBalancesVisible,
+      hiddenBalancePlaceholder,
+      bitcoinPrice,
+      balance,
+      totalBalance,
+      currencyCode,
+      bitcoinPriceVariation
+    ]
+  );
+
+  const portfolioTotalBalance = useMemo(
+    () => computeBalance(totalBalance, fiatCurrency.code, 1),
+    [totalBalance, fiatCurrency.code]
   );
 
   const assetsPortfolio = (
@@ -68,7 +94,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       assetList={assets}
       isBalanceLoading={false}
       isLoadingFirstTime={isLoadingFirstTime}
-      portfolioTotalBalance={totalBalance.toString()}
+      portfolioTotalBalance={portfolioTotalBalance}
       onRowClick={() => {}}
       onTableScroll={() => {}}
       totalAssets={assets.length}

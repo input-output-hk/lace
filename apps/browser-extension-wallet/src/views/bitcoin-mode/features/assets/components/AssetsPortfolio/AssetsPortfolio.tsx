@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import { Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import React, { useMemo } from 'react';
@@ -23,6 +24,7 @@ import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/config';
 import { Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Wallet } from '@lace/cardano';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const MINUTES_UNTIL_WARNING_BANNER = 3;
 
@@ -61,6 +63,8 @@ export const AssetsPortfolio = ({
   const redirectToReceive = useRedirection(walletRoutePaths.receive);
   const redirectToSend = useRedirection<{ params: { id: string } }>(walletRoutePaths.send);
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoin = blockchain === 'bitcoin';
 
   const isPopupView = appMode === APP_MODE_POPUP;
   const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
@@ -101,8 +105,12 @@ export const AssetsPortfolio = ({
       <div className={styles.portfolio}>
         <PortfolioBalance
           loading={isPortfolioBalanceLoading}
-          balance={compactNumberWithUnit(portfolioBalanceAsBigNumber.toString())}
-          currencyCode={fiatCurrency.code}
+          balance={
+            fiatCurrency.code === 'ADA'
+              ? portfolioBalanceAsBigNumber.toString()
+              : compactNumberWithUnit(portfolioBalanceAsBigNumber.toString())
+          }
+          currencyCode={isBitcoin && fiatCurrency.code === 'ADA' ? 'BTC' : fiatCurrency.code}
           label={t('browserView.assets.totalWalletBalance')}
           isPriceOutdatedBannerVisible={isPriceOutdated}
           lastPriceFetchedDate={coinPrice.timestamp}
