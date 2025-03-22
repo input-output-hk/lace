@@ -8,12 +8,16 @@ import { AssetsPortfolio } from './AssetsPortfolio/AssetsPortfolio';
 import BitcoinLogo from '../../../../../assets/icons/browser-view/bitcoin-logo.svg';
 import BigNumber from 'bignumber.js';
 import { MidnightEventBanner } from '@views/browser/features/assets/components/MidnightEventBanner';
-import { Layout, SectionLayout } from '@views/browser/components';
+import { Layout, SectionLayout, TopUpWalletCard } from '@views/browser/components';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { AssetEducationalList } from '@views/browser/features/assets/components/AssetEducationalList/AssetEducationalList';
 import { APP_MODE_POPUP } from '@utils/constants';
 import { useCurrencyStore } from '@providers';
 import { compactNumberWithUnit } from '@utils/format-number';
+import { USE_FOOR_TOPUP } from '@views/browser/components/TopUpWallet/config';
+import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
+import { BREAKPOINT_SMALL } from '@styles/constants';
+import { Wallet } from '@lace/cardano';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -33,7 +37,8 @@ const computeBalance = (totalBalance: number, fiatCurrency: string, bitcoinPrice
 export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const {
-    walletUI: { appMode, areBalancesVisible, getHiddenBalancePlaceholder }
+    walletUI: { appMode, areBalancesVisible, getHiddenBalancePlaceholder },
+    currentChain
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
   const { bitcoinWallet } = useWalletManager();
@@ -51,6 +56,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     () => (currencyCode === 'BTC' ? Number(balance) / SATS_IN_BTC : (Number(balance) / SATS_IN_BTC) * bitcoinPrice),
     [balance, bitcoinPrice, currencyCode]
   );
+  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
+  const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
   const assets = useMemo(
     () => [
@@ -79,7 +86,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
       balance,
       totalBalance,
       currencyCode,
-      bitcoinPriceVariation
+      bitcoinPriceVariation,
+      fiatCurrency.code
     ]
   );
 
@@ -114,6 +122,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
         hasCredit={assets?.length > 0}
         sidePanelContent={
           <Flex flexDirection="column" gap="$28">
+            {USE_FOOR_TOPUP && isMainnet && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}
             <AssetEducationalList />
           </Flex>
         }
