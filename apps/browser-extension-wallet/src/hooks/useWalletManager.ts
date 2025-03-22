@@ -1201,7 +1201,23 @@ export const useWalletManager = (): UseWalletManager => {
 
   const getMnemonic = useCallback(
     async (passphrase: Uint8Array) => {
-      const { wallet } = cardanoWallet.source;
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+      const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+        combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+      );
+
+      const selectedWallet: Pick<WalletManagerActivateProps, 'walletId'> =
+        activeBlockchain === 'bitcoin' ? bitcoinActiveWallet : activeWallet;
+
+      const wallet = (await firstValueFrom(walletRepository.wallets$)).find(
+        (w) => w.walletId === selectedWallet.walletId
+      );
+
+      if (!wallet) {
+        throw new Error('Wallet not found');
+      }
+
       switch (wallet.type) {
         case WalletType.InMemory: {
           const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
@@ -1222,7 +1238,7 @@ export const useWalletManager = (): UseWalletManager => {
           throw new Error('Mnemonic is not available for hardware wallets');
       }
     },
-    [cardanoWallet]
+    [backgroundService, walletManager, bitcoinWalletManager, walletRepository]
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
