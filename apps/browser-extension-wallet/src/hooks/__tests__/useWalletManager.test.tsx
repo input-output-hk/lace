@@ -118,13 +118,14 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  );
+    ({ children }: { children: React.ReactNode }) =>
+      (
+        <AppSettingsProvider>
+          <DatabaseProvider>
+            <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+          </DatabaseProvider>
+        </AppSettingsProvider>
+      );
 
 const render = () =>
   renderHook(() => useWalletManager(), {
