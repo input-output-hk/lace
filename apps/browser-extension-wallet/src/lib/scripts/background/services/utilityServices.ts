@@ -253,7 +253,7 @@ const fetchBitcoinPrice = () => {
   const vsCurrencies =
     (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
   fetch(
-    `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${vsCurrencies}&include_24hr_change=true`
+    `https://coingecko.ops-preview-1.eks.lw.iog.io/api/v3/simple/price?ids=bitcoin&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
       const { bitcoin: prices } = await response.json();
