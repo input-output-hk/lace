@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable promise/catch-or-return */
+import React, { useEffect, useState } from 'react';
 import { SettingsCard } from './';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
@@ -14,6 +15,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import cn from 'classnames';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { walletRepository } from '@lib/wallet-api-ui';
 
 const { Title, Text } = Typography;
 
@@ -21,10 +23,17 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
   const { t } = useTranslation();
 
   const [isRemoveWalletAlertVisible, setIsRemoveWalletAlertVisible] = useState(false);
-  const { deleteWallet, walletRepository, walletManager } = useWalletManager();
-  const { walletInfo, setDeletingWallet, isSharedWallet } = useWalletStore();
+  const { deleteWallet, getActiveWalletName, walletManager } = useWalletManager();
+  const { setDeletingWallet, isSharedWallet } = useWalletStore();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const [fullWalletName, setFullWalletName] = useState<string>('');
   const analytics = useAnalyticsContext();
+
+  useEffect(() => {
+    getActiveWalletName().then((name) => {
+      setFullWalletName(name);
+    });
+  }, [getActiveWalletName]);
 
   const activeWalletId = useObservable(walletManager.activeWalletId$);
   const wallets = useObservable(walletRepository.wallets$);
@@ -97,7 +106,7 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
             data-testid="remove-wallet-button"
             disabled={hasAssociatedSharedWallet}
           >
-            {t('browserView.settings.wallet.general.removeAction', { walletName: walletInfo.name })}
+            {t('browserView.settings.wallet.general.removeAction', { walletName: fullWalletName })}
           </Button>
         </div>
       </SettingsCard>

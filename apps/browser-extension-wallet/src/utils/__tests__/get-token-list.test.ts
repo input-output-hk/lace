@@ -48,6 +48,10 @@ describe('getTokensList', () => {
         price: 2,
         priceVariationPercentage24h: 0.2
       },
+      bitcoin: {
+        price: 2,
+        priceVariationPercentage24h: 0.2
+      },
       tokens: new Map([
         [
           Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c40'),

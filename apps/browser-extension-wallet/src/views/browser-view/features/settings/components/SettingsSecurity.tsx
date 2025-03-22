@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   SettingsCard,
@@ -17,6 +18,7 @@ import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
 import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const { Title } = Typography;
 interface SettingsSecurityProps {
@@ -40,6 +42,7 @@ export const SettingsSecurity = ({
   const { isWalletLocked, isInMemoryWallet, isSharedWallet, isNamiWallet } = useWalletStore();
   const [settings] = useAppSettingsContext();
   const { mnemonicVerificationFrequency } = settings;
+  const { blockchain } = useCurrentBlockchain();
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
   const [analyticsStatus, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
@@ -47,6 +50,7 @@ export const SettingsSecurity = ({
   );
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
+  const isBitcoin = blockchain === 'bitcoin';
 
   const handleAnalyticsChoice = async (isOptedIn: boolean) => {
     const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
@@ -124,7 +128,7 @@ export const SettingsSecurity = ({
             </SettingsLink>
           </>
         )}
-        {isInMemoryWallet && paperWalletEnabled && !popupView && (
+        {!isBitcoin && isInMemoryWallet && paperWalletEnabled && !popupView && (
           <SettingsLink
             description={t('browserView.settings.generatePaperWallet.description')}
             onClick={handleOpenShowPaperWalletDrawer}

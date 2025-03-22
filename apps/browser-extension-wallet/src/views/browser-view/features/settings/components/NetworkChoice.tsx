@@ -12,6 +12,7 @@ import { useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 const { AVAILABLE_CHAINS } = config();
 
@@ -54,6 +55,7 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   const { environmentName, isSharedWallet } = useWalletStore();
   const { switchNetwork } = useWalletManager();
   const analytics = useAnalyticsContext();
+  const { blockchain } = useCurrentBlockchain();
 
   const getNetworkName = useCallback(
     (chainName: Wallet.ChainName) => {
@@ -101,17 +103,32 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
       value={environmentName}
       data-testid={'network-choice-radio-group'}
     >
-      {availableChains.map((network) => (
-        <a className={styles.radio} key={network}>
-          <Radio
-            value={network}
-            className={styles.radioLabel}
-            data-testid={`network-${network.toLowerCase()}-radio-button`}
-          >
-            {getNetworkName(network as Wallet.ChainName)}
-          </Radio>
-        </a>
-      ))}
+      {blockchain === Blockchain.Cardano ? (
+        availableChains.map((network) => (
+          <a className={styles.radio} key={network}>
+            <Radio
+              value={network}
+              className={styles.radioLabel}
+              data-testid={`network-${network.toLowerCase()}-radio-button`}
+            >
+              {getNetworkName(network as Wallet.ChainName)}
+            </Radio>
+          </a>
+        ))
+      ) : (
+        <>
+          <a className={styles.radio} key="Preprod">
+            <Radio value="Preprod" className={styles.radioLabel} data-testid={'network-preprod-radio-button'}>
+              Testnet4
+            </Radio>
+          </a>
+          <a className={styles.radio} key="Mainnet">
+            <Radio value="Mainnet" className={styles.radioLabel} data-testid={'network-mainnet-radio-button'}>
+              Mainnet
+            </Radio>
+          </a>
+        </>
+      )}
     </Radio.Group>
   );
 };

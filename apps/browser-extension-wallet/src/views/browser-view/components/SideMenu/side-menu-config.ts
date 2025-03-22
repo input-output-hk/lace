@@ -84,3 +84,25 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     activeIcon: DappExplorerIconActive
   }
 ];
+
+export const bitcoinsideMenuConfig: SideMenuItemConfig[] = [
+  {
+    id: MenuItemList.ASSETS,
+    label: 'browserView.sideMenu.links.tokens',
+    testId: 'item-assets',
+    path: routes.assets,
+    regularIcon: AssetsIconDefault,
+    hoverIcon: AssetIconHover,
+    activeIcon: AssetsIconActive,
+    iconClassName: styles.tokensLinkIcon
+  },
+  {
+    id: MenuItemList.TRANSACTIONS,
+    label: 'browserView.sideMenu.links.activity',
+    testId: 'item-transactions',
+    path: routes.activity,
+    regularIcon: TransactionsIconDefault,
+    hoverIcon: TransactionsIconHover,
+    activeIcon: TransactionsIconActive
+  }
+];

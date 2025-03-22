@@ -10,6 +10,6 @@ export const useCurrentWallet = (): AnyWallet<Wallet.WalletMetadata, Wallet.Acco
   const { cardanoWallet } = useWalletStore();
   const wallets = useObservable(walletRepository.wallets$);
 
-  const activeWalletId = cardanoWallet.source.wallet.walletId;
+  const activeWalletId = cardanoWallet?.source?.wallet?.walletId;
   return wallets?.find(({ walletId }) => walletId === activeWalletId);
 };

@@ -20,6 +20,7 @@ import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
 import { COLLATERAL_AMOUNT_LOVELACES } from '@utils/constants';
+import { Blockchain, useCurrentBlockchain } from '@src/multichain';
 
 const { Title } = Typography;
 
@@ -47,6 +48,14 @@ export interface SettingsWalletProps<AdditionalDrawers extends string = never> {
   popupView?: boolean;
 }
 
+const getNetworkName = (blockchain: Blockchain, environmentName: string): string => {
+  if (blockchain === Blockchain.Cardano) {
+    return environmentName;
+  }
+
+  return environmentName === 'Mainnet' ? environmentName : 'Testnet4';
+};
+
 // eslint-disable-next-line complexity
 export const SettingsWalletBase = <AdditionalDrawers extends string>({
   renderLocalNodeSlot,
@@ -61,6 +70,8 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
     [redirectToSettings]
   );
   const closeDrawer = useRedirection(walletRoutePaths.settings);
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoinWallet = blockchain === 'bitcoin';
 
   const { t } = useTranslation();
   const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus, isSharedWallet } = useWalletStore();
@@ -202,26 +213,28 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
             <SettingsLink
               onClick={handleOpenNetworkChoiceDrawer}
               description={t('browserView.settings.wallet.network.description')}
-              addon={environmentName}
+              addon={getNetworkName(blockchain, environmentName)}
               data-testid="settings-wallet-network-link"
             >
               {t('browserView.settings.wallet.network.title')}
             </SettingsLink>
           </>
         )}
-        <SettingsLink
-          description={t('browserView.settings.wallet.customSubmitApi.settingsLinkDescription')}
-          onClick={handleOpenCustomSubmitApiDrawer}
-          addon={
-            getCustomSubmitApiForNetwork(environmentName).status
-              ? t('browserView.settings.wallet.customSubmitApi.enabled')
-              : t('browserView.settings.wallet.customSubmitApi.disabled')
-          }
-          data-testid="settings-wallet-custom-submit-api-link"
-        >
-          {t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')}
-        </SettingsLink>
-        {authorizedAppsEnabled && (
+        {!isBitcoinWallet && (
+          <SettingsLink
+            description={t('browserView.settings.wallet.customSubmitApi.settingsLinkDescription')}
+            onClick={handleOpenCustomSubmitApiDrawer}
+            addon={
+              getCustomSubmitApiForNetwork(environmentName).status
+                ? t('browserView.settings.wallet.customSubmitApi.enabled')
+                : t('browserView.settings.wallet.customSubmitApi.disabled')
+            }
+            data-testid="settings-wallet-custom-submit-api-link"
+          >
+            {t('browserView.settings.wallet.customSubmitApi.settingsLinkTitle')}
+          </SettingsLink>
+        )}
+        {!isBitcoinWallet && authorizedAppsEnabled && (
           <>
             <DappListDrawer
               visible={activeDrawer === SettingsDrawer.dappList}
@@ -238,15 +251,17 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
             </SettingsLink>
           </>
         )}
-        <SettingsLink
-          onClick={handleOpenGeneralSettingsDrawer}
-          description={t('browserView.settings.wallet.general.description')}
-          data-testid="settings-wallet-general-link"
-        >
-          {t('browserView.settings.wallet.general.title')}
-        </SettingsLink>
+        {!isBitcoinWallet && (
+          <SettingsLink
+            onClick={handleOpenGeneralSettingsDrawer}
+            description={t('browserView.settings.wallet.general.description')}
+            data-testid="settings-wallet-general-link"
+          >
+            {t('browserView.settings.wallet.general.title')}
+          </SettingsLink>
+        )}
         {renderLocalNodeSlot && renderLocalNodeSlot({ activeDrawer, closeDrawer, openDrawer })}
-        {!isSharedWallet && (
+        {!isSharedWallet && !isBitcoinWallet && (
           <>
             <SettingsLink
               onClick={handleOpenCollateralDrawer}

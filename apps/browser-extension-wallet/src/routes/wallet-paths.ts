@@ -28,6 +28,12 @@ export const walletRoutePaths = {
     hardware: '/new-wallet/hardware',
     restore: '/new-wallet/restore'
   },
+  newBitcoinWallet: {
+    root: '/new-bitcoin-wallet',
+    create: '/new-bitcoin-wallet/create',
+    hardware: '/new-bitcoin-wallet/hardware',
+    restore: '/new-bitcoin-wallet/restore'
+  },
   sharedWallet: {
     root: '/shared-wallet',
     generateKeys: '/shared-wallet/generate-key',

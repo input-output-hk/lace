@@ -1,0 +1,12 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.address {
+  word-break: break-all;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+}

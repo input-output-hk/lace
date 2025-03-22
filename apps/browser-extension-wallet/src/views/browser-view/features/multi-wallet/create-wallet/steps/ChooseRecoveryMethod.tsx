@@ -43,6 +43,7 @@ export const ChooseRecoveryMethodBase: VFC<ChooseRecoveryMethodBaseProps> = ({
 }) => {
   const analytics = useAnalyticsContext();
   const { postHogActions } = useWalletOnboarding();
+
   return (
     <>
       <WalletSetupStepLayoutRevamp

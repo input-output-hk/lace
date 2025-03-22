@@ -4,6 +4,7 @@ import { Wallet } from '@lace/cardano';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { isSharedWallet } from '@lace/core';
 import { isNamiWallet } from '@src/views/nami-mode/utils';
+import { Bitcoin } from '@lace/bitcoin/';
 
 /**
  * has all wallet info related actions and states
@@ -19,6 +20,8 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   manageAccountsWallet: undefined,
   inMemoryWallet: undefined,
   cardanoWallet: undefined,
+  bitcoinWallet: undefined,
+  isBitcoinWallet: undefined,
   walletState: undefined,
   setWalletState: (walletState?: ObservableWalletState) => set({ walletState }),
   walletManager: undefined,
@@ -43,6 +46,15 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
       isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type),
       isSharedWallet: isSharedWallet(wallet),
       isNamiWallet: isNamiWallet(wallet)
+    }),
+  setBitcoinWallet: (wallet?: Bitcoin.BitcoinWallet) =>
+    set({
+      bitcoinWallet: wallet,
+      isBitcoinWallet: !!wallet
+    }),
+  setIsBitcoinWallet: (isBitcoinWallet: boolean) =>
+    set({
+      isBitcoinWallet
     }),
   setCurrentChain: (chain: Wallet.ChainName) => {
     set({ currentChain: Wallet.Cardano.ChainIds[chain], environmentName: chain });

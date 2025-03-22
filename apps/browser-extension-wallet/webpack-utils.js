@@ -43,6 +43,7 @@ const transformManifest = (content, mode) => {
       .replace('$CARDANO_WS_SERVER_URLS', cardanoWsServicesUrls)
       .replace('$CARDANO_SERVICES_URLS', cardanoServicesUrls)
       .replace('$BLOCKFROST_URLS', blockfrostUrls)
+      .replace('$MAESTRO_URLS', `${process.env.MAESTRO_URL_MAINNET} ${process.env.MAESTRO_URL_TESTNET}`)
       .replace('$LOCALHOST_DEFAULT_SRC', mode === 'development' ? 'http://localhost:3000' : '')
       .replace(
         '$LOCALHOST_CONNECT_SRC',

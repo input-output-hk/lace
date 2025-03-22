@@ -129,7 +129,13 @@ const getWrapper =
 
 const render = () =>
   renderHook(() => useWalletManager(), {
-    wrapper: getWrapper({})
+    wrapper: getWrapper({
+      backgroundService: {
+        clearBackgroundStorage: jest.fn(),
+        getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
+        setBackgroundStorage: jest.fn()
+      } as unknown as BackgroundServiceAPIProviderProps['value']
+    })
   }).result.current;
 
 describe('Testing useWalletManager hook', () => {
@@ -526,15 +532,20 @@ describe('Testing useWalletManager hook', () => {
   describe('deleteWallet', () => {
     const walletId = 'walletId';
     let clearBackgroundStorage: jest.Mock;
+    let getBackgroundStorage: jest.Mock;
+    let setBackgroundStorage: jest.Mock;
     let clearLocalStorage: jest.Mock;
     let resetWalletLock: jest.Mock;
     let setCardanoWallet: jest.Mock;
+    let setIsBitcoinWallet: jest.Mock;
     let deleteWallet: UseWalletManager['deleteWallet'];
 
     beforeEach(() => {
       (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
+      (walletApiUi.bitcoinWalletManager as any).activeWalletId$ = of(null);
       (walletApiUi.walletManager as any).deactivate = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
@@ -544,14 +555,18 @@ describe('Testing useWalletManager hook', () => {
         setAddressesDiscoveryCompleted: () => {}
       }));
       clearBackgroundStorage = jest.fn();
+      setBackgroundStorage = jest.fn();
+      getBackgroundStorage = jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' });
       clearLocalStorage = jest.fn();
       jest.spyOn(localStorage, 'clearLocalStorage').mockImplementation(clearLocalStorage);
 
       resetWalletLock = jest.fn();
       setCardanoWallet = jest.fn();
+      setIsBitcoinWallet = jest.fn();
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         resetWalletLock,
-        setCardanoWallet
+        setCardanoWallet,
+        setIsBitcoinWallet
       }));
       ({
         result: {
@@ -560,7 +575,9 @@ describe('Testing useWalletManager hook', () => {
       } = renderHook(() => useWalletManager(), {
         wrapper: getWrapper({
           backgroundService: {
-            clearBackgroundStorage
+            clearBackgroundStorage,
+            getBackgroundStorage,
+            setBackgroundStorage
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
       }));
@@ -611,8 +628,13 @@ describe('Testing useWalletManager hook', () => {
   });
 
   describe('switchNetwork', () => {
+    const walletId = 'walletId';
     beforeEach(() => {
       (walletApiUi.walletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).switchNetwork = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.bitcoinWalletManager as any).activeWalletId$ = of(null);
+      (walletApiUi.walletManager as any).activeWalletId$ = of({ walletId });
+      (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         updateAppSettings: jest.fn(),
         settings: {},
@@ -670,7 +692,11 @@ describe('Testing useWalletManager hook', () => {
           current: { switchNetwork }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({})
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
       });
       expect(switchNetwork).toBeDefined();
       await switchNetwork(chainName);
@@ -695,7 +721,11 @@ describe('Testing useWalletManager hook', () => {
           current: { switchNetwork }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({})
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
       });
 
       await switchNetwork('Preprod');
@@ -785,6 +815,12 @@ describe('Testing useWalletManager hook', () => {
         any,
         any
       >);
+      walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+
+      const setIsBitcoinWallet = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setIsBitcoinWallet
+      }));
 
       const { activateWallet } = render();
       await activateWallet({ walletId, accountIndex });
@@ -796,6 +832,12 @@ describe('Testing useWalletManager hook', () => {
 
     it('stores lastActiveAccountIndex in wallet metadata and activates wallet via WalletManager', async () => {
       walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
+      walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+
+      const setIsBitcoinWallet = jest.fn();
+      jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+        setIsBitcoinWallet
+      }));
 
       const { activateWallet } = render();
       await activateWallet({ walletId, accountIndex });

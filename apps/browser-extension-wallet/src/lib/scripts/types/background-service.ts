@@ -47,6 +47,7 @@ export enum BrowserViewSections {
   COLLATERAL_SETTINGS = 'collateral-settings',
   FORGOT_PASSWORD = 'forgot_password',
   NEW_WALLET = 'new_wallet',
+  NEW_BITCOIN_WALLET = 'new_bitcoin_wallet',
   ADD_SHARED_WALLET = 'add_shared_wallet',
   NAMI_MIGRATION = 'nami_migration',
   NAMI_HW_FLOW = 'nami_hw_flow',
@@ -114,7 +115,7 @@ export type BackgroundService = {
 };
 
 export type WalletMode = {
-  mode: BackgroundStorage['namiMigration']['mode'];
+  mode: BackgroundStorage['namiMigration']['mode'] | Extract<BackgroundStorage['activeBlockchain'], 'bitcoin'>;
   dappInjectCompatibilityMode: BackgroundStorage['dappInjectCompatibilityMode'];
 };
 

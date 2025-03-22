@@ -1,0 +1,13 @@
+@import '../../../../../styles/index';
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  position: relative;
+  flex: 1;
+}
+
+.buttons {
+  border-top: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));
+  margin: 0 -40px;
+  width: calc(100% + 80px);
+}

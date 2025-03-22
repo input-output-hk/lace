@@ -115,6 +115,7 @@ export const WalletSetupMainPage = (): ReactElement => {
         onRestoreWalletRequest={handleRestoreWallet}
         translations={walletSetupOptionsStepTranslations}
         withAgreement
+        withHardwareWallet
       />
       <AnalyticsConfirmationBanner
         message={

@@ -38,6 +38,10 @@ describe('Testing useFetchCoinPrice hook', () => {
           price: 1,
           priceVariationPercentage24h: 0
         },
+        bitcoin: {
+          price: undefined,
+          priceVariationPercentage24h: 0
+        },
         tokens: undefined
       },
       status: undefined,
@@ -99,6 +103,10 @@ describe('Testing useFetchCoinPrice hook', () => {
     });
     expect(hook.result.current).toEqual({
       priceResult: {
+        bitcoin: {
+          price: undefined,
+          priceVariationPercentage24h: 0
+        },
         cardano: {
           price: 1,
           priceVariationPercentage24h: 0
@@ -117,6 +125,10 @@ describe('Testing useFetchCoinPrice hook', () => {
     hook.rerender();
     expect(hook.result.current).toEqual({
       priceResult: {
+        bitcoin: {
+          price: undefined,
+          priceVariationPercentage24h: 0
+        },
         cardano: {
           price: prices.usd,
           priceVariationPercentage24h: prices.usd_24h_change
