@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React, { SVGProps } from 'react';
 
 // TODO: Mode to lace UI toolkit

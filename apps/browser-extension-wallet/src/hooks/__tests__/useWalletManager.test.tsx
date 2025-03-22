@@ -720,7 +720,11 @@ describe('Testing useWalletManager hook', () => {
           current: { switchNetwork }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({})
+        wrapper: getWrapper({
+          backgroundService: {
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
       });
 
       await switchNetwork('Preprod');

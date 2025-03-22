@@ -1238,7 +1238,7 @@ export const useWalletManager = (): UseWalletManager => {
           throw new Error('Mnemonic is not available for hardware wallets');
       }
     },
-    [backgroundService, walletManager, bitcoinWalletManager, walletRepository]
+    [backgroundService]
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
