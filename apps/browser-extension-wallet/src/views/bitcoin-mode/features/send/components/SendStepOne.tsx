@@ -48,10 +48,10 @@ interface SendStepOneProps {
 
 const InputError = ({ error }: { error: string }) => (
   <Box style={{ position: 'relative' }} w="$fill">
-    <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24">
-      <Text.Label color="error" weight="$medium" data-testid="address-input-error">
+    <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24" py="$4">
+      <Text.Body.Small color="error" weight="$semibold" data-testid="address-input-error">
         {error}
-      </Text.Label>
+      </Text.Body.Small>
     </Box>
   </Box>
 );
@@ -166,7 +166,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
         {!isValidAddress && !!address?.length && <InputError error={t('general.errors.incorrectAddress')} />}
 
-        <Box w="$fill" mt={isPopupView ? '$16' : '$20'} py="$24" px="$32" className={styles.amountSection}>
+        <Box w="$fill" mt={isPopupView ? '$16' : '$32'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
             inputId="BTC"
             coin={coin}
@@ -249,7 +249,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         className={mainStyles.buttons}
       >
         <Button
-          disabled={hasNoValue || exceedsBalance || address.trim() === ''}
+          disabled={hasNoValue || exceedsBalance || address.trim() === '' || !isValidAddress}
           color="primary"
           block
           size="medium"
