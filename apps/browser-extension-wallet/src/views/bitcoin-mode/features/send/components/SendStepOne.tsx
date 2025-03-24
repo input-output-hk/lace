@@ -46,9 +46,9 @@ interface SendStepOneProps {
   network: Bitcoin.Network | null;
 }
 
-const InputError = ({ error }: { error: string }) => (
+const InputError = ({ error, isPopupView }: { error: string; isPopupView: boolean }) => (
   <Box style={{ position: 'relative' }} w="$fill">
-    <Box style={{ position: 'absolute', top: 0, left: 0 }} pl="$24" py="$4">
+    <Box style={!isPopupView ? { position: 'absolute', top: 0, left: 0 } : {}} pl="$24" py="$4">
       <Text.Body.Small color="error" weight="$semibold" data-testid="address-input-error">
         {error}
       </Text.Body.Small>
@@ -164,7 +164,9 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           style={{ width: '100%' }}
         />
 
-        {!isValidAddress && !!address?.length && <InputError error={t('general.errors.incorrectAddress')} />}
+        {!isValidAddress && !!address?.length && (
+          <InputError error={t('general.errors.incorrectAddress')} isPopupView={isPopupView} />
+        )}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$32'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
@@ -220,11 +222,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 className={styles.feeInput}
                 step="0.1"
                 type="number"
-                label={
-                  isPopupView
-                    ? t('browserView.transaction.btc.popup.send.feeRateCustom')
-                    : t('browserView.transaction.btc.send.feeRateCustom')
-                }
+                label={t('browserView.transaction.btc.send.feeRateCustom')}
                 disabled={false}
                 value={customFee}
                 data-testid="btc-add-custom-fee"
@@ -233,7 +231,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                   setCustomFee(e.target.value);
                 }}
               />
-              {customFeeError && <InputError error={customFeeError} />}
+              {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
             </Box>
           )}
         </Flex>

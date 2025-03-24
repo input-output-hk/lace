@@ -546,7 +546,6 @@
   "browserView.transaction.btc.send.balance": "Balance",
   "browserView.transaction.btc.send.feeRate": "Select a fee rate",
   "browserView.transaction.btc.send.feeRateCustom": "Set a custom fee rate (sats/VB)",
-  "browserView.transaction.btc.popup.send.feeRateCustom": "fee rate (sats/VB)",
   "browserView.transaction.btc.send.error.feeTooLow": "Custom fee is lower than the recommended minimum. Your transaction may experience long delays.",
   "browserView.transaction.btc.send.error.feeTooHigh": "Custom fee is higher than the recommended maximum. You may be overpaying for this transaction.",
   "browserView.transaction.success.localNodeBanner.buttonText": "Learn more",
