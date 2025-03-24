@@ -48,7 +48,7 @@ interface SendStepOneProps {
 
 const InputError = ({ error, isPopupView }: { error: string; isPopupView: boolean }) => (
   <Box style={{ position: 'relative' }} w="$fill">
-    <Box style={!isPopupView ? { position: 'absolute', top: 0, left: 0 } : {}} pl="$24" py="$4">
+    <Box style={!isPopupView ? { position: 'absolute', top: 0, left: 0 } : {}} pl="$24" py="$8">
       <Text.Body.Small color="error" weight="$semibold" data-testid="address-input-error">
         {error}
       </Text.Body.Small>
@@ -168,7 +168,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           <InputError error={t('general.errors.incorrectAddress')} isPopupView={isPopupView} />
         )}
 
-        <Box w="$fill" mt={isPopupView ? '$16' : '$32'} py="$24" px="$32" className={styles.amountSection}>
+        <Box w="$fill" mt={isPopupView ? '$16' : '$40'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
             inputId="BTC"
             coin={coin}
