@@ -1,27 +1,23 @@
-import React, { ReactElement, useCallback, useEffect } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { DappError } from '@src/features/dapp/components/DappError';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
-import { tabs } from 'webextension-polyfill';
-import { walletRoutePaths } from '@routes';
 import { MainLayout } from '@components/Layout';
+import { useTranslation } from 'react-i18next';
 
 export const BitcoinDappConnectorView = (): ReactElement => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     removePreloaderIfExists();
-  }, []);
-
-  const onCloseClick = useCallback(() => {
-    tabs.create({ url: `app.html#${walletRoutePaths.setup.home}` });
-    window.close();
   }, []);
 
   return (
     <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
       <DappError
-        title="Bitcoin Wallet"
-        description="Bitcoin Wallet is not supported in this version of the extension."
-        closeButtonLabel="Close"
-        onCloseClick={onCloseClick}
+        title={t('dapp.connector.btc.error.title')}
+        description={t('dapp.connector.btc.error.description')}
+        closeButtonLabel={t('dapp.connector.btc.error.closeButton')}
+        onCloseClick={() => window.close()}
         containerTestId="no-wallet-container"
         imageTestId="no-wallet-image"
         titleTestId="no-wallet-heading"
