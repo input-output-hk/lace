@@ -79,12 +79,12 @@ const App = (): React.ReactElement => {
     storage.onChanged.addListener(handleStorageChange);
 
     const getWalletMode = async () => {
-      const { activeBlockchain } = await getBackgroundStorage();
+      const { namiMigration, activeBlockchain } = await getBackgroundStorage();
       if (activeBlockchain === 'bitcoin') {
         setMode(BITCOIN_LACE);
         setBlockchain(Blockchain.Bitcoin);
       } else {
-        setMode(CARDANO_LACE);
+        setMode(namiMigration?.mode || CARDANO_LACE);
         setBlockchain(Blockchain.Cardano);
       }
     };
