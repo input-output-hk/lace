@@ -22,7 +22,12 @@ export const SendContainer = (): React.ReactElement => {
       open
       onClose={redirectToOverview}
       title={isPopupView ? undefined : <DrawerHeader title={t('browserView.transaction.send.title')} />}
-      navigation={<DrawerNavigation onCloseIconClick={redirectToOverview} />}
+      navigation={
+        <DrawerNavigation
+          onCloseIconClick={!isPopupView ? redirectToOverview : undefined}
+          onArrowIconClick={isPopupView ? redirectToOverview : undefined}
+        />
+      }
       popupView
     >
       <Flex className={styles.container} data-testid="btc-send" flexDirection="column" gap="$16">
