@@ -204,8 +204,9 @@ export const SendFlow: React.FC = () => {
 
       try {
         return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
-      } catch {
+      } catch (error) {
         setStep('UNAUTHORIZED');
+        throw error;
       }
     },
     [unsignedTransaction, walletInfo]
@@ -295,7 +296,7 @@ export const SendFlow: React.FC = () => {
   }
 
   if (step === 'UNAUTHORIZED') {
-    return <UnauthorizedTx />;
+    return <UnauthorizedTx onClose={onClose} isPopupView={isPopupView} onBack={backToReview} />;
   }
 
   return <></>;
