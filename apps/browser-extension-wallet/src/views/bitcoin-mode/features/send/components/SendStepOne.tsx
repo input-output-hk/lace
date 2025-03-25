@@ -15,6 +15,7 @@ import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
+const CUSTOM_FEE_STEP = 0.1;
 
 interface RecommendedFee {
   key?: keyof Bitcoin.EstimatedFees | 'custom';
@@ -93,7 +94,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     () => recommendedFees.find((f) => f.key === selectedFeeKey),
     [recommendedFees, selectedFeeKey]
   );
-  const [customFee, setCustomFee] = useState<string>('0');
+  const [customFee, setCustomFee] = useState<string>('');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
 
@@ -150,6 +151,16 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     },
     [network, onAddressChange]
   );
+
+  const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    const disallowedKeys = ['-', '+', 'e'];
+    const targetValue = Number(target.value);
+
+    if (disallowedKeys.includes(e.key) || (e.key === 'ArrowDown' && targetValue <= 0)) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <Flex className={mainStyles.container} flexDirection="column" w="$fill">
@@ -220,7 +231,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
             <Box w="$fill">
               <Input
                 className={styles.feeInput}
-                step="0.1"
+                step={CUSTOM_FEE_STEP}
                 type="number"
                 label={t('browserView.transaction.btc.send.feeRateCustom')}
                 disabled={false}
@@ -230,10 +241,19 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 onChange={(e) => {
                   setCustomFee(e.target.value);
                 }}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (e.key === '-' || e.key === 'e' || (e.key === 'ArrowDown' && Number(target.value) <= 0)) {
-                    e.preventDefault();
+                onKeyDown={handleCustomFeeKeyDown}
+                onWheel={(e) => {
+                  e.preventDefault();
+
+                  const step = CUSTOM_FEE_STEP;
+                  const currentValue = Number(customFee);
+
+                  // Handle scrolling up (increment) or down (decrement but not below 0)
+                  const newValue = Math.max(e.deltaY < 0 ? currentValue + step : Math.max(0, currentValue - step), 0);
+
+                  // Only update if value changed
+                  if (newValue !== currentValue) {
+                    setCustomFee(newValue.toFixed(1));
                   }
                 }}
               />
