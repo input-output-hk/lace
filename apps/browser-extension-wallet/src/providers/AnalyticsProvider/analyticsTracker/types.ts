@@ -43,6 +43,7 @@ export type PostHogMetadata = {
   sent_at_local: string;
   posthog_project_id: number;
   network: string;
+  blockchain?: string;
 } & PostHogPersonProperties;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

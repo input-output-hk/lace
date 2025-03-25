@@ -289,12 +289,14 @@ export class PostHogClient<Action extends string = string> {
   }
 
   protected async getEventMetadata(): Promise<PostHogMetadata> {
+    const storage = await this.backgroundServiceUtils.getBackgroundStorage();
     return {
       view: this.view,
       sent_at_local: dayjs().format(),
       distinct_id: await this.userIdService.getUserId(this.chain.networkMagic),
       posthog_project_id: this.getProjectId(),
       network: NETWORK_MAGIC_TO_NETWORK_NAME.get(this.chain.networkMagic),
+      blockchain: storage.activeBlockchain ?? 'cardano',
       ...(await this.getPersonProperties())
     };
   }

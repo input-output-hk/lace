@@ -2,6 +2,7 @@
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable max-statements */
+/* eslint-disable consistent-return */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SendStepOne } from './SendStepOne';
 import { ReviewTransaction } from './ReviewTransaction';
@@ -10,13 +11,14 @@ import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFailed } from './TransactionFailed';
 import { UnauthorizedTx } from './UnauthorizedTx';
 import { useFetchCoinPrice, useRedirection, useWalletManager } from '@hooks';
-import { useObservable } from '@lace/common';
+import { PostHogAction, useObservable } from '@lace/common';
 import { Bitcoin } from '@lace/bitcoin';
 import { Wallet as Cardano } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
 import { useDrawer } from '@src/views/browser-view/stores';
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
+import { useAnalyticsContext } from '@providers';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -124,11 +126,32 @@ export const SendFlow: React.FC = () => {
 
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
+  const analytics = useAnalyticsContext();
 
   const {
     walletUI: { appMode }
   } = useWalletStore();
   const isPopupView = appMode === APP_MODE_POPUP;
+
+  useEffect(() => {
+    switch (step) {
+      case 'AMOUNT':
+        analytics.sendEventToPostHog(PostHogAction.SendClick);
+        break;
+      case 'REVIEW':
+        analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
+        break;
+      case 'DONE':
+        analytics.sendEventToPostHog(PostHogAction.SendAllDoneView);
+        break;
+      case 'FAILED':
+      case 'UNAUTHORIZED':
+        analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongView);
+        break;
+      default:
+        break;
+    }
+  }, [step, analytics]);
 
   useEffect(() => {
     // TODO: Make into an observable
@@ -178,13 +201,17 @@ export const SendFlow: React.FC = () => {
     async (password: Buffer): Promise<Bitcoin.SignedTransaction> | undefined => {
       if (!unsignedTransaction || !walletInfo?.encryptedSecrets.seed) return;
       // eslint-disable-next-line consistent-return
-      return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
+
+      try {
+        return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
+      } catch {
+        setStep('UNAUTHORIZED');
+      }
     },
     [unsignedTransaction, walletInfo]
   );
 
   const handleSubmitTx = async (signedTx: Bitcoin.SignedTransaction) => {
-    console.error('Signed transaction:', signedTx.hex);
     try {
       const hash = await bitcoinWallet.submitTransaction(signedTx.hex);
       setConfirmationHash(hash);

@@ -31,6 +31,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({ onSubmit, signTran
         signedTx = await signTransaction(passphrase);
       } catch {
         setValidPassword(false);
+        return;
       }
       await onSubmit(signedTx);
       clearSecrets();
