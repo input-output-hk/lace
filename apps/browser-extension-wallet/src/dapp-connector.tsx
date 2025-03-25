@@ -39,13 +39,13 @@ const App = (): React.ReactElement => {
   useEffect(() => {
     (async () => {
       const { namiMigration, activeBlockchain } = await getBackgroundStorage();
-      if (activeBlockchain === 'cardano') {
+      if (activeBlockchain === 'bitcoin') {
+        setMode(BITCOIN_LACE);
+      } else {
         if (namiMigration?.mode === 'nami') {
           document.title = POPUP_WINDOW_NAMI_TITLE;
         }
         setMode(namiMigration?.mode || CARDANO_LACE);
-      } else {
-        setMode(BITCOIN_LACE);
       }
     })();
   }, []);
