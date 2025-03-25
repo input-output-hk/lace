@@ -17,17 +17,17 @@ const hasStorageChangeForKey = <T extends keyof ExtensionStorage>(
 ): changes is Record<T, ExtensionStorageChange<T>> => key in changes;
 
 const handleBackgroundStorageChange = (changes: ExtensionStorageChange<'BACKGROUND_STORAGE'>) => {
-  if (changes.newValue.logLevel && changes.oldValue?.logLevel !== changes.newValue?.logLevel) {
+  if (changes.newValue?.logLevel && changes.oldValue?.logLevel !== changes.newValue.logLevel) {
     commonLogger.setLogLevel(changes.newValue.logLevel);
   }
 
-  if (changes.newValue.featureFlags) {
+  if (changes.newValue?.featureFlags) {
     // this FF is not network specific, we always pick the mainnet value
     const networkMagic = Wallet.Cardano.NetworkMagics.Mainnet;
     const oldLoggerSentryIntegrationEnabled =
       changes.oldValue?.featureFlags?.[networkMagic]?.['send-console-errors-to-sentry'];
     const newLoggerSentryIntegrationEnabled =
-      changes.newValue?.featureFlags?.[networkMagic]?.['send-console-errors-to-sentry'];
+      changes.newValue.featureFlags?.[networkMagic]?.['send-console-errors-to-sentry'];
 
     if (newLoggerSentryIntegrationEnabled !== oldLoggerSentryIntegrationEnabled) {
       commonLogger.setSentryIntegrationEnabled(newLoggerSentryIntegrationEnabled || false);
