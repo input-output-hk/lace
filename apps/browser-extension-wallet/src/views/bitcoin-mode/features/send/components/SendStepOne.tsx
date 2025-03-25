@@ -205,7 +205,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
             ))}
           </ToggleButtonGroup.Root>
         </Flex>
-        <Flex w="$fill" mt={isPopupView ? '$16' : '$32'} justifyContent="space-between">
+        <Flex w="$fill" mt={isPopupView ? '$16' : '$32'} justifyContent="space-between" mb="$8">
           {selectedFeeKey !== 'custom' ? (
             <>
               <Text.Body.Normal weight="$semibold">{t('browserView.transaction.send.transactionFee')}</Text.Body.Normal>
@@ -229,6 +229,12 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 bordered={false}
                 onChange={(e) => {
                   setCustomFee(e.target.value);
+                }}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (e.key === '-' || e.key === 'e' || (e.key === 'ArrowDown' && Number(target.value) <= 0)) {
+                    e.preventDefault();
+                  }
                 }}
               />
               {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
