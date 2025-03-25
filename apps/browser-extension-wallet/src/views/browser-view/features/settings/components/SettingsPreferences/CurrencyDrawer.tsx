@@ -9,6 +9,7 @@ import styles from '../SettingsLayout.module.scss';
 import { useCurrencyStore } from '@providers';
 import { ADASymbols, CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { currencyCode } from '@providers/currency/constants';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const { Text } = Typography;
 
@@ -27,6 +28,8 @@ export const CurrencyDrawer = ({
 }: CurrencyDrawerProps): React.ReactElement => {
   const { t } = useTranslation();
   const { fiatCurrency, supportedCurrencies, setFiatCurrency } = useCurrencyStore();
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoin = blockchain === 'bitcoin';
 
   const handleCurrencyChange = (event: RadioChangeEvent) => {
     try {
@@ -88,9 +91,11 @@ export const CurrencyDrawer = ({
                   data-testid={`currency-${code.toLowerCase()}-radio-button`}
                 >
                   <span className={styles.currencyWrapper}>
-                    <span>{code}</span>
+                    <span>{isBitcoin && code === 'ADA' ? 'BTC' : code}</span>
                     <span className={styles.currency}>
-                      {t(`browserView.settings.preferences.currency.list.${code}`)}
+                      {isBitcoin && code === 'ADA'
+                        ? 'Bitcoin'
+                        : t(`browserView.settings.preferences.currency.list.${code}`)}
                     </span>
                   </span>
                 </Radio>

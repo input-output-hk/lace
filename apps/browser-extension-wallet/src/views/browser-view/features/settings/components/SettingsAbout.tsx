@@ -5,6 +5,7 @@ import { Typography } from 'antd';
 import { useWalletStore } from '@src/stores';
 import { addEllipsis } from '@lace/common';
 import { SocialNetwork, SocialNetworkIcon } from '@views/browser/components/SocialNetworks/SocialNetworkIcon';
+import { Blockchain, useCurrentBlockchain } from '@src/multichain';
 const { Title } = Typography;
 const COMMIT_HASH_START_LENGTH = 8;
 const COMMIT_HASH_END_LENGTH = 4;
@@ -21,12 +22,21 @@ interface SettingsAboutProps {
   'data-testid'?: string;
 }
 
+const getNetworkName = (blockchain: Blockchain, environmentName: string): string => {
+  if (blockchain === Blockchain.Cardano) {
+    return environmentName;
+  }
+
+  return environmentName === 'Mainnet' ? environmentName : 'Testnet4';
+};
+
 export const SettingsAbout = ({ ...props }: SettingsAboutProps): React.ReactElement => {
   const { t } = useTranslation();
   const commitHashWithEllipsis = process.env.COMMIT_HASH
     ? addEllipsis(process.env.COMMIT_HASH, COMMIT_HASH_START_LENGTH, COMMIT_HASH_END_LENGTH)
     : undefined;
   const { environmentName } = useWalletStore();
+  const { blockchain } = useCurrentBlockchain();
 
   const dataTestId = `${props['data-testid'] || ''}`;
   return (
@@ -39,7 +49,7 @@ export const SettingsAbout = ({ ...props }: SettingsAboutProps): React.ReactElem
           {t('browserView.settings.wallet.about.content.network')}
         </div>
         <div className={styles.aboutGridValue} data-testid="about-network-value">
-          {environmentName}
+          {getNetworkName(blockchain, environmentName)}
         </div>
         <div className={styles.aboutGridLabel} data-testid="about-version-label">
           {t('browserView.settings.wallet.about.content.currentVersion')}

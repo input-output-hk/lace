@@ -11,6 +11,7 @@ import { currencyCode } from '@providers/currency/constants';
 import { Switch } from '@lace/common';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const { Title } = Typography;
 
@@ -26,6 +27,8 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
   const { fiatCurrency } = useCurrencyStore();
   const posthog = usePostHogClientContext();
   const [isOptInBeta, setIsOptInBeta] = useState(false);
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoin = blockchain === 'bitcoin';
 
   useEffect(() => {
     const subscription = posthog.hasOptedInBeta().subscribe((optInStatus) => {
@@ -87,7 +90,7 @@ export const SettingsPreferences = ({ popupView = false }: SettingsPreferencesPr
         <SettingsLink
           onClick={handleOpenCurrencyDrawer}
           description={t('browserView.settings.preferences.currency.description')}
-          addon={fiatCurrency?.code?.toUpperCase()}
+          addon={isBitcoin && fiatCurrency?.code === 'ADA' ? 'BTC' : fiatCurrency?.code?.toUpperCase()}
           data-testid="settings-wallet-currency-link"
         >
           {t('browserView.settings.preferences.currency.title')}

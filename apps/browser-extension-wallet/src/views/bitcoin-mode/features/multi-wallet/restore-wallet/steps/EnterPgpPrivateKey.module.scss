@@ -1,0 +1,53 @@
+@import '../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/mixins.scss';
+
+.textArea:global(.ant-input) {
+  @include scroll-bar-style;
+  height: 110px !important;
+  overflow-y: scroll;
+  margin-top: size_unit(2);
+  padding-top: 0 !important;
+  outline: 0 !important;
+  border: none !important;
+  -webkit-text-security: disc;
+  &:hover {
+    border: none !important;
+  }
+}
+
+.validationContainer {
+  height: size_unit(2);
+  padding-left: size_unit(3);
+  fill: var(--data-green);
+  stroke: var(--data-green);
+}
+
+.wrapper {
+  padding-top: 24px !important;
+  background: var(--light-mode-light-grey, var(--dark-mode-dark-grey)) !important;
+  border-radius: size_unit(2);
+}
+
+.privateKeyEntryMethod {
+  label[for='pgp-private-key-upload'] {
+    height: 150px !important;
+  }
+  > div,
+  form,
+  .pgpKeyBlockWrapper {
+    width: 100%;
+  }
+}
+
+.successContainer {
+  border-radius: size_unit(2);
+  background-color: var(--light-mode-light-grey, var(--dark-mode-dark-grey));
+}
+
+.lockIcon {
+  transform: scale(2);
+}
+
+.alignCenter {
+  text-align: center;
+}

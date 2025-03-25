@@ -1,8 +1,10 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import React, { ReactNode, useCallback, useState, VFC, useMemo, useEffect } from 'react';
 import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
   AddressBookLink,
+  AddNewBitcoinWalletLink,
   Links,
   LockWallet,
   NetworkChoise,
@@ -32,6 +34,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
 import { useCurrentWallet, useWalletManager } from '@hooks';
+import { useCurrentBlockchain } from '@src/multichain';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -56,13 +59,15 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const wallets = useObservable(walletRepository.wallets$);
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
+  const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoinWallet = blockchain === 'bitcoin';
   const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
   const [modalOpen, setModalOpen] = useState(false);
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
-  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode');
-
+  const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode') && !isBitcoinWallet;
   useEffect(() => {
     getBackgroundStorage()
       .then((storage) => setNamiMigration(storage.namiMigration))
@@ -110,6 +115,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     (w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet.walletId
   );
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
+  const showAddBitcoinWalletLink = bitcoinWalletsEnabled;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';
@@ -163,11 +169,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             {process.env.USE_MULTI_WALLET === 'true' && (
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
-            {showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
-            <AddressBookLink />
+            {!isBitcoinWallet && showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
+            {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
+            {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />
             <Separator />
-            {shouldShowSignMessage && getSignMessageLink()}
+            {!isBitcoinWallet && shouldShowSignMessage && getSignMessageLink()}
             <ThemeSwitcher isPopup={isPopup} />
             {useSwitchToNamiMode && !isSharedWallet && (
               <div className={styles.menuItemTheme} data-testid="header-menu-nami-mode-switcher">

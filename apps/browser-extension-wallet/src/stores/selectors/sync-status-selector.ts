@@ -1,4 +1,4 @@
-import { combineLatest, Observable, of, concat } from 'rxjs';
+import { combineLatest, Observable, of, concat, BehaviorSubject } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
 import { Wallet } from '@lace/cardano';
 import { useWalletStore } from '../StoreProvider';
@@ -88,8 +88,21 @@ const transformSyncStatusObservables = (
   );
 };
 
+// TODO: Dummy sync status, implement and use BitcoinWallet sync status
+const dummySyncStatus = {
+  isAnyRequestPending$: new BehaviorSubject(false),
+  isUpToDate$: new BehaviorSubject(true),
+  isSettled$: new BehaviorSubject(true),
+  shutdown: () => {
+    dummySyncStatus.isAnyRequestPending$.complete();
+    dummySyncStatus.isUpToDate$.complete();
+    dummySyncStatus.isSettled$.complete();
+  }
+};
 export const useSyncStatus = (): Observable<WalletStatusProps> => {
-  const syncStatus = useWalletStore((state) => state.inMemoryWallet.syncStatus);
+  const syncStatus = useWalletStore((state) =>
+    state.inMemoryWallet ? state.inMemoryWallet.syncStatus : dummySyncStatus
+  );
   const networkConnection = useWalletStore((state) => state.walletUI.networkConnection);
   return useMemo(() => transformSyncStatusObservables(syncStatus, networkConnection), [syncStatus, networkConnection]);
 };

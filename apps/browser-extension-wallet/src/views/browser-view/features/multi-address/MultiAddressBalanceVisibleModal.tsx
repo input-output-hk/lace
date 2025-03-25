@@ -11,7 +11,7 @@ export const MultiAddressBalanceVisibleModal = (): ReactElement => {
   const analytics = useAnalyticsContext();
   const [showMultiAddressModal, { updateLocalStorage: setShowMultiAddressModal }] = useLocalStorage(
     'showMultiAddressModal',
-    walletState.addresses.length > 1
+    walletState?.addresses?.length > 1
   );
   const { t } = useTranslation();
 

@@ -1,0 +1,47 @@
+@import '../../../../../../../packages/common/src/ui/styles/theme.scss';
+
+.header {
+  width: 100%;
+  display: flex;
+  background-color: var(--bg-color-body, #fff);
+  padding-left: 1px;
+  padding-right: 1px;
+
+  .content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: size_unit(1.75) size_unit(3);
+    .linkLogo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo {
+      font-size: var(--heading);
+      height: size_unit(4.5);
+      width: size_unit(4.5);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: size_unit(1);
+
+      .avatar {
+        font-size: 20px;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.multiWallet {
+  flex-wrap: wrap;
+}
+
+.multiWalletNetworkPillBox {
+  width: 100%;
+  margin-bottom: 12px;
+}

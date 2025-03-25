@@ -20,9 +20,13 @@ import { NamiDappConnector } from './views/nami-mode/indexInternal';
 import { storage } from 'webextension-polyfill';
 import { TxWitnessRequestProvider } from '@providers/TxWitnessRequestProvider';
 import { ErrorBoundary } from '@components/ErrorBoundary';
+import { BitcoinDappConnectorView } from './views/BitcoinDappConnectorView';
+
+const CARDANO_LACE = 'lace';
+const BITCOIN_LACE = 'bitcoin';
 
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami' | undefined>();
+  const [mode, setMode] = useState<'lace' | 'nami' | 'bitcoin'>(CARDANO_LACE);
 
   storage.onChanged.addListener((changes) => {
     const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
@@ -33,16 +37,31 @@ const App = (): React.ReactElement => {
   });
 
   useEffect(() => {
-    const getWalletMode = async () => {
-      const { namiMigration } = await getBackgroundStorage();
-      if (namiMigration?.mode === 'nami') {
-        document.title = POPUP_WINDOW_NAMI_TITLE;
+    (async () => {
+      const { namiMigration, activeBlockchain } = await getBackgroundStorage();
+      if (activeBlockchain === 'bitcoin') {
+        setMode(BITCOIN_LACE);
+      } else {
+        if (namiMigration?.mode === 'nami') {
+          document.title = POPUP_WINDOW_NAMI_TITLE;
+        }
+        setMode(namiMigration?.mode || CARDANO_LACE);
       }
-      setMode(namiMigration?.mode || 'lace');
-    };
-
-    getWalletMode();
+    })();
   }, []);
+
+  const getDappConnectorComponent = () => {
+    if (mode === BITCOIN_LACE) {
+      return <BitcoinDappConnectorView />;
+    }
+    if (mode === 'nami') {
+      return <NamiDappConnector />;
+    }
+    if (mode === CARDANO_LACE) {
+      return <DappConnectorView />;
+    }
+    return <></>;
+  };
 
   return (
     <ErrorBoundary>
@@ -58,9 +77,7 @@ const App = (): React.ReactElement => {
                         <ExternalLinkOpenerProvider>
                           <AddressesDiscoveryOverlay>
                             <UIThemeProvider>
-                              <TxWitnessRequestProvider>
-                                {!mode ? <></> : mode === 'nami' ? <NamiDappConnector /> : <DappConnectorView />}
-                              </TxWitnessRequestProvider>
+                              <TxWitnessRequestProvider>{getDappConnectorComponent()}</TxWitnessRequestProvider>
                             </UIThemeProvider>
                           </AddressesDiscoveryOverlay>
                         </ExternalLinkOpenerProvider>

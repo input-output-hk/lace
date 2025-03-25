@@ -21,6 +21,7 @@ import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discovere
 import { Cardano, Reward } from '@cardano-sdk/core';
 import { StakePoolSortOptions } from '@lace/staking';
 import { ObservableWalletState } from '@hooks/useWalletState';
+import { Bitcoin } from '@lace/bitcoin';
 
 export enum StateStatus {
   IDLE = 'idle',
@@ -94,6 +95,8 @@ export interface StakePoolSearchSlice {
 // TODO: add support for custom nodes/environments [LW-3727]
 export type EnvironmentTypes = Wallet.ChainName;
 
+export type BitcoinNetworks = 'Mainnet' | 'Testnet4';
+
 export interface WalletInfoSlice {
   manageAccountsWallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined;
   setManageAccountsWallet: (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => void;
@@ -103,16 +106,19 @@ export interface WalletInfoSlice {
   walletState: ObservableWalletState | null;
   setWalletState: (walletState: ObservableWalletState | null) => void;
   cardanoWallet: Wallet.CardanoWallet | undefined;
+  bitcoinWallet: Bitcoin.BitcoinWallet | undefined;
   walletManager: WalletManagerApi | undefined;
   initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
   hdDiscoveryStatus: AddressesDiscoveryStatus | null;
   setHdDiscoveryStatus: (AddressesDiscoveryStatus: AddressesDiscoveryStatus) => void;
   setCardanoWallet: (wallet?: Wallet.CardanoWallet | null) => void;
+  setIsBitcoinWallet: (isBitcoinWallet: boolean) => void;
   currentChain?: Wallet.Cardano.ChainId;
   setCurrentChain: (chain: Wallet.ChainName) => void;
   environmentName?: EnvironmentTypes;
   walletType: WalletType;
+  isBitcoinWallet: boolean;
   isInMemoryWallet: boolean;
   isHardwareWallet: boolean;
   isSharedWallet: boolean;

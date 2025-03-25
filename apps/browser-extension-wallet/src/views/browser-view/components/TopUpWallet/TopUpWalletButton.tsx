@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { BANXA_LACE_URL } from './config';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { PostHogAction } from '@lace/common';
+import { useCurrentBlockchain } from '@src/multichain';
+import SvgBtcComponentTransparent from './SvgBtcComponentTransparent';
 
 export const TopUpWalletButton = (): React.ReactElement => {
   const dialogTriggerReference = useRef<HTMLButtonElement>(null);
@@ -12,12 +14,18 @@ export const TopUpWalletButton = (): React.ReactElement => {
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
   const openExternalLink = useExternalLinkOpener();
+  const { blockchain } = useCurrentBlockchain();
+  const isBitcoin = blockchain === 'bitcoin';
 
   return (
     <>
       <Button.CallToAction
-        icon={<AdaComponentTransparent />}
-        label={t('browserView.assets.topupWallet.buyButton.caption')}
+        icon={!isBitcoin ? <AdaComponentTransparent /> : <SvgBtcComponentTransparent />}
+        label={
+          !isBitcoin
+            ? t('browserView.assets.topupWallet.buyButton.caption')
+            : t('browserView.assets.topupWallet.buyButton.captionBtc')
+        }
         onClick={() => {
           analytics.sendEventToPostHog(PostHogAction.TokenTokensTopYourWalletBuyAdaClick);
           setOpen(true);

@@ -23,6 +23,7 @@ export interface WalletSetupOptionsStepProps {
     agreementText: ReactNode;
   };
   withAgreement?: boolean;
+  withHardwareWallet?: boolean;
 }
 
 const couldConnectHW = process.env.BROWSER !== 'firefox';
@@ -32,7 +33,8 @@ export const WalletSetupOptionsStep = ({
   onHardwareWalletRequest,
   onRestoreWalletRequest,
   translations,
-  withAgreement
+  withAgreement,
+  withHardwareWallet
 }: WalletSetupOptionsStepProps): React.ReactElement => (
   <div className={styles.walletSetupOptionsStep} data-testid="wallet-setup-options-container">
     <div className={styles.content} data-testid="wallet-setup-options-content">
@@ -52,14 +54,18 @@ export const WalletSetupOptionsStep = ({
           onClick={onNewWalletRequest}
           testId="create-wallet"
         />
-        <div className={styles.separator} />
-        <WalletSetupOption
-          disabled={!couldConnectHW}
-          copies={translations.hardwareWallet}
-          icon={!couldConnectHW ? HardwareWalletDisabledIcon : HardwareWalletIcon}
-          onClick={onHardwareWalletRequest}
-          testId="hardware-wallet"
-        />
+        {withHardwareWallet && (
+          <>
+            <div className={styles.separator} />
+            <WalletSetupOption
+              disabled={!couldConnectHW}
+              copies={translations.hardwareWallet}
+              icon={!couldConnectHW ? HardwareWalletDisabledIcon : HardwareWalletIcon}
+              onClick={onHardwareWalletRequest}
+              testId="hardware-wallet"
+            />
+          </>
+        )}
         <div className={styles.separator} />
         <WalletSetupOption
           icon={RestoreWalletIcon}

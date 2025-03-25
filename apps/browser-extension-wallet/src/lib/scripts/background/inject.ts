@@ -63,26 +63,35 @@ export const initializeInjectedScript = async ({ logger }: cip30.InitializeInjec
   const authenticator = consumeRemoteAuthenticatorApi(cip30WalletProperties, dependencies);
   const walletApi = consumeRemoteWalletApi(cip30WalletProperties, dependencies);
 
-  // Always eagerly inject in lace namespace with all extensions enabled to speed up injection
-  injectInLaceNs(walletApi, authenticator, logger);
-
   const result = getWalletMode(injectedRuntime);
 
   if (isCachedWalletModeResult(result)) {
-    // Cache was primed. Use it to speed up injection
     const { cachedWalletMode, latestWalletMode } = result;
 
+    // Wait for latest mode before proceeding with any injection
+    const latestModeResult = await latestWalletMode;
+    if (latestModeResult.mode === 'bitcoin') {
+      // Confirmed Bitcoin mode, skipping all injections
+      return;
+    }
+
+    // Proceed with injections for non-Bitcoin mode
+    injectInLaceNs(walletApi, authenticator, logger);
     const namiInjected = injectInNamiNs(cachedWalletMode, walletApi, authenticator, logger);
 
     if (!namiInjected) {
-      // Cached values indicated that we should NOT inject in nami namespace.
-      // No harm in waiting for the latest value and lazy inject it if was updated.
-      const latestMode = await latestWalletMode;
-      injectInNamiNs(latestMode, walletApi, authenticator, logger);
+      injectInNamiNs(latestModeResult, walletApi, authenticator, logger);
     }
   } else {
-    // Cache was not primed. Wait for the latest value and inject in nami namespace if needed
+    // Wait for latest mode before any injection
     const { mode, dappInjectCompatibilityMode } = await result.latestWalletMode;
+
+    if (mode === 'bitcoin') {
+      // Skipping all injections for Bitcoin mode
+      return;
+    }
+
+    injectInLaceNs(walletApi, authenticator, logger);
     injectInNamiNs({ mode, dappInjectCompatibilityMode }, walletApi, authenticator, logger);
   }
 };

@@ -1,0 +1,1 @@
+export { RestoreWallet } from './RestoreWallet';
