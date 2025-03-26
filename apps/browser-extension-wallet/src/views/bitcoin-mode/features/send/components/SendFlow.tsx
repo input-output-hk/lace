@@ -9,7 +9,6 @@ import { ReviewTransaction } from './ReviewTransaction';
 import { PasswordInput } from './PasswordInput';
 import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFailed } from './TransactionFailed';
-import { UnauthorizedTx } from './UnauthorizedTx';
 import { useFetchCoinPrice, useRedirection, useWalletManager } from '@hooks';
 import { PostHogAction, useObservable } from '@lace/common';
 import { Bitcoin } from '@lace/bitcoin';
@@ -290,10 +289,6 @@ export const SendFlow: React.FC = () => {
 
   if (step === 'FAILED') {
     return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
-  }
-
-  if (step === 'UNAUTHORIZED') {
-    return <UnauthorizedTx onClose={onClose} isPopupView={isPopupView} onBack={backToReview} />;
   }
 
   return <></>;
