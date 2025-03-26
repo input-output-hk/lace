@@ -93,7 +93,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   );
 
   useEffect(() => {
-    if (walletInfo.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
+    if (walletInfo?.addresses[0].address && passphrase && pgpInfo.pgpPublicKey)
       generatePaperWalletPdf({
         walletAddress: walletInfo.addresses[0].address,
         walletName: walletInfo.name,
@@ -112,7 +112,7 @@ export const PaperWalletSettingsDrawer = ({ isOpen, onClose, popupView = false }
   }, [passphrase, pgpInfo, walletInfo, CHAIN, setPdfInstance]);
 
   const formattedWalletName = i18n.t('core.paperWallet.savePaperWallet.walletName', {
-    walletName: replaceWhitespace(walletInfo.name, '_').trim()
+    walletName: replaceWhitespace(walletInfo?.name ?? '', '_').trim()
   });
 
   const visibleStage: React.ReactElement = useMemo(() => {

@@ -36,11 +36,9 @@ interface SendStepOneProps {
   address: string;
   availableBalance: number;
   onAddressChange: (value: string) => void;
-  feeRate: number;
-  onFeeRateChange: (value: number) => void;
   feeMarkets: Bitcoin.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
-  onContinue: () => void;
+  onContinue: (feeRate: number) => void;
   isPopupView: boolean;
   onClose: () => void;
   network: Bitcoin.Network | null;
@@ -62,8 +60,6 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   address,
   onAddressChange,
   availableBalance,
-  feeRate,
-  onFeeRateChange,
   feeMarkets,
   onEstimatedTimeChange,
   onContinue,
@@ -75,6 +71,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const numericAmount = Number.parseFloat(amount) || 0;
   const hasNoValue = numericAmount === 0;
   const exceedsBalance = numericAmount > availableBalance / SATS_IN_BTC;
+  const [feeRate, setFeeRate] = useState<number>(1);
 
   const getFees = useCallback(
     () =>
@@ -96,6 +93,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const [customFee, setCustomFee] = useState<string>('0');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
+  const [invalidAddressError, setInvalidAddressError] = useState<string | undefined>();
 
   useEffect(() => {
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -118,13 +116,14 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleNext = () => {
     if (hasNoValue || exceedsBalance || address.trim() === '') return;
 
-    onFeeRateChange(
+    const newFeeRate =
       selectedFeeKey === 'custom'
         ? Number.parseFloat(((Number.parseFloat(customFee) / SATS_IN_BTC) * 1000).toFixed(8))
-        : selectedFee?.feeRate
-    );
+        : selectedFee?.feeRate;
+
+    setFeeRate(newFeeRate);
     onEstimatedTimeChange(selectedFee?.estimatedTime);
-    onContinue();
+    onContinue(newFeeRate);
   };
   const { priceResult } = useFetchCoinPrice();
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
@@ -142,13 +141,26 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleChangeAddress = useCallback(
     (value: string) => {
       onAddressChange(value);
-      if (Bitcoin.isValidBitcoinAddress(value, network)) {
-        setIsValidAddress(true);
-      } else {
-        setIsValidAddress(false);
+
+      const result = Bitcoin.validateBitcoinAddress(value, network);
+
+      switch (result) {
+        case Bitcoin.AddressValidationResult.Valid:
+          setIsValidAddress(true);
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          setInvalidAddressError(undefined);
+          break;
+        case Bitcoin.AddressValidationResult.InvalidNetwork:
+          setIsValidAddress(false);
+          setInvalidAddressError(t('general.errors.incorrectAddressNetwork'));
+          break;
+        case Bitcoin.AddressValidationResult.InvalidAddress:
+          setIsValidAddress(false);
+          setInvalidAddressError(t('general.errors.incorrectAddress'));
+          break;
       }
     },
-    [network, onAddressChange]
+    [network, onAddressChange, t]
   );
 
   return (
@@ -164,9 +176,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           style={{ width: '100%' }}
         />
 
-        {!isValidAddress && !!address?.length && (
-          <InputError error={t('general.errors.incorrectAddress')} isPopupView={isPopupView} />
-        )}
+        {!isValidAddress && !!address?.length && <InputError error={invalidAddressError} isPopupView={isPopupView} />}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$40'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput

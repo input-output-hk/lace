@@ -101,7 +101,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
                 {Number.parseFloat((Number(feeInBtc) / SATS_IN_BTC).toFixed(8))} BTC
               </Text.Body.Normal>
               <Text.Body.Normal weight="$medium" data-testid="output-summary-fee-rate">
-                {(feeRate * SATS_IN_BTC) / 1000} sats/vB
+                {((feeRate * SATS_IN_BTC) / 1000).toFixed(2)} sats/vB
               </Text.Body.Normal>
             </Flex>
           </RowContainer>

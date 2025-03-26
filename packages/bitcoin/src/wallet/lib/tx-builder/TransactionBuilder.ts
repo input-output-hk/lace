@@ -1,35 +1,33 @@
-/* eslint-disable no-magic-numbers, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion, no-magic-numbers */
 import { GreedyInputSelector, InputSelector } from '../input-selection';
-import { DerivedAddress, Network } from '../common';
+import {
+  DerivedAddress,
+  Network,
+  validateBitcoinAddress,
+  AddressValidationResult,
+  UnsignedTransaction,
+  isP2trAddress
+} from '../common';
 import { UTxO } from '../providers';
-import { payments, Psbt } from 'bitcoinjs-lib';
-
+import { payments, script, Psbt } from 'bitcoinjs-lib';
 import * as bitcoin from 'bitcoinjs-lib';
 
 const INPUT_SIZE = 68;
 const OUTPUT_SIZE = 34;
 const TRANSACTION_OVERHEAD = 10;
 
-export type UnsignedTransaction = {
-  context: Psbt;
-  toAddress: string;
-  amount: bigint;
-  fee: bigint;
-  vBytes: number;
-  signers: DerivedAddress[];
-};
-
+/**
+ * A class to build Bitcoin transactions using a flexible input and output management system.
+ */
 export class TransactionBuilder {
   private psbt: Psbt;
-  private net: bitcoin.networks.Network;
+  private network: Network;
   private feeRate: number;
   private knownAddresses: DerivedAddress[];
-
   private outputs: { address: string; value: bigint }[] = [];
   private utxos: UTxO[] = [];
   private changeAddress?: string;
   private signers: DerivedAddress[] = [];
-
   private inputSelector: InputSelector = new GreedyInputSelector();
 
   /**
@@ -42,8 +40,9 @@ export class TransactionBuilder {
   constructor(network: Network, feeRate: number, knownAddresses: DerivedAddress[]) {
     this.feeRate = feeRate;
     this.knownAddresses = knownAddresses;
-    this.net = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
-    this.psbt = new Psbt({ network: this.net });
+    this.network = network;
+    const net = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+    this.psbt = new Psbt({ network: net });
   }
 
   /**
@@ -64,6 +63,9 @@ export class TransactionBuilder {
    * @returns The builder instance for chaining.
    */
   public setChangeAddress(changeAddress: string): this {
+    if (validateBitcoinAddress(changeAddress, this.network) !== AddressValidationResult.Valid) {
+      throw new Error(`Invalid change address: ${changeAddress}`);
+    }
     this.changeAddress = changeAddress;
     return this;
   }
@@ -87,6 +89,9 @@ export class TransactionBuilder {
    * @returns The builder instance for chaining.
    */
   public addOutput(address: string, value: bigint): this {
+    if (validateBitcoinAddress(address, this.network) !== AddressValidationResult.Valid) {
+      throw new Error(`Invalid recipient address: ${address}`);
+    }
     this.outputs.push({ address, value });
     return this;
   }
@@ -129,26 +134,33 @@ export class TransactionBuilder {
         throw new Error('Unknown address in UTXO set.');
       }
       this.signers.push(knownAddr);
+
+      const net = this.network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+
       this.psbt.addInput({
         hash: utxo.txId,
         index: utxo.index,
         witnessUtxo: {
-          script: payments.p2wpkh({ pubkey: Buffer.from(knownAddr.publicKeyHex, 'hex'), network: this.net }).output!,
+          script: payments.p2wpkh({ pubkey: Buffer.from(knownAddr.publicKeyHex, 'hex'), network: net }).output!,
           value: Number(utxo.satoshis)
         }
       });
     }
 
-    coinselectOutputs.forEach((output) => {
-      this.psbt.addOutput({
-        address: output.address,
-        value: output.value
-      });
+    coinselectOutputs.forEach(({ address, value }) => {
+      if (isP2trAddress(address)) {
+        const taprootPubKey = Buffer.from(bitcoin.address.fromBech32(address).data);
+        this.psbt.addOutput({
+          script: script.compile([bitcoin.opcodes.OP_1, taprootPubKey]),
+          value
+        });
+      } else {
+        this.psbt.addOutput({ address, value });
+      }
     });
 
     const vBytes = selectedUTxOs.length * INPUT_SIZE + coinselectOutputs.length * OUTPUT_SIZE + TRANSACTION_OVERHEAD;
 
-    // Supports single outputs
     return {
       context: this.psbt,
       toAddress: this.outputs[0].address,

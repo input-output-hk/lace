@@ -704,6 +704,7 @@
   "general.errors.bundleAmountIsEmpty": "Amount value missing",
   "general.errors.handleConflict": "There is an address conflict. We expected {{receivedAddress}} but got {{actualAddress}}.",
   "general.errors.incorrectAddress": "Incorrect address",
+  "general.errors.incorrectAddressNetwork": "Address is for incorrect network",
   "general.errors.incorrectHandle": "Handle not found",
   "general.errors.insufficientBalance": "Insufficient balance",
   "general.errors.insufficientAvailableBalance": "Action required",

@@ -9,7 +9,6 @@ import { ReviewTransaction } from './ReviewTransaction';
 import { PasswordInput } from './PasswordInput';
 import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFailed } from './TransactionFailed';
-import { UnauthorizedTx } from './UnauthorizedTx';
 import { useFetchCoinPrice, useRedirection, useWalletManager } from '@hooks';
 import { PostHogAction, useObservable } from '@lace/common';
 import { Bitcoin } from '@lace/bitcoin';
@@ -87,7 +86,11 @@ const buildTransaction = ({
   utxos,
   network
 }: BuildTxProps): Bitcoin.UnsignedTransaction =>
-  Bitcoin.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, knownAddresses);
+  new Bitcoin.TransactionBuilder(network, feeRate, knownAddresses)
+    .setChangeAddress(changeAddress)
+    .setUtxoSet(utxos)
+    .addOutput(recipientAddress, amount)
+    .build();
 
 const btcStringToSatoshisBigint = (btcString: string): bigint => {
   // Split the BTC string into integer and fractional parts.
@@ -180,13 +183,14 @@ export const SendFlow: React.FC = () => {
   }, [bitcoinWallet]);
 
   // Step 1 -> 2
-  const goToReview = () => {
+  const goToReview = (newFeeRate: number) => {
+    setFeeRate(newFeeRate);
     setUnsignedTransaction(
       buildTransaction({
         knownAddresses,
         changeAddress: knownAddresses[0].address,
         recipientAddress: address,
-        feeRate,
+        feeRate: newFeeRate,
         amount: btcStringToSatoshisBigint(amount),
         utxos,
         network
@@ -200,14 +204,7 @@ export const SendFlow: React.FC = () => {
   const handleSignTransaction = useCallback(
     async (password: Buffer): Promise<Bitcoin.SignedTransaction> | undefined => {
       if (!unsignedTransaction || !walletInfo?.encryptedSecrets.seed) return;
-      // eslint-disable-next-line consistent-return
-
-      try {
-        return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
-      } catch (error) {
-        setStep('UNAUTHORIZED');
-        throw error;
-      }
+      return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
     },
     [unsignedTransaction, walletInfo]
   );
@@ -242,9 +239,7 @@ export const SendFlow: React.FC = () => {
         address={address}
         availableBalance={Number(balance)}
         onAddressChange={setAddress}
-        feeRate={feeRate}
         feeMarkets={feeMarkets}
-        onFeeRateChange={setFeeRate}
         onEstimatedTimeChange={setEstimatedTime}
         onContinue={goToReview}
         network={network}
@@ -293,10 +288,6 @@ export const SendFlow: React.FC = () => {
 
   if (step === 'FAILED') {
     return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
-  }
-
-  if (step === 'UNAUTHORIZED') {
-    return <UnauthorizedTx onClose={onClose} isPopupView={isPopupView} onBack={backToReview} />;
   }
 
   return <></>;
