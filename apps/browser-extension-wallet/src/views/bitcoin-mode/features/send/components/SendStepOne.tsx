@@ -13,6 +13,7 @@ import { CoreTranslationKey } from '@lace/translation';
 import { Box, Flex, Text, ToggleButtonGroup } from '@input-output-hk/lace-ui-toolkit';
 import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
+import { formatNumberForDisplay } from '@utils/format-number';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -164,7 +165,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   );
 
   const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const disallowedKeys = ['-', '+', 'e'];
+    const disallowedKeys = ['-', '+', 'e', ','];
     const targetValue = Number(e.currentTarget.value);
 
     if (disallowedKeys.includes(e.key) || (e.key === 'ArrowDown' && targetValue <= 0)) {
@@ -199,6 +200,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
             invalid={exceedsBalance}
             isPopupView={isPopupView}
             hasMaxBtn={false}
+            displayValue={formatNumberForDisplay(amount, 15)}
+            focused
           />
         </Box>
 
@@ -247,7 +250,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 data-testid="btc-add-custom-fee"
                 bordered={false}
                 onChange={(e) => {
-                  setCustomFee(e.target.value);
+                  const normalizedValue = e.target.value.replace(',', '.');
+                  setCustomFee(normalizedValue);
                 }}
                 onKeyDown={handleCustomFeeKeyDown}
                 onWheel={(e) => {
@@ -255,6 +259,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                   e.stopPropagation();
                   e.currentTarget.blur();
                 }}
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
               />
               {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
             </Box>
