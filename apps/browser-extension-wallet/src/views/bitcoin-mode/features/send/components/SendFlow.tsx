@@ -183,13 +183,14 @@ export const SendFlow: React.FC = () => {
   }, [bitcoinWallet]);
 
   // Step 1 -> 2
-  const goToReview = () => {
+  const goToReview = (newFeeRate: number) => {
+    setFeeRate(newFeeRate);
     setUnsignedTransaction(
       buildTransaction({
         knownAddresses,
         changeAddress: knownAddresses[0].address,
         recipientAddress: address,
-        feeRate,
+        feeRate: newFeeRate,
         amount: btcStringToSatoshisBigint(amount),
         utxos,
         network
@@ -238,9 +239,7 @@ export const SendFlow: React.FC = () => {
         address={address}
         availableBalance={Number(balance)}
         onAddressChange={setAddress}
-        feeRate={feeRate}
         feeMarkets={feeMarkets}
-        onFeeRateChange={setFeeRate}
         onEstimatedTimeChange={setEstimatedTime}
         onContinue={goToReview}
         network={network}

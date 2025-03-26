@@ -36,11 +36,9 @@ interface SendStepOneProps {
   address: string;
   availableBalance: number;
   onAddressChange: (value: string) => void;
-  feeRate: number;
-  onFeeRateChange: (value: number) => void;
   feeMarkets: Bitcoin.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
-  onContinue: () => void;
+  onContinue: (feeRate: number) => void;
   isPopupView: boolean;
   onClose: () => void;
   network: Bitcoin.Network | null;
@@ -62,8 +60,6 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   address,
   onAddressChange,
   availableBalance,
-  feeRate,
-  onFeeRateChange,
   feeMarkets,
   onEstimatedTimeChange,
   onContinue,
@@ -75,6 +71,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const numericAmount = Number.parseFloat(amount) || 0;
   const hasNoValue = numericAmount === 0;
   const exceedsBalance = numericAmount > availableBalance / SATS_IN_BTC;
+  const [feeRate, setFeeRate] = useState<number>(1);
 
   const getFees = useCallback(
     () =>
@@ -119,13 +116,14 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleNext = () => {
     if (hasNoValue || exceedsBalance || address.trim() === '') return;
 
-    onFeeRateChange(
+    const newFeeRate =
       selectedFeeKey === 'custom'
         ? Number.parseFloat(((Number.parseFloat(customFee) / SATS_IN_BTC) * 1000).toFixed(8))
-        : selectedFee?.feeRate
-    );
+        : selectedFee?.feeRate;
+
+    setFeeRate(newFeeRate);
     onEstimatedTimeChange(selectedFee?.estimatedTime);
-    onContinue();
+    onContinue(newFeeRate);
   };
   const { priceResult } = useFetchCoinPrice();
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
