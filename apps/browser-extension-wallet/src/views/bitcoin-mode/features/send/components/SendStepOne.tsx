@@ -15,7 +15,6 @@ import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
-const CUSTOM_FEE_STEP = 0.1;
 
 interface RecommendedFee {
   key?: keyof Bitcoin.EstimatedFees | 'custom';
@@ -153,9 +152,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   );
 
   const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const target = e.target as HTMLInputElement;
     const disallowedKeys = ['-', '+', 'e'];
-    const targetValue = Number(target.value);
+    const targetValue = Number(e.currentTarget.value);
 
     if (disallowedKeys.includes(e.key) || (e.key === 'ArrowDown' && targetValue <= 0)) {
       e.preventDefault();
@@ -231,7 +229,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
             <Box w="$fill">
               <Input
                 className={styles.feeInput}
-                step={CUSTOM_FEE_STEP}
+                step="0.1"
                 type="number"
                 label={t('browserView.transaction.btc.send.feeRateCustom')}
                 disabled={false}
@@ -244,17 +242,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 onKeyDown={handleCustomFeeKeyDown}
                 onWheel={(e) => {
                   e.preventDefault();
-
-                  const step = CUSTOM_FEE_STEP;
-                  const currentValue = Number(customFee);
-
-                  // Handle scrolling up (increment) or down (decrement but not below 0)
-                  const newValue = Math.max(e.deltaY < 0 ? currentValue + step : Math.max(0, currentValue - step), 0);
-
-                  // Only update if value changed
-                  if (newValue !== currentValue) {
-                    setCustomFee(newValue.toFixed(1));
-                  }
+                  e.stopPropagation();
+                  e.currentTarget.blur();
                 }}
               />
               {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
