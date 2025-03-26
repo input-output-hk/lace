@@ -937,5 +937,8 @@
   "paperWallet.SettingsDrawer.ExitWarningDescription": "You have generated a paper wallet, but haven't downloaded it yet! You'll have to generate a new one next time.",
   "paperWallet.SettingsDrawer.ExitButton": "Exit",
   "paperWallet.SettingsDrawer.passphraseStage.title": "Enter your password",
-  "paperWallet.SettingsDrawer.passphraseStage.subtitle": "This is the password you use to unlock your wallet and make transactions"
+  "paperWallet.SettingsDrawer.passphraseStage.subtitle": "This is the password you use to unlock your wallet and make transactions",
+  "dapp.connector.btc.error.title": "Bitcoin Wallet",
+  "dapp.connector.btc.error.description": "DApp connector for Bitcoin wallet is not supported in this version of the extension.",
+  "dapp.connector.btc.error.closeButton": "Close"
 }
