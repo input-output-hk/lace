@@ -87,7 +87,11 @@ const buildTransaction = ({
   utxos,
   network
 }: BuildTxProps): Bitcoin.UnsignedTransaction =>
-  Bitcoin.buildTx(recipientAddress, changeAddress, amount, feeRate, utxos, network, knownAddresses);
+  new Bitcoin.TransactionBuilder(network, feeRate, knownAddresses)
+    .setChangeAddress(changeAddress)
+    .setUtxoSet(utxos)
+    .addOutput(recipientAddress, amount)
+    .build();
 
 const btcStringToSatoshisBigint = (btcString: string): bigint => {
   // Split the BTC string into integer and fractional parts.

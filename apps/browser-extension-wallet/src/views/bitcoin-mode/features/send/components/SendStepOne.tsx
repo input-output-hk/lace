@@ -96,6 +96,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const [customFee, setCustomFee] = useState<string>('0');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
+  const [invalidAddressError, setInvalidAddressError] = useState<string | undefined>();
 
   useEffect(() => {
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -142,13 +143,25 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const handleChangeAddress = useCallback(
     (value: string) => {
       onAddressChange(value);
-      if (Bitcoin.isValidBitcoinAddress(value, network)) {
-        setIsValidAddress(true);
-      } else {
-        setIsValidAddress(false);
+
+      const result = Bitcoin.validateBitcoinAddress(value, network);
+
+      switch (result) {
+        case Bitcoin.AddressValidationResult.Valid:
+          setIsValidAddress(true);
+          setInvalidAddressError();
+          break;
+        case Bitcoin.AddressValidationResult.InvalidNetwork:
+          setIsValidAddress(false);
+          setInvalidAddressError(t('general.errors.incorrectAddressNetwork'));
+          break;
+        case Bitcoin.AddressValidationResult.InvalidAddress:
+          setIsValidAddress(false);
+          setInvalidAddressError(t('general.errors.incorrectAddress'));
+          break;
       }
     },
-    [network, onAddressChange]
+    [network, onAddressChange, t]
   );
 
   return (
@@ -164,9 +177,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           style={{ width: '100%' }}
         />
 
-        {!isValidAddress && !!address?.length && (
-          <InputError error={t('general.errors.incorrectAddress')} isPopupView={isPopupView} />
-        )}
+        {!isValidAddress && !!address?.length && <InputError error={invalidAddressError} isPopupView={isPopupView} />}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$40'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput

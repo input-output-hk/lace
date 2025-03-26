@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion, complexity, no-magic-numbers */
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { Network } from './network';
@@ -179,17 +179,66 @@ export type DerivedAddress = {
 };
 
 /**
- * Checks if the given Bitcoin address is valid for the specified network.
- * @param {string} address - The Bitcoin address to validate.
- * @param {Network} network - The Bitcoin network (mainnet or testnet).
- * @returns {boolean}
+ * Enumeration for results of Bitcoin address validation.
  */
-export const isValidBitcoinAddress = (address: string, network: Network): boolean => {
+export enum AddressValidationResult {
+  /**
+   * Indicates the address is correctly formatted and matches the expected network.
+   */
+  Valid = 'Valid',
+
+  /**
+   * Indicates the address does not match the expected network prefix.
+   */
+  InvalidNetwork = 'InvalidNetwork',
+
+  /**
+   * Indicates the address format is incorrect or not supported.
+   */
+  InvalidAddress = 'InvalidAddress'
+}
+
+/**
+ * Validates a Bitcoin address and returns a result indicating if the address is valid or the type of issue found.
+ *
+ * @param address The Bitcoin address to validate.
+ * @param network The expected Bitcoin network (mainnet or testnet).
+ * @returns An enum value indicating the validation result.
+ */
+export const validateBitcoinAddress = (address: string, network: Network): AddressValidationResult => {
   const bitcoinNetwork = network === Network.Testnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
+
   try {
-    bitcoin.address.toOutputScript(address, bitcoinNetwork);
-    return true;
+    const decodedBase58 = bitcoin.address.fromBase58Check(address);
+    if (decodedBase58.version === bitcoinNetwork.pubKeyHash || decodedBase58.version === bitcoinNetwork.scriptHash) {
+      return AddressValidationResult.Valid;
+    }
+    return AddressValidationResult.InvalidNetwork;
   } catch {
-    return false;
+    // continue
   }
+
+  try {
+    const decodedBech32 = bitcoin.address.fromBech32(address);
+    if (decodedBech32.prefix !== bitcoinNetwork.bech32) {
+      return AddressValidationResult.InvalidNetwork;
+    }
+    if (
+      (decodedBech32.version === 0 && (decodedBech32.data.length === 20 || decodedBech32.data.length === 32)) ||
+      (decodedBech32.version === 1 && decodedBech32.data.length === 32)
+    ) {
+      return AddressValidationResult.Valid;
+    }
+  } catch {
+    return AddressValidationResult.InvalidAddress;
+  }
+
+  return AddressValidationResult.InvalidAddress;
 };
+
+/**
+ * Checks if a Bitcoin address is a Taproot (P2TR) address.
+ * @param {string} address - The Bitcoin address to check.
+ * @returns {boolean} True if the address is a Taproot address, otherwise false.
+ */
+export const isP2trAddress = (address: string): boolean => address.startsWith('bc1p') || address.startsWith('tb1p');
