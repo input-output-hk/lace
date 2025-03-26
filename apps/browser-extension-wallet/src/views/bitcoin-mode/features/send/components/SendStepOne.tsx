@@ -133,10 +133,10 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const coin = {
     id: 'btc',
     ticker: 'BTC',
-    balance: `${t('browserView.transaction.btc.send.balance')}: ${(availableBalance / SATS_IN_BTC).toFixed(8)} BTC`
+    balance: `${t('browserView.transaction.btc.send.balance')}: ${(availableBalance / SATS_IN_BTC).toFixed(8)}`
   };
 
-  const fiatValue = `${new BigNumber(enteredAmount.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} USD`;
+  const fiatValue = `≈ ${new BigNumber(enteredAmount.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} USD`;
 
   const handleChangeAddress = useCallback(
     (value: string) => {
