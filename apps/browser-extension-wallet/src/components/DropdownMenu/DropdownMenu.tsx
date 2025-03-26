@@ -82,6 +82,7 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
       {process.env.USE_MULTI_WALLET === 'true' && fullWalletName ? (
         <div className={styles.profileDropdownTrigger}>
           <ProfileDropdown.Trigger
+            style={{ textAlign: 'left' }}
             title={addEllipsis(fullWalletName, titleCharBeforeEll)}
             subtitle={addEllipsis(getActiveWalletSubtitle(lastActiveAccount), titleCharBeforeEll)}
             active={isDropdownMenuOpen}

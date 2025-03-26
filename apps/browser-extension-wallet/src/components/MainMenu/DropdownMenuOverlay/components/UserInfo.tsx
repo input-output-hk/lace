@@ -117,6 +117,7 @@ export const UserInfo = ({
 
       return (
         <ProfileDropdown.WalletOption
+          style={{ textAlign: 'left' }}
           key={wallet.walletId}
           title={shortenWalletName(wallet.metadata.name, WALLET_OPTION_NAME_MAX_LENGTH)}
           subtitle={shortenWalletName(
@@ -207,7 +208,7 @@ export const UserInfo = ({
         })}
       >
         {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>{wallets.map((wallet) => renderWallet(wallet, true))}</div>
+          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
         ) : (
           <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
