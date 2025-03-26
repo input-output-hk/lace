@@ -149,7 +149,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
       switch (result) {
         case Bitcoin.AddressValidationResult.Valid:
           setIsValidAddress(true);
-          setInvalidAddressError();
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          setInvalidAddressError(undefined);
           break;
         case Bitcoin.AddressValidationResult.InvalidNetwork:
           setIsValidAddress(false);

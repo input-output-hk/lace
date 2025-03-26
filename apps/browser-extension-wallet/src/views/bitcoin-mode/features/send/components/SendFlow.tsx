@@ -204,14 +204,7 @@ export const SendFlow: React.FC = () => {
   const handleSignTransaction = useCallback(
     async (password: Buffer): Promise<Bitcoin.SignedTransaction> | undefined => {
       if (!unsignedTransaction || !walletInfo?.encryptedSecrets.seed) return;
-      // eslint-disable-next-line consistent-return
-
-      try {
-        return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
-      } catch (error) {
-        setStep('UNAUTHORIZED');
-        throw error;
-      }
+      return await signTransaction(unsignedTransaction, walletInfo.encryptedSecrets.seed, password);
     },
     [unsignedTransaction, walletInfo]
   );
