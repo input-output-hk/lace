@@ -90,7 +90,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     () => recommendedFees.find((f) => f.key === selectedFeeKey),
     [recommendedFees, selectedFeeKey]
   );
-  const [customFee, setCustomFee] = useState<string>('0');
+  const [customFee, setCustomFee] = useState<string>('');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
   const [invalidAddressError, setInvalidAddressError] = useState<string | undefined>();
@@ -162,6 +162,15 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     },
     [network, onAddressChange, t]
   );
+
+  const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const disallowedKeys = ['-', '+', 'e'];
+    const targetValue = Number(e.currentTarget.value);
+
+    if (disallowedKeys.includes(e.key) || (e.key === 'ArrowDown' && targetValue <= 0)) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <Flex className={mainStyles.container} flexDirection="column" w="$fill">
@@ -240,11 +249,11 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 onChange={(e) => {
                   setCustomFee(e.target.value);
                 }}
-                onKeyDown={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  if (e.key === '-' || e.key === 'e' || (e.key === 'ArrowDown' && Number(target.value) <= 0)) {
-                    e.preventDefault();
-                  }
+                onKeyDown={handleCustomFeeKeyDown}
+                onWheel={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.currentTarget.blur();
                 }}
               />
               {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
