@@ -1,11 +1,11 @@
 import testContext from '../utils/testContext';
 import extensionUtils from '../utils/utils';
-import { cleanBrowserStorage } from '../utils/browserStorage';
 import localStorageManager from '../utils/localStorageManager';
 import { browser } from '@wdio/globals';
 import { closeAllTabsExceptOriginalOne } from '../utils/window';
-import { addAndActivateWalletsInRepository, clearWalletRepository } from './walletRepositoryInitializer';
+import { addAndActivateWalletsInRepository } from './walletRepositoryInitializer';
 import { TestWalletName } from '../support/walletConfiguration';
+import extendedView from '../page/extendedView';
 
 class LocalStorageInitializer {
   async initializeLastStaking(): Promise<void> {
@@ -69,9 +69,8 @@ class LocalStorageInitializer {
   };
 
   reInitializeWallet = async (walletName: string) => {
-    await clearWalletRepository();
-    await cleanBrowserStorage();
-    await localStorageManager.cleanLocalStorage();
+    await browser.reloadSession();
+    await extendedView.visit();
     await this.initialiseBasicLocalStorageData(walletName);
     await addAndActivateWalletsInRepository([walletName as TestWalletName]);
     await browser.refresh();

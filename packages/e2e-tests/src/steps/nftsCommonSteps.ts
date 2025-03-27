@@ -21,6 +21,7 @@ import {
   getNonActiveNftWalletName
 } from '../utils/walletUtils';
 import { visit } from '../utils/pageUtils';
+import popupView from '../page/popupView';
 
 When(
   /^I (left|right) click on the NFT with name "([^"]*)" on NFTs page$/,
@@ -105,6 +106,7 @@ Given(
         walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
       }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
+      if (mode === 'popup') await popupView.visit();
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await visit('NFTs', mode);
       expect(await NftsPage.isNftDisplayed(nftName)).to.be.true;
