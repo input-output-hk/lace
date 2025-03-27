@@ -45,7 +45,9 @@ export const TransactionSuccess: React.FC<TransactionSuccessProps> = ({
                   title="Transaction hash"
                   plain
                 >
-                  <TransactionHashBox hash={hash} />
+                  <Flex justifyContent="center">
+                    <TransactionHashBox hash={hash} />
+                  </Flex>
                 </SummaryExpander>
               </Box>
             </Flex>
