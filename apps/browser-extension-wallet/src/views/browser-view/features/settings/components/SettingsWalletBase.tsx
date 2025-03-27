@@ -20,7 +20,8 @@ import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
 import { COLLATERAL_AMOUNT_LOVELACES } from '@utils/constants';
-import { Blockchain, useCurrentBlockchain } from '@src/multichain';
+import { useCurrentBlockchain } from '@src/multichain';
+import { getNetworkName } from '@src/utils/get-network-name';
 
 const { Title } = Typography;
 
@@ -47,14 +48,6 @@ export interface SettingsWalletProps<AdditionalDrawers extends string = never> {
   renderLocalNodeSlot?: (params: RenderLocalNodeSlotParams<AdditionalDrawers>) => ReactNode;
   popupView?: boolean;
 }
-
-const getNetworkName = (blockchain: Blockchain, environmentName: string): string => {
-  if (blockchain === Blockchain.Cardano) {
-    return environmentName;
-  }
-
-  return environmentName === 'Mainnet' ? environmentName : 'Testnet4';
-};
 
 // eslint-disable-next-line complexity
 export const SettingsWalletBase = <AdditionalDrawers extends string>({

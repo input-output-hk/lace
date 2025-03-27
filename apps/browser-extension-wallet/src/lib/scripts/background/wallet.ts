@@ -60,6 +60,7 @@ import {
   bitcoinWalletManagerProperties,
   bitcoinWalletProperties
 } from './bitcoinWalletManager';
+import { isBitcoinNetworkSwitchingDisabled } from '@utils/get-network-name';
 
 if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
@@ -236,6 +237,11 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
 
 const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
   create: async ({ network, accountIndex }, wallet) => {
+    // Override network for testnet if flag is off
+    if (isBitcoinNetworkSwitchingDisabled()) {
+      network = Bitcoin.Network.Testnet;
+    }
+
     if (wallet.type !== WalletType.InMemory) {
       throw new Error('Unsupported wallet type for Bitcoin');
     }

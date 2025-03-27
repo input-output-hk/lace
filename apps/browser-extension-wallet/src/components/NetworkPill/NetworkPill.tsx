@@ -5,7 +5,8 @@ import { useWalletStore } from '@src/stores';
 import { useNetwork } from '@hooks';
 import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useCurrentBlockchain, Blockchain } from '@src/multichain';
+import { Blockchain, useCurrentBlockchain } from '@src/multichain';
+import { getNetworkName, isBitcoinNetworkSwitchingDisabled } from '@src/utils/get-network-name';
 
 interface NetworkPillProp {
   isExpandable?: boolean;
@@ -18,7 +19,28 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
   const { isOnline, isBackendFailing } = useNetwork();
   const { blockchain } = useCurrentBlockchain();
 
+  // eslint-disable-next-line complexity
   return useMemo(() => {
+    if (isOnline && !isBackendFailing && blockchain === Blockchain.Bitcoin && isBitcoinNetworkSwitchingDisabled()) {
+      return (
+        <div
+          className={classnames(styles.networkPill, {
+            [styles.expandablePill]: isExpandable,
+            [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
+          })}
+          data-testid="network-pill"
+        >
+          <span
+            className={classnames({
+              [styles.networkPillText]: isExpandable
+            })}
+          >
+            Testnet4
+          </span>
+        </div>
+      );
+    }
+
     if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
       return (
         <div
@@ -33,7 +55,7 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
               [styles.networkPillText]: isExpandable
             })}
           >
-            {blockchain === Blockchain.Cardano ? environmentName : 'Testnet4'}
+            {getNetworkName(blockchain, environmentName)}
           </span>
         </div>
       );

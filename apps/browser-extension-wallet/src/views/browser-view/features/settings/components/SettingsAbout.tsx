@@ -5,7 +5,9 @@ import { Typography } from 'antd';
 import { useWalletStore } from '@src/stores';
 import { addEllipsis } from '@lace/common';
 import { SocialNetwork, SocialNetworkIcon } from '@views/browser/components/SocialNetworks/SocialNetworkIcon';
-import { Blockchain, useCurrentBlockchain } from '@src/multichain';
+import { useCurrentBlockchain } from '@src/multichain';
+import { getNetworkName } from '@src/utils/get-network-name';
+
 const { Title } = Typography;
 const COMMIT_HASH_START_LENGTH = 8;
 const COMMIT_HASH_END_LENGTH = 4;
@@ -21,14 +23,6 @@ const socialNetworks = [
 interface SettingsAboutProps {
   'data-testid'?: string;
 }
-
-const getNetworkName = (blockchain: Blockchain, environmentName: string): string => {
-  if (blockchain === Blockchain.Cardano) {
-    return environmentName;
-  }
-
-  return environmentName === 'Mainnet' ? environmentName : 'Testnet4';
-};
 
 export const SettingsAbout = ({ ...props }: SettingsAboutProps): React.ReactElement => {
   const { t } = useTranslation();
