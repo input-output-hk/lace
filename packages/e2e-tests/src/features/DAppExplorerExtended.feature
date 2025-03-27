@@ -5,7 +5,8 @@ Feature: DApp Explorer - extended view
   Background:
     Given Wallet is synced
 
-  @LW-12105
+  @LW-12105 @Pending
+  @issue=LW-12569
   Scenario: Extended View - DApp Explorer - open
     When I navigate to DApps extended page
     Then I see DApp Explorer page
@@ -14,7 +15,8 @@ Feature: DApp Explorer - extended view
     When I hover over info icon on DApp Explorer page
     Then I see a tooltip with information about DApp Explorer
 
-  @LW-12108
+  @LW-12108 @Pending
+  @issue=LW-12569
   Scenario Outline: Extended View - DApp Explorer - filter by category
     When I navigate to DApps extended page
     And I click on "<category>" DApp category
@@ -31,7 +33,8 @@ Feature: DApp Explorer - extended view
       | Other        |
       | Show All     |
 
-  @LW-12109 @LW-12110
+  @LW-12109 @LW-12110 @Pending
+  @issue=LW-12569
   Scenario Outline: Extended View - DApp Explorer - open DApp details
     When I navigate to DApps extended page
     And I click on "<dapp_name>" DApp card
