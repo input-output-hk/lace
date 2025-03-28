@@ -3,18 +3,11 @@ import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import { useWalletStore } from '@src/stores';
 import styles from '../DropdownMenuOverlay.module.scss';
-import { useCurrentBlockchain, Blockchain } from '@src/multichain';
+import { getNetworkName } from '@src/utils/get-network-name';
+import { useCurrentBlockchain } from '@src/multichain';
 
 type NetworkChoiseProps = {
   onClick: () => void;
-};
-
-const getNetworkName = (blockchain: Blockchain, environmentName: string): string => {
-  if (blockchain === Blockchain.Cardano) {
-    return environmentName;
-  }
-
-  return environmentName === 'Mainnet' ? environmentName : 'Testnet4';
 };
 
 export const NetworkChoise = ({ onClick }: NetworkChoiseProps): React.ReactElement => {

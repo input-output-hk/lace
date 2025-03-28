@@ -13,6 +13,7 @@ import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useCurrentBlockchain, Blockchain } from '@src/multichain';
+import { isBitcoinNetworkSwitchingDisabled } from '@utils/get-network-name';
 
 const { AVAILABLE_CHAINS } = config();
 
@@ -95,6 +96,18 @@ export const NetworkChoice = ({ section }: { section?: 'settings' | 'wallet-prof
   const availableChains = isSharedWallet
     ? AVAILABLE_CHAINS.filter((chain) => posthog?.featureFlagsByNetwork[cardanoNetworkMap[chain]]['shared-wallets'])
     : AVAILABLE_CHAINS;
+
+  if (blockchain === Blockchain.Bitcoin && isBitcoinNetworkSwitchingDisabled()) {
+    return (
+      <Radio.Group className={styles.radioGroup} value="Testnet4" data-testid={'network-choice-radio-group'}>
+        <a className={styles.radio} key="Testnet4">
+          <Radio value="Testnet4" className={styles.radioLabel} data-testid={'network-preprod-radio-button'}>
+            Testnet4
+          </Radio>
+        </a>
+      </Radio.Group>
+    );
+  }
 
   return (
     <Radio.Group
