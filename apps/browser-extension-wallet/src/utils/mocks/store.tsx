@@ -95,6 +95,17 @@ export const walletStoreMock = async (
       Wallet.AccountMetadata
     >,
     blockchainProvider: mockBlockchainProviders(),
+    bitcoinBlockchainProvider: {
+      getLastKnownBlock: jest.fn(),
+      getTransaction: jest.fn(),
+      getTransactions: jest.fn(),
+      getTransactionsInMempool: jest.fn(),
+      getUTxOs: jest.fn(),
+      submitTransaction: jest.fn(),
+      getTransactionStatus: jest.fn(),
+      estimateFee: jest.fn()
+    },
+    setBitcoinBlockchainProvider: jest.fn(),
     setBlockchainProvider: jest.fn(),
     initialHdDiscoveryCompleted: false,
     setAddressesDiscoveryCompleted: jest.fn(),

@@ -187,6 +187,11 @@ export interface BlockchainProviderSlice {
   setBlockchainProvider: (chain: Wallet.ChainName) => void;
 }
 
+export interface BitcoinBlockchainProviderSlice {
+  bitcoinBlockchainProvider: Bitcoin.BlockchainDataProvider;
+  setBitcoinBlockchainProvider: () => void;
+}
+
 // ===== WALLET STORE =====
 
 export type WalletStore = WalletActivitiesSlice &
@@ -197,4 +202,5 @@ export type WalletStore = WalletActivitiesSlice &
   ActivityDetailSlice &
   AssetDetailsSlice &
   UISlice &
-  BlockchainProviderSlice;
+  BlockchainProviderSlice &
+  BitcoinBlockchainProviderSlice;

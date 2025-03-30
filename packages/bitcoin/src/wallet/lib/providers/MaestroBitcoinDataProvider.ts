@@ -9,6 +9,8 @@ import {
   UTxO
 } from './BitcoinDataProvider';
 import { Network } from '../common';
+import type { Cache } from '@cardano-sdk/util';
+import { Logger } from 'ts-log';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -23,8 +25,12 @@ const btcStringToSatoshisBigint = (btcString: string): bigint => {
 
 export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   private api: AxiosInstance;
+  private cache: Cache<any>; // TODO: Create Maestro Transaction Model.
+  private logger: Logger;
 
-  constructor(token: string, network: Network = Network.Mainnet) {
+  constructor(token: string, cache: Cache<any>, logger: Logger, network: Network = Network.Mainnet) {
+    this.cache = cache;
+    this.logger = logger;
     this.api = axios.create({
       baseURL: `https://xbt-${network}.gomaestro-api.org/v0`,
       headers: {
@@ -48,49 +54,54 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   }
 
   /**
+   * Retrieves detailed information about a specific blockchain transaction by its hash.
+   *
+   * @param {string} txHash - The hash of the transaction to retrieve. This is typically a unique identifier
+   * in hexadecimal format.
+   * @returns {Promise<TransactionHistoryEntry>} A promise that resolves to a `TransactionHistoryEntry`.
+   *
+   * @throws {Error} Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
+   * incorrect transaction hash, or the transaction not existing in the blockchain.
+   */
+  async getTransaction(txHash: string): Promise<TransactionHistoryEntry> {
+    return MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(txHash));
+  }
+
+  /**
    * Fetches the transaction history for an address.
    */
   async getTransactions(
     address: string,
     afterBlockHeight?: number,
     limit = 50,
-    offset = 0
-  ): Promise<TransactionHistoryEntry[]> {
-    const params: Record<string, any> = { limit, offset, order: 'desc' };
+    cursor = ''
+  ): Promise<{ transactions: TransactionHistoryEntry[]; nextCursor: string }> {
+    const params: Record<string, any> = { count: limit, order: 'desc' };
+
+    if (cursor !== undefined && cursor !== '') {
+      params.cursor = cursor;
+    }
 
     if (afterBlockHeight !== undefined) {
       params.from = afterBlockHeight;
     }
 
     try {
-      // TODO: Add caching
       const response = await this.api.get(`/addresses/${address}/txs`, { params });
       const transactions = response.data.data || [];
-      return await Promise.all(
-        transactions.map(async (tx: any) => {
-          const details = await this.getTransactionDetails(tx.tx_hash);
-          return {
-            inputs: details.inputs.map((input: any) => ({
-              txId: input.txid,
-              index: input.vout,
-              address: input.address,
-              satoshis: BigInt(input.satoshis)
-            })),
-            outputs: details.outputs.map((output: any) => ({
-              address: output.address,
-              satoshis: BigInt(output.satoshis)
-            })),
-            transactionHash: tx.tx_hash,
-            confirmations: details.confirmations,
-            status: TransactionStatus.Confirmed,
-            blockHeight: details.height,
-            timestamp: details.unix_timestamp
-          };
-        })
+      const txDetails = await Promise.all(
+        transactions.map(async (tx: any) =>
+          MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(tx.tx_hash))
+        )
       );
+
+      return {
+        transactions: txDetails,
+        nextCursor: response.data.next_cursor || ''
+      };
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
-        return [];
+        return { transactions: [], nextCursor: '' };
       }
       throw error;
     }
@@ -110,8 +121,6 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
   async getTransactionsInMempool(address: string, afterBlockHeight?: number): Promise<TransactionHistoryEntry[]> {
     const params: Record<string, any> = { from: afterBlockHeight };
 
-    // TODO: Use cursor to fetch all pages.
-    // TODO: Add caching
     try {
       const response = await this.api.get(`/mempool/addresses/${address}/utxos`, { params });
       const transactions = response.data.data || [];
@@ -121,28 +130,18 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
       );
 
       return await Promise.all(
-        // filter and deduplicate
         uniqueTransactions
           .filter((tx: any) => tx.mempool)
           .map(async (tx: any) => {
-            const details = await this.getRpcTransactionDetails(tx.txid);
-            return {
-              inputs: details.vin.map((input: any) => ({
-                txId: input.txid,
-                index: input.vout,
-                address: input.address,
-                satoshis: btcStringToSatoshisBigint(input.value.toString())
-              })),
-              outputs: details.vout.map((output: any) => ({
-                address: output.address,
-                satoshis: btcStringToSatoshisBigint(output.value.toString())
-              })),
-              transactionHash: tx.txid,
-              confirmations: -1,
-              status: TransactionStatus.Pending,
-              blockHeight: 0,
-              timestamp: 0
-            };
+            const details = MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(tx.txid));
+
+            details.status = TransactionStatus.Pending;
+            details.confirmations = -1;
+            details.blockHeight = 0;
+            details.timestamp = 0;
+            details.transactionHash = tx.txid;
+
+            return details;
           })
       );
     } catch (error: any) {
@@ -246,25 +245,56 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
       }
       return { feeRate: response.data.data.feerate, blocks: response.data.data.blocks };
     } catch (error: any) {
-      console.error('Error estimating fee:', error.message || error);
-      throw new Error('Failed to estimate fee. Please try again later.');
+      throw new Error(`Failed to estimate fee. Please try again later. ${error.message || error}`);
     }
   }
 
-  // TODO: unify. We can probably always use /rpc endpoint for this
   /**
    * Fetches details of a specific transaction by its hash.
    */
   private async getTransactionDetails(txHash: string): Promise<any> {
-    const response = await this.api.get(`/transactions/${txHash}`);
+    const cached = await this.cache.get(txHash);
+
+    if (cached) {
+      this.logger.debug(`Resolved TX ${txHash} from cache`);
+      return cached;
+    }
+
+    const response = await this.api.get(`/rpc/transaction/${txHash}?verbose=true`);
+
+    // Only cache transactions that are confirmed, we need to keep fetching
+    // unconfirmed transaction to get their updated block time and height when they are confirmed.
+    if (response.data.data.confirmations > 0) {
+      void this.cache.set(txHash, response.data.data);
+    }
+
     return response.data.data;
   }
 
   /**
-   * Fetches details of a specific transaction by its hash.
+   * Maps the transaction details from the Maestro API to the common transaction history entry.
+   *
+   * @param tx - The transaction details from the Maestro API.
+   * @private
    */
-  private async getRpcTransactionDetails(txHash: string): Promise<any> {
-    const response = await this.api.get(`/rpc/transaction/${txHash}?verbose=true`);
-    return response.data.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static mapTransactionDetails(tx: any): TransactionHistoryEntry {
+    return {
+      inputs: tx.vin.map((input: any) => ({
+        txId: input.txid,
+        index: input.vout,
+        address: input.address,
+        satoshis: btcStringToSatoshisBigint(input.value.toString())
+      })),
+      outputs: tx.vout.map((output: any) => ({
+        address: output.address,
+        satoshis: btcStringToSatoshisBigint(output.value.toString())
+      })),
+      transactionHash: tx.tx_hash,
+      confirmations: tx.confirmations,
+      status: TransactionStatus.Confirmed,
+      blockHeight: tx.blockheight,
+      timestamp: tx.blocktime
+    };
   }
 }
