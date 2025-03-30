@@ -97,13 +97,13 @@ export type OutputEntry = {
  * @property {UTxO[]} spentUtxos - The list of spent utxos.
  */
 export type TransactionHistoryEntry = {
-  readonly inputs: InputEntry[];
-  readonly outputs: OutputEntry[];
-  readonly transactionHash: string;
-  readonly confirmations: number;
-  readonly status: TransactionStatus;
-  readonly blockHeight: number;
-  readonly timestamp: number;
+  inputs: InputEntry[];
+  outputs: OutputEntry[];
+  transactionHash: string;
+  confirmations: number;
+  status: TransactionStatus;
+  blockHeight: number;
+  timestamp: number;
 };
 
 /**
@@ -118,21 +118,37 @@ export interface BlockchainDataProvider {
   getLastKnownBlock(): Promise<BlockInfo>;
 
   /**
-   * Fetches the transactions of a specified common.
+   * Retrieves detailed information about a specific blockchain transaction by its hash.
    *
-   * @param {string} address - The blockchain common whose transactions are to be retrieved.
-   * @param {number} [afterBlockHeight] - Fetch transactions that occurred after this block height (optional).
-   * @param {number} [limit=50] - The maximum number of transactions to fetch (optional, default is 50).
-   * @param {number} [offset=0] - The starting index for transactions (optional, default is 0).
-   * @returns {Promise<TransactionHistoryEntry[]>} An observable that emits a list of transactions
-   *                                                  associated with the common.
+   * @param {string} txHash - The hash of the transaction to retrieve. This is typically a unique identifier
+   * in hexadecimal format.
+   * @returns {Promise<TransactionHistoryEntry>} A promise that resolves to a `TransactionHistoryEntry`.
+   *
+   * @throws {Error} Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
+   * incorrect transaction hash, or the transaction not existing in the blockchain.
+   */
+  getTransaction(txHash: string): Promise<TransactionHistoryEntry>;
+
+  /**
+   * Fetches the transactions for a specified address.
+   *
+   * This method retrieves the history of transactions associated with a given blockchain address. It supports pagination
+   * and can limit the results to transactions occurring after a specified block height.
+   *
+   * @param {string} address - The blockchain address whose transactions are to be retrieved.
+   * @param {number} [afterBlockHeight] - Optional. Specifies to fetch transactions that occurred after this block height.
+   * @param {number} [limit=50] - Optional. The maximum number of transactions to return. Default is 50.
+   * @param {string} [cursor=''] - Optional. Pagination cursor to continue fetching transactions from where the last query ended.
+   * @returns {Promise<{ transactions: TransactionHistoryEntry[], nextCursor: string }>} A promise that resolves to an object containing
+   *                                                                                   an array of transactions and a nextCursor string
+   *                                                                                   for pagination.
    */
   getTransactions(
     address: string,
     afterBlockHeight?: number,
     limit?: number,
-    offset?: number
-  ): Promise<TransactionHistoryEntry[]>;
+    cursor?: string
+  ): Promise<{ transactions: TransactionHistoryEntry[]; nextCursor: string }>;
 
   /**
    * Retrieves unconfirmed transactions (as transaction history entries) from the mempool for a given Bitcoin address.
