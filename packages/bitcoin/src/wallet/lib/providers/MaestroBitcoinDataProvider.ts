@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any, no-magic-numbers, sonarjs/no-identical-functions */
 import axios, { AxiosInstance } from 'axios';
 import {
   BlockchainDataProvider,
@@ -64,7 +64,24 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
    * incorrect transaction hash, or the transaction not existing in the blockchain.
    */
   async getTransaction(txHash: string): Promise<TransactionHistoryEntry> {
-    return MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(txHash));
+    const details = await this.getTransactionDetails(txHash);
+    return {
+      inputs: details.vin.map((input: any) => ({
+        txId: input.txid,
+        index: input.vout,
+        address: input.address,
+        satoshis: btcStringToSatoshisBigint(input.value.toString())
+      })),
+      outputs: details.vout.map((output: any) => ({
+        address: output.address,
+        satoshis: btcStringToSatoshisBigint(output.value.toString())
+      })),
+      transactionHash: txHash,
+      confirmations: details.confirmations,
+      status: TransactionStatus.Confirmed,
+      blockHeight: details.blockheight,
+      timestamp: details.blocktime
+    };
   }
 
   /**
@@ -90,9 +107,26 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
       const response = await this.api.get(`/addresses/${address}/txs`, { params });
       const transactions = response.data.data || [];
       const txDetails = await Promise.all(
-        transactions.map(async (tx: any) =>
-          MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(tx.tx_hash))
-        )
+        transactions.map(async (tx: any) => {
+          const details = await this.getTransactionDetails(tx.tx_hash);
+          return {
+            inputs: details.vin.map((input: any) => ({
+              txId: input.txid,
+              index: input.vout,
+              address: input.address,
+              satoshis: btcStringToSatoshisBigint(input.value.toString())
+            })),
+            outputs: details.vout.map((output: any) => ({
+              address: output.address,
+              satoshis: btcStringToSatoshisBigint(output.value.toString())
+            })),
+            transactionHash: tx.tx_hash,
+            confirmations: details.confirmations,
+            status: TransactionStatus.Confirmed,
+            blockHeight: details.blockheight,
+            timestamp: details.blocktime
+          };
+        })
       );
 
       return {
@@ -133,15 +167,24 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
         uniqueTransactions
           .filter((tx: any) => tx.mempool)
           .map(async (tx: any) => {
-            const details = MaestroBitcoinDataProvider.mapTransactionDetails(await this.getTransactionDetails(tx.txid));
-
-            details.status = TransactionStatus.Pending;
-            details.confirmations = -1;
-            details.blockHeight = 0;
-            details.timestamp = 0;
-            details.transactionHash = tx.txid;
-
-            return details;
+            const details = await this.getTransactionDetails(tx.txid);
+            return {
+              inputs: details.vin.map((input: any) => ({
+                txId: input.txid,
+                index: input.vout,
+                address: input.address,
+                satoshis: btcStringToSatoshisBigint(input.value.toString())
+              })),
+              outputs: details.vout.map((output: any) => ({
+                address: output.address,
+                satoshis: btcStringToSatoshisBigint(output.value.toString())
+              })),
+              transactionHash: tx.txid,
+              confirmations: -1,
+              status: TransactionStatus.Pending,
+              blockHeight: 0,
+              timestamp: 0
+            };
           })
       );
     } catch (error: any) {
@@ -269,32 +312,5 @@ export class MaestroBitcoinDataProvider implements BlockchainDataProvider {
     }
 
     return response.data.data;
-  }
-
-  /**
-   * Maps the transaction details from the Maestro API to the common transaction history entry.
-   *
-   * @param tx - The transaction details from the Maestro API.
-   * @private
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static mapTransactionDetails(tx: any): TransactionHistoryEntry {
-    return {
-      inputs: tx.vin.map((input: any) => ({
-        txId: input.txid,
-        index: input.vout,
-        address: input.address,
-        satoshis: btcStringToSatoshisBigint(input.value.toString())
-      })),
-      outputs: tx.vout.map((output: any) => ({
-        address: output.address,
-        satoshis: btcStringToSatoshisBigint(output.value.toString())
-      })),
-      transactionHash: tx.tx_hash,
-      confirmations: tx.confirmations,
-      status: TransactionStatus.Confirmed,
-      blockHeight: tx.blockheight,
-      timestamp: tx.blocktime
-    };
   }
 }
