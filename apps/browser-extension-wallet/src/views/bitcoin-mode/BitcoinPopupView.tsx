@@ -26,7 +26,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 
 // TODO: unify providers and logic to load wallet and such for popup, dapp and browser view in one place [LW-5341]
 export const BitcoinPopupView = (): React.ReactElement => {
-  const { isWalletLocked, walletLock } = useWalletStore();
+  const { isWalletLocked, walletLock, walletDisplayInfo } = useWalletStore();
   const { getActiveWalletId } = useWalletManager();
   const [activeWalletId, setActiveWalletId] = useState<string>('');
 
@@ -53,7 +53,7 @@ export const BitcoinPopupView = (): React.ReactElement => {
   }, [getActiveWalletId, backgroundServices, isWalletLocked]);
 
   const fatalError = useFatalError();
-  const isLoaded = useMemo(() => activeWalletId !== '', [activeWalletId]);
+  const isLoaded = useMemo(() => activeWalletId !== '' && !!walletDisplayInfo, [walletDisplayInfo, activeWalletId]);
   useEffect(() => {
     if (isLoaded || fatalError) {
       document.querySelector('#preloader')?.remove();

@@ -63,6 +63,7 @@ export { InputSelectionError } from '@cardano-sdk/input-selection';
 
 export {
   CardanoWallet,
+  WalletDisplayInfo,
   WalletProvidersDependencies,
   validateWalletMnemonic,
   getBip32Ed25519,

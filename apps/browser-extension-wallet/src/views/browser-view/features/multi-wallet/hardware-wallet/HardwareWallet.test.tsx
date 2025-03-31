@@ -7,7 +7,12 @@ jest.mock('@lib/wallet-api-ui', () => ({
     wallets$: of([])
   },
   walletManager: {
-    activate: jest.fn().mockReturnValue(void 0)
+    activate: jest.fn().mockReturnValue(void 0),
+    activeWalletId$: of('')
+  },
+  bitcoinWalletManager: {
+    activate: jest.fn().mockReturnValue(void 0),
+    activeWalletId$: of('')
   },
   observableWallet: {
     addresses$: of([[]])
@@ -38,6 +43,12 @@ jest.mock('@providers/AnalyticsProvider', () => ({
       sendMergeEvent: jest.fn(),
       sendAliasEvent: jest.fn()
     })
+}));
+
+jest.mock('@providers/BackgroundServiceAPI', () => ({
+  useBackgroundServiceAPIContext: jest.fn().mockReturnValue({
+    getBackgroundStorage: jest.fn().mockResolvedValue('cardano')
+  })
 }));
 
 const connectHardwareWalletStep = async () => {
@@ -131,6 +142,7 @@ describe('Multi Wallet Setup/Hardware Wallet', () => {
 
   test('setting up a new hardware wallet', async () => {
     const history = createMemoryHistory();
+
     render(
       <AppSettingsProvider>
         <DatabaseProvider>

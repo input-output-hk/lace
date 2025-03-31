@@ -364,6 +364,7 @@ export const useWalletManager = (): UseWalletManager => {
     setWalletLock,
     cardanoWallet,
     setCardanoWallet,
+    setWalletDisplayInfo,
     setIsBitcoinWallet,
     resetWalletLock,
     currentChain,
@@ -390,6 +391,31 @@ export const useWalletManager = (): UseWalletManager => {
     const storedChain = getValueFromLocalStorage('appSettings');
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
+
+  const getWalletInfo = useCallback(async (): Promise<Wallet.WalletDisplayInfo | undefined> => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+
+    const [activeWallet, bitcoinActiveWallet] = await firstValueFrom(
+      combineLatest([walletManager.activeWalletId$, bitcoinWalletManager.activeWalletId$])
+    );
+
+    const walletId = activeBlockchain === 'bitcoin' ? bitcoinActiveWallet?.walletId : activeWallet?.walletId;
+    const wallets = await firstValueFrom(walletRepository.wallets$);
+    const wallet = wallets.find((w) => w.walletId === walletId);
+
+    let accountMetadata;
+    if (wallet && isAnyBip32Wallet(wallet)) {
+      const account = wallet.accounts.find((a) => a.accountIndex === wallet.metadata.lastActiveAccountIndex);
+      accountMetadata = account.metadata;
+    }
+
+    return {
+      walletId,
+      walletName: wallet?.metadata?.name,
+      walletAccount: accountMetadata,
+      walletType: wallet?.type
+    };
+  }, [backgroundService]);
 
   const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
     async ({ accountIndexes, connection, name }) => {
@@ -476,12 +502,14 @@ export const useWalletManager = (): UseWalletManager => {
         setWalletLock(lock);
       }
       setCardanoWallet(null);
+      setWalletDisplayInfo();
       return;
     }
 
     // Wallet info for current network
     if (!walletName) {
       setCardanoWallet(null);
+      setWalletDisplayInfo();
       return;
     }
 
@@ -510,7 +538,7 @@ export const useWalletManager = (): UseWalletManager => {
     });
 
     return firstValueFrom(walletRepository.wallets$);
-  }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletLock, getCurrentChainId]);
+  }, [resetWalletLock, backgroundService, setCardanoWallet, setWalletDisplayInfo, setWalletLock, getCurrentChainId]);
 
   const getActiveWalletId = useCallback(async (): Promise<string> => {
     const { activeBlockchain } = await backgroundService.getBackgroundStorage();
@@ -626,6 +654,7 @@ export const useWalletManager = (): UseWalletManager => {
         });
 
         setIsBitcoinWallet(true);
+        setWalletDisplayInfo(await getWalletInfo());
       } else {
         await walletManager.activate({
           ...props,
@@ -637,9 +666,10 @@ export const useWalletManager = (): UseWalletManager => {
         });
 
         setIsBitcoinWallet(false);
+        setWalletDisplayInfo(await getWalletInfo());
       }
     },
-    [getCurrentChainId, backgroundService, setIsBitcoinWallet]
+    [getCurrentChainId, backgroundService, setIsBitcoinWallet, setWalletDisplayInfo, getWalletInfo]
   );
 
   const activateAnyWallet = useCallback(
@@ -667,6 +697,7 @@ export const useWalletManager = (): UseWalletManager => {
       if (wallets.length === 0) {
         if (!(await tryMigrateToWalletRepository())) {
           setCardanoWallet(null);
+          setWalletDisplayInfo();
         }
         return;
       }
@@ -712,6 +743,7 @@ export const useWalletManager = (): UseWalletManager => {
         !deepEquals(cardanoWallet.source.account, activeAccount)
       ) {
         setCardanoWallet(newCardanoWallet);
+        setWalletDisplayInfo(await getWalletInfo());
       }
 
       // Synchronize the currently managed wallet UI state with service worker
@@ -728,7 +760,9 @@ export const useWalletManager = (): UseWalletManager => {
       return newCardanoWallet;
     },
     [
+      getWalletInfo,
       setCardanoWallet,
+      setWalletDisplayInfo,
       setCurrentChain,
       tryMigrateToWalletRepository,
       cardanoWallet,
@@ -749,9 +783,10 @@ export const useWalletManager = (): UseWalletManager => {
       updateAppSettings({ chainName });
 
       setCardanoWallet(wallet);
+      setWalletDisplayInfo(await getWalletInfo());
       setCurrentChain(chainName);
     },
-    [updateAppSettings, setCardanoWallet, setCurrentChain]
+    [getWalletInfo, updateAppSettings, setCardanoWallet, setWalletDisplayInfo, setCurrentChain]
   );
 
   /**
@@ -1061,6 +1096,7 @@ export const useWalletManager = (): UseWalletManager => {
       });
       resetWalletLock();
       setCardanoWallet();
+      setWalletDisplayInfo();
 
       const commonLocalStorageKeysToKeep: (keyof ILocalStorage)[] = [
         'currency',
@@ -1101,6 +1137,7 @@ export const useWalletManager = (): UseWalletManager => {
       setIsBitcoinWallet,
       resetWalletLock,
       setCardanoWallet,
+      setWalletDisplayInfo,
       backgroundService,
       userIdService,
       clearAddressBook,
@@ -1165,8 +1202,9 @@ export const useWalletManager = (): UseWalletManager => {
     if (!lockValue) return;
     setWalletLock(Buffer.from(lockValue, 'hex'));
     setCardanoWallet();
+    setWalletDisplayInfo();
     setAddressesDiscoveryCompleted(false);
-  }, [setCardanoWallet, cardanoWallet, setWalletLock, setAddressesDiscoveryCompleted]);
+  }, [setCardanoWallet, setWalletDisplayInfo, cardanoWallet, setWalletLock, setAddressesDiscoveryCompleted]);
 
   /**
    * Recovers wallet info from encrypted lock using the wallet password

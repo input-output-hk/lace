@@ -14,7 +14,12 @@ import {
 } from '@cardano-sdk/core';
 import { AddressDiscovery, ObservableWallet } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
-import { AnyWallet, Bip32WalletAccount, SigningCoordinatorConfirmationApi } from '@cardano-sdk/web-extension';
+import {
+  AnyWallet,
+  Bip32WalletAccount,
+  SigningCoordinatorConfirmationApi,
+  WalletType
+} from '@cardano-sdk/web-extension';
 import * as Crypto from '@cardano-sdk/crypto';
 import { Wallet } from '@src/index';
 import { HexBlob } from '@cardano-sdk/util';
@@ -70,6 +75,12 @@ export interface CardanoWallet {
   };
   name: string;
   signingCoordinator: SigningCoordinatorConfirmationApi<WalletMetadata, AccountMetadata>;
+}
+export interface WalletDisplayInfo {
+  walletId: string;
+  walletName: string;
+  walletAccount?: Wallet.AccountMetadata;
+  walletType: WalletType;
 }
 
 export interface WalletProvidersDependencies {

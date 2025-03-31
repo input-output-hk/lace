@@ -94,6 +94,7 @@ export const BitcoinBrowserViewRoutes = ({
 }): React.ReactElement => {
   const {
     isWalletLocked,
+    walletDisplayInfo,
     setCardanoCoin,
     currentChain,
     setCurrentChain,
@@ -203,11 +204,12 @@ export const BitcoinBrowserViewRoutes = ({
 
   const isOnboarding = useMemo(
     () =>
+      !!walletDisplayInfo &&
       posthogClientInitialized &&
       !isLoadingWalletInfo &&
       !deletingWallet &&
       (cardanoWallet === null || stayOnAllDonePage),
-    [posthogClientInitialized, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
+    [posthogClientInitialized, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage, walletDisplayInfo]
   );
 
   const isInNamiMode = useMemo(

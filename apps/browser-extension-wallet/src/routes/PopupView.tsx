@@ -28,6 +28,7 @@ const isLastValidationExpired = (lastVerification: string, frequency: string): b
 export const PopupView = (): React.ReactElement => {
   const {
     cardanoWallet,
+    walletDisplayInfo,
     inMemoryWallet,
     currentChain,
     walletInfo,
@@ -60,8 +61,14 @@ export const PopupView = (): React.ReactElement => {
 
   const fatalError = useFatalError();
   const isLoaded = useMemo(
-    () => !!cardanoWallet && walletInfo && walletState && inMemoryWallet && initialHdDiscoveryCompleted,
-    [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted]
+    () =>
+      !!cardanoWallet &&
+      !!walletDisplayInfo &&
+      walletInfo &&
+      walletState &&
+      inMemoryWallet &&
+      initialHdDiscoveryCompleted,
+    [cardanoWallet, walletInfo, walletState, inMemoryWallet, initialHdDiscoveryCompleted, walletDisplayInfo]
   );
   useEffect(() => {
     if (isLoaded || fatalError) {

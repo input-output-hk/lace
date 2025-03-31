@@ -63,7 +63,6 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     const subscription = bitcoinWallet.balance$.subscribe((newBalance) => {
       setBalance(newBalance);
       setIsBalanceLoading(false);
-      console.error(newBalance);
     });
     return () => subscription.unsubscribe();
   }, [bitcoinWallet, balance]);
