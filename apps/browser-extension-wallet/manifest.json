@@ -23,14 +23,14 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./sw/inject.js"],
+      "js": ["./app/inject.js"],
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
     },
     {
       "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./sw/content.js"],
+      "js": ["./app/content.js"],
       "run_at": "document_start",
       "all_frames": true
     },
@@ -42,7 +42,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["/sw/inject.js", "/sw/*.js"],
+      "resources": ["/app/*.js", "/sw/*.js"],
       "matches": ["<all_urls>"]
     }
   ]

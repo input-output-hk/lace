@@ -11,6 +11,13 @@ require('dotenv-defaults').config({
 module.exports = () => ({
   mode: 'production',
   devtool: false,
+  performance: {
+    // images/videos might be larger
+    maxAssetSize: 30_000_000,
+    // Mozilla doesn't allow assets larger than 4M
+    maxEntrypointSize: 4_000_000,
+    hints: 'error'
+  },
   plugins: [
     new Dotenv({
       path: '.env',
