@@ -38,6 +38,8 @@ export const walletStoreMock = async (
     setManageAccountsWallet: jest.fn(),
     manageAccountsWallet: undefined,
     walletState: undefined,
+    walletDisplayInfo: undefined,
+    setWalletDisplayInfo: jest.fn(),
     setWalletState: jest.fn(),
     fetchNetworkInfo: jest.fn(),
     resetStakePools: jest.fn(),

@@ -108,6 +108,8 @@ export interface WalletInfoSlice {
   cardanoWallet: Wallet.CardanoWallet | undefined;
   bitcoinWallet: Bitcoin.BitcoinWallet | undefined;
   walletManager: WalletManagerApi | undefined;
+  walletDisplayInfo: Wallet.WalletDisplayInfo | undefined;
+  setWalletDisplayInfo: (info?: Wallet.WalletDisplayInfo) => void;
   initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
   hdDiscoveryStatus: AddressesDiscoveryStatus | null;
