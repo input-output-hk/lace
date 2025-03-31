@@ -26,6 +26,8 @@ module.exports = () =>
     entry: {
       popup: withMaybeSentry(path.join(__dirname, 'src/index-popup.tsx')),
       options: withMaybeSentry(path.join(__dirname, 'src/index-options.tsx')),
+      content: path.join(__dirname, 'src/lib/scripts/background/content.ts'),
+      inject: path.join(__dirname, 'src/lib/scripts/background/inject.ts'),
       dappConnector: withMaybeSentry(path.join(__dirname, 'src/index-dapp-connector.tsx')),
       ['trezor-content-script']: path.join(__dirname, 'src/lib/scripts/trezor/trezor-content-script.ts'),
       ['trezor-usb-permissions']: withMaybeSentry(
