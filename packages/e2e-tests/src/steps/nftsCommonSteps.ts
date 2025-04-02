@@ -146,6 +146,7 @@ Then(/^each NFT has name and image displayed$/, async () => {
 When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'extended' | 'popup') => {
   const walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
+  if (mode === 'popup') await popupView.visit();
 });
 
 When(/^I open NFT receiving HD wallet$/, async () => {
