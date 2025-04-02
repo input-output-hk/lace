@@ -385,7 +385,7 @@ describe('Testing useWalletManager hook', () => {
           current: { loadWallet }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper(      {
+        wrapper: getWrapper({
           backgroundService: {
             clearBackgroundStorage: jest.fn(),
             getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
