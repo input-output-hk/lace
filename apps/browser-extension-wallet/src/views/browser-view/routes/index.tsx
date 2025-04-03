@@ -121,6 +121,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const {
     walletInfo,
     isWalletLocked,
+    walletDisplayInfo,
     setCardanoCoin,
     currentChain,
     setCurrentChain,
@@ -221,8 +222,21 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   });
 
   const isLoaded = useMemo(
-    () => posthogClientInitialized && !isLoadingWalletInfo && walletInfo && walletState && initialHdDiscoveryCompleted,
-    [posthogClientInitialized, isLoadingWalletInfo, walletInfo, walletState, initialHdDiscoveryCompleted]
+    () =>
+      !!walletDisplayInfo &&
+      posthogClientInitialized &&
+      !isLoadingWalletInfo &&
+      walletInfo &&
+      walletState &&
+      initialHdDiscoveryCompleted,
+    [
+      posthogClientInitialized,
+      isLoadingWalletInfo,
+      walletInfo,
+      walletState,
+      initialHdDiscoveryCompleted,
+      walletDisplayInfo
+    ]
   );
 
   const isOnboarding = useMemo(

@@ -20,6 +20,7 @@ import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
   consumeSigningCoordinatorApi,
+  createPersistentCacheStorage,
   exposeApi,
   observableWalletProperties,
   repositoryChannel,
@@ -255,10 +256,27 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
       throw new Error('Wallet account not found');
     }
 
+    const cache = createPersistentCacheStorage({
+      extensionLocalStorage: webStorage.local,
+      fallbackMaxCollectionItemsGuard: 5_000_000_000,
+      resourceName: 'bitcoin-tx-history-provider-cache',
+      quotaInBytes: 30_000_000
+    });
+
     const provider =
       network === Bitcoin.Network.Testnet
-        ? new Bitcoin.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_TESTNET, Bitcoin.Network.Testnet)
-        : new Bitcoin.MaestroBitcoinDataProvider(process.env.MAESTRO_PROJECT_ID_MAINNET, Bitcoin.Network.Mainnet);
+        ? new Bitcoin.MaestroBitcoinDataProvider(
+            process.env.MAESTRO_PROJECT_ID_TESTNET,
+            cache,
+            logger,
+            Bitcoin.Network.Testnet
+          )
+        : new Bitcoin.MaestroBitcoinDataProvider(
+            process.env.MAESTRO_PROJECT_ID_MAINNET,
+            cache,
+            logger,
+            Bitcoin.Network.Mainnet
+          );
 
     if (!walletAccount.metadata.bitcoin) {
       throw new Error('Bitcoin metadata not found');
@@ -282,7 +300,15 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
       : 10_000;
 
     currentBitcoinWalletProvider$.next(provider);
-    return new Bitcoin.BitcoinWallet(provider, localPollingIntervalConfig, 20, walletInfo, network);
+    return new Bitcoin.BitcoinWallet(
+      provider,
+      localPollingIntervalConfig,
+      20,
+      walletInfo,
+      network,
+      pollController$,
+      logger
+    );
   }
 };
 

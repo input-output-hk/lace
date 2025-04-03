@@ -354,6 +354,7 @@ export const bitcoinWalletManagerProperties: RemoteApiProperties<BitcoinWalletMa
 
 export const bitcoinProviderProperties: RemoteApiProperties<Bitcoin.BlockchainDataProvider> = {
   getLastKnownBlock: RemoteApiPropertyType.MethodReturningPromise,
+  getTransaction: RemoteApiPropertyType.MethodReturningPromise,
   getTransactions: RemoteApiPropertyType.MethodReturningPromise,
   getTransactionsInMempool: RemoteApiPropertyType.MethodReturningPromise,
   getUTxOs: RemoteApiPropertyType.MethodReturningPromise,
