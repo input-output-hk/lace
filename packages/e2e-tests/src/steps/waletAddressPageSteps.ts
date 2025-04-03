@@ -159,3 +159,7 @@ When(/^I hover over "Advanced mode" toggle info icon$/, async () => {
 When(/^I see tooltip for "Advanced mode" toggle info icon$/, async () => {
   await walletAddressPageAssert.assertSeeAdvancedModeToggleTooltip();
 });
+
+Then(/^I see "([^"]*)" name on main address card$/, async (name: string) => {
+  await walletAddressPageAssert.assertSeeWalletName(name);
+});
