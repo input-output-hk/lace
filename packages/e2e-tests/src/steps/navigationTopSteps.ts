@@ -75,6 +75,10 @@ Then(/^"([^"]*)" is displayed as a wallet name on the menu button$/, async (expe
   await topNavigationAssert.assertSeeWalletNameOnMenuButton(expectedWalletName);
 });
 
+Then(/^"([^"]*)" is displayed as an account name on the menu button$/, async (expectedWalletName: string) => {
+  await topNavigationAssert.assertSeeAccountNameOnMenuButton(expectedWalletName);
+});
+
 Then(/^chevron icon is changed to (up|down)$/, async (chevronDirection: 'up' | 'down') => {
   await topNavigationAssert.assertChevronDirection(chevronDirection);
 });

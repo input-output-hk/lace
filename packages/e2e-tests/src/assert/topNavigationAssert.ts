@@ -39,11 +39,23 @@ class TopNavigationAssert {
     expect(await MenuHeader.walletNameOnButton.getText()).to.equal(expectedName);
   }
 
+  async assertSeeAccountNameOnMenuButton(expectedName: string): Promise<void> {
+    await MenuHeader.accountNameOnButton.waitForDisplayed();
+    expect(await MenuHeader.accountNameOnButton.getText()).to.equal(expectedName);
+  }
+
   async assertSeeWalletOnUserMenu(index: number, expectedName: string): Promise<void> {
     const wallet = new WalletOption(index);
     await wallet.container.waitForDisplayed();
     await wallet.title.waitForDisplayed();
     expect(await wallet.title.getText()).to.equal(expectedName);
+  }
+
+  async assertSeeWalletAccountOnUserMenu(walletIndex: number, expectedName: string): Promise<void> {
+    const wallet = new WalletOption(walletIndex);
+    await wallet.container.waitForDisplayed();
+    await wallet.subtitle.waitForDisplayed();
+    expect(await wallet.subtitle.getText()).to.equal(expectedName);
   }
 
   async assertWalletIsActive(index: number): Promise<void> {

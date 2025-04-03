@@ -274,6 +274,11 @@ class WalletAddressPageAssert {
     const savedAddress = await WalletAddressPage.getSavedLastAddress();
     expect(penultimateCardAddress).to.equal(savedAddress);
   }
+
+  async assertSeeWalletName(walletName: string): Promise<void> {
+    await WalletAddressPage.walletName.waitForStable();
+    expect(await WalletAddressPage.walletName.getText()).to.equal(walletName);
+  }
 }
 
 export default new WalletAddressPageAssert();

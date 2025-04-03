@@ -8,6 +8,7 @@ class WalletOption {
   private TITLE = '//span[@data-testid="wallet-option-title"]';
   private SUBTITLE = '//span[@data-testid="wallet-option-subtitle"]';
   private ACCOUNTS_MENU_BUTTON = '//div[@data-testid="wallet-option-accounts-menu-button"]';
+  private EDIT_BUTTON = '//div[@data-testid="wallet-option-edit-wallet-button"]';
   private STATUS = '//p[@data-testid="header-wallet-status"]';
 
   constructor(index = 1) {
@@ -34,6 +35,10 @@ class WalletOption {
     return $(`${this.CONTAINER_SELECTOR}${this.ACCOUNTS_MENU_BUTTON}`);
   }
 
+  get editButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(`${this.EDIT_BUTTON}`);
+  }
+
   get status(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.CONTAINER_SELECTOR}${this.STATUS}`);
   }
@@ -47,6 +52,11 @@ class WalletOption {
     await this.accountsMenuButton.waitForClickable();
     await this.accountsMenuButton.scrollIntoView();
     await this.accountsMenuButton.click();
+  }
+
+  async clickOnEditButton(): Promise<void> {
+    await this.editButton.waitForClickable();
+    await this.editButton.click();
   }
 }
 
