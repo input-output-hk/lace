@@ -17,18 +17,10 @@ import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
 import { useCurrencyStore } from '@providers';
 import { useWalletStore } from '@stores';
-import uniqBy from 'lodash/uniqBy';
 import debounce from 'lodash/debounce';
 import { LACE_APP_ID } from '@utils/constants';
 import { Skeleton } from 'antd';
-
-const updateTransactions = (
-  existingTransactions: Bitcoin.TransactionHistoryEntry[],
-  newTransactions: Bitcoin.TransactionHistoryEntry[]
-) => {
-  const combinedTransactions = [...existingTransactions, ...newTransactions];
-  return uniqBy(combinedTransactions, 'transactionHash');
-};
+import { updateTransactions } from './Activity';
 
 const formattedDate = (date: Date) =>
   dayjs().isSame(date, 'day') ? 'Today' : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });

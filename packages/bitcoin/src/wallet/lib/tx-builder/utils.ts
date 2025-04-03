@@ -35,12 +35,7 @@ export const historyEntryFromRawTx = async (
       const txId = Buffer.from(input.hash).reverse().toString('hex');
       const index = input.index;
       try {
-        const resolvedInput = await inputResolver.resolve(txId, index);
-        return {
-          ...resolvedInput,
-          txId,
-          index
-        };
+        return await inputResolver.resolve(txId, index);
       } catch (error) {
         console.warn(`Failed to resolve input ${txId}:${index}`, error);
         return {

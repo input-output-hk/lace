@@ -18,7 +18,7 @@ import { useWalletStore } from '@stores';
 import debounce from 'lodash/debounce';
 import uniqBy from 'lodash/uniqBy';
 
-const updateTransactions = (
+export const updateTransactions = (
   existingTransactions: Bitcoin.TransactionHistoryEntry[],
   newTransactions: Bitcoin.TransactionHistoryEntry[]
 ) => {
