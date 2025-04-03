@@ -1,4 +1,4 @@
-/* eslint-disable  @typescript-eslint/explicit-module-boundary-types, promise/catch-or-return, sonarjs/cognitive-complexity, no-magic-numbers, unicorn/no-null */
+/* eslint-disable promise/catch-or-return, sonarjs/cognitive-complexity, no-magic-numbers, unicorn/no-null */
 import React, { useMemo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFetchCoinPrice, useWalletManager } from '@hooks';
