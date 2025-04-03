@@ -19,10 +19,11 @@ module.exports = () =>
       filename: '[name].js',
       chunkFilename: '[name].chunk.js',
       // the following setting is required for SRI to work:
-      crossOriginLoading: 'anonymous',
-      publicPath: './'
+      crossOriginLoading: 'anonymous'
     },
-    target: 'webworker',
+    // target: 'web',
+    // target: 'webworker',
+    target: process.env.BROWSER === 'firefox' ? 'web' : 'webworker',
     module: {
       // configuration regarding modules
       rules: [

@@ -14,7 +14,7 @@ module.exports = () =>
   merge(commonProdConfig(), commonAppConfig(), {
     optimization: {
       mangleExports: false,
-      minimize: true,
+      minimize: false,
       moduleIds: 'named',
       splitChunks: {
         maxSize: 3000000,
@@ -36,9 +36,7 @@ module.exports = () =>
           // Only enable what we need to speedup the build process
           terserOptions: {
             compress: {
-              drop_console: process.env.DROP_CONSOLE_IN_PRODUCTION
-                ? process.env.DROP_CONSOLE_IN_PRODUCTION === 'true'
-                : true,
+              drop_console: false,
               drop_debugger: true,
               unused: false,
               arrows: false,

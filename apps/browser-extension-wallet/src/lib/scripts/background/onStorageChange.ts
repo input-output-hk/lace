@@ -44,6 +44,7 @@ const initializeStorageListener = () => {
         oldValue: undefined,
         newValue: storage.BACKGROUND_STORAGE
       });
+      console.log('Initial storage value:', storage.BACKGROUND_STORAGE);
     })
     .catch((error) => {
       logger.error('Failed to read the storage', error);

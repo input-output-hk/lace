@@ -13,9 +13,9 @@ module.exports = () => ({
   devtool: false,
   performance: {
     // images/videos might be larger
-    maxAssetSize: 30_000_000,
+    maxAssetSize: 100_000_000,
     // Mozilla doesn't allow assets larger than 4M
-    maxEntrypointSize: 4_000_000,
+    maxEntrypointSize: 40_000_000,
     hints: 'error'
   },
   plugins: [
