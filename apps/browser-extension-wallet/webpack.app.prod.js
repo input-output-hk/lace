@@ -1,6 +1,5 @@
 const TerserPlugin = require('terser-webpack-plugin');
 const { merge } = require('webpack-merge');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const commonProdConfig = require('./webpack.common.prod');
 const commonAppConfig = require('./webpack.common.app');
@@ -72,12 +71,5 @@ module.exports = () =>
           }
         })
       ]
-    },
-    plugins: [
-      new BundleAnalyzerPlugin({
-        analyzerMode: 'static',
-        reportFilename: 'report.html',
-        openAnalyzer: false
-      })
-    ]
+    }
   });
