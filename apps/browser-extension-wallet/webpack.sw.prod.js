@@ -17,8 +17,6 @@ module.exports = () =>
       mangleExports: false,
       minimize: true,
       moduleIds: 'named',
-      // usedExports: false,
-      // removeEmptyChunks: false,
       splitChunks: {
         maxSize: 4000000,
         cacheGroups: {

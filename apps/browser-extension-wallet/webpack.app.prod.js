@@ -14,7 +14,7 @@ module.exports = () =>
   merge(commonProdConfig(), commonAppConfig(), {
     optimization: {
       mangleExports: false,
-      minimize: false,
+      minimize: true,
       moduleIds: 'named',
       splitChunks: {
         maxSize: 3000000,

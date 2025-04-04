@@ -21,8 +21,7 @@ module.exports = () =>
       // the following setting is required for SRI to work:
       crossOriginLoading: 'anonymous'
     },
-    // target: 'web',
-    // target: 'webworker',
+    // The background script in Firefox is a hidden DOM page, so target is web
     target: process.env.BROWSER === 'firefox' ? 'web' : 'webworker',
     module: {
       // configuration regarding modules

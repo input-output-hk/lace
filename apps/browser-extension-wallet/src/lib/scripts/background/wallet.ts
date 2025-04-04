@@ -36,7 +36,7 @@ import {
 import { Wallet } from '@lace/cardano';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
-// import { isBackgroundProcess } from '@cardano-sdk/util';
+import { isBackgroundProcess } from '@cardano-sdk/util';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
@@ -62,9 +62,9 @@ import {
 } from './bitcoinWalletManager';
 import { isBitcoinNetworkSwitchingDisabled } from '@utils/get-network-name';
 
-// if (!isBackgroundProcess()) {
-//   throw new TypeError('This module should only be imported in service worker');
-// }
+if (!isBackgroundProcess()) {
+  throw new TypeError('This module should only be imported in service worker');
+}
 
 export const dAppConnectorActivity$ = new Subject<void>();
 const pollController$ = new TrackerSubject(

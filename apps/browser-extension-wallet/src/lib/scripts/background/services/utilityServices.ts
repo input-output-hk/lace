@@ -60,7 +60,6 @@ const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefine
 
 // eslint-disable-next-line complexity
 const handleOpenBrowser = async (data: OpenBrowserData) => {
-  console.log('handleOpenBrowser', data);
   let path = '';
   switch (data.section) {
     case BrowserViewSections.SEND_ADVANCED:
@@ -117,8 +116,6 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
   await catchAndBrandExtensionApiError(tabs.create({ url }), `Failed to open expanded view with url: ${url}`).catch(
     (error) => logger.error(error)
   );
-
-  console.log('handleOpenBrowser 2', data);
 };
 
 const handleOpenNamiBrowser = async (data: OpenNamiBrowserData) => {
