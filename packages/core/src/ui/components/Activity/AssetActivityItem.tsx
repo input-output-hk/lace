@@ -192,6 +192,16 @@ export const AssetActivityItem = ({
 
   const isNegativeBalance = amount.startsWith('-');
 
+  const label =
+    isPendingTx &&
+    type &&
+    type !== TransactionActivityType.self &&
+    !(type in DelegationActivityType) &&
+    type !== ConwayEraCertificatesTypes.Registration &&
+    type !== ConwayEraCertificatesTypes.Unregistration
+      ? t('core.assetActivityItem.entry.name.sending')
+      : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey);
+
   return (
     <div data-testid="asset-activity-item" onClick={onClick} className={styles.assetActivityItem}>
       <div className={styles.leftSide}>
@@ -204,14 +214,9 @@ export const AssetActivityItem = ({
         </div>
         <div data-testid="asset-info" className={styles.info}>
           <h6 data-testid="transaction-type" className={styles.title}>
-            {isPendingTx &&
-            type &&
-            type !== TransactionActivityType.self &&
-            !(type in DelegationActivityType) &&
-            type !== ConwayEraCertificatesTypes.Registration &&
-            type !== ConwayEraCertificatesTypes.Unregistration
-              ? t('core.assetActivityItem.entry.name.sending')
-              : t(`core.assetActivityItem.entry.name.${type}` as unknown as CoreTranslationKey)}
+            {isPendingTx && type === TransactionActivityType.incoming
+              ? t('core.assetActivityItem.entry.name.receiving')
+              : label}
           </h6>
           {isAwaitingCoSigningTx ? (
             <p data-testid="timestamp" className={styles.description}>
@@ -239,9 +244,11 @@ export const AssetActivityItem = ({
                 overlayClassName={styles.tooltip}
                 title={
                   <>
-                    {assets?.slice(assetsToShow, assets.length).map(({ id, val, info }) => (
-                      <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
-                    ))}
+                    {assets
+                      ?.slice(assetsToShow, assets.length)
+                      .map(({ id, val, info }) => (
+                        <div key={id} className={styles.tooltipItem}>{`${val} ${info?.ticker ?? '?'}`}</div>
+                      ))}
                   </>
                 }
               >

@@ -21,6 +21,7 @@ import debounce from 'lodash/debounce';
 import { LACE_APP_ID } from '@utils/constants';
 import { Skeleton } from 'antd';
 import { updateTransactions } from './Activity';
+import uniqBy from 'lodash/uniqBy';
 
 const formattedDate = (date: Date) =>
   dayjs().isSame(date, 'day') ? 'Today' : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
@@ -58,7 +59,7 @@ export const ActivityLayout = (): React.ReactElement => {
   const [explorerBaseUrl, setExplorerBaseUrl] = useState<string>('');
   const [error, setError] = useState<Error | null>(null);
   const [loadedTxLength, setLoadedTxLength] = useState<number>(0);
-  const [mightHaveMore, setMightHaveMore] = useState<boolean>(true);
+  const [mightHaveMore, setMightHaveMore] = useState<boolean>(false);
   const [currentCursor, setCurrentCursor] = useState<string | null>('');
   const debouncedLoadMore = useMemo(
     () =>
@@ -94,13 +95,14 @@ export const ActivityLayout = (): React.ReactElement => {
   useEffect(() => {
     const subscription = bitcoinWallet.transactionHistory$.subscribe((newTransactions) => {
       setRecentTransactions((prev) => updateTransactions(prev, newTransactions));
+      setMightHaveMore(newTransactions.length >= 20);
     });
     return () => subscription.unsubscribe();
-  }, [bitcoinWallet]);
+  }, [bitcoinWallet, setMightHaveMore]);
 
   useEffect(() => {
     const subscription = bitcoinWallet.pendingTransactions$.subscribe((pendingTransactions) => {
-      setPendingTransaction((prev) => updateTransactions(prev, pendingTransactions));
+      setPendingTransaction(uniqBy(pendingTransactions, 'transactionHash'));
     });
     return () => subscription.unsubscribe();
   }, [bitcoinWallet]);
@@ -117,14 +119,17 @@ export const ActivityLayout = (): React.ReactElement => {
 
     const walletAddress = addresses[0].address;
 
-    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
-      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(transaction);
-      return acc;
-    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
+    const groups = [...recentTransactions, ...pendingTransaction].reduce(
+      (acc, transaction) => {
+        const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+      },
+      {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] }
+    );
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;
@@ -148,7 +153,15 @@ export const ActivityLayout = (): React.ReactElement => {
           .filter((output) => output.address === walletAddress)
           .reduce((acc, output) => acc + BigInt(output.satoshis), BigInt(0));
 
+        const outgoingToForeign = transaction.outputs.filter((output) => output.address !== walletAddress);
+
+        const isSelf = incoming > 0 && outgoingToForeign.length === 0;
+
         const net = incoming - outgoing;
+        let type = net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing;
+        if (isSelf) {
+          type = TransactionActivityType.self;
+        }
 
         return {
           id: transaction.transactionHash,
@@ -162,7 +175,7 @@ export const ActivityLayout = (): React.ReactElement => {
           }`,
           status:
             transaction.status === Bitcoin.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
-          type: net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing,
+          type,
           onClick: () => {
             window.open(`${explorerBaseUrl}/${transaction.transactionHash}`, '_blank');
           }
