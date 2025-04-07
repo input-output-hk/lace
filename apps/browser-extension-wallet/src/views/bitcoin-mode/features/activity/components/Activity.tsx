@@ -201,7 +201,7 @@ export const Activity = (): React.ReactElement => {
   const hasActivities = walletActivities.length > 0;
 
   return (
-    <ContentLayout title={layoutTitle} titleSideText="(Recent)" isLoading={isLoading}>
+    <ContentLayout title={layoutTitle} titleSideText="" isLoading={isLoading}>
       <div className={styles.activitiesContainer}>
         {hasActivities || isLoading ? (
           <GroupedAssetActivityList
