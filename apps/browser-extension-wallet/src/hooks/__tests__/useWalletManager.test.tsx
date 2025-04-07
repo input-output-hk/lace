@@ -830,6 +830,8 @@ describe('Testing useWalletManager hook', () => {
 
   describe('addAccount', () => {
     describe('for existing bip32 wallet', () => {
+      const walletId = 'bip32-wallet-id';
+      const originalMetadata = { name: 'wallet' };
       const extendedAccountPublicKey =
         '12b608b67a743891656d6463f72aa6e5f0e62ba6dc47e32edfebafab1acf0fa9f3033c2daefa3cb2ac16916b08c7e7424d4e1aafae2206d23c4d002299c07128';
       const walletTypes = [
@@ -860,25 +862,37 @@ describe('Testing useWalletManager hook', () => {
 
       beforeEach(() => {
         walletApiUi.walletRepository.addAccount = jest.fn().mockResolvedValueOnce(void 0);
+        walletApiUi.walletRepository.wallets$ = of([
+          {
+            walletId,
+            metadata: originalMetadata
+          } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
+        ]);
         (walletApiUi.walletManager as any).getWalletInfo = jest.fn().mockResolvedValue({
           walletId: '',
           walletName: '',
           walletAccount: { name: '' },
           walletType: 'InMemory'
         });
+        walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
       });
 
       it.each(walletTypes)(
         'derives extended account public key for $type wallet and adds new account into the repository',
         async ({ type, walletProps, prepare, passphrase }) => {
           prepare();
-          const walletId = 'bip32-wallet-id';
           const addAccountProps = {
             wallet: { walletId, type, ...walletProps } as AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
             accountIndex: 0,
             metadata: { name: 'new account' },
             passphrase
           };
+
+          const setIsBitcoinWallet = jest.fn();
+          jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
+            setIsBitcoinWallet,
+            ...walletDisplayInfoMockData
+          }));
 
           const { addAccount } = render();
           await addAccount(addAccountProps);

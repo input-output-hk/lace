@@ -1410,9 +1410,13 @@ export const useWalletManager = (): UseWalletManager => {
         metadata,
         walletId: wallet.walletId
       });
-      await walletManager.activate({ chainId: getCurrentChainId(), walletId: wallet.walletId, accountIndex });
+
+      await activateWallet({
+        walletId: wallet.walletId,
+        accountIndex
+      });
     },
-    [getCurrentChainId]
+    [activateWallet]
   );
 
   const enableCustomNode = useCallback(
