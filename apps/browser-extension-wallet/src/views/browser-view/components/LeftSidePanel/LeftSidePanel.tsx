@@ -8,21 +8,39 @@ import { BREAKPOINT_XSMALL } from '@src/styles/constants';
 import { NetworkPill } from '@components/NetworkPill';
 import laceLogo from '@assets/branding/lace-logo.svg';
 import laceLogoDarkMode from '@assets/branding/lace-logo-dark-mode.svg';
+import laceLogoBeta from '@assets/branding/lace-logo-beta.svg';
+import laceLogoBetaDark from '@assets/branding/lace-logo-beta-dark.svg';
 import LaceLogoMark from '@assets/branding/lace-logo-mark.component.svg';
+import LaceBetaLogoMark from '@assets/branding/lace-logo-beta-white.component.svg';
 import styles from './LeftSidePanel.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 
 export interface VerticalNavigationBarProps {
   theme: string;
 }
 
-const logoExtended: Record<string, string> = {
-  dark: laceLogoDarkMode,
-  light: laceLogo
+const CARDANO_LACE = 'lace';
+const BITCOIN_LACE = 'lace-bitcoin';
+
+type LaceMode = typeof CARDANO_LACE | typeof BITCOIN_LACE;
+
+const logoExtended: Record<string, Record<LaceMode, string>> = {
+  dark: {
+    [CARDANO_LACE]: laceLogoDarkMode,
+    [BITCOIN_LACE]: laceLogoBetaDark
+  },
+  light: {
+    [CARDANO_LACE]: laceLogo,
+    [BITCOIN_LACE]: laceLogoBeta
+  }
 };
 
 export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
+  const [mode, setMode] = useState<LaceMode>(CARDANO_LACE);
+  const backgroundService = useBackgroundServiceAPIContext();
+
   const history = useHistory();
   const analytics = useAnalyticsContext();
   const isNarrowWindow = useIsSmallerScreenWidthThan(BREAKPOINT_XSMALL);
@@ -35,8 +53,17 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
   const handleLogoMouseEnter = () => setShouldLogoHaveNoShadow(true);
   const handleLogoMouseLeave = () => setShouldLogoHaveNoShadow(false);
 
+  const getWalletMode = async () => {
+    const { activeBlockchain } = await backgroundService.getBackgroundStorage();
+    setMode(activeBlockchain === 'bitcoin' ? BITCOIN_LACE : CARDANO_LACE);
+  };
+
+  getWalletMode();
+
+  const LaceLogo = mode === BITCOIN_LACE ? LaceBetaLogoMark : LaceLogoMark;
+
   const logo = isNarrowWindow ? (
-    <LaceLogoMark
+    <LaceLogo
       onMouseOver={handleLogoMouseEnter}
       onMouseLeave={handleLogoMouseLeave}
       className={styles.shortenedLogo}
@@ -45,7 +72,7 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
   ) : (
     <img
       className={styles.logo}
-      src={logoExtended[theme]}
+      src={logoExtended[theme][mode]}
       alt="LACE"
       data-testid="header-logo"
       onClick={handleLogoRedirection}
