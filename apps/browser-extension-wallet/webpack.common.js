@@ -51,6 +51,9 @@ module.exports = () => {
       ]
     },
     resolve: {
+      alias: {
+        '@protobufjs/inquire': path.resolve(__dirname, 'src/shims/inquire.js')
+      },
       extensions: ['.ts', '.tsx', '.js', '.mjs'],
       fallback: {
         https: require.resolve('https-browserify'),

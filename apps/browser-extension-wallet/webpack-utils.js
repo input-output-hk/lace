@@ -66,7 +66,22 @@ const transformManifest = (content, mode) => {
       // Firefox: Reading text is only available for extensions with the Web Extension clipboardRead permission
       manifest.permissions = [...manifest.permissions, 'clipboardRead'];
       // The background script in Firefox is a hidden DOM page
-      manifest.background = { scripts: ['./js/background.js'] };
+      manifest.background = {
+        scripts: [
+          './sw/171.chunk.js',
+          './sw/650.chunk.js',
+          './sw/628.chunk.js',
+          './sw/113.chunk.js',
+          './sw/435.chunk.js',
+          './sw/972.chunk.js',
+          './sw/473.chunk.js',
+          './sw/237.chunk.js',
+          './sw/47.chunk.js',
+          './sw/255.chunk.js',
+          './sw/background.js'
+        ],
+        type: 'module'
+      };
     } else {
       // Chrome
       manifest.key = process.env.LACE_EXTENSION_KEY;
