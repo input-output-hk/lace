@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MainHeader.module.scss';
-import LaceLogoMark from '../../../../assets/branding/lace-logo-mark.component.svg';
+import LaceLogoMark from '../../../../assets/branding/lace-logo-beta-white.component.svg';
 import { walletRoutePaths } from '../../wallet-paths';
 import classNames from 'classnames';
 
