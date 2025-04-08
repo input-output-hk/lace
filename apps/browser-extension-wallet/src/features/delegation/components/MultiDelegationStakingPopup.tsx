@@ -139,7 +139,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         multidelegationDAppCompatibility,
         triggerMultidelegationDAppCompatibility: () => setMultidelegationDAppCompatibility(false),
         expandStakingView: (urlSearchParams?: string) =>
-          handleOpenBrowser({ section: BrowserViewSections.STAKING, urlSearchParams }),
+          handleOpenBrowser({ section: BrowserViewSections.STAKING, urlSearchParams }).then(() => window.close()),
         balancesBalance: balance,
         delegationStoreSetDelegationTxBuilder: setDelegationTxBuilder,
         delegationStoreDelegationTxBuilder: delegationTxBuilder,
