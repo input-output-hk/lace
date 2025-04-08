@@ -67,6 +67,7 @@ export const Activity = (): React.ReactElement => {
   const [loadedTxLength, setLoadedTxLength] = useState<number>(0);
   const [mightHaveMore, setMightHaveMore] = useState<boolean>(false);
   const [currentCursor, setCurrentCursor] = useState<string | null>('');
+  const [activityFetched, setActivityFetched] = useState<boolean>(false);
 
   const debouncedLoadMore = useMemo(
     () =>
@@ -103,9 +104,10 @@ export const Activity = (): React.ReactElement => {
     const subscription = bitcoinWallet.transactionHistory$.subscribe((newTransactions) => {
       setRecentTransactions((prev) => updateTransactions(prev, newTransactions));
       setMightHaveMore(newTransactions.length >= 20);
+      setActivityFetched(true);
     });
     return () => subscription.unsubscribe();
-  }, [bitcoinWallet]);
+  }, [bitcoinWallet, setActivityFetched]);
 
   useEffect(() => {
     const subscription = bitcoinWallet.pendingTransactions$.subscribe((pendingTransactions) => {
@@ -194,7 +196,8 @@ export const Activity = (): React.ReactElement => {
     });
   }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency]);
 
-  const isLoading = addresses.length === 0 || explorerBaseUrl.length === 0 || currentCursor === null;
+  const isLoading =
+    addresses.length === 0 || explorerBaseUrl.length === 0 || currentCursor === null || !activityFetched;
   const hasActivities = walletActivities.length > 0;
 
   return (

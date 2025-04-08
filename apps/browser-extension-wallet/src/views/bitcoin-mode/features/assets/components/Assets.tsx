@@ -17,8 +17,10 @@ import { USE_FOOR_TOPUP } from '@views/browser/components/TopUpWallet/config';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@styles/constants';
 import { Wallet } from '@lace/cardano';
+import { debounceTime } from 'rxjs';
 
 const SATS_IN_BTC = 100_000_000;
+const DEBOUNCE_TIME = 1000;
 
 interface AssetsProps {
   topSection?: React.ReactNode;
@@ -60,12 +62,16 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
   useEffect(() => {
-    const subscription = bitcoinWallet.balance$.subscribe((newBalance) => {
+    const subscription = bitcoinWallet.balance$.pipe(debounceTime(DEBOUNCE_TIME)).subscribe((newBalance) => {
       setBalance(newBalance);
       setIsBalanceLoading(false);
     });
     return () => subscription.unsubscribe();
   }, [bitcoinWallet, balance]);
+
+  useEffect(() => {
+    setIsBalanceLoading(true);
+  }, [currentChain, setIsBalanceLoading]);
 
   const assets = useMemo(
     () => [
