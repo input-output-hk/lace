@@ -1,5 +1,3 @@
-const { transformManifest } = require('./webpack-utils');
-const CopyPlugin = require('copy-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 
@@ -75,15 +73,6 @@ module.exports = () => ({
       defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.developerpreview' : true,
       systemvars: true,
       allowEmptyValues: true
-    }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: 'manifest.json',
-          to: '../manifest.json',
-          transform: (content) => transformManifest(content, 'production')
-        }
-      ]
     })
   ]
 });

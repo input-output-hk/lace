@@ -3,15 +3,17 @@ const constructSentryConnectSrc = (dsn) => {
   return '';
 };
 
-const transformManifest = (content, mode) => {
+const transformManifest = (content, mode, jsAssets = []) => {
   require('dotenv-defaults').config({
     path: './.env',
     encoding: 'utf8',
     defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
   });
+
   try {
     const manifest = JSON.parse(content.toString());
     manifest.name = manifest.name.replace('$WALLET_MANIFEST_NAME', process.env.WALLET_MANIFEST_NAME);
+
     if (process.env.BUILD_DEV_PREVIEW === 'true') {
       const date = new Date();
       manifest.version = `${manifest.version}.${date.getMonth()}${date.getDate()}`;
@@ -58,28 +60,17 @@ const transformManifest = (content, mode) => {
     if (process.env.BROWSER === 'firefox') {
       manifest.browser_specific_settings = {
         gecko: {
-          id: 'lace-wallet-ext@lace.io',
+          id: 'lace-wallet@lace.io',
           strict_min_version: '134.0'
         }
       };
 
       // Firefox: Reading text is only available for extensions with the Web Extension clipboardRead permission
       manifest.permissions = [...manifest.permissions, 'clipboardRead'];
+
       // The background script in Firefox is a hidden DOM page
       manifest.background = {
-        scripts: [
-          './sw/171.chunk.js',
-          './sw/650.chunk.js',
-          './sw/628.chunk.js',
-          './sw/113.chunk.js',
-          './sw/435.chunk.js',
-          './sw/972.chunk.js',
-          './sw/473.chunk.js',
-          './sw/237.chunk.js',
-          './sw/47.chunk.js',
-          './sw/255.chunk.js',
-          './sw/background.js'
-        ],
+        scripts: jsAssets.map((asset) => `./sw/${asset}`),
         type: 'module'
       };
     } else {

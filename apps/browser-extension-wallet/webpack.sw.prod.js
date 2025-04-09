@@ -1,5 +1,6 @@
-const path = require('path');
 const { merge } = require('webpack-merge');
+const path = require('path');
+const TransformManifestFilePlugin = require('./transform-manifest-file-plugin');
 
 const commonProdConfig = require('./webpack.common.prod');
 const commonSwConfig = require('./webpack.common.sw');
@@ -69,5 +70,6 @@ module.exports = () =>
           }
         }
       }
-    }
+    },
+    plugins: [new TransformManifestFilePlugin()]
   });
