@@ -113,6 +113,7 @@ export const SendFlow: React.FC = () => {
 
   const [feeMarkets, setFreeMarkets] = useState<Bitcoin.EstimatedFees | null>(null);
   const [utxos, setUtxos] = useState<Bitcoin.UTxO[] | null>(null);
+  const [pendingTxs, setPendingTxs] = useState<Bitcoin.TransactionHistoryEntry[] | null>(null);
   const [knownAddresses, setKnownAddresses] = useState<Bitcoin.DerivedAddress[] | null>(null);
   const [walletInfo, setWalletInfo] = useState<Bitcoin.BitcoinWalletInfo | null>(null);
   const [network, setWalletNetwork] = useState<Bitcoin.Network | null>(null);
@@ -130,6 +131,24 @@ export const SendFlow: React.FC = () => {
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
   const analytics = useAnalyticsContext();
+  const hasUtxosInMempool = useMemo(() => {
+    if (!pendingTxs || pendingTxs?.length === 0) return false;
+    if (!utxos || utxos?.length === 0) return false;
+
+    for (const tx of pendingTxs) {
+      const { inputs } = tx;
+
+      for (const utxo of utxos) {
+        const isUtxoInMempool = inputs.some((input) => input.index === utxo.index && input.txId === utxo.txId);
+
+        if (isUtxoInMempool) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }, [pendingTxs, utxos]);
 
   const {
     walletUI: { appMode }
@@ -174,6 +193,10 @@ export const SendFlow: React.FC = () => {
 
   useEffect(() => {
     bitcoinWallet.utxos$.subscribe(setUtxos);
+  }, [bitcoinWallet]);
+
+  useEffect(() => {
+    bitcoinWallet.pendingTransactions$.subscribe(setPendingTxs);
   }, [bitcoinWallet]);
 
   useEffect(() => {
@@ -243,6 +266,7 @@ export const SendFlow: React.FC = () => {
         onEstimatedTimeChange={setEstimatedTime}
         onContinue={goToReview}
         network={network}
+        hasUtxosInMempool={hasUtxosInMempool}
       />
     );
   }
