@@ -3,6 +3,7 @@ import React from 'react';
 import { Box, Image, Text, useColorModeValue } from '@chakra-ui/react';
 import { Button as LaceButton } from '@lace/common';
 import { motion } from 'framer-motion';
+import { runtime } from 'webextension-polyfill';
 
 import LaceLogo from '../../../assets/img/lace.svg';
 import laceGradientBackground from '../../../assets/img/laceGradientBackground.png';
@@ -15,9 +16,7 @@ import LaceSecondaryButton from './laceSecondaryButton';
 
 export const getLaceVideoBackgroundSrc = () => {
   return (
-    (typeof chrome !== 'undefined' &&
-      chrome.runtime?.getURL('laceVideoBackground.mp4')) ||
-    laceVideoBackground
+    runtime.getURL('assets/laceVideoBackground.mp4') ?? laceVideoBackground
   );
 };
 
