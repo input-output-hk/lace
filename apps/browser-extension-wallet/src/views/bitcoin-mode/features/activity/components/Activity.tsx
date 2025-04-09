@@ -74,7 +74,7 @@ export const Activity = (): React.ReactElement => {
       debounce(() => {
         if (mightHaveMore && addresses.length > 0) {
           void bitcoinBlockchainProvider
-            .getTransactions(addresses[0].address, 0, 20, currentCursor ?? undefined)
+            .getTransactions(addresses[0].address, 0, 25, currentCursor ?? undefined)
             .then(({ transactions, nextCursor }) => {
               setRecentTransactions((prev) => updateTransactions(prev, transactions));
               setCurrentCursor(nextCursor);
@@ -128,14 +128,17 @@ export const Activity = (): React.ReactElement => {
 
     const walletAddress = addresses[0].address;
 
-    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
-      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(transaction);
-      return acc;
-    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
+    const groups = [...recentTransactions, ...pendingTransaction].reduce(
+      (acc, transaction) => {
+        const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+      },
+      {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] }
+    );
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;

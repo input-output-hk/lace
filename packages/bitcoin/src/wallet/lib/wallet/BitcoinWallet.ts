@@ -24,7 +24,7 @@ import { Logger } from 'ts-log';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import isEqual from 'lodash/isEqual';
-import { historyEntryFromRawTx } from '@src/wallet';
+import { historyEntryFromRawTx } from '../tx-builder/utils';
 
 bitcoin.initEccLib(ecc);
 
