@@ -12,6 +12,7 @@ import laceLogoBeta from '@assets/branding/lace-logo-beta.svg';
 import laceLogoBetaDark from '@assets/branding/lace-logo-beta-dark.svg';
 import LaceLogoMark from '@assets/branding/lace-logo-mark.component.svg';
 import LaceBetaLogoMark from '@assets/branding/lace-logo-beta-white.component.svg';
+import LaceBetaDarkLogoMark from '@assets/branding/lace-logo-beta-dark.component.svg';
 import styles from './LeftSidePanel.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -37,6 +38,11 @@ const logoExtended: Record<string, Record<LaceMode, string>> = {
   }
 };
 
+const logoMark: Record<string, string> = {
+  dark: LaceBetaDarkLogoMark,
+  light: LaceBetaLogoMark
+};
+
 export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.ReactElement => {
   const [mode, setMode] = useState<LaceMode>(CARDANO_LACE);
   const backgroundService = useBackgroundServiceAPIContext();
@@ -60,7 +66,7 @@ export const LeftSidePanel = ({ theme }: VerticalNavigationBarProps): React.Reac
 
   getWalletMode();
 
-  const LaceLogo = mode === BITCOIN_LACE ? LaceBetaLogoMark : LaceLogoMark;
+  const LaceLogo = mode === BITCOIN_LACE ? logoMark[theme] : LaceLogoMark;
 
   const logo = isNarrowWindow ? (
     <LaceLogo
