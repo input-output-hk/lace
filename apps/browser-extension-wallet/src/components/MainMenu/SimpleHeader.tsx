@@ -14,7 +14,9 @@ export const SimpleHeader = ({ beta = false }: { beta?: boolean }): React.ReactE
         </div>
         {beta && (
           <Flex h="$48" w="$64" alignItems="center" justifyContent="center" className={styles.betaPill}>
-            <Text.Body.Normal weight="$semibold">{t('modals.beta.pill')}</Text.Body.Normal>
+            <Text.Body.Normal className={styles.betaPillCopy} weight="$semibold">
+              {t('modals.beta.pill')}
+            </Text.Body.Normal>
           </Flex>
         )}
       </div>
