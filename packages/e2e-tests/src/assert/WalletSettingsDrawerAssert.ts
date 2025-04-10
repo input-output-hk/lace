@@ -22,13 +22,17 @@ class WalletSettingsDrawerAssert {
     );
     await WalletSettingsDrawer.renameWalletInput.waitForEnabled();
     expect(await WalletSettingsDrawer.renameWalletInput.getValue()).to.exist;
+    await WalletSettingsDrawer.renameWalletInputLabel.waitForDisplayed();
+    expect(await WalletSettingsDrawer.renameWalletInputLabel.getText()).to.equal(
+      await t('browserView.renameWalletDrawer.walletName')
+    );
     await WalletSettingsDrawer.renameEnabledAccountsLabel.waitForDisplayed();
     expect(await WalletSettingsDrawer.renameEnabledAccountsLabel.getText()).to.equal(
       await t('browserView.renameWalletDrawer.renameEnabledAccounts')
     );
     await WalletSettingsDrawer.getAccountNameInput(0).waitForEnabled();
     const accountNameInputLabel = await WalletSettingsDrawer.getAccountNameInputLabel(0);
-    await accountNameInputLabel.waitForEnabled();
+    await accountNameInputLabel.waitForDisplayed();
     expect(await accountNameInputLabel.getText()).to.equal("m/1852'/1815'/0'");
     await WalletSettingsDrawer.saveButton.waitForEnabled();
     expect(await WalletSettingsDrawer.saveButton.getText()).to.equal(await t('browserView.renameWalletDrawer.save'));

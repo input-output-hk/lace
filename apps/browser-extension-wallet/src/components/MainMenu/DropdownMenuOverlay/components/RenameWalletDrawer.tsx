@@ -155,7 +155,7 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
             }}
             w="$fill"
             errorMessage={newWalletName.errorMessage}
-            data-testid={'rename-wallet-name-input'}
+            data-testid={'rename-wallet-name'}
           />
         </Box>
         <Box mt="$60" mb="$16">
@@ -173,7 +173,7 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
                   errorMessage={accountsData[index]?.errorMessage}
                   w="$fill"
                   onChange={(e) => handleOnChangeAccountData(e, index)}
-                  data-testid={`rename-account-input-${index}`}
+                  data-testid={`rename-account-${index}`}
                 />
               </Box>
             ))}
