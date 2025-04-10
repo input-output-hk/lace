@@ -13,7 +13,7 @@ export const useUpdateAddressStatus = (
   const [validatedAddressStatus, setValidatedAddressStatus] = useState<updateAddressStatusType>({});
 
   useEffect(() => {
-    const queueInterval = 10_000;
+    const queueInterval = 600_000; // 10 minutes
     const batchTasks = 4;
     const intervalBetweenBatch = 100;
 
