@@ -1,6 +1,5 @@
 const path = require('path');
 const { merge } = require('webpack-merge');
-const CopyPlugin = require('copy-webpack-plugin');
 const { transformManifest } = require('./webpack-utils');
 const Dotenv = require('dotenv-webpack');
 require('dotenv-defaults').config({
@@ -51,15 +50,6 @@ module.exports =
             defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.developerpreview' : true,
             systemvars: true,
             allowEmptyValues: true
-          }),
-          new CopyPlugin({
-            patterns: [
-              {
-                from: 'manifest.json',
-                to: '../manifest.json',
-                transform: (content) => transformManifest(content, 'development')
-              }
-            ]
           })
         ],
         watchOptions: {

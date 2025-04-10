@@ -8,6 +8,7 @@ import {
 } from '@cardano-sdk/core';
 import { createAvatar } from '@dicebear/avatars';
 import * as style from '@dicebear/avatars-bottts-sprites';
+import { runtime } from 'webextension-polyfill';
 
 import { APIError, TxSendError } from '../../config/config';
 
@@ -17,14 +18,14 @@ import type { Wallet } from '@lace/cardano';
 // This is used when dapp favicon is missing. Currently not working on chrome either
 // TODO: fix this if issues regarding dapp icon in whitelist is missing.
 export const getFavoriteIcon = (domain: string) => {
-  return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${domain}&size=32`;
+  return `chrome-extension://${runtime.id}/_favicon/?pageUrl=${domain}&size=32`;
 };
 
 export const createTab = async (tab: string, query = '') =>
   new Promise((res, rej) => {
     chrome.tabs.create(
       {
-        url: chrome.runtime.getURL(`${tab}.html${query}`),
+        url: runtime.getURL(`${tab}.html${query}`),
         active: true,
       },
       tab => {

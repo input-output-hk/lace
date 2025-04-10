@@ -8,6 +8,7 @@ import {
   ModalOverlay,
   useDisclosure,
 } from '@chakra-ui/react';
+import { runtime } from 'webextension-polyfill';
 
 const TrezorWidget = React.forwardRef((props, ref) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -55,7 +56,7 @@ const TrezorWidget = React.forwardRef((props, ref) => {
           />
           <Box rounded="3xl" overflow="hidden" background="white">
             <iframe
-              src={chrome.runtime.getURL('Trezor/popup.html')}
+              src={runtime.getURL('Trezor/popup.html')}
               id="trezorPopupNami"
               width="360px"
               height="560px"

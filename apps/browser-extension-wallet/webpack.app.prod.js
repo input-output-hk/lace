@@ -1,7 +1,6 @@
 const { merge } = require('webpack-merge');
-
-const prodConfig = require('./webpack.common.prod');
-const appConfig = require('./webpack.common.app');
+const commonProdConfig = require('./webpack.common.prod');
+const commonAppConfig = require('./webpack.common.app');
 
 require('dotenv-defaults').config({
   path: './.env',
@@ -9,4 +8,20 @@ require('dotenv-defaults').config({
   defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? './.env.developerpreview' : './.env.defaults'
 });
 
-module.exports = () => merge(prodConfig(), appConfig());
+module.exports = () =>
+  merge(commonProdConfig(), commonAppConfig(), {
+    optimization: {
+      splitChunks: {
+        maxSize: 4000000,
+        cacheGroups: {
+          vendors: {
+            test: /[/\\]node_modules[/\\]/,
+            enforce: true,
+            priority: -20,
+            chunks: 'async',
+            reuseExistingChunk: true
+          }
+        }
+      }
+    }
+  });

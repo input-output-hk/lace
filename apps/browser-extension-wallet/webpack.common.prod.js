@@ -1,7 +1,5 @@
-const TerserPlugin = require('terser-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const { transformManifest } = require('./webpack-utils');
 const Dotenv = require('dotenv-webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 
 require('dotenv-defaults').config({
   path: './.env',
@@ -12,27 +10,17 @@ require('dotenv-defaults').config({
 module.exports = () => ({
   mode: 'production',
   devtool: 'source-map',
-  plugins: [
-    new Dotenv({
-      path: '.env',
-      safe: false,
-      silent: false,
-      defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.developerpreview' : true,
-      systemvars: true,
-      allowEmptyValues: true
-    }),
-    new CopyPlugin({
-      patterns: [
-        {
-          from: 'manifest.json',
-          to: '../manifest.json',
-          transform: (content) => transformManifest(content, 'production')
-        }
-      ]
-    })
-  ],
+  performance: {
+    // images/videos might be larger
+    maxAssetSize: 30_000_000,
+    // Mozilla doesn't allow assets larger than 4M
+    maxEntrypointSize: 4_000_000,
+    hints: 'error'
+  },
   optimization: {
+    mangleExports: false,
     minimize: true,
+    moduleIds: 'named',
     minimizer: [
       new TerserPlugin({
         exclude: /(node_modules)/,
@@ -45,7 +33,7 @@ module.exports = () => ({
               ? process.env.DROP_CONSOLE_IN_PRODUCTION === 'true'
               : true,
             drop_debugger: true,
-            unused: true,
+            unused: false,
             arrows: false,
             booleans: false,
             collapse_vars: false,
@@ -76,5 +64,15 @@ module.exports = () => ({
         }
       })
     ]
-  }
+  },
+  plugins: [
+    new Dotenv({
+      path: '.env',
+      safe: false,
+      silent: false,
+      defaults: process.env.BUILD_DEV_PREVIEW === 'true' ? '.env.developerpreview' : true,
+      systemvars: true,
+      allowEmptyValues: true
+    })
+  ]
 });

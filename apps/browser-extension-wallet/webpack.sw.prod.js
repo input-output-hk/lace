@@ -1,7 +1,10 @@
 const { merge } = require('webpack-merge');
+const path = require('path');
+const TransformManifestFilePlugin = require('./transform-manifest-file-plugin');
 
-const prodConfig = require('./webpack.common.prod');
-const swConfig = require('./webpack.common.sw');
+const commonProdConfig = require('./webpack.common.prod');
+const commonSwConfig = require('./webpack.common.sw');
+
 require('dotenv-defaults').config({
   path: './.env',
   encoding: 'utf8',
@@ -9,19 +12,64 @@ require('dotenv-defaults').config({
 });
 
 module.exports = () =>
-  merge(
-    prodConfig(),
-    swConfig(),
-    // Needed for the service worker to work with a production build
-    // TODO: after removing imports from dist/cjs, service worker no longer loads when built in production mode.
-    // It is likely that some optimization is triggering it, such as tree shaking.
-    {
-      mode: 'development',
-      optimization: {
-        moduleIds: 'named',
-        mangleExports: false,
-        // minimize mess up the source maps
-        minimize: false
+  merge(commonProdConfig(), commonSwConfig(), {
+    optimization: {
+      splitChunks: {
+        maxSize: 4000000,
+        cacheGroups: {
+          medium: {
+            // sums up to ~2.7M
+            test: /[/\\]node_modules[/\\](@cardano-sdk|posthog-js|rxjs|react-dom|pouchdb|@sentry|@sentry-internal)[\\/]/,
+            enforce: true,
+            priority: -10,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          emurgo: {
+            test: /[/\\]node_modules[/\\]@emurgo[\\/]/,
+            enforce: true,
+            priority: -11,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          cf: {
+            test: /[/\\]node_modules[/\\]@cardano-foundation[\\/]/,
+            enforce: true,
+            priority: -12,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          trezor: {
+            test: /[/\\]node_modules[/\\]@trezor[\\/]/,
+            enforce: true,
+            priority: -13,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          sodium: {
+            test: /[/\\]node_modules[/\\]libsodium-sumo[\\/]/,
+            enforce: true,
+            priority: -14,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          antd: {
+            test: /[/\\]node_modules[/\\]antd[\\/]/,
+            enforce: true,
+            priority: -15,
+            chunks: 'async',
+            reuseExistingChunk: true
+          },
+          // sums up to ~2.45M; this might break the 3M limit if we add new dependencies
+          vendors: {
+            test: /[/\\]node_modules[/\\]/,
+            enforce: true,
+            priority: -20,
+            chunks: 'async',
+            reuseExistingChunk: true
+          }
+        }
       }
-    }
-  );
+    },
+    plugins: [new TransformManifestFilePlugin()]
+  });
