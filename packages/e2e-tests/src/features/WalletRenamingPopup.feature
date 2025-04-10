@@ -14,7 +14,7 @@ Feature: Wallet renaming
     Then I see a toast with text: "Wallet renamed successfully"
     When I close a toast message
     Then Wallet number 1 with "Renamed wall..." name is displayed on the user menu
-    #And "Renamed wall..." is displayed as a wallet name on the menu button // Bug: LW-12612
+    And "Renamed wa..." is displayed as a wallet name on the menu button
     When I close header menu
     And I click "Receive" button on Tokens page in popup mode
     Then I see "Renamed wallet" name on main address card
@@ -57,7 +57,7 @@ Feature: Wallet renaming
     Then I see a toast with text: "Wallet renamed successfully"
     When I close a toast message
     Then Wallet number 1 with "Renamed acco..." account name is displayed on the user menu
-#    And "Renamed acco..." is displayed as an account name on the menu button // Bug: LW-12612
+    And "Renamed ac..." is displayed as an account name on the menu button
 
   @LW-12289
   Scenario: Popup view - rename account - cancel
