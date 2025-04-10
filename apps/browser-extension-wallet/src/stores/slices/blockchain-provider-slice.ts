@@ -1,9 +1,11 @@
-import { BlockchainProviderSlice, SliceCreator } from '../types';
+import { BitcoinBlockchainProviderSlice, BlockchainProviderSlice, SliceCreator } from '../types';
 import { Wallet } from '@lace/cardano';
 import { consumeRemoteApi } from '@cardano-sdk/web-extension';
 import { runtime } from 'webextension-polyfill';
 import { Cardano, DRepProvider } from '@cardano-sdk/core';
 import { logger } from '@lace/common';
+import { Bitcoin } from '@lace/bitcoin';
+import { bitcoinProviderProperties } from '@lib/scripts/background/bitcoinWalletManager';
 
 export interface IBlockchainProvider {
   stakePoolProvider: Wallet.StakePoolProvider;
@@ -16,6 +18,7 @@ export interface IBlockchainProvider {
   rewardsProvider: Wallet.RewardsProvider;
   drepProvider?: DRepProvider;
   inputResolver: Cardano.InputResolver;
+  bitcoinProvider?: Bitcoin.BlockchainDataProvider;
 }
 
 export type BlockchainProviderFactory = () => IBlockchainProvider;
@@ -55,6 +58,14 @@ const providers = consumeRemoteApi<Wallet.WalletProvidersDependencies>(
   { logger, runtime }
 );
 
+export const bitcoinProvider = consumeRemoteApi<Bitcoin.BlockchainDataProvider>(
+  {
+    baseChannel: 'bitcoin-wallet-providers',
+    properties: bitcoinProviderProperties
+  },
+  { logger, runtime }
+);
+
 export const getProviders: BlockchainProviderFactory = () => IBlockchainProvider.fromWalletProviders(providers);
 
 /**
@@ -67,4 +78,13 @@ export const blockchainProviderSlice: SliceCreator<
 > = ({ set }, { blockchainProviderFactory = getProviders }) => ({
   blockchainProvider: blockchainProviderFactory(),
   setBlockchainProvider: () => set({ blockchainProvider: blockchainProviderFactory() })
+});
+
+export const bitcoinBlockchainProviderSlice: SliceCreator<
+  BitcoinBlockchainProviderSlice,
+  BitcoinBlockchainProviderSlice,
+  { provider?: Bitcoin.BlockchainDataProvider }
+> = ({ set }, { provider = bitcoinProvider }) => ({
+  bitcoinBlockchainProvider: provider,
+  setBitcoinBlockchainProvider: () => set({ bitcoinBlockchainProvider: provider })
 });

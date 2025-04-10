@@ -1,6 +1,5 @@
 /* eslint-disable sonarjs/cognitive-complexity, no-magic-numbers, consistent-return, @typescript-eslint/no-empty-function */
-import React, { useMemo } from 'react';
-import { useObservable } from '@lace/common';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useFetchCoinPrice, useWalletManager } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { ContentLayout } from '@components/Layout';
@@ -43,7 +42,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const popupView = appMode === APP_MODE_POPUP;
   const { bitcoinWallet } = useWalletManager();
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
-  const balance = useObservable(bitcoinWallet.balance$, BigInt(0));
+  const [balance, setBalance] = useState<BigInt>(BigInt(0));
+  const [isBalanceLoading, setIsBalanceLoading] = useState<boolean>(true);
   const isLoadingFirstTime = !priceResult.bitcoin;
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
   const bitcoinPriceVariation = useMemo(
@@ -59,9 +59,29 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
+  useEffect(() => {
+    setIsBalanceLoading(true);
+    const subscription = bitcoinWallet.balance$.subscribe((newBalance) => {
+      setBalance(newBalance);
+
+      if (newBalance === BigInt(0)) {
+        setTimeout(() => {
+          setIsBalanceLoading(false);
+        }, 1000);
+      } else {
+        setIsBalanceLoading(false);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [bitcoinWallet, balance]);
+
+  useEffect(() => {
+    setIsBalanceLoading(true);
+  }, [currentChain, setIsBalanceLoading]);
+
   const assets = useMemo(
     () => [
-      ...(balance > 0
+      ...(balance > BigInt(0)
         ? [
             {
               id: 'btc',
@@ -100,8 +120,8 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     <AssetsPortfolio
       appMode={appMode}
       assetList={assets}
-      isBalanceLoading={false}
-      isLoadingFirstTime={isLoadingFirstTime}
+      isBalanceLoading={isBalanceLoading}
+      isLoadingFirstTime={isLoadingFirstTime || isBalanceLoading}
       portfolioTotalBalance={portfolioTotalBalance}
       onRowClick={() => {}}
       onTableScroll={() => {}}
@@ -111,7 +131,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
 
   return popupView ? (
     <>
-      <ContentLayout hasCredit={assets?.length > 0}>
+      <ContentLayout hasCredit={assets?.length > 0 || isBalanceLoading}>
         <MidnightEventBanner />
         {assetsPortfolio}
       </ContentLayout>
@@ -119,7 +139,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   ) : (
     <Layout>
       <SectionLayout
-        hasCredit={assets?.length > 0}
+        hasCredit={assets?.length > 0 || isBalanceLoading}
         sidePanelContent={
           <Flex flexDirection="column" gap="$28">
             {USE_FOOR_TOPUP && isMainnet && !isScreenTooSmallForSidePanel && <TopUpWalletCard />}

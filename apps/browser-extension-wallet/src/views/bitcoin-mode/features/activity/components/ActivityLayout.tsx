@@ -1,10 +1,9 @@
-/* eslint-disable promise/catch-or-return, sonarjs/cognitive-complexity, no-magic-numbers,  */
+/* eslint-disable promise/catch-or-return, sonarjs/cognitive-complexity, no-magic-numbers, unicorn/no-null */
 import React, { useMemo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFetchCoinPrice, useWalletManager } from '@hooks';
-import { GroupedAssetActivityList } from './GroupedAssetActivityList';
+import { GroupedAssetActivityList } from '@lace/core';
 import { ActivityStatus, TransactionActivityType } from './AssetActivityItem';
-import styles from './Activity.module.scss';
 import { FundWalletBanner, EducationalList, SectionLayout, Layout } from '@src/views/browser-view/components';
 import { Bitcoin } from '@lace/bitcoin/';
 import isEqual from 'lodash/isEqual';
@@ -17,6 +16,12 @@ import Book from '@assets/icons/book.svg';
 import LightBulb from '@assets/icons/light.svg';
 import Video from '@assets/icons/video.svg';
 import { useCurrencyStore } from '@providers';
+import { useWalletStore } from '@stores';
+import debounce from 'lodash/debounce';
+import { LACE_APP_ID } from '@utils/constants';
+import { Skeleton } from 'antd';
+import { updateTransactions } from './Activity';
+import uniqBy from 'lodash/uniqBy';
 
 const formattedDate = (date: Date) =>
   dayjs().isSame(date, 'day') ? 'Today' : formatDate({ date, format: 'DD MMMM YYYY', type: 'local' });
@@ -37,10 +42,13 @@ const computeBalance = (totalBalance: number, fiatCurrency: string, bitcoinPrice
   return new BigNumber((totalBalance * bitcoinPrice).toString()).toFixed(2, BigNumber.ROUND_HALF_UP);
 };
 
+const loadMoreDebounce = 300;
+
 export const ActivityLayout = (): React.ReactElement => {
   const { t } = useTranslation();
   const { MEMPOOL_URLS } = config();
   const { bitcoinWallet } = useWalletManager();
+  const { bitcoinBlockchainProvider } = useWalletStore();
   const { priceResult } = useFetchCoinPrice();
   const bitcoinPrice = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
   const { fiatCurrency } = useCurrencyStore();
@@ -49,6 +57,30 @@ export const ActivityLayout = (): React.ReactElement => {
   const [pendingTransaction, setPendingTransaction] = useState<Bitcoin.TransactionHistoryEntry[]>([]);
   const [addresses, setAddresses] = useState<Bitcoin.DerivedAddress[]>([]);
   const [explorerBaseUrl, setExplorerBaseUrl] = useState<string>('');
+  const [error, setError] = useState<Error | null>(null);
+  const [loadedTxLength, setLoadedTxLength] = useState<number>(0);
+  const [mightHaveMore, setMightHaveMore] = useState<boolean>(false);
+  const [activityFetched, setActivityFetched] = useState<boolean>(false);
+  const [currentCursor, setCurrentCursor] = useState<string | null>('');
+  const debouncedLoadMore = useMemo(
+    () =>
+      debounce(() => {
+        if (mightHaveMore && addresses.length > 0) {
+          void bitcoinBlockchainProvider
+            .getTransactions(addresses[0].address, 0, 25, currentCursor ?? undefined)
+            .then(({ transactions, nextCursor }) => {
+              setRecentTransactions((prev) => updateTransactions(prev, transactions));
+              setCurrentCursor(nextCursor);
+              setMightHaveMore(nextCursor && nextCursor !== '');
+              setLoadedTxLength((prev) => prev + transactions.length);
+            })
+            .catch((error_) => {
+              setError(error_);
+            });
+        }
+      }, loadMoreDebounce),
+    [bitcoinBlockchainProvider, addresses, currentCursor, mightHaveMore]
+  );
 
   useEffect(() => {
     // TODO: Make into an observable
@@ -59,18 +91,20 @@ export const ActivityLayout = (): React.ReactElement => {
         setExplorerBaseUrl(MEMPOOL_URLS.Testnet4);
       }
     });
-  }, [bitcoinWallet, MEMPOOL_URLS]);
+  }, [bitcoinWallet, MEMPOOL_URLS.Mainnet, MEMPOOL_URLS.Testnet4]);
 
   useEffect(() => {
     const subscription = bitcoinWallet.transactionHistory$.subscribe((newTransactions) => {
-      setRecentTransactions((prev) => (isEqual(prev, newTransactions) ? prev : newTransactions));
+      setRecentTransactions((prev) => updateTransactions(prev, newTransactions));
+      setMightHaveMore(newTransactions.length >= 20);
+      setActivityFetched(true);
     });
     return () => subscription.unsubscribe();
-  }, [bitcoinWallet]);
+  }, [bitcoinWallet, setMightHaveMore, setActivityFetched]);
 
   useEffect(() => {
     const subscription = bitcoinWallet.pendingTransactions$.subscribe((pendingTransactions) => {
-      setPendingTransaction((prev) => (isEqual(prev, pendingTransactions) ? prev : pendingTransactions));
+      setPendingTransaction(uniqBy(pendingTransactions, 'transactionHash'));
     });
     return () => subscription.unsubscribe();
   }, [bitcoinWallet]);
@@ -87,14 +121,17 @@ export const ActivityLayout = (): React.ReactElement => {
 
     const walletAddress = addresses[0].address;
 
-    const groups = [...recentTransactions, ...pendingTransaction].reduce((acc, transaction) => {
-      const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(transaction);
-      return acc;
-    }, {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] });
+    const groups = [...recentTransactions, ...pendingTransaction].reduce(
+      (acc, transaction) => {
+        const dateKey = transaction.timestamp === 0 ? 'Pending' : formattedDate(new Date(transaction.timestamp * 1000));
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
+        acc[dateKey].push(transaction);
+        return acc;
+      },
+      {} as { [date: string]: Bitcoin.TransactionHistoryEntry[] }
+    );
 
     const sortedDates = Object.keys(groups).sort((a, b) => {
       if (a === 'Pending') return -1;
@@ -118,7 +155,15 @@ export const ActivityLayout = (): React.ReactElement => {
           .filter((output) => output.address === walletAddress)
           .reduce((acc, output) => acc + BigInt(output.satoshis), BigInt(0));
 
+        const outgoingToForeign = transaction.outputs.filter((output) => output.address !== walletAddress);
+
+        const isSelf = incoming > 0 && outgoingToForeign.length === 0;
+
         const net = incoming - outgoing;
+        let type = net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing;
+        if (isSelf) {
+          type = TransactionActivityType.self;
+        }
 
         return {
           id: transaction.transactionHash,
@@ -132,7 +177,7 @@ export const ActivityLayout = (): React.ReactElement => {
           }`,
           status:
             transaction.status === Bitcoin.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
-          type: net >= BigInt(0) ? TransactionActivityType.incoming : TransactionActivityType.outgoing,
+          type,
           onClick: () => {
             window.open(`${explorerBaseUrl}/${transaction.transactionHash}`, '_blank');
           }
@@ -147,7 +192,8 @@ export const ActivityLayout = (): React.ReactElement => {
     });
   }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency]);
 
-  const isLoading = addresses.length === 0 || explorerBaseUrl.length === 0;
+  const isLoading =
+    addresses.length === 0 || explorerBaseUrl.length === 0 || currentCursor === null || !activityFetched;
   const hasActivities = walletActivities.length > 0;
 
   const titles = {
@@ -189,23 +235,28 @@ export const ActivityLayout = (): React.ReactElement => {
         sidePanelContent={<EducationalList items={educationalList} title={t('browserView.sidePanel.learnAbout')} />}
       >
         <SectionTitle title={t('browserView.activity.title')} />
-        <div className={styles.activitiesContainer}>
-          {hasActivities ? (
+        <Skeleton loading={isLoading}>
+          {hasActivities && (
             <GroupedAssetActivityList
+              hasMore={mightHaveMore}
+              loadMore={debouncedLoadMore}
               lists={walletActivities}
-              infiniteScrollProps={{ scrollableTarget: 'contentLayout' }}
+              scrollableTarget={LACE_APP_ID}
+              dataLength={loadedTxLength}
+              loadingError={error}
+              retryLoading={debouncedLoadMore}
             />
-          ) : (
-            <div className={styles.emptyState}>
-              <FundWalletBanner
-                title={t('browserView.assets.welcome')}
-                subtitle={t('browserView.activity.fundWalletBanner.title')}
-                prompt={t('browserView.fundWalletBanner.prompt')}
-                walletAddress={isLoading ? '' : addresses[0].address}
-              />
-            </div>
           )}
-        </div>
+          {!hasActivities && (
+            <FundWalletBanner
+              title={t('browserView.activity.fundWalletBanner.title')}
+              subtitle={t('browserView.activity.fundWalletBanner.subtitle')}
+              prompt={t('browserView.fundWalletBanner.prompt')}
+              walletAddress={isLoading ? '' : addresses[0].address}
+              shouldHaveVerticalContent
+            />
+          )}
+        </Skeleton>
       </SectionLayout>
     </Layout>
   );

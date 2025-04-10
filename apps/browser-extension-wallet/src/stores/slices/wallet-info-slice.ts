@@ -30,6 +30,7 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   isHardwareWallet: undefined,
   isSharedWallet: undefined,
   isNamiWallet: undefined,
+  walletDisplayInfo: undefined,
   walletType: undefined,
   stayOnAllDonePage: false,
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted) =>
@@ -46,6 +47,10 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
       isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type),
       isSharedWallet: isSharedWallet(wallet),
       isNamiWallet: isNamiWallet(wallet)
+    }),
+  setWalletDisplayInfo: (info?: Wallet.WalletDisplayInfo) =>
+    set({
+      walletDisplayInfo: info
     }),
   setBitcoinWallet: (wallet?: Bitcoin.BitcoinWallet) =>
     set({

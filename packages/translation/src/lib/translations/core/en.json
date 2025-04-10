@@ -165,6 +165,7 @@
   "core.assetActivityItem.entry.name.rewards": "Rewards",
   "core.assetActivityItem.entry.name.self": "Self Transaction",
   "core.assetActivityItem.entry.name.sending": "Sending",
+  "core.assetActivityItem.entry.name.receiving": "Receiving",
   "core.assetActivityItem.entry.name.awaitingCosignatures": "Awaiting co-signatures",
   "core.assetActivityItem.entry.name.StakeRegistrationDelegateCertificate": "Stake Registration Delegation Certificate",
   "core.assetActivityItem.entry.name.StakeRegistrationDelegationCertificate": "Stake Registration Delegation Certificate",
