@@ -43,11 +43,20 @@ interface SendStepOneProps {
   isPopupView: boolean;
   onClose: () => void;
   network: Bitcoin.Network | null;
+  hasUtxosInMempool: boolean;
 }
 
-const InputError = ({ error, isPopupView }: { error: string; isPopupView: boolean }) => (
+const InputError = ({
+  marginBottom,
+  error,
+  isPopupView
+}: {
+  marginBottom?: boolean;
+  error: string;
+  isPopupView: boolean;
+}) => (
   <Box style={{ position: 'relative' }} w="$fill">
-    <Box style={!isPopupView ? { position: 'absolute', top: 0, left: 0 } : {}} pl="$24" py="$8">
+    <Box style={!isPopupView && !marginBottom ? { position: 'absolute', top: 0, left: 0 } : {}} pl="$24" py="$8">
       <Text.Body.Small color="error" weight="$semibold" data-testid="address-input-error">
         {error}
       </Text.Body.Small>
@@ -66,7 +75,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   onContinue,
   isPopupView,
   onClose,
-  network
+  network,
+  hasUtxosInMempool
 }) => {
   const { t } = useTranslation();
   const numericAmount = Number.parseFloat(amount) || 0;
@@ -177,8 +187,16 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     <Flex className={mainStyles.container} flexDirection="column" w="$fill">
       <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
         {isPopupView && <Text.Heading weight="$bold">{t('browserView.transaction.send.title')}</Text.Heading>}
+        {hasUtxosInMempool && (
+          <InputError
+            marginBottom
+            error="You cannot send transactions while previous transactions are still pending."
+            isPopupView={isPopupView}
+          />
+        )}
+
         <Search
-          disabled={false}
+          disabled={hasUtxosInMempool}
           value={address}
           data-testid="btc-address-input"
           label={t('core.destinationAddressInput.recipientAddressOnly')}
@@ -190,6 +208,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$40'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
+            disabled={hasUtxosInMempool}
             inputId="BTC"
             coin={coin}
             value={amount}
@@ -215,6 +234,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
         <Flex mt={isPopupView ? '$16' : '$32'} w="$fill">
           <ToggleButtonGroup.Root
+            disabled={hasUtxosInMempool}
             onValueChange={(feeKey: RecommendedFee['key']) => {
               setSelectedFeeKey(feeKey);
             }}
@@ -245,7 +265,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 step="0.1"
                 type="number"
                 label={t('browserView.transaction.btc.send.feeRateCustom')}
-                disabled={false}
+                disabled={hasUtxosInMempool}
                 value={customFee}
                 data-testid="btc-add-custom-fee"
                 bordered={false}

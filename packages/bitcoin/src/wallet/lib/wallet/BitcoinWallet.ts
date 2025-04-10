@@ -1,6 +1,14 @@
 /* eslint-disable no-magic-numbers, unicorn/no-null, unicorn/prefer-array-some, @typescript-eslint/explicit-module-boundary-types */
-import { BlockchainDataProvider, BlockInfo, FeeEstimationMode, TransactionHistoryEntry, UTxO } from './../providers';
-import { BehaviorSubject, interval, Observable, of, startWith, Subscription } from 'rxjs';
+import {
+  BlockchainDataProvider,
+  BlockchainInputResolver,
+  BlockInfo,
+  FeeEstimationMode,
+  InputResolver,
+  TransactionHistoryEntry,
+  UTxO
+} from './../providers';
+import { BehaviorSubject, combineLatest, filter, interval, Observable, of, startWith, Subscription, tap } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   AddressType,
@@ -12,9 +20,11 @@ import {
   getNetworkKeys,
   Network
 } from '../common';
+import { Logger } from 'ts-log';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import isEqual from 'lodash/isEqual';
+import { historyEntryFromRawTx } from '../tx-builder/utils';
 
 bitcoin.initEccLib(ecc);
 
@@ -78,6 +88,10 @@ export class BitcoinWallet {
   private info: BitcoinWalletInfo;
   private network: Network;
   private address: DerivedAddress;
+  private pollController$: Observable<boolean>;
+  private logger: Logger;
+  private inputResolver: InputResolver;
+
   public syncStatus: SyncStatus;
 
   public transactionHistory$: BehaviorSubject<TransactionHistoryEntry[]> = new BehaviorSubject(
@@ -90,14 +104,19 @@ export class BitcoinWallet {
   public balance$: BehaviorSubject<bigint> = new BehaviorSubject(BigInt(0));
   public addresses$: BehaviorSubject<DerivedAddress[]> = new BehaviorSubject(new Array<DerivedAddress>());
 
+  // eslint-disable-next-line max-params
   constructor(
     provider: BlockchainDataProvider,
     pollInterval = 30_000,
     historyDepth = 20,
     info: BitcoinWalletInfo,
-    network: Network = Network.Testnet
+    network: Network = Network.Testnet,
+    pollController$: Observable<boolean>,
+    logger: Logger
   ) {
     const bitcoinNetwork = network === Network.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
+    this.pollController$ = pollController$;
+    this.logger = logger;
     this.network = network;
     this.pollInterval = pollInterval;
     this.historyDepth = historyDepth;
@@ -111,6 +130,9 @@ export class BitcoinWallet {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       shutdown: () => {}
     };
+
+    // TODO: Allow this to be injected.
+    this.inputResolver = new BlockchainInputResolver(provider);
 
     const networkKeys = getNetworkKeys(info, network);
     const extendedAccountPubKey = networkKeys.nativeSegWit;
@@ -190,7 +212,7 @@ export class BitcoinWallet {
         }
       };
     } catch (error) {
-      console.error('Failed to fetch fee market:', error);
+      this.logger.error('Failed to fetch fee market:', error);
       throw error;
     }
   }
@@ -202,9 +224,18 @@ export class BitcoinWallet {
    */
   public async submitTransaction(rawTransaction: string): Promise<string> {
     try {
-      return await this.provider.submitTransaction(rawTransaction);
+      const transactionId = await this.provider.submitTransaction(rawTransaction);
+      const entry = await historyEntryFromRawTx(rawTransaction, this.network, this.inputResolver);
+      entry.transactionHash = transactionId;
+
+      // Add to pending transactions if not already present
+      if (!this.pendingTransactions$.value.find((tx) => tx.transactionHash === entry.transactionHash)) {
+        this.pendingTransactions$.next([...this.pendingTransactions$.value, entry]);
+      }
+
+      return transactionId;
     } catch (error) {
-      console.error('Failed to submit transaction:', error);
+      this.logger.error('Failed to submit transaction:', error);
       throw error;
     }
   }
@@ -223,42 +254,111 @@ export class BitcoinWallet {
    * Starts polling for new blocks and updating wallet state.
    */
   private startPolling() {
-    this.pollSubscription = interval(this.pollInterval)
+    this.pollSubscription = combineLatest([interval(this.pollInterval).pipe(startWith(0)), this.pollController$])
       .pipe(
-        startWith(0),
+        tap(([intervalVal, pollAllowed]) =>
+          this.logger.debug(`Poll Interval tick: ${intervalVal}, Poll Allowed: ${pollAllowed}`)
+        ),
+        filter(([, pollAllowed]) => pollAllowed),
         switchMap(() => this.provider.getLastKnownBlock()),
         catchError((error) => {
-          console.error('Failed to fetch blockchain info during polling:', error);
+          this.logger.error('Failed to fetch blockchain info during polling:', error);
           return of(null);
         })
       )
       .subscribe(async (latestBlockInfo: BlockInfo | null) => {
         if (!latestBlockInfo) return;
 
-        await (!this.lastKnownBlock || this.lastKnownBlock.hash !== latestBlockInfo.hash
-          ? this.updateState(latestBlockInfo)
-          : this.updatePendingTransactions());
+        try {
+          await (!this.lastKnownBlock || this.lastKnownBlock.hash !== latestBlockInfo.hash
+            ? this.updateState(latestBlockInfo)
+            : this.updatePendingTransactions());
+        } catch (error) {
+          this.logger.error('Failed to update wallet state:', error);
+        }
       });
   }
 
-  private async updateTransactions() {
-    const newTxs = await this.provider.getTransactions(this.address.address, 0, this.historyDepth, 0);
+  private async updateTransactions(): Promise<boolean> {
+    const { transactions } = await this.provider.getTransactions(this.address.address, 0, this.historyDepth);
 
-    if (!isEqual(newTxs, this.transactionHistory)) {
-      this.transactionHistory = newTxs;
+    const txSetChanged = !isEqual(transactions, this.transactionHistory);
+
+    if (txSetChanged) {
+      this.transactionHistory = transactions;
       this.transactionHistory$.next(this.transactionHistory);
     }
+
+    return txSetChanged;
   }
 
+  /**
+   * Updates the local list of pending transactions by synchronizing with the remote mempool.
+   *
+   * Transactions in the Bitcoin network can be replaced in the mempool by another transaction
+   * with the same inputs but possibly with a higher fee (Replace-By-Fee, RBF).
+   *
+   * The method performs the following operations:
+   *
+   * 1. **Fetch Remote Pending Transactions**: Retrieves the list of pending transactions from the mempool
+   *    for the wallet's address. This includes transactions that are waiting to be confirmed.
+   *
+   * 2. **Synchronize Local and Remote Transactions**:
+   *    - For each remote pending transaction:
+   *      - If it matches a transaction in the local list (by transaction hash), it updates the local transaction
+   *        with the remote version, since it contains more metadata (I.E resolved inputs).
+   *
+   * 3. **Purge Invalid Local Transactions**:
+   *    - Iterates over the local list of pending transactions to check each transaction's inputs against:
+   *      a. Inputs of all other transactions in the transaction history to detect if any inputs have been confirmed in a block.
+   *      b. Inputs of other remote pending transactions to handle RBF scenarios where a transaction might be replaced
+   *         by another with the same inputs but not the same hash.
+   *    - Removes any local transactions whose inputs are found in the confirmed transactions or in another competing pending transaction.
+   */
   private async updatePendingTransactions() {
-    const pendingTxs = await this.provider.getTransactionsInMempool(this.address.address);
-
-    const newPendingTxs = pendingTxs.filter(
-      (tx) => !this.transactionHistory.find((historyTx) => historyTx.transactionHash === tx.transactionHash)
+    const remotePendingTxs = await this.provider.getTransactionsInMempool(
+      this.address.address,
+      this.lastKnownBlock?.height ?? 0
     );
+    const updatedPendingTxs = [...this.pendingTransactions$.value];
 
-    if (!isEqual(newPendingTxs, this.pendingTransactions$.value)) {
-      this.pendingTransactions$.next(newPendingTxs);
+    updatedPendingTxs.forEach((localTx, index) => {
+      const inputUsedInHistory = this.transactionHistory.some((historyTx) =>
+        historyTx.inputs.some((histInput) =>
+          localTx.inputs.some(
+            (localInput) => histInput.txId === localInput.txId && histInput.index === localInput.index
+          )
+        )
+      );
+
+      const inputUsedInRemotePending = remotePendingTxs.some(
+        (remoteTx) =>
+          remoteTx.transactionHash !== localTx.transactionHash &&
+          remoteTx.inputs.some((remoteInput) =>
+            localTx.inputs.some(
+              (localInput) => remoteInput.txId === localInput.txId && remoteInput.index === localInput.index
+            )
+          )
+      );
+
+      if (inputUsedInHistory || inputUsedInRemotePending) {
+        updatedPendingTxs.splice(index, 1);
+      }
+    });
+
+    remotePendingTxs.forEach((remoteTx) => {
+      const localTxIndex = updatedPendingTxs.findIndex(
+        (localTx) => localTx.transactionHash === remoteTx.transactionHash
+      );
+      if (localTxIndex > -1) {
+        updatedPendingTxs[localTxIndex] = remoteTx;
+      } else {
+        updatedPendingTxs.push(remoteTx);
+      }
+    });
+
+    if (!isEqual(updatedPendingTxs, this.pendingTransactions$.value)) {
+      this.pendingTransactions$.next(updatedPendingTxs);
     }
   }
 
@@ -276,9 +376,12 @@ export class BitcoinWallet {
   private async updateState(latestBlockInfo: BlockInfo): Promise<void> {
     this.lastKnownBlock = latestBlockInfo;
 
-    await this.updateTransactions();
+    const txSetChanged = await this.updateTransactions();
     await this.updatePendingTransactions();
-    await this.updateUtxos();
+
+    if (txSetChanged) {
+      await this.updateUtxos();
+    }
 
     this.lastKnownBlock = latestBlockInfo;
   }

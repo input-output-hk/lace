@@ -19,33 +19,55 @@ export class StubBitcoinDataProvider implements BlockchainDataProvider {
     };
   }
 
+  async getTransaction(_txHash: string): Promise<TransactionHistoryEntry> {
+    return {
+      inputs: [
+        {
+          address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf',
+          txId: '0000000000000000000a1b2c3d4e5f67890123456789abcdefabcdefabcdef',
+          index: 0,
+          satoshis: BigInt(5000)
+        }
+      ],
+      outputs: [{ address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf', satoshis: BigInt(4000) }],
+      transactionHash: 'd528068a1156d135430c815573c79faa7d45b3f395728e92322f3db1ad99da30',
+      confirmations: 10,
+      status: TransactionStatus.Confirmed,
+      blockHeight: 999,
+      timestamp: new Date().getUTCSeconds()
+    };
+  }
+
   async getTransactions(
     address: string,
     _afterBlockHeight?: number,
     _limit = 50,
-    _offset = 0
-  ): Promise<TransactionHistoryEntry[]> {
-    return [
-      {
-        inputs: [
-          {
-            address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf',
-            txId: '0000000000000000000a1b2c3d4e5f67890123456789abcdefabcdefabcdef',
-            index: 0,
-            satoshis: BigInt(5000)
-          }
-        ],
-        outputs: [
-          { address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf', satoshis: BigInt(4000) },
-          { address, satoshis: BigInt(9000) }
-        ],
-        transactionHash: 'd528068a1156d135430c815573c79faa7d45b3f395728e92322f3db1ad99da30',
-        confirmations: 10,
-        status: TransactionStatus.Confirmed,
-        blockHeight: 999,
-        timestamp: new Date().getUTCSeconds()
-      }
-    ];
+    _cursor = ''
+  ): Promise<{ transactions: TransactionHistoryEntry[]; nextCursor: string }> {
+    return {
+      transactions: [
+        {
+          inputs: [
+            {
+              address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf',
+              txId: '0000000000000000000a1b2c3d4e5f67890123456789abcdefabcdefabcdef',
+              index: 0,
+              satoshis: BigInt(5000)
+            }
+          ],
+          outputs: [
+            { address: 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf', satoshis: BigInt(4000) },
+            { address, satoshis: BigInt(9000) }
+          ],
+          transactionHash: 'd528068a1156d135430c815573c79faa7d45b3f395728e92322f3db1ad99da30',
+          confirmations: 10,
+          status: TransactionStatus.Confirmed,
+          blockHeight: 999,
+          timestamp: new Date().getUTCSeconds()
+        }
+      ],
+      nextCursor: ''
+    };
   }
 
   async getTransactionsInMempool(address: string, _afterBlockHeight?: number): Promise<TransactionHistoryEntry[]> {

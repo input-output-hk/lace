@@ -56,6 +56,7 @@ export interface AssetInputProps {
   setFocusInput?: (input?: string) => void;
   setFocus?: (focus: boolean) => void;
   isPopupView?: boolean;
+  disabled?: boolean;
 }
 
 const placeholderValue = '0';
@@ -87,7 +88,8 @@ export const AssetInput = ({
   focused,
   setFocusInput,
   setFocus,
-  isPopupView
+  isPopupView,
+  disabled
 }: AssetInputProps): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputRef = useRef<any>(null);
@@ -224,7 +226,7 @@ export const AssetInput = ({
                 size="small"
                 color="secondary"
                 className={cn(styles.maxBtn, { [styles.show]: displayMaxBtn })}
-                disabled={hasReachedMaxAmount || hasReachedMaxAvailableAmount}
+                disabled={hasReachedMaxAmount || hasReachedMaxAvailableAmount || disabled}
               >
                 {t('core.assetInput.maxButton')}
               </Button>
@@ -245,6 +247,7 @@ export const AssetInput = ({
               onBlur={handleOnBlur}
               onFocus={handleOnFocus}
               onKeyDown={handleKeyPress}
+              disabled={disabled}
             />
           </Tooltip>
         </div>

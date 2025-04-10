@@ -10,7 +10,8 @@ import {
   lockSlice,
   activityDetailSlice,
   uiSlice,
-  blockchainProviderSlice
+  blockchainProviderSlice,
+  bitcoinBlockchainProviderSlice
 } from './slices';
 import { assetDetailsSlice } from './slices/asset-details-slice';
 import { AppMode } from '@src/utils/constants';
@@ -27,6 +28,7 @@ export const createWalletStore = (
   return create((set, get) => ({
     currentChain,
     environmentName: currentChainName || CHAIN,
+    ...bitcoinBlockchainProviderSlice({ set, get }, {}),
     ...blockchainProviderSlice({ set, get }, { currentChainName, blockchainProviderFactory }),
     ...uiSlice({ set, get }, { currentChain, appMode }),
     ...walletInfoSlice({ set, get }),

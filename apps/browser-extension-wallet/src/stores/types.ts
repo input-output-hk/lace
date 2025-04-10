@@ -108,6 +108,8 @@ export interface WalletInfoSlice {
   cardanoWallet: Wallet.CardanoWallet | undefined;
   bitcoinWallet: Bitcoin.BitcoinWallet | undefined;
   walletManager: WalletManagerApi | undefined;
+  walletDisplayInfo: Wallet.WalletDisplayInfo | undefined;
+  setWalletDisplayInfo: (info?: Wallet.WalletDisplayInfo) => void;
   initialHdDiscoveryCompleted: boolean;
   setAddressesDiscoveryCompleted: (addressesDiscoveryCompleted: boolean) => void;
   hdDiscoveryStatus: AddressesDiscoveryStatus | null;
@@ -187,6 +189,11 @@ export interface BlockchainProviderSlice {
   setBlockchainProvider: (chain: Wallet.ChainName) => void;
 }
 
+export interface BitcoinBlockchainProviderSlice {
+  bitcoinBlockchainProvider: Bitcoin.BlockchainDataProvider;
+  setBitcoinBlockchainProvider: () => void;
+}
+
 // ===== WALLET STORE =====
 
 export type WalletStore = WalletActivitiesSlice &
@@ -197,4 +204,5 @@ export type WalletStore = WalletActivitiesSlice &
   ActivityDetailSlice &
   AssetDetailsSlice &
   UISlice &
-  BlockchainProviderSlice;
+  BlockchainProviderSlice &
+  BitcoinBlockchainProviderSlice;
