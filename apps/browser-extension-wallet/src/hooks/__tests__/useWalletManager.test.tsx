@@ -618,6 +618,7 @@ describe('Testing useWalletManager hook', () => {
       (walletApiUi.walletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.bitcoinWalletManager as any).destroyData = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletRepository as any).removeWallet = jest.fn().mockResolvedValue(undefined);
+      (walletApiUi.walletRepository as any).updateWalletMetadata = jest.fn().mockResolvedValue(undefined);
       (walletApiUi.walletManager as any).getWalletInfo = jest.fn().mockResolvedValue({
         walletId: '',
         walletName: '',
