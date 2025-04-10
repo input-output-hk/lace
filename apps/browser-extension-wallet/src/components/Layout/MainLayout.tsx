@@ -15,6 +15,7 @@ interface MainLayoutProps {
   useSimpleHeader?: boolean;
   hideFooter?: boolean;
   showAnnouncement?: boolean;
+  showBetaPill?: boolean;
 }
 
 const toastThrottle = 500;
@@ -29,7 +30,8 @@ export const MainLayout = ({
   children,
   useSimpleHeader = false,
   hideFooter,
-  showAnnouncement = true
+  showAnnouncement = true,
+  showBetaPill = false
 }: MainLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const [aboutExtension, setAboutExtension] = useState({} as ExtensionUpdateData);
@@ -64,7 +66,7 @@ export const MainLayout = ({
     <div className={styles.layoutContainer}>
       <div className={styles.layoutContent}>
         <div className={styles.contentWrapper}>
-          {useSimpleHeader ? <SimpleHeader /> : <MainHeader />}
+          {useSimpleHeader ? <SimpleHeader beta={showBetaPill} /> : <MainHeader />}
           <div id={extensionScrollableContainerID} className={styles.content}>
             {children}
           </div>

@@ -1,14 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './MainHeader.module.scss';
-import LaceLogoMark from '../../../../assets/branding/lace-logo-mark.component.svg';
+import LaceLogoMark from '../../../../assets/branding/lace-logo-beta-white.component.svg';
+import LaceLogoMarkDark from '../../../../assets/branding/lace-logo-beta-dark.component.svg';
 import { walletRoutePaths } from '../../wallet-paths';
 import classNames from 'classnames';
 
 import { DropdownMenu } from '@components/DropdownMenu';
 import { ExpandButton } from '@components/ExpandButton';
 import { NetworkPill } from '@components/NetworkPill';
-import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext, useTheme } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
@@ -18,6 +19,7 @@ export const MainHeader = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
   const location = useLocation();
+  const { theme } = useTheme();
 
   const locationBrowserSection = {
     [walletRoutePaths.assets]: BrowserViewSections.HOME,
@@ -28,6 +30,8 @@ export const MainHeader = (): React.ReactElement => {
     [walletRoutePaths.signMessage]: BrowserViewSections.SIGN_MESSAGE,
     [walletRoutePaths.settings]: BrowserViewSections.SETTINGS
   };
+
+  const LaceLogo = theme.name === 'dark' ? LaceLogoMarkDark : LaceLogoMark;
 
   return (
     <div className={styles.header} data-testid="header-container">
@@ -47,7 +51,7 @@ export const MainHeader = (): React.ReactElement => {
           data-testid="header-logo"
           onClick={() => analytics.sendEventToPostHog(PostHogAction.WalletLaceClick)}
         >
-          <LaceLogoMark className={styles.logo} />
+          <LaceLogo className={styles.logo} />
           {process.env.USE_MULTI_WALLET !== 'true' && <NetworkPill />}
         </Link>
         <div className={styles.controls}>

@@ -45,3 +45,12 @@
   width: 100%;
   margin-bottom: 12px;
 }
+
+.betaPill {
+  background: linear-gradient(94.22deg, #FF92E1 -18.3%, #FDC300 118.89%);
+  border-radius: 100px;
+
+  .betaPillCopy {
+    color: var(--light-mode-body, --dark-mode-black);
+  }
+}
