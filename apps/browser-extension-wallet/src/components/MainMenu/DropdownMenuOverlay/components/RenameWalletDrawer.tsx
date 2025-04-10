@@ -124,8 +124,14 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
             w="$fill"
             onClick={renameWallet}
             disabled={isSaveButtonDisabled}
+            data-testid={'rename-wallet-save-button'}
           />
-          <Button.Secondary label={t('browserView.renameWalletDrawer.cancel')} w="$fill" onClick={handleOnClose} />
+          <Button.Secondary
+            label={t('browserView.renameWalletDrawer.cancel')}
+            w="$fill"
+            onClick={handleOnClose}
+            data-testid={'rename-wallet-cancel-button'}
+          />
         </Flex>
       }
       popupView={popupView}
@@ -133,7 +139,9 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
       <>
         <Box mt="$44">
           <Box mb="$24">
-            <Text.Body.Large color="secondary">{t('browserView.renameWalletDrawer.renameWallet')}</Text.Body.Large>
+            <Text.Body.Large color="secondary" data-testid={'rename-wallet-label'}>
+              {t('browserView.renameWalletDrawer.renameWallet')}
+            </Text.Body.Large>
           </Box>
           <TextBox
             label={t('browserView.renameWalletDrawer.walletName')}
@@ -147,11 +155,12 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
             }}
             w="$fill"
             errorMessage={newWalletName.errorMessage}
+            data-testid={'rename-wallet-name'}
           />
         </Box>
         <Box mt="$60" mb="$16">
           <Box mb="$24">
-            <Text.Body.Large color="secondary">
+            <Text.Body.Large color="secondary" data-testid={'rename-enabled-accounts-label'}>
               {t('browserView.renameWalletDrawer.renameEnabledAccounts')}
             </Text.Body.Large>
           </Box>
@@ -164,6 +173,7 @@ export const RenameWalletDrawer = ({ popupView, onClose, open }: RenameWalletDra
                   errorMessage={accountsData[index]?.errorMessage}
                   w="$fill"
                   onChange={(e) => handleOnChangeAccountData(e, index)}
+                  data-testid={`rename-account-${index}`}
                 />
               </Box>
             ))}
