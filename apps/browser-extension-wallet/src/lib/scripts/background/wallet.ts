@@ -15,7 +15,7 @@ import {
 } from 'rxjs';
 import { getProviders, SESSION_TIMEOUT } from './config';
 import { createPersonalWallet, createSharedWallet, DEFAULT_POLLING_CONFIG, storage } from '@cardano-sdk/wallet';
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
 import { Cardano, HandleProvider } from '@cardano-sdk/core';
 import {
   AnyWallet,
@@ -52,7 +52,7 @@ import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresM
 import { createUserSessionTracker, isLacePopupOpen$, isLaceTabActive$ } from './session';
 import { TrackerSubject } from '@cardano-sdk/util-rxjs';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
-import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
+import { handleKoraLabsPolicyId, TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 import { Bitcoin } from '@lace/bitcoin';
 import {
   bitcoinProviderProperties,
@@ -135,7 +135,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    const baseUrl = getBaseUrlForChain(chainName);
+    const serverUrl = getBaseUrlForChain(chainName);
     let providers = await getProviders(chainName);
 
     // Sanchonet does not have a handle provider
@@ -168,10 +168,10 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           paymentScript,
           stakingScript,
           handleProvider: supportsHandleResolver
-            ? handleHttpProvider({
+            ? new KoraLabsHandleProvider({
                 adapter: axiosFetchAdapter,
-                baseUrl,
-                logger
+                serverUrl,
+                policyId: handleKoraLabsPolicyId
               })
             : noopHandleResolver,
           stores,
@@ -216,10 +216,10 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         ...providers,
         stores,
         handleProvider: supportsHandleResolver
-          ? handleHttpProvider({
+          ? new KoraLabsHandleProvider({
               adapter: axiosFetchAdapter,
-              baseUrl,
-              logger
+              serverUrl,
+              policyId: handleKoraLabsPolicyId
             })
           : noopHandleResolver,
         witnesser,

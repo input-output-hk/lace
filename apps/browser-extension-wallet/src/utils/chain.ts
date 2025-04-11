@@ -24,6 +24,19 @@ export const getBaseUrlForChain = (chainName: Wallet.ChainName): string => {
   return url;
 };
 
+export const getBaseKoraLabsUrlForChain = (chainName: Wallet.ChainName): string => {
+  switch (chainName) {
+    case 'Mainnet':
+      return 'https://api.handle.me/';
+    case 'Preprod':
+      return 'https://preprod.api.handle.me/';
+    case 'Preview':
+      return 'https://preview.api.handle.me/';
+  }
+
+  throw new Error('Chain not supported by KoraLabs');
+};
+
 export const getMagicForChain = (chainName: Wallet.ChainName): Wallet.Cardano.NetworkMagics => {
   const { AVAILABLE_CHAINS } = config();
   let magic = 0;
