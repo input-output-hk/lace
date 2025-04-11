@@ -9,7 +9,7 @@ class CustomSubmitApiDrawer extends CommonDrawerElements {
   private LEARN_MORE_LINK = '[data-testid="custom-submit-api-learn-more-url"]';
   private DEFAULT_ADDRESS = '[data-testid="custom-submit-api-default-address"]';
   private URL_INPUT = '[data-testid="custom-submit-api-url-input"]';
-  private URL_INPUT_LABEL = 'form label';
+  private URL_INPUT_LABEL = '[data-testid="custom-submit-api-url-label"]';
   private ENABLE_BUTTON = '[data-testid="custom-submit-button-enable"]';
   private DISABLE_BUTTON = '[data-testid="custom-submit-button-disable"]';
   private VALIDATION_ERROR = '[data-testid="custom-submit-api-validation-error"]';

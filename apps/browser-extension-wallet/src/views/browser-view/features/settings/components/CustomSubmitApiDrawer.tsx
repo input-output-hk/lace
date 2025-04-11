@@ -112,7 +112,7 @@ export const CustomSubmitApiDrawer = ({
             value={customSubmitTxUrl}
             onChange={(event) => setCustomSubmitTxUrl(event.target.value)}
             disabled={isCustomApiEnabledForCurrentNetwork}
-            data-testid="custom-submit-api-url-input"
+            data-testid="custom-submit-api-url"
           />
           <Button.Primary
             label={
