@@ -29,6 +29,7 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     When I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
     Then I validate latest analytics single event "onboarding | restore wallet revamp | added"
+    And I wait for main loader to disappear
     And "$create_alias" PostHog event was sent
     And I validate that alias event has assigned same user id "9646a33207b90ae60ae83770aaa82597" in posthog
 
