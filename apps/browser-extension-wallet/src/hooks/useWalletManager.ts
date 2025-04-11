@@ -1043,45 +1043,14 @@ export const useWalletManager = (): UseWalletManager => {
       const wallets = nextWallet ? [nextWallet] : await firstValueFrom(walletRepository.wallets$);
 
       if (wallets.length > 0) {
-        const isBitcoinWallet = wallets[0].type === WalletType.InMemory && wallets[0].blockchainName === 'Bitcoin';
-
-        if (!isBitcoinWallet) {
-          const activateProps = {
-            walletId: wallets[0].walletId,
-            chainId: getCurrentChainId(),
-            accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0].accountIndex
-          };
-          await walletManager.activate(activateProps);
-
-          await backgroundService.setBackgroundStorage({
-            activeBlockchain: 'cardano'
-          });
-
-          setIsBitcoinWallet(false);
-
-          return activateProps;
-        }
-        const network =
-          getCurrentChainId().networkId === Wallet.Cardano.NetworkId.Mainnet
-            ? BtcWallet.Network.Mainnet
-            : BtcWallet.Network.Testnet;
-
-        await bitcoinWalletManager.activate({
-          walletId: wallets[0].walletId,
-          accountIndex: 0,
-          network
-        });
-
-        await backgroundService.setBackgroundStorage({
-          activeBlockchain: 'bitcoin'
-        });
-
-        setIsBitcoinWallet(true);
-        return {
+        const props = {
           walletId: wallets[0].walletId,
           chainId: getCurrentChainId(),
-          accountIndex: 0
+          accountIndex: wallets[0].type === WalletType.Script ? undefined : wallets[0].accounts[0].accountIndex
         };
+
+        await activateWallet(props);
+        return props;
       }
 
       // deleting last wallet clears all data
@@ -1134,7 +1103,6 @@ export const useWalletManager = (): UseWalletManager => {
       }
     },
     [
-      setIsBitcoinWallet,
       resetWalletLock,
       setCardanoWallet,
       setWalletDisplayInfo,
@@ -1142,7 +1110,8 @@ export const useWalletManager = (): UseWalletManager => {
       userIdService,
       clearAddressBook,
       clearNftsFolders,
-      getCurrentChainId
+      getCurrentChainId,
+      activateWallet
     ]
   );
 
