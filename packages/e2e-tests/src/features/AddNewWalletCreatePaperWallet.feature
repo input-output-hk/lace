@@ -101,6 +101,7 @@ Feature: Add new wallet - Create paper wallet
     Then "Open wallet" button is disabled on "Save your paper wallet" page
     When I click on "Download" button on "Save your paper wallet" page
     And I click on "Open wallet" button on "Save your paper wallet" page
+    And I switch to window with Lace
     And I wait for main loader to disappear
     Then I see LW homepage
     And "Paper Wall..." is displayed as a wallet name on the menu button
