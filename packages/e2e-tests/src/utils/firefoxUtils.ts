@@ -8,7 +8,7 @@ export const getExtensionUUID = async (): Promise<string> => {
   Logger.log(`Trying to get extension id from: ${filePath}${fileName}`);
 
   const data = fs.readFileSync(filePath + fileName, 'utf8');
-  const match = data.match(/\\"lace-wallet-ext@lace\.io\\":\\"\b([\w-]+)\b\\"/);
+  const match = data.match(/\\"lace-wallet@lace\.io\\":\\"\b([\w-]+)\b\\"/);
 
   if (match) {
     return match[1];
