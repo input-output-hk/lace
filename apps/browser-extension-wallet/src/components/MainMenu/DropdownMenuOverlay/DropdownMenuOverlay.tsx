@@ -41,6 +41,7 @@ interface Props extends MenuProps {
   lockWalletButton?: ReactNode;
   topSection?: ReactNode;
   sendAnalyticsEvent?: (event: PostHogAction) => void;
+  open: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -49,6 +50,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   lockWalletButton = <LockWallet />,
   topSection,
   sendAnalyticsEvent,
+  open,
   ...props
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -94,6 +96,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   };
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
+
+  useEffect(() => {
+    if (!open) {
+      goBackToMainSection();
+    }
+  }, [open, goBackToMainSection]);
 
   topSection = topSection ?? (
     <UserInfo
