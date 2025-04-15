@@ -52,6 +52,7 @@ import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 import extensionUtils from '../utils/utils';
 import CrashScreen from '../elements/CrashScreen';
+import { expect } from 'chai';
 
 Given(/^Lace is ready for test$/, async () => {
   if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
@@ -478,3 +479,29 @@ When(/^I click on "DApps" button$/, async () => {
   testContext.save('tabsCount', tabsCount);
   await visit('DApps', 'popup', false);
 });
+
+When(/^I start tracing$/, async () => {
+  if (browser.isChromium) {
+    await browser.startTracing();
+  } else {
+    Logger.log('Tracing now available on non-chromium browsers');
+  }
+});
+
+When(/^I end tracing$/, async () => {
+  if (browser.isChromium) {
+    await browser.endTracing();
+  } else {
+    Logger.log('Tracing now available on non-chromium browsers');
+  }
+});
+
+Then(
+  /^there were approximately (\d+) requests sent \((\d+)% threshold\)$/,
+  async (noOfRequests: number, threshold: number) => {
+    const metrics = await browser.getPageWeight();
+    const min = Math.round(noOfRequests * (1 - threshold / 100));
+    const max = Math.round(noOfRequests * (1 + threshold / 100));
+    expect(metrics.requestCount).to.be.within(min, max);
+  }
+);
