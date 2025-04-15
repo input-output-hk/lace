@@ -38,7 +38,7 @@ import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { isBackgroundProcess } from '@cardano-sdk/util';
 import { SharedWalletScriptKind } from '@lace/core';
-import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
+import { getBaseKoraLabsUrlForChain, getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
@@ -134,7 +134,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    const serverUrl = getBaseUrlForChain(chainName);
+    const serverUrl = getBaseKoraLabsUrlForChain(chainName);
     let providers = await getProviders(chainName);
 
     // Sanchonet does not have a handle provider

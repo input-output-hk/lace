@@ -1,4 +1,4 @@
-import { getBaseUrlForChain } from '@src/utils/chain';
+import { getBaseKoraLabsUrlForChain } from '@src/utils/chain';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
@@ -9,7 +9,7 @@ import { handleKoraLabsPolicyId } from '@src/utils/constants';
 
 export const useHandleResolver = (): HandleProvider => {
   const { currentChain } = useWalletStore();
-  const serverUrl = getBaseUrlForChain(getChainName(currentChain));
+  const serverUrl = getBaseKoraLabsUrlForChain(getChainName(currentChain));
 
   return useMemo(
     () =>
