@@ -54,9 +54,10 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   return (
     <Dropdown
       overlayClassName={styles.overlay}
-      destroyPopupOnHide
       onOpenChange={handleDropdownState}
-      overlay={<DropdownMenuOverlay isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />}
+      overlay={
+        <DropdownMenuOverlay open={isDropdownMenuOpen} isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
+      }
       placement="bottomRight"
       trigger={['click']}
     >

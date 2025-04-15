@@ -41,6 +41,7 @@ interface Props extends MenuProps {
   lockWalletButton?: ReactNode;
   topSection?: ReactNode;
   sendAnalyticsEvent?: (event: PostHogAction) => void;
+  open: boolean;
 }
 
 // eslint-disable-next-line complexity
@@ -49,6 +50,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   lockWalletButton = <LockWallet />,
   topSection,
   sendAnalyticsEvent,
+  open,
   ...props
 }): React.ReactElement => {
   const { t } = useTranslation();
@@ -69,9 +71,18 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const [isRenamingWallet, setIsRenamingWallet] = useState(false);
   const useSwitchToNamiMode = posthog?.isFeatureFlagEnabled('use-switch-to-nami-mode') && !isBitcoinWallet;
   useEffect(() => {
+    let mounted = true;
     getBackgroundStorage()
-      .then((storage) => setNamiMigration(storage.namiMigration))
+      .then(async (storage) => {
+        if (mounted) {
+          setNamiMigration(storage.namiMigration);
+        }
+      })
       .catch(logger.error);
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const openWalletAccounts = (wallet: AnyBip32Wallet<Wallet.WalletMetadata, Wallet.AccountMetadata>) => {
@@ -85,6 +96,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   };
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
+
+  useEffect(() => {
+    if (!open) {
+      goBackToMainSection();
+    }
+  }, [open, goBackToMainSection]);
 
   topSection = topSection ?? (
     <UserInfo

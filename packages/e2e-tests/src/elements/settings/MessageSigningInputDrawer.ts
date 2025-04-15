@@ -13,7 +13,7 @@ class MessageSigningInputDrawer extends CommonDrawerElements {
   private MESSAGE_INPUT = '[data-testid="sign-message-input"]';
   private SIGN_MESSAGE_BUTTON = '[data-testid="sign-message-button"]';
   private CLOSE_BUTTON = '[data-testid="close-button"]';
-  private ADDRESS_MENU = '.ant-dropdown-menu';
+  private ADDRESS_MENU = '[data-testid="address-dropdown-menu"]';
   private ADDRESS_ITEM = '.ant-dropdown-menu-item';
 
   get drawerHeaderTitle(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -53,7 +53,7 @@ class MessageSigningInputDrawer extends CommonDrawerElements {
   }
 
   get addresses(): ChainablePromiseArray<WebdriverIO.ElementArray> {
-    return $$(this.ADDRESS_ITEM);
+    return this.addressMenu.$$(this.ADDRESS_ITEM);
   }
 
   async clickOnSelectAddressButton(): Promise<void> {

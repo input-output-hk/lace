@@ -34,7 +34,7 @@ export const AddNewBitcoinWalletLink = ({ isPopup }: Props): React.ReactElement 
       onClick={openNewWallet}
     >
       <Menu.Item data-testid="header-menu-new-wallet" className={styles.menuItem}>
-        <a>Add Bitcoin wallet</a>
+        Add Bitcoin wallet
       </Menu.Item>
     </Link>
   );
