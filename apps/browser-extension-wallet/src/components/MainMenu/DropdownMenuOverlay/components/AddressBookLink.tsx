@@ -18,7 +18,7 @@ export const AddressBookLink = (): React.ReactElement => {
   return (
     <Link to={walletRoutePaths.addressBook} onClick={handleOnClicked}>
       <Menu.Item data-testid="header-menu-address-book" className={styles.menuItem}>
-        <a>{t('browserView.sideMenu.links.addressBook')}</a>
+        {t('browserView.sideMenu.links.addressBook')}
       </Menu.Item>
     </Link>
   );

@@ -18,7 +18,7 @@ export const SettingsLink = (): React.ReactElement => {
   return (
     <Link to={walletRoutePaths.settings} onClick={handleOnLinkClick}>
       <Menu.Item data-testid="header-menu-settings" className={styles.menuItem}>
-        <a>{t('browserView.topNavigationBar.links.settings')}</a>
+        {t('browserView.topNavigationBar.links.settings')}
       </Menu.Item>
     </Link>
   );

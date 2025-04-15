@@ -14,7 +14,7 @@ export const SignMessageLink = (): React.ReactElement => {
 
   return (
     <Menu.Item data-testid="header-menu-sign-message" className={styles.menuItem} onClick={handleOnLinkClick}>
-      <a>{t('browserView.topNavigationBar.links.signMessage')}</a>
+      {t('browserView.topNavigationBar.links.signMessage')}
     </Menu.Item>
   );
 };

@@ -37,7 +37,7 @@ export const AddNewWalletLink = ({ isPopup, sendAnalyticsEvent }: Props): React.
       onClick={openNewWallet}
     >
       <Menu.Item data-testid="header-menu-new-wallet" className={styles.menuItem}>
-        <a>{t('browserView.sideMenu.links.addNewWallet')}</a>
+        {t('browserView.sideMenu.links.addNewWallet')}
       </Menu.Item>
     </Link>
   );
