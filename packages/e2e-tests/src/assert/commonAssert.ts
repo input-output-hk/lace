@@ -112,6 +112,12 @@ class CommonAssert {
       Logger.log('skipping check for password in memory snapshot, not supported in Firefox');
     }
   }
+
+  async assertValueWithinRange(currentRequestCount: number, expectedNoOfRequests: number, threshold: number) {
+    const min = Math.round(expectedNoOfRequests * (1 - threshold / 100));
+    const max = Math.round(expectedNoOfRequests * (1 + threshold / 100));
+    expect(currentRequestCount).to.be.within(min, max);
+  }
 }
 
 export default new CommonAssert();

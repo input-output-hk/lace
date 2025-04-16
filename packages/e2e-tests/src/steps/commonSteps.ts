@@ -52,7 +52,6 @@ import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 import extensionUtils from '../utils/utils';
 import CrashScreen from '../elements/CrashScreen';
-import { expect } from 'chai';
 
 Given(/^Lace is ready for test$/, async () => {
   if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
@@ -484,7 +483,7 @@ When(/^I start tracing$/, async () => {
   if (browser.isChromium) {
     await browser.startTracing();
   } else {
-    Logger.log('Tracing now available on non-chromium browsers');
+    Logger.log('Tracing not available on non-chromium browsers');
   }
 });
 
@@ -492,16 +491,38 @@ When(/^I end tracing$/, async () => {
   if (browser.isChromium) {
     await browser.endTracing();
   } else {
-    Logger.log('Tracing now available on non-chromium browsers');
+    Logger.log('Tracing not available on non-chromium browsers');
   }
 });
 
 Then(
-  /^there were approximately (\d+) requests sent \((\d+)% threshold\)$/,
-  async (noOfRequests: number, threshold: number) => {
-    const metrics = await browser.getPageWeight();
-    const min = Math.round(noOfRequests * (1 - threshold / 100));
-    const max = Math.round(noOfRequests * (1 + threshold / 100));
-    expect(metrics.requestCount).to.be.within(min, max);
+  /^there were approximately (\d+) requests sent \((\d+)% threshold\) \[getPageWeight\(\)]$/,
+  async (expectedNumberOfRequests: number, threshold: number) => {
+    if (browser.isChromium) {
+      const metrics = await browser.getPageWeight();
+      const requestCount = metrics.requestCount;
+      Logger.log(`Total requests (getPageWeight): ${metrics.requestCount}`);
+      await commonAssert.assertValueWithinRange(requestCount, expectedNumberOfRequests, threshold);
+    } else {
+      Logger.log('getPageWeight() not available on non-chromium browsers');
+    }
   }
 );
+
+Then(
+  /^there were approximately (\d+) requests sent \((\d+)% threshold\) \[Puppeteer and CDP]$/,
+  async (expectedNumberOfRequests: number, threshold: number) => {
+    if (browser.isChromium) {
+      const requestCount = networkManager.getRequestCount();
+      Logger.log(`Total requests (Puppeteer and CDP): ${requestCount}`);
+      await commonAssert.assertValueWithinRange(requestCount, expectedNumberOfRequests, threshold);
+      networkManager.resetRequestCount();
+    } else {
+      Logger.log('Puppeteer and CDP not available on non-chromium browsers');
+    }
+  }
+);
+
+When('I start counting requests using Puppeteer and CDP', async () => {
+  await networkManager.countSentRequests();
+});
