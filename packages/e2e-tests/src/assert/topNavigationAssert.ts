@@ -68,6 +68,16 @@ class TopNavigationAssert {
     expect(await MenuHeader.menuAddNewWalletButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addNewWallet')
     );
+    await MenuHeader.menuAddBitcoinWalletButton.waitForDisplayed({ reverse: extensionUtils.isMainnet() });
+    await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: extensionUtils.isMainnet() });
+    if (!extensionUtils.isMainnet()) {
+      expect(await MenuHeader.menuAddBitcoinWalletButton.getText()).to.equal(
+        await t('browserView.sideMenu.links.addBitcoinWallet')
+      );
+      expect(await MenuHeader.menuAddSharedWalletButton.getText()).to.equal(
+        await t('browserView.sideMenu.links.addSharedWallet')
+      );
+    }
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addressBook')

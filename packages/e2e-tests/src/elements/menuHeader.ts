@@ -15,6 +15,8 @@ export class MenuHeader {
   private MENU_BUTTON = '//button[@data-testid="profile-dropdown-trigger-menu"]';
   private MENU_ADDRESS_BOOK_BUTTON = '//li[@data-testid="header-menu-address-book"]';
   private MENU_ADD_NEW_WALLET_BUTTON = '[data-testid="header-menu-new-wallet"]';
+  private MENU_ADD_BITCOIN_WALLET_BUTTON = '[data-testid="header-menu-add-bitcoin-wallet"]';
+  private MENU_ADD_SHARED_WALLET_BUTTON = '[data-testid="header-menu-add-shared-wallet"]';
   private MENU_SETTINGS_BUTTON = '//li[@data-testid="header-menu-settings"]';
   private MENU_SIGN_MESSAGE_BUTTON = '//li[@data-testid="header-menu-sign-message"]';
   private MENU_LOCK_BUTTON = '//li[@data-testid="header-menu-lock"]';
@@ -102,6 +104,14 @@ export class MenuHeader {
     return $(this.MENU_ADD_NEW_WALLET_BUTTON);
   }
 
+  get menuAddBitcoinWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_ADD_BITCOIN_WALLET_BUTTON);
+  }
+
+  get menuAddSharedWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_ADD_SHARED_WALLET_BUTTON);
+  }
+
   get menuSettingsButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MENU_SETTINGS_BUTTON);
   }
@@ -177,6 +187,16 @@ export class MenuHeader {
   async clickOnAddNewWalletOption(): Promise<void> {
     await this.menuAddNewWalletButton.waitForClickable();
     await this.menuAddNewWalletButton.click();
+  }
+
+  async clickOnAddBitcoinWalletOption(): Promise<void> {
+    await this.menuAddBitcoinWalletButton.waitForClickable();
+    await this.menuAddBitcoinWalletButton.click();
+  }
+
+  async clickOnAddSharedWalletOption(): Promise<void> {
+    await this.menuAddSharedWalletButton.waitForClickable();
+    await this.menuAddSharedWalletButton.click();
   }
 
   async clickMenuButton(): Promise<void> {
