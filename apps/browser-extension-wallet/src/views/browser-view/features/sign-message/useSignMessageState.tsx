@@ -43,6 +43,7 @@ export const useSignMessageState = (): SignMessageState => {
     setError('');
     setHardwareWalletError('');
     setErrorObj(undefined);
+    setSignature(undefined);
   }, []);
 
   const performSigning = useCallback(
