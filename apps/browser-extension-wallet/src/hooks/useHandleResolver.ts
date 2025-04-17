@@ -1,23 +1,23 @@
-import { getBaseUrlForChain } from '@src/utils/chain';
+import { getBaseKoraLabsUrlForChain } from '@src/utils/chain';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
+import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { HandleProvider } from '@cardano-sdk/core';
-import { logger } from '@lace/common';
+import { handleKoraLabsPolicyId } from '@src/utils/constants';
 
 export const useHandleResolver = (): HandleProvider => {
   const { currentChain } = useWalletStore();
-  const baseCardanoServicesUrl = getBaseUrlForChain(getChainName(currentChain));
+  const serverUrl = getBaseKoraLabsUrlForChain(getChainName(currentChain));
 
   return useMemo(
     () =>
-      handleHttpProvider({
+      new KoraLabsHandleProvider({
         adapter: axiosFetchAdapter,
-        baseUrl: baseCardanoServicesUrl,
-        logger
+        serverUrl,
+        policyId: handleKoraLabsPolicyId
       }),
-    [baseCardanoServicesUrl]
+    [serverUrl]
   );
 };

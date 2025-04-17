@@ -1,3 +1,4 @@
+import { Cardano } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 
 export const LACE_APP_ID = 'lace-app';
@@ -120,3 +121,5 @@ export const MULTIDELEGATION_DAPP_COMPATIBILITY_LS_KEY = 'isMultiDelegationDAppC
 export const STAKING_BROWSER_PREFERENCES_LS_KEY = 'stakingBrowserPreferences';
 
 export const TRACK_POPUP_CHANNEL = 'popup';
+
+export const handleKoraLabsPolicyId = Cardano.PolicyId('f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a');
