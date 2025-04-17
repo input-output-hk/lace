@@ -5,6 +5,11 @@ import { CDPSession } from 'puppeteer';
 import { browser } from '@wdio/globals';
 import extensionUtils from './utils';
 
+interface CountRequestOptions {
+  targetTypes?: string[];
+  printRequests?: boolean;
+}
+
 export class NetworkManager {
   private readonly NETWORK_ENABLE = 'Network.enable';
   private static cdpSessions: CDPSession[] = [];
@@ -96,6 +101,48 @@ export class NetworkManager {
       Logger.log('requests logging not available in Firefox');
     }
   };
+
+  private requestCount = 0;
+
+  async countSentRequests(options: CountRequestOptions = {}): Promise<void> {
+    if (!browser.isChromium) {
+      Logger.log('Requests logging with CDP not available in non-chromium browsers');
+      return;
+    }
+
+    const { targetTypes = ['page', 'service_worker', 'other'], printRequests = false } = options;
+
+    await browser.call(async () => {
+      const puppeteer = await browser.getPuppeteer();
+      const targets = puppeteer.targets().filter((target) => targetTypes.includes(target.type()));
+
+      await Promise.all(
+        targets.map(async (target) => {
+          try {
+            const client = await target.createCDPSession();
+
+            await client.send(this.NETWORK_ENABLE);
+            client.on('Network.requestWillBeSent', (request) => {
+              this.requestCount++;
+              if (printRequests) {
+                Logger.log(`Request #${this.requestCount}: ${request.request.url}`);
+              }
+            });
+          } catch (error) {
+            Logger.log(`CDP session error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+          }
+        })
+      );
+    });
+  }
+
+  getRequestCount(): number {
+    return this.requestCount;
+  }
+
+  resetRequestCount(): void {
+    this.requestCount = 0;
+  }
 
   closeOpenedCdpSessions = async (): Promise<void> => {
     if ((await extensionUtils.getBrowser()) !== 'firefox') {
