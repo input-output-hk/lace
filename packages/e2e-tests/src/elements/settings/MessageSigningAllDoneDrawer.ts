@@ -7,9 +7,11 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
   private TITLE = '[data-testid="result-message-title"]';
   private SIGNATURE = '[data-testid="sign-message-signature"]';
   private SIGNATURE_LABEL = '[data-testid="result-message-signature-label"]';
+  private SIGNATURE_COPY_TO_CLIPBOARD_BUTTON = '[data-testid="signature-copy-to-clipboard-button"]';
   private KEY = '[data-testid="sign-message-key"]';
   private KEY_LABEL = '[data-testid="result-message-key-label"]';
-  private COPY_BUTTON = '[data-testid="copy-button"]';
+  private KEY_COPY_TO_CLIPBOARD_BUTTON = '[data-testid="public-key-copy-to-clipboard-button"]';
+  private SIGN_ANOTHER_MESSAGE_BUTTON = '[data-testid="sign-another-message-button"]';
   private CLOSE_BUTTON = '[data-testid="close-button"]';
 
   get image(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -28,6 +30,10 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
     return $(this.SIGNATURE_LABEL);
   }
 
+  get signatureCopyToClipboardButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SIGNATURE_COPY_TO_CLIPBOARD_BUTTON);
+  }
+
   get key(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.KEY);
   }
@@ -36,17 +42,31 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
     return $(this.KEY_LABEL);
   }
 
-  get copyButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.COPY_BUTTON);
+  get keyCopyToClipboardButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.KEY_COPY_TO_CLIPBOARD_BUTTON);
+  }
+
+  get signAnotherMessageButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SIGN_ANOTHER_MESSAGE_BUTTON);
   }
 
   get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLOSE_BUTTON);
   }
 
-  async clickOnCopySignatureToClipboardButton(): Promise<void> {
-    await this.copyButton.waitForClickable();
-    await this.copyButton.click();
+  async clickOnCopyToClipboardButtonInSignatureSection(): Promise<void> {
+    await this.signatureCopyToClipboardButton.waitForClickable();
+    await this.signatureCopyToClipboardButton.click();
+  }
+
+  async clickOnCopyToClipboardButtonInPublicKeySection(): Promise<void> {
+    await this.keyCopyToClipboardButton.waitForClickable();
+    await this.keyCopyToClipboardButton.click();
+  }
+
+  async clickOnSignAnotherMessageButton(): Promise<void> {
+    await this.signAnotherMessageButton.waitForClickable();
+    await this.signAnotherMessageButton.click();
   }
 
   async clickOnCloseButton(): Promise<void> {
