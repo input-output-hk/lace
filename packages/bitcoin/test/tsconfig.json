@@ -1,12 +1,12 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@src/*": ["../src/*"]
-    },
-    "baseUrl": ".",
-    "rootDir": ".."
+    "baseUrl": "."
   },
-  "include": ["../src/*", "../src/ui/typings"]
+  "include": ["./**/*.ts", "../src/**/*.ts"],
+  "references": [
+    {
+      "path": "../src"
+    }
+  ]
 }
