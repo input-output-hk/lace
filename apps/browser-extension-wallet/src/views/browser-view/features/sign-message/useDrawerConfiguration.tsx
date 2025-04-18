@@ -50,7 +50,7 @@ export const useDrawerConfiguration = ({
   const getActionButton = useCallback(() => {
     if (signatureObject?.signature && !error) {
       return (
-        <Button onClick={signAnotherMessage} data-testid={'copy-button'}>
+        <Button onClick={signAnotherMessage} data-testid={'sign-another-message-button'}>
           {t('core.signMessage.signAnotherMessage')}
         </Button>
       );

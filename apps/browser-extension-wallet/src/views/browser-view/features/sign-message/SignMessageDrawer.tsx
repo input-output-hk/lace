@@ -16,10 +16,20 @@ import CopyToClipboardImg from '@assets/icons/copy.component.svg';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { TFunction } from 'i18next';
 
-const renderCopyToClipboard = ({ text, handleCopy, t }: { text: string; handleCopy: () => void; t: TFunction }) => (
+const renderCopyToClipboard = ({
+  text,
+  handleCopy,
+  t,
+  testId
+}: {
+  text: string;
+  handleCopy: () => void;
+  t: TFunction;
+  testId?: string;
+}) => (
   <CopyToClipboard text={text}>
     <Box className={styles.copyButton} onClick={handleCopy}>
-      <Text.Button color="accent" weight="$semibold">
+      <Text.Button color="accent" weight="$semibold" data-testid={testId ?? 'copy-to-clipboard-button'}>
         <Flex alignItems="center">
           <CopyToClipboardImg className={styles.copyIcon} />
           {t('core.signMessage.copyToClipboard')}
@@ -172,7 +182,12 @@ export const SignMessageDrawer: React.FC = () => {
           <Text.Body.Normal weight="$medium" data-testid={'result-message-signature-label'}>
             {t('core.signMessage.signature')}
           </Text.Body.Normal>
-          {renderCopyToClipboard({ text: signatureObject.signature, handleCopy, t })}
+          {renderCopyToClipboard({
+            text: signatureObject.signature,
+            handleCopy,
+            t,
+            testId: 'signature-copy-to-clipboard-button'
+          })}
         </Flex>
 
         <TextArea
@@ -187,7 +202,12 @@ export const SignMessageDrawer: React.FC = () => {
           <Text.Body.Normal weight="$medium" data-testid={'result-message-key-label'}>
             {t('core.signMessage.key')}
           </Text.Body.Normal>
-          {renderCopyToClipboard({ text: signatureObject.key, handleCopy, t })}
+          {renderCopyToClipboard({
+            text: signatureObject.key,
+            handleCopy,
+            t,
+            testId: 'public-key-copy-to-clipboard-button'
+          })}
         </Flex>
         <TextArea
           value={signatureObject.key}
