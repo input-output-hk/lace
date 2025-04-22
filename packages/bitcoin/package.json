@@ -34,7 +34,7 @@
     "prepare": "ts-patch install -s",
     "prestart": "yarn build",
     "start": "node dist/index.js",
-    "test": "echo \"@lace/bitcoin: no test command specified\"",
+    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
     "tsc:declarationOnly": "tsc --project ./src/tsconfig.declarationOnly.json",
     "type-check": "echo \"@lace/bitcoin: no type-check command specified\"",
     "watch": "yarn build --watch"
