@@ -202,7 +202,10 @@ const ConfirmModalNormal = ({
             onChange={secretsUtil.setPassword}
             label="Enter password"
             errorMessage={errorMessage}
-            onSubmit={async () => await confirmHandler()}
+            onSubmit={async (event) => {
+              event.preventDefault();
+              await confirmHandler();
+            }}
           />
         </ModalBody>
 
