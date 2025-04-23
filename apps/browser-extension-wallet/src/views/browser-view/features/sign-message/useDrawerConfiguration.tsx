@@ -3,10 +3,8 @@ import { useDrawer } from '@views/browser/stores';
 import { useTranslation } from 'react-i18next';
 import { DrawerContent } from '@views/browser/components/Drawer';
 import { DrawerNavigation, Button, useKeyboardShortcut } from '@lace/common';
-import CopyToClipboard from 'react-copy-to-clipboard';
 import styles from './SignMessageDrawer.module.scss';
 import { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
-import CopyToClipboardImg from '@assets/icons/copy.component.svg';
 
 interface UseDrawerConfigurationProps {
   selectedAddress: string;
@@ -15,10 +13,10 @@ interface UseDrawerConfigurationProps {
   isHardwareWallet: boolean;
   error: string;
   handleSign: () => void;
-  handleCopy: () => void;
   clearSecrets: () => void;
   signatureObject: Cip30DataSignature | undefined;
   goBack: () => void;
+  signAnotherMessage: () => void;
 }
 
 export const useDrawerConfiguration = ({
@@ -27,11 +25,11 @@ export const useDrawerConfiguration = ({
   isSigningInProgress,
   isHardwareWallet,
   handleSign,
-  handleCopy,
   error,
   clearSecrets,
   signatureObject,
-  goBack
+  goBack,
+  signAnotherMessage
 }: UseDrawerConfigurationProps): void => {
   const { t } = useTranslation();
   const [, setDrawerConfig] = useDrawer();
@@ -52,12 +50,9 @@ export const useDrawerConfiguration = ({
   const getActionButton = useCallback(() => {
     if (signatureObject?.signature && !error) {
       return (
-        <CopyToClipboard text={signatureObject.signature}>
-          <Button onClick={handleCopy} data-testid={'copy-button'}>
-            {t('core.signMessage.copyToClipboard')}
-            <CopyToClipboardImg className={styles.newFolderIcon} />
-          </Button>
-        </CopyToClipboard>
+        <Button onClick={signAnotherMessage} data-testid={'sign-another-message-button'}>
+          {t('core.signMessage.signAnotherMessage')}
+        </Button>
       );
     }
     return (
@@ -77,7 +72,7 @@ export const useDrawerConfiguration = ({
     message,
     isSigningInProgress,
     getActionButtonLabel,
-    handleCopy,
+    signAnotherMessage,
     t
   ]);
 

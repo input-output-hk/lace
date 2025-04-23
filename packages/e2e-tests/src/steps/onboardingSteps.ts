@@ -37,6 +37,7 @@ import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletP
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
 import { switchToWindowWithLace } from '../utils/window';
+import LocalStorageInitializer from '../fixture/localStorageInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -251,6 +252,15 @@ Given(/^I restore a wallet$/, async () => {
     getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [],
     true
   );
+  await OnboardingWalletSetupPage.clickEnterWalletButton();
+  await TopNavigationAssert.assertLogoPresent();
+});
+
+Given(/^I restore the "([^"]*)" wallet$/, async (walletName: string) => {
+  await LocalStorageInitializer.initializeAppSettings(); // Set network
+  await browser.refresh();
+  await OnboardingMainPage.restoreWalletButton.click();
+  await OnboardingWalletSetupPage.goToWalletSetupPage('Restore', getTestWallet(walletName).mnemonic ?? [], true);
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
 });

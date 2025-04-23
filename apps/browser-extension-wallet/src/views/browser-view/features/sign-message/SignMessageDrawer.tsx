@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useSignMessageState } from './useSignMessageState';
@@ -11,6 +12,32 @@ import styles from './SignMessageDrawer.module.scss';
 import { MainLoader } from '@components/MainLoader';
 import { ResultMessage } from '@components/ResultMessage';
 import CheckSuccessImg from '@assets/icons/circle-check-gradient.svg';
+import CopyToClipboardImg from '@assets/icons/copy.component.svg';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { TFunction } from 'i18next';
+
+const renderCopyToClipboard = ({
+  text,
+  handleCopy,
+  t,
+  testId
+}: {
+  text: string;
+  handleCopy: () => void;
+  t: TFunction;
+  testId?: string;
+}) => (
+  <CopyToClipboard text={text}>
+    <Box className={styles.copyButton} onClick={handleCopy}>
+      <Text.Button color="accent" weight="$semibold" data-testid={testId ?? 'copy-to-clipboard-button'}>
+        <Flex alignItems="center">
+          <CopyToClipboardImg className={styles.copyIcon} />
+          {t('core.signMessage.copyToClipboard')}
+        </Flex>
+      </Text.Button>
+    </Box>
+  </CopyToClipboard>
+);
 
 const inputId = `id-${uuidv4()}`;
 
@@ -69,6 +96,12 @@ export const SignMessageDrawer: React.FC = () => {
     resetSigningState();
   }, [clearSecrets, resetSigningState]);
 
+  const signAnotherMessage = useCallback(() => {
+    setMessage('');
+    setSelectedAddress('');
+    goBack();
+  }, [goBack]);
+
   useDrawerConfiguration({
     selectedAddress,
     message,
@@ -76,10 +109,10 @@ export const SignMessageDrawer: React.FC = () => {
     isHardwareWallet,
     error,
     handleSign,
-    handleCopy,
     clearSecrets,
     signatureObject,
-    goBack
+    goBack,
+    signAnotherMessage
   });
 
   const renderInitialState = () => (
@@ -145,9 +178,18 @@ export const SignMessageDrawer: React.FC = () => {
     <div className={styles.inputGroup}>
       <ResultMessage customBgImg={CheckSuccessImg} title={t('core.signMessage.successTitle')} />
       <div className={styles.inputGroup}>
-        <Text.Body.Normal weight="$medium" data-testid={'result-message-signature-label'}>
-          {t('core.signMessage.signature')}
-        </Text.Body.Normal>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text.Body.Normal weight="$medium" data-testid={'result-message-signature-label'}>
+            {t('core.signMessage.signature')}
+          </Text.Body.Normal>
+          {renderCopyToClipboard({
+            text: signatureObject.signature,
+            handleCopy,
+            t,
+            testId: 'signature-copy-to-clipboard-button'
+          })}
+        </Flex>
+
         <TextArea
           value={signatureObject.signature}
           dataTestId="sign-message-signature"
@@ -156,9 +198,17 @@ export const SignMessageDrawer: React.FC = () => {
         />
       </div>
       <div className={styles.inputGroup}>
-        <Text.Body.Normal weight="$medium" data-testid={'result-message-key-label'}>
-          {t('core.signMessage.key')}
-        </Text.Body.Normal>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text.Body.Normal weight="$medium" data-testid={'result-message-key-label'}>
+            {t('core.signMessage.key')}
+          </Text.Body.Normal>
+          {renderCopyToClipboard({
+            text: signatureObject.key,
+            handleCopy,
+            t,
+            testId: 'public-key-copy-to-clipboard-button'
+          })}
+        </Flex>
         <TextArea
           value={signatureObject.key}
           dataTestId="sign-message-key"

@@ -44,14 +44,28 @@ Then(/^"All done" drawer is displayed for message signing flow$/, async () => {
   await MessageSigningAllDoneDrawerAssert.assertSeeAllDoneDrawer();
 });
 
-When(/^I click on "Copy signature to clipboard" button$/, async () => {
-  await MessageSigningAllDoneDrawer.clickOnCopySignatureToClipboardButton();
-});
+When(
+  /^I click on "Copy to clipboard" button in "(Signature|Public Key)" section$/,
+  async (section: 'Signature' | 'Public Key') => {
+    section === 'Signature'
+      ? await MessageSigningAllDoneDrawer.clickOnCopyToClipboardButtonInSignatureSection()
+      : await MessageSigningAllDoneDrawer.clickOnCopyToClipboardButtonInPublicKeySection();
+  }
+);
 
 Then(/^signature in clipboard is equal to the one displayed on drawer$/, async () => {
   await MessageSigningAllDoneDrawerAssert.assertSignatureInClipboardIsCorrect();
 });
 
-When(/^I click on "Close" button on "All done!" drawer for message signing$/, async () => {
-  await MessageSigningAllDoneDrawer.clickOnCloseButton();
+Then(/^public key in clipboard is equal to the one displayed on drawer$/, async () => {
+  await MessageSigningAllDoneDrawerAssert.assertPublicKeyInClipboardIsCorrect();
 });
+
+When(
+  /^I click on "(Close|Sign another message)" button on "All done!" drawer for message signing$/,
+  async (button: 'Close' | 'Sign another message') => {
+    button === 'Close'
+      ? await MessageSigningAllDoneDrawer.clickOnCloseButton()
+      : await MessageSigningAllDoneDrawer.clickOnSignAnotherMessageButton();
+  }
+);

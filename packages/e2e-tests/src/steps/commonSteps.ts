@@ -478,3 +478,51 @@ When(/^I click on "DApps" button$/, async () => {
   testContext.save('tabsCount', tabsCount);
   await visit('DApps', 'popup', false);
 });
+
+When(/^I start tracing$/, async () => {
+  if (browser.isChromium) {
+    await browser.startTracing();
+  } else {
+    Logger.log('Tracing not available on non-chromium browsers');
+  }
+});
+
+When(/^I end tracing$/, async () => {
+  if (browser.isChromium) {
+    await browser.endTracing();
+  } else {
+    Logger.log('Tracing not available on non-chromium browsers');
+  }
+});
+
+Then(
+  /^there were approximately (\d+) requests sent \((\d+)% threshold\) \[getPageWeight\(\)]$/,
+  async (expectedNumberOfRequests: number, threshold: number) => {
+    if (browser.isChromium) {
+      const metrics = await browser.getPageWeight();
+      const requestCount = metrics.requestCount;
+      Logger.log(`Total requests (getPageWeight): ${metrics.requestCount}`);
+      await commonAssert.assertValueWithinRange(requestCount, expectedNumberOfRequests, threshold);
+    } else {
+      Logger.log('getPageWeight() not available on non-chromium browsers');
+    }
+  }
+);
+
+Then(
+  /^there were approximately (\d+) requests sent \((\d+)% threshold\) \[Puppeteer and CDP]$/,
+  async (expectedNumberOfRequests: number, threshold: number) => {
+    if (browser.isChromium) {
+      const requestCount = networkManager.getRequestCount();
+      Logger.log(`Total requests (Puppeteer and CDP): ${requestCount}`);
+      await commonAssert.assertValueWithinRange(requestCount, expectedNumberOfRequests, threshold);
+      networkManager.resetRequestCount();
+    } else {
+      Logger.log('Puppeteer and CDP not available on non-chromium browsers');
+    }
+  }
+);
+
+When('I start counting requests using Puppeteer and CDP', async () => {
+  await networkManager.countSentRequests();
+});

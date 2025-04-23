@@ -110,7 +110,6 @@ export const ConfirmTransaction = (): React.ReactElement => {
           {t('dapp.confirm.btn.cancel')}
         </Button>
       </div>
-      )
     </Layout>
   );
 };

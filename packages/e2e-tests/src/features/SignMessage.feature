@@ -54,8 +54,13 @@ Feature: Sign message
     And I click on "Sign message" button
     Then "All done" drawer is displayed for message signing flow
     And valid password is not in snapshot
-    When I click on "Copy signature to clipboard" button
+    When I click on "Copy to clipboard" button in "Signature" section
     Then I see a toast with text: "Copied to clipboard"
     And signature in clipboard is equal to the one displayed on drawer
+    When I click on "Copy to clipboard" button in "Public Key" section
+    Then I see a toast with text: "Copied to clipboard"
+    And public key in clipboard is equal to the one displayed on drawer
+    When I click on "Sign another message" button on "All done!" drawer for message signing
+    Then "Message signing" drawer is displayed
     When I click on "Close" button on "All done!" drawer for message signing
     Then Drawer is not displayed

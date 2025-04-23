@@ -45,14 +45,14 @@ export const Main = () => {
                 accountName={activeAccount.name}
               />
             </Route>
-            <Route path="/dapp/sign-tx">
+            <Route path="/dapp/transaction/sign-tx">
               <SignTx
                 dappConnector={dappConnector}
                 inMemoryWallet={inMemoryWallet}
                 account={activeAccount}
               />
             </Route>
-            <Route path="/dapp/sign-data">
+            <Route path="/dapp/data/sign-data">
               <SignData dappConnector={dappConnector} account={activeAccount} />
             </Route>
           </Switch>
