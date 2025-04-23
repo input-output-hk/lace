@@ -11,6 +11,12 @@ inputs:
   BLOCKFROST_PROJECT_ID_PREVIEW:
     description: 'Preview Project ID for Blockfrost API usage'
     required: true
+  MAESTRO_PROJECT_ID_MAINNET:
+    description: 'MainNet Project ID for Bitcoin API usage'
+    required: true
+  MAESTRO_PROJECT_ID_TESTNET:
+    description: 'TestNet4 Project ID for Bitcoin API usage'
+    required: true
   DIR:
     description: 'app directory'
     required: true
@@ -82,6 +88,8 @@ runs:
         BLOCKFROST_PROJECT_ID_MAINNET: ${{ inputs.BLOCKFROST_PROJECT_ID_MAINNET }}
         BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
         BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
+        MAESTRO_PROJECT_ID_MAINNET: ${{ inputs.MAESTRO_PROJECT_ID_MAINNET }}
+        MAESTRO_PROJECT_ID_TESTNET: ${{ inputs.MAESTRO_PROJECT_ID_TESTNET }}
         LACE_EXTENSION_KEY: ${{ inputs.LACE_EXTENSION_KEY }}
         DAPP_RADAR_API_KEY: ${{ inputs.DAPP_RADAR_API_KEY }}
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
@@ -101,13 +109,13 @@ runs:
       with:
         name: ${{ inputs.NAME }}
         path: ${{ inputs.DIR }}/dist
-    
+
     - name: Pack Firefox
       if: ${{ inputs.BROWSER_TARGET == 'firefox' }}
       run: yarn pack:firefox
       shell: bash
       working-directory: ${{ inputs.DIR }}
-      
+
     - name: Upload Firefox artifact
       if: ${{ inputs.BROWSER_TARGET == 'firefox' }}
       uses: actions/upload-artifact@v4
