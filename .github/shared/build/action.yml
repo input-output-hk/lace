@@ -35,6 +35,12 @@ inputs:
   BLOCKFROST_PROJECT_ID_SANCHONET:
     description: 'SanchoNet Project ID for Blockfrost API usage'
     required: true
+  MAESTRO_PROJECT_ID_MAINNET:
+    description: 'MainNet Project ID for Bitcoin API usage'
+    required: true
+  MAESTRO_PROJECT_ID_TESTNET:
+    description: 'TestNet4 Project ID for Bitcoin API usage'
+    required: true
   CARDANO_SERVICES_URL_MAINNET:
     description: 'Url for mainnet env'
     required: false
@@ -152,6 +158,8 @@ runs:
         BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
         BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
         BLOCKFROST_PROJECT_ID_SANCHONET: ${{ inputs.BLOCKFROST_PROJECT_ID_SANCHONET }}
+        MAESTRO_PROJECT_ID_MAINNET: ${{ inputs.MAESTRO_PROJECT_ID_MAINNET }}
+        MAESTRO_PROJECT_ID_TESTNET: ${{ inputs.MAESTRO_PROJECT_ID_TESTNET }}
         CARDANO_SERVICES_URL_MAINNET: ${{ inputs.CARDANO_SERVICES_URL_MAINNET }}
         CARDANO_SERVICES_URL_PREPROD: ${{ inputs.CARDANO_SERVICES_URL_PREPROD }}
         CARDANO_SERVICES_URL_PREVIEW: ${{ inputs.CARDANO_SERVICES_URL_PREVIEW }}
