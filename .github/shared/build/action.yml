@@ -102,6 +102,10 @@ inputs:
     description: 'Browser target to build for. Options are [firefox | chromium]'
     required: false
     default: 'chromium'
+  E2E_FORCE_TREZOR_PICKED:
+    description: 'Force Trezor emulation'
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -175,4 +179,5 @@ runs:
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
+        E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
       run: yarn browser build

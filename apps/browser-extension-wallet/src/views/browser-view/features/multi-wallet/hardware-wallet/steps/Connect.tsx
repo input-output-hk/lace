@@ -5,6 +5,7 @@ import { TranslationKey } from '@lace/translation';
 import { TFunction } from 'i18next';
 import React, { useCallback, useEffect, useState, VFC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useAnalyticsContext } from '@providers';
 import { useHardwareWallet } from '../context';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
@@ -41,6 +42,14 @@ enum DiscoveryState {
   Running = 'Running'
 }
 
+const useE2eForceTrezorPicked = (): USBDevice | null => {
+  const { search } = useLocation();
+  if (process.env.E2E_FORCE_TREZOR_PICKED !== 'true') return null;
+
+  const forceTrezorPicked = new URLSearchParams(search).has('force-trezor-picked');
+  return forceTrezorPicked ? (Wallet.trezorDescriptors[0] as USBDevice) : null;
+};
+
 export const Connect: VFC = () => {
   const { t } = useTranslation();
   const { postHogActions } = useWalletOnboarding();
@@ -48,6 +57,7 @@ export const Connect: VFC = () => {
   const [discoveryState, setDiscoveryState] = useState<DiscoveryState>(DiscoveryState.Requested);
   const [connectionError, setConnectionError] = useState<ConnectionError | null>(null);
   const analytics = useAnalyticsContext();
+  const forcedTrezorUsbDevice = useE2eForceTrezorPicked();
 
   const translations = makeTranslations({ connectionError, t });
 
@@ -64,7 +74,7 @@ export const Connect: VFC = () => {
       setDiscoveryState(DiscoveryState.Running);
       try {
         void analytics.sendEventToPostHog(postHogActions.hardware.CONNECT_HW_VIEW);
-        const usbDevice = await requestHardwareWalletConnection();
+        const usbDevice = forcedTrezorUsbDevice || (await requestHardwareWalletConnection());
         void analytics.sendEventToPostHog(postHogActions.hardware.HW_POPUP_CONNECT_CLICK);
         await connect(usbDevice);
         setDiscoveryState(DiscoveryState.Idle);
@@ -75,7 +85,7 @@ export const Connect: VFC = () => {
         setConnectionError(parseConnectionError(error));
       }
     })();
-  }, [connect, discoveryState, analytics, next, postHogActions.hardware]);
+  }, [connect, discoveryState, analytics, next, postHogActions.hardware, forcedTrezorUsbDevice]);
 
   return (
     <WalletSetupConnectHardwareWalletStepRevamp
