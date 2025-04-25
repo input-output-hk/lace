@@ -265,6 +265,7 @@ export const SignData = ({ dappConnector, account }: Readonly<Props>) => {
           }
         }}
         onCloseBtn={() => {
+          setError('');
           capture(Events.DappConnectorDappDataCancelClick);
         }}
         onConfirm={async status => {
