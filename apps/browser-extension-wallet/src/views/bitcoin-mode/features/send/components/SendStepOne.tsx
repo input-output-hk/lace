@@ -101,7 +101,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     () => recommendedFees.find((f) => f.key === selectedFeeKey),
     [recommendedFees, selectedFeeKey]
   );
-  const [customFee, setCustomFee] = useState<string>('');
+  const [customFee, setCustomFee] = useState<string>('0');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
   const [invalidAddressError, setInvalidAddressError] = useState<string | undefined>();
@@ -181,6 +181,10 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     if (disallowedKeys.includes(e.key) || (e.key === 'ArrowDown' && targetValue <= 0)) {
       e.preventDefault();
     }
+  };
+
+  const onCustomFeeBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setCustomFee(e.target.value || '0');
   };
 
   return (
@@ -281,6 +285,8 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
                 }}
                 inputMode="decimal"
                 pattern="[0-9]*[.]?[0-9]*"
+                onBlur={onCustomFeeBlur}
+                filledLabelOnFocus
               />
               {customFeeError && <InputError error={customFeeError} isPopupView={isPopupView} />}
             </Box>
