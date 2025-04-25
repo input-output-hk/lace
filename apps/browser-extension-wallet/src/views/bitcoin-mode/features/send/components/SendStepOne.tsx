@@ -149,30 +149,25 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
   const fiatValue = `≈ ${new BigNumber(enteredAmount.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} USD`;
 
-  const handleChangeAddress = useCallback(
-    (value: string) => {
-      onAddressChange(value);
+  useEffect(() => {
+    const result = Bitcoin.validateBitcoinAddress(address, network);
 
-      const result = Bitcoin.validateBitcoinAddress(value, network);
-
-      switch (result) {
-        case Bitcoin.AddressValidationResult.Valid:
-          setIsValidAddress(true);
-          // eslint-disable-next-line unicorn/no-useless-undefined
-          setInvalidAddressError(undefined);
-          break;
-        case Bitcoin.AddressValidationResult.InvalidNetwork:
-          setIsValidAddress(false);
-          setInvalidAddressError(t('general.errors.incorrectAddressNetwork'));
-          break;
-        case Bitcoin.AddressValidationResult.InvalidAddress:
-          setIsValidAddress(false);
-          setInvalidAddressError(t('general.errors.incorrectAddress'));
-          break;
-      }
-    },
-    [network, onAddressChange, t]
-  );
+    switch (result) {
+      case Bitcoin.AddressValidationResult.Valid:
+        setIsValidAddress(true);
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        setInvalidAddressError(undefined);
+        break;
+      case Bitcoin.AddressValidationResult.InvalidNetwork:
+        setIsValidAddress(false);
+        setInvalidAddressError(t('general.errors.incorrectAddressNetwork'));
+        break;
+      case Bitcoin.AddressValidationResult.InvalidAddress:
+        setIsValidAddress(false);
+        setInvalidAddressError(t('general.errors.incorrectAddress'));
+        break;
+    }
+  }, [address, network, onAddressChange, t]);
 
   const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const disallowedKeys = ['-', '+', 'e', ','];
@@ -204,7 +199,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           value={address}
           data-testid="btc-address-input"
           label={t('core.destinationAddressInput.recipientAddressOnly')}
-          onChange={(value) => handleChangeAddress(value)}
+          onChange={(value) => onAddressChange(value)}
           style={{ width: '100%' }}
         />
 
