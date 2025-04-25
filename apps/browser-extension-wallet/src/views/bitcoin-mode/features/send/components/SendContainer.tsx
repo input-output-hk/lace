@@ -28,6 +28,7 @@ export const SendContainer = (): React.ReactElement => {
           onArrowIconClick={isPopupView ? redirectToOverview : undefined}
         />
       }
+      closable
       popupView
     >
       <Flex className={styles.container} data-testid="btc-send" flexDirection="column" gap="$16">
