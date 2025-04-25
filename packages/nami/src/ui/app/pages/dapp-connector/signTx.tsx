@@ -621,6 +621,7 @@ export const SignTx = ({
         openHWFlow={openHWFlow}
         walletType={walletType}
         onCloseBtn={() => {
+          setIsLoading(l => ({ ...l, error: '' }));
           capture(Events.DappConnectorDappTxCancelClick);
         }}
         secretsUtil={secretsUtil}
