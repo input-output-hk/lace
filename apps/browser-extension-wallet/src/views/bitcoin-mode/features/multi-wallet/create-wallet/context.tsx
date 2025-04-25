@@ -121,9 +121,10 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
             await finalizeWalletCreation(state);
             history.push(walletRoutePaths.assets);
             window.location.reload();
-          } else {
-            setStep(WalletCreateStep.SavePaperWallet);
+            break;
           }
+
+          setStep(WalletCreateStep.SavePaperWallet);
           break;
         }
         case WalletCreateStep.SavePaperWallet: {
