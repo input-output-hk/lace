@@ -32,7 +32,7 @@ const App = (): React.ReactElement => {
     const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
     const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
     if (oldModeValue?.mode !== newModeValue?.mode) {
-      setMode(newModeValue);
+      setMode(newModeValue.mode);
     }
   });
 
