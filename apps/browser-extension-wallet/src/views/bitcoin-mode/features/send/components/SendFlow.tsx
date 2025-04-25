@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable unicorn/no-null */
@@ -10,7 +11,7 @@ import { PasswordInput } from './PasswordInput';
 import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFailed } from './TransactionFailed';
 import { useFetchCoinPrice, useRedirection, useWalletManager } from '@hooks';
-import { PostHogAction, useObservable } from '@lace/common';
+import { DrawerNavigation, PostHogAction, useObservable } from '@lace/common';
 import { Bitcoin } from '@lace/bitcoin';
 import { Wallet as Cardano } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -18,6 +19,8 @@ import { useDrawer } from '@src/views/browser-view/stores';
 import { useWalletStore } from '@src/stores';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
+import { DrawerContent } from '@src/views/browser-view/components/Drawer';
+import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -102,6 +105,7 @@ const btcStringToSatoshisBigint = (btcString: string): bigint => {
 };
 
 export const SendFlow: React.FC = () => {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('AMOUNT');
 
   const [amount, setAmount] = useState<string>('');
@@ -126,7 +130,7 @@ export const SendFlow: React.FC = () => {
   const btcToUsdRate = useMemo(() => priceResult.bitcoin?.price ?? 0, [priceResult.bitcoin]);
   const balance = useObservable(bitcoinWallet.balance$, BigInt(0));
 
-  const [config, clearContent] = useDrawer();
+  const [config, setDrawerConfig] = useDrawer();
 
   const redirectToTransactions = useRedirection(walletRoutePaths.activity);
   const redirectToOverview = useRedirection(walletRoutePaths.assets);
@@ -205,6 +209,24 @@ export const SendFlow: React.FC = () => {
     });
   }, [bitcoinWallet]);
 
+  const onClose = useCallback(() => {
+    if (isPopupView) redirectToOverview();
+    else {
+      config?.onClose ? config?.onClose() : setDrawerConfig();
+    }
+  }, [setDrawerConfig, config, isPopupView, redirectToOverview]);
+
+  const backToAmount = () => {
+    setStep('AMOUNT');
+    setDrawerConfig({
+      ...config,
+      content: DrawerContent.SEND_BITCOIN_TRANSACTION,
+      renderHeader: () => (
+        <DrawerNavigation title={<div>{t('browserView.transaction.send.title')}</div>} onCloseIconClick={onClose} />
+      )
+    });
+  };
+
   // Step 1 -> 2
   const goToReview = (newFeeRate: number) => {
     setFeeRate(newFeeRate);
@@ -220,6 +242,17 @@ export const SendFlow: React.FC = () => {
       })
     );
     setStep('REVIEW');
+    setDrawerConfig({
+      ...config,
+      content: DrawerContent.SEND_BITCOIN_TRANSACTION,
+      renderHeader: () => (
+        <DrawerNavigation
+          title={<div>{t('browserView.transaction.send.title')}</div>}
+          onCloseIconClick={onClose}
+          onArrowIconClick={backToAmount}
+        />
+      )
+    });
   };
   // Step 2 -> 3
   const goToPassword = () => setStep('PASSWORD');
@@ -242,13 +275,6 @@ export const SendFlow: React.FC = () => {
       setStep('FAILED');
     }
   };
-
-  const onClose = useCallback(() => {
-    if (isPopupView) redirectToOverview();
-    else {
-      config?.onClose ? config?.onClose() : clearContent();
-    }
-  }, [clearContent, config, isPopupView, redirectToOverview]);
 
   const backToReview = () => setStep('REVIEW');
 
@@ -302,7 +328,7 @@ export const SendFlow: React.FC = () => {
         onClose={onClose}
         isPopupView={isPopupView}
         onViewTransaction={() => {
-          clearContent();
+          setDrawerConfig();
           redirectToTransactions();
         }}
         hash={confirmationHash}
