@@ -13,6 +13,7 @@ export type inputProps = {
   invalid?: boolean;
   focus?: boolean;
   labelClassName?: string;
+  filledLabelOnFocus?: boolean;
 } & InputProps;
 
 export const Input = ({
@@ -23,10 +24,12 @@ export const Input = ({
   value,
   focus,
   labelClassName = '',
+  filledLabelOnFocus,
   ...props
 }: inputProps): React.ReactElement => {
   const inputRef = useRef(null);
   const [localVal, setLocalVal] = useState<string>('');
+  const [isFocused, setIsFocused] = useState<boolean>(focus ?? false);
   const onValChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalVal(e?.target?.value ?? '');
     onChange?.(e);
@@ -36,6 +39,16 @@ export const Input = ({
     setLocalVal(value ?? '');
   }, [value]);
 
+  const onFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true);
+    props.onFocus?.(event);
+  };
+
+  const onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    props.onBlur?.(event);
+  };
+
   useAutoFocus(inputRef, focus);
 
   return (
@@ -44,7 +57,14 @@ export const Input = ({
       onChange={onValChange}
       {...(label && {
         prefix: (
-          <div className={cn(styles.label, { [styles.filled]: localVal }, labelClassName)} data-testid="input-label">
+          <div
+            className={cn(
+              styles.label,
+              { [styles.filled]: localVal || (filledLabelOnFocus && isFocused) },
+              labelClassName
+            )}
+            data-testid="input-label"
+          >
             {label}
           </div>
         )
@@ -54,9 +74,11 @@ export const Input = ({
       {...props}
       className={cn(styles.input, {
         ...(props.className && { [props.className]: props.className }),
-        [styles.withLabel]: localVal && label,
+        [styles.withLabel]: (localVal || (filledLabelOnFocus && isFocused)) && label,
         [styles.invalid]: invalid
       })}
+      onFocus={onFocus}
+      onBlur={onBlur}
     />
   );
 };
