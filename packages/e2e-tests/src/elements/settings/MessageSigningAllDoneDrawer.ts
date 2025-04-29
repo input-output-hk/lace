@@ -55,13 +55,23 @@ class MessageSigningAllDoneDrawer extends CommonDrawerElements {
   }
 
   async clickOnCopyToClipboardButtonInSignatureSection(): Promise<void> {
-    await this.signatureCopyToClipboardButton.waitForClickable();
-    await this.signatureCopyToClipboardButton.click();
+    if (browser.isFirefox) {
+      await this.signatureCopyToClipboardButton.$('svg').waitForClickable();
+      await this.signatureCopyToClipboardButton.$('svg').click();
+    } else {
+      await this.signatureCopyToClipboardButton.waitForClickable();
+      await this.signatureCopyToClipboardButton.click();
+    }
   }
 
   async clickOnCopyToClipboardButtonInPublicKeySection(): Promise<void> {
-    await this.keyCopyToClipboardButton.waitForClickable();
-    await this.keyCopyToClipboardButton.click();
+    if (browser.isFirefox) {
+      await this.keyCopyToClipboardButton.$('svg').waitForClickable();
+      await this.keyCopyToClipboardButton.$('svg').click();
+    } else {
+      await this.keyCopyToClipboardButton.waitForClickable();
+      await this.keyCopyToClipboardButton.click();
+    }
   }
 
   async clickOnSignAnotherMessageButton(): Promise<void> {
