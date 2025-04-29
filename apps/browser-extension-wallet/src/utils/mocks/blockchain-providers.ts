@@ -49,6 +49,8 @@ export const mockChainHistoryProvider = (): Wallet.ChainHistoryProvider => Walle
 export const mockRewardAccountInfoProvider = (): Wallet.RewardAccountInfoProvider =>
   Wallet.mockUtils.rewardAccountInfoProviderStub();
 
+export const mockHandleProvider = (): Wallet.HandleProvider => Wallet.mockUtils.handleProviderStub();
+
 export const mockBlockchainProviders = (blockchainProviders?: Partial<IBlockchainProvider>): IBlockchainProvider => ({
   assetProvider: mockAssetProvider(),
   networkInfoProvider: mockNetworkInfoProvider(),
@@ -57,6 +59,7 @@ export const mockBlockchainProviders = (blockchainProviders?: Partial<IBlockchai
   utxoProvider: mockUtxoProvider(),
   rewardAccountInfoProvider: mockRewardAccountInfoProvider(),
   rewardsProvider: mockRewardsProvider(),
+  handleProvider: mockHandleProvider(),
   chainHistoryProvider: mockChainHistoryProvider(),
   inputResolver: {
     resolveInput: jest.fn().mockResolvedValue({
