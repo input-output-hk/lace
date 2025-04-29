@@ -11,6 +11,7 @@ export {
   QueryStakePoolsArgs,
   EpochInfo,
   RewardsProvider,
+  HandleProvider,
   UtxoProvider,
   ChainHistoryProvider,
   NetworkInfoProvider,

@@ -1,7 +1,7 @@
 import { IWalletProvider } from '@lib/wallet-provider';
 import { Wallet } from '@lace/cardano';
 import { IBlockchainProvider } from '@src/stores/slices';
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, HandleProvider } from '@cardano-sdk/core';
 
 /**
  * Wallet Provider mock
@@ -57,6 +57,8 @@ export const mockBlockchainProviders = (blockchainProviders?: Partial<IBlockchai
   utxoProvider: mockUtxoProvider(),
   rewardAccountInfoProvider: mockRewardAccountInfoProvider(),
   rewardsProvider: mockRewardsProvider(),
+  // TODO create the mock
+  handleProvider: {} as unknown as HandleProvider,
   chainHistoryProvider: mockChainHistoryProvider(),
   inputResolver: {
     resolveInput: jest.fn().mockResolvedValue({

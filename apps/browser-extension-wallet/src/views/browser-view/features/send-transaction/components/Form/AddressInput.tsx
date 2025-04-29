@@ -23,12 +23,13 @@ import styles from './AddressInput.module.scss';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from '@lace/cardano';
 import { Banner } from '@lace/common';
-import { useHandleResolver } from '@hooks/useHandleResolver';
+// import { useHandleResolver } from '@hooks/useHandleResolver';
 import debounce from 'lodash/debounce';
 import { getTemporaryTxDataFromStorage } from '../../helpers';
 import { Asset, HandleResolution } from '@cardano-sdk/core';
 import ExclamationCircleOutline from '@src/assets/icons/red-exclamation-circle.component.svg';
 import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { getProviders } from '@src/stores/slices';
 
 const { Text } = Typography;
 
@@ -52,7 +53,9 @@ export enum HandleVerificationState {
 
 export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputProps): React.ReactElement => {
   const { t } = useTranslation();
-  const handleResolver = useHandleResolver();
+  // const handleResolver = useHandleResolver();
+  const { handleProvider: handleResolver } = getProviders();
+
   const [addressInputValue, setAddressInputValue] = useState<inputValue>({ address: '' });
   // eslint-disable-next-line no-magic-numbers
   const MAX_ADDRESSES = isPopupView ? 3 : 5;

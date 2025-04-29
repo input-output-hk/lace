@@ -19,6 +19,8 @@ export const verifyHandle = async (
   handleResolver: HandleProvider
 ): Promise<ValidationResult & { handles?: HandleResolution[] }> => {
   try {
+    // eslint-disable-next-line no-console
+    console.log('verifyHandle', value);
     const resolvedHandles = await handleResolver.resolveHandles({ handles: [value.slice(1).toLowerCase()] });
     if (!resolvedHandles[0]) {
       return { valid: false };
@@ -50,7 +52,10 @@ export class CustomConflictError extends Error {
 }
 
 export class CustomError extends Error {
-  constructor(message: string, public readonly isValidHandle: boolean = true) {
+  constructor(
+    message: string,
+    public readonly isValidHandle: boolean = true
+  ) {
     super(message);
     this.name = 'CustomError';
     Object.setPrototypeOf(this, CustomError.prototype);

@@ -62,6 +62,7 @@ import {
   bitcoinWalletProperties
 } from './bitcoinWalletManager';
 import { isBitcoinNetworkSwitchingDisabled } from '@utils/get-network-name';
+import { initHandleService } from './services/handleService';
 
 if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
@@ -147,6 +148,8 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
       healthCheck: async () => ({ ok: true }),
       getPolicyIds: async () => []
     };
+
+    await initHandleService(chainName);
 
     if ('wsProvider' in providers) {
       providers.wsProvider.health$.subscribe((check) => {

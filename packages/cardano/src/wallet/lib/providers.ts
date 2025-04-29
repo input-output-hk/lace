@@ -38,6 +38,7 @@ import { RemoteApiProperties, RemoteApiPropertyType, createPersistentCacheStorag
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
 import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
+import { initHandleService } from './handleService';
 
 const createTxSubmitProvider = (
   blockfrostClient: BlockfrostClient,
@@ -175,6 +176,10 @@ export const createProviders = ({
     logger
   });
 
+  // eslint-disable-next-line no-console
+  console.log('createProviders');
+  const handleProvider = initHandleService(baseUrl);
+
   if (useWebSocket) {
     const url = new URL(baseUrl);
 
@@ -196,6 +201,7 @@ export const createProviders = ({
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardAccountInfoProvider,
       rewardsProvider,
+      handleProvider,
       wsProvider,
       addressDiscovery,
       inputResolver,
@@ -223,6 +229,7 @@ export const createProviders = ({
     chainHistoryProvider,
     rewardAccountInfoProvider,
     rewardsProvider,
+    handleProvider,
     addressDiscovery,
     inputResolver,
     drepProvider: dRepProvider
@@ -281,5 +288,10 @@ export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDepen
   },
   inputResolver: {
     resolveInput: RemoteApiPropertyType.MethodReturningPromise
+  },
+  handleProvider: {
+    getPolicyIds: RemoteApiPropertyType.MethodReturningPromise,
+    resolveHandles: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
   }
 };
