@@ -40,7 +40,7 @@ Feature: Staking Page - Extended View
       | a Ocean                | 3                 | OCEAN             |
       | a ocean                | 3                 | OCEAN             |
       | ABC#                   | 0                 |                   |
-      | HUA                    | 1                 | HUADA             |
+      | HUA                    | 2                 | HUADA             |
       | 123456                 | 0                 |                   |
       | ZZZ                    | 3                 | ZZZZX             |
       | £££                    | 0                 |                   |
