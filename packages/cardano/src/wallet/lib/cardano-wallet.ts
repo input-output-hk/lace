@@ -5,6 +5,7 @@ import {
   Cardano,
   ChainHistoryProvider,
   DRepProvider,
+  HandleProvider,
   NetworkInfoProvider,
   RewardAccountInfoProvider,
   RewardsProvider,
@@ -91,6 +92,7 @@ export interface WalletProvidersDependencies {
   utxoProvider: UtxoProvider;
   rewardAccountInfoProvider: RewardAccountInfoProvider;
   rewardsProvider: RewardsProvider;
+  handleProvider: HandleProvider;
   chainHistoryProvider: ChainHistoryProvider;
   wsProvider?: WsProvider;
   drepProvider: DRepProvider;
