@@ -1,5 +1,5 @@
 import { Psbt } from 'bitcoinjs-lib';
-import { DerivedAddress } from '@wallet';
+import { DerivedAddress } from './address';
 
 export type UnsignedTransaction = {
   context: Psbt;
