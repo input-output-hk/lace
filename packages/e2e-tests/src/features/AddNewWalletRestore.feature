@@ -145,7 +145,7 @@ Feature: Add new wallet - Restore wallet
     Examples:
       | page                  | action                                       |
       | Mnemonic verification | I click "X" button on "Add new wallet" modal |
-#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+      | Mnemonic verification | I click outside "Add new wallet" modal       |
 
   @LW-9246
   Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page with any user input interaction - <action>
@@ -156,9 +156,9 @@ Feature: Add new wallet - Restore wallet
     Examples:
       | page                  | action                                       |
       | Mnemonic verification | I click "X" button on "Add new wallet" modal |
-#      | Mnemonic verification | I click outside "Add new wallet" modal       | BUG: LW-10975
+      | Mnemonic verification | I click outside "Add new wallet" modal       |
       | Wallet setup          | I click "X" button on "Add new wallet" modal |
-#      | Wallet setup          | I click outside "Add new wallet" modal       | BUG: LW-10975
+      | Wallet setup          | I click outside "Add new wallet" modal       |
 
   @LW-9247
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - go back

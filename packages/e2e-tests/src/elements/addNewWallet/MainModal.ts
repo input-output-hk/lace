@@ -5,7 +5,7 @@ import { OnboardingMainPage } from '../onboarding/mainPage';
 class AddNewWalletMainModal extends OnboardingMainPage {
   private MODAL = '.ant-modal-content';
   private CLOSE_BUTTON = '[data-testid="navigation-button-cross"]';
-  private AREA_OUTSIDE_MODAL = '.ant-modal-mask';
+  private MODAL_MASK = '.ant-modal-mask';
 
   get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MODAL);
@@ -15,8 +15,8 @@ class AddNewWalletMainModal extends OnboardingMainPage {
     return $(this.CLOSE_BUTTON);
   }
 
-  get areaOutsideModal(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.AREA_OUTSIDE_MODAL);
+  get modalMask(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MODAL_MASK);
   }
 }
 
