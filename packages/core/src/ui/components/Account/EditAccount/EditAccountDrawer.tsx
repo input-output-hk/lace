@@ -61,7 +61,7 @@ export const EditAccountDrawer = ({
           <Text.SubHeading weight="$bold">{translations.title}</Text.SubHeading>
         </Box>
         <TextBox
-          data-testid="edit-account-name-input"
+          data-testid="edit-account-name"
           containerStyle={{ width: '100%' }}
           label={translations.inputLabel}
           defaultValue={name}
