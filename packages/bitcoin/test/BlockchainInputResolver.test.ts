@@ -34,7 +34,7 @@ describe('BlockchainInputResolver', () => {
   });
 
   it('throws error if transaction is not found', async () => {
-    (mockProvider.getTransaction as jest.Mock).mockResolvedValue();
+    (mockProvider.getTransaction as jest.Mock).mockResolvedValue(undefined);
 
     const resolver = new BlockchainInputResolver(mockProvider);
 
