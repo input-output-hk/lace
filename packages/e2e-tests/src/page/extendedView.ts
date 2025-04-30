@@ -62,6 +62,11 @@ class ExtendedView extends LaceView implements Page {
     await browser.url(`${await this.getBaseUrl()}#/voting`);
     await this.waitForPreloaderToDisappear();
   }
+
+  async visitTrezorSetupAccountPageWithOverride() {
+    await browser.url(`${await this.getBaseUrl()}#/setup/hardware?force-trezor-picked`);
+    await this.waitForPreloaderToDisappear();
+  }
 }
 
 export default new ExtendedView();
