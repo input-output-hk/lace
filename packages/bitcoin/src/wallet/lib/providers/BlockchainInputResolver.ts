@@ -1,5 +1,5 @@
 import { BlockchainDataProvider, UTxO } from './BitcoinDataProvider';
-import { InputResolver } from '@src/wallet';
+import { InputResolver } from './InputResolver';
 
 /**
  * Represents an implementation of the `InputResolver` interface that fetches detailed information
