@@ -3,6 +3,7 @@
 yarn.lock               @input-output-hk/lace-core
 
 # Packages Teams
+/packages/bitcoin/      @input-output-hk/lace-core
 /packages/cardano/      @input-output-hk/lace-core
 /packages/common/       @input-output-hk/lace-core
 /packages/core/         @input-output-hk/lace-core
