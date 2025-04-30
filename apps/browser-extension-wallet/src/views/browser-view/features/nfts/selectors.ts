@@ -62,15 +62,15 @@ export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
     image,
     tokenInformation: [
       {
-        name: 'Policy ID',
+        name: i18n.t('core.nftDetail.policyId'),
         value: asset.policyId.toString()
       },
       {
-        name: 'Asset ID',
+        name: i18n.t('core.nftDetail.assetId'),
         value: asset.assetId.toString()
       },
       {
-        name: 'Media URL',
+        name: i18n.t('core.nftDetail.mediaUrl'),
         value: image
       }
     ],

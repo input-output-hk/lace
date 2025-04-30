@@ -49,7 +49,8 @@ Then(
 );
 
 When(/^I click outside "Add new wallet" modal$/, async () => {
-  await AddNewWalletMainModal.areaOutsideModal.click({ x: 0, y: 0 }); // TODO: adjust when LW-10975 is resolved
+  await AddNewWalletMainModal.modalMask.moveTo({ xOffset: 0, yOffset: 0 });
+  await browser.action('pointer').down().perform();
 });
 
 When(
