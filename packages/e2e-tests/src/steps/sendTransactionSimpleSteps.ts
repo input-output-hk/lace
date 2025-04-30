@@ -214,7 +214,7 @@ Then(
   /^click "(Add|Remove) address" button inside address input (\d+)$/,
   async (_ignored: string, inputIndex: number) => {
     const addressInput = new AddressInput(inputIndex);
-    await addressInput.searchLoader.waitForClickable({ reverse: true });
+    await addressInput.searchLoader.waitForDisplayed({ reverse: true, timeout: 15_000 });
     await addressInput.clickAddAddressButton();
   }
 );
