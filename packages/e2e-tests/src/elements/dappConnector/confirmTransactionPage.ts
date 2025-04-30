@@ -29,6 +29,10 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     '[data-testid="dapp-transaction-from-section-expander"] [data-testid="expander-button"]';
   private TRANSACTION_FROM_SECTION_EXPANDER_LABEL =
     '[data-testid="dapp-transaction-from-section-expander"] [data-testid="expander-title"]';
+  private TRANSACTION_CBOR_SECTION_EXPANDER_BUTTON = '[data-testid="cbor-detail_toggle"]';
+  private TRANSACTION_CBOR_SECTION_EXPANDER_LABEL = '[data-testid="cbor-detail_label"]';
+  private TRANSACTION_CBOR_SECTION_COPY_BUTTON = '[data-testid="copy-cbor-btn"]';
+  private TRANSACTION_CBOR_SECTION_CBOR_VALUE = '[data-testid="cbor-value"]';
   private CONFIRM_BUTTON = '[data-testid="dapp-transaction-confirm"]';
   private CANCEL_BUTTON = '[data-testid="dapp-transaction-cancel"]';
   private ADDRESS_TAG_FROM_SECTION =
@@ -103,6 +107,22 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     return $(this.TRANSACTION_ORIGIN_EXPANDER_BUTTON);
   }
 
+  get transactionCBORSectionExpanderLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_CBOR_SECTION_EXPANDER_LABEL);
+  }
+
+  get transactionCBORSectionExpanderButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_CBOR_SECTION_EXPANDER_BUTTON);
+  }
+
+  get copyCborButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_CBOR_SECTION_COPY_BUTTON);
+  }
+
+  get cborValue(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TRANSACTION_CBOR_SECTION_CBOR_VALUE);
+  }
+
   get transactionSummaryAssetsRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.TRANSACTION_SUMMARY_ROW);
   }
@@ -133,7 +153,9 @@ class ConfirmTransactionPage extends CommonDappPageElements {
     return textArray.map((str) => str.replace(/\n/g, ' '));
   }
 
-  async expandSectionInDappTransactionWindow(section: 'Origin' | 'From address' | 'To address') {
+  async expandSectionInDappTransactionWindow(
+    section: 'Origin' | 'From address' | 'To address' | 'Raw Transaction (CBOR)'
+  ) {
     await this.transactionOriginSectionExpanderButton.waitForDisplayed();
     switch (section) {
       case 'Origin':
@@ -148,9 +170,18 @@ class ConfirmTransactionPage extends CommonDappPageElements {
         await this.transactionToSectionExpanderButton.scrollIntoView();
         await this.transactionToSectionExpanderButton.click();
         break;
+      case 'Raw Transaction (CBOR)':
+        await this.transactionCBORSectionExpanderButton.scrollIntoView();
+        await this.transactionCBORSectionExpanderButton.click();
+        break;
       default:
         throw new Error(`Unsupported section name: ${section}`);
     }
+  }
+
+  async clickOnCopyCborButton() {
+    await this.copyCborButton.waitForClickable();
+    await this.copyCborButton.click();
   }
 
   async saveDAppTransactionFeeValue() {

@@ -34,7 +34,7 @@ Feature: Send Transactions from Dapp - E2E
     And I click on a transaction: 1
     Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 3.00 and wallet: "WalletSendDappTransactionE2E" address
 
-  @LW-6797 @Testnet @memory-snapshot
+  @LW-6797 @LW-12403 @LW-12404 @Testnet @memory-snapshot
   Scenario: Send Token from DApp E2E
     And I de-authorize all DApps in extended mode
     And I save token: "LaceCoin2" balance
@@ -58,7 +58,13 @@ Feature: Send Transactions from Dapp - E2E
       | 1.38 tADA                                       |
       | 2 LaceCoin2                                     |
     And I save fee value on DApp "Confirm transaction" page
-    And I click "Confirm" button on "Confirm transaction" page
+    When I expand "Raw Transaction (CBOR)" section in DApp transaction window
+    Then "Raw Transaction (CBOR)" section is displayed
+    And I save CBOR in test context
+    When I click on "Copy" button inside "Raw Transaction (CBOR)" section
+    Then I see a toast with text: "Copied to clipboard"
+    And clipboard contains CBOR
+    When I click "Confirm" button on "Confirm transaction" page
     And I see DApp connector "Sign transaction" page
     And I fill correct password
     And I click "Confirm" button on "Sign transaction" page

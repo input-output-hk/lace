@@ -282,6 +282,8 @@ class DAppConnectorAssert {
       await t('core.dappTransaction.toAddress')
     );
 
+    await this.assertSeeCBORSection('collapsed');
+
     await ConfirmTransactionPage.confirmButton.waitForDisplayed();
     expect(await ConfirmTransactionPage.confirmButton.getText()).to.equal(await t('dapp.confirm.btn.confirm'));
 
@@ -391,6 +393,15 @@ class DAppConnectorAssert {
       })()
       `);
     expect(String(result)).to.equal(magic);
+  }
+
+  async assertSeeCBORSection(state: 'collapsed' | 'expanded') {
+    await ConfirmTransactionPage.transactionCBORSectionExpanderButton.waitForClickable();
+    expect(await ConfirmTransactionPage.transactionCBORSectionExpanderLabel.getText()).to.equal(
+      await t('core.activityDetails.CBOR')
+    );
+    await ConfirmTransactionPage.copyCborButton.waitForDisplayed({ reverse: state === 'collapsed' });
+    await ConfirmTransactionPage.cborValue.waitForDisplayed({ reverse: state === 'collapsed' });
   }
 }
 

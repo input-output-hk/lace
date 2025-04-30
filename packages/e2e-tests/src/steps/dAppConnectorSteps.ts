@@ -24,6 +24,7 @@ import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import ConfirmDataPage from '../elements/dappConnector/ConfirmDataPage';
 import ConfirmDataPageAssert from '../assert/ConfirmDataPageAssert';
 import extensionUtils from '../utils/utils';
+import testContext from '../utils/testContext';
 
 const testDAppDetails: ExpectedDAppDetails = {
   hasLogo: true,
@@ -97,6 +98,10 @@ Then(
   }
 );
 
+Then(/^"Raw Transaction \(CBOR\)" section is displayed$/, async () => {
+  await DAppConnectorAssert.assertSeeCBORSection('expanded');
+});
+
 Then(
   /^I see DApp connector "(Confirm transaction|Something went wrong|All done)" page on (\d) window handle$/,
   async (expectedPage: 'Confirm transaction' | 'Something went wrong' | 'All done', handleNumber: number) => {
@@ -156,22 +161,35 @@ Then(/^I see DApp removal confirmation window$/, async () => {
   await DAppConnectorAssert.assertSeeDAppRemovalConfirmationModal();
 });
 
-Then(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async (button: 'Authorize' | 'Cancel') => {
+When(/^I click "(Authorize|Cancel)" button in DApp authorization window$/, async (button: 'Authorize' | 'Cancel') => {
   await AuthorizeDAppPage.clickButton(button);
 });
 
-Then(
-  /^I expand "(Origin|From address|To address)" section in DApp transaction window$/,
-  async (section: 'Origin' | 'From address' | 'To address') => {
+When(
+  /^I expand "(Origin|From address|To address|Raw Transaction \(CBOR\))" section in DApp transaction window$/,
+  async (section: 'Origin' | 'From address' | 'To address' | 'Raw Transaction (CBOR)') => {
     await ConfirmTransactionPage.expandSectionInDappTransactionWindow(section);
   }
 );
 
-Then(/^I click "(Always|Only once)" button in DApp authorization window$/, async (button: 'Always' | 'Only once') => {
+When(/^I click on "Copy" button inside "Raw Transaction \(CBOR\)" section/, async () => {
+  await ConfirmTransactionPage.clickOnCopyCborButton();
+});
+
+Then(/^I save CBOR in test context$/, async () => {
+  testContext.save('cbor', await ConfirmTransactionPage.cborValue.getText());
+});
+
+Then(/^clipboard contains CBOR$/, async () => {
+  const expectedCbor = String(testContext.load('cbor'));
+  await CommonAssert.assertClipboardContains(expectedCbor);
+});
+
+When(/^I click "(Always|Only once)" button in DApp authorization window$/, async (button: 'Always' | 'Only once') => {
   await AuthorizeDAppModal.clickButton(button);
 });
 
-Then(
+When(
   /^I click "(Add funds|Cancel)" button in DApp insufficient funds window/,
   async (button: 'Add funds' | 'Cancel') => {
     await DAppConnectorUtils.waitAndSwitchToDAppConnectorWindow(3);

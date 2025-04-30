@@ -443,7 +443,7 @@ describe('Testing DappTransactionContainer component', () => {
       fireEvent.click(queryByTestId('cbor-detail_toggle'));
     });
 
-    expect(queryByTestId('cbor')).toHaveTextContent('cbor');
+    expect(queryByTestId('cbor-value')).toHaveTextContent('cbor');
   });
 
   it('should display drep registration certificate', async () => {
