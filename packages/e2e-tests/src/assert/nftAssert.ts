@@ -88,13 +88,13 @@ class NftAssert {
     expect(await NftDetails.tokenInfoSectionTitle.getText()).to.equal(await t('core.nftDetail.tokenInformation'));
 
     await NftDetails.policyIdLabel.waitForDisplayed();
-    expect(await NftDetails.policyIdLabel.getText()).to.equal('Policy ID'); // TODO: replace with translation keys when LW-7278 is resolved
+    expect(await NftDetails.policyIdLabel.getText()).to.equal(await t('core.nftDetail.policyId'));
     await NftDetails.policyIdValue.waitForDisplayed();
     await NftDetails.assetIdLabel.waitForDisplayed();
-    expect(await NftDetails.assetIdLabel.getText()).to.equal('Asset ID');
+    expect(await NftDetails.assetIdLabel.getText()).to.equal(await t('core.nftDetail.assetId'));
     await NftDetails.assetIdValue.waitForDisplayed();
     await NftDetails.mediaUrlLabel.waitForDisplayed();
-    expect(await NftDetails.mediaUrlLabel.getText()).to.equal('Media URL');
+    expect(await NftDetails.mediaUrlLabel.getText()).to.equal(await t('core.nftDetail.mediaUrl'));
     await NftDetails.mediaUrlValue.waitForDisplayed();
   }
 
