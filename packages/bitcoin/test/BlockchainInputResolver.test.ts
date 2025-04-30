@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers, no-loop-func, @typescript-eslint/no-non-null-assertion, unicorn/consistent-function-scoping, @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, camelcase */
+/* eslint-disable unicorn/no-useless-undefined, no-magic-numbers, no-loop-func, @typescript-eslint/no-non-null-assertion, unicorn/consistent-function-scoping, @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, camelcase */
 import { BlockchainInputResolver } from '../src/wallet/lib/providers/BlockchainInputResolver';
 import { BlockchainDataProvider } from '../src/wallet/lib/providers/BitcoinDataProvider';
 
