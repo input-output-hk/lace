@@ -2,8 +2,8 @@ import {
   HardwareWalletComponent as ColdWalletIcon,
   Flex,
   WalletComponent as HotWalletIcon,
+  PasswordBox,
   Text,
-  UncontrolledPasswordBox,
 } from '@input-output-hk/lace-ui-toolkit';
 import { Banner, logger, useAutoFocus } from '@lace/common';
 import { CoreTranslationKey, SharedWalletsTranslationKey } from '@lace/translation';
@@ -116,7 +116,7 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
           </Flex>
         </Flex>
         {!isHW && (
-          <UncontrolledPasswordBox
+          <PasswordBox
             disabled={loading}
             label={t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.passwordInputLabel')}
             onChange={setPassword}
