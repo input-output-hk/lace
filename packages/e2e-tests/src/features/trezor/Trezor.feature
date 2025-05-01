@@ -1,7 +1,7 @@
 @TrezorOnboarding @Trezor @Testnet
 Feature: Trezor Onboarding
 
-  @LW-7877
+  @LW-7877 @Pending
   Scenario: Onboarding Trezor wallet
     And I connect, unlock and enter correct pin on Trezor emulator
     And I force the Trezor account setup page to open

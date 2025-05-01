@@ -3,9 +3,13 @@ import path from 'node:path';
 
 import { DockerComposeEnvironment, StartedDockerComposeEnvironment, Wait } from 'testcontainers';
 import { Logger } from './logger';
+import fs from 'fs/promises';
+import { promisify } from 'node:util';
+const execAsync = promisify(exec);
 
 export class DockerManager {
   private static _composeEnvironment: StartedDockerComposeEnvironment;
+  private static projectName = 'lw-hw-testing-toolkit-e2e';
 
   public static async isDockerRunning(): Promise<boolean> {
     return new Promise((resolve) => {
@@ -33,7 +37,8 @@ export class DockerManager {
         composeFilePath,
         'lw-hw-testing-toolkit.yml'
       )
-        .withWaitStrategy('lw-hw-testing-toolkit-e2e', Wait.forLogMessage('Trezor Device Manipulation API is running'))
+        .withProjectName(this.projectName)
+        .withWaitStrategy(this.projectName, Wait.forLogMessage('Trezor Device Manipulation API is running'))
         .up();
 
       Logger.log('Docker compose environment for lw-hw-testing-toolkit has started');
@@ -58,6 +63,28 @@ export class DockerManager {
 
   public static async downDockerCompose(): Promise<void> {
     Logger.log('Tearing down docker compose.');
+    await this.saveDockerLogs();
     await this._composeEnvironment.down();
+  }
+
+  public static async saveDockerLogs(): Promise<void> {
+    try {
+      const composeFilePath = path.resolve(import.meta.dirname, '../compose');
+      const composeFile = 'lw-hw-testing-toolkit.yml';
+      const logDir = path.resolve('./logs');
+      await fs.mkdir(logDir, { recursive: true });
+
+      const logFilePath = path.join(logDir, './docker-compose.log');
+
+      const { stdout, stderr } = await execAsync(
+        `docker compose -p ${this.projectName} -f ${composeFile} logs --no-color --timestamps`,
+        { cwd: composeFilePath }
+      );
+
+      await fs.writeFile(logFilePath, stdout + stderr);
+      Logger.log('Docker compose logs saved.');
+    } catch (error) {
+      Logger.warn(`Failed to save docker compose logs: ${error}`);
+    }
   }
 }
