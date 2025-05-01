@@ -373,6 +373,7 @@
   "browserView.sideMenu.dapps.header": "Open Dapps",
   "browserView.sideMenu.links.activity": "Activity",
   "browserView.sideMenu.links.addNewWallet": "Add new wallet",
+  "browserView.sideMenu.links.addBitcoinWallet": "Add Bitcoin wallet",
   "browserView.sideMenu.links.addressBook": "Address Book",
   "browserView.sideMenu.links.addSharedWallet": "Add shared wallet",
   "browserView.sideMenu.links.dappExplorer": "DApps",

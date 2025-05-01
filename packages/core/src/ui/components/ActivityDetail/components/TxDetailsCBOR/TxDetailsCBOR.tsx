@@ -26,10 +26,10 @@ export const TxDetailsCBOR = ({ cbor }: TxDetailsCBORProps): React.ReactElement 
       <Flex flexDirection="column" gap="$20">
         <Flex w="$fill" justifyContent="flex-end">
           <CopyToClipboard text={cbor}>
-            <CopyIcon className={styles.copyButton} data-testid="copy-address-btn" onClick={doToast} />
+            <CopyIcon className={styles.copyButton} data-testid="copy-cbor-btn" onClick={doToast} />
           </CopyToClipboard>
         </Flex>
-        <Text.Body.Normal data-testid="cbor" className={styles.cbor} weight="$medium">
+        <Text.Body.Normal data-testid="cbor-value" className={styles.cbor} weight="$medium">
           {cbor}
         </Text.Body.Normal>
       </Flex>

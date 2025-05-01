@@ -43,7 +43,9 @@ export const TxDetailsGroup = ({
     >
       <div className={styles.expanderHeader}>
         <Flex alignItems="center" className={styles.title}>
-          <Text.Body.Normal weight="$semibold">{title}</Text.Body.Normal>
+          <Text.Body.Normal weight="$semibold" data-testid={`${testId}_label`}>
+            {title}
+          </Text.Body.Normal>
           {tooltipContent && (
             <Tooltip title={tooltipContent}>
               <InfoCircleOutlined className={styles.infoIcon} />

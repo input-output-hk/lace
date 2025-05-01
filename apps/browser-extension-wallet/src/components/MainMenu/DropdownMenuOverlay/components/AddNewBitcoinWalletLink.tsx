@@ -7,6 +7,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { PostHogAction } from '@lace/common';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   isPopup?: boolean;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export const AddNewBitcoinWalletLink = ({ isPopup }: Props): React.ReactElement => {
+  const { t } = useTranslation();
   const location = useLocation();
   const backgroundServices = useBackgroundServiceAPIContext();
   const { setBackgroundPage } = useBackgroundPage();
@@ -33,8 +35,8 @@ export const AddNewBitcoinWalletLink = ({ isPopup }: Props): React.ReactElement 
       }}
       onClick={openNewWallet}
     >
-      <Menu.Item data-testid="header-menu-new-wallet" className={styles.menuItem}>
-        Add Bitcoin wallet
+      <Menu.Item data-testid="header-menu-add-bitcoin-wallet" className={styles.menuItem}>
+        {t('browserView.sideMenu.links.addBitcoinWallet')}
       </Menu.Item>
     </Link>
   );
