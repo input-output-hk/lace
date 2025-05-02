@@ -194,7 +194,7 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
         amount
       });
     } else {
-      const tokenPriceInAda = prices?.tokens?.get(assetId)?.priceInAda;
+      const tokenPriceInAda = prices?.cardano.getTokenPrice(assetId)?.priceInAda;
       const fiat =
         info?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano.price
           ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices.cardano.price)))} ${
