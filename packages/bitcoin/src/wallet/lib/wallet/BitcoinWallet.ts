@@ -322,7 +322,7 @@ export class BitcoinWallet {
     );
     const updatedPendingTxs = [...this.pendingTransactions$.value];
 
-    updatedPendingTxs.forEach((localTx, index) => {
+    const filteredPendingTxs = updatedPendingTxs.filter((localTx) => {
       const inputUsedInHistory = this.transactionHistory.some((historyTx) =>
         historyTx.inputs.some((histInput) =>
           localTx.inputs.some(
@@ -341,24 +341,17 @@ export class BitcoinWallet {
           )
       );
 
-      if (inputUsedInHistory || inputUsedInRemotePending) {
-        updatedPendingTxs.splice(index, 1);
-      }
+      return !(inputUsedInHistory || inputUsedInRemotePending);
     });
 
     remotePendingTxs.forEach((remoteTx) => {
-      const localTxIndex = updatedPendingTxs.findIndex(
-        (localTx) => localTx.transactionHash === remoteTx.transactionHash
-      );
-      if (localTxIndex > -1) {
-        updatedPendingTxs[localTxIndex] = remoteTx;
-      } else {
-        updatedPendingTxs.push(remoteTx);
-      }
+      const index = filteredPendingTxs.findIndex((t) => t.transactionHash === remoteTx.transactionHash);
+      if (index > -1) filteredPendingTxs[index] = remoteTx;
+      else filteredPendingTxs.push(remoteTx);
     });
 
-    if (!isEqual(updatedPendingTxs, this.pendingTransactions$.value)) {
-      this.pendingTransactions$.next(updatedPendingTxs);
+    if (!isEqual(filteredPendingTxs, this.pendingTransactions$.value)) {
+      this.pendingTransactions$.next(filteredPendingTxs);
     }
   }
 
