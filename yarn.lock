@@ -12375,6 +12375,7 @@ __metadata:
     classnames: 2.3.1
     coinselect: ^3.1.13
     dayjs: 1.10.7
+    ecpair: ^3.0.0
     hash.js: ^1.1.7
     js-sha256: ^0.11.0
     lodash: 4.17.21
@@ -27348,6 +27349,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-x@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "base-x@npm:5.0.1"
+  checksum: 6e4f847ef842e0a71c6b6020a6ec482a2a5e727f5a98534dbfd5d5a4e8afbc0d1bdf1fd57174b3f0455d107f10a932c3c7710bec07e2878f80178607f8f605c8
+  languageName: node
+  linkType: hard
+
 "base64-arraybuffer-es6@npm:^0.7.0":
   version: 0.7.0
   resolution: "base64-arraybuffer-es6@npm:0.7.0"
@@ -28167,6 +28175,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bs58@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "bs58@npm:6.0.0"
+  dependencies:
+    base-x: ^5.0.0
+  checksum: 820334f9513bba6195136dfc9dfbd1f5aded6c7864639f3ee7b63c2d9d6f9f2813b9949b1f6beb9c161237be2a461097444c2ff587c8c3b824fe18878fa22448
+  languageName: node
+  linkType: hard
+
 "bs58check@npm:2.1.2":
   version: 2.1.2
   resolution: "bs58check@npm:2.1.2"
@@ -28185,6 +28202,16 @@ __metadata:
     "@noble/hashes": ^1.2.0
     bs58: ^5.0.0
   checksum: dbbecc7a09f3836e821149266c864c4bbd545539cea43c35f23f4c3c46b54c86c52b65d224b9ea2e916fa6d93bd2ce9fac5b6c6bfcf19621a9c209a5602f71c8
+  languageName: node
+  linkType: hard
+
+"bs58check@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "bs58check@npm:4.0.0"
+  dependencies:
+    "@noble/hashes": ^1.2.0
+    bs58: ^6.0.0
+  checksum: 416131b647563e9c7daf5d18222862b40dfd39110f8635e9e1d19805d624e96cc12ba03c8e6fdc1f9c0e364dd2918877fb8a02671caeef0de9beeb33c1fb0ed4
   languageName: node
   linkType: hard
 
@@ -32826,6 +32853,17 @@ __metadata:
     wcwidth:
       optional: true
   checksum: 66961b19751a68d2d30ce9b74ef750c374cc3112bbcac3d1ed5a939e43c035ecf6b1954098df2d5b05f1e853ab2b67de893794390dcbf0abe1f157fddeb52174
+  languageName: node
+  linkType: hard
+
+"ecpair@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "ecpair@npm:3.0.0"
+  dependencies:
+    uint8array-tools: ^0.0.8
+    valibot: ^0.37.0
+    wif: ^5.0.0
+  checksum: ff46b3a20d50fd53dbce601bbb50516a94e1c809277092aa53393c150405599273f381c4ffd529e814841fa0b328d090f0c6336b6b5291e6ed8de3670c096536
   languageName: node
   linkType: hard
 
@@ -57471,6 +57509,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"uint8array-tools@npm:^0.0.8":
+  version: 0.0.8
+  resolution: "uint8array-tools@npm:0.0.8"
+  checksum: 4cc4abe2db18b240cdcc9860fbb110d87e5197c254f1c3162e171c07944b2d10c8e809c524d7384a59b5f5118f2a60b7b855dbefe462c3fc6f89442b0a43a134
+  languageName: node
+  linkType: hard
+
 "uint8arraylist@npm:^2.0.0, uint8arraylist@npm:^2.4.8":
   version: 2.4.8
   resolution: "uint8arraylist@npm:2.4.8"
@@ -58468,6 +58513,18 @@ __metadata:
     "@types/istanbul-lib-coverage": ^2.0.1
     convert-source-map: ^1.6.0
   checksum: a49c34bf0a3af0c11041a3952a2600913904a983bd1bc87148b5c033bc5c1d02d5a13620fcdbfa2c60bc582a2e2970185780f0c844b4c3a220abf405f8af6311
+  languageName: node
+  linkType: hard
+
+"valibot@npm:^0.37.0":
+  version: 0.37.0
+  resolution: "valibot@npm:0.37.0"
+  peerDependencies:
+    typescript: ">=5"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 2847b40bbcaeccff194aa6f9fbaa8bb9f4995dd35e8118c73101ed43a889f941813bebfe081175438883843954e2d0b056bf72a8801d966011e74b2ec276d963
   languageName: node
   linkType: hard
 
@@ -59785,6 +59842,15 @@ __metadata:
   dependencies:
     bs58check: ^3.0.1
   checksum: 7c298e675e46b8bf1ee7dec787cab4e9e22c73aef9882efbe83f76700b43d60dc65616ca3635415aa78203f92da45e6897cd72d5cb0940d49c66d9621d40c223
+  languageName: node
+  linkType: hard
+
+"wif@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "wif@npm:5.0.0"
+  dependencies:
+    bs58check: ^4.0.0
+  checksum: 3af0d4e9f1d1b35672b860470b6545f34f77b4a804e06ccae2f06f43c96a31fba859cf64889344eded621433eb609fc4c95aa28d62c02057372232b85231e414
   languageName: node
   linkType: hard
 
