@@ -61,7 +61,7 @@ export const tokenTransformer = (
   const { name } = { ...tokenMetadata, ...nftMetadata };
   const [assetId, bigintBalance] = assetBalance;
   const amount = Wallet.util.calculateAssetBalance(bigintBalance, assetInfo);
-  const tokenPriceInAda = prices?.tokens?.get(assetId)?.priceInAda;
+  const tokenPriceInAda = prices?.cardano.getTokenPrice(assetId)?.priceInAda;
   const fiatBalance =
     tokenMetadata !== undefined &&
     tokenPriceInAda &&

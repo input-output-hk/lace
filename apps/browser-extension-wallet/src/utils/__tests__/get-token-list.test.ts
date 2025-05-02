@@ -7,10 +7,16 @@ import { defaultCurrency } from '@providers/currency/constants';
 import { Wallet } from '@lace/cardano';
 import { Asset } from '@cardano-sdk/core';
 import { PriceResult } from '@hooks';
+import { TokenPrice } from '@lib/scripts/types';
 
 const testEnvironment = 'Preprod';
 
 describe('getTokensList', () => {
+  const assetId = Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c40');
+  const assetPrice = { priceInAda: 22, priceVariationPercentage24h: 0.3 };
+  const getTokenPrice = (asset: Wallet.Cardano.AssetId) => (asset === assetId ? assetPrice : undefined);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const emptyGetTokenPrice = (_: Wallet.Cardano.AssetId): TokenPrice | undefined => undefined;
   const payload = {
     assetsInfo: new Map([
       [mockAsset.assetId, mockAsset],
@@ -35,7 +41,7 @@ describe('getTokensList', () => {
     ]),
     balance: new Map([
       [mockAsset.assetId, BigInt(20)],
-      [Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c40'), BigInt(20)],
+      [assetId, BigInt(20)],
       [mockNft.assetId, BigInt(1)],
       [Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c42'), BigInt(1)],
       [Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c43'), BigInt(1)]
@@ -45,6 +51,7 @@ describe('getTokensList', () => {
     tokensSpent: { [mockAsset.assetId]: '1' },
     prices: {
       cardano: {
+        getTokenPrice,
         price: 2,
         priceVariationPercentage24h: 0.2
       },
@@ -52,16 +59,7 @@ describe('getTokensList', () => {
         price: 2,
         priceVariationPercentage24h: 0.2
       },
-      tokens: new Map([
-        [
-          Wallet.Cardano.AssetId('659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c40'),
-          {
-            id: 'id',
-            priceInAda: 22,
-            priceVariationPercentage24h: 0.3
-          }
-        ]
-      ])
+      tokens: new Map([[assetId, { lastFetchTime: 0, price: assetPrice }]])
     }
   } as GetTokenListParams;
   test('should return a list with all nfts and another with all non-nft assets', () => {
@@ -85,13 +83,23 @@ describe('getTokensList', () => {
   });
 
   test('should return proper fiat value in case token is missing from tokens map', () => {
-    expect(getTokenList({ ...payload, prices: { tokens: new Map() } as PriceResult }).tokenList[0].fiat).toEqual('-');
+    expect(
+      getTokenList({
+        ...payload,
+        prices: { cardano: { getTokenPrice: emptyGetTokenPrice }, tokens: new Map() } as PriceResult
+      }).tokenList[0].fiat
+    ).toEqual('-');
   });
 
   test('should return proper fiat value in case token data is missing from tokens map', () => {
     expect(
-      getTokenList({ ...payload, prices: { tokens: new Map([[mockAsset.assetId, {}]]) } as PriceResult }).tokenList[0]
-        .fiat
+      getTokenList({
+        ...payload,
+        prices: {
+          cardano: { getTokenPrice: emptyGetTokenPrice },
+          tokens: new Map([[mockAsset.assetId, {}]])
+        } as PriceResult
+      }).tokenList[0].fiat
     ).toEqual('-');
   });
 
@@ -110,7 +118,10 @@ describe('getTokensList', () => {
 
   test('should return proper fiat value in case token prices map is missing', () => {
     expect(
-      getTokenList({ ...payload, prices: { cardano: {} as PriceResult['cardano'] } as PriceResult }).tokenList[0].fiat
+      getTokenList({
+        ...payload,
+        prices: { cardano: { getTokenPrice: emptyGetTokenPrice } as PriceResult['cardano'] } as PriceResult
+      }).tokenList[0].fiat
     ).toEqual('-');
   });
 
@@ -118,7 +129,7 @@ describe('getTokensList', () => {
     expect(
       getTokenList({
         ...payload,
-        prices: { cardano: {} as PriceResult['cardano'], tokens: payload.prices.tokens } as PriceResult
+        prices: { cardano: { getTokenPrice } as PriceResult['cardano'], tokens: payload.prices.tokens } as PriceResult
       }).tokenList[0].fiat
     ).toEqual('-');
   });

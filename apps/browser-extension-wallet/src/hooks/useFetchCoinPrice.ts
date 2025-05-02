@@ -1,12 +1,15 @@
 import { useMemo } from 'react';
-import { useObservable } from '@lace/common';
-import { TokenPrices, StatusTypes, ADAPricesKeys } from '@lib/scripts/types';
+import { logger, useObservable } from '@lace/common';
+import { TokenPrices, StatusTypes, ADAPricesKeys, TokenPrice } from '@lib/scripts/types';
 import { useBackgroundServiceAPIContext, useCurrencyStore } from '../providers';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { Wallet } from '@lace/cardano';
+import { config } from '@src/config';
+import { useWalletStore } from '@stores';
 
 export interface PriceResult {
   cardano: {
+    getTokenPrice: (assetId: Wallet.Cardano.AssetId) => TokenPrice | undefined;
     price: number;
     priceVariationPercentage24h: number;
   };
@@ -14,6 +17,7 @@ export interface PriceResult {
     price: number;
     priceVariationPercentage24h: number;
   };
+  /** @deprecated Use `cardano.getTokenPrice` instead. */
   tokens: TokenPrices;
 }
 
@@ -23,13 +27,15 @@ export interface UseFetchCoinPrice {
   timestamp?: number;
 }
 
+const { TOKEN_PRICE_CHECK_INTERVAL } = config();
+
 export const useFetchCoinPrice = (): UseFetchCoinPrice => {
-  const backgroundServices = useBackgroundServiceAPIContext();
+  const { coinPrices, trackCardanoTokenPrice } = useBackgroundServiceAPIContext();
   const { fiatCurrency } = useCurrencyStore();
-  const { coinPrices } = backgroundServices;
   const tokenPrices = useObservable(coinPrices.tokenPrices$);
   const adaPrices = useObservable(coinPrices.adaPrices$);
   const bitcoinPrices = useObservable(coinPrices.bitcoinPrices$);
+  const networkId = useWalletStore((state) => state.currentChain?.networkId);
 
   const isAdaCurrency = fiatCurrency.code === CARDANO_COIN_SYMBOL[Wallet.Cardano.NetworkId.Mainnet];
 
@@ -42,25 +48,49 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
     [bitcoinPrices?.prices, fiatCurrency.code]
   );
 
-  const price = useMemo(
+  const cardano = useMemo(
     () => ({
+      getTokenPrice: (assetId: Wallet.Cardano.AssetId): TokenPrice | undefined => {
+        const tokenPrice = tokenPrices?.tokens.get(assetId);
+        // Actually track the price only for token in Cardano mainnet, otherwise just do nothing
+        const trackPrice = () =>
+          networkId === Wallet.Cardano.NetworkId.Mainnet
+            ? trackCardanoTokenPrice(assetId).catch((error) => logger.error(error))
+            : undefined;
+
+        // If the price for this token was never fetched, wee need to track it
+        if (!tokenPrice) {
+          trackPrice();
+
+          return undefined;
+        }
+
+        const { lastFetchTime, price } = tokenPrice;
+
+        // If the price was fetched, but it is still not present, it means the price for this token is not tracked by CoinGecko:
+        // let's retry a new fetch only after the TOKEN_PRICE_CHECK_INTERVAL to check if now the price is being tracked.
+        if (!price && lastFetchTime < Date.now() - TOKEN_PRICE_CHECK_INTERVAL) trackPrice();
+
+        // eslint-disable-next-line consistent-return
+        return price;
+      },
       price: isAdaCurrency ? 1 : adaPrices?.prices?.[fiatCurrency.code.toLowerCase() as ADAPricesKeys],
       priceVariationPercentage24h:
         adaPrices?.prices?.[`${fiatCurrency.code.toLowerCase()}_24h_change` as ADAPricesKeys] || 0
     }),
-    [adaPrices?.prices, fiatCurrency.code, isAdaCurrency]
+    [adaPrices?.prices, fiatCurrency.code, isAdaCurrency, tokenPrices?.tokens, trackCardanoTokenPrice, networkId]
   );
 
   return useMemo(
     () => ({
       priceResult: {
-        cardano: price,
+        cardano,
         bitcoin: bitcoinPrice,
         tokens: tokenPrices?.tokens
       },
       status: adaPrices?.status,
       timestamp: adaPrices?.timestamp
     }),
-    [tokenPrices, adaPrices, price, bitcoinPrice]
+    [tokenPrices, adaPrices, cardano, bitcoinPrice]
   );
 };

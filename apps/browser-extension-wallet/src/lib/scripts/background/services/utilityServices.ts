@@ -10,7 +10,6 @@ import {
   OpenBrowserData,
   OpenNamiBrowserData,
   MigrationState,
-  TokenPrices,
   CoinPrices,
   ChangeModeData,
   LaceFeaturesApi,
@@ -21,7 +20,6 @@ import { Subject, of, BehaviorSubject, merge, map, fromEvent } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { exposeApi } from '@cardano-sdk/web-extension';
-import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
 import { getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs, getBtcPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
@@ -31,6 +29,7 @@ import { getErrorMessage } from '@src/utils/get-error-message';
 import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
+import { initCardanoTokenPrices, trackCardanoTokenPrice } from './cardanoTokenPrices';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -44,17 +43,8 @@ const coinPrices: CoinPrices = {
     prices: {},
     status: 'idle'
   }),
-  tokenPrices$: new BehaviorSubject({
-    tokens: new Map(),
-    status: 'idle'
-  })
+  tokenPrices$: initCardanoTokenPrices()
 };
-interface TokenAPIResponse {
-  [key: string]: {
-    price: number; // price in ADA
-    priceChange: { '24h': string };
-  };
-}
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
 
@@ -181,31 +171,7 @@ const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type
 
 const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
-const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION, TOKEN_PRICE_CHECK_INTERVAL } = config();
-const fetchTokenPrices = () => {
-  fetch('https://muesliswap.live-mainnet.eks.lw.iog.io/lace/prices')
-    .then(async (response) => {
-      const tokens: TokenAPIResponse = await response.json();
-      const tokenPrices: TokenPrices = new Map();
-      for (const [key, token] of Object.entries(tokens)) {
-        const [policyId, name] = key.split('.');
-        try {
-          const assetId = Cardano.AssetId.fromParts(Cardano.PolicyId(policyId), Cardano.AssetName(name));
-          tokenPrices.set(assetId, {
-            priceInAda: token.price,
-            priceVariationPercentage24h: Number(token.priceChange['24h'])
-          });
-        } catch {
-          // If a token couldn't be parsed then skip it
-        }
-      }
-      coinPrices.tokenPrices$.next({ tokens: tokenPrices, status: 'fetched' });
-    })
-    .catch((error) => {
-      logger.debug('Error fetching token prices:', error);
-      coinPrices.tokenPrices$.next({ ...coinPrices.tokenPrices$.value, status: 'error' });
-    });
-};
+const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
 
 const fetchAdaPrice = () => {
   const vsCurrencies =
@@ -297,11 +263,6 @@ fetchBitcoinPrice();
 setInterval(fetchAdaPrice, ADA_PRICE_CHECK_INTERVAL);
 setInterval(fetchBitcoinPrice, ADA_PRICE_CHECK_INTERVAL);
 
-if (process.env.USE_TOKEN_PRICING === 'true') {
-  fetchTokenPrices();
-  setInterval(fetchTokenPrices, TOKEN_PRICE_CHECK_INTERVAL);
-}
-
 exposeApi<LaceFeaturesApi>(
   {
     api$: of({
@@ -344,6 +305,7 @@ exposeApi<BackgroundService>(
       requestMessage$,
       migrationState$,
       coinPrices,
+      trackCardanoTokenPrice,
       handleChangeTheme,
       handleChangeMode,
       clearBackgroundStorage,

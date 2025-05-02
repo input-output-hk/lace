@@ -6,6 +6,7 @@ import { SpentBalances } from '../../../../types';
 import { PriceResult } from '@hooks';
 import { CurrencyInfo } from '@src/types';
 import { currencyCode } from '@providers/currency/constants';
+import { TokenPrices } from '@lib/scripts/types';
 
 describe('CoinInput util', () => {
   describe('getMaxSpendableAmount', () => {
@@ -198,8 +199,12 @@ describe('CoinInput util', () => {
     const assetInfo = { tokenMetadata: { name: 'Test Token' } } as Wallet.Asset.AssetInfo;
     const assetInputItem = { id: mockAsset.assetId.toString(), value: '5' };
     const prices = {
-      tokens: new Map([[mockAsset.assetId, { priceInAda: 10 }]]),
-      cardano: { price: 0.5 }
+      tokens: new Map([[mockAsset.assetId, { lastFetchTime: 0, price: { priceInAda: 10 } }]]),
+      cardano: {
+        getTokenPrice: (assetId: Wallet.Cardano.AssetId) =>
+          assetId === mockAsset.assetId ? { priceInAda: 10 } : undefined,
+        price: 0.5
+      }
     } as PriceResult;
     const fiatCurrency: CurrencyInfo = { symbol: '$', code: currencyCode.USD };
 
@@ -226,9 +231,11 @@ describe('CoinInput util', () => {
       });
 
       test('if there is no price in ADA for the asset', () => {
-        expect(getAssetFiatValue(assetInputItem, assetInfo, { ...prices, tokens: new Map() }, fiatCurrency)).toEqual(
-          '-'
-        );
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        const cardano = { ...prices.cardano, getTokenPrice: (): undefined => undefined };
+        expect(
+          getAssetFiatValue(assetInputItem, assetInfo, { ...prices, cardano, tokens: new Map() }, fiatCurrency)
+        ).toEqual('-');
         expect(
           getAssetFiatValue(
             { ...assetInputItem, id: '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41' }, // != mockAsset.assetId
@@ -241,7 +248,7 @@ describe('CoinInput util', () => {
           getAssetFiatValue(
             assetInputItem,
             assetInfo,
-            { ...prices, tokens: new Map([[mockAsset.assetId, {}]]) } as PriceResult,
+            { ...prices, cardano, tokens: new Map([[mockAsset.assetId, {}]]) as TokenPrices },
             fiatCurrency
           )
         ).toEqual('-');
@@ -249,7 +256,12 @@ describe('CoinInput util', () => {
 
       test('if there is no fiat price for ADA', () => {
         expect(
-          getAssetFiatValue(assetInputItem, assetInfo, { ...prices, cardano: {} } as PriceResult, fiatCurrency)
+          getAssetFiatValue(
+            assetInputItem,
+            assetInfo,
+            { ...prices, cardano: { getTokenPrice: (): undefined => undefined } } as unknown as PriceResult,
+            fiatCurrency
+          )
         ).toEqual('-');
       });
     });

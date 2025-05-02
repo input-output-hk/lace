@@ -8,6 +8,7 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
 import { BackgroundServiceAPIProviderProps } from '@src/providers';
+import { Wallet } from '@lace/cardano';
 
 const tokenPrices$ = new BehaviorSubject({});
 const adaPrices$ = new BehaviorSubject({});
@@ -15,6 +16,14 @@ const adaPrices$ = new BehaviorSubject({});
 jest.mock('@providers/currency', (): typeof CurrencyProvider => ({
   ...jest.requireActual<typeof CurrencyProvider>('@providers/currency'),
   useCurrencyStore: mockUseCurrencyStore
+}));
+
+jest.mock('../../stores', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ...jest.requireActual<any>('../../stores'),
+  useWalletStore: () => ({
+    currentChain: { networkId: Wallet.Cardano.NetworkId.Mainnet }
+  })
 }));
 
 const backgroundServices = {
@@ -32,9 +41,11 @@ jest.mock('@providers/BackgroundServiceAPI', () => ({
 describe('Testing useFetchCoinPrice hook', () => {
   test('should return proper state', async () => {
     const hook = renderHook(() => useFetchCoinPrice());
+    expect(typeof hook.result.current.priceResult.cardano.getTokenPrice).toBe('function');
     expect(hook.result.current).toEqual({
       priceResult: {
         cardano: {
+          getTokenPrice: hook.result.current.priceResult.cardano.getTokenPrice,
           price: 1,
           priceVariationPercentage24h: 0
         },
@@ -108,12 +119,14 @@ describe('Testing useFetchCoinPrice hook', () => {
           priceVariationPercentage24h: 0
         },
         cardano: {
+          getTokenPrice: hook.result.current.priceResult.cardano.getTokenPrice,
           price: 1,
           priceVariationPercentage24h: 0
         },
         tokens
       },
-      status: 'fetched'
+      status: 'fetched',
+      timestamp: undefined
     });
 
     const fiatCurrency = { code: 'USD', symbol: '$' };
@@ -130,6 +143,7 @@ describe('Testing useFetchCoinPrice hook', () => {
           priceVariationPercentage24h: 0
         },
         cardano: {
+          getTokenPrice: hook.result.current.priceResult.cardano.getTokenPrice,
           price: prices.usd,
           priceVariationPercentage24h: prices.usd_24h_change
         },

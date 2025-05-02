@@ -256,7 +256,7 @@ export const formatRow = ({
     if (asset) {
       const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
       const amount = Wallet.util.calculateAssetBalance(balance, asset);
-      const tokenPriceInAda = prices?.tokens?.get(id)?.priceInAda;
+      const tokenPriceInAda = prices?.cardano.getTokenPrice(id)?.priceInAda;
       const fiatAmount =
         asset.tokenMetadata !== undefined && tokenPriceInAda
           ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${
