@@ -1,7 +1,13 @@
-/* eslint-disable unicorn/no-useless-undefined, no-magic-numbers, no-loop-func, @typescript-eslint/no-non-null-assertion, unicorn/consistent-function-scoping, @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, camelcase */
-import { BitcoinWallet } from '../src/wallet/lib/wallet/BitcoinWallet';
-import { TransactionHistoryEntry, UTxO } from '../src/wallet/lib/providers';
-import { Network, ChainType, AddressType, BitcoinWalletInfo } from '../src/wallet/lib/common';
+/* eslint-disable no-magic-numbers, @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any */
+import {
+  AddressType,
+  ChainType,
+  BitcoinWalletInfo,
+  Network,
+  BitcoinWallet,
+  TransactionHistoryEntry,
+  UTxO
+} from '../src/wallet/lib';
 import { firstValueFrom, of } from 'rxjs';
 import * as utils from '../src/wallet/lib/tx-builder/utils';
 
@@ -298,7 +304,7 @@ describe('BitcoinWallet', () => {
       } as unknown as TransactionHistoryEntry
     ];
 
-    wallet.transactionHistory = existingTxs;
+    (wallet as any).transactionHistory = existingTxs;
     wallet.transactionHistory$.next(existingTxs);
 
     provider.getTransactions.mockResolvedValue({ transactions: [...existingTxs] });

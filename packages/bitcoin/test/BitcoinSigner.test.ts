@@ -1,6 +1,13 @@
-/* eslint-disable unicorn/no-useless-undefined, no-magic-numbers, no-loop-func, @typescript-eslint/no-non-null-assertion, unicorn/consistent-function-scoping, @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, camelcase */
-import { BitcoinSigner, signTx } from '../src/wallet/lib/wallet/BitcoinSigner';
-import { AddressType, ChainType, KeyPair, Network, UnsignedTransaction } from '../src/wallet/lib/common';
+/* eslint-disable no-magic-numbers, @typescript-eslint/no-non-null-assertion */
+import {
+  BitcoinSigner,
+  signTx,
+  AddressType,
+  ChainType,
+  KeyPair,
+  Network,
+  UnsignedTransaction
+} from '../src/wallet/lib';
 import * as bitcoin from 'bitcoinjs-lib';
 import * as ecc from '@bitcoinerlab/secp256k1';
 import * as ECPairFactory from 'ecpair';

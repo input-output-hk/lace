@@ -1,6 +1,5 @@
-/* eslint-disable unicorn/no-useless-undefined, no-magic-numbers, no-loop-func, @typescript-eslint/no-non-null-assertion, unicorn/consistent-function-scoping, @typescript-eslint/no-explicit-any, @typescript-eslint/no-var-requires, camelcase */
-import { TransactionBuilder } from '../src/wallet/lib/tx-builder/TransactionBuilder';
-import { Network, DerivedAddress } from '../src/wallet/lib/common';
+/* eslint-disable no-magic-numbers, @typescript-eslint/no-non-null-assertion */
+import { TransactionBuilder, Network, DerivedAddress } from '../src/wallet/lib';
 
 describe('TransactionBuilder', () => {
   const knownAddress = {
