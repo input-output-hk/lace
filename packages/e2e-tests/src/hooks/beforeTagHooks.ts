@@ -7,6 +7,7 @@ import networkManager from '../utils/networkManager';
 import analyticsBanner from '../elements/analyticsBanner';
 import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 import { setUsePersistentUserId } from '../utils/browserStorage';
+import { checkAndStartEmulator } from '../utils/trezorEmulatorApiClient';
 
 const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
@@ -301,5 +302,14 @@ Before(
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
     await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
     await localStorageInitializer.disableShowPinExtension();
+  }
+);
+
+Before(
+  {
+    tags: '@Trezor'
+  },
+  async () => {
+    await checkAndStartEmulator();
   }
 );

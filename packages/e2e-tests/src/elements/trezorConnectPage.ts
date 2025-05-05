@@ -2,10 +2,10 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class TrezorConnectPage {
-  private CONFIRM_BUTTON = '[data-test="@permissions/confirm-button"]';
+  private CONFIRM_BUTTON = '[data-testid="@permissions/confirm-button"]';
   private EXPORT_BUTTON = '[id="container"] .confirm';
-  private ANALYTICS_CONFIRM_BUTTON = '[data-test="@analytics/continue-button"]';
-  private ANALYTICS_TOGGLE_BUTTON = '[data-test="@analytics/toggle-switch"]';
+  private ANALYTICS_CONFIRM_BUTTON = '[data-testid="@analytics/continue-button"]';
+  private ANALYTICS_TOGGLE_BUTTON = '[data-testid="@analytics/toggle-switch"]';
   private SHADOW_ROOT = '#react';
 
   get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {

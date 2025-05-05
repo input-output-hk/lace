@@ -3,6 +3,8 @@
 import extensionUtils from './src/utils/utils';
 import fs from 'fs';
 import { Logger } from './src/support/logger';
+import { beforeFeatureHook } from './src/hooks/beforeFeatureHooks';
+import { afterFeatureHook } from './src/hooks/afterFeatureHooks';
 
 export const config: WebdriverIO.Config = {
   runner: 'local',
@@ -63,7 +65,7 @@ export const config: WebdriverIO.Config = {
       './src/features/NavigationMain*.feature',
       './src/features/NetworkSwitching*.feature',
       './src/features/OwnTags*.feature',
-      './src/features/Trezor/Trezor.feature',
+      './src/features/trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
@@ -160,5 +162,11 @@ export const config: WebdriverIO.Config = {
       // eslint-disable-next-line unicorn/no-process-exit
       process.exit(1);
     }
+  },
+  beforeFeature: async (uri, feature): Promise<void> => {
+    await beforeFeatureHook(uri, feature);
+  },
+  afterFeature: async () => {
+    await afterFeatureHook();
   }
 };

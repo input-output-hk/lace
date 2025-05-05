@@ -10,6 +10,7 @@ UI-mapped gherkin tests for the Lace browser extension
   - On macOS, you can install it easily with homebrew: `brew install openjdk`
 - gpg
 - Firefox Developer Edition (for running tests on Firefox locally)
+- Docker (for Trezor tests)
 
 ## Running tests locally
 
@@ -86,12 +87,12 @@ UI-mapped gherkin tests for the Lace browser extension
 - encrypt `walletConfiguration.ts` by running `./encrypt_secret.sh` (from the `packages/e2e-tests` directory)
 - delete `packages/e2e-tests/src/support/walletConfiguration.ts`
 
-## Trezor test automation precondition (local run)
+## Trezor test automation precondition (for local development)
 
-- run docker image locally <https://github.com/input-output-hk/lace-hw-testing-toolkit.git>
+- build docker image locally <https://github.com/input-output-hk/lace-hw-testing-toolkit.git> or
+- `docker pull public.ecr.aws/e8d0p1a5/lw-hw-testing-toolkit:latest` (you need to be authenticated) and run it
 - After starting docker image (info should be displayed - `⚡️ Trezor Device Manipulation API is running at http://localhost:8000`)
   Tests need to be triggered in 60 sec because emulator shuts down device if there is no action  
-  (will be improved in follow-up tickets by starting emulator trough API)
 
 ## Running tests locally in debug mode using IntelliJ IDEA/WebStorm
 

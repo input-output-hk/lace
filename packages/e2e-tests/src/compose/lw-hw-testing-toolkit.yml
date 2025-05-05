@@ -1,0 +1,17 @@
+services:
+  lw-hw-testing-toolkit-e2e:
+    image: 'public.ecr.aws/e8d0p1a5/lw-hw-testing-toolkit:latest'
+    container_name: lw-hw-testing-toolkit
+    ports:
+      - "3389:3389/tcp"
+      - "127.0.0.1:21325:11325"
+      - "8000:8000"
+    tty: true
+    stdin_open: true
+    restart: "no"
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/healthcheck']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
