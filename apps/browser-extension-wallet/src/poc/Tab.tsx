@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import styles from './Tab.module.scss';
+// import styles from './Tab.module.scss';
 
 const allowedCharactersRegex = /^[\d!#$%&()*@L^\p{L}]$/u;
 
@@ -8,10 +8,12 @@ export const Tab = () => {
   const [textValue, setTextValue] = useState('');
   const fakeValueRef = useRef('');
   const [fakeValueBuffer, setFakeValueBuffer] = useState([Buffer.from('', 'utf8')]);
-  const fakeInputRef = useRef<HTMLSpanElement | null>(null);
+  const fakeInputRef = useRef<HTMLInputElement | null>(null);
   const fakeInputAnimationFrameRef = useRef<number | null>(null);
 
   const onFakePasswordInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    e.preventDefault();
+
     if (e.key === 'Backspace') {
       if (fakeValueBuffer.length === 0) return;
 
@@ -22,13 +24,13 @@ export const Tab = () => {
     if (!allowedCharactersRegex.test(e.key)) return;
 
     setFakeValueBuffer([Buffer.concat([fakeValueBuffer[0], Buffer.from(e.key)].filter(Boolean)), ...fakeValueBuffer]);
-    fakeValueRef.current = `●${fakeValueRef.current}`;
+    fakeValueRef.current = `${fakeValueRef.current}•`;
   };
 
   const animateFakeInputChange = () => {
     fakeInputAnimationFrameRef.current = requestAnimationFrame(() => {
       if (!fakeInputRef.current) return;
-      fakeInputRef.current.textContent = fakeValueRef.current;
+      fakeInputRef.current.value = fakeValueRef.current;
       animateFakeInputChange();
     });
   };
@@ -52,9 +54,10 @@ export const Tab = () => {
       <h4>text controlled</h4>
       <input type={'text'} value={textValue} onChange={(e) => setTextValue(e.currentTarget.value)} />
       <h4>fake (capturing keyboard event)</h4>
-      <span className={styles.fakePasswordInput} tabIndex={0} onKeyDown={onFakePasswordInputKeyDown}>
-        <span ref={fakeInputRef} className={styles.fakePasswordInputContent} />
-      </span>
+      <input ref={fakeInputRef} type={'text'} onKeyDownCapture={onFakePasswordInputKeyDown} />
+      {/*<span className={styles.fakePasswordInput} tabIndex={0} onKeyDown={onFakePasswordInputKeyDown}>*/}
+      {/*  <span ref={fakeInputRef} className={styles.fakePasswordInputContent} />*/}
+      {/*</span>*/}
       {fakeValueBuffer.length > 0 && String.fromCharCode(...fakeValueBuffer[0])}
     </>
   );
