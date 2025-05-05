@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-import { BrowserViewRoutes } from '@views/browser/routes';
-import { BitcoinBrowserViewRoutes } from '../bitcoin-mode/BitcoinBrowserViewRoutes';
+// import { BrowserViewRoutes } from '@views/browser/routes';
+// import { BitcoinBrowserViewRoutes } from '../bitcoin-mode/BitcoinBrowserViewRoutes';
 import {
   CurrencyStoreProvider,
   DatabaseProvider,
@@ -35,12 +35,15 @@ import { storage, Storage } from 'webextension-polyfill';
 import { walletRoutePaths } from '@routes';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './../../multichain/BlockchainProvider';
+import { Tab } from '@src/poc/Tab';
 
 const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
+// const passwordPOC = true;
+
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'lace-bitcoin'>('lace');
+  const [_, setMode] = useState<'lace' | 'lace-bitcoin'>('lace');
   const { setBlockchain } = useCurrentBlockchain();
 
   /* eslint-disable sonarjs/cognitive-complexity */
@@ -106,7 +109,7 @@ const App = (): React.ReactElement => {
                                   <AddressesDiscoveryOverlay>
                                     <NamiMigrationGuard>
                                       <AppVersionGuard>
-                                        {mode === BITCOIN_LACE ? <BitcoinBrowserViewRoutes /> : <BrowserViewRoutes />}
+                                        <Tab />
                                       </AppVersionGuard>
                                     </NamiMigrationGuard>
                                   </AddressesDiscoveryOverlay>

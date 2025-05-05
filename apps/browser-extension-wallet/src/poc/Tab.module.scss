@@ -1,0 +1,20 @@
+.fakePasswordInput {
+  display: block;
+  width: 200px;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 2px 6px;
+  height: 28px;
+  overflow: hidden;
+
+  &:focus {
+    border-color: #2bf2c4;
+  }
+
+  .fakePasswordInputContent {
+    display: flex;
+    flex-direction: row-reverse;
+    overflow-x: scroll;
+    height: calc(100% + 25px);
+  }
+}

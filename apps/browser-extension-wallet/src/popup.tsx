@@ -32,11 +32,15 @@ import { AppVersionGuard } from './utils/AppVersionGuard';
 import { ErrorBoundary } from '@components/ErrorBoundary';
 import { BitcoinPopupView } from '@src/views/bitcoin-mode';
 import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './multichain/BlockchainProvider';
+import { Popup } from '@src/poc/Popup';
 
 const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
+const passwordPOC = true;
+
 const getPopupModeView = (mode: 'lace' | 'nami' | 'lace-bitcoin') => {
+  if (passwordPOC) return <Popup />;
   switch (mode) {
     case 'lace':
       return <PopupView />;
