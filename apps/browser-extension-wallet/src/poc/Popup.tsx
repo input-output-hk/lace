@@ -1,3 +1,4 @@
 import React from 'react';
+import { Inputs } from './Inputs';
 
-export const Popup = () => <></>;
+export const Popup = () => <Inputs />;
