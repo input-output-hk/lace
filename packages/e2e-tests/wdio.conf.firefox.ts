@@ -57,7 +57,7 @@ const firefoxConfig = {
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
     batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
-    batch11: ['./src/features/e2e/StakingInitialFundsE2E.feature'],
+    batch11: ['./src/features/e2e/StakingInitialFundsE2E.feature', './src/features/SharedWalletOnboarding.feature'],
     batch12: [
       './src/features/AdaHandleExtended.feature',
       './src/features/AdaHandlePopup.feature',

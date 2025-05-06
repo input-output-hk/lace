@@ -73,6 +73,7 @@ export const AddCoSignerInput = ({
           errorMessage={(dirty?.name && errorMessage.name) || undefined}
           onChange={makeChangeHandler('name')}
           w="$fill"
+          data-testid="identifier"
         />
       </Box>
       <Box>
@@ -83,6 +84,7 @@ export const AddCoSignerInput = ({
           onChange={makeChangeHandler('sharedWalletKey')}
           w="$fill"
           disabled={keyFieldDisabled}
+          data-testid="shared-wallet-key"
         />
       </Box>
     </>
