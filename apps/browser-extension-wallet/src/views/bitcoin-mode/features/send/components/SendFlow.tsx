@@ -11,7 +11,7 @@ import { PasswordInput } from './PasswordInput';
 import { TransactionSuccess } from './TransactionSuccess';
 import { TransactionFailed } from './TransactionFailed';
 import { useFetchCoinPrice, useRedirection, useWalletManager } from '@hooks';
-import { DrawerNavigation, PostHogAction, useObservable } from '@lace/common';
+import { DrawerNavigation, PostHogAction, useKeyboardShortcut, useObservable } from '@lace/common';
 import { Bitcoin } from '@lace/bitcoin';
 import { Wallet as Cardano } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
@@ -21,6 +21,8 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useAnalyticsContext } from '@providers';
 import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { useTranslation } from 'react-i18next';
+import { WarningModal } from '@views/browser/components';
+import styles from './SendFlow.module.scss';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -123,6 +125,7 @@ export const SendFlow: React.FC = () => {
   const [network, setWalletNetwork] = useState<Bitcoin.Network | null>(null);
   const [confirmationHash, setConfirmationHash] = useState<string>('');
   const [txError, setTxError] = useState<Error | undefined>();
+  const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
 
   const { priceResult } = useFetchCoinPrice();
   const { bitcoinWallet } = useWalletManager();
@@ -209,12 +212,16 @@ export const SendFlow: React.FC = () => {
     });
   }, [bitcoinWallet]);
 
-  const onClose = useCallback(() => {
+  const onClose = useCallback(() => setIsWarningModalVisible(true), []);
+
+  const confirmOnClose = useCallback(() => {
     if (isPopupView) redirectToOverview();
     else {
       config?.onClose ? config?.onClose() : setDrawerConfig();
     }
-  }, [setDrawerConfig, config, isPopupView, redirectToOverview]);
+  }, [isPopupView, redirectToOverview, config, setDrawerConfig]);
+
+  useKeyboardShortcut(['Escape'], () => (step === 'AMOUNT' ? confirmOnClose() : onClose()));
 
   const backToAmount = () => {
     setStep('AMOUNT');
@@ -278,67 +285,92 @@ export const SendFlow: React.FC = () => {
 
   const backToReview = () => setStep('REVIEW');
 
-  if (step === 'AMOUNT') {
-    return (
-      <SendStepOne
-        onClose={onClose}
+  const getSendComponent = () => {
+    if (step === 'AMOUNT') {
+      return (
+        <SendStepOne
+          onClose={onClose}
+          isPopupView={isPopupView}
+          amount={amount}
+          onAmountChange={setAmount}
+          address={address}
+          availableBalance={Number(balance)}
+          onAddressChange={setAddress}
+          feeMarkets={feeMarkets}
+          onEstimatedTimeChange={setEstimatedTime}
+          onContinue={goToReview}
+          network={network}
+          hasUtxosInMempool={hasUtxosInMempool}
+        />
+      );
+    }
+
+    if (step === 'REVIEW') {
+      return (
+        <>
+          <ReviewTransaction
+            onClose={onClose}
+            isPopupView={isPopupView}
+            unsignedTransaction={unsignedTransaction}
+            btcToUsdRate={btcToUsdRate}
+            feeRate={feeRate}
+            estimatedTime={estimatedTime}
+            onConfirm={goToPassword}
+          />
+        </>
+      );
+    }
+
+    if (step === 'PASSWORD') {
+      return (
+        <PasswordInput
+          onClose={onClose}
+          isPopupView={isPopupView}
+          onSubmit={handleSubmitTx}
+          signTransaction={handleSignTransaction}
+        />
+      );
+    }
+
+    if (step === 'DONE') {
+      return (
+        <TransactionSuccess
+          onClose={onClose}
+          isPopupView={isPopupView}
+          onViewTransaction={() => {
+            setDrawerConfig();
+            redirectToTransactions();
+          }}
+          hash={confirmationHash}
+        />
+      );
+    }
+
+    if (step === 'FAILED') {
+      return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
+    }
+
+    return <></>;
+  };
+
+  return (
+    <>
+      {getSendComponent()}
+      <WarningModal
+        header={t('general.warnings.youHaveToStartAgain')}
+        content={
+          <div className={styles.modalContent}>
+            {t('general.warnings.areYouSureYouWantToExit')}
+            <br />
+            {t('general.warnings.thisWillNotBeSaved')}
+          </div>
+        }
+        onConfirm={confirmOnClose}
+        onCancel={() => setIsWarningModalVisible(false)}
+        visible={isWarningModalVisible}
         isPopupView={isPopupView}
-        amount={amount}
-        onAmountChange={setAmount}
-        address={address}
-        availableBalance={Number(balance)}
-        onAddressChange={setAddress}
-        feeMarkets={feeMarkets}
-        onEstimatedTimeChange={setEstimatedTime}
-        onContinue={goToReview}
-        network={network}
-        hasUtxosInMempool={hasUtxosInMempool}
+        dataTestId="send-warning-modal"
       />
-    );
-  }
-
-  if (step === 'REVIEW') {
-    return (
-      <ReviewTransaction
-        onClose={onClose}
-        isPopupView={isPopupView}
-        unsignedTransaction={unsignedTransaction}
-        btcToUsdRate={btcToUsdRate}
-        feeRate={feeRate}
-        estimatedTime={estimatedTime}
-        onConfirm={goToPassword}
-      />
-    );
-  }
-
-  if (step === 'PASSWORD') {
-    return (
-      <PasswordInput
-        onClose={onClose}
-        isPopupView={isPopupView}
-        onSubmit={handleSubmitTx}
-        signTransaction={handleSignTransaction}
-      />
-    );
-  }
-
-  if (step === 'DONE') {
-    return (
-      <TransactionSuccess
-        onClose={onClose}
-        isPopupView={isPopupView}
-        onViewTransaction={() => {
-          setDrawerConfig();
-          redirectToTransactions();
-        }}
-        hash={confirmationHash}
-      />
-    );
-  }
-
-  if (step === 'FAILED') {
-    return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
-  }
-
-  return <></>;
+    </>
+  );
 };
