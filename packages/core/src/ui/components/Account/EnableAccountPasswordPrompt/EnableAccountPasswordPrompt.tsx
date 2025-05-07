@@ -1,7 +1,7 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Box, Button, Flex, Text, UncontrolledPasswordBox } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Button, Flex, PasswordBox, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation, useAutoFocus } from '@lace/common';
 import styles from './EnableAccountPasswordPrompt.module.scss';
 import { useSecrets } from '@src/ui/hooks';
@@ -35,7 +35,7 @@ const EnableAccountPassword = ({
   useAutoFocus(inputId, true);
 
   return (
-    <UncontrolledPasswordBox
+    <PasswordBox
       label={translations.passwordPlaceholder}
       data-testid="enable-account-password-input"
       onChange={setPassword}

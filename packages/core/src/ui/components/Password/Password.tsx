@@ -1,9 +1,5 @@
 import React, { FormEvent } from 'react';
-import {
-  OnPasswordChange,
-  UncontrolledPasswordBox,
-  UncontrolledPasswordBoxProps
-} from '@input-output-hk/lace-ui-toolkit';
+import { OnPasswordChange, PasswordBox, PasswordBoxProps } from '@input-output-hk/lace-ui-toolkit';
 import { inputProps } from '@lace/common';
 
 export type PasswordProps = {
@@ -16,7 +12,7 @@ export type PasswordProps = {
   onChange: OnPasswordChange;
 } & Omit<inputProps, 'onChange' | 'value'>;
 
-const mapProps = (props: PasswordProps): UncontrolledPasswordBoxProps => ({
+const mapProps = (props: PasswordProps): PasswordBoxProps => ({
   ...props,
   testId: props['data-testid'] || props.dataTestId,
   label: props.label || '',
@@ -36,5 +32,5 @@ export const Password = ({
   autoFocus = false,
   ...rest
 }: PasswordProps): React.ReactElement => (
-  <UncontrolledPasswordBox {...mapProps({ ...rest, dataTestId, errorMessage, autoFocus })} />
+  <PasswordBox {...mapProps({ ...rest, dataTestId, errorMessage, autoFocus })} />
 );

@@ -11464,9 +11464,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:1.19.0":
-  version: 1.19.0
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:1.19.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F1.19.0%2F60c8d2a44c030475d19ca9783644f3089214a751"
+"@input-output-hk/lace-ui-toolkit@npm:3.5.0":
+  version: 3.5.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.5.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.5.0%2F36411aa779a25342d6975a571530b7e7c57dad30"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -11498,45 +11498,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: 4473f4aa5e33088735c921e6e99b50731e3adf9c52fed186d4ebbc8e8361d4cb32fb2c9ea6c7653a9daa8213e2ce6c045bfbd7e8ca9c8428a63ab0e43ca14e9f
-  languageName: node
-  linkType: hard
-
-"@input-output-hk/lace-ui-toolkit@npm:3.4.0":
-  version: 3.4.0
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.4.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.4.0%2F4bc20445fee46fb6813066eb2aa3e7297f84344a"
-  dependencies:
-    "@radix-ui/react-alert-dialog": ^1.0.4
-    "@radix-ui/react-avatar": ^1.0.2
-    "@radix-ui/react-checkbox": ^1.0.4
-    "@radix-ui/react-collapsible": ^1.0.3
-    "@radix-ui/react-dialog": ^1.0.4
-    "@radix-ui/react-form": ^0.0.3
-    "@radix-ui/react-popover": ^1.0.7
-    "@radix-ui/react-progress": ^1.0.3
-    "@radix-ui/react-radio-group": ^1.1.3
-    "@radix-ui/react-scroll-area": ^1.0.5
-    "@radix-ui/react-select": 1.2.2
-    "@radix-ui/react-switch": ^1.0.3
-    "@radix-ui/react-tabs": ^1.0.3
-    "@radix-ui/react-toast": ^1.0.3
-    "@radix-ui/react-toggle-group": ^1.0.4
-    "@radix-ui/react-tooltip": ^1.0.6
-    "@vanilla-extract/css": 1.11.1
-    "@vanilla-extract/css-utils": 0.1.3
-    "@vanilla-extract/recipes": 0.5.1
-    "@vanilla-extract/sprinkles": 1.5.1
-    antd: 4.24.12
-    classnames: ^2.3.2
-    lodash: ^4.17.21
-    polished: ^4.2.2
-    react-responsive: ^9.0.2
-    react-virtuoso: " 4.6.3"
-    recharts: ^2.6.2
-  peerDependencies:
-    react: ">=17.0.2"
-    react-dom: ">=17.0.2"
-  checksum: 973fb80a44f3904441e434bfa8764588e8b2fe6f31e285131a36f2483231b117ab4830bc4955aa95689e9367674b22c4f80b3e05e8622be3651840ac5aeb2381
+  checksum: 1785fc4536ae83a9ab4c62632d5eeb0a3c8d2f5b221ee26a097b9c268e98adb284d5172f04078afff8b78f4e4325baf5e73d2bb8bb97851956c5dfde8ebbc7b4
   languageName: node
   linkType: hard
 
@@ -12451,7 +12413,7 @@ __metadata:
     "@cardano-sdk/web-extension": 0.39.6
     "@emurgo/cardano-message-signing-asmjs": 1.0.1
     "@emurgo/cip14-js": ~3.0.1
-    "@input-output-hk/lace-ui-toolkit": 3.4.0
+    "@input-output-hk/lace-ui-toolkit": 3.5.0
     "@lace/bitcoin": 0.1.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
@@ -12613,7 +12575,7 @@ __metadata:
     "@cardano-sdk/crypto": 0.2.3
     "@cardano-sdk/wallet": 0.52.6
     "@cardano-sdk/web-extension": 0.39.6
-    "@input-output-hk/lace-ui-toolkit": 1.19.0
+    "@input-output-hk/lace-ui-toolkit": 3.5.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0
@@ -12797,7 +12759,7 @@ __metadata:
     "@cardano-sdk/util": 0.16.0
     "@cardano-sdk/wallet": 0.52.6
     "@cardano-sdk/web-extension": 0.39.6
-    "@input-output-hk/lace-ui-toolkit": 1.19.0
+    "@input-output-hk/lace-ui-toolkit": 3.5.0
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
@@ -42986,7 +42948,7 @@ __metadata:
     "@babel/runtime": ^7.26.10
     "@commitlint/cli": ^17.0.3
     "@commitlint/config-conventional": ^17.0.3
-    "@input-output-hk/lace-ui-toolkit": 3.4.0
+    "@input-output-hk/lace-ui-toolkit": 3.5.0
     "@rollup/plugin-commonjs": 20.0.0
     "@rollup/plugin-image": 2.1.1
     "@rollup/plugin-json": ^6.0.0
