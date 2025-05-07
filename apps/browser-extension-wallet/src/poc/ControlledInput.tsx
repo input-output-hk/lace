@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 
+const initialValueBuffer = [Buffer.from('', 'utf8')];
+
 export const ControlledInput = () => {
   const [fakeValue, setFakeValue] = useState('');
-  const [fakeValueBuffer, setFakeValueBuffer] = useState([Buffer.from('', 'utf8')]);
+  const [fakeValueBuffer, setFakeValueBuffer] = useState(initialValueBuffer);
 
   const onFakePasswordInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     if (e.currentTarget.value.length < fakeValue.length) {
@@ -21,8 +23,22 @@ export const ControlledInput = () => {
   return (
     <>
       <input type={'text'} value={fakeValue} onChangeCapture={onFakePasswordInputChange} />
-      {/* eslint-disable-next-line no-alert */}
-      <button onClick={() => alert(String.fromCharCode(...fakeValueBuffer[0]))}>show</button>
+      <button
+        onClick={() => {
+          setFakeValue('');
+          setFakeValueBuffer(initialValueBuffer);
+        }}
+      >
+        submit
+      </button>
+      {/* <button*/}
+      {/*  onClick={() => {*/}
+      {/*    // eslint-disable-next-line no-alert*/}
+      {/*    alert(String.fromCharCode(...fakeValueBuffer[0]));*/}
+      {/*  }}*/}
+      {/* >*/}
+      {/*  show*/}
+      {/* </button>*/}
     </>
   );
 };
