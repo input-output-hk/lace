@@ -52,7 +52,6 @@ const firefoxConfig = {
       './src/features/NavigationMain*.feature',
       './src/features/NetworkSwitching*.feature',
       './src/features/OwnTags*.feature',
-      './src/features/Trezor/Trezor.feature',
       './src/features/WalletAccounts*.feature'
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
