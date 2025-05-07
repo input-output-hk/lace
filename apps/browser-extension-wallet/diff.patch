@@ -1,0 +1,139 @@
+diff --git a/apps/browser-extension-wallet/src/poc/ControlledInput.tsx b/apps/browser-extension-wallet/src/poc/ControlledInput.tsx
+index c2da488a3..ea641ac81 100644
+--- a/apps/browser-extension-wallet/src/poc/ControlledInput.tsx
++++ b/apps/browser-extension-wallet/src/poc/ControlledInput.tsx
+@@ -20,7 +20,7 @@ export const ControlledInput = () => {
+ 
+   return (
+     <>
+-      <input type={'text'} value={fakeValue} onChange={onFakePasswordInputChange} />
++      <input type={'text'} value={fakeValue} onChangeCapture={onFakePasswordInputChange} />
+       {/* eslint-disable-next-line no-alert */}
+       <button onClick={() => alert(String.fromCharCode(...fakeValueBuffer[0]))}>show</button>
+     </>
+diff --git a/apps/browser-extension-wallet/src/poc/Inputs.tsx b/apps/browser-extension-wallet/src/poc/Inputs.tsx
+index 3f918a016..f668e224d 100644
+--- a/apps/browser-extension-wallet/src/poc/Inputs.tsx
++++ b/apps/browser-extension-wallet/src/poc/Inputs.tsx
+@@ -1,7 +1,34 @@
+-import React, { useState } from 'react';
++import React, { useEffect, useState } from 'react';
+ import { SpanInput } from '@src/poc/SpanInput';
+ import { ControlledInput } from '@src/poc/ControlledInput';
+ 
++const keydownArea = 'key-down-area';
++
++let buffers = [Buffer.from('', 'utf8')];
++
++const A = () => {
++  useEffect(() => {
++    const { abort, signal } = new AbortController();
++    const keydownAreaNode = document.querySelector(`.${keydownArea}`);
++    if (!keydownAreaNode) return () => void 0;
++
++    console.log('Captured');
++
++    keydownAreaNode.addEventListener(
++      'keydown',
++      (event) => {
++        event.preventDefault();
++        event.stopPropagation();
++        buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
++      },
++      { signal }
++    );
++    return abort;
++  }, []);
++
++  return <div id={keydownArea} style={{ width: 100, height: 40, border: '1px solid black', borderRadius: 4 }} />;
++};
++
+ export const Inputs = () => {
+   const [passwordValue, setPasswordValue] = useState('');
+   const [textValue, setTextValue] = useState('');
+@@ -20,6 +47,7 @@ export const Inputs = () => {
+       <SpanInput />
+       <h4 style={{ margin: '10px 0 0' }}>fake capturing value change + input</h4>
+       <ControlledInput />
++      <A />
+     </>
+   );
+ };
+diff --git a/apps/browser-extension-wallet/src/poc/SpanInput.tsx b/apps/browser-extension-wallet/src/poc/SpanInput.tsx
+index 4f65b411a..517f28006 100644
+--- a/apps/browser-extension-wallet/src/poc/SpanInput.tsx
++++ b/apps/browser-extension-wallet/src/poc/SpanInput.tsx
+@@ -41,7 +41,7 @@ export const SpanInput = () => {
+ 
+   return (
+     <>
+-      <span className={styles.fakePasswordInput} tabIndex={0} onKeyDown={onFakePasswordInputKeyDown}>
++      <span className={styles.fakePasswordInput} tabIndex={0} onKeyDownCapture={onFakePasswordInputKeyDown}>
+         <span ref={fakeInputRef} className={styles.fakePasswordInputContent} />
+       </span>
+       {/* eslint-disable-next-line no-alert */}
+diff --git a/apps/browser-extension-wallet/src/popup.tsx b/apps/browser-extension-wallet/src/popup.tsx
+index 701e0e532..88b3a41c7 100644
+--- a/apps/browser-extension-wallet/src/popup.tsx
++++ b/apps/browser-extension-wallet/src/popup.tsx
+@@ -2,7 +2,7 @@
+ import React, { useEffect, useState } from 'react';
+ import * as ReactDOM from 'react-dom';
+ import { HashRouter } from 'react-router-dom';
+-import { PopupView, walletRoutePaths } from '@routes';
++import { walletRoutePaths } from '@routes';
+ import { StoreProvider } from '@stores';
+ import { CurrencyStoreProvider } from '@providers/currency';
+ import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
+@@ -22,7 +22,6 @@ import { DataCheckContainer } from '@components/DataCheckContainer';
+ import { PostHogClientProvider } from '@providers/PostHogClientProvider';
+ import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
+ import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
+-import { NamiPopup } from './views/nami-mode';
+ import { getBackgroundStorage } from '@lib/scripts/background/storage';
+ import { runtime, Storage, storage } from 'webextension-polyfill';
+ import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
+@@ -30,31 +29,14 @@ import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
+ import { logger } from '@lace/common';
+ import { AppVersionGuard } from './utils/AppVersionGuard';
+ import { ErrorBoundary } from '@components/ErrorBoundary';
+-import { BitcoinPopupView } from '@src/views/bitcoin-mode';
+ import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './multichain/BlockchainProvider';
+ import { Popup } from '@src/poc/Popup';
+ 
+ const CARDANO_LACE = 'lace';
+ const BITCOIN_LACE = 'lace-bitcoin';
+ 
+-const passwordPOC = true;
+-
+-const getPopupModeView = (mode: 'lace' | 'nami' | 'lace-bitcoin') => {
+-  if (passwordPOC) return <Popup />;
+-  switch (mode) {
+-    case 'lace':
+-      return <PopupView />;
+-    case 'nami':
+-      return <NamiPopup />;
+-    case 'lace-bitcoin':
+-      return <BitcoinPopupView />;
+-    default:
+-      return <PopupView />;
+-  }
+-};
+-
+ const App = (): React.ReactElement => {
+-  const [mode, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
++  const [_, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
+   const { setBlockchain } = useCurrentBlockchain();
+ 
+   useEffect(() => {
+@@ -117,7 +99,9 @@ const App = (): React.ReactElement => {
+                               <AddressesDiscoveryOverlay>
+                                 <NamiMigrationGuard>
+                                   <BackgroundPageProvider>
+-                                    <AppVersionGuard>{getPopupModeView(mode)}</AppVersionGuard>
++                                    <AppVersionGuard>
++                                      <Popup />
++                                    </AppVersionGuard>
+                                   </BackgroundPageProvider>
+                                 </NamiMigrationGuard>
+                               </AddressesDiscoveryOverlay>

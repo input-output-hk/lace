@@ -20,7 +20,7 @@ export const ControlledInput = () => {
 
   return (
     <>
-      <input type={'text'} value={fakeValue} onChange={onFakePasswordInputChange} />
+      <input type={'text'} value={fakeValue} onChangeCapture={onFakePasswordInputChange} />
       {/* eslint-disable-next-line no-alert */}
       <button onClick={() => alert(String.fromCharCode(...fakeValueBuffer[0]))}>show</button>
     </>

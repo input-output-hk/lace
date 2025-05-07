@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
+import { allowedCharactersRegex } from './constants';
 import styles from './SpanInput.module.scss';
-
-const allowedCharactersRegex = /^[\d!#$%&()*@L^\p{L}]$/u;
 
 export const SpanInput = () => {
   const fakeValueRef = useRef('');
@@ -41,7 +40,7 @@ export const SpanInput = () => {
 
   return (
     <>
-      <span className={styles.fakePasswordInput} tabIndex={0} onKeyDown={onFakePasswordInputKeyDown}>
+      <span className={styles.fakePasswordInput} tabIndex={0} onKeyDownCapture={onFakePasswordInputKeyDown}>
         <span ref={fakeInputRef} className={styles.fakePasswordInputContent} />
       </span>
       {/* eslint-disable-next-line no-alert */}

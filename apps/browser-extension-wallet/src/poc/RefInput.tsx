@@ -1,6 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-
-const allowedCharactersRegex = /^[\d!#$%&()*@L^\p{L}]$/u;
+import { allowedCharactersRegex } from './constants';
 
 export const RefInput = () => {
   const fakeValueRef = useRef('');

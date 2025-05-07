@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-import { PopupView, walletRoutePaths } from '@routes';
+import { walletRoutePaths } from '@routes';
 import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
 import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
@@ -22,7 +22,6 @@ import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
-import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { runtime, Storage, storage } from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
@@ -30,31 +29,14 @@ import { createNonBackgroundMessenger } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
 import { AppVersionGuard } from './utils/AppVersionGuard';
 import { ErrorBoundary } from '@components/ErrorBoundary';
-import { BitcoinPopupView } from '@src/views/bitcoin-mode';
 import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './multichain/BlockchainProvider';
 import { Popup } from '@src/poc/Popup';
 
 const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
-const passwordPOC = true;
-
-const getPopupModeView = (mode: 'lace' | 'nami' | 'lace-bitcoin') => {
-  if (passwordPOC) return <Popup />;
-  switch (mode) {
-    case 'lace':
-      return <PopupView />;
-    case 'nami':
-      return <NamiPopup />;
-    case 'lace-bitcoin':
-      return <BitcoinPopupView />;
-    default:
-      return <PopupView />;
-  }
-};
-
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
+  const [_, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
   const { setBlockchain } = useCurrentBlockchain();
 
   useEffect(() => {
@@ -117,7 +99,9 @@ const App = (): React.ReactElement => {
                               <AddressesDiscoveryOverlay>
                                 <NamiMigrationGuard>
                                   <BackgroundPageProvider>
-                                    <AppVersionGuard>{getPopupModeView(mode)}</AppVersionGuard>
+                                    <AppVersionGuard>
+                                      <Popup />
+                                    </AppVersionGuard>
                                   </BackgroundPageProvider>
                                 </NamiMigrationGuard>
                               </AddressesDiscoveryOverlay>
