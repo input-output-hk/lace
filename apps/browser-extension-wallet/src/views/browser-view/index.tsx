@@ -23,7 +23,6 @@ import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { APP_MODE_BROWSER } from '@src/utils/constants';
-import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import '../../lib/scripts/keep-alive-ui';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
@@ -101,17 +100,15 @@ const App = (): React.ReactElement => {
                         <ThemeProvider>
                           <UIThemeProvider>
                             <ExternalLinkOpenerProvider>
-                              <MigrationContainer appMode={APP_MODE_BROWSER}>
-                                <DataCheckContainer appMode={APP_MODE_BROWSER}>
-                                  <AddressesDiscoveryOverlay>
-                                    <NamiMigrationGuard>
-                                      <AppVersionGuard>
-                                        {mode === BITCOIN_LACE ? <BitcoinBrowserViewRoutes /> : <BrowserViewRoutes />}
-                                      </AppVersionGuard>
-                                    </NamiMigrationGuard>
-                                  </AddressesDiscoveryOverlay>
-                                </DataCheckContainer>
-                              </MigrationContainer>
+                              <DataCheckContainer appMode={APP_MODE_BROWSER}>
+                                <AddressesDiscoveryOverlay>
+                                  <NamiMigrationGuard>
+                                    <AppVersionGuard>
+                                      {mode === BITCOIN_LACE ? <BitcoinBrowserViewRoutes /> : <BrowserViewRoutes />}
+                                    </AppVersionGuard>
+                                  </NamiMigrationGuard>
+                                </AddressesDiscoveryOverlay>
+                              </DataCheckContainer>
                             </ExternalLinkOpenerProvider>
                           </UIThemeProvider>
                         </ThemeProvider>
