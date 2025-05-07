@@ -47,6 +47,12 @@ runs:
       run: |
         Xvfb :99 &
 
+    - name: Collect Workflow Telemetry Smoke Tests
+      if: ${{ inputs.SMOKE_ONLY == 'true' }}
+      uses: catchpoint/workflow-telemetry-action@v2
+      with:
+        comment_on_pr: false
+
     - name: Execute E2E tests
       if: success()
       shell: bash
