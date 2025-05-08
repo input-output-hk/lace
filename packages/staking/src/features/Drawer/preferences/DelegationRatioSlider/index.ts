@@ -1,1 +1,0 @@
-export { DelegationRatioSlider } from './DelegationRatioSlider';

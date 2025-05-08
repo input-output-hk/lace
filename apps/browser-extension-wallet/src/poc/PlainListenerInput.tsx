@@ -20,7 +20,7 @@ export const PlainListenerInput = () => {
         event.stopPropagation();
 
         if (event.key === 'Backspace') {
-          if (buffers[0].length === 0) return;
+          if (keydownAreaNode.textContent.length === 0) return;
 
           if (capturePassword) {
             buffers = buffers.slice(1);

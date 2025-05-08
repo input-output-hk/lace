@@ -1,1 +1,0 @@
-export { ShareWalletDetails } from './ShareWalletDetails';

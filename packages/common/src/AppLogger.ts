@@ -1,8 +1,34 @@
 /* eslint-disable no-console, no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from 'ts-log';
-import { isNetworkError, stringifyWithFallback } from '@src/ui/lib';
 import * as Sentry from '@sentry/react';
+import { toSerializableObject } from '@cardano-sdk/util';
+/* eslint-disable wrap-regex */
+import { ProviderError, ProviderFailure } from '@cardano-sdk/core';
+import { AxiosError } from 'axios';
+
+const isFetchNetworkError = (error: unknown): boolean =>
+  error instanceof TypeError && /failed to fetch|networkerror/i.test(error.message);
+const isAxiosNetworkError = (error: unknown): error is AxiosError =>
+  error instanceof AxiosError &&
+  (error.code === 'ECONNABORTED' || error.code === 'ERR_NETWORK' || error.message === 'Network Error');
+const isProviderNetworkError = (error: unknown): error is ProviderError =>
+  error instanceof ProviderError && error.reason === ProviderFailure.ConnectionFailure;
+
+export const isNetworkError = (error: unknown): boolean =>
+  isFetchNetworkError(error) || isAxiosNetworkError(error) || isProviderNetworkError(error);
+
+export const stringifyWithFallback = (
+  value: unknown,
+  fallbackValue = '<failed-to-stringify>'
+): [string] | [string, Error] => {
+  if (typeof value === 'string') return [value];
+  try {
+    return [JSON.stringify(toSerializableObject(value))];
+  } catch (error) {
+    return [fallbackValue, error];
+  }
+};
 
 enum LogLevel {
   error = 0,

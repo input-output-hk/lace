@@ -125,14 +125,9 @@ module.exports = () =>
         patterns: [
           { from: 'src/assets/branding/*.png', to: '../[name][ext]' },
           { from: 'src/assets/html/trezor-usb-permissions.html', to: '../[name][ext]' },
-          { from: path.resolve(__dirname, '../../packages/nami/dist/assets/video/*.mp4'), to: '../assets/[name][ext]' },
           { from: path.resolve(__dirname, 'src/assets/html/*.html'), to: '../[name][ext]' },
           { from: path.resolve(__dirname, 'src/assets/html/*.js'), to: '../app/[name][ext]' },
-          { from: path.resolve(__dirname, 'src/assets/html/*.css'), to: '../assets/[name][ext]' },
-          {
-            from: path.resolve(__dirname, '../../packages/common/src/ui/assets/icons/loader.png'),
-            to: '../assets/[name][ext]'
-          }
+          { from: path.resolve(__dirname, 'src/assets/html/*.css'), to: '../assets/[name][ext]' }
         ]
       })
     ]

@@ -30,7 +30,7 @@ export const addPlainJsInput = () => {
     event.preventDefault();
     event.stopPropagation();
     if (event.key === 'Backspace') {
-      if (buffers[0].length === 0) return;
+      if (input.value.length === 0) return;
 
       if (checkbox.checked) {
         buffers = buffers.slice(1);

@@ -1,9 +1,9 @@
-import './cip30';
-import './onError';
-import './onUpdate';
-import './services';
-import './services/expose';
+// import './cip30';
+// import './onError';
+// import './onUpdate';
+// import './services';
+// import './services/expose';
 import './keep-alive-sw';
-import './onUninstall';
-import './nami-migration';
-import './onStorageChange';
+// import './onUninstall';
+// import './nami-migration';
+// import './onStorageChange';

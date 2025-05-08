@@ -1,1 +1,0 @@
-export { RegistrationCertificate } from './RegistrationCertificate';

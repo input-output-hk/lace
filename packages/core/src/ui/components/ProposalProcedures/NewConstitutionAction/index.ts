@@ -1,1 +1,0 @@
-export { NewConstitutionAction } from './NewConstitutionAction';

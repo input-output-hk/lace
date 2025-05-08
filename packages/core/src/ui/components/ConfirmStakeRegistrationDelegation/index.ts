@@ -1,1 +1,0 @@
-export { ConfirmStakeRegistrationDelegation } from './ConfirmStakeRegistrationDelegation';

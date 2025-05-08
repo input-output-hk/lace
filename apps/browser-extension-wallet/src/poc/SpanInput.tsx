@@ -16,7 +16,7 @@ export const SpanInput = () => {
     e.stopPropagation();
 
     if (e.key === 'Backspace') {
-      if (fakeValueBuffer[0].length === 0) return;
+      if (fakeValueRef.current.length === 0) return;
 
       if (capturePassword) {
         setFakeValueBuffer(fakeValueBuffer.slice(1));
@@ -28,16 +28,7 @@ export const SpanInput = () => {
 
     if (capturePassword) {
       setFakeValueBuffer([
-        Uint8Array.from(
-          Buffer.concat(
-            [
-              fakeValueBuffer[0],
-              Uint8Array.from(
-                Buffer.from(e.key)
-              )
-            ].filter(Boolean)
-          )
-        ),
+        Uint8Array.from(Buffer.concat([fakeValueBuffer[0], Uint8Array.from(Buffer.from(e.key))].filter(Boolean))),
         ...fakeValueBuffer
       ]);
     }
@@ -86,14 +77,14 @@ export const SpanInput = () => {
       >
         submit
       </button>
-       <button
+      <button
         onClick={() => {
           // eslint-disable-next-line no-alert
           alert(String.fromCharCode(...fakeValueBuffer[0]));
         }}
-       >
+      >
         show
-       </button>
+      </button>
     </>
   );
 };

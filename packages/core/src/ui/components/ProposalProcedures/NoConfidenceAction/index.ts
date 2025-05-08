@@ -1,1 +1,0 @@
-export { NoConfidenceAction } from './NoConfidenceAction';
