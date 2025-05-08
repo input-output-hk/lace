@@ -11,6 +11,9 @@ export const SpanInput = () => {
   const fakeInputAnimationFrameRef = useRef<number | null>(null);
 
   const onFakePasswordInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (e.key === 'Backspace') {
       if (fakeValueBuffer[0].length === 0) return;
 

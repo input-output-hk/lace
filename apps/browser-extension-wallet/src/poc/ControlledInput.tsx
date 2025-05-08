@@ -7,6 +7,9 @@ export const ControlledInput = () => {
   const [fakeValueBuffer, setFakeValueBuffer] = useState(initialValueBuffer);
 
   const onFakePasswordInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     if (e.currentTarget.value.length < fakeValue.length) {
       setFakeValueBuffer(fakeValueBuffer.slice(1));
       setFakeValue(fakeValue.slice(1));
