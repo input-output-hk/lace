@@ -12380,8 +12380,8 @@ __metadata:
     lodash: 4.17.21
     pbkdf2: ^3.1.2
     randombytes: 2.1.0
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
     ts-custom-error: ^3.3.1
@@ -12390,8 +12390,8 @@ __metadata:
     typescript: ^4.9.5
     webextension-polyfill: 0.10.0
   peerDependencies:
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
   languageName: unknown
   linkType: soft
 
@@ -12468,8 +12468,8 @@ __metadata:
     posthog-js: ^1.161.3
     process: ^0.11.10
     qrcode: ^1.5.3
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
     react-i18next: ^12.3.1
     react-infinite-scroll-hook: ^4.1.1
     react-lottie: ^1.2.3
@@ -12524,8 +12524,8 @@ __metadata:
     pify: 5.0.0
     qr-code-styling: ^1.6.0-rc.1
     randombytes: 2.1.0
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
     rollup-plugin-polyfill-node: ^0.8.0
     rxjs: 7.4.0
     ts-custom-error: ^3.3.1
@@ -12534,8 +12534,8 @@ __metadata:
     typescript: ^4.9.5
     webextension-polyfill: 0.10.0
   peerDependencies:
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
   languageName: unknown
   linkType: soft
 
@@ -12549,16 +12549,16 @@ __metadata:
     jdenticon: 3.1.0
     lodash: 4.17.21
     qr-code-styling: 1.6.0-rc.1
-    react: 17.0.2
+    react: 18.3.1
     react-copy-to-clipboard: 5.0.4
-    react-dom: 17.0.2
+    react-dom: 18.3.1
     react-tooltip: 4.2.7
     ts-log: ^2.2.7
     typescript: ^4.9.5
   peerDependencies:
     "@sentry/react": ^8.33.1
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
     react-router-dom: 5.2.0
   languageName: unknown
   linkType: soft
@@ -12605,9 +12605,9 @@ __metadata:
     i18next: ^22.5.1
     jest-mock-extended: 3.0.4
     lodash: 4.17.21
-    react: 17.0.2
+    react: 18.3.1
     react-copy-to-clipboard: 5.0.4
-    react-dom: 17.0.2
+    react-dom: 18.3.1
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
     rxjs: 7.4.0
@@ -12619,8 +12619,8 @@ __metadata:
     zod: ^3.23.8
     zxcvbn: ^4.4.2
   peerDependencies:
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
   languageName: unknown
   linkType: soft
 
@@ -12697,7 +12697,7 @@ __metadata:
     "@svgr/rollup": ^6.1.2
     "@types/chrome": ^0.0.268
     "@types/lodash": ^4.17.7
-    "@types/react": 17.0.2
+    "@types/react": 18.3.1
     "@types/react-kawaii": ^0.17.3
     "@types/react-lazy-load-image-component": 1.6.4
     "@typescript-eslint/eslint-plugin": ^5.51.0
@@ -12720,9 +12720,9 @@ __metadata:
     lodash: ^4.17.21
     prettier: 3.2.5
     promise-latest: ^1.0.4
-    react: 17.0.2
+    react: 18.3.1
     react-custom-scrollbars-2: ^4.5.0
-    react-dom: 17.0.2
+    react-dom: 18.3.1
     react-icons: 4.2.0
     react-kawaii: ^0.18.0
     react-lazy-load-image-component: ^1.5.1
@@ -12740,8 +12740,8 @@ __metadata:
     typescript: ^4.9.5
     use-constant: ^1.1.0
   peerDependencies:
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
   languageName: unknown
   linkType: soft
 
@@ -12801,9 +12801,9 @@ __metadata:
     mini-css-extract-plugin: ^2.7.6
     normalize.css: ^8.0.1
     rambda: ^8.5.0
-    react: 17.0.2
+    react: 18.3.1
     react-copy-to-clipboard: ^5.1.0
-    react-dom: 17.0.2
+    react-dom: 18.3.1
     react-i18next: ^12.3.1
     react-infinite-scroll-component: ^6.1.0
     react-responsive: ^9.0.2
@@ -12832,11 +12832,11 @@ __metadata:
     "@lace/cardano": ^0.1.0
     "@lace/common": ^0.1.0
     "@lace/core": 0.1.0
-    "@types/react": 17.0.18
+    "@types/react": 18.3.1
     antd: ^4.17.3
     bignumber.js: 9.0.1
-    react: 17.0.2
-    react-dom: 17.0.2
+    react: 18.3.1
+    react-dom: 18.3.1
     react-infinite-scroll-component: ^6.1.0
   languageName: unknown
   linkType: soft
@@ -23106,7 +23106,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:17.0.9, @types/react-dom@npm:>=16.9.0":
+"@types/react-dom@npm:18.3.1":
+  version: 18.3.1
+  resolution: "@types/react-dom@npm:18.3.1"
+  dependencies:
+    "@types/react": "*"
+  checksum: ad28ecce3915d30dc76adc2a1373fda1745ba429cea290e16c6628df9a05fd80b6403c8e87d78b45e6c60e51df7a67add389ab62b90070fbfdc9bda8307d9953
+  languageName: node
+  linkType: hard
+
+"@types/react-dom@npm:>=16.9.0":
   version: 17.0.9
   resolution: "@types/react-dom@npm:17.0.9"
   dependencies:
@@ -23201,7 +23210,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:17.0.18":
+"@types/react@npm:*":
   version: 17.0.18
   resolution: "@types/react@npm:17.0.18"
   dependencies:
@@ -23212,13 +23221,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:17.0.2":
-  version: 17.0.2
-  resolution: "@types/react@npm:17.0.2"
+"@types/react@npm:18.3.1":
+  version: 18.3.1
+  resolution: "@types/react@npm:18.3.1"
   dependencies:
     "@types/prop-types": "*"
     csstype: ^3.0.2
-  checksum: a5198857165feddcbfc7d33e3322460ac62b8894d702414496a825b0c82272911ec33a42ef7c9d623a59308070eef4dfee6ff834b0674aa3f87eeb644196ee3b
+  checksum: 9224ef319a0c2b7f66e7e7f06012aa5eb638a6c76c9742843eab1a5d243f2bed5ff829ddbb41efd60d33a266420528adfcb84cb93f238b00e905f98c3a355768
   languageName: node
   linkType: hard
 
@@ -42829,9 +42838,9 @@ __metadata:
     "@types/pbkdf2": 3.1.0
     "@types/pify": 5.0.1
     "@types/randombytes": 2.0.0
-    "@types/react": 17.0.18
+    "@types/react": 18.3.1
     "@types/react-copy-to-clipboard": 5.0.1
-    "@types/react-dom": 17.0.9
+    "@types/react-dom": 18.3.1
     "@types/react-router-dom": 5.1.8
     "@types/storybook-react-router": ^1.0.2
     "@types/uuid": ^8.3.4
@@ -50554,20 +50563,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:17.0.2":
-  version: 17.0.2
-  resolution: "react-dom@npm:17.0.2"
-  dependencies:
-    loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-    scheduler: ^0.20.2
-  peerDependencies:
-    react: 17.0.2
-  checksum: 1c1eaa3bca7c7228d24b70932e3d7c99e70d1d04e13bb0843bbf321582bc25d7961d6b8a6978a58a598af2af496d1cedcfb1bf65f6b0960a0a8161cb8dab743c
-  languageName: node
-  linkType: hard
-
-"react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
+"react-dom@npm:18.3.1, react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -51160,17 +51156,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:17.0.2":
-  version: 17.0.2
-  resolution: "react@npm:17.0.2"
-  dependencies:
-    loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: b254cc17ce3011788330f7bbf383ab653c6848902d7936a87b09d835d091e3f295f7e9dd1597c6daac5dc80f90e778c8230218ba8ad599f74adcc11e33b9d61b
-  languageName: node
-  linkType: hard
-
-"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
+"react@npm:18.3.1, react@npm:^16.8.0 || ^17.0.0 || ^18.0.0":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
@@ -53127,16 +53113,6 @@ __metadata:
   dependencies:
     xmlchars: ^2.2.0
   checksum: 5636b55cf15f7cf0baa73f2797bf992bdcf75d1b39d82c0aa4608555c774368f6ac321cb641fd5f3d3ceb87805122cd47540da6a7b5960fe0dbdb8f8c263f000
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.20.2":
-  version: 0.20.2
-  resolution: "scheduler@npm:0.20.2"
-  dependencies:
-    loose-envify: ^1.1.0
-    object-assign: ^4.1.1
-  checksum: c4b35cf967c8f0d3e65753252d0f260271f81a81e427241295c5a7b783abf4ea9e905f22f815ab66676f5313be0a25f47be582254db8f9241b259213e999b8fc
   languageName: node
   linkType: hard
 

@@ -113,8 +113,8 @@
     "happy-dom": "^15.10.2",
     "mini-css-extract-plugin": "^2.7.6",
     "normalize.css": "^8.0.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-infinite-scroll-component": "^6.1.0",
     "storybook": "^7.6.7",
     "tsup": "^6.7.0",
@@ -137,11 +137,11 @@
     "@lace/cardano": "^0.1.0",
     "@lace/common": "^0.1.0",
     "@lace/core": "0.1.0",
-    "@types/react": "17.0.18",
+    "@types/react": "18.3.1",
     "antd": "^4.17.3",
     "bignumber.js": "9.0.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-infinite-scroll-component": "^6.1.0"
   }
 }

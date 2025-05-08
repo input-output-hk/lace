@@ -98,11 +98,11 @@ module.exports = () => {
         Buffer: ['buffer', 'Buffer'],
         process: 'process/browser'
       }),
-      new ForkTsCheckerWebpackPlugin({
-        typescript: {
-          configFile: 'src/tsconfig.json'
-        }
-      }),
+      // new ForkTsCheckerWebpackPlugin({
+      //   typescript: {
+      //     configFile: 'src/tsconfig.json'
+      //   }
+      // }),
       new Dotenv({
         path: '.env',
         safe: false,
