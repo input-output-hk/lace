@@ -9,6 +9,7 @@ export const SpanInput = () => {
   const [fakeValueBuffer, setFakeValueBuffer] = useState(initialValueBuffer);
   const fakeInputRef = useRef<HTMLSpanElement | null>(null);
   const fakeInputAnimationFrameRef = useRef<number | null>(null);
+  const [capturePassword, setCapturePassword] = useState(false);
 
   const onFakePasswordInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     e.preventDefault();
@@ -17,13 +18,17 @@ export const SpanInput = () => {
     if (e.key === 'Backspace') {
       if (fakeValueBuffer[0].length === 0) return;
 
-      setFakeValueBuffer(fakeValueBuffer.slice(1));
+      if (capturePassword) {
+        setFakeValueBuffer(fakeValueBuffer.slice(1));
+      }
       fakeValueRef.current = fakeValueRef.current.slice(1);
       return;
     }
     if (!allowedCharactersRegex.test(e.key)) return;
 
-    setFakeValueBuffer([Buffer.concat([fakeValueBuffer[0], Buffer.from(e.key)].filter(Boolean)), ...fakeValueBuffer]);
+    if (capturePassword) {
+      setFakeValueBuffer([Buffer.concat([fakeValueBuffer[0], Buffer.from(e.key)].filter(Boolean)), ...fakeValueBuffer]);
+    }
     fakeValueRef.current = `●${fakeValueRef.current}`;
   };
 
@@ -45,6 +50,15 @@ export const SpanInput = () => {
 
   return (
     <>
+      <div>
+        <input
+          id={'spaninput'}
+          type={'checkbox'}
+          checked={capturePassword}
+          onChange={() => setCapturePassword(!capturePassword)}
+        />
+        <label htmlFor={'spaninput'}>capture password</label>
+      </div>
       <span className={styles.fakePasswordInput} tabIndex={0} onKeyDownCapture={onFakePasswordInputKeyDown}>
         <span ref={fakeInputRef} className={styles.fakePasswordInputContent} />
       </span>

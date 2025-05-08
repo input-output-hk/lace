@@ -12,14 +12,18 @@ export const addPlainJsInput = () => {
   header.textContent = 'fake - plain js';
   containerNode.append(header);
 
-  const form = document.createElement('form');
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const input = (event.currentTarget as HTMLFormElement).elements[0] as HTMLInputElement;
-    input.value = '';
-    buffers = initialValueBuffer;
-  });
-  containerNode.append(form);
+  const checkboxContainer = document.createElement('div');
+  containerNode.append(checkboxContainer);
+
+  const checkbox = document.createElement('input');
+  checkbox.id = 'plainjs';
+  checkbox.type = 'checkbox';
+  checkboxContainer.append(checkbox);
+
+  const checkboxLabel = document.createElement('label');
+  checkboxLabel.setAttribute('for', 'plainjs');
+  checkboxLabel.textContent = 'capture password';
+  checkboxContainer.append(checkboxLabel);
 
   const input = document.createElement('input');
   input.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -28,20 +32,31 @@ export const addPlainJsInput = () => {
     if (event.key === 'Backspace') {
       if (buffers[0].length === 0) return;
 
-      buffers = buffers.slice(1);
+      if (checkbox.checked) {
+        buffers = buffers.slice(1);
+      }
       input.value = input.value.slice(1);
       return;
     }
     if (!allowedCharactersRegex.test(event.key)) return;
 
-    buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
+    if (checkbox.checked) {
+      buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
+    }
     input.value = `${input.value}*`;
   });
-  form.append(input);
+  containerNode.append(input);
 
   const submitButton = document.createElement('button');
   submitButton.textContent = 'submit';
-  form.append(submitButton);
+  submitButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    input.value = '';
+    buffers = initialValueBuffer;
+  });
+  containerNode.append(submitButton);
 
   // const showButton = document.createElement('button');
   // showButton.textContent = 'show';

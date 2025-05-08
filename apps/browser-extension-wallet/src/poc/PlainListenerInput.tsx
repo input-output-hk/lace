@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { allowedCharactersRegex } from '@src/poc/constants';
 
 const keydownArea = 'key-down-area';
@@ -6,6 +6,8 @@ const initialValueBuffer = [Buffer.from('', 'utf8')];
 let buffers = initialValueBuffer;
 
 export const PlainListenerInput = () => {
+  const [capturePassword, setCapturePassword] = useState(false);
+
   useEffect(() => {
     const { abort, signal } = new AbortController();
     const keydownAreaNode = document.querySelector(`#${keydownArea}`);
@@ -20,13 +22,17 @@ export const PlainListenerInput = () => {
         if (event.key === 'Backspace') {
           if (buffers[0].length === 0) return;
 
-          buffers = buffers.slice(1);
+          if (capturePassword) {
+            buffers = buffers.slice(1);
+          }
           keydownAreaNode.textContent = keydownAreaNode.textContent.slice(1);
           return;
         }
         if (!allowedCharactersRegex.test(event.key)) return;
 
-        buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
+        if (capturePassword) {
+          buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
+        }
         keydownAreaNode.textContent = `${keydownAreaNode.textContent}*`;
       },
       { signal }
@@ -34,10 +40,19 @@ export const PlainListenerInput = () => {
     return () => {
       abort();
     };
-  }, []);
+  }, [capturePassword]);
 
   return (
     <>
+      <div>
+        <input
+          id={'plainlistener'}
+          type={'checkbox'}
+          checked={capturePassword}
+          onChange={() => setCapturePassword(!capturePassword)}
+        />
+        <label htmlFor={'plainlistener'}>capture password</label>
+      </div>
       <div
         tabIndex={0}
         id={keydownArea}
