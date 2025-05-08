@@ -1,7 +1,7 @@
 import { allowedCharactersRegex } from '@src/poc/constants';
 
 const nodeId = 'plain-js-input';
-const initialValueBuffer = [Buffer.from('', 'utf8')];
+const initialValueBuffer = [Uint8Array.from(Buffer.from('', 'utf8'))];
 let buffers = initialValueBuffer;
 
 export const addPlainJsInput = () => {
@@ -41,7 +41,10 @@ export const addPlainJsInput = () => {
     if (!allowedCharactersRegex.test(event.key)) return;
 
     if (checkbox.checked) {
-      buffers = [Buffer.concat([buffers[0], Buffer.from(event.key)].filter(Boolean)), ...buffers];
+      buffers = [
+        Uint8Array.from(Buffer.concat([buffers[0], Uint8Array.from(Buffer.from(event.key))].filter(Boolean))),
+        ...buffers
+      ];
     }
     input.value = `${input.value}*`;
   });
@@ -54,15 +57,18 @@ export const addPlainJsInput = () => {
     event.stopPropagation();
 
     input.value = '';
+    buffers.forEach((buffer) => {
+      buffer.fill(0);
+    });
     buffers = initialValueBuffer;
   });
   containerNode.append(submitButton);
 
-  // const showButton = document.createElement('button');
-  // showButton.textContent = 'show';
-  // showButton.addEventListener('click', () => {
-  //   // eslint-disable-next-line no-alert
-  //   alert(String.fromCharCode(...buffers[0]));
-  // });
-  // containerNode.append(showButton);
+  const showButton = document.createElement('button');
+  showButton.textContent = 'show';
+  showButton.addEventListener('click', () => {
+    // eslint-disable-next-line no-alert
+    alert(String.fromCharCode(...buffers[0]));
+  });
+  containerNode.append(showButton);
 };

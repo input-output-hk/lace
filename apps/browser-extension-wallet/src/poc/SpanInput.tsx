@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import { allowedCharactersRegex } from './constants';
 import styles from './SpanInput.module.scss';
 
-const initialValueBuffer = [Buffer.from('', 'utf8')];
+const initialValueBuffer = [Uint8Array.from(Buffer.from('', 'utf8'))];
 
 export const SpanInput = () => {
   const fakeValueRef = useRef('');
@@ -27,7 +27,19 @@ export const SpanInput = () => {
     if (!allowedCharactersRegex.test(e.key)) return;
 
     if (capturePassword) {
-      setFakeValueBuffer([Buffer.concat([fakeValueBuffer[0], Buffer.from(e.key)].filter(Boolean)), ...fakeValueBuffer]);
+      setFakeValueBuffer([
+        Uint8Array.from(
+          Buffer.concat(
+            [
+              fakeValueBuffer[0],
+              Uint8Array.from(
+                Buffer.from(e.key)
+              )
+            ].filter(Boolean)
+          )
+        ),
+        ...fakeValueBuffer
+      ]);
     }
     fakeValueRef.current = `●${fakeValueRef.current}`;
   };
@@ -65,20 +77,23 @@ export const SpanInput = () => {
       <button
         onClick={() => {
           fakeValueRef.current = '';
+          fakeValueBuffer.forEach((buffer) => {
+            buffer.fill(0);
+          });
           setFakeValueBuffer(initialValueBuffer);
           fakeInputRef.current.textContent = '';
         }}
       >
         submit
       </button>
-      {/* <button*/}
-      {/*  onClick={() => {*/}
-      {/*    // eslint-disable-next-line no-alert*/}
-      {/*    alert(String.fromCharCode(...fakeValueBuffer[0]));*/}
-      {/*  }}*/}
-      {/* >*/}
-      {/*  show*/}
-      {/* </button>*/}
+       <button
+        onClick={() => {
+          // eslint-disable-next-line no-alert
+          alert(String.fromCharCode(...fakeValueBuffer[0]));
+        }}
+       >
+        show
+       </button>
     </>
   );
 };
