@@ -318,6 +318,7 @@
   "core.nftDetail.avatarUpdated": "User avatar updated",
   "core.nftDetail.sendNFT": "Send NFT",
   "core.nftDetail.setAsAvatar": "Set as your wallet avatar",
+  "core.nftDetail.printNft": "Print this NFT",
   "core.nftDetail.title": "NFT detail",
   "core.nftDetail.tokenInformation": "Token Information",
   "core.nftDetail.policyId": "Policy ID",
