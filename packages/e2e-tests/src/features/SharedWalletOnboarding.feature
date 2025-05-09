@@ -71,7 +71,8 @@ Feature: Shared wallet - onboarding
     When I open header menu
     Then I do not see "Nami mode" switch
 
-  @LW-11822
+  @LW-11822 @skip(browserName="firefox")
+  #  The uploadFile command is not available in Firefox
   Scenario: Shared wallets - Import shared wallet
     Given I have previously generated shared wallet key
     When I open header menu
