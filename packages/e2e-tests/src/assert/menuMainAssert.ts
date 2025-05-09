@@ -25,10 +25,10 @@ class MenuMainPopupPageAssert {
       : MenuMainExtended.transactionsButton.waitForDisplayed());
   }
 
-  async assertSeeStakingButton(mode: 'popup' | 'extended') {
+  async assertSeeStakingButton(mode: 'popup' | 'extended', reverseAssertion = false) {
     await (mode === 'popup'
-      ? MenuMainPopup.stakingButton.waitForDisplayed()
-      : MenuMainExtended.stakingButton.waitForDisplayed());
+      ? MenuMainPopup.stakingButton.waitForDisplayed({ reverse: reverseAssertion })
+      : MenuMainExtended.stakingButton.waitForDisplayed({ reverse: reverseAssertion }));
   }
 
   async assertSeeVotingButton(mode: 'popup' | 'extended') {

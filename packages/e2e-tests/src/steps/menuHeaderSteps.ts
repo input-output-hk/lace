@@ -89,3 +89,7 @@ Then(
     await topNavigationAssert.assertSeeWalletAccountOnUserMenu(walletIndex, accountName);
   }
 );
+
+Then(/^I do not see "Nami mode" switch$/, async () => {
+  await topNavigationAssert.assertDoNotSeeNamiModeSwitch();
+});

@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "coSigners": [
+      {
+        "id": "c63ae173-2cac-11f0-b26f-8b931d11544a",
+        "name": "My ID",
+        "sharedWalletKey": "acct_shared_xvk1aavzsy74znzdmlfvju023tkpk6q0pjeh464rsuqzywg4vujpmlf5mft65523yqhavr6q0ld34pxxu7lrk9fauyq9vnn7fwvrfy86a5c95n3qp"
+      },
+      {
+        "id": "c63ae174-2cac-11f0-b26f-8b931d11544a",
+        "name": "Cosigner 1",
+        "sharedWalletKey": "acct_shared_xvk1n5qmf8grawmu5wvuattk456fsm8lmtp4t2524jexgpnv8ens522f4fln7hfzpjjyr3ecj7zv32pnf5n86dus098j464cmvfsmf908ds865qg5"
+      },
+      {
+        "id": "c63ae175-2cac-11f0-b26f-8b931d11544a",
+        "name": "Cosigner 2",
+        "sharedWalletKey": "acct_shared_xvk1lcshacml3qv96euzjjwwuh562k9uslr3kvhdkgapsd2gqwctlm0zsjadrek0vgfhqcmgpjvhn3zky5ptk7fcg3xr4u9sskqc2v6y8gsvrq7vp"
+      }
+    ],
+    "sharedWalletName": "SW TEST 1"
+  },
+  "nativeScript": {
+    "n": 2,
+    "scripts": [
+      {
+        "pubkey": "82cf38f6d0f76042f00385407c6bd4dd15967f91373c0d901abfa97c",
+        "tag": "pubkey"
+      },
+      {
+        "pubkey": "f9d816ca548423416bd1a2581254a2b1fb6189b776dc29fb6f73a349",
+        "tag": "pubkey"
+      },
+      {
+        "pubkey": "4a492e29576feb2467153ad6fa8977d2afa18e10c446f4678c5a2f76",
+        "tag": "pubkey"
+      }
+    ],
+    "tag": "n_of_k"
+  }
+}

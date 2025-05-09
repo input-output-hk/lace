@@ -85,7 +85,9 @@ export const SetupSharedWallet = ({
         errorMessage={walletNameErrorMessage}
       />
       <Box mt="$12" mb="$20">
-        <Text.Body.Normal weight="$semibold">{translations.body}</Text.Body.Normal>
+        <Text.Body.Normal weight="$semibold" data-testid="active-lace-wallet-notice">
+          {translations.body}
+        </Text.Body.Normal>
       </Box>
       <FlowCard.Card flowCardClassName={styles.walletCard ?? ''}>
         <FlowCard.Profile icon={<ProfileDropdown.WalletIcon type={walletKind} />} name={activeWalletName} />

@@ -23,6 +23,11 @@ class TopNavigationAssert {
     expect(await MenuHeader.sendButton.getText()).to.equal(await t('core.transactionCtas.send'));
   }
 
+  async assertSeeCoSignButton() {
+    await MenuHeader.coSignButton.waitForDisplayed();
+    expect(await MenuHeader.coSignButton.getText()).to.equal(await t('core.transactionCtas.coSign'));
+  }
+
   async assertLogoPresent() {
     await MenuHeader.logo.waitForDisplayed({ timeout: 180_000 });
   }
@@ -241,6 +246,10 @@ class TopNavigationAssert {
   assertSeeExpandedIcon = async (shouldSee: boolean) => {
     await MenuHeader.logo.waitForDisplayed({ reverse: !shouldSee });
   };
+
+  async assertDoNotSeeNamiModeSwitch() {
+    await MenuHeader.menuNamiModeSwitch.waitForDisplayed({ reverse: true });
+  }
 }
 
 export default new TopNavigationAssert();

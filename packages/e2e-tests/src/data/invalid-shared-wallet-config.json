@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "coSigners": [
+      {
+        "id": "92328903-ff1b-11ef-88b3-2541b4b1467c",
+        "name": "me",
+        "sharedWalletKey": "d79fd1e16fcff10bb185f94a2e1b8a01ddbf259b2dad538b249d9acfc9c4be2ca29982c41fc81c34f1aa466c2955bcaf1816c4eefda34147947e12d1595114d5"
+      },
+      {
+        "id": "92328904-ff1b-11ef-88b3-2541b4b1467c",
+        "name": "id1",
+        "sharedWalletKey": "70ca780cf58cc4650245d3fdd584ff7991d3a219881f720f70a3afbc5e371e80799427cd3cc8f8aaa5fb569930f6e591159443b98d17db7837cab4c736e4fec9"
+      },
+      {
+        "id": "92328905-ff1b-11ef-88b3-2541b4b1467c",
+        "name": "id2",
+        "sharedWalletKey": "acb277d4950c43288b1e0a8fc445fc0499455cbcc7c07b674acc38d706bdd30e7e0411b3c9b400416b6a84756727916dfe69b481b5e247f028f035d5ab7afb44"
+      }
+    ],
+    "sharedWalletName": "Ledger SW"
+  },
+  "nativeScript": {
+    "n": 1,
+    "scripts": [
+      {
+        "pubkey": "832e4cded9b002ca427012481bcebacfbbc4b7104b6b9eb9f59f1bfa",
+        "tag": "pubkey"
+      },
+      {
+        "pubkey": "b50fbd5fad4ddebc1d78377449c680bd5776ed8d384ddca2e66e1737",
+        "tag": "pubkey"
+      },
+      {
+        "pubkey": "645b9cb578061ce4993da00a6e439bc38815281d95a1beb368a10934",
+        "tag": "pubkey"
+      }
+    ],
+    "tag": "n_of_k"
+  }
+}

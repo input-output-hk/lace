@@ -137,12 +137,15 @@ export const QuorumOption = ({
                         onChange={onNumberOfCosignerChange}
                         showArrow
                         zIndex={1001}
+                        triggerTestId="number-of-cosigners-dropdown-trigger"
                       >
                         {cosignersNumberPickerOptions.map((num) => (
-                          <Select.Item key={num} value={num} title={num} />
+                          <Select.Item key={num} value={num} title={num} testId={num} />
                         ))}
                       </Select.Root>
-                      <Text.Body.Small>{translations.cosignersAmountPickerText}</Text.Body.Small>
+                      <Text.Body.Small data-testid="total-signatures-label">
+                        {translations.cosignersAmountPickerText}
+                      </Text.Body.Small>
                     </Flex>
                   </Flex>
                 </Card.Outlined>

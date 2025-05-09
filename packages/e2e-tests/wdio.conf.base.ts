@@ -75,7 +75,8 @@ export const config: WebdriverIO.Config = {
       './src/features/analytics/AnalyticsSetting*.feature',
       './src/features/analytics/AnalyticsStaking*.feature',
       './src/features/analytics/AnalyticsToggle*.feature',
-      './src/features/analytics/AnalyticsToken*.feature'
+      './src/features/analytics/AnalyticsToken*.feature',
+      './src/features/SharedWalletOnboarding.feature'
     ],
     batch12: [
       './src/features/AdaHandleExtended.feature',

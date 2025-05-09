@@ -165,7 +165,8 @@ Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: strin
     'Your custom submit API is enabled...': 'browserView.settings.wallet.customSubmitApi.usingCustomTxSubmitEndpoint',
     'Your custom submit API is disabled...':
       'browserView.settings.wallet.customSubmitApi.usingStandardTxSubmitEndpoint',
-    'Wallet renamed successfully': 'browserView.renameWalletDrawer.renameSuccessful'
+    'Wallet renamed successfully': 'browserView.renameWalletDrawer.renameSuccessful',
+    'Shared wallet key copied to clipboard': 'sharedWallets.addSharedWallet.keyGeneration.copyKeys.toastText'
   };
 
   const translationKey = toastTextToTranslationKeyMap[toastText];

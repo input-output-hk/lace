@@ -91,7 +91,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
     <Flex h="$fill" w="$fill" className={styles.root}>
       <Timeline className={styles.timeline}>
         {parseTimelineSteps(timelineSteps, timelineCurrentStep).map(({ current, marked, name }) => (
-          <Timeline.Item key={name} active={marked}>
+          <Timeline.Item key={name} active={marked} data-testid={`${marked ? 'active' : 'inactive'}-onboarding-step`}>
             <Box className={cn({ [`${styles.activeText}`]: current })}>{name}</Box>
           </Timeline.Item>
         ))}

@@ -10,6 +10,7 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
   const extensionTranslationPath = `../../../../packages/translation/src/lib/translations/browser-extension-wallet/${language}.json`;
   const coreTranslationPath = `../../../../packages/translation/src/lib/translations/core/${language}.json`;
   const cardanoTranslationPath = `../../../../packages/translation/src/lib/translations/cardano/${language}.json`;
+  const sharedWalletsTranslationPath = `../../../../packages/translation/src/lib/translations/shared-wallets/${language}.json`;
   const stakingTranslationPath = `../../../../packages/translation/src/lib/translations/staking/${language}.json`;
 
   const extension: Translations = await flatten(
@@ -21,6 +22,9 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
   const cardano: Translations = await flatten(
     JSON.parse(readFromFile(import.meta.dirname, cardanoTranslationPath).toString())
   );
+  const sharedWallets: Translations = await flatten(
+    JSON.parse(readFromFile(import.meta.dirname, sharedWalletsTranslationPath).toString())
+  );
   const staking: Translations = await flatten(
     JSON.parse(readFromFile(import.meta.dirname, stakingTranslationPath).toString())
   );
@@ -28,6 +32,7 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
     ...cardano,
     ...core,
     ...extension,
+    ...sharedWallets,
     ...staking
   };
   return translationOrigin === 'base' ? baseTranslations : staking;
