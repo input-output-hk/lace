@@ -92,4 +92,5 @@ runs:
           ./packages/e2e-tests/logs
           ./packages/e2e-tests/reports/allure/results
           ./packages/e2e-tests/dmesg.log
+          ./packages/e2e-tests/metrics
         retention-days: 5

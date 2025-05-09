@@ -12673,6 +12673,7 @@ __metadata:
     "@types/chai-string": 1.4.5
     "@types/flat": 5.0.5
     "@types/node": 20.14.2
+    "@types/pidusage": 2.0.5
     "@types/puppeteer": 7.0.4
     "@typescript-eslint/eslint-plugin": 6.0.0
     "@typescript-eslint/parser": 6.0.0
@@ -12695,6 +12696,7 @@ __metadata:
     eslint-plugin-import: 2.27.5
     eslint-plugin-wdio: 8.37.0
     flat: 6.0.1
+    pidusage: 4.0.1
     testcontainers: 10.24.2
     ts-node: 10.9.1
     typescript: ^4.9.5
@@ -23060,6 +23062,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: bebe1e596cbbe5f7d2726a58859e61986c5a42459048e29cb7f2d4d764be6bbb0844572fd5d70ca8955a8a17e8b4ed80984fc4903e165d9efb8807a3fbb051aa
+  languageName: node
+  linkType: hard
+
+"@types/pidusage@npm:2.0.5":
+  version: 2.0.5
+  resolution: "@types/pidusage@npm:2.0.5"
+  checksum: 24188bf108b9b5a2ccb16155a492ff1cca7d7bf07aa4e2649cce421e0940dd5b0cd06baa48da9b8bde46343463fc500a7070c0788a0ed3f3f57d3e3bcf4ac64d
   languageName: node
   linkType: hard
 
@@ -47953,6 +47962,15 @@ __metadata:
   bin:
     pidtree: bin/pidtree.js
   checksum: eb49025099f1af89a4696f7673351421f13420f3397b963c901fe23a1c9c2ff50f4750321970d4472c0ffbb065e4a6c3c27f75e226cc62284b19e21d32ce7012
+  languageName: node
+  linkType: hard
+
+"pidusage@npm:4.0.1":
+  version: 4.0.1
+  resolution: "pidusage@npm:4.0.1"
+  dependencies:
+    safe-buffer: ^5.2.1
+  checksum: 89ce11679b9871f8da6f21160c734f195fb6230e4a1017235133ac5294b9b0ec94d6c55a66fba43474bac524a7845ea309f43f37ce0e5c8f4e23512fa14ef2b6
   languageName: node
   linkType: hard
 
