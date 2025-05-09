@@ -328,3 +328,9 @@ jobs:
         with:
           name: allure-results
           path: ./artifacts/reports/allure/results
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: ./artifacts/metrics
