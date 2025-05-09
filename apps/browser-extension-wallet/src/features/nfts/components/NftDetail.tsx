@@ -1,6 +1,6 @@
 import { useAssetInfo, useRedirection, useWalletAvatar } from '@hooks';
 import { walletRoutePaths } from '@routes';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from './Nfts.module.scss';
 import { Button, Drawer, DrawerNavigation, toast, useObservable } from '@lace/common';
@@ -12,17 +12,22 @@ import { useTranslation } from 'react-i18next';
 import { SendFlowTriggerPoints, useOutputInitialState } from '@src/views/browser-view/features/send-transaction';
 import { APP_MODE_POPUP, DEFAULT_WALLET_BALANCE, SEND_NFT_DEFAULT_AMOUNT } from '@src/utils/constants';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { useAnalyticsContext } from '@providers';
+import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { buttonIds } from '@hooks/useEnterKeyPress';
 import { withNftsFoldersContext } from '../context';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+
+export const NFTPRINTLAB_URL = process.env.NFTPRINTLAB_URL;
 
 export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
   const {
     inMemoryWallet,
-    walletUI: { appMode }
+    walletUI: { appMode },
+    currentChain
   } = useWalletStore();
   const { t } = useTranslation();
   const analytics = useAnalyticsContext();
+  const posthog = usePostHogClientContext();
   const { setAvatar } = useWalletAvatar();
 
   const redirectToNfts = useRedirection(walletRoutePaths.nfts);
@@ -30,6 +35,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
   const { id } = useParams<{ id: string }>();
   const assetsInfo = useAssetInfo();
   const setSendInitialState = useOutputInitialState();
+  const openExternalLink = useExternalLinkOpener();
 
   const assetId = Wallet.Cardano.AssetId(id);
   const assetInfo = assetsInfo?.get(assetId);
@@ -50,6 +56,14 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
     toast.notify({ text: t('core.nftDetail.avatarUpdated') });
     analytics.sendEventToPostHog(PostHogAction.NFTDetailSetAsAvatarClick);
   };
+
+  const handleOpenTabNFTPrintLab = useCallback(() => {
+    analytics.sendEventToPostHog(PostHogAction.NFTDetailPrintClick);
+    openExternalLink(NFTPRINTLAB_URL);
+  }, [analytics, openExternalLink]);
+
+  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
+  const canPrintNft = isMainnet && posthog?.isFeatureFlagEnabled('nftprintlab');
 
   return (
     <Drawer
@@ -73,6 +87,7 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
           amount={amount}
           title={<h2 className={styles.secondaryTitle}>{nftNameSelector(assetInfo)}</h2>}
           onSetAsAvatar={handleSetAsAvatar}
+          onPrintNft={canPrintNft ? handleOpenTabNFTPrintLab : undefined}
         />
       )}
     </Drawer>
