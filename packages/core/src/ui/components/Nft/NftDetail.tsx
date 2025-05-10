@@ -7,6 +7,7 @@ import { Breadcrumb } from 'antd';
 import { FolderOutlined, RightOutlined } from '@ant-design/icons';
 import { Box, ControlButton, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
+import { ReactComponent as PrintNftIcon } from '../../assets/icons/print-nft.component.svg';
 
 export interface NftDetailProps {
   title?: ReactNode;
@@ -15,8 +16,9 @@ export interface NftDetailProps {
   attributes?: string;
   folder?: string;
   amount?: number | string;
-  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar' | 'directory'>;
+  translations: TranslationsFor<'tokenInformation' | 'attributes' | 'setAsAvatar' | 'directory' | 'printNft'>;
   onSetAsAvatar?: (image: string) => void;
+  onPrintNft?: () => void;
   isPopup?: boolean;
 }
 
@@ -39,6 +41,7 @@ export const NftDetail = ({
   amount,
   translations,
   onSetAsAvatar,
+  onPrintNft,
   isPopup
 }: NftDetailProps): React.ReactElement => (
   <div className={styles.nftDetail}>
@@ -53,13 +56,26 @@ export const NftDetail = ({
         <NftImage image={image} detailView popupView />
       </div>
     </div>
-    <ControlButton.Outlined
-      size="small"
-      label={translations.setAsAvatar}
-      icon={<ProfileIcon />}
-      onClick={() => image && onSetAsAvatar?.(image)}
-      data-testid="nft-set-as-avatar-button"
-    />
+    <Flex w="$fill" gap="$24" flexDirection={isPopup ? 'column' : 'row'} justifyContent="center" px="$10">
+      <ControlButton.Outlined
+        w={onPrintNft ? '$fill' : undefined}
+        size="small"
+        label={translations.setAsAvatar}
+        icon={<ProfileIcon />}
+        onClick={() => image && onSetAsAvatar?.(image)}
+        data-testid="nft-set-as-avatar-button"
+      />
+      {onPrintNft && (
+        <ControlButton.Outlined
+          w="$fill"
+          size="small"
+          label={translations.printNft}
+          icon={<PrintNftIcon />}
+          onClick={() => onPrintNft()}
+          data-testid="nft-print-button"
+        />
+      )}
+    </Flex>
     <div className={styles.info}>
       <div data-testid="nft-info" className={styles.section}>
         <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>
