@@ -12,29 +12,27 @@ export const TopUpWalletCard = (): React.ReactElement => {
 
   return (
     <Card.Outlined className={styles.card} data-testid="top-up-wallet-card">
-      <Flex flexDirection="column" mx="$20" my="$20" gap="$6" alignItems="stretch">
+      <Flex flexDirection="column" mx="$20" my="$28" py="$2" alignItems="stretch">
         <div className={styles.titleBadge} data-testid="top-up-wallet-card-badge">
           <Text.Label className={styles.badgeCaption} weight="$medium">
             {t('browserView.assets.topupWallet.card.badge')}
           </Text.Label>
         </div>
-        <Flex my="$10">
-          <Text.SubHeading weight="$bold" data-testid="top-up-wallet-card-title">
-            {t('browserView.assets.topupWallet.card.title')}
-          </Text.SubHeading>
-        </Flex>
-        <Flex flexDirection="column" alignItems="stretch" gap="$16" mt="$10">
+        <Text.SubHeading weight="$bold" data-testid="top-up-wallet-card-title">
+          {t('browserView.assets.topupWallet.card.title')}
+        </Text.SubHeading>
+        <Flex flexDirection="column" alignItems="stretch" gap="$16">
           <Text.Body.Normal weight="$medium" color="secondary" data-testid="top-up-wallet-card-subtitle">
             {!isBitcoin
               ? t('browserView.assets.topupWallet.buyButton.title')
               : t('browserView.assets.topupWallet.buyButtonBtc.title')}
           </Text.Body.Normal>
           <TopUpWalletButton />
-          <Text.Label weight="$medium" className={styles.disclaimerShort} data-testid="top-up-wallet-card-disclaimer">
+          <Text.Body.Normal weight="$medium" color="secondary" data-testid="top-up-wallet-card-disclaimer">
             {!isBitcoin
               ? t('browserView.assets.topupWallet.disclaimer.short')
               : t('browserView.assets.topupWallet.disclaimer.shortBtc')}
-          </Text.Label>
+          </Text.Body.Normal>
         </Flex>
       </Flex>
     </Card.Outlined>
