@@ -4,9 +4,10 @@ import { AddSharedWalletCommonModalElements } from './AddSharedWalletCommonModal
 import path from 'node:path';
 
 class LetsFindYourSharedWalletScreen extends AddSharedWalletCommonModalElements {
-  // TODO: update POM when https://github.com/input-output-hk/lace/pull/1850 is merged
   private UPLOAD_COMPONENT = '#upload-json-label';
   private UPLOAD_INPUT = '#upload-json';
+  private UPLOAD_FILE_LABEL = '[data-testid="file-upload-label"]';
+  private SUPPORTED_FORMATS_LABEL = '[data-testid="supported-formats-label"]';
 
   get uploadComponent(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.UPLOAD_COMPONENT);
@@ -14,6 +15,14 @@ class LetsFindYourSharedWalletScreen extends AddSharedWalletCommonModalElements 
 
   get uploadInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.UPLOAD_INPUT);
+  }
+
+  get uploadFileLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.UPLOAD_FILE_LABEL);
+  }
+
+  get supportedFormatsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SUPPORTED_FORMATS_LABEL);
   }
 
   get openWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {

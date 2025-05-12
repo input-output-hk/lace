@@ -46,7 +46,7 @@
     "@cardano-sdk/crypto": "0.2.3",
     "@cardano-sdk/wallet": "0.52.6",
     "@cardano-sdk/web-extension": "0.39.6",
-    "@input-output-hk/lace-ui-toolkit": "3.5.0",
+    "@input-output-hk/lace-ui-toolkit": "3.7.0",
     "@lace/cardano": "0.1.0",
     "@lace/common": "0.1.0",
     "@lace/translation": "0.1.0",

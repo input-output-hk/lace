@@ -14,7 +14,15 @@ class LetsFindYourSharedWalletScreenAssert {
       await t('sharedWallets.addSharedWallet.import.subtitle')
     );
     await LetsFindYourSharedWalletScreen.uploadComponent.waitForDisplayed();
-    // TODO: add more assertions when https://github.com/input-output-hk/lace/pull/1850 is merged
+    await LetsFindYourSharedWalletScreen.uploadFileLabel.waitForDisplayed();
+    const expectedUploadFileLabel = String(await t('sharedWallets.addSharedWallet.import.uploadBtnTitle'))
+      .replace('<Link>', '')
+      .replace('</Link>', '');
+    expect(await LetsFindYourSharedWalletScreen.uploadFileLabel.getText()).to.equal(expectedUploadFileLabel);
+    await LetsFindYourSharedWalletScreen.supportedFormatsLabel.waitForDisplayed();
+    expect(await LetsFindYourSharedWalletScreen.supportedFormatsLabel.getText()).to.equal(
+      await t('sharedWallets.addSharedWallet.import.uploadBtnFormats')
+    );
     await LetsFindYourSharedWalletScreen.backButton.waitForDisplayed();
     expect(await LetsFindYourSharedWalletScreen.backButton.getText()).to.equal(
       await t('sharedWallets.addSharedWallet.layout.defaultBackButtonLabel')
