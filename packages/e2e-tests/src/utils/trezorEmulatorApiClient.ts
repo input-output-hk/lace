@@ -11,9 +11,21 @@ export const clickImageOnScreenshot = async (imageName: string): Promise<void> =
 
     response.ok
       ? Logger.log(`Click response: ${await response.text()}`)
-      : console.error('Error on click:', response.statusText);
+      : Logger.error(`Error on click: ${response.statusText}`);
   } catch (error) {
     throw new Error(`Failed to click image '${imageName}' on screenshot: ${error}`);
+  }
+};
+
+export const holdImageOnScreenshot = async (imageName: string): Promise<void> => {
+  try {
+    const response = await fetch(`${baseUrl}/hold/${imageName}`, requestOptions);
+
+    response.ok
+      ? Logger.log(`Hold response: ${await response.text()}`)
+      : Logger.error(`Error on hold: ${response.statusText}`);
+  } catch (error) {
+    throw new Error(`Failed to hold image '${imageName}' on screenshot: ${error}`);
   }
 };
 
@@ -23,7 +35,7 @@ export const startEmulator = async (): Promise<void> => {
 
     response.ok
       ? Logger.log(`Emulator started: ${await response.text()}`)
-      : console.error('Error when starting emulator:', response.statusText);
+      : Logger.error(`Error when starting emulator: ${response.statusText}`);
   } catch (error) {
     throw new Error(`Failed to start the emulator: ${error}`);
   }
@@ -35,7 +47,7 @@ export const stopEmulator = async (): Promise<void> => {
 
     response.ok
       ? Logger.log(`Emulator stopped: ${await response.text()}`)
-      : console.error('Error when stopping emulator:', response.statusText);
+      : Logger.error(`Error when stopping emulator: ${response.statusText}`);
   } catch (error) {
     throw new Error(`Failed to stop the emulator: ${error}`);
   }

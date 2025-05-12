@@ -1,5 +1,5 @@
 import { Given } from '@cucumber/cucumber';
-import { clickImageOnScreenshot } from '../utils/trezorEmulatorApiClient';
+import { clickImageOnScreenshot, holdImageOnScreenshot } from '../utils/trezorEmulatorApiClient';
 import { browser } from '@wdio/globals';
 import extendedView from '../page/extendedView';
 
@@ -17,4 +17,12 @@ Given(/^I confirm exporting public key on Trezor emulator$/, async () => {
 
 Given(/^I force the Trezor account setup page to open$/, async () => {
   await extendedView.visitTrezorSetupAccountPageWithOverride();
+});
+
+Given(/^I confirm send simple transaction on Trezor emulator$/, async () => {
+  await browser.pause(3000);
+  await clickImageOnScreenshot('showSimpleButton.png');
+  await clickImageOnScreenshot('continueButton.png');
+  await clickImageOnScreenshot('confirmButton.png');
+  await holdImageOnScreenshot('holdToConfirmButton.png');
 });

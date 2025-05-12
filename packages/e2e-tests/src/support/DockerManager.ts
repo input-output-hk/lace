@@ -27,6 +27,7 @@ export class DockerManager {
     }
   }
 
+  // eslint-disable-next-line consistent-return
   public static async startLwHwTestingToolkit(): Promise<StartedDockerComposeEnvironment> {
     Logger.log('Spinning up docker compose environment for lw-hw-testing-toolkit');
 
@@ -45,8 +46,9 @@ export class DockerManager {
 
       return startedDockerComposeEnvironment;
     } catch (error) {
-      Logger.warn(`Failed to start Docker Compose environment: ${error}`);
-      throw error;
+      Logger.error(`Failed to start Docker Compose environment: ${error}`);
+      // eslint-disable-next-line unicorn/no-process-exit
+      process.exit(1);
     }
   }
 

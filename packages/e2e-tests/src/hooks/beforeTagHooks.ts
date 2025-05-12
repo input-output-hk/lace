@@ -313,3 +313,15 @@ Before(
     await checkAndStartEmulator();
   }
 );
+
+Before(
+  {
+    tags: '@TrezorSendExtended'
+  },
+  async () => {
+    await extendedViewRepositoryWalletInitialization([TestWalletName.TrezorWallet]);
+    await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+    await localStorageInitializer.disableShowPinExtension();
+  }
+);
