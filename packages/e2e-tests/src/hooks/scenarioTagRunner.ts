@@ -6,6 +6,7 @@ import consoleManager from '../utils/consoleManager';
 import allure from '@wdio/allure-reporter';
 import testContext from '../utils/testContext';
 import PidMonitor from '../support/PidMonitor';
+import { Logger } from '../support/logger';
 
 const monitor = PidMonitor.getInstance();
 
@@ -15,8 +16,11 @@ Before(async () => {
     await consoleManager.startLogsCollection();
   }
   const pidMonitorInitialized = await monitor.init();
-  if (!pidMonitorInitialized) return;
-  monitor.start();
+  if (pidMonitorInitialized) {
+    monitor.start();
+  } else {
+    Logger.warn('PID monitor not initialized. Skipping start.');
+  }
 });
 
 After({ tags: 'not @Pending and not @pending' }, async (scenario) => {

@@ -4,6 +4,7 @@ import path from 'path';
 import { exec } from 'node:child_process';
 import { promisify } from 'util';
 import { clearInterval } from 'node:timers';
+import { Logger } from './logger';
 
 const execAsync = promisify(exec);
 
@@ -16,10 +17,10 @@ interface UsageData {
 class PidMonitor {
   private static _instance: PidMonitor;
 
-  private pid: number | undefined;
+  private pid?: number;
   private readonly intervalMs: number;
   private _data: UsageData[] = [];
-  private timer: ReturnType<typeof setTimeout> | undefined = undefined;
+  private timer?: ReturnType<typeof setInterval>;
 
   private constructor(intervalMs = 1000) {
     this.intervalMs = intervalMs;
@@ -41,31 +42,41 @@ class PidMonitor {
       const { stdout } = await execAsync(
         "ps aux | grep '[c]hrome.*--extension-process.*--enable-automation.*--test-type=webdriver' | awk '{print $2}'"
       );
-      this.pid = Number(stdout.trim());
+      const pid = Number(stdout.trim());
+
+      if (Number.isNaN(pid)) {
+        Logger.error(`Parsed PID is NaN from stdout: "${stdout}"`);
+        return false;
+      }
+
+      this.pid = pid;
       return true;
     } catch (error) {
-      console.error('Error finding PID:', error);
+      Logger.error(`Error finding PID: ${error}`);
       return false;
     }
   }
 
   public start(): void {
-    if (!this.pid) {
-      throw new Error('PID is not set. Did you call init()?');
+    if (this.pid === undefined) {
+      Logger.warn('PID is not set. Call init() first.');
+      return;
     }
+
     if (this.timer) return;
 
-    const pid = this.pid;
-
     this.timer = setInterval(async () => {
+      if (this.pid === undefined) return;
+
       try {
-        const stats = await pidusage(pid);
+        const stats = await pidusage(this.pid);
         this._data.push({
           timestamp: new Date().toISOString(),
           cpu: stats.cpu,
           memory: stats.memory
         });
-      } catch {
+      } catch (error) {
+        Logger.error(`pidusage failed: ${error}`);
         this.stop();
       }
     }, this.intervalMs);
@@ -83,11 +94,15 @@ class PidMonitor {
   }
 
   public saveToFile(filePath: string): void {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    try {
+      const dir = path.dirname(filePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(filePath, JSON.stringify(this._data, undefined, 2), 'utf-8');
+    } catch (error) {
+      Logger.error(`Failed to save data to file: ${error}`);
     }
-    fs.writeFileSync(filePath, JSON.stringify(this._data, undefined, 2), 'utf-8');
   }
 }
 
