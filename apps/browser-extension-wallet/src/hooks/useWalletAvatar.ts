@@ -2,8 +2,9 @@ import { useLocalStorage } from '@hooks/useLocalStorage';
 import { getAssetImageUrl } from '@utils/get-asset-image-url';
 import { useWalletStore } from '@stores';
 import { useGetHandles } from '@hooks/useGetHandles';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { walletRepository } from '@lib/wallet-api-ui';
+import { useWalletManager } from './useWalletManager';
 
 interface UseWalletAvatar {
   activeWalletAvatar: string;
@@ -13,10 +14,20 @@ interface UseWalletAvatar {
 
 export const useWalletAvatar = (): UseWalletAvatar => {
   const { cardanoWallet, environmentName } = useWalletStore();
+  const [activeWalletId, setActiveWalletId] = useState<string>('');
+
+  const { getActiveWalletId } = useWalletManager();
+
+  useEffect(() => {
+    // eslint-disable-next-line promise/catch-or-return
+    getActiveWalletId().then((id) => {
+      setActiveWalletId(id);
+    });
+  }, [getActiveWalletId]);
+
   const [handle] = useGetHandles();
   const [avatars, { updateLocalStorage: setUserAvatar }] = useLocalStorage('userAvatar');
 
-  const activeWalletId = cardanoWallet?.source.wallet.walletId;
   const { accountIndex, metadata } = cardanoWallet?.source.account ?? {};
   const handleImage = handle?.profilePic;
   const activeWalletAvatar =
