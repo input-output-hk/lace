@@ -13,18 +13,27 @@ interface UsageData {
   memory: number;
 }
 
-export class PidMonitor {
-  get data(): UsageData[] {
-    return this._data;
-  }
+class PidMonitor {
+  private static _instance: PidMonitor;
 
   private pid: number | undefined;
-  private intervalMs: number;
+  private readonly intervalMs: number;
   private _data: UsageData[] = [];
   private timer: ReturnType<typeof setTimeout> | undefined = undefined;
 
-  constructor(intervalMs = 1000) {
+  private constructor(intervalMs = 1000) {
     this.intervalMs = intervalMs;
+  }
+
+  public static getInstance(intervalMs = 1000): PidMonitor {
+    if (!PidMonitor._instance) {
+      PidMonitor._instance = new PidMonitor(intervalMs);
+    }
+    return PidMonitor._instance;
+  }
+
+  public get data(): UsageData[] {
+    return this._data;
   }
 
   public async init(): Promise<boolean> {
@@ -46,9 +55,11 @@ export class PidMonitor {
     }
     if (this.timer) return;
 
+    const pid = this.pid;
+
     this.timer = setInterval(async () => {
       try {
-        const stats = await pidusage(this.pid!);
+        const stats = await pidusage(pid);
         this._data.push({
           timestamp: new Date().toISOString(),
           cpu: stats.cpu,
@@ -79,3 +90,5 @@ export class PidMonitor {
     fs.writeFileSync(filePath, JSON.stringify(this._data, undefined, 2), 'utf-8');
   }
 }
+
+export default PidMonitor;

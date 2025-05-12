@@ -5,8 +5,9 @@ import consoleManager from '../utils/consoleManager';
 
 import allure from '@wdio/allure-reporter';
 import testContext from '../utils/testContext';
-import { PidMonitor } from '../support/PidMonitor';
-const monitor = new PidMonitor(1000);
+import PidMonitor from '../support/PidMonitor';
+
+const monitor = PidMonitor.getInstance();
 
 // eslint-disable-next-line no-unused-vars
 Before(async () => {
@@ -21,7 +22,6 @@ Before(async () => {
 After({ tags: 'not @Pending and not @pending' }, async (scenario) => {
   monitor.stop();
   monitor.saveToFile(`./metrics/${scenario.testCaseStartedId}-chrome-usage.json`);
-  // allure.addAttachment('Perf data', monitor.data, 'text/plain');
   monitor.clear();
 
   testContext.clearContext();
