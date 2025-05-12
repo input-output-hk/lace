@@ -15,7 +15,6 @@ on:
         type: choice
         options:
           - chrome
-          - edge
           - firefox
       network:
         description: 'network to use'
@@ -49,64 +48,6 @@ on:
         description: 'Tags(optional)'
         required: false
         default: ''
-      cardano_mainnet_url:
-        type: choice
-        required: true
-        default: dev-mainnet.lw.iog.io
-        description: 'cardano mainnet url to use'
-        options:
-          - dev-mainnet.lw.iog.io
-          - dev-mainnet.eu-central-1.lw.iog.io
-          - dev-mainnet.eu-west-1.lw.iog.io
-          - dev-mainnet.us-east-1.lw.iog.io
-          - dev-mainnet.us-east-2.lw.iog.io
-          - live-mainnet.lw.iog.io
-          - live-mainnet.eu-central-1.lw.iog.io
-          - live-mainnet.eu-west-1.lw.iog.io
-          - live-mainnet.us-east-1.lw.iog.io
-          - live-mainnet.us-east-2.lw.iog.io
-          - staging-mainnet.lw.iog.io
-          - staging-mainnet.eu-central-1.lw.iog.io
-          - staging-mainnet.eu-west-1.lw.iog.io
-          - staging-mainnet.us-east-1.lw.iog.io
-          - staging-mainnet.us-east-2.lw.iog.io
-      cardano_preprod_url:
-        type: choice
-        required: true
-        default: dev-preprod.lw.iog.io
-        description: 'cardano preprod url to use'
-        options:
-          - dev-preprod.lw.iog.io
-          - dev-preprod.eu-central-1.lw.iog.io
-          - dev-preprod.eu-west-1.lw.iog.io
-          - dev-preprod.us-east-1.lw.iog.io
-          - dev-preprod.us-east-2.lw.iog.io
-          - live-preprod.lw.iog.io
-          - live-preprod.eu-central-1.lw.iog.io
-          - live-preprod.eu-west-1.lw.iog.io
-          - live-preprod.us-east-1.lw.iog.io
-          - live-preprod.us-east-2.lw.iog.io
-          - staging-preprod.lw.iog.io
-          - staging-preprod.eu-central-1.lw.iog.io
-          - staging-preprod.eu-west-1.lw.iog.io
-          - staging-preprod.us-east-1.lw.iog.io
-          - staging-preprod.us-east-2.lw.iog.io
-      cardano_preview_url:
-        type: choice
-        required: true
-        default: dev-preview.lw.iog.io
-        description: 'cardano preview url to use'
-        options:
-          - dev-preview.lw.iog.io
-          - dev-preview.eu-central-1.lw.iog.io
-          - dev-preview.eu-west-1.lw.iog.io
-          - dev-preview.us-east-1.lw.iog.io
-          - dev-preview.us-east-2.lw.iog.io
-          - live-preview.lw.iog.io
-          - live-preview.eu-central-1.lw.iog.io
-          - live-preview.eu-west-1.lw.iog.io
-          - live-preview.us-east-1.lw.iog.io
-          - live-preview.us-east-2.lw.iog.io
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | tags: ${{ github.event.inputs.tags || '' }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
@@ -117,10 +58,7 @@ env:
   DISPLAY: ':99.0'
   NODE_OPTIONS: --max-old-space-size=16384
   BRANCH: ${{ github.ref_name }}
-  CARDANO_MAINNET_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-mainnet.lw.iog.io' || (github.event.inputs.cardano_mainnet_url || 'dev-mainnet.lw.iog.io') }}
-  CARDANO_PREPROD_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}
-  CARDANO_PREVIEW_URL: ${{ startsWith(github.ref_name, 'release/') && 'live-preview.lw.iog.io' || (github.event.inputs.cardano_preview_url || 'dev-preview.lw.iog.io') }}
-  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'live-preprod.lw.iog.io' || (github.event.inputs.cardano_preprod_url || 'dev-preprod.lw.iog.io') }}-${{ github.sha }}-${{ github.event.inputs.browser || 'chrome' }}
+  BUILD_ARTIFACT_NAME: lace-${{ startsWith(github.ref_name, 'release/') && 'release' || 'dev' }}-${{ github.sha }}-${{ github.event.inputs.browser || 'chrome' }}
 
 jobs:
   setup:
@@ -153,9 +91,6 @@ jobs:
           echo "Runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}"
           echo "Smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
           echo "Tags(optional): ${{ github.event.inputs.tags || '' }}"
-          echo "Cardano mainnet url: ${{ env.CARDANO_MAINNET_URL }}"
-          echo "Cardano preprod url: ${{ env.CARDANO_PREPROD_URL }}"
-          echo "Cardano preview url: ${{ env.CARDANO_PREVIEW_URL }}"
           echo "Build artifact name: ${{ env.BUILD_ARTIFACT_NAME }}"
     outputs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
@@ -175,12 +110,6 @@ jobs:
         if: needs.setup.outputs.build_exists == 'false'
         uses: ./.github/shared/build
         with:
-          CARDANO_SERVICES_URL_MAINNET: 'https://${{ env.CARDANO_MAINNET_URL }}'
-          CARDANO_SERVICES_URL_PREPROD: 'https://${{ env.CARDANO_PREPROD_URL }}'
-          CARDANO_SERVICES_URL_PREVIEW: 'https://${{ env.CARDANO_PREVIEW_URL }}'
-          CARDANO_WS_SERVER_URL_MAINNET: 'wss://${{ env.CARDANO_MAINNET_URL }}'
-          CARDANO_WS_SERVER_URL_PREPROD: 'wss://${{ env.CARDANO_PREPROD_URL }}'
-          CARDANO_WS_SERVER_URL_PREVIEW: 'wss://${{ env.CARDANO_PREVIEW_URL }}'
           BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
           BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
           BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
@@ -281,9 +210,6 @@ jobs:
           platform=Linux
           smoke_only=${{ needs.setup.outputs.smoke_only }}
           tags=${{ needs.setup.outputs.tags }}
-          cardano_mainnet_url=${CARDANO_MAINNET_URL}
-          cardano_preprod_url=${CARDANO_PREPROD_URL}
-          cardano_preview_url=${CARDANO_PREVIEW_URL}
           " > environment.properties
 
       - name: Publish allure report to S3
