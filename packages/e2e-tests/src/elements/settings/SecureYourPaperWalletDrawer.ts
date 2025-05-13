@@ -3,11 +3,10 @@ import CommonDrawerElements from '../CommonDrawerElements';
 import type { ChainablePromiseElement } from 'webdriverio';
 
 class SecureYourPaperWalletDrawer extends CommonDrawerElements {
-  // TODO: update selectors when new lace-ui-toolkit package is released
-  private PGP_KEY_NAME_INPUT = '[data-testid="pgp-public-key-reference"]';
-  private PGP_KEY_NAME_INPUT_LABEL = '//form//label';
-  private YOUR_PUBLIC_PGP_KEY_BLOCK_INPUT = '[data-testid="pgp-public-key-block"]';
-  private YOUR_PUBLIC_PGP_KEY_BLOCK_INPUT_LABEL = '//span[contains(@class, "text-area-label")]';
+  private PGP_KEY_NAME_INPUT = '[data-testid="pgp-public-key-reference-input"]';
+  private PGP_KEY_NAME_INPUT_LABEL = '[data-testid="pgp-public-key-reference-label"]';
+  private YOUR_PUBLIC_PGP_KEY_BLOCK_INPUT = '[data-testid="pgp-public-key-block-input"]';
+  private YOUR_PUBLIC_PGP_KEY_BLOCK_INPUT_LABEL = '[data-testid="pgp-public-key-block-label"]';
   private NEXT_BUTTON = '[data-testid="next-button"]';
 
   get pgpKeyNameInput(): ChainablePromiseElement<WebdriverIO.Element> {

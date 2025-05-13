@@ -5,10 +5,10 @@ import type { ChainablePromiseElement } from 'webdriverio';
 class MessageSigningAllDoneDrawer extends CommonDrawerElements {
   private IMAGE = '[data-testid="result-message-img"]';
   private TITLE = '[data-testid="result-message-title"]';
-  private SIGNATURE = '[data-testid="sign-message-signature"]';
+  private SIGNATURE = '[data-testid="sign-message-signature-input"]';
   private SIGNATURE_LABEL = '[data-testid="result-message-signature-label"]';
   private SIGNATURE_COPY_TO_CLIPBOARD_BUTTON = '[data-testid="signature-copy-to-clipboard-button"]';
-  private KEY = '[data-testid="sign-message-key"]';
+  private KEY = '[data-testid="sign-message-key-input"]';
   private KEY_LABEL = '[data-testid="result-message-key-label"]';
   private KEY_COPY_TO_CLIPBOARD_BUTTON = '[data-testid="public-key-copy-to-clipboard-button"]';
   private SIGN_ANOTHER_MESSAGE_BUTTON = '[data-testid="sign-another-message-button"]';
