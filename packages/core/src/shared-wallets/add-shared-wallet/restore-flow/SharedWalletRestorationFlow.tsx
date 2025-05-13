@@ -115,6 +115,7 @@ export const SharedWalletRestorationFlow: VFC<SharedWalletRestorationProps> = ({
           files={file ? [file.name] : undefined}
           onRemove={() => setFile(undefined)}
           key={file ? file.name : ''}
+          data-testid="file-upload"
         />
       </SharedWalletLayout>
       <Dialog.Root open={error?.message === FileErrorMessage.UNRECOGNIZED} zIndex={1000} setOpen={() => void 0}>

@@ -38,8 +38,8 @@ const errorsMap: Record<PasswordErrorType, CoreTranslationKey | SharedWalletsTra
 };
 
 const mapOfWalletTypeIconProperties: Record<WalletKind, ReactElement> = {
-  cold: <ColdWalletIcon />,
-  hot: <HotWalletIcon />,
+  cold: <ColdWalletIcon data-testid="cold-wallet-icon" />,
+  hot: <HotWalletIcon data-testid="hot-wallet-icon" />,
 };
 
 type EnterPasswordProps = {
@@ -109,10 +109,12 @@ export const EnterPassword: VFC<EnterPasswordProps> = ({
             {icon}
           </Flex>
           <Flex flexDirection="column">
-            <Text.Address color="secondary">
+            <Text.Address color="secondary" data-testid="wallet-type">
               {t('sharedWallets.addSharedWallet.keyGeneration.enterPassword.activeWalletLabel')}
             </Text.Address>
-            <Text.Body.Large weight="$bold">{walletName}</Text.Body.Large>
+            <Text.Body.Large weight="$bold" data-testid="wallet-name">
+              {walletName}
+            </Text.Body.Large>
           </Flex>
         </Flex>
         {!isHW && (

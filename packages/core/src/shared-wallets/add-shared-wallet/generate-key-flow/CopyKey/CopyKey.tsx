@@ -37,21 +37,25 @@ export const CopyKey: VFC<CopyKeysProps> = ({ onClose, onCopyKey, sharedWalletKe
           label={t('sharedWallets.addSharedWallet.keyGeneration.copyKeys.backButtonLabel')}
           icon={<CopyIcon />}
           onClick={copyKeys}
+          data-testid="copy-key-to-clipboard-button"
         />
       }
       customNextButton={
         <Button.Secondary
           onClick={onClose}
           label={t('sharedWallets.addSharedWallet.keyGeneration.copyKeys.nextButtonLabel')}
+          data-testid="close-button"
         />
       }
     >
       <Card.Greyed>
         <Flex p="$16" gap="$4" flexDirection="column">
-          <Text.Body.Large weight="$bold">
+          <Text.Body.Large weight="$bold" data-testid="shared-wallet-keys-label">
             {t('sharedWallets.addSharedWallet.keyGeneration.copyKeys.keyBoxTitle')}
           </Text.Body.Large>
-          <Text.Body.Small className={styles.keyBox}>{sharedWalletKey}</Text.Body.Small>
+          <Text.Body.Small className={styles.keyBox} data-testid="shared-wallet-keys-value">
+            {sharedWalletKey}
+          </Text.Body.Small>
         </Flex>
       </Card.Greyed>
     </SharedWalletLayout>

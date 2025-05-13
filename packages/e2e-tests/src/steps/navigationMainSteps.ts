@@ -9,3 +9,7 @@ When(/^I see main navigation with all items in (popup|extended) mode$/, async (m
 Then(/^Each main navigation item contains icon and text$/, async () => {
   await menuMainAssert.assertSeeIconAndTextForEachMenuItemExtended();
 });
+
+Then(/^I do not see "Staking" section in side menu$/, async () => {
+  await menuMainAssert.assertSeeStakingButton('extended', true);
+});

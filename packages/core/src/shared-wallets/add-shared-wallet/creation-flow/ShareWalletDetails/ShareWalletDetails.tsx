@@ -41,7 +41,7 @@ export const ShareWalletDetails = ({
       isNextEnabled
     >
       <Box mt="$12">
-        <Text.Body.Normal>{translations.body}</Text.Body.Normal>
+        <Text.Body.Normal data-testid="download-notice">{translations.body}</Text.Body.Normal>
       </Box>
       <Divider my="$20" />
       <ActionCard
@@ -49,6 +49,7 @@ export const ShareWalletDetails = ({
         description={FILENAME}
         rootClassName={styles.root}
         iconClassName={styles.icon}
+        testId="shared-wallet-setup-file"
         icon={
           <Button
             block
@@ -59,7 +60,7 @@ export const ShareWalletDetails = ({
             color="gradient"
             data-testid="download-json-btn"
           >
-            <DownloadFileIcon />
+            <DownloadFileIcon data-testid="download-icon" />
             <Text.Body.Normal weight="$semibold">{translations.cta}</Text.Body.Normal>
           </Button>
         }
