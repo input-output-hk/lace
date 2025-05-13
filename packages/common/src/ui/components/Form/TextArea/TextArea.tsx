@@ -58,7 +58,10 @@ export const TextArea = ({
   return (
     <div className={cn(styles.wrapper, wrapperClassName)}>
       {label && (
-        <span className={cn('text-area-label', styles.label, { [styles.focused]: isFocused || localVal })}>
+        <span
+          className={cn('text-area-label', styles.label, { [styles.focused]: isFocused || localVal })}
+          data-testid={dataTestId ? `${dataTestId}-label` : 'text-area-label'}
+        >
           {label}
         </span>
       )}
@@ -72,7 +75,7 @@ export const TextArea = ({
           }
         }}
         onChange={onValChange}
-        data-testid={dataTestId}
+        data-testid={dataTestId ? `${dataTestId}-input` : 'text-area-input'}
         value={localVal}
         autoSize
         rows={props.rows ?? 1}
