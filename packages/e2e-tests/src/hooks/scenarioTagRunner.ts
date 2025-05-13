@@ -15,19 +15,22 @@ Before(async () => {
   if (String(process.env.SERVICE_WORKER_LOGS) === 'true') {
     await consoleManager.startLogsCollection();
   }
-  const pidMonitorInitialized = await monitor.init();
-  if (pidMonitorInitialized) {
-    monitor.start();
-  } else {
-    Logger.warn('PID monitor not initialized. Skipping start.');
+  if (browser.isChromium) {
+    const pidMonitorInitialized = await monitor.init();
+    if (pidMonitorInitialized) {
+      monitor.start();
+    } else {
+      Logger.warn('PID monitor not initialized. Skipping start.');
+    }
   }
 });
 
 After({ tags: 'not @Pending and not @pending' }, async (scenario) => {
-  monitor.stop();
-  monitor.saveToFile(`./metrics/${scenario.testCaseStartedId}-chrome-usage.json`);
-  monitor.clear();
-
+  if (browser.isChromium) {
+    monitor.stop();
+    monitor.saveToFile(`./metrics/${scenario.testCaseStartedId}-chrome-usage.json`);
+    monitor.clear();
+  }
   testContext.clearContext();
   await browser.reloadSession();
 });
