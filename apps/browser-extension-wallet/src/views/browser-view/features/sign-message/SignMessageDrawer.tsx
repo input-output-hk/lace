@@ -146,7 +146,7 @@ export const SignMessageDrawer: React.FC = () => {
           placeholder={t('core.signMessage.messagePlaceholder')}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          dataTestId="sign-message-input"
+          dataTestId="sign-message"
           rows={4}
           className={styles.customTextArea}
         />
