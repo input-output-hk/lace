@@ -17,7 +17,6 @@ import '@lace/staking/index.css';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
 import { ExternalLinkOpenerProvider } from '@providers/ExternalLinkOpenerProvider';
 import { APP_MODE_POPUP, TRACK_POPUP_CHANNEL } from './utils/constants';
-import { MigrationContainer } from '@components/MigrationContainer';
 import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
@@ -108,17 +107,15 @@ const App = (): React.ReactElement => {
                     <AnalyticsProvider>
                       <ThemeProvider>
                         <ExternalLinkOpenerProvider>
-                          <MigrationContainer appMode={APP_MODE_POPUP}>
-                            <DataCheckContainer appMode={APP_MODE_POPUP}>
-                              <AddressesDiscoveryOverlay>
-                                <NamiMigrationGuard>
-                                  <BackgroundPageProvider>
-                                    <AppVersionGuard>{getPopupModeView(mode)}</AppVersionGuard>
-                                  </BackgroundPageProvider>
-                                </NamiMigrationGuard>
-                              </AddressesDiscoveryOverlay>
-                            </DataCheckContainer>
-                          </MigrationContainer>
+                          <DataCheckContainer appMode={APP_MODE_POPUP}>
+                            <AddressesDiscoveryOverlay>
+                              <NamiMigrationGuard>
+                                <BackgroundPageProvider>
+                                  <AppVersionGuard>{getPopupModeView(mode)}</AppVersionGuard>
+                                </BackgroundPageProvider>
+                              </NamiMigrationGuard>
+                            </AddressesDiscoveryOverlay>
+                          </DataCheckContainer>
                         </ExternalLinkOpenerProvider>
                       </ThemeProvider>
                     </AnalyticsProvider>
