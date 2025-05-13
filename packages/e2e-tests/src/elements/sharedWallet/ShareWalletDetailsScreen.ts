@@ -5,9 +5,8 @@ import { AddSharedWalletCommonModalElements } from './AddSharedWalletCommonModal
 class ShareWalletDetailsScreen extends AddSharedWalletCommonModalElements {
   private DOWNLOAD_BUTTON = '[data-testid="download-json-btn"]';
   private DOWNLOAD_NOTICE = '[data-testid="download-notice"]';
-  // TODO: update selectors when https://github.com/input-output-hk/lace-ui-toolkit/pull/115 is merged
-  private CONFIG_FILE_LABEL = '(//div[@rootclassname]//span)[3]';
-  private CONFIG_FILE_PATH = '(//div[@rootclassname]//span)[4]';
+  private CONFIG_FILE_LABEL = '[data-testid="shared-wallet-setup-file-title"]';
+  private CONFIG_FILE_PATH = '[data-testid="shared-wallet-setup-file-description"]';
 
   get downloadNotice(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DOWNLOAD_NOTICE);

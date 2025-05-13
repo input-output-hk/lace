@@ -93,7 +93,7 @@ export const SetupSharedWallet = ({
         <FlowCard.Profile
           icon={<ProfileDropdown.WalletIcon type={walletKind} testId="active-lace-wallet-icon" />}
           name={activeWalletName}
-          data-testid="active-lace-wallet"
+          testId="active-lace-wallet"
         />
         <FlowCard.Details
           subtitle={addEllipsis(activeWalletAddress, ADDRESS_FIRST_PART_LENGTH, ADDRESS_LAST_PART_LENGTH)}

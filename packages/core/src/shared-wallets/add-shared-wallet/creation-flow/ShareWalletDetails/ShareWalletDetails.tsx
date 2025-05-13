@@ -49,6 +49,7 @@ export const ShareWalletDetails = ({
         description={FILENAME}
         rootClassName={styles.root}
         iconClassName={styles.icon}
+        testId="shared-wallet-setup-file"
         icon={
           <Button
             block

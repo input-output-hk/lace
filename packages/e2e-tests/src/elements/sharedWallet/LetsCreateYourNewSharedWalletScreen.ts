@@ -8,8 +8,7 @@ class LetsCreateYourNewSharedWalletScreen extends AddSharedWalletCommonModalElem
   private SHARED_WALLET_NAME_LABEL = '[data-testid="input-label"]';
   private ACTIVE_LACE_WALLET_NOTICE = '[data-testid="active-lace-wallet-notice"]';
   private ACTIVE_LACE_WALLET_ICON = '[data-testid="active-lace-wallet-icon"]';
-  // TODO: update when https://github.com/input-output-hk/lace-ui-toolkit/pull/114 is merged
-  private ACTIVE_LACE_WALLET_NAME = 'div[flowcardclassname] > div > div > div > div > span';
+  private ACTIVE_LACE_WALLET_NAME = '[data-testid="active-lace-wallet-name"]';
 
   get sharedWalletNameInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SHARED_WALLET_NAME_INPUT);

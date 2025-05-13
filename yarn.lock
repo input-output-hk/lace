@@ -11502,9 +11502,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@input-output-hk/lace-ui-toolkit@npm:3.7.0":
-  version: 3.7.0
-  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.7.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.7.0%2F0edc2662139c13d9edfe06b2b3b348ff011cafbe"
+"@input-output-hk/lace-ui-toolkit@npm:3.8.0":
+  version: 3.8.0
+  resolution: "@input-output-hk/lace-ui-toolkit@npm:3.8.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40input-output-hk%2Flace-ui-toolkit%2F3.8.0%2F3cfebb953d437ed4b48da5dcce2f7e3f28495a24"
   dependencies:
     "@radix-ui/react-alert-dialog": ^1.0.4
     "@radix-ui/react-avatar": ^1.0.2
@@ -11536,7 +11536,7 @@ __metadata:
   peerDependencies:
     react: ">=17.0.2"
     react-dom: ">=17.0.2"
-  checksum: 3658b32a7a1be91abd8a136679a1a3e5631f3d30ef2fc06c39ea01e68f9f5a7fc27c332e8c7eb5187dcbb89c358b5433f8f27eb2b2b1f33283821e809e06ca91
+  checksum: 5c2c7696b218845a1ffeda051ea9fdd5da5de0736da628071d81e1e5394f236707f8d495b12992fcfc76d9e3da7e17df217c2fac048a0faaccc5c599ffd6f5aa
   languageName: node
   linkType: hard
 
@@ -12613,7 +12613,7 @@ __metadata:
     "@cardano-sdk/crypto": 0.2.3
     "@cardano-sdk/wallet": 0.52.6
     "@cardano-sdk/web-extension": 0.39.6
-    "@input-output-hk/lace-ui-toolkit": 3.7.0
+    "@input-output-hk/lace-ui-toolkit": 3.8.0
     "@lace/cardano": 0.1.0
     "@lace/common": 0.1.0
     "@lace/translation": 0.1.0

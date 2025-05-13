@@ -5,17 +5,17 @@ import type { CosignersData } from '../../types/sharedWallet';
 
 class AddWalletCosignersScreen extends AddSharedWalletCommonModalElements {
   private YOUR_IDENTIFIER_INPUT = '(//input[@data-testid="identifier-input"])[1]';
-  private YOUR_IDENTIFIER_LABEL = '(//input[@data-testid="identifier-label"])[1]';
+  private YOUR_IDENTIFIER_LABEL = '(//label[@data-testid="identifier-label"])[1]';
   private YOUR_SHARED_WALLET_KEY_INPUT = '(//input[@data-testid="shared-wallet-key-input"])[1]';
-  private YOUR_SHARED_WALLET_KEY_LABEL = '(//input[@data-testid="shared-wallet-key-label"])[1]';
+  private YOUR_SHARED_WALLET_KEY_LABEL = '(//label[@data-testid="shared-wallet-key-label"])[1]';
   private COSIGNER_1_IDENTIFIER_INPUT = '(//input[@data-testid="identifier-input"])[2]';
-  private COSIGNER_1_IDENTIFIER_LABEL = '(//input[@data-testid="identifier-label"])[2]';
+  private COSIGNER_1_IDENTIFIER_LABEL = '(//label[@data-testid="identifier-label"])[2]';
   private COSIGNER_1_SHARED_WALLET_KEY_INPUT = '(//input[@data-testid="shared-wallet-key-input"])[2]';
-  private COSIGNER_1_SHARED_WALLET_KEY_LABEL = '(//input[@data-testid="shared-wallet-key-label"])[2]';
+  private COSIGNER_1_SHARED_WALLET_KEY_LABEL = '(//label[@data-testid="shared-wallet-key-label"])[2]';
   private COSIGNER_2_IDENTIFIER_INPUT = '(//input[@data-testid="identifier-input"])[3]';
-  private COSIGNER_2_IDENTIFIER_LABEL = '(//input[@data-testid="identifier-label"])[3]';
+  private COSIGNER_2_IDENTIFIER_LABEL = '(//label[@data-testid="identifier-label"])[3]';
   private COSIGNER_2_SHARED_WALLET_KEY_INPUT = '(//input[@data-testid="shared-wallet-key-input"])[3]';
-  private COSIGNER_2_SHARED_WALLET_KEY_LABEL = '(//input[@data-testid="shared-wallet-key-label"])[3]';
+  private COSIGNER_2_SHARED_WALLET_KEY_LABEL = '(//label[@data-testid="shared-wallet-key-label"])[3]';
 
   get yourIdentifierInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.YOUR_IDENTIFIER_INPUT);
