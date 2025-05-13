@@ -7,12 +7,12 @@ import { act } from 'react-dom/test-utils';
 describe('TextArea', () => {
   test('initial value is an empty string', () => {
     const { queryByTestId } = render(<TextArea dataTestId="text-area-test" />);
-    expect(queryByTestId('text-area-test')).toHaveValue('');
+    expect(queryByTestId('text-area-test-input')).toHaveValue('');
   });
   test('on input change value is updated and onChange function prop is called', () => {
     const onChange = jest.fn();
     const { queryByTestId } = render(<TextArea dataTestId="text-area-test" onChange={onChange} />);
-    const area = queryByTestId('text-area-test');
+    const area = queryByTestId('text-area-test-input');
     expect(area).toHaveValue('');
     act(() => {
       area && fireEvent.change(area, { target: { value: 'new value' } });
@@ -24,7 +24,7 @@ describe('TextArea', () => {
     const onBlur = jest.fn();
     const { queryByTestId } = render(<TextArea dataTestId="text-area-test" onBlur={onBlur} />);
     await waitFor(() => {
-      const area = queryByTestId('text-area-test');
+      const area = queryByTestId('text-area-test-input');
       area && fireEvent.blur(area);
     });
     expect(onBlur).toHaveBeenCalled();
