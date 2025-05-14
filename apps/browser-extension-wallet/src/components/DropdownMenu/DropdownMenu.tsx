@@ -16,6 +16,8 @@ import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { useWalletAvatar } from '@hooks';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 import i18n from 'i18next';
+import { WalletType } from '@cardano-sdk/web-extension';
+import { useCurrentBlockchain, Blockchain } from '@src/multichain';
 
 export interface DropdownMenuProps {
   isPopup?: boolean;
@@ -29,6 +31,7 @@ const addEllipsis = (text: string, length: number) => (text.length > length ? `$
 
 export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement => {
   const analytics = useAnalyticsContext();
+  const { blockchain } = useCurrentBlockchain();
   const {
     walletUI: { isDropdownMenuOpen = false },
     setIsDropdownMenuOpen,
@@ -50,6 +53,19 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
   };
 
   useEffect(() => () => setIsDropdownMenuOpen(false), [setIsDropdownMenuOpen]);
+
+  const walletType = getUiWalletType(walletDisplayInfo?.walletType);
+
+  const isBitcoinWallet = walletDisplayInfo?.walletType !== WalletType.Script && blockchain === Blockchain.Bitcoin;
+  const customBitcoinProfile = isBitcoinWallet
+    ? {
+        customProfileComponent: (
+          <span className={styles.walletOptionBitcoin}>
+            <ProfileDropdown.WalletIcon type={walletType} testId={'wallet-option-icon'} />
+          </span>
+        )
+      }
+    : undefined;
 
   return (
     <Dropdown
@@ -74,9 +90,9 @@ export const DropdownMenu = ({ isPopup }: DropdownMenuProps): React.ReactElement
                     fallbackText: walletDisplayInfo?.walletName,
                     imageSrc: activeWalletAvatar
                   }
-                : undefined
+                : customBitcoinProfile
             }
-            type={getUiWalletType(walletDisplayInfo?.walletType)}
+            type={walletType}
             id="menu"
           />
         </div>

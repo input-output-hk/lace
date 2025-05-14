@@ -114,6 +114,18 @@ export const UserInfo = ({
   const renderWalletOption = useCallback(
     ({ wallet, lastActiveAccount: acc }: RenderWalletOptionsParams) => {
       const walletAvatar = getAvatar(wallet.walletId);
+      const walletType = getUiWalletType(wallet.type);
+
+      const isBitcoinWallet = wallet.type !== WalletType.Script && wallet.blockchainName === 'Bitcoin';
+      const customBitcoinProfile = isBitcoinWallet
+        ? {
+            customProfileComponent: (
+              <span className={styles.walletOptionBitcoin}>
+                <ProfileDropdown.WalletIcon type={walletType} testId={'wallet-option-icon'} />
+              </span>
+            )
+          }
+        : undefined;
 
       return (
         <ProfileDropdown.WalletOption
@@ -142,14 +154,14 @@ export const UserInfo = ({
               text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
           }}
-          type={getUiWalletType(wallet.type)}
+          type={walletType}
           profile={
             walletAvatar
               ? {
                   fallbackText: fullWalletName,
                   imageSrc: walletAvatar
                 }
-              : undefined
+              : customBitcoinProfile
           }
           {...(wallet.type !== WalletType.Script &&
             wallet.blockchainName !== 'Bitcoin' && {
