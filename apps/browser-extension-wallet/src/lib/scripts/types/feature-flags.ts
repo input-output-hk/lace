@@ -12,7 +12,8 @@ export enum ExperimentName {
   WEBSOCKET_API = 'websocket-api',
   DAPP_EXPLORER = 'dapp-explorer',
   SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',
-  BITCOIN_WALLETS = 'bitcoin-wallets'
+  BITCOIN_WALLETS = 'bitcoin-wallets',
+  NFTPRINTLAB = 'nftprintlab'
 }
 
 export type FeatureFlag = `${ExperimentName}`;
