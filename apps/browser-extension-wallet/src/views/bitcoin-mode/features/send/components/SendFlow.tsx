@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable no-magic-numbers */
@@ -23,6 +24,7 @@ import { DrawerContent } from '@src/views/browser-view/components/Drawer';
 import { useTranslation } from 'react-i18next';
 import { WarningModal } from '@views/browser/components';
 import styles from './SendFlow.module.scss';
+import { TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -157,6 +159,28 @@ export const SendFlow: React.FC = () => {
     return false;
   }, [pendingTxs, utxos]);
 
+  useEffect(() => {
+    setDrawerConfig({
+      ...config,
+      onClose: () => {
+        // eslint-disable-next-line sonarjs/no-small-switch
+        switch (step) {
+          case 'DONE':
+            analytics.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
+            break;
+          case 'FAILED':
+          case 'UNAUTHORIZED':
+            analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongXClick);
+            break;
+          default:
+            break;
+        }
+        config?.onClose ? config?.onClose() : setDrawerConfig();
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analytics, setDrawerConfig, step]);
+
   const {
     walletUI: { appMode }
   } = useWalletStore();
@@ -164,12 +188,6 @@ export const SendFlow: React.FC = () => {
 
   useEffect(() => {
     switch (step) {
-      case 'AMOUNT':
-        analytics.sendEventToPostHog(PostHogAction.SendClick);
-        break;
-      case 'REVIEW':
-        analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
-        break;
       case 'DONE':
         analytics.sendEventToPostHog(PostHogAction.SendAllDoneView);
         break;
@@ -236,6 +254,7 @@ export const SendFlow: React.FC = () => {
 
   // Step 1 -> 2
   const goToReview = (newFeeRate: number) => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
     setFeeRate(newFeeRate);
     setUnsignedTransaction(
       buildTransaction({
@@ -262,7 +281,13 @@ export const SendFlow: React.FC = () => {
     });
   };
   // Step 2 -> 3
-  const goToPassword = () => setStep('PASSWORD');
+  const goToPassword = () => {
+    analytics.sendEventToPostHog(PostHogAction.SendTransactionSummaryConfirmClick, {
+      trigger_point: 'send button',
+      [TX_CREATION_TYPE_KEY]: TxCreationType.Internal
+    });
+    setStep('PASSWORD');
+  };
 
   const handleSignTransaction = useCallback(
     async (password: Buffer): Promise<Bitcoin.SignedTransaction> | undefined => {
@@ -274,6 +299,7 @@ export const SendFlow: React.FC = () => {
 
   const handleSubmitTx = async (signedTx: Bitcoin.SignedTransaction) => {
     try {
+      analytics.sendEventToPostHog(PostHogAction.SendTransactionConfirmationConfirmClick);
       const hash = await bitcoinWallet.submitTransaction(signedTx.hex);
       setConfirmationHash(hash);
       setStep('DONE');
@@ -335,9 +361,13 @@ export const SendFlow: React.FC = () => {
     if (step === 'DONE') {
       return (
         <TransactionSuccess
-          onClose={onClose}
+          onClose={() => {
+            analytics.sendEventToPostHog(PostHogAction.SendAllDoneCloseClick);
+            onClose();
+          }}
           isPopupView={isPopupView}
           onViewTransaction={() => {
+            analytics.sendEventToPostHog(PostHogAction.SendAllDoneViewTransactionClick);
             setDrawerConfig();
             redirectToTransactions();
           }}
@@ -347,7 +377,20 @@ export const SendFlow: React.FC = () => {
     }
 
     if (step === 'FAILED') {
-      return <TransactionFailed onClose={onClose} isPopupView={isPopupView} onBack={backToReview} txError={txError} />;
+      return (
+        <TransactionFailed
+          onClose={() => {
+            analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongCancelClick);
+            onClose();
+          }}
+          isPopupView={isPopupView}
+          onBack={() => {
+            analytics.sendEventToPostHog(PostHogAction.SendSomethingWentWrongBackClick);
+            backToReview();
+          }}
+          txError={txError}
+        />
+      );
     }
 
     return <></>;
