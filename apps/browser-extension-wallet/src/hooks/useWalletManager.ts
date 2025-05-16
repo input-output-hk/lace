@@ -822,6 +822,10 @@ export const useWalletManager = (): UseWalletManager => {
         accountIndex
       });
 
+      await backgroundService.setBackgroundStorage({
+        activeBlockchain: 'cardano'
+      });
+
       // Needed for reset password flow
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
@@ -842,7 +846,7 @@ export const useWalletManager = (): UseWalletManager => {
         }
       };
     },
-    [getCurrentChainId, clearSecrets]
+    [getCurrentChainId, backgroundService, clearSecrets]
   );
 
   /**
