@@ -822,6 +822,10 @@ export const useWalletManager = (): UseWalletManager => {
         accountIndex
       });
 
+      await backgroundService.setBackgroundStorage({
+        activeBlockchain: 'cardano'
+      });
+
       // Needed for reset password flow
       saveValueInLocalStorage({ key: 'wallet', value: { name } });
 
