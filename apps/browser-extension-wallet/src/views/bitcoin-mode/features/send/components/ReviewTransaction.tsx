@@ -10,6 +10,7 @@ import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 
 const SATS_IN_BTC = 100_000_000;
+const MAXIMUM_FEE_DECIMAL = 8;
 
 interface ReviewTransactionProps {
   unsignedTransaction: Bitcoin.UnsignedTransaction;
@@ -98,7 +99,12 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
             })}
             <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
               <Text.Body.Normal weight="$medium" data-testid="output-summary-fee">
-                {Number.parseFloat((Number(feeInBtc) / SATS_IN_BTC).toFixed(8))} BTC
+                {(Number(feeInBtc) / SATS_IN_BTC).toLocaleString('en-US', {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: MAXIMUM_FEE_DECIMAL,
+                  useGrouping: false
+                })}{' '}
+                BTC
               </Text.Body.Normal>
               <Text.Body.Normal weight="$medium" data-testid="output-summary-fee-rate" className={styles.feeRateLabel}>
                 {((feeRate * SATS_IN_BTC) / 1000).toFixed(2)} sats/vB
