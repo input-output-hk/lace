@@ -115,7 +115,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     (assetId, withVisibleBalances = true) => {
       const info = assetsInfo?.get(assetId);
       const fiat = priceResult?.cardano?.price;
-      const pricesInfo = priceResult?.tokens?.get(assetId);
+      const pricesInfo = priceResult.cardano.getTokenPrice(assetId);
       return info && !isNFT(info)
         ? assetTransformer({
             key: assetId,
@@ -129,15 +129,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
           })
         : undefined;
     },
-    [
-      areBalancesVisible,
-      assetsInfo,
-      hiddenBalancePlaceholder,
-      fiatCurrency,
-      priceResult?.cardano?.price,
-      priceResult?.tokens,
-      utxoTotal
-    ]
+    [areBalancesVisible, assetsInfo, hiddenBalancePlaceholder, fiatCurrency, priceResult?.cardano, utxoTotal]
   );
 
   /**

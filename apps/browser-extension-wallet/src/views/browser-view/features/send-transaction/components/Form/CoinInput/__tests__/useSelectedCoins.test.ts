@@ -6,7 +6,9 @@ const mockCoinStateSelector = {
   removeCoinFromOutputs: jest.fn()
 } as unknown as SendTransactionStore.UseCoinStateSelector;
 
-const mockUseFetchCoinPrice = jest.fn().mockReturnValue({ priceResult: { cardano: { price: 2 }, tokens: new Map() } });
+const mockUseFetchCoinPrice = jest.fn().mockReturnValue({
+  priceResult: { cardano: { getTokenPrice: (): undefined => undefined, price: 2 }, tokens: new Map() }
+});
 const mockUseCurrencyStore = jest.fn().mockReturnValue({ fiatCurrency: { code: 'usd', symbol: '$' } });
 const mockUseWalletStore = jest.fn().mockReturnValue({
   walletUI: { cardanoCoin: { id: '1', name: 'Cardano', decimals: 6, symbol: 'ADA' }, appMode: 'popup' }
@@ -30,6 +32,7 @@ import * as UseFetchCoinPrice from '@hooks/useFetchCoinPrice';
 import * as CurrencyProvider from '@providers/currency';
 import * as Stores from '@stores';
 import * as SendTransactionStore from '../../../../store';
+import { Cardano } from '@cardano-sdk/core';
 
 jest.mock('@hooks/useFetchCoinPrice', (): typeof UseFetchCoinPrice => ({
   ...jest.requireActual<typeof UseFetchCoinPrice>('@hooks/useFetchCoinPrice'),
@@ -348,7 +351,11 @@ describe('useSelectedCoin', () => {
       });
       mockUseFetchCoinPrice.mockReturnValueOnce({
         priceResult: {
-          cardano: { price: '2' },
+          cardano: {
+            getTokenPrice: (assetId: Cardano.AssetId) =>
+              assetId === mockAsset.assetId ? { priceInAda: 1_000_000 } : undefined,
+            price: '2'
+          },
           tokens: new Map([[mockAsset.assetId, { priceInAda: 1_000_000 }]])
         } as unknown as UseFetchCoinPrice.PriceResult
       });

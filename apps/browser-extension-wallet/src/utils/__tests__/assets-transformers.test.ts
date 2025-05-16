@@ -80,7 +80,12 @@ describe('Testing assets transformers', () => {
     };
     const params = {
       total: { coins: BigInt(20), assets: new Map() },
-      fiatPrice: { price: 1, priceVariationPercentage24h: 1 },
+      fiatPrice: {
+        // eslint-disable-next-line unicorn/no-useless-undefined
+        getTokenPrice: (): undefined => undefined,
+        price: 1,
+        priceVariationPercentage24h: 1
+      },
       fiatCode: 'fiatCode',
       cardanoCoin
     };

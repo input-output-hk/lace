@@ -146,7 +146,7 @@ const mockProps: Props = {
   isLoading: false,
   isPopupView: false,
   prices: {
-    tokens: new Map([[mockAsset.assetId, { priceInAda: 10 }]]),
+    tokens: new Map([[mockAsset.assetId, { lastFetchTime: 0, price: { priceInAda: 10 } }]]),
     cardano: { price: 0.5 }
   } as PriceResult
 };

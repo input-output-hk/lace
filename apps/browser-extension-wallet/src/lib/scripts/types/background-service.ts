@@ -3,6 +3,7 @@ import { themes } from '@providers/ThemeProvider';
 import { BackgroundStorage, MigrationState } from './storage';
 import { CoinPrices } from './prices';
 import type { clearBackgroundStorage } from '../background/storage';
+import { Cardano } from '@cardano-sdk/core';
 
 export enum BaseChannels {
   BACKGROUND_ACTIONS = 'background-actions'
@@ -103,6 +104,7 @@ export type BackgroundService = {
   requestMessage$: Subject<Message>;
   migrationState$: BehaviorSubject<MigrationState | undefined>;
   coinPrices: CoinPrices;
+  trackCardanoTokenPrice: (assetId: Cardano.AssetId) => Promise<void>;
   handleChangeTheme: (data: ChangeThemeData) => void;
   handleChangeMode: (data: ChangeModeData) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;

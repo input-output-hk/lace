@@ -613,6 +613,8 @@ export const mockAssetDetails = {
 
 export const mockPrices: PriceResult = {
   cardano: {
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    getTokenPrice: () => undefined,
     price: 0.4,
     priceVariationPercentage24h: 1.293
   },
