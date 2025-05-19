@@ -14,6 +14,11 @@ interface UsageData {
   memory: number;
 }
 
+interface OutputData {
+  scenarioName: string | undefined;
+  data: UsageData[];
+}
+
 class PidMonitor {
   private static _instance: PidMonitor;
 
@@ -21,6 +26,7 @@ class PidMonitor {
   private readonly intervalMs: number;
   private _data: UsageData[] = [];
   private timer?: ReturnType<typeof setInterval>;
+  private scenarioName: string | undefined = undefined;
 
   private constructor(intervalMs = 1000) {
     this.intervalMs = intervalMs;
@@ -31,6 +37,10 @@ class PidMonitor {
       PidMonitor._instance = new PidMonitor(intervalMs);
     }
     return PidMonitor._instance;
+  }
+
+  public setScenarioName(name: string): void {
+    this.scenarioName = name;
   }
 
   public get data(): UsageData[] {
@@ -91,6 +101,7 @@ class PidMonitor {
 
   public clear(): void {
     this._data = [];
+    this.scenarioName = undefined;
   }
 
   public saveToFile(filePath: string): void {
@@ -99,7 +110,13 @@ class PidMonitor {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(filePath, JSON.stringify(this._data, undefined, 2), 'utf-8');
+
+      const output: OutputData = {
+        scenarioName: this.scenarioName,
+        data: this._data
+      };
+
+      fs.writeFileSync(filePath, JSON.stringify(output, undefined, 2), 'utf-8');
     } catch (error) {
       Logger.error(`Failed to save data to file: ${error}`);
     }
