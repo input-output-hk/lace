@@ -11,13 +11,14 @@ import { Logger } from '../support/logger';
 const monitor = PidMonitor.getInstance();
 
 // eslint-disable-next-line no-unused-vars
-Before(async () => {
+Before(async (scenario) => {
   if (String(process.env.SERVICE_WORKER_LOGS) === 'true') {
     await consoleManager.startLogsCollection();
   }
   if (browser.isChromium) {
     const pidMonitorInitialized = await monitor.init();
     if (pidMonitorInitialized) {
+      monitor.setScenarioName(scenario.pickle.name);
       monitor.start();
     } else {
       Logger.warn('PID monitor not initialized. Skipping start.');
