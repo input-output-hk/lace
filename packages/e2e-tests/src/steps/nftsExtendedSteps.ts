@@ -5,6 +5,9 @@ import NftDetails from '../elements/NFTs/nftDetails';
 import nftCreateFolderAssert from '../assert/nftCreateFolderAssert';
 import nftSelectNftsAssert from '../assert/nftSelectNftsAssert';
 import { progressWithSendUntilPasswordPage } from '../helpers/NFTPageHelper';
+import NFTPrintLabModalAssert from '../assert/NFTPrintLabModalAssert';
+import NFTPrintLabModal from '../elements/NFTs/NFTPrintLabModal';
+import commonAssert from '../assert/commonAssert';
 
 Then(
   /^NFT with name: "([^"]*)" (is displayed|is not displayed) in coin selector$/,
@@ -21,14 +24,20 @@ Given(
 );
 
 When(
-  /^I click "(Send NFT|Set as your wallet avatar)" button on NFT details drawer$/,
-  async (button: 'Send NFT' | 'Set as your wallet avatar') => {
-    if (button === 'Send NFT') {
-      await NftDetails.sendNFTButton.waitForStable();
-      await NftDetails.sendNFTButton.click();
-    } else if (button === 'Set as your wallet avatar') {
-      await NftDetails.setAsAvatarButton.waitForStable();
-      await NftDetails.setAsAvatarButton.click();
+  /^I click "(Send NFT|Set as your wallet avatar|Print this NFT)" button on NFT details drawer$/,
+  async (button: 'Send NFT' | 'Set as your wallet avatar' | 'Print this NFT') => {
+    switch (button) {
+      case 'Send NFT':
+        await NftDetails.clickOnSendNFTButton();
+        break;
+      case 'Set as your wallet avatar':
+        await NftDetails.clickOnSetAsAvatarButton();
+        break;
+      case 'Print this NFT':
+        await NftDetails.clickOnPrintThisNFTButton();
+        break;
+      default:
+        throw new Error(`Unsupported button: ${button}`);
     }
   }
 );
@@ -94,3 +103,27 @@ Then(
     await nftAssert.assertSeeCustomAdaHandleNftDetails(mode);
   }
 );
+
+Then(/^I (see|do not see) "You're leaving Lace for NFTPrintLab.io" modal$/, async (state: 'see' | 'do not see') => {
+  await NFTPrintLabModalAssert.assertSeeModal(state === 'see');
+});
+
+When(
+  /^I click on "(Cancel|Continue)" button on "You're leaving Lace for NFTPrintLab.io" modal$/,
+  async (button: 'Cancel' | 'Continue') => {
+    switch (button) {
+      case 'Cancel':
+        await NFTPrintLabModal.clickOnCancelButton();
+        break;
+      case 'Continue':
+        await NFTPrintLabModal.clickOnContinueButton();
+        break;
+      default:
+        throw new Error(`Unsupported button: ${button}`);
+    }
+  }
+);
+
+Then(/^NFT Print Lab page is displayed in a new tab$/, async () => {
+  await commonAssert.assertSeeTabWithUrl('https://nftprintlab.io/');
+});
