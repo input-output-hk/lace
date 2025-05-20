@@ -47,10 +47,6 @@ class StakePoolConfirmationScreenAssert {
     await StakingConfirmationDrawer.nextButton.waitForDisplayed();
     await StakingConfirmationDrawer.txFeeLabel.waitForDisplayed();
   }
-
-  async assertSeeNextButtonEnabled(isEnabled: boolean) {
-    await StakingConfirmationDrawer.nextButton.waitForEnabled({ timeout: 15_000, reverse: !isEnabled });
-  }
 }
 
 export default new StakePoolConfirmationScreenAssert();
