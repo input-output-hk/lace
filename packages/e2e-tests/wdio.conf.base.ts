@@ -69,7 +69,11 @@ export const config: WebdriverIO.Config = {
       './src/features/WalletAccounts*.feature'
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
-    batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
+    batch10: [
+      './src/features/MultiDelegationPageExtended*.feature',
+      './src/features/NFTPrintLabExtended.feature',
+      './src/features/NFTPrintLabPopup.feature'
+    ],
     batch11: [
       './src/features/analytics/AnalyticsSend*.feature',
       './src/features/analytics/AnalyticsSetting*.feature',

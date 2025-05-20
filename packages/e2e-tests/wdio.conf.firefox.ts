@@ -55,7 +55,11 @@ const firefoxConfig = {
       './src/features/WalletAccounts*.feature'
     ],
     batch9: ['./src/features/SendTransactionSimplePopup*.feature'],
-    batch10: ['./src/features/MultiDelegationPageExtended*.feature'],
+    batch10: [
+      './src/features/MultiDelegationPageExtended*.feature',
+      './src/features/NFTPrintLabExtended.feature',
+      './src/features/NFTPrintLabPopup.feature'
+    ],
     batch11: ['./src/features/e2e/StakingInitialFundsE2E.feature', './src/features/SharedWalletOnboarding.feature'],
     batch12: [
       './src/features/AdaHandleExtended.feature',
