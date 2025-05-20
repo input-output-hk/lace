@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import PasswordInput from './passwordInput';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class WalletUnlockPage {
   private MAIN_IMG = '[data-testid="unlock-screen-img"]';
@@ -7,11 +9,11 @@ class WalletUnlockPage {
   private FORGOT_PASSWORD_LINK = '[data-testid="forgot-password-link"]';
   private HELP_AND_SUPPORT_BUTTON = '[data-testid="lock-screen-help-button"]';
 
-  get mainImage() {
+  get mainImage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAIN_IMG);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
 
@@ -19,15 +21,15 @@ class WalletUnlockPage {
     return PasswordInput.input;
   }
 
-  get unlockButton() {
+  get unlockButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.UNLOCK_BUTTON);
   }
 
-  get forgotPassword() {
+  get forgotPassword(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.FORGOT_PASSWORD_LINK);
   }
 
-  get helpAndSupportButton() {
+  get helpAndSupportButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HELP_AND_SUPPORT_BUTTON);
   }
 }

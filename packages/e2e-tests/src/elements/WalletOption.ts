@@ -36,7 +36,7 @@ class WalletOption {
   }
 
   get editButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(`${this.EDIT_BUTTON}`);
+    return $(`${this.CONTAINER_SELECTOR}${this.EDIT_BUTTON}`);
   }
 
   get status(): ChainablePromiseElement<WebdriverIO.Element> {

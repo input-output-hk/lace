@@ -30,6 +30,10 @@ When(/^I click on "Edit" button for wallet number (\d)$/, async (walletIndex: nu
   await new WalletOption(walletIndex).clickOnEditButton();
 });
 
+Then(/^Pencil icon (is|is not) displayed next to shared wallet$/, async (state: 'is' | 'is not') => {
+  await topNavigationAssert.assertSeeEditOptionForWallet(2, state === 'is');
+});
+
 Then(
   /^Wallet number (\d) with "([^"]*)" name is displayed on the user menu$/,
   async (walletIndex: number, walletName: string) => {
@@ -59,6 +63,7 @@ When(/^I click on "(Cancel|Save)" button on "Wallet settings" page$/, async (but
 });
 
 When(/^I enter "([^"]*)" as a new wallet name$/, async (walletName: string) => {
+  await WalletSettingsDrawer.renameWalletInput.waitForClickable();
   await setInputFieldValue(await WalletSettingsDrawer.renameWalletInput, walletName);
 });
 
