@@ -324,6 +324,9 @@ jobs:
     needs: smokeTests
     if: always()
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download all smoke tests artifacts
         uses: actions/download-artifact@v4
         with:
@@ -342,6 +345,11 @@ jobs:
           tags= '@Smoke'
           platform=Linux
           " > environment.properties
+
+      - name: Convert metrics JSON to Prometheus format
+        working-directory: './packages/e2e-tests/tools/'
+        run: |
+          ./convert_metrics_to_prometheus.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../metrics
 
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.9.0

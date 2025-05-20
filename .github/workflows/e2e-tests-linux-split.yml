@@ -193,6 +193,9 @@ jobs:
     # when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
     if: ${{ success() || failure() }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -211,6 +214,11 @@ jobs:
           smoke_only=${{ needs.setup.outputs.smoke_only }}
           tags=${{ needs.setup.outputs.tags }}
           " > environment.properties
+
+      - name: Convert metrics JSON to Prometheus format
+        working-directory: './packages/e2e-tests/tools/'
+        run: |
+          ./convert_metrics_to_prometheus.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics
 
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.9.0
