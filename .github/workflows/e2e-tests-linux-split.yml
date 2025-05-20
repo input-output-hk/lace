@@ -249,6 +249,9 @@ jobs:
           SLACK_TITLE: 'Test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          PUSH_URL: ${{ secrets.GRAFANA_PUSH_URL }}    # e.g., https://prometheus-us-central1.grafana.net/api/prom/push
+          PUSH_USER: ${{ secrets.GRAFANA_USERNAME }}   # e.g., 787878
+          PUSH_PASS: ${{ secrets.GRAFANA_PASSWORD }}   # e.g., eyJrIjoxxxxxxxxxxxxxxyMX0=
 
       - name: Deleting chrome tmp files
         id: clean-chrome-tmp-files
@@ -268,3 +271,33 @@ jobs:
         with:
           name: performance-metrics
           path: ./artifacts/metrics
+
+      - name: Create Prometheus config
+        run: |
+          cat >prometheus.yml <<EOF
+          global:
+            scrape_interval: 15s
+          scrape_configs:
+            - job_name: 'e2e-perf-metrics'
+              static_configs:
+                - targets: ['http-server:8000']
+              metrics_path: '/prometheus.txt'
+          remote_write:
+            - url: "$PUSH_URL"
+              basic_auth:
+                username: "$PUSH_USER"
+                password: "$PUSH_PASS"
+          EOF
+          cat ./artifacts/metrics/prometheus.txt
+
+      - name: Start Python HTTP server
+        run: |
+          docker run -d --name http-server -v $(pwd):/app -w /app -p 8000:8000 python:3.11-slim python -m http.server 8000 > http.log 2>&1
+          pwd
+      - name: Run Prometheus
+        run: |
+          docker run -d --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link http-server prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 > prom.log 2>&1
+          sleep 60
+          # Uncomment for troubleshooting.
+          curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total
+
