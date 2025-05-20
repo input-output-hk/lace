@@ -63,6 +63,11 @@ class TopNavigationAssert {
     expect(await wallet.subtitle.getText()).to.equal(expectedName);
   }
 
+  async assertSeeEditOptionForWallet(index: number, shouldBeDisplayed: boolean): Promise<void> {
+    const wallet = new WalletOption(index);
+    await wallet.editButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
   async assertWalletIsActive(index: number): Promise<void> {
     await new WalletOption(index).status.waitForDisplayed();
   }
@@ -249,6 +254,10 @@ class TopNavigationAssert {
 
   async assertDoNotSeeNamiModeSwitch() {
     await MenuHeader.menuNamiModeSwitch.waitForDisplayed({ reverse: true });
+  }
+
+  async assertSeeAddSharedWalletOption(shouldBeDisplayed: boolean) {
+    await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
   }
 }
 
