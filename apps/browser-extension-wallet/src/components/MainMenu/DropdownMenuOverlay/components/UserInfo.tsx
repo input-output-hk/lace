@@ -11,7 +11,7 @@ import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, WALLET_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
@@ -145,7 +145,9 @@ export const UserInfo = ({
               return;
             }
 
-            void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+            void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet, {
+              [WALLET_TYPE_KEY]: walletType
+            });
 
             await activateWallet({
               walletId: wallet.walletId,
