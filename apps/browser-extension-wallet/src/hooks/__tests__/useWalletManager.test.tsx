@@ -403,6 +403,7 @@ describe('Testing useWalletManager hook', () => {
 
   describe('createWallet', () => {
     test('should store wallet in repository', async () => {
+      const setBackgroundStorage = jest.fn();
       const walletId = 'walletId';
       (walletApiUi.walletRepository as any).addWallet = jest.fn().mockResolvedValue(walletId);
       (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
@@ -432,7 +433,13 @@ describe('Testing useWalletManager hook', () => {
           current: { createWallet }
         }
       } = renderHook(() => useWalletManager(), {
-        wrapper: getWrapper({})
+        wrapper: getWrapper({
+          backgroundService: {
+            clearBackgroundStorage: jest.fn(),
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
+            setBackgroundStorage
+          } as unknown as BackgroundServiceAPIProviderProps['value']
+        })
       });
 
       expect(createWallet).toBeDefined();
@@ -453,6 +460,8 @@ describe('Testing useWalletManager hook', () => {
       expect(walletApiUi.walletRepository.addWallet).toBeCalledTimes(1);
       expect(walletApiUi.walletManager.activate).toBeCalledTimes(1);
       expect(mockUseSecrets.clearSecrets).toBeCalledTimes(1);
+      expect(setBackgroundStorage).toBeCalledTimes(1);
+      expect(setBackgroundStorage).toBeCalledWith({ activeBlockchain: 'cardano' });
     });
   });
 
