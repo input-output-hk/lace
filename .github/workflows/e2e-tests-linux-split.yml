@@ -309,16 +309,16 @@ jobs:
           # Enable logs for debugging
           #docker run --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 --log.level=debug
           docker run -d --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 > prom.log 2>&1
-          sleep 500
+          sleep 20
           # Uncomment for troubleshooting.
           printf '\n*****************\n'
           printf '\n curl e2e_cpu_seconds_total \n'
           curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total
-          printf '\n*****************\n'
-          printf '\n send_failures_total \n'
-          curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_queue_send_failures_total'
-          printf '\n*****************\n'
-          printf '\n storage_retries_total \n'
-          curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_retries_total'
+          #printf '\n*****************\n'
+          #printf '\n send_failures_total \n'
+          #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_queue_send_failures_total'
+          #printf '\n*****************\n'
+          #printf '\n storage_retries_total \n'
+          #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_retries_total'
 
 
