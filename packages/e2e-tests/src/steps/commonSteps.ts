@@ -59,6 +59,7 @@ Given(/^Lace is ready for test$/, async () => {
   }
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closePrivacyPolycyUpdateBanner();
   await settingsExtendedPageObject.multiAddressModalConfirm();
   await TokensPage.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();

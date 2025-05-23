@@ -183,12 +183,9 @@ When(/^I click "Create a support ticket" button on Help drawer$/, async () => {
 });
 
 Then(
-  /I see (Analytics|Beta Program|Debugging) option with proper description and toggle/,
-  async (optionName: 'Analytics' | 'Beta Program' | 'Debugging') => {
+  /I see (Beta Program|Debugging) option with proper description and toggle/,
+  async (optionName: 'Beta Program' | 'Debugging') => {
     switch (optionName) {
-      case 'Analytics':
-        await settingsPageExtendedAssert.assertSeeAnalyticsSection();
-        break;
       case 'Beta Program':
         await settingsPageExtendedAssert.assertSeeBetaProgramSection(false);
         break;
@@ -201,14 +198,9 @@ Then(
   }
 );
 
-When(
-  /^(Analytics|Debugging) toggle (is|is not) enabled$/,
-  async (option: 'Analytics' | 'Debugging', isEnabled: 'is' | 'is not') => {
-    option === 'Analytics'
-      ? await settingsExtendedPageObject.toggleAnalytics(isEnabled === 'is')
-      : await settingsExtendedPageObject.toggleDebugging(isEnabled === 'is');
-  }
-);
+When(/^Debugging toggle (is|is not) enabled$/, async (isEnabled: 'is' | 'is not') => {
+  await settingsExtendedPageObject.toggleDebugging(isEnabled === 'is');
+});
 
 Then(/^Side drawer "Show 24-word passphrase" is displayed$/, async () => {
   await passphraseDrawerAssert.assertSeeDrawerTitle(

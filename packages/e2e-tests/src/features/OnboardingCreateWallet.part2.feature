@@ -46,8 +46,6 @@ Feature: Onboarding - Create wallet
     When I click "Enter wallet" button
     And I see LW homepage
     And "N_8J@bne87A" password is not in snapshot
-    And I open settings from header menu
-    Then Analytics toggle is enabled
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
@@ -58,8 +56,6 @@ Feature: Onboarding - Create wallet
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
     And I see LW homepage
-    And I open settings from header menu
-    Then Analytics toggle is not enabled
 
   @LW-2627
   Scenario: Create Wallet - autofill words

@@ -119,6 +119,3 @@ Feature: Forgot password
     Then I see LW homepage
     And I click the menu button
     Then header menu displays "TestAutomationWallet" as a wallet name
-    When I close header menu
-    And I navigate to Settings extended page
-    Then Analytics toggle is not enabled

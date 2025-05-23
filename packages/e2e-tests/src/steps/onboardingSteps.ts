@@ -20,10 +20,9 @@ import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingR
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
-import analyticsBanner from '../elements/analyticsBanner';
+import analyticsBanner from '../elements/PrivacyPolicyUpdateBanner';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
-import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 import ModalAssert from '../assert/modalAssert';
@@ -428,14 +427,6 @@ Then(
 
 Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
   await new OnboardingCommonAssert().assertNextButtonEnabled(state === 'enabled');
-});
-
-Then(/^I see Analytics banner displayed correctly$/, async () => {
-  await OnboardingAnalyticsBannerAssert.assertBannerIsDisplayedCorrectly();
-});
-
-Then(/^I (see|do not see) Analytics banner$/, async (shouldSee: 'see' | 'do not see') => {
-  await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(shouldSee === 'see');
 });
 
 When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order$/, async () => {

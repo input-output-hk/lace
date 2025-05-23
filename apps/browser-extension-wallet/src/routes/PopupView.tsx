@@ -10,11 +10,14 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { useEnterKeyPress } from '@hooks/useEnterKeyPress';
 import { getValueFromLocalStorage } from '@src/utils/local-storage';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit } from '@hooks';
+import { useAppInit, useLocalStorage } from '@hooks';
 import { ILocalStorage } from '@src/types';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/ErrorBoundary';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { useAnalyticsContext } from '@providers';
 
 dayjs.extend(duration);
 
@@ -40,6 +43,19 @@ export const PopupView = (): React.ReactElement => {
 
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
+
+  const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
+  );
+
+  useEffect(() => {
+    if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   useAppInit();
   useEnterKeyPress();

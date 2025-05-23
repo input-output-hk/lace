@@ -12,29 +12,18 @@ import {
   PopoverContent,
   PopoverTrigger,
   Spacer,
-  Switch,
   Text,
 } from '@chakra-ui/react';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
-import PrivacyPolicy from '../../../ui/app/components/privacyPolicy';
 import TermsOfUse from '../../../ui/app/components/termsOfUse';
 
-interface Props {
-  isAnalyticsOptIn: boolean;
-  handleAnalyticsChoice: (isOptedIn: boolean) => Promise<void>;
-}
-
-export const LegalSettings = ({
-  isAnalyticsOptIn,
-  handleAnalyticsChoice,
-}: Readonly<Props>) => {
+export const LegalSettings = () => {
   const capture = useCaptureEvent();
   const { openExternalLink } = useOutsideHandles();
   const termsReference = useRef<{ openModal: () => void }>();
-  const privacyPolicyReference = useRef<{ openModal: () => void }>();
   return (
     <>
       <Box height="10" />
@@ -84,12 +73,6 @@ export const LegalSettings = ({
           </Popover>
         </Text>
         <Spacer />
-        <Switch
-          isChecked={isAnalyticsOptIn}
-          onChange={() => {
-            void handleAnalyticsChoice(!isAnalyticsOptIn);
-          }}
-        />
       </Flex>
       <Box height="3" />
       <Button
@@ -110,11 +93,12 @@ export const LegalSettings = ({
         width="65%"
         rightIcon={<ChevronRightIcon />}
         variant="ghost"
-        onClick={() => privacyPolicyReference.current?.openModal()}
+        onClick={() => {
+          openExternalLink(`${process.env.PRIVACY_POLICY_URL}`);
+        }}
       >
         Privacy Policy
       </Button>
-      <PrivacyPolicy ref={privacyPolicyReference} />
       <TermsOfUse ref={termsReference} />
     </>
   );

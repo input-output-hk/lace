@@ -66,6 +66,7 @@ class LocalStorageInitializer {
     await this.initializeAppSettings();
     await this.disableShowPinExtension();
     await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
+    await localStorageManager.setItem('hasUserAcknowledgedPrivacyPolicyUpdate', 'true');
   };
 
   reInitializeWallet = async (walletName: string) => {

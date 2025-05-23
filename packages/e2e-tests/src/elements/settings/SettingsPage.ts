@@ -15,7 +15,6 @@ class SettingsPage extends CommonDrawerElements {
   private readonly REMOVE_WALLET_HEADER = '[data-testid="remove-wallet-heading"]';
   private readonly REMOVE_WALLET_DESCRIPTION = '[data-testid="remove-wallet-description"]';
   private readonly REMOVE_WALLET_BUTTON = '[data-testid="remove-wallet-button"]';
-  private readonly ANALYTICS_SWITCH = '[data-testid="settings-analytics-switch"]';
   private readonly SECURITY_SETTINGS_ELEMENTS = '[data-testid="security-settings-heading"] + div';
   private readonly SYNC_BUTTON = '[data-testid="settings-wallet-wallet-sync-cta"]';
 
@@ -162,10 +161,6 @@ class SettingsPage extends CommonDrawerElements {
 
   get cookiePolicy() {
     return new SettingsLink(this.COOKIE_POLICY_LINK_TEST_ID);
-  }
-
-  get analyticsSwitch(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.ANALYTICS_SWITCH);
   }
 
   get themeSwitch(): ChainablePromiseElement<WebdriverIO.Element> {

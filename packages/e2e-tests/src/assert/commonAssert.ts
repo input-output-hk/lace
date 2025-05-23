@@ -75,7 +75,7 @@ class CommonAssert {
         expectedUrl = 'https://www.lace.io/lace-cookie-policy.pdf';
         break;
       case 'Privacy policy':
-        expectedUrl = 'https://www.lace.io/iog-privacy-policy.pdf';
+        expectedUrl = 'https://www.lace.io/lace-privacy-policy.pdf';
         break;
       case 'Terms of service':
       case 'Terms and conditions':

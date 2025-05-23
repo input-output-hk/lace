@@ -1,14 +1,9 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { WarningModal } from '@views/browser/components';
-import { AnalyticsConfirmationBanner, WalletAnalyticsInfo, WalletSetupOptionsStep } from '@lace/core';
+import { WalletSetupOptionsStep } from '@lace/core';
 import styles from '@views/browser/features/wallet-setup/components/WalletSetup.module.scss';
 import { walletRoutePaths } from '@routes';
-import {
-  EnhancedAnalyticsOptInStatus,
-  postHogOnboardingActions,
-  UserTrackingType
-} from '@providers/AnalyticsProvider/analyticsTracker';
+import { EnhancedAnalyticsOptInStatus, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
 import { useLocalStorage } from '@hooks';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
@@ -19,13 +14,16 @@ const TERMS_OF_USE_URL = process.env.TERMS_OF_USE_URL;
 
 export const WalletSetupMainPage = (): ReactElement => {
   const history = useHistory();
-  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const { t: translate } = useTranslation();
 
   const analytics = useAnalyticsContext();
   const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
     ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
     EnhancedAnalyticsOptInStatus.NotSet
+  );
+  const [, { updateLocalStorage: setDoesUserAcknowledgePPUdate }] = useLocalStorage(
+    'hasUserAcknowledgedPrivacyPolicyUpdate',
+    false
   );
 
   const walletSetupOptionsStepTranslations = {
@@ -75,78 +73,38 @@ export const WalletSetupMainPage = (): ReactElement => {
   };
 
   const handleStartHardwareOnboarding = () => {
+    setDoesUserAcknowledgePPUdate(true);
     history.push(walletRoutePaths.setup.hardware);
     analytics.sendEventToPostHog(postHogOnboardingActions.hw?.SETUP_OPTION_CLICK);
   };
 
-  const handleAnalyticsChoice = async (isAccepted: boolean) => {
-    const analyticsStatus = isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
-    setDoesUserAllowAnalytics(analyticsStatus);
-    await analytics.setOptedInForEnhancedAnalytics(
-      isAccepted ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut
-    );
-
-    const postHogAnalyticsAgreeAction = postHogOnboardingActions.onboarding.ANALYTICS_AGREE_CLICK;
-    const postHogAnalyticsRejectAction = postHogOnboardingActions.onboarding.ANALYTICS_REJECT_CLICK;
-
-    const postHogAction = isAccepted ? postHogAnalyticsAgreeAction : postHogAnalyticsRejectAction;
-    const postHogProperties = {
-      // eslint-disable-next-line camelcase
-      $set: { user_tracking_type: isAccepted ? UserTrackingType.Enhanced : UserTrackingType.Basic }
-    };
-    await analytics.sendEventToPostHog(postHogAction, postHogProperties);
-  };
+  useEffect(() => {
+    if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAcknowledgePPUdate, setDoesUserAllowAnalytics]);
 
   const handleRestoreWallet = () => {
+    setDoesUserAcknowledgePPUdate(true);
     analytics.sendEventToPostHog(postHogOnboardingActions.restore?.SETUP_OPTION_CLICK);
     history.push(walletRoutePaths.setup.restore);
   };
 
   const handleCreateNewWallet = () => {
+    setDoesUserAcknowledgePPUdate(true);
     analytics.sendEventToPostHog(postHogOnboardingActions.create.SETUP_OPTION_CLICK);
     history.push(walletRoutePaths.setup.create);
   };
 
   return (
-    <>
-      <WalletSetupOptionsStep
-        onNewWalletRequest={handleCreateNewWallet}
-        onHardwareWalletRequest={handleStartHardwareOnboarding}
-        onRestoreWalletRequest={handleRestoreWallet}
-        translations={walletSetupOptionsStepTranslations}
-        withAgreement
-        withHardwareWallet
-      />
-      <AnalyticsConfirmationBanner
-        message={
-          <>
-            <span data-testid="analytic-banner-message">{translate('analyticsConfirmationBanner.message')}</span>
-            <span
-              className={styles.learnMore}
-              onClick={() => {
-                setIsAnalyticsModalOpen(true);
-                analytics.sendEventToPostHog(postHogOnboardingActions.onboarding.LEARN_MORE_CLICK);
-              }}
-              data-testid="analytic-banner-learn-more"
-            >
-              {translate('analyticsConfirmationBanner.learnMore')}
-            </span>
-          </>
-        }
-        onConfirm={() => handleAnalyticsChoice(true)}
-        onReject={() => handleAnalyticsChoice(false)}
-        show={enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet}
-      />
-      <WarningModal
-        header={<div className={styles.analyticsModalTitle}>{translate('core.walletAnalyticsInfo.title')}</div>}
-        content={<WalletAnalyticsInfo />}
-        visible={isAnalyticsModalOpen}
-        confirmLabel={translate('core.walletAnalyticsInfo.gotIt')}
-        onConfirm={() => {
-          setIsAnalyticsModalOpen(false);
-          analytics.sendEventToPostHog(postHogOnboardingActions.onboarding.GOT_IT_CLICK);
-        }}
-      />
-    </>
+    <WalletSetupOptionsStep
+      onNewWalletRequest={handleCreateNewWallet}
+      onHardwareWalletRequest={handleStartHardwareOnboarding}
+      onRestoreWalletRequest={handleRestoreWallet}
+      translations={walletSetupOptionsStepTranslations}
+      withAgreement
+      withHardwareWallet
+    />
   );
 };
