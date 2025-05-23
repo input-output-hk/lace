@@ -56,8 +56,8 @@ for file in "${FILES[@]}"; do
       cpu=$(echo "$entry" | jq -r '.cpu')
       memory=$(echo "$entry" | jq -r '.memory')
 
-      echo "e2e_cpu_seconds_total{scenario_name=\"$scenario_name\",scenario_id=\"$scenario_id\",job=\"$JOB\",instance=\"$INSTANCE\",timestamp=\"$timestamp\"} $cpu" >> "$OUTPUT_FILE"
-      echo "e2e_memory_rss_bytes{scenario_name=\"$scenario_name\",scenario_id=\"$scenario_id\",job=\"$JOB\",instance=\"$INSTANCE\",timestamp=\"$timestamp\"} $memory" >> "$OUTPUT_FILE"
+      echo "e2e_cpu_seconds_total{scenario_name=\"$scenario_name\",scenario_id=\"$scenario_id\",job=\"$JOB\",instance=\"$INSTANCE\"} $cpu $timestamp" >> "$OUTPUT_FILE"
+      echo "e2e_memory_rss_bytes{scenario_name=\"$scenario_name\",scenario_id=\"$scenario_id\",job=\"$JOB\",instance=\"$INSTANCE\"} $memory $timestamp" >> "$OUTPUT_FILE"
     done
   fi
 done
