@@ -3,14 +3,14 @@ Feature: CIP-95 Static methods
 
   @LW-10611
   Scenario: CIP-95 - Static methods - user hasn't staked yet
-    Given I open wallet: 'TAWalletNonDelegated' in: extended mode
+    Given I open wallet: "TAWalletNonDelegated" in: extended mode
     When I open CIP-95 test DApp
     And I see CIP-95 test DApp authorization window
-    And I click 'Authorize' button in DApp authorization window
-    And I click 'Only once' button in DApp authorization window
+    And I click "Authorize" button in DApp authorization window
+    And I click "Only once" button in DApp authorization window
     And I switch to window with CIP-95 test DApp
     And I wait for CIP-95 test DApp to be populated with data
-    Then .getPubDRepKey() returned '6f7494abbbbfac938214b26b66626c442065818312f9fddaa3c4e057162479f9'
+    Then .getPubDRepKey() returned "6f7494abbbbfac938214b26b66626c442065818312f9fddaa3c4e057162479f9"
     And .getRegisteredPubStakeKeys() did not return anything
     And .getUnregisteredPubStakeKeys() returned:
       | index | key                                                              |
@@ -18,28 +18,28 @@ Feature: CIP-95 Static methods
 
   @LW-10612
   Scenario: CIP-95 - Static methods - user has staked funds on one stake pool
-    Given I open wallet: 'MultidelegationDelegatedSingle' in: extended mode
+    Given I open wallet: "MultidelegationDelegatedSingle" in: extended mode
     When I open CIP-95 test DApp
     And I see CIP-95 test DApp authorization window
-    And I click 'Authorize' button in DApp authorization window
-    And I click 'Only once' button in DApp authorization window
+    And I click "Authorize" button in DApp authorization window
+    And I click "Only once" button in DApp authorization window
     And I switch to window with CIP-95 test DApp
     And I wait for CIP-95 test DApp to be populated with data
-    Then .getPubDRepKey() returned '912f7179f6c7d41e62168f15c947879b3ee89aa94f69bd60c93d756385062afd'
+    Then .getPubDRepKey() returned "912f7179f6c7d41e62168f15c947879b3ee89aa94f69bd60c93d756385062afd"
     And .getRegisteredPubStakeKeys() returned:
       | index | key                                                              |
       | 0     | cbcb3e0af7a089a8e94da7382b2b02eee6aad4a501cf4d0e01eda44a2a71ca85 |
 
   @LW-10613
   Scenario: CIP-95 - Static methods - user has staked funds on multiple stake pools
-    Given I open wallet: 'MultidelegationDelegatedMulti' in: extended mode
+    Given I open wallet: "MultidelegationDelegatedMulti" in: extended mode
     When I open CIP-95 test DApp
     And I see CIP-95 test DApp authorization window
-    And I click 'Authorize' button in DApp authorization window
-    And I click 'Only once' button in DApp authorization window
+    And I click "Authorize" button in DApp authorization window
+    And I click "Only once" button in DApp authorization window
     And I switch to window with CIP-95 test DApp
     And I wait for CIP-95 test DApp to be populated with data
-    Then .getPubDRepKey() returned '27462175f60d64881a71475b4e929f137032b91fd0ec4c1edfdcc610fec16c36'
+    Then .getPubDRepKey() returned "27462175f60d64881a71475b4e929f137032b91fd0ec4c1edfdcc610fec16c36"
     And .getRegisteredPubStakeKeys() returned:
       | index | key                                                              |
       | 0     | 19aa588402d786c3d18d02ed66d2f50837907a069691416c3dbc2fcc26eb872d |

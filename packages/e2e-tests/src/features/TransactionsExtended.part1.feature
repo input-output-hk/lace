@@ -70,13 +70,13 @@ Feature: Transactions - Extended view
   @LW-2562 @Testnet @Mainnet
   Scenario: Extended View - Transactions section - Educational banner
     When I navigate to Activity extended page
-    Then I see Activity 'Learn about' widget with all relevant items
+    Then I see Activity "Learn about" widget with all relevant items
 
   @LW-2562 @Testnet @Mainnet
-  Scenario Outline: Extended View - 'Learn about' widget item click - <subtitle>
+  Scenario Outline: Extended View - "Learn about" widget item click - <subtitle>
     Given I navigate to Activity extended page
-    When I click on a widget item with subtitle: '<subtitle>'
-    Then I see a '<type>' article with title '<subtitle>'
+    When I click on a widget item with subtitle: "<subtitle>"
+    Then I see a "<type>" article with title "<subtitle>"
     Examples:
       | type     | subtitle                            |
       | Glossary | What are activity details?          |

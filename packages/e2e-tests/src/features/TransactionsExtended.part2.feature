@@ -30,13 +30,13 @@ Feature: Transactions - Extended view
 
   @LW-9280 @Testnet
   Scenario: Defect LW-9229 - transaction details with high amount of inputs
-    When I open wallet: 'ManyInputTransactionDefectWallet' in: extended mode
-    And I save tx hash value 'a21a3069e214f34ef32e4797865233f87195b753a4cfbca7bed2ccf4807d98d0'
+    When I open wallet: "ManyInputTransactionDefectWallet" in: extended mode
+    And I save tx hash value "a21a3069e214f34ef32e4797865233f87195b753a4cfbca7bed2ccf4807d98d0"
     And I navigate to Activity extended page
     And I wait for the transaction history to be loaded and all transactions to be confirmed
-    When the Sent transaction is displayed with value: '25.00 tADA' and tokens count 1
+    When the Sent transaction is displayed with value: "25.00 tADA" and tokens count 1
     When I click on a transaction: 1
-    Then The Tx details are displayed as 'core.activityDetails.sent' for ADA with value: 24.79 and wallet: 'addr_test1qp7vynpwhsyjsqvyw9n8r4uy3uj5hu2arfy94vynvng6556hhqrnhndmg2pntqazt36v700x6kryqjhe75p58v65v6kszx7h3j' address
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 24.79 and wallet: "addr_test1qp7vynpwhsyjsqvyw9n8r4uy3uj5hu2arfy94vynvng6556hhqrnhndmg2pntqazt36v700x6kryqjhe75p58v65v6kszx7h3j" address
 
   @LW-9914 @Testnet
   Scenario Outline: Extended View - transaction list - styling: <styling> applied to tx type: <tx_type>

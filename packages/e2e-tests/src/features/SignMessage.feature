@@ -5,16 +5,16 @@ Feature: Sign message
     Given Wallet is synced
 
   @LW-11536
-  Scenario: Extended view - Sign message - open 'Message signing' drawer
+  Scenario: Extended view - Sign message - open "Message signing" drawer
     When I click the menu button
-    And I click on the 'Sign message' option
-    Then 'Message signing' drawer is displayed
+    And I click on the "Sign message" option
+    Then "Message signing" drawer is displayed
 
   @LW-11537
   Scenario: Extended view - Sign message - main account - show available addresses
     When I click the menu button
-    And I click on the 'Sign message' option
-    And I click on 'Select an address to use' button
+    And I click on the "Sign message" option
+    And I click on "Select an address to use" button
     Then the list of all available addresses is shown and contains:
       # For main account from TestAutomationWallet
       | addr_test1qzkk4azpmv8etfx5tfq...x70z2nqqd80frq |
@@ -34,8 +34,8 @@ Feature: Sign message
   Scenario: Extended view - Sign message - additional account - show available addresses
     Given One of additional accounts is active
     When I click the menu button
-    And I click on the 'Sign message' option
-    And I click on 'Select an address to use' button
+    And I click on the "Sign message" option
+    And I click on "Select an address to use" button
     Then the list of all available addresses is shown and contains:
       # For 3rd account from TestAutomationWallet
       | addr_test1qzcsy9ulqjfjyga36yt...q8x8u84q58umw7 |
@@ -43,24 +43,24 @@ Feature: Sign message
   @LW-11539 @Smoke @memory-snapshot
   Scenario: Extended view - Sign message - happy path
     When I click the menu button
-    And I click on the 'Sign message' option
-    And I click on 'Select an address to use' button
+    And I click on the "Sign message" option
+    And I click on "Select an address to use" button
     And I select a random address from the list
     Then selected address is displayed on a drawer
-    When I fill 'Message to sign' field
-    And I click on 'Sign message' button
-    Then 'Sign confirmation' drawer is displayed
+    When I fill "Message to sign" field
+    And I click on "Sign message" button
+    Then "Sign confirmation" drawer is displayed
     When I fill password input with correct password
-    And I click on 'Sign message' button
-    Then 'All done' drawer is displayed for message signing flow
+    And I click on "Sign message" button
+    Then "All done" drawer is displayed for message signing flow
     And valid password is not in snapshot
-    When I click on 'Copy to clipboard' button in 'Signature' section
-    Then I see a toast with text: 'Copied to clipboard'
+    When I click on "Copy to clipboard" button in "Signature" section
+    Then I see a toast with text: "Copied to clipboard"
     And signature in clipboard is equal to the one displayed on drawer
-    When I click on 'Copy to clipboard' button in 'Public Key' section
-    Then I see a toast with text: 'Copied to clipboard'
+    When I click on "Copy to clipboard" button in "Public Key" section
+    Then I see a toast with text: "Copied to clipboard"
     And public key in clipboard is equal to the one displayed on drawer
-    When I click on 'Sign another message' button on 'All done!' drawer for message signing
-    Then 'Message signing' drawer is displayed
-    When I click on 'Close' button on 'All done!' drawer for message signing
+    When I click on "Sign another message" button on "All done!" drawer for message signing
+    Then "Message signing" drawer is displayed
+    When I click on "Close" button on "All done!" drawer for message signing
     Then Drawer is not displayed

@@ -19,9 +19,9 @@ Feature: DApp Explorer - extended view
   @issue=LW-12569
   Scenario Outline: Extended View - DApp Explorer - filter by category
     When I navigate to DApps extended page
-    And I click on '<category>' DApp category
-    Then DApps page label matches selected '<category>' category
-    Then only DApps matching '<category>' are displayed
+    And I click on "<category>" DApp category
+    Then DApps page label matches selected "<category>" category
+    Then only DApps matching "<category>" are displayed
     Examples:
       | category     |
       | Games        |
@@ -37,16 +37,16 @@ Feature: DApp Explorer - extended view
   @issue=LW-12569
   Scenario Outline: Extended View - DApp Explorer - open DApp details
     When I navigate to DApps extended page
-    And I click on '<dapp_name>' DApp card
-    Then '<dapp_name>' DApp details drawer is displayed
+    And I click on "<dapp_name>" DApp card
+    Then "<dapp_name>" DApp details drawer is displayed
     When I click on DApp URL button
-    Then New tab with url containing '<dapp_url>' is opened
+    Then New tab with url containing "<dapp_url>" is opened
     Examples:
       | dapp_name | dapp_url                  |
       | DexHunter | https://app.dexhunter.io/ |
 
   @LW-12320
-  Scenario: Extended View - 'No DApps available' when no connection with DApp Radar
+  Scenario: Extended View - "No DApps available" when no connection with DApp Radar
     When I am in the offline network mode
     And I navigate to DApps extended page
-    Then 'No DApps available' message is displayed
+    Then "No DApps available" message is displayed

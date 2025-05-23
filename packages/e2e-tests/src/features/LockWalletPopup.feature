@@ -18,15 +18,15 @@ Feature: Wallet locking / unlocking - Popup view
   @LW-3040
   Scenario: Popup view - Unlocking wallet with correct password opens wallet
     And I am on unlock screen
-    And 'Unlock' button is disabled on unlock screen
+    And "Unlock" button is disabled on unlock screen
     When I fill password input with correct password
-    And 'Unlock' button is enabled on unlock screen
-    And I click 'Unlock' button on unlock screen
+    And "Unlock" button is enabled on unlock screen
+    And I click "Unlock" button on unlock screen
     Then I see Lace extension main page in popup mode
 
   @LW-3041
   Scenario: Popup view - Unlocking wallet with incorrect password shows error
     And I am on unlock screen
     When I fill password input with incorrect password
-    And I click 'Unlock' button on unlock screen
-    Then I see 'general.errors.invalidPassword' password error
+    And I click "Unlock" button on unlock screen
+    Then I see "general.errors.invalidPassword" password error

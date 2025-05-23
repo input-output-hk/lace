@@ -6,100 +6,100 @@ Feature: Send Transactions from Dapp - E2E
 
   @LW-3761 @Testnet @Smoke
   Scenario: Send ADA from DApp E2E
-    And I save token: 'Cardano' balance
-    And I open and authorize test DApp with 'Only once' setting
-    And I set send to wallet address to: 'WalletReceiveDappTransactionE2E' in test DApp
-    When I click 'Send ADA' 'Run' button in test DApp
-    Then I see DApp connector 'Confirm transaction' page with all UI elements and with following data in 'Transaction Summary' section:
+    And I save token: "Cardano" balance
+    And I open and authorize test DApp with "Only once" setting
+    And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
+    When I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
       | -3.00 tADA - FEE |
-    And I save fee value on DApp 'Confirm transaction' page
-    And I click 'Confirm' button on 'Confirm transaction' page
-    And I see DApp connector 'Sign transaction' page
+    And I save fee value on DApp "Confirm transaction" page
+    And I click "Confirm" button on "Confirm transaction" page
+    And I see DApp connector "Sign transaction" page
     And I fill correct password
-    And I click 'Confirm' button on 'Sign transaction' page
-    And I see DApp connector 'All done' page
-    And I click 'Close' button on DApp 'All done' page
+    And I click "Confirm" button on "Sign transaction" page
+    And I see DApp connector "All done" page
+    And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
     And I navigate to Tokens extended page
-    Then the sent amount of: '3' with 'DApp transaction' fee for token 'Cardano' is subtracted from the total balance
+    Then the sent amount of: "3" with "DApp transaction" fee for token "Cardano" is subtracted from the total balance
     When I navigate to Activity extended page
-    Then the Sent transaction is displayed with value: '-3.18 tADA' and tokens count 1
+    Then the Sent transaction is displayed with value: "-3.18 tADA" and tokens count 1
     And I click on a transaction: 1
-    Then The Tx details are displayed as 'core.activityDetails.sent' for ADA with value: 3.00 and wallet: 'WalletReceiveDappTransactionE2E' address
-    When I open wallet: 'WalletReceiveDappTransactionE2E' in: extended mode
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: 3.00 and wallet: "WalletReceiveDappTransactionE2E" address
+    When I open wallet: "WalletReceiveDappTransactionE2E" in: extended mode
     And Wallet is synced
     And I navigate to Activity extended page
-    Then the Received transaction is displayed with value: '3.00 tADA' and tokens count 1
+    Then the Received transaction is displayed with value: "3.00 tADA" and tokens count 1
     And I click on a transaction: 1
-    Then The Tx details are displayed as 'core.activityDetails.received' for ADA with value: 3.00 and wallet: 'WalletSendDappTransactionE2E' address
+    Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: 3.00 and wallet: "WalletSendDappTransactionE2E" address
 
   @LW-6797 @LW-12403 @LW-12404 @Testnet @memory-snapshot
   Scenario: Send Token from DApp E2E
     And I de-authorize all DApps in extended mode
-    And I save token: 'LaceCoin2' balance
-    And I open and authorize test DApp with 'Only once' setting
-    And I set send to wallet address to: 'WalletReceiveDappTransactionE2E' in test DApp
-    And I click 'Send Token' button in test DApp
-    When I click 'Send Token' 'Run' button in test DApp
-    Then I see DApp connector 'Confirm transaction' page with all UI elements and with following data in 'Transaction Summary' section:
+    And I save token: "LaceCoin2" balance
+    And I open and authorize test DApp with "Only once" setting
+    And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
+    And I click "Send Token" button in test DApp
+    When I click "Send Token" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
       | -1.38 tADA - FEE |
       | -2 LaceCoin2     |
-    And I expand 'From address' section in DApp transaction window
-    And I see DApp connector 'Confirm transaction' page 'From address' section with following data:
+    And I expand "From address" section in DApp transaction window
+    And I see DApp connector "Confirm transaction" page "From address" section with following data:
       | Address WalletSendDappTransactionE2E own |
       | Tokens -2 item(s)                        |
       | -1.38 tADA - FEE                         |
       | -2 LaceCoin2                             |
-    And I expand 'To address' section in DApp transaction window
-    And I see DApp connector 'Confirm transaction' page 'To address' section with following data:
+    And I expand "To address" section in DApp transaction window
+    And I see DApp connector "Confirm transaction" page "To address" section with following data:
       | Address WalletReceiveDappTransactionE2E foreign |
       | Tokens 2 item(s)                                |
       | 1.38 tADA                                       |
       | 2 LaceCoin2                                     |
-    And I save fee value on DApp 'Confirm transaction' page
-    When I expand 'Raw Transaction (CBOR)' section in DApp transaction window
-    Then 'Raw Transaction (CBOR)' section is displayed
+    And I save fee value on DApp "Confirm transaction" page
+    When I expand "Raw Transaction (CBOR)" section in DApp transaction window
+    Then "Raw Transaction (CBOR)" section is displayed
     And I save CBOR in test context
-    When I click on 'Copy' button inside 'Raw Transaction (CBOR)' section
-    Then I see a toast with text: 'Copied to clipboard'
+    When I click on "Copy" button inside "Raw Transaction (CBOR)" section
+    Then I see a toast with text: "Copied to clipboard"
     And clipboard contains CBOR
-    When I click 'Confirm' button on 'Confirm transaction' page
-    And I see DApp connector 'Sign transaction' page
+    When I click "Confirm" button on "Confirm transaction" page
+    And I see DApp connector "Sign transaction" page
     And I fill correct password
-    And I click 'Confirm' button on 'Sign transaction' page
-    And I see DApp connector 'All done' page
+    And I click "Confirm" button on "Sign transaction" page
+    And I see DApp connector "All done" page
     And valid password is not in snapshot
-    And I click 'Close' button on DApp 'All done' page
+    And I click "Close" button on DApp "All done" page
     And I don't see DApp window
     And I switch to window with Lace
     And I navigate to Tokens extended page
-    Then the sent amount of: '2' for token 'LaceCoin2' is subtracted from the total balance
+    Then the sent amount of: "2" for token "LaceCoin2" is subtracted from the total balance
     When I navigate to Activity extended page
-    Then the Sent transaction is displayed with value: '-1.56 tADA, -2 LaceCoin2' and tokens count 2
+    Then the Sent transaction is displayed with value: "-1.56 tADA, -2 LaceCoin2" and tokens count 2
     And I click on a transaction: 1
-    Then The Tx details are displayed as 'core.activityDetails.sent' for ADA with value: '1.38' and LaceCoin2 with value: '2' and wallet: 'WalletReceiveDappTransactionE2E' address
-    When I open wallet: 'WalletReceiveDappTransactionE2E' in: extended mode
+    Then The Tx details are displayed as "core.activityDetails.sent" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletReceiveDappTransactionE2E" address
+    When I open wallet: "WalletReceiveDappTransactionE2E" in: extended mode
     And Wallet is synced
     And I navigate to Activity extended page
-    Then the Received transaction is displayed with value: '1.38 tADA' and tokens count 2
+    Then the Received transaction is displayed with value: "1.38 tADA" and tokens count 2
     And I click on a transaction: 1
-    Then The Tx details are displayed as 'core.activityDetails.received' for ADA with value: '1.38' and LaceCoin2 with value: '2' and wallet: 'WalletSendDappTransactionE2E' address
+    Then The Tx details are displayed as "core.activityDetails.received" for ADA with value: "1.38" and LaceCoin2 with value: "2" and wallet: "WalletSendDappTransactionE2E" address
 
   @LW-9279 @Testnet
   Scenario: Defect LW-9273 - User is not able to accept second DApp transaction until close first DApp window
     And I de-authorize all DApps in extended mode
-    And I open and authorize test DApp with 'Only once' setting
-    And I set send to wallet address to: 'WalletReceiveDappTransactionE2E' in test DApp
-    When I click 'Send ADA' 'Run' button in test DApp
-    Then I see DApp connector 'Confirm transaction' page with all UI elements and with following data in 'Transaction Summary' section:
+    And I open and authorize test DApp with "Only once" setting
+    And I set send to wallet address to: "WalletReceiveDappTransactionE2E" in test DApp
+    When I click "Send ADA" "Run" button in test DApp
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
       | -3.00 tADA - FEE |
-    And I click 'Confirm' button on 'Confirm transaction' page
-    And I see DApp connector 'Sign transaction' page
+    And I click "Confirm" button on "Confirm transaction" page
+    And I see DApp connector "Sign transaction" page
     And I fill correct password
-    And I click 'Confirm' button on 'Sign transaction' page
-    And I see DApp connector 'All done' page
-    And I click 'Send ADA' 'Run' button in test DApp without retry
+    And I click "Confirm" button on "Sign transaction" page
+    And I see DApp connector "All done" page
+    And I click "Send ADA" "Run" button in test DApp without retry
     When I switch to last window
-    Then I see DApp connector 'Confirm transaction' page with all UI elements and with following data in 'Transaction Summary' section:
+    Then I see DApp connector "Confirm transaction" page with all UI elements and with following data in "Transaction Summary" section:
       | -3.00 tADA - FEE |

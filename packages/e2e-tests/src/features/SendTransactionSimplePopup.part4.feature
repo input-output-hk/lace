@@ -6,14 +6,14 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   @LW-5181 @Testnet
   Scenario Outline: Popup View - Send flow - Ticker displaying only 5 characters for <nft> NFT
-    And I click 'Send' button on Tokens page in popup mode
-    And click on the coin selector for 'tADA' asset in bundle 1
+    And I click "Send" button on Tokens page in popup mode
+    And click on the coin selector for "tADA" asset in bundle 1
     And click on the NFTs button in the coin selector dropdown
     When I save ticker for the NFT with name: <nft>
-    And I click on NFT with name: '<nft>'
+    And I click on NFT with name: "<nft>"
     Then the displayed ticker for NFTs has the correct amount of characters
-    When I hover over the ticker for '<nft>' asset in bundle 1
-    Then I see a tooltip showing full name: '<nft>' for NFTs
+    When I hover over the ticker for "<nft>" asset in bundle 1
+    Then I see a tooltip showing full name: "<nft>" for NFTs
     Examples:
       | nft                |
       | LaceNFT            |
@@ -23,17 +23,17 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   @LW-5183 @Testnet
   Scenario Outline: Popup View - Send flow - Values switched from <value_to_enter> to <displayed_value> when building a transaction
-    When I click 'Send' button on Tokens page in popup mode
-    And click on the coin selector for 'tADA' asset in bundle 1
+    When I click "Send" button on Tokens page in popup mode
+    And click on the coin selector for "tADA" asset in bundle 1
     And click on the <assetType> button in the coin selector dropdown
-    And <assetSelectionAction> '<assetName>'
-    And I enter an exact value of: <value_to_enter> to the '<assetName>' asset in bundle 1
+    And <assetSelectionAction> "<assetName>"
+    And I enter an exact value of: <value_to_enter> to the "<assetName>" asset in bundle 1
     Then I see <displayed_value> as displayed value
     When I click to loose focus from value field
     Then I see <conv_value> as displayed value
-    And I <shouldSeeError> insufficient balance error in bundle 1 for '<assetName>' asset
-    When I hover over the value for '<assetName>' asset in bundle 1
-    Then I <should_see_tooltip> a tooltip showing full value: '<displayed_value>' for <assetType>
+    And I <shouldSeeError> insufficient balance error in bundle 1 for "<assetName>" asset
+    When I hover over the value for "<assetName>" asset in bundle 1
+    Then I <should_see_tooltip> a tooltip showing full value: "<displayed_value>" for <assetType>
     Examples:
       | value_to_enter      | displayed_value        | conv_value | assetType | assetName | assetSelectionAction         | shouldSeeError | should_see_tooltip |
       | 100                 | 100                    | 100.00     | Tokens    | tHOSKY    | click on an token with name: | do not see     | do not see         |
@@ -67,17 +67,17 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   @LW-5183 @Mainnet
   Scenario Outline: Popup View - Send flow - Values switched from <value_to_enter> to <displayed_value> when building a transaction
-    When I click 'Send' button on Tokens page in popup mode
-    And click on the coin selector for 'ADA' asset in bundle 1
+    When I click "Send" button on Tokens page in popup mode
+    And click on the coin selector for "ADA" asset in bundle 1
     And click on the <assetType> button in the coin selector dropdown
-    And <assetSelectionAction> '<assetName>'
-    And I enter an exact value of: <value_to_enter> to the '<assetName>' asset in bundle 1
+    And <assetSelectionAction> "<assetName>"
+    And I enter an exact value of: <value_to_enter> to the "<assetName>" asset in bundle 1
     Then I see <displayed_value> as displayed value
     When I click to loose focus from value field
     Then I see <conv_value> as displayed value
-    And I <shouldSeeError> insufficient balance error in bundle 1 for '<assetName>' asset
-    When I hover over the value for '<assetName>' asset in bundle 1
-    Then I <should_see_tooltip> a tooltip showing full value: '<displayed_value>' for <assetType>
+    And I <shouldSeeError> insufficient balance error in bundle 1 for "<assetName>" asset
+    When I hover over the value for "<assetName>" asset in bundle 1
+    Then I <should_see_tooltip> a tooltip showing full value: "<displayed_value>" for <assetType>
     Examples:
       | value_to_enter      | displayed_value        | conv_value | assetType | assetName  | assetSelectionAction         | shouldSeeError | should_see_tooltip |
       | 100                 | 100                    | 100.00     | Tokens    | Ibilecoin  | click on an token with name: | do not see     | do not see         |
@@ -112,31 +112,31 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
 
   @LW-11468 @Testnet @Mainnet
   Scenario: Popup View - Send flow - Use Enter key to confirm asset input
-    When I click 'Send' button on Tokens page in popup mode
-    And I enter a value of: 987654 to the 'tADA' asset in bundle 1 without clearing input
+    When I click "Send" button on Tokens page in popup mode
+    And I enter a value of: 987654 to the "tADA" asset in bundle 1 without clearing input
     And I see 987,654 as displayed value
     When I press keyboard Enter button
     Then I see 987,654.00 as displayed value
 
   @LW-11469 @Testnet @Mainnet
   Scenario: Popup View - Send flow - Empty asset input handled correctly
-    When I click 'Send' button on Tokens page in popup mode
-    And click on the coin selector for 'tADA' asset in bundle 1
-    And click on an token with name: 'Ibilecoin'
+    When I click "Send" button on Tokens page in popup mode
+    And click on the coin selector for "tADA" asset in bundle 1
+    And click on an token with name: "Ibilecoin"
     And I click to loose focus from value field
     Then I see 0.00 as displayed value
-    And I do not see insufficient balance error in bundle 1 for 'Ibilecoin' asset
-    When I hover over the value for 'Ibilecoin' asset in bundle 1
-    Then I see a tooltip showing full value: '0' for Tokens
+    And I do not see insufficient balance error in bundle 1 for "Ibilecoin" asset
+    When I hover over the value for "Ibilecoin" asset in bundle 1
+    Then I see a tooltip showing full value: "0" for Tokens
 
   @LW-2408 @Testnet
   @Pending # due to issues with Fetch.enable
   Scenario: Popup-view - Transaction error screen displayed on transaction submit error
-    Given I enable network interception to finish request: '*/tx-submit/submit' with error 400
-    And I click 'Send' button on Tokens page in popup mode
+    Given I enable network interception to finish request: "*/tx-submit/submit" with error 400
+    And I click "Send" button on Tokens page in popup mode
     And I’ve entered accepted values for all fields of simple Tx
-    And I click 'Review transaction' button on 'Send' page
-    And I click 'Confirm' button on 'Transaction summary' page
+    And I click "Review transaction" button on "Send" page
+    And I click "Confirm" button on "Transaction summary" page
     When I enter correct password and confirm the transaction
     Then The Transaction error screen is displayed in popup mode
 
@@ -145,19 +145,19 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
   Scenario: Popup view - Validate if contact name that has up to 12 characters is not truncated
     Given address book contains address with name that has 12 characters
     When I navigate to Tokens popup page
-    And I click 'Send' button on Tokens page in popup mode
-    And I enter 'abcdefghijkl' in the bundle 1 recipient's address
-    Then first result in address dropdown has name 'abcdefghijkl'
+    And I click "Send" button on Tokens page in popup mode
+    And I enter "abcdefghijkl" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghijkl"
     When I click on one of the contacts on the dropdown
-    Then recipients address input contains address entry with name 'abcdefghijkl'
+    Then recipients address input contains address entry with name "abcdefghijkl"
 
   @LW-7827 @Testnet @Pending
   @issue=LW-8579
   Scenario: Popup view - Validate if contact name that has >12 characters is truncated
     Given address book contains address with name that has more than 12 characters
     When I navigate to Tokens popup page
-    And I click 'Send' button on Tokens page in popup mode
-    And I enter 'abcdefghijklm' in the bundle 1 recipient's address
-    Then first result in address dropdown has name 'abcdefghi...'
+    And I click "Send" button on Tokens page in popup mode
+    And I enter "abcdefghijklm" in the bundle 1 recipient's address
+    Then first result in address dropdown has name "abcdefghi..."
     When I click on one of the contacts on the dropdown
-    Then recipients address input contains address entry with name 'abcdefghi...'
+    Then recipients address input contains address entry with name "abcdefghi..."

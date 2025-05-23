@@ -6,11 +6,11 @@ Feature: LW: Tokens tab - extended view
 
   @LW-4878 @Testnet @Mainnet
   Scenario: Extended-view - Tokens details - Enter and Escape buttons support
-    And I click token with name: 'Cardano'
-    And The Token details screen is displayed for token 'Cardano' with ticker 'tADA' in extended mode
+    And I click token with name: "Cardano"
+    And The Token details screen is displayed for token "Cardano" with ticker "tADA" in extended mode
     When I press keyboard Escape button
     Then Drawer is not displayed
-    And I click token with name: 'Cardano'
+    And I click token with name: "Cardano"
     When I press keyboard Enter button
     Then send drawer is displayed with all its components in extended mode
     When I press keyboard Escape button
@@ -22,8 +22,8 @@ Feature: LW: Tokens tab - extended view
 
   @LW-5906 @Testnet @Mainnet
   Scenario: CoinGecko credits - redirection
-    When I click on 'CoinGecko' link
-    Then 'www.coingecko.com' page is displayed in new tab
+    When I click on "CoinGecko" link
+    Then "www.coingecko.com" page is displayed in new tab
 
   @LW-6877 @Testnet @Mainnet
   Scenario: Extended View - Hide my balance - positive balance - closed eye icon displayed by default
@@ -71,50 +71,50 @@ Feature: LW: Tokens tab - extended view
   @issue=LW-10296
   Scenario: Extended view - Token pricing - Price fetch expired error is displayed when coingecko request fails
     Given ADA fiat price has been fetched
-    When I enable network interception to fail request: 'https://coingecko.*'
+    When I enable network interception to fail request: "https://coingecko.*"
     And I shift back last fiat price fetch time in local storage by 500 seconds
-    Then 'Price data expired' error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And 'Price data expired' error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-10283 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Extended view - Token pricing - Price fetch expired error is displayed when coingecko request returns 500
     Given ADA fiat price has been fetched
-    When I enable network interception to finish request: 'https://coingecko.*' with error 500
+    When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I shift back last fiat price fetch time in local storage by 500 seconds
-    Then 'Price data expired' error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And 'Price data expired' error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-6890 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Extended view - Token pricing - Fiat price unable to fetch error is displayed on failed request
     Given ADA fiat price has been fetched
-    When I enable network interception to fail request: 'https://coingecko.*'
+    When I enable network interception to fail request: "https://coingecko.*"
     And I delete fiat price timestamp from background storage
-    Then 'Unable to fetch fiat values' error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    Then 'Unable to fetch fiat values' error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed
 
   @LW-6681 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Extended view - Token pricing - Fiat price unable to fetch error is displayed when coingecko request returns 500
     Given ADA fiat price has been fetched
-    When I enable network interception to finish request: 'https://coingecko.*' with error 500
+    When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I delete fiat price timestamp from background storage
-    Then 'Unable to fetch fiat values' error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     And I disable network interception
     Then ADA fiat price has been fetched
-    Then 'Unable to fetch fiat values' error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed
 
   @LW-10328 @Testnet
   Scenario Outline: Extended View - Search tokens by name, policy id, fingerprint and ticker - <token>
-    When I search for token: '<token>'
-    Then I see only token with name: '<token_result>'
+    When I search for token: "<token>"
+    Then I see only token with name: "<token_result>"
     Examples:
       | token                                | token_result |
       | Cardano                              | Cardano      |

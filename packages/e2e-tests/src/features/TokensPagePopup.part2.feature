@@ -46,50 +46,50 @@ Feature: LW: Tokens tab - popup view
   @issue=LW-10296
   Scenario: Popup view - Token pricing - Price fetch expired error is displayed when coingecko request fails
     Given ADA fiat price has been fetched
-    When I enable network interception to fail request: 'https://coingecko.*'
+    When I enable network interception to fail request: "https://coingecko.*"
     And I shift back last fiat price fetch time in local storage by 500 seconds
-    Then 'Price data expired' error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And 'Price data expired' error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-10307 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Popup view - Token pricing - Price fetch expired error is displayed when coingecko request returns 500
     Given ADA fiat price has been fetched
-    When I enable network interception to finish request: 'https://coingecko.*' with error 500
+    When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I shift back last fiat price fetch time in local storage by 500 seconds
-    Then 'Price data expired' error is displayed
+    Then "Price data expired" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    And 'Price data expired' error is not displayed
+    And "Price data expired" error is not displayed
 
   @LW-6682 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Popup view - Token pricing - Fiat price unable to fetch error is displayed on failed request
     Given ADA fiat price has been fetched
-    When I enable network interception to fail request: 'https://coingecko.*'
+    When I enable network interception to fail request: "https://coingecko.*"
     And I delete fiat price timestamp from background storage
-    Then 'Unable to fetch fiat values' error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     When I disable network interception
     Then ADA fiat price has been fetched
-    Then 'Unable to fetch fiat values' error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed
 
   @LW-6683 @Testnet @Mainnet @Pending
   @issue=LW-10296
   Scenario: Popup view - Token pricing - Fiat price unable to fetch error is displayed when coingecko request returns 500
     Given ADA fiat price has been fetched
-    When I enable network interception to finish request: 'https://coingecko.*' with error 500
+    When I enable network interception to finish request: "https://coingecko.*" with error 500
     And I delete fiat price timestamp from background storage
-    Then 'Unable to fetch fiat values' error is displayed
+    Then "Unable to fetch fiat values" error is displayed
     And I disable network interception
     Then ADA fiat price has been fetched
-    Then 'Unable to fetch fiat values' error is not displayed
+    Then "Unable to fetch fiat values" error is not displayed
 
   @LW-10653 @Testnet
   Scenario Outline: Popup View - Search tokens by name, policy id, fingerprint and ticker - <token>
-    When I search for token: '<token>'
-    Then I see only token with name: '<token_result>'
+    When I search for token: "<token>"
+    Then I see only token with name: "<token_result>"
     Examples:
       | token                                | token_result |
       | Cardano                              | Cardano      |
