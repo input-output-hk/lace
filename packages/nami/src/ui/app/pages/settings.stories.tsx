@@ -66,9 +66,7 @@ const SettingsStory = ({
         setTheme={() => {}}
         theme="light"
         updateAccountMetadata={async () => undefined}
-        isAnalyticsOptIn={false}
         isCompatibilityMode={false}
-        handleAnalyticsChoice={async () => {}}
         handleCompatibilityModeChoice={async () => {}}
         switchWalletMode={async () => {}}
         switchNetwork={async () => {}}

@@ -22,12 +22,12 @@ import { Portal } from '../browser-view/features/wallet-setup/components/Portal'
 import { MultiWallet } from '../browser-view/features/multi-wallet';
 import { MultiWallet as BitcoinMultiWallet } from './features/multi-wallet/MultiWallet';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit, useWalletManager } from '@hooks';
+import { useAppInit, useLocalStorage, useWalletManager } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
 import LaceLogoMark from '@src/assets/branding/lace-logo-mark.svg';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { Trans, useTranslation } from 'react-i18next';
@@ -39,6 +39,8 @@ import { logger } from '@lace/common';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { SettingsLayout } from '../../features/settings';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -162,6 +164,19 @@ export const BitcoinBrowserViewRoutes = ({
 
   useAppInit();
   useEnterKeyPress();
+
+  const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
+  );
+
+  useEffect(() => {
+    if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   // Register event listeners
   useEffect(() => {

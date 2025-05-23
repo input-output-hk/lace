@@ -1,0 +1,75 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/_typography';
+@import '../../../../../packages/common/src/ui/styles/abstracts/mixins';
+@import '../../styles/rules/modal.scss';
+
+.continueInBrowser {
+  @extend %modal-globals;
+}
+
+.modal {
+  &:global(.ant-modal) {
+    max-width: calc(100vw - #{size_unit(6)}) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+  :global(.ant-modal-content) {
+    background: var(--color-white, var(--dark-mode-light-black)) !important;
+    border-radius: size_unit(2) !important;
+    box-shadow: var(--shadows-card-pop-up) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+  :global(.ant-modal-body) {
+    display: flex;
+    flex-direction: column;
+    padding: size_unit(5) !important;
+    max-height: calc(100vh - 80px) !important;
+  }
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  margin-left: -#{size_unit(5)};
+  margin-right: -#{size_unit(3)};
+  .content {
+    @include scroll-bar-style;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    padding-right: size_unit(3);
+    padding-left: size_unit(5);
+  }
+}
+
+.badge {
+  @include text-bodyXS-medium;
+  align-content: center;
+  align-self: flex-start;
+  border-radius: size_unit(2);
+  flex-wrap: wrap;
+  background: var(--primary-gradient);
+  color: var(--bg-color-body);
+  display: flex;
+  height: 20px;
+  min-height: 20px;
+  margin-bottom: size_unit(1);
+  padding: 0 size_unit(1);
+}
+
+.title {
+  @include text-bodyLarge-bold;
+  color: var(--text-color-primary) !important;
+  margin-bottom: 0 !important;
+}
+
+.description {
+  @include text-body-regular;
+  display: block;
+  margin-top: size_unit(2) !important;
+  color: var(--text-color-primary) !important;
+}
+
+.button {
+  margin-top: size_unit(3) !important;
+}

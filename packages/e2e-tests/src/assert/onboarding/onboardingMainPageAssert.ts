@@ -2,7 +2,6 @@ import OnboardingMainPage from '../../elements/onboarding/mainPage';
 import OnboardingCommonAssert from '../onboarding/onboardingCommonAssert';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
-import OnboardingAnalyticsBannerAssert from './onboardingAnalyticsBannerAssert';
 
 class OnboardingMainPageAssert extends OnboardingCommonAssert {
   async assertSeeLogo() {
@@ -90,7 +89,6 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeMainPage() {
-    await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(false);
     await this.assertSeeLogo();
     await this.assertSeeTitle();
     await this.assertSeeSubtitle();

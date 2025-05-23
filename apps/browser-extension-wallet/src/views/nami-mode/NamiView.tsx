@@ -77,7 +77,7 @@ export const NamiView = withDappContext((): React.ReactElement => {
     setDeletingWallet
   } = useWalletStore();
   const { theme, setTheme } = useTheme();
-  const { handleAnalyticsChoice, isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
+  const { isAnalyticsOptIn, sendEventToPostHog } = useAnalytics();
   const connectedDapps = useDappContext();
   const removeDapp = useCallback((origin: string) => localDappService.removeAuthorizedDapp(origin), []);
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
@@ -201,7 +201,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
         connectedDapps,
         isAnalyticsOptIn,
         isCompatibilityMode,
-        handleAnalyticsChoice,
         handleCompatibilityModeChoice,
         hasEnoughAdaForCollateral,
         createWallet: createWalletFromPrivateKey,

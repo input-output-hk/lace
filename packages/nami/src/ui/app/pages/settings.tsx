@@ -62,8 +62,6 @@ type Props = Pick<
   | 'enableCustomNode'
   | 'environmentName'
   | 'getCustomSubmitApiForNetwork'
-  | 'handleAnalyticsChoice'
-  | 'isAnalyticsOptIn'
   | 'isValidURL'
   | 'removeDapp'
   | 'setTheme'
@@ -91,11 +89,9 @@ const Settings = ({
   setTheme,
   accountName,
   accountAvatar,
-  isAnalyticsOptIn,
   isCompatibilityMode,
   connectedDapps,
   removeDapp,
-  handleAnalyticsChoice,
   handleCompatibilityModeChoice,
   changePassword,
   updateAccountMetadata,
@@ -175,10 +171,7 @@ const Settings = ({
           />
         </Route>
         <Route path="/settings/legal" exact>
-          <LegalSettings
-            isAnalyticsOptIn={isAnalyticsOptIn}
-            handleAnalyticsChoice={handleAnalyticsChoice}
-          />
+          <LegalSettings />
         </Route>
         <Route path="*">
           <Overview
