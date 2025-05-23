@@ -263,6 +263,18 @@ jobs:
           name: allure-results
           path: ./artifacts/reports/allure/results
 
+      - name: Push renamed metrics
+        working-directory: './artifacts/metrics'
+        run: |
+          sed -E '
+            s/^(e2e_cpu_seconds_total)\{/e2e_cpu_seconds_total_v1\{/;
+            s/^(e2e_memory_rss_bytes)\{/e2e_memory_rss_bytes_v1\{/
+          ' prometheus.txt > prometheus_renamed.txt
+
+          printf '\n*****************\n'
+          printf '\n curl e2e_cpu_seconds_total \n'
+          cat prometheus_renamed.txt
+
       - name: Upload performance metrics
         uses: actions/upload-artifact@v4
         with:
@@ -282,20 +294,6 @@ jobs:
             - job_name: 'e2e-perf-metrics'
               static_configs:
                 - targets: ['pushgateway:9091']
-
-              metric_relabel_configs:
-                # rename old_metric → new_metric
-                - source_labels: [__name__]
-                  regex: '^e2e_cpu_seconds_total$'
-                  target_label: __name__
-                  replacement: e2e_cpu_seconds_total_v1
-                  action: replace
-                - source_labels: [__name__]
-                  regex: '^e2e_memory_rss_bytes$'
-                  target_label: __name__
-                  replacement: e2e_memory_rss_bytes_v1
-                  action: replace
-
           remote_write:
             - url: "$PUSH_URL"
               basic_auth:
@@ -308,7 +306,7 @@ jobs:
       - name: Start pushgateway server
         run: |
           docker run -d --name pushgateway -p 9091:9091 prom/pushgateway
-          cat ./artifacts/metrics/prometheus.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
+          cat ./artifacts/metrics/prometheus_renamed.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
           #docker run -d --name http-server -v $(pwd):/app -w /app -p 8000:8000 python:3.11-slim python -m http.server 8000 > http.log 2>&1
           printf '\n*****************\n'
           echo 'This is my current directory:'
@@ -327,7 +325,7 @@ jobs:
           # Uncomment for troubleshooting.
           printf '\n*****************\n'
           printf '\n curl e2e_cpu_seconds_total \n'
-          curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total
+          curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total_v1
           #printf '\n*****************\n'
           #printf '\n send_failures_total \n'
           #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_queue_send_failures_total'
