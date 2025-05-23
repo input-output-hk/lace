@@ -15,8 +15,7 @@ import {
 } from 'rxjs';
 import { getProviders, SESSION_TIMEOUT } from './config';
 import { createPersonalWallet, createSharedWallet, DEFAULT_POLLING_CONFIG, storage } from '@cardano-sdk/wallet';
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
-import { Cardano, HandleProvider } from '@cardano-sdk/core';
+import { Cardano } from '@cardano-sdk/core';
 import {
   AnyWallet,
   consumeSigningCoordinatorApi,
@@ -36,10 +35,9 @@ import {
 } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address';
-import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { isBackgroundProcess } from '@cardano-sdk/util';
 import { SharedWalletScriptKind } from '@lace/core';
-import { getBaseUrlForChain, getMagicForChain } from '@utils/chain';
+import { getMagicForChain } from '@utils/chain';
 import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
@@ -135,18 +133,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
   // eslint-disable-next-line complexity, max-statements
   create: async ({ chainId, accountIndex }, wallet, { stores, witnesser }) => {
     const chainName: Wallet.ChainName = networkMagicToChainName(chainId.networkMagic);
-    const baseUrl = getBaseUrlForChain(chainName);
     let providers = await getProviders(chainName);
-
-    // Sanchonet does not have a handle provider
-    const supportsHandleResolver = chainName !== 'Sanchonet';
-
-    // This is used in place ofgetProviders the handle provider for environments where the handle provider is not available
-    const noopHandleResolver: HandleProvider = {
-      resolveHandles: async () => [],
-      healthCheck: async () => ({ ok: true }),
-      getPolicyIds: async () => []
-    };
 
     if ('wsProvider' in providers) {
       providers.wsProvider.health$.subscribe((check) => {
@@ -167,13 +154,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           logger,
           paymentScript,
           stakingScript,
-          handleProvider: supportsHandleResolver
-            ? handleHttpProvider({
-                adapter: axiosFetchAdapter,
-                baseUrl,
-                logger
-              })
-            : noopHandleResolver,
           stores,
           pollController$,
           witnesser
@@ -215,13 +195,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         logger,
         ...providers,
         stores,
-        handleProvider: supportsHandleResolver
-          ? handleHttpProvider({
-              adapter: axiosFetchAdapter,
-              baseUrl,
-              logger
-            })
-          : noopHandleResolver,
         witnesser,
         pollController$,
         bip32Account
@@ -335,7 +308,7 @@ const pouchdbStoresFactory: StoresFactory = {
             this.rewardsHistory.destroy(),
             this.stakePools.destroy(),
             this.rewardsBalances.destroy()
-          ]).pipe(map(() => void 0));
+          ]).pipe(map((): void => void 0));
         }
         return EMPTY;
       },
@@ -389,7 +362,7 @@ export const extensionStorageStoresFactory: StoresFactory = {
           this.rewardsHistory.destroy(),
           this.stakePools.destroy(),
           this.rewardsBalances.destroy()
-        ]).pipe(map(() => void 0));
+        ]).pipe(map((): void => void 0));
       }
       return EMPTY;
     },

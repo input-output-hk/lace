@@ -38,6 +38,7 @@ import { RemoteApiProperties, RemoteApiPropertyType, createPersistentCacheStorag
 import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-discovery';
 import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
+import { initHandleService } from './handleService';
 
 const createTxSubmitProvider = (
   blockfrostClient: BlockfrostClient,
@@ -98,6 +99,7 @@ let wsProvider: CardanoWsClient;
 
 enum CacheName {
   chainHistoryProvider = 'chain-history-provider-cache',
+  handleProvider = 'handle-provider-cache',
   inputResolver = 'input-resolver-cache',
   utxoProvider = 'utxo-provider-cache'
 }
@@ -110,6 +112,11 @@ const sizeOf1mb = 1024 * 1024;
 const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
   [CacheName.chainHistoryProvider]: {
     count: 5_180_160_021,
+    // eslint-disable-next-line no-magic-numbers
+    size: 30 * sizeOf1mb
+  },
+  [CacheName.handleProvider]: {
+    count: 65_529_512_340,
     // eslint-disable-next-line no-magic-numbers
     size: 30 * sizeOf1mb
   },
@@ -175,6 +182,17 @@ export const createProviders = ({
     logger
   });
 
+  const handleProvider = initHandleService({
+    adapter: axiosAdapter,
+    baseCardanoServicesUrl: baseUrl,
+    cache: createPersistentCacheStorage({
+      extensionLocalStorage,
+      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.handleProvider].count,
+      resourceName: CacheName.handleProvider,
+      quotaInBytes: cacheAssignment[CacheName.handleProvider].size
+    })
+  });
+
   if (useWebSocket) {
     const url = new URL(baseUrl);
 
@@ -196,6 +214,7 @@ export const createProviders = ({
       chainHistoryProvider: wsProvider.chainHistoryProvider,
       rewardAccountInfoProvider,
       rewardsProvider,
+      handleProvider,
       wsProvider,
       addressDiscovery,
       inputResolver,
@@ -223,6 +242,7 @@ export const createProviders = ({
     chainHistoryProvider,
     rewardAccountInfoProvider,
     rewardsProvider,
+    handleProvider,
     addressDiscovery,
     inputResolver,
     drepProvider: dRepProvider
@@ -281,5 +301,10 @@ export const walletProvidersProperties: RemoteApiProperties<WalletProvidersDepen
   },
   inputResolver: {
     resolveInput: RemoteApiPropertyType.MethodReturningPromise
+  },
+  handleProvider: {
+    getPolicyIds: RemoteApiPropertyType.MethodReturningPromise,
+    resolveHandles: RemoteApiPropertyType.MethodReturningPromise,
+    healthCheck: RemoteApiPropertyType.MethodReturningPromise
   }
 };
