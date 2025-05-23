@@ -31,15 +31,15 @@ Feature: Top Navigation - Extended view
   Scenario: Avatar dropdown displays a valid wallet sync status (synced)
     When I click the menu button
     Then wallet sync status component is visible
-    And sync status displays "Wallet synced" state
+    And sync status displays 'Wallet synced' state
 
   @LW-4598 @Testnet
   Scenario: Extended View - network id is visible for Testnet
-    Then I see network id: "Preprod"
+    Then I see network id: 'Preprod'
 
   @LW-4598 @Mainnet
   Scenario: Extended View - network id is not visible for Mainnet
-    Then I do not see network id: "Mainnet"
+    Then I do not see network id: 'Mainnet'
 
   @LW-4843 @Mainnet @Testnet
   Scenario Outline: Extended view - theme switcher - <theme> mode
@@ -90,8 +90,8 @@ Feature: Top Navigation - Extended view
   Scenario: Extended View - Toast displayed after switching network to Preview
     When I click the menu button
     And I click on the network option
-    When I click on "Preview" radio button
-    Then I see a toast with text: "Switched network"
+    When I click on 'Preview' radio button
+    Then I see a toast with text: 'Switched network'
     Then Lace is loaded properly
 
   @LW-6074 @Testnet @Mainnet
@@ -99,25 +99,25 @@ Feature: Top Navigation - Extended view
     Given I click the menu button
     And I see current network in user menu
     And I click on the network option
-    When I click on "Preview" radio button
+    When I click on 'Preview' radio button
     Then Lace is loaded properly
     When I click the menu button
     And I click on the settings option
-    Then I see current network: "Preview" name in network setting
-    And I see current network: "Preview" name in "About Lace" widget
-    And I see network id: "Preview"
-    And Local storage appSettings contains info about network: "Preview"
+    Then I see current network: 'Preview' name in network setting
+    And I see current network: 'Preview' name in 'About Lace' widget
+    And I see network id: 'Preview'
+    And Local storage appSettings contains info about network: 'Preview'
 
   @LW-1717 @LW-5255 @Mainnet @Testnet
-  @skip(browserName="firefox")
+  @skip(browserName='firefox')
   Scenario: Avatar dropdown displays a valid wallet sync status (syncing) + toast & network pill
     Given I close wallet synced toast
     When I am in the offline network mode
     Then I see network id with status: offline
-    And I see a toast with text: "Network Error"
+    And I see a toast with text: 'Network Error'
     When I click the menu button
     Then wallet sync status component is visible
-    And sync status displays "Not synced to the blockchain" state
+    And sync status displays 'Not synced to the blockchain' state
 
   @LW-6769
   Scenario Outline: Extended view - Main Navigation - Collapsible Lace icon - width <width>

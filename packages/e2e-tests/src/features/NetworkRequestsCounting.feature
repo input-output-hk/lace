@@ -5,7 +5,7 @@ Feature: Network requests counting
   Scenario: Count requests during HD wallet onboarding
     Given I start tracing
     And I start counting requests using Puppeteer and CDP
-    When I restore the "HdWalletReadOnly1" wallet
+    When I restore the 'HdWalletReadOnly1' wallet
     Then I see LW homepage
     And I confirm multi-address discovery modal
     And Wallet is synced

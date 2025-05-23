@@ -12,12 +12,12 @@ Feature: Main Navigation - Extended view
     And <step>
     Examples:
       | section      | step                                                                  |
-      | Tokens       | I see Tokens "About your wallet" widget with all relevant items       |
-      | NFTs         | I see "More on NFTs" widget with all relevant items                   |
-      | Activity     | I see Activity "Learn about" widget with all relevant items           |
-      | Staking      | I see "About staking" widget with all relevant items                  |
-      | Settings     | I see "About Lace" component                                          |
-      | Address Book | I see Address Book "About your wallet" widget with all relevant items |
+      | Tokens       | I see Tokens 'About your wallet' widget with all relevant items       |
+      | NFTs         | I see 'More on NFTs' widget with all relevant items                   |
+      | Activity     | I see Activity 'Learn about' widget with all relevant items           |
+      | Staking      | I see 'About staking' widget with all relevant items                  |
+      | Settings     | I see 'About Lace' component                                          |
+      | Address Book | I see Address Book 'About your wallet' widget with all relevant items |
 
   @LW-6661
   Scenario Outline: Extended view - Main Navigation - Right side panel displayed in <section> section - width <width>
@@ -33,15 +33,15 @@ Feature: Main Navigation - Extended view
     Then I do not see the right side panel for <section> section
     Examples:
       | section      | width | step                                                                  | should_see_scroll |
-      | Tokens       | 1280  | I see Tokens "About your wallet" widget with all relevant items       | do not see        |
-      | Tokens       | 668   | I see Tokens "About your wallet" widget with all relevant items       | see               |
-      | NFTs         | 1280  | I see "More on NFTs" widget with all relevant items                   | do not see        |
-      | NFTs         | 668   | I see "More on NFTs" widget with all relevant items                   | see               |
-      | Activity     | 1280  | I see Activity "Learn about" widget with all relevant items           | do not see        |
-      | Activity     | 668   | I see Activity "Learn about" widget with all relevant items           | see               |
-      | Staking      | 1280  | I see "About staking" widget with all relevant items                  | do not see        |
-      | Staking      | 668   | I see "About staking" widget with all relevant items                  | see               |
-      | Settings     | 1280  | I see "About Lace" component                                          | do not see        |
-      | Settings     | 668   | I see "About Lace" component                                          | see               |
-      | Address Book | 1280  | I see Address Book "About your wallet" widget with all relevant items | do not see        |
-      | Address Book | 668   | I see Address Book "About your wallet" widget with all relevant items | see               |
+      | Tokens       | 1280  | I see Tokens 'About your wallet' widget with all relevant items       | do not see        |
+      | Tokens       | 668   | I see Tokens 'About your wallet' widget with all relevant items       | see               |
+      | NFTs         | 1280  | I see 'More on NFTs' widget with all relevant items                   | do not see        |
+      | NFTs         | 668   | I see 'More on NFTs' widget with all relevant items                   | see               |
+      | Activity     | 1280  | I see Activity 'Learn about' widget with all relevant items           | do not see        |
+      | Activity     | 668   | I see Activity 'Learn about' widget with all relevant items           | see               |
+      | Staking      | 1280  | I see 'About staking' widget with all relevant items                  | do not see        |
+      | Staking      | 668   | I see 'About staking' widget with all relevant items                  | see               |
+      | Settings     | 1280  | I see 'About Lace' component                                          | do not see        |
+      | Settings     | 668   | I see 'About Lace' component                                          | see               |
+      | Address Book | 1280  | I see Address Book 'About your wallet' widget with all relevant items | do not see        |
+      | Address Book | 668   | I see Address Book 'About your wallet' widget with all relevant items | see               |

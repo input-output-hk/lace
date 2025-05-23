@@ -28,7 +28,7 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
   @LW-9446 @Testnet
   Scenario Outline: Popup View - Staking - Stakepool details drawer - Close drawer by clicking <close_button> button
     Given I navigate to Staking popup page
-    And I click on the stake pool title: "ADA Ocean" in currently staking component
+    And I click on the stake pool title: 'ADA Ocean' in currently staking component
     And Stake pool details drawer is opened
     When I close the drawer by clicking <close_button> button
     Then Stake pool details drawer is not opened
@@ -38,9 +38,9 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
 #      | close        | @issue=LW-9152
 
   @LW-8934 @LW-8472 @skip(browserName='firefox') @issue=LW-12440
-  Scenario: Popup View - Start Staking - Delegated to single pool - "Expanded view" button click
+  Scenario: Popup View - Start Staking - Delegated to single pool - 'Expanded view' button click
     Given I navigate to Staking popup page
     And I see Expanded View banner
-    When I click "Expand view" on Start Staking page
+    When I click 'Expand view' on Start Staking page
     And I switch to last window
     Then I see Lace extension main page in extended mode

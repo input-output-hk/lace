@@ -27,41 +27,41 @@ Feature: LW: Tokens tab - extended view
 
   @LW-2335 @Testnet @Mainnet
   Scenario: Receive button click
-    When I click "Receive" button on page header
-    Then I see "Wallet Address" page in extended mode for wallet "TestAutomationWallet"
+    When I click 'Receive' button on page header
+    Then I see 'Wallet Address' page in extended mode for wallet 'TestAutomationWallet'
 
   @LW-2336 @Testnet @Mainnet
   Scenario: Send button click
-    When I click "Send" button on page header
+    When I click 'Send' button on page header
     Then the 'Send' screen is displayed in extended mode
 
   @LW-2337 @Smoke @Testnet
-  Scenario Outline: "<token_name>" item click
-    When I open wallet: "WalletSendBundlesTransactionE2E" in: extended mode
-    And I click token with name: "<token_name>"
-    Then The Token details screen is displayed for token "<token_name>" with ticker "<token_ticker>" in extended mode
+  Scenario Outline: '<token_name>' item click
+    When I open wallet: 'WalletSendBundlesTransactionE2E' in: extended mode
+    And I click token with name: '<token_name>'
+    Then The Token details screen is displayed for token '<token_name>' with ticker '<token_ticker>' in extended mode
     Examples:
       | token_name | token_ticker |
       | Cardano    | tADA         |
       | LaceCoin2  | LaceCoin2    |
 
   @LW-2337 @Mainnet
-  Scenario Outline: "<token_name>" item click
-    When I click token with name: "<token_name>"
-    Then The Token details screen is displayed for token "<token_name>" with ticker "<token_ticker>" in extended mode
+  Scenario Outline: '<token_name>' item click
+    When I click token with name: '<token_name>'
+    Then The Token details screen is displayed for token '<token_name>' with ticker '<token_ticker>' in extended mode
     Examples:
       | token_name  | token_ticker |
       | Cardano     | ADA          |
       | HOSKY Token | HOSKY        |
 
   @LW-2338 @Testnet @Mainnet
-  Scenario: "About your wallet" widget
-    Then I see Tokens "About your wallet" widget with all relevant items
+  Scenario: 'About your wallet' widget
+    Then I see Tokens 'About your wallet' widget with all relevant items
 
   @LW-2339 @Testnet @Mainnet
-  Scenario Outline: "About your wallet" widget item click - <subtitle>
-    When I click on a widget item with subtitle: "<subtitle>"
-    Then I see a "<type>" article with title "<subtitle>"
+  Scenario Outline: 'About your wallet' widget item click - <subtitle>
+    When I click on a widget item with subtitle: '<subtitle>'
+    Then I see a '<type>' article with title '<subtitle>'
     Examples:
       | type     | subtitle                                                                     |
       | Glossary | What is a digital asset?                                                     |
