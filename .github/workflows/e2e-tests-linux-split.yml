@@ -270,7 +270,7 @@ jobs:
             s/^(e2e_cpu_seconds_total)\{/e2e_cpu_seconds_total_v1\{/;
             s/^(e2e_memory_rss_bytes)\{/e2e_memory_rss_bytes_v1\{/
           ' prometheus.txt > prometheus_renamed.txt
-
+          sed -E 's/\s+[0-9]+(\.[0-9]+)?$//' prometheus.txt > prometheus_no_ts.txt
           printf '\n*****************\n'
           printf '\n curl e2e_cpu_seconds_total \n'
           cat prometheus_renamed.txt
@@ -306,7 +306,7 @@ jobs:
       - name: Start pushgateway server
         run: |
           docker run -d --name pushgateway -p 9091:9091 prom/pushgateway
-          cat ./artifacts/metrics/prometheus_renamed.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
+          cat ./artifacts/metrics/prometheus_no_ts.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
           #docker run -d --name http-server -v $(pwd):/app -w /app -p 8000:8000 python:3.11-slim python -m http.server 8000 > http.log 2>&1
           printf '\n*****************\n'
           echo 'This is my current directory:'
