@@ -4,6 +4,17 @@ Feature: Shared wallet - onboarding
   Background:
     Given Lace is ready for test
 
+  @LW-11814
+  Scenario Outline: Shared wallets - Add shared wallets option <is_displayed> when using <network> network
+    Given I switch network to: "<network>" in extended mode
+    When I open header menu
+    Then "Add shared wallet" <is_displayed> in menu
+    Examples:
+      | network | is_displayed     |
+      | Mainnet | is not displayed |
+      | Preprod | is displayed     |
+      | Preview | is displayed     |
+
   @LW-11818
   Scenario: Shared wallets - Clicking shared wallet menu option for the first time
     Given I do not have previously generated shared wallet key
@@ -43,7 +54,7 @@ Feature: Shared wallet - onboarding
     And "New Shared wallet" option is active
     And "Import shared wallet" option is active
 
-  @LW-11821 @LW-11816 @LW-11817
+  @LW-11821 @LW-11816 @LW-11817 @LW-12302
   Scenario: Shared wallets - Create shared wallet
     Given I have previously generated shared wallet key
     When I open header menu
@@ -70,6 +81,7 @@ Feature: Shared wallet - onboarding
     And I do not see "Staking" section in side menu
     When I open header menu
     Then I do not see "Nami mode" switch
+    And Pencil icon is not displayed next to shared wallet
 
   @LW-11822 @skip(browserName="firefox")
   #  The uploadFile command is not available in Firefox

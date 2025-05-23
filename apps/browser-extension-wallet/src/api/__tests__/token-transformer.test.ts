@@ -40,16 +40,11 @@ describe('Testing tokenTransformer function', () => {
   test('should format token with fiatBalance', () => {
     const prices = {
       ...mockPrices,
-      tokens: new Map([
-        [
-          balance[0],
-          {
-            id: balance[0].toString(),
-            priceInAda: 1.2,
-            priceVariationPercentage24h: 2.9
-          }
-        ]
-      ])
+      cardano: {
+        ...mockPrices.cardano,
+        getTokenPrice: (assetId: Wallet.Cardano.AssetId) =>
+          assetId === balance[0] ? { priceInAda: 1.2, priceVariationPercentage24h: 2.9 } : undefined
+      }
     };
     const result = tokenTransformer(mockAsset, balance, prices, defaultCurrency);
     const tokenPrice = 1.2;

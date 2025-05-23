@@ -11,12 +11,14 @@ import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
 import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
 import { useAnalyticsContext } from '@providers';
-import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
+import { PostHogAction, WALLET_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
 import { AnyBip32Wallet, AnyWallet, Bip32WalletAccount, ScriptWallet, WalletType } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
+import { isScriptWallet } from '@lace/core';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -65,6 +67,7 @@ export const UserInfo = ({
   const [lastActiveAccount, setLastActiveAccount] = useState<number>(0);
   const [handle] = useGetHandles();
   const { activeWalletAvatar, getAvatar } = useWalletAvatar();
+  const { blockchain } = useCurrentBlockchain();
 
   const handleName = handle?.nftMetadata?.name;
 
@@ -142,7 +145,9 @@ export const UserInfo = ({
               return;
             }
 
-            void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet);
+            void analytics.sendEventToPostHog(PostHogAction.MultiWalletSwitchWallet, {
+              [WALLET_TYPE_KEY]: walletType
+            });
 
             await activateWallet({
               walletId: wallet.walletId,
@@ -153,6 +158,9 @@ export const UserInfo = ({
               duration: TOAST_DEFAULT_DURATION,
               text: t('multiWallet.activated.wallet', { walletName: wallet.metadata.name })
             });
+            // reload if we switch from, to or between btc wallet(s)
+            if ((!isScriptWallet(wallet) && wallet.blockchainName === 'Bitcoin') || blockchain === 'bitcoin')
+              window.location.reload();
           }}
           type={walletType}
           profile={
@@ -180,7 +188,8 @@ export const UserInfo = ({
       onOpenWalletAccounts,
       setIsDropdownMenuOpen,
       activeWalletId,
-      t
+      t,
+      blockchain
     ]
   );
 

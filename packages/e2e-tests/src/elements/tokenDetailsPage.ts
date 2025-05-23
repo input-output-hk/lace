@@ -1,6 +1,7 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 
 import CommonDrawerElements from './CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class TokenDetailsPage extends CommonDrawerElements {
   private TOKEN_LOGO = '[data-testid="token-logo"]';
@@ -19,55 +20,55 @@ class TokenDetailsPage extends CommonDrawerElements {
 
   private VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
 
-  get tokenLogo() {
+  get tokenLogo(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKEN_LOGO);
   }
 
-  get tokenName() {
+  get tokenName(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKEN_NAME);
   }
 
-  get tokenTicker() {
+  get tokenTicker(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOKEN_TICKER);
   }
 
-  get tokenPriceLabel() {
+  get tokenPriceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_LABEL);
   }
 
-  get tokenPriceValue() {
+  get tokenPriceValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_VALUE);
   }
 
-  get tokenPriceCurrency() {
+  get tokenPriceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_CURRENCY);
   }
 
-  get tokenPriceChange() {
+  get tokenPriceChange(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_PRICE_COMPONENT).$(this.BALANCE_SUBTITLE);
   }
 
-  get tokenBalanceLabel() {
+  get tokenBalanceLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_LABEL);
   }
 
-  get tokenBalanceValue() {
+  get tokenBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_VALUE);
   }
 
-  get tokenBalanceCurrency() {
+  get tokenBalanceCurrency(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_CURRENCY);
   }
 
-  get tokenFiatBalance() {
+  get tokenFiatBalance(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.drawerBody.$(this.TOKEN_BALANCE_COMPONENT).$(this.BALANCE_SUBTITLE);
   }
 
-  get transactionsListTitle() {
+  get transactionsListTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTIONS_LIST_TITLE);
   }
 
-  get viewAllButton() {
+  get viewAllButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.VIEW_ALL_BUTTON);
   }
 
@@ -75,7 +76,7 @@ class TokenDetailsPage extends CommonDrawerElements {
     return $$(this.TRANSACTION_ITEM);
   }
 
-  async clickOnViewAllButton() {
+  async clickOnViewAllButton(): Promise<void> {
     await this.viewAllButton.click();
   }
 }

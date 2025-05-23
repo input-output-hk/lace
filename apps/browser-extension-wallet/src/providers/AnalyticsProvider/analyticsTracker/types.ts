@@ -24,6 +24,7 @@ export enum TxRecipientType {
 }
 
 export const TX_CREATION_TYPE_KEY = 'tx_creation_type';
+export const WALLET_TYPE_KEY = 'wallet_type';
 
 export enum TxCreationType {
   Internal = 'internal',

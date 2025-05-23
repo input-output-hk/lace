@@ -131,19 +131,19 @@ describe('assets utils', () => {
     const mockTokens = {
       // 10 tokens * 200 = 2000 ADA
       '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba8254534c41': {
-        tokenPrice: { priceInAda: 200, priceVariationPercentage24h: 0.7 },
+        tokenPrice: { lastFetchTime: 0, price: { priceInAda: 200, priceVariationPercentage24h: 0.7 } },
         balance: BigInt(10),
         assetInfo: { tokenMetadata: {} } as Wallet.Asset.AssetInfo // No decimals, but metadata available
       },
       // 1 token * 1000 = 1000 ADA
       b0d07d45fe9514f80213f4020e5a61241458be626841cde717cb38a76e7574636f696e: {
-        tokenPrice: { priceInAda: 1000, priceVariationPercentage24h: 0.7 },
+        tokenPrice: { lastFetchTime: 0, price: { priceInAda: 1000, priceVariationPercentage24h: 0.7 } },
         balance: BigInt(1_000_000),
         assetInfo: { tokenMetadata: { decimals: 6 } } as Wallet.Asset.AssetInfo
       },
       // 5 tokens * 100 = 500 ADA
       '6b8d07d69639e9413dd637a1a815a7323c69c86abbafb66dbfdb1aa7': {
-        tokenPrice: { priceInAda: 100, priceVariationPercentage24h: 0.7 },
+        tokenPrice: { lastFetchTime: 0, price: { priceInAda: 100, priceVariationPercentage24h: 0.7 } },
         balance: BigInt(5000),
         assetInfo: { tokenMetadata: { decimals: 3 } } as Wallet.Asset.AssetInfo
       }

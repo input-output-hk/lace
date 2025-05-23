@@ -116,7 +116,7 @@ class StakePoolDetails extends CommonDrawerElements {
     return $$(this.OWNER);
   }
 
-  get stakeButton() {
+  get stakeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STAKE_BUTTON);
   }
 }

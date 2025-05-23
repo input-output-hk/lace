@@ -136,7 +136,7 @@ export const getAssetFiatValue = (
   prices: PriceResult,
   fiatCurrency: CurrencyInfo
 ): string => {
-  const tokenPriceInAda = prices?.tokens?.get(Wallet.Cardano.AssetId(assetInputItem.id))?.priceInAda;
+  const tokenPriceInAda = prices?.cardano.getTokenPrice(Wallet.Cardano.AssetId(assetInputItem.id))?.priceInAda;
   return assetInfo?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano?.price
     ? `= ${
         assetInputItem?.value

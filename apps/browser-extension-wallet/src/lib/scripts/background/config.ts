@@ -19,6 +19,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
     adaPrices$: RemoteApiPropertyType.HotObservable,
     tokenPrices$: RemoteApiPropertyType.HotObservable
   },
+  trackCardanoTokenPrice: RemoteApiPropertyType.MethodReturningPromise,
   handleOpenBrowser: RemoteApiPropertyType.MethodReturningPromise,
   handleOpenNamiBrowser: RemoteApiPropertyType.MethodReturningPromise,
   closeAllTabsAndOpenPopup: RemoteApiPropertyType.MethodReturningPromise,

@@ -7,14 +7,6 @@ import { StakePool } from '../data/expectedStakePoolsData';
 import { browser } from '@wdio/globals';
 
 class StakingPageAssert {
-  assertStakePoolSwitched = async (stakePoolName: string) => {
-    await browser.waitUntil(async () => (await StakingInfoComponent.poolName.getText()) === stakePoolName, {
-      timeout: 180_000,
-      interval: 2000,
-      timeoutMsg: 'failed while waiting for stake Pool Switch'
-    });
-  };
-
   assertSeeCurrentlyStakingComponent = async (
     expectedStakePool: StakePool,
     mode: 'extended' | 'popup',
