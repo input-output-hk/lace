@@ -282,6 +282,20 @@ jobs:
             - job_name: 'e2e-perf-metrics'
               static_configs:
                 - targets: ['pushgateway:9091']
+
+              metric_relabel_configs:
+                # rename old_metric → new_metric
+                - source_labels: [__name__]
+                  regex: '^e2e_cpu_seconds_total$'
+                  target_label: __name__
+                  replacement: e2e_cpu_seconds_total_v1
+                  action: replace
+                - source_labels: [__name__]
+                  regex: '^e2e_memory_rss_bytes$'
+                  target_label: __name__
+                  replacement: e2e_memory_rss_bytes_v1
+                  action: replace
+
           remote_write:
             - url: "$PUSH_URL"
               basic_auth:
