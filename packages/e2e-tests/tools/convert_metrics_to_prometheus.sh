@@ -42,7 +42,7 @@ for file in "${FILES[@]}"; do
 
   filename=$(basename "$file")
   scenario_id="${filename%%-chrome-usage.json}"
-  scenario_name=$(jq -r '.scenarioName // empty' "$file")
+  scenario_name=$(jq -r '.scenarioName // empty' "$file" | sed 's/"/\\"/g')
   data_length=$(jq '.data | length' "$file")
 
   echo "# Metrics from $filename" >> "$OUTPUT_FILE"
