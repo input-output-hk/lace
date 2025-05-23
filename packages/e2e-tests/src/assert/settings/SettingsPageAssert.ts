@@ -112,9 +112,6 @@ class SettingsPageAssert {
     // expect(await SettingsPage.passphraseVerificationLink.getDescriptionText()).to.equal(
     //   await t('browserView.settings.security.passphrasePeriodicVerification.description')
     // );
-    expect(await SettingsPage.analyticsLink.getDescriptionText()).to.equal(
-      await t('browserView.settings.security.analytics.description')
-    );
     expect(await SettingsPage.faqsLink.getDescriptionText()).to.equal(
       await t('browserView.settings.help.faqs.description')
     );
@@ -168,18 +165,6 @@ class SettingsPageAssert {
     expect(await SettingsPage.removeWalletButton.getText()).to.equal(
       await t('browserView.settings.wallet.general.removeAction')
     );
-  }
-
-  async assertSeeAnalyticsSection() {
-    await SettingsPage.analyticsLink.title.waitForDisplayed();
-    expect(await SettingsPage.analyticsLink.getTitleText()).to.equal(
-      await t('browserView.settings.security.analytics.title')
-    );
-    await SettingsPage.analyticsLink.description.waitForDisplayed();
-    expect(await SettingsPage.analyticsLink.getDescriptionText()).to.equal(
-      await t('browserView.settings.security.analytics.description')
-    );
-    await SettingsPage.analyticsSwitch.waitForDisplayed();
   }
 
   async assertSeeBetaProgramSection(switchChecked: boolean) {

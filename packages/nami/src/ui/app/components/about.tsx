@@ -23,10 +23,8 @@ import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useOutsideHandles } from '../../../features/outside-handles-provider';
 
-import PrivacyPolicy from './privacyPolicy';
 import TermsOfUse from './termsOfUse';
 
-import type { PrivacyPolicyRef } from './privacyPolicy';
 import type { TermsOfUseRef } from './termsOfUse';
 
 export interface AboutRef {
@@ -42,7 +40,6 @@ const About = (_props, ref) => {
   const IOHK = useColorModeValue(IOHKWhite, IOHKBlack);
 
   const termsRef = React.useRef<TermsOfUseRef>(null);
-  const privacyPolRef = React.useRef<PrivacyPolicyRef>(null);
 
   React.useImperativeHandle(ref, () => ({
     openModal: () => {
@@ -124,7 +121,9 @@ const About = (_props, ref) => {
               </Link>
               <span> | </span>
               <Link
-                onClick={() => privacyPolRef.current?.openModal()}
+                onClick={() => {
+                  openExternalLink(`${process.env.PRIVACY_POLICY_URL}`)
+                }}
                 color="GrayText"
                 _hover={{ color: 'GrayText', textDecoration: 'underline' }}
               >
@@ -136,7 +135,6 @@ const About = (_props, ref) => {
         </ModalContent>
       </Modal>
       <TermsOfUse ref={termsRef} />
-      <PrivacyPolicy ref={privacyPolRef} />
     </>
   );
 };
