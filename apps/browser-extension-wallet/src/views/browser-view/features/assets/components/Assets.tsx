@@ -1,7 +1,6 @@
 /* eslint-disable sonarjs/cognitive-complexity */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import isNil from 'lodash/isNil';
-import { Wallet } from '@lace/cardano';
 import { AssetTableProps, useItemsPageSize } from '@lace/core';
 import { useObservable } from '@lace/common';
 import { useBalances, useFetchCoinPrice, useRedirection } from '@hooks';
@@ -33,6 +32,8 @@ import { USE_FOOR_TOPUP } from '@src/views/browser-view/components/TopUpWallet/c
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
 import { MidnightEventBanner } from './MidnightEventBanner';
+import { useCurrentBlockchain } from '@src/multichain';
+import { getNetworkName } from '@src/utils/get-network-name';
 
 const LIST_ITEM_HEIGHT = 80;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -57,15 +58,15 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     activityDetail,
     resetActivityState,
     blockchainProvider,
-    environmentName,
-    currentChain
+    environmentName
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const { setPickedCoin } = useCoinStateSelector(SEND_COIN_OUTPUT_ID);
   const { setTriggerPoint } = useAnalyticsSendFlowTriggerPoint();
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
-  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
+  const { blockchain } = useCurrentBlockchain();
+  const isMainnet = getNetworkName(blockchain, environmentName) === 'Mainnet';
 
   const [isActivityDetailsOpen, setIsActivityDetailsOpen] = useState(false);
   const [fullAssetList, setFullAssetList] = useState<AssetTableProps['rows']>();
