@@ -81,6 +81,7 @@ interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
   env: {
     baseCardanoServicesUrl: string;
+    baseKoraLabsServicesUrl: string;
     customSubmitTxUrl?: string;
     blockfrostConfig: BlockfrostClientConfig & { rateLimiter: RateLimiter };
   };
@@ -134,7 +135,7 @@ const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
 
 export const createProviders = ({
   axiosAdapter,
-  env: { baseCardanoServicesUrl: baseUrl, customSubmitTxUrl, blockfrostConfig },
+  env: { baseCardanoServicesUrl: baseUrl, baseKoraLabsServicesUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
   experiments: { useWebSocket },
   extensionLocalStorage
@@ -184,7 +185,7 @@ export const createProviders = ({
 
   const handleProvider = initHandleService({
     adapter: axiosAdapter,
-    baseCardanoServicesUrl: baseUrl,
+    baseKoraLabsServicesUrl,
     cache: createPersistentCacheStorage({
       extensionLocalStorage,
       fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.handleProvider].count,

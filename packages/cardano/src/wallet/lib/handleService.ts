@@ -1,7 +1,6 @@
-import { handleHttpProvider } from '@cardano-sdk/cardano-services-client';
-import { HandleProvider, HandleResolution, ResolveHandlesArgs } from '@cardano-sdk/core';
+import { KoraLabsHandleProvider } from '@cardano-sdk/cardano-services-client';
+import { Cardano, HandleProvider, HandleResolution, ResolveHandlesArgs } from '@cardano-sdk/core';
 import type { Cache } from '@cardano-sdk/util';
-import { logger } from '@lace/common';
 import { AxiosAdapter } from 'axios';
 
 export interface HandleResolutionCacheItem {
@@ -11,20 +10,22 @@ export interface HandleResolutionCacheItem {
 
 export interface HandleServiceProps {
   adapter?: AxiosAdapter;
-  baseCardanoServicesUrl: string;
+  baseKoraLabsServicesUrl: string;
   cache: Cache<HandleResolutionCacheItem>;
 }
 
 // eslint-disable-next-line no-magic-numbers
 const HANDLE_RESOLUTION_CACHE_LIFETIME = 10 * 60 * 1000; // 10 minutes
 
-export const initHandleService = (props: HandleServiceProps): HandleProvider => {
-  const { adapter, baseCardanoServicesUrl, cache } = props;
+export const handleKoraLabsPolicyId = Cardano.PolicyId('f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a');
 
-  const origin = handleHttpProvider({
+export const initHandleService = (props: HandleServiceProps): HandleProvider => {
+  const { adapter, baseKoraLabsServicesUrl, cache } = props;
+
+  const origin = new KoraLabsHandleProvider({
     adapter,
-    baseUrl: baseCardanoServicesUrl,
-    logger
+    policyId: handleKoraLabsPolicyId,
+    serverUrl: baseKoraLabsServicesUrl
   });
 
   return {
