@@ -456,10 +456,10 @@ When(
   }
 );
 
-Then(/^Gov Tool page is displayed in a new tab$/, async () => {
+Then(/^tempo.vote page is displayed in a new tab$/, async () => {
   const expectedUrl = extensionUtils.isMainnet()
-    ? 'https://gov.tools/'
-    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+    ? 'https://tempo.vote/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.tempo.vote/`;
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
 
