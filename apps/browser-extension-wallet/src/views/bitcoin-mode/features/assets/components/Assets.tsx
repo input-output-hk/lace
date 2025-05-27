@@ -16,7 +16,8 @@ import { compactNumberWithUnit } from '@utils/format-number';
 import { USE_FOOR_TOPUP } from '@views/browser/components/TopUpWallet/config';
 import { useIsSmallerScreenWidthThan } from '@hooks/useIsSmallerScreenWidthThan';
 import { BREAKPOINT_SMALL } from '@styles/constants';
-import { Wallet } from '@lace/cardano';
+import { getNetworkName } from '@src/utils/get-network-name';
+import { useCurrentBlockchain } from '@src/multichain';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -37,10 +38,12 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const { priceResult } = useFetchCoinPrice();
   const {
     walletUI: { appMode, areBalancesVisible, getHiddenBalancePlaceholder },
-    currentChain
+    currentChain,
+    environmentName
   } = useWalletStore();
   const popupView = appMode === APP_MODE_POPUP;
   const { bitcoinWallet } = useWalletManager();
+  const { blockchain } = useCurrentBlockchain();
   const hiddenBalancePlaceholder = getHiddenBalancePlaceholder();
   const [balance, setBalance] = useState<BigInt>(BigInt(0));
   const [isBalanceLoading, setIsBalanceLoading] = useState<boolean>(true);
@@ -56,7 +59,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     () => (currencyCode === 'BTC' ? Number(balance) / SATS_IN_BTC : (Number(balance) / SATS_IN_BTC) * bitcoinPrice),
     [balance, bitcoinPrice, currencyCode]
   );
-  const isMainnet = currentChain?.networkMagic === Wallet.Cardano.NetworkMagics.Mainnet;
+  const isMainnet = getNetworkName(blockchain, environmentName) === 'Mainnet';
   const isScreenTooSmallForSidePanel = useIsSmallerScreenWidthThan(BREAKPOINT_SMALL);
 
   useEffect(() => {
