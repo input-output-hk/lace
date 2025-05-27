@@ -308,7 +308,7 @@ const TransactionBuilder = (undefined, ref) => {
                   openExternalLink(govToolsUrl);
                 }}
               >
-                Gov.tools
+                tempo.vote
               </Link>
               {' '}portal. Once delegated, you will be able to de-register the keys.
             </Text>

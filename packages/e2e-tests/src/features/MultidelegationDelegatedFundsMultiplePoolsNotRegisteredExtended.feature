@@ -16,7 +16,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Not registered voting
     Then I see a "FAQ" article with title "What is the Voltaire GovTool?"
 
   @LW-12039
-  Scenario: Extended View - "Delegate your voting power" banner - click on "Register now at Gov Tool" button
+  Scenario: Extended View - "Delegate your voting power" banner - click on "Register now at tempo.vote" button
     When I navigate to Staking extended page
-    And I click on "Register now at Gov Tool" button
-    Then Gov Tool page is displayed in a new tab
+    And I click on "Register now at tempo.vote" button
+    Then tempo.vote page is displayed in a new tab

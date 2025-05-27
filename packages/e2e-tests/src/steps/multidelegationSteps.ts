@@ -703,6 +703,6 @@ When(/^I click on "Know more" link on "Delegate your voting power" banner$/, asy
   await DelegateYourVotingPowerBanner.clickOnKnowMoreLink();
 });
 
-When(/^I click on "Register now at Gov Tool" button$/, async () => {
+When(/^I click on "Register now at tempo.vote" button$/, async () => {
   await DelegateYourVotingPowerBanner.clickRegisterButton();
 });
