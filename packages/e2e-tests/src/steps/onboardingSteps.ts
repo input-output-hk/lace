@@ -20,7 +20,6 @@ import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingR
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
-import analyticsBanner from '../elements/PrivacyPolicyUpdateBanner';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
 import { shuffle } from '../utils/arrayUtils';
@@ -35,7 +34,6 @@ import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWal
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
-import { switchToWindowWithLace } from '../utils/window';
 import LocalStorageInitializer from '../fixture/localStorageInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
@@ -115,13 +113,6 @@ Then(
 
 Then(/^"Get started" page is displayed$/, async () => {
   await OnboardingMainPageAssert.assertSeeMainPage();
-});
-
-Then(/^I (accept|reject) analytics banner on "Get started" page$/, async (action: 'accept' | 'reject') => {
-  if (browser.isFirefox) {
-    await switchToWindowWithLace();
-  }
-  action === 'accept' ? await analyticsBanner.clickOnAgreeButton() : await analyticsBanner.clickOnRejectButton();
 });
 
 Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {

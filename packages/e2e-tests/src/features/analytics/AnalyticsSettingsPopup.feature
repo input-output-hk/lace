@@ -158,14 +158,6 @@ Feature: Analytics - Settings - Popup View
     Then I validate latest analytics single event "settings | faqs | click"
     Then I validate that 1 analytics event(s) have been sent
 
-  @LW-8785
-  Scenario: Analytics - Popup View - Settings - Analytics
-    Given I am on Tokens popup page
-    When I open settings from header menu
-    And I set up request interception for posthog analytics request(s)
-    Then I validate latest analytics single event "settings | analytics | skip | click"
-    Then I validate that 1 analytics event(s) have been sent
-
   @LW-8786
   Scenario: Analytics - Popup View - Settings - Theme switch
     Given I set light theme mode in Local Storage

@@ -95,7 +95,6 @@ Feature: Forgot password
     And I switch to tab with restore wallet process
     # And I am on <expected_page> page of restoration flow
     And I leave "Forgot password" flow
-    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     Examples:
       | expected_page         |

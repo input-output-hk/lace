@@ -20,10 +20,6 @@ class LocalStorageInitializer {
     await localStorageManager.setItem('unconfirmedTransactions', `[${value}]`);
   }
 
-  async initializeAnalyticsStatus(value: 'ACCEPTED' | 'REJECTED'): Promise<void> {
-    await localStorageManager.setItem('analyticsStatus', JSON.stringify(value));
-  }
-
   async initializeShowDAppBetaModal(value: boolean): Promise<void> {
     await localStorageManager.setItem('showDappBetaModal', JSON.stringify(value));
   }
@@ -34,10 +30,6 @@ class LocalStorageInitializer {
 
   disableShowingMultidelegationBetaBanner = async () => {
     await localStorageManager.setItem('multidelegationFirstVisit', 'false');
-  };
-
-  enableShowingAnalyticsBanner = async () => {
-    await localStorageManager.setItem('analyticsStatus', '');
   };
 
   disableShowingMultidelegationDAppsIssueModal = async () => {
@@ -61,7 +53,6 @@ class LocalStorageInitializer {
   initialiseBasicLocalStorageData = async (walletName = 'TestAutomationWallet'): Promise<void> => {
     testContext.saveWithOverride('activeWallet', walletName);
 
-    await this.initializeAnalyticsStatus('ACCEPTED');
     await this.initializeShowDAppBetaModal(false);
     await this.initializeAppSettings();
     await this.disableShowPinExtension();

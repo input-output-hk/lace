@@ -29,7 +29,6 @@ class SettingsPage extends CommonDrawerElements {
   private readonly SHOW_RECOVERY_PHRASE_LINK_TEST_ID = 'settings-show-recovery-phrase-link';
   private readonly GENERATE_PAPER_WALLET_LINK_TEST_ID = 'settings-generate-paperwallet-link';
   private readonly PASSPHRASE_VERIFICATION_LINK_TEST_ID = 'settings-passphrase-verification-link';
-  private readonly ANALYTICS_LINK_TEST_ID = 'settings-analytics-section';
   private readonly FAQS_LINK_TEST_ID = 'settings-support-faqs-link';
   private readonly HELP_LINK_TEST_ID = 'settings-support-help-link';
   private readonly TNC_LINK_TEST_ID = 'settings-legal-tnc-link';
@@ -137,10 +136,6 @@ class SettingsPage extends CommonDrawerElements {
 
   get generatePaperWallet() {
     return new SettingsLink(this.GENERATE_PAPER_WALLET_LINK_TEST_ID);
-  }
-
-  get analyticsLink() {
-    return new SettingsLink(this.ANALYTICS_LINK_TEST_ID);
   }
 
   get faqsLink() {

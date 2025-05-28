@@ -144,13 +144,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | faqs | click"
     Then I validate that 1 analytics event(s) have been sent
 
-  @LW-8789
-  Scenario: Analytics - Extended View - Settings - Analytics
-    When I open settings from header menu
-    And I set up request interception for posthog analytics request(s)
-    Then I validate latest analytics single event "settings | analytics | skip | click"
-    Then I validate that 1 analytics event(s) have been sent
-
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
     When I set light theme mode in Local Storage

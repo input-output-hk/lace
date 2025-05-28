@@ -17,7 +17,6 @@ import localStorageAssert from '../assert/localStorageAssert';
 import collateralDrawerAssert from '../assert/settings/CollateralDrawerAssert';
 import Modal from '../elements/modal';
 import WalletAddressPage from '../elements/walletAddressPage';
-import { browser } from '@wdio/globals';
 import CollateralDrawer from '../elements/settings/CollateralDrawer';
 import HelpDrawer from '../elements/settings/HelpDrawer';
 import ModalAssert from '../assert/modalAssert';
@@ -271,13 +270,12 @@ Then(/^"Remove wallet" modal (is|is not) displayed$/, async (shouldBeDisplayed: 
 });
 
 When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (button: 'Back' | 'Remove wallet') => {
-  await browser.pause(500);
   switch (button) {
     case 'Back':
-      await Modal.cancelButton.click();
+      await Modal.clickCancelButton();
       break;
     case 'Remove wallet':
-      await Modal.confirmButton.click();
+      await Modal.clickConfirmButton();
       break;
     default:
       throw new Error(`Unsupported button name: ${button}`);
@@ -287,7 +285,7 @@ When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (
 When(/^I remove wallet$/, async () => {
   await MenuHeader.openSettings();
   await settingsExtendedPageObject.clickOnRemoveWallet();
-  await Modal.confirmButton.click();
+  await Modal.clickConfirmButton();
 });
 
 Then(/^I see "Show public key" page in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {

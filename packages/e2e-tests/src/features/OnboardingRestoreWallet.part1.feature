@@ -72,7 +72,6 @@ Feature: Onboarding - Restore wallet
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    And I reject analytics banner on "Get started" page
     Given I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page from "Restore" wallet flow and fill values
     When I click "Enter wallet" button

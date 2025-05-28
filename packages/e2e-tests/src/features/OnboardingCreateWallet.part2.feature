@@ -49,7 +49,6 @@ Feature: Onboarding - Create wallet
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    And I reject analytics banner on "Get started" page
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
@@ -165,11 +164,6 @@ Feature: Onboarding - Create wallet
     And "Next" button is disabled during onboarding process
     When I enter saved mnemonic words
     Then "Next" button is enabled during onboarding process
-
-  @LW-10138
-  Scenario: Create Wallet - Analytics banner is displayed correctly
-    Given I enable showing Analytics consent banner
-    Then I see Analytics banner displayed correctly
 
   @LW-10452
   Scenario: Create wallet - Copy and Paste from clipboard has a tooltip
