@@ -706,10 +706,6 @@ Then(/^"Handle not found" error is displayed under address input in "Send" drawe
   await drawerSendExtendedAssert.assertSeeAdaHandleError(true);
 });
 
-Then(/^search loader is displayed inside address input field$/, async () => {
-  await drawerSendExtendedAssert.assertSeeSearchLoader(true);
-});
-
 Then(
   /^"Add address" button is (enabled|disabled) in the bundle (\d) recipient's address input$/,
   async (state: 'enabled' | 'disabled', inputIndex: number) => {
