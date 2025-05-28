@@ -61,24 +61,27 @@ export const SharedWallet = (): JSX.Element => {
     if (isSharedWallet) setBackgroundPage();
   }, [isSharedWallet, setBackgroundPage]);
 
-  const handleCreateWallet = async (data: CreateWalletParams) => {
-    const activeWalletId = cardanoWallet.source.wallet.walletId;
+  const handleCreateWallet = useCallback(
+    async (data: CreateWalletParams) => {
+      const activeWalletId = cardanoWallet.source.wallet.walletId;
 
-    try {
-      await createInMemorySharedWallet({
-        name: data.name,
-        chainId: Wallet.Cardano.ChainIds[environmentName],
-        ownSignerWalletId: activeWalletId,
-        quorumRules: data.quorumRules,
-        coSigners: data.coSigners
-      });
-    } catch (error: unknown) {
-      if (error instanceof WalletConflictError) {
-        setIsWalletConflictModalVisible(true);
+      try {
+        await createInMemorySharedWallet({
+          name: data.name,
+          chainId: Wallet.Cardano.ChainIds[environmentName],
+          ownSignerWalletId: activeWalletId,
+          quorumRules: data.quorumRules,
+          coSigners: data.coSigners
+        });
+      } catch (error: unknown) {
+        if (error instanceof WalletConflictError) {
+          setIsWalletConflictModalVisible(true);
+        }
+        throw error;
       }
-      throw error;
-    }
-  };
+    },
+    [cardanoWallet.source.wallet.walletId, environmentName, createInMemorySharedWallet]
+  );
 
   const generateKey = useCallback(
     async (enteredPassword?: string) => {
@@ -97,6 +100,7 @@ export const SharedWallet = (): JSX.Element => {
   );
 
   const navigateToRoot = useCallback(() => history.push(walletRoutePaths.sharedWallet.root), [history]);
+  const navigateToAppHome = useCallback(() => setBackgroundPage(), [setBackgroundPage]);
 
   return (
     <>
@@ -131,7 +135,7 @@ export const SharedWallet = (): JSX.Element => {
                   walletKind={isHardwareWallet ? 'cold' : 'hot'}
                   activeWalletName={walletInfo?.name || ''}
                   initialWalletName={initialWalletName}
-                  navigateToAppHome={() => setBackgroundPage()}
+                  navigateToAppHome={navigateToAppHome}
                   exitTheFlow={navigateToRoot}
                   sharedWalletKey={sharedWalletKey}
                   onCreateSharedWallet={handleCreateWallet}
@@ -174,7 +178,7 @@ export const SharedWallet = (): JSX.Element => {
                   }}
                   sharedKeys={sharedWalletKey}
                   exitTheFlow={navigateToRoot}
-                  navigateToAppHome={() => setBackgroundPage()}
+                  navigateToAppHome={navigateToAppHome}
                   onImportJsonError={async () =>
                     await analytics.sendEventToPostHog(PostHogAction.SharedWalletsLocateWalletImportJsonError)
                   }
