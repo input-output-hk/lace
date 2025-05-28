@@ -1,13 +1,14 @@
 /* eslint-disable no-magic-numbers */
 import { useEffect, useState } from 'react';
 import { Wallet } from '@lace/cardano';
-import { useWalletStore } from '@src/stores';
+import { useSyncStatus, useWalletStore } from '@src/stores';
 import { useObservable } from '@lace/common';
 import { OutputsMap, useMaxAdaStatus, useTransactionProps } from '@src/views/browser-view/features/send-transaction';
 import { TxBuilder } from '@cardano-sdk/tx-construction';
 import { Assets, WalletUtil } from '@cardano-sdk/wallet';
 import pDebounce from 'p-debounce';
 import { subtractValueQuantities } from '@cardano-sdk/core';
+import { Status } from '@components/WalletStatus';
 
 const { getTotalMinimumCoins, setMissingCoins } = Wallet;
 
@@ -236,6 +237,7 @@ export const dCalculateMaxAda = pDebounce.promise(calculateMaxAda);
 
 export const useMaxAda = (): bigint => {
   const [maxADA, setMaxADA] = useState<bigint>(BigInt(0));
+  const status$ = useSyncStatus();
   const { walletInfo, inMemoryWallet } = useWalletStore();
   const balance = useObservable(inMemoryWallet?.balance?.utxo.available$);
   const availableRewards = useObservable(inMemoryWallet?.balance?.rewardAccounts?.rewards$);
@@ -243,6 +245,7 @@ export const useMaxAda = (): bigint => {
   const { outputsMap } = useTransactionProps();
   const { setMaxAdaLoading } = useMaxAdaStatus();
   const address = walletInfo?.addresses[0].address;
+  const walletStatus = useObservable(status$);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -289,13 +292,13 @@ export const useMaxAda = (): bigint => {
       }
     };
 
-    if (balance && address) {
+    if (balance && address && walletStatus.status === Status.SYNCED) {
       calculate();
     }
     return () => {
       abortController.abort();
     };
-  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputsMap, setMaxAdaLoading]);
+  }, [availableRewards, assetInfo, balance, inMemoryWallet, address, outputsMap, setMaxAdaLoading, walletStatus]);
 
   return maxADA;
 };

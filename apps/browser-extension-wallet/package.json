@@ -37,7 +37,7 @@
     "cleanup:firefox-artifacts": "rm -rf artifacts-firefox",
     "cleanup:node_modules": "rm -rf node_modules",
     "dev": "run-s cleanup:dist dev:project",
-    "dev:firefox": "BROWSER=firefox run-s cleanup:dist watch:sw serve:app ",
+    "dev:firefox": "BROWSER=firefox run-s cleanup:dist dev:project ",
     "dev:project": "run-p watch:sw serve:app",
     "format-check": "echo \"@lace/browser-extension-wallet: no format-check command specified\"",
     "lint": "cd ../.. && yarn extension:lint",
