@@ -20,3 +20,7 @@ runtime.onConnect.addListener((port: TimedPort) => {
   port.onDisconnect.addListener(deleteTimer);
   port._timer = setTimeout(forceReconnect, 250e3, port);
 });
+
+if (process.env.BROWSER === 'firefox') {
+  runtime.onMessage.addListener(() => Promise.resolve('Pong'));
+}
