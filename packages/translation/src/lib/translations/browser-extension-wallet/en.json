@@ -728,7 +728,7 @@
   "general.errors.utxoNotFragmentedEnough": "UTxO Not Fragmented Enough",
   "general.errors.wrongAddressEra": "Byron addresses are not supported, please use a Shelley address instead.",
   "general.errors.wrongNetworkAddress": "This address belongs to a different network",
-  "general.errors.lockedStakeRewards.description": "Your total balance includes Locked Stake Rewards that can not be withdrawn. Go to the staking center to register your voting power to unlock them",
+  "general.errors.lockedStakeRewards.description": "Your total balance includes Locked Stake Rewards that can not be withdrawn. Go to the <0>staking center</0> to register your voting power to unlock them",
   "general.errors.lockedStakeRewards.cta": "Staking center",
   "general.loading": "Loading...",
   "general.lock.helpAndSupport": "Help and support",
