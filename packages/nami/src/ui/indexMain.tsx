@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { Box, Spinner, useToast } from '@chakra-ui/react';
 import { debounce } from 'lodash';
@@ -19,6 +19,7 @@ import { useChangePassword } from '../adapters/wallet';
 
 import { useCommonOutsideHandles } from './../features/common-outside-handles-provider';
 import { useOutsideHandles } from './../features/outside-handles-provider/useOutsideHandles';
+import PrivacyPolicyUpdate from './app/components/privacyPolicyUpdate';
 import { HWConnectFlow } from './app/hw/hw';
 import { SuccessAndClose } from './app/hw/success-and-close';
 import { TrezorTx } from './app/hw/trezorTx';
@@ -42,7 +43,6 @@ const App = () => {
     fiatCurrency,
     theme,
     walletAddresses,
-    isAnalyticsOptIn,
     isCompatibilityMode,
     currentChain,
     cardanoPrice,
@@ -53,7 +53,6 @@ const App = () => {
     removeDapp,
     createWallet,
     deleteWallet,
-    handleAnalyticsChoice,
     handleCompatibilityModeChoice,
     environmentName,
     switchNetwork,
@@ -208,9 +207,7 @@ const App = () => {
             setTheme={setTheme}
             accountAvatar={activeAccount.avatar}
             accountName={activeAccount.name}
-            isAnalyticsOptIn={isAnalyticsOptIn}
             isCompatibilityMode={isCompatibilityMode}
-            handleAnalyticsChoice={handleAnalyticsChoice}
             handleCompatibilityModeChoice={handleCompatibilityModeChoice}
             updateAccountMetadata={updateAccountMetadata}
             environmentName={environmentName}
@@ -276,9 +273,20 @@ const App = () => {
 
 export const Main = () => {
   const { theme, environmentName, switchWalletMode } = useOutsideHandles();
+  const privacyPolicyReference = useRef<{ openModal: () => void }>();
+
+  useEffect(() => {
+    if (
+      localStorage.getItem('hasUserAcknowledgedPrivacyPolicyUpdate') !== 'true'
+    ) {
+      privacyPolicyReference.current?.openModal();
+    }
+  }, [privacyPolicyReference.current]);
+
   return (
     <HashRouter>
       <Container environmentName={environmentName} theme={theme}>
+        <PrivacyPolicyUpdate ref={privacyPolicyReference} />
         <UpgradeToLaceHeader switchWalletMode={switchWalletMode} />
         <App />
       </Container>

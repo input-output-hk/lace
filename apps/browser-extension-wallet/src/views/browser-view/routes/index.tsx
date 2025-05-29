@@ -26,13 +26,13 @@ import { Portal } from '../features/wallet-setup/components/Portal';
 import { MultiWallet } from '../features/multi-wallet';
 import { MultiWallet as BitcoinMultiWallet } from '../../bitcoin-mode/features/multi-wallet/MultiWallet';
 import { MainLoader } from '@components/MainLoader';
-import { useAppInit } from '@hooks';
+import { useAppInit, useLocalStorage } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
 import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
 import LaceLogoMark from '@src/assets/branding/lace-logo-mark.svg';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { Trans, useTranslation } from 'react-i18next';
@@ -45,6 +45,8 @@ import { logger } from '@lace/common';
 import { VotingLayout } from '../features/voting-beta';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -186,6 +188,19 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
 
   useAppInit();
   useEnterKeyPress();
+
+  const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
+  );
+
+  useEffect(() => {
+    if (enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.OptedIn) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   // Register event listeners
   useEffect(() => {
