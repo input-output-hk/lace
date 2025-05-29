@@ -200,10 +200,10 @@ export const AssetInput = ({
   const lockedRewards = (
     <>
       <Text.Body.Normal color="secondary">{coin.availableBalance}</Text.Body.Normal>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <Flex w="$fill" alignItems="center" gap="$4">
         <Text.Body.Normal color="secondary">{coin.lockedStakeRewards}</Text.Body.Normal>
         {lockedRewardsTooltip}
-      </div>
+      </Flex>
     </>
   );
 
