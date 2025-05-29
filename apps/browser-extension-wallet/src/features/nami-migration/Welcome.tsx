@@ -32,7 +32,7 @@ export const Welcome = (): JSX.Element => {
   }, [analytics]);
 
   useEffect(() => {
-    if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet) {
+    if (enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.OptedIn) {
       setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
       analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
     }

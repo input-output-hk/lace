@@ -1,19 +1,7 @@
 import React, { useRef } from 'react';
 
-import { ChevronRightIcon, InfoOutlineIcon } from '@chakra-ui/icons';
-import {
-  Box,
-  Button,
-  Flex,
-  Link,
-  Popover,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  PopoverTrigger,
-  Spacer,
-  Text,
-} from '@chakra-ui/react';
+import { ChevronRightIcon } from '@chakra-ui/icons';
+import { Box, Button, Text } from '@chakra-ui/react';
 
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
@@ -31,50 +19,6 @@ export const LegalSettings = () => {
         Legal
       </Text>
       <Box height="6" />
-      <Flex minWidth="65%" padding="0 16px" alignItems="center" gap="2">
-        <Text fontSize="16" fontWeight="bold">
-          Analytics
-          <Popover autoFocus={false}>
-            <PopoverTrigger>
-              <InfoOutlineIcon
-                cursor="pointer"
-                color="#4A5568"
-                ml="10px"
-                width="14px"
-                height="14px"
-                display="inline-block"
-              />
-            </PopoverTrigger>
-            <PopoverContent>
-              <PopoverArrow />
-              <PopoverBody>
-                <Text
-                  color="grey"
-                  fontWeight="500"
-                  fontSize="14"
-                  lineHeight="24px"
-                >
-                  We collect anonymous information from your browser extension
-                  to help us improve the quality and performance of Nami. This
-                  may include data about how you use our service, your
-                  preferences and information about your system. Read more&nbsp;
-                  <Link
-                    onClick={() => {
-                      openExternalLink('https://namiwallet.io');
-                    }}
-                    textDecoration="underline"
-                  >
-                    here
-                  </Link>
-                  .
-                </Text>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </Text>
-        <Spacer />
-      </Flex>
-      <Box height="3" />
       <Button
         justifyContent="space-between"
         width="65%"

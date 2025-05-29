@@ -46,7 +46,7 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
   );
 
   useEffect(() => {
-    if (enhancedAnalyticsStatus === EnhancedAnalyticsOptInStatus.NotSet) {
+    if (enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.OptedIn) {
       setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
       analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
     }
