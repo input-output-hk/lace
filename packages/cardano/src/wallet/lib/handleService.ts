@@ -15,8 +15,7 @@ export interface HandleServiceProps {
   cache: Cache<HandleResolutionCacheItem>;
 }
 
-// eslint-disable-next-line no-magic-numbers
-const HANDLE_RESOLUTION_CACHE_LIFETIME = 10 * 60 * 1000; // 10 minutes
+const HANDLE_RESOLUTION_CACHE_LIFETIME = Number.parseInt(process.env.HANDLE_RESOLUTION_CACHE_LIFETIME || '600000', 10);
 
 export const initHandleService = (props: HandleServiceProps): HandleProvider => {
   const { adapter, baseCardanoServicesUrl, cache } = props;
@@ -30,20 +29,22 @@ export const initHandleService = (props: HandleServiceProps): HandleProvider => 
   return {
     getPolicyIds: () => origin.getPolicyIds(),
     healthCheck: () => origin.healthCheck(),
-    resolveHandles: async ({ handles }: ResolveHandlesArgs) => {
+    resolveHandles: async ({ force, handles }: ResolveHandlesArgs) => {
       const now = Date.now();
       const threshold = now - HANDLE_RESOLUTION_CACHE_LIFETIME;
       const handlesToResolveWithRequestIndex: [string, number][] = [];
 
-      const handlesAndCachedItems = await Promise.all(
-        handles.map((handle) =>
-          (async (): Promise<[string, HandleResolutionCacheItem | undefined]> => {
-            const cachedItem = await cache.get(handle);
+      const handlesAndCachedItems: [string, HandleResolutionCacheItem | undefined][] = force
+        ? handles.map((handle) => [handle, undefined])
+        : await Promise.all(
+            handles.map((handle) =>
+              (async () => {
+                const cachedItem = await cache.get(handle);
 
-            return [handle, cachedItem];
-          })()
-        )
-      );
+                return [handle, cachedItem];
+              })()
+            )
+          );
 
       const response = handlesAndCachedItems.map(([handle, cachedItem], index): HandleResolution | null => {
         if (cachedItem && cachedItem.timestamp > threshold) return cachedItem.resolution;

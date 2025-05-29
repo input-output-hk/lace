@@ -117,6 +117,7 @@ export const AddressInput = ({ row, currentNetwork, isPopupView }: AddressInputP
 
         try {
           await ensureHandleOwnerHasntChanged({
+            force: true,
             handleResolution: addressInputValue?.handleResolution,
             handleResolver
           });
