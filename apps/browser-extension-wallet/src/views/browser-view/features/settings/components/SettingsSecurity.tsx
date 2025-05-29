@@ -7,16 +7,13 @@ import {
   ShowPassphraseDrawer,
   PaperWalletSettingsDrawer
 } from './';
-import { Switch } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
 import styles from './SettingsLayout.module.scss';
 import { useWalletStore } from '@src/stores';
-import { useLocalStorage } from '@src/hooks';
 import { useAnalyticsContext, useAppSettingsContext } from '@providers';
 import { PHRASE_FREQUENCY_OPTIONS } from '@src/utils/constants';
-import { EnhancedAnalyticsOptInStatus, PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useCurrentBlockchain } from '@src/multichain';
 
@@ -44,28 +41,9 @@ export const SettingsSecurity = ({
   const { mnemonicVerificationFrequency } = settings;
   const { blockchain } = useCurrentBlockchain();
   const frequency = PHRASE_FREQUENCY_OPTIONS.find(({ value }) => value === mnemonicVerificationFrequency)?.label;
-  const [analyticsStatus, { updateLocalStorage: setEnhancedAnalyticsOptInStatus }] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.OptedOut
-  );
   const analytics = useAnalyticsContext();
   const showPassphraseVerification = process.env.USE_PASSWORD_VERIFICATION === 'true';
   const isBitcoin = blockchain === 'bitcoin';
-
-  const handleAnalyticsChoice = async (isOptedIn: boolean) => {
-    const status = isOptedIn ? EnhancedAnalyticsOptInStatus.OptedIn : EnhancedAnalyticsOptInStatus.OptedOut;
-
-    if (isOptedIn) {
-      await analytics.setOptedInForEnhancedAnalytics(status);
-      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsAgreeClick);
-      await analytics.sendAliasEvent();
-    } else {
-      await analytics.sendEventToPostHog(PostHogAction.SettingsAnalyticsSkipClick);
-      await analytics.setOptedInForEnhancedAnalytics(status);
-    }
-
-    setEnhancedAnalyticsOptInStatus(status);
-  };
 
   const isMnemonicAvailable = useCallback(async () => {
     setHideShowPassphraseSetting(isWalletLocked() || !isInMemoryWallet);
@@ -147,20 +125,6 @@ export const SettingsSecurity = ({
             {t('browserView.settings.security.passphrasePeriodicVerification.title')}
           </SettingsLink>
         )}
-        <SettingsLink
-          description={t('browserView.settings.security.analytics.description')}
-          addon={
-            <Switch
-              testId="settings-analytics-switch"
-              checked={analyticsStatus === EnhancedAnalyticsOptInStatus.OptedIn}
-              onChange={handleAnalyticsChoice}
-              className={styles.analyticsSwitch}
-            />
-          }
-          data-testid="settings-analytics-section"
-        >
-          {t('browserView.settings.security.analytics.title')}
-        </SettingsLink>
       </SettingsCard>
     </>
   );

@@ -5,8 +5,7 @@ import { Portal } from './Portal';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { WalletSetupMainPage } from './WalletSetupMainPage';
-import { useLocalStorage } from '@hooks';
-import { EnhancedAnalyticsOptInStatus, postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
+import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analyticsTracker';
 import { WalletOnboardingFlows } from '@views/browser/features/multi-wallet/WalletOnboardingFlows';
 import { WalletSetupLayout } from '@views/browser/components';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
@@ -14,10 +13,6 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 export const WalletSetup = (): React.ReactElement => {
   const isForgotPasswordFlow = getValueFromLocalStorage('isForgotPasswordFlow');
   const posthogClient = usePostHogClientContext();
-  const [enhancedAnalyticsStatus] = useLocalStorage(
-    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
-    EnhancedAnalyticsOptInStatus.NotSet
-  );
 
   useEffect(() => {
     if (!isForgotPasswordFlow) return () => void 0;
@@ -42,9 +37,7 @@ export const WalletSetup = (): React.ReactElement => {
       <WalletSetupLayout>
         <WalletOnboardingFlows
           aliasEventRequired
-          flowsEnabled={
-            enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.NotSet && !!posthogClient.featureFlagsByNetwork
-          }
+          flowsEnabled={!!posthogClient.featureFlagsByNetwork}
           forgotPasswordFlowActive={isForgotPasswordFlow}
           postHogActions={{
             ...postHogOnboardingActions,

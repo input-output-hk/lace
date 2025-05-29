@@ -46,20 +46,15 @@ Feature: Onboarding - Create wallet
     When I click "Enter wallet" button
     And I see LW homepage
     And "N_8J@bne87A" password is not in snapshot
-    And I open settings from header menu
-    Then Analytics toggle is enabled
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    And I reject analytics banner on "Get started" page
     Given I click "Create" button on wallet setup page
     And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
     And I click "Next" button during wallet setup
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     When I click "Enter wallet" button
     And I see LW homepage
-    And I open settings from header menu
-    Then Analytics toggle is not enabled
 
   @LW-2627
   Scenario: Create Wallet - autofill words
@@ -169,11 +164,6 @@ Feature: Onboarding - Create wallet
     And "Next" button is disabled during onboarding process
     When I enter saved mnemonic words
     Then "Next" button is enabled during onboarding process
-
-  @LW-10138
-  Scenario: Create Wallet - Analytics banner is displayed correctly
-    Given I enable showing Analytics consent banner
-    Then I see Analytics banner displayed correctly
 
   @LW-10452
   Scenario: Create wallet - Copy and Paste from clipboard has a tooltip

@@ -1,16 +1,18 @@
 import React, { useEffect, useMemo } from 'react';
 import { useWalletStore } from '@src/stores';
-import { useAppInit } from '@hooks';
+import { useAppInit, useLocalStorage } from '@hooks';
 import { MainLoader } from '@components/MainLoader';
 import { withDappContext } from '@src/features/dapp/context';
 import { NamiView } from './NamiView';
 import '../../lib/scripts/keep-alive-ui';
 import './index.scss';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { Crash } from '@components/ErrorBoundary';
 import { useFatalError } from '@hooks/useFatalError';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 
 export const NamiPopup = withDappContext((): React.ReactElement => {
   const {
@@ -36,6 +38,19 @@ export const NamiPopup = withDappContext((): React.ReactElement => {
   }, [isLoaded, fatalError]);
 
   useAppInit();
+
+  const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
+  );
+
+  useEffect(() => {
+    if (enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.OptedIn) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   useEffect(() => {
     if (cardanoWallet === null && !deletingWallet) {
