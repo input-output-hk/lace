@@ -8,3 +8,4 @@ export * from './NetworkInfoProviderStub';
 export * from './UtxoProviderStub';
 export * from './RewardsProviderStub';
 export * from './ChainHistoryProviderStub';
+export * from './HandleProviderStub';
