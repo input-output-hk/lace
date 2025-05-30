@@ -106,6 +106,10 @@ inputs:
     description: 'Force Trezor emulation'
     required: false
     default: 'false'
+  HANDLE_RESOLUTION_CACHE_LIFETIME:
+      description: ' ADA handle cache lifetime'
+      required: false
+      default: 600000
 runs:
   using: 'composite'
   steps:
@@ -180,4 +184,5 @@ runs:
         WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
+        HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
       run: yarn browser build

@@ -377,14 +377,6 @@ class DrawerSendExtendedAssert {
     }
   }
 
-  async assertSeeSearchLoader(shouldBeDisplayed: boolean) {
-    await new AddressInput().searchLoader.waitForDisplayed({
-      reverse: !shouldBeDisplayed,
-      interval: 50,
-      timeout: 10_000
-    });
-  }
-
   async assertAddressBookButtonEnabled(bundleIndex: number, shouldBeEnabled: boolean) {
     await new AddressInput(bundleIndex).ctaButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }

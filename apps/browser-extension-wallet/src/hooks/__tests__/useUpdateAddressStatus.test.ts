@@ -8,11 +8,13 @@ jest.mock('@src/utils/validators', () => ({
   ensureHandleOwnerHasntChanged: jest.fn()
 }));
 
+const cardanoAddress = Cardano.PaymentAddress(
+  'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
+);
 const mockHandleResolution = {
+  addresses: { cardano: cardanoAddress },
   backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
-  cardanoAddress: Cardano.PaymentAddress(
-    'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
-  ),
+  cardanoAddress,
   handle: 'bob',
   hasDatum: false,
   image: Asset.Uri('ipfs://c8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe'),
@@ -49,12 +51,8 @@ describe('useUpdateAddressStatus', () => {
   it('sets an address as invalid if a handle resolves with an error', async () => {
     const handleError = new CustomConflictError({
       message: 'Unexpected values',
-      expectedAddress: Cardano.PaymentAddress(
-        'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
-      ),
-      actualAddress: Cardano.PaymentAddress(
-        'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
-      )
+      expectedAddress: cardanoAddress,
+      actualAddress: cardanoAddress
     });
 
     (ensureHandleOwnerHasntChanged as jest.Mock).mockResolvedValueOnce(true).mockRejectedValueOnce(handleError);

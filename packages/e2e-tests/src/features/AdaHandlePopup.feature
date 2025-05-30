@@ -152,7 +152,6 @@ Feature: ADA handle - popup view
     When I click "Send" button on Tokens page in popup mode
     And I am in the slow network mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address
-    Then search loader is displayed inside address input field
     And Green tick icon is displayed next to ADA handle
     And "Add address" button is enabled in the bundle 1 recipient's address input
 
@@ -162,7 +161,6 @@ Feature: ADA handle - popup view
     When I click "Send" button on Tokens page in popup mode
     And I am in the slow network mode
     And I enter "$fake_handle" in the bundle 1 recipient's address
-    Then search loader is displayed inside address input field
     And Red exclamation icon is displayed next to ADA handle
     And "Handle not found" error is displayed under address input in "Send" drawer
     And "Add address" button is disabled in the bundle 1 recipient's address input

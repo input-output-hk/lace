@@ -52,6 +52,7 @@ export const buildTransactionProps = (props: {
         },
         handleResolution: output.handle
           ? {
+              addresses: { cardano: output.address },
               handle: output.handle,
               cardanoAddress: output.address,
               hasDatum: !!output.datum,
