@@ -13,6 +13,7 @@ export const AssetInputRow = ({
   focused,
   onBlur,
   isPopupView,
+  lockedRewardsTooltip,
   ...row
 }: AssetInputProps & {
   onDelete?: () => void;
@@ -74,6 +75,7 @@ export const AssetInputRow = ({
           onBlur={onBlur}
           onFocus={onFocus}
           isPopupView={isPopupView}
+          lockedRewardsTooltip={lockedRewardsTooltip}
         />
         {rowsLength > 1 && (
           <div

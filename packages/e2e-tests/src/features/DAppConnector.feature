@@ -63,7 +63,6 @@ Feature: DAppConnector - Common
   @issue=LW-11988
   Scenario: "No wallet" modal displayed after trying to connect Dapp when there is no wallet
     Given I remove wallet
-    And I accept analytics banner on "Get started" page
     And "Get started" page is displayed
     When I open test DApp
     Then I see DApp no wallet page
@@ -142,7 +141,6 @@ Feature: DAppConnector - Common
     And I switch to window with Lace
     And I close all remaining tabs except current one
     And I remove wallet
-    Then I accept analytics banner on "Get started" page
     And I restore a wallet
     And I disable showing multi-address discovery modal
     And Wallet is synced

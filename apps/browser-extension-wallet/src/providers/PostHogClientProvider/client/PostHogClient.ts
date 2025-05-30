@@ -50,11 +50,8 @@ const logger = contextLogger(commonLogger, 'PostHogClient');
  */
 export class PostHogClient<Action extends string = string> {
   protected static postHogClientInstance: PostHogClient;
-  private userTrackingType: UserTrackingType;
-  private currentUserTrackingType?: UserTrackingType;
   private subscription: Subscription;
   private readonly optedInBeta$ = new BehaviorSubject(false);
-  private updatePersonaProperties = false;
   hasPostHogInitialized$ = new BehaviorSubject(false);
   featureFlagsByNetwork: FeatureFlagsByNetwork = featureFlagsByNetworkInitialValue;
   featureFlagPayloads: FeatureFlagPayloads = featureFlagPayloadsInitialValue;
@@ -144,8 +141,7 @@ export class PostHogClient<Action extends string = string> {
   }
 
   subscribeToDistinctIdUpdate(): void {
-    this.subscription = this.userIdService.userId$.subscribe(async ({ id, type }) => {
-      this.currentUserTrackingType = type;
+    this.subscription = this.userIdService.userId$.subscribe(async ({ id }) => {
       posthog.register({
         distinct_id: id
       });
@@ -221,7 +217,6 @@ export class PostHogClient<Action extends string = string> {
       optedInBeta
     });
 
-    this.updatePersonaProperties = true;
     this.optedInBeta$.next(optedInBeta);
 
     logger.debug('Changing Opted In Beta', optedInBeta);
@@ -301,20 +296,8 @@ export class PostHogClient<Action extends string = string> {
     };
   }
 
-  protected async getPersonProperties(): Promise<PostHogPersonProperties | undefined> {
-    if (!this.userTrackingType) {
-      this.userTrackingType = this.currentUserTrackingType;
-      // set user_tracking_type and opted_in_beta in the first event
-      return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
-    }
-
-    // eslint-disable-next-line consistent-return
-    if (this.currentUserTrackingType === this.userTrackingType && !this.updatePersonaProperties) return;
-
-    this.updatePersonaProperties = false;
-    this.userTrackingType = this.currentUserTrackingType;
-
-    return { $set: { user_tracking_type: this.userTrackingType, opted_in_beta: this.optedInBeta$.value } };
+  protected async getPersonProperties(): Promise<PostHogPersonProperties> {
+    return { $set: { user_tracking_type: UserTrackingType.Enhanced, opted_in_beta: this.optedInBeta$.value } };
   }
 
   static parseFeaturePayloads(payloads: RawFeatureFlagPayloads): FeatureFlagPayloads {

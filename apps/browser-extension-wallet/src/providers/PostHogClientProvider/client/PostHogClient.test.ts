@@ -226,7 +226,7 @@ describe('PostHogClient', () => {
     client.shutdown();
   });
 
-  it('should return user_tracking_type basic after calling twice', async () => {
+  it('should return same user_tracking_type basic after calling twice', async () => {
     const event = PostHogAction.OnboardingCreateClick;
     const tracking = new BehaviorSubject<UserId>({
       type: UserTrackingType.Enhanced,
@@ -265,7 +265,7 @@ describe('PostHogClient', () => {
           // eslint-disable-next-line camelcase
           opted_in_beta: false,
           // eslint-disable-next-line camelcase
-          user_tracking_type: 'basic'
+          user_tracking_type: 'enhanced'
         }
       })
     );

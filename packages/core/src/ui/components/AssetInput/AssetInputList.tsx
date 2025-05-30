@@ -18,6 +18,7 @@ export interface AssetInputListProps {
   disabled?: boolean;
   translations: TranslationsFor<'addAsset'>;
   isPopupView?: boolean;
+  lockedRewardsTooltip?: React.ReactNode;
 }
 
 export const AssetInputList = ({
@@ -25,7 +26,8 @@ export const AssetInputList = ({
   onAddAsset,
   disabled,
   translations,
-  isPopupView
+  isPopupView,
+  lockedRewardsTooltip
 }: AssetInputListProps): React.ReactElement => (
   <div className={styles.assetInputContainer} data-testid="asset-input-container">
     {rows.map((row, idx) => (
@@ -35,6 +37,7 @@ export const AssetInputList = ({
         idx={idx}
         rowsLength={rows.length}
         isPopupView={isPopupView}
+        lockedRewardsTooltip={lockedRewardsTooltip}
       />
     ))}
     <Button

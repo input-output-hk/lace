@@ -4,7 +4,6 @@ import localStorageInitializer from '../fixture/localStorageInitializer';
 import popupView from '../page/popupView';
 import { TestWalletName } from '../support/walletConfiguration';
 import networkManager from '../utils/networkManager';
-import analyticsBanner from '../elements/analyticsBanner';
 import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 import { setUsePersistentUserId } from '../utils/browserStorage';
 import { checkAndStartEmulator } from '../utils/trezorEmulatorApiClient';
@@ -34,7 +33,6 @@ Before(
   },
   async () => {
     await extendedView.visit();
-    if (await analyticsBanner.agreeButton.isExisting()) await analyticsBanner.agreeButton.click();
   }
 );
 

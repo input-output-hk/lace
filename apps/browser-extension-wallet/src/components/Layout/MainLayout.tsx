@@ -9,6 +9,7 @@ import { useNetworkError } from '@hooks/useNetworkError';
 import { Announcement } from '@components/Announcement/Announcement';
 import { storage } from 'webextension-polyfill';
 import { ABOUT_EXTENSION_KEY, ExtensionUpdateData } from '@lib/scripts/types';
+import { PrivacyPolicyUpdate } from '../PrivacyPolicyUpdate/PrivacyPolicyUpdate';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -78,6 +79,7 @@ export const MainLayout = ({
         version={version}
         reason={reason}
       />
+      <PrivacyPolicyUpdate />
       {!hideFooter && <MainFooter />}
     </div>
   );

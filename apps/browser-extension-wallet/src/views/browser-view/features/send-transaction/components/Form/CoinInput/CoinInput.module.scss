@@ -1,0 +1,9 @@
+@import '../../../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.infoIcon {
+  font-size: var(--bodyLarge, 18px);
+  color: var(--text-color-primary);
+  margin-bottom: 0px;
+  cursor: pointer;
+}
