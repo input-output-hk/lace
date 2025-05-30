@@ -14,7 +14,7 @@ import { AddressListType, getTransactionData } from '@views/browser/features/act
 import { useAddressBookContext, withAddressBookContext } from '@src/features/address-book/context';
 import { TransactionActivityDetail, TxDirection, TxDirections } from '@types';
 import { useObservable } from '@lace/common';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
 
 interface SharedWalletTransactionDetailsProxyProps {
   amountTransformer: (amount: string) => string;
@@ -57,7 +57,7 @@ export const SharedWalletTransactionDetailsWrapper = withAddressBookContext(
     const wallets = useObservable(walletRepository.wallets$);
     const wallet = useCurrentWallet();
 
-    const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+    const parentMultiSigAccount = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account;
     const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
 
     const coSigners = wallet?.metadata?.coSigners;
