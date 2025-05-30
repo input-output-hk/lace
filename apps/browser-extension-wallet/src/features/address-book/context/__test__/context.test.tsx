@@ -35,15 +35,16 @@ const mockHandleResolution = {
 
 const makeDbContextWrapper =
   (dbInstance: WalletDatabase): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' }) as any)}>
-        <DatabaseProvider dbCustomInstance={dbInstance}>
-          <AddressBookProvider>{children}</AddressBookProvider>
-        </DatabaseProvider>
-      </StoreProvider>
-    </AppSettingsProvider>
-  );
+  ({ children }: { children?: React.ReactNode }) =>
+    (
+      <AppSettingsProvider>
+        <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
+          <DatabaseProvider dbCustomInstance={dbInstance}>
+            <AddressBookProvider>{children}</AddressBookProvider>
+          </DatabaseProvider>
+        </StoreProvider>
+      </AppSettingsProvider>
+    );
 
 describe('testing useAddressBookState', () => {
   let db: WalletDatabase;
