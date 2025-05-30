@@ -263,18 +263,6 @@ jobs:
           name: allure-results
           path: ./artifacts/reports/allure/results
 
-      - name: Push renamed metrics
-        working-directory: './artifacts/metrics'
-        run: |
-          sed -E '
-            s/^(e2e_cpu_seconds_total)\{/e2e_cpu_seconds_total_v1\{/;
-            s/^(e2e_memory_rss_bytes)\{/e2e_memory_rss_bytes_v1\{/
-          ' prometheus.txt > prometheus_renamed.txt
-          sed -E 's/\s+[0-9]+(\.[0-9]+)?$//' prometheus.txt > prometheus_no_ts.txt
-          printf '\n*****************\n'
-          printf '\n curl e2e_cpu_seconds_total \n'
-          cat prometheus_renamed.txt
-
       - name: Upload performance metrics
         uses: actions/upload-artifact@v4
         with:
@@ -302,11 +290,12 @@ jobs:
           EOF
           pwd
           ls -al ./artifacts/metrics/prometheus.txt
+          head ./artifacts/metrics/prometheus.txt
 
       - name: Start pushgateway server
         run: |
           docker run -d --name pushgateway -p 9091:9091 prom/pushgateway
-          cat ./artifacts/metrics/prometheus_no_ts.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
+          cat ./artifacts/metrics/prometheus.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
           #docker run -d --name http-server -v $(pwd):/app -w /app -p 8000:8000 python:3.11-slim python -m http.server 8000 > http.log 2>&1
           printf '\n*****************\n'
           echo 'This is my current directory:'
@@ -321,11 +310,14 @@ jobs:
           # Enable logs for debugging
           #docker run --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 --log.level=debug
           docker run -d --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 > prom.log 2>&1
-          sleep 20
+          sleep 60
           # Uncomment for troubleshooting.
           printf '\n*****************\n'
           printf '\n curl e2e_cpu_seconds_total \n'
           curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total_v1
+          printf '\n*****************\n'
+          printf '\n cat prom.log \n'
+          cat prom.log
           #printf '\n*****************\n'
           #printf '\n send_failures_total \n'
           #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_queue_send_failures_total'
