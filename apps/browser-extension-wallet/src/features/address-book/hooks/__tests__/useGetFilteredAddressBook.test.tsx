@@ -26,13 +26,14 @@ const mockHandleResolution = {
 };
 const makeDbContextWrapper =
   (dbIntance: WalletDatabase): FunctionComponent =>
-  ({ children }: { children?: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' }) as any)}>
-        <DatabaseProvider dbCustomInstance={dbIntance}>{children}</DatabaseProvider>
-      </StoreProvider>
-    </AppSettingsProvider>
-  );
+  ({ children }: { children?: React.ReactNode }) =>
+    (
+      <AppSettingsProvider>
+        <StoreProvider appMode="browser" store={create(() => ({ environmentName: 'Preprod' } as any))}>
+          <DatabaseProvider dbCustomInstance={dbIntance}>{children}</DatabaseProvider>
+        </StoreProvider>
+      </AppSettingsProvider>
+    );
 describe('Testing useGetFilteredAddressBook hook', () => {
   let db: WalletDatabase;
   const mockAddress: AddressBookSchema[] = [

@@ -50,10 +50,7 @@ export class CustomConflictError extends Error {
 }
 
 export class CustomError extends Error {
-  constructor(
-    message: string,
-    public readonly isValidHandle: boolean = true
-  ) {
+  constructor(message: string, public readonly isValidHandle: boolean = true) {
     super(message);
     this.name = 'CustomError';
     Object.setPrototypeOf(this, CustomError.prototype);
