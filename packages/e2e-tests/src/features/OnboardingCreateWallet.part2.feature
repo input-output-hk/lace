@@ -34,9 +34,9 @@ Feature: Onboarding - Create wallet
     And I go to "Wallet setup" page from "Create" wallet flow and fill values
     When I click "Enter wallet" button
     Then I see LW homepage
-    And "N_8J@bne87A" password is not in snapshot
     And "Pin the wallet extension" notification is displayed
     And "Pin the wallet extension" notification disappears after 5 seconds
+    And "N_8J@bne87A" password is not in snapshot
 
   @LW-2627
   Scenario: Create Wallet - autofill words

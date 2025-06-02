@@ -1,18 +1,5 @@
 import { browser } from '@wdio/globals';
 
-export const getAllTabTitles = async (): Promise<string[]> => {
-  const titles: string[] = [];
-  const handles = await browser.getWindowHandles();
-
-  for (const handle of handles) {
-    await browser.switchToWindow(handle);
-    const title = await browser.getTitle();
-    titles.push(title);
-  }
-
-  return titles;
-};
-
 export const switchToLastWindow = async (): Promise<void> => {
   await browser.pause(1000);
   const windowHandles = await browser.getWindowHandles();
@@ -93,6 +80,6 @@ export const switchToWindowWithRetry = async (url: string): Promise<void> => {
   await browser.waitUntil(async () => await switchToWindowWithTitle(url), {
     timeout: 6000,
     interval: 1000,
-    timeoutMsg: `failed while switching to tab with title: ${url}, active tabs: ${await getAllTabTitles()}`
+    timeoutMsg: `failed while switching to tab with title: ${url}`
   });
 };
