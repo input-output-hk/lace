@@ -2,11 +2,12 @@ import { AdaComponentTransparent, Button } from '@input-output-hk/lace-ui-toolki
 import React, { useRef, useState } from 'react';
 import { TopUpWalletDialog } from './TopUpWalletDialog';
 import { useTranslation } from 'react-i18next';
-import { BANXA_LACE_URL } from './config';
 import { useAnalyticsContext, useExternalLinkOpener } from '@providers';
 import { PostHogAction } from '@lace/common';
 import { useCurrentBlockchain } from '@src/multichain';
 import SvgBtcComponentTransparent from './SvgBtcComponentTransparent';
+import { getBanxaUrl } from './utils';
+import { useWalletStore } from '@src/stores';
 
 export const TopUpWalletButton = (): React.ReactElement => {
   const dialogTriggerReference = useRef<HTMLButtonElement>(null);
@@ -15,6 +16,8 @@ export const TopUpWalletButton = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const openExternalLink = useExternalLinkOpener();
   const { blockchain } = useCurrentBlockchain();
+  const { walletInfo } = useWalletStore();
+  const walletAddress = walletInfo ? walletInfo.addresses[0].address.toString() : '';
   const isBitcoin = blockchain === 'bitcoin';
 
   return (
@@ -43,7 +46,7 @@ export const TopUpWalletButton = (): React.ReactElement => {
         triggerRef={dialogTriggerReference}
         onConfirm={() => {
           analytics.sendEventToPostHog(PostHogAction.TokenBuyAdaDisclaimerContinueClick);
-          openExternalLink(BANXA_LACE_URL);
+          openExternalLink(getBanxaUrl({ blockchain, walletAddress }));
           setOpen(false);
         }}
       />
