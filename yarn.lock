@@ -12500,7 +12500,6 @@ __metadata:
     lodash: 4.17.21
     node-abort-controller: ^3.1.1
     npm-run-all: 4.1.5
-    openpgp: ^5.11.2
     p-debounce: ^4.0.0
     pluralize: ^8.0.0
     posthog-js: ^1.161.3
@@ -26470,7 +26469,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"asn1.js@npm:^5.0.0, asn1.js@npm:^5.2.0":
+"asn1.js@npm:^5.2.0":
   version: 5.4.1
   resolution: "asn1.js@npm:5.4.1"
   dependencies:
@@ -43021,6 +43020,7 @@ __metadata:
     node-sass: 9.0.0
     normalize.css: ^8.0.1
     npm-run-all: 4.1.5
+    openpgp: ^6.1.1
     p-retry: 5.1.2
     postcss: 8.4.31
     prettier: ^2.3.2
@@ -46955,12 +46955,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"openpgp@npm:^5.11.2":
-  version: 5.11.2
-  resolution: "openpgp@npm:5.11.2"
-  dependencies:
-    asn1.js: ^5.0.0
-  checksum: 1e7627e4dc89add906cb0c1060b50dfcee40817fd425a5077b7c1abe44f5176d2433d66f1dfca0ad04f3c69bb3714f1a3afca1c578f40c436941266feecfa679
+"openpgp@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "openpgp@npm:6.1.1"
+  checksum: 364efcaf6fb308e59d777adaa874dbe716962f5adbcafaff263cfc2754820af278f5455cc6955025d366fab9b1a0a0b170f2a3c2069f9d8d79f44cd55c13fbb5
   languageName: node
   linkType: hard
 
