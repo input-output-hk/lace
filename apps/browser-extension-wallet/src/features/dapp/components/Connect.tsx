@@ -1,5 +1,5 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Banner, Button, logger } from '@lace/common';
 import cn from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -106,6 +106,14 @@ export const Connect = (): React.ReactElement => {
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const [isSSLEncrypted, setIsSSLEncrypted] = useState(true);
   const { environmentName } = useWalletStore();
+  const allowAlwaysButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isModalVisible && allowAlwaysButtonRef.current) {
+      allowAlwaysButtonRef.current.focus();
+    }
+  }, [isModalVisible]);
+
   useEffect(() => {
     dappDataApi
       .getDappInfo()
@@ -151,7 +159,12 @@ export const Connect = (): React.ReactElement => {
         <AuthorizeDapp dappInfo={dappInfo} warningBanner={showNonSSLBanner ? <NonSSLBanner /> : <WarningBanner />} />
       </div>
       <div className={styles.footer}>
-        <Button className={styles.footerBtn} data-testid="connect-authorize-button" onClick={handleAuthorizeClick}>
+        <Button
+          autoFocus
+          className={styles.footerBtn}
+          data-testid="connect-authorize-button"
+          onClick={handleAuthorizeClick}
+        >
           {t('dapp.connect.btn.accept')}
         </Button>
         <Button
@@ -181,7 +194,12 @@ export const Connect = (): React.ReactElement => {
             {t('dapp.connect.modal.description')}
           </div>
           <div className={styles.modalActions}>
-            <Button block data-testid="connect-modal-accept-always" onClick={handleAllowAlwaysClick}>
+            <Button
+              ref={allowAlwaysButtonRef}
+              block
+              data-testid="connect-modal-accept-always"
+              onClick={handleAllowAlwaysClick}
+            >
               {t('dapp.connect.modal.allowAlways')}
             </Button>
             <Button block data-testid="connect-modal-accept-once" onClick={handleAllowOnceClick} color="secondary">
