@@ -4,7 +4,7 @@ import MultidelegationPageAssert from '../assert/multidelegation/Multidelegation
 import MultidelegationPage from '../elements/multidelegation/MultidelegationPage';
 import { parseSearchTerm } from '../utils/multiDelegationUtils';
 import testContext from '../utils/testContext';
-import { getStakePoolById, getStakePoolByName, getStakePoolByTicker } from '../data/expectedStakePoolsData';
+import { getStakePoolByName, getStakePoolByTicker } from '../data/expectedStakePoolsData';
 import extensionUtils from '../utils/utils';
 import StakePoolDetailsAssert from '../assert/multidelegation/StakePoolDetailsAssert';
 import StakePoolDetailsDrawer from '../elements/multidelegation/StakePoolDetailsDrawer';
@@ -155,11 +155,6 @@ Then(
     await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, true, false, true);
   }
 );
-
-Then(/^I see stake pool details drawer for stake pool without metadata$/, async () => {
-  const stakePool = getStakePoolById(testContext.load('currentStakePoolId'));
-  await StakePoolDetailsAssert.assertSeeStakePoolDetailsPage(stakePool, false, true);
-});
 
 When(
   /^I click on "(Stake all on this pool|Select pool for multi-staking|Manage delegation)" button on stake pool details drawer$/,

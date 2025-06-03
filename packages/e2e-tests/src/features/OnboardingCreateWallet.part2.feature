@@ -28,7 +28,7 @@ Feature: Onboarding - Create wallet
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
-  @LW-2445 @LW-10208 @Smoke
+  @LW-2445 @LW-10208 @Smoke @memory-snapshot
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values
@@ -36,25 +36,7 @@ Feature: Onboarding - Create wallet
     Then I see LW homepage
     And "Pin the wallet extension" notification is displayed
     And "Pin the wallet extension" notification disappears after 5 seconds
-
-  @LW-3060 @memory-snapshot
-  Scenario: Extended view - Settings - Analytics enabled/disabled when creating a wallet
-    Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
-    And I click "Next" button during wallet setup
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    When I click "Enter wallet" button
-    And I see LW homepage
     And "N_8J@bne87A" password is not in snapshot
-    When I open settings from header menu
-    And I click on Remove wallet button
-    And I click "Remove wallet" button on "Remove wallet" modal
-    Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
-    And I click "Next" button during wallet setup
-    And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
-    When I click "Enter wallet" button
-    And I see LW homepage
 
   @LW-2627
   Scenario: Create Wallet - autofill words
