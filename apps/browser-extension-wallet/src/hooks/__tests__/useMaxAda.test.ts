@@ -4,13 +4,16 @@
 import { useMaxAda, UTXO_DEPLETED_ADA_BUFFER } from '../useMaxAda';
 import { renderHook } from '@testing-library/react-hooks';
 import { mockWalletInfoTestnet } from '@src/utils/mocks/test-helpers';
-import { Subject, of } from 'rxjs';
+import { Subject, of, BehaviorSubject } from 'rxjs';
 import { Wallet } from '@lace/cardano';
 import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
+import { Status } from '@components/WalletStatus';
 
 const MIN_COINS_FOR_TOKENS = 1_155_080;
 const TX_FEE = 155_381;
+
+const statusSubject = new BehaviorSubject({ text: 'test', status: Status.SYNCED });
 
 const inspect = jest.fn();
 const mockCreateTxBuilder = jest.fn().mockReturnValue({
@@ -38,7 +41,8 @@ jest.mock('../../stores', () => ({
   useWalletStore: () => ({
     walletInfo: mockWalletInfoTestnet,
     inMemoryWallet
-  })
+  }),
+  useSyncStatus: () => statusSubject
 }));
 
 const outputMap = new Map();
