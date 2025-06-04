@@ -58,8 +58,10 @@ export const ScanShieldedMessage: VFC = () => {
   const [deviceId, setDeviceId] = useState<MediaDeviceInfo['deviceId'] | null>();
 
   const endVideoTracks = () => {
-    streamRef.current.getVideoTracks().forEach((t) => t.stop());
-    streamRef.current = null;
+    if (streamRef.current) {
+      streamRef.current.getVideoTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
   };
 
   const handleDeviceChange = async (value: MediaDeviceInfo['deviceId']) => {
@@ -109,6 +111,8 @@ export const ScanShieldedMessage: VFC = () => {
     };
     setScanState('waiting');
     getVideoStream();
+
+    return endVideoTracks;
   }, [
     deviceId,
     analytics,
