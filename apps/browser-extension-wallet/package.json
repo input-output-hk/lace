@@ -98,7 +98,6 @@
     "little-state-machine": "4.8.0",
     "lodash": "4.17.21",
     "node-abort-controller": "^3.1.1",
-    "openpgp": "^5.11.2",
     "p-debounce": "^4.0.0",
     "pluralize": "^8.0.0",
     "posthog-js": "^1.161.3",
