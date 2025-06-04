@@ -171,11 +171,17 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
     if (!walletAccount) {
       throw new Error('Wallet account not found');
     }
-    const bip32Account = new Wallet.KeyManagement.Bip32Account({
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
-    });
+    const bip32Account = new Wallet.KeyManagement.Bip32Account(
+      {
+        accountIndex,
+        chainId,
+        extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
+      },
+      {
+        bip32Ed25519: await Wallet.getBip32Ed25519(),
+        blake2b: Wallet.Crypto.blake2b
+      }
+    );
 
     const useWebSocket = isExperimentEnabled(featureFlags, ExperimentName.WEBSOCKET_API);
     const localPollingIntervalConfig = !Number.isNaN(Number(process.env.WALLET_POLLING_INTERVAL_IN_SEC))

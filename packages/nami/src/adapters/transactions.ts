@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable functional/prefer-immutable-types */
 import { useCallback, useEffect, useState, useMemo } from 'react';
 

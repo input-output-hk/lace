@@ -2,6 +2,7 @@
 import { Cardano, RewardAccountInfoProvider } from '@cardano-sdk/core';
 import { ObservableWallet, BaseWallet, createPersonalWallet, storage } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
+import * as Crypto from '@cardano-sdk/crypto';
 import { assetsProviderStub } from './AssetsProviderStub';
 import { networkInfoProviderStub } from './NetworkInfoProviderStub';
 import { queryTransactionsResult, rewardAccount } from './ProviderStub';
@@ -60,6 +61,9 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
   const rewardAccountInfoProvider = rewardAccountInfoProviderStub();
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
   const handleProvider = handleProviderStub();
+
+  const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
+  const dependencies = { bip32Ed25519, blake2b: Crypto.blake2b, logger };
   const wallet = createPersonalWallet(
     { name },
     {
@@ -74,7 +78,7 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
       handleProvider,
       logger,
       witnesser: KeyManagement.util.createBip32Ed25519Witnesser(asyncKeyAgent),
-      bip32Account: new KeyManagement.Bip32Account(keyAgent)
+      bip32Account: new KeyManagement.Bip32Account(keyAgent, dependencies)
     }
   );
 
