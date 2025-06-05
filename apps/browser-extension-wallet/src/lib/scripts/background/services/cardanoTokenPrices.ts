@@ -5,6 +5,7 @@ import { TokenPrices, Status } from '../../types';
 import { Wallet } from '@lace/cardano';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
+import Bottleneck from 'bottleneck';
 
 /** The subset of token data from CoinGecko relevant for Lace to show token prices. */
 type PriceData = [priceInAda: number, priceVariationPercentage24h: number];
@@ -14,6 +15,13 @@ type FetchedPriceData = [lastFetchTime: number] | [lastFetchTime: number, priceD
 
 const CACHE_KEY = 'cardano-token-prices';
 const { TOKEN_PRICE_CHECK_INTERVAL } = config();
+
+const rateLimiter = new Bottleneck({
+  reservoir: 10,
+  reservoirIncreaseAmount: 5,
+  reservoirIncreaseInterval: 1000,
+  reservoirIncreaseMaximum: 10
+});
 
 /**
  * Given the total amount of token prices data is quite small, rather than fetching it from cache every time it is required,
@@ -67,7 +75,7 @@ const fetchPrice = async (assetId: Cardano.AssetId) => {
 
   try {
     const url = `${process.env.TOKEN_PRICES_URL}/cardano/tokens/${assetId}/pools`;
-    const response = await fetch(url);
+    const response = await rateLimiter.schedule(() => fetch(url));
     const body = await response.json();
     const data = body.data?.[0]?.attributes;
 
