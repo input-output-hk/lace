@@ -36,7 +36,12 @@ export const DappTransactionSuccess = (): React.ReactElement => {
         </div>
       </div>
       <div className={styles.footer}>
-        <Button data-testid="dapp-sign-tx-success-close-button" className={styles.footerBtn} onClick={onClose}>
+        <Button
+          autoFocus
+          data-testid="dapp-sign-tx-success-close-button"
+          className={styles.footerBtn}
+          onClick={onClose}
+        >
           {t('general.button.close')}
         </Button>
       </div>

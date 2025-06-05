@@ -163,6 +163,7 @@ export const DappConfirmData = (): React.ReactElement => {
       </div>
       <div className={styles.actions}>
         <Button
+          autoFocus
           onClick={confirmationCallback}
           disabled={!formattedData || isConfirmingTx}
           data-testid="dapp-transaction-confirm"

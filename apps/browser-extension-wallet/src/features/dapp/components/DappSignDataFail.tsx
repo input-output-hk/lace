@@ -41,6 +41,7 @@ export const DappSignDataFail = (): React.ReactElement => {
       </div>
       <div className={styles.footer}>
         <Button
+          autoFocus
           data-testid="dapp-sign-data-fail-close-button"
           onClick={onClose}
           color="secondary"

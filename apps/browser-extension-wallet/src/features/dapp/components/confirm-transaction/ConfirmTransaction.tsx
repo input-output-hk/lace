@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Button, logger, PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../Layout';
@@ -30,6 +30,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const disallowSignTx = useDisallowSignTx(req);
   const { isConfirmingTx, signWithHardwareWallet } = useSignWithHardwareWallet(req);
+  const confirmTransactionButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleConfirmTransaction = () => {
     if (!req) return;
@@ -48,6 +49,7 @@ export const ConfirmTransaction = (): React.ReactElement => {
   };
 
   const txWitnessRequest = useTxWitnessRequest();
+  const isConfirmTransactionLoading = !req || (isHardwareWallet && isConfirmingTx);
 
   const cancelTransaction = useCallback(() => {
     disallowSignTx(true);
@@ -87,13 +89,20 @@ export const ConfirmTransaction = (): React.ReactElement => {
     };
   }, [setSignTxRequest, setDappInfo, txWitnessRequest, redirectToDappTxSignFailure, disallowSignTx]);
 
+  useEffect(() => {
+    if (!isConfirmTransactionLoading && confirmTransactionButtonRef.current) {
+      confirmTransactionButtonRef.current.focus();
+    }
+  }, [isConfirmTransactionLoading]);
+
   return (
     <Layout pageClassname={styles.spaceBetween}>
       {req && walletInfo && inMemoryWallet ? <DappTransactionContainer /> : <Skeleton loading />}
       <div className={styles.actions}>
         <Button
+          ref={confirmTransactionButtonRef}
           onClick={handleConfirmTransaction}
-          loading={!req || (isHardwareWallet && isConfirmingTx)}
+          loading={isConfirmTransactionLoading}
           data-testid="dapp-transaction-confirm"
           className={styles.actionBtn}
         >
