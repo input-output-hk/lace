@@ -4,7 +4,6 @@ import { TokenPrices, StatusTypes, ADAPricesKeys, TokenPrice } from '@lib/script
 import { useBackgroundServiceAPIContext, useCurrencyStore } from '../providers';
 import { CARDANO_COIN_SYMBOL } from '@src/utils/constants';
 import { Wallet } from '@lace/cardano';
-import { config } from '@src/config';
 import { useWalletStore } from '@stores';
 
 export interface PriceResult {
@@ -26,8 +25,6 @@ export interface UseFetchCoinPrice {
   status: StatusTypes;
   timestamp?: number;
 }
-
-const { TOKEN_PRICE_CHECK_INTERVAL } = config();
 
 export const useFetchCoinPrice = (): UseFetchCoinPrice => {
   const { coinPrices, trackCardanoTokenPrice } = useBackgroundServiceAPIContext();
@@ -52,27 +49,15 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
     () => ({
       getTokenPrice: (assetId: Wallet.Cardano.AssetId): TokenPrice | undefined => {
         const tokenPrice = tokenPrices?.tokens.get(assetId);
-        // Actually track the price only for token in Cardano mainnet, otherwise just do nothing
-        const trackPrice = () =>
-          networkId === Wallet.Cardano.NetworkId.Mainnet
-            ? trackCardanoTokenPrice(assetId).catch((error) => logger.error(error))
-            : undefined;
 
-        // If the price for this token was never fetched, wee need to track it
-        if (!tokenPrice) {
-          trackPrice();
+        if (tokenPrice) return tokenPrice.price;
 
-          return undefined;
-        }
-
-        const { lastFetchTime, price } = tokenPrice;
-
-        // If the price was fetched, but it is still not present, it means the price for this token is not tracked by CoinGecko:
-        // let's retry a new fetch only after the TOKEN_PRICE_CHECK_INTERVAL to check if now the price is being tracked.
-        if (!price && lastFetchTime < Date.now() - TOKEN_PRICE_CHECK_INTERVAL) trackPrice();
+        // Actually track the price of the token only in Cardano mainnet
+        if (networkId === Wallet.Cardano.NetworkId.Mainnet)
+          trackCardanoTokenPrice(assetId).catch((error) => logger.error(error));
 
         // eslint-disable-next-line consistent-return
-        return price;
+        return undefined;
       },
       price: isAdaCurrency ? 1 : adaPrices?.prices?.[fiatCurrency.code.toLowerCase() as ADAPricesKeys],
       priceVariationPercentage24h:
