@@ -28,6 +28,7 @@ export interface UseFetchCoinPrice {
 }
 
 const { TOKEN_PRICE_CHECK_INTERVAL } = config();
+const alreadyRequestedPriceFrom = new Set<Wallet.Cardano.AssetId>();
 
 export const useFetchCoinPrice = (): UseFetchCoinPrice => {
   const { coinPrices, trackCardanoTokenPrice } = useBackgroundServiceAPIContext();
@@ -51,15 +52,15 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
   const cardano = useMemo(
     () => ({
       getTokenPrice: (assetId: Wallet.Cardano.AssetId): TokenPrice | undefined => {
+        // track the price only for token in Cardano mainnet, otherwise just do nothing
+        if (networkId !== Wallet.Cardano.NetworkId.Mainnet) return;
         const tokenPrice = tokenPrices?.tokens.get(assetId);
-        // Actually track the price only for token in Cardano mainnet, otherwise just do nothing
-        const trackPrice = () =>
-          networkId === Wallet.Cardano.NetworkId.Mainnet
-            ? trackCardanoTokenPrice(assetId).catch((error) => logger.error(error))
-            : undefined;
+        const trackPrice = () => trackCardanoTokenPrice(assetId).catch((error) => logger.error(error));
 
         // If the price for this token was never fetched, wee need to track it
         if (!tokenPrice) {
+          if (alreadyRequestedPriceFrom.has(assetId)) return;
+          alreadyRequestedPriceFrom.add(assetId);
           trackPrice();
 
           return undefined;
