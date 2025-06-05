@@ -60,7 +60,7 @@ const transformManifest = (content, mode, jsAssets = []) => {
     if (process.env.BROWSER === 'firefox') {
       manifest.browser_specific_settings = {
         gecko: {
-          id: 'lace-wallet@lace.io',
+          id: 'lace-wallet-ext@lace.io',
           strict_min_version: '134.0'
         }
       };
