@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import type { Serialization } from '@cardano-sdk/core';
 import type { Cip30DataSignature } from '@cardano-sdk/dapp-connector';
 import type { HexBlob } from '@cardano-sdk/util';

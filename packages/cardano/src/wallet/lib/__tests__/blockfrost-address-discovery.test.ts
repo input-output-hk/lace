@@ -42,7 +42,7 @@ describe('BlockfrostAddressDiscovery', () => {
     const paymentAddress2 = 'addr2...' as Cardano.PaymentAddress;
 
     accountMock.deriveAddress
-      .mockResolvedValueOnce({
+      .mockReturnValueOnce({
         address: paymentAddress1,
         rewardAccount,
         type: AddressType.External,
@@ -54,7 +54,7 @@ describe('BlockfrostAddressDiscovery', () => {
           role: KeyRole.Stake
         }
       })
-      .mockResolvedValue({
+      .mockReturnValue({
         address: paymentAddress2,
         rewardAccount,
         type: AddressType.External,
@@ -104,7 +104,7 @@ describe('BlockfrostAddressDiscovery', () => {
     const rewardAccount = 'stake1u9p...' as Cardano.RewardAccount;
     const paymentAddress1 = 'addr1...' as Cardano.PaymentAddress;
 
-    accountMock.deriveAddress.mockResolvedValue({
+    accountMock.deriveAddress.mockReturnValue({
       address: paymentAddress1,
       rewardAccount,
       type: AddressType.External,
@@ -130,7 +130,7 @@ describe('BlockfrostAddressDiscovery', () => {
     const paymentAddress1 = 'addr1...' as Cardano.PaymentAddress;
     const frankenAddress = 'addrUnknown...' as Cardano.PaymentAddress;
 
-    accountMock.deriveAddress.mockResolvedValue({
+    accountMock.deriveAddress.mockReturnValue({
       address: paymentAddress1,
       rewardAccount,
       type: AddressType.External,

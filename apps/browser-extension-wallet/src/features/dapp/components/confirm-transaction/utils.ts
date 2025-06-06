@@ -66,8 +66,7 @@ export const pubDRepKeyToHash = async (
   pubDRepKeyHex: Wallet.Crypto.Ed25519PublicKeyHex
 ): Promise<Wallet.Crypto.Hash28ByteBase16> => {
   const pubDRepKey = await Wallet.Crypto.Ed25519PublicKey.fromHex(pubDRepKeyHex);
-  const drepKeyHex = (await pubDRepKey.hash()).hex();
-  return Wallet.Crypto.Hash28ByteBase16.fromEd25519KeyHashHex(drepKeyHex);
+  return (await pubDRepKey.hash()).hex();
 };
 
 export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
