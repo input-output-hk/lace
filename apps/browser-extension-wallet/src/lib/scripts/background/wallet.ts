@@ -177,10 +177,7 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         chainId,
         extendedAccountPublicKey: walletAccount.extendedAccountPublicKey
       },
-      {
-        bip32Ed25519: await Wallet.getBip32Ed25519(),
-        blake2b: Wallet.Crypto.blake2b
-      }
+      await Wallet.KeyManagement.Bip32Account.createDefaultDependencies()
     );
 
     const useWebSocket = isExperimentEnabled(featureFlags, ExperimentName.WEBSOCKET_API);
