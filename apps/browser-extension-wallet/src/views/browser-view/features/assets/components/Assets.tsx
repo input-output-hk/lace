@@ -14,7 +14,7 @@ import { APP_MODE_POPUP } from '@src/utils/constants';
 import { ContentLayout } from '@components/Layout';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { isNFT } from '@src/utils/is-nft';
+import { isNFT, mayBeNFT } from '@src/utils/is-nft';
 import {
   SendFlowAnalyticsProperties,
   SendFlowTriggerPoints,
@@ -116,14 +116,13 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     (assetId, withVisibleBalances = true) => {
       const info = assetsInfo?.get(assetId);
       const fiat = priceResult?.cardano?.price;
-      const pricesInfo = priceResult.cardano.getTokenPrice(assetId);
-      return info && !isNFT(info)
+      return !mayBeNFT(info)
         ? assetTransformer({
             key: assetId,
             fiat,
             token: info,
             total: utxoTotal,
-            pricesInfo,
+            pricesInfo: priceResult.cardano.getTokenPrice(assetId),
             fiatCurrency,
             areBalancesVisible: withVisibleBalances || areBalancesVisible,
             balancesPlaceholder: hiddenBalancePlaceholder

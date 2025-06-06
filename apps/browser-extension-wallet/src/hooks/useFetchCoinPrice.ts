@@ -9,7 +9,7 @@ import { useWalletStore } from '@stores';
 
 export interface PriceResult {
   cardano: {
-    getTokenPrice: (assetId: Wallet.Cardano.AssetId) => TokenPrice | undefined;
+    getTokenPrice: (assetId: Wallet.Cardano.AssetId, options?: { cacheOnly: boolean }) => TokenPrice | undefined;
     price: number;
     priceVariationPercentage24h: number;
   };
@@ -51,10 +51,14 @@ export const useFetchCoinPrice = (): UseFetchCoinPrice => {
 
   const cardano = useMemo(
     () => ({
-      getTokenPrice: (assetId: Wallet.Cardano.AssetId): TokenPrice | undefined => {
+      getTokenPrice: (
+        assetId: Wallet.Cardano.AssetId,
+        options: { cacheOnly?: boolean } = {}
+      ): TokenPrice | undefined => {
         // track the price only for token in Cardano mainnet, otherwise just do nothing
         if (networkId !== Wallet.Cardano.NetworkId.Mainnet) return;
         const tokenPrice = tokenPrices?.tokens.get(assetId);
+        if (options.cacheOnly) return;
         const trackPrice = () => trackCardanoTokenPrice(assetId).catch((error) => logger.error(error));
 
         // If the price for this token was never fetched, wee need to track it

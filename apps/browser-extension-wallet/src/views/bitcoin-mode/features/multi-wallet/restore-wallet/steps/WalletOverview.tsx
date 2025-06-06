@@ -72,7 +72,7 @@ export const WalletOverview = (): JSX.Element => {
             const additionalOtherItems = new Set(acc.otherItems);
             if (coinPricing.priceResult?.tokens) {
               output.value.assets?.forEach((value, assetId) => {
-                const tokenPrice = coinPricing.priceResult?.cardano.getTokenPrice(assetId);
+                const tokenPrice = coinPricing.priceResult?.cardano.getTokenPrice(assetId, { cacheOnly: true });
                 if (tokenPrice)
                   assetUsdValue = assetUsdValue.plus(new BigNumber(tokenPrice.priceInAda).times(value.toString()));
 
