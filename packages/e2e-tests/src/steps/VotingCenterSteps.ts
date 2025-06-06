@@ -11,6 +11,6 @@ Then(/^I see "Learn about" widget with all relevant items$/, async () => {
   await educationalListAssert.assertSeeVotingWidget();
 });
 
-When(/^I click on "Access Gov.tool" button$/, async () => {
+When(/^I click on "Access tempo.vote" button$/, async () => {
   await VotingCenterPage.clickOnGovToolButton();
 });
