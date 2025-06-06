@@ -85,7 +85,7 @@ describe('Testing utils', () => {
   });
 
   test('testing pubDRepKeyToHash', async () => {
-    const pubDRepKeyHex = '_pubDRepKeyHex';
+    const pubDRepKeyHex = '8293d319ef5b3ac72366dd28006bd315b715f7e7cfcbd3004129b80d';
     expect(await pubDRepKeyToHash(pubDRepKeyHex as Wallet.Crypto.Ed25519PublicKeyHex)).toEqual(pubDRepKeyHex);
   });
 

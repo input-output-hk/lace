@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 /* eslint-disable unicorn/no-null */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import {
   Cardano,
   Serialization,

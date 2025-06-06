@@ -12,7 +12,6 @@ import {
   WalletType
 } from '@cardano-sdk/web-extension';
 import * as KeyManagement from '@cardano-sdk/key-management';
-import { HexBlob } from '@cardano-sdk/util';
 import { getBackgroundStorage } from './storage';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 
@@ -200,8 +199,5 @@ export const getWalletName = (): string => {
   return `${process.env.WALLET_NAME}`;
 };
 
-export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string => {
-  const input = Buffer.from(extendedAccountPublicKey);
-
-  return blake2b.hash(HexBlob.fromBytes(input), 32);
-};
+export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string =>
+  blake2b.hash(extendedAccountPublicKey, 16);
