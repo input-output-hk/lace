@@ -10,7 +10,7 @@ import { getTokenAmountInFiat, parseFiat } from './assets-transformers';
 import { getAssetImageUrl } from './get-asset-image-url';
 import { EnvironmentTypes } from '@stores';
 import { CurrencyInfo } from '@src/types';
-import { isNFT } from './is-nft';
+import { isNFT, mayBeNFT } from './is-nft';
 import { getAssetImage } from './get-asset-image';
 import { Asset } from '@cardano-sdk/core';
 import { TokenInformation } from '@src/views/browser-view/features/assets/types';
@@ -194,7 +194,7 @@ export const getTokenList = (params: GetTokenListParams): { tokenList: NonNFTAss
         amount
       });
     } else {
-      const tokenPriceInAda = prices?.cardano.getTokenPrice(assetId)?.priceInAda;
+      const tokenPriceInAda = mayBeNFT(info) ? undefined : prices?.cardano.getTokenPrice(assetId)?.priceInAda;
       const fiat =
         info?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano.price
           ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices.cardano.price)))} ${

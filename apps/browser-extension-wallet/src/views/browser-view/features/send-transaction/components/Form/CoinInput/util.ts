@@ -5,6 +5,7 @@ import { AssetInfo, SpentBalances } from '../../../types';
 import { PriceResult } from '@hooks/useFetchCoinPrice';
 import { CurrencyInfo } from '@src/types/local-storage';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
+import { mayBeNFT } from '@src/utils/is-nft';
 
 /**
  * Calculates the maximum spendable amount of a token, given the total spendable balance, total spent, and current spending.
@@ -136,7 +137,9 @@ export const getAssetFiatValue = (
   prices: PriceResult,
   fiatCurrency: CurrencyInfo
 ): string => {
-  const tokenPriceInAda = prices?.cardano.getTokenPrice(Wallet.Cardano.AssetId(assetInputItem.id))?.priceInAda;
+  const tokenPriceInAda = mayBeNFT(assetInfo)
+    ? undefined
+    : prices?.cardano.getTokenPrice(Wallet.Cardano.AssetId(assetInputItem.id))?.priceInAda;
   return assetInfo?.tokenMetadata !== undefined && tokenPriceInAda && prices?.cardano?.price
     ? `= ${
         assetInputItem?.value

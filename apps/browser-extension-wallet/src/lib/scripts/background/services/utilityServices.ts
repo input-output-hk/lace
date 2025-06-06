@@ -16,10 +16,10 @@ import {
   UnhandledError,
   WalletMode
 } from '../../types';
-import { Subject, of, BehaviorSubject, merge, map, fromEvent } from 'rxjs';
+import { Subject, of, BehaviorSubject, merge, map, fromEvent, Observable } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
-import { exposeApi } from '@cardano-sdk/web-extension';
+import { ActiveWallet, exposeApi } from '@cardano-sdk/web-extension';
 import { config } from '@src/config';
 import { getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs, getBtcPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
@@ -29,12 +29,12 @@ import { getErrorMessage } from '@src/utils/get-error-message';
 import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
-import { initCardanoTokenPrices, trackCardanoTokenPrice } from './cardanoTokenPrices';
+import { initCardanoTokenPrices } from './cardanoTokenPrices';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
 
-const coinPrices: CoinPrices = {
+const initializeCoinPrices = (wallet$: Observable<ActiveWallet>): CoinPrices => ({
   adaPrices$: new BehaviorSubject({
     prices: {},
     status: 'idle'
@@ -43,8 +43,8 @@ const coinPrices: CoinPrices = {
     prices: {},
     status: 'idle'
   }),
-  tokenPrices$: initCardanoTokenPrices()
-};
+  tokenPrices$: initCardanoTokenPrices(wallet$)
+});
 
 const migrationState$ = new BehaviorSubject<MigrationState | undefined>(undefined);
 
@@ -173,7 +173,7 @@ const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: 
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
 
-const fetchAdaPrice = () => {
+const fetchAdaPrice = (coinPrices: CoinPrices) => {
   const vsCurrencies =
     (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
   fetch(
@@ -215,7 +215,7 @@ const fetchAdaPrice = () => {
     });
 };
 
-const fetchBitcoinPrice = () => {
+const fetchBitcoinPrice = (coinPrices: CoinPrices) => {
   const vsCurrencies =
     (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
   fetch(
@@ -257,12 +257,6 @@ const fetchBitcoinPrice = () => {
     });
 };
 
-fetchAdaPrice();
-fetchBitcoinPrice();
-
-setInterval(fetchAdaPrice, ADA_PRICE_CHECK_INTERVAL);
-setInterval(fetchBitcoinPrice, ADA_PRICE_CHECK_INTERVAL);
-
 exposeApi<LaceFeaturesApi>(
   {
     api$: of({
@@ -296,31 +290,40 @@ const unhandledError$ = merge(
 
 const getAppVersion = async () => await process.env.APP_VERSION;
 
-exposeApi<BackgroundService>(
-  {
-    api$: of({
-      handleOpenBrowser,
-      handleOpenNamiBrowser,
-      closeAllTabsAndOpenPopup,
-      requestMessage$,
-      migrationState$,
-      coinPrices,
-      trackCardanoTokenPrice,
-      handleChangeTheme,
-      handleChangeMode,
-      clearBackgroundStorage,
-      getBackgroundStorage,
-      setBackgroundStorage,
-      resetStorage: async () => {
-        await clearBackgroundStorage();
-        await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
-      },
-      getAppVersion,
-      backendFailures$,
-      unhandledError$
-    }),
-    baseChannel: BaseChannels.BACKGROUND_ACTIONS,
-    properties: backgroundServiceProperties
-  },
-  { logger, runtime }
-);
+export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void => {
+  const coinPrices = initializeCoinPrices(wallet$);
+  const updatePrices = () => {
+    fetchAdaPrice(coinPrices);
+    fetchBitcoinPrice(coinPrices);
+  };
+  updatePrices();
+  setInterval(updatePrices, ADA_PRICE_CHECK_INTERVAL);
+
+  exposeApi<BackgroundService>(
+    {
+      api$: of({
+        handleOpenBrowser,
+        handleOpenNamiBrowser,
+        closeAllTabsAndOpenPopup,
+        requestMessage$,
+        migrationState$,
+        coinPrices,
+        handleChangeTheme,
+        handleChangeMode,
+        clearBackgroundStorage,
+        getBackgroundStorage,
+        setBackgroundStorage,
+        resetStorage: async () => {
+          await clearBackgroundStorage();
+          await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
+        },
+        getAppVersion,
+        backendFailures$,
+        unhandledError$
+      }),
+      baseChannel: BaseChannels.BACKGROUND_ACTIONS,
+      properties: backgroundServiceProperties
+    },
+    { logger, runtime }
+  );
+};
