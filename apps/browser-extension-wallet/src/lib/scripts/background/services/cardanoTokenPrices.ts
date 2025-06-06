@@ -5,6 +5,7 @@ import { TokenPrices, Status } from '../../types';
 import { Wallet } from '@lace/cardano';
 import { Cardano } from '@cardano-sdk/core';
 import { config } from '@src/config';
+import throttle from 'lodash/fp/throttle';
 
 /** The subset of token data from CoinGecko relevant for Lace to show token prices. */
 type PriceData = [priceInAda: number, priceVariationPercentage24h: number];
@@ -28,7 +29,8 @@ const tokenPrices$ = new BehaviorSubject<{ tokens: TokenPrices } & Status>({
   status: 'idle'
 });
 
-const emitPrices = () =>
+const EMIT_PRICE_THROTTLE_TIME = 10_000;
+const emitPrices = throttle(EMIT_PRICE_THROTTLE_TIME, () =>
   tokenPrices$.next({
     status: 'fetched',
     tokens: new Map(
@@ -44,7 +46,8 @@ const emitPrices = () =>
           return [asset, { lastFetchTime, price: { priceInAda, priceVariationPercentage24h } }];
         })
     )
-  });
+  })
+);
 
 const updatePriceData = (assetId: string, data?: PriceData) => {
   const now = Date.now();
@@ -88,10 +91,27 @@ const fetchPrice = async (assetId: Cardano.AssetId) => {
   }
 };
 
+let fetchPricesTimeout: NodeJS.Timeout | undefined;
+let fetchPricesIsRunning = false;
 const fetchPrices = async () => {
+  if (fetchPricesIsRunning) return;
+  fetchPricesIsRunning = true;
+
+  if (fetchPricesTimeout) {
+    clearTimeout(fetchPricesTimeout);
+    fetchPricesTimeout = undefined;
+  }
+
+  const tokensToFetch = Object.keys(priceData).length;
+
   for (const assetId in priceData) await fetchPrice(assetId as Cardano.AssetId);
 
-  setTimeout(fetchPrices, TOKEN_PRICE_CHECK_INTERVAL);
+  fetchPricesIsRunning = false;
+
+  // If new tokens requested while running, run again...
+  if (tokensToFetch !== Object.keys(priceData).length) fetchPrices();
+  // ... otherwise, schedule next run
+  else fetchPricesTimeout = setTimeout(fetchPrices, TOKEN_PRICE_CHECK_INTERVAL);
 };
 
 export const initCardanoTokenPrices = () => {
@@ -115,5 +135,9 @@ export const trackCardanoTokenPrice = async (assetId: Cardano.AssetId) => {
   // If init not yet completed, do nothing
   if (!priceData) return;
 
-  fetchPrice(assetId);
+  // If already tracked, do nothing
+  if (priceData[assetId]) return;
+
+  priceData[assetId] = [0];
+  fetchPrices();
 };
