@@ -6,7 +6,7 @@ export interface TokenPrice {
   priceInAda: number;
   priceVariationPercentage24h: number;
 }
-export type MaybeTokenPrice = { lastFetchTime: number; price?: TokenPrice };
+export type MaybeTokenPrice = { lastFetchTime: number; price?: TokenPrice; notFound?: boolean };
 export type TokenPrices = Map<Wallet.Cardano.AssetId, MaybeTokenPrice>;
 
 export type ADAPricesKeys = currencyCode | `${currencyCode}_24h_change`;
