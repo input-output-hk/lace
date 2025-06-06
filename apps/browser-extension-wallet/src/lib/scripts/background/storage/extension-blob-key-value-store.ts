@@ -9,7 +9,7 @@ import { toSerializableObject } from '@cardano-sdk/util';
  * Stores entire key-value collection in a single document
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class ExtensionBlobKeyValueStore<K extends PropertyKey, V extends {}>
+export class ExtensionBlobKeyValueStore<K extends string, V extends {}>
   extends ExtensionDocumentStore<Record<K, V>>
   implements sdkStorage.KeyValueStore<K, V>
 {

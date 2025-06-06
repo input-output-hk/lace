@@ -1,9 +1,9 @@
 /* eslint-disable sonarjs/no-small-switch */
 /* eslint-disable complexity */
 import { Wallet } from '@lace/cardano';
-import { RemoteApiPropertyType, TransactionWitnessRequest, WalletType, exposeApi } from '@cardano-sdk/web-extension';
+import { exposeApi, RemoteApiPropertyType, TransactionWitnessRequest, WalletType } from '@cardano-sdk/web-extension';
 import type { UserPromptService } from '@lib/scripts/background/services';
-import { DAPP_CHANNELS, cardanoCoin } from '@src/utils/constants';
+import { cardanoCoin, DAPP_CHANNELS } from '@src/utils/constants';
 import { runtime } from 'webextension-polyfill';
 import { of } from 'rxjs';
 import { logger } from '@lace/common';
@@ -66,7 +66,7 @@ export const pubDRepKeyToHash = async (
   pubDRepKeyHex: Wallet.Crypto.Ed25519PublicKeyHex
 ): Promise<Wallet.Crypto.Hash28ByteBase16> => {
   const pubDRepKey = await Wallet.Crypto.Ed25519PublicKey.fromHex(pubDRepKeyHex);
-  return (await pubDRepKey.hash()).hex();
+  return (await pubDRepKey.hash()).hex() as unknown as Wallet.Crypto.Hash28ByteBase16;
 };
 
 export const depositPaidWithSymbol = (deposit: bigint, coinId: Wallet.CoinId): string => {
