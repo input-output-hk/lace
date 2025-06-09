@@ -5,6 +5,7 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable max-statements */
 /* eslint-disable consistent-return */
+/* eslint-disable func-call-spacing */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SendStepOne } from './SendStepOne';
 import { ReviewTransaction } from './ReviewTransaction';
@@ -25,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { WarningModal } from '@views/browser/components';
 import styles from './SendFlow.module.scss';
 import { TxCreationType, TX_CREATION_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
+import { AddressValue } from './types';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -113,9 +115,11 @@ export const SendFlow: React.FC = () => {
   const [step, setStep] = useState<Step>('AMOUNT');
 
   const [amount, setAmount] = useState<string>('');
-  const [address, setAddress] = useState<string>('');
+  const [address, setAddress] = useState<AddressValue | undefined>();
 
-  const [unsignedTransaction, setUnsignedTransaction] = useState<Bitcoin.UnsignedTransaction | null>(null);
+  const [unsignedTransaction, setUnsignedTransaction] = useState<
+    (Bitcoin.UnsignedTransaction & { isHandle: boolean; handle: string }) | null
+  >(null);
   const [feeRate, setFeeRate] = useState<number>(1);
   const [estimatedTime, setEstimatedTime] = useState<string>('~30 min');
 
@@ -256,17 +260,19 @@ export const SendFlow: React.FC = () => {
   const goToReview = (newFeeRate: number) => {
     analytics.sendEventToPostHog(PostHogAction.SendTransactionDataReviewTransactionClick);
     setFeeRate(newFeeRate);
-    setUnsignedTransaction(
-      buildTransaction({
+    setUnsignedTransaction({
+      ...buildTransaction({
         knownAddresses,
         changeAddress: knownAddresses[0].address,
-        recipientAddress: address,
+        recipientAddress: address.isHandle ? address.resolvedAddress : address.address,
         feeRate: newFeeRate,
         amount: btcStringToSatoshisBigint(amount),
         utxos,
         network
-      })
-    );
+      }),
+      isHandle: address.isHandle,
+      handle: address.isHandle ? address.address : ''
+    });
     setStep('REVIEW');
     setDrawerConfig({
       ...config,

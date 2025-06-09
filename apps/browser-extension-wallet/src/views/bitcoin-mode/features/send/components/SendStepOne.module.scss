@@ -19,3 +19,17 @@
     -moz-appearance: textfield;
   }
 }
+
+:global(.anticon) {
+  &.valid {
+    color: var(--text-color-green);
+  }
+
+  &.invalid {
+    color: var(--text-color-red);
+  }
+
+  &.loading {
+    color: var(--text-color-grey);
+  }
+}

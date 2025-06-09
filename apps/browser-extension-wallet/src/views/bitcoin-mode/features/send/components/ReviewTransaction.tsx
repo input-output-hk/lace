@@ -13,7 +13,7 @@ const SATS_IN_BTC = 100_000_000;
 const MAXIMUM_FEE_DECIMAL = 8;
 
 interface ReviewTransactionProps {
-  unsignedTransaction: Bitcoin.UnsignedTransaction;
+  unsignedTransaction: Bitcoin.UnsignedTransaction & { isHandle: boolean; handle: string };
   btcToUsdRate: number;
   feeRate: number;
   estimatedTime: string;
@@ -81,6 +81,11 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
             })}
             <Flex flexDirection="column">
               <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+                {unsignedTransaction.isHandle && (
+                  <Text.Address className={styles.handle} data-testid="output-summary-recipient-address-handle">
+                    {isPopupView ? addEllipsis(unsignedTransaction.handle, 12, 5) : unsignedTransaction.handle}
+                  </Text.Address>
+                )}
                 <Text.Address className={styles.address} data-testid="output-summary-recipient-address">
                   {isPopupView ? addEllipsis(unsignedTransaction.toAddress, 12, 5) : unsignedTransaction.toAddress}
                 </Text.Address>
