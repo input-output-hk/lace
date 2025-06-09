@@ -36,10 +36,10 @@ import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 import { isMultidelegationSupportedByDevice } from '@views/browser/features/staking';
 import { useSecrets, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '@src/views/browser-view/features/staking/hooks';
-import { config } from '@src/config';
 import { parseError } from '@src/utils/parse-error';
 import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
 import { useObservable } from '@lace/common';
+import { walletRoutePaths } from '@routes';
 
 export const MultiDelegationStakingPopup = (): JSX.Element => {
   const { t } = useTranslation();
@@ -124,8 +124,6 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
     fetchNetworkInfo();
   }, [fetchNetworkInfo, blockchainProvider]);
 
-  const { GOV_TOOLS_URLS } = config();
-
   return (
     <OutsideHandlesProvider
       {...{
@@ -175,7 +173,7 @@ export const MultiDelegationStakingPopup = (): JSX.Element => {
         sharedWalletKey: parentMultiSigAccount?.extendedAccountPublicKey,
         coSigners: wallet?.metadata?.coSigners,
         useRewardAccountsData,
-        govToolUrl: GOV_TOOLS_URLS[environmentName],
+        votingCenterUrl: walletRoutePaths.voting,
         parseError
       }}
     >

@@ -58,7 +58,7 @@
   "drawer.confirmation.button.signing": "Signing in progress",
   "drawer.confirmation.cardanoName": "Cardano",
   "drawer.confirmation.chargedDepositAmountInfo": "The amount you'll be charged for registering your stake key.",
-  "drawer.confirmation.errors.rewardsLocked": "Due to Cardano protocol rules, some of your stake keys cannot be de-registered as they have pending rewards. To withdraw the rewards, you must first delegate the voting power of those stake keys using <Link>Gov.tools</Link> portal. Once delegated, you will be able to de-register the keys.<keys>",
+  "drawer.confirmation.errors.rewardsLocked": "Due to Cardano protocol rules, some of your stake keys cannot be de-registered as they have pending rewards. To withdraw the rewards, you must first delegate the voting power of those stake keys in the <Link>voting center</Link>. Once delegated, you will be able to de-register the keys.<keys>",
   "drawer.confirmation.errors.utxoBalanceInsufficient": "Balance Insufficient",
   "drawer.confirmation.errors.utxoFullyDepleted": "UTxO Fully Depleted",
   "drawer.confirmation.noPools": "No pools",

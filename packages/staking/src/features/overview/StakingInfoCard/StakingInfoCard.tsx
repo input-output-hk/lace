@@ -9,6 +9,8 @@ import BigNumber from 'bignumber.js';
 import cn from 'classnames';
 import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+
 import InfoIcon from '../../../assets/icons/info-icon.svg';
 import MoonIcon from '../../../assets/icons/moon.component.svg';
 import WarningIcon from '../../../assets/icons/warning.component.svg';
@@ -95,7 +97,8 @@ export const StakingInfoCard = ({
   rewardAccount,
 }: StakingInfoCardProps): React.ReactElement => {
   const { t } = useTranslation();
-  const { openExternalLink, govToolUrl } = useOutsideHandles();
+  const { push } = useHistory();
+  const { votingCenterUrl } = useOutsideHandles();
 
   const dRepDelegatee = rewardAccount?.dRepDelegatee;
   const isDRepRetired =
@@ -212,7 +215,7 @@ export const StakingInfoCard = ({
               </Text.Button>
               <Button.CallToAction
                 w="$fill"
-                onClick={() => govToolUrl && openExternalLink(govToolUrl)}
+                onClick={() => votingCenterUrl && push(votingCenterUrl)}
                 data-testid="stats-register-as-drep-cta"
                 label={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
               />
@@ -227,7 +230,7 @@ export const StakingInfoCard = ({
                   ? 'overview.stakingInfoCard.registerAsDRepBanner.descriptionRetired'
                   : 'overview.stakingInfoCard.registerAsDRepBanner.description'
               )}
-              onButtonClick={() => govToolUrl && openExternalLink(govToolUrl)}
+              onButtonClick={() => votingCenterUrl && push(votingCenterUrl)}
               buttonMessage={t('overview.stakingInfoCard.registerAsDRepBanner.cta')}
             />
           )}

@@ -11,6 +11,8 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import isNil from 'lodash/isNil';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+
 import { useOutsideHandles } from '../../outside-handles-provider';
 import { StakingError, StakingErrorType, useDelegationPortfolioStore, useStakingStore } from '../../store';
 import { AmountInfo } from './AmountInfo';
@@ -41,6 +43,7 @@ const isInputSelectionError = (error: any): error is { failure: InputSelectionFa
 export const StakePoolConfirmationContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const { setIsBuildingTx, setStakingError, stakingError } = useStakingStore();
+  const { push } = useHistory();
   const {
     balancesBalance: balance,
     walletStoreInMemoryWallet: inMemoryWallet,
@@ -54,8 +57,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
     signPolicy,
     sharedWalletKey,
     coSigners,
-    govToolUrl,
-    openExternalLink,
+    votingCenterUrl,
   } = useOutsideHandles();
   const { draftPortfolio } = useDelegationPortfolioStore((store) => ({
     draftPortfolio: store.draftPortfolio || [],
@@ -141,7 +143,7 @@ export const StakePoolConfirmationContent = (): React.ReactElement => {
         i18nKey="drawer.confirmation.errors.rewardsLocked"
         t={t}
         components={{
-          Link: <a onClick={() => openExternalLink(govToolUrl)} />,
+          Link: <a onClick={() => push(votingCenterUrl)} />,
           keys: <LockedStakeKeysList items={error.data} />,
         }}
       />
