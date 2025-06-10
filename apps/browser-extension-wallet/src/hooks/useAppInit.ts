@@ -1,12 +1,14 @@
 import { useObservable } from '@lace/common';
 import { useWalletStore } from '@stores';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { AddressesDiscoveryStatus } from '@lib/communication/addresses-discoverer';
 import { useWalletManager } from './useWalletManager';
 import { useWalletState } from './useWalletState';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
+import { bitcoinWalletManager } from '@lib/wallet-api-ui';
+import { useCurrentBlockchain } from '@src/multichain';
 
 export const useAppInit = (): void => {
   const {
@@ -19,9 +21,10 @@ export const useAppInit = (): void => {
     setHdDiscoveryStatus,
     deletingWallet
   } = useWalletStore();
+  const { blockchain } = useCurrentBlockchain();
   const { loadWallet, walletManager, walletRepository } = useWalletManager();
   const walletState = useWalletState();
-  const { environmentName } = useWalletStore();
+  const { environmentName, currentChain } = useWalletStore();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
 
   useEffect(() => {
@@ -56,7 +59,16 @@ export const useAppInit = (): void => {
   }, [environmentName, getCustomSubmitApiForNetwork]);
 
   const wallets = useObservable(walletRepository.wallets$);
-  const activeWalletProps = useObservable(walletManager.activeWalletId$);
+  const activeCardanoWalletProps = useObservable(walletManager.activeWalletId$);
+  const activeBitcoinWalletProps = useObservable(bitcoinWalletManager.activeWalletId$);
+  const activeWalletProps = useMemo(
+    () =>
+      blockchain === 'bitcoin'
+        ? activeBitcoinWalletProps && currentChain && { ...activeBitcoinWalletProps, chainId: currentChain }
+        : activeCardanoWalletProps,
+    [blockchain, activeCardanoWalletProps, activeBitcoinWalletProps, currentChain]
+  );
+
   useEffect(() => {
     if (deletingWallet || typeof wallets === 'undefined' || typeof activeWalletProps === 'undefined') return;
     void loadWallet(wallets, activeWalletProps);
