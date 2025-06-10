@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { SettingsCard } from './';
 import { useTranslation } from 'react-i18next';
 import { Typography } from 'antd';
-import { Button, useObservable } from '@lace/common';
+import { Button, toast, useObservable } from '@lace/common';
 import { WarningModal } from '@views/browser/components/WarningModal';
 import styles from './SettingsLayout.module.scss';
-import { useWalletManager } from '@hooks';
+import { useWalletManager, TOAST_DEFAULT_DURATION } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { BrowserViewSections } from '@lib/scripts/types';
@@ -59,8 +59,13 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
       // eslint-disable-next-line camelcase
       $set: { wallet_accounts_quantity: await getWalletAccountsQtyString(walletRepository) }
     });
-    const nextActiveWallet = await deleteWallet();
+    const { walletId: nextActiveWalletId } = (await deleteWallet()) || {};
+    const nextActiveWallet = wallets?.find(({ walletId }) => walletId === nextActiveWalletId);
     setDeletingWallet(false);
+    toast.notify({
+      duration: TOAST_DEFAULT_DURATION,
+      text: t('multiWallet.activated.wallet', { walletName: nextActiveWallet.metadata.name })
+    });
     if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // force reload to ensure all stores are cleaned up
