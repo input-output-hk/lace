@@ -3,6 +3,8 @@ import { Box, Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+
 import bgPopup from '../../../assets/images/register-drep-bg-popup.png';
 import BG from '../../../assets/images/register-drep-bg.png';
 import styles from './RegisterAsDRepBanner.module.scss';
@@ -10,11 +12,12 @@ import styles from './RegisterAsDRepBanner.module.scss';
 type props = {
   popupView?: boolean;
   openExternalLink: (url: string) => void;
-  govToolUrl?: string;
+  votingCenterUrl?: string;
 };
 
-export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }: props): React.ReactElement => {
+export const RegisterAsDRepBanner = ({ popupView, openExternalLink, votingCenterUrl }: props): React.ReactElement => {
   const { t } = useTranslation();
+  const { push } = useHistory();
   return (
     <div className={cn(styles.container, { [styles.popupView!]: popupView })} data-testid="register-as-drep-banner">
       <img className={styles.bg} src={popupView ? bgPopup : BG} />
@@ -39,8 +42,8 @@ export const RegisterAsDRepBanner = ({ popupView, openExternalLink, govToolUrl }
         <Box mt="$20" h="$48">
           <Button.CallToAction
             w="$auto"
-            onClick={() => govToolUrl && openExternalLink(govToolUrl)}
-            data-testid="register-now-at-gov-tool-button"
+            onClick={() => votingCenterUrl && push(votingCenterUrl)}
+            data-testid="register-now-button"
             label={t('browserView.staking.stakingInfo.RegisterAsDRepBanner.cta')}
           />
         </Box>

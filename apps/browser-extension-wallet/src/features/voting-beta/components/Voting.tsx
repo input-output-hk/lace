@@ -10,7 +10,7 @@ import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 export const Voting = (): React.ReactElement => {
   const openExternalLink = useExternalLinkOpener();
   const { environmentName } = useWalletStore();
-  const { GOV_TOOLS_URLS } = config();
+  const { GOV_TOOLS_URLS, TEMPO_VOTE_URLS } = config();
   const analytics = useAnalyticsContext();
 
   const openLink = useCallback(
@@ -26,7 +26,12 @@ export const Voting = (): React.ReactElement => {
     <ContentLayout>
       <div className={styles.activitiesContainer}>
         <div className={styles.emptyState}>
-          <VotingCenterBanner openExternalLink={openLink} govToolUrl={GOV_TOOLS_URLS[environmentName]} popupView />
+          <VotingCenterBanner
+            openExternalLink={openLink}
+            govToolUrl={GOV_TOOLS_URLS[environmentName]}
+            tempoVoteUrl={TEMPO_VOTE_URLS[environmentName]}
+            popupView
+          />
         </div>
       </div>
     </ContentLayout>

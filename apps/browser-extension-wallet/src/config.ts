@@ -33,6 +33,7 @@ export type Config = {
   SAVED_PRICE_DURATION: number;
   DEFAULT_SUBMIT_API: string;
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
+  TEMPO_VOTE_URLS: Record<EnvironmentTypes, string>;
   SESSION_TIMEOUT: Milliseconds;
   POSTHOG_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS: number;
   MEMPOOL_URLS: Record<BitcoinNetworks, string>;
@@ -146,6 +147,12 @@ export const config = (): Config => {
       Preprod: `${process.env.GOV_TOOLS_URL_PREPROD}`,
       Preview: `${process.env.GOV_TOOLS_URL_PREVIEW}`,
       Sanchonet: `${process.env.GOV_TOOLS_URL_SANCHONET}`
+    },
+    TEMPO_VOTE_URLS: {
+      Mainnet: `${process.env.TEMPO_VOTE_URL_MAINNET}`,
+      Preprod: `${process.env.TEMPO_VOTE_URL_PREPROD}`,
+      Preview: `${process.env.TEMPO_VOTE_URL_PREVIEW}`,
+      Sanchonet: `${process.env.TEMPO_VOTE_URL_SANCHONET}`
     },
     // eslint-disable-next-line new-cap
     SESSION_TIMEOUT: Milliseconds(

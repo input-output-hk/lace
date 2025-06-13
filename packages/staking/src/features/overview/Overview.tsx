@@ -27,7 +27,7 @@ export const Overview = () => {
     walletStoreWalletActivities: walletActivities,
     walletStoreInMemoryWallet: inMemoryWallet,
     isSharedWallet,
-    govToolUrl,
+    votingCenterUrl,
     openExternalLink,
     useRewardAccountsData,
   } = useOutsideHandles();
@@ -123,7 +123,7 @@ export const Overview = () => {
     <>
       {showRegisterAsDRepBanner && (
         <Box mb="$28" mt="$32">
-          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} />
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} votingCenterUrl={votingCenterUrl} />
         </Box>
       )}
       {!isSharedWallet && (

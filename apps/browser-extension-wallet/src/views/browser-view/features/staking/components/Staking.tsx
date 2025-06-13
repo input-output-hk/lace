@@ -24,8 +24,8 @@ import { useObservable } from '@lace/common';
 import { fetchPoolsInfo } from '../utils';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { useExternalLinkOpener } from '@providers';
-import { config } from '@src/config';
 import { useRewardAccountsData } from '../hooks';
+import { walletRoutePaths } from '@routes';
 
 const stepsWithExitConfirmation = new Set([Sections.CONFIRMATION, Sections.SIGN, Sections.FAIL_TX]);
 
@@ -41,8 +41,7 @@ export const Staking = (): React.ReactElement => {
     blockchainProvider,
     walletInfo,
     inMemoryWallet,
-    walletUI: { cardanoCoin },
-    environmentName
+    walletUI: { cardanoCoin }
   } = useWalletStore();
   const { fetchStakePools } = useWalletStore(stakePoolResultsSelector);
   const { priceResult } = useFetchCoinPrice();
@@ -68,7 +67,6 @@ export const Staking = (): React.ReactElement => {
 
   const { areAllRegisteredStakeKeysWithoutVotingDelegation, poolIdToRewardAccountsMap } = useRewardAccountsData();
   const showRegisterAsDRepBanner = !hasNoFunds && areAllRegisteredStakeKeysWithoutVotingDelegation;
-  const { GOV_TOOLS_URLS } = config();
 
   const openDelagationConfirmation = useCallback(() => {
     setSection();
@@ -119,7 +117,7 @@ export const Staking = (): React.ReactElement => {
     <>
       {showRegisterAsDRepBanner && (
         <Box mb="$56">
-          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={GOV_TOOLS_URLS[environmentName]} />
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} votingCenterUrl={walletRoutePaths.voting} />
         </Box>
       )}
       <div>
