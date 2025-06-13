@@ -11,7 +11,7 @@ import { AboutDrawer } from './AboutDrawer';
 import { config } from '@src/config';
 import { useCustomSubmitApi, useRedirection } from '@hooks';
 import { BrowserViewSections, MessageTypes } from '@lib/scripts/types';
-import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
+import { useAnalyticsContext, useBackgroundServiceAPIContext, useExternalLinkOpener } from '@providers';
 import { useSearchParams, useObservable, Button } from '@lace/common';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
@@ -49,7 +49,7 @@ export interface SettingsWalletProps<AdditionalDrawers extends string = never> {
   popupView?: boolean;
 }
 
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity,max-statements
 export const SettingsWalletBase = <AdditionalDrawers extends string>({
   renderLocalNodeSlot,
   popupView = false
@@ -76,6 +76,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
+  const openExternalLink = useExternalLinkOpener();
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
@@ -176,14 +177,15 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
-        {process.env.USE_GLACIER_DROP === 'true' ? (
+        {process.env.USE_GLACIER_DROP === 'true' && (
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"
+            onClick={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
           >
             {t('browserView.settings.wallet.midnight.prelaunch.title')}
           </SettingsLink>
-        ) : undefined}
+        )}
         {popupView && (
           <>
             <AboutDrawer visible={activeDrawer === SettingsDrawer.about} onClose={closeDrawer} popupView={popupView} />

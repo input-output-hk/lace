@@ -1,11 +1,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { MidnightEventBanner as View } from '@lace/core';
-import { useWalletStore } from '@src/stores';
-import { APP_MODE_POPUP } from '@src/utils/constants';
 import { Box, Dialog, sx } from '@input-output-hk/lace-ui-toolkit';
 import { storage } from 'webextension-polyfill';
 import { MIDNIGHT_EVENT_BANNER_KEY, MidnightEventBannerStorage } from '@lib/scripts/types';
 import { useTranslation } from 'react-i18next';
+import { useExternalLinkOpener } from '@providers';
 
 interface State {
   isLoading: boolean;
@@ -18,15 +17,12 @@ const REMINDER_TIME = Number.parseInt(process.env.MIDNIGHT_EVENT_BANNER_REMINDER
 
 export const MidnightEventBanner = (): JSX.Element => {
   const { t } = useTranslation();
-  const {
-    walletUI: { appMode }
-  } = useWalletStore();
-  const popupView = appMode === APP_MODE_POPUP;
   const [state, setState] = useState<State>({
     isLoading: true,
     isDialogOpen: false,
     data: undefined
   });
+  const openExternalLink = useExternalLinkOpener();
 
   useEffect(() => {
     const loadStorage = async () => {
@@ -134,14 +130,13 @@ export const MidnightEventBanner = (): JSX.Element => {
       >
         <View
           translations={{
-            title: popupView ? t('midnightEventBanner.popup.title') : t('midnightEventBanner.desktop.title'),
-            description: popupView
-              ? t('midnightEventBanner.popup.description')
-              : t('midnightEventBanner.desktop.description'),
-            moreDetails: t('midnightEventBanner.moreDetails'),
+            title: t('midnightEventBanner.title'),
+            description: t('midnightEventBanner.description'),
+            learnMore: t('midnightEventBanner.learnMore'),
             reminder: t('midnightEventBanner.reminder')
           }}
           onReminder={handleReminder}
+          onLearnMore={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
           onClose={() => handleDialog(true)}
         />
       </Box>

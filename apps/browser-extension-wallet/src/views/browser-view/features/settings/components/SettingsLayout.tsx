@@ -7,6 +7,7 @@ import { SettingsRemoveWallet } from './SettingsRemoveWallet';
 import { MidnightPreLaunchSettingsBanner } from '@lace/core';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
+import { useExternalLinkOpener } from '@providers';
 
 export interface SettingsLayoutProps {
   defaultPassphraseVisible?: boolean;
@@ -18,12 +19,16 @@ export const SettingsLayout = ({
   defaultMnemonic
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
+  const openExternalLink = useExternalLinkOpener();
 
   const sidePanelContent = (
     <div>
       {process.env.USE_GLACIER_DROP === 'true' ? (
         <Box mb="$32">
-          <MidnightPreLaunchSettingsBanner bannerImageUrl={MidnightPreLaunchBannerImage} />
+          <MidnightPreLaunchSettingsBanner
+            bannerImageUrl={MidnightPreLaunchBannerImage}
+            onCtaButtonClick={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
+          />
         </Box>
       ) : undefined}
       <SettingsAbout data-testid="about-container" />

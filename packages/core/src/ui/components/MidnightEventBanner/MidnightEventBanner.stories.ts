@@ -17,10 +17,10 @@ type Story = StoryObj<typeof MidnightEventBanner>;
 const data: ComponentProps<typeof MidnightEventBanner> = {
   translations: {
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna',
-    title: 'Participate in the\nMidnight Pre-Launch Event',
+      'The free, multi-phase distribution of NIGHT tokens aimed at empowering a broad, diverse community to build the future of the Midnight network',
+    title: 'Discover the Midnight Token Distribution',
     reminder: 'Remind me later',
-    moreDetails: 'More details'
+    learnMore: 'Learn more'
   }
 };
 
