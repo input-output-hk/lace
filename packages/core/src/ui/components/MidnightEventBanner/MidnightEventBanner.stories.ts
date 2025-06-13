@@ -18,7 +18,7 @@ const data: ComponentProps<typeof MidnightEventBanner> = {
   translations: {
     description:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna',
-    title: 'Participate in the\nMidnight Pre-Launch Event',
+    title: 'Discover the Midnight Token Distribution',
     reminder: 'Remind me later',
     moreDetails: 'More details'
   }
