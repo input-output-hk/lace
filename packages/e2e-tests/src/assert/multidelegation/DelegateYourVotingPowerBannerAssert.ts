@@ -16,8 +16,8 @@ class DelegateYourVotingPowerBannerAssert {
         .replace('</a>', '');
       expect(await DelegateYourVotingPowerBanner.description.getText()).to.equal(expectedDescription);
       await DelegateYourVotingPowerBanner.knowMoreLink.waitForDisplayed();
-      await DelegateYourVotingPowerBanner.registerButton.waitForEnabled();
-      expect(await DelegateYourVotingPowerBanner.registerButton.getText()).to.equal(
+      await DelegateYourVotingPowerBanner.registerNowButton.waitForEnabled();
+      expect(await DelegateYourVotingPowerBanner.registerNowButton.getText()).to.equal(
         await t('browserView.staking.stakingInfo.RegisterAsDRepBanner.cta')
       );
     }

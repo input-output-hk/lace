@@ -463,6 +463,13 @@ Then(/^Gov Tool page is displayed in a new tab$/, async () => {
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
 
+Then(/^Tempo.vote page is displayed in a new tab$/, async () => {
+  const expectedUrl = extensionUtils.isMainnet()
+    ? 'https://tempo.vote/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.tempo.vote/`;
+  await commonAssert.assertSeeTabWithUrl(expectedUrl);
+});
+
 Then(
   /(invalid|valid|"N_8J@bne87A") password is not in snapshot/,
   async (password: 'invalid' | 'valid' | 'N_8J@bne87A') => {

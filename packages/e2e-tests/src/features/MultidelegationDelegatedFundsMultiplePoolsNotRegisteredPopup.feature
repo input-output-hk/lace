@@ -16,7 +16,7 @@ Feature: Staking Page - Delegated funds - Multiple pools - Not registered voting
     Then I see a "FAQ" article with title "What is the Voltaire GovTool?"
 
   @LW-12040
-  Scenario: Popup View - "Delegate your voting power" banner - click on "Register now at Gov Tool" button
+  Scenario: Popup View - "Delegate your voting power" banner - click on "Register now" button
     When I navigate to Staking popup page
-    And I click on "Register now at Gov Tool" button
-    Then Gov Tool page is displayed in a new tab
+    And I click on "Register now" button
+    Then I'm redirected to "Voting Center" page
