@@ -14,8 +14,14 @@ class VotingCenterPageAssert {
       : 'browserView.voting-beta.modal.description';
     const expectedDescription = (await t(expectedDescriptionKey)).replaceAll('<br /><br />', '\n\n');
     expect(await VotingCenterPage.description.getProperty('innerText')).to.equal(expectedDescription);
-    await VotingCenterPage.govToolButton.waitForClickable();
-    expect(await VotingCenterPage.govToolButton.getText()).to.equal(await t('browserView.voting-beta.modal.cta'));
+    await VotingCenterPage.accessGovToolButton.waitForClickable();
+    expect(await VotingCenterPage.accessGovToolButton.getText()).to.equal(
+      await t('browserView.voting-beta.modal.govTool.cta')
+    );
+    await VotingCenterPage.accessTempoVoteButton.waitForClickable();
+    expect(await VotingCenterPage.accessTempoVoteButton.getText()).to.equal(
+      await t('browserView.voting-beta.modal.tempoVote.cta')
+    );
   }
 }
 
