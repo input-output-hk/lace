@@ -8,6 +8,7 @@ import { MidnightPreLaunchSettingsBanner } from '@lace/core';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
 import { useExternalLinkOpener } from '@providers';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export interface SettingsLayoutProps {
   defaultPassphraseVisible?: boolean;
@@ -20,10 +21,13 @@ export const SettingsLayout = ({
 }: SettingsLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
+  const posthog = usePostHogClientContext();
+
+  const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
 
   const sidePanelContent = (
     <div>
-      {process.env.USE_GLACIER_DROP === 'true' ? (
+      {isGlacierDropEnabled ? (
         <Box mb="$32">
           <MidnightPreLaunchSettingsBanner
             bannerImageUrl={MidnightPreLaunchBannerImage}

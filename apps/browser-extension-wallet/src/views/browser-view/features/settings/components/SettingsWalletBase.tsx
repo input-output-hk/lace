@@ -22,6 +22,7 @@ import { CustomSubmitApiDrawer } from './CustomSubmitApiDrawer';
 import { COLLATERAL_AMOUNT_LOVELACES } from '@utils/constants';
 import { useCurrentBlockchain } from '@src/multichain';
 import { getNetworkName } from '@src/utils/get-network-name';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const { Title } = Typography;
 
@@ -65,6 +66,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const closeDrawer = useRedirection(walletRoutePaths.settings);
   const { blockchain } = useCurrentBlockchain();
   const isBitcoinWallet = blockchain === 'bitcoin';
+  const posthog = usePostHogClientContext();
 
   const { t } = useTranslation();
   const { environmentName, inMemoryWallet, walletInfo, setHdDiscoveryStatus, isSharedWallet } = useWalletStore();
@@ -80,6 +82,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
 
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
+  const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
 
   useEffect(() => {
     const openCollateralDrawer = async () => {
@@ -177,7 +180,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
         <Title level={5} className={styles.heading5} data-testid="wallet-settings-heading">
           {t('browserView.settings.wallet.title')}
         </Title>
-        {process.env.USE_GLACIER_DROP === 'true' && (
+        {isGlacierDropEnabled && (
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"
