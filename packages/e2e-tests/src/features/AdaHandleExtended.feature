@@ -60,7 +60,7 @@ Feature: ADA handle - extended view
     And I click "Done" button on "Edit address" drawer
     And I see a toast with text: "Given address already exists"
 
-  @LW-7140 @LW-7136
+  @LW-7140 @LW-7136 @Pending @issue=LW-13056
   Scenario: Extended View - Ada handles displayed and sorted by handle length
     When I click "Receive" button on page header
     Then I see "Wallet Address" page in extended mode for wallet "WalletAdaHandle"
@@ -98,7 +98,7 @@ Feature: ADA handle - extended view
     And I close a toast message
     And Clipboard contains text: "$test_handle_3"
 
-  @LW-7427 @LW-7426
+  @LW-7427 @LW-7426 @Pending @issue=LW-13056
   Scenario: Extended View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
     When I click "Receive" button on page header
     Then I see ADA handle with custom image on the "Wallet Address" page
@@ -118,7 +118,7 @@ Feature: ADA handle - extended view
     When I click on NFT with name: "$test_handle_1"
     Then the "$test_handle_1" asset is displayed in bundle 1
 
-  @LW-7429
+  @LW-7429 @Pending @issue=LW-13056
   Scenario: Extended View - Validate custom ADA handle image on the NFT folder thumbnail/page
     Given I navigate to NFTs extended page
     And I click "Receive" button on page header
@@ -135,7 +135,7 @@ Feature: ADA handle - extended view
     And I see NFT with name "$t_h_1" on the NFT folder page
     Then I see ADA handle NFT with custom image on the NFT folder page
 
-  @LW-7428
+  @LW-7428 @Pending @issue=LW-13056
   Scenario: Extended View - Validate custom ADA handle image on the "Select NFT" (folder) screen
     Given I navigate to NFTs extended page
     And I click "Receive" button on page header
