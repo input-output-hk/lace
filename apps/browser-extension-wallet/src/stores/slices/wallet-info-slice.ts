@@ -4,7 +4,6 @@ import { Wallet } from '@lace/cardano';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { isSharedWallet } from '@lace/core';
 import { isNamiWallet } from '@src/views/nami-mode/utils';
-import { Bitcoin } from '@lace/bitcoin/';
 
 /**
  * has all wallet info related actions and states
@@ -51,11 +50,6 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
   setWalletDisplayInfo: (info?: Wallet.WalletDisplayInfo) =>
     set({
       walletDisplayInfo: info
-    }),
-  setBitcoinWallet: (wallet?: Bitcoin.BitcoinWallet) =>
-    set({
-      bitcoinWallet: wallet,
-      isBitcoinWallet: !!wallet
     }),
   setIsBitcoinWallet: (isBitcoinWallet: boolean) =>
     set({

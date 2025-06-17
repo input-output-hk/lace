@@ -669,7 +669,7 @@ export const useWalletManager = (): UseWalletManager => {
         setWalletDisplayInfo(await getWalletInfo());
       }
     },
-    [getCurrentChainId, backgroundService, setIsBitcoinWallet, setWalletDisplayInfo, getWalletInfo]
+    [backgroundService, getCurrentChainId, setWalletDisplayInfo, getWalletInfo, setIsBitcoinWallet]
   );
 
   const activateAnyWallet = useCallback(
@@ -688,11 +688,12 @@ export const useWalletManager = (): UseWalletManager => {
    * @returns resolves with wallet information or null when no wallet is found
    */
   const loadWallet = useCallback(
-    // eslint-disable-next-line complexity
+    // eslint-disable-next-line complexity, max-statements
     async (
       wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[],
       activeWalletProps: WalletManagerActivateProps | null
     ): Promise<Wallet.CardanoWallet | undefined> => {
+      const { activeBlockchain } = await backgroundService.getBackgroundStorage();
       // If there are no wallets, attempt to migrate local storage data to wallet repository
       if (wallets.length === 0) {
         if (!(await tryMigrateToWalletRepository())) {
@@ -727,6 +728,13 @@ export const useWalletManager = (): UseWalletManager => {
         activeWallet.type !== WalletType.Script
           ? activeWallet.accounts.find((a) => a.accountIndex === activeWalletProps.accountIndex)
           : undefined;
+
+      if (activeBlockchain === 'bitcoin' && activeWallet) {
+        setIsBitcoinWallet(true);
+        setWalletDisplayInfo(await getWalletInfo());
+        return;
+      }
+
       const newCardanoWallet = {
         name: activeWallet.metadata.name,
         signingCoordinator,
@@ -760,17 +768,19 @@ export const useWalletManager = (): UseWalletManager => {
       return newCardanoWallet;
     },
     [
-      getWalletInfo,
+      backgroundService,
+      currentChain?.networkMagic,
+      cardanoWallet,
+      manageAccountsWallet,
+      tryMigrateToWalletRepository,
       setCardanoWallet,
       setWalletDisplayInfo,
-      setCurrentChain,
-      tryMigrateToWalletRepository,
-      cardanoWallet,
-      currentChain,
-      manageAccountsWallet,
-      activateAnyWallet,
       deletingWallet,
+      activateAnyWallet,
+      setCurrentChain,
       setCardanoCoin,
+      setIsBitcoinWallet,
+      getWalletInfo,
       setManageAccountsWallet
     ]
   );
