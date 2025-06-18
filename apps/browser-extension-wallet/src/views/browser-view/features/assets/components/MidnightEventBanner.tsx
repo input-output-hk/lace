@@ -5,6 +5,7 @@ import { storage } from 'webextension-polyfill';
 import { MIDNIGHT_EVENT_BANNER_KEY, MidnightEventBannerStorage } from '@lib/scripts/types';
 import { useTranslation } from 'react-i18next';
 import { useExternalLinkOpener } from '@providers';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 interface State {
   isLoading: boolean;
@@ -23,6 +24,9 @@ export const MidnightEventBanner = (): JSX.Element => {
     data: undefined
   });
   const openExternalLink = useExternalLinkOpener();
+  const posthog = usePostHogClientContext();
+
+  const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
 
   useEffect(() => {
     const loadStorage = async () => {
@@ -39,7 +43,7 @@ export const MidnightEventBanner = (): JSX.Element => {
   }, []);
 
   const shouldHide = () => {
-    if (process.env.USE_GLACIER_DROP !== 'true') {
+    if (!isGlacierDropEnabled) {
       return true;
     }
 
