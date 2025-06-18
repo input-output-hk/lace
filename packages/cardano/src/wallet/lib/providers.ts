@@ -39,6 +39,7 @@ import { BlockfrostAddressDiscovery } from '@wallet/lib/blockfrost-address-disco
 import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
 import { initHandleService } from './handleService';
+import { initStakePoolService } from './stakePoolService';
 
 const createTxSubmitProvider = (
   blockfrostClient: BlockfrostClient,
@@ -160,6 +161,7 @@ export const createProviders = ({
   });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
   const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
+  initStakePoolService({ blockfrostClient, extensionLocalStorage });
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
