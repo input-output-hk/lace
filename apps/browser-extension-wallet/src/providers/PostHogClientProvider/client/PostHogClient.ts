@@ -32,7 +32,8 @@ import {
   FeatureFlagPayloads,
   FeatureFlagsByNetwork,
   FeatureFlags,
-  RawFeatureFlagPayloads
+  RawFeatureFlagPayloads,
+  FeatureFlagGlacierDropSchema
 } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
 import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
@@ -310,6 +311,11 @@ export class PostHogClient<Action extends string = string> {
           payloadsByFeature[featureFlag] = featureFlagSchema.dappExplorer.parse(
             payload
           ) as FeatureFlagDappExplorerSchema;
+          continue;
+        }
+
+        if (featureFlag === ExperimentName.GLACIER_DROP) {
+          payloadsByFeature[featureFlag] = featureFlagSchema.glacierDrop.parse(payload) as FeatureFlagGlacierDropSchema;
           continue;
         }
 

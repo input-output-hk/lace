@@ -24,6 +24,7 @@ export const SettingsLayout = ({
   const posthog = usePostHogClientContext();
 
   const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
+  const glacierDropPayload = posthog?.getFeatureFlagPayload('glacier-drop');
 
   const sidePanelContent = (
     <div>
@@ -31,7 +32,7 @@ export const SettingsLayout = ({
         <Box mb="$32">
           <MidnightPreLaunchSettingsBanner
             bannerImageUrl={MidnightPreLaunchBannerImage}
-            onCtaButtonClick={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
+            onCtaButtonClick={() => glacierDropPayload && openExternalLink(glacierDropPayload?.learnMoreUrl)}
           />
         </Box>
       ) : undefined}
