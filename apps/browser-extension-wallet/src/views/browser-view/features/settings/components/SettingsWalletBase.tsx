@@ -83,6 +83,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
   const isNetworkChoiceEnabled = AVAILABLE_CHAINS.length > 1;
   const authorizedAppsEnabled = process.env.USE_DAPP_CONNECTOR === 'true' && !isSharedWallet;
   const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
+  const glacierDropPayload = posthog?.getFeatureFlagPayload('glacier-drop');
 
   useEffect(() => {
     const openCollateralDrawer = async () => {
@@ -184,7 +185,7 @@ export const SettingsWalletBase = <AdditionalDrawers extends string>({
           <SettingsLink
             description={t('browserView.settings.wallet.midnight.prelaunch.description')}
             data-testid="settings-wallet-midnight-prelaunch-link"
-            onClick={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
+            onClick={() => glacierDropPayload && openExternalLink(glacierDropPayload?.learnMoreUrl)}
           >
             {t('browserView.settings.wallet.midnight.prelaunch.title')}
           </SettingsLink>

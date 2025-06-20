@@ -2,7 +2,7 @@ import { Cardano } from '@cardano-sdk/core';
 import { z } from 'zod';
 import { DeepRequired } from 'utility-types';
 import { JsonType } from 'posthog-js';
-import { commonSchema, dappExplorerSchema } from '@providers/PostHogClientProvider/schema';
+import { commonSchema, dappExplorerSchema, glacierDropSchema } from '@providers/PostHogClientProvider/schema';
 
 export enum ExperimentName {
   CREATE_PAPER_WALLET = 'create-paper-wallet',
@@ -29,6 +29,7 @@ export type FeatureFlagsByNetwork = Record<Cardano.NetworkMagics, FeatureFlags>;
 // so we use extra types with DeepRequired, these types can be removed after Lace uses strict null checks
 export type FeatureFlagCommonSchema = DeepRequired<z.infer<typeof commonSchema>>;
 export type FeatureFlagDappExplorerSchema = DeepRequired<z.infer<typeof dappExplorerSchema>>;
+export type FeatureFlagGlacierDropSchema = DeepRequired<z.infer<typeof glacierDropSchema>>;
 
 // Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
 // strict null checks enabled so `false` is a replacement for `undefined` in this case
@@ -37,6 +38,7 @@ type FeatureFlagPayload<T extends Record<string, unknown> = {}> = (FeatureFlagCo
 
 type FeatureFlagCustomPayloads = {
   [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<FeatureFlagDappExplorerSchema>;
+  [ExperimentName.GLACIER_DROP]: FeatureFlagPayload<FeatureFlagGlacierDropSchema>;
 };
 
 export type FeatureFlagPayloads = {

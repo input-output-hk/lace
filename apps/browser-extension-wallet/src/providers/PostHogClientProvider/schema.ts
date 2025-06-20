@@ -41,7 +41,14 @@ export const dappExplorerSchema = commonSchema.merge(
   })
 );
 
+export const glacierDropSchema = commonSchema.merge(
+  z.object({
+    learnMoreUrl: z.string().url()
+  })
+);
+
 export const featureFlagSchema = {
   common: z.preprocess(parseJsonPreprocessor, commonSchema),
-  dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema)
+  dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema),
+  glacierDrop: z.preprocess(parseJsonPreprocessor, glacierDropSchema)
 };

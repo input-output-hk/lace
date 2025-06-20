@@ -27,6 +27,7 @@ export const MidnightEventBanner = (): JSX.Element => {
   const posthog = usePostHogClientContext();
 
   const isGlacierDropEnabled = posthog?.isFeatureFlagEnabled('glacier-drop');
+  const glacierDropPayload = posthog.getFeatureFlagPayload('glacier-drop');
 
   useEffect(() => {
     const loadStorage = async () => {
@@ -140,7 +141,7 @@ export const MidnightEventBanner = (): JSX.Element => {
             reminder: t('midnightEventBanner.reminder')
           }}
           onReminder={handleReminder}
-          onLearnMore={() => openExternalLink(process.env.MIDNIGHT_LEARN_MORE_URL)}
+          onLearnMore={() => glacierDropPayload && openExternalLink(glacierDropPayload?.learnMoreUrl)}
           onClose={() => handleDialog(true)}
         />
       </Box>
