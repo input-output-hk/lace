@@ -193,5 +193,7 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
     And I wait until modal disappears
-    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate latest analytics multiple events:
+      | settings \| hold up \| remove wallet \| click |
+      | wallet \| session start \| pageview           |
+    And I validate that 3 analytics event(s) have been sent
