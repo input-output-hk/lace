@@ -25,15 +25,15 @@ export class MenuHeaderNetwork {
   }
 
   get mainnetRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkDrawer.mainnetRadioButtonInput;
+    return NetworkDrawer.mainnetRadioButton;
   }
 
   get preprodRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkDrawer.preprodRadioButtonInput;
+    return NetworkDrawer.preprodRadioButton;
   }
 
   get previewRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return NetworkDrawer.previewRadioButtonInput;
+    return NetworkDrawer.previewRadioButton;
   }
 }
 

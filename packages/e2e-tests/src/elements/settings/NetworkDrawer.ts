@@ -5,30 +5,30 @@ import type { NetworkType } from '../../types/network';
 
 class NetworkDrawer extends CommonDrawerElements {
   private MAINNET_RADIO_BUTTON_INPUT = '//input[@data-testid="network-mainnet-radio-button"]';
-  private MAINNET_RADIO_BUTTON_LABEL = '//label[span/input[@data-testid="network-mainnet-radio-button"]]';
+  private MAINNET_RADIO_BUTTON = '//label[span/input[@data-testid="network-mainnet-radio-button"]]';
   private PREPROD_RADIO_BUTTON_INPUT = '//input[@data-testid="network-preprod-radio-button"]';
-  private PREPROD_RADIO_BUTTON_LABEL = '//label[span/input[@data-testid="network-preprod-radio-button"]]';
+  private PREPROD_RADIO_BUTTON = '//label[span/input[@data-testid="network-preprod-radio-button"]]';
   private PREVIEW_RADIO_BUTTON_INPUT = '//input[@data-testid="network-preview-radio-button"]';
-  private PREVIEW_RADIO_BUTTON_LABEL = '//label[span/input[@data-testid="network-preview-radio-button"]]';
+  private PREVIEW_RADIO_BUTTON = '//label[span/input[@data-testid="network-preview-radio-button"]]';
 
-  get mainnetRadioButtonLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.MAINNET_RADIO_BUTTON_LABEL);
+  get mainnetRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MAINNET_RADIO_BUTTON);
   }
 
   get mainnetRadioButtonInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAINNET_RADIO_BUTTON_INPUT);
   }
 
-  get preprodRadioButtonLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.PREPROD_RADIO_BUTTON_LABEL);
+  get preprodRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PREPROD_RADIO_BUTTON);
   }
 
   get preprodRadioButtonInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PREPROD_RADIO_BUTTON_INPUT);
   }
 
-  get previewRadioButtonLabel(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.PREVIEW_RADIO_BUTTON_LABEL);
+  get previewRadioButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.PREVIEW_RADIO_BUTTON);
   }
 
   get previewRadioButtonInput(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -38,16 +38,16 @@ class NetworkDrawer extends CommonDrawerElements {
   clickOnNetworkRadioButton = async (network: NetworkType) => {
     switch (network) {
       case 'Mainnet':
-        await this.mainnetRadioButtonInput.waitForClickable();
-        await this.mainnetRadioButtonInput.click();
+        await this.mainnetRadioButton.waitForClickable();
+        await this.mainnetRadioButton.click();
         break;
       case 'Preprod':
-        await this.preprodRadioButtonInput.waitForClickable();
-        await this.preprodRadioButtonInput.click();
+        await this.preprodRadioButton.waitForClickable();
+        await this.preprodRadioButton.click();
         break;
       case 'Preview':
-        await this.previewRadioButtonInput.waitForClickable();
-        await this.previewRadioButtonInput.click();
+        await this.previewRadioButton.waitForClickable();
+        await this.previewRadioButton.click();
         break;
     }
   };
