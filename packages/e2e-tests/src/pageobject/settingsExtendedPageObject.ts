@@ -61,23 +61,6 @@ class SettingsExtendedPageObject {
     await YourKeysDrawer.showPublicKeyButton.click();
   };
 
-  clickOnNetworkRadioButton = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
-    switch (network) {
-      case 'Mainnet':
-        await NetworkDrawer.mainnetRadioButton.waitForClickable();
-        await NetworkDrawer.mainnetRadioButton.click();
-        break;
-      case 'Preprod':
-        await NetworkDrawer.preprodRadioButton.waitForClickable();
-        await NetworkDrawer.preprodRadioButton.click();
-        break;
-      case 'Preview':
-        await NetworkDrawer.previewRadioButton.waitForClickable();
-        await NetworkDrawer.previewRadioButton.click();
-        break;
-    }
-  };
-
   toggleDebugging = async (isEnabled: boolean) => {
     (await SettingsPage.debuggingSwitch.getAttribute(toggleEnabledAttribute)) !== String(isEnabled) &&
       (await SettingsPage.debuggingSwitch.click());
@@ -137,10 +120,12 @@ class SettingsExtendedPageObject {
   switchNetworkWithoutClosingDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
     await MenuHeader.openSettings();
     await this.clickOnNetwork();
-    await this.clickOnNetworkRadioButton(network);
-    await browser.waitUntil(
-      async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network
-    );
+    if (!(await NetworkDrawer.isNetworkSelected(network))) {
+      await NetworkDrawer.clickOnNetworkRadioButton(network);
+      await browser.waitUntil(
+        async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network
+      );
+    }
   };
 
   switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {

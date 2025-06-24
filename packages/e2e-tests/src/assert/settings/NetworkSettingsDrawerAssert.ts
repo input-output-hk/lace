@@ -5,18 +5,18 @@ import { browser } from '@wdio/globals';
 
 class NetworkSettingsDrawerAssert {
   async assertSeeNetworkRadioButtons() {
-    await NetworkDrawer.preprodRadioButton.waitForDisplayed();
+    await NetworkDrawer.preprodRadioButtonLabel.waitForDisplayed();
 
-    await browser.waitUntil(async () => (await NetworkDrawer.preprodRadioButton.getText()) !== '', {
+    await browser.waitUntil(async () => (await NetworkDrawer.preprodRadioButtonLabel.getText()) !== '', {
       timeout: 2000,
       timeoutMsg: 'radio button text should not be empty'
     });
 
-    expect(await NetworkDrawer.preprodRadioButton.getText()).to.equal(await t('general.networks.preprod'));
-    await NetworkDrawer.previewRadioButton.waitForDisplayed();
-    expect(await NetworkDrawer.previewRadioButton.getText()).to.equal(await t('general.networks.preview'));
-    await NetworkDrawer.mainnetRadioButton.waitForDisplayed();
-    expect(await NetworkDrawer.mainnetRadioButton.getText()).to.equal(await t('general.networks.mainnet'));
+    expect(await NetworkDrawer.preprodRadioButtonLabel.getText()).to.equal(await t('general.networks.preprod'));
+    await NetworkDrawer.previewRadioButtonLabel.waitForDisplayed();
+    expect(await NetworkDrawer.previewRadioButtonLabel.getText()).to.equal(await t('general.networks.preview'));
+    await NetworkDrawer.mainnetRadioButtonLabel.waitForDisplayed();
+    expect(await NetworkDrawer.mainnetRadioButtonLabel.getText()).to.equal(await t('general.networks.mainnet'));
   }
 }
 

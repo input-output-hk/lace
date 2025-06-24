@@ -33,6 +33,7 @@ import SecureYourPaperWalletDrawer from '../elements/settings/SecureYourPaperWal
 import EnterYourPasswordDrawerAssert from '../assert/settings/EnterYourPasswordDrawerAssert';
 import EnterYourPasswordDrawer from '../elements/settings/EnterYourPasswordDrawer';
 import SaveYourPaperWalletDrawerAssert from '../assert/settings/SaveYourPaperWalletDrawerAssert';
+import NetworkDrawer from '../elements/settings/NetworkDrawer';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API|Generate paper wallet)" setting$/,
@@ -120,7 +121,7 @@ Then(/^I see network radio buttons$/, async () => {
 });
 
 When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: NetworkType) => {
-  await settingsExtendedPageObject.clickOnNetworkRadioButton(network);
+  await NetworkDrawer.clickOnNetworkRadioButton(network);
 });
 
 When(
