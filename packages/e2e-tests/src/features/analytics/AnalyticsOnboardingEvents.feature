@@ -26,7 +26,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | restore wallet revamp | added"
     And I wait for main loader to disappear
     And "$create_alias" PostHog event was sent
-    And I validate that alias event has assigned same user id "9646a33207b90ae60ae83770aaa82597" in posthog
+    And I validate that alias event has assigned same user id "f8a1e17e98bf157a31a082a2e4ad85a0" in posthog
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
