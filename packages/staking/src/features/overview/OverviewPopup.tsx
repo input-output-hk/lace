@@ -27,7 +27,7 @@ export const OverviewPopup = () => {
     walletStoreWalletActivities: walletActivities,
     isSharedWallet,
     openExternalLink,
-    govToolUrl,
+    votingCenterUrl,
     useRewardAccountsData,
   } = useOutsideHandles();
   const rewardAccounts = useObservable(inMemoryWallet.delegation.rewardAccounts$);
@@ -97,7 +97,7 @@ export const OverviewPopup = () => {
     <>
       {showRegisterAsDRepBanner && (
         <Box mb="$28" mt="$32">
-          <RegisterAsDRepBanner openExternalLink={openExternalLink} govToolUrl={govToolUrl} popupView />
+          <RegisterAsDRepBanner openExternalLink={openExternalLink} votingCenterUrl={votingCenterUrl} popupView />
         </Box>
       )}
       {stakingNotifications.length > 0 && (

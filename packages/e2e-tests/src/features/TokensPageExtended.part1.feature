@@ -69,5 +69,5 @@ Feature: LW: Tokens tab - extended view
       | Video    | Secure self-custody with Lace                                                |
       | Video    | Connecting to DApps with Lace                                                |
       | FAQ      | How is the Conway Ledger era (also called governance era) supported by Lace? |
-      | FAQ      | What type of governance features are supported in Lace using the GovTool?    |
+      | FAQ      | What type of governance features are supported in Lace?                      |
       | FAQ      | What type of governance actions are supported by Lace?                       |

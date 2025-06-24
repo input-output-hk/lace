@@ -3,6 +3,7 @@ import React, {
   ReactElement,
   ReactNode,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -279,7 +280,7 @@ export const SharedWalletCreationStore = ({
   sharedWalletKey,
 }: SharedWalletCreationStoreProps): ReactElement => {
   const initialState = useInitialState(makeInitialState(activeWalletName));
-  const [state, dispatch] = useReducer(
+  const reducer = useCallback(
     (prevState: CreationFlowState, action: SharedWalletCreationAction): CreationFlowState => {
       const stateMachine = makeStateMachine({
         exitTheFlow,
@@ -290,8 +291,10 @@ export const SharedWalletCreationStore = ({
       const handler = stateMachine[prevState.step] as Handler<CreationFlowState>;
       return handler(prevState, action);
     },
-    initialState,
+    [exitTheFlow, navigateToAppHome, onCreateSharedWallet, sharedWalletKey],
   );
+
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     if (state.walletName !== undefined || initialWalletName === undefined) return;

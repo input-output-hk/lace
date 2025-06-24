@@ -67,7 +67,7 @@ inputs:
     required: false
     default: ''
   BROWSER_TARGET:
-    description: 'Browser target to build for. Options are [firefox | chromium]'
+    description: 'Browser target to build for. Options are [chromium | firefox]'
     required: false
     default: 'chromium'
 
@@ -103,14 +103,27 @@ runs:
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
 
-    - name: Upload artifact
-      if: ${{ inputs.BROWSER_TARGET != 'firefox' }}
+    - name: Upload Chrome artifact
+      if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ inputs.NAME }}
+        name: lace-chrome-browser-extension
         path: ${{ inputs.DIR }}/dist
 
-    - name: Pack Firefox
+    - name: Prepare MS Edge
+      if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
+      run: 'sed -i "s/\"key\": \"[^\"]*\",//" manifest.json'
+      shell: bash
+      working-directory: ${{ inputs.DIR }}/dist
+
+    - name: Upload MS Edge artifact
+      if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: lace-edge-browser-extension
+        path: ${{ inputs.DIR }}/dist
+
+    - name: Prepare Firefox
       if: ${{ inputs.BROWSER_TARGET == 'firefox' }}
       run: yarn pack:firefox
       shell: bash

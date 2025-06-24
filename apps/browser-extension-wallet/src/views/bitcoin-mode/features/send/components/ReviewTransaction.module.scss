@@ -6,6 +6,11 @@
   word-break: break-all;
 }
 
+.handle {
+  word-break: break-all;
+  font-weight: bold;
+}
+
 .divider {
   height: 1px;
   background-color: var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333));

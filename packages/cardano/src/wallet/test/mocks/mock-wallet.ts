@@ -11,6 +11,7 @@ import { utxoProviderStub } from './UtxoProviderStub';
 import { chainHistoryProviderStub } from './ChainHistoryProviderStub';
 import { rewardsHistoryProviderStub } from './RewardsProviderStub';
 import { of } from 'rxjs';
+import { handleProviderStub } from './HandleProviderStub';
 
 const logger = console;
 const name = 'Test Wallet';
@@ -58,6 +59,8 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
   // eslint-disable-next-line sonarjs/no-use-of-empty-return-value
   const rewardAccountInfoProvider = rewardAccountInfoProviderStub();
   const asyncKeyAgent = KeyManagement.util.createAsyncKeyAgent(keyAgent);
+  const handleProvider = handleProviderStub();
+
   const wallet = createPersonalWallet(
     { name },
     {
@@ -69,9 +72,10 @@ export const mockWallet = async (customKeyAgent?: KeyManagement.InMemoryKeyAgent
       chainHistoryProvider,
       utxoProvider,
       rewardAccountInfoProvider,
+      handleProvider,
       logger,
       witnesser: KeyManagement.util.createBip32Ed25519Witnesser(asyncKeyAgent),
-      bip32Account: new KeyManagement.Bip32Account(keyAgent)
+      bip32Account: await KeyManagement.Bip32Account.fromAsyncKeyAgent(asyncKeyAgent)
     }
   );
 

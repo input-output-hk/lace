@@ -95,7 +95,6 @@ Feature: Forgot password
     And I switch to tab with restore wallet process
     # And I am on <expected_page> page of restoration flow
     And I leave "Forgot password" flow
-    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     Examples:
       | expected_page         |
@@ -119,6 +118,3 @@ Feature: Forgot password
     Then I see LW homepage
     And I click the menu button
     Then header menu displays "TestAutomationWallet" as a wallet name
-    When I close header menu
-    And I navigate to Settings extended page
-    Then Analytics toggle is not enabled

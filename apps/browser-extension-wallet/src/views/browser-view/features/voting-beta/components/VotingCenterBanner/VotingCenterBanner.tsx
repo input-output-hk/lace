@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Box, Button, Flex } from '@input-output-hk/lace-ui-toolkit';
+import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import cn from 'classnames';
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
@@ -11,9 +11,15 @@ type props = {
   popupView?: boolean;
   openExternalLink: (url: string) => void;
   govToolUrl: string;
+  tempoVoteUrl: string;
 };
 
-export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: props): React.ReactElement => {
+export const VotingCenterBanner = ({
+  popupView,
+  openExternalLink,
+  govToolUrl,
+  tempoVoteUrl
+}: props): React.ReactElement => {
   const { t } = useTranslation();
   const btnWidth = popupView ? '$fill' : '$auto';
 
@@ -36,14 +42,20 @@ export const VotingCenterBanner = ({ popupView, openExternalLink, govToolUrl }: 
             />
           )}
         </div>
-        <Box w={btnWidth} mt="$20" h="$48">
+        <Flex gap="$16" w={btnWidth} mt="$20" h="$48">
           <Button.CallToAction
             w={btnWidth}
             onClick={() => openExternalLink(govToolUrl)}
             data-testid="voting-center-gov-tool-button"
-            label={t('browserView.voting-beta.modal.cta')}
+            label={t('browserView.voting-beta.modal.govTool.cta')}
           />
-        </Box>
+          <Button.CallToAction
+            w={btnWidth}
+            onClick={() => openExternalLink(tempoVoteUrl)}
+            data-testid="voting-center-tempo-vote-button"
+            label={t('browserView.voting-beta.modal.tempoVote.cta')}
+          />
+        </Flex>
       </Flex>
     </div>
   );

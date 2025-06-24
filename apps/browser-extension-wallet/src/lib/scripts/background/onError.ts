@@ -8,6 +8,7 @@ const INTERNAL_SERVER_ERROR_STATUS_CODE = 500;
 const GATEWAY_TIMEOUT_STATUS_CODE = 503;
 const UNAUTHORIZED_STATUS_CODE = 401;
 const NOT_FOUND_STATUS_CODE = 404;
+const TOO_MANY_REQUESTS_STATUS_CODE = 429;
 
 // eslint-disable-next-line unicorn/no-null
 let sentryUrl: string | null = '';
@@ -21,7 +22,10 @@ const isSentryRequest = (url: string) => !!sentryUrl && url.startsWith(sentryUrl
 const handleProviderServerErrors = (data: WebRequest.OnCompletedDetailsType) => {
   if (data?.type === 'xmlhttprequest' && runtime.getURL('').startsWith(data.initiator)) {
     const statusCodeQualifiedAsFailure =
+      // normal response for empty/no data from Blockfrost
       data.statusCode !== NOT_FOUND_STATUS_CODE &&
+      // client's fault, not server's fault
+      data.statusCode !== TOO_MANY_REQUESTS_STATUS_CODE &&
       data.statusCode > UNAUTHORIZED_STATUS_CODE &&
       data.statusCode < GATEWAY_TIMEOUT_STATUS_CODE;
     if (statusCodeQualifiedAsFailure) {

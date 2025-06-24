@@ -3,13 +3,13 @@ import { ExtensionDocumentStore } from './extension-document-store';
 import { storage as sdkStorage } from '@cardano-sdk/wallet';
 import { Logger } from 'ts-log';
 import { defaultIfEmpty, EMPTY, firstValueFrom, from, mergeMap, Observable, of } from 'rxjs';
-import { OpaqueString, toSerializableObject } from '@cardano-sdk/util';
+import { toSerializableObject } from '@cardano-sdk/util';
 
 /**
  * Stores entire key-value collection in a single document
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class ExtensionBlobKeyValueStore<K extends string | OpaqueString<any>, V extends {}>
+export class ExtensionBlobKeyValueStore<K extends string, V extends {}>
   extends ExtensionDocumentStore<Record<K, V>>
   implements sdkStorage.KeyValueStore<K, V>
 {
@@ -27,7 +27,7 @@ export class ExtensionBlobKeyValueStore<K extends string | OpaqueString<any>, V 
         for (const key of keys) {
           const value = collection[key];
           if (!value) {
-            this.logger.debug(`Key "$${key}" was not found`);
+            this.logger.debug(`Key "$${key.toString()}" was not found`);
             return EMPTY;
           }
           values.push(value);

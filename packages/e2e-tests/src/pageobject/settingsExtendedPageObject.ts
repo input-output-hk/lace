@@ -10,6 +10,7 @@ import { Logger } from '../support/logger';
 import { expect } from 'chai';
 import MainLoader from '../elements/MainLoader';
 import MenuHeader from '../elements/menuHeader';
+import PrivacyPolicyUpdateBanner from '../elements/PrivacyPolicyUpdateBanner';
 
 const toggleEnabledAttribute = 'aria-checked';
 
@@ -75,11 +76,6 @@ class SettingsExtendedPageObject {
         await NetworkDrawer.previewRadioButton.click();
         break;
     }
-  };
-
-  toggleAnalytics = async (isEnabled: boolean) => {
-    (await SettingsPage.analyticsSwitch.getAttribute(toggleEnabledAttribute)) !== String(isEnabled) &&
-      (await SettingsPage.analyticsSwitch.click());
   };
 
   toggleDebugging = async (isEnabled: boolean) => {
@@ -176,6 +172,12 @@ class SettingsExtendedPageObject {
     }
   };
 
+  closePrivacyPolycyUpdateBanner = async () => {
+    if (await PrivacyPolicyUpdateBanner.container.isDisplayed()) {
+      await PrivacyPolicyUpdateBanner.clickOnAgreeButton();
+    }
+  };
+
   waitUntilSyncingModalDisappears = async () => {
     await browser.pause(500);
     if (
@@ -190,6 +192,7 @@ class SettingsExtendedPageObject {
     await MainLoader.waitUntilLoaderDisappears();
     await this.waitUntilSyncingModalDisappears();
     await this.closeWalletSyncedToast();
+    await this.closePrivacyPolycyUpdateBanner();
     await this.multiAddressModalConfirm();
   }
 

@@ -144,16 +144,6 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | faqs | click"
     Then I validate that 1 analytics event(s) have been sent
 
-  @LW-8789
-  Scenario: Analytics - Extended View - Settings - Analytics
-    When I open settings from header menu
-    And I set up request interception for posthog analytics request(s)
-    And Analytics toggle is enabled
-    And Analytics toggle is not enabled
-    Then I validate latest analytics single event "settings | analytics | skip | click"
-    Then I validate that 1 analytics event(s) have been sent
-    And Analytics toggle is enabled
-
   @LW-8790
   Scenario: Analytics - Extended View - Settings - Theme switch
     When I set light theme mode in Local Storage
@@ -203,5 +193,7 @@ Feature: Analytics - Settings - Extended View
     Then I validate latest analytics single event "settings | remove wallet | click"
     And I click "Remove wallet" button on "Remove wallet" modal
     And I wait until modal disappears
-    Then I validate latest analytics single event "settings | hold up | remove wallet | click"
-    And I validate that 2 analytics event(s) have been sent
+    And I validate latest analytics multiple events:
+      | settings \| hold up \| remove wallet \| click |
+      | wallet \| session start \| pageview           |
+    And I validate that 3 analytics event(s) have been sent

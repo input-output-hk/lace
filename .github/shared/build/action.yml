@@ -44,35 +44,35 @@ inputs:
   CARDANO_SERVICES_URL_MAINNET:
     description: 'Url for mainnet env'
     required: false
-    default: 'https://dev-mainnet.lw.iog.io'
+    default: 'https://live-mainnet.lw.iog.io'
   CARDANO_SERVICES_URL_PREPROD:
     description: 'Url for preprod env'
     required: false
-    default: 'https://dev-preprod.lw.iog.io'
+    default: 'https://live-preprod.lw.iog.io'
   CARDANO_SERVICES_URL_PREVIEW:
     description: 'Url for preview env'
     required: false
-    default: 'https://dev-preview.lw.iog.io'
+    default: 'https://live-preview.lw.iog.io'
   CARDANO_SERVICES_URL_SANCHONET:
     description: 'Url for sanchonet env'
     required: false
-    default: 'https://dev-sanchonet.lw.iog.io'
+    default: 'https://live-sanchonet.lw.iog.io'
   CARDANO_WS_SERVER_URL_MAINNET:
     description: 'WS url for mainnet env'
     required: false
-    default: 'wss://dev-mainnet.lw.iog.io'
+    default: 'wss://live-mainnet.lw.iog.io'
   CARDANO_WS_SERVER_URL_PREPROD:
     description: 'WS url for preprod env'
     required: false
-    default: 'wss://dev-preprod.lw.iog.io'
+    default: 'wss://live-preprod.lw.iog.io'
   CARDANO_WS_SERVER_URL_PREVIEW:
     description: 'WS url for preview env'
     required: false
-    default: 'wss://dev-preview.lw.iog.io'
+    default: 'wss://live-preview.lw.iog.io'
   CARDANO_WS_SERVER_URL_SANCHONET:
     description: 'WS url for sanchonet env'
     required: false
-    default: 'wss://dev-sanchonet.lw.iog.io'
+    default: 'wss://live-sanchonet.lw.iog.io'
   SENTRY_AUTH_TOKEN:
     description: 'Authentication token for Sentry, used to publish source maps for releases'
     required: false
@@ -106,6 +106,10 @@ inputs:
     description: 'Force Trezor emulation'
     required: false
     default: 'false'
+  HANDLE_RESOLUTION_CACHE_LIFETIME:
+      description: ' ADA handle cache lifetime'
+      required: false
+      default: 600000
 runs:
   using: 'composite'
   steps:
@@ -180,4 +184,5 @@ runs:
         WALLET_POLLING_INTERVAL_IN_SEC: ${{ inputs.WALLET_POLLING_INTERVAL_IN_SEC }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
+        HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
       run: yarn browser build

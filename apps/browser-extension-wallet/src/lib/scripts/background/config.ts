@@ -2,7 +2,7 @@ import { storage } from 'webextension-polyfill';
 import axiosFetchAdapter from '@shiroyasha9/axios-fetch-adapter';
 import { Wallet } from '@lace/cardano';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
-import { getBaseUrlForChain, getMagicForChain } from '@src/utils/chain';
+import { getBaseKoraLabsUrlForChain, getBaseUrlForChain, getMagicForChain } from '@src/utils/chain';
 import { BackgroundService, UserIdService as UserIdServiceInterface } from '../types';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { logger } from '@lace/common';
@@ -19,7 +19,6 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
     adaPrices$: RemoteApiPropertyType.HotObservable,
     tokenPrices$: RemoteApiPropertyType.HotObservable
   },
-  trackCardanoTokenPrice: RemoteApiPropertyType.MethodReturningPromise,
   handleOpenBrowser: RemoteApiPropertyType.MethodReturningPromise,
   handleOpenNamiBrowser: RemoteApiPropertyType.MethodReturningPromise,
   closeAllTabsAndOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
@@ -46,6 +45,7 @@ export const rateLimiter: RateLimiter = new Bottleneck({
 
 export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.WalletProvidersDependencies> => {
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
+  const baseKoraLabsServicesUrl = getBaseKoraLabsUrlForChain(chainName);
   const magic = getMagicForChain(chainName);
   const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
 
@@ -55,6 +55,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
     axiosAdapter: axiosFetchAdapter,
     env: {
       baseCardanoServicesUrl,
+      baseKoraLabsServicesUrl,
       customSubmitTxUrl,
       blockfrostConfig: {
         ...BLOCKFROST_CONFIGS[chainName],

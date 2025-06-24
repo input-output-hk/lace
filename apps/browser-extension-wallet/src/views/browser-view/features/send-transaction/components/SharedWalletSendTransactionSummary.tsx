@@ -13,7 +13,7 @@ import { Wallet } from '@lace/cardano';
 import { useCurrentWallet, useFetchCoinPrice, useWalletManager } from '@hooks';
 import { useBuiltTxState } from '@views/browser/features/send-transaction';
 import { useObservable } from '@lace/common';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
 
 interface SharedWalletSendTransactionSummaryProps {
   rows: OutputSummaryProps[];
@@ -30,7 +30,7 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
 
-  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account;
   const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
 
   const coSigners = wallet?.metadata?.coSigners;

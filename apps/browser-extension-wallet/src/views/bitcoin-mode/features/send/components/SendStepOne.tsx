@@ -2,18 +2,25 @@
 /* eslint-disable react/no-multi-comp */
 /* eslint-disable complexity */
 /* eslint-disable no-magic-numbers */
+/* eslint-disable max-statements */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Search } from '@lace/common';
 import styles from './SendStepOne.module.scss';
 import mainStyles from './SendFlow.module.scss';
-import { AssetInput } from '@lace/core';
+import { AssetInput, HANDLE_DEBOUNCE_TIME, isHandle } from '@lace/core';
 import BigNumber from 'bignumber.js';
-import { useFetchCoinPrice } from '@hooks';
+import { useFetchCoinPrice, useHandleResolver } from '@hooks';
 import { CoreTranslationKey } from '@lace/translation';
 import { Box, Flex, Text, ToggleButtonGroup } from '@input-output-hk/lace-ui-toolkit';
 import { Bitcoin } from '@lace/bitcoin';
 import { useTranslation } from 'react-i18next';
 import { formatNumberForDisplay } from '@utils/format-number';
+import { isAdaHandleEnabled } from '@src/features/ada-handle/config';
+import { Asset } from '@cardano-sdk/core';
+import debounce from 'lodash/debounce';
+import { CustomConflictError, CustomError, ensureHandleOwnerHasntChanged, verifyHandle } from '@utils/validators';
+import { AddressValue, HandleVerificationState } from './types';
+import { CheckCircleOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -34,9 +41,9 @@ const fees: RecommendedFee[] = [
 interface SendStepOneProps {
   amount: string;
   onAmountChange: (value: string) => void;
-  address: string;
+  address: AddressValue;
   availableBalance: number;
-  onAddressChange: (value: string) => void;
+  onAddressChange: (value: AddressValue) => void;
   feeMarkets: Bitcoin.EstimatedFees | null;
   onEstimatedTimeChange: (value: string) => void;
   onContinue: (feeRate: number) => void;
@@ -64,6 +71,10 @@ const InputError = ({
   </Box>
 );
 
+type HandleIcons = {
+  [key in HandleVerificationState]: JSX.Element | undefined;
+};
+
 export const SendStepOne: React.FC<SendStepOneProps> = ({
   amount,
   onAmountChange,
@@ -83,6 +94,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const hasNoValue = numericAmount === 0;
   const exceedsBalance = numericAmount > availableBalance / SATS_IN_BTC;
   const [feeRate, setFeeRate] = useState<number>(1);
+  const handleResolver = useHandleResolver();
 
   const getFees = useCallback(
     () =>
@@ -93,6 +105,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     [feeMarkets]
   );
 
+  const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
   const [recommendedFees, setRecommendedFees] = useState<RecommendedFee[]>(getFees());
   const [selectedFeeKey, setSelectedFeeKey] = useState<RecommendedFee['key']>(
     recommendedFees.find((f) => f.feeRate === feeRate)?.key || recommendedFees[1]?.key
@@ -101,10 +114,28 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
     () => recommendedFees.find((f) => f.key === selectedFeeKey),
     [recommendedFees, selectedFeeKey]
   );
+
   const [customFee, setCustomFee] = useState<string>('0');
   const [customFeeError, setCustomFeeError] = useState<string | undefined>();
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
   const [invalidAddressError, setInvalidAddressError] = useState<string | undefined>();
+  const [icon, setIcon] = useState<JSX.Element | undefined>();
+
+  const calcIcon = debounce((state: HandleVerificationState | undefined) => {
+    const handleIcons: HandleIcons = {
+      [HandleVerificationState.VALID]: <CheckCircleOutlined className={styles.valid} />,
+      [HandleVerificationState.CHANGED_OWNERSHIP]: <CheckCircleOutlined className={styles.valid} />,
+      [HandleVerificationState.INVALID]: <ExclamationCircleOutlined className={styles.invalid} />,
+      [HandleVerificationState.VERIFYING]: <LoadingOutlined className={styles.loading} />
+    };
+    const handleIcon = (state && handleIcons[state]) || undefined;
+    setIcon(handleIcon);
+  }, HANDLE_DEBOUNCE_TIME);
+
+  useEffect(() => {
+    calcIcon(handleVerificationState);
+    return () => calcIcon.cancel();
+  }, [handleVerificationState, calcIcon]);
 
   useEffect(() => {
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -125,7 +156,12 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   }, [getFees]);
 
   const handleNext = () => {
-    if (hasNoValue || exceedsBalance || address.trim() === '') return;
+    if (
+      hasNoValue || exceedsBalance || address?.isHandle
+        ? address?.resolvedAddress.trim() === ''
+        : address?.address.trim() === ''
+    )
+      return;
 
     const newFeeRate =
       selectedFeeKey === 'custom'
@@ -149,8 +185,102 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
   const fiatValue = `≈ ${new BigNumber(enteredAmount.toString()).toFixed(2, BigNumber.ROUND_HALF_UP)} USD`;
 
+  const isAddressInputInvalidHandle =
+    isAdaHandleEnabled &&
+    isHandle(address?.address) &&
+    !Asset.util.isValidHandle(address?.address?.toString().slice(1).toLowerCase());
+
+  const isAddressInputValueHandle = isAdaHandleEnabled && isHandle(address?.address);
+
+  const resolveHandle = useMemo(
+    () =>
+      debounce(async () => {
+        setHandleVerificationState(HandleVerificationState.VERIFYING);
+
+        if (isAddressInputInvalidHandle) {
+          setHandleVerificationState(HandleVerificationState.INVALID);
+        }
+        if (!address?.handleResolution) {
+          const { valid, handles } = await verifyHandle(address?.address, handleResolver);
+
+          if (valid && !!handles[0].addresses?.bitcoin) {
+            setHandleVerificationState(HandleVerificationState.VALID);
+
+            onAddressChange({
+              address: address?.address,
+              resolvedAddress: handles[0].addresses?.bitcoin,
+              isHandle: true,
+              handleResolution: handles[0]
+            });
+          } else {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+          return;
+        }
+
+        try {
+          await ensureHandleOwnerHasntChanged({
+            force: true,
+            handleResolution: address?.handleResolution,
+            handleResolver
+          });
+
+          setHandleVerificationState(HandleVerificationState.VALID);
+        } catch (error) {
+          if (error instanceof CustomError && error.isValidHandle === false) {
+            setHandleVerificationState(HandleVerificationState.INVALID);
+          }
+          if (error instanceof CustomConflictError) {
+            setHandleVerificationState(HandleVerificationState.CHANGED_OWNERSHIP);
+          }
+        }
+      }, HANDLE_DEBOUNCE_TIME),
+    [address?.address, address?.handleResolution, onAddressChange, handleResolver, isAddressInputInvalidHandle]
+  );
+
   useEffect(() => {
-    const result = Bitcoin.validateBitcoinAddress(address, network);
+    if (!address) {
+      return;
+    }
+
+    if (isAddressInputValueHandle) {
+      resolveHandle();
+    } else {
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      setHandleVerificationState(undefined);
+    }
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      resolveHandle && resolveHandle.cancel();
+    };
+  }, [address, setHandleVerificationState, resolveHandle, isAddressInputValueHandle]);
+
+  useEffect(() => {
+    if (handleVerificationState === HandleVerificationState.VERIFYING) return;
+
+    if (isAddressInputValueHandle) {
+      if (
+        !address?.isHandle ||
+        isAddressInputInvalidHandle ||
+        handleVerificationState === HandleVerificationState.INVALID
+      ) {
+        setIsValidAddress(false);
+        setInvalidAddressError(t('core.destinationAddressInput.invalidBitcoinHandle'));
+        return;
+      }
+
+      if (handleVerificationState === HandleVerificationState.CHANGED_OWNERSHIP) {
+        setIsValidAddress(false);
+        setInvalidAddressError(t('core.destinationAddressInput.handleChangedOwner'));
+        return;
+      }
+    }
+
+    const addressToValidate = address?.isHandle ? address?.resolvedAddress : address?.address;
+
+    if (!addressToValidate) return;
+    const result = Bitcoin.validateBitcoinAddress(addressToValidate, network);
 
     switch (result) {
       case Bitcoin.AddressValidationResult.Valid:
@@ -167,7 +297,15 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         setInvalidAddressError(t('general.errors.incorrectAddress'));
         break;
     }
-  }, [address, network, onAddressChange, t]);
+  }, [
+    isAddressInputValueHandle,
+    isAddressInputInvalidHandle,
+    handleVerificationState,
+    address,
+    network,
+    onAddressChange,
+    t
+  ]);
 
   const handleCustomFeeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const disallowedKeys = ['-', '+', 'e', ','];
@@ -196,14 +334,22 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
 
         <Search
           disabled={hasUtxosInMempool}
-          value={address}
+          value={address?.address}
           data-testid="btc-address-input"
           label={t('core.destinationAddressInput.recipientAddressOnly')}
-          onChange={(value) => onAddressChange(value)}
+          onChange={(value) => {
+            setHandleVerificationState(HandleVerificationState.VERIFYING);
+            // eslint-disable-next-line unicorn/no-useless-undefined
+            setInvalidAddressError(undefined);
+            onAddressChange({ isHandle: false, address: value, resolvedAddress: '' });
+          }}
           style={{ width: '100%' }}
+          customIcon={icon}
         />
 
-        {!isValidAddress && !!address?.length && <InputError error={invalidAddressError} isPopupView={isPopupView} />}
+        {!isValidAddress && !!address?.address?.length && (
+          <InputError error={invalidAddressError} isPopupView={isPopupView} />
+        )}
 
         <Box w="$fill" mt={isPopupView ? '$16' : '$40'} py="$24" px="$32" className={styles.amountSection}>
           <AssetInput
@@ -299,7 +445,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         className={mainStyles.buttons}
       >
         <Button
-          disabled={hasNoValue || exceedsBalance || address.trim() === '' || !isValidAddress}
+          disabled={hasNoValue || exceedsBalance || !address || address?.address?.trim() === '' || !isValidAddress}
           color="primary"
           block
           size="medium"

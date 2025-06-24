@@ -29,10 +29,10 @@ import { useWalletActivities } from '@hooks/useWalletActivities';
 import { useSubmitingState } from '@views/browser/features/send-transaction';
 import { useSecrets, useSignPolicy } from '@lace/core';
 import { useRewardAccountsData } from '../hooks';
-import { config } from '@src/config';
 import { parseError } from '@src/utils/parse-error';
 import { useObservable } from '@lace/common';
-import { getParentWalletCIP1854Account } from '@lib/scripts/background/util';
+import { walletRoutePaths } from '@routes';
+import { getParentWalletForCIP1854Account } from '@lib/scripts/background/util';
 
 export const StakingContainer = (): React.ReactElement => {
   // TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.
@@ -107,11 +107,10 @@ export const StakingContainer = (): React.ReactElement => {
   const wallets = useObservable(walletRepository.wallets$);
   const wallet = useCurrentWallet();
 
-  const parentMultiSigAccount = getParentWalletCIP1854Account({ wallets, activeWallet: wallet });
+  const parentMultiSigAccount = getParentWalletForCIP1854Account({ wallets, activeWallet: wallet })?.account;
   const sharedWalletKey = parentMultiSigAccount?.extendedAccountPublicKey;
   const coSigners = wallet?.metadata?.coSigners;
   const signPolicy = useSignPolicy(wallet, 'staking');
-  const { GOV_TOOLS_URLS } = config();
 
   return (
     <Layout>
@@ -159,7 +158,7 @@ export const StakingContainer = (): React.ReactElement => {
           sharedWalletKey,
           coSigners,
           useRewardAccountsData,
-          govToolUrl: GOV_TOOLS_URLS[environmentName],
+          votingCenterUrl: walletRoutePaths.voting,
           parseError
         }}
       >

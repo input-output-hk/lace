@@ -20,10 +20,8 @@ import onboardingRecoveryPhrasePageAssert from '../assert/onboarding/onboardingR
 import RecoveryPhrasePage from '../elements/onboarding/recoveryPhrasePage';
 import onboardingWatchVideoModalAssert from '../assert/onboarding/onboardingWatchVideoModalAssert';
 import watchVideoModal from '../elements/onboarding/watchVideoModal';
-import analyticsBanner from '../elements/analyticsBanner';
 import { getWalletsFromRepository } from '../fixture/walletRepositoryInitializer';
 import OnboardingWalletSetupPageAssert from '../assert/onboarding/onboardingWalletSetupPageAssert';
-import OnboardingAnalyticsBannerAssert from '../assert/onboarding/onboardingAnalyticsBannerAssert';
 import { shuffle } from '../utils/arrayUtils';
 import ConnectYourDevicePageAssert from '../assert/onboarding/ConnectYourDevicePageAssert';
 import ModalAssert from '../assert/modalAssert';
@@ -36,7 +34,6 @@ import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWal
 import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletPage';
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
-import { switchToWindowWithLace } from '../utils/window';
 import LocalStorageInitializer from '../fixture/localStorageInitializer';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
@@ -116,13 +113,6 @@ Then(
 
 Then(/^"Get started" page is displayed$/, async () => {
   await OnboardingMainPageAssert.assertSeeMainPage();
-});
-
-Then(/^I (accept|reject) analytics banner on "Get started" page$/, async (action: 'accept' | 'reject') => {
-  if (browser.isFirefox) {
-    await switchToWindowWithLace();
-  }
-  action === 'accept' ? await analyticsBanner.clickOnAgreeButton() : await analyticsBanner.clickOnRejectButton();
 });
 
 Then(/^I select (12|15|24) word passphrase length$/, async (length: RecoveryPhrase) => {
@@ -428,14 +418,6 @@ Then(
 
 Then(/^"Next" button is (enabled|disabled) during onboarding process$/, async (state: 'enabled' | 'disabled') => {
   await new OnboardingCommonAssert().assertNextButtonEnabled(state === 'enabled');
-});
-
-Then(/^I see Analytics banner displayed correctly$/, async () => {
-  await OnboardingAnalyticsBannerAssert.assertBannerIsDisplayedCorrectly();
-});
-
-Then(/^I (see|do not see) Analytics banner$/, async (shouldSee: 'see' | 'do not see') => {
-  await OnboardingAnalyticsBannerAssert.assertBannerIsVisible(shouldSee === 'see');
 });
 
 When(/^I fill passphrase fields using saved 24 words mnemonic in incorrect order$/, async () => {

@@ -103,11 +103,13 @@ export const validateWalletHandle = async ({ value, handleResolver }: validateWa
 };
 
 type ensureHandleOwnerHasntChangedArgs = {
+  force?: boolean;
   handleResolution: HandleResolution;
   handleResolver: HandleProvider;
 };
 
 export const ensureHandleOwnerHasntChanged = async ({
+  force,
   handleResolution,
   handleResolver
 }: ensureHandleOwnerHasntChangedArgs): Promise<void> => {
@@ -116,7 +118,7 @@ export const ensureHandleOwnerHasntChanged = async ({
   }
 
   const { handle, cardanoAddress } = handleResolution;
-  const resolvedHandle = await handleResolver.resolveHandles({ handles: [handle] });
+  const resolvedHandle = await handleResolver.resolveHandles({ force, handles: [handle] });
 
   if (!resolvedHandle[0]) {
     throw new CustomError(i18n.t('general.errors.incorrectHandle'), false);

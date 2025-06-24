@@ -312,7 +312,7 @@ $btn-gap: var(--btn-gap, size_unit(1));
 }
 
 .btn[data-color='gradient-secondary'] {
-  @extend .btn[data-color='gradient'];
+  @extend .btn, [data-color='gradient'];
   background: linear-gradient($btn-gradient2-bg, $btn-gradient2-bg) padding-box, var(--lace-gradient) border-box;
 
   &:hover:not(.loading) {

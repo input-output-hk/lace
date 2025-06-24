@@ -14,7 +14,7 @@ export const VotingLayout = (): ReactElement => {
 
   const openExternalLink = useExternalLinkOpener();
   const { environmentName } = useWalletStore();
-  const { GOV_TOOLS_URLS } = config();
+  const { GOV_TOOLS_URLS, TEMPO_VOTE_URLS } = config();
 
   const educationalList = getEducationalList(t);
 
@@ -32,7 +32,11 @@ export const VotingLayout = (): ReactElement => {
       <SectionLayout
         sidePanelContent={<EducationalList items={educationalList} title={t('browserView.sidePanel.learnAbout')} />}
       >
-        <VotingCenterBanner openExternalLink={openLink} govToolUrl={GOV_TOOLS_URLS[environmentName]} />
+        <VotingCenterBanner
+          openExternalLink={openLink}
+          govToolUrl={GOV_TOOLS_URLS[environmentName]}
+          tempoVoteUrl={TEMPO_VOTE_URLS[environmentName]}
+        />
       </SectionLayout>
     </Layout>
   );

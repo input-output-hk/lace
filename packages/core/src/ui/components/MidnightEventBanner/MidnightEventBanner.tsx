@@ -9,15 +9,15 @@ interface Props {
   translations: {
     title: string;
     description: string;
-    moreDetails: string;
+    learnMore: string;
     reminder: string;
   };
   onClose?: () => void;
-  onMoreDetails?: () => void;
+  onLearnMore?: () => void;
   onReminder?: () => void;
 }
 
-const PopupButtons = ({ translations, onMoreDetails, onReminder }: Props): JSX.Element => (
+const PopupButtons = ({ translations, onLearnMore, onReminder }: Props): JSX.Element => (
   <Box
     w="$fill"
     className={sx({
@@ -29,7 +29,7 @@ const PopupButtons = ({ translations, onMoreDetails, onReminder }: Props): JSX.E
     })}
   >
     <Box mb="$10" w="$fill">
-      <Button.CallToAction label={translations.moreDetails} w="$fill" onClick={onMoreDetails} />
+      <Button.CallToAction label={translations.learnMore} w="$fill" onClick={onLearnMore} />
     </Box>
     <Box w="$fill">
       <Button.Secondary label={translations.reminder} w="$fill" onClick={onReminder} />
@@ -37,7 +37,7 @@ const PopupButtons = ({ translations, onMoreDetails, onReminder }: Props): JSX.E
   </Box>
 );
 
-const FullScreenButtons = ({ translations, onMoreDetails, onReminder }: Props): JSX.Element => (
+const FullScreenButtons = ({ translations, onLearnMore, onReminder }: Props): JSX.Element => (
   <Box
     w="$fill"
     className={sx({
@@ -49,7 +49,7 @@ const FullScreenButtons = ({ translations, onMoreDetails, onReminder }: Props): 
     })}
   >
     <Box mr={'$20'}>
-      <Button.CallToAction label={translations.moreDetails} onClick={onMoreDetails} />
+      <Button.CallToAction label={translations.learnMore} onClick={onLearnMore} />
     </Box>
     <Box>
       <Button.Secondary label={translations.reminder} onClick={onReminder} />
@@ -90,7 +90,7 @@ const Title = ({ translations }: Props): JSX.Element => (
   </>
 );
 
-export const MidnightEventBanner = ({ translations, onClose, onMoreDetails, onReminder }: Props): JSX.Element => (
+export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onReminder }: Props): JSX.Element => (
   <Flex
     style={{ backgroundImage: `url(${banner})` }}
     className={cx(
@@ -123,7 +123,7 @@ export const MidnightEventBanner = ({ translations, onClose, onMoreDetails, onRe
         </Text.Body.Normal>
       </Box>
     </Flex>
-    <PopupButtons translations={translations} onMoreDetails={onMoreDetails} onReminder={onReminder} />
-    <FullScreenButtons translations={translations} onMoreDetails={onMoreDetails} onReminder={onReminder} />
+    <PopupButtons translations={translations} onLearnMore={onLearnMore} onReminder={onReminder} />
+    <FullScreenButtons translations={translations} onLearnMore={onLearnMore} onReminder={onReminder} />
   </Flex>
 );

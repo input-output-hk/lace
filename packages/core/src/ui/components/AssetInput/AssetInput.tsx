@@ -57,6 +57,7 @@ export interface AssetInputProps {
   setFocus?: (focus: boolean) => void;
   isPopupView?: boolean;
   disabled?: boolean;
+  lockedRewardsTooltip?: React.ReactNode;
 }
 
 const placeholderValue = '0';
@@ -89,7 +90,8 @@ export const AssetInput = ({
   setFocusInput,
   setFocus,
   isPopupView,
-  disabled
+  disabled,
+  lockedRewardsTooltip
 }: AssetInputProps): React.ReactElement => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputRef = useRef<any>(null);
@@ -198,7 +200,10 @@ export const AssetInput = ({
   const lockedRewards = (
     <>
       <Text.Body.Normal color="secondary">{coin.availableBalance}</Text.Body.Normal>
-      <Text.Body.Normal color="secondary">{coin.lockedStakeRewards}</Text.Body.Normal>
+      <Flex w="$fill" alignItems="center" gap="$4">
+        <Text.Body.Normal color="secondary">{coin.lockedStakeRewards}</Text.Body.Normal>
+        {lockedRewardsTooltip}
+      </Flex>
     </>
   );
 

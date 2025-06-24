@@ -1,19 +1,14 @@
 @OnboardingCreateWallet @Analytics @Testnet
-Feature: Analytics - Posthog - Onboarding - Extended View
+Feature: Analytics - PostHog - Onboarding - Extended View
 
-  @LW-8311
-  Scenario Outline: Analytics - Posthog events are enabled or disabled based on decision <enable_analytics> on Analytics page
+  @LW-12966
+  Scenario: Analytics - PostHog events are enabled by default
     Given "Get started" page is displayed
-    When I enable showing Analytics consent banner
-    And I set up request interception for posthog analytics request(s)
-    And I <enable_analytics> analytics banner on "Get started" page
+    Then Local Storage "analyticsStatus" key has "ACCEPTED" value
+    When I set up request interception for posthog analytics request(s)
     And I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values
-    Then I validate that <number_of_events> analytics event(s) have been sent
-    Examples:
-      | enable_analytics | number_of_events |
-      | accept           | 7                |
-      | reject           | 1                |
+    Then I validate that 6 analytics event(s) have been sent
 
   @LW-7363
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
@@ -31,16 +26,13 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics single event "onboarding | restore wallet revamp | added"
     And I wait for main loader to disappear
     And "$create_alias" PostHog event was sent
-    And I validate that alias event has assigned same user id "9646a33207b90ae60ae83770aaa82597" in posthog
+    And I validate that alias event has assigned same user id "f8a1e17e98bf157a31a082a2e4ad85a0" in posthog
 
   @LW-7365
   Scenario: Analytics - Onboarding new wallet events
     Given "Get started" page is displayed
-    When I enable showing Analytics consent banner
     And I set up request interception for posthog analytics request(s)
-    And I accept analytics banner on "Get started" page
-    Then I validate latest analytics single event "onboarding | analytics banner | agree | click"
-    When I click "Create" button on wallet setup page
+    And I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
     When I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
@@ -57,15 +49,5 @@ Feature: Analytics - Posthog - Onboarding - Extended View
     Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | onboarding \| new wallet revamp \| added                                                 |
-    And I validate that 9 analytics event(s) have been sent
+    And I validate that 8 analytics event(s) have been sent
     And "$create_alias" PostHog event was sent
-
-  @LW-7364 @Pending
-    # Disabled as user is opted out until he decision about tracking.
-  Scenario: Analytics - Restore wallet events - cancel on "Restoring a multi-address wallet?" modal
-    Given I set up request interception for posthog analytics request(s)
-    When I click "Restore" button on wallet setup page
-    Then I validate latest analytics single event "onboarding | restore wallet | restore | click"
-    When I click "Cancel" button on "Restoring a multi-address wallet?" modal
-    Then I validate latest analytics single event "onboarding | restore wallet | warning multi-address wallet | cancel | click"
-    And I validate that 2 analytics event(s) have been sent

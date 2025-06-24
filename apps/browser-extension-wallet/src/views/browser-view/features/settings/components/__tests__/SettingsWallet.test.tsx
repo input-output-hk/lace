@@ -21,7 +21,8 @@ import {
   BackgroundServiceAPIProvider,
   BackgroundServiceAPIProviderProps,
   CurrencyStoreProvider,
-  DatabaseProvider
+  DatabaseProvider,
+  ExternalLinkOpenerProvider
 } from '@providers';
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
@@ -130,7 +131,9 @@ const getWrapper =
             <I18nextProvider i18n={i18n}>
               <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
                 <CurrencyStoreProvider>
-                  <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+                  <ExternalLinkOpenerProvider>
+                    <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+                  </ExternalLinkOpenerProvider>
                 </CurrencyStoreProvider>
               </AnalyticsProvider>
             </I18nextProvider>

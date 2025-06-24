@@ -10,7 +10,7 @@ import {
 } from './types';
 import BigNumber from 'bignumber.js';
 import isNil from 'lodash/isNil';
-import { isNFT } from '@src/utils/is-nft';
+import { isNFT, mayBeNFT } from '@src/utils/is-nft';
 import flatMapDeep from 'lodash/flatMapDeep';
 import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@types';
 import { PriceResult } from '@hooks';
@@ -256,7 +256,7 @@ export const formatRow = ({
     if (asset) {
       const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
       const amount = Wallet.util.calculateAssetBalance(balance, asset);
-      const tokenPriceInAda = prices?.cardano.getTokenPrice(id)?.priceInAda;
+      const tokenPriceInAda = mayBeNFT(asset) ? undefined : prices?.cardano.getTokenPrice(id)?.priceInAda;
       const fiatAmount =
         asset.tokenMetadata !== undefined && tokenPriceInAda
           ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${

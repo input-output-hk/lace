@@ -44,7 +44,7 @@ export const DappError = ({
         </div>
       </div>
       <div className={styles.footer}>
-        <Button data-testid={closeButtonTestId} className={styles.footerBtn} onClick={handleClose}>
+        <Button autoFocus data-testid={closeButtonTestId} className={styles.footerBtn} onClick={handleClose}>
           {closeButtonLabel || t('dapp.dappErrorPage.closeButton')}
         </Button>
       </div>

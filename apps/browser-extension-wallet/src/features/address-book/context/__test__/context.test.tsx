@@ -19,11 +19,13 @@ jest.mock('../AddressBookProvider', () => ({
   withAddressBookContext: jest.fn()
 }));
 
+const cardanoAddress = Cardano.PaymentAddress(
+  'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
+);
 const mockHandleResolution = {
+  addresses: { cardano: cardanoAddress },
   backgroundImage: Asset.Uri('ipfs://zrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3yd'),
-  cardanoAddress: Cardano.PaymentAddress(
-    'addr_test1qzrljm7nskakjydxlr450ktsj08zuw6aktvgfkmmyw9semrkrezryq3ydtmkg0e7e2jvzg443h0ffzfwd09wpcxy2fuql9tk0g'
-  ),
+  cardanoAddress,
   handle: 'bob',
   hasDatum: false,
   image: Asset.Uri('ipfs://c8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe'),

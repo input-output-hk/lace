@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 env:
-  BUILD_ARTIFACT_NAME: 'lace-dev-${{ github.sha }}'
+  BUILD_ARTIFACT_NAME: 'lace-chrome-browser-extension-for-smoke-tests-${{ github.sha }}'
 
 jobs:
   prepare:
@@ -148,8 +148,8 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
 
-  release-pkg:
-    name: Release package
+  release-chromium-pkg:
+    name: Release Chromium package
     runs-on: ubuntu-22.04
     needs: prepare
 
@@ -210,7 +210,7 @@ jobs:
         with:
           comment_on_pr: false
 
-      - name: Build Lace browser extension
+      - name: Build Lace Chromium browser extension
         uses: ./.github/actions/build/app
         with:
           BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
@@ -219,7 +219,7 @@ jobs:
           MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
           MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
           DIR: apps/browser-extension-wallet
-          NAME: lace-browser-extension
+          NAME: lace-chrome-browser-extension
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
@@ -231,7 +231,69 @@ jobs:
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
 
-      - name: Build Lace Firefox addon
+  release-firefox-pkg:
+    name: Release Firefox package
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
+      - name: Download packages-bitcoin
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-bitcoin
+          path: packages/bitcoin/dist
+
+      - name: Collect Workflow Telemetry Smoke Tests
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Build Lace Firefox browser extension
         uses: ./.github/actions/build/app
         with:
           BROWSER_TARGET: 'firefox'
@@ -241,7 +303,7 @@ jobs:
           MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
           MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
           DIR: apps/browser-extension-wallet
-          NAME: lace-firefox-addon
+          NAME: lace-firefox-browser-extension
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
           PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
@@ -254,7 +316,7 @@ jobs:
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
 
   build:
-    name: Build Lace
+    name: Build Lace for E2E Tests
     runs-on: ubuntu-22.04
 
     steps:
@@ -557,4 +619,94 @@ jobs:
       - name: Skip
         if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 0 }}
         run: echo "Chromatic check for packages/staking not needed"
+          exit 0
+
+  if-nami-changed:
+    name: When nami changed
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-22.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/nami/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticNami:
+    name: >
+      Run Chromatic check: Nami
+    runs-on: ubuntu-22.04
+    needs:
+      - prepare
+      - if-nami-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-nami
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
+      - name: Chromatic packages-nami
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
+          TOKEN: ${{ secrets.CHROMATIC_LACE_NAMI_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-nami-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/nami not needed"
           exit 0

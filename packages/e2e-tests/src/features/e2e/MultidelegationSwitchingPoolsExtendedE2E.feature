@@ -57,32 +57,6 @@ Feature: Staking Page - Switching pools - Extended Browser View - E2E
     When I click on a transaction: 1
     Then The Tx details are displayed for Staking with metadata
 
-  @LW-8435 @Testnet
-  Scenario: Extended View - Transactions details - Delegation Tx shows pool name and ticker - Stake pool without metadata
-    And I save identifiers of stake pools currently in use
-    And I open Browse pools tab
-    And I switch to list view on "Browse pools" tab
-    And I input "OtherNoMetadataStakePool" into stake pool search bar
-    And I click on the stake pool with ticker "-"
-    Then I see stake pool details drawer for stake pool without metadata
-    When I save stake pool details
-    And I click on "Stake all on this pool" button on stake pool details drawer
-    Then I click "Fine by me" button on "Changing staking preferences?" modal
-    And I click on "Next" button on staking preferences drawer
-    And I click on "Next" button on staking confirmation drawer
-    And I enter correct wallet password and confirm staking
-    Then Switching staking success drawer is displayed
-    When I click "Close" button on staking success drawer
-    And I navigate to Activity extended page
-    Then I can see transaction 1 with type "Delegation"
-    And I navigate to Staking extended page
-    And I open Overview tab
-    And I wait until "-" pool is on "Your pools" list
-    And I save identifiers of stake pools currently in use
-    And I navigate to Activity extended page
-    When I click on a transaction: 1
-    Then The Tx details are displayed for Staking without metadata
-
   @LW-8437 @Testnet
   @Pending # due to issues with Fetch.enable
   Scenario: Extended View - Staking - Staking error screen displayed on transaction submit error

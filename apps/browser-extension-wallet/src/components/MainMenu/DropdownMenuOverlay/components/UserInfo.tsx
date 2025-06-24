@@ -173,7 +173,7 @@ export const UserInfo = ({
           }
           {...(wallet.type !== WalletType.Script &&
             wallet.blockchainName !== 'Bitcoin' && {
-              onOpenAccountsMenu: () => onOpenWalletAccounts(wallet),
+              ...(blockchain !== 'bitcoin' ? { onOpenAccountsMenu: () => onOpenWalletAccounts(wallet) } : {}),
               onOpenEditWallet: () => onOpenEditWallet(wallet)
             })}
         />

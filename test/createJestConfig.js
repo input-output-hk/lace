@@ -18,7 +18,8 @@ const esmExceptions = jestEsmExceptions([
   'p-retry',
   'p-debounce',
   'react-icons',
-  'bip32'
+  'bip32',
+  'openpgp'
 ]);
 
 const rootDir = process.cwd();

@@ -137,6 +137,10 @@ Then(
 Then(
   /^"(\$create_alias|\$feature_flag_called|\$pageview)" PostHog event was sent$/,
   async (eventName: '$create_alias' | '$feature_flag_called' | '$pageview') => {
-    expect(await getPostHogEvent(eventName)).to.not.be.undefined;
+    await browser.waitUntil(async () => (await getPostHogEvent(eventName)) !== undefined, {
+      interval: 1000,
+      timeout: 10_000,
+      timeoutMsg: `Failed while waiting for "${eventName}" event`
+    });
   }
 );

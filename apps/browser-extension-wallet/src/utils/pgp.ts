@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null */
-import { createMessage, decrypt, encrypt, readKey, readMessage, readPrivateKey, decryptKey } from 'openpgp';
+import { createMessage, decrypt, encrypt, readKey, readMessage, readPrivateKey, decryptKey, enums } from 'openpgp';
 import type { Key, MaybeArray, Message, PartialConfig, PrivateKey, PublicKey } from 'openpgp';
 import { i18n } from '@lace/translation';
 import type { PublicPgpKeyData } from '@src/types';
@@ -127,7 +127,7 @@ export const encryptMessageWithPgpAsBinaryFormat = async ({
     signingKeys: privateKeys,
     format: 'binary',
     config: {
-      deflateLevel: 9
+      preferredCompressionAlgorithm: enums.compression.zlib
     }
   });
 

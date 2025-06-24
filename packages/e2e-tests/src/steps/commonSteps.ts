@@ -59,6 +59,7 @@ Given(/^Lace is ready for test$/, async () => {
   }
   await MainLoader.waitUntilLoaderDisappears();
   await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await settingsExtendedPageObject.closePrivacyPolycyUpdateBanner();
   await settingsExtendedPageObject.multiAddressModalConfirm();
   await TokensPage.waitUntilCardanoTokenLoaded();
   await settingsExtendedPageObject.closeWalletSyncedToast();
@@ -301,6 +302,10 @@ Then(/^following keys are not present in Local Storage:/, async (keys) => {
   }
 });
 
+Then(/^Local Storage "([^"]*)" key has "([^"]*)" value$/, async (key: string, value: string) => {
+  await LocalStorageAssert.assertLocalStorageKeyValue(key, value);
+});
+
 Then(/^I close all remaining tabs except current one$/, async () => {
   await closeAllTabsExceptActiveOne();
 });
@@ -362,11 +367,6 @@ Given(/^I disable showing multi-address discovery modal$/, async () => {
 
 Then(/^I wait until modal disappears$/, async () => {
   await Modal.waitUntilModalDisappears();
-});
-
-Given(/^I enable showing Analytics consent banner$/, async () => {
-  await localStorageInitializer.enableShowingAnalyticsBanner();
-  await browser.refresh();
 });
 
 Then(/^Clipboard contains address of wallet: "([^"]*)"$/, async (walletName: string) => {
@@ -460,6 +460,13 @@ Then(/^Gov Tool page is displayed in a new tab$/, async () => {
   const expectedUrl = extensionUtils.isMainnet()
     ? 'https://gov.tools/'
     : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+  await commonAssert.assertSeeTabWithUrl(expectedUrl);
+});
+
+Then(/^Tempo.vote page is displayed in a new tab$/, async () => {
+  const expectedUrl = extensionUtils.isMainnet()
+    ? 'https://tempo.vote/'
+    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.tempo.vote/`;
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
 

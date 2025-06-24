@@ -28,6 +28,12 @@ if (typeof global.TextDecoder === 'undefined') {
   global.TextDecoder = TextDecoder;
 }
 
+// Add WebCrypto API polyfill, required for openpgp.js
+const { webcrypto } = require('node:crypto');
+if (typeof global.crypto === 'undefined') {
+  global.crypto = webcrypto;
+}
+
 // Add Uint8Array to prototype chain of Buffer, so that it behaves the same in jsdom as in nodejs and polyfilled browser env
 let Type = Buffer;
 while (Type.prototype) Type = Type.prototype;

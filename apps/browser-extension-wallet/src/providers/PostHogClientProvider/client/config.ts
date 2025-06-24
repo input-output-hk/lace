@@ -37,7 +37,8 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.DAPP_EXPLORER]: false,
   [ExperimentName.SEND_CONSOLE_ERRORS_TO_SENTRY]: false,
   [ExperimentName.BITCOIN_WALLETS]: false,
-  [ExperimentName.NFTPRINTLAB]: false
+  [ExperimentName.NFTPRINTLAB]: false,
+  [ExperimentName.GLACIER_DROP]: false
 };
 
 export const featureFlagsByNetworkInitialValue: FeatureFlagsByNetwork = {

@@ -23,7 +23,6 @@ Feature: General Settings - Extended Browser View
     Then I see <option_name> option with proper description and toggle
     Examples:
       | option_name  |
-      | Analytics    |
       | Beta Program |
       | Debugging    |
 
@@ -151,7 +150,6 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values
@@ -164,7 +162,6 @@ Feature: General Settings - Extended Browser View
     When I open settings from header menu
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    And I accept analytics banner on "Get started" page
     Then "Get started" page is displayed
     When I click "Restore" button on wallet setup page
     And I go to "Wallet setup" page with wallet TAWalletNoFunds from "Restore" wallet flow and fill values
@@ -230,6 +227,6 @@ Feature: General Settings - Extended Browser View
     Then I see Remove wallet section
     When I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
-    Then I see Analytics banner
+    Then "Get started" page is displayed
     And I expect wallet repository and local storage to be empty
     And Mnemonic is not stored in background storage

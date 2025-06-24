@@ -36,9 +36,9 @@ export const faqArticles: Record<string, Record<string, string>> = {
     question: 'how-is-the-conway-ledger-era-also-called-governance-era-supported-by-lace',
     title: 'How is the Conway Ledger era (also called governance era) supported by Lace?'
   },
-  'What type of governance features are supported in Lace using the GovTool?': {
-    question: 'what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current',
-    title: 'What type of governance features are supported in Lace using the GovTool?'
+  'What type of governance features are supported in Lace?': {
+    question: 'what-type-of-governance-features-are-supported-in-lace',
+    title: 'What type of governance features are supported in Lace?'
   },
   'What type of governance actions are supported by Lace?': {
     question: 'what-type-of-governance-actions-are-supported-by-lace',

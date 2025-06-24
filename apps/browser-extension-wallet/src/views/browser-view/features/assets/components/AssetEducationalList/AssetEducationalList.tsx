@@ -43,7 +43,7 @@ export const getEducationalList = (t: TFunction): EducationalListRowProps[] => [
     title: t(faqKey),
     subtitle: t('educationalBanners.subtitle.governanceFeatures'),
     src: LightBulb,
-    link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-features-are-supported-in-lace-using-the-govtool-in-the-current`
+    link: `${process.env.WEBSITE_URL}/faq?question=what-type-of-governance-features-are-supported-in-lace`
   },
   {
     title: t(faqKey),

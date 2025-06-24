@@ -9,7 +9,7 @@ class LocalStorageAssert {
     expect(JSON.parse(await localStorageManager.getItem('lastStaking'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('unconfirmedTransactions'))).to.be.null;
     expect(JSON.parse(await localStorageManager.getItem('wallet'))).to.be.null;
-    expect(JSON.parse(await localStorageManager.getItem('analyticsStatus'))).to.be.null;
+    expect(JSON.parse(await localStorageManager.getItem('analyticsStatus'))).to.equal('ACCEPTED'); // LW-12777
     expect(await getNumWalletsInRepository()).to.be.eq(0);
   };
 
@@ -23,6 +23,10 @@ class LocalStorageAssert {
 
   assertLocalStorageContainNetwork = async (expectedNetwork: string) => {
     expect(JSON.parse(await localStorageManager.getItem('appSettings')).chainName).to.equal(expectedNetwork);
+  };
+
+  assertLocalStorageKeyValue = async (key: string, value: string) => {
+    expect(JSON.parse(await localStorageManager.getItem(key))).to.equal(value);
   };
 
   assertLocalStorageKeyDoesNotExist = async (key: string) => {

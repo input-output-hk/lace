@@ -1,9 +1,10 @@
+/* eslint-disable max-statements */
 /* eslint-disable no-console */
 /* eslint-disable react/no-multi-comp */
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useWalletStore } from '@stores';
 import { UnlockWalletContainer } from '@src/features/unlock-wallet';
-import { useAppInit } from '@src/hooks';
+import { useAppInit, useLocalStorage } from '@src/hooks';
 import { dAppRoutePaths, walletRoutePaths } from '@routes';
 import '@lib/i18n';
 import { Route, Switch, useLocation } from 'react-router-dom';
@@ -18,7 +19,7 @@ import {
 import { Loader } from '@lace/common';
 import styles from './DappConnectorView.module.scss';
 import { lockWalletSelector } from '@src/features/unlock-wallet/selectors';
-import { useAppSettingsContext, ViewFlowProvider } from '@providers';
+import { useAnalyticsContext, useAppSettingsContext, ViewFlowProvider } from '@providers';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { DappError } from '@src/features/dapp/components/DappError';
@@ -31,6 +32,8 @@ import { useFatalError } from '@hooks/useFatalError';
 import { POPUP_WINDOW } from '@src/utils/constants';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { sendViewsFlowState, signDataViewsFlowState } from '@src/features/dapp/config';
+import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
+import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 
 dayjs.extend(duration);
 
@@ -71,6 +74,19 @@ export const DappConnectorView = (): React.ReactElement => {
 
   const [hasNoAvailableWallet, setHasNoAvailableWallet] = useState(false);
   useAppInit();
+
+  const analytics = useAnalyticsContext();
+  const [enhancedAnalyticsStatus, { updateLocalStorage: setDoesUserAllowAnalytics }] = useLocalStorage(
+    ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY,
+    EnhancedAnalyticsOptInStatus.NotSet
+  );
+
+  useEffect(() => {
+    if (enhancedAnalyticsStatus !== EnhancedAnalyticsOptInStatus.OptedIn) {
+      setDoesUserAllowAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+      analytics.setOptedInForEnhancedAnalytics(EnhancedAnalyticsOptInStatus.OptedIn);
+    }
+  }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   useEffect(() => {
     const load = async () => {
