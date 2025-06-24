@@ -60,7 +60,7 @@ Feature: ADA handle - popup view
     And I click "Done" button on "Edit address" drawer
     And I see a toast with text: "Given address already exists"
 
-  @LW-7135 @LW-7139 @Pending @issue=LW-13056
+  @LW-7135 @LW-7139
   Scenario: Popup View - Ada handles displayed and sorted by handle length
     When I click "Receive" button on Tokens page in popup mode
     Then I see "Wallet Address" page in popup mode for wallet "WalletAdaHandle"
@@ -97,7 +97,7 @@ Feature: ADA handle - popup view
     And I close a toast message
     And Clipboard contains text: "$test_handle_3"
 
-  @LW-7435 @LW-7436 @Pending @issue=LW-13056
+  @LW-7435 @LW-7436
   Scenario: Popup View - Validate custom ADA handle image on the wallet address/NFTs/NFT details page
     And I click "Receive" button on Tokens page in popup mode
     Then I see ADA handle with custom image on the "Wallet Address" page
@@ -117,7 +117,7 @@ Feature: ADA handle - popup view
     When I click on NFT with name: "$test_handle_1"
     Then the "$test_hand..." asset is displayed in bundle 1
 
-  @LW-7434 @Pending @issue=LW-13056
+  @LW-7434
   Scenario: Popup View - Validate custom ADA handle image on the NFT folder thumbnail/page
     Given I click "Receive" button on Tokens page in popup mode
     And I see handles listed on the "Receive" screen
@@ -133,7 +133,7 @@ Feature: ADA handle - popup view
     And I see NFT with name "$t_h_1" on the NFT folder page
     Then I see ADA handle NFT with custom image on the NFT folder page
 
-  @LW-7433 @skip(browserName='firefox') @issue=LW-12440 @Pending @issue=LW-13056
+  @LW-7433 @skip(browserName='firefox') @issue=LW-12440
   Scenario: Popup View - Validate custom image from a handle on the "Select NFT" (folder) screen
     Given I click "Receive" button on Tokens page in popup mode
     And I see handles listed on the "Receive" screen
