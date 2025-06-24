@@ -194,9 +194,6 @@ jobs:
     # when cancelling job always() will prevent step from being cancelled and we don't want process results in this case
     if: ${{ success() || failure() }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -215,11 +212,6 @@ jobs:
           smoke_only=${{ needs.setup.outputs.smoke_only }}
           tags=${{ needs.setup.outputs.tags }}
           " > environment.properties
-
-      - name: Convert metrics JSON to Prometheus format
-        working-directory: './packages/e2e-tests/tools/'
-        run: |
-          ./convert_metrics_to_prometheus.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics
 
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.9.0
@@ -269,61 +261,3 @@ jobs:
         with:
           name: performance-metrics
           path: ./artifacts/metrics
-
-      - name: Create Prometheus config
-        env:
-          PUSH_URL: ${{ secrets.GRAFANA_PUSH_URL }}    # e.g., https://prometheus-us-central1.grafana.net/api/prom/push
-          PUSH_USER: ${{ secrets.GRAFANA_USERNAME }}   # e.g., 787878
-          PUSH_PASS: ${{ secrets.GRAFANA_PASSWORD }}   # e.g., eyJrIjoxxxxxxxxxxxxxxyMX0=
-        run: |
-          cat >prometheus.yml <<EOF
-          global:
-            scrape_interval: 5s
-          scrape_configs:
-            - job_name: 'e2e-perf-metrics'
-              static_configs:
-                - targets: ['pushgateway:9091']
-          remote_write:
-            - url: "$PUSH_URL"
-              basic_auth:
-                username: "$PUSH_USER"
-                password: "$PUSH_PASS"
-          EOF
-          pwd
-          ls -al ./artifacts/metrics/prometheus.txt
-          head ./artifacts/metrics/prometheus.txt
-
-      - name: Start pushgateway server
-        run: |
-          docker run -d --name pushgateway -p 9091:9091 prom/pushgateway
-          cat ./artifacts/metrics/prometheus.txt  | curl --data-binary @- http://localhost:9091/metrics/job/e2e-perf
-          #docker run -d --name http-server -v $(pwd):/app -w /app -p 8000:8000 python:3.11-slim python -m http.server 8000 > http.log 2>&1
-          printf '\n*****************\n'
-          echo 'This is my current directory:'
-          pwd
-          printf '\n*****************\n'
-          echo 'This is ls -al in that directory'
-          ls -al
-          printf '\n*****************\n'
-
-      - name: Run Prometheus
-        run: |
-          # Enable logs for debugging
-          #docker run --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 --log.level=debug
-          docker run -d --name prometheus -v $(pwd):/etc/prometheus -p 9090:9090 --link pushgateway:pushgateway prom/prometheus:latest --config.file=/etc/prometheus/prometheus.yml --web.listen-address=:9090 > prom.log 2>&1
-          sleep 60
-          # Uncomment for troubleshooting.
-          printf '\n*****************\n'
-          printf '\n curl e2e_cpu_seconds_total \n'
-          curl http://localhost:9090/api/v1/query?query=e2e_cpu_seconds_total_v1
-          printf '\n*****************\n'
-          printf '\n cat prom.log \n'
-          cat prom.log
-          #printf '\n*****************\n'
-          #printf '\n send_failures_total \n'
-          #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_queue_send_failures_total'
-          #printf '\n*****************\n'
-          #printf '\n storage_retries_total \n'
-          #curl 'http://localhost:9090/api/v1/query?query=prometheus_remote_storage_retries_total'
-
-
