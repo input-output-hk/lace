@@ -187,6 +187,13 @@ class SettingsPage extends CommonDrawerElements {
     await this.betaProgramSwitch.waitForClickable();
     await this.betaProgramSwitch.click();
   }
+
+  async setExtensionTheme(mode: 'light' | 'dark'): Promise<void> {
+    if (mode !== ((await this.themeSwitch.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await this.themeSwitch.waitForClickable();
+      await this.themeSwitch.click();
+    }
+  }
 }
 
 export default new SettingsPage();

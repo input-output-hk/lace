@@ -1,16 +1,13 @@
-import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 import SettingsPage from '../elements/settings/SettingsPage';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
 import localStorageManager from '../utils/localStorageManager';
 import Modal from '../elements/modal';
 import { browser } from '@wdio/globals';
-import ToastMessage from '../elements/toastMessage';
-import { t } from '../utils/translationService';
-import { Logger } from '../support/logger';
-import { expect } from 'chai';
 import MainLoader from '../elements/MainLoader';
 import MenuHeader from '../elements/menuHeader';
 import PrivacyPolicyUpdateBanner from '../elements/PrivacyPolicyUpdateBanner';
+import ToastMessage from '../elements/toastMessage';
+import type { NetworkType } from '../types/network';
 
 const toggleEnabledAttribute = 'aria-checked';
 
@@ -54,11 +51,6 @@ class SettingsExtendedPageObject {
   clickOnRemoveWallet = async () => {
     await SettingsPage.removeWalletButton.waitForStable();
     await SettingsPage.removeWalletButton.click();
-  };
-
-  clickOnShowPublicKey = async () => {
-    await YourKeysDrawer.showPublicKeyButton.waitForStable();
-    await YourKeysDrawer.showPublicKeyButton.click();
   };
 
   toggleDebugging = async (isEnabled: boolean) => {
@@ -117,7 +109,7 @@ class SettingsExtendedPageObject {
     }
   };
 
-  switchNetworkWithoutClosingDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview') => {
+  switchNetworkWithoutClosingDrawer = async (network: NetworkType) => {
     await MenuHeader.openSettings();
     await this.clickOnNetwork();
     if (!(await NetworkDrawer.isNetworkSelected(network))) {
@@ -128,64 +120,18 @@ class SettingsExtendedPageObject {
     }
   };
 
-  switchNetworkAndCloseDrawer = async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
+  switchNetworkAndCloseDrawer = async (network: NetworkType, mode: 'extended' | 'popup') => {
     await this.switchNetworkWithoutClosingDrawer(network);
     await this.waitUntilHdWalletSynced();
     await (mode === 'extended' ? NetworkDrawer.clickCloseDrawerButton() : NetworkDrawer.clickBackDrawerButton());
   };
 
-  removeWallet = async () => {
-    await MenuHeader.openSettings();
-    await this.clickOnRemoveWallet();
-    await Modal.confirmButton.click();
-  };
-
-  setExtensionTheme = async (mode: 'light' | 'dark') => {
-    if (mode !== ((await SettingsPage.themeSwitch.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
-      await SettingsPage.themeSwitch.waitForClickable();
-      await SettingsPage.themeSwitch.click();
-    }
-  };
-  closeWalletSyncedToast = async () => {
-    if (await ToastMessage.container.isDisplayed()) {
-      const toastMessage = await (await ToastMessage.messageText).getText();
-      if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
-        await ToastMessage.clickCloseButton();
-      } else {
-        Logger.warn('Wallet synced toast is not displayed, you might want to remove this step');
-      }
-    }
-  };
-
-  closePrivacyPolycyUpdateBanner = async () => {
-    if (await PrivacyPolicyUpdateBanner.container.isDisplayed()) {
-      await PrivacyPolicyUpdateBanner.clickOnAgreeButton();
-    }
-  };
-
-  waitUntilSyncingModalDisappears = async () => {
-    await browser.pause(500);
-    if (
-      (await Modal.container.isDisplayed()) &&
-      (await Modal.title.getText()) === (await t('addressesDiscovery.overlay.title'))
-    ) {
-      await Modal.title.waitForDisplayed({ reverse: true, timeout: 220_000 });
-    }
-  };
-
   async waitUntilHdWalletSynced() {
     await MainLoader.waitUntilLoaderDisappears();
-    await this.waitUntilSyncingModalDisappears();
-    await this.closeWalletSyncedToast();
-    await this.closePrivacyPolycyUpdateBanner();
-    await this.multiAddressModalConfirm();
-  }
-
-  async multiAddressModalConfirm() {
-    if (await Modal.container.isDisplayed()) {
-      expect(await Modal.confirmButton.getText()).to.equal(await t('modals.beta.button', 'staking'));
-      await Modal.confirmButton.click();
-    }
+    await Modal.waitUntilSyncingModalDisappears();
+    await ToastMessage.closeWalletSyncedToast();
+    await PrivacyPolicyUpdateBanner.closePrivacyPolicyUpdateBanner();
+    await Modal.confirmMultiAddressModal();
   }
 }
 

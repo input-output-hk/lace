@@ -34,6 +34,7 @@ import EnterYourPasswordDrawerAssert from '../assert/settings/EnterYourPasswordD
 import EnterYourPasswordDrawer from '../elements/settings/EnterYourPasswordDrawer';
 import SaveYourPaperWalletDrawerAssert from '../assert/settings/SaveYourPaperWalletDrawerAssert';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
+import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API|Generate paper wallet)" setting$/,
@@ -105,7 +106,7 @@ Then(/^I click on "Sync" button$/, async () => {
 });
 
 Then(/^I click on Show public key button$/, async () => {
-  await settingsExtendedPageObject.clickOnShowPublicKey();
+  await YourKeysDrawer.clickOnShowPublicKey();
 });
 
 Then(/^I see "([^"]*)" wallet public key$/, async (walletName: string) => {
@@ -326,7 +327,7 @@ When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mod
 });
 
 When(/^I set theme switch in settings to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
-  await settingsExtendedPageObject.setExtensionTheme(mode);
+  await SettingsPage.setExtensionTheme(mode);
 });
 
 Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {

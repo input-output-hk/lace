@@ -8,6 +8,11 @@ class YourKeysDrawer extends CommonDrawerElements {
   get showPublicKeyButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SHOW_PUBLIC_KEY_BUTTON);
   }
+
+  async clickOnShowPublicKey(): Promise<void> {
+    await this.showPublicKeyButton.waitForStable();
+    await this.showPublicKeyButton.click();
+  }
 }
 
 export default new YourKeysDrawer();

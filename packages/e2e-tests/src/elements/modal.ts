@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
 import { browser } from '@wdio/globals';
+import { expect } from 'chai';
+import { t } from '../utils/translationService';
 
 class Modal {
   private CONTAINER_FIREFOX = '.ant-modal-root .ant-modal-content';
@@ -49,6 +51,23 @@ class Modal {
       interval: 500,
       timeoutMsg: 'failed while waiting for the modal to disappear'
     });
+  }
+
+  async confirmMultiAddressModal() {
+    if (await this.container.isDisplayed()) {
+      expect(await this.confirmButton.getText()).to.equal(await t('modals.beta.button'));
+      await this.confirmButton.click();
+    }
+  }
+
+  async waitUntilSyncingModalDisappears(): Promise<void> {
+    await browser.pause(500);
+    if (
+      (await this.container.isDisplayed()) &&
+      (await this.title.getText()) === (await t('addressesDiscovery.overlay.title'))
+    ) {
+      await this.title.waitForDisplayed({ reverse: true, timeout: 220_000 });
+    }
   }
 }
 

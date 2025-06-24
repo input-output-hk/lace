@@ -39,7 +39,6 @@ import faqPageAssert from '../assert/faqPageAssert';
 import { visit } from '../utils/pageUtils';
 import CommonDrawerElements from '../elements/CommonDrawerElements';
 import DAppConnectorUtils from '../utils/DAppConnectorUtils';
-import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import consoleManager from '../utils/consoleManager';
 import consoleAssert from '../assert/consoleAssert';
 import {
@@ -52,22 +51,23 @@ import Modal from '../elements/modal';
 import { setCameraAccessPermission } from '../utils/browserPermissionsUtils';
 import extensionUtils from '../utils/utils';
 import CrashScreen from '../elements/CrashScreen';
+import PrivacyPolicyUpdateBanner from '../elements/PrivacyPolicyUpdateBanner';
 
 Given(/^Lace is ready for test$/, async () => {
   if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
     throw new Error('Crash screen occurred!');
   }
   await MainLoader.waitUntilLoaderDisappears();
-  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-  await settingsExtendedPageObject.closePrivacyPolycyUpdateBanner();
-  await settingsExtendedPageObject.multiAddressModalConfirm();
+  await Modal.waitUntilSyncingModalDisappears();
+  await PrivacyPolicyUpdateBanner.closePrivacyPolicyUpdateBanner();
+  await Modal.confirmMultiAddressModal();
   await TokensPage.waitUntilCardanoTokenLoaded();
-  await settingsExtendedPageObject.closeWalletSyncedToast();
+  await ToastMessage.closeWalletSyncedToast();
 });
 
 Then(/^Lace is loaded properly$/, async () => {
   await MainLoader.waitUntilLoaderDisappears();
-  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
+  await Modal.waitUntilSyncingModalDisappears();
   await TokensPage.waitUntilCardanoTokenLoaded();
 });
 
@@ -90,7 +90,7 @@ Then(/^I close the drawer by clicking back button$/, async () => {
 });
 
 Then(/^I close wallet synced toast/, async () => {
-  await settingsExtendedPageObject.closeWalletSyncedToast();
+  await ToastMessage.closeWalletSyncedToast();
 });
 
 Then(/^Wallet is synced$/, async () => {
@@ -145,7 +145,7 @@ Then(
 );
 
 Then(/^I (see|don't see) a toast with text: "([^"]*)"$/, async (shouldSee: string, toastText: string) => {
-  await settingsExtendedPageObject.closeWalletSyncedToast();
+  await ToastMessage.closeWalletSyncedToast();
 
   const toastTextToTranslationKeyMap: { [key: string]: string } = {
     'Handle copied': 'core.infoWallet.handleCopied',
@@ -218,8 +218,8 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
 
   await browser.refresh();
   await closeAllTabsExceptOriginalOne();
-  await settingsExtendedPageObject.waitUntilSyncingModalDisappears();
-  await settingsExtendedPageObject.closeWalletSyncedToast();
+  await Modal.waitUntilSyncingModalDisappears();
+  await ToastMessage.closeWalletSyncedToast();
   if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
     throw new Error('Crash screen occurred!');
   }
@@ -408,7 +408,7 @@ When(/^I scroll (down|up) (\d*) pixels$/, async (direction: 'down' | 'up', pixel
 });
 
 Given(/^I confirm multi-address discovery modal$/, async () => {
-  await settingsExtendedPageObject.multiAddressModalConfirm();
+  await Modal.confirmMultiAddressModal();
 });
 
 When(/^I enable network interception to fail request: "([^"]*)"$/, async (urlPattern: string) => {
