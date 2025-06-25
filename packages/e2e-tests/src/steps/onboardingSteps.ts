@@ -8,7 +8,6 @@ import OnboardingCommonAssert from '../assert/onboarding/onboardingCommonAssert'
 import OnboardingMainPage from '../elements/onboarding/mainPage';
 import OnboardingMainPageAssert from '../assert/onboarding/onboardingMainPageAssert';
 import OnboardingWalletSetupPage from '../elements/onboarding/walletSetupPage';
-import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import TokensPageAssert from '../assert/tokensPageAssert';
 import TopNavigationAssert from '../assert/topNavigationAssert';
 import testContext from '../utils/testContext';
@@ -35,6 +34,7 @@ import SaveYourPaperWalletPage from '../elements/onboarding/SaveYourPaperWalletP
 import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivateQrCodePageAssert';
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
 import LocalStorageInitializer from '../fixture/localStorageInitializer';
+import { switchNetworkAndCloseDrawer } from '../utils/networkUtils';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -198,7 +198,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
-  await settingsExtendedPageObject.switchNetworkAndCloseDrawer('Preprod', 'extended');
+  await switchNetworkAndCloseDrawer('Preprod', 'extended');
   const newCreatedWallet = JSON.stringify(await getWalletsFromRepository());
   testContext.save('newCreatedWallet', newCreatedWallet);
 });

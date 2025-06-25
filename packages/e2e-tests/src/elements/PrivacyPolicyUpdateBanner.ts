@@ -17,6 +17,12 @@ class PrivacyPolicyUpdateBanner {
     await this.agreeButton.waitForClickable();
     await this.agreeButton.click();
   }
+
+  async closePrivacyPolicyUpdateBanner(): Promise<void> {
+    if (await this.container.isDisplayed()) {
+      await this.clickOnAgreeButton();
+    }
+  }
 }
 
 export default new PrivacyPolicyUpdateBanner();

@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
+import { t } from '../utils/translationService';
+import { Logger } from '../support/logger';
 
 class ToastMessage {
   private CONTAINER = '[data-testid="toast-content-wrapper"]';
@@ -31,6 +33,17 @@ class ToastMessage {
   async clickCloseButton() {
     await this.closeButton.waitForClickable();
     await this.closeButton.click();
+  }
+
+  async closeWalletSyncedToast(): Promise<void> {
+    if (await this.container.isDisplayed()) {
+      const toastMessage = await (await this.messageText).getText();
+      if (toastMessage === (await t('addressesDiscovery.toast.successText')).toString()) {
+        await this.clickCloseButton();
+      } else {
+        Logger.warn('Wallet synced toast is not displayed, you might want to remove this step');
+      }
+    }
   }
 }
 

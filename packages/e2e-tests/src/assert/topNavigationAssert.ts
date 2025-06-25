@@ -4,10 +4,10 @@ import { t } from '../utils/translationService';
 import { expect } from 'chai';
 import { ParsedCSSValue } from 'webdriverio';
 import extensionUtils from '../utils/utils';
-import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import { browser } from '@wdio/globals';
 import WalletOption from '../elements/WalletOption';
 import CrashScreen from '../elements/CrashScreen';
+import { waitUntilHdWalletSynced } from '../utils/networkUtils';
 
 class TopNavigationAssert {
   private readonly CSS_COLOR = 'color';
@@ -137,7 +137,7 @@ class TopNavigationAssert {
     if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
       throw new Error('Crash screen occurred!');
     }
-    await settingsExtendedPageObject.waitUntilHdWalletSynced();
+    await waitUntilHdWalletSynced();
     await this.assertLogoPresent();
     await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });
     await MenuHeader.menuButton.click();

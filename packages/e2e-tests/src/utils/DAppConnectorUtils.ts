@@ -3,7 +3,6 @@ import { waitUntilExpectedNumberOfHandles } from './window';
 import AuthorizeDappPage from '../elements/dappConnector/authorizeDAppPage';
 import AuthorizeDappModal from '../elements/dappConnector/authorizeDAppModal';
 import extendedView from '../page/extendedView';
-import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import AuthorizedDappsPage from '../elements/dappConnector/authorizedDAppsPage';
 import popupView from '../page/popupView';
 import ToastMessage from '../elements/toastMessage';
@@ -11,6 +10,7 @@ import RemoveDAppModal from '../elements/dappConnector/removeDAppModal';
 import DAppConnectorAssert, { ExpectedDAppDetails } from '../assert/dAppConnectorAssert';
 import { Logger } from '../support/logger';
 import TestDAppPage from '../elements/dappConnector/testDAppPage';
+import SettingsPage from '../elements/settings/SettingsPage';
 
 class DAppConnectorUtils {
   TEST_DAPP_URL = this.getTestDAppUrl();
@@ -51,7 +51,7 @@ class DAppConnectorUtils {
 
   async deauthorizeAllDApps(mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
-    await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
+    await SettingsPage.clickSettingsItem('Authorized DApps');
 
     for (const removeDappButton of await AuthorizedDappsPage.dAppRemoveButtons) {
       await removeDappButton.waitForClickable();
@@ -65,7 +65,7 @@ class DAppConnectorUtils {
 
   async deauthorizeDApp(expectedDappName: string, mode: 'extended' | 'popup') {
     mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
-    await settingsExtendedPageObject.clickSettingsItem('Authorized DApps');
+    await SettingsPage.clickSettingsItem('Authorized DApps');
     await AuthorizedDappsPage.drawerHeaderTitle.waitForClickable();
 
     for (const dAppName of await AuthorizedDappsPage.dAppNames) {

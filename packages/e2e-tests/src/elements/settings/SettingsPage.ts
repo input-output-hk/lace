@@ -5,6 +5,22 @@ import { SettingsLink } from './SettingsLink';
 import CommonDrawerElements from '../CommonDrawerElements';
 import { ChainablePromiseArray } from 'webdriverio/build/types';
 
+export type SettingsElementName =
+  | 'About'
+  | 'Your keys'
+  | 'Network'
+  | 'Authorized DApps'
+  | 'Show recovery phrase'
+  | 'Passphrase verification'
+  | 'FAQs'
+  | 'Help'
+  | 'Terms and conditions'
+  | 'Privacy policy'
+  | 'Collateral'
+  | 'Cookie policy'
+  | 'Custom Submit API'
+  | 'Generate paper wallet';
+
 class SettingsPage extends CommonDrawerElements {
   private readonly WALLET_HEADER = '[data-testid="wallet-settings-heading"]';
   private readonly SECURITY_HEADER = '[data-testid="security-settings-heading"]';
@@ -187,6 +203,92 @@ class SettingsPage extends CommonDrawerElements {
     await this.betaProgramSwitch.waitForClickable();
     await this.betaProgramSwitch.click();
   }
+
+  async setExtensionTheme(mode: 'light' | 'dark'): Promise<void> {
+    if (mode !== ((await this.themeSwitch.getAttribute('aria-checked')) === 'true' ? 'light' : 'dark')) {
+      await this.themeSwitch.waitForClickable();
+      await this.themeSwitch.click();
+    }
+  }
+
+  async clickOnRemoveWallet(): Promise<void> {
+    await this.removeWalletButton.waitForStable();
+    await this.removeWalletButton.click();
+  }
+
+  async toggleDebugging(isEnabled: boolean): Promise<void> {
+    (await this.debuggingSwitch.getAttribute('aria-checked')) !== String(isEnabled) &&
+      (await this.debuggingSwitch.click());
+  }
+
+  private readonly elementActions: Record<SettingsElementName, () => Promise<void>> = {
+    About: async () => {
+      await this.aboutLink.element.waitForClickable();
+      await this.aboutLink.element.click();
+    },
+    'Your keys': async () => {
+      await this.yourKeysLink.element.waitForClickable();
+      await this.yourKeysLink.element.click();
+    },
+    Network: async () => {
+      await this.networkLink.element.waitForClickable();
+      await this.networkLink.element.click();
+    },
+    'Authorized DApps': async () => {
+      await this.authorizedDAppsLink.element.waitForClickable();
+      await this.authorizedDAppsLink.element.click();
+    },
+    'Show recovery phrase': async () => {
+      await this.showRecoveryPhraseLink.element.waitForClickable();
+      await this.showRecoveryPhraseLink.element.click();
+    },
+    'Passphrase verification': async () => {
+      await this.passphraseVerificationLink.element.waitForClickable();
+      await this.passphraseVerificationLink.element.click();
+    },
+    FAQs: async () => {
+      await this.faqsLink.element.waitForClickable();
+      await this.faqsLink.element.click();
+    },
+    Help: async () => {
+      await this.helpLink.element.waitForClickable();
+      await this.helpLink.element.click();
+    },
+    'Terms and conditions': async () => {
+      await this.tncLink.element.waitForClickable();
+      await this.tncLink.element.click();
+    },
+    'Privacy policy': async () => {
+      await this.privacyPolicyLink.element.waitForClickable();
+      await this.privacyPolicyLink.element.click();
+    },
+    Collateral: async () => {
+      await this.collateralLink.element.waitForClickable();
+      await this.collateralLink.element.click();
+    },
+    'Cookie policy': async () => {
+      await this.cookiePolicy.element.waitForClickable();
+      await this.cookiePolicy.element.click();
+    },
+    'Custom Submit API': async () => {
+      await this.customSubmitAPILink.element.waitForClickable();
+      await this.customSubmitAPILink.element.click();
+    },
+    'Generate paper wallet': async () => {
+      await this.generatePaperWallet.element.waitForClickable();
+      await this.generatePaperWallet.element.click();
+    }
+  };
+
+  clickSettingsItem = async (elementName: SettingsElementName): Promise<void> => {
+    const action = this.elementActions[elementName];
+    if (!action) {
+      const supportedElements = Object.keys(this.elementActions).join(', ');
+      throw new Error(`Unsupported element: "${elementName}". Supported elements: ${supportedElements}`);
+    }
+
+    await action();
+  };
 }
 
 export default new SettingsPage();

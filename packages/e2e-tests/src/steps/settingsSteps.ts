@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import { Given, Then, When } from '@wdio/cucumber-framework';
 import { DataTable } from '@cucumber/cucumber';
-import settingsExtendedPageObject from '../pageobject/settingsExtendedPageObject';
 import drawerGeneralSettingsAssert from '../assert/settings/YourKeysDrawerAssert';
 import settingsPageExtendedAssert from '../assert/settings/SettingsPageAssert';
 import drawerCommonExtendedAssert from '../assert/drawerCommonExtendedAssert';
@@ -20,7 +19,7 @@ import WalletAddressPage from '../elements/walletAddressPage';
 import CollateralDrawer from '../elements/settings/CollateralDrawer';
 import HelpDrawer from '../elements/settings/HelpDrawer';
 import ModalAssert from '../assert/modalAssert';
-import SettingsPage from '../elements/settings/SettingsPage';
+import SettingsPage, { SettingsElementName } from '../elements/settings/SettingsPage';
 import extendedView from '../page/extendedView';
 import popupView from '../page/popupView';
 import type { NetworkType } from '../types/network';
@@ -33,11 +32,14 @@ import SecureYourPaperWalletDrawer from '../elements/settings/SecureYourPaperWal
 import EnterYourPasswordDrawerAssert from '../assert/settings/EnterYourPasswordDrawerAssert';
 import EnterYourPasswordDrawer from '../elements/settings/EnterYourPasswordDrawer';
 import SaveYourPaperWalletDrawerAssert from '../assert/settings/SaveYourPaperWalletDrawerAssert';
+import NetworkDrawer from '../elements/settings/NetworkDrawer';
+import YourKeysDrawer from '../elements/settings/YourKeysDrawer';
+import { switchNetworkAndCloseDrawer, switchNetworkWithoutClosingDrawer } from '../utils/networkUtils';
 
 Given(
   /^I click on "(About|Your keys|Network|Authorized DApps|Show recovery phrase|Passphrase verification|FAQs|Help|Terms and conditions|Privacy policy|Cookie policy|Collateral|Custom Submit API|Generate paper wallet)" setting$/,
   async (settingsElement) => {
-    await settingsExtendedPageObject.clickSettingsItem(settingsElement);
+    await SettingsPage.clickSettingsItem(settingsElement);
   }
 );
 
@@ -49,7 +51,7 @@ Then(
   /^click on the following settings in (extended|popup) view opens a drawer:$/,
   async (viewType: string, settings: DataTable) => {
     for (const row of settings.rows()) {
-      await settingsExtendedPageObject.clickSettingsItem(await t(row[0]));
+      await SettingsPage.clickSettingsItem((await t(row[0])) as SettingsElementName);
       await drawerCommonExtendedAssert.assertSeeDrawer(true);
       await (viewType === 'extended'
         ? new CommonDrawerElements().clickCloseDrawerButton()
@@ -64,7 +66,7 @@ Then(/my local storage is fully initialized/, async () => {
 });
 
 When(/^I click on About component$/, async () => {
-  await settingsExtendedPageObject.clickOnAbout();
+  await SettingsPage.clickSettingsItem('About');
 });
 
 Then(/^I see settings page$/, async () => {
@@ -96,7 +98,7 @@ Then(/^I see Remove wallet section/, async () => {
 });
 
 Then(/I click on Remove wallet button/, async () => {
-  await settingsExtendedPageObject.clickOnRemoveWallet();
+  await SettingsPage.clickOnRemoveWallet();
 });
 
 Then(/^I click on "Sync" button$/, async () => {
@@ -104,7 +106,7 @@ Then(/^I click on "Sync" button$/, async () => {
 });
 
 Then(/^I click on Show public key button$/, async () => {
-  await settingsExtendedPageObject.clickOnShowPublicKey();
+  await YourKeysDrawer.clickOnShowPublicKey();
 });
 
 Then(/^I see "([^"]*)" wallet public key$/, async (walletName: string) => {
@@ -120,18 +122,18 @@ Then(/^I see network radio buttons$/, async () => {
 });
 
 When(/I click on "(Mainnet|Preprod|Preview)" radio button/, async (network: NetworkType) => {
-  await settingsExtendedPageObject.clickOnNetworkRadioButton(network);
+  await NetworkDrawer.clickOnNetworkRadioButton(network);
 });
 
 When(
   /^I switch network to: "(Mainnet|Preprod|Preview)" in (extended|popup) mode/,
-  async (network: 'Mainnet' | 'Preprod' | 'Preview', mode: 'extended' | 'popup') => {
-    await settingsExtendedPageObject.switchNetworkAndCloseDrawer(network, mode);
+  async (network: NetworkType, mode: 'extended' | 'popup') => {
+    await switchNetworkAndCloseDrawer(network, mode);
   }
 );
 
 When(/^I switch network to: "(Mainnet|Preprod|Preview)" without closing drawer/, async (network: NetworkType) => {
-  await settingsExtendedPageObject.switchNetworkWithoutClosingDrawer(network);
+  await switchNetworkWithoutClosingDrawer(network);
 });
 
 Then(
@@ -198,7 +200,7 @@ Then(
 );
 
 When(/^Debugging toggle (is|is not) enabled$/, async (isEnabled: 'is' | 'is not') => {
-  await settingsExtendedPageObject.toggleDebugging(isEnabled === 'is');
+  await SettingsPage.toggleDebugging(isEnabled === 'is');
 });
 
 Then(/^Side drawer "Show 24-word passphrase" is displayed$/, async () => {
@@ -284,7 +286,7 @@ When(/^I click "(Back|Remove wallet)" button on "Remove wallet" modal$/, async (
 
 When(/^I remove wallet$/, async () => {
   await MenuHeader.openSettings();
-  await settingsExtendedPageObject.clickOnRemoveWallet();
+  await SettingsPage.clickOnRemoveWallet();
   await Modal.clickConfirmButton();
 });
 
@@ -318,14 +320,14 @@ When(/^I click "Reclaim collateral" button on collateral drawer$/, async () => {
 When(/^I reclaim collateral \(if active\) in (extended|popup) mode$/, async (mode: 'extended' | 'popup') => {
   mode === 'extended' ? await extendedView.visitSettings() : await popupView.visitSettings();
   if ((await SettingsPage.collateralLink.addon.getText()) === 'Active') {
-    await settingsExtendedPageObject.clickSettingsItem('Collateral');
+    await SettingsPage.clickSettingsItem('Collateral');
     await CollateralDrawer.collateralButton.waitForClickable();
     await CollateralDrawer.collateralButton.click();
   }
 });
 
 When(/^I set theme switch in settings to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
-  await settingsExtendedPageObject.setExtensionTheme(mode);
+  await SettingsPage.setExtensionTheme(mode);
 });
 
 Then(/^I see current network: "(Mainnet|Preprod|Preview)" name in network setting$/, async (network: NetworkType) => {
