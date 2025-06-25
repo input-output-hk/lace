@@ -457,9 +457,21 @@ When(
 );
 
 Then(/^Gov Tool page is displayed in a new tab$/, async () => {
-  const expectedUrl = extensionUtils.isMainnet()
-    ? 'https://gov.tools/'
-    : `https://${String(extensionUtils.getNetwork().name).toLowerCase()}.gov.tools/`;
+  let expectedUrl;
+  const networkName = String(extensionUtils.getNetwork().name).toLowerCase();
+  switch (networkName) {
+    case 'mainnet':
+      expectedUrl = 'https://gov.tools/';
+      break;
+    case 'preprod':
+      expectedUrl = 'https://pre-prod.gov.tools/';
+      break;
+    case 'preview':
+      expectedUrl = 'https://preview.gov.tools/';
+      break;
+    default:
+      throw new Error(`Unsupported network name: ${networkName}`);
+  }
   await commonAssert.assertSeeTabWithUrl(expectedUrl);
 });
 
