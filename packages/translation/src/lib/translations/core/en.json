@@ -617,6 +617,7 @@
   "core.walletSetupOptionsStep.restoreWallet.title": "Restore wallet",
   "core.walletSetupOptionsStep.subTitle": "Choose an option to get started",
   "core.walletSetupOptionsStep.agreementText": "By clicking the Create, Connect or Restore button above, you agree with Lace’s <a1>Terms of Service</a1> and <a2>Privacy Policy</a2>",
+  "core.walletSetupOptionsStep.infoMessage": "Do not import Bitcoin accounts that contain inscriptions (such as Ordinals or Runes) or receive inscriptions in an account created within Lace. Lace currently does not support inscriptions, and ignoring this advice may result in loss of assets.",
   "core.walletSetupOptionsStep.title": "Let's explore Web3 together",
   "core.walletSetupRecoveryPhraseLengthStep.description": "Choose your recovery phrase length of either 12, 15 or 24 words to restore your wallet.",
   "core.walletSetupRecoveryPhraseLengthStep.title": "Recovery phrase length",
