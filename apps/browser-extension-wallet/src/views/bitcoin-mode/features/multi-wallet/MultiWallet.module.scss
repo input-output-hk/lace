@@ -25,6 +25,16 @@ $container-width: 840px;
   :global(.ant-modal-close-x) {
     display: none;
   }
+
+  &.flex {
+    :global(.ant-modal-content) {
+      min-height: fit-content;
+    }
+
+    :global(.ant-modal-body) {
+      height: auto;
+    }
+  }
 }
 
 .container {

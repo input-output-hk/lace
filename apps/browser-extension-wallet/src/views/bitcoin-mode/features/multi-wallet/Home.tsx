@@ -58,7 +58,8 @@ export const Home = (): JSX.Element => {
           )
         }}
       />
-    )
+    ),
+    infoMessage: translate('core.walletSetupOptionsStep.infoMessage')
   };
 
   return (
@@ -77,6 +78,7 @@ export const Home = (): JSX.Element => {
       }}
       translations={walletSetupOptionsStepTranslations}
       withHardwareWallet={false}
+      withInfoMessage
     />
   );
 };

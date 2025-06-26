@@ -7,6 +7,7 @@ import { ReactComponent as HardwareWalletDisabledIcon } from '../../assets/icons
 import { ReactComponent as RestoreWalletIcon } from '../../assets/icons/onboarding/restore-wallet.component.svg';
 import { WalletSetupOption } from './WalletSetupOption';
 import { TranslationsFor } from '@ui/utils/types';
+import { Box, InfoBar, InfoComponent } from '@input-output-hk/lace-ui-toolkit';
 
 type SetupOptionTranslations = TranslationsFor<'title' | 'description' | 'button'>;
 
@@ -21,7 +22,9 @@ export interface WalletSetupOptionsStepProps {
     hardwareWallet: SetupOptionTranslations & TranslationsFor<'tooltip'>;
     restoreWallet: SetupOptionTranslations;
     agreementText: ReactNode;
+    infoMessage?: string;
   };
+  withInfoMessage?: boolean;
   withAgreement?: boolean;
   withHardwareWallet?: boolean;
 }
@@ -34,7 +37,8 @@ export const WalletSetupOptionsStep = ({
   onRestoreWalletRequest,
   translations,
   withAgreement,
-  withHardwareWallet
+  withHardwareWallet,
+  withInfoMessage
 }: WalletSetupOptionsStepProps): React.ReactElement => (
   <div className={styles.walletSetupOptionsStep} data-testid="wallet-setup-options-container">
     <div className={styles.content} data-testid="wallet-setup-options-content">
@@ -75,6 +79,11 @@ export const WalletSetupOptionsStep = ({
         />
       </div>
     </div>
+    {withInfoMessage && (
+      <Box mt="$32">
+        <InfoBar icon={<InfoComponent />} message={translations.infoMessage} />
+      </Box>
+    )}
     {withAgreement && (
       <div className={styles.legal} data-testid="agreement-text">
         {translations.agreementText}
