@@ -1,12 +1,8 @@
-/* eslint-disable no-console */
 import { PostHogAction } from '@lace/common';
-import { StateStatus, useOutsideHandles } from 'features/outside-handles-provider';
+import { useOutsideHandles } from 'features/outside-handles-provider';
 import { StakePoolDetails, mapStakePoolToDisplayData, useDelegationPortfolioStore } from 'features/store';
-import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ListRange } from 'react-virtuoso';
-import { SEARCH_DEBOUNCE_IN_MS } from '../constants';
 import { StakePoolSortOptions } from '../types';
 
 type QueryStatus = 'idle' | 'fetching' | 'paginating';
@@ -23,57 +19,25 @@ type UseQueryStakePoolsResult = {
 };
 
 export const useQueryStakePools = () => {
-  const portfolioMutators = useDelegationPortfolioStore((s) => s.mutators);
+  const portfolioStore = useDelegationPortfolioStore();
+  const { portfolioMutators, searchQuery, sort } = useMemo(() => {
+    const { mutators, searchQuery: searchQueryStore, sortField, sortOrder } = portfolioStore;
+
+    return {
+      portfolioMutators: mutators,
+      searchQuery: searchQueryStore || '',
+      sort: sortField && sortOrder && { field: sortField, order: sortOrder },
+    };
+  }, [portfolioStore]);
+
   const {
-    walletStoreStakePoolSearchResults: { pageResults, totalResultCount: totalPoolsCount },
-    walletStoreStakePoolSearchResultsStatus,
-    walletStoreFetchStakePools: fetchStakePools,
     analytics,
+    walletStoreBlockchainProvider: { stakePoolProvider },
   } = useOutsideHandles();
 
-  const { searchQuery, sortField, sortOrder } = useDelegationPortfolioStore((store) => ({
-    searchQuery: store.searchQuery || '',
-    sortField: store.sortField,
-    sortOrder: store.sortOrder,
-  }));
-
-  const previousRequest = useRef<{ searchQuery: string; sortField?: string; sortOrder?: string } | null>(null);
-  const status = useMemo(() => {
-    const nextRequest = { searchQuery, sortField, sortOrder };
-    const requestChanged = !isEqual(previousRequest.current, nextRequest);
-    const statusIdle =
-      walletStoreStakePoolSearchResultsStatus === StateStatus.LOADED ||
-      walletStoreStakePoolSearchResultsStatus === StateStatus.IDLE;
-
-    return statusIdle ? 'idle' : requestChanged ? 'fetching' : 'paginating';
-  }, [searchQuery, sortField, sortOrder, walletStoreStakePoolSearchResultsStatus]);
-
-  const debouncedSearch = useMemo(
-    () =>
-      debounce(async (params: Parameters<typeof fetchStakePools>[0]) => {
-        await fetchStakePools(params);
-        previousRequest.current = {
-          searchQuery: params.searchString,
-          sortField: params.sort?.field,
-          sortOrder: params.sort?.order,
-        };
-      }, SEARCH_DEBOUNCE_IN_MS),
-    [fetchStakePools]
-  );
-
-  const paginatePools = useCallback(
-    async ({ startIndex, endIndex }: { startIndex: number; endIndex: number }) => {
-      if (startIndex === endIndex) return;
-
-      debouncedSearch({
-        limit: endIndex,
-        searchString: searchQuery ?? '',
-        skip: startIndex,
-        ...(sortField && sortOrder && { sort: { field: sortField, order: sortOrder } }),
-      });
-    },
-    [debouncedSearch, searchQuery, sortField, sortOrder]
-  );
+  const [pools, setPools] = useState<StakePoolDetails[]>(Array.from({ length: 100 }));
+  const [status, setStatus] = useState<'fetching' | 'idle'>('fetching');
+  const [totalPoolsCount, setTotalPoolsCount] = useState<number>(0);
 
   const setSearchQuery = useCallback(
     (searchString: string) => {
@@ -89,11 +53,6 @@ export const useQueryStakePools = () => {
     [analytics, portfolioMutators, searchQuery]
   );
 
-  const pools = useMemo(
-    () => pageResults.map((pool) => (pool ? mapStakePoolToDisplayData({ stakePool: pool }) : undefined)),
-    [pageResults]
-  );
-
   const setSort = useCallback(
     (data: StakePoolSortOptions) =>
       portfolioMutators.executeCommand({
@@ -103,23 +62,33 @@ export const useQueryStakePools = () => {
     [portfolioMutators]
   );
 
+  useEffect(() => {
+    setStatus('fetching');
+    stakePoolProvider
+      .queryStakePools({
+        filters: { pledgeMet: true, text: searchQuery },
+        pagination: { limit: 100_000_000, startAt: 0 },
+        sort,
+      })
+      .then(({ pageResults, totalResultCount }) => {
+        setPools(pageResults.map((pool) => mapStakePoolToDisplayData({ stakePool: pool })));
+        setTotalPoolsCount(totalResultCount);
+        setStatus('idle');
+      })
+      .catch((error) => console.error(error));
+  }, [searchQuery, sort, stakePoolProvider]);
+
   return useMemo<UseQueryStakePoolsResult>(
     () => ({
-      paginatePools,
+      paginatePools: () => Promise.resolve(),
       pools,
       searchQuery,
       setSearchQuery,
       setSort,
-      ...(sortField &&
-        sortOrder && {
-          sort: {
-            field: sortField,
-            order: sortOrder,
-          },
-        }),
+      sort,
       status,
       totalPoolsCount,
     }),
-    [paginatePools, pools, searchQuery, setSearchQuery, setSort, sortField, sortOrder, status, totalPoolsCount]
+    [pools, searchQuery, setSearchQuery, sort, setSort, status, totalPoolsCount]
   );
 };
