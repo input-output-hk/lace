@@ -6,15 +6,14 @@ import {
   validateBitcoinAddress,
   AddressValidationResult,
   UnsignedTransaction,
-  isP2trAddress
+  isP2trAddress,
+  INPUT_SIZE,
+  OUTPUT_SIZE,
+  TRANSACTION_OVERHEAD
 } from '../common';
 import { UTxO } from '../providers';
 import { payments, script, Psbt } from 'bitcoinjs-lib';
 import * as bitcoin from 'bitcoinjs-lib';
-
-const INPUT_SIZE = 68;
-const OUTPUT_SIZE = 34;
-const TRANSACTION_OVERHEAD = 10;
 
 /**
  * A class to build Bitcoin transactions using a flexible input and output management system.

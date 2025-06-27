@@ -254,6 +254,15 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
             Bitcoin.Network.Mainnet
           );
 
+    const featureFlags = await getFeatureFlags(
+      network === Bitcoin.Network.Testnet ? Cardano.NetworkMagics.Preprod : Cardano.NetworkMagics.Mainnet
+    );
+    const useMempoolSpaceFeeMarket = isExperimentEnabled(featureFlags, ExperimentName.MEMPOOLSPACE_FEE_MARKET);
+
+    const feeMarketProvider = useMempoolSpaceFeeMarket
+      ? new Bitcoin.MempoolSpaceMarketProvider(process.env.MEMPOOLSPACE_URL, logger, network)
+      : new Bitcoin.MaestroFeeMarketProvider(provider, logger, network);
+
     if (!walletAccount.metadata.bitcoin) {
       throw new Error('Bitcoin metadata not found');
     }
@@ -278,6 +287,7 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
     currentBitcoinWalletProvider$.next(provider);
     return new Bitcoin.BitcoinWallet(
       provider,
+      feeMarketProvider,
       localPollingIntervalConfig,
       20,
       walletInfo,
