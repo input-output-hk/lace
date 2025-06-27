@@ -1,6 +1,7 @@
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Search } from '@lace/common';
 import { USE_MULTI_DELEGATION_STAKING_GRID_VIEW } from 'featureFlags';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDelegationPortfolioStore } from '../store';
 import * as styles from './BrowsePools.css';
@@ -15,7 +16,7 @@ import { BrowsePoolsView } from './types';
 const LACE_APP_ID = 'lace-app';
 
 export const BrowsePools = () => {
-  const { totalPoolsCount, status, searchQuery, setSearchQuery, setSort, sort, pools, paginatePools } =
+  const { totalPoolsCount, status, searchQuery, setSearchQuery, setSort, sort, pools, paginatePools, performQuery } =
     useQueryStakePools();
   const { poolsView, switchPoolsView } = useBrowsePoolsView();
 
@@ -25,6 +26,10 @@ export const BrowsePools = () => {
   }));
 
   const fetching = status === 'fetching';
+
+  useEffect(() => {
+    performQuery();
+  }, [performQuery]);
 
   return (
     <>
