@@ -19,7 +19,6 @@
     "esModuleInterop": true,
     "rootDir": "../../"
   },
-  "files": ["../staking/src/features/i18n/translations/en.ts"],
   "include": ["."],
   "ts-node": {
     "esm": true,
