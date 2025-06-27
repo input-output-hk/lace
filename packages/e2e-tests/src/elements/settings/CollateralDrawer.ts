@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class CollateralDrawer extends CommonDrawerElements {
   private COLLATERAL_DESCRIPTION = '[data-testid="collateral-description"]';
@@ -12,36 +14,36 @@ class CollateralDrawer extends CommonDrawerElements {
   private SAD_FACE_ICON = '[data-testid="collateral-sad-face-icon"]';
   private ERROR_LABEL = '[data-testid="collateral-not-enough-ada-error"]';
 
-  get sadFaceIcon() {
+  get sadFaceIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SAD_FACE_ICON);
   }
-  get error() {
+  get error(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_LABEL);
   }
 
-  get collateralDescription() {
+  get collateralDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLLATERAL_DESCRIPTION);
   }
 
-  get collateralBannerDescription() {
+  get collateralBannerDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLLATERAL_BANNER_DESCRIPTION);
   }
-  get passwordInput() {
+  get passwordInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PASSWORD_INPUT);
   }
-  get passwordInputContainer() {
+  get passwordInputContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PASSWORD_INPUT_CONTAINER);
   }
-  get transactionFeeLabel() {
+  get transactionFeeLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_LABEL);
   }
-  get transactionFeeAmount() {
+  get transactionFeeAmount(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_AMOUNT);
   }
-  get transactionFeeFiat() {
+  get transactionFeeFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_AMOUNT_FIAT);
   }
-  get collateralButton() {
+  get collateralButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COLLATERAL_BUTTON);
   }
 }
