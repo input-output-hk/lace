@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import { CoinConfigure } from './coinConfigure';
 import { AddressInput } from '../AddressInput';
 import { Asset } from '../../data/Asset';
@@ -55,47 +55,47 @@ class TransactionNewPage extends CommonDrawerElements {
     return new AddressInput(index);
   }
 
-  get transactionCostsSectionLabel() {
+  get transactionCostsSectionLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_COSTS_SECTION_LABEL);
   }
 
-  get transactionFeeLabel() {
+  get transactionFeeLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_LABEL);
   }
 
-  get transactionFeeValueAda() {
+  get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_VALUE_ADA);
   }
 
-  get transactionFeeValueFiat() {
+  get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_VALUE_FIAT);
   }
 
-  get adaAllocationValueAda() {
+  get adaAllocationValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADA_ALLOCATION_VALUE_ADA);
   }
 
-  get adaAllocationValueFiat() {
+  get adaAllocationValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADA_ALLOCATION_VALUE_FIAT);
   }
 
-  addressBookSearchResultRow(index: number) {
+  addressBookSearchResultRow(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`(${this.ADDR_SEARCH_RESULTS_ROW})[${index}]`);
   }
 
-  addressBookSearchResultRowName(index: number) {
+  addressBookSearchResultRowName(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_NAME})[${index}]`);
   }
 
-  addressBookSearchResultRowAddress(index: number) {
+  addressBookSearchResultRowAddress(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`(${this.ADDR_SEARCH_RESULTS_ROW}${this.ADDR_SEARCH_RESULTS_ROW_ADDRESS})[${index}]`);
   }
 
-  get metadataInputLabel() {
+  get metadataInputLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.METADATA_INPUT_LABEL);
   }
 
-  get metadataInputField() {
+  get metadataInputField(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.METADATA_INPUT_FIELD);
   }
 
@@ -107,7 +107,7 @@ class TransactionNewPage extends CommonDrawerElements {
     return $(this.METADATA_BIN_BUTTON);
   }
 
-  get bundleDescription() {
+  get bundleDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BUNDLE_DESCRIPTION);
   }
 
@@ -119,7 +119,7 @@ class TransactionNewPage extends CommonDrawerElements {
     return $(this.CANCEL_TRANSACTION_BUTTON);
   }
 
-  invalidAddressError(index: number) {
+  invalidAddressError(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`(${this.INVALID_ADDRESS_ERROR_SELECTOR})[${index}]`);
   }
 

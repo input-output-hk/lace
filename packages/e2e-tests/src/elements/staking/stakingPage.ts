@@ -1,5 +1,6 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import SectionTitle from '../sectionTitle';
+import { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class StakingPage {
   private STATS_TITLE = '[data-testid="stats-title"]';
@@ -9,11 +10,11 @@ class StakingPage {
     return SectionTitle.sectionCounter;
   }
 
-  get statsTitle() {
+  get statsTitle(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.STATS_TITLE);
   }
 
-  get statsValues() {
+  get statsValues(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.STATS_VALUE);
   }
 

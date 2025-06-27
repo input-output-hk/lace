@@ -1,5 +1,6 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import { StatsComponent } from './statsComponent';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class StakingInfoComponent {
   private CONTAINER = '[data-testid="delegated-pool-item"]';
@@ -14,19 +15,19 @@ class StakingInfoComponent {
   private STATS_TOTAL_STAKED_CONTAINER = '[data-testid="stats-total-staked-container"]';
   private STATS_TOTAL_REWARDS_CONTAINER = '[data-testid="stats-total-rewards-container"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
   }
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
-  get poolLogo() {
+  get poolLogo(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.POOL_LOGO);
   }
-  get poolName() {
+  get poolName(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.POOL_NAME);
   }
-  get poolTicker() {
+  get poolTicker(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.POOL_TICKER);
   }
 

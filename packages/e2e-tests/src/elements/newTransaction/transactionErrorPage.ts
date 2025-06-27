@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class TransactionErrorPage extends CommonDrawerElements {
   private MAIN_TITLE_SELECTOR = '[data-testid="send-error-title"]';
@@ -8,27 +10,27 @@ class TransactionErrorPage extends CommonDrawerElements {
   private ERROR_BACK_BUTTON = '[data-testid="send-next-btn"]';
   private ERROR_IMAGE = '[data-testid="result-message-img"]';
 
-  get image() {
+  get image(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_IMAGE);
   }
 
-  get mainTitle() {
+  get mainTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAIN_TITLE_SELECTOR);
   }
 
-  get descriptionLine1() {
+  get descriptionLine1(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_DESCRIPTION_1);
   }
 
-  get descriptionLine2() {
+  get descriptionLine2(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_DESCRIPTION_2);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_CANCEL_BUTTON);
   }
 
-  get backButton() {
+  get backButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ERROR_BACK_BUTTON);
   }
 }

@@ -1,6 +1,8 @@
+/* global WebdriverIO */
 import { SortingOption } from './SortingOption';
 import { StakePoolSortingOption } from '../../enums/StakePoolSortingOption';
 import { scrollToTheTop } from '../../utils/scrollUtils';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class MoreOptionsComponent {
   private MORE_OPTIONS_LABEL = '[data-testid="stake-pools-more-options-label"]';
@@ -11,15 +13,15 @@ class MoreOptionsComponent {
   private PERFORMANCE_FILTER_LABEL = '[data-testid="filter-Performance-label"]';
   private ROS_FILTER_LABEL = '[data-testid="filter-Ros-label"]';
 
-  get moreOptionsLabel() {
+  get moreOptionsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MORE_OPTIONS_LABEL);
   }
 
-  get sortingToggle() {
+  get sortingToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SORTING_TOGGLE);
   }
 
-  get filtersToggle() {
+  get filtersToggle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.FILTERS_TOGGLE);
   }
 
@@ -55,19 +57,19 @@ class MoreOptionsComponent {
     return new SortingOption('liveStake');
   }
 
-  get saturationFilterLabel() {
+  get saturationFilterLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SATURATION_FILTER_LABEL);
   }
 
-  get profitMarginFilterLabel() {
+  get profitMarginFilterLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PROFIT_MARGIN_FILTER_LABEL);
   }
 
-  get performanceFilterLabel() {
+  get performanceFilterLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PERFORMANCE_FILTER_LABEL);
   }
 
-  get rosFilterLabel() {
+  get rosFilterLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ROS_FILTER_LABEL);
   }
 

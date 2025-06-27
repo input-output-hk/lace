@@ -1,3 +1,6 @@
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+
 class NetworkInfoComponent {
   private NETWORK_CONTAINER = '[data-testid="network-header-container"]';
   private NETWORK_HEADER_TITLE = '[data-testid="network-header-title"]';
@@ -10,43 +13,43 @@ class NetworkInfoComponent {
   private NETWORK_STAKED_LABEL = '[data-testid="network-staked-label"]';
   private NETWORK_STAKED_DETAIL = '[data-testid="network-staked-detail"]';
 
-  get networkContainer() {
+  get networkContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NETWORK_CONTAINER);
   }
 
-  get networkTitle() {
+  get networkTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NETWORK_HEADER_TITLE);
   }
 
-  get currentEpochLabel() {
+  get currentEpochLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CURRENT_EPOCH_LABEL);
   }
 
-  get currentEpochDetail() {
+  get currentEpochDetail(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CURRENT_EPOCH_DETAIL);
   }
 
-  get epochEndLabel() {
+  get epochEndLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EPOCH_END_LABEL);
   }
 
-  get epochEndDetail() {
+  get epochEndDetail(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EPOCH_END_DETAIL);
   }
 
-  get totalPoolsLabel() {
+  get totalPoolsLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOTAL_POOLS_LABEL);
   }
 
-  get totalPoolsDetail() {
+  get totalPoolsDetail(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TOTAL_POOLS_DETAIL);
   }
 
-  get percentageStakedLabel() {
+  get percentageStakedLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NETWORK_STAKED_LABEL);
   }
 
-  get percentageStakedDetail() {
+  get percentageStakedDetail(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NETWORK_STAKED_DETAIL);
   }
 }

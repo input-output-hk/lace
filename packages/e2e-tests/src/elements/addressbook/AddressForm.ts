@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import { clearInputFieldValue, setInputFieldValue } from '../../utils/inputFieldUtils';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class AddressForm {
   private NAME_INPUT = '[data-testid="address-form-name-input"]';
@@ -10,31 +12,31 @@ class AddressForm {
   private ADA_HANDLE_ICON_INVALID = '[data-icon="close-circle"]';
   private ADA_HANDLE_ICON_VALID = '[data-icon="check-circle"]';
 
-  get nameInput() {
+  get nameInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NAME_INPUT);
   }
 
-  get addressInput() {
+  get addressInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_INPUT).$(this.SEARCH_INPUT);
   }
 
-  get nameError() {
+  get nameError(): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.FORM_ITEM)[0].$(this.ERROR);
   }
 
-  get addressError() {
+  get addressError(): ChainablePromiseElement<WebdriverIO.Element> {
     return $$(this.FORM_ITEM)[1].$(this.ERROR);
   }
 
-  get searchLoader() {
+  get searchLoader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SEARCH_LOADER);
   }
 
-  get adaHandleIconInvalid() {
+  get adaHandleIconInvalid(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADA_HANDLE_ICON_INVALID);
   }
 
-  get adaHandleIconValid() {
+  get adaHandleIconValid(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADA_HANDLE_ICON_VALID);
   }
 

@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import PasswordInput from '../passwordInput';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class TransactionPasswordPage {
   private DRAWER_HEADER_TITLE = '[data-testid="drawer-header-title"]';
@@ -7,11 +9,11 @@ class TransactionPasswordPage {
   private NEXT_BUTTON = '[data-testid="send-next-btn"]';
   private BUTTON_LOADER = '[data-testid="btn-loader-container"]';
 
-  get headerTitle() {
+  get headerTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DRAWER_HEADER_TITLE);
   }
 
-  get headerSubtitle() {
+  get headerSubtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DRAWER_HEADER_SUBTITLE);
   }
 
@@ -23,15 +25,15 @@ class TransactionPasswordPage {
     return PasswordInput.passwordShowButton;
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
 
-  get nextButton() {
+  get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
   }
 
-  get buttonLoader() {
+  get buttonLoader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BUTTON_LOADER);
   }
 

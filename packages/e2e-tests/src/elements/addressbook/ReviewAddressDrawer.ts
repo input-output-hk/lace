@@ -1,5 +1,7 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
 import Banner from '../banner';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class ReviewAddressDrawer extends CommonDrawerElements {
   private PREVIOUS_ADDRESS_TITLE = '[data-testid="previous-address-title"]';
@@ -15,35 +17,35 @@ class ReviewAddressDrawer extends CommonDrawerElements {
     return Banner;
   }
 
-  get previousAddressTitle() {
+  get previousAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PREVIOUS_ADDRESS_TITLE);
   }
 
-  get previousAddressValue() {
+  get previousAddressValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PREVIOUS_ADDRESS_VALUE);
   }
 
-  get previousAddressCopyButton() {
+  get previousAddressCopyButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PREVIOUS_ADDRESS_COPY_BUTTON);
   }
 
-  get newAddressTitle() {
+  get newAddressTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEW_ADDRESS_TITLE);
   }
 
-  get newAddressValue() {
+  get newAddressValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEW_ADDRESS_VALUE);
   }
 
-  get newAddressCopyButton() {
+  get newAddressCopyButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEW_ADDRESS_COPY_BUTTON);
   }
 
-  get acceptAddressButton() {
+  get acceptAddressButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACCEPT_BUTTON);
   }
 
-  get deleteAddressButton() {
+  get deleteAddressButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELETE_BUTTON);
   }
 

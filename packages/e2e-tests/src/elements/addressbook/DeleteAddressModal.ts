@@ -1,3 +1,6 @@
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+
 class DeleteAddressModal {
   private CONTAINER = '.ant-modal-wrap:not([style="display: none;"]) .ant-modal-content';
   private TITLE = '[data-testid="delete-address-modal-title"]';
@@ -5,23 +8,23 @@ class DeleteAddressModal {
   private CANCEL_BUTTON = '[data-testid="delete-address-modal-cancel"]';
   private DELETE_ADDRESS_BUTTON = '[data-testid="delete-address-modal-confirm"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.TITLE);
   }
 
-  get description() {
+  get description(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.DESCRIPTION);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.CANCEL_BUTTON);
   }
 
-  get deleteAddressButton() {
+  get deleteAddressButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return this.container.$(this.DELETE_ADDRESS_BUTTON);
   }
 }

@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class ShowPublicKeyDrawer extends CommonDrawerElements {
   private QR_CODE = '[data-testid="qr-code"]';
@@ -6,19 +8,19 @@ class ShowPublicKeyDrawer extends CommonDrawerElements {
   private WALLET_ADDRESS = '[data-testid="info-wallet-full-address"]';
   private COPY_BUTTON = '[data-testid="copy-address-btn"]';
 
-  get qrCode() {
+  get qrCode(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.QR_CODE);
   }
 
-  get walletName() {
+  get walletName(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_NAME);
   }
 
-  get walletAddress() {
+  get walletAddress(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WALLET_ADDRESS);
   }
 
-  get copyButton() {
+  get copyButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COPY_BUTTON);
   }
 }

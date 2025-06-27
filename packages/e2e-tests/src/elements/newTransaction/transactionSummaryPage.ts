@@ -1,6 +1,7 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
 import testContext from '../../utils/testContext';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class TransactionSummaryPage extends CommonDrawerElements {
   private BUNDLE_ROW = '//div[@data-testid="bundle-summary-row"]';
@@ -20,61 +21,61 @@ class TransactionSummaryPage extends CommonDrawerElements {
   private CANCEL_BUTTON = '[data-testid="send-cancel-btn"]';
   private CONFIRM_BUTTON = '[data-testid="send-next-btn"]';
 
-  bundleRowTitle(bundleIndex = 1) {
+  bundleRowTitle(bundleIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.BUNDLE_ROW_TITLE}`);
   }
 
-  sendingTitle(bundleIndex = 1) {
+  sendingTitle(bundleIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.SENDING_TITLE}`);
   }
 
-  sendingValueAda(bundleIndex = 1, assetRowIndex = 1) {
+  sendingValueAda(bundleIndex = 1, assetRowIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(
       `${this.BUNDLE_ROW}[${bundleIndex}]${this.ASSET_INFO_CONTAINER}[${assetRowIndex}]${this.ASSET_INFO_VALUE}`
     );
   }
 
-  sendingValueFiat(bundleIndex = 1, assetRowIndex = 1) {
+  sendingValueFiat(bundleIndex = 1, assetRowIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.ASSET_INFO_CONTAINER}[${assetRowIndex}]${this.ASSET_INFO_FIAT}`);
   }
 
-  recipientAddressLabel(bundleIndex = 1) {
+  recipientAddressLabel(bundleIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.RECIPIENT_ADDRESS_LABEL}`);
   }
 
-  recipientAddressValue(bundleIndex = 1) {
+  recipientAddressValue(bundleIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.RECIPIENT_ADDRESS_VALUE}`);
   }
 
-  recipientAddressTag(bundleIndex = 1) {
+  recipientAddressTag(bundleIndex = 1): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.BUNDLE_ROW}[${bundleIndex}]${this.RECIPIENT_ADDRESS_TAG}`);
   }
 
-  get transactionFeeLabel() {
+  get transactionFeeLabel(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_LABEL);
   }
 
-  get transactionFeeValueAda() {
+  get transactionFeeValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.FEE_CONTAINER}${this.ASSET_INFO_VALUE}`);
   }
 
-  get transactionFeeValueFiat() {
+  get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.FEE_CONTAINER}${this.ASSET_INFO_FIAT}`);
   }
 
-  get metadataTitle() {
+  get metadataTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.METADATA_CONTAINER}${this.METADATA_LABEL}`);
   }
 
-  get metadataValue() {
+  get metadataValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`${this.METADATA_CONTAINER}${this.METADATA_VALUE}`);
   }
 
-  get confirmButton() {
+  get confirmButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONFIRM_BUTTON);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
 
