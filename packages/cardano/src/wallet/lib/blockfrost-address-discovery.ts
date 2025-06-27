@@ -75,8 +75,8 @@ const fetchAllAddressesForAccount = async (
 /**
  * Derive the reward account (stake address) at a given stakeIndex.
  */
-const deriveRewardAccount = (account: Bip32Account, stakeIndex: number): Cardano.RewardAccount => {
-  const address = account.deriveAddress({ type: AddressType.External, index: 0 }, stakeIndex);
+const deriveRewardAccount = async (account: Bip32Account, stakeIndex: number): Promise<Cardano.RewardAccount> => {
+  const address = await account.deriveAddress({ type: AddressType.External, index: 0 }, stakeIndex);
 
   return address.rewardAccount;
 };
@@ -84,12 +84,12 @@ const deriveRewardAccount = (account: Bip32Account, stakeIndex: number): Cardano
 /**
  * Derive a payment address at a given (payment) index + address type (internal/external).
  */
-const derivePaymentAddress = (
+const derivePaymentAddress = async (
   account: Bip32Account,
   paymentIndex: number,
   stakeIndex: number,
   isInternal: boolean
-): GroupedAddress => {
+): Promise<GroupedAddress> => {
   const type = isInternal ? AddressType.Internal : AddressType.External;
   return account.deriveAddress({ type, index: paymentIndex }, stakeIndex);
 };
@@ -101,12 +101,12 @@ const derivePaymentAddress = (
  *
  * @returns Array of discovered (matched) addresses + leftover “unknown/franken” addresses
  */
-const discoverAddressesForStakeKey = (
+const discoverAddressesForStakeKey = async (
   account: Bip32Account,
   logger: Logger,
   stakeIndex: number,
   allAddressesForStake: Cardano.PaymentAddress[]
-): { discovered: GroupedAddress[]; unknown: Cardano.PaymentAddress[] } => {
+): Promise<{ discovered: GroupedAddress[]; unknown: Cardano.PaymentAddress[] }> => {
   const discovered: GroupedAddress[] = [];
   const uniqueAddressesForStake = new Set(allAddressesForStake);
 
@@ -120,10 +120,10 @@ const discoverAddressesForStakeKey = (
       break;
     }
 
-    const externalAddr = derivePaymentAddress(account, paymentIndex, stakeIndex, false);
+    const externalAddr = await derivePaymentAddress(account, paymentIndex, stakeIndex, false);
     const externalInSet = uniqueAddressesForStake.has(externalAddr.address as Cardano.PaymentAddress);
 
-    const internalAddr = derivePaymentAddress(account, paymentIndex, stakeIndex, true);
+    const internalAddr = await derivePaymentAddress(account, paymentIndex, stakeIndex, true);
     const internalInSet = uniqueAddressesForStake.has(internalAddr.address as Cardano.PaymentAddress);
 
     if (externalInSet) {
@@ -174,7 +174,7 @@ const discoverAddresses = async (
 
   while (stakeGapCount < STAKE_KEY_GAP) {
     logger.debug(`Deriving reward account for stake index ${stakeIndex}...`);
-    const rewardAccount = deriveRewardAccount(account, stakeIndex);
+    const rewardAccount = await deriveRewardAccount(account, stakeIndex);
 
     logger.debug(`Fetching addresses for stake credential ${rewardAccount}...`);
     const allAddressesForStake = await fetchAllAddressesForAccount(client, rewardAccount, logger);
@@ -187,7 +187,12 @@ const discoverAddresses = async (
 
     stakeGapCount = 0;
 
-    const { discovered, unknown } = discoverAddressesForStakeKey(account, logger, stakeIndex, allAddressesForStake);
+    const { discovered, unknown } = await discoverAddressesForStakeKey(
+      account,
+      logger,
+      stakeIndex,
+      allAddressesForStake
+    );
 
     discoveredAll.push(...discovered);
 
@@ -221,7 +226,7 @@ export class BlockfrostAddressDiscovery implements AddressDiscovery {
   public async discover(manager: Bip32Account): Promise<GroupedAddress[]> {
     this.#logger.debug('Discovering addresses using Blockfrost...');
 
-    const firstAddress = manager.deriveAddress({ index: 0, type: AddressType.External }, 0);
+    const firstAddress = await manager.deriveAddress({ index: 0, type: AddressType.External }, 0);
 
     const discoveredAddresses = await discoverAddresses(manager, this.#client, this.#logger);
 
