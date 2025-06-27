@@ -18,8 +18,6 @@ const FUZZY_SEARCH_OPTIONS = {
   distance: 255,
   fieldNormWeight: 1,
   ignoreFieldNorm: false,
-  ignoreLocation: true,
-  includeScore: true,
   keys: [
     { name: 'description', weight: 4 },
     { name: 'homepage', weight: 1 },
@@ -107,7 +105,7 @@ const enrichStakePool = (stakePools: Cardano.StakePool[], id: Cardano.PoolId, de
 
 // eslint-disable-next-line sonarjs/cognitive-complexity, complexity
 const getSorter = (sort: QueryStakePoolsArgs['sort']) => {
-  if (!sort) sort = { field: 'ticker', order: 'asc' };
+  if (!sort) return null;
 
   const { field, order } = sort;
 
@@ -305,7 +303,9 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       result = fuzzy.filter(({ item: { id } }) => idMap.has(id)).map(({ item: { id } }) => idMap.get(id)!);
-    } else if (sorter) result.sort(sorter);
+    }
+
+    if (sorter) result.sort(sorter);
 
     return {
       totalResultCount: result.length,
