@@ -10,6 +10,7 @@ import {
 } from '../src/wallet/lib';
 import { firstValueFrom, of } from 'rxjs';
 import * as utils from '../src/wallet/lib/tx-builder/utils';
+import { FeeMarketProvider } from '../src/wallet/lib/wallet/FeeMarketProvider';
 
 jest.mock('../src/wallet/lib/tx-builder/utils');
 
@@ -17,6 +18,7 @@ describe('BitcoinWallet', () => {
   let provider: any;
   let logger: any;
   let walletInfo: BitcoinWalletInfo;
+  let feeMarketProvider: FeeMarketProvider;
 
   beforeEach(() => {
     provider = {
@@ -28,6 +30,22 @@ describe('BitcoinWallet', () => {
       estimateFee: jest.fn()
     };
 
+    feeMarketProvider = {
+      getFeeMarket: jest.fn().mockResolvedValue({
+        fast: {
+          feeRate: 0.000_025,
+          targetConfirmationTime: 1
+        },
+        standard: {
+          feeRate: 0.000_015,
+          targetConfirmationTime: 3
+        },
+        slow: {
+          feeRate: 0.000_01,
+          targetConfirmationTime: 6
+        }
+      })
+    };
     logger = {
       error: jest.fn(),
       debug: jest.fn()
@@ -72,7 +90,16 @@ describe('BitcoinWallet', () => {
 
   it('initializes and exposes derived address', async () => {
     const poll$ = of(false); // disables polling for this test
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
     const addr = await wallet.getAddress();
 
     expect(addr.network).toBe(Network.Testnet);
@@ -97,7 +124,16 @@ describe('BitcoinWallet', () => {
     (utils.historyEntryFromRawTx as jest.Mock).mockResolvedValue(fakeEntry);
 
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     const txId = await wallet.submitTransaction('rawTxHex');
 
@@ -127,7 +163,16 @@ describe('BitcoinWallet', () => {
     (utils.historyEntryFromRawTx as jest.Mock).mockResolvedValue(fakeEntry);
 
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     wallet.pendingTransactions$.next([fakeEntry]);
 
@@ -142,7 +187,16 @@ describe('BitcoinWallet', () => {
 
   it('syncs remote pending transactions and removes/replaces local ones correctly', async () => {
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     // Manually set transactionHistory (simulate confirmed tx using input a:0)
     (wallet as any).transactionHistory = [
@@ -210,7 +264,16 @@ describe('BitcoinWallet', () => {
 
   it('returns static fee market on testnet', async () => {
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     const fees = await wallet.getCurrentFeeMarket();
     expect(fees.fast.feeRate).toBe(0.000_025);
@@ -226,7 +289,16 @@ describe('BitcoinWallet', () => {
     provider.getUTxOs.mockResolvedValue(utxos);
 
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     expect(wallet.utxos$.value).toEqual([]);
 
@@ -248,7 +320,16 @@ describe('BitcoinWallet', () => {
     provider.getUTxOs.mockResolvedValue(newUtxos);
 
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     wallet.utxos$.next(oldUtxos);
     wallet.balance$.next(BigInt(1000));
@@ -263,7 +344,16 @@ describe('BitcoinWallet', () => {
 
   it('updates transaction history when new transactions are detected', async () => {
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     const newTxs: TransactionHistoryEntry[] = [
       {
@@ -291,7 +381,16 @@ describe('BitcoinWallet', () => {
 
   it('does not update transaction history when there are no changes', async () => {
     const poll$ = of(false);
-    const wallet = new BitcoinWallet(provider, 30_000, 20, walletInfo, Network.Testnet, poll$, logger);
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      30_000,
+      20,
+      walletInfo,
+      Network.Testnet,
+      poll$,
+      logger
+    );
 
     const existingTxs: TransactionHistoryEntry[] = [
       {
