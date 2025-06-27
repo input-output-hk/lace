@@ -1,6 +1,8 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
 import { Logger } from '../../support/logger';
 import testContext from '../../utils/testContext';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class TransactionSubmittedPage extends CommonDrawerElements {
   private IMAGE = '[data-testid="result-message-img"]';
@@ -10,27 +12,27 @@ class TransactionSubmittedPage extends CommonDrawerElements {
   private VIEW_TRANSACTION_BUTTON = '[data-testid="send-next-btn"]';
   private CLOSE_BUTTON = '[data-testid="send-cancel-btn"]';
 
-  get image() {
+  get image(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.IMAGE);
   }
 
-  get title() {
+  get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAIN_TITLE);
   }
 
-  get subtitle() {
+  get subtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SUBTITLE);
   }
 
-  get txHash() {
+  get txHash(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TX_HASH);
   }
 
-  get viewTransactionButton() {
+  get viewTransactionButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.VIEW_TRANSACTION_BUTTON);
   }
 
-  get closeButton() {
+  get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLOSE_BUTTON);
   }
 

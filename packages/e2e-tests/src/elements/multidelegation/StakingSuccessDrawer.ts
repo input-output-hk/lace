@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class StakingSuccessDrawer extends CommonDrawerElements {
   private RESULT_ICON = '[data-testid="result-message-img"]';
@@ -6,19 +8,19 @@ class StakingSuccessDrawer extends CommonDrawerElements {
   private RESULT_SUBTITLE = '[data-testid="result-message-description"]';
   private CLOSE_BUTTON = "[data-testid='transaction-success-footer-close-button']";
 
-  get resultIcon() {
+  get resultIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESULT_ICON);
   }
 
-  get resultTitle() {
+  get resultTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESULT_TITLE);
   }
 
-  get resultSubtitle() {
+  get resultSubtitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.RESULT_SUBTITLE);
   }
 
-  get closeButton() {
+  get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLOSE_BUTTON);
   }
 

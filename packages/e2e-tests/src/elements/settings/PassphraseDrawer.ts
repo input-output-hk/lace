@@ -1,4 +1,7 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
+import type { ChainablePromiseArray } from 'webdriverio/build/types';
 
 class PassphraseDrawer extends CommonDrawerElements {
   private BANNER_ICON = '[data-testid="banner-icon"]';
@@ -10,35 +13,35 @@ class PassphraseDrawer extends CommonDrawerElements {
   private MNEMONIC_WORD_CONTAINER = '[data-testid="mnemonic-word-container"]';
   private MNEMONIC_WORD_WRITEDOWN = '[data-testid="mnemonic-word-writedown"]';
 
-  get description() {
+  get description(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PASSPHRASE_DRAWER_DESCRIPTION);
   }
 
-  get bannerIcon() {
+  get bannerIcon(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_ICON);
   }
 
-  get bannerDescription() {
+  get bannerDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_DESCRIPTION);
   }
 
-  get passwordInputContainer() {
+  get passwordInputContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PASSWORD_INPUT_CONTAINER);
   }
 
-  get showPassphraseButton() {
+  get showPassphraseButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SHOW_PASSPHRASE_BUTTON);
   }
 
-  get hidePassphraseButton() {
+  get hidePassphraseButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.HIDE_PASSPHRASE_BUTTON);
   }
 
-  get mnemonicWordContainers() {
+  get mnemonicWordContainers(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.MNEMONIC_WORD_CONTAINER);
   }
 
-  get mnemonicWordWritedowns() {
+  get mnemonicWordWritedowns(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return $$(this.MNEMONIC_WORD_WRITEDOWN);
   }
 }

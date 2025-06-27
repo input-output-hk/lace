@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import { ChainablePromiseElement } from 'webdriverio';
 
 export enum SocialComponentEnum {

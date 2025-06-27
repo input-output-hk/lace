@@ -1,4 +1,7 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+import type { ChainablePromiseArray } from 'webdriverio/build/types';
+
 class AddressBookPage {
   private TITLE = '[data-testid="page-title"]';
   private COUNTER = '[data-testid="counter"]';
@@ -15,43 +18,43 @@ class AddressBookPage {
   public ADDRESS_LIST_ITEM_WARNING_ICON = '[data-testid="address-list-item-warning"]';
   private WARNING_TOOLTIP = 'div.ant-tooltip-inner';
 
-  get pageTitle() {
+  get pageTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
 
-  get addressCounter() {
+  get addressCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COUNTER);
   }
 
-  get addAddressButton() {
+  get addAddressButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADD_ADDRESS_BUTTON);
   }
 
-  get emptyStateImage() {
+  get emptyStateImage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_BOOK_EMPTY_STATE_IMAGE);
   }
 
-  get emptyStateTitle() {
+  get emptyStateTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_BOOK_EMPTY_STATE_TITLE);
   }
 
-  get emptyStateMessage() {
+  get emptyStateMessage(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_BOOK_EMPTY_STATE_MESSAGE);
   }
 
-  get addressList() {
+  get addressList(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_LIST);
   }
 
-  get warningTooltip() {
+  get warningTooltip(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.WARNING_TOOLTIP);
   }
 
-  getAddressListRows() {
+  getAddressListRows(): ChainablePromiseArray<WebdriverIO.ElementArray> {
     return this.addressList.$$(this.ADDRESS_LIST_ITEM);
   }
 
-  get addressListHeader() {
+  get addressListHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_LIST_HEADER);
   }
 

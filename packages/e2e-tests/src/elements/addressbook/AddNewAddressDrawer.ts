@@ -1,5 +1,7 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
 import AddressForm from './AddressForm';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class AddNewAddressDrawer extends CommonDrawerElements {
   private SAVE_ADDRESS_BUTTON = '[data-testid="address-form-button-save"]';
@@ -9,11 +11,11 @@ class AddNewAddressDrawer extends CommonDrawerElements {
     return AddressForm;
   }
 
-  get saveAddressButton() {
+  get saveAddressButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SAVE_ADDRESS_BUTTON);
   }
 
-  get cancelButton() {
+  get cancelButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CANCEL_BUTTON);
   }
 

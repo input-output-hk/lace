@@ -1,4 +1,6 @@
+/* global WebdriverIO */
 import CommonDrawerElements from '../CommonDrawerElements';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 class AddressDetails extends CommonDrawerElements {
   private ADDRESS_DETAILS_CONTAINER = '[data-testid="address-form-details-container"]';
@@ -8,27 +10,27 @@ class AddressDetails extends CommonDrawerElements {
   private EDIT_BUTTON = '[data-testid="address-form-details-btn-edit"]';
   private DELETE_BUTTON = '[data-testid="address-form-details-btn-delete"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS_DETAILS_CONTAINER);
   }
 
-  get name() {
+  get name(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NAME);
   }
 
-  get address() {
+  get address(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ADDRESS);
   }
 
-  get copyButton() {
+  get copyButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.COPY_BUTTON);
   }
 
-  get editButton() {
+  get editButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EDIT_BUTTON);
   }
 
-  get deleteButton() {
+  get deleteButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.DELETE_BUTTON);
   }
 }

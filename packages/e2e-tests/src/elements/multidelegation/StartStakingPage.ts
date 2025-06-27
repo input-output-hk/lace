@@ -1,3 +1,6 @@
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+
 class StartStakingPage {
   private BANNER_CONTAINER = '[data-testid="stake-funds-banner-container"]';
   private BANNER_TITLE = '[data-testid="stake-funds-banner-title"]';
@@ -18,75 +21,75 @@ class StartStakingPage {
   private EXPANDED_VIEW_BANNER_DESCRIPTION = '[data-testid="expanded-view-banner-description"]';
   private EXPANDED_VIEW_BANNER_BUTTON = '[data-testid="expanded-view-banner-button"]';
 
-  get bannerContainer() {
+  get bannerContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_CONTAINER);
   }
 
-  get bannerTitle() {
+  get bannerTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_TITLE);
   }
 
-  get bannerDescription() {
+  get bannerDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_DESCRIPTION);
   }
 
-  get bannerBalanceTitle() {
+  get bannerBalanceTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_BALANCE_TITLE);
   }
 
-  get bannerBalanceValue() {
+  get bannerBalanceValue(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_BALANCE_VALUE);
   }
 
-  get bannerBalanceSymbol() {
+  get bannerBalanceSymbol(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.BANNER_BALANCE_SYMBOL);
   }
 
-  get getStartedTitle() {
+  get getStartedTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_TITLE);
   }
 
-  get getStartedDescription() {
+  get getStartedDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_DESCRIPTION);
   }
 
-  get getStartedStep1Title() {
+  get getStartedStep1Title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_1_TITLE);
   }
 
-  get getStartedStep1Description() {
+  get getStartedStep1Description(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_1_DESCRIPTION);
   }
 
-  get getStartedStep1Link() {
+  get getStartedStep1Link(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_1_LINK);
   }
 
-  get getStartedStep2Title() {
+  get getStartedStep2Title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_2_TITLE);
   }
 
-  get getStartedStep2Description() {
+  get getStartedStep2Description(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_2_DESCRIPTION);
   }
 
-  get getStartedStep2Link() {
+  get getStartedStep2Link(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.GET_STARTED_STEP_2_LINK);
   }
 
-  get expandedViewBannerContainer() {
+  get expandedViewBannerContainer(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPANDED_VIEW_BANNER_CONTAINER);
   }
 
-  get expandedViewBannerTitle() {
+  get expandedViewBannerTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPANDED_VIEW_BANNER_TITLE);
   }
 
-  get expandedViewBannerDescription() {
+  get expandedViewBannerDescription(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPANDED_VIEW_BANNER_DESCRIPTION);
   }
 
-  get expandedViewBannerButton() {
+  get expandedViewBannerButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.EXPANDED_VIEW_BANNER_BUTTON);
   }
 

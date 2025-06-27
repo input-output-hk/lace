@@ -1,3 +1,6 @@
+/* global WebdriverIO */
+import type { ChainablePromiseElement } from 'webdriverio';
+
 class PortfolioBar {
   private CONTAINER = '[data-testid="portfoliobar-container"]';
   private SELECTED_POOLS_COUNTER = '[data-testid="portfoliobar-selected-pools"]';
@@ -5,23 +8,23 @@ class PortfolioBar {
   private NEXT_BUTTON = '[data-testid="portfoliobar-btn-next"]';
   private CLEAR_BUTTON = '[data-testid="portfoliobar-btn-clear"]';
 
-  get container() {
+  get container(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CONTAINER);
   }
 
-  get selectedPoolsCounter() {
+  get selectedPoolsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SELECTED_POOLS_COUNTER);
   }
 
-  get maxPoolsCounter() {
+  get maxPoolsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MAX_POOLS_COUNTER);
   }
 
-  get nextButton() {
+  get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
   }
 
-  get clearButton() {
+  get clearButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLEAR_BUTTON);
   }
 
