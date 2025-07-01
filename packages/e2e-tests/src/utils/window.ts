@@ -34,7 +34,9 @@ export const waitUntilExpectedNumberOfHandles = async (expectedNumberOfHandles: 
   await browser.waitUntil(async () => (await browser.getWindowHandles()).length === expectedNumberOfHandles, {
     timeout: 20_000,
     timeoutMsg: `failed while waiting for ${expectedNumberOfHandles} window handles. Actual number of handles ${
-      (await browser.getWindowHandles()).length
+      (
+        await browser.getWindowHandles()
+      ).length
     }`
   });
 };
