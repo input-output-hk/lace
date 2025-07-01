@@ -14,7 +14,8 @@ export enum ExperimentName {
   SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',
   BITCOIN_WALLETS = 'bitcoin-wallets',
   NFTPRINTLAB = 'nftprintlab',
-  GLACIER_DROP = 'glacier-drop'
+  GLACIER_DROP = 'glacier-drop',
+  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market'
 }
 
 export type FeatureFlag = `${ExperimentName}`;
