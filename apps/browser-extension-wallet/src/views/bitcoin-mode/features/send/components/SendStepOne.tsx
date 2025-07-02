@@ -32,7 +32,7 @@ interface RecommendedFee {
 }
 
 const fees: RecommendedFee[] = [
-  { key: 'fast', label: 'Fast', feeRate: 10, estimatedTime: '~10 min' },
+  { key: 'fast', label: 'High', feeRate: 10, estimatedTime: '~10 min' },
   { key: 'standard', label: 'Average', feeRate: 5, estimatedTime: '~30 min' },
   { key: 'slow', label: 'Slow', feeRate: 1, estimatedTime: '~60 min' },
   { key: 'custom', label: 'Custom', estimatedTime: '~?? min' }
