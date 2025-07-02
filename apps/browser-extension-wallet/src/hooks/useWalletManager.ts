@@ -1137,6 +1137,7 @@ export const useWalletManager = (): UseWalletManager => {
     if (activeBlockchain === 'bitcoin') {
       if (activeBitcoinWallet) {
         await bitcoinWalletManager.activate(activeBitcoinWallet, true);
+        window.location.reload();
       }
     } else if (activeWallet) {
       await walletManager.activate(activeWallet, true);
