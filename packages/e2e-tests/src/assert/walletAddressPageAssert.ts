@@ -125,6 +125,7 @@ class WalletAddressPageAssert {
     const addressCards = await WalletAddressPage.addressCards;
 
     const unusedAddressCard = addressCards[addressCards.length - 1]; // it should always be the last one
+    await unusedAddressCard.moveTo();
 
     const qrCodeElement = await unusedAddressCard.$(WalletAddressPage.QR_CODE);
     await qrCodeElement.waitForDisplayed();
