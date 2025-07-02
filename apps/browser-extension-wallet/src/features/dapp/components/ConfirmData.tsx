@@ -21,7 +21,7 @@ import { useAnalyticsContext } from '@providers';
 import { TX_CREATION_TYPE_KEY, TxCreationType } from '@providers/AnalyticsProvider/analyticsTracker';
 import { signingCoordinator } from '@lib/wallet-api-ui';
 import { senderToDappInfo } from '@src/utils/senderToDappInfo';
-import { useOnUnload } from './confirm-transaction/hooks';
+import { useGetOwnPubDRepKeyHash, useOnUnload } from './confirm-transaction/hooks';
 import { parseError } from '@src/utils/parse-error';
 
 const INDENT_SPACING = 2;
@@ -39,6 +39,10 @@ const hasJsonStructure = (str: string): boolean => {
   }
 };
 
+const isPaymentAddress = (
+  signWith: Wallet.Cardano.PaymentAddress | Wallet.Cardano.RewardAccount
+): signWith is Wallet.Cardano.PaymentAddress => signWith.startsWith('addr');
+
 export const DappConfirmData = (): React.ReactElement => {
   const {
     utils: { setNextView },
@@ -52,6 +56,8 @@ export const DappConfirmData = (): React.ReactElement => {
   const [isConfirmingTx, setIsConfirmingTx] = useState<boolean>();
   const [dappInfo, setDappInfo] = useState<Wallet.DappInfo>();
   const analytics = useAnalyticsContext();
+
+  const { ownPubDRepKeyHash, loading: isLoadingOwnPubDRepKeyHash } = useGetOwnPubDRepKeyHash();
 
   const [formattedData, setFormattedData] = useState<{
     address: string;
@@ -99,7 +105,23 @@ export const DappConfirmData = (): React.ReactElement => {
   useEffect(() => {
     if (!req) return;
     const dataFromHex = fromHex(req.signContext.payload);
-    const txDataAddress = req.signContext.signWith;
+
+    let txDataAddress = req.signContext.signWith;
+
+    if (ownPubDRepKeyHash && isPaymentAddress(txDataAddress)) {
+      const drepAddr = Wallet.Cardano.Address.fromString(txDataAddress);
+
+      if (
+        drepAddr?.getType() === Wallet.Cardano.AddressType.EnterpriseKey &&
+        drepAddr?.getProps().paymentPart?.hash === ownPubDRepKeyHash
+      ) {
+        txDataAddress = Wallet.Cardano.DRepID.cip129FromCredential({
+          hash: drepAddr?.getProps().paymentPart?.hash,
+          type: Wallet.Cardano.CredentialType.KeyHash
+        });
+      }
+    }
+
     const jsonStructureOrHexString = {
       address: txDataAddress,
       dataToSign: hasJsonStructure(dataFromHex)
@@ -107,7 +129,7 @@ export const DappConfirmData = (): React.ReactElement => {
         : dataFromHex
     };
     setFormattedData(jsonStructureOrHexString);
-  }, [req]);
+  }, [req, ownPubDRepKeyHash]);
 
   const signWithHardwareWallet = useCallback(async () => {
     setIsConfirmingTx(true);
@@ -138,7 +160,7 @@ export const DappConfirmData = (): React.ReactElement => {
     <Layout pageClassname={styles.spaceBetween} title={t(sectionTitle[DAPP_VIEWS.CONFIRM_DATA])}>
       <div className={styles.container}>
         <DappInfo {...dappInfo} className={styles.dappInfo} />
-        {formattedData ? (
+        {formattedData && !isLoadingOwnPubDRepKeyHash ? (
           <>
             <div className={styles.contentSection}>
               <p className={styles.heading} data-testid="dapp-transaction-recipient-address-title">
