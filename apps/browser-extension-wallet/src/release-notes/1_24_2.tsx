@@ -6,7 +6,7 @@ const ReleaseNote_1_24_2 = (): React.ReactElement => (
     <p>
       <strong>Optimized Bitcoin Fee Estimation</strong>
       <br />
-      discover more competitive rates when sending BTC.
+      Discover more competitive rates when sending BTC.
     </p>
     <p>
       <strong>Improved Ledger Message Signing</strong>
