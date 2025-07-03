@@ -21,10 +21,16 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
 
   async assertSeeTermsOfServiceLink() {
     await OnboardingMainPage.agreementTermsOfServiceLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementTermsOfServiceLink.getAttribute('href')).to.equal(
+      'https://www.lace.io/iohktermsandconditions.pdf'
+    );
   }
 
   async assertSeePrivacyPolicyLink() {
     await OnboardingMainPage.agreementPrivacyPolicyLink.waitForDisplayed();
+    expect(await OnboardingMainPage.agreementPrivacyPolicyLink.getAttribute('href')).to.equal(
+      'https://www.lace.io/lace-privacy-policy.pdf'
+    );
   }
 
   async assertSeeTitle() {

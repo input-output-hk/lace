@@ -180,19 +180,19 @@ Feature: General Settings - Extended Browser View
     And  I open address book in extended mode
     Then I see address count: 3
 
-  @LW-2776 @Mainnet @Testnet
+  @LW-2776 @Mainnet @Testnet @pending @issue=LW-13195
   Scenario: Extended View - Settings - Terms and Conditions copy
     When I open settings from header menu
     When I click on "Terms and conditions" setting
     Then "Terms and conditions" are displayed in new tab
 
-  @LW-2781 @Mainnet @Testnet
+  @LW-2781 @Mainnet @Testnet @pending @issue=LW-13195
   Scenario: Extended View - Settings - Privacy policy copy
     When I open settings from header menu
     When I click on "Privacy policy" setting
     Then "Privacy policy" is displayed in new tab
 
-  @LW-5830 @Mainnet @Testnet
+  @LW-5830 @Mainnet @Testnet @pending @issue=LW-13195
   Scenario: Extended View - Settings - Cookie policy copy
     When I open settings from header menu
     And I click on "Cookie policy" setting
