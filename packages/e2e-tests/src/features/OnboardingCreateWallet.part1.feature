@@ -5,7 +5,7 @@ Feature: Onboarding - Create wallet
   Scenario: Create Wallet - Get started page displayed
     Then "Get started" page is displayed
 
-  @LW-10069
+  @LW-10069 @pending @issue=LW-13195
   Scenario Outline: "Get started" page - Agreement text - Legal links - click on <legal_link> link
     When "Get started" page is displayed
     And I click on "<legal_link>" legal link on "Main page"
