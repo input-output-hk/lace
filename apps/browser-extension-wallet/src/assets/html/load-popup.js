@@ -7,3 +7,8 @@ window.addEventListener(
   },
   { once: true }
 );
+
+// this should prevent https://web.dev/articles/bfcache
+window.onunload = () => {
+  console.log('unload');
+};
