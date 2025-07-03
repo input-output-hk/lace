@@ -72,14 +72,14 @@ class CommonAssert {
     let expectedUrl;
     switch (linkName) {
       case 'Cookie policy':
-        expectedUrl = 'https://www.lace.io/lace-cookie-policy.pdf';
+        expectedUrl = 'https://www.lace.io/legal/iog-cookie-policy';
         break;
       case 'Privacy policy':
-        expectedUrl = 'https://www.lace.io/lace-privacy-policy.pdf';
+        expectedUrl = 'https://www.lace.io/legal/lace-privacy-policy';
         break;
       case 'Terms of service':
       case 'Terms and conditions':
-        expectedUrl = 'https://www.lace.io/iohktermsandconditions.pdf';
+        expectedUrl = 'https://www.lace.io/legal/lace-terms-of-use';
         break;
       default:
         throw new Error(`Unsupported legal link - ${linkName}`);
