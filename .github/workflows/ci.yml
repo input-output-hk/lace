@@ -386,6 +386,19 @@ jobs:
     needs: smokeTests
     if: always()
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
       - name: Download all smoke tests artifacts
         uses: actions/download-artifact@v4
         with:
@@ -428,10 +441,18 @@ jobs:
         with:
           name: test-artifacts
           path: |
-            ./packages/e2e-tests/screenshots
-            ./packages/e2e-tests/logs
-            ./packages/e2e-tests/reports
+            ./screenshots
+            ./logs
+            ./reports
+            ./metrics
           retention-days: 5
+
+      - name: Push performance metrics to Datadog
+        working-directory: ./packages/e2e-tests/tools
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          DD_SITE: us5.datadoghq.com
+        run: python push_to_datadog.py ../../../metrics
 
       - run: |
           if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
