@@ -24,11 +24,9 @@ describe('Testing sendTransactionSelector', () => {
     expect(result.current).toHaveProperty('transactionValue');
     expect(result.current).toHaveProperty('transaction');
     expect(result.current).toHaveProperty('transactionFeeLovelace');
-    expect(result.current).toHaveProperty('minimumCoinQuantity');
     expect(result.current).toHaveProperty('setDestinationAddress');
     expect(result.current).toHaveProperty('setTransactionValue');
     expect(result.current).toHaveProperty('setTransaction');
     expect(result.current).toHaveProperty('setTransactionFeeLovelace');
-    expect(result.current).toHaveProperty('setMinimumCoinQuantity');
   });
 });

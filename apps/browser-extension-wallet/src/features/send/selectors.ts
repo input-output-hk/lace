@@ -11,21 +11,17 @@ export const sendTransactionSelector: StateSelector<SendStore, SendTransactionSl
   transactionValue,
   transaction,
   transactionFeeLovelace,
-  minimumCoinQuantity,
   setDestinationAddress,
   setTransactionValue,
   setTransaction,
-  setTransactionFeeLovelace,
-  setMinimumCoinQuantity
+  setTransactionFeeLovelace
 }) => ({
   destinationAddress,
   transactionValue,
   transaction,
   transactionFeeLovelace,
-  minimumCoinQuantity,
   setDestinationAddress,
   setTransactionValue,
   setTransaction,
-  setTransactionFeeLovelace,
-  setMinimumCoinQuantity
+  setTransactionFeeLovelace
 });
