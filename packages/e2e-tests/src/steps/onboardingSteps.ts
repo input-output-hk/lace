@@ -263,8 +263,9 @@ Given(
   /^I enter wallet name: "([^"]*)", password: "([^"]*)" and password confirmation: "([^"]*)"$/,
   async (walletName: string, password: string, passwordConfirmation: string) => {
     await OnboardingWalletSetupPage.setWalletNameInput(walletName);
-    await OnboardingWalletSetupPage.setWalletPasswordInput(password);
-    await OnboardingWalletSetupPage.setWalletPasswordConfirmInput(passwordConfirmation);
+    password.length > 0 && (await OnboardingWalletSetupPage.setWalletPasswordInput(password));
+    passwordConfirmation.length > 0 &&
+      (await OnboardingWalletSetupPage.setWalletPasswordConfirmInput(passwordConfirmation));
   }
 );
 

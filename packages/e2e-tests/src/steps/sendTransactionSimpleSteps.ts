@@ -98,12 +98,12 @@ When(
         addr = address;
         break;
     }
-    await new AddressInput(inputIndex).fillAddress(addr);
+    await new AddressInput(inputIndex).fillAddress(addr, 'paste');
   }
 );
 
 When(/I enter "([^"]*)" in the bundle (\d+) recipient's address/, async (value: string, inputIndex: number) => {
-  await new AddressInput(inputIndex).fillAddress(value);
+  await new AddressInput(inputIndex).fillAddress(value, 'paste');
 });
 
 When(/I enter the first characters of the contacts/, async () => {
@@ -164,13 +164,13 @@ Then(
 Then(
   /I enter an address that matches the amount of characters but does not match with the checksum into address input (\d+)/,
   async (inputIndex: number) => {
-    await new AddressInput(inputIndex).fillAddress(shelleyInvalid.getAddress());
+    await new AddressInput(inputIndex).fillAddress(shelleyInvalid.getAddress(), 'paste');
   }
 );
 
 Then(/I enter more or less characters than the required for an address in the bundle recipient's address/, async () => {
   const addressInput = new AddressInput();
-  await addressInput.fillAddress(shelley.getAddress());
+  await addressInput.fillAddress(shelley.getAddress(), 'paste');
   await addressInput.addToAddress('a');
 });
 
@@ -223,7 +223,7 @@ When(
   /^I fill bundle (\d+) with "([^"]*)" (main|other multiaddress|second account) address with following assets:$/,
   async (bundleIndex, walletName, addressType: AddressType, options) => {
     const addressInput = new AddressInput(bundleIndex);
-    await addressInput.fillAddress(parseWalletAddress(walletName, addressType));
+    await addressInput.fillAddress(parseWalletAddress(walletName, addressType), 'paste');
     await addressInput.searchLoader.waitForDisplayed({ reverse: true });
     // Close address dropdown menu if exists
     if (await TransactionNewPage.addressBookSearchResultRow(1).isExisting()) {
@@ -252,13 +252,13 @@ When(
 
 When(/^I fill bundle with copied address and ([^"]*) ADA$/, async (adaValue: string) => {
   const addressInput = new AddressInput(1);
-  await addressInput.fillAddress(await clipboard.read());
+  await addressInput.fillAddress(await clipboard.read(), 'paste');
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
 });
 
 When(/^I fill bundle with saved unused address and ([^"]*) ADA$/, async (adaValue: string) => {
   const addressInput = new AddressInput(1);
-  await addressInput.fillAddress(await walletAddressPage.getSavedLastAddress());
+  await addressInput.fillAddress(await walletAddressPage.getSavedLastAddress(), 'paste');
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(Number.parseFloat(adaValue));
 });
 
@@ -337,7 +337,7 @@ Then(
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx$/, async () => {
-  await new AddressInput().fillAddress(shelley.getAddress());
+  await new AddressInput().fillAddress(shelley.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
 });
 
@@ -345,13 +345,13 @@ Then(
   /^I've entered accepted values for all (Preprod|Mainnet) fields of simple Tx$/,
   async (network: 'Preprod' | 'Mainnet') => {
     const address = network === 'Mainnet' ? shelley.getMainnetAddress() : shelley.getTestnetAddress();
-    await new AddressInput().fillAddress(address);
+    await new AddressInput().fillAddress(address, 'paste');
     await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
   }
 );
 
 Then(/^I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value$/, async () => {
-  await new AddressInput().fillAddress(byron.getAddress());
+  await new AddressInput().fillAddress(byron.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(1).fillTokenValue(0.5);
 });
 
