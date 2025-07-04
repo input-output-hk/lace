@@ -112,7 +112,9 @@ runs:
 
     - name: Prepare MS Edge
       if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
-      run: 'sed -i "s/\"key\": \"[^\"]*\",//" manifest.json'
+      run: |
+        jq 'del(.key)' manifest.json | jq -c . > manifest.tmp.json
+        mv manifest.tmp.json manifest.json
       shell: bash
       working-directory: ${{ inputs.DIR }}/dist
 
