@@ -37,7 +37,7 @@ export const progressWithSendUntilPasswordPage = async (
   const receiverAddress = extensionUtils.isMainnet()
     ? String(receiverWallet.accounts[0].mainnetAddress)
     : String(receiverWallet.accounts[0].address);
-  await new AddressInput().fillAddress(receiverAddress);
+  await new AddressInput().fillAddress(receiverAddress, 'paste');
   await TransactionNewPage.coinConfigure(1).fillTokenValue(1);
   await TransactionNewPage.reviewTransactionButton.waitForClickable({ timeout: 15_000 });
   await TransactionNewPage.reviewTransactionButton.click();

@@ -10,7 +10,7 @@ import { scrollToTheTop } from '../utils/scrollUtils';
 
 export default new (class NewTransactionExtendedPageObject {
   async setTwoAssetsForBundle(bundleIndex: number, assetValue1: number, assetValue2: number) {
-    await new AddressInput(bundleIndex).fillAddress(byron.getAddress());
+    await new AddressInput(bundleIndex).fillAddress(byron.getAddress(), 'paste');
     await new AssetInput(bundleIndex).clickAddAssetButton();
     await TokenSelectionPage.clickOnToken(extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name);
     await TransactionNewPage.coinConfigure(bundleIndex, Asset.CARDANO.ticker).fillTokenValue(assetValue1);
@@ -24,7 +24,7 @@ export default new (class NewTransactionExtendedPageObject {
     await this.setTwoAssetsForBundle(1, 2, 1);
     await TransactionNewPage.addBundleButton.waitForClickable();
     await TransactionNewPage.addBundleButton.click();
-    await new AddressInput(2).fillAddress(shelley.getAddress());
+    await new AddressInput(2).fillAddress(shelley.getAddress(), 'paste');
     await TransactionNewPage.coinConfigure(2, Asset.CARDANO.ticker).clickCoinSelectorName();
     await TokenSelectionPage.clickNFTsButton();
     await TokenSelectionPage.clickNftItemInAssetSelector(Asset.IBILECOIN.name);
@@ -43,7 +43,7 @@ export default new (class NewTransactionExtendedPageObject {
   }
 
   async setOneBundleWithMultipleAssets() {
-    await new AddressInput(1).fillAddress(shelley.getAddress());
+    await new AddressInput(1).fillAddress(shelley.getAddress(), 'paste');
     await new AssetInput(1).clickAddAssetButton();
     await TokenSelectionPage.clickOnToken(extensionUtils.isMainnet() ? Asset.HOSKY_TOKEN.name : Asset.LACE_COIN.name);
     await new AssetInput(1).clickAddAssetButton();

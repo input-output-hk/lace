@@ -8,6 +8,7 @@ import CommonDrawerElements from '../CommonDrawerElements';
 import testContext from '../../utils/testContext';
 import { generateRandomString } from '../../utils/textUtils';
 import { browser } from '@wdio/globals';
+import { pasteValueIntoInputField } from '../../utils/inputFieldUtils';
 
 class TransactionNewPage extends CommonDrawerElements {
   private CONTAINER = '//div[@class="ant-drawer-body"]';
@@ -165,7 +166,7 @@ class TransactionNewPage extends CommonDrawerElements {
 
   fillMetadata = async (characters: number) => {
     const text = await generateRandomString(characters);
-    await this.metadataInputField.setValue(text);
+    await pasteValueIntoInputField(await this.metadataInputField, text);
   };
 
   saveMetadata = async () => {
