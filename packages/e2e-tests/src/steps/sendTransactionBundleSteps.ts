@@ -25,18 +25,18 @@ When(/^I remove bundle (\d)$/, async (index: number) => {
 });
 
 When(/^I set multiple outputs for advanced transaction$/, async () => {
-  await new AddressInput(1).fillAddress(shelley.getAddress());
+  await new AddressInput(1).fillAddress(shelley.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.name).fillTokenValue(1);
   await TransactionNewPage.addBundleButton.click();
-  await new AddressInput(2).fillAddress(shelley.getAddress());
+  await new AddressInput(2).fillAddress(shelley.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(2, Asset.CARDANO.name).fillTokenValue(2);
 });
 
 When(/^I set multiple outputs for advanced transaction with less than minimum value for Byron address$/, async () => {
-  await new AddressInput(1).fillAddress(byron.getAddress());
+  await new AddressInput(1).fillAddress(byron.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(1, Asset.CARDANO.ticker).fillTokenValue(1);
   await TransactionNewPage.addBundleButton.click();
-  await new AddressInput(2).fillAddress(byron.getAddress());
+  await new AddressInput(2).fillAddress(byron.getAddress(), 'paste');
   await TransactionNewPage.coinConfigure(2, Asset.CARDANO.ticker).fillTokenValue(2);
 });
 

@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
 import { ChainablePromiseElement } from 'webdriverio';
+import { browser } from '@wdio/globals';
+import { pasteValueIntoInputField } from '../utils/inputFieldUtils';
 
 export class AddressInput {
   protected CONTAINER = '//div[@data-testid="address-input"]';
@@ -47,9 +49,21 @@ export class AddressInput {
     return $(this.ADA_HANDLE_INPUT_ERROR);
   }
 
-  fillAddress = async (address: string): Promise<void> => {
+  fillAddress = async (address: string, method: 'keys' | 'paste' | 'setValue' = 'setValue'): Promise<void> => {
     await this.input.waitForClickable();
-    await this.input.setValue(address);
+    switch (method) {
+      case 'paste':
+        await pasteValueIntoInputField(await this.input, address);
+        break;
+      case 'keys':
+        await this.input.click();
+        await browser.keys(address);
+        break;
+      case 'setValue':
+      default:
+        await this.input.setValue(address);
+        break;
+    }
   };
 
   fillAddressWithFirstChars = async (address: string, characters: number): Promise<void> => {
