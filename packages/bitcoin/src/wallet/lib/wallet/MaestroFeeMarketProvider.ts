@@ -5,7 +5,7 @@ import { MaestroBitcoinDataProvider } from '../providers/MaestroBitcoinDataProvi
 import { Network } from '../common/network';
 import { Logger } from 'ts-log';
 import { FeeMarketProvider } from './FeeMarketProvider';
-import { DEFAULT_MARKETS } from './constants';
+import { DEFAULT_MARKETS, MIN_FEE_RATE } from './constants';
 
 export class MaestroFeeMarketProvider implements FeeMarketProvider {
   constructor(
@@ -26,15 +26,15 @@ export class MaestroFeeMarketProvider implements FeeMarketProvider {
 
       return {
         fast: {
-          feeRate: fastEstimate.feeRate,
+          feeRate: Math.max(fastEstimate.feeRate, MIN_FEE_RATE),
           targetConfirmationTime: fastEstimate.blocks * 10 * 60
         },
         standard: {
-          feeRate: standardEstimate.feeRate,
+          feeRate: Math.max(standardEstimate.feeRate, MIN_FEE_RATE),
           targetConfirmationTime: standardEstimate.blocks * 10 * 60
         },
         slow: {
-          feeRate: slowEstimate.feeRate,
+          feeRate: Math.max(slowEstimate.feeRate, MIN_FEE_RATE),
           targetConfirmationTime: slowEstimate.blocks * 10 * 60
         }
       };
