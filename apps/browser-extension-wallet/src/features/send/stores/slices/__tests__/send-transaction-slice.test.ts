@@ -22,12 +22,10 @@ describe('Testing send transaction store slice', () => {
     expect(result.current.transaction).toBeUndefined();
     expect(result.current.transactionValue).toBeUndefined();
     expect(result.current.transactionFeeLovelace).toEqual('0');
-    expect(result.current.minimumCoinQuantity).toEqual({ coinMissing: '0', minimumCoin: '0' });
     expect(typeof result.current.setDestinationAddress).toBe('function');
     expect(typeof result.current.setTransaction).toBe('function');
     expect(typeof result.current.setTransactionValue).toBe('function');
     expect(typeof result.current.setTransactionFeeLovelace).toBe('function');
-    expect(typeof result.current.setMinimumCoinQuantity).toBe('function');
   });
 
   test('should be able to set destination address', () => {
@@ -61,14 +59,5 @@ describe('Testing send transaction store slice', () => {
     });
 
     expect(result.current.transactionFeeLovelace).toEqual('2000000');
-  });
-
-  test('should be able to set minimum coin quantity', () => {
-    const { result } = renderHook(() => useSendTxHook());
-    act(() => {
-      result.current.setMinimumCoinQuantity({ coinMissing: '0', minimumCoin: '2000000' });
-    });
-
-    expect(result.current.minimumCoinQuantity).toEqual({ coinMissing: '0', minimumCoin: '2000000' });
   });
 });
