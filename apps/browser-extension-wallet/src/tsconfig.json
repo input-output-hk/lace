@@ -24,7 +24,8 @@
       "@types": ["types"],
       "@types/*": ["types/*"],
       "@utils/*": ["utils/*"],
-      "@views/browser/*": ["views/browser-view/*"]
+      "@views/browser/*": ["views/browser-view/*"],
+      "@views/*": ["views/*"]
     }
   },
   "references": [

@@ -178,6 +178,9 @@ export const MainFooter = (): React.ReactElement => {
             <DappExplorerIcon className={styles.icon} />
           </button>
         )}
+        <button data-testid="main-footer-cashback" onClick={() => handleNavigation(walletRoutePaths.cashback)}>
+          <NftIconDefault className={styles.icon} />
+        </button>
       </div>
     </div>
   );

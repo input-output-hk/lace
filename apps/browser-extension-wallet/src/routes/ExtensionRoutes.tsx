@@ -15,6 +15,7 @@ import { NftDetail, Nfts } from '@src/features/nfts';
 import { useWalletStore } from '@stores';
 import { config } from '@src/config';
 import { Voting } from '@src/features/voting-beta/components';
+import { CashbackPortal } from '@views/bring3-poc';
 
 const { GOV_TOOLS_URLS } = config();
 
@@ -36,6 +37,7 @@ export const ExtensionRoutes = (): React.ReactElement => {
         <Route exact path={walletRoutePaths.signMessage} component={SignMessageDrawer} />
         <Route exact path={walletRoutePaths.nfts} component={Nfts} />
         {isVotingCenterEnabled && <Route exact path={walletRoutePaths.voting} component={Voting} />}
+        <Route exact path={walletRoutePaths.cashback} component={CashbackPortal} />
         <Route path="*" render={() => <Redirect to={walletRoutePaths.assets} />} />
       </Switch>
       {/* TODO: LW-7575 Remove old staking in post-MVP of multi delegation staking.*/}

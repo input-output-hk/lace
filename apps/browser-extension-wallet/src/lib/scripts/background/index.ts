@@ -8,3 +8,4 @@ import './keep-alive-sw';
 import './onUninstall';
 import './nami-migration';
 import './onStorageChange';
+import './bringweb3';

@@ -1,4 +1,5 @@
 export const walletRoutePaths = {
+  cashback: '/cashback',
   activity: '/activity',
   addressBook: '/address-book',
   coinActivity: '/coin/:id/:symbol/:name',
