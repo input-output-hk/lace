@@ -74,12 +74,6 @@ export class CoinConfigure {
     if (loseFocus) await this.clickToLoseFocus();
   };
 
-  fillTokenValueUsingKeys = async (valueToEnter: number): Promise<void> => {
-    await this.input.waitForClickable();
-    await this.input.click();
-    await browser.keys(String(valueToEnter));
-  };
-
   fillTokenValueWithoutClearingField = async (valueToEnter: number): Promise<void> => {
     await this.input.waitForClickable();
     await this.input.click();
