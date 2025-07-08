@@ -41,7 +41,6 @@ import { AddressInput } from '../elements/AddressInput';
 import { AssetInput } from '../elements/newTransaction/assetInput';
 import TokenSelectionPage from '../elements/newTransaction/tokenSelectionPage';
 import TransactionPasswordPage from '../elements/newTransaction/transactionPasswordPage';
-import { Key } from 'webdriverio';
 import { parseWalletAddress } from '../utils/parseWalletAddress';
 import { AddressType } from '../enums/AddressTypeEnum';
 import clipboard from 'clipboardy';
@@ -269,7 +268,7 @@ When(
   }
 );
 
-When(/^I click to loose focus from value field$/, async () => {
+When(/^I click to lose focus from value field$/, async () => {
   await TransactionNewPage.coinConfigure().clickToLoseFocus();
 });
 
@@ -287,12 +286,6 @@ Then(
     await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(Number.parseFloat(valueToEnter));
   }
 );
-
-Then(/^I open cancel modal to trigger button validation$/, async () => {
-  // workaround for test automation only to fire all events after finished typing
-  await browser.keys(Key.Escape);
-  await Modal.cancelButton.click();
-});
 
 Then(/^I click on transaction drawer background to lose focus$/, async () => {
   await TransactionNewPage.clickDrawerBackground();
@@ -332,7 +325,7 @@ Then(
     const tokenBalance: string = testContext.load(`${assetName}tokenBalance`);
     const value = Number.parseFloat(tokenBalance) * (Number.parseFloat(percentage) * (1 / 100));
     const valueToEnter = Number.parseFloat(value.toPrecision(2));
-    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValueUsingKeys(valueToEnter);
+    await TransactionNewPage.coinConfigure(bundleIndex, assetName).fillTokenValue(valueToEnter);
   }
 );
 

@@ -29,7 +29,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And <assetSelectionAction> "<assetName>"
     And I enter an exact value of: <value_to_enter> to the "<assetName>" asset in bundle 1
     Then I see <displayed_value> as displayed value
-    When I click to loose focus from value field
+    When I click to lose focus from value field
     Then I see <conv_value> as displayed value
     And I <shouldSeeError> insufficient balance error in bundle 1 for "<assetName>" asset
     When I hover over the value for "<assetName>" asset in bundle 1
@@ -73,7 +73,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     And <assetSelectionAction> "<assetName>"
     And I enter an exact value of: <value_to_enter> to the "<assetName>" asset in bundle 1
     Then I see <displayed_value> as displayed value
-    When I click to loose focus from value field
+    When I click to lose focus from value field
     Then I see <conv_value> as displayed value
     And I <shouldSeeError> insufficient balance error in bundle 1 for "<assetName>" asset
     When I hover over the value for "<assetName>" asset in bundle 1
@@ -123,7 +123,7 @@ Feature: LW-484: Send & Receive - Popup View (Simple Tx)
     When I click "Send" button on Tokens page in popup mode
     And click on the coin selector for "tADA" asset in bundle 1
     And click on an token with name: "Ibilecoin"
-    And I click to loose focus from value field
+    And I click to lose focus from value field
     Then I see 0.00 as displayed value
     And I do not see insufficient balance error in bundle 1 for "Ibilecoin" asset
     When I hover over the value for "Ibilecoin" asset in bundle 1
