@@ -64,7 +64,7 @@ Feature: Send - Extended Browser View (Advanced Tx)
     And I click "Review transaction" button on "Send" page
     Then The Tx summary screen is displayed for 2 bundles with multiple assets
 
-  @LW-3190
+  @LW-3190 @pending @issue=LW-13227
   Scenario: Extended-view - Byron address minimum amount for two bundles
     Given I click "Send" button on page header
     When I set multiple outputs for advanced transaction with less than minimum value for Byron address
