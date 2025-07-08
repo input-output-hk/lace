@@ -4,7 +4,7 @@ import { Network } from '../common/network';
 import { FeeMarketProvider } from './FeeMarketProvider';
 import axios, { AxiosInstance } from 'axios';
 import { Logger } from 'ts-log';
-import { DEFAULT_MARKETS } from './constants';
+import { DEFAULT_MARKETS, MIN_FEE_RATE } from './constants';
 
 const satsPerVByteToBtcPerKB = (satsPerVByte: number): number => (satsPerVByte * 1000) / 100_000_000;
 
@@ -31,15 +31,15 @@ export class MempoolSpaceMarketProvider implements FeeMarketProvider {
 
       return {
         fast: {
-          feeRate: satsPerVByteToBtcPerKB(fastEstimate),
+          feeRate: Math.max(satsPerVByteToBtcPerKB(fastEstimate), MIN_FEE_RATE),
           targetConfirmationTime: 600 // 10 minutes
         },
         standard: {
-          feeRate: satsPerVByteToBtcPerKB(standardEstimate),
+          feeRate: Math.max(satsPerVByteToBtcPerKB(standardEstimate), MIN_FEE_RATE),
           targetConfirmationTime: 1800 // 30 minutes
         },
         slow: {
-          feeRate: satsPerVByteToBtcPerKB(slowEstimate),
+          feeRate: Math.max(satsPerVByteToBtcPerKB(slowEstimate), MIN_FEE_RATE),
           targetConfirmationTime: 3600 // 60 minutes
         }
       };
