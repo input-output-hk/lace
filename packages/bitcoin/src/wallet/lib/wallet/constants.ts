@@ -1,3 +1,5 @@
+export const MIN_FEE_RATE = 0.000_011;
+
 export const DEFAULT_MARKETS = {
   fast: {
     feeRate: 0.000_025,
@@ -8,7 +10,7 @@ export const DEFAULT_MARKETS = {
     targetConfirmationTime: 3
   },
   slow: {
-    feeRate: 0.000_01,
+    feeRate: 0.000_011,
     targetConfirmationTime: 6
   }
 };
