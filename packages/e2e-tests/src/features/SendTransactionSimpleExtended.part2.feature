@@ -29,7 +29,7 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
       | Button: "Confirm"                    |
       | Button: "Cancel"                     |
 
-  @LW-3191 @Testnet @Mainnet
+  @LW-3191 @Testnet @Mainnet @pending @issue=LW-13227
   Scenario: Extended-view - Tx summary page is displayed for Byron address minimum amount
     And I click "Send" button on page header
     When I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value
