@@ -7,7 +7,7 @@ import { SettingsRemoveWallet } from './SettingsRemoveWallet';
 import { MidnightPreLaunchSettingsBanner } from '@lace/core';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import MidnightPreLaunchBannerImage from '../../../../../../../../packages/core/src/ui/assets/images/midnight-launch-event-sidebar-banner.png';
-import { useExternalLinkOpener } from '@providers';
+import { useExternalLinkOpener, useTheme } from '@providers';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export interface SettingsLayoutProps {
@@ -19,6 +19,7 @@ export const SettingsLayout = ({
   defaultPassphraseVisible,
   defaultMnemonic
 }: SettingsLayoutProps): React.ReactElement => {
+  const { theme } = useTheme();
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
   const posthog = usePostHogClientContext();
@@ -33,6 +34,7 @@ export const SettingsLayout = ({
           <MidnightPreLaunchSettingsBanner
             bannerImageUrl={MidnightPreLaunchBannerImage}
             onCtaButtonClick={() => glacierDropPayload && openExternalLink(glacierDropPayload?.learnMoreUrl)}
+            darkBackgroundImage={theme.name === 'dark'}
           />
         </Box>
       ) : undefined}

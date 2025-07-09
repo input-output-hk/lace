@@ -6,7 +6,7 @@
 }
 
 .heading {
-  color: white;
+  color: var(--text-color-primary);
   font-size: 18px;
   line-height: 24px;
   margin-bottom: 10px;
@@ -14,7 +14,7 @@
 }
 
 .description {
-  color: #A9A9A9;
+  color: var(--dark-mode-light-grey, var(--text-color-secondary));
   font-size: 16px;
   line-height: 24px;
   font-weight: 500;
