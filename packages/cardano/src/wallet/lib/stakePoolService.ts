@@ -204,6 +204,7 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
 
   const createIndex = (stakePools: Cardano.StakePool[]) => {
     const data = stakePools.map(({ id, metadata }) => {
+      // metadata from BlockFrost API has more fields than required, extracting only the relevant ones to keep cache size small
       const { description, homepage, name, ticker } = metadata || {};
 
       return { description, homepage, id, name, ticker };
