@@ -196,7 +196,21 @@ export interface StakePoolServiceProps {
 export const initStakePoolService = (props: StakePoolServiceProps): StakePoolProvider => {
   const { blockfrostClient, extensionLocalStorage } = props;
 
+  /**
+   * `cachedData` is _usually_ always available, but not _actually_ always available.
+   *
+   * `initStakePoolService` is a synchronous function while reading cached data from the extension local storage is not,
+   * so the methods of the returned `StakePoolProvider` may be called before the cached data is available.
+   * More than this, the very first time the extension runs, the data needs to be entirely fetched.
+   *
+   * Storing the cached data in a `Promise` rather than a value helps us handling the cases where the cached data is not yet available.
+   */
   let cachedData: Promise<StakePoolCachedData>;
+  /**
+   * `fetchData` may be called multiple times in short periods of time: we need to avoid fetching the data multiple times.
+   *
+   * This flag ensures that only one instance of `fetchData` runs at a time.
+   */
   let fetchingData = false;
   let healthStatus = false;
   let index: Fuse<{ id: Cardano.PoolId }>;
@@ -227,6 +241,13 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     return [...stakePools, ...(await nextPages)];
   };
 
+  /**
+   * Fetches all the date required to make the stake pools browsing page to work.
+   * It also saves the data in the cache and builds the fuzzy index.
+   *
+   * This function is designed to be called in a synchronous way i.e. to propagate errors to the caller;
+   * the `try`/`finally` block ensures that the `fetchingData` flag is set to `false` even if the function fails.
+   */
   const fetchData = async (): Promise<StakePoolCachedData> => {
     fetchingData = true;
 
@@ -262,8 +283,17 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     return data;
   };
 
+  /**
+   * This function is designed to be called in an _fire and forget_ way.
+   * When cached data is available but expired, this function refreshes the cached data in background,
+   * to let the `StakePoolProvider` continue to work, even if with old data.
+   */
   const asyncFetchData = () => (fetchingData ? undefined : fetchData().catch(console.error));
 
+  /**
+   * This function is the entry point to access the cached data.
+   * Each time it is used, all the checks on cache expiration are performed.
+   */
   const getCachedData = async () => {
     let data: StakePoolCachedData | undefined;
 
