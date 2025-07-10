@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { MidnightEventBanner as View } from '@lace/core';
+import { MidnightEventBanner as MidnightEventBannerBase } from '@lace/core';
 import { Box, Dialog, sx } from '@input-output-hk/lace-ui-toolkit';
 import { storage } from 'webextension-polyfill';
 import { MIDNIGHT_EVENT_BANNER_KEY, MidnightEventBannerStorage } from '@lib/scripts/types';
@@ -133,7 +133,7 @@ export const MidnightEventBanner = (): JSX.Element => {
           }
         })}
       >
-        <View
+        <MidnightEventBannerBase
           translations={{
             title: t('midnightEventBanner.title'),
             description: t('midnightEventBanner.description'),

@@ -1,9 +1,9 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
-import { sx, Flex, Text, Box, Button, NavigationButton } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Button, Flex, NavigationButton, sx, Text } from '@input-output-hk/lace-ui-toolkit';
 import styles from './MidnightEventBanner.module.scss';
 import cx from 'classnames';
-import banner from '../../assets/images/midnight_banner.png';
+import midnightGDLight from '../../assets/images/midnight_gd_light.png';
 
 interface Props {
   translations: {
@@ -22,7 +22,7 @@ const PopupButtons = ({ translations, onLearnMore, onReminder }: Props): JSX.Ele
     w="$fill"
     className={sx({
       display: {
-        mediumScreen: 'none',
+        minimumScreen: 'none',
         popupScreen: 'block'
       },
       mt: '$10'
@@ -42,7 +42,7 @@ const FullScreenButtons = ({ translations, onLearnMore, onReminder }: Props): JS
     w="$fill"
     className={sx({
       display: {
-        mediumScreen: 'flex',
+        minimumScreen: 'flex',
         popupScreen: 'none'
       },
       mt: '$28'
@@ -92,7 +92,7 @@ const Title = ({ translations }: Props): JSX.Element => (
 
 export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onReminder }: Props): JSX.Element => (
   <Flex
-    style={{ backgroundImage: `url(${banner})` }}
+    style={{ backgroundImage: `url(${midnightGDLight})` }}
     className={cx(
       styles.container,
       sx({
@@ -117,7 +117,15 @@ export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onRemi
     </Box>
     <Flex w="$fill" flexDirection="column">
       <Title translations={translations} />
-      <Box mt="$10">
+      <Box
+        mt="$10"
+        className={sx({
+          paddingRight: {
+            minimumScreen: '$214',
+            popupScreen: '$20'
+          }
+        })}
+      >
         <Text.Body.Normal className={styles.description} weight="$medium">
           {translations.description}
         </Text.Body.Normal>

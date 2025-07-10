@@ -4,18 +4,13 @@ import { useTranslation } from 'react-i18next';
 import styles from './MidnightPreLaunchSettingsBanner.module.scss';
 
 export const MidnightPreLaunchSettingsBanner = ({
-  bannerImageUrl,
   onCtaButtonClick
 }: {
-  bannerImageUrl: string;
   onCtaButtonClick?: () => void;
 }): React.ReactElement => {
   const { t } = useTranslation();
   return (
-    <Card.Outlined
-      className={styles.card}
-      style={{ '--midnight-pre-launch-banner-image': `url(${bannerImageUrl})` } as React.CSSProperties}
-    >
+    <Card.Outlined className={styles.card}>
       <div className={styles.heading}>{t('core.MidnightPreLaunchSettingsBanner.heading')}</div>
       <div className={styles.description}>{t('core.MidnightPreLaunchSettingsBanner.description')}</div>
       <Button.CallToAction
