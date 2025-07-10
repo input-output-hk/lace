@@ -11,8 +11,11 @@ import Fuse from 'fuse.js';
 
 const BF_API_PAGE_SIZE = 100;
 const CACHE_KEY = 'stake-pool-service-data';
-const EMPTY_TEXT_PLACEHOLDER = '\uFFFD';
 const ONE_DAY = 86_400_000; // One day in milliseconds
+
+// The empty text placeholders used to make the stake pools with empty names or tickers to be sorted at the end of the list
+const EMPTY_TEXT_PLACEHOLDER_ASC_ORDER = '\uFFFD';
+const EMPTY_TEXT_PLACEHOLDER_DESC_ORDER = '';
 
 const FUZZY_SEARCH_OPTIONS = {
   distance: 255,
@@ -116,14 +119,14 @@ const getSorter = (sort: QueryStakePoolsArgs['sort']) => {
     switch (field) {
       case 'name':
         return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const nameA = a.metadata?.name || EMPTY_TEXT_PLACEHOLDER;
-          const nameB = b.metadata?.name || EMPTY_TEXT_PLACEHOLDER;
+          const nameA = a.metadata?.name || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
+          const nameB = b.metadata?.name || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
           return nameA.localeCompare(nameB);
         };
       case 'ticker':
         return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const tickerA = a.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER;
-          const tickerB = b.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER;
+          const tickerA = a.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
+          const tickerB = b.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
           return tickerA.localeCompare(tickerB);
         };
       case 'cost':
@@ -150,14 +153,14 @@ const getSorter = (sort: QueryStakePoolsArgs['sort']) => {
     switch (field) {
       case 'name':
         return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const nameA = a.metadata?.name || '';
-          const nameB = b.metadata?.name || '';
+          const nameA = a.metadata?.name || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
+          const nameB = b.metadata?.name || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
           return nameB.localeCompare(nameA);
         };
       case 'ticker':
         return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const tickerA = a.metadata?.ticker || '';
-          const tickerB = b.metadata?.ticker || '';
+          const tickerA = a.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
+          const tickerB = b.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
           return tickerB.localeCompare(tickerA);
         };
       case 'cost':
