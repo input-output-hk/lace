@@ -4,7 +4,7 @@ import { Box, Dialog, sx } from '@input-output-hk/lace-ui-toolkit';
 import { storage } from 'webextension-polyfill';
 import { MIDNIGHT_EVENT_BANNER_KEY, MidnightEventBannerStorage } from '@lib/scripts/types';
 import { useTranslation } from 'react-i18next';
-import { useExternalLinkOpener, useTheme } from '@providers';
+import { useExternalLinkOpener } from '@providers';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 interface State {
@@ -17,7 +17,6 @@ interface State {
 const REMINDER_TIME = Number.parseInt(process.env.MIDNIGHT_EVENT_BANNER_REMINDER_TIME);
 
 export const MidnightEventBanner = (): JSX.Element => {
-  const { theme } = useTheme();
   const { t } = useTranslation();
   const [state, setState] = useState<State>({
     isLoading: true,
@@ -144,7 +143,6 @@ export const MidnightEventBanner = (): JSX.Element => {
           onReminder={handleReminder}
           onLearnMore={() => glacierDropPayload && openExternalLink(glacierDropPayload?.learnMoreUrl)}
           onClose={() => handleDialog(true)}
-          theme={theme.name}
         />
       </Box>
     </>

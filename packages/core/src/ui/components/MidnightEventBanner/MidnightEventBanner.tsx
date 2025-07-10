@@ -4,7 +4,6 @@ import { Box, Button, Flex, NavigationButton, sx, Text } from '@input-output-hk/
 import styles from './MidnightEventBanner.module.scss';
 import cx from 'classnames';
 import midnightGDLight from '../../assets/images/midnight_gd_light.png';
-import midnightGDDark from '../../assets/images/midnight_gd_dark.png';
 
 interface Props {
   translations: {
@@ -16,7 +15,6 @@ interface Props {
   onClose?: () => void;
   onLearnMore?: () => void;
   onReminder?: () => void;
-  theme?: 'light' | 'dark';
 }
 
 const PopupButtons = ({ translations, onLearnMore, onReminder }: Props): JSX.Element => (
@@ -92,9 +90,9 @@ const Title = ({ translations }: Props): JSX.Element => (
   </>
 );
 
-export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onReminder, theme }: Props): JSX.Element => (
+export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onReminder }: Props): JSX.Element => (
   <Flex
-    style={{ backgroundImage: `url(${theme === 'dark' ? midnightGDDark : midnightGDLight})` }}
+    style={{ backgroundImage: `url(${midnightGDLight})` }}
     className={cx(
       styles.container,
       sx({

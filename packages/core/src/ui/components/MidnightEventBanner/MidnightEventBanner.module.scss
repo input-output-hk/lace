@@ -1,7 +1,7 @@
 @import '../../../../../common/src/ui/styles/theme.scss';
 
 .container {
-  background-color: var(--light-mode-body, var(--dark-mode-black));
+  background-color: #fff;
   position: relative;
   box-shadow: var(--dark-mode-shadow-banner, var(--shadow-setup-box));
 
@@ -22,11 +22,11 @@
 }
 
 .title {
-  color: var(--text-color-primary) !important;
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   white-space: pre-wrap;
 }
 
 .description {
-  color: var(--dark-mode-light-grey, var(--text-color-primary)) !important;
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   white-space: pre-wrap;
 }

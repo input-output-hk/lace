@@ -1,12 +1,10 @@
 .card {
-  background-image: var(--midnight-pre-launch-banner-image);
-  background-size: cover;
-  background-position: center right;
+  background-color: #fff !important;
   padding: 30px 20px 30px 20px;
 }
 
 .heading {
-  color: var(--text-color-primary);
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   font-size: 18px;
   line-height: 24px;
   margin-bottom: 10px;
@@ -14,7 +12,7 @@
 }
 
 .description {
-  color: var(--dark-mode-light-grey, var(--text-color-secondary));
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   font-size: 16px;
   line-height: 24px;
   font-weight: 500;
