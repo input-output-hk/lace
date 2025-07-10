@@ -1,14 +1,17 @@
 @import '../../../../../common/src/ui/styles/theme.scss';
 
 .container {
-  background-color: black;
+  background-color: #fff;
   position: relative;
+  box-shadow: var(--dark-mode-shadow-banner, var(--shadow-setup-box));
 
   background-repeat: no-repeat;
-  background-position: right 10px bottom -10px;
+  // there is no good way do display light theme image under the text (small resolution)
+  // hiding both images on small resolutions
+  background-position: -1000% -1000%;
 
   @media screen and (min-width: $breakpoint-minimum) {
-    background-position: right 40px bottom -10px;
+    background-position: right 40px bottom 50%;
   }
 }
 
@@ -16,19 +19,14 @@
   position: absolute;
   top: 15px;
   right: 15px;
-
-  button {
-    background: transparent;
-    color: white;
-  }
 }
 
 .title {
-  color: white !important;
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   white-space: pre-wrap;
 }
 
 .description {
-  color: #a9a9a9 !important;
+  color: var(--dark-mode-grey, var(--text-color-primary)) !important;
   white-space: pre-wrap;
 }
