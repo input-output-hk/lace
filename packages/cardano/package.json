@@ -58,6 +58,7 @@
     "buffer": "6.0.3",
     "classnames": "2.3.1",
     "dayjs": "1.10.7",
+    "fuse.js": "^7.1.0",
     "graphql": "^15.6.1",
     "graphql-request": "3.5.0",
     "lodash": "4.17.21",
