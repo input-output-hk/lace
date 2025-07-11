@@ -822,7 +822,7 @@
   "send.sendMultipleOutputsAtTheSameTime": "Send multiple outputs at the same time and add metadata. This means you can send multiple assets to different addresses in one transaction",
   "send.summary.youSign": "You sign:",
   "send.theAmountYoullBeChargedToProcessYourTransaction": "The amount you'll be charged to process your transaction",
-  "send.toSendAnNFTOrNativeToken": "To send an NFT or a native token, a small amount of ADA has to be sent with it to facilitate the operation",
+  "send.toSendAnNFTOrNativeToken": "A minimum ADA amount is required for a valid transaction. This \"Ada allocation\" adds ADA to the transaction to meet the required minimum ADA amount. This is a Cardano requirement, not a fee from this wallet.",
   "send.trezorDoesNotDupportDecimals": "Trezor does not support decimals for Cardano tokens, so your device's software may show incorrect amounts (3 token units as 3,000,000, for example) when sending these tokens.",
   "settings.copyAddress": "Copy address",
   "settings.copyHandle": "Copy handle",
