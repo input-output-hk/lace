@@ -11,6 +11,7 @@ export interface InputSelector {
    * @param utxos - Array of available UTXOs.
    * @param outputs - Array of desired outputs.
    * @param feeRate - Fee rate in satoshis per byte.
+   * @param hasOpReturn - Indicates if the transaction includes an OP_RETURN output.
    * @returns An object containing the selected UTXOs, the outputs as returned by coinselect (which might include a change output),
    *          and the calculated fee. Returns null if no valid selection was found.
    */
@@ -18,6 +19,7 @@ export interface InputSelector {
     changeAddress: string,
     utxos: UTxO[],
     outputs: { address: string; value: bigint }[],
-    feeRate: number
+    feeRate: number,
+    hasOpReturn: boolean
   ): { selectedUTxOs: UTxO[]; outputs: { address: string; value: number }[]; fee: number } | undefined;
 }

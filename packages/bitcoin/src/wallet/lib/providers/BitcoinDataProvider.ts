@@ -76,10 +76,12 @@ export type InputEntry = UTxO;
  *
  * @property {string} address - The address involved in the transaction input or output.
  * @property {bigint} satoshis - The amount in satoshis for this input or output.
+ * @property {string} opReturnData - The OP_RETURN data associated with this output, if any.
  */
 export type OutputEntry = {
   readonly address: string;
   readonly satoshis: bigint;
+  readonly opReturnData?: string;
 };
 
 /**

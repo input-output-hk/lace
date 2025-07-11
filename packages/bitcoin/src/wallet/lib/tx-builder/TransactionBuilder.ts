@@ -28,6 +28,7 @@ export class TransactionBuilder {
   private changeAddress?: string;
   private signers: DerivedAddress[] = [];
   private inputSelector: InputSelector = new GreedyInputSelector();
+  private opReturnData?: Buffer;
 
   /**
    * Initializes the transaction builder.
@@ -96,6 +97,29 @@ export class TransactionBuilder {
   }
 
   /**
+   * Adds an OP_RETURN message to the transaction.
+   *
+   * @param message - The message to embed (string, UTF-8). Max 80 bytes after encoding.
+   *                  If null, removes any existing OP_RETURN data.
+   * @returns The builder instance for chaining.
+   */
+  public addOpReturnOutput(message: string | null): this {
+    if (!message?.trim()) {
+      this.opReturnData = undefined;
+      return this;
+    }
+
+    const data = Buffer.from(message, 'utf8');
+
+    if (data.length > 80) {
+      throw new Error(`OP_RETURN message exceeds 80 bytes (actual: ${data.length}).`);
+    }
+
+    this.opReturnData = data;
+    return this;
+  }
+
+  /**
    * Builds the transaction by selecting UTXOs (using either the provided input selector or a fallback),
    * adding inputs and outputs (including a change output if needed), and calculating fees.
    * If the change amount is below the dust threshold, it is added to the fee instead.
@@ -119,7 +143,13 @@ export class TransactionBuilder {
     let fee = 0;
     let coinselectOutputs: { address: string; value: number }[] = [];
 
-    const result = this.inputSelector.selectInputs(this.changeAddress, this.utxos, this.outputs, feeRateSatoshis);
+    const result = this.inputSelector.selectInputs(
+      this.changeAddress,
+      this.utxos,
+      this.outputs,
+      feeRateSatoshis,
+      !!this.opReturnData
+    );
     if (!result) {
       throw new Error('Insufficient funds or coin selection failed.');
     }
@@ -158,7 +188,19 @@ export class TransactionBuilder {
       }
     });
 
-    const vBytes = selectedUTxOs.length * INPUT_SIZE + coinselectOutputs.length * OUTPUT_SIZE + TRANSACTION_OVERHEAD;
+    if (this.opReturnData) {
+      const embed = bitcoin.payments.embed({ data: [this.opReturnData] });
+      this.psbt.addOutput({
+        script: embed.output!,
+        value: 0
+      });
+    }
+
+    const opReturnOutput = this.opReturnData ? 1 : 0;
+    const vBytes =
+      selectedUTxOs.length * INPUT_SIZE +
+      (coinselectOutputs.length + opReturnOutput) * OUTPUT_SIZE +
+      TRANSACTION_OVERHEAD;
 
     return {
       context: this.psbt,

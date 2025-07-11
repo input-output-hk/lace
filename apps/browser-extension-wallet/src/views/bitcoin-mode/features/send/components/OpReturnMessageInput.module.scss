@@ -1,0 +1,63 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.opReturnMessageInput {
+  margin-top: size_unit(2);
+  padding-bottom: size_unit(3);
+  width: 100%;
+
+  :global(.ant-input-affix-wrapper) {
+    transition: none !important;
+  }
+
+  &.visibleCounter {
+    padding-bottom: size_unit(2.5);
+
+    :global(.ant-input-suffix) {
+      position: absolute;
+      right: size_unit(0.5);
+      top: size_unit(0.5);
+      width: size_unit(6.5);
+    }
+  }
+
+  input {
+    @include text-bodyLarge-medium;
+    color: var(--text-color-primary) !important;
+    transition: none;
+    ::placeholder {
+      color: var(--text-color-secondary) !important;
+    }
+  }
+
+  @media (max-width: 400px) {
+    margin-top: size_unit(1);
+    padding-bottom: size_unit(5);
+
+    &.visibleCounter {
+      padding-bottom: size_unit(4);
+    }
+  }
+
+  .suffixContent {
+    margin-right: -7px;
+    &.focus {
+      margin-bottom: -#{size_unit(1.5)};
+    }
+  }
+}
+
+.characterCounter {
+  margin: size_unit(0.5) 0 0;
+  padding-left: size_unit(3);
+  @include text-form-label($weight: 500);
+  color: var(--text-color-secondary);
+
+  &.error {
+    color: var(--data-pink);
+  }
+}
+
+.iconSize {
+  font-size: size_unit(3) !important;
+}

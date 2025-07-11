@@ -539,6 +539,7 @@
   "browserView.transaction.send.group.label1": "simple",
   "browserView.transaction.send.group.label2": "advanced",
   "browserView.transaction.send.metadata.addANote": "Add a note (max 160 char.)",
+  "browserView.transaction.send.metadata.addAOpReturnNote": "Add a note (max 80 char.)",
   "browserView.transaction.send.metadata.count": "{{count}} characters",
   "browserView.transaction.send.metadata.note": "Note",
   "browserView.transaction.send.password.placeholder": "Password",

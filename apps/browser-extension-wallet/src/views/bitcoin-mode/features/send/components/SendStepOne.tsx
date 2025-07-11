@@ -21,6 +21,7 @@ import debounce from 'lodash/debounce';
 import { CustomConflictError, CustomError, ensureHandleOwnerHasntChanged, verifyHandle } from '@utils/validators';
 import { AddressValue, HandleVerificationState } from './types';
 import { CheckCircleOutlined, ExclamationCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import { OpReturnMessageInput } from './OpReturnMessageInput';
 
 const SATS_IN_BTC = 100_000_000;
 
@@ -51,6 +52,8 @@ interface SendStepOneProps {
   onClose: () => void;
   network: Bitcoin.Network | null;
   hasUtxosInMempool: boolean;
+  onOpReturnMessageChange: (value: string) => void;
+  opReturnMessage: string;
 }
 
 const InputError = ({
@@ -87,7 +90,9 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   isPopupView,
   onClose,
   network,
-  hasUtxosInMempool
+  hasUtxosInMempool,
+  onOpReturnMessageChange,
+  opReturnMessage
 }) => {
   const { t } = useTranslation();
   const numericAmount = Number.parseFloat(amount) || 0;
@@ -369,6 +374,12 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
           />
         </Box>
 
+        <OpReturnMessageInput
+          opReturnMessage={opReturnMessage}
+          disabled={hasUtxosInMempool}
+          onOpReturnMessageChange={onOpReturnMessageChange}
+        />
+
         <Box mt={isPopupView ? '$24' : '$32'}>
           {isPopupView ? (
             <Text.Body.Large weight="$bold">{t('browserView.transaction.btc.send.feeRate')}</Text.Body.Large>
@@ -445,7 +456,14 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
         className={mainStyles.buttons}
       >
         <Button
-          disabled={hasNoValue || exceedsBalance || !address || address?.address?.trim() === '' || !isValidAddress}
+          disabled={
+            hasNoValue ||
+            exceedsBalance ||
+            !address ||
+            address?.address?.trim() === '' ||
+            !isValidAddress ||
+            opReturnMessage?.length > 80
+          }
           color="primary"
           block
           size="medium"

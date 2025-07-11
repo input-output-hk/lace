@@ -334,6 +334,7 @@
   "core.outputSummaryList.noLimit": "No limit",
   "core.outputSummaryList.utc": "UTC",
   "core.outputSummaryList.recipientAddress": "Recipient address",
+  "core.outputSummaryList.note": "Note",
   "core.outputSummaryList.sending": "Sending",
   "core.outputSummaryList.txFee": "Transaction fee",
   "core.password.feedback.1": "Weak password. Add some numbers and characters to make it stronger.",

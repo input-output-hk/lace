@@ -18,7 +18,7 @@ describe('GreedyInputSelector', () => {
   it('selects sufficient UTxOs and returns change', () => {
     const utxos = [createUTxO(BigInt(5000)), createUTxO(BigInt(8000))];
     const outputs = [{ address: 'address1', value: BigInt(4000) }];
-    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate, false);
 
     expect(result).toBeDefined();
     expect(result!.selectedUTxOs.length).toBeGreaterThan(0);
@@ -29,7 +29,7 @@ describe('GreedyInputSelector', () => {
   it('returns undefined if inputs are insufficient', () => {
     const utxos = [createUTxO(BigInt(1000))];
     const outputs = [{ address: 'address1', value: BigInt(2000) }];
-    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate, false);
 
     expect(result).toBeUndefined();
   });
@@ -40,7 +40,7 @@ describe('GreedyInputSelector', () => {
       { address: 'address1', value: BigInt(3000) },
       { address: 'address2', value: BigInt(2000) }
     ];
-    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate, false);
 
     expect(result).toBeDefined();
     const sumOutputs = result!.outputs.reduce((acc, o) => acc + o.value, 0);
@@ -51,7 +51,7 @@ describe('GreedyInputSelector', () => {
   it('adds dust change to fee instead of outputting it', () => {
     const utxos = [createUTxO(BigInt(6000))];
     const outputs = [{ address: 'address1', value: BigInt(5500) }];
-    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate, false);
 
     expect(result).toBeDefined();
     expect(result!.outputs.some((o) => o.address === changeAddress)).toBe(false);
@@ -64,7 +64,7 @@ describe('GreedyInputSelector', () => {
     const utxos = [createUTxO(BigInt(6000), 'utxo1'), createUTxO(BigInt(1000), 'utxo2')];
     const outputs = [{ address: 'dest1', value: BigInt(5500) }];
 
-    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, feeRate, false);
 
     expect(result).toBeDefined();
     // Should include both inputs because rescuing dust is profitable.
@@ -84,7 +84,7 @@ describe('GreedyInputSelector', () => {
     const utxos = [createUTxO(BigInt(9000), 'big_utxo'), createUTxO(BigInt(600), 'small_utxo')];
     const outputs = [{ address: 'dest1', value: BigInt(8000) }];
 
-    const result = selector.selectInputs(changeAddress, utxos, outputs, bigFeeRate);
+    const result = selector.selectInputs(changeAddress, utxos, outputs, bigFeeRate, false);
 
     expect(result).toBeDefined();
     // Only the first (large) UTxO should be used.

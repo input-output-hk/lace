@@ -13,7 +13,8 @@ export class GreedyInputSelector implements InputSelector {
     changeAddress: string,
     utxos: UTxO[],
     outputs: { address: string; value: bigint }[],
-    feeRate: number
+    feeRate: number,
+    hasOpReturn: boolean
   ): { selectedUTxOs: UTxO[]; outputs: { address: string; value: number }[]; fee: number } | undefined {
     const selected: UTxO[] = [];
     const totalOutput = outputs.reduce((acc, o) => acc + o.value, ZERO);
@@ -23,7 +24,7 @@ export class GreedyInputSelector implements InputSelector {
     for (const utxo of utxos) {
       selected.push(utxo);
       inputSum += utxo.satoshis;
-      fee = this.computeFee(selected.length, outputs.length + 1, feeRate);
+      fee = this.computeFee(selected.length, outputs.length + 1, feeRate, hasOpReturn);
       if (inputSum >= totalOutput + BigInt(fee)) break;
     }
 
@@ -39,7 +40,8 @@ export class GreedyInputSelector implements InputSelector {
         remaining: utxos.slice(selected.length),
         inputSum,
         totalOutput,
-        outputsCount: outputs.length
+        outputsCount: outputs.length,
+        hasOpReturn
       });
       change = newChange;
       fee += feeDelta;
@@ -60,8 +62,9 @@ export class GreedyInputSelector implements InputSelector {
   }
 
   /** Estimate the fee for a given input / output count */
-  private computeFee(inputCount: number, outputCount: number, feeRate: number): number {
-    const size = inputCount * INPUT_SIZE + outputCount * OUTPUT_SIZE + TRANSACTION_OVERHEAD;
+  private computeFee(inputCount: number, outputCount: number, feeRate: number, hasOpReturn: boolean): number {
+    const size =
+      inputCount * INPUT_SIZE + (outputCount + (hasOpReturn ? 1 : 0)) * OUTPUT_SIZE + Number(TRANSACTION_OVERHEAD);
     return Math.ceil(size * feeRate);
   }
 
@@ -76,7 +79,8 @@ export class GreedyInputSelector implements InputSelector {
     remaining,
     inputSum,
     totalOutput,
-    outputsCount
+    outputsCount,
+    hasOpReturn
   }: {
     change: bigint;
     feeRate: number;
@@ -85,6 +89,7 @@ export class GreedyInputSelector implements InputSelector {
     inputSum: bigint;
     totalOutput: bigint;
     outputsCount: number;
+    hasOpReturn: boolean;
   }): { change: bigint; fee: number } {
     if (change === ZERO || Number(change) >= DUST_THRESHOLD) return { change, fee: 0 };
 
@@ -93,7 +98,7 @@ export class GreedyInputSelector implements InputSelector {
 
     for (const utxo of remaining) {
       const newInputSum = inputSum + utxo.satoshis;
-      const newFee = this.computeFee(selected.length + 1, outputsCount + 1, feeRate);
+      const newFee = this.computeFee(selected.length + 1, outputsCount + 1, feeRate, hasOpReturn);
       const newChange = newInputSum - totalOutput - BigInt(newFee);
 
       const rescued = newChange - originalChange;
@@ -101,7 +106,7 @@ export class GreedyInputSelector implements InputSelector {
 
       if (rescued >= extraCost && newChange >= BigInt(DUST_THRESHOLD)) {
         selected.push(utxo);
-        feeDelta = newFee - this.computeFee(selected.length - 1, outputsCount + 1, feeRate);
+        feeDelta = newFee - this.computeFee(selected.length - 1, outputsCount + 1, feeRate, hasOpReturn);
         return { change: newChange, fee: feeDelta };
       }
     }
