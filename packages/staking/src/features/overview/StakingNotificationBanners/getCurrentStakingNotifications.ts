@@ -1,7 +1,7 @@
 import type { StakingNotificationType } from './types';
 import type { AssetActivityListProps } from '@lace/core';
 import { CurrentPortfolioStakePool, isPortfolioDrifted } from '../../store';
-import { hasPendingDelegationTransaction, hasSaturatedOrRetiredPools } from '../helpers';
+import { hasPendingDelegationTransaction, hasPledgeNotMetPools, hasSaturatedOrRetiredPools } from '../helpers';
 
 type GetCurrentStakingNotificationsParams = {
   walletActivities: AssetActivityListProps[];
@@ -21,5 +21,6 @@ export const getCurrentStakingNotifications = ({
   return [
     isPortfolioDrifted(currentPortfolio) ? 'portfolioDrifted' : undefined,
     hasSaturatedOrRetiredPools(currentPortfolio) ? 'poolRetiredOrSaturated' : undefined,
+    hasPledgeNotMetPools(currentPortfolio) ? 'pledgeNotMet' : undefined,
   ].filter(Boolean) as StakingNotificationType[];
 };
