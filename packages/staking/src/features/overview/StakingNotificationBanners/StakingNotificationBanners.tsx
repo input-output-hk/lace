@@ -49,6 +49,16 @@ export const StakingNotificationBanners = ({ popupView, notifications }: Staking
         description={t('overview.banners.pendingPortfolioModification.message')}
       />
     ),
+    pledgeNotMet: (
+      <Banner
+        popupView={popupView}
+        withIcon
+        customIcon={<WarningTriangleIcon />}
+        message={t('overview.banners.pledgeNotMet.title')}
+        description={t('overview.banners.pledgeNotMet.message')}
+        onBannerClick={onPoolRetiredOrSaturatedBannerClick}
+      />
+    ),
     poolRetiredOrSaturated: (
       <Banner
         popupView={popupView}
