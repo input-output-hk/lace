@@ -109,80 +109,48 @@ const enrichStakePool = (stakePools: Cardano.StakePool[], id: Cardano.PoolId, de
   }
 };
 
-// eslint-disable-next-line sonarjs/cognitive-complexity, complexity
+// eslint-disable-next-line sonarjs/cognitive-complexity
 const getSorter = (sort: QueryStakePoolsArgs['sort']) => {
   if (!sort) return null;
 
   const { field, order } = sort;
+  const asc = order === 'asc';
+  const placeholder = asc ? EMPTY_TEXT_PLACEHOLDER_ASC_ORDER : EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
 
-  if (order === 'asc') {
-    switch (field) {
-      case 'name':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const nameA = a.metadata?.name || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
-          const nameB = b.metadata?.name || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
-          return nameA.localeCompare(nameB);
-        };
-      case 'ticker':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const tickerA = a.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
-          const tickerB = b.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_ASC_ORDER;
-          return tickerA.localeCompare(tickerB);
-        };
-      case 'cost':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => Number(a.cost - b.cost);
-      case 'margin':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const marginA = Cardano.FractionUtils.toNumber(a.margin);
-          const marginB = Cardano.FractionUtils.toNumber(b.margin);
-          return marginA - marginB;
-        };
-      case 'pledge':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => Number(a.pledge - b.pledge);
-      case 'blocks':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          (a.metrics?.blocksCreated || 0) - (b.metrics?.blocksCreated || 0);
-      case 'liveStake':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          Number((a.metrics?.stake.live || BigInt(0)) - (b.metrics?.stake.live || BigInt(0)));
-      case 'saturation':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          (a.metrics?.saturation || 0) - (b.metrics?.saturation || 0);
-    }
-  } else {
-    switch (field) {
-      case 'name':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const nameA = a.metadata?.name || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
-          const nameB = b.metadata?.name || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
-          return nameB.localeCompare(nameA);
-        };
-      case 'ticker':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const tickerA = a.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
-          const tickerB = b.metadata?.ticker || EMPTY_TEXT_PLACEHOLDER_DESC_ORDER;
-          return tickerB.localeCompare(tickerA);
-        };
-      case 'cost':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => Number(b.cost - a.cost);
-      case 'margin':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => {
-          const marginA = Cardano.FractionUtils.toNumber(a.margin);
-          const marginB = Cardano.FractionUtils.toNumber(b.margin);
-          return marginB - marginA;
-        };
-      case 'pledge':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) => Number(b.pledge - a.pledge);
-      case 'blocks':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          (b.metrics?.blocksCreated || 0) - (a.metrics?.blocksCreated || 0);
-      case 'liveStake':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          Number((b.metrics?.stake.live || BigInt(0)) - (a.metrics?.stake.live || BigInt(0)));
-      case 'saturation':
-        return (a: Cardano.StakePool, b: Cardano.StakePool) =>
-          (b.metrics?.saturation || 0) - (a.metrics?.saturation || 0);
-    }
+  switch (field) {
+    case 'name':
+    case 'ticker':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) => {
+        const valueA = a.metadata?.[field] || placeholder;
+        const valueB = b.metadata?.[field] || placeholder;
+        return asc ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+      };
+    case 'cost':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) => (asc ? Number(a.cost - b.cost) : Number(b.cost - a.cost));
+    case 'margin':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) => {
+        const marginA = Cardano.FractionUtils.toNumber(a.margin);
+        const marginB = Cardano.FractionUtils.toNumber(b.margin);
+        return asc ? marginA - marginB : marginB - marginA;
+      };
+    case 'pledge':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) =>
+        asc ? Number(a.pledge - b.pledge) : Number(b.pledge - a.pledge);
+    case 'blocks':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) =>
+        asc
+          ? (a.metrics?.blocksCreated || 0) - (b.metrics?.blocksCreated || 0)
+          : (b.metrics?.blocksCreated || 0) - (a.metrics?.blocksCreated || 0);
+    case 'liveStake':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) =>
+        asc
+          ? Number((a.metrics?.stake.live || BigInt(0)) - (b.metrics?.stake.live || BigInt(0)))
+          : Number((b.metrics?.stake.live || BigInt(0)) - (a.metrics?.stake.live || BigInt(0)));
+    case 'saturation':
+      return (a: Cardano.StakePool, b: Cardano.StakePool) =>
+        asc
+          ? (a.metrics?.saturation || 0) - (b.metrics?.saturation || 0)
+          : (b.metrics?.saturation || 0) - (a.metrics?.saturation || 0);
   }
 
   return null;
