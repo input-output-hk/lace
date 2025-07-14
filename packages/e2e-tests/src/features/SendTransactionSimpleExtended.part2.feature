@@ -29,11 +29,12 @@ Feature: LW-484: Send & Receive - Extended Browser View (Simple Tx)
       | Button: "Confirm"                    |
       | Button: "Cancel"                     |
 
-  @LW-3191 @Testnet @Mainnet @pending @issue=LW-13227
+  @LW-3191 @Testnet @Mainnet
   Scenario: Extended-view - Tx summary page is displayed for Byron address minimum amount
     And I click "Send" button on page header
     When I’ve entered accepted values for all fields of simple Tx for Byron with less than minimum value
-    And I click "Review transaction" button on "Send" page
+    Then "Ada allocation" is displayed on "Send" drawer
+    When I click "Review transaction" button on "Send" page
     Then The Tx summary screen is displayed for Byron with minimum value:
       | Title: "Transaction summary"         |
       | Subtitle: "Breakdown of your..."     |

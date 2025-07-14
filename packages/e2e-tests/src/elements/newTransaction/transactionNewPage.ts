@@ -29,8 +29,11 @@ class TransactionNewPage extends CommonDrawerElements {
   private TRANSACTION_FEE_LABEL = '[data-testid="transaction-fee-label"]';
   private TRANSACTION_FEE_VALUE_ADA = '[data-testid="transaction-fee-value-ada"]';
   private TRANSACTION_FEE_VALUE_FIAT = '[data-testid="transaction-fee-value-fiat"]';
+  private ADA_ALLOCATION_LABEL = '[data-testid="ada-allocation-label"]';
+  private ADA_ALLOCATION_INFO_ICON = '[data-testid="ada-allocation-info-icon"]';
   private ADA_ALLOCATION_VALUE_ADA = '[data-testid="ada-allocation-value-ada"]';
   private ADA_ALLOCATION_VALUE_FIAT = '[data-testid="ada-allocation-value-fiat"]';
+  private TOOLTIP = '.ant-tooltip';
 
   get banner(): typeof Banner {
     return Banner;
@@ -70,6 +73,14 @@ class TransactionNewPage extends CommonDrawerElements {
 
   get transactionFeeValueFiat(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TRANSACTION_FEE_VALUE_FIAT);
+  }
+
+  get adaAllocationLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ADA_ALLOCATION_LABEL);
+  }
+
+  get adaAllocationInfoIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.ADA_ALLOCATION_INFO_ICON);
   }
 
   get adaAllocationValueAda(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -122,6 +133,10 @@ class TransactionNewPage extends CommonDrawerElements {
 
   invalidAddressError(index: number): ChainablePromiseElement<WebdriverIO.Element> {
     return $(`(${this.INVALID_ADDRESS_ERROR_SELECTOR})[${index}]`);
+  }
+
+  get tooltip(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.TOOLTIP);
   }
 
   async getTransactionFeeValueInAda(): Promise<number> {

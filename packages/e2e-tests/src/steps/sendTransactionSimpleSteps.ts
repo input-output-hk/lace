@@ -359,7 +359,7 @@ Then(/^The Tx summary screen is displayed:$/, async (_ignored: string) => {
 Then(/^The Tx summary screen is displayed for Byron with minimum value:$/, async (_ignored: string) => {
   const expectedTransactionSummaryData = {
     recipientAddress: byron.getAddress(),
-    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '0.97', currency: Asset.CARDANO.ticker }]
+    valueToBeSent: [{ value: extensionUtils.isMainnet() ? '1.05' : '1.08', currency: Asset.CARDANO.ticker }]
   };
   await transactionSummaryAssert.assertSeeSummaryPage([expectedTransactionSummaryData]);
 });
@@ -605,6 +605,10 @@ When(
     }
   }
 );
+
+Then(/^"Ada allocation" is displayed on "Send" drawer$/, async () => {
+  await drawerSendExtendedAssert.assertSeeAdaAllocationEntry();
+});
 
 When(/^I click "Confirm" button on "Transaction summary" page$/, async () => {
   await TransactionSummaryPage.confirmButton.waitForEnabled();

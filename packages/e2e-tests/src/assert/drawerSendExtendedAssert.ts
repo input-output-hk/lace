@@ -138,6 +138,23 @@ class DrawerSendExtendedAssert {
     expect(await TransactionNewPage.transactionFeeValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
   }
 
+  async assertSeeAdaAllocationEntry() {
+    await TransactionNewPage.adaAllocationLabel.waitForDisplayed();
+    expect(await TransactionNewPage.adaAllocationLabel.getText()).to.equal(
+      await t('browserView.transaction.send.adaAllocation')
+    );
+
+    await TransactionNewPage.adaAllocationInfoIcon.waitForDisplayed();
+    await TransactionNewPage.adaAllocationInfoIcon.moveTo();
+    await TransactionNewPage.tooltip.waitForDisplayed();
+    expect(await TransactionNewPage.tooltip.getText()).to.equal(await t('send.toSendAnNFTOrNativeToken'));
+
+    await TransactionNewPage.adaAllocationValueAda.waitForDisplayed();
+    expect(await TransactionNewPage.adaAllocationValueAda.getText()).to.match(TestnetPatterns.ADA_LITERAL_VALUE_REGEX);
+    await TransactionNewPage.adaAllocationValueFiat.waitForDisplayed();
+    expect(await TransactionNewPage.adaAllocationValueFiat.getText()).to.match(TestnetPatterns.USD_VALUE_REGEX);
+  }
+
   async assertSeeAdaAllocationCosts(expectedValueAdaAllocation: string) {
     // may need to be updated in the future
     await browser.pause(1000);
