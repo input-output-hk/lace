@@ -34,7 +34,7 @@ export const SendTransactionCost = ({
             if (visible && onTooltipHover) onTooltipHover();
           }}
         >
-          <Info className={styles.infoIcon} />
+          <Info className={styles.infoIcon} data-testid={`${testId}-info-icon`} />
         </Tooltip>
       </div>
     </div>
