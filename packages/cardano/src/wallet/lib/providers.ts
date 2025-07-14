@@ -159,7 +159,14 @@ export const createProviders = ({
     logger
   });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
-  const stakePoolProvider = stakePoolHttpProvider(httpProviderConfig);
+  const stakePoolProvider = {
+    ...stakePoolHttpProvider(httpProviderConfig),
+    queryStakePools: async () => {
+      // eslint-disable-next-line no-magic-numbers
+      await new Promise((resolve) => setTimeout(resolve, 120_000));
+      throw new Error('test error');
+    }
+  };
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
