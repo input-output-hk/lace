@@ -222,6 +222,11 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     let data: StakePoolCachedData;
 
     try {
+      if (fetchingData) {
+        // eslint-disable-next-line no-magic-numbers
+        await new Promise((resolve) => setTimeout(resolve, 120_000));
+        throw new Error('test error');
+      }
       const stakePools = await fetchPages();
       const retiringPools = await blockfrostClient.request<Responses['pool_list_retire']>('pools/retiring');
       const retiringPoolIds = new Set(retiringPools.map(({ pool_id }) => pool_id));
