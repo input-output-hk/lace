@@ -80,6 +80,7 @@ type BuildTxProps = {
   knownAddresses: Bitcoin.DerivedAddress[];
   changeAddress: string;
   recipientAddress: string;
+  opReturnMessage: string;
   feeRate: number;
   amount: bigint;
   utxos: Bitcoin.UTxO[];
@@ -93,12 +94,14 @@ const buildTransaction = ({
   feeRate,
   amount,
   utxos,
+  opReturnMessage,
   network
 }: BuildTxProps): Bitcoin.UnsignedTransaction =>
   new Bitcoin.TransactionBuilder(network, feeRate, knownAddresses)
     .setChangeAddress(changeAddress)
     .setUtxoSet(utxos)
     .addOutput(recipientAddress, amount)
+    .addOpReturnOutput(opReturnMessage)
     .build();
 
 const btcStringToSatoshisBigint = (btcString: string): bigint => {
@@ -132,7 +135,7 @@ export const SendFlow: React.FC = () => {
   const [confirmationHash, setConfirmationHash] = useState<string>('');
   const [txError, setTxError] = useState<Error | undefined>();
   const [isWarningModalVisible, setIsWarningModalVisible] = useState(false);
-
+  const [opReturnMessage, setOpReturnMessage] = useState<string>('');
   const { priceResult } = useFetchCoinPrice();
   const { bitcoinWallet } = useWalletManager();
 
@@ -268,7 +271,8 @@ export const SendFlow: React.FC = () => {
         feeRate: newFeeRate,
         amount: btcStringToSatoshisBigint(amount),
         utxos,
-        network
+        network,
+        opReturnMessage
       }),
       isHandle: address.isHandle,
       handle: address.isHandle ? address.address : ''
@@ -333,6 +337,8 @@ export const SendFlow: React.FC = () => {
           onContinue={goToReview}
           network={network}
           hasUtxosInMempool={hasUtxosInMempool}
+          onOpReturnMessageChange={setOpReturnMessage}
+          opReturnMessage={opReturnMessage}
         />
       );
     }
@@ -348,6 +354,7 @@ export const SendFlow: React.FC = () => {
             feeRate={feeRate}
             estimatedTime={estimatedTime}
             onConfirm={goToPassword}
+            opReturnMessage={opReturnMessage}
           />
         </>
       );
