@@ -168,6 +168,8 @@
   "overview.banners.pendingFirstDelegation.title": "Your staking transaction has been submitted",
   "overview.banners.pendingPortfolioModification.message": "In case of changing pools you will continue to receive rewards from your former stake pool(s) for two epochs",
   "overview.banners.pendingPortfolioModification.title": "You are modifying your staking portfolio",
+  "overview.banners.pledgeNotMet.message": "Your stake in this pool is not earning rewards. Review and update your delegation",
+  "overview.banners.pledgeNotMet.title": "Warning: Delegated pool pledge not met",
   "overview.banners.portfolioDrifted.message": "Make sure to rebalance your staking ratios if you want to match your preferences",
   "overview.banners.portfolioDrifted.title": "Your current delegation portfolio has shifted",
   "overview.banners.saturatedOrRetiredPool.message": "Please make sure to choose other pool(s) to avoid losing rewards",

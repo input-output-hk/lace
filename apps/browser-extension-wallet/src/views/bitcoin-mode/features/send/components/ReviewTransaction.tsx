@@ -1,4 +1,4 @@
-/* eslint-disable complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 /* eslint-disable no-magic-numbers */
 import React from 'react';
 import { renderLabel, RowContainer } from '@lace/core';
@@ -16,6 +16,7 @@ interface ReviewTransactionProps {
   unsignedTransaction: Bitcoin.UnsignedTransaction & { isHandle: boolean; handle: string };
   btcToUsdRate: number;
   feeRate: number;
+  opReturnMessage: string;
   estimatedTime: string;
   onConfirm: () => void;
   onClose: () => void;
@@ -29,12 +30,14 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
   estimatedTime,
   onConfirm,
   isPopupView,
-  onClose
+  onClose,
+  opReturnMessage
 }) => {
   const { t } = useTranslation();
   const amount = Number(unsignedTransaction.amount);
   const usdValue = (amount / SATS_IN_BTC) * btcToUsdRate;
   const feeInBtc = unsignedTransaction.fee;
+  const hasOpReturn = opReturnMessage && opReturnMessage.length > 0;
 
   return (
     <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
@@ -93,6 +96,24 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
             </Flex>
           </RowContainer>
         </Box>
+
+        {hasOpReturn && (
+          <Box w="$fill" mt={isPopupView ? '$24' : '$32'}>
+            <RowContainer>
+              {renderLabel({
+                label: t('core.outputSummaryList.note'),
+                dataTestId: 'output-summary-note'
+              })}
+              <Flex flexDirection="column">
+                <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$4">
+                  <Text.Address className={styles.address} data-testid="output-summary-note">
+                    {opReturnMessage}
+                  </Text.Address>
+                </Flex>
+              </Flex>
+            </RowContainer>
+          </Box>
+        )}
 
         <Box w="$fill" mt={isPopupView ? '$32' : '$40'} mb="$8" className={styles.divider} />
 

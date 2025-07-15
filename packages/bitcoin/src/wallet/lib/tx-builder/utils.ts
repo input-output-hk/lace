@@ -48,12 +48,24 @@ export const historyEntryFromRawTx = async (
     })
   );
 
-  const resolvedOutputs = tx.outs.map((output) => {
-    const address = bitcoin.address.fromOutputScript(output.script, bitcoinNetwork);
-    return {
-      address,
-      satoshis: BigInt(output.value)
-    };
+  const resolvedOutputs = tx.outs.map((o) => {
+    const chunks = bitcoin.script.decompile(o.script);
+    const isNullData = chunks && chunks[0] === bitcoin.opcodes.OP_RETURN;
+
+    if (isNullData) {
+      const payloadChunks = chunks.slice(1).filter((c: Buffer) => Buffer.isBuffer(c)) as Buffer[];
+
+      const opReturnData = Buffer.concat(payloadChunks).toString('utf8');
+
+      return {
+        address: '',
+        satoshis: BigInt(o.value),
+        opReturnData
+      };
+    }
+
+    const address = bitcoin.address.fromOutputScript(o.script, bitcoinNetwork);
+    return { address, satoshis: BigInt(o.value) };
   });
 
   return {
