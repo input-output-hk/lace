@@ -660,7 +660,7 @@
   "dapp.noWallet.heading": "You don't have a wallet right now",
   "dapp.sign.data.failure.description": "Signing failed. Please try again",
   "dapp.sign.data.success.description": "Data signed",
-  "dapp.sign.failure.description": "The transaction has not been proceed. Please try again",
+  "dapp.sign.failure.description": "The transaction has not been processed. Please try again",
   "dapp.signData.failure.description": "The data has not been signed. Please try again",
   "dapp.sign.failure.title": "Oops something went wrong!",
   "dapp.sign.header": "Sign transaction",
