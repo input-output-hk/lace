@@ -26,7 +26,6 @@ import { WarningModal } from '@src/views/browser-view/components';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import styles from './AssetPicker.module.scss';
 import { useCurrencyStore } from '@providers';
-import { isNFT } from '@src/utils/is-nft';
 import { logger, useObservable, VirtualisedGridColumns } from '@lace/common';
 import { searchToken } from '../../assets/components/AssetsPortfolio/AssetPortfolioContent';
 import { searchNft } from '@hooks/useNftSearch';
@@ -197,7 +196,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
   const changePickedCoin = (id: string) => {
     setPickedCoin(row, { prev: coinId, next: id });
     const assetInfo = getAssetInfo(id);
-    if (isNFT(assetInfo)) {
+    if (Wallet.util.isNFT(assetInfo)) {
       setCoinValue(row, { id, value: '1' });
     }
 
@@ -206,7 +205,7 @@ export const AssetPicker = ({ isPopupView }: AssetPickerProps): React.ReactEleme
 
   const handleMultipleTokens = (id: string) => {
     const assetInfo = getAssetInfo(id);
-    setSelectedTokenList(id, isNFT(assetInfo));
+    setSelectedTokenList(id, Wallet.util.isNFT(assetInfo));
   };
 
   const handleSearchNfts = useCallback(

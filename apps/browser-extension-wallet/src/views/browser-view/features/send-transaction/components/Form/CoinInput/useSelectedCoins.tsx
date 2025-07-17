@@ -19,7 +19,6 @@ import { compactNumberWithUnit, handleFormattedValueChange, formatNumberForDispl
 import { getADACoinProperties, getAssetFiatValue, getAssetProperties } from './util';
 import { isValidAddress } from '@src/utils/validators';
 import { shortenString } from '@src/utils/format-string';
-import { isNFT } from '@src/utils/is-nft';
 import { APP_MODE_POPUP } from '@src/utils/constants';
 import { useCallback } from 'react';
 import { AssetInfo } from '../../../types';
@@ -241,7 +240,10 @@ export const useSelectedCoins = ({
           amount: compactNumberWithUnit(totalAssetBalance)
         }),
         ...(appMode === APP_MODE_POPUP && {
-          shortTicker: shortenString(ticker, isNFT(assetInfo) ? MAX_NFT_TICKER_LENGTH : MAX_TOKEN_TICKER_LENGTH)
+          shortTicker: shortenString(
+            ticker,
+            Wallet.util.isNFT(assetInfo) ? MAX_NFT_TICKER_LENGTH : MAX_TOKEN_TICKER_LENGTH
+          )
         })
       },
       fiatValue: getAssetFiatValue(assetInputItem, assetInfo, prices, fiatCurrency),

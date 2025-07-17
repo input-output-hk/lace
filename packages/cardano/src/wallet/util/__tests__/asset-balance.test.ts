@@ -26,6 +26,15 @@ describe('asset-balance', () => {
       );
       expect(calculateAssetBalance(BigInt(15), { tokenMetadata: { decimals: 0 } } as Asset.AssetInfo)).toEqual('15');
     });
+
+    test('NFT with supply of 1 and decimals metadata - should ignore decimals', () => {
+      const nftAssetInfo = {
+        supply: BigInt(1),
+        tokenMetadata: { decimals: 5 }
+      } as Asset.AssetInfo;
+      expect(calculateAssetBalance(BigInt(1), nftAssetInfo)).toEqual('1');
+      expect(calculateAssetBalance(BigInt(15), nftAssetInfo)).toEqual('15');
+    });
   });
 
   describe('assetBalanceToBigInt', () => {
@@ -60,6 +69,15 @@ describe('asset-balance', () => {
       expect(assetBalanceToBigInt('9507199254740992', { tokenMetadata: { decimals: 0 } } as Asset.AssetInfo)).toEqual(
         BigInt(9_507_199_254_740_992)
       );
+    });
+
+    test('NFT with supply of 1 and decimals metadata - should ignore decimals', () => {
+      const nftAssetInfo = {
+        supply: BigInt(1),
+        tokenMetadata: { decimals: 5 }
+      } as Asset.AssetInfo;
+      expect(assetBalanceToBigInt('1', nftAssetInfo)).toEqual(BigInt(1));
+      expect(assetBalanceToBigInt('15', nftAssetInfo)).toEqual(BigInt(15));
     });
   });
 });
