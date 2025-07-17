@@ -41,7 +41,6 @@
   "scripts": {
     "build": "rm -rf dist && run -T rollup -c rollup.config.js",
     "build-storybook": "storybook build",
-    "chromatic": "echo \"@lace/nami: no chromatic command specified\"",
     "cleanup": "yarn exec rm -rf dist node_modules",
     "format": "yarn prettier --write .",
     "format-check": "yarn prettier --check .",
@@ -51,7 +50,6 @@
     "start": "node dist/index.js",
     "storybook": "storybook dev -p 6006 --debug",
     "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js --silent",
-    "test-storybook:ci": "echo \"@lace/nami: no test-storybook:ci specified\"",
     "type-check": "echo \"@lace/nami: no type-check command specified\"",
     "watch": "yarn build --watch"
   },
@@ -94,7 +92,6 @@
     "use-constant": "^1.1.0"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^1.5.0",
     "@rollup/plugin-image": "^3.0.3",
     "@storybook/addon-essentials": "^8.1.6",
     "@storybook/addon-interactions": "^8.1.6",

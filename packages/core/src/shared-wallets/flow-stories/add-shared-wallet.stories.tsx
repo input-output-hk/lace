@@ -5,7 +5,6 @@ import { AddSharedWalletStorybookHelper, sharedWalletKey } from './AddSharedWall
 const meta: Meta<typeof AddSharedWalletStorybookHelper> = {
   component: AddSharedWalletStorybookHelper,
   parameters: {
-    chromatic: { disableSnapshot: true },
     decorators: {
       colorSchema: false,
     },
