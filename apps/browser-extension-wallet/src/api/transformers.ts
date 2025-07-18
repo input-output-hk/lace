@@ -14,7 +14,6 @@ import { formatDate, formatTime } from '../utils/format-date';
 import { TokenInfo } from '@src/utils/get-assets-information';
 import { getTokenAmountInFiat, parseFiat } from '@src/utils/assets-transformers';
 import { PriceResult } from '@hooks';
-import { mayBeNFT } from '@src/utils/is-nft';
 
 export const walletBalanceTransformer = (lovelaceBalance: string, fiat?: number): WalletBalance => {
   const adaValue = Wallet.util.lovelacesToAdaString(lovelaceBalance);
@@ -62,7 +61,9 @@ export const tokenTransformer = (
   const { name } = { ...tokenMetadata, ...nftMetadata };
   const [assetId, bigintBalance] = assetBalance;
   const amount = Wallet.util.calculateAssetBalance(bigintBalance, assetInfo);
-  const tokenPriceInAda = mayBeNFT(assetInfo) ? undefined : prices?.cardano.getTokenPrice(assetId)?.priceInAda;
+  const tokenPriceInAda = Wallet.util.mayBeNFT(assetInfo)
+    ? undefined
+    : prices?.cardano.getTokenPrice(assetId)?.priceInAda;
   const fiatBalance =
     tokenMetadata !== undefined &&
     tokenPriceInAda &&

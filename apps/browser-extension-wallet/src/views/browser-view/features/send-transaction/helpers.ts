@@ -10,7 +10,6 @@ import {
 } from './types';
 import BigNumber from 'bignumber.js';
 import isNil from 'lodash/isNil';
-import { isNFT, mayBeNFT } from '@src/utils/is-nft';
 import flatMapDeep from 'lodash/flatMapDeep';
 import { CardanoTxOut, CurrencyInfo, TokensDetails } from '@types';
 import { PriceResult } from '@hooks';
@@ -190,7 +189,7 @@ const getCardanoCoinAnalyticsProperties = (cardanoCoin: Wallet.CoinId, amount: s
 
 const getAssetAnalyticsProperties = (assetsMap: Wallet.Assets, id: string, amount: string) => {
   const info = assetsMap.get(Wallet.Cardano.AssetId(id));
-  const name = isNFT(info) ? info?.nftMetadata?.name : info?.tokenMetadata?.name;
+  const name = Wallet.util.isNFT(info) ? info?.nftMetadata?.name : info?.tokenMetadata?.name;
   const ticker = info?.tokenMetadata?.ticker;
   return { id: info?.fingerprint, amount, name, ticker };
 };
@@ -256,7 +255,7 @@ export const formatRow = ({
     if (asset) {
       const ticker = asset.nftMetadata?.name ?? asset.tokenMetadata?.ticker ?? asset.tokenMetadata?.name;
       const amount = Wallet.util.calculateAssetBalance(balance, asset);
-      const tokenPriceInAda = mayBeNFT(asset) ? undefined : prices?.cardano.getTokenPrice(id)?.priceInAda;
+      const tokenPriceInAda = Wallet.util.mayBeNFT(asset) ? undefined : prices?.cardano.getTokenPrice(id)?.priceInAda;
       const fiatAmount =
         asset.tokenMetadata !== undefined && tokenPriceInAda
           ? `${parseFiat(Number(getTokenAmountInFiat(amount, tokenPriceInAda, prices?.cardano?.price)))} ${

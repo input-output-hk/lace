@@ -1,5 +1,6 @@
 import { Asset } from '@cardano-sdk/core';
 import BigNumber from 'bignumber.js';
+import { isNFT } from './is-nft';
 
 const BASE = 10;
 
@@ -15,7 +16,7 @@ const getPlaceholderDecimal = (value: string) => {
 
 export const calculateAssetBalance = (balance: bigint | string, assetInfo?: Asset.AssetInfo): string => {
   const decimals = assetInfo?.tokenMetadata?.decimals;
-  if (!decimals) return balance.toString();
+  if (isNFT(assetInfo) || !decimals) return balance.toString();
 
   return new BigNumber(balance.toString()).div(new BigNumber(BASE).pow(decimals)).toString();
 };
@@ -24,7 +25,7 @@ export const assetBalanceToBigInt = (balanceWithDecimals: string, assetInfo?: As
   const tokenMetadataDecimals = assetInfo?.tokenMetadata?.decimals;
   const decimals = tokenMetadataDecimals ? tokenMetadataDecimals : getPlaceholderDecimal(balanceWithDecimals);
 
-  if (!decimals) return BigInt(balanceWithDecimals);
+  if (isNFT(assetInfo) || !decimals) return BigInt(balanceWithDecimals);
 
   return BigInt(new BigNumber(balanceWithDecimals).times(new BigNumber(BASE).pow(decimals)).toFixed(0).toString());
 };

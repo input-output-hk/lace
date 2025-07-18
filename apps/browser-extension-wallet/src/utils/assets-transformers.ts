@@ -14,7 +14,6 @@ import { TokenPrice } from '@lib/scripts/types';
 import { PriceResult } from '@hooks';
 import { getTokenDisplayMetadata } from '@utils/get-token-list';
 import { getRandomIcon } from '@lace/common';
-import { isNFT } from './is-nft';
 
 export const variationParser = (variation: number): string =>
   `${variation > 0 ? '+' : ''}${formatLocaleNumber(variation.toString())}`;
@@ -130,7 +129,7 @@ export const getTotalAssetsByAddress = (
     .reduce((allAssets, key) => allAssets.add(key), new Set<string>());
 
   const nftsInAssets = [...countedAssets]
-    .filter((key: Wallet.Cardano.AssetId) => assets.has(key) && isNFT(assets.get(key)))
+    .filter((key: Wallet.Cardano.AssetId) => assets.has(key) && Wallet.util.isNFT(assets.get(key)))
     .reduce((nfts, key) => nfts.add(key), new Set<string>());
 
   return { assets: countedAssets.size, nfts: nftsInAssets.size };

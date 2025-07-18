@@ -27,7 +27,7 @@ import { config } from '@src/config';
 import Bottleneck from 'bottleneck';
 import { ActiveWallet } from '@cardano-sdk/web-extension';
 import { ObservableWallet } from '@cardano-sdk/wallet';
-import { mayBeNFT } from '@src/utils/is-nft';
+import { Wallet } from '@lace/cardano';
 
 /** The subset of token data from CoinGecko relevant for Lace to show token prices. */
 type PriceData = [priceInAda: number, priceVariationPercentage24h: number];
@@ -141,7 +141,7 @@ const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
 const fungibleTokenAssetIds = (wallet: ObservableWallet) =>
   combineLatest([wallet.balance.utxo.total$, wallet.assetInfo$]).pipe(
     mergeMap(([{ assets = new Map() }, assetInfoMap]) =>
-      [...assets.keys()].filter((assetId) => !mayBeNFT(assetInfoMap.get(assetId)))
+      [...assets.keys()].filter((assetId) => !Wallet.util.mayBeNFT(assetInfoMap.get(assetId)))
     )
   );
 

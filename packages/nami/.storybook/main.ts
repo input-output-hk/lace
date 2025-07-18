@@ -16,7 +16,6 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-webpack5-compiler-swc'),
     getAbsolutePath('@storybook/addon-links'),
     getAbsolutePath('@storybook/addon-essentials'),
-    getAbsolutePath('@chromatic-com/storybook'),
     {
       name: '@storybook/addon-styling',
       options: {
