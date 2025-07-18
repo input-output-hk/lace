@@ -32,6 +32,7 @@ export type Config = {
   CEXPLORER_URL_PATHS: CExplorerUrlPaths;
   SAVED_PRICE_DURATION: number;
   DEFAULT_SUBMIT_API: string;
+  DEFAULT_BLOCKFROST_API: string;
   GOV_TOOLS_URLS: Record<EnvironmentTypes, string>;
   TEMPO_VOTE_URLS: Record<EnvironmentTypes, string>;
   SESSION_TIMEOUT: Milliseconds;
@@ -142,6 +143,7 @@ export const config = (): Config => {
       ? Number(process.env.SAVED_PRICE_DURATION_IN_MINUTES)
       : 720,
     DEFAULT_SUBMIT_API: 'http://localhost:8090/api/submit/tx',
+    DEFAULT_BLOCKFROST_API: 'http://127.0.0.1:60536',
     GOV_TOOLS_URLS: {
       Mainnet: `${process.env.GOV_TOOLS_URL_MAINNET}`,
       Preprod: `${process.env.GOV_TOOLS_URL_PREPROD}`,
