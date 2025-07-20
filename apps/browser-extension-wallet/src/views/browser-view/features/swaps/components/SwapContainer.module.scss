@@ -1,0 +1,97 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/_typography';
+@import '../../../../../styles/rules/modal.scss';
+
+.modal {
+  @extend %modal-globals;
+
+  &:global(.ant-modal) {
+    max-width: calc(100vw - 50px) !important;
+    gap: size_unit(2);
+  }
+
+  .modalColumn {
+    gap: size_unit(2);
+    flex-direction: column;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex: 1;
+  gap: size_unit(2);
+  flex-direction: row;
+}
+
+.button {
+  font-weight: 600 !important;
+}
+
+.slippageBlock {
+  gap: size_unit(2);
+}
+
+.swapArrow {
+  margin-top: -#{size_unit(3)};
+  margin-bottom: -#{size_unit(3)};
+  padding: 12px;
+  background-color: 'white';
+  width: size_unit(6);
+  height: size_unit(6);
+  z-index: 1;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
+.swapContainer {
+  padding: size_unit(4);
+}
+
+.swapTokenCard {
+  padding: size_unit(3);
+  padding-left: size_unit(4);
+  padding-right: size_unit(4);
+  width: 100%;
+}
+
+.swapTokenATextbox {
+  background-color: transparent;
+  padding-left: 0px;
+  outline: none !important;
+  border: none !important;
+  height: unset;
+  input {
+    top: unset;
+    line-height: 32px;
+    font-weight: 600;
+    font-size: 25px;
+    padding: 0 !important;
+    outline: none !important;
+    border: none !important;
+    height: unset;
+
+    &:hover {
+      outline: none !important;
+      border: none !important;
+      height: unset;
+    }
+  }
+  label {
+    display: none;
+  }
+}
+
+.swapTokenSelectTrigger {
+  border-radius: 40px;
+  background-color: transparent;
+  width: 180px;
+}
+
+.swapTokenIcon {
+  border-radius: 100%;
+  padding: size_unit(1);
+  background-color: 'white';
+  display: flex;
+  justify-content: center;
+}

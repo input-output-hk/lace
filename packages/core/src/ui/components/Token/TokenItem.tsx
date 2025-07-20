@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import DefaultActivityImage from '../../assets/images/token-default-logo.png';
 import { ReactComponent as SelectedIcon } from '../../assets/icons/check-token-icon.svg';
-
 import styles from './TokenItem.module.scss';
 import { useTranslation } from 'react-i18next';
 import { ImageWithFallback } from '../ImageWithFallback';
+import cn from 'classnames';
+import noop from 'lodash/noop';
 
 export interface TokenItemProps {
   amount: string;
@@ -15,6 +16,7 @@ export interface TokenItemProps {
   defaultLogo?: string;
   onClick?: () => void;
   selected?: boolean;
+  disabled?: boolean;
 }
 
 export const TokenItem = ({
@@ -25,7 +27,8 @@ export const TokenItem = ({
   description,
   selected,
   logo = DefaultActivityImage,
-  defaultLogo = DefaultActivityImage
+  defaultLogo = DefaultActivityImage,
+  disabled
 }: TokenItemProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isDeselectVisible, setDeselectVisibility] = useState(false);
@@ -35,12 +38,14 @@ export const TokenItem = ({
 
   // add hover action only when token is selected
   const amountContainerMouseHandlers = selected ? { onMouseEnter: handleMouseIn, onMouseLeave: handleMouseOut } : {};
+
+  const handleClick = useCallback(() => (disabled ? noop() : onClick?.()), [disabled, onClick]);
   return (
     <div
       {...amountContainerMouseHandlers}
       data-testid="coin-search-row"
-      onClick={onClick}
-      className={styles.tokenContainer}
+      onClick={handleClick}
+      className={cn(styles.tokenContainer, { [styles.disabled]: disabled })}
     >
       <div className={styles.leftSide}>
         <div data-testid="coin-search-row-icon" className={styles.iconWrapper}>

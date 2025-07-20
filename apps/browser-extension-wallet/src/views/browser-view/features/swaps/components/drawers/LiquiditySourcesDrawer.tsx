@@ -1,0 +1,60 @@
+import React, { useState, useCallback, ReactElement } from 'react';
+import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Drawer, DrawerHeader, DrawerNavigation, Switch, PostHogAction } from '@lace/common';
+import { SwapStage } from '../../types';
+import { useSwaps } from '../SwapProvider';
+import { useTranslation } from 'react-i18next';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+
+export const LiquiditySourcesDrawer = (): ReactElement => {
+  const { t } = useTranslation();
+  const posthog = usePostHogClientContext();
+  const { stage, setStage, setExcludedDexs, dexList, excludedDexs } = useSwaps();
+
+  const [localExcludedDexs, setLocalExcludedDexs] = useState(excludedDexs);
+  const handleConfirmDexChoices = useCallback(() => {
+    setExcludedDexs(localExcludedDexs);
+    posthog.sendEvent(PostHogAction.SwapsAdjustSources, {
+      excludedDexs: localExcludedDexs
+    });
+    setStage(SwapStage.Initial);
+  }, [localExcludedDexs, setExcludedDexs, setStage, posthog]);
+
+  return (
+    <Drawer
+      open={stage === SwapStage.SelectLiquiditySources}
+      maskClosable
+      onClose={() => setStage(SwapStage.Initial)}
+      title={<DrawerHeader title={t('swaps.liquiditySourcesDrawer.heading')} />}
+      navigation={
+        <DrawerNavigation
+          title={t('swaps.liquiditySourcesDrawer.title')}
+          onCloseIconClick={() => setStage(SwapStage.Initial)}
+        />
+      }
+      dataTestId="swap-liquidity-sources-drawer"
+      footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleConfirmDexChoices} />}
+    >
+      <div>
+        <Text.Body.Normal>{t('swaps.liquiditySourcesDrawer.subtitle')}</Text.Body.Normal>
+        <Flex flexDirection={'column'} w="$fill" gap={'$8'}>
+          {dexList.length > 0 &&
+            dexList.map((dex) => (
+              <Flex key={dex} w={'$fill'} justifyContent={'space-between'}>
+                <Text.Body.Normal>{dex}</Text.Body.Normal>
+                <Switch
+                  checked={!localExcludedDexs?.includes(dex)}
+                  onChange={(checked) =>
+                    checked
+                      ? setLocalExcludedDexs(localExcludedDexs.filter((d) => d !== dex))
+                      : setLocalExcludedDexs([...localExcludedDexs, dex])
+                  }
+                  testId={`dex-switch-${dex}`}
+                />
+              </Flex>
+            ))}
+        </Flex>
+      </div>
+    </Drawer>
+  );
+};

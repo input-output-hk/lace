@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { walletRoutePaths } from '../../routes';
@@ -24,6 +25,9 @@ import TransactionsIconHover from '../../assets/icons/hover-transactions-icon.co
 import VotingIconDefault from '../../assets/icons/voting-icon.component.svg';
 import VotingIconHover from '../../assets/icons/hover-voting-icon.component.svg';
 
+import SwapIconDefault from '../../assets/icons/trending-up.component.svg';
+import SwapIconHover from '../../assets/icons/hover-trending-up.component.svg';
+
 import { MenuItemList } from '@src/utils/constants';
 import styles from './MainFooter.module.scss';
 import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
@@ -38,7 +42,7 @@ const { GOV_TOOLS_URLS } = config();
 
 const includesCoin = /coin/i;
 
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity, sonarjs/cognitive-complexity
 export const MainFooter = (): React.ReactElement => {
   const location = useLocation<{ pathname: string }>();
   const history = useHistory();
@@ -48,6 +52,7 @@ export const MainFooter = (): React.ReactElement => {
   const backgroundServices = useBackgroundServiceAPIContext();
 
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
+  const isSwapCenterEnabled = posthog.isFeatureFlagEnabled(ExperimentName.SWAP_CENTER);
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
   const currentLocation = location?.pathname;
   const isWalletIconActive =
@@ -68,6 +73,7 @@ export const MainFooter = (): React.ReactElement => {
   const StakingIcon = currentHoveredItem === MenuItemList.STAKING ? StakingIconHover : StakingIconDefault;
   const DappExplorerIcon = currentHoveredItem === MenuItemList.DAPPS ? DappExplorerIconHover : DappExplorerIconDefault;
   const VotingIcon = currentHoveredItem === MenuItemList.VOTING ? VotingIconHover : VotingIconDefault;
+  const SwapIcon = currentHoveredItem === MenuItemList.VOTING ? SwapIconHover : SwapIconDefault;
 
   const sendAnalytics = (postHogAction?: PostHogAction) => {
     if (postHogAction) {
@@ -95,6 +101,11 @@ export const MainFooter = (): React.ReactElement => {
       case walletRoutePaths.dapps:
         // TODO: LW-11885 send proper dapp explorer event
         break;
+    }
+
+    if (path === walletRoutePaths.swaps) {
+      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SWAPS });
+      return;
     }
 
     if (path === walletRoutePaths.dapps) {
@@ -176,6 +187,20 @@ export const MainFooter = (): React.ReactElement => {
             onClick={() => handleNavigation(walletRoutePaths.dapps)}
           >
             <DappExplorerIcon className={styles.icon} />
+          </button>
+        )}
+        {isSwapCenterEnabled && (
+          <button
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.SWAPS)}
+            onMouseLeave={onMouseLeaveItem}
+            data-testid="main-footer-swaps"
+            onClick={() => handleNavigation(walletRoutePaths.swaps)}
+          >
+            {currentLocation === walletRoutePaths.swaps ? (
+              <SwapIconHover className={styles.icon} />
+            ) : (
+              <SwapIcon className={styles.icon} />
+            )}
           </button>
         )}
       </div>

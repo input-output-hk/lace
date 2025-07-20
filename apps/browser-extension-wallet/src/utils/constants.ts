@@ -83,7 +83,8 @@ export enum MenuItemList {
   TRANSACTIONS = 'transactions',
   STAKING = 'staking',
   DAPPS = 'dapps',
-  VOTING = 'voting'
+  VOTING = 'voting',
+  SWAPS = 'swaps'
 }
 
 export const POPUP_WINDOW = {
