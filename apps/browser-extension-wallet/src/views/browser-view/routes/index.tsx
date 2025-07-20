@@ -47,6 +47,7 @@ import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { SwapsContainer } from '../features/swaps';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -84,6 +85,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.nfts,
     component: NftsLayout
+  },
+  {
+    path: routes.swaps,
+    component: SwapsContainer
   }
 ];
 

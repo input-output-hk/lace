@@ -326,7 +326,9 @@ export enum PostHogAction {
   RenameWalletCancelClick = 'rename wallet | cancel | click',
   // Voting Center
   VotingClick = 'voting | voting | click',
-  VotingBannerButtonClick = 'voting | voting | banner | button | click'
+  VotingBannerButtonClick = 'voting | voting | banner | button | click',
+  // Swaps
+  SwapsClick = 'swaps | click'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -15,7 +15,8 @@ export enum ExperimentName {
   BITCOIN_WALLETS = 'bitcoin-wallets',
   NFTPRINTLAB = 'nftprintlab',
   GLACIER_DROP = 'glacier-drop',
-  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market'
+  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
+  SWAP_CENTER = 'swap-center'
 }
 
 export type FeatureFlag = `${ExperimentName}`;

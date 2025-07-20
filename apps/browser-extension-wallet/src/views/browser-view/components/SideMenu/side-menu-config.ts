@@ -82,6 +82,15 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     regularIcon: DappExplorerIconDefault,
     hoverIcon: DappExplorerIconHover,
     activeIcon: DappExplorerIconActive
+  },
+  {
+    id: MenuItemList.SWAPS,
+    label: 'browserView.sideMenu.links.swapsCenter',
+    testId: 'item-swaps',
+    path: routes.swaps,
+    regularIcon: DappExplorerIconDefault,
+    hoverIcon: DappExplorerIconHover,
+    activeIcon: DappExplorerIconActive
   }
 ];
 
