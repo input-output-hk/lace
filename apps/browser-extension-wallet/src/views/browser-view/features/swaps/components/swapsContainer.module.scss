@@ -1,0 +1,32 @@
+@import '../../../../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../../../../packages/common/src/ui/styles/abstracts/_typography';
+@import '../../../../../styles/rules/modal.scss';
+
+.modal {
+  @extend %modal-globals;
+
+  &:global(.ant-modal) {
+    max-width: calc(100vw - 50px) !important;
+    gap: size_unit(2);
+  }
+
+  .modalColumn {
+    gap: size_unit(2);
+    flex-direction: column;
+  }
+}
+
+.buttons {
+  display: flex;
+  flex: 1;
+  gap: size_unit(2);
+  flex-direction: row;
+}
+
+.button {
+  font-weight: 600 !important;
+}
+
+.slippageBlock {
+  gap: size_unit(2);
+}

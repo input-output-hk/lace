@@ -56,7 +56,9 @@ const transformManifest = (content, mode, jsAssets = []) => {
       .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST)
       .replace('$MEMPOOLSPACE_URL', process.env.MEMPOOLSPACE_URL)
       .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN))
-      .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL);
+      .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL)
+      .replace('$SWAPS_API_SECURE_URL', process.env.SWAPS_API_SECURE_URL)
+      .replace('$SWAPS_API_INSECURE_URL', process.env.SWAPS_API_INSECURE_URL);
 
     if (process.env.BROWSER === 'firefox') {
       manifest.browser_specific_settings = {

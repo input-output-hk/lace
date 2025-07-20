@@ -26,6 +26,8 @@ export const SideMenu = (): React.ReactElement => {
   const analytics = useAnalyticsContext();
   const posthog = usePostHogClientContext();
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
+  const isSwapCenterEnabled = posthog.isFeatureFlagEnabled(ExperimentName.SWAP_CENTER);
+
   const { isSharedWallet, environmentName } = useWalletStore();
   const { blockchain } = useCurrentBlockchain();
 
@@ -66,6 +68,8 @@ export const SideMenu = (): React.ReactElement => {
       case routes.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
         break;
+      case routes.swaps:
+        sendAnalytics(PostHogAction.SwapsClick);
     }
     push(field.key);
   };
@@ -86,6 +90,9 @@ export const SideMenu = (): React.ReactElement => {
   }
   if (!isVotingCenterEnabled) {
     excludeItems.push(MenuItemList.VOTING);
+  }
+  if (!isSwapCenterEnabled) {
+    excludeItems.push(MenuItemList.SWAPS);
   }
   const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
 
