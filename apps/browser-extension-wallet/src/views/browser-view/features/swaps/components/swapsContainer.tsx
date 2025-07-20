@@ -15,6 +15,8 @@ import { useAssetInfo } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import { DEFAULT_WALLET_BALANCE } from '@src/utils/constants';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { Switch } from '@lace/common';
+
 const { Title } = Typography;
 
 /**
@@ -38,33 +40,37 @@ const defaultSlippagePercentages = [0.1, 0.3, 0.5]; // TODO: get from posthog
 const initialSlippagePercentage = 3;
 
 const getDexList = async () => {
-  const response = await window.fetch(`${process.env.SWAPS_API_URL}/dex/list`, { method: 'GET' });
+  const response = await window.fetch(`${process.env.SWAPS_API_SECURE_URL}/dex/list`, { method: 'GET' });
 
   if (!response.ok) {
     throw new Error('Unexpected response');
   }
 
-  const parsedResponse = (await response.json()) as { results: string[] };
-  return parsedResponse.results;
+  const parsedResponse = (await response.json()) as string[];
+  return parsedResponse;
 };
 
 const getSwappableTokensList = async () => {
-  const response = await window.fetch(`${process.env.SWAPS_API_URL}/tokens/list`, { method: 'GET' });
+  const response = await window.fetch(`${process.env.SWAPS_API_SECURE_URL}/tokens/list`, { method: 'GET' });
 
   if (!response.ok) {
     throw new Error('Unexpected response');
   }
 
-  const parsedResponse = (await response.json()) as { results: TokenListFetchResponse };
-  return parsedResponse.results;
+  const parsedResponse = (await response.json()) as TokenListFetchResponse[];
+  return parsedResponse;
 };
 
 export const SwapsContainer = (): React.ReactElement => {
   const { t } = useTranslation();
-  const [tokenA, setTokenA] = useState<{ token: string; amount: string }>({ token: 'ADA', amount: '0' });
-  const [tokenB, setTokenB] = useState<{ token: string; amount: string }>({ token: '', amount: '0' });
+  const [tokenAName, setTokenAName] = useState<string>('lovelace');
+  const [tokenBName, setTokenBName] = useState<string>();
+  const [quantity, setQuantity] = useState<number>();
+  const [predictFromOutputAmount, setPredictFromOutputAmount] = useState(false);
   const [dexList, setDexList] = useState<string[]>([]);
-  const [chosenDexList, setChosenDexList] = useState<string[]>([]);
+  const [ignoredDexs, setIgnoredDexs] = useState<string[]>([]);
+  const [dexTokenList, setDexTokenList] = useState<TokenListFetchResponse[]>([]);
+
   const swapCenterPayload = usePostHogClientContext().getFeatureFlagPayload('swap-center');
   console.log(swapCenterPayload);
   const [isSlippageModalVisible, setIsSlippageModalVisible] = useState(false);
@@ -91,10 +97,57 @@ export const SwapsContainer = (): React.ReactElement => {
   useEffect(() => {
     getDexList().then((response) => {
       setDexList(response);
-      setChosenDexList(response);
     });
-    getSwappableTokensList();
+    getSwappableTokensList().then((response) => {
+      setDexTokenList(response);
+    });
   }, []);
+
+  useEffect(() => {
+    const estimateSwap = async () => {
+      // estimate the swap
+      /**
+       * Inputs:
+        tokenA - The swap input token (hex encoded asset)
+        tokenB - The swap output token (hex encoded asset)
+        quantity - The quantity of either the input or output token
+        predictFromOutputAmount - When false (default), the quantity is tokenA and the amount of tokenB is estimated. When false, the quantity is tokenB and the amount of tokenA is estimated.
+        ignoreDexes - A list of DEXes used to estimate the swap split. If ignoreDexes is an empty array (default), all DEXes are used.
+        partner: str | None - A partner name. This will lead to different fee structure.
+        da: list[dict[str, int]] | None | str - A list of assets for fee reductions.
+        Returns
+        A list of JSON objects that give information on solo swaps for each pool on each DEX as well as the optimal swap split. Only returns dexes with non-zero values in out_split.
+       */
+
+      const postBody = JSON.stringify({
+        tokenA: tokenAName,
+        tokenB: tokenBName,
+        quantity,
+        predictFromOutputAmount,
+        ignoreDexes: ignoredDexs,
+        partner: '',
+        hop: true,
+        da: []
+      });
+
+      const response = await window.fetch(`${process.env.SWAPS_API_SECURE_URL}/swap/estimate`, {
+        method: 'POST',
+        body: postBody
+      });
+
+      if (!response.ok) {
+        throw new Error('Unexpected response');
+      }
+
+      const parsedResponse = (await response.json()) as string[];
+      console.log('GOT AN ESTIMATE', parsedResponse);
+      return parsedResponse;
+    };
+
+    if (!!quantity && !!tokenAName && !!tokenBName) {
+      estimateSwap();
+    }
+  }, [quantity, tokenAName, tokenBName, predictFromOutputAmount]);
 
   const educationalItems = [
     {
@@ -149,14 +202,25 @@ export const SwapsContainer = (): React.ReactElement => {
                   align="selected"
                   variant="outline"
                   showArrow
-                  value={tokenA?.token}
-                  onChange={(v) => setTokenA({ amount: '0', token: v })}
+                  value={tokenAName || ''}
+                  onChange={(v) => setTokenAName(v)}
                 >
+                  <Select.Item title="ADA" value="lovelace" />
                   {swappableTokens.map((token) => (
-                    <Select.Item key={token.name} title={token.name} value={token.name} />
+                    <Select.Item
+                      key={token.name}
+                      title={token.name}
+                      value={Buffer.from(token.assetId).toString('hex')}
+                    />
                   ))}
                 </Select.Root>
-                <TextBox label="" value={tokenA?.amount} />
+                <TextBox
+                  label=""
+                  onChange={(e) => {
+                    setQuantity(Number(e.target.value));
+                    setPredictFromOutputAmount(false);
+                  }}
+                />
               </Flex>
             </Card.Outlined>
             <Title level={3}>To get</Title>
@@ -166,14 +230,24 @@ export const SwapsContainer = (): React.ReactElement => {
                   align="selected"
                   variant="outline"
                   showArrow
-                  value={tokenB?.token}
-                  onChange={(v) => setTokenB({ amount: '0', token: v })}
+                  value={tokenBName}
+                  onChange={(v) => setTokenBName(v)}
                 >
-                  {swappableTokens.map((token) => (
-                    <Select.Item key={token.name} title={token.name} value={token.name} />
+                  {dexTokenList.map((token) => (
+                    <Select.Item
+                      key={`${token.name}-${token.policyId}`}
+                      title={token.name}
+                      value={`${token.policyId}${Buffer.from(token.ticker).toString('hex')}`}
+                    />
                   ))}
                 </Select.Root>
-                <TextBox label="" value={tokenA?.amount} />
+                <TextBox
+                  label=""
+                  onChange={(e) => {
+                    setQuantity(Number(e.target.value));
+                    setPredictFromOutputAmount(true);
+                  }}
+                />
               </Flex>
             </Card.Outlined>
           </Flex>
@@ -212,23 +286,28 @@ export const SwapsContainer = (): React.ReactElement => {
             </Flex>
           </Flex>
         </Modal>
-        <Modal footer={null} className={styles.modal} open={isDexChoiceModalVisible} centered>
+        <Modal closable={false} footer={null} className={styles.modal} open={isDexChoiceModalVisible} centered>
           <Title level={3}>Available DEX's</Title>
-          <Flex flexDirection={'column'}>
-            {chosenDexList}
-            {dexList.map((dex) => (
-              <p>{dex}</p>
+          <Flex flexDirection={'column'} w="$fill" gap={'$8'}>
+            {dexList?.map((dex) => (
+              <Flex w={'$fill'} justifyContent={'space-between'}>
+                <Title level={4}>{dex}</Title>
+                <Switch
+                  checked={!ignoredDexs.includes(dex)}
+                  onChange={(checked) => {
+                    console.log(checked);
+                    if (checked) {
+                      setIgnoredDexs([...ignoredDexs, dex]);
+                    } else {
+                      setIgnoredDexs(ignoredDexs.filter((d) => d !== dex));
+                    }
+                  }}
+                />
+              </Flex>
             ))}
-            <Flex justifyContent={'flex-end'}>
-              <Button.Secondary
-                onClick={() => setIsDexChoiceModalVisible(false)}
-                data-testid="forgot-password-cancel-button"
-                label={t('general.button.cancel')}
-              />
+            <Flex w={'$fill'} justifyContent={'flex-end'}>
               <Button.Primary
-                onClick={() => {
-                  // set dex stuff
-                }}
+                onClick={() => setIsDexChoiceModalVisible(false)}
                 data-testid="set-dexs"
                 label="update choices"
               />
