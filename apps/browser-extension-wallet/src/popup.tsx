@@ -7,6 +7,7 @@ import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
 import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
 import '@lib/i18n';
+import '@lib/scripts/keep-alive-ui';
 import 'antd/dist/antd.css';
 import './styles/index.scss';
 import 'normalize.css';
