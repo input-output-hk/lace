@@ -5,6 +5,7 @@
 import { BlockfrostClient } from '@cardano-sdk/cardano-services-client';
 import {
   Cardano,
+  NetworkInfoProvider,
   Paginated,
   QueryStakePoolsArgs,
   StakePoolProvider,
@@ -18,6 +19,7 @@ import Fuse from 'fuse.js';
 
 const BF_API_PAGE_SIZE = 100;
 export const CACHE_KEY = 'stake-pool-service-data';
+const SECONDS_PER_YEAR = 31_536_000; // 365 * 24 * 60 * 60
 const ONE_DAY = 86_400_000; // One day in milliseconds
 
 // The empty text placeholders used to make the stake pools with empty names or tickers to be sorted at the end of the list
@@ -64,6 +66,11 @@ interface BlockFrostPool {
 }
 
 interface StakePoolCachedData {
+  networkData: {
+    genesisParameters: Cardano.CompactGenesis;
+    network: Responses['network'];
+    protocolParameters: Cardano.ProtocolParameters;
+  };
   lastFetchTime: number;
   poolDetails: Map<Cardano.PoolId, Responses['pool']>;
   stakePools: Cardano.StakePool[];
@@ -107,13 +114,95 @@ const filterByIdentifier = (identifier: IdentifierType) => (pool: Cardano.StakeP
       : pool.metadata?.ticker.toLowerCase() === value.ticker?.toLowerCase();
   });
 
-const enrichStakePool = (stakePools: Cardano.StakePool[], id: Cardano.PoolId, details: Responses['pool']) => {
+interface enrichStakePoolParams {
+  details: Responses['pool'];
+  networkData: StakePoolCachedData['networkData'];
+  id: Cardano.PoolId;
+  stakePools: Cardano.StakePool[];
+}
+
+type StakePoolWithMetrics = Cardano.StakePool & { metrics: Cardano.StakePoolMetrics };
+
+const estimateROS = (stakePool: StakePoolWithMetrics, networkData: StakePoolCachedData['networkData']) => {
+  // If the live pledge is less than the declared pledge, the ROS is 0
+  if (stakePool.metrics.livePledge < stakePool.pledge) return 0;
+
+  // Ref: https://github.com/intersectmbo/cardano-ledger/releases/latest/download/shelley-ledger.pdf
+  // The document refers to stake, pledge, reserves, circulating, etc. It refers to values from the
+  // snapshot at epoch rollover. Using live values to estimate the ROS in current epoch.
+
+  const { genesisParameters, network, protocolParameters } = networkData;
+  const livePledge = Number(stakePool.metrics.livePledge);
+  const liveStake = Number(stakePool.metrics.stake.live);
+
+  // Fig. 46.1
+
+  const monetaryExpansion = Number(protocolParameters.monetaryExpansion);
+  const totalStake = Number(network.stake.live);
+  const reserves = Number(network.supply.reserves);
+  const a0 = Number(protocolParameters.poolInfluence);
+  const pr = livePledge / totalStake;
+  const s = liveStake / totalStake;
+  const z0 = 1 / protocolParameters.desiredNumberOfPools;
+  const p1 = Math.min(pr, z0);
+  const s1 = Math.min(s, z0);
+  const R = reserves * monetaryExpansion;
+
+  const maxPool = (R / (1 + a0)) * (s1 + (p1 * a0 * (s1 - (p1 * (z0 - s1)) / z0)) / z0);
+
+  // Estimated Fig. 46.2
+  // The document refers to the number of blocks the pool added to the chain and the total number of blocks added
+  // to the chain in the last epoch. Using estimated values for current epoch.
+  // In Conway era the formula was changed; the d >= 0.8 case no longer exists.
+  // Ref: https://intersectmbo.github.io/formal-ledger-specifications/cardano-ledger.pdf - Fig. 64
+
+  const blocksPerEpoch = genesisParameters.epochLength * genesisParameters.activeSlotsCoefficient;
+  const poolBlocks = (blocksPerEpoch * liveStake) / totalStake;
+
+  const mkApparentPerformance = poolBlocks / (blocksPerEpoch * s);
+
+  // Simplified Fig. 47.2
+  // BF does not offer a way to distinguish between member stake and operator stake.
+  // By luck, there is no need to distinguish between member rewards and operator rewards; it is enough to compute
+  // the reward from member perspective as if all the stake was controlled by the members.
+  // This is why the multiplication by member proportional stake is not needed.
+  // It is mandatory to keep in mind this in next steps.
+
+  const rewards = maxPool * mkApparentPerformance;
+  const c = Number(stakePool.cost);
+  const m = Cardano.FractionUtils.toNumber(stakePool.margin);
+
+  // If the rewards are less than the stakePool cost, the ROS is 0
+  if (rewards <= c) return 0;
+
+  // The omitted computation of member proportional stake.
+  // t = memberStake / stake;
+  // memberRewards = (rewards - c) * (1 - m) * t;
+  // simplifiedMemberRewards = memberRewards / t = memberRewards * stake / memberStake;
+  const simplifiedMemberRewards = (rewards - c) * (1 - m);
+
+  // The epoch ROS is the memberRewards divided by the member stake.
+  // Given the simplification in Fig. 47.2, dividing the simplified memberRewards by the entire stake gives the same result.
+  // epochROS = memberRewards / memberStake = (simplifiedMemberRewards * memberStake / stake) / memberStake;
+  const epochROS = liveStake === 0 ? 0 : simplifiedMemberRewards / liveStake;
+
+  // Annualized ROS
+
+  const secondsPerEpoch = genesisParameters.epochLength * genesisParameters.slotLength;
+  const epochsPerYear = SECONDS_PER_YEAR / secondsPerEpoch;
+
+  return Math.pow(1 + epochROS, epochsPerYear) - 1;
+};
+
+const enrichStakePool = ({ details, networkData, id, stakePools }: enrichStakePoolParams) => {
   const stakePool = stakePools.find((pool) => pool.id === id);
 
   if (stakePool) {
     if (stakePool.metrics) {
       stakePool.metrics.livePledge = BigInt(details.live_pledge);
       stakePool.metrics.delegators = details.live_delegators;
+      // The `if` containing this branch makes the stakePool a StakePoolWithMetrics
+      stakePool.metrics.ros = estimateROS(stakePool as StakePoolWithMetrics, networkData);
     }
     stakePool.owners = details.owners;
   }
@@ -183,6 +272,7 @@ const getSorter = (sort: Exclude<QueryStakePoolsArgs['sort'], undefined>): Sorte
 interface StakePoolServiceProps {
   blockfrostClient: BlockfrostClient;
   extensionLocalStorage: Storage.LocalStorageArea;
+  networkInfoProvider: NetworkInfoProvider;
 }
 
 /**
@@ -211,7 +301,7 @@ interface StakePoolServiceProps {
  * the missing data when it is called querying stake pools by id.
  */
 export const initStakePoolService = (props: StakePoolServiceProps): StakePoolProvider => {
-  const { blockfrostClient, extensionLocalStorage } = props;
+  const { blockfrostClient, extensionLocalStorage, networkInfoProvider } = props;
 
   /**
    * Storing `cachedData` in a `Promise` rather than in a value is the key to handle the cases where the `StakePoolProvider` methods are
@@ -246,6 +336,14 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     extensionLocalStorage.set({ [CACHE_KEY]: toSerializableObject(data) }).catch(console.error);
   };
 
+  const fetchNetworkData = async () => {
+    const genesisParameters = await networkInfoProvider.genesisParameters();
+    const protocolParameters = await networkInfoProvider.protocolParameters();
+    const network = await blockfrostClient.request<Responses['network']>('network');
+
+    return { genesisParameters, network, protocolParameters };
+  };
+
   const fetchPages = async (firstPage = 1): Promise<Cardano.StakePool[]> => {
     const url = `pools/extended?count=${BF_API_PAGE_SIZE}&page=${firstPage}`;
     const response = await blockfrostClient.request<BlockFrostPool[]>(url);
@@ -278,18 +376,15 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     let data: StakePoolCachedData;
 
     try {
-      const stakePools = await fetchPages();
+      const [stakePools, networkData] = await Promise.all([fetchPages(), fetchNetworkData()]);
       const retiringPools = await blockfrostClient.request<Responses['pool_list_retire']>('pools/retiring');
       const retiringPoolIds = new Set(retiringPools.map(({ pool_id }) => pool_id));
+      const active = stakePools.length - retiringPools.length;
 
       for (const pool of stakePools) if (retiringPoolIds.has(pool.id)) pool.status = Cardano.StakePoolStatus.Retiring;
 
-      // TODO
-      // LW-13053
-      // Compute ROS
-
-      const active = stakePools.length - retiringPools.length;
       data = {
+        networkData,
         lastFetchTime: Date.now(),
         poolDetails: new Map(),
         stakePools,
@@ -329,7 +424,7 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
 
   const queryStakePools = async (args: QueryStakePoolsArgs): Promise<Paginated<Cardano.StakePool>> => {
     const data = await getCachedData();
-    const { poolDetails, stakePools } = data;
+    const { networkData, poolDetails, stakePools } = data;
     const { filters, pagination, sort } = args;
     const { identifier, pledgeMet, text } = filters || {};
 
@@ -341,7 +436,7 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
           const details = await blockfrostClient.request<Responses['pool']>(`pools/${id}`);
 
           poolDetails.set(id, details);
-          enrichStakePool(stakePools, id, details);
+          enrichStakePool({ details, networkData, id, stakePools });
           saveData(data);
         }
     }

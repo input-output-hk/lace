@@ -159,7 +159,7 @@ export const createProviders = ({
     logger
   });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
-  const stakePoolProvider = initStakePoolService({ blockfrostClient, extensionLocalStorage });
+  const stakePoolProvider = initStakePoolService({ blockfrostClient, extensionLocalStorage, networkInfoProvider });
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
