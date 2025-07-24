@@ -7,8 +7,6 @@ import { BlockfrostClient } from '@cardano-sdk/cardano-services-client';
 import { Storage } from 'webextension-polyfill';
 import { fromSerializableObject } from '@cardano-sdk/util';
 
-jest.mock('@cardano-sdk/cardano-services-client');
-
 const genesisParameters = fromSerializableObject({
   activeSlotsCoefficient: 0.05,
   epochLength: 432_000,
@@ -271,7 +269,8 @@ describe('initStakePoolService', () => {
   const init = () =>
     initStakePoolService({
       blockfrostClient: blockfrostClientMock,
-      extensionLocalStorage: extensionLocalStorageMock
+      extensionLocalStorage: extensionLocalStorageMock,
+      networkInfoProvider: networkInfoProviderMock
     });
 
   beforeEach(() => {
@@ -306,7 +305,7 @@ describe('initStakePoolService', () => {
         throw new Error('Test BF Error');
       }
 
-      if (url === 'network') return { supply: { reserves: '7036998224247014' } };
+      if (url === 'network') return { stake: { live: '21877143906293058' }, supply: { reserves: '7036998224247014' } };
 
       // cSpell:disable-next-line
       if (url === 'pools/retiring') return [{ pool_id: 'pool1qqqqqdk4zhsjuxxd8jyvwncf5eucfskz0xjjj64fdmlgj735lr9' }];
