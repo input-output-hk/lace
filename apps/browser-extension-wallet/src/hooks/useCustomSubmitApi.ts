@@ -1,10 +1,10 @@
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { EnvironmentTypes } from '@stores';
-import { CustomSubmitApiConfig } from '@types';
+import { CustomBackendApiConfig } from '@types';
 
 interface useCustomSubmitApiReturn {
-  getCustomSubmitApiForNetwork: (network: EnvironmentTypes) => CustomSubmitApiConfig;
-  updateCustomSubmitApi: (network: EnvironmentTypes, data: CustomSubmitApiConfig) => void;
+  getCustomSubmitApiForNetwork: (network: EnvironmentTypes) => CustomBackendApiConfig;
+  updateCustomSubmitApi: (network: EnvironmentTypes, data: CustomBackendApiConfig) => void;
 }
 
 export const useCustomSubmitApi = (): useCustomSubmitApiReturn => {
@@ -18,9 +18,32 @@ export const useCustomSubmitApi = (): useCustomSubmitApiReturn => {
     return { status, url };
   };
 
-  const updateCustomSubmitApi = (network: EnvironmentTypes, data: CustomSubmitApiConfig) => {
+  const updateCustomSubmitApi = (network: EnvironmentTypes, data: CustomBackendApiConfig) => {
     updateCustomSubmitApiEnabled({ ...isCustomSubmitApiEnabled, [network]: data });
   };
 
   return { getCustomSubmitApiForNetwork, updateCustomSubmitApi };
+};
+
+interface useCustomBackendConfigurationApiReturn {
+  getCustomBackendApiForNetwork: (network: EnvironmentTypes) => CustomBackendApiConfig;
+  updateCustomBackendApi: (network: EnvironmentTypes, data: CustomBackendApiConfig) => void;
+}
+
+export const useCustomBackendApi = (): useCustomBackendConfigurationApiReturn => {
+  const [isCustomBackendApiEnabled, { updateLocalStorage: updateCustomBackendApiEnabled }] =
+    useLocalStorage('isCustomBackendApiEnabled');
+
+  const getCustomBackendApiForNetwork = (network: EnvironmentTypes) => {
+    const networkConfig = isCustomBackendApiEnabled?.[network];
+    const status = networkConfig?.status || false;
+    const url = networkConfig?.url || '';
+    return { status, url };
+  };
+
+  const updateCustomBackendApi = (network: EnvironmentTypes, data: CustomBackendApiConfig) => {
+    updateCustomBackendApiEnabled({ ...isCustomBackendApiEnabled, [network]: data });
+  };
+
+  return { getCustomBackendApiForNetwork, updateCustomBackendApi };
 };

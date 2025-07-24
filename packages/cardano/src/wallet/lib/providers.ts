@@ -16,6 +16,7 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
+import { createFallbackBlockfrostClient } from './blockfrost-client-with-fallback';
 
 import {
   CardanoWsClient,
@@ -83,6 +84,7 @@ interface ProvidersConfig {
     baseCardanoServicesUrl: string;
     baseKoraLabsServicesUrl: string;
     customSubmitTxUrl?: string;
+    customBlockfrostUrl?: string;
     blockfrostConfig: BlockfrostClientConfig & { rateLimiter: RateLimiter };
   };
   logger: Logger;
@@ -135,16 +137,25 @@ const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
 
 export const createProviders = ({
   axiosAdapter,
-  env: { baseCardanoServicesUrl: baseUrl, baseKoraLabsServicesUrl, customSubmitTxUrl, blockfrostConfig },
+  env: {
+    baseCardanoServicesUrl: baseUrl,
+    baseKoraLabsServicesUrl,
+    customSubmitTxUrl,
+    blockfrostConfig,
+    customBlockfrostUrl
+  },
   logger,
   experiments: { useWebSocket },
   extensionLocalStorage
 }: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
 
-  const blockfrostClient = new BlockfrostClient(blockfrostConfig, {
+  const blockfrostClient = createFallbackBlockfrostClient({
+    customBlockfrostUrl,
+    config: blockfrostConfig,
     rateLimiter: blockfrostConfig.rateLimiter
   });
+
   const assetProvider = new BlockfrostAssetProvider(blockfrostClient, logger);
   const networkInfoProvider = new BlockfrostNetworkInfoProvider(blockfrostClient, logger);
   const chainHistoryProvider = new BlockfrostChainHistoryProvider({

@@ -41,6 +41,7 @@ export interface BackgroundStorage {
   initialPosthogFeatureFlags?: FeatureFlags;
   initialPosthogFeatureFlagPayloads?: RawFeatureFlagPayloads;
   customSubmitTxUrl?: string;
+  customBlockfrostUrl?: string;
   namiMigration?: {
     completed: boolean;
     mode: 'lace' | 'nami';
