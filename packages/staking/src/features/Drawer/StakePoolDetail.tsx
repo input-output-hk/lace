@@ -3,7 +3,7 @@
 import { WalletType } from '@cardano-sdk/web-extension';
 import { Button, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { StakePoolMetricsBrowser, StakePoolNameBrowser, Wallet } from '@lace/cardano';
-import { Ellipsis, PostHogAction } from '@lace/common';
+import { Ellipsis, PostHogAction, logger } from '@lace/common';
 import cn from 'classnames';
 import { StakePoolCardProgressBar } from 'features/BrowsePools';
 import { isOversaturated } from 'features/BrowsePools/utils';
@@ -16,6 +16,7 @@ import {
   DelegationPortfolioStore,
   MAX_POOLS_COUNT,
   StakePoolDetails,
+  mapStakePoolToDisplayData,
   stakePoolDetailsSelector,
   useDelegationPortfolioStore,
 } from '../store';
@@ -24,30 +25,14 @@ import styles from './StakePoolDetail.module.scss';
 
 export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.ReactElement => {
   const { t } = useTranslation();
-  const { openExternalLink } = useOutsideHandles();
+  const {
+    openExternalLink,
+    walletStoreBlockchainProvider: { stakePoolProvider },
+  } = useOutsideHandles();
 
   const {
     delegatingToThisPool,
-    details: {
-      delegators,
-      description,
-      id,
-      hexId,
-      owners = [],
-      ros,
-      saturation,
-      activeStake,
-      liveStake,
-      logo,
-      name,
-      ticker,
-      status,
-      contact,
-      blocks,
-      cost,
-      pledge,
-      margin,
-    },
+    details: { activeStake, blocks, cost, contact, description, hexId, id, logo, name, pledge, ticker, saturation },
   } = useDelegationPortfolioStore((store) => ({
     delegatingToThisPool:
       store.viewedStakePool?.hexId &&
@@ -56,6 +41,15 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
         .includes(Wallet.Cardano.PoolIdHex(store.viewedStakePool?.hexId)),
     details: stakePoolDetailsSelector(store) || ({} as StakePoolDetails),
   }));
+
+  const [{ delegators, liveStake, margin, owners = [], ros, status }, setDetails] = useState({} as StakePoolDetails);
+
+  useEffect(() => {
+    stakePoolProvider
+      .queryStakePools({ filters: { identifier: { values: [{ id }] } }, pagination: { limit: 1, startAt: 0 } })
+      .then(({ pageResults: [stakePool] }) => stakePool && setDetails(mapStakePoolToDisplayData({ stakePool })))
+      .catch(logger.error);
+  }, [id, stakePoolProvider]);
 
   const socialNetworks = [
     { href: contact?.feed, type: SocialNetwork.RSS_FEED },
