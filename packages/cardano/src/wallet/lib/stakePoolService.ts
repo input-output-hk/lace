@@ -103,9 +103,10 @@ const toCore = (pool: BlockFrostPool): Cardano.StakePool => ({
   vrf: '' as Cardano.VrfVkHex
 });
 
-type IdentifierType = Required<Required<QueryStakePoolsArgs>['filters']>['identifier'];
+type Identifier = Required<Required<QueryStakePoolsArgs>['filters']>['identifier'];
+type IdentifierValues = Identifier['values'];
 
-const filterByIdentifier = (identifier: IdentifierType) => (pool: Cardano.StakePool) =>
+const filterByIdentifier = (identifier: Identifier) => (pool: Cardano.StakePool) =>
   identifier.values.some((value) => {
     if (value.id) return pool.id === value.id;
 
@@ -376,7 +377,8 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     let data: StakePoolCachedData;
 
     try {
-      const [stakePools, networkData] = await Promise.all([fetchPages(), fetchNetworkData()]);
+      const stakePools = await fetchPages();
+      const networkData = await fetchNetworkData();
       const retiringPools = await blockfrostClient.request<Responses['pool_list_retire']>('pools/retiring');
       const retiringPoolIds = new Set(retiringPools.map(({ pool_id }) => pool_id));
       const active = stakePools.length - retiringPools.length;
@@ -422,24 +424,55 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     return data;
   };
 
-  const queryStakePools = async (args: QueryStakePoolsArgs): Promise<Paginated<Cardano.StakePool>> => {
-    const data = await getCachedData();
+  const queryForSpecificStakePools = async (values: IdentifierValues): Promise<Paginated<Cardano.StakePool>> => {
+    const result: Paginated<Cardano.StakePool> = { pageResults: [], totalResultCount: 0 };
+
+    for (const { id } of values) {
+      const pool = await blockfrostClient.request<Responses['pool']>(`pools/${id}`);
+      const metadata = await blockfrostClient.request<Responses['pool_metadata']>(`pools/${id}/metadata`);
+
+      result.pageResults.push(toCore({ ...pool, metadata } as BlockFrostPool));
+    }
+
+    result.totalResultCount = result.pageResults.length;
+
+    return result;
+  };
+
+  const fetchAndEnrichStakePools = async (data: StakePoolCachedData, values: IdentifierValues) => {
     const { networkData, poolDetails, stakePools } = data;
+
+    // Check if some pool is queried by id
+    for (const { id } of values)
+      if (id && !poolDetails.has(id)) {
+        // If the pool is queried by id and details are not present in the cache, fetch them
+        const details = await blockfrostClient.request<Responses['pool']>(`pools/${id}`);
+
+        poolDetails.set(id, details);
+        enrichStakePool({ details, networkData, id, stakePools });
+        saveData(data);
+      }
+  };
+
+  const filterResultWithFuzzySearch = (result: Cardano.StakePool[], text: string) => {
+    const fuzzyResult = fuzzyIndex.search(text);
+    const idMap = new Map(result.map((pool) => [pool.id, pool]));
+
+    return fuzzyResult.map(({ item: { id } }) => idMap.get(id)).filter(Boolean) as Cardano.StakePool[];
+  };
+
+  const queryStakePools = async (args: QueryStakePoolsArgs): Promise<Paginated<Cardano.StakePool>> => {
     const { filters, pagination, sort } = args;
     const { identifier, pledgeMet, text } = filters || {};
 
-    // Check if some pool is queried by id
-    if (identifier) {
-      for (const { id } of identifier.values)
-        if (id && !poolDetails.has(id)) {
-          // If the pool is queried by id and details are not present in the cache, fetch them
-          const details = await blockfrostClient.request<Responses['pool']>(`pools/${id}`);
+    // If the cached data is not yet loaded and the query is by id, data can be fetched only for the specific stake pools
+    if (!healthStatus && identifier && identifier.values.every(({ id }) => id))
+      return queryForSpecificStakePools(identifier.values);
 
-          poolDetails.set(id, details);
-          enrichStakePool({ details, networkData, id, stakePools });
-          saveData(data);
-        }
-    }
+    const data = await getCachedData();
+    const { stakePools } = data;
+
+    if (identifier) await fetchAndEnrichStakePools(data, identifier.values);
 
     let result = identifier && !text ? stakePools.filter(filterByIdentifier(identifier)) : [...stakePools];
 
@@ -447,12 +480,7 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
     // If the live stake is lower than the declared pledge, the pledge is not met as well
     if (pledgeMet) result = result.filter((pool) => pool.pledge <= (pool.metrics?.stake.live || BigInt(0)));
 
-    if (text) {
-      const fuzzyResult = fuzzyIndex.search(text);
-      const idMap = new Map(result.map((pool) => [pool.id, pool]));
-
-      result = fuzzyResult.map(({ item: { id } }) => idMap.get(id)).filter(Boolean) as Cardano.StakePool[];
-    }
+    if (text) result = filterResultWithFuzzySearch(result, text);
 
     if (sort) result.sort(getSorter(sort));
 
