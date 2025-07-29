@@ -29,7 +29,8 @@ jobs:
       - name: Send CI metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending metrics to Datadog..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -44,7 +45,10 @@ jobs:
                   "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "status:${{ job.status }}"],
                   "type": "gauge"
                 }]
-              }'
+              }')
+            echo "Datadog API response: $response"
+          else
+            echo "No DATADOG_API_KEY provided, skipping metrics"
           fi
 
   prepare:
@@ -114,7 +118,8 @@ jobs:
       - name: Send build metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending build metrics to Datadog..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -124,7 +129,10 @@ jobs:
                   "tags": ["service:lace-wallet", "env:ci", "workflow:prepare"],
                   "type": "gauge"
                 }]
-              }'
+              }')
+            echo "Datadog API response: $response"
+          else
+            echo "No DATADOG_API_KEY provided, skipping build metrics"
           fi
 
   unitTests:
@@ -195,7 +203,8 @@ jobs:
       - name: Send test metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending test metrics to Datadog..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -205,7 +214,10 @@ jobs:
                   "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "status:${{ job.status }}"],
                   "type": "gauge"
                 }]
-              }'
+              }')
+            echo "Datadog API response: $response"
+          else
+            echo "No DATADOG_API_KEY provided, skipping test metrics"
           fi
 
   release-pkg:
@@ -266,7 +278,7 @@ jobs:
           path: packages/bitcoin/dist
 
       - name: Collect Workflow Telemetry Release Package
-        uses: catchpoint/workflow-telemetry-action@v4
+        uses: catchpoint/workflow-telemetry-action@v2
         with:
           comment_on_pr: false
 
@@ -276,7 +288,8 @@ jobs:
       - name: Send release metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending release metrics to Datadog..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -286,7 +299,10 @@ jobs:
                   "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "status:${{ job.status }}"],
                   "type": "gauge"
                 }]
-              }'
+              }')
+            echo "Datadog API response: $response"
+          else
+            echo "No DATADOG_API_KEY provided, skipping release metrics"
           fi
 
   datadog-final:
@@ -296,7 +312,8 @@ jobs:
       - name: Send final CI metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            curl -X POST "https://api.datadoghq.com/api/v1/events" \
+            echo "Sending final metrics to Datadog..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/events" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -305,5 +322,8 @@ jobs:
                 "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "repo:lace"],
                 "alert_type": "${{ needs.prepare.result == 'success' && needs.unitTests.result == 'success' && needs.release-pkg.result == 'success' && 'info' || 'error' }}",
                 "source_type_name": "github"
-              }'
+              }')
+            echo "Datadog API response: $response"
+          else
+            echo "No DATADOG_API_KEY provided, skipping final metrics"
           fi 
