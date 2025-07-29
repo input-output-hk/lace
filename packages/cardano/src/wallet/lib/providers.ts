@@ -39,6 +39,7 @@ import { WalletProvidersDependencies } from './cardano-wallet';
 import { BlockfrostInputResolver } from './blockfrost-input-resolver';
 import { initHandleService } from './handleService';
 import { initStakePoolService } from './stakePoolService';
+import { ChainName } from '../types';
 
 const createTxSubmitProvider = (
   blockfrostClient: BlockfrostClient,
@@ -79,6 +80,7 @@ export type RateLimiterConfig = {
 
 interface ProvidersConfig {
   axiosAdapter?: AxiosAdapter;
+  chainName: ChainName;
   env: {
     baseCardanoServicesUrl: string;
     baseKoraLabsServicesUrl: string;
@@ -135,6 +137,7 @@ const cacheAssignment: Record<CacheName, { count: number; size: number }> = {
 
 export const createProviders = ({
   axiosAdapter,
+  chainName,
   env: { baseCardanoServicesUrl: baseUrl, baseKoraLabsServicesUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
   experiments: { useWebSocket },
@@ -159,7 +162,12 @@ export const createProviders = ({
     logger
   });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
-  const stakePoolProvider = initStakePoolService({ blockfrostClient, extensionLocalStorage, networkInfoProvider });
+  const stakePoolProvider = initStakePoolService({
+    blockfrostClient,
+    chainName,
+    extensionLocalStorage,
+    networkInfoProvider
+  });
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 
