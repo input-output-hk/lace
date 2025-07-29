@@ -26,24 +26,26 @@ jobs:
   datadog-ci:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Datadog CI
-        id: datadog-setup
-        uses: DataDog/github-action-dd-trace@v1
-        with:
-          api-key: ${{ secrets.DATADOG_API_KEY }}
-          site: datadoghq.com
-          service: lace-wallet
-          env: ci
-          tags: ci:true,service:lace-wallet,repo:lace
-
       - name: Send CI metrics to Datadog
-        uses: DataDog/github-action-metrics@v1
-        with:
-          api-key: ${{ secrets.DATADOG_API_KEY }}
-          site: datadoghq.com
-          metrics: |
-            github.ci.pipeline.duration:${{ github.run_duration }}|#service:lace-wallet,env:ci,workflow:${{ github.workflow }},job:${{ github.job }}
-            github.ci.pipeline.status:1|#service:lace-wallet,env:ci,workflow:${{ github.workflow }},job:${{ github.job }},status:${{ job.status }}
+        run: |
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d '{
+                "series": [{
+                  "metric": "github.ci.pipeline.duration",
+                  "points": [[$(date +%s), ${{ github.run_duration }}]],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}"],
+                  "type": "gauge"
+                }, {
+                  "metric": "github.ci.pipeline.status",
+                  "points": [[$(date +%s), 1]],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "status:${{ job.status }}"],
+                  "type": "gauge"
+                }]
+              }'
+          fi
 
   prepare:
     name: Prepare
@@ -111,17 +113,19 @@ jobs:
 
       - name: Send build metrics to Datadog
         run: |
-          curl -X POST "https://api.datadoghq.com/api/v1/series" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-            -d '{
-              "series": [{
-                "metric": "lace.build.packages",
-                "points": [[$(date +%s), 7]],
-                "tags": ["service:lace-wallet", "env:ci", "workflow:prepare"],
-                "type": "gauge"
-              }]
-            }'
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d '{
+                "series": [{
+                  "metric": "lace.build.packages",
+                  "points": [[$(date +%s), 7]],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:prepare"],
+                  "type": "gauge"
+                }]
+              }'
+          fi
 
   unitTests:
     name: Unit tests
@@ -190,17 +194,19 @@ jobs:
 
       - name: Send test metrics to Datadog
         run: |
-          curl -X POST "https://api.datadoghq.com/api/v1/series" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-            -d '{
-              "series": [{
-                "metric": "lace.tests.unit",
-                "points": [[$(date +%s), 1]],
-                "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "status:${{ job.status }}"],
-                "type": "gauge"
-              }]
-            }'
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d '{
+                "series": [{
+                  "metric": "lace.tests.unit",
+                  "points": [[$(date +%s), 1]],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "status:${{ job.status }}"],
+                  "type": "gauge"
+                }]
+              }'
+          fi
 
   release-pkg:
     name: Release package
@@ -269,17 +275,19 @@ jobs:
 
       - name: Send release metrics to Datadog
         run: |
-          curl -X POST "https://api.datadoghq.com/api/v1/series" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-            -d '{
-              "series": [{
-                "metric": "lace.release.package",
-                "points": [[$(date +%s), 1]],
-                "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "status:${{ job.status }}"],
-                "type": "gauge"
-              }]
-            }'
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            curl -X POST "https://api.datadoghq.com/api/v1/series" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d '{
+                "series": [{
+                  "metric": "lace.release.package",
+                  "points": [[$(date +%s), 1]],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "status:${{ job.status }}"],
+                  "type": "gauge"
+                }]
+              }'
+          fi
 
   datadog-final:
     needs: [prepare, unitTests, release-pkg]
@@ -287,13 +295,15 @@ jobs:
     steps:
       - name: Send final CI metrics to Datadog
         run: |
-          curl -X POST "https://api.datadoghq.com/api/v1/events" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-            -d '{
-              "title": "Lace CI Pipeline Complete",
-              "text": "All CI jobs completed for ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nStatus: ${{ needs.prepare.result }}, ${{ needs.unitTests.result }}, ${{ needs.release-pkg.result }}",
-              "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "repo:lace"],
-              "alert_type": "${{ needs.prepare.result == 'success' && needs.unitTests.result == 'success' && needs.release-pkg.result == 'success' && 'info' || 'error' }}",
-              "source_type_name": "github"
-            }' 
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            curl -X POST "https://api.datadoghq.com/api/v1/events" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d '{
+                "title": "Lace CI Pipeline Complete",
+                "text": "All CI jobs completed for ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nStatus: ${{ needs.prepare.result }}, ${{ needs.unitTests.result }}, ${{ needs.release-pkg.result }}",
+                "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "repo:lace"],
+                "alert_type": "${{ needs.prepare.result == 'success' && needs.unitTests.result == 'success' && needs.release-pkg.result == 'success' && 'info' || 'error' }}",
+                "source_type_name": "github"
+              }'
+          fi 

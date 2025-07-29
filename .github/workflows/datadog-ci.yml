@@ -36,13 +36,9 @@ jobs:
     steps:
       - name: Setup Datadog CI
         id: datadog-setup
-        uses: DataDog/github-action-dd-trace@v1
-        with:
-          api-key: ${{ inputs.datadog-api-key }}
-          site: ${{ inputs.datadog-site }}
-          service: ${{ inputs.service-name }}
-          env: ${{ inputs.environment }}
-          tags: ${{ inputs.tags }}
+        run: |
+          echo "trace-id=$(date +%s)" >> $GITHUB_OUTPUT
+          echo "span-id=$(date +%s)" >> $GITHUB_OUTPUT
 
   datadog-monitor:
     runs-on: ubuntu-latest
@@ -50,20 +46,33 @@ jobs:
     if: always()
     steps:
       - name: Send CI metrics to Datadog
-        uses: DataDog/github-action-metrics@v1
-        with:
-          api-key: ${{ inputs.datadog-api-key }}
-          site: ${{ inputs.datadog-site }}
-          metrics: |
-            # CI Pipeline metrics
-            github.ci.pipeline.duration:${{ github.run_duration }}|#service:${{ inputs.service-name }},env:${{ inputs.environment }},workflow:${{ github.workflow }},job:${{ github.job }}
-            github.ci.pipeline.status:1|#service:${{ inputs.service-name }},env:${{ inputs.environment }},workflow:${{ github.workflow }},job:${{ github.job }},status:${{ job.status }}
-            
-            # Repository metrics
-            github.ci.repository.workflow_runs:1|#service:${{ inputs.service-name }},env:${{ inputs.environment }},repo:${{ github.repository }},branch:${{ github.ref_name }}
-            
-            # Job metrics
-            github.ci.job.duration:${{ github.run_duration }}|#service:${{ inputs.service-name }},env:${{ inputs.environment }},job:${{ github.job }},runner:${{ runner.os }}
+        run: |
+          curl -X POST "https://api.${{ inputs.datadog-site }}/api/v1/series" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ inputs.datadog-api-key }}" \
+            -d '{
+              "series": [{
+                "metric": "github.ci.pipeline.duration",
+                "points": [[$(date +%s), ${{ github.run_duration }}]],
+                "tags": ["service:${{ inputs.service-name }}", "env:${{ inputs.environment }}", "workflow:${{ github.workflow }}", "job:${{ github.job }}"],
+                "type": "gauge"
+              }, {
+                "metric": "github.ci.pipeline.status",
+                "points": [[$(date +%s), 1]],
+                "tags": ["service:${{ inputs.service-name }}", "env:${{ inputs.environment }}", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "status:${{ job.status }}"],
+                "type": "gauge"
+              }, {
+                "metric": "github.ci.repository.workflow_runs",
+                "points": [[$(date +%s), 1]],
+                "tags": ["service:${{ inputs.service-name }}", "env:${{ inputs.environment }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}"],
+                "type": "gauge"
+              }, {
+                "metric": "github.ci.job.duration",
+                "points": [[$(date +%s), ${{ github.run_duration }}]],
+                "tags": ["service:${{ inputs.service-name }}", "env:${{ inputs.environment }}", "job:${{ github.job }}", "runner:${{ runner.os }}"],
+                "type": "gauge"
+              }]
+            }'
 
       - name: Send CI events to Datadog
         if: always()
