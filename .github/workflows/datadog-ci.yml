@@ -1,0 +1,80 @@
+name: Datadog CI Integration
+
+on:
+  workflow_call:
+    inputs:
+      datadog-api-key:
+        required: true
+        type: string
+        description: 'Datadog API key for CI metrics and logs'
+      datadog-site:
+        required: false
+        type: string
+        default: 'datadoghq.com'
+        description: 'Datadog site (datadoghq.com, datadoghq.eu, etc.)'
+      service-name:
+        required: true
+        type: string
+        description: 'Service name for Datadog metrics'
+      environment:
+        required: false
+        type: string
+        default: 'ci'
+        description: 'Environment name'
+      tags:
+        required: false
+        type: string
+        default: 'ci:true'
+        description: 'Additional tags for metrics (comma-separated)'
+
+jobs:
+  datadog-setup:
+    runs-on: ubuntu-latest
+    outputs:
+      dd-trace-id: ${{ steps.datadog-setup.outputs.trace-id }}
+      dd-span-id: ${{ steps.datadog-setup.outputs.span-id }}
+    steps:
+      - name: Setup Datadog CI
+        id: datadog-setup
+        uses: DataDog/github-action-dd-trace@v1
+        with:
+          api-key: ${{ inputs.datadog-api-key }}
+          site: ${{ inputs.datadog-site }}
+          service: ${{ inputs.service-name }}
+          env: ${{ inputs.environment }}
+          tags: ${{ inputs.tags }}
+
+  datadog-monitor:
+    runs-on: ubuntu-latest
+    needs: datadog-setup
+    if: always()
+    steps:
+      - name: Send CI metrics to Datadog
+        uses: DataDog/github-action-metrics@v1
+        with:
+          api-key: ${{ inputs.datadog-api-key }}
+          site: ${{ inputs.datadog-site }}
+          metrics: |
+            # CI Pipeline metrics
+            github.ci.pipeline.duration:${{ github.run_duration }}|#service:${{ inputs.service-name }},env:${{ inputs.environment }},workflow:${{ github.workflow }},job:${{ github.job }}
+            github.ci.pipeline.status:1|#service:${{ inputs.service-name }},env:${{ inputs.environment }},workflow:${{ github.workflow }},job:${{ github.job }},status:${{ job.status }}
+            
+            # Repository metrics
+            github.ci.repository.workflow_runs:1|#service:${{ inputs.service-name }},env:${{ inputs.environment }},repo:${{ github.repository }},branch:${{ github.ref_name }}
+            
+            # Job metrics
+            github.ci.job.duration:${{ github.run_duration }}|#service:${{ inputs.service-name }},env:${{ inputs.environment }},job:${{ github.job }},runner:${{ runner.os }}
+
+      - name: Send CI events to Datadog
+        if: always()
+        run: |
+          curl -X POST "https://api.${{ inputs.datadog-site }}/api/v1/events" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ inputs.datadog-api-key }}" \
+            -d '{
+              "title": "Lace CI Pipeline: ${{ github.workflow }}",
+              "text": "Workflow ${{ github.workflow }} completed with status: ${{ job.status }}\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}",
+              "tags": ["service:${{ inputs.service-name }}", "env:${{ inputs.environment }}", "workflow:${{ github.workflow }}", "status:${{ job.status }}", "repo:${{ github.repository }}"],
+              "alert_type": "${{ job.status == 'success' && 'info' || 'error' }}",
+              "source_type_name": "github"
+            }' 
