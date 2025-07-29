@@ -53,6 +53,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
 
   return Wallet.createProviders({
     axiosAdapter: axiosFetchAdapter,
+    chainName,
     env: {
       baseCardanoServicesUrl,
       baseKoraLabsServicesUrl,

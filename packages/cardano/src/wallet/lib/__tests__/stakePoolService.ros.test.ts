@@ -1,7 +1,7 @@
 // cSpell:ignore adaseal atada
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers, camelcase */
-import { CACHE_KEY, initStakePoolService } from '../stakePoolService';
+import { getCacheKey, initStakePoolService } from '../stakePoolService';
 import { Cardano, NetworkInfoProvider, SupplySummary } from '@cardano-sdk/core';
 import { BlockfrostClient } from '@cardano-sdk/cardano-services-client';
 import { Storage } from 'webextension-polyfill';
@@ -2472,6 +2472,7 @@ describe('StakePoolService ROS', () => {
   const init = () =>
     initStakePoolService({
       blockfrostClient: blockfrostClientMock,
+      chainName: 'Mainnet',
       extensionLocalStorage: extensionLocalStorageMock,
       networkInfoProvider: networkInfoProviderMock
     });
@@ -2512,7 +2513,7 @@ describe('StakePoolService ROS', () => {
       return result;
     });
 
-    extensionLocalStorageMock.get.mockResolvedValue({ [CACHE_KEY]: cachedData });
+    extensionLocalStorageMock.get.mockResolvedValue({ [getCacheKey('Mainnet')]: cachedData });
     extensionLocalStorageMock.set.mockResolvedValue();
 
     networkInfoProviderMock.genesisParameters.mockResolvedValue(genesisParameters);
