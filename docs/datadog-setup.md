@@ -1,6 +1,6 @@
 # Datadog CI Setup for Lace Wallet
 
-Simple guide to add Datadog monitoring to your Lace CI/CD pipelines.
+This is a simple guide to add Datadog monitoring to your Lace CI/CD pipelines.
 
 ## Quick Setup
 
@@ -91,4 +91,4 @@ avg:github.ci.job.duration{service:lace-wallet,workflow:ci} > 1800
 ## Support
 
 - [Datadog CI Documentation](https://docs.datadoghq.com/continuous_integration/)
-- [GitHub Actions Integration](https://github.com/DataDog/github-action-metrics) 
+- [GitHub Actions Integration](https://github.com/DataDog/github-action-metrics)
