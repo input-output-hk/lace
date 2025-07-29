@@ -7,6 +7,9 @@ on:
     branches:
       - main
       - 'release/**'
+      - 'test/**'
+      - 'feature/**'
+  workflow_dispatch:
 
 permissions:
   pull-requests: write
@@ -257,7 +260,7 @@ jobs:
           path: packages/bitcoin/dist
 
       - name: Collect Workflow Telemetry Release Package
-        uses: catchpoint/workflow-telemetry-action@v2
+        uses: catchpoint/workflow-telemetry-action@v4
         with:
           comment_on_pr: false
 
