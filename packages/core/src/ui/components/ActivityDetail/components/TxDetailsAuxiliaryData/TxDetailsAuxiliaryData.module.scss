@@ -1,0 +1,18 @@
+@import '../../../../styles/theme.scss';
+@import '../../../../../../../common/src/ui/styles/abstracts/typography';
+
+.metadata {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text-color-primary);
+}
+
+.copyButton {
+  color: var(--dark-mode-mid-grey, var(--light-mode-light-grey));
+  font-size: 26px;
+  cursor: pointer;
+  opacity: .5;
+  &:hover {
+    opacity: 1;
+  }
+}
