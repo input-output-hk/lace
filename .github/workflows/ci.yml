@@ -2,7 +2,7 @@ name: Continuous Integration with Datadog
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, test/berno_prom_metrics ]
   pull_request:
     branches: [ main, develop ]
 
