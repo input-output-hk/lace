@@ -180,7 +180,11 @@ jobs:
           path: packages/bitcoin/dist
 
       - name: Run unit tests
-        run: npm run test:unit
+        run: yarn test
+        env:
+          AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
+          DEFAULT_CHAIN: 'Preprod'
+          NODE_OPTIONS: '--max_old_space_size=8192'
 
       - name: Send test metrics to Datadog
         run: |
