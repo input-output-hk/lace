@@ -1,0 +1,560 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - main
+      - 'release/**'
+
+permissions:
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  BUILD_ARTIFACT_NAME: 'lace-dev-${{ github.sha }}'
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Collect Workflow Telemetry Build Packages
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build common
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/common
+          NAME: packages-common
+
+      - name: Build cardano
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/cardano
+          NAME: packages-cardano
+
+      - name: Build translation
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/translation
+          NAME: packages-translation
+
+      - name: Build core
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/core
+          NAME: packages-core
+
+      - name: Build staking
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/staking
+          NAME: packages-staking
+
+      - name: Build nami
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/nami
+          NAME: packages-nami
+
+      - name: Build bitcoin
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/bitcoin
+          NAME: packages-bitcoin
+
+  unitTests:
+    name: Unit tests
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
+      - name: Download packages-bitcoin
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-bitcoin
+          path: packages/bitcoin/dist
+
+      - name: Collect Workflow Telemetry Unit Tests
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Execute unit tests
+        uses: ./.github/actions/test/unit
+
+  release-pkg:
+    name: Release package
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Download packages-nami
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-nami
+          path: packages/nami/dist
+
+      - name: Download packages-bitcoin
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-bitcoin
+          path: packages/bitcoin/dist
+
+      - name: Collect Workflow Telemetry Smoke Tests
+        uses: catchpoint/workflow-telemetry-action@v2
+        with:
+          comment_on_pr: false
+
+      - name: Build Lace browser extension
+        uses: ./.github/actions/build/app
+        with:
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
+          MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
+          DIR: apps/browser-extension-wallet
+          NAME: lace-browser-extension
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
+          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
+
+      - name: Build Lace Firefox addon
+        uses: ./.github/actions/build/app
+        with:
+          BROWSER_TARGET: 'firefox'
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
+          MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
+          DIR: apps/browser-extension-wallet
+          NAME: lace-firefox-addon
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
+          PRODUCTION_MODE_TRACKING: ${{ startsWith(github.ref, 'refs/heads/release') && 'true' || 'false' }}
+          BANXA_LACE_URL: ${{ startsWith(github.ref, 'refs/heads/release') && 'https://lacewallet.banxa.com/' }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
+
+  build:
+    name: Build Lace
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Lace artifact
+        uses: ./.github/shared/build
+        with:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          BLOCKFROST_PROJECT_ID_SANCHONET: ${{ secrets.BLOCKFROST_PROJECT_ID_SANCHONET }}
+          MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
+          MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
+          SENTRY_AUTH_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_ORG || '' }}
+          SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
+          SENTRY_ENVIRONMENT: 'smoke-tests'
+          WALLET_POLLING_INTERVAL_IN_SEC: 5
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+  smokeTests:
+    name: Smoke e2e tests
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: '${{ env.BUILD_ARTIFACT_NAME }}'
+          path: ./apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
+        uses: ./.github/actions/test/e2e
+        with:
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
+
+  processReports:
+    name: Process smoke e2e test reports
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all smoke tests artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        shell: bash
+        if: always()
+        working-directory: ./reports/allure/results
+        run: |
+          echo "
+          branch=${{ github.ref_name }}
+          browser= 'Chrome'
+          tags= '@Smoke'
+          platform=Linux
+          " > environment.properties
+
+      - name: Convert metrics JSON to Prometheus format
+        working-directory: './packages/e2e-tests/tools/'
+        run: |
+          ./convert_metrics_to_prometheus.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../metrics
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.9.0
+        if: always()
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'smoke/linux/chrome/${{ github.run_number }}'
+          copyLatest: true
+          ignoreMissingResults: true
+          updatePr: comment
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Publish artifacts (logs, reports, screenshots)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            ./packages/e2e-tests/screenshots
+            ./packages/e2e-tests/logs
+            ./packages/e2e-tests/reports
+          retention-days: 5
+
+      - run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
+  if-core-changed:
+    name: When core changed
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-22.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/core/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticCore:
+    name: >
+      Run Chromatic check: Core
+    runs-on: ubuntu-22.04
+    needs:
+      - prepare
+      - if-core-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Chromatic packages-core
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/core
+          NAME: packages-core
+          TOKEN: ${{ secrets.CHROMATIC_LACE_CORE_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-core-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/core not needed"
+          exit 0
+
+  if-staking-changed:
+    name: When staking change
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-22.04
+    outputs:
+      requireChromaticCheck: ${{ steps.diffcheck.outputs.requireChromaticCheck }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: diffcheck
+        run: |
+          set +e
+          git diff --quiet ${{ github.event.pull_request.base.sha }}..${{ github.sha }} -- packages/staking/**
+          echo "requireChromaticCheck=$?" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+          set -e
+
+  chromaticStaking:
+    name: >
+      Run Chromatic check: Staking
+    runs-on: ubuntu-22.04
+    needs:
+      - prepare
+      - if-staking-changed
+
+    steps:
+      - name: Checkout repository
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js and install dependencies
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download packages-common
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-common
+          path: packages/common/dist
+
+      - name: Download packages-cardano
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-cardano
+          path: packages/cardano/dist
+
+      - name: Download packages-translation
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-translation
+          path: packages/translation/dist
+
+      - name: Download packages-core
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-core
+          path: packages/core/dist
+
+      - name: Download packages-staking
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          name: packages-staking
+          path: packages/staking/dist
+
+      - name: Chromatic packages-staking
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 1 }}
+        uses: ./.github/actions/chromatic
+        with:
+          DIR: packages/staking
+          NAME: packages-staking
+          TOKEN: ${{ secrets.CHROMATIC_LACE_STAKING_TOKEN }}
+
+      - name: Skip
+        if: ${{ needs.if-staking-changed.outputs.requireChromaticCheck == 0 }}
+        run: echo "Chromatic check for packages/staking not needed"
+          exit 0
