@@ -17,7 +17,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "Sending metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/series" \
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -106,7 +106,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "Sending build metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/series" \
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -190,7 +190,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "Sending test metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/series" \
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -293,7 +293,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "Sending release metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/series" \
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
@@ -317,7 +317,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "Sending final metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/events" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{

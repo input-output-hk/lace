@@ -6,7 +6,7 @@ echo "Testing Datadog API Key..."
 # Check if DATADOG_API_KEY is set
 if [ -z "$DATADOG_API_KEY" ]; then
     echo "❌ DATADOG_API_KEY environment variable is not set"
-    echo "Please set it with: export DATADOG_API_KEY=your_api_key_here"
+    echo "Please set it with: export DATADOG_API_KEY=your_personal_api_key_here"
     exit 1
 fi
 
@@ -68,4 +68,4 @@ else
     echo "❌ Failed to send event to Datadog"
     echo "HTTP Code: $event_http_code"
     echo "Response: $event_response_body"
-fi 
+fi
