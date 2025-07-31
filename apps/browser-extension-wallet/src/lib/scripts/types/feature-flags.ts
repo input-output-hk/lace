@@ -9,6 +9,7 @@ export enum ExperimentName {
   RESTORE_PAPER_WALLET = 'restore-paper-wallet',
   USE_SWITCH_TO_NAMI_MODE = 'use-switch-to-nami-mode',
   SHARED_WALLETS = 'shared-wallets',
+  STAKE_POOLS_SERVICE = 'use-client-stakepools-service',
   WEBSOCKET_API = 'websocket-api',
   DAPP_EXPLORER = 'dapp-explorer',
   SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',

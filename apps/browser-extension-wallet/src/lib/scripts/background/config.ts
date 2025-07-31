@@ -65,6 +65,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
     },
     logger,
     experiments: {
+      useStakePoolsService: isExperimentEnabled(ExperimentName.STAKE_POOLS_SERVICE),
       useWebSocket: isExperimentEnabled(ExperimentName.WEBSOCKET_API)
     },
     extensionLocalStorage: storage.local

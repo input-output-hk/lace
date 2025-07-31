@@ -18,6 +18,7 @@ import {
 } from '@cardano-sdk/core';
 
 import {
+  stakePoolHttpProvider,
   CardanoWsClient,
   CreateHttpProviderConfig,
   TxSubmitApiProvider,
@@ -87,6 +88,7 @@ interface ProvidersConfig {
   };
   logger: Logger;
   experiments: {
+    useStakePoolsService?: boolean;
     useWebSocket?: boolean;
   };
   extensionLocalStorage: Storage.LocalStorageArea;
@@ -137,7 +139,7 @@ export const createProviders = ({
   axiosAdapter,
   env: { baseCardanoServicesUrl: baseUrl, baseKoraLabsServicesUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useWebSocket },
+  experiments: { useStakePoolsService, useWebSocket },
   extensionLocalStorage
 }: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
@@ -159,7 +161,9 @@ export const createProviders = ({
     logger
   });
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
-  const stakePoolProvider = initStakePoolService({ blockfrostClient, extensionLocalStorage, networkInfoProvider });
+  const stakePoolProvider = useStakePoolsService
+    ? initStakePoolService({ blockfrostClient, extensionLocalStorage, networkInfoProvider })
+    : stakePoolHttpProvider(httpProviderConfig);
   const txSubmitProvider = createTxSubmitProvider(blockfrostClient, httpProviderConfig, customSubmitTxUrl);
   const dRepProvider = new BlockfrostDRepProvider(blockfrostClient, logger);
 

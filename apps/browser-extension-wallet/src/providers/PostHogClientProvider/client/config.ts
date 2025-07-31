@@ -33,6 +33,7 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.RESTORE_PAPER_WALLET]: false,
   [ExperimentName.USE_SWITCH_TO_NAMI_MODE]: false,
   [ExperimentName.SHARED_WALLETS]: false,
+  [ExperimentName.STAKE_POOLS_SERVICE]: false,
   [ExperimentName.WEBSOCKET_API]: false,
   [ExperimentName.DAPP_EXPLORER]: false,
   [ExperimentName.SEND_CONSOLE_ERRORS_TO_SENTRY]: false,
