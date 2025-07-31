@@ -1,4 +1,4 @@
-// cSpell:ignore adaseal atada
+// cSpell:ignore adaseal atada pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers, camelcase */
 import { CACHE_KEY, initStakePoolService } from '../stakePoolService';
@@ -258,13 +258,27 @@ const poolDetails = {
   retirement: [],
   calidus_key: null
 };
+
+const poolMetadata = {
+  pool_id: 'pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt',
+  hex: '7d59eb08203e86f74d3011c7e967ed50fbd0954001eab1cb00b69422',
+  url: 'https://adaseal.eu/poolMetaData.json',
+  hash: '06179016bb99292a607ffea0dd7deba50483fa19195a6ce02854805657195658',
+  ticker: 'SEAL',
+  name: 'adaseal.eu',
+  description:
+    'Community pool - Dedicated HA cluster, server room, 0% margin. 10% of profits donated to seal sanctuaries and zoos.',
+  homepage: 'https://adaseal.eu'
+};
 // cSpell:enable
 
 describe('initStakePoolService', () => {
   let blockfrostClientMock: jest.Mocked<BlockfrostClient>;
   let extensionLocalStorageMock: jest.Mocked<Storage.LocalStorageArea>;
   let networkInfoProviderMock: jest.Mocked<NetworkInfoProvider>;
+  let nextBFCallHangs = false;
   let nextBFCallThrows = false;
+  let resolver: (value: unknown) => void;
 
   const init = () =>
     initStakePoolService({
@@ -305,6 +319,11 @@ describe('initStakePoolService', () => {
         throw new Error('Test BF Error');
       }
 
+      if (nextBFCallHangs) {
+        nextBFCallHangs = false;
+        await new Promise((resolve) => (resolver = resolve));
+      }
+
       if (url === 'network') return { stake: { live: '21877143906293058' }, supply: { reserves: '7036998224247014' } };
 
       // cSpell:disable-next-line
@@ -312,7 +331,9 @@ describe('initStakePoolService', () => {
 
       if (url.startsWith('pools/extended')) return pools;
 
-      if (url.startsWith('pools/')) return poolDetails;
+      if (url === 'pools/pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt') return poolDetails;
+
+      if (url === 'pools/pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt/metadata') return poolMetadata;
 
       throw new Error(`Unexpected URL in blockfrostClientMock: ${url}`);
     });
@@ -434,6 +455,10 @@ describe('initStakePoolService', () => {
       // Live pledge is not available for all the pools
       expect(result1.pageResults[0].metrics?.livePledge).toBe(BigInt(0));
 
+      // The calls performed by init
+      const initCalls = [['pools/extended?count=100&page=1'], ['network'], ['pools/retiring']];
+      expect(blockfrostClientMock.request.mock.calls).toEqual(initCalls);
+
       const result2 = await stakePoolProvider.queryStakePools({
         filters: { identifier: { values: [{ id: result1.pageResults[0].id }] } },
         pagination: { startAt: 0, limit: 10 }
@@ -442,7 +467,47 @@ describe('initStakePoolService', () => {
       expect(result2.totalResultCount).toBe(1);
       expect(result2.pageResults[0].metadata?.ticker).toBe('SEAL');
       // Live pledge is available for pools queried by id
-      expect(result1.pageResults[0].metrics?.livePledge).toBe(BigInt('87313446210'));
+      expect(result2.pageResults[0].metrics?.livePledge).toBe(BigInt('87313446210'));
+
+      expect(blockfrostClientMock.request.mock.calls).toEqual([
+        ...initCalls,
+        // The call performed to fetch stake pool details
+        ['pools/pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt']
+      ]);
+    });
+
+    it('should respond to stake pools queries by id even if the data is not loaded', async () => {
+      nextBFCallHangs = true;
+
+      const stakePoolProvider = init();
+
+      // Wait a while to let init to call the hanging promise, otherwise next queryStakePools call will hit it
+      while (blockfrostClientMock.request.mock.calls.length === 0)
+        await new Promise((resolve) => setTimeout(resolve, 1));
+
+      expect(blockfrostClientMock.request.mock.calls).toEqual([
+        // The first call performed by init, the hanging one
+        ['pools/extended?count=100&page=1']
+      ]);
+
+      const result = await stakePoolProvider.queryStakePools({
+        filters: { identifier: { values: [{ id: 'pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt' }] } },
+        pagination: { startAt: 0, limit: 10 }
+      });
+
+      expect(result.totalResultCount).toBe(1);
+      expect(result.pageResults[0].metadata?.ticker).toBe('SEAL');
+      expect(blockfrostClientMock.request.mock.calls).toEqual([
+        // The first call performed by init, the hanging one
+        ['pools/extended?count=100&page=1'],
+        // The call performed to fetch stake pool details, this is not a proof as it is called either way
+        ['pools/pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt'],
+        // The call performed to fetch stake pool metadata, this ensures the flow is the one expected
+        ['pools/pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt/metadata']
+      ]);
+
+      // Resolve the hanging promise to free resources
+      resolver('test');
     });
   });
 
@@ -488,7 +553,6 @@ describe('initStakePoolService', () => {
           {
             cost: { __type: 'bigint', value: '170000000' },
             hexId: '7d59eb08203e86f74d3011c7e967ed50fbd0954001eab1cb00b69422',
-            // cSpell:disable-next-line
             id: 'pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt',
             margin: { denominator: 1, numerator: 0 },
             metadata: {
