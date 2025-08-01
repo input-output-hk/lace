@@ -5,7 +5,8 @@ import {
   TxDetailsCBOR,
   TxDetailsCertificates,
   TxDetailsProposalProcedures,
-  TxDetailsVotingProcedures
+  TxDetailsVotingProcedures,
+  TxDetailsAuxiliaryData
 } from '@lace/core';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
 import { useViewsFlowContext } from '@providers/ViewFlowProvider';
@@ -189,6 +190,7 @@ export const DappTransactionContainer = withAddressBookContext(
                 withSeparatorLine={false}
               />
             )}
+            {tx?.auxiliaryData !== undefined && <TxDetailsAuxiliaryData auxiliaryData={tx.auxiliaryData} />}
           </>
         ) : (
           <Skeleton loading />
