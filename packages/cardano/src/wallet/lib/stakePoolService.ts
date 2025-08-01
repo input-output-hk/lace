@@ -16,9 +16,9 @@ import { fromSerializableObject, toSerializableObject } from '@cardano-sdk/util'
 import { Storage } from 'webextension-polyfill';
 import type { Responses } from '@blockfrost/blockfrost-js';
 import Fuse from 'fuse.js';
+import { ChainName } from '../types';
 
 const BF_API_PAGE_SIZE = 100;
-export const CACHE_KEY = 'stake-pool-service-data';
 const SECONDS_PER_YEAR = 31_536_000; // 365 * 24 * 60 * 60
 const ONE_DAY = 86_400_000; // One day in milliseconds
 
@@ -77,7 +77,7 @@ interface StakePoolCachedData {
   stats: StakePoolStats;
 }
 
-type CachedData = { [key in typeof CACHE_KEY]: StakePoolCachedData };
+export const getCacheKey = (chainName: ChainName): string => `stake-pool-service-${chainName}`;
 
 const toCore = (pool: BlockFrostPool): Cardano.StakePool => ({
   cost: BigInt(pool.fixed_cost),
@@ -272,6 +272,7 @@ const getSorter = (sort: Exclude<QueryStakePoolsArgs['sort'], undefined>): Sorte
 
 interface StakePoolServiceProps {
   blockfrostClient: BlockfrostClient;
+  chainName: ChainName;
   extensionLocalStorage: Storage.LocalStorageArea;
   networkInfoProvider: NetworkInfoProvider;
 }
@@ -302,7 +303,8 @@ interface StakePoolServiceProps {
  * the missing data when it is called querying stake pools by id.
  */
 export const initStakePoolService = (props: StakePoolServiceProps): StakePoolProvider => {
-  const { blockfrostClient, extensionLocalStorage, networkInfoProvider } = props;
+  const { blockfrostClient, chainName, extensionLocalStorage, networkInfoProvider } = props;
+  const cacheKey = getCacheKey(chainName);
 
   /**
    * Storing `cachedData` in a `Promise` rather than in a value is the key to handle the cases where the `StakePoolProvider` methods are
@@ -334,7 +336,7 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
   const saveData = (data: StakePoolCachedData) => {
     // Save data in a fire and forget way.
     // Errors while saving data should not prevent the StakePoolProvider from working.
-    extensionLocalStorage.set({ [CACHE_KEY]: toSerializableObject(data) }).catch(console.error);
+    extensionLocalStorage.set({ [cacheKey]: toSerializableObject(data) }).catch(console.error);
   };
 
   const fetchNetworkData = async () => {
@@ -491,8 +493,8 @@ export const initStakePoolService = (props: StakePoolServiceProps): StakePoolPro
   };
 
   const init = async () => {
-    const storageObject = (await extensionLocalStorage.get(CACHE_KEY)) as CachedData;
-    let data = fromSerializableObject<StakePoolCachedData>(storageObject[CACHE_KEY]);
+    const storageObject = await extensionLocalStorage.get(cacheKey);
+    let data = fromSerializableObject<StakePoolCachedData>(storageObject[cacheKey]);
 
     // The very first time the extension runs, nothing can be done rather than fetching the data synchronously.
     // In this case there is no need to create the index, because it will be created by `fetchData` function.

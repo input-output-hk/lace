@@ -1,11 +1,13 @@
 // cSpell:ignore adaseal atada pool104v7kzpq86r0wnfsz8r7jeld2raap92qq84trjcqk62zyh9akqt
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers, camelcase */
-import { CACHE_KEY, initStakePoolService } from '../stakePoolService';
+import { getCacheKey, initStakePoolService } from '../stakePoolService';
 import { Cardano, NetworkInfoProvider, SupplySummary } from '@cardano-sdk/core';
 import { BlockfrostClient } from '@cardano-sdk/cardano-services-client';
 import { Storage } from 'webextension-polyfill';
 import { fromSerializableObject } from '@cardano-sdk/util';
+
+const cacheKey = getCacheKey('Mainnet');
 
 const genesisParameters = fromSerializableObject({
   activeSlotsCoefficient: 0.05,
@@ -283,6 +285,7 @@ describe('initStakePoolService', () => {
   const init = () =>
     initStakePoolService({
       blockfrostClient: blockfrostClientMock,
+      chainName: 'Mainnet',
       extensionLocalStorage: extensionLocalStorageMock,
       networkInfoProvider: networkInfoProviderMock
     });
@@ -338,7 +341,7 @@ describe('initStakePoolService', () => {
       throw new Error(`Unexpected URL in blockfrostClientMock: ${url}`);
     });
 
-    extensionLocalStorageMock.get.mockResolvedValue({ [CACHE_KEY]: undefined });
+    extensionLocalStorageMock.get.mockResolvedValue({ [cacheKey]: undefined });
     extensionLocalStorageMock.set.mockResolvedValue();
 
     networkInfoProviderMock.genesisParameters.mockResolvedValue(genesisParameters);
@@ -589,7 +592,7 @@ describe('initStakePoolService', () => {
       };
 
       it('in case of expired cache data and error in asyncFetchData, StakePoolProvider works anyway even if with old data', async () => {
-        extensionLocalStorageMock.get.mockResolvedValue({ [CACHE_KEY]: expiredCachedData });
+        extensionLocalStorageMock.get.mockResolvedValue({ [cacheKey]: expiredCachedData });
         nextBFCallThrows = true;
 
         const stakePoolProvider = init();
@@ -604,7 +607,7 @@ describe('initStakePoolService', () => {
       });
 
       it('in case of expired cache data and continuous error in asyncFetchData, StakePoolProvider continues to work', async () => {
-        extensionLocalStorageMock.get.mockResolvedValue({ [CACHE_KEY]: expiredCachedData });
+        extensionLocalStorageMock.get.mockResolvedValue({ [cacheKey]: expiredCachedData });
         nextBFCallThrows = true;
 
         const stakePoolProvider = init();
@@ -633,7 +636,7 @@ describe('initStakePoolService', () => {
       });
 
       it('asyncFetchData continues to try to recover', async () => {
-        extensionLocalStorageMock.get.mockResolvedValue({ [CACHE_KEY]: expiredCachedData });
+        extensionLocalStorageMock.get.mockResolvedValue({ [cacheKey]: expiredCachedData });
         nextBFCallThrows = true;
 
         const stakePoolProvider = init();
