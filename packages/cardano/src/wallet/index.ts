@@ -90,3 +90,4 @@ export * from '@wallet/lib/blockfrost-address-discovery';
 
 export * as mockUtils from '@wallet/test/mocks';
 export * from '@wallet/types';
+export { metadatum } from '@cardano-sdk/core';
