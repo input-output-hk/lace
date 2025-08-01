@@ -102,7 +102,14 @@ export const NftDetail = withNftsFoldersContext((): React.ReactElement => {
         open={nftPrintLabDialogOpen}
         onConfirm={() => {
           analytics.sendEventToPostHog(PostHogAction.NFTPrintLabDisclaimerConfirmClick);
-          openExternalLink(NFTPRINTLAB_URL);
+          const searchParams = new URLSearchParams({
+            pid: assetInfo?.policyId,
+            aid: assetInfo.assetId,
+            name: assetInfo.tokenMetadata.name,
+            aff: 'LACE'
+          });
+          const parameterizedUrl = `${NFTPRINTLAB_URL}?${searchParams.toString()}`;
+          openExternalLink(parameterizedUrl);
           setNftPrintLabDialogOpen(false);
         }}
       />
