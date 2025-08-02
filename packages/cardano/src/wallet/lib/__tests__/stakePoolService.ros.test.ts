@@ -1628,7 +1628,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.026_280_557_055_574_638
+    ros: 0.026_280_556_891_642_88
   },
   pool1nqheyct9a0mxn80cwp9pd5guncfu3rzwqtmru0l94accz7gjcgl: {
     details: {
@@ -1781,7 +1781,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.031_588_033_495_945_744
+    ros: 0.031_588_033_384_080_116
   },
   pool14cq4fchmmqjygwjw4zexmqqd6a7caxptjnvseyu6wanjuppv4vk: {
     details: {
@@ -1868,7 +1868,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.031_592_478_914_478_36
+    ros: 0.031_592_478_767_300_536
   },
   pool10rdglgh4pzvkf936p2m669qzarr9dusrhmmz9nultm3uvq4eh5k: {
     details: {
@@ -1904,7 +1904,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.029_787_129_468_942_464
+    ros: 0.029_787_129_228_867_17
   },
   pool18ufrgfgmslekdxnk9v9345qvhrr7vfgzkvneqtwm7unnwaht6ww: {
     details: {
@@ -1954,7 +1954,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.031_666_573_448_705_604
+    ros: 0.031_666_573_173_462_44
   },
   pool16agnvfan65ypnswgg6rml52lqtcqe5guxltexkn82sqgj2crqtx: {
     details: {
@@ -1997,7 +1997,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.031_445_045_316_998_99
+    ros: 0.031_445_045_009_323_1
   },
   pool1lhz4gsk5ezdl5s4mv2kxgrkhzzhad6me2v0xmwuyt845vensdlc: {
     details: {
@@ -2047,7 +2047,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.031_739_948_706_602_35
+    ros: 0.031_739_948_424_187_15
   },
   pool1sskadl6p2w0ttfr60y2ssfzcmrnaty4wt68v5glzd3e5vwkh7z5: {
     details: {
@@ -2132,7 +2132,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0
+    ros: 0.000_834_040_552_604_387
   },
   pool1rw29y8c5md2rm4ynkrqhpm9saatd0a0xzyyc6xudelgkww5junh: {
     details: {
@@ -2298,7 +2298,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.023_746_987_322_657_01
+    ros: 0.023_746_303_862_673_29
   },
   pool1hezakp5r240dy4fcsm7mfd3qqahcvyrhj8hl770yxmxxzdwvcre: {
     details: {
@@ -2332,7 +2332,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.004_769_856_990_362_919_5
+    ros: 0.004_769_854_990_042_122
   },
   pool1a6ysvnx24xsjh2f6ehgmx7yu9q45fd7lsk88v2swxkek7pkxtgp: {
     details: {
@@ -2481,7 +2481,7 @@ const details = {
       retirement: ['b5d5d7b32c3c9f4c40f9826453449988780c4cccb2aecc7d091e3f0fda7c54df'],
       calidus_key: null
     },
-    ros: 0.026_084_639_801_992_937
+    ros: 0.026_084_633_210_397
   },
   pool1522rtve5zlgnlh3zm5a4mcy3u7gpndg3kkac3xyzxmp6x6weca3: {
     details: {
@@ -2506,7 +2506,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.039_918_668_182_618_69
+    ros: 0.039_918_653_777_090_36
   },
   pool1gaztx97t53k47fr7282d70tje8323vvzx8pshgts30t9krw62tm: {
     details: {
@@ -2537,7 +2537,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0.037_316_834_216_654_77
+    ros: 0.037_316_833_560_096_63
   },
   pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu: {
     details: {
@@ -2566,7 +2566,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0
+    ros: 0.021_118_720_873_503_083
   },
   pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8: {
     details: {
@@ -2614,7 +2614,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0
+    ros: 0.024_619_120_927_203_753
   },
   pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5: {
     details: {
@@ -2639,7 +2639,7 @@ const details = {
       retirement: [],
       calidus_key: null
     },
-    ros: 0
+    ros: 0.024_240_674_285_476_16
   }
 };
 // cSpell:enable

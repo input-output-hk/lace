@@ -151,48 +151,61 @@ const estimateROS = (stakePool: StakePoolWithMetrics, networkData: StakePoolCach
 
   const maxPool = (R / (1 + a0)) * (s1 + (p1 * a0 * (s1 - (p1 * (z0 - s1)) / z0)) / z0);
 
+  // Estimated Fig. 46.2 inputs
+
+  const blocksPerEpoch = genesisParameters.epochLength * genesisParameters.activeSlotsCoefficient;
+  const poolBlocks = (blocksPerEpoch * liveStake) / totalStake;
+
   // Estimated Fig. 46.2
   // The document refers to the number of blocks the pool added to the chain and the total number of blocks added
   // to the chain in the last epoch. Using estimated values for current epoch.
   // In Conway era the formula was changed; the d >= 0.8 case no longer exists.
   // Ref: https://intersectmbo.github.io/formal-ledger-specifications/cardano-ledger.pdf - Fig. 64
 
-  const blocksPerEpoch = genesisParameters.epochLength * genesisParameters.activeSlotsCoefficient;
-  const poolBlocks = (blocksPerEpoch * liveStake) / totalStake;
+  const computeEpochROS = (blocks: number) => {
+    const mkApparentPerformance = blocks / (blocksPerEpoch * s);
 
-  const mkApparentPerformance = poolBlocks / (blocksPerEpoch * s);
+    // Simplified Fig. 47.2
+    // BF does not offer a way to distinguish between member stake and operator stake.
+    // By luck, there is no need to distinguish between member rewards and operator rewards; it is enough to compute
+    // the reward from member perspective as if all the stake was controlled by the members.
+    // This is why the multiplication by member proportional stake is not needed.
+    // It is mandatory to keep in mind this in next steps.
 
-  // Simplified Fig. 47.2
-  // BF does not offer a way to distinguish between member stake and operator stake.
-  // By luck, there is no need to distinguish between member rewards and operator rewards; it is enough to compute
-  // the reward from member perspective as if all the stake was controlled by the members.
-  // This is why the multiplication by member proportional stake is not needed.
-  // It is mandatory to keep in mind this in next steps.
+    const rewards = maxPool * mkApparentPerformance;
+    const c = Number(stakePool.cost);
+    const m = Cardano.FractionUtils.toNumber(stakePool.margin);
 
-  const rewards = maxPool * mkApparentPerformance;
-  const c = Number(stakePool.cost);
-  const m = Cardano.FractionUtils.toNumber(stakePool.margin);
+    // If the rewards are less than the stakePool cost, the ROS is 0
+    if (rewards <= c) return 0;
 
-  // If the rewards are less than the stakePool cost, the ROS is 0
-  if (rewards <= c) return 0;
+    // The omitted computation of member proportional stake.
+    // t = memberStake / stake;
+    // memberRewards = (rewards - c) * (1 - m) * t;
+    // simplifiedMemberRewards = memberRewards / t = memberRewards * stake / memberStake;
+    const simplifiedMemberRewards = (rewards - c) * (1 - m);
 
-  // The omitted computation of member proportional stake.
-  // t = memberStake / stake;
-  // memberRewards = (rewards - c) * (1 - m) * t;
-  // simplifiedMemberRewards = memberRewards / t = memberRewards * stake / memberStake;
-  const simplifiedMemberRewards = (rewards - c) * (1 - m);
-
-  // The epoch ROS is the memberRewards divided by the member stake.
-  // Given the simplification in Fig. 47.2, dividing the simplified memberRewards by the entire stake gives the same result.
-  // epochROS = memberRewards / memberStake = (simplifiedMemberRewards * memberStake / stake) / memberStake;
-  const epochROS = liveStake === 0 ? 0 : simplifiedMemberRewards / liveStake;
+    // The epoch ROS is the memberRewards divided by the member stake.
+    // Given the simplification in Fig. 47.2, dividing the simplified memberRewards by the entire stake gives the same result.
+    // epochROS = memberRewards / memberStake = (simplifiedMemberRewards * memberStake / stake) / memberStake;
+    return liveStake === 0 ? 0 : simplifiedMemberRewards / liveStake;
+  };
 
   // Annualized ROS
 
   const secondsPerEpoch = genesisParameters.epochLength * genesisParameters.slotLength;
   const epochsPerYear = SECONDS_PER_YEAR / secondsPerEpoch;
 
-  return Math.pow(1 + epochROS, epochsPerYear) - 1;
+  const poolBlocksFloor = Math.floor(poolBlocks);
+  const epochsAtCeilWeight = poolBlocks - poolBlocksFloor;
+  const epochsAtFloorWeight = 1 - epochsAtCeilWeight;
+
+  const epochROSFloor = computeEpochROS(poolBlocksFloor);
+  const epochROSCeil = computeEpochROS(poolBlocksFloor + 1);
+  const epochsAtFloor = epochsPerYear * epochsAtFloorWeight;
+  const epochsAtCeil = epochsPerYear * epochsAtCeilWeight;
+
+  return Math.pow(1 + epochROSFloor, epochsAtFloor) * Math.pow(1 + epochROSCeil, epochsAtCeil) - 1;
 };
 
 const enrichStakePool = ({ details, networkData, id, stakePools }: enrichStakePoolParams) => {
