@@ -47,7 +47,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
   const baseCardanoServicesUrl = getBaseUrlForChain(chainName);
   const baseKoraLabsServicesUrl = getBaseKoraLabsUrlForChain(chainName);
   const magic = getMagicForChain(chainName);
-  const { customSubmitTxUrl, featureFlags } = await getBackgroundStorage();
+  const { customSubmitTxUrl, featureFlags, customBlockfrostUrl } = await getBackgroundStorage();
 
   const isExperimentEnabled = (experimentName: ExperimentName) => !!(featureFlags?.[magic]?.[experimentName] ?? false);
 
@@ -57,6 +57,7 @@ export const getProviders = async (chainName: Wallet.ChainName): Promise<Wallet.
       baseCardanoServicesUrl,
       baseKoraLabsServicesUrl,
       customSubmitTxUrl,
+      customBlockfrostUrl,
       blockfrostConfig: {
         ...BLOCKFROST_CONFIGS[chainName],
         rateLimiter,

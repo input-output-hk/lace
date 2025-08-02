@@ -38,7 +38,7 @@ export interface UnconfirmedTransaction {
   date: string;
 }
 
-export interface CustomSubmitApiConfig {
+export interface CustomBackendApiConfig {
   status: boolean;
   url: string;
 }
@@ -64,7 +64,8 @@ export interface ILocalStorage {
   showPinExtension?: boolean;
   showMultiAddressModal?: boolean;
   userAvatar?: Record<`${EnvironmentTypes}${string}`, string>;
-  isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
+  isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomBackendApiConfig>;
+  isCustomBackendApiEnabled?: Record<EnvironmentTypes, CustomBackendApiConfig>;
   isReceiveInAdvancedMode?: boolean;
   hasUserAcknowledgedPrivacyPolicyUpdate?: boolean;
 }
