@@ -30,7 +30,8 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
   getAppVersion: RemoteApiPropertyType.MethodReturningPromise,
   backendFailures$: RemoteApiPropertyType.HotObservable,
-  unhandledError$: RemoteApiPropertyType.HotObservable
+  unhandledError$: RemoteApiPropertyType.HotObservable,
+  ping: RemoteApiPropertyType.MethodReturningPromise
 };
 
 const { BLOCKFROST_CONFIGS, BLOCKFROST_RATE_LIMIT_CONFIG, SESSION_TIMEOUT } = config();
