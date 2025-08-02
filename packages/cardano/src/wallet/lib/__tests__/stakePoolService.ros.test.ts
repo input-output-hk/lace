@@ -1404,6 +1404,169 @@ const cachedData = {
       rewardAccount: '',
       status: 'active',
       vrf: ''
+    },
+    {
+      cost: {
+        __type: 'bigint',
+        value: '340000000'
+      },
+      hexId: '0a156f7c3a768ecfb1a4c710a26391dd86b78aa959ba4aa0e2c5e47f',
+      id: 'pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8',
+      margin: {
+        denominator: 50,
+        numerator: 1
+      },
+      metadata: {
+        hash: 'f56dab21c341269b6930858223b683f09895e0ab585b744f6c4e5e384da18a2e',
+        url: 'https://raw.githubusercontent.com/VJRAS/v/main/poolmeta.json',
+        ticker: 'VJRAS',
+        name: 'Love_over_Gold',
+        description: '247 Uptime',
+        homepage: 'http://75.119.134.23/index.html'
+      },
+      metrics: {
+        blocksCreated: 193,
+        delegators: 0,
+        livePledge: {
+          __type: 'bigint',
+          value: '0'
+        },
+        saturation: 0.000_013_222_653_211_648_44,
+        size: {
+          active: 0,
+          live: 0
+        },
+        stake: {
+          active: {
+            __type: 'bigint',
+            value: '1005175300'
+          },
+          live: {
+            __type: 'bigint',
+            value: '1005175300'
+          }
+        },
+        lastRos: 0,
+        ros: 0
+      },
+      owners: [],
+      pledge: {
+        __type: 'bigint',
+        value: '1000000000'
+      },
+      relays: [],
+      rewardAccount: '',
+      status: 'active',
+      vrf: ''
+    },
+    {
+      cost: {
+        __type: 'bigint',
+        value: '345000000'
+      },
+      hexId: '3a0c080b10b148b7ca13161458d29a3516fc35e66e423d15cbe94775',
+      id: 'pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5',
+      margin: {
+        denominator: 20,
+        numerator: 3
+      },
+      metadata: {
+        hash: '4300f53b92bab9af1e2d04c5612be0402771322a76b1955955ea2212b3932ee8',
+        url: 'https://raw.githubusercontent.com/joeloliver/ada/main/pMD.json',
+        ticker: null,
+        name: null,
+        description: null,
+        homepage: null
+      },
+      metrics: {
+        blocksCreated: 0,
+        delegators: 0,
+        livePledge: {
+          __type: 'bigint',
+          value: '0'
+        },
+        saturation: 0.000_066_018_362_421_107_98,
+        size: {
+          active: 0,
+          live: 0
+        },
+        stake: {
+          active: {
+            __type: 'bigint',
+            value: '5018662003'
+          },
+          live: {
+            __type: 'bigint',
+            value: '5018662003'
+          }
+        },
+        lastRos: 0,
+        ros: 0
+      },
+      owners: [],
+      pledge: {
+        __type: 'bigint',
+        value: '5000000000'
+      },
+      relays: [],
+      rewardAccount: '',
+      status: 'active',
+      vrf: ''
+    },
+    {
+      cost: {
+        __type: 'bigint',
+        value: '340000000'
+      },
+      hexId: '4413cf615dc6877ad1b33c75b26e054fc25291f918420c88ef9bb37b',
+      id: 'pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu',
+      margin: {
+        denominator: 25,
+        numerator: 1
+      },
+      metadata: {
+        hash: 'ee5f23e05cd0408b3fff94808ac2772e9da10bfb926df001304d5d958c945e37',
+        url: 'https://www.blockops.zone/spo-cardano/bzone.json',
+        ticker: 'BZONE',
+        name: 'Blockops Zone',
+        description:
+          'BZONE is a staking pool maintained by a group of individuals with the objective of raising resources to develop software and to promote the adoption of blockchain, especially Cardano. Please visit the website and stake with us to support the project.',
+        homepage: 'https://www.blockops.zone'
+      },
+      metrics: {
+        blocksCreated: 252,
+        delegators: 0,
+        livePledge: {
+          __type: 'bigint',
+          value: '0'
+        },
+        saturation: 0.000_006_585_808_520_620_812,
+        size: {
+          active: 0,
+          live: 0
+        },
+        stake: {
+          active: {
+            __type: 'bigint',
+            value: '500647786'
+          },
+          live: {
+            __type: 'bigint',
+            value: '500647786'
+          }
+        },
+        lastRos: 0,
+        ros: 0
+      },
+      owners: [],
+      pledge: {
+        __type: 'bigint',
+        value: '500000000'
+      },
+      relays: [],
+      rewardAccount: '',
+      status: 'active',
+      vrf: ''
     }
   ],
   stats: {
@@ -2375,6 +2538,108 @@ const details = {
       calidus_key: null
     },
     ros: 0.037_316_834_216_654_77
+  },
+  pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu: {
+    details: {
+      pool_id: 'pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu',
+      hex: '4413cf615dc6877ad1b33c75b26e054fc25291f918420c88ef9bb37b',
+      vrf_key: '8446a911ed7cdf5c802e493eb16a20d3d3af2df99b51a4811cac84a5c95aba64',
+      blocks_minted: 252,
+      blocks_epoch: 0,
+      live_stake: '500647786',
+      live_size: 2.288_005_722_968_331e-8,
+      live_saturation: 0.000_006_585_808_520_620_812,
+      live_delegators: 1,
+      active_stake: '500647786',
+      active_size: 2.286_204_595_609_873_4e-8,
+      declared_pledge: '500000000',
+      live_pledge: '500647786',
+      margin_cost: 0.04,
+      fixed_cost: '340000000',
+      reward_account: 'stake1uynam6a655dlqxstmntkamupweyuu9346ekjgfspc563jjgyyuj7t',
+      owners: ['stake1uynam6a655dlqxstmntkamupweyuu9346ekjgfspc563jjgyyuj7t'],
+      registration: [
+        '36171685d44f4b934e2351bf1423663c15f080d6a588d11fc18c44fb72488ca9',
+        '270633a3b7337455b32fa4f3ded0debd15cbb2484d0013efaa3fd699e8365895',
+        'ccbd1b5e6e2666d000dc03e48193b5a81d2469d51cc92d73b1c92eca8f9cbd3e'
+      ],
+      retirement: [],
+      calidus_key: null
+    },
+    ros: 0
+  },
+  pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8: {
+    details: {
+      pool_id: 'pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8',
+      hex: '0a156f7c3a768ecfb1a4c710a26391dd86b78aa959ba4aa0e2c5e47f',
+      vrf_key: 'f8f5ba15e5e4a8cca6d2d1ec85616311fe6b7440795950a3feaa7cfac24ac75f',
+      blocks_minted: 193,
+      blocks_epoch: 0,
+      live_stake: '1005175300',
+      live_size: 4.593_742_154_262_535_5e-8,
+      live_saturation: 0.000_013_222_653_211_648_44,
+      live_delegators: 2,
+      active_stake: '1005175300',
+      active_size: 4.590_125_941_860_318e-8,
+      declared_pledge: '1000000000',
+      live_pledge: '1005175300',
+      margin_cost: 0.02,
+      fixed_cost: '340000000',
+      reward_account: 'stake1uyl3vhvdnwv4vn0pxvrm378rj5lteqr82sxmcppctdd4n0cqvefmk',
+      owners: ['stake1uyl3vhvdnwv4vn0pxvrm378rj5lteqr82sxmcppctdd4n0cqvefmk'],
+      registration: [
+        'b77bdf3718563ab9f971a1e779bee617b6da627a190a7e35b7c2a8be3070b5aa',
+        '9756a1cbcb745abb9109e93f08ea0c2c6a4c2da3dfa6b239bbef93ad84acdaac',
+        'e99a7474ce5060e9e71af3543a00350a1e864a95a96dea31dbf53df12c05b808',
+        'c0151d2bc976ceeb85d7a4288a6d0ea5805dac935d7cf3a2191d5fde359e9c87',
+        'ac7a43e2afd9c063740372c764e0d9ce7c5d580825d5e4b891946359be780e26',
+        '30ed807b8e85c2405f1c046c76c361e96a5ee501a81cf028298fd0b23d85b06e',
+        'b6e4cea27bd39c8f0a283d8b42a334ac987d8f88339c265a20924fff6438d34f',
+        'a44a6446b6e34a178b6935db78d8f2b658b1bb13ba9d37a26446fc20ee4b7035',
+        'f3d2882ce51799eb06ce0327edb4b106f7529136bdd0a608d573cbfedfaf382e',
+        '913b5d4462aad88efccf39ae306723fe94b335f084639ec070acb19af72b28d6',
+        '82f38bd2faf913555af05d509e6b9bd5bd8c3ce0ccaa6c7f702736d5a37f4763',
+        'de64547e4994aa7afffafad92503244c2436f4b34d1aecab12e863c776730850',
+        '1e9d628b0721820b847238aae5a1337685f4613e1591529fa3e31abed12acdd3',
+        '2e66270918a34e12414cb3f58ccb051f1cf32a684f4a8753ef3c49c0b8f6edc5',
+        '0b01b72196723f1abb04de2799030a32f40394d7d587c6a1f27140bcc832be89',
+        '4e3d501f136a8a9f73ee244837e05bb699132a0f7610535a038ce8f69e80ed0e',
+        'd90f9191bd904278592c66c178202da120fca7c0807999aa91cbb139c4bf5147',
+        'a72330eb517d7db655330f1ca869e120286e5d17c22df52650c625aad0b637d1',
+        '3f27fdae30d3c82c3455b105bb4bfc0483e6038c5521398d430d7b4175cff267',
+        'fe260ca9ad08359eb1796fbe68477c9dbad7cfea6a8662fd440bd42d45495bb4',
+        'e14d764e8665e5b97d330f136cda3d578573acbb421736a00a9de83920c3e1fa',
+        'ec697f5dace4ad267a1d66bad169c1e99284064b0747d7780dd21d045119fab2'
+      ],
+      retirement: [],
+      calidus_key: null
+    },
+    ros: 0
+  },
+  pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5: {
+    details: {
+      pool_id: 'pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5',
+      hex: '3a0c080b10b148b7ca13161458d29a3516fc35e66e423d15cbe94775',
+      vrf_key: 'ef122b3415d6336d3e59204c14f758e8ee986177eb2457e099e80836d1178f27',
+      blocks_minted: 0,
+      blocks_epoch: 0,
+      live_stake: '5018662003',
+      live_size: 2.293_573_986_664_490_4e-7,
+      live_saturation: 0.000_066_018_362_421_107_98,
+      live_delegators: 1,
+      active_stake: '5018662003',
+      active_size: 2.291_768_475_946_331_6e-7,
+      declared_pledge: '5000000000',
+      live_pledge: '5018662003',
+      margin_cost: 0.15,
+      fixed_cost: '345000000',
+      reward_account: 'stake1uydlrmc9t3k2h5t0l7dd7k9j2kp8nakdxqjg4x4h2cmkhjcqvpars',
+      owners: ['stake1uydlrmc9t3k2h5t0l7dd7k9j2kp8nakdxqjg4x4h2cmkhjcqvpars'],
+      registration: ['2b85fe58517fc6ca0f3ebc9d4de4a7fd1f54be52aa6a63de5b562177eda26895'],
+      retirement: [],
+      calidus_key: null
+    },
+    ros: 0
   }
 };
 // cSpell:enable
