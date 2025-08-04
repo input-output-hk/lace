@@ -469,7 +469,7 @@
   "browserView.staking.stakingInfo.stats.Fee": "Fee",
   "browserView.staking.stakingInfo.stats.Margin": "Margin",
   "browserView.staking.stakingInfo.stats.stakeKey": "Stake key",
-  "browserView.staking.stakingInfo.stats.ros": "ROS",
+  "browserView.staking.stakingInfo.stats.ros": "Estimated ROS",
   "browserView.staking.stakingInfo.title": "You are currently staking with:",
   "browserView.staking.stakingInfo.tooltip.title": "USD Value",
   "browserView.staking.stakingInfo.totalRewards.title": "Total rewards",
