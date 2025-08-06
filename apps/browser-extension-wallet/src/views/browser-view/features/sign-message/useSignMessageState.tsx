@@ -13,7 +13,7 @@ import { useSecrets } from '@lace/core';
 import { parseError } from '@src/utils/parse-error';
 
 interface SignMessageState {
-  usedAddresses: { address: string; id: number }[];
+  usedAddresses: { address: string; id: number; type: 'payment' | 'stake' }[];
   isSigningInProgress: boolean;
   signatureObject: Cip30DataSignature | undefined;
   error: string;
@@ -37,6 +37,7 @@ export const useSignMessageState = (): SignMessageState => {
   const [hardwareWalletError, setHardwareWalletError] = useState<string>('');
 
   const addresses = useObservable(inMemoryWallet?.addresses$);
+  const rewardAccounts = useObservable(inMemoryWallet?.delegation.rewardAccounts$);
 
   const resetSigningState = useCallback(() => {
     setIsSigningInProgress(false);
@@ -57,10 +58,16 @@ export const useSignMessageState = (): SignMessageState => {
         isHardwareWallet
           ? analytics.sendEventToPostHog(PostHogAction.SignMessageAskingHardwareWalletInteraction)
           : analytics.sendEventToPostHog(PostHogAction.SignMessageAskingForPassword);
+
+        // Determine if the address is a payment address or reward account
+        const isRewardAccount = Wallet.Cardano.isRewardAccount(address);
+
         const signatureGenerated = await withSignDataConfirmation(
           async () =>
             await inMemoryWallet.signData({
-              signWith: address as Wallet.Cardano.PaymentAddress,
+              signWith: isRewardAccount
+                ? (address as Wallet.Cardano.RewardAccount)
+                : (address as Wallet.Cardano.PaymentAddress),
               payload
             }),
           !isHardwareWallet ? password : {},
@@ -92,11 +99,20 @@ export const useSignMessageState = (): SignMessageState => {
     [isHardwareWallet, analytics, clearSecrets, inMemoryWallet, t]
   );
 
-  const usedAddresses =
-    addresses?.map((address, index) => ({
+  const usedAddresses = [
+    // Payment addresses
+    ...(addresses?.map((address, index) => ({
       address: address.address.toString(),
-      id: index
-    })) || [];
+      id: index,
+      type: 'payment' as const
+    })) || []),
+    // Reward accounts (stake addresses)
+    ...(rewardAccounts?.map((rewardAccount, index) => ({
+      address: rewardAccount.address,
+      id: addresses?.length ? addresses.length + index : index,
+      type: 'stake' as const
+    })) || [])
+  ];
 
   return {
     usedAddresses,
