@@ -63,8 +63,8 @@
     "@cardano-sdk/tx-construction": "0.28.2",
     "@cardano-sdk/util": "0.17.0",
     "@cardano-sdk/util-rxjs": "0.9.22",
-    "@cardano-sdk/wallet": "0.53.12",
-    "@cardano-sdk/web-extension": "0.39.22",
+    "@cardano-sdk/wallet": "0.53.13",
+    "@cardano-sdk/web-extension": "0.39.23",
     "@emurgo/cip14-js": "~3.0.1",
     "@input-output-hk/lace-ui-toolkit": "3.5.0",
     "@lace/bitcoin": "0.1.0",
@@ -119,7 +119,7 @@
     "zustand": "3.5.14"
   },
   "devDependencies": {
-    "@cardano-sdk/hardware-ledger": "0.16.11",
+    "@cardano-sdk/hardware-ledger": "0.16.12",
     "@emurgo/cardano-message-signing-asmjs": "1.0.1",
     "@openpgp/web-stream-tools": "0.0.11-patch-0",
     "@pdfme/common": "^4.0.2",
