@@ -99,43 +99,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-common
           path: packages/common/dist
 
       - name: Download packages-cardano
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-cardano
           path: packages/cardano/dist
 
       - name: Download packages-translation
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-translation
           path: packages/translation/dist
 
       - name: Download packages-core
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-core
           path: packages/core/dist
 
       - name: Download packages-staking
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-staking
           path: packages/staking/dist
 
       - name: Download packages-nami
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-nami
           path: packages/nami/dist
 
       - name: Download packages-bitcoin
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
@@ -164,43 +164,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-common
           path: packages/common/dist
 
       - name: Download packages-cardano
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-cardano
           path: packages/cardano/dist
 
       - name: Download packages-translation
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-translation
           path: packages/translation/dist
 
       - name: Download packages-core
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-core
           path: packages/core/dist
 
       - name: Download packages-staking
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-staking
           path: packages/staking/dist
 
       - name: Download packages-nami
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-nami
           path: packages/nami/dist
 
       - name: Download packages-bitcoin
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
@@ -247,43 +247,43 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download packages-common
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-common
           path: packages/common/dist
 
       - name: Download packages-cardano
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-cardano
           path: packages/cardano/dist
 
       - name: Download packages-translation
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-translation
           path: packages/translation/dist
 
       - name: Download packages-core
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-core
           path: packages/core/dist
 
       - name: Download packages-staking
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-staking
           path: packages/staking/dist
 
       - name: Download packages-nami
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-nami
           path: packages/nami/dist
 
       - name: Download packages-bitcoin
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
@@ -366,7 +366,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./apps/browser-extension-wallet/dist
@@ -387,7 +387,7 @@ jobs:
     if: always()
     steps:
       - name: Download all smoke tests artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           pattern: 'runner-artifacts-*'
