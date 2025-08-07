@@ -54,7 +54,8 @@ class MessageSigningInputDrawerAssert {
   async assertSeeSelectedAddress(expectedAddress: string) {
     await MessageSigningInputDrawer.selectAddressButton.waitForDisplayed();
     const actualAddress = await MessageSigningInputDrawer.selectAddressButton.getText();
-    expect(actualAddress).to.equal(expectedAddress);
+    const normalizedExpectedAddress = expectedAddress.replace(/\s*\((Payment|Stake)\)$/, '');
+    expect(actualAddress).to.equal(normalizedExpectedAddress);
   }
 }
 

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 export interface AddressSchema {
   id: number;
   address: string;
+  type?: 'payment' | 'stake';
 }
 
 export type WalletOwnAddressDropdownProps = {
@@ -40,10 +41,25 @@ export const WalletOwnAddressDropdown = ({
     }
   };
 
-  const items: MenuProps['items'] = addresses.map((address) => ({
-    key: address.id.toString(),
-    label: addEllipsis(address.address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH)
-  }));
+  const getAddressTypeDisplay = (addressType?: 'payment' | 'stake'): string => {
+    if (addressType === 'stake') {
+      return ` (${t('core.signMessage.addressTypeStake')})`;
+    }
+    if (addressType === 'payment') {
+      return ` (${t('core.signMessage.addressTypePayment')})`;
+    }
+    return '';
+  };
+
+  const items: MenuProps['items'] = addresses.map((address) => {
+    const shortenedAddress = addEllipsis(address.address, FIRST_PART_ADDRESS_LENGTH, LAST_PART_ADDRESS_LENGTH);
+    const addressType = getAddressTypeDisplay(address.type);
+
+    return {
+      key: address.id.toString(),
+      label: `${shortenedAddress}${addressType}`
+    };
+  });
 
   const menuProps: MenuProps = {
     items,
@@ -53,7 +69,11 @@ export const WalletOwnAddressDropdown = ({
   return (
     <Dropdown
       menu={menuProps}
-      dropdownRender={(menus) => <div data-testid="address-dropdown-menu">{menus}</div>}
+      dropdownRender={(menus) => (
+        <div data-testid="address-dropdown-menu" className={styles.addressDropdownMenu}>
+          {menus}
+        </div>
+      )}
       trigger={['click']}
       data-testid="address-menu"
     >
