@@ -36,6 +36,11 @@
   color: var(--text-color-primary, #000000) !important;
 }
 
+.addressDropdownMenu {
+  max-height: 40vh;
+  overflow: auto;
+}
+
 :global(.ant-dropdown-menu) {
   background-color: var(--bg-color-body, #ffffff) !important;
   border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;

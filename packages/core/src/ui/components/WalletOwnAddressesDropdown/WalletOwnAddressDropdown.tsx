@@ -69,7 +69,11 @@ export const WalletOwnAddressDropdown = ({
   return (
     <Dropdown
       menu={menuProps}
-      dropdownRender={(menus) => <div data-testid="address-dropdown-menu">{menus}</div>}
+      dropdownRender={(menus) => (
+        <div data-testid="address-dropdown-menu" className={styles.addressDropdownMenu}>
+          {menus}
+        </div>
+      )}
       trigger={['click']}
       data-testid="address-menu"
     >
