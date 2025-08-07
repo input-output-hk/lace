@@ -216,6 +216,25 @@ export const SignMessageDrawer: React.FC = () => {
           className={styles.customTextArea}
         />
       </div>
+      <div className={styles.inputGroup}>
+        <Flex justifyContent="space-between" alignItems="center">
+          <Text.Body.Normal weight="$medium" data-testid={'result-message-raw-key-label'}>
+            {t('core.signMessage.rawKey')}
+          </Text.Body.Normal>
+          {renderCopyToClipboard({
+            text: signatureObject.rawKey,
+            handleCopy,
+            t,
+            testId: 'raw-public-key-copy-to-clipboard-button'
+          })}
+        </Flex>
+        <TextArea
+          value={signatureObject.rawKey}
+          dataTestId="sign-message-raw-key"
+          rows={4}
+          className={styles.customTextArea}
+        />
+      </div>
     </div>
   );
 

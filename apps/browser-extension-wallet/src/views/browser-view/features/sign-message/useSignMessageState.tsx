@@ -12,10 +12,12 @@ import { useAnalyticsContext } from '@providers';
 import { useSecrets } from '@lace/core';
 import { parseError } from '@src/utils/parse-error';
 
+type SignatureObject = Cip30DataSignature & { rawKey: Wallet.Crypto.Ed25519PublicKeyHex };
+
 interface SignMessageState {
-  usedAddresses: { address: string; id: number }[];
+  usedAddresses: { address: string; id: number; type: 'payment' | 'stake' }[];
   isSigningInProgress: boolean;
-  signatureObject: Cip30DataSignature | undefined;
+  signatureObject: SignatureObject | undefined;
   error: string;
   errorObj?: Error;
   hardwareWalletError: string;
@@ -31,19 +33,20 @@ export const useSignMessageState = (): SignMessageState => {
 
   const { inMemoryWallet, isHardwareWallet } = useWalletStore();
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
-  const [signature, setSignature] = useState<Cip30DataSignature>();
+  const [signatureObject, setSignatureObject] = useState<SignatureObject | undefined>();
   const [error, setError] = useState<string>('');
   const [errorObj, setErrorObj] = useState<Error | undefined>();
   const [hardwareWalletError, setHardwareWalletError] = useState<string>('');
 
   const addresses = useObservable(inMemoryWallet?.addresses$);
+  const rewardAccounts = useObservable(inMemoryWallet?.delegation.rewardAccounts$);
 
   const resetSigningState = useCallback(() => {
     setIsSigningInProgress(false);
     setError('');
     setHardwareWalletError('');
     setErrorObj(undefined);
-    setSignature(undefined);
+    setSignatureObject(undefined);
   }, []);
 
   const performSigning = useCallback(
@@ -57,17 +60,26 @@ export const useSignMessageState = (): SignMessageState => {
         isHardwareWallet
           ? analytics.sendEventToPostHog(PostHogAction.SignMessageAskingHardwareWalletInteraction)
           : analytics.sendEventToPostHog(PostHogAction.SignMessageAskingForPassword);
+
+        // Determine if the address is a payment address or reward account
+        const isRewardAccount = Wallet.Cardano.isRewardAccount(address);
+
         const signatureGenerated = await withSignDataConfirmation(
           async () =>
             await inMemoryWallet.signData({
-              signWith: address as Wallet.Cardano.PaymentAddress,
+              signWith: isRewardAccount
+                ? (address as Wallet.Cardano.RewardAccount)
+                : (address as Wallet.Cardano.PaymentAddress),
               payload
             }),
           !isHardwareWallet ? password : {},
           clearSecrets
         );
 
-        setSignature(signatureGenerated);
+        setSignatureObject({
+          ...signatureGenerated,
+          rawKey: Wallet.util.coseKeyToRaw(signatureGenerated.key)
+        });
       } catch (signingError: unknown) {
         logger.error('Error signing message:', signingError);
         setErrorObj(parseError(signingError));
@@ -92,16 +104,25 @@ export const useSignMessageState = (): SignMessageState => {
     [isHardwareWallet, analytics, clearSecrets, inMemoryWallet, t]
   );
 
-  const usedAddresses =
-    addresses?.map((address, index) => ({
+  const usedAddresses = [
+    // Payment addresses
+    ...(addresses?.map((address, index) => ({
       address: address.address.toString(),
-      id: index
-    })) || [];
+      id: index,
+      type: 'payment' as const
+    })) || []),
+    // Reward accounts (stake addresses)
+    ...(rewardAccounts?.map((rewardAccount, index) => ({
+      address: rewardAccount.address,
+      id: addresses?.length ? addresses.length + index : index,
+      type: 'stake' as const
+    })) || [])
+  ];
 
   return {
     usedAddresses,
     isSigningInProgress,
-    signatureObject: signature,
+    signatureObject,
     error,
     errorObj,
     hardwareWalletError,

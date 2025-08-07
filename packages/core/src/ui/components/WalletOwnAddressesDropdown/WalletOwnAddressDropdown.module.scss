@@ -1,4 +1,5 @@
 @import '../../styles/theme.scss';
+@import '../../../../../common/src/ui/styles/abstracts/mixins';
 
 .overlay {
   z-index: 10 !important;
@@ -34,6 +35,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-color-primary, #000000) !important;
+}
+
+.addressDropdownMenu {
+  @include scroll-bar-style;
+  max-height: 40vh;
+  overflow: auto;
 }
 
 :global(.ant-dropdown-menu) {
