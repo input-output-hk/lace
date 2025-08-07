@@ -37,8 +37,8 @@ Feature: Staking Page - Extended View
     And (if applicable) first stake pool search result has "<stake_pool_ticker>" ticker
     Examples:
       | stake_pool_search_term | number_of_results | stake_pool_ticker |
-      | a Ocean                | 3                 | OCEAN             |
-      | a ocean                | 3                 | OCEAN             |
+      | a Capital              | 2                 | ADACT             |
+      | a capital              | 2                 | ADACT             |
       | ABC#                   | 0                 |                   |
       | HUA                    | 2                 | HUADA             |
       | 123456                 | 0                 |                   |

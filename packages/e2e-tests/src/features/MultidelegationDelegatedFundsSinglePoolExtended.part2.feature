@@ -130,6 +130,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
+    And I wait for stake pool list to be populated
     And I click on a random stake pool from the list
     And I click on "Stake all on this pool" button on stake pool details drawer
     And I click "Fine by me" button on "Changing staking preferences?" modal
@@ -145,6 +146,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     Given I reset default behaviour for modal about issues with multi-delegation and DApps
     When I navigate to Staking extended page
     And I open Browse pools tab
+    And I wait for stake pool grid to be populated
     And I click on a random stake pool from the grid
     And I click on "Select pool for multi-staking" button on stake pool details drawer
     Then I see the modal about issues with multi-delegation and DApps

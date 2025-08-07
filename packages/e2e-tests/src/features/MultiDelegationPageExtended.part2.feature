@@ -96,8 +96,6 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I wait for stake pool list to be populated
-    When I scroll down 500 pixels
     Then stake pool list row skeleton is displayed
     When I wait 500 milliseconds
     Then stake pool list row skeleton is not displayed
@@ -107,8 +105,6 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I switch to grid view on "Browse pools" tab
-    When I scroll down 500 pixels
-    And I scroll down 500 pixels
     Then stake pool grid card skeleton is displayed
     When I wait 500 milliseconds
     Then stake pool grid card skeleton is not displayed

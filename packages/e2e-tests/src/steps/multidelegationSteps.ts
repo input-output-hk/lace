@@ -360,8 +360,17 @@ Given(/^I click "Expand view" on Start Staking page$/, async () => {
   await StartStakingPage.clickExpandedViewBannerButton();
 });
 
-When(/^I wait for stake pool list to be populated$/, async () => {
-  await MultidelegationPage.waitForStakePoolListToLoad();
+When(/^I wait for stake pool (grid|list) to be populated$/, async (view: 'grid' | 'list') => {
+  switch (view) {
+    case 'grid':
+      await MultidelegationPage.waitForStakePoolGridToLoad();
+      break;
+    case 'list':
+      await MultidelegationPage.waitForStakePoolListToLoad();
+      break;
+    default:
+      throw new Error(`Unsupported stake pool display view: ${view}`);
+  }
 });
 
 Then(

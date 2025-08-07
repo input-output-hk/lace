@@ -547,6 +547,13 @@ class MultidelegationPage {
     });
   }
 
+  async waitForStakePoolGridToLoad() {
+    await browser.waitUntil(async () => (await this.displayedCards).length > 1, {
+      timeout: 30_000,
+      timeoutMsg: 'failed while waiting for stake pool grid to load'
+    });
+  }
+
   async clickManageButton() {
     await this.manageBtn.waitForClickable();
     await this.manageBtn.click();
