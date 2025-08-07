@@ -12,10 +12,12 @@ import { useAnalyticsContext } from '@providers';
 import { useSecrets } from '@lace/core';
 import { parseError } from '@src/utils/parse-error';
 
+type SignatureObject = Cip30DataSignature & { rawKey: Wallet.Crypto.Ed25519PublicKeyHex };
+
 interface SignMessageState {
   usedAddresses: { address: string; id: number; type: 'payment' | 'stake' }[];
   isSigningInProgress: boolean;
-  signatureObject: Cip30DataSignature | undefined;
+  signatureObject: SignatureObject | undefined;
   error: string;
   errorObj?: Error;
   hardwareWalletError: string;
@@ -31,7 +33,7 @@ export const useSignMessageState = (): SignMessageState => {
 
   const { inMemoryWallet, isHardwareWallet } = useWalletStore();
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
-  const [signature, setSignature] = useState<Cip30DataSignature>();
+  const [signatureObject, setSignatureObject] = useState<SignatureObject | undefined>();
   const [error, setError] = useState<string>('');
   const [errorObj, setErrorObj] = useState<Error | undefined>();
   const [hardwareWalletError, setHardwareWalletError] = useState<string>('');
@@ -44,7 +46,7 @@ export const useSignMessageState = (): SignMessageState => {
     setError('');
     setHardwareWalletError('');
     setErrorObj(undefined);
-    setSignature(undefined);
+    setSignatureObject(undefined);
   }, []);
 
   const performSigning = useCallback(
@@ -74,7 +76,10 @@ export const useSignMessageState = (): SignMessageState => {
           clearSecrets
         );
 
-        setSignature(signatureGenerated);
+        setSignatureObject({
+          ...signatureGenerated,
+          rawKey: Wallet.util.coseKeyToRaw(signatureGenerated.key)
+        });
       } catch (signingError: unknown) {
         logger.error('Error signing message:', signingError);
         setErrorObj(parseError(signingError));
@@ -117,7 +122,7 @@ export const useSignMessageState = (): SignMessageState => {
   return {
     usedAddresses,
     isSigningInProgress,
-    signatureObject: signature,
+    signatureObject,
     error,
     errorObj,
     hardwareWalletError,

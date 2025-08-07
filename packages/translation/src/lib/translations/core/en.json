@@ -231,6 +231,7 @@
   "core.signMessage.successTitle": "All done!",
   "core.signMessage.signature": "Signature",
   "core.signMessage.key": "Public Key",
+  "core.signMessage.rawKey": "Public Key (Glacier Drop Compatible)",
   "core.signMessage.nextButton": "Next",
   "core.signMessage.closeButton": "Close",
   "core.signMessage.cancelButton": "Cancel",
