@@ -16,21 +16,23 @@ jobs:
       - name: Send CI metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            echo "Sending metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending CI metrics to Datadog v2..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v2/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
                 "series": [{
                   "metric": "github.ci.pipeline.duration",
-                  "points": [[$(date +%s), ${{ github.run_duration }}]],
-                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}"],
-                  "type": "gauge"
+                  "points": [{"timestamp": $(date +%s), "value": ${{ github.run_duration }}}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}"]
                 }, {
                   "metric": "github.ci.pipeline.status",
-                  "points": [[$(date +%s), 1]],
-                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "status:${{ job.status }}"],
-                  "type": "gauge"
+                  "points": [{"timestamp": $(date +%s), "value": 1}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "status:${{ job.status }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}"]
+                }, {
+                  "metric": "github.ci.job.duration",
+                  "points": [{"timestamp": $(date +%s), "value": ${{ github.run_duration }}}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:${{ github.workflow }}", "job:${{ github.job }}", "runner:ubuntu-latest", "repo:${{ github.repository }}"]
                 }]
               }')
             echo "Datadog API response: $response"
@@ -105,16 +107,19 @@ jobs:
       - name: Send build metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            echo "Sending build metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending build metrics to Datadog v2..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v2/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
                 "series": [{
                   "metric": "lace.build.packages",
-                  "points": [[$(date +%s), 1]],
-                  "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "status:${{ job.status }}"],
-                  "type": "gauge"
+                  "points": [{"timestamp": $(date +%s), "value": 1}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "status:${{ job.status }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}", "job:prepare"]
+                }, {
+                  "metric": "lace.build.duration",
+                  "points": [{"timestamp": $(date +%s), "value": ${{ github.run_duration }}}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "job:prepare", "repo:${{ github.repository }}"]
                 }]
               }')
             echo "Datadog API response: $response"
@@ -189,16 +194,19 @@ jobs:
       - name: Send test metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            echo "Sending test metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending test metrics to Datadog v2..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v2/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
                 "series": [{
                   "metric": "lace.tests.unit",
-                  "points": [[$(date +%s), 1]],
-                  "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "status:${{ job.status }}"],
-                  "type": "gauge"
+                  "points": [{"timestamp": $(date +%s), "value": 1}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "status:${{ job.status }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}", "test_type:unit"]
+                }, {
+                  "metric": "lace.tests.duration",
+                  "points": [{"timestamp": $(date +%s), "value": ${{ github.run_duration }}}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:unitTests", "test_type:unit", "repo:${{ github.repository }}"]
                 }]
               }')
             echo "Datadog API response: $response"
@@ -292,16 +300,19 @@ jobs:
       - name: Send release metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            echo "Sending release metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/series" \
+            echo "Sending release metrics to Datadog v2..."
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v2/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
               -d '{
                 "series": [{
                   "metric": "lace.release.package",
-                  "points": [[$(date +%s), 1]],
-                  "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "status:${{ job.status }}"],
-                  "type": "gauge"
+                  "points": [{"timestamp": $(date +%s), "value": 1}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "status:${{ job.status }}", "repo:${{ github.repository }}", "branch:${{ github.ref_name }}", "artifact:lace-browser-extension"]
+                }, {
+                  "metric": "lace.release.duration",
+                  "points": [{"timestamp": $(date +%s), "value": ${{ github.run_duration }}}],
+                  "tags": ["service:lace-wallet", "env:ci", "workflow:release-pkg", "repo:${{ github.repository }}"]
                 }]
               }')
             echo "Datadog API response: $response"
@@ -316,18 +327,47 @@ jobs:
       - name: Send final CI metrics to Datadog
         run: |
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
-            echo "Sending final metrics to Datadog..."
-            response=$(curl -s -w "%{http_code}" -X POST "https://api.datadoghq.com/api/v1/events" \
+            echo "Sending final metrics to Datadog v2..."
+            
+            # Calculate overall pipeline status
+            if [ "${{ needs.prepare.result }}" = "success" ] && [ "${{ needs.unitTests.result }}" = "success" ] && [ "${{ needs.release-pkg.result }}" = "success" ]; then
+              overall_status="success"
+            else
+              overall_status="failure"
+            fi
+            
+            # Get current timestamp
+            timestamp=$(date +%s)
+            
+            # Send final metrics
+            response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v2/series" \
               -H "Content-Type: application/json" \
               -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-              -d '{
-                "title": "Lace CI Pipeline Complete",
-                "text": "All CI jobs completed for ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nStatus: ${{ needs.prepare.result }}, ${{ needs.unitTests.result }}, ${{ needs.release-pkg.result }}",
-                "tags": ["service:lace-wallet", "env:ci", "workflow:ci", "repo:lace"],
-                "alert_type": "${{ needs.prepare.result == 'success' && needs.unitTests.result == 'success' && needs.release-pkg.result == 'success' && 'info' || 'error' }}",
-                "source_type_name": "github"
-              }')
+              -d "{
+                \"series\": [{
+                  \"metric\": \"github.ci.pipeline.final_status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:ci\", \"workflow:ci\", \"status:$overall_status\", \"repo:${{ github.repository }}\", \"branch:${{ github.ref_name }}\", \"commit:${{ github.sha }}\"]
+                }, {
+                  \"metric\": \"github.ci.pipeline.total_duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": ${{ github.run_duration }}}],
+                  \"tags\": [\"service:lace-wallet\", \"env:ci\", \"workflow:ci\", \"repo:${{ github.repository }}\", \"branch:${{ github.ref_name }}\"]
+                }]
+              }")
             echo "Datadog API response: $response"
+            
+            # Send event using v1 API (more reliable for events)
+            event_response=$(curl -s -w "%{http_code}" -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d "{
+                \"title\": \"Lace CI Pipeline Complete\",
+                \"text\": \"All CI jobs completed for ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nStatus: ${{ needs.prepare.result }}, ${{ needs.unitTests.result }}, ${{ needs.release-pkg.result }}\nOverall: $overall_status\",
+                \"tags\": [\"service:lace-wallet\", \"env:ci\", \"workflow:ci\", \"repo:lace\", \"status:$overall_status\"],
+                \"alert_type\": \"$overall_status\",
+                \"source_type_name\": \"github\"
+              }")
+            echo "Datadog Event API response: $event_response"
           else
             echo "No DATADOG_API_KEY provided, skipping final metrics"
           fi 
