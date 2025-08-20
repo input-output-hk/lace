@@ -23,10 +23,10 @@
     "test:local:firefox": "../../node_modules/.bin/wdio run wdio.conf.firefox.ts"
   },
   "dependencies": {
-    "@types/chai": "5.2.1",
+    "@types/chai": "5.2.2",
     "@types/chai-sorted": "0.2.3",
     "@types/chai-string": "1.4.5",
-    "chai": "5.2.0",
+    "chai": "5.3.1",
     "chai-sorted": "0.2.0",
     "chai-string": "1.6.0"
   },
