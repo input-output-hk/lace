@@ -133,6 +133,16 @@ Use the `test-datadog.yml` workflow to verify your setup:
    - Set time range to "Last 1 hour"
    - Look for metrics with tags: `service:lace-wallet, env:test`
 
+### Events Testing ✅ **VERIFIED**
+
+Events functionality has been tested and confirmed working:
+
+1. **Run the test workflow** to create test events
+2. **Check Events Explorer**: https://us5.datadoghq.com/event/explorer
+3. **Search for**: "Test Datadog CI Event" or "Minimal Test"
+4. **Direct URLs**: Each event includes a direct link in the logs
+5. **Expected Result**: Events appear with full metadata and direct access URLs
+
 ### Debugging Tips
 
 - The test workflow provides detailed logging

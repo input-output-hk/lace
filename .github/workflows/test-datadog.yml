@@ -97,6 +97,12 @@ jobs:
             # Test CI Events functionality
             echo ""
             echo "📝 Testing CI Events..."
+            echo "🔍 Debug Info:"
+            echo "   Datadog Site: us5.datadoghq.com"
+            echo "   Events API: https://api.us5.datadoghq.com/api/v1/events"
+            echo "   API Key: $([ -n "${{ secrets.DATADOG_API_KEY }}" ] && echo "SET" || echo "NOT SET")"
+            echo ""
+            
             event_payload="{
               \"title\": \"Test Datadog CI Event: ${{ github.workflow }}\",
               \"text\": \"Test workflow ${{ github.workflow }} completed successfully\\nRepository: ${{ github.repository }}\\nBranch: ${{ github.ref_name }}\\nCommit: ${{ github.sha }}\",
@@ -148,38 +154,93 @@ jobs:
               echo "   4. Ensure you're using the correct endpoint"
             fi
             
-            # Try alternative event format if first one failed
-            if [ "$event_http_code" != "202" ]; then
-              echo ""
-              echo "🔄 Trying alternative event format..."
-              simple_event_payload="{
-                \"title\": \"Test CI Event\",
-                \"text\": \"Simple test event from GitHub Actions\",
-                \"tags\": [\"service:lace-wallet\", \"env:test\"],
-                \"alert_type\": \"info\"
-              }"
-              
-              echo "📤 Sending simple event payload:"
-              echo "$simple_event_payload"
-              echo ""
-              
-              simple_event_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
-                -X POST "https://api.us5.datadoghq.com/api/v1/events" \
-                -H "Content-Type: application/json" \
-                -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-                -d "$simple_event_payload")
-              
-              simple_event_http_code=$(echo "$simple_event_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
-              simple_event_response_body=$(echo "$simple_event_response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
-              
-              if [ "$simple_event_http_code" = "202" ]; then
-                echo "✅ SUCCESS: Simple CI Event sent successfully to Datadog!"
-              else
-                echo "❌ ERROR: Simple CI Event also failed"
-                echo "   Status: $simple_event_http_code"
-                echo "   Error: $simple_event_response_body"
+            # Test API permissions and try different event formats
+            echo ""
+            echo "🔍 Testing API permissions and alternative formats..."
+            
+            # Test 1: Check if we can read events (permissions test)
+            echo "📋 Test 1: Checking API permissions..."
+            permissions_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\n" \
+              -X GET "https://api.us5.datadoghq.com/api/v1/events?start=$(date -d '1 hour ago' +%s)&end=$(date +%s)" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -H "Content-Type: application/json")
+            
+            permissions_http_code=$(echo "$permissions_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+            echo "   Events Read Permission: $permissions_http_code"
+            
+            # Test 2: Try minimal event format
+            echo ""
+            echo "📋 Test 2: Minimal event format..."
+            minimal_event_payload="{
+              \"title\": \"Minimal Test\",
+              \"text\": \"Minimal test event\",
+              \"tags\": [\"test:minimal\"]
+            }"
+            
+            minimal_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
+              -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d "$minimal_event_payload")
+            
+            minimal_http_code=$(echo "$minimal_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+            minimal_response_body=$(echo "$minimal_response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
+            
+            echo "   Minimal Event Status: $minimal_http_code"
+            echo "   Minimal Event Response: $minimal_response_body"
+            
+            # Test 3: Create a very distinctive event for easy finding
+            echo ""
+            echo "📋 Test 3: Creating distinctive event for UI testing..."
+            distinctive_event_payload="{
+              \"title\": \"🎯 BERNO TEST EVENT - LOOK FOR THIS ONE\",
+              \"text\": \"This is a distinctive test event created at $(date). Look for this exact title in the Events Explorer.\\n\\nRepository: ${{ github.repository }}\\nWorkflow: ${{ github.workflow }}\\nTimestamp: $(date +%s)\",
+              \"tags\": [\"test:distinctive\", \"user:berno\", \"search:me\", \"service:lace-wallet\"],
+              \"alert_type\": \"info\",
+              \"priority\": \"normal\"
+            }"
+            
+            distinctive_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
+              -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d "$distinctive_event_payload")
+            
+            distinctive_http_code=$(echo "$distinctive_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+            distinctive_response_body=$(echo "$distinctive_response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
+            
+            echo "   Distinctive Event Status: $distinctive_http_code"
+            echo "   Distinctive Event Response: $distinctive_response_body"
+            
+            # Extract the event ID for direct URL
+            if [ "$distinctive_http_code" = "202" ]; then
+              event_id=$(echo "$distinctive_response_body" | jq -r '.event.id_str' 2>/dev/null)
+              if [ -n "$event_id" ] && [ "$event_id" != "null" ]; then
+                echo "   🎯 Direct URL: https://us5.datadoghq.com/event/event?id=$event_id"
+                echo "   🔍 Search for: 'BERNO TEST EVENT' in Events Explorer"
               fi
             fi
+            
+            # Summary
+            echo ""
+            echo "📊 API Test Summary:"
+            echo "   Original Event: $event_http_code"
+            echo "   Read Permission: $permissions_http_code"
+            echo "   Minimal Event: $minimal_http_code"
+            echo "   Distinctive Event: $distinctive_http_code"
+            echo ""
+            echo "🔍 Troubleshooting Guide:"
+            echo "   - 202: Success (events created successfully)"
+            echo "   - 403: Forbidden (API key lacks permissions)"
+            echo "   - 401: Unauthorized (invalid API key)"
+            echo "   - 400: Bad Request (payload format issue)"
+            echo ""
+            echo "🎯 To find events in Datadog UI:"
+            echo "   1. Go to: https://us5.datadoghq.com/event/explorer"
+            echo "   2. Search for: 'BERNO TEST EVENT' or 'Test Datadog CI Event'"
+            echo "   3. Check time range: Last 1 hour"
+            echo "   4. Clear any filters on the left sidebar"
+            echo "   5. Try direct URLs from the logs above"
             
             echo ""
             echo "🔍 To verify in Datadog UI:"
