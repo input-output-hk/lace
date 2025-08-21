@@ -8,6 +8,7 @@ This is a simple guide to add Datadog monitoring to your Lace CI/CD pipelines.
 1. Create account at [datadoghq.com](https://datadoghq.com) (free tier available)
 2. Go to **Organization Settings** → **API Keys**
 3. Create new API key named "Lace CI Integration"
+4. **Important**: Ensure the key has "Metrics Write" permission
 
 ### 2. Add GitHub Secret
 1. Go to your Lace repository on GitHub
@@ -18,6 +19,34 @@ This is a simple guide to add Datadog monitoring to your Lace CI/CD pipelines.
 
 ### 3. Use the New Workflow
 Replace your current `ci.yml` with `ci-with-datadog.yml` or add Datadog to existing workflows.
+
+## API Integration Details
+
+### Datadog v2 API Format
+The working payload format for Datadog v2 API:
+
+```json
+{
+  "series": [{
+    "metric": "test.datadog.integration",
+    "points": [{"timestamp": 1703123456, "value": 42}],
+    "tags": ["service:lace-wallet", "env:test", "workflow:test-datadog"]
+  }]
+}
+```
+
+### Key Requirements
+- **Timestamp**: Must be Unix timestamp (seconds since epoch)
+- **Points format**: Array of `{"timestamp": X, "value": Y}` objects
+- **Tags**: Array of strings in `key:value` format
+- **Headers**: 
+  - `Content-Type: application/json`
+  - `DD-API-KEY: your-api-key`
+
+### API Endpoint
+```
+POST https://api.us5.datadoghq.com/api/v2/series
+```
 
 ## What You'll Get
 
@@ -74,21 +103,61 @@ sum:github.ci.pipeline.status{status:failure,service:lace-wallet} / sum:github.c
 avg:github.ci.job.duration{service:lace-wallet,workflow:ci} > 1800
 ```
 
+## Troubleshooting
+
+### Common Issues
+
+1. **HTTP 403 Forbidden**
+   - Check API key permissions (needs "Metrics Write")
+   - Verify API key is correct
+   - Ensure you're using the right Datadog site (us5.datadoghq.com)
+
+2. **HTTP 400 Bad Request**
+   - Check JSON payload format
+   - Ensure timestamps are Unix timestamps (seconds, not milliseconds)
+   - Verify tags are in correct format
+
+3. **HTTP 401 Unauthorized**
+   - API key is invalid or expired
+   - Check if the key has proper permissions
+
+### Testing Your Integration
+
+Use the `test-datadog.yml` workflow to verify your setup:
+
+1. **Manual trigger**: Go to Actions → Test Datadog v2 API → Run workflow
+2. **Check logs**: Look for "✅ SUCCESS: Metrics sent successfully to Datadog!"
+3. **Verify in Datadog**: 
+   - Go to Metrics Explorer
+   - Search for `test.datadog.integration`
+   - Set time range to "Last 1 hour"
+   - Look for metrics with tags: `service:lace-wallet, env:test`
+
+### Debugging Tips
+
+- The test workflow provides detailed logging
+- Check HTTP status codes (202 = success)
+- Validate JSON payload with `jq`
+- Monitor response times for performance issues
+
 ## Files Created
 
-1. **`.github/workflows/datadog-ci.yml`** - Reusable Datadog workflow
-2. **`.github/workflows/ci-with-datadog.yml`** - CI with Datadog integration
-3. **`docs/datadog-setup.md`** - This guide
+1. **`.github/workflows/test-datadog.yml`** - Test workflow for Datadog integration
+2. **`.github/workflows/datadog-ci.yml`** - Reusable Datadog workflow
+3. **`.github/workflows/ci-with-datadog.yml`** - CI with Datadog integration
+4. **`docs/datadog-setup.md`** - This guide
 
 ## Next Steps
 
 1. **Set up your Datadog account** and API key
 2. **Add the secret** to GitHub
-3. **Test the integration** with a small PR
+3. **Test the integration** using the test workflow
 4. **Create dashboards** using the queries above
 5. **Set up alerts** for critical failures
+6. **Integrate with your main CI/CD** workflows
 
 ## Support
 
 - [Datadog CI Documentation](https://docs.datadoghq.com/continuous_integration/)
 - [GitHub Actions Integration](https://github.com/DataDog/github-action-metrics)
+- [Datadog v2 API Reference](https://docs.datadoghq.com/api/latest/metrics/)
