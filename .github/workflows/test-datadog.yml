@@ -27,25 +27,101 @@ jobs:
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "✅ API Key is set, proceeding with test..."
             
-            # Prepare the JSON payload (v2 API format) - Testing CI metrics
+            # Prepare the JSON payload (v2 API format) - Comprehensive CI metrics
+            timestamp=$(date +%s)
             json_payload="{
-              \"series\": [{
-                \"metric\": \"test.datadog.integration\",
-                \"points\": [{\"timestamp\": $(date +%s), \"value\": 42}],
-                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
-              }, {
-                \"metric\": \"test.datadog.simple\",
-                \"points\": [{\"timestamp\": $(date +%s), \"value\": 100}],
-                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
-              }, {
-                \"metric\": \"github.ci.pipeline.duration\",
-                \"points\": [{\"timestamp\": $(date +%s), \"value\": 120}],
-                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test-datadog\"]
-              }, {
-                \"metric\": \"github.ci.pipeline.status\",
-                \"points\": [{\"timestamp\": $(date +%s), \"value\": 1}],
-                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"status:success\"]
-              }]
+              \"series\": [
+                {
+                  \"metric\": \"test.datadog.integration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 42}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
+                },
+                {
+                  \"metric\": \"test.datadog.simple\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 100}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
+                },
+                {
+                  \"metric\": \"github.ci.pipeline.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 120}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test-datadog\"]
+                },
+                {
+                  \"metric\": \"github.ci.pipeline.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"github.ci.repository.workflow_runs\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"repo:${{ github.repository }}\", \"branch:${{ github.ref_name }}\"]
+                },
+                {
+                  \"metric\": \"github.ci.job.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 120}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test-datadog\", \"runner:${{ runner.os }}\"]
+                },
+                {
+                  \"metric\": \"lace.ci.build.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 180}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:build\", \"type:typescript\"]
+                },
+                {
+                  \"metric\": \"lace.ci.build.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:build\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"lace.ci.e2e.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 420}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:e2e\", \"type:playwright\"]
+                },
+                {
+                  \"metric\": \"lace.ci.e2e.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:e2e\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"lace.ci.artifact.size\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 52428800}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:artifact\", \"type:extension\"]
+                },
+                {
+                  \"metric\": \"lace.ci.artifact.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:artifact\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"lace.ci.test.unit.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 45}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test\", \"type:unit\"]
+                },
+                {
+                  \"metric\": \"lace.ci.test.unit.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test\", \"type:unit\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"lace.ci.test.integration.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 180}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test\", \"type:integration\"]
+                },
+                {
+                  \"metric\": \"lace.ci.test.integration.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test\", \"type:integration\", \"status:success\"]
+                },
+                {
+                  \"metric\": \"lace.ci.lint.duration\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 15}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:lint\", \"type:eslint\"]
+                },
+                {
+                  \"metric\": \"lace.ci.lint.status\",
+                  \"points\": [{\"timestamp\": $timestamp, \"value\": 1}],
+                  \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:lint\", \"type:eslint\", \"status:success\"]
+                }
+              ]
             }"
             
             echo "📤 Sending JSON payload:"
