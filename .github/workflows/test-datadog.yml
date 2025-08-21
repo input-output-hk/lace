@@ -3,7 +3,7 @@ name: Test Datadog v2 API
 on:
   workflow_dispatch:
   push:
-    branches: [ berno_prom_metrics ]
+    branches: [ main, test/berno_prom_metrics ]
 
 jobs:
   test-datadog:
@@ -27,25 +27,24 @@ jobs:
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "✅ API Key is set, proceeding with test..."
             
-            # Get current timestamp
-            timestamp=$(date +%s)
-            echo "📅 Using timestamp: $timestamp"
-            
-            # Prepare the JSON payload
+            # Prepare the JSON payload (v2 API format)
             json_payload="{
               \"series\": [{
                 \"metric\": \"test.datadog.integration\",
-                \"points\": [{\"timestamp\": $timestamp, \"value\": 42}],
-                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"repo:${{ github.repository }}\", \"branch:${{ github.ref_name }}\", \"commit:${{ github.sha }}\"]
+                \"points\": [{\"timestamp\": $(date +%s), \"value\": 42}],
+                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
               }, {
-                \"metric\": \"test.datadog.timestamp\",
-                \"points\": [{\"timestamp\": $timestamp, \"value\": $timestamp}],
+                \"metric\": \"test.datadog.simple\",
+                \"points\": [{\"timestamp\": $(date +%s), \"value\": 100}],
                 \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
               }]
             }"
             
             echo "📤 Sending JSON payload:"
             echo "$json_payload"
+            echo ""
+            echo "🔍 JSON validation:"
+            echo "$json_payload" | jq '.' 2>/dev/null && echo "✅ JSON is valid" || echo "❌ JSON is invalid"
             echo ""
             
             # Send metrics to Datadog v2 API
