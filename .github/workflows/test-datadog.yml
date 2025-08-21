@@ -1,0 +1,108 @@
+name: Test Datadog v2 API
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ berno_prom_metrics ]
+
+jobs:
+  test-datadog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Test Datadog v2 API
+        run: |
+          echo "🔍 Starting Datadog v2 API test..."
+          echo "📊 API Key present: $([ -n "${{ secrets.DATADOG_API_KEY }}" ] && echo "YES" || echo "NO")"
+          echo "🌐 Datadog Site: us5.datadoghq.com"
+          echo "⏰ Timestamp: $(date)"
+          echo "📝 Workflow: ${{ github.workflow }}"
+          echo "🏷️ Repository: ${{ github.repository }}"
+          echo "🌿 Branch: ${{ github.ref_name }}"
+          echo "🔗 Commit: ${{ github.sha }}"
+          echo ""
+          
+          if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
+            echo "✅ API Key is set, proceeding with test..."
+            
+            # Get current timestamp
+            timestamp=$(date +%s)
+            echo "📅 Using timestamp: $timestamp"
+            
+            # Prepare the JSON payload
+            json_payload="{
+              \"series\": [{
+                \"metric\": \"test.datadog.integration\",
+                \"points\": [{\"timestamp\": $timestamp, \"value\": 42}],
+                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"repo:${{ github.repository }}\", \"branch:${{ github.ref_name }}\", \"commit:${{ github.sha }}\"]
+              }, {
+                \"metric\": \"test.datadog.timestamp\",
+                \"points\": [{\"timestamp\": $timestamp, \"value\": $timestamp}],
+                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
+              }]
+            }"
+            
+            echo "📤 Sending JSON payload:"
+            echo "$json_payload"
+            echo ""
+            
+            # Send metrics to Datadog v2 API
+            echo "🚀 Sending request to Datadog v2 API..."
+            response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
+              -X POST "https://api.us5.datadoghq.com/api/v2/series" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d "$json_payload")
+            
+            echo "📥 Raw response:"
+            echo "$response"
+            echo ""
+            
+            # Extract HTTP status code
+            http_code=$(echo "$response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+            total_time=$(echo "$response" | grep "TOTAL_TIME:" | cut -d: -f2)
+            response_body=$(echo "$response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
+            
+            echo "📊 Response Analysis:"
+            echo "   HTTP Status Code: $http_code"
+            echo "   Response Time: ${total_time}s"
+            echo "   Response Body: $response_body"
+            echo ""
+            
+            if [ "$http_code" = "202" ]; then
+              echo "✅ SUCCESS: Metrics sent successfully to Datadog!"
+              echo "   Status: $http_code"
+              echo "   Time: ${total_time}s"
+            else
+              echo "❌ ERROR: Failed to send metrics to Datadog"
+              echo "   Status: $http_code"
+              echo "   Error: $response_body"
+              echo ""
+              echo "🔍 Troubleshooting tips:"
+              echo "   1. Check API key permissions in Datadog"
+              echo "   2. Verify the API key is correct"
+              echo "   3. Check if the key has 'Metrics Write' permission"
+              echo "   4. Ensure you're looking at us5.datadoghq.com"
+            fi
+            
+            echo ""
+            echo "🔍 To verify in Datadog UI:"
+            echo "   1. Go to Metrics Explorer"
+            echo "   2. Search for: test.datadog.integration"
+            echo "   3. Set time range to 'Last 1 hour'"
+            echo "   4. Look for metrics with tags: service:lace-wallet, env:test"
+            
+          else
+            echo "❌ ERROR: DATADOG_API_KEY secret is not set"
+            echo ""
+            echo "🔧 To fix this:"
+            echo "   1. Go to repository Settings → Secrets and variables → Actions"
+            echo "   2. Add a new repository secret named 'DATADOG_API_KEY'"
+            echo "   3. Set the value to your Datadog API key"
+            echo "   4. Make sure the key has 'Metrics Write' permission"
+          fi
+          
+          echo ""
+          echo "🏁 Test completed at $(date)" 
