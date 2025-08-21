@@ -27,7 +27,7 @@ jobs:
           if [ -n "${{ secrets.DATADOG_API_KEY }}" ]; then
             echo "✅ API Key is set, proceeding with test..."
             
-            # Prepare the JSON payload (v2 API format)
+            # Prepare the JSON payload (v2 API format) - Testing CI metrics
             json_payload="{
               \"series\": [{
                 \"metric\": \"test.datadog.integration\",
@@ -37,6 +37,14 @@ jobs:
                 \"metric\": \"test.datadog.simple\",
                 \"points\": [{\"timestamp\": $(date +%s), \"value\": 100}],
                 \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\"]
+              }, {
+                \"metric\": \"github.ci.pipeline.duration\",
+                \"points\": [{\"timestamp\": $(date +%s), \"value\": 120}],
+                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"job:test-datadog\"]
+              }, {
+                \"metric\": \"github.ci.pipeline.status\",
+                \"points\": [{\"timestamp\": $(date +%s), \"value\": 1}],
+                \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"status:success\"]
               }]
             }"
             
@@ -86,12 +94,105 @@ jobs:
               echo "   4. Ensure you're looking at us5.datadoghq.com"
             fi
             
+            # Test CI Events functionality
+            echo ""
+            echo "📝 Testing CI Events..."
+            event_payload="{
+              \"title\": \"Test Datadog CI Event: ${{ github.workflow }}\",
+              \"text\": \"Test workflow ${{ github.workflow }} completed successfully\\nRepository: ${{ github.repository }}\\nBranch: ${{ github.ref_name }}\\nCommit: ${{ github.sha }}\",
+              \"tags\": [\"service:lace-wallet\", \"env:test\", \"workflow:test-datadog\", \"status:success\", \"repo:${{ github.repository }}\"],
+              \"alert_type\": \"info\",
+              \"source_type_name\": \"github\"
+            }"
+            
+            echo "📤 Sending CI event payload:"
+            echo "$event_payload"
+            echo ""
+            echo "🔍 JSON validation for event:"
+            echo "$event_payload" | jq '.' 2>/dev/null && echo "✅ Event JSON is valid" || echo "❌ Event JSON is invalid"
+            echo ""
+            
+            event_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
+              -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+              -H "Content-Type: application/json" \
+              -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+              -d "$event_payload")
+            
+            echo "📥 Raw event response:"
+            echo "$event_response"
+            echo ""
+            
+            event_http_code=$(echo "$event_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+            event_total_time=$(echo "$event_response" | grep "TOTAL_TIME:" | cut -d: -f2)
+            event_response_body=$(echo "$event_response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
+            
+            echo "📊 Event Response Analysis:"
+            echo "   HTTP Status Code: $event_http_code"
+            echo "   Response Time: ${event_total_time}s"
+            echo "   Response Body: $event_response_body"
+            echo ""
+            
+            if [ "$event_http_code" = "202" ]; then
+              echo "✅ SUCCESS: CI Event sent successfully to Datadog!"
+              echo "   Status: $event_http_code"
+              echo "   Time: ${event_total_time}s"
+            else
+              echo "❌ ERROR: Failed to send CI Event to Datadog"
+              echo "   Status: $event_http_code"
+              echo "   Error: $event_response_body"
+              echo ""
+              echo "🔍 Event troubleshooting tips:"
+              echo "   1. Check if API key has 'Events Write' permission"
+              echo "   2. Verify the event payload format"
+              echo "   3. Check Datadog v1 events API documentation"
+              echo "   4. Ensure you're using the correct endpoint"
+            fi
+            
+            # Try alternative event format if first one failed
+            if [ "$event_http_code" != "202" ]; then
+              echo ""
+              echo "🔄 Trying alternative event format..."
+              simple_event_payload="{
+                \"title\": \"Test CI Event\",
+                \"text\": \"Simple test event from GitHub Actions\",
+                \"tags\": [\"service:lace-wallet\", \"env:test\"],
+                \"alert_type\": \"info\"
+              }"
+              
+              echo "📤 Sending simple event payload:"
+              echo "$simple_event_payload"
+              echo ""
+              
+              simple_event_response=$(curl -s -w "\nHTTP_STATUS_CODE:%{http_code}\nTOTAL_TIME:%{time_total}s\n" \
+                -X POST "https://api.us5.datadoghq.com/api/v1/events" \
+                -H "Content-Type: application/json" \
+                -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+                -d "$simple_event_payload")
+              
+              simple_event_http_code=$(echo "$simple_event_response" | grep "HTTP_STATUS_CODE:" | cut -d: -f2)
+              simple_event_response_body=$(echo "$simple_event_response" | sed '/HTTP_STATUS_CODE:/d' | sed '/TOTAL_TIME:/d')
+              
+              if [ "$simple_event_http_code" = "202" ]; then
+                echo "✅ SUCCESS: Simple CI Event sent successfully to Datadog!"
+              else
+                echo "❌ ERROR: Simple CI Event also failed"
+                echo "   Status: $simple_event_http_code"
+                echo "   Error: $simple_event_response_body"
+              fi
+            fi
+            
             echo ""
             echo "🔍 To verify in Datadog UI:"
             echo "   1. Go to Metrics Explorer"
             echo "   2. Search for: test.datadog.integration"
             echo "   3. Set time range to 'Last 1 hour'"
             echo "   4. Look for metrics with tags: service:lace-wallet, env:test"
+            echo ""
+            echo "📊 Also check for CI metrics:"
+            echo "   5. Search for: github.ci.pipeline.duration"
+            echo "   6. Search for: github.ci.pipeline.status"
+            echo "   7. Check Events tab for CI events"
+            echo "   8. Look for event titled: 'Test Datadog CI Event: test-datadog'"
             
           else
             echo "❌ ERROR: DATADOG_API_KEY secret is not set"
