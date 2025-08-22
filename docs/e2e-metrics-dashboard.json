@@ -1,0 +1,84 @@
+{
+  "title": "Lace E2E Metrics Dashboard",
+  "description": "E2E test performance metrics dashboard",
+  "widgets": [
+    {
+      "definition": {
+        "title": "E2E CPU Usage (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.e2e.cpu.seconds_total{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "E2E Memory Usage (MB)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.e2e.memory.rss_bytes{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1 / 1048576"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 1,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+} 

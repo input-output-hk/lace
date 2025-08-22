@@ -215,10 +215,10 @@ jobs:
           tags=${{ needs.setup.outputs.tags }}
           " > environment.properties
 
-      - name: Convert metrics JSON to Prometheus format
+      - name: Convert metrics JSON to Datadog format
         working-directory: './packages/e2e-tests/tools/'
         run: |
-          ./convert_metrics_to_prometheus.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics
+          ./convert_metrics_to_datadog.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics "${{ secrets.DATADOG_API_KEY }}"
 
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.9.0
@@ -269,67 +269,21 @@ jobs:
           name: performance-metrics
           path: ./artifacts/metrics
 
-      - name: Serve metrics file locally
+      - name: Send E2E metrics to Datadog
         run: |
-          cat <<'PY' > serve_metrics.py
-          import http.server, socketserver, pathlib, sys
-          FILE = pathlib.Path('./artifacts/metrics/prometheus.txt')
-          class H(http.server.SimpleHTTPRequestHandler):
-              def do_GET(self):
-                  if self.path == './artifacts/metrics':
-                      content = FILE.read_bytes() if FILE.exists() else b'# metrics not ready\n'
-                      self.send_response(200)
-                      self.end_headers()
-                      self.wfile.write(content)
-                  else:
-                      self.send_error(404)
-          with socketserver.TCPServer(('0.0.0.0', 9101), H) as s:
-              print('Serving metrics on :9101/metrics', file=sys.stderr)
-              s.serve_forever()
-          PY
-          python serve_metrics.py &
+          echo "📊 E2E metrics have been sent to Datadog via the conversion script"
+          echo "📁 Datadog payload saved to: ./artifacts/metrics/datadog_payload.json"
+          echo "🔍 Check the previous step for detailed metrics information"
 
         # ------------------------------------------------------------------------
         # 3) Write Alloy (River) config — scrape localhost:9101 and remote_write
         # ------------------------------------------------------------------------
-      - name: Generate alloy.river
-        env:
-          GRAFANA_CLOUD_USERNAME: ${{ secrets.GRAFANA_ALLOY_USERNAME }}
-          GRAFANA_CLOUD_API_KEY:  ${{ secrets.GRAFANA_ALLOY_API_KEY }}
-        run: |
-          mkdir -p alloy
-          cat > alloy/alloy.river <<RIVER
-          prometheus.remote_write "gc" {
-            endpoint {
-              url = "https://prometheus-us-central1.grafana.net/api/prom/push"
-              basic_auth {
-                username = env("GRAFANA_CLOUD_USERNAME")
-                password = env("GRAFANA_CLOUD_API_KEY")
-              }
-            }
-          }
 
-          prometheus.scrape "e2e" {
-            targets = [{
-              __address__ = "127.0.0.1:9101",
-            }]
-            forward_to = [prometheus.remote_write.gc.receiver]
-          }
-          RIVER
 
         # ------------------------------------------------------------------------
         # 4) Launch Alloy for ~45 s to scrape + push the data, then shut it down.
         # ------------------------------------------------------------------------
-      - name: Run Alloy and push metrics
-        run: |
-          docker run --rm \
-            -e ALLOY_CONFIG=/etc/alloy.river \
-            -v "$PWD/alloy/alloy.river:/etc/alloy.river:ro" \
-            grafana/alloy:latest run /etc/alloy.river &
-          ALLOY_PID=$!
-          # wait for two scrape cycles + remote write
-          sleep 45
-          kill "$ALLOY_PID" || true
+
 
       #      - name: Create Prometheus config
       #        env:
