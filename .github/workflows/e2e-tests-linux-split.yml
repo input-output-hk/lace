@@ -218,7 +218,7 @@ jobs:
       - name: Convert metrics JSON to Datadog format
         working-directory: './packages/e2e-tests/tools/'
         run: |
-          ./convert_metrics_to_datadog.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics "${{ secrets.DATADOG_API_KEY }}"
+          bash convert_metrics_to_datadog.sh "${{ github.workflow }}" "${{ github.run_id }}" ../../../artifacts/metrics "${{ secrets.DATADOG_API_KEY }}"
 
       - name: Publish allure report to S3
         uses: andrcuns/allure-publish-action@v2.9.0
