@@ -1,0 +1,602 @@
+{
+  "title": "Lace Wallet Comprehensive CI Dashboard",
+  "description": "Complete CI/CD monitoring dashboard for Lace Wallet with build, test, e2e, and artifact metrics",
+  "widgets": [
+    {
+      "definition": {
+        "title": "Pipeline Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:github.ci.pipeline.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Average Pipeline Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:github.ci.pipeline.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Total Workflow Runs",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "count:github.ci.pipeline.status{service:lace-wallet}",
+                "aggregator": "sum"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Average Job Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:github.ci.job.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Build Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.build.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Build Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.build.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "E2E Test Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.e2e.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "E2E Test Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.e2e.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Unit Test Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.test.unit.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Unit Test Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.test.unit.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 2,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Integration Test Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.test.integration.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Integration Test Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.test.integration.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 2,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Lint Duration (seconds)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.lint.duration{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 0,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 4,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Lint Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.lint.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 6,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Artifact Size (MB)",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.artifact.size{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1 / 1048576"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 1,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 8,
+        "y": 4,
+        "width": 2,
+        "height": 2
+      }
+    },
+    {
+      "definition": {
+        "title": "Artifact Success Rate",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "query_value",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "data_source": "metrics",
+                "name": "query1",
+                "query": "avg:lace.ci.artifact.status{service:lace-wallet}",
+                "aggregator": "avg"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ]
+          }
+        ],
+        "autoscale": true,
+        "precision": 2,
+        "timeseries_background": {
+          "type": "area"
+        }
+      },
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 2,
+        "height": 2
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+} 
