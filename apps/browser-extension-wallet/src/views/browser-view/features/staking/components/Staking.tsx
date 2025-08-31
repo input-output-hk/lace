@@ -114,19 +114,14 @@ export const Staking = (): React.ReactElement => {
   ]);
 
   return (
-    <>
-      {showRegisterAsDRepBanner && (
-        <Box mb="$56">
-          <RegisterAsDRepBanner openExternalLink={openExternalLink} votingCenterUrl={walletRoutePaths.voting} />
-        </Box>
-      )}
-      <div>
-        <SectionTitle
-          title={t('browserView.staking.title')}
-          // eslint-disable-next-line max-len
-          // TODO: removed until we have multidelegation see https://github.com/input-output-hk/lace/pull/1166#issuecomment-1247989647
-          // sideText={`(${isDelegating ? 1 : 0})`}
-        />
+    <div className={styles.stakingContainer}>
+      <div className={styles.stakingContent}>
+        {showRegisterAsDRepBanner && (
+          <Box mb="$56">
+            <RegisterAsDRepBanner openExternalLink={openExternalLink} votingCenterUrl={walletRoutePaths.voting} />
+          </Box>
+        )}
+        <SectionTitle title={t('browserView.staking.title')} />
         {hasNoFunds && (
           <FundWalletBanner
             title={t('browserView.assets.welcome')}
@@ -161,6 +156,6 @@ export const Staking = (): React.ReactElement => {
           onStake={onStake}
         />
       </div>
-    </>
+    </div>
   );
 };
