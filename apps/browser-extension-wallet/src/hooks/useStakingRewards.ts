@@ -31,23 +31,33 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
             logRewardsDebug('Total rewards history entries:', all?.length || 0);
             logRewardsDebug('Raw rewards history:', all);
 
-            // rewards do not become stable until 2 epochs after they are distributed
-            const lastNonVolatileEpoch = epochNo.valueOf() - LAST_STABLE_EPOCH;
-            logRewardsDebug('Last non-volatile epoch:', lastNonVolatileEpoch);
+            // Rewards are calculated and added to the database immediately when they are distributed
+            // However, they need 2 epochs to pass before they become available for withdrawal
+            // This is a Cardano protocol requirement, not a database limitation
+            const lastWithdrawableEpoch = epochNo.valueOf() - LAST_STABLE_EPOCH;
+            logRewardsDebug('Current epoch:', epochNo?.valueOf());
             logRewardsDebug('LAST_STABLE_EPOCH constant:', LAST_STABLE_EPOCH);
-            logRewardsDebug('Epochs being excluded:', [epochNo.valueOf(), epochNo.valueOf() - 1]);
+            logRewardsDebug('Last epoch with withdrawable rewards:', lastWithdrawableEpoch);
+            logRewardsDebug('Epochs with non-withdrawable rewards (excluded):', [
+              epochNo.valueOf(),
+              epochNo.valueOf() - 1
+            ]);
 
-            const confirmedRewardHistory = all?.filter(({ epoch }) => epoch.valueOf() <= lastNonVolatileEpoch) ?? [];
-            logRewardsDebug('Confirmed rewards history (filtered):', confirmedRewardHistory);
-            logRewardsDebug('Number of confirmed rewards:', confirmedRewardHistory.length);
+            const withdrawableRewardHistory =
+              all?.filter(({ epoch }) => epoch.valueOf() <= lastWithdrawableEpoch) ?? [];
+            logRewardsDebug('Withdrawable rewards history (filtered):', withdrawableRewardHistory);
+            logRewardsDebug('Number of withdrawable rewards:', withdrawableRewardHistory.length);
 
-            if (confirmedRewardHistory.length > 0) {
-              logRewardsDebug('First confirmed reward:', confirmedRewardHistory[0]);
-              logRewardsDebug('Last confirmed reward:', confirmedRewardHistory[confirmedRewardHistory.length - 1]);
+            if (withdrawableRewardHistory.length > 0) {
+              logRewardsDebug('First withdrawable reward:', withdrawableRewardHistory[0]);
+              logRewardsDebug(
+                'Last withdrawable reward:',
+                withdrawableRewardHistory[withdrawableRewardHistory.length - 1]
+              );
 
               // Log each reward entry for detailed inspection
               logRewardsDebug('=== DETAILED REWARDS BREAKDOWN ===');
-              confirmedRewardHistory.forEach((reward, index) => {
+              withdrawableRewardHistory.forEach((reward, index) => {
                 logRewardsDebug(`Reward ${index + 1}:`, {
                   epoch: reward.epoch.valueOf(),
                   rewards: reward.rewards.toString(),
@@ -64,8 +74,8 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
             let lastReward = 0;
             let totalBigNumber: BigNumber | undefined;
 
-            if (confirmedRewardHistory.length > 0) {
-              const rewardStrings = confirmedRewardHistory.map(({ rewards }) => rewards.toString());
+            if (withdrawableRewardHistory.length > 0) {
+              const rewardStrings = withdrawableRewardHistory.map(({ rewards }) => rewards.toString());
               const total = BigNumber.sum.apply(undefined, rewardStrings ?? []);
               totalBigNumber = total;
               totalRewards = total.dividedBy(LOVELACE_TO_ADA).toNumber();
@@ -74,7 +84,7 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
               const debugInfo = {
                 currentEpoch: epochNo?.valueOf(),
                 rawRewardsHistoryLength: all?.length || 0,
-                confirmedRewardsLength: confirmedRewardHistory?.length || 0,
+                withdrawableRewardsLength: withdrawableRewardHistory?.length || 0,
                 rewardsArray: rewardStrings,
                 totalBigNumber: total.toString(),
                 totalADA: total.dividedBy(LOVELACE_TO_ADA).toString()
@@ -86,7 +96,7 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
               }
 
               // Calculate last reward
-              const last = confirmedRewardHistory[confirmedRewardHistory.length - 1];
+              const last = withdrawableRewardHistory[withdrawableRewardHistory.length - 1];
               const lastRewardValue = new BigNumber(last.rewards.toString());
               lastReward = lastRewardValue.dividedBy(LOVELACE_TO_ADA).toNumber();
 
@@ -105,10 +115,10 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
             }
 
             logRewardsDebug('Total rewards calculation details:');
-            logRewardsDebug('  - confirmedRewardHistory.length:', confirmedRewardHistory.length);
+            logRewardsDebug('  - withdrawableRewardHistory.length:', withdrawableRewardHistory.length);
             logRewardsDebug(
               '  - rewards values:',
-              confirmedRewardHistory.map(({ rewards }) => rewards.toString())
+              withdrawableRewardHistory.map(({ rewards }) => rewards.toString())
             );
             logRewardsDebug('  - BigNumber.sum result:', totalBigNumber?.toString() || '0');
             logRewardsDebug('  - totalRewards type:', typeof totalRewards);
