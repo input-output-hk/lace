@@ -1,6 +1,6 @@
 // Lace Wallet Debug Information Extractor
 // Run this script in the browser console on the staking page
-// 
+//
 // NOTE: Debugging works in both popup AND browser tab view!
 // The browser view has been configured to use the local Staking component
 // with debugging enabled instead of the @lace/staking package component.
@@ -14,10 +14,14 @@ if (window.rewardsDebugInfo) {
   console.log('\n📊 TOTAL REWARDS DEBUG INFO:');
   console.log('Current Epoch:', window.rewardsDebugInfo.currentEpoch);
   console.log('Raw History Length:', window.rewardsDebugInfo.rawRewardsHistoryLength);
-  console.log('Confirmed Length:', window.rewardsDebugInfo.confirmedRewardsLength);
+  console.log('Withdrawable Length:', window.rewardsDebugInfo.withdrawableRewardsLength);
   console.log('Rewards Array:', window.rewardsDebugInfo.rewardsArray);
   console.log('Total BigNumber:', window.rewardsDebugInfo.totalBigNumber);
   console.log('Total ADA:', window.rewardsDebugInfo.totalADA);
+  console.log('Raw Rewards Sum (lovelace):', window.rewardsDebugInfo.rawRewardsSum);
+  console.log('Raw Rewards Sum (ADA):', window.rewardsDebugInfo.rawRewardsSumADA);
+  console.log('Excluded Rewards Sum (lovelace):', window.rewardsDebugInfo.excludedRewardsSum);
+  console.log('Excluded Rewards Sum (ADA):', window.rewardsDebugInfo.excludedRewardsSumADA);
 } else {
   console.log('❌ No rewards debug info available');
 }
@@ -45,15 +49,16 @@ const exportDebugData = () => {
     rewardsDebugInfo: window.rewardsDebugInfo || null,
     lastRewardDebugInfo: window.lastRewardDebugInfo || null
   };
-  
+
   console.log('\n📋 EXPORTABLE DEBUG DATA:');
   console.log(JSON.stringify(debugData, null, 2));
-  
+
   // Copy to clipboard if available
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(JSON.stringify(debugData, null, 2))
+    navigator.clipboard
+      .writeText(JSON.stringify(debugData, null, 2))
       .then(() => console.log('✅ Debug data copied to clipboard'))
-      .catch(err => console.log('❌ Failed to copy to clipboard:', err));
+      .catch((err) => console.log('❌ Failed to copy to clipboard:', err));
   }
 };
 

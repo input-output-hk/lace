@@ -31,6 +31,16 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
             logRewardsDebug('Total rewards history entries:', all?.length || 0);
             logRewardsDebug('Raw rewards history:', all);
 
+            // Calculate what the raw rewards_sum would be (sum of all rewards without filtering)
+            const rawRewardsSum =
+              all?.reduce((sum, reward) => sum + BigInt(reward.rewards.toString()), BigInt(0)) ?? BigInt(0);
+            const rawRewardsSumADA = Number(rawRewardsSum) / LOVELACE_TO_ADA;
+            logRewardsDebug('=== RAW REWARDS ANALYSIS ===');
+            logRewardsDebug('Raw rewards_sum (all epochs):', rawRewardsSum.toString());
+            // eslint-disable-next-line no-magic-numbers
+            logRewardsDebug('Raw rewards_sum in ADA:', rawRewardsSumADA.toFixed(6));
+            logRewardsDebug('This should match Blockfrost rewards_sum field');
+
             // Rewards are calculated and added to the database immediately when they are distributed
             // However, they need 2 epochs to pass before they become available for withdrawal
             // This is a Cardano protocol requirement, not a database limitation
@@ -47,6 +57,26 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
               all?.filter(({ epoch }) => epoch.valueOf() <= lastWithdrawableEpoch) ?? [];
             logRewardsDebug('Withdrawable rewards history (filtered):', withdrawableRewardHistory);
             logRewardsDebug('Number of withdrawable rewards:', withdrawableRewardHistory.length);
+
+            // Show which specific rewards are being excluded
+            const excludedRewards = all?.filter(({ epoch }) => epoch.valueOf() > lastWithdrawableEpoch) ?? [];
+            if (excludedRewards.length > 0) {
+              logRewardsDebug('=== EXCLUDED REWARDS (2-epoch offset) ===');
+              logRewardsDebug('Number of excluded rewards:', excludedRewards.length);
+              const excludedSum = excludedRewards.reduce(
+                (sum, reward) => sum + BigInt(reward.rewards.toString()),
+                BigInt(0)
+              );
+              const excludedSumADA = Number(excludedSum) / LOVELACE_TO_ADA;
+              logRewardsDebug('Excluded rewards sum in lovelace:', excludedSum.toString());
+              // eslint-disable-next-line no-magic-numbers
+              logRewardsDebug('Excluded rewards sum in ADA:', excludedSumADA.toFixed(6));
+              logRewardsDebug(
+                'Excluded reward epochs:',
+                excludedRewards.map((r) => r.epoch.valueOf())
+              );
+              logRewardsDebug('This explains the difference between raw rewards_sum and displayed Total Rewards');
+            }
 
             if (withdrawableRewardHistory.length > 0) {
               logRewardsDebug('First withdrawable reward:', withdrawableRewardHistory[0]);
@@ -87,7 +117,18 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
                 withdrawableRewardsLength: withdrawableRewardHistory?.length || 0,
                 rewardsArray: rewardStrings,
                 totalBigNumber: total.toString(),
-                totalADA: total.dividedBy(LOVELACE_TO_ADA).toString()
+                totalADA: total.dividedBy(LOVELACE_TO_ADA).toString(),
+                rawRewardsSum: rawRewardsSum.toString(),
+                // eslint-disable-next-line no-magic-numbers
+                rawRewardsSumADA: rawRewardsSumADA.toFixed(6),
+                excludedRewardsSum: excludedRewards
+                  .reduce((sum, reward) => sum + BigInt(reward.rewards.toString()), BigInt(0))
+                  .toString(),
+                // eslint-disable-next-line no-magic-numbers
+                excludedRewardsSumADA: (
+                  Number(excludedRewards.reduce((sum, reward) => sum + BigInt(reward.rewards.toString()), BigInt(0))) /
+                  LOVELACE_TO_ADA
+                ).toFixed(6) // eslint-disable-line no-magic-numbers
               };
 
               // Store debug info in a way that won't be stripped by minification
@@ -130,6 +171,17 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
 
             logRewardsDebug('Last reward:', lastReward);
             logRewardsDebug('Last reward type:', typeof lastReward);
+
+            // Final summary comparison
+            logRewardsDebug('=== FINAL COMPARISON ===');
+            // eslint-disable-next-line no-magic-numbers
+            logRewardsDebug('Raw rewards_sum (all epochs):', `${rawRewardsSumADA.toFixed(6)} ADA`);
+            // eslint-disable-next-line no-magic-numbers
+            logRewardsDebug('Displayed Total Rewards:', `${totalRewards.toFixed(6)} ADA`);
+            const difference = rawRewardsSumADA - totalRewards;
+            // eslint-disable-next-line no-magic-numbers
+            logRewardsDebug('Difference:', `${difference.toFixed(6)} ADA`);
+            logRewardsDebug('This difference should match the excluded rewards sum above');
             logRewardsDebug('=== REWARDS CALCULATION END ===');
 
             return {

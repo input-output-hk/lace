@@ -36,9 +36,15 @@ For comprehensive debug data extraction, run the provided script in the console:
 #### Rewards Calculation Flow
 1. **Raw Rewards History**: Check `window.rewardsDebugInfo.rawRewardsHistoryLength`
 2. **Epoch Filtering**: Current epoch and which epochs are excluded
-3. **Confirmed Rewards**: Number of rewards after filtering
+3. **Withdrawable Rewards**: Number of rewards after filtering (2-epoch offset)
 4. **BigNumber Conversion**: See the exact values being summed
 5. **Final ADA Conversion**: Check the division by 1,000,000
+
+#### Enhanced Debug Information
+6. **Raw Rewards Sum**: Total of all rewards without filtering (`window.rewardsDebugInfo.rawRewardsSum`)
+7. **Raw Rewards Sum (ADA)**: Raw sum converted to ADA (`window.rewardsDebugInfo.rawRewardsSumADA`)
+8. **Excluded Rewards Sum**: Sum of rewards excluded by 2-epoch offset (`window.rewardsDebugInfo.excludedRewardsSum`)
+9. **Excluded Rewards Sum (ADA)**: Excluded sum converted to ADA (`window.rewardsDebugInfo.excludedRewardsSumADA`)
 
 #### Key Debug Points
 - **Current Epoch**: What epoch the calculation is based on
@@ -46,6 +52,9 @@ For comprehensive debug data extraction, run the provided script in the console:
 - **Rewards Array**: The exact string values being passed to BigNumber.sum
 - **Precision**: Check if any precision is lost during string conversion
 - **Type Consistency**: Ensure all values are the expected types
+- **Raw vs Filtered**: Compare `rawRewardsSumADA` vs displayed Total Rewards
+- **Excluded Amount**: Verify that `excludedRewardsSumADA` explains the difference
+- **2-Epoch Offset**: Confirm that excluded rewards match the 2-epoch protocol requirement
 
 ### 5. Expected Behavior
 - **Total Rewards**: Should match explorer values (accounting for 2-epoch delay)
