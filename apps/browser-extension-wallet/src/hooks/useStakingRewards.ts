@@ -41,6 +41,9 @@ export const useStakingRewards = (): UseStakingRewardsReturns => {
             logRewardsDebug('Raw rewards_sum in ADA:', rawRewardsSumADA.toFixed(6));
             logRewardsDebug('This should match Blockfrost rewards_sum field');
 
+            // Automated Blockfrost comparison will be triggered by useBlockfrostComparison hook
+            // The comparison data will be available in window.blockfrostComparison
+
             // Rewards are calculated and added to the database immediately when they are distributed
             // However, they need 2 epochs to pass before they become available for withdrawal
             // This is a Cardano protocol requirement, not a database limitation

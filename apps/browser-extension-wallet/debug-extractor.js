@@ -37,6 +37,29 @@ if (window.lastRewardDebugInfo) {
   console.log('❌ No last reward debug info available');
 }
 
+// Extract Blockfrost comparison data
+if (window.blockfrostComparison) {
+  console.log('\n🌐 BLOCKFROST COMPARISON:');
+  console.log('Status:', window.blockfrostComparison.status);
+  console.log('Stake Address:', window.blockfrostComparison.stakeAddress);
+  console.log('Blockfrost rewards_sum (lovelace):', window.blockfrostComparison.blockfrostRewardsSum);
+  console.log('Blockfrost rewards_sum (ADA):', window.blockfrostComparison.blockfrostRewardsSumADA);
+  console.log('Lace calculated rewards_sum (lovelace):', window.blockfrostComparison.laceRewardsSum);
+  console.log('Lace calculated rewards_sum (ADA):', window.blockfrostComparison.laceRewardsSumADA);
+  console.log('Difference:', window.blockfrostComparison.difference, 'ADA');
+  console.log('Blockfrost controlled_amount (lovelace):', window.blockfrostComparison.blockfrostControlledAmount);
+  console.log('Blockfrost controlled_amount (ADA):', window.blockfrostComparison.blockfrostControlledAmountADA);
+  console.log('Timestamp:', window.blockfrostComparison.timestamp);
+
+  if (window.blockfrostComparison.error) {
+    console.log('❌ Error:', window.blockfrostComparison.error);
+  }
+} else {
+  console.log('\n🌐 BLOCKFROST COMPARISON:');
+  console.log('No comparison data available yet');
+  console.log('Check console logs for Blockfrost API calls');
+}
+
 // Check for any console errors or warnings
 console.log('\n⚠️ CONSOLE STATUS:');
 console.log('Console logging enabled:', typeof console.log === 'function');
@@ -47,7 +70,8 @@ const exportDebugData = () => {
   const debugData = {
     timestamp: new Date().toISOString(),
     rewardsDebugInfo: window.rewardsDebugInfo || null,
-    lastRewardDebugInfo: window.lastRewardDebugInfo || null
+    lastRewardDebugInfo: window.lastRewardDebugInfo || null,
+    blockfrostComparison: window.blockfrostComparison || null
   };
 
   console.log('\n📋 EXPORTABLE DEBUG DATA:');

@@ -11,6 +11,7 @@ import { StakeFundsBanner } from './StakeFundsBanner';
 import { FundWalletBanner } from '@src/views/browser-view/components';
 import { useWalletStore } from '@stores';
 import { useBalances, useDelegationDetails, useFetchCoinPrice, useStakingRewards } from '@src/hooks';
+import { useBlockfrostComparison } from '@src/hooks/useBlockfrostComparison';
 import { useDelegationStore } from '@src/features/delegation/stores';
 import { walletBalanceTransformer } from '@src/api/transformers';
 import { StakePoolDetails } from './StakePoolDetails';
@@ -20,7 +21,7 @@ import { StakingInfo } from './StakingInfo';
 import { useStakePoolDetails } from '../store';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { LACE_APP_ID } from '@src/utils/constants';
-import { useObservable } from '@lace/common';
+import { useObservable, logger } from '@lace/common';
 import { fetchPoolsInfo } from '../utils';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { useExternalLinkOpener } from '@providers';
@@ -50,6 +51,19 @@ export const Staking = (): React.ReactElement => {
   const protocolParameters = useObservable(inMemoryWallet?.protocolParameters$);
   const delegationDetails = useDelegationDetails();
   const { totalRewards, lastReward } = useStakingRewards();
+
+  // Automated Blockfrost comparison for data integrity validation
+  // This hook runs automatically to compare Lace vs Blockfrost data
+  const blockfrostComparison = useBlockfrostComparison(totalRewards.toString(), Number(totalRewards));
+
+  // Log comparison status for debugging (satisfies TypeScript)
+  if (blockfrostComparison.comparisonData) {
+    logger.info('🔍 [STAKING_DEBUG] Blockfrost comparison available:', {
+      stakeAddress: blockfrostComparison.stakeAddress,
+      status: blockfrostComparison.comparisonData.status
+    });
+  }
+
   const openExternalLink = useExternalLinkOpener();
 
   const { coinBalance: minAda } = walletBalanceTransformer(protocolParameters?.stakeKeyDeposit.toString());
