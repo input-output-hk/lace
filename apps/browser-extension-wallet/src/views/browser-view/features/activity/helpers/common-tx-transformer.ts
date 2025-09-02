@@ -195,9 +195,7 @@ export const txTransformer = async ({
       // We don't want the transactionSummaryInspector to build a fallback asset on its own getAssets() failure,
       // because it logs an error, and we don't want that as having a fallback asset is intentional.
       assetProvider: {
-        getAsset: async ({ assetId }) => getFallbackAsset(assetId),
-        getAssets: async ({ assetIds }) => assetIds.map((id) => getFallbackAsset(id)),
-        healthCheck: () => Promise.resolve({ ok: true })
+        getAssets: async ({ assetIds }) => assetIds.map((id) => getFallbackAsset(id))
       },
       timeout: TIMEOUT,
       logger
