@@ -43,6 +43,7 @@ Before(
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.TestAutomationWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+    await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   }
 );
 
