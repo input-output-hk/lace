@@ -30,7 +30,10 @@ class TokensPageAssert {
 
   assertCounterNumberMatchesWalletTokens = async () => {
     const tokensCounterValue = await TokensPage.getTokensCounterAsNumber();
-    if (tokensCounterValue > 0) await TokensPage.coinGeckoCredits.scrollIntoView();
+    if (tokensCounterValue > 0) {
+      await TokensPage.coinGeckoCredits.moveTo();
+      await TokensPage.coinGeckoCredits.scrollIntoView();
+    }
     await TokensPage.tokenRowSkeleton.waitForDisplayed({ reverse: true, timeout: 60_000 });
     const rowsNumber = (await TokensPage.getRows()).length;
     expect(rowsNumber).to.equal(tokensCounterValue);
