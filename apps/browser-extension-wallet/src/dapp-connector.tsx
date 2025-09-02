@@ -4,6 +4,7 @@ import { render } from 'react-dom';
 import { DappConnectorView } from '@routes';
 import { StoreProvider } from '@stores';
 import '@lib/i18n';
+import '@lib/scripts/keep-alive-ui';
 import 'antd/dist/antd.css';
 import { CurrencyStoreProvider } from '@providers/currency';
 import { DatabaseProvider, AppSettingsProvider, AnalyticsProvider, ExternalLinkOpenerProvider } from '@providers';
