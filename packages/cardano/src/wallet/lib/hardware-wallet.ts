@@ -8,6 +8,8 @@ import { WalletType } from '@cardano-sdk/web-extension';
 import { ledgerUSBVendorId } from '@ledgerhq/devices';
 import { TREZOR_USB_DESCRIPTORS } from '@trezor/transport';
 
+export type DerivationType = 'ICARUS' | 'ICARUS_TREZOR' | 'LEDGER';
+
 const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
 const createEnumObject = <T extends string>(o: Array<T>) => o;
@@ -76,12 +78,14 @@ export const getHwExtendedAccountPublicKey = async ({
   walletType,
   accountIndex,
   ledgerConnection,
-  purpose = KeyManagement.KeyPurpose.STANDARD
+  purpose = KeyManagement.KeyPurpose.STANDARD,
+  derivationType
 }: {
   walletType: HardwareWallets;
   accountIndex: number;
   ledgerConnection?: LedgerConnection;
   purpose?: KeyManagement.KeyPurpose;
+  derivationType?: DerivationType;
 }): Promise<Bip32PublicKeyHex> => {
   if (walletType === WalletType.Ledger) {
     return await HardwareLedger.LedgerKeyAgent.getXpub({
@@ -95,7 +99,8 @@ export const getHwExtendedAccountPublicKey = async ({
     return await HardwareTrezor.TrezorKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       accountIndex,
-      purpose
+      purpose,
+      derivationType
     });
   }
   throw invalidDeviceError;

@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { Wallet } from '@lace/cardano';
+import { Wallet, DerivationType } from '@lace/cardano';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useWalletManager } from '@hooks';
@@ -17,8 +17,9 @@ import { logger } from '@lace/common';
 type WalletData = {
   accountIndex: number;
   name: string;
+  derivationType?: DerivationType;
 };
-type OnNameAndAccountChange = ({ accountIndex, name }: WalletData) => void;
+type OnNameAndAccountChange = ({ accountIndex, name, derivationType }: WalletData) => void;
 
 interface State {
   back: () => void;
@@ -31,6 +32,7 @@ interface State {
   onNameAndAccountChange: OnNameAndAccountChange;
   onStartOverDialogAction: (confirmed: boolean) => void;
   step: WalletConnectStep;
+  connection?: Wallet.HardwareWalletConnection;
 }
 
 interface HardwareWalletProviderProps {
@@ -169,8 +171,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     [connectDevice]
   );
 
-  const onNameAndAccountChange: OnNameAndAccountChange = useCallback(({ accountIndex, name }) => {
-    setWalletData({ accountIndex, name });
+  const onNameAndAccountChange: OnNameAndAccountChange = useCallback(({ accountIndex, name, derivationType }) => {
+    setWalletData({ accountIndex, name, derivationType });
   }, []);
 
   const createWallet = useCallback(async () => {
@@ -179,7 +181,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       cardanoWallet = await createHardwareWalletRevamped({
         connection,
         ...walletData,
-        accountIndexes: [walletData.accountIndex]
+        accountIndexes: [walletData.accountIndex],
+        derivationType: walletData.derivationType
       });
     } catch (error) {
       logger.error('ERROR creating hardware wallet', { error });
@@ -250,7 +253,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       onErrorDialogRetry,
       onNameAndAccountChange,
       onStartOverDialogAction,
-      step
+      step,
+      connection
     }),
     [
       back,
@@ -262,7 +266,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       onErrorDialogRetry,
       onNameAndAccountChange,
       onStartOverDialogAction,
-      step
+      step,
+      connection
     ]
   );
 

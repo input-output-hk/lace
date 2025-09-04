@@ -1,0 +1,41 @@
+@import '../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.container {
+  margin-bottom: size_unit(2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: size_unit(2);
+  margin-bottom: size_unit(1);
+}
+
+.label {
+  @include text-form-label;
+  color: var(--text-color-primary);
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  gap: size_unit(3);
+  align-items: flex-start;
+}
+
+.selectWrapper {
+  width: size_unit(25);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.description {
+  @include text-body-regular;
+  flex: 1;
+  padding-top: size_unit(2);
+  margin: 0;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+  font-style: italic;
+}
