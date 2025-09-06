@@ -3,7 +3,7 @@
 /* eslint-disable complexity */
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useMemo } from 'react';
-import { Wallet } from '@lace/cardano';
+import { Wallet, DerivationType } from '@lace/cardano';
 import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
@@ -164,6 +164,7 @@ type CreateHardwareWalletRevampedParams = {
   accountIndexes: number[];
   name: string;
   connection: Wallet.HardwareWalletConnection;
+  derivationType?: DerivationType;
 };
 
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
@@ -418,7 +419,7 @@ export const useWalletManager = (): UseWalletManager => {
   }, [backgroundService]);
 
   const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
-    async ({ accountIndexes, connection, name }) => {
+    async ({ accountIndexes, connection, name, derivationType }) => {
       const accounts: Bip32WalletAccount<Wallet.AccountMetadata>[] = [];
       for (const accountIndex of accountIndexes) {
         let extendedAccountPublicKey;
@@ -426,7 +427,8 @@ export const useWalletManager = (): UseWalletManager => {
           extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey({
             walletType: connection.type,
             accountIndex,
-            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined
+            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined,
+            derivationType
           });
         } catch (error: unknown) {
           throw error;
@@ -439,7 +441,10 @@ export const useWalletManager = (): UseWalletManager => {
       }
 
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lastActiveAccountIndex: accountIndexes[0] },
+        metadata: {
+          name,
+          lastActiveAccountIndex: accountIndexes[0]
+        },
         type: connection.type,
         accounts
       };

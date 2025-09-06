@@ -8,3 +8,5 @@ export * from '@ui/components/Voting';
 export * from '@ui/components/StakePoolMetricsBrowser';
 export * from '@ui/components/StakePoolNameBrowser';
 export * from '@ui/components/StakePoolStatusLogo';
+
+export { DerivationType } from '@wallet/lib/hardware-wallet';
