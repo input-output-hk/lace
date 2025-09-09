@@ -373,6 +373,7 @@ describe('Testing DappTransactionContainer component', () => {
       deposit: BigInt(1000),
       fee: BigInt(170_000),
       returnedDeposit: BigInt(0),
+      resolvedInputs: [] as any,
       unresolved: {
         inputs: [
           {
