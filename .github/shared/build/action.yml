@@ -33,6 +33,10 @@ inputs:
     description: 'Preview Project ID for Blockfrost API usage'
     required: true
   BLOCKFROST_PROJECT_ID_SANCHONET:
+  BLOCKFROST_URL_PREVIEW:
+    description: 'Preview Blockfrost URL'
+    required: false
+    default: 'https://blockfrost.lace.io'
     description: 'SanchoNet Project ID for Blockfrost API usage'
     required: true
   MAESTRO_PROJECT_ID_MAINNET:
@@ -165,6 +169,7 @@ runs:
         BLOCKFROST_PROJECT_ID_MAINNET: ${{ inputs.BLOCKFROST_PROJECT_ID_MAINNET }}
         BLOCKFROST_PROJECT_ID_PREPROD: ${{ inputs.BLOCKFROST_PROJECT_ID_PREPROD }}
         BLOCKFROST_PROJECT_ID_PREVIEW: ${{ inputs.BLOCKFROST_PROJECT_ID_PREVIEW }}
+        BLOCKFROST_URL_PREVIEW: ${{ inputs.BLOCKFROST_URL_PREVIEW }}
         BLOCKFROST_PROJECT_ID_SANCHONET: ${{ inputs.BLOCKFROST_PROJECT_ID_SANCHONET }}
         MAESTRO_PROJECT_ID_MAINNET: ${{ inputs.MAESTRO_PROJECT_ID_MAINNET }}
         MAESTRO_PROJECT_ID_TESTNET: ${{ inputs.MAESTRO_PROJECT_ID_TESTNET }}
