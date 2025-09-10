@@ -115,10 +115,14 @@ export const DappConfirmData = (): React.ReactElement => {
         drepAddr?.getType() === Wallet.Cardano.AddressType.EnterpriseKey &&
         drepAddr?.getProps().paymentPart?.hash === ownPubDRepKeyHash
       ) {
-        txDataAddress = Wallet.Cardano.DRepID.cip129FromCredential({
-          hash: drepAddr?.getProps().paymentPart?.hash,
-          type: Wallet.Cardano.CredentialType.KeyHash
-        });
+        txDataAddress = Wallet.Cardano.DRepID.toAddress(
+          Wallet.Cardano.DRepID.cip129FromCredential({
+            hash: drepAddr?.getProps().paymentPart?.hash,
+            type: Wallet.Cardano.CredentialType.KeyHash
+          })
+        )
+          .toAddress()
+          .toBech32();
       }
     }
 

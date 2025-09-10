@@ -1,5 +1,5 @@
 // cSpell:ignore delegators
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, new-cap */
 /* eslint-disable unicorn/no-array-callback-reference */
 
 import { BlockfrostClient } from '@cardano-sdk/cardano-services-client';
@@ -12,7 +12,7 @@ import {
   StakePoolSortOptions,
   StakePoolStats
 } from '@cardano-sdk/core';
-import { fromSerializableObject, toSerializableObject } from '@cardano-sdk/util';
+import { fromSerializableObject, Percent, toSerializableObject } from '@cardano-sdk/util';
 import { Storage } from 'webextension-polyfill';
 import type { Responses } from '@blockfrost/blockfrost-js';
 import Fuse from 'fuse.js';
@@ -89,11 +89,11 @@ const toCore = (pool: BlockFrostPool): Cardano.StakePool => ({
     blocksCreated: pool.blocks_minted,
     delegators: 0,
     livePledge: BigInt(0),
-    saturation: pool.live_saturation,
-    size: { active: 0, live: 0 },
+    saturation: Percent(pool.live_saturation),
+    size: { active: Percent(0), live: Percent(0) },
     stake: { active: BigInt(pool.active_stake), live: BigInt(pool.live_stake) },
-    lastRos: 0,
-    ros: 0
+    lastRos: Percent(0),
+    ros: Percent(0)
   },
   owners: [],
   pledge: BigInt(pool.declared_pledge),
@@ -216,9 +216,9 @@ const enrichStakePool = ({ details, networkData, id, stakePools }: enrichStakePo
       stakePool.metrics.livePledge = BigInt(details.live_pledge);
       stakePool.metrics.delegators = details.live_delegators;
       // The `if` containing this branch makes the stakePool a StakePoolWithMetrics
-      stakePool.metrics.ros = estimateROS(stakePool as StakePoolWithMetrics, networkData);
+      stakePool.metrics.ros = Percent(estimateROS(stakePool as StakePoolWithMetrics, networkData));
     }
-    stakePool.owners = details.owners;
+    stakePool.owners = details.owners.map((owner) => Cardano.RewardAccount(owner));
   }
 };
 
