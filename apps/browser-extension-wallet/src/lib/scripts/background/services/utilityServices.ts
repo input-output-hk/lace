@@ -30,6 +30,7 @@ import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { initCardanoTokenPrices } from './cardanoTokenPrices';
+import { Language } from '@lace/translation';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -168,6 +169,8 @@ const closeAllTabsAndOpenPopup = async () => {
 };
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
+
+const handleChangeLanguage = (data: Language) => requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data });
 
 const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
@@ -309,6 +312,7 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
         migrationState$,
         coinPrices,
         handleChangeTheme,
+        handleChangeLanguage,
         handleChangeMode,
         clearBackgroundStorage,
         getBackgroundStorage,

@@ -12,3 +12,5 @@ export * from './NetworkInfo';
 export * from './AddNewWalletLink';
 export * from './AddNewBitcoinWalletLink';
 export * from './RenameWalletDrawer';
+export * from './LanguageInfo';
+export * from './LanguageChoice';
