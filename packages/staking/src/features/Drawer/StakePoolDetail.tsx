@@ -46,7 +46,10 @@ export const StakePoolDetail = ({ popupView }: { popupView?: boolean }): React.R
 
   useEffect(() => {
     stakePoolProvider
-      .queryStakePools({ filters: { identifier: { values: [{ id }] } }, pagination: { limit: 1, startAt: 0 } })
+      .queryStakePools({
+        filters: { identifier: { values: [{ id: Wallet.Cardano.PoolId(id) }] } },
+        pagination: { limit: 1, startAt: 0 },
+      })
       .then(({ pageResults: [stakePool] }) => stakePool && setDetails(mapStakePoolToDisplayData({ stakePool })))
       .catch(logger.error);
   }, [id, stakePoolProvider]);

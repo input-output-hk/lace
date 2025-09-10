@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers */
+/* eslint-disable no-magic-numbers, new-cap */
 import { POPUP_WINDOW, POPUP_WINDOW_NAMI, POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
@@ -14,6 +14,7 @@ import {
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { getBackgroundStorage } from './storage';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
+import { HexBlob } from '@cardano-sdk/util';
 
 const { blake2b } = Wallet.Crypto;
 const DAPP_CONNECTOR_REGEX = new RegExp(/dappconnector/i);
@@ -200,4 +201,4 @@ export const getWalletName = (): string => {
 };
 
 export const hashExtendedAccountPublicKey = (extendedAccountPublicKey: string): string =>
-  blake2b.hash(extendedAccountPublicKey, 16);
+  blake2b.hash(HexBlob(extendedAccountPublicKey), 16);
