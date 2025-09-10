@@ -8,6 +8,8 @@ import {
   Links,
   LockWallet,
   NetworkChoise,
+  LanguageChoice,
+  LanguageInfo,
   RenameWalletDrawer,
   Separator,
   SettingsLink,
@@ -96,6 +98,11 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const handleNetworkChoise = () => {
     setCurrentSection(Sections.NetworkInfo);
     sendAnalyticsEvent(PostHogAction.UserWalletProfileNetworkClick);
+  };
+
+  const handleLanguageChoice = () => {
+    setCurrentSection(Sections.Language);
+    sendAnalyticsEvent(PostHogAction.UserWalletProfileLanguageClick);
   };
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
@@ -209,6 +216,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
                 />
               </div>
             )}
+            <LanguageChoice onClick={handleLanguageChoice} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (
               <>
@@ -219,6 +227,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         </div>
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={goBackToMainSection} />}
+      {currentSection === Sections.Language && <LanguageInfo onBack={goBackToMainSection} />}
       {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={goBackToMainSection} isPopup={isPopup} />}
       {isRenamingWallet && (
         <RenameWalletDrawer open={isRenamingWallet} popupView={isPopup} onClose={() => setIsRenamingWallet(false)} />
