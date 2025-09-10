@@ -247,6 +247,8 @@ export enum PostHogAction {
   UserWalletProfileLightModeClick = 'user/wallet profile | light mode | click',
   UserWalletProfileDarkModeClick = 'user/wallet profile | dark mode | click',
   UserWalletProfileNetworkClick = 'user/wallet profile | network | click',
+  UserWalletProfileLanguageClick = 'user/wallet profile | language | click',
+  UserWalletProfileLanguageSelectClick = 'user/wallet profile | language select | click',
   UserWalletProfileNetworkPreviewClick = 'user/wallet profile | network | preview | click',
   UserWalletProfileNetworkPreprodClick = 'user/wallet profile | network | preprod | click',
   UserWalletProfileNetworkMainnetClick = 'user/wallet profile | network | mainnet | click',
