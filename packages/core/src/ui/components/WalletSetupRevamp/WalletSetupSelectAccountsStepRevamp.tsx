@@ -17,6 +17,7 @@ export interface WalletSetupSelectAccountsStepRevampProps {
   onSubmit: (accountIndex: number, name: string) => void;
   isNextLoading?: boolean;
   onSelectedAccountChange?: () => void;
+  contentBeforeAccountSelector?: React.ReactNode;
 }
 
 export const WalletSetupSelectAccountsStepRevamp = ({
@@ -24,7 +25,8 @@ export const WalletSetupSelectAccountsStepRevamp = ({
   onBack,
   onSubmit,
   isNextLoading,
-  onSelectedAccountChange
+  onSelectedAccountChange,
+  contentBeforeAccountSelector
 }: WalletSetupSelectAccountsStepRevampProps): React.ReactElement => {
   const [selectedAccount, setSelectedAccount] = useState<string | undefined>('0');
   const [walletName, setWalletName] = useState(INITIAL_WALLET_NAME);
@@ -70,6 +72,7 @@ export const WalletSetupSelectAccountsStepRevamp = ({
             </p>
           )}
         </div>
+        {contentBeforeAccountSelector && <Box mt="$16">{contentBeforeAccountSelector}</Box>}
         <Box mt="$16">
           <Select.Root
             variant="outline"

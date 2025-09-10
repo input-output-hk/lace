@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { Wallet } from '@lace/cardano';
+import { Wallet, DerivationType } from '@lace/cardano';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useWalletManager } from '@hooks';
@@ -17,8 +17,9 @@ import { logger } from '@lace/common';
 type WalletData = {
   accountIndex: number;
   name: string;
+  derivationType?: DerivationType;
 };
-type OnNameAndAccountChange = ({ accountIndex, name }: WalletData) => void;
+type OnNameAndAccountChange = ({ accountIndex, name, derivationType }: WalletData) => void;
 
 interface State {
   back: () => void;
@@ -31,6 +32,8 @@ interface State {
   onNameAndAccountChange: OnNameAndAccountChange;
   onStartOverDialogAction: (confirmed: boolean) => void;
   step: WalletConnectStep;
+  connection?: Wallet.HardwareWalletConnection;
+  connectedUsbDevice?: USBDevice;
 }
 
 interface HardwareWalletProviderProps {
@@ -65,13 +68,30 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       if (walletData?.name) return;
       const wallets = await firstValueFrom(walletRepository.wallets$);
       const name = `Wallet ${wallets.length + 1}`;
-      setWalletData((prevState) => ({ ...prevState, name }));
+      setWalletData((prevState) => ({ ...prevState, name, derivationType: 'ICARUS' }));
     })();
   }, [walletData?.name, walletRepository]);
 
   useEffect(() => {
     const onHardwareWalletDisconnect = (event: USBConnectionEvent) => {
-      if (event.device !== connectedUsbDevice || !connection) return;
+      // Only handle disconnect events for the currently connected device
+      if (event.device !== connectedUsbDevice || !connection) {
+        return;
+      }
+
+      // For Trezor devices, ignore disconnect events if the device was already closed
+      // The Trezor SDK manages USB connections internally and closes the WebUSB device
+      // during its initialization process. This triggers a disconnect event that we were
+      // incorrectly interpreting as a real disconnection, causing the connection to drop.
+      // By checking if event.device.opened is false, we can distinguish between:
+      // 1. SDK-managed closure (opened: false) - ignore this event
+      // 2. Physical device disconnection (opened: true) - show error dialog
+      if (connection.type === WalletType.Trezor && !event.device.opened) {
+        logger.debug('Trezor disconnect event ignored - device was already closed by SDK');
+        return;
+      }
+
+      // For Ledger devices or real Trezor disconnections, show the error dialog
       setErrorDialogCode(ErrorDialogCode.DeviceDisconnected);
     };
 
@@ -169,8 +189,8 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
     [connectDevice]
   );
 
-  const onNameAndAccountChange: OnNameAndAccountChange = useCallback(({ accountIndex, name }) => {
-    setWalletData({ accountIndex, name });
+  const onNameAndAccountChange: OnNameAndAccountChange = useCallback(({ accountIndex, name, derivationType }) => {
+    setWalletData({ accountIndex, name, derivationType });
   }, []);
 
   const createWallet = useCallback(async () => {
@@ -250,7 +270,9 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       onErrorDialogRetry,
       onNameAndAccountChange,
       onStartOverDialogAction,
-      step
+      step,
+      connection,
+      connectedUsbDevice
     }),
     [
       back,
@@ -262,7 +284,9 @@ export const HardwareWalletProvider = ({ children }: HardwareWalletProviderProps
       onErrorDialogRetry,
       onNameAndAccountChange,
       onStartOverDialogAction,
-      step
+      step,
+      connection,
+      connectedUsbDevice
     ]
   );
 
