@@ -10,6 +10,8 @@ import { TREZOR_USB_DESCRIPTORS } from '@trezor/transport';
 
 const isTrezorHWSupported = (): boolean => process.env.USE_TREZOR_HW === 'true';
 
+export type DerivationType = 'ICARUS' | 'ICARUS_TREZOR' | 'LEDGER';
+
 const createEnumObject = <T extends string>(o: Array<T>) => o;
 export const AVAILABLE_WALLETS = createEnumObject<HardwareWallets>(
   isTrezorHWSupported() ? [WalletType.Ledger, WalletType.Trezor] : [WalletType.Ledger]
@@ -22,8 +24,8 @@ export const manifest: KeyManagement.TrezorConfig['manifest'] = {
   email: process.env.EMAIL_ADDRESS as unknown as string
 };
 
-const initializeTrezor = () =>
-  HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
+const initializeTrezor = async () =>
+  await HardwareTrezor.TrezorKeyAgent.initializeTrezorTransport({
     manifest,
     communicationType: DEFAULT_COMMUNICATION_TYPE
   });
@@ -76,12 +78,14 @@ export const getHwExtendedAccountPublicKey = async ({
   walletType,
   accountIndex,
   ledgerConnection,
-  purpose = KeyManagement.KeyPurpose.STANDARD
+  purpose = KeyManagement.KeyPurpose.STANDARD,
+  derivationType
 }: {
   walletType: HardwareWallets;
   accountIndex: number;
   ledgerConnection?: LedgerConnection;
   purpose?: KeyManagement.KeyPurpose;
+  derivationType?: DerivationType;
 }): Promise<Bip32PublicKeyHex> => {
   if (walletType === WalletType.Ledger) {
     return await HardwareLedger.LedgerKeyAgent.getXpub({
@@ -95,7 +99,8 @@ export const getHwExtendedAccountPublicKey = async ({
     return await HardwareTrezor.TrezorKeyAgent.getXpub({
       communicationType: DEFAULT_COMMUNICATION_TYPE,
       accountIndex,
-      purpose
+      purpose,
+      derivationType
     });
   }
   throw invalidDeviceError;
