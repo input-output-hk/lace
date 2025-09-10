@@ -6,6 +6,7 @@ import type {
 
 export enum Language {
   en = 'en',
+  ja = 'ja',
 }
 
 export type TranslationKey = keyof (typeof allTranslations)[Language.en];
