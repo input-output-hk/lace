@@ -370,8 +370,10 @@
   "browserView.settings.wallet.midnight.prelaunch.title": "Midnight Token Distribution",
   "browserView.settings.wallet.network.description": "Switch from mainnet to testnet",
   "browserView.settings.wallet.network.drawerDescription": "Select the network you would like your wallet to operate on.",
+  "browserView.settings.wallet.language.drawerDescription": "Select the language you want to use.",
   "browserView.settings.wallet.network.networkSwitched": "Switched network",
   "browserView.settings.wallet.network.title": "Network",
+  "browserView.settings.wallet.language.title": "Language",
   "browserView.settings.wallet.title": "Wallet",
   "browserView.settings.wallet.walletSync.ctaLabel": "Sync",
   "browserView.settings.wallet.walletSync.description": "Sync new addresses of your HD wallet. This may be needed if you're using other HD wallets at the same time as Lace",
@@ -391,6 +393,7 @@
   "browserView.sideMenu.links.voting": "Voting Center",
   "browserView.sideMenu.mode.dark": "Dark mode",
   "browserView.sideMenu.mode.light": "Light mode",
+  "browserView.sideMenu.mode.language": "Language",
   "browserView.sidePanel.aboutStaking": "About staking",
   "browserView.sidePanel.aboutYourWallet": "About your wallet",
   "browserView.sidePanel.learnAbout": "Learn about",
@@ -478,6 +481,7 @@
   "browserView.staking.title": "Staking",
   "browserView.topNavigationBar.links.lockWallet": "Lock wallet",
   "browserView.topNavigationBar.links.network": "Network",
+  "browserView.topNavigationBar.links.language": "Language",
   "browserView.topNavigationBar.links.settings": "Settings",
   "browserView.topNavigationBar.links.signMessage": "Sign message",
   "browserView.topNavigationBar.walletStatus.notSyncedToTheBlockchain": "Not synced to the blockchain",
@@ -959,5 +963,7 @@
   "paperWallet.SettingsDrawer.passphraseStage.subtitle": "This is the password you use to unlock your wallet and make transactions",
   "dapp.connector.btc.error.title": "Bitcoin Wallet",
   "dapp.connector.btc.error.description": "DApp connector for Bitcoin wallet is not supported in this version of the extension.",
-  "dapp.connector.btc.error.closeButton": "Close"
+  "dapp.connector.btc.error.closeButton": "Close",
+  "languageChoice.english": "English",
+  "languageChoice.japanese": "Japanese"
 }
