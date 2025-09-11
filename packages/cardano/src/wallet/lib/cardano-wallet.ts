@@ -13,6 +13,7 @@ import {
   TxSubmitProvider,
   UtxoProvider
 } from '@cardano-sdk/core';
+import { DerivationType } from './hardware-wallet';
 import { AddressDiscovery, ObservableWallet } from '@cardano-sdk/wallet';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import {
@@ -38,6 +39,7 @@ export interface WalletMetadata {
   lastActiveAccountIndex?: number;
   walletAddresses?: Cardano.PaymentAddress[];
   coSigners?: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
+  derivationType?: DerivationType;
 }
 
 export interface AccountMetadata {
