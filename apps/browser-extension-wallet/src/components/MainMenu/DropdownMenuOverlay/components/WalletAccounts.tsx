@@ -156,7 +156,8 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
         await addAccount({
           wallet,
           accountIndex,
-          metadata: { name }
+          metadata: { name },
+          derivationType: wallet.metadata.derivationType
         });
         analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
           // eslint-disable-next-line camelcase

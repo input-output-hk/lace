@@ -1,0 +1,23 @@
+@import '../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../packages/common/src/ui/styles/abstracts/typography';
+
+.container {
+  margin-bottom: size_unit(2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: size_unit(2);
+  margin-bottom: size_unit(1);
+}
+
+.label {
+  @include text-form-label;
+  color: var(--text-color-primary);
+  margin: 0;
+}
+
+.content {
+  width: 100%;
+}

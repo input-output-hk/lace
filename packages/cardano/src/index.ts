@@ -1,5 +1,7 @@
 export * as Wallet from '@wallet';
 
+export { DerivationType } from '@wallet/lib/hardware-wallet';
+
 export * from '@ui/hooks';
 
 export * from '@ui/components/StakingConfirmationInfo';
