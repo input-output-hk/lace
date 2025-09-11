@@ -94,6 +94,7 @@ export type ExtendedAccountPublicKeyParams = {
   accountIndex: number;
   passphrase?: Uint8Array;
   purpose?: KeyManagement.KeyPurpose;
+  derivationType?: DerivationType;
 };
 
 export type CreateWalletParamsBase = {
@@ -156,6 +157,7 @@ type WalletManagerAddAccountProps = {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
+  derivationType?: DerivationType;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
@@ -252,7 +254,8 @@ const getExtendedAccountPublicKey = async ({
   wallet,
   accountIndex,
   passphrase,
-  purpose = KeyManagement.KeyPurpose.STANDARD
+  purpose = KeyManagement.KeyPurpose.STANDARD,
+  derivationType
 }: ExtendedAccountPublicKeyParams) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
@@ -281,7 +284,8 @@ const getExtendedAccountPublicKey = async ({
       return await Wallet.getHwExtendedAccountPublicKey({
         walletType: wallet.type,
         accountIndex,
-        purpose
+        purpose,
+        derivationType
       });
   }
 };
@@ -441,7 +445,7 @@ export const useWalletManager = (): UseWalletManager => {
       }
 
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lastActiveAccountIndex: accountIndexes[0] },
+        metadata: { name, lastActiveAccountIndex: accountIndexes[0], derivationType },
         type: connection.type,
         accounts
       };
@@ -1388,8 +1392,22 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const addAccount = useCallback(
-    async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
-      const extendedAccountPublicKey = await getExtendedAccountPublicKey({ wallet, accountIndex, passphrase });
+    async ({
+      wallet,
+      accountIndex,
+      metadata,
+      passphrase,
+      derivationType
+    }: WalletManagerAddAccountProps): Promise<void> => {
+      // Get derivation type from wallet metadata if not provided
+      const walletDerivationType = derivationType || wallet.metadata.derivationType;
+
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey({
+        wallet,
+        accountIndex,
+        passphrase,
+        derivationType: walletDerivationType
+      });
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,
