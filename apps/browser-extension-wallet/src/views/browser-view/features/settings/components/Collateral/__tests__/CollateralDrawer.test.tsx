@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/imports-first */
 const mockUseWalletStore = jest.fn();
+const mockUseLMP = jest.fn().mockReturnValue({ midnightWallets: [], switchToLMP: jest.fn() });
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
 const mockUseSections = jest.fn();
@@ -70,6 +71,7 @@ jest.mock('@hooks', () => {
     useCollateral: mockUseCollateral,
     useSyncingTheFirstTime: mockUseSyncingTheFirstTime,
     useRedirection: mockUseRedirection,
+    useLMP: mockUseLMP(),
     useSharedWalletData: () => ({ getSignPolicy: () => {} })
   };
 });
