@@ -44,6 +44,7 @@ import { deepEquals, HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
+import { useLMP } from '@hooks/useLMP';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
@@ -396,6 +397,7 @@ export const useWalletManager = (): UseWalletManager => {
     const storedChain = getValueFromLocalStorage('appSettings');
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
+  const { midnightWallets, switchToLMP } = useLMP();
 
   const getWalletInfo = useCallback(async (): Promise<Wallet.WalletDisplayInfo | undefined> => {
     const { activeBlockchain } = await backgroundService.getBackgroundStorage();
@@ -1121,6 +1123,10 @@ export const useWalletManager = (): UseWalletManager => {
       for (const network of [BtcWallet.Network.Mainnet, BtcWallet.Network.Testnet]) {
         await bitcoinWalletManager.destroyData(walletToDelete.walletId, network);
       }
+
+      if (midnightWallets && midnightWallets?.length > 0) {
+        switchToLMP();
+      }
     },
     [
       resetWalletLock,
@@ -1131,7 +1137,9 @@ export const useWalletManager = (): UseWalletManager => {
       clearAddressBook,
       clearNftsFolders,
       getCurrentChainId,
-      activateWallet
+      activateWallet,
+      midnightWallets,
+      switchToLMP
     ]
   );
 

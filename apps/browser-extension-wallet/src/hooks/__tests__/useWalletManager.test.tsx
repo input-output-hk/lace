@@ -21,6 +21,7 @@ const mockLedgerGetXpub = jest.fn();
 const mockTrezorGetXpub = jest.fn();
 const mockInitializeTrezorTransport = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
+const mockUseLMP = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 const mockUseSecrets = {
   password: {} as Partial<Password>,
@@ -116,6 +117,11 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
   };
 });
 
+jest.mock('@hooks/useLMP', () => ({
+  __esModule: true,
+  useLMP: mockUseLMP
+}));
+
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
@@ -153,6 +159,7 @@ const walletDisplayInfoMockData = {
 describe('Testing useWalletManager hook', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockUseLMP.mockReturnValue({ midnightWallets: [], switchToLMP: jest.fn() });
     jest.spyOn(AppSettings, 'useAppSettingsContext').mockReturnValue([{}, jest.fn()]);
     jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({}));
   });

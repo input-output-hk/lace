@@ -9,7 +9,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
-import { useGetHandles, useWalletAvatar, useWalletManager } from '@hooks';
+import { useGetHandles, useWalletAvatar, useWalletManager, useLMP } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction, WALLET_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
@@ -19,6 +19,7 @@ import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 import { isScriptWallet } from '@lace/core';
 import { useCurrentBlockchain } from '@src/multichain';
+import { LmpBundleWallet } from '@src/utils/lmp';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -59,6 +60,7 @@ export const UserInfo = ({
     useWalletManager();
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
+  const { midnightWallets = [], switchToLMP } = useLMP();
   const walletAddress = walletInfo ? walletInfo.addresses[0].address.toString() : '';
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const [fullWalletName, setFullWalletName] = useState<string>('');
@@ -193,6 +195,27 @@ export const UserInfo = ({
     ]
   );
 
+  const renderLmpWallet = useCallback(
+    ({ walletIcon, walletId, walletName }: LmpBundleWallet, isLast: boolean) => (
+      <div key={walletId}>
+        <ProfileDropdown.WalletOption
+          style={{ textAlign: 'left' }}
+          key={walletId}
+          title={shortenWalletName(walletName, WALLET_OPTION_NAME_MAX_LENGTH)}
+          id={`wallet-option-${walletId}`}
+          onClick={switchToLMP}
+          type={'hot'}
+          profile={{
+            fallbackText: walletName,
+            imageSrc: walletIcon
+          }}
+        />
+        {isLast ? undefined : <Separator />}
+      </div>
+    ),
+    [switchToLMP]
+  );
+
   const renderScriptWallet = useCallback(
     (wallet: ScriptWallet<Wallet.WalletMetadata>) => renderWalletOption({ wallet }),
     [renderWalletOption]
@@ -228,7 +251,14 @@ export const UserInfo = ({
         })}
       >
         {process.env.USE_MULTI_WALLET === 'true' ? (
-          <div>{wallets.map((wallet, i) => renderWallet(wallet, i === wallets.length - 1))}</div>
+          <>
+            <div>
+              {wallets.map((wallet, i) =>
+                renderWallet(wallet, i === wallets.length - 1 && midnightWallets.length === 0)
+              )}
+              {midnightWallets.map((wallet, i) => renderLmpWallet(wallet, i === midnightWallets.length - 1))}
+            </div>
+          </>
         ) : (
           <CopyToClipboard text={handleName || walletAddress}>
             <AntdTooltip
