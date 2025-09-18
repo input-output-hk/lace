@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@cardano-sdk/util": "^0.17.1",
     "@lace/common": "0.1.0",
     "@scure/bip32": "^1.6.0",
     "bip39": "^3.1.0",
