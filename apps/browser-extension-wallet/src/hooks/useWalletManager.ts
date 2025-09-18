@@ -1275,11 +1275,14 @@ export const useWalletManager = (): UseWalletManager => {
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
+      // Respect wallet derivation type (e.g. ICARUS_TREZOR) when deriving shared wallet keys
+      const derivationType = wallet.metadata?.trezorConfig?.derivationType;
       const bip32AccountPublicKey = await getExtendedAccountPublicKey({
         wallet,
         accountIndex,
         passphrase,
-        purpose: KeyManagement.KeyPurpose.MULTI_SIG
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+        derivationType
       });
       return Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(bip32AccountPublicKey);
     },
