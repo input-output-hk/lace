@@ -157,7 +157,7 @@ export const WalletAccounts = ({ isPopup, onBack }: { isPopup: boolean; onBack: 
           wallet,
           accountIndex,
           metadata: { name },
-          derivationType: wallet.metadata.derivationType
+          derivationType: wallet.metadata.trezorConfig?.derivationType
         });
         analytics.sendEventToPostHog(PostHogAction.MultiWalletEnableAccount, {
           // eslint-disable-next-line camelcase

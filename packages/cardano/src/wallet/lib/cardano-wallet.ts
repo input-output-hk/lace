@@ -39,7 +39,7 @@ export interface WalletMetadata {
   lastActiveAccountIndex?: number;
   walletAddresses?: Cardano.PaymentAddress[];
   coSigners?: { sharedWalletKey: Wallet.Crypto.Bip32PublicKeyHex; name: string }[];
-  derivationType?: DerivationType;
+  trezorConfig?: { derivationType?: DerivationType };
 }
 
 export interface AccountMetadata {
