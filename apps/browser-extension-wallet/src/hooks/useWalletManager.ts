@@ -1400,7 +1400,7 @@ export const useWalletManager = (): UseWalletManager => {
       derivationType
     }: WalletManagerAddAccountProps): Promise<void> => {
       // Get derivation type from wallet metadata if not provided
-      const walletDerivationType = derivationType || wallet.metadata.trezorConfig?.derivationType;
+      const walletDerivationType = derivationType || wallet.metadata?.trezorConfig?.derivationType;
 
       const extendedAccountPublicKey = await getExtendedAccountPublicKey({
         wallet,

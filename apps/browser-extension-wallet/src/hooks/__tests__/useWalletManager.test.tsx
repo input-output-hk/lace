@@ -118,14 +118,13 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <BackgroundServiceAPIProvider value={backgroundService}>{children}</BackgroundServiceAPIProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  );
 
 const render = () =>
   renderHook(() => useWalletManager(), {
@@ -885,6 +884,10 @@ describe('Testing useWalletManager hook', () => {
           walletType: 'InMemory'
         });
         walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
+        // Mock the observables required by activateWallet
+        walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
+        walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+        (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
       });
 
       it.each(walletTypes)(
