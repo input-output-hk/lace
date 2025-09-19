@@ -5,6 +5,7 @@
 /* eslint-disable import/imports-first */
 const useLocationMock = jest.fn();
 const mockUseWalletStore = jest.fn();
+const mockUseLMP = jest.fn();
 const mockGetBackgroundStorage = jest.fn();
 const mockUseCollateral = jest.fn();
 import * as React from 'react';
@@ -80,9 +81,15 @@ jest.mock('@hooks', () => {
   return {
     __esModule: true,
     ...original,
-    useCollateral: mockUseCollateral
+    useCollateral: mockUseCollateral,
+    useLMP: mockUseLMP
   };
 });
+
+jest.mock('@hooks/useLMP', () => ({
+  __esModule: true,
+  useLMP: mockUseLMP
+}));
 
 jest.mock('@lace/common', () => {
   const original = jest.requireActual('@lace/common');
@@ -164,6 +171,7 @@ describe('Testing SettingsWalletBase component', () => {
         walletUI: {},
         walletInfo: {}
       }));
+      mockUseLMP.mockReturnValue({ midnightWallets: [], switchToLMP: jest.fn() });
     });
 
     afterEach(() => {
