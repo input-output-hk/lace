@@ -276,6 +276,18 @@ class TokensPageAssert {
         await t('general.warnings.cannotFetchPrice')
       );
   }
+
+  async assertSendButtonEnabled(shouldBeEnabled: boolean): Promise<void> {
+    await MenuHeader.sendButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
+
+  async assertSeeMidnightTokensPage() {
+    await TokensPage.title.waitForDisplayed();
+    expect(await TokensPage.title.getText()).to.contain(await t('app.tokens'));
+
+    await TokensPage.counter.waitForDisplayed();
+    expect(await TokensPage.counter.getText()).to.to.match(TestnetPatterns.COUNTER_REGEX);
+  }
 }
 
 export default new TokensPageAssert();
