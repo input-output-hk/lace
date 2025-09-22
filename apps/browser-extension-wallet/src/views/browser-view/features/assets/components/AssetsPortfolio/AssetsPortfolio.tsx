@@ -83,13 +83,11 @@ export const AssetsPortfolio = ({
     redirectToSend({ params: { id: '1' } });
   };
 
-  // Display banner after 3 minutes since last coin price save
+  // Display banner after 3 minutes since last coin price save or when there's an error
   const isPriceOutdated = useMemo(
     () =>
-      // If there is no timestamp, that means that we never saved a previous price, so we just check if it has an error
-      coinPrice.status === 'error' && coinPrice.timestamp
-        ? dayjs().diff(coinPrice.timestamp, 'minutes') >= MINUTES_UNTIL_WARNING_BANNER
-        : coinPrice.status === 'error',
+      coinPrice.status === 'error' ||
+      (coinPrice.timestamp && dayjs().diff(coinPrice.timestamp, 'minutes') >= MINUTES_UNTIL_WARNING_BANNER),
     [coinPrice]
   );
 
