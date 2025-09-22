@@ -141,7 +141,7 @@ export const useWalletActivitiesPaginated = ({
 
   useEffect(() => {
     (async () => {
-      if (loadedHistory?.transactions === undefined || !fiatCurrency || !cardanoFiatPrice) return;
+      if (loadedHistory?.transactions === undefined || !fiatCurrency) return;
 
       handleUpdateWalletActivities(loadedHistory.transactions.slice(0, currentPage * pageSize));
     })();
