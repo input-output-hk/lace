@@ -29,7 +29,6 @@ export const useWalletActivities = ({
 
   const fetchWalletActivities = useCallback(async () => {
     fiatCurrency &&
-      cardanoFiatPrice &&
       getWalletActivities({
         fiatCurrency,
         cardanoFiatPrice,
