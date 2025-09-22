@@ -62,7 +62,9 @@ const SharedWalletSendTransactionSummary = ({ rows, fee }: SharedWalletSendTrans
   }, [builtTxData.importedSharedWalletTx, coSigners]);
 
   const amountTransformer = (ada: string) =>
-    `${Wallet.util.convertAdaToFiat({ ada, fiat: priceResult?.cardano?.price })} ${fiatCurrency?.code}`;
+    `${priceResult?.cardano?.price ? Wallet.util.convertAdaToFiat({ ada, fiat: priceResult.cardano.price }) : '-'} ${
+      fiatCurrency?.code
+    }`;
 
   return (
     <SharedWalletTransactionDetails
