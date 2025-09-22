@@ -242,7 +242,7 @@ export const formatRow = ({
 
   const cardano: AssetsListItem = {
     assetAmount: `${cardanoAmount.coinBalance} ${cardanoCoin.symbol}`,
-    fiatAmount: `${cardanoAmount.fiatBalance} ${fiatCurrency?.code}`
+    fiatAmount: cardanoAmount.fiatBalance ? `${cardanoAmount.fiatBalance} ${fiatCurrency?.code}` : ''
   };
 
   if (isUndefined(output.value.assets)) return [cardano];
