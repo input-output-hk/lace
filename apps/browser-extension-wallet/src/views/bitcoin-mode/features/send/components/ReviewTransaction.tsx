@@ -70,7 +70,7 @@ export const ReviewTransaction: React.FC<ReviewTransactionProps> = ({
                 weight={isPopupView ? '$medium' : '$semibold'}
                 data-testid="output-summary-amount-fiat"
               >
-                {Number.parseFloat(usdValue.toFixed(2))} USD
+                {btcToUsdRate ? `${Number.parseFloat(usdValue.toFixed(2))} USD` : ''}
               </Text.Body.Normal>
             </Flex>
           </RowContainer>
