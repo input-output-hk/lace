@@ -131,7 +131,7 @@ describe('Testing assets transformers', () => {
         balance: 'balance',
         price: 'formattedPrice',
         variation: 'variationParserResult',
-        fiatBalance: `- ${params.fiatCode}`
+        fiatBalance: '-'
       });
       expect(formatNumberSpy).toBeCalledWith(params.fiatPrice?.price.toString(), 3);
       expect(walletBalanceTransformerSpy).toBeCalledWith(params.total.coins.toString(), params.fiatPrice?.price);
@@ -189,7 +189,7 @@ describe('Testing assets transformers', () => {
       const isNumericSpy = jest.spyOn(formatNumber, 'isNumeric');
       isNumericSpy.mockReturnValue(false);
 
-      expect(assetsTransformers.cardanoTransformer(params).fiatBalance).toEqual(`? ${params.fiatCode}`);
+      expect(assetsTransformers.cardanoTransformer(params).fiatBalance).toEqual('-');
       expect(isNumericSpy).toBeCalledWith(walletBalanceTransformerResult.fiatBalance);
 
       isNumericSpy.mockRestore();
