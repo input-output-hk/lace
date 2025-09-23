@@ -39,7 +39,8 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.BITCOIN_WALLETS]: false,
   [ExperimentName.NFTPRINTLAB]: false,
   [ExperimentName.GLACIER_DROP]: false,
-  [ExperimentName.MEMPOOLSPACE_FEE_MARKET]: false
+  [ExperimentName.MEMPOOLSPACE_FEE_MARKET]: false,
+  [ExperimentName.NOTIFICATIONS_CENTER]: false
 };
 
 export const featureFlagsByNetworkInitialValue: FeatureFlagsByNetwork = {
