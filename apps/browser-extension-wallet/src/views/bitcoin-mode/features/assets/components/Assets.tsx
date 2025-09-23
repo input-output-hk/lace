@@ -96,7 +96,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
               variation: currencyCode === 'BTC' ? '-' : `${bitcoinPriceVariation.toFixed(2)}`,
               balance: areBalancesVisible ? (Number(balance) / SATS_IN_BTC).toString() : hiddenBalancePlaceholder,
               fiatBalance: areBalancesVisible
-                ? `${computeBalance(totalBalance, fiatCurrency.code, 1)} ${currencyCode}`
+                ? `${bitcoinPrice ? computeBalance(totalBalance, fiatCurrency.code, 1) : '-'} ${currencyCode}`
                 : hiddenBalancePlaceholder
             }
           ]

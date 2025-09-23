@@ -169,9 +169,9 @@ export const ActivityLayout = (): React.ReactElement => {
               ? 'PENDING'
               : formattedTimestamp(new Date(transaction.timestamp * 1000)),
           amount: `${new BigNumber(net.toString()).dividedBy(100_000_000).toFixed(8, BigNumber.ROUND_HALF_UP)} BTC`,
-          fiatAmount: `${computeBalance(Number(net) / SATS_IN_BTC, fiatCurrency.code, bitcoinPrice)} ${
-            fiatCurrency.code === 'ADA' ? 'BTC' : fiatCurrency.code
-          }`,
+          fiatAmount: `${
+            bitcoinPrice ? computeBalance(Number(net) / SATS_IN_BTC, fiatCurrency.code, bitcoinPrice) : '-'
+          } ${fiatCurrency.code === 'ADA' ? 'BTC' : fiatCurrency.code}`,
           status:
             transaction.status === Bitcoin.TransactionStatus.Pending ? ActivityStatus.PENDING : ActivityStatus.SUCCESS,
           type,

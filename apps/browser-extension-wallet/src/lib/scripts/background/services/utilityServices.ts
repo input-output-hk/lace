@@ -180,7 +180,19 @@ const fetchAdaPrice = (coinPrices: CoinPrices) => {
     `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
-      const { cardano: prices } = await response.json();
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ADA price: HTTP ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Check if we have valid cardano price data
+      if (!responseData.cardano) {
+        throw new Error('Invalid ADA price response: missing cardano data');
+      }
+
+      const { cardano: prices } = responseData;
       // save the last fetched ada price in background storage
       await setBackgroundStorage({
         fiatPrices: {
@@ -222,8 +234,20 @@ const fetchBitcoinPrice = (coinPrices: CoinPrices) => {
     `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=bitcoin&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
-      const { bitcoin: prices } = await response.json();
-      // save the last fetched ada price in background storage
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Bitcoin price: HTTP ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Check if we have valid bitcoin price data
+      if (!responseData.bitcoin) {
+        throw new Error('Invalid Bitcoin price response: missing bitcoin data');
+      }
+
+      const { bitcoin: prices } = responseData;
+      // save the last fetched bitcoin price in background storage
       await setBackgroundStorage({
         fiatBitcoinPrices: {
           prices,
