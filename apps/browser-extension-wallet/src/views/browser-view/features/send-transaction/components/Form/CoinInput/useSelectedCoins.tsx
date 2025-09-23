@@ -1,4 +1,4 @@
-/* eslint-disable complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 import { Wallet } from '@lace/cardano';
 import { AssetInputListProps, AssetInputProps } from '@lace/core';
 import {
