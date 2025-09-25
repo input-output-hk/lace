@@ -168,7 +168,7 @@ export const AssetSelectorOverlay = ({
           setValue('');
         }}
         withSearchIcon
-        inputPlaceholder={t('asset.searchPlaceholder')}
+        inputPlaceholder={t('core.asset.searchPlaceholder')}
         onChange={handleSearch}
         value={value}
         onFocus={() => setFocus(true)}
