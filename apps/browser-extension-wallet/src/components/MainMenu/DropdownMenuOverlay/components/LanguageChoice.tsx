@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import cn from 'classnames';
 import styles from '../DropdownMenuOverlay.module.scss';
 import { useBackgroundServiceAPIContext } from '@providers';
+import { storage as webStorage } from 'webextension-polyfill';
 
 type LanguageChoiceProps = {
   onClick: () => void;
@@ -16,9 +17,10 @@ export const LanguageChoice = ({ onClick }: LanguageChoiceProps): React.ReactEle
   useEffect(() => {
     const getLanguage = async () => {
       const { languageChoice } = await getBackgroundStorage();
-      setLanguage(languageChoice);
+      if (languageChoice) setLanguage(languageChoice);
     };
     getLanguage();
+    webStorage.onChanged.addListener(getLanguage);
   }, [getBackgroundStorage]);
 
   return (
