@@ -168,7 +168,7 @@ export const AssetSelectorOverlay = ({
           setValue('');
         }}
         withSearchIcon
-        inputPlaceholder="Search by ID or name"
+        inputPlaceholder={t('asset.searchPlaceholder')}
         onChange={handleSearch}
         value={value}
         onFocus={() => setFocus(true)}
