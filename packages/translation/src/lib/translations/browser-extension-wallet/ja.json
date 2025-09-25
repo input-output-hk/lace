@@ -954,5 +954,6 @@
   "dapp.connector.btc.error.description": "この拡張機能のバージョンでは、BitcoinウォレットのDAppコネクタはサポートされていません。",
   "dapp.connector.btc.error.closeButton": "閉じる",
   "languageChoice.english": "英語",
-  "languageChoice.japanese": "日本語"
+  "languageChoice.japanese": "日本語",
+  "asset.searchPlaceholder": "IDまたは名前で検索"
 }

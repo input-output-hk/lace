@@ -965,5 +965,6 @@
   "dapp.connector.btc.error.description": "DApp connector for Bitcoin wallet is not supported in this version of the extension.",
   "dapp.connector.btc.error.closeButton": "Close",
   "languageChoice.english": "English",
-  "languageChoice.japanese": "Japanese"
+  "languageChoice.japanese": "Japanese",
+  "asset.searchPlaceholder": "Search by ID or name"
 }
