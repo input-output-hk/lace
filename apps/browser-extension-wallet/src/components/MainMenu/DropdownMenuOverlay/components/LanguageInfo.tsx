@@ -5,6 +5,7 @@ import styles from './NetworkInfo.module.scss';
 import { useBackgroundServiceAPIContext } from '@providers';
 import { Radio, RadioChangeEvent } from 'antd';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { storage as webStorage } from 'webextension-polyfill';
 
 type LanguageChoiceProps = {
   onBack: () => void;
@@ -24,6 +25,7 @@ export const LanguageInfo = ({ onBack }: LanguageChoiceProps): React.ReactElemen
       const { languageChoice } = await getBackgroundStorage();
       if (languageChoice) setLanguage(languageChoice);
     };
+    webStorage.onChanged.addListener(getLanguage);
     getLanguage();
   }, [getBackgroundStorage]);
 
