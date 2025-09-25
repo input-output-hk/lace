@@ -8,6 +8,7 @@ import { FolderOutlined, RightOutlined } from '@ant-design/icons';
 import { Box, ControlButton, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { ReactComponent as ProfileIcon } from '../../assets/icons/profile-icon.component.svg';
 import { ReactComponent as PrintNftIcon } from '../../assets/icons/print-nft.component.svg';
+import { useTranslation } from 'react-i18next';
 
 export interface NftDetailProps {
   title?: ReactNode;
@@ -43,80 +44,86 @@ export const NftDetail = ({
   onSetAsAvatar,
   onPrintNft,
   isPopup
-}: NftDetailProps): React.ReactElement => (
-  <div className={styles.nftDetail}>
-    {title}
-    <div className={styles.imageContainer}>
-      <div className={styles.imageWrapper}>
-        {Number(amount) > 1 && (
-          <div data-testid="nft-item-amount" className={styles.amount}>
-            {amount}
-          </div>
-        )}
-        <NftImage image={image} detailView popupView />
+}: NftDetailProps): React.ReactElement => {
+  const { t } = useTranslation();
+  const rootKey = t('core.nftFolderName.root');
+  return (
+    <div className={styles.nftDetail}>
+      {title}
+      <div className={styles.imageContainer}>
+        <div className={styles.imageWrapper}>
+          {Number(amount) > 1 && (
+            <div data-testid="nft-item-amount" className={styles.amount}>
+              {amount}
+            </div>
+          )}
+          <NftImage image={image} detailView popupView />
+        </div>
       </div>
-    </div>
-    <Flex w="$fill" gap="$24" flexDirection={isPopup ? 'column' : 'row'} justifyContent="center" px="$10">
-      <ControlButton.Outlined
-        w={onPrintNft ? '$fill' : undefined}
-        size="small"
-        label={translations.setAsAvatar}
-        icon={<ProfileIcon />}
-        onClick={() => image && onSetAsAvatar?.(image)}
-        data-testid="nft-set-as-avatar-button"
-      />
-      {onPrintNft && (
+      <Flex w="$fill" gap="$24" flexDirection={isPopup ? 'column' : 'row'} justifyContent="center" px="$10">
         <ControlButton.Outlined
-          w="$fill"
+          w={onPrintNft ? '$fill' : undefined}
           size="small"
-          label={translations.printNft}
-          icon={<PrintNftIcon />}
-          onClick={() => onPrintNft()}
-          data-testid="nft-print-button"
+          label={translations.setAsAvatar}
+          icon={<ProfileIcon />}
+          onClick={() => image && onSetAsAvatar?.(image)}
+          data-testid="nft-set-as-avatar-button"
         />
-      )}
-    </Flex>
-    <div className={styles.info}>
-      <div data-testid="nft-info" className={styles.section}>
-        <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>
-        <InlineInfoList
-          items={[
-            ...tokenInformation,
-            {
-              name: translations.directory,
-              value: folder ? `Root > ${folder}` : 'Root',
-              renderValueAs: !isPopup ? (
-                <Breadcrumb separator={<RightOutlined />}>
-                  <Breadcrumb.Item>
-                    <FolderOutlined />
-                    <span data-testid="folder-path-1">Root</span>
-                  </Breadcrumb.Item>
-                  {folder && (
+        {onPrintNft && (
+          <ControlButton.Outlined
+            w="$fill"
+            size="small"
+            label={translations.printNft}
+            icon={<PrintNftIcon />}
+            onClick={() => onPrintNft()}
+            data-testid="nft-print-button"
+          />
+        )}
+      </Flex>
+      <div className={styles.info}>
+        <div data-testid="nft-info" className={styles.section}>
+          <h4 data-testid="nft-info-label">{translations.tokenInformation}</h4>
+          <InlineInfoList
+            items={[
+              ...tokenInformation,
+              {
+                name: translations.directory,
+                value: folder ? `${rootKey} > ${folder}` : rootKey,
+                renderValueAs: !isPopup ? (
+                  <Breadcrumb separator={<RightOutlined />}>
                     <Breadcrumb.Item>
-                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />
+                      <FolderOutlined />
+                      <span data-testid="folder-path-1">Root</span>
                     </Breadcrumb.Item>
-                  )}
-                </Breadcrumb>
-              ) : (
-                <Flex justifyContent="space-between" gap="$1">
-                  <Box testId="folder-path-1">Root</Box>
-                  {folder && <Box px="$8">{'>'}</Box>}
-                  {folder && <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />}
-                </Flex>
-              )
-            }
-          ]}
-        />
+                    {folder && (
+                      <Breadcrumb.Item>
+                        <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />
+                      </Breadcrumb.Item>
+                    )}
+                  </Breadcrumb>
+                ) : (
+                  <Flex justifyContent="space-between" gap="$1">
+                    <Box testId="folder-path-1">{rootKey}</Box>
+                    {folder && <Box px="$8">{'>'}</Box>}
+                    {folder && (
+                      <Ellipsis text={folder} beforeEllipsis={5} afterEllipsis={5} dataTestId="folder-path-2" />
+                    )}
+                  </Flex>
+                )
+              }
+            ]}
+          />
+        </div>
+        {attributes && (
+          <>
+            <div className={styles.separator} />
+            <div data-testid="nft-attributes" className={styles.section}>
+              <h4 data-testid="nft-attributes-label">{translations.attributes}</h4>
+              <InlineInfoList items={parseAttributes(JSON.parse(attributes))} />
+            </div>
+          </>
+        )}
       </div>
-      {attributes && (
-        <>
-          <div className={styles.separator} />
-          <div data-testid="nft-attributes" className={styles.section}>
-            <h4 data-testid="nft-attributes-label">{translations.attributes}</h4>
-            <InlineInfoList items={parseAttributes(JSON.parse(attributes))} />
-          </div>
-        </>
-      )}
     </div>
-  </div>
-);
+  );
+};

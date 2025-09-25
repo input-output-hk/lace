@@ -713,5 +713,7 @@
   "core.derivationType.ledger": "Ledger",
   "core.derivationType.ledgerDescription": "Select if connecting a Ledger-created wallet",
   "core.derivationType.selectDerivationType": "Derivation type",
-  "core.derivationType.infoTooltip": "Determines how accounts and addresses are generated from your seed phrase."
+  "core.derivationType.infoTooltip": "Determines how accounts and addresses are generated from your seed phrase.",
+  "core.nftFolderName.root": "Root",
+  "asset.searchPlaceholder": "Search by ID or name"
 }
