@@ -966,5 +966,10 @@
   "dapp.connector.btc.error.closeButton": "Close",
   "languageChoice.english": "English",
   "languageChoice.japanese": "Japanese",
-  "asset.searchPlaceholder": "Search by ID or name"
+  "asset.searchPlaceholder": "Search by ID or name",
+  "bitcoinSendMode.fee.high": "High",
+  "bitcoinSendMode.fee.average": "Average",
+  "bitcoinSendMode.fee.slow": "Slow",
+  "bitcoinSendMode.fee.custom": "Custom",
+  "bitcoinSendMode.previousTxSendError": "You cannot send transactions while previous transactions are still pending."
 }
