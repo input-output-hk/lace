@@ -27,7 +27,7 @@
     .controls {
       display: flex;
       align-items: center;
-      gap: size_unit(1);
+      gap: size_unit(0.75);
 
       .avatar {
         font-size: 20px;
@@ -47,7 +47,7 @@
 }
 
 .betaPill {
-  background: linear-gradient(94.22deg, #FF92E1 -18.3%, #FDC300 118.89%);
+  background: linear-gradient(94.22deg, #ff92e1 -18.3%, #fdc300 118.89%);
   border-radius: 100px;
 
   .betaPillCopy {

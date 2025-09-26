@@ -1,4 +1,4 @@
-/* eslint-disable complexity */
+/* eslint-disable complexity, sonarjs/cognitive-complexity */
 import { Wallet } from '@lace/cardano';
 import { AssetInputListProps, AssetInputProps } from '@lace/core';
 import {
@@ -193,10 +193,12 @@ export const useSelectedCoins = ({
         assetInputItem?.value ?? '0',
         rewardAcountsData.lockedStakeRewards.toString() || '0'
       );
-      const fiatValue = Wallet.util.convertAdaToFiat({
-        ada: assetInputItem?.value || '0',
-        fiat: prices?.cardano?.price
-      });
+      const fiatValue = prices?.cardano?.price
+        ? Wallet.util.convertAdaToFiat({
+            ada: assetInputItem?.value || '0',
+            fiat: prices?.cardano?.price
+          })
+        : '';
       return {
         ...commonCoinProps,
         ...adaCoinProps,
@@ -216,8 +218,8 @@ export const useSelectedCoins = ({
             })
           })
         },
-        formattedFiatValue: `≈ ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}`,
-        fiatValue: `≈ ${fiatValue} ${fiatCurrency?.code}`,
+        formattedFiatValue: fiatValue ? `≈ ${compactNumberWithUnit(fiatValue)} ${fiatCurrency?.code}` : '',
+        fiatValue: fiatValue ? `≈ ${fiatValue} ${fiatCurrency?.code}` : '',
         maxDecimals: cardanoCoin.decimals
       } as AssetInputListProps['rows'][number];
     }

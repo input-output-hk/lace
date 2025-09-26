@@ -32,8 +32,8 @@ export const cardanoTransformer = (params: {
     balance.fiatBalance === '-'
       ? balance.fiatBalance
       : isNumeric(balance.fiatBalance)
-      ? formatLocaleNumber(balance.fiatBalance)
-      : '?';
+        ? `${formatLocaleNumber(balance.fiatBalance)} ${fiatCode}`
+        : '-';
 
   return {
     id: cardanoCoin.id,
@@ -44,7 +44,7 @@ export const cardanoTransformer = (params: {
     price: isNumber(fiatPrice?.price) ? formatLocaleNumber(fiatPrice.price.toString(), 3) : '-',
     variation: fiatPrice?.priceVariationPercentage24h ? variationParser(fiatPrice.priceVariationPercentage24h) : '-',
     balance: areBalancesVisible ? formatLocaleNumber(balance.coinBalance) : balancesPlaceholder,
-    fiatBalance: areBalancesVisible ? `${fiatBalance} ${fiatCode}` : balancesPlaceholder
+    fiatBalance: areBalancesVisible ? fiatBalance : balancesPlaceholder
   };
 };
 

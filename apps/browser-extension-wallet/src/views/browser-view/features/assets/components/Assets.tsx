@@ -91,9 +91,9 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
     () => BigInt(utxoTotal?.coins || 0) + BigInt(lovelaceRewards || 0),
     [lovelaceRewards, utxoTotal]
   );
-  // Wait for initial wallet's balance and price loading
-  const isLoadingFirstTime = !utxoTotal || !priceResult.cardano;
 
+  // Wait for initial wallet's balance and price loading
+  const isLoadingFirstTime = !utxoTotal;
   /**
    * Means it has more than 1 asset (ADA) in portfolio for Assets list that it's not an NFT.
    */
@@ -181,7 +181,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   const totalWalletBalanceWithTokens = useMemo(
     () =>
       getTotalWalletBalance(
-        balanceInAdaAndFiat?.total?.fiatBalance,
+        balanceInAdaAndFiat?.total?.fiatBalance || '0',
         priceResult.tokens,
         utxoTotal?.assets,
         priceResult?.cardano?.price || 0,

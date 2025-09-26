@@ -130,7 +130,9 @@ export const ActivityDetail = ({ price }: ActivityDetailProps): ReactElement => 
       : t(getTypeLabel(activityInfo.type));
 
   const amountTransformer = (ada: string) =>
-    `${Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price })} ${fiatCurrency?.code}`;
+    `${price?.cardano?.price ? Wallet.util.convertAdaToFiat({ ada, fiat: price?.cardano?.price }) : '-'} ${
+      fiatCurrency?.code
+    }`;
 
   if (activityInfo.type === TransactionActivityType.rewards) {
     return (

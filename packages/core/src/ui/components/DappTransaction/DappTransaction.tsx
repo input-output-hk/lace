@@ -24,7 +24,7 @@ import { DappAddressSections } from '../DappAddressSections/DappAddressSections'
 import { useTranslation } from 'react-i18next';
 
 const amountTransformer = (fiat: { price: number; code: string }) => (ada: string) =>
-  `${Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price })} ${fiat.code}`;
+  `${fiat.price ? Wallet.util.convertAdaToFiat({ ada, fiat: fiat.price }) : '-'} ${fiat.code}`;
 
 export interface DappTransactionProps {
   /** Transaction details such as type, amount, fee and address */

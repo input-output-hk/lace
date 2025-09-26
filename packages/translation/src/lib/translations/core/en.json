@@ -707,5 +707,13 @@
   "core.namiMigration.allDone.message": "You can now close this tab and reload the extension",
   "core.namiMigration.allDone.close": "Close",
   "core.nftFolderName.root": "Root",
-  "asset.searchPlaceholder": "Search by ID or name"
+  "asset.searchPlaceholder": "Search by ID or name",
+  "core.derivationType.icarus": "Icarus (default)",
+  "core.derivationType.icarusDescription": "Recommended for new wallets",
+  "core.derivationType.icarusTrezor": "Icarus Trezor",
+  "core.derivationType.icarusTrezorDescription": "Select only if your assets don't appear with the default",
+  "core.derivationType.ledger": "Ledger",
+  "core.derivationType.ledgerDescription": "Select if connecting a Ledger-created wallet",
+  "core.derivationType.selectDerivationType": "Derivation type",
+  "core.derivationType.infoTooltip": "Determines how accounts and addresses are generated from your seed phrase."
 }

@@ -15,7 +15,8 @@ export enum ExperimentName {
   BITCOIN_WALLETS = 'bitcoin-wallets',
   NFTPRINTLAB = 'nftprintlab',
   GLACIER_DROP = 'glacier-drop',
-  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market'
+  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
+  NOTIFICATIONS_CENTER = 'notifications-center'
 }
 
 export type FeatureFlag = `${ExperimentName}`;
@@ -44,7 +45,6 @@ type FeatureFlagCustomPayloads = {
 
 export type FeatureFlagPayloads = {
   [key in FeatureFlag]: FeatureFlagPayload;
-} &
-  FeatureFlagCustomPayloads;
+} & FeatureFlagCustomPayloads;
 
 export type RawFeatureFlagPayloads = Record<ExperimentName, JsonType>;

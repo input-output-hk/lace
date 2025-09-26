@@ -36,14 +36,14 @@ export const getFee = (
   if (!fee)
     return {
       ada: `0.00 ${cardanoCoin.symbol}`,
-      fiat: `0.00 ${fiatCurrency?.code}`
+      fiat: adaPrice ? `0.00 ${fiatCurrency?.code}` : ''
     };
 
   const feeValue = walletBalanceTransformer(fee, adaPrice);
 
   return {
     ada: `${feeValue.coinBalance} ${cardanoCoin.symbol}`,
-    fiat: `${feeValue.fiatBalance} ${fiatCurrency?.code}`
+    fiat: adaPrice ? `${feeValue.fiatBalance} ${fiatCurrency?.code}` : ''
   };
 };
 
