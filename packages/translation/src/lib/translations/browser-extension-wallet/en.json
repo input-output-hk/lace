@@ -787,6 +787,7 @@
   "notificationsCenter.allClear.description": "You don't have any notifications currently",
   "notificationsCenter.manageSubscriptions": "Manage subscriptions",
   "notificationsCenter.markAllAsRead": "Mark all as read",
+  "notificationsCenter.title": "Notifications",
   "notificationsCenter.viewAll": "View all",
   "poolDetails.delegate": "Delegate to this pool",
   "poolDetails.sectionTitle": "Pool detail",

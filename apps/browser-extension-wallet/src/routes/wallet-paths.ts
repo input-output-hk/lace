@@ -5,6 +5,7 @@ export const walletRoutePaths = {
   confirmDelegation: '/delegate/confirm',
   delegate: '/delegate',
   earn: '/earn',
+  notifications: '/notifications',
   nftDetail: '/nft/:id',
   nfts: '/nfts',
   assets: '/assets',
