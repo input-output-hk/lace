@@ -42,7 +42,7 @@ export const useAppInit = (): void => {
     backgroundServices
       .getBackgroundStorage()
       .then((bs) => {
-        initI18n(bs.languageChoice ?? window.navigator.language);
+        initI18n(bs.languageChoice ?? globalThis.navigator.language ?? 'en');
       })
       .catch((error) => {
         // eslint-disable-next-line no-console
