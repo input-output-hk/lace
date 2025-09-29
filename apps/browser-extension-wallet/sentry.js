@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from 'webextension-polyfill';
+
 Sentry.init({
   environment: process.env.SENTRY_ENVIRONMENT,
   dsn: process.env.SENTRY_DSN,
