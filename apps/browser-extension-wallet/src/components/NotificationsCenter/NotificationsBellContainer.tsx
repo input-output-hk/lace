@@ -1,27 +1,63 @@
 import React, { useState } from 'react';
-import { NotificationsBell } from './NotificationsBell';
+import { Dropdown } from 'antd';
+
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
+
+import { NotificationsBell } from './NotificationsBell';
+import { NotificationsDropDown } from './NotificationsDropDown';
+
 export interface NotificationsCenterContainerProps {
   popupView?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const NotificationsBellContainer = ({ popupView }: NotificationsCenterContainerProps): React.ReactElement => {
   const posthog = usePostHogClientContext();
 
-  // TODO Connect with notifications center
-  const [notificationsCount, setNotificationsCount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
   // TODO Connect with notifications center
-  const handleClick = () => {
-    // eslint-disable-next-line no-magic-numbers
-    setNotificationsCount(notificationsCount === 11 ? 0 : notificationsCount + 1);
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+
+    // TODO remove this placeholder logic
+    if (!open) {
+      setNotifications(
+        // eslint-disable-next-line no-magic-numbers
+        notifications.length === 11 ? [] : [...notifications, `Notification ${notifications.length + 1}`]
+      );
+    }
+  };
+
+  const handleMarkAllAsRead = () => {
+    // TODO remove this placeholder logic
+    setNotifications([]);
+  };
+
+  const handleViewAll = () => {
+    setIsOpen(false);
   };
 
   return (
     posthog?.isFeatureFlagEnabled(ExperimentName.NOTIFICATIONS_CENTER) && (
-      <NotificationsBell notificationsCount={notificationsCount} onClick={handleClick} popupView={popupView} />
+      <Dropdown
+        onOpenChange={handleOpenChange}
+        open={isOpen}
+        dropdownRender={() => (
+          <NotificationsDropDown
+            notifications={notifications}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onViewAll={handleViewAll}
+            popupView={popupView}
+          />
+        )}
+        placement="bottomRight"
+        trigger={['click']}
+      >
+        <NotificationsBell onClick={() => setIsOpen(!isOpen)} unreadNotifications={notifications.length} />
+      </Dropdown>
     )
   );
 };
