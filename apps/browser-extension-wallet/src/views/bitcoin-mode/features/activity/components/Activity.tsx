@@ -173,7 +173,7 @@ export const Activity = (): React.ReactElement => {
           id: transaction.transactionHash,
           formattedTimestamp:
             transaction.status === Bitcoin.TransactionStatus.Pending
-              ? 'PENDING'
+              ? t('browserView.activity.entry.name.pending')
               : formattedTimestamp(new Date(transaction.timestamp * 1000)),
           amount: `${new BigNumber(net.toString()).dividedBy(100_000_000).toFixed(8, BigNumber.ROUND_HALF_UP)} BTC`,
           fiatAmount: `${computeBalance(Number(net) / SATS_IN_BTC, fiatCurrency.code, bitcoinPrice)} ${
@@ -194,7 +194,7 @@ export const Activity = (): React.ReactElement => {
         items
       };
     });
-  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency]);
+  }, [addresses, recentTransactions, bitcoinPrice, explorerBaseUrl, pendingTransaction, fiatCurrency, t]);
 
   const isLoading =
     addresses.length === 0 || explorerBaseUrl.length === 0 || currentCursor === null || !activityFetched;

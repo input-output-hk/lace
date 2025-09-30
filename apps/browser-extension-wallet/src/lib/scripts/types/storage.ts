@@ -8,6 +8,7 @@ import {
   RawFeatureFlagPayloads
 } from '@lib/scripts/types/feature-flags';
 import { LogLevelString } from '@lace/common';
+import { Language } from '@lace/translation';
 
 export interface PendingMigrationState {
   from: string;
@@ -49,6 +50,7 @@ export interface BackgroundStorage {
   dappInjectCompatibilityMode?: boolean;
   optedInBeta?: boolean;
   logLevel?: LogLevelString;
+  languageChoice?: Language;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

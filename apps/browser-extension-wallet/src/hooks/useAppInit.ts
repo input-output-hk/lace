@@ -9,6 +9,9 @@ import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { bitcoinWalletManager } from '@lib/wallet-api-ui';
 import { useCurrentBlockchain } from '@src/multichain';
+import { useBackgroundServiceAPIContext } from '@providers';
+import { initI18n } from '@lace/translation';
+import { Message, MessageTypes } from '@lib/scripts/types';
 
 export const useAppInit = (): void => {
   const {
@@ -26,6 +29,28 @@ export const useAppInit = (): void => {
   const walletState = useWalletState();
   const { environmentName, currentChain } = useWalletStore();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
+  const backgroundServices = useBackgroundServiceAPIContext();
+
+  useEffect(() => {
+    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
+      if (type === MessageTypes.CHANGE_LANGUAGE) {
+        initI18n(data);
+        backgroundServices.setBackgroundStorage({ languageChoice: data });
+      }
+    });
+
+    backgroundServices
+      .getBackgroundStorage()
+      .then((bs) => {
+        initI18n(bs.languageChoice ?? globalThis.navigator.language ?? 'en');
+      })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.log(error);
+      });
+
+    return () => subscription.unsubscribe();
+  }, [backgroundServices]);
 
   useEffect(() => {
     setWalletState(walletState);
