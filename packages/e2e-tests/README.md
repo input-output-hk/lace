@@ -74,6 +74,9 @@ UI-mapped gherkin tests for the Lace browser extension
   - not supported for Firefox
 - `FIREFOX_BINARY=/Applications/Firefox\ Developer\ Edition.app/Contents/MacOS/firefox` (required for Firefox)
   - default path to Firefox Developer Edition binary on macOS, please adjust to your local setup
+- `LMP_BUNDLE=true|false` default = false (optional)
+  - true = run tests for LMP bundle (V1 + Midnight) dist
+  - false = run tests using the default lace-platform Midnight dist
 
 ## Run a single feature file with params
 

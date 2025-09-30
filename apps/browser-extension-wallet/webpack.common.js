@@ -23,6 +23,9 @@ if ('SENTRY_ENVIRONMENT' in process.env) envsToExpose['SENTRY_ENVIRONMENT'] = pr
 
 module.exports = () => {
   return {
+    output: {
+      publicPath: process.env.WEBPACK_PUBLIC_PATH
+    },
     module: {
       rules: [
         {

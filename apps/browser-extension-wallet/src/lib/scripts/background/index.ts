@@ -3,6 +3,7 @@ import './onError';
 import './onUpdate';
 import './services';
 import './services/expose';
+import './services/lmpService';
 import './expose-background-service';
 import './keep-alive-sw';
 import './onUninstall';

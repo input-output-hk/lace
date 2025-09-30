@@ -38,6 +38,10 @@ module.exports = () =>
               importObjectProps: `'./cardano_message_signing_bg.js': __webpack_require__("../../node_modules/@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js")`
             }
           }
+        },
+        {
+          test: /^[.]*(?!.*\.component\.svg$).*\.svg*$/,
+          use: 'file-loader'
         }
       ]
     }

@@ -13,6 +13,12 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
   const sharedWalletsTranslationPath = `../../../../packages/translation/src/lib/translations/shared-wallets/${language}.json`;
   const stakingTranslationPath = `../../../../packages/translation/src/lib/translations/staking/${language}.json`;
 
+  let midnight: Translations = {};
+  if (String(process.env.LMP_BUNDLE) === 'true') {
+    const midnightTranslationPath = `../../../../../lace-platform/packages/contract/i18n/src/translations/${language}.json`;
+    midnight = await flatten(JSON.parse(readFromFile(import.meta.dirname, midnightTranslationPath).toString()));
+  }
+
   const extension: Translations = await flatten(
     JSON.parse(readFromFile(import.meta.dirname, extensionTranslationPath).toString())
   );
@@ -33,7 +39,8 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
     ...core,
     ...extension,
     ...sharedWallets,
-    ...staking
+    ...staking,
+    ...midnight
   };
   return translationOrigin === 'base' ? baseTranslations : staking;
 };
