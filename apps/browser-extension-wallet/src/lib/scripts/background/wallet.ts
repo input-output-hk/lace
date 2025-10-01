@@ -1,19 +1,7 @@
 /* eslint-disable unicorn/no-null, no-magic-numbers, promise/catch-or-return, promise/no-nesting */
 import { runtime, storage as webStorage } from 'webextension-polyfill';
-import {
-  BehaviorSubject,
-  combineLatest,
-  defaultIfEmpty,
-  EMPTY,
-  firstValueFrom,
-  from,
-  map,
-  Observable,
-  of,
-  Subject,
-  tap
-} from 'rxjs';
-import { getProviders, SESSION_TIMEOUT } from './config';
+import { BehaviorSubject, combineLatest, defaultIfEmpty, EMPTY, firstValueFrom, from, map, Observable, of } from 'rxjs';
+import { getProviders } from './config';
 import { createPersonalWallet, createSharedWallet, DEFAULT_POLLING_CONFIG, storage } from '@cardano-sdk/wallet';
 import { Cardano } from '@cardano-sdk/core';
 import {
@@ -47,8 +35,7 @@ import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
-import { createUserSessionTracker, isLacePopupOpen$, isLaceTabActive$ } from './session';
-import { TrackerSubject } from '@cardano-sdk/util-rxjs';
+import { pollController$ } from './session/poll-controller';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 import { Bitcoin } from '@lace/bitcoin';
@@ -64,13 +51,6 @@ import { isBitcoinNetworkSwitchingDisabled } from '@utils/get-network-name';
 if (!isBackgroundProcess()) {
   throw new TypeError('This module should only be imported in service worker');
 }
-
-export const dAppConnectorActivity$ = new Subject<void>();
-const pollController$ = new TrackerSubject(
-  createUserSessionTracker(isLacePopupOpen$, isLaceTabActive$, dAppConnectorActivity$, SESSION_TIMEOUT).pipe(
-    tap((isActive) => logger.debug('Session active:', isActive))
-  )
-);
 
 const networkMagicToChainName = (networkMagic: Cardano.NetworkMagic): Wallet.ChainName => {
   switch (networkMagic) {

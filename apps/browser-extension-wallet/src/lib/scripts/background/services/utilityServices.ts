@@ -16,7 +16,18 @@ import {
   UnhandledError,
   WalletMode
 } from '../../types';
-import { Subject, of, BehaviorSubject, merge, map, fromEvent, Observable } from 'rxjs';
+import {
+  Subject,
+  of,
+  BehaviorSubject,
+  merge,
+  map,
+  fromEvent,
+  Observable,
+  filter,
+  withLatestFrom,
+  interval
+} from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { ActiveWallet, exposeApi } from '@cardano-sdk/web-extension';
@@ -30,6 +41,7 @@ import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { initCardanoTokenPrices } from './cardanoTokenPrices';
+import { pollController$ } from '../session/poll-controller';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -320,8 +332,15 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
     fetchAdaPrice(coinPrices);
     fetchBitcoinPrice(coinPrices);
   };
+  // Fetch the prices initially, regardless of the session status
   updatePrices();
-  setInterval(updatePrices, ADA_PRICE_CHECK_INTERVAL);
+  // Fetch the prices periodically, only if the session is active
+  interval(ADA_PRICE_CHECK_INTERVAL)
+    .pipe(
+      withLatestFrom(pollController$),
+      filter(([, isActive]) => isActive)
+    )
+    .subscribe(updatePrices);
 
   exposeApi<BackgroundService>(
     {
