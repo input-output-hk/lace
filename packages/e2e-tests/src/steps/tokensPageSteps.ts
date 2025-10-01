@@ -152,6 +152,11 @@ Then(/^"www.coingecko.com" page is displayed in new tab$/, async () => {
   await tokensPageAssert.assertSeeCoinGeckoURL();
 });
 
+Then(/^"www.midnight.gd" page is displayed in new tab$/, async () => {
+  await switchToLastWindow();
+  await tokensPageAssert.assertSeeMidnightURL();
+});
+
 When(/^I click "(Receive|Send)" button on Tokens page in popup mode$/, async (button: 'Receive' | 'Send') => {
   switch (button) {
     case 'Receive':

@@ -190,6 +190,12 @@ class TokensPageAssert {
     expect(currentUrl).to.contain(COINGECKO_URL);
   }
 
+  async assertSeeMidnightURL() {
+    const MIDNIGHT_URL = 'https://www.midnight.gd';
+    const currentUrl = await browser.getUrl();
+    expect(currentUrl).to.contain(MIDNIGHT_URL);
+  }
+
   async assertDoNotSeeEyeIcon() {
     await TokensPage.closedEyeIcon.waitForDisplayed({ reverse: true });
     await TokensPage.openedEyeIcon.waitForDisplayed({ reverse: true });
