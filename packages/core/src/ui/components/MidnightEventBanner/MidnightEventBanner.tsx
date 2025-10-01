@@ -83,6 +83,7 @@ const Title = ({ translations }: Props): JSX.Element => (
         })
       )}
       weight="$bold"
+      data-testid="midnight-event-banner-title"
     >
       {translations.title}
     </Text.SubHeading>
@@ -97,7 +98,6 @@ const Title = ({ translations }: Props): JSX.Element => (
         })
       )}
       weight="$bold"
-      data-testid="midnight-event-banner-title"
     >
       {translations.title}
     </Text.Body.Large>

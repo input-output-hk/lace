@@ -1,10 +1,11 @@
 import { Given, When } from '@cucumber/cucumber';
-import midnightPopup from '../elements/midnightBanner';
+import midnightBanner from '../elements/midnightBanner';
+import midnightBannerAssert from '../assert/midnightBannerAssert';
 
 Given(/^"Discover the Midnight Token Distribution" banner is displayed$/, async () => {
-  await midnightPopup.clickOnLearnMoreButton();
+  await midnightBannerAssert.assertSeeMidnightBanner();
 });
 
 When(/^I click on "Learn more" button on "Discover the Midnight Token Distribution" banner$/, async () => {
-  await midnightPopup.clickOnLearnMoreButton();
+  await midnightBanner.clickOnLearnMoreButton();
 });
