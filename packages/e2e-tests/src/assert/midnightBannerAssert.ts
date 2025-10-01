@@ -16,6 +16,12 @@ class MidnightBannerAssert {
     await midnightBanner.bannerDescriptionText.waitForDisplayed();
     expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(data['midnightEventBanner.description']);
   }
+
+  async assertSeeMidnightURL() {
+    const MIDNIGHT_URL = 'https://www.midnight.gd';
+    const currentUrl = await browser.getUrl();
+    expect(currentUrl).to.contain(MIDNIGHT_URL);
+  }
 }
 
 export default new MidnightBannerAssert();
