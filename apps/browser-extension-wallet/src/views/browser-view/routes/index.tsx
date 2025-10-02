@@ -47,6 +47,8 @@ import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { NotificationsCenterLayout } from '@components/NotificationsCenter';
+import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -84,6 +86,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.nfts,
     component: NftsLayout
+  },
+  {
+    path: routes.notifications,
+    component: NotificationsCenterLayout
   }
 ];
 
@@ -143,10 +149,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
+  const { isNotificationsCenterEnabled } = useNotificationsCenterConfig();
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
     if (route.path === routes.voting && !isVotingCenterEnabled) return false;
+    if (route.path === routes.notifications && !isNotificationsCenterEnabled) return false;
     return true;
   });
 
