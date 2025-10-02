@@ -5,22 +5,27 @@ import { Menu } from 'antd';
 
 import { Divider, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
+import { LaceNotification } from '@src/types/notifications-center';
+
 import { NotificationsAllClear } from './NotificationsAllClear';
 
 import styles from './NotificationsDropDown.module.scss';
 
 export interface NotificationsDropDownProps {
-  notifications: string[];
+  notifications: LaceNotification[];
   onMarkAllAsRead: () => void;
+  onMarkAsRead: (id: string) => void;
   onViewAll: () => void;
   popupView?: boolean;
+  unreadNotifications: number;
 }
 
 export const NotificationsDropDown = ({
   notifications,
   onMarkAllAsRead,
   onViewAll,
-  popupView
+  popupView,
+  unreadNotifications
 }: NotificationsDropDownProps): React.ReactElement => {
   const { t } = useTranslation();
 
@@ -36,7 +41,7 @@ export const NotificationsDropDown = ({
             {t(`notificationsCenter.${notifications.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}
           </a>
         </Text.Body.Normal>
-        {notifications.length > 0 && (
+        {unreadNotifications > 0 && (
           <Text.Body.Normal>
             <a onClick={onMarkAllAsRead}>{t('notificationsCenter.markAllAsRead')}</a>
           </Text.Body.Normal>

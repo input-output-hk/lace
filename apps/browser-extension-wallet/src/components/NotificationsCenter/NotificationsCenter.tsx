@@ -4,20 +4,26 @@ import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 
 import { Button, NavigationButton } from '@lace/common';
 import { SectionTitle } from '@components/Layout/SectionTitle';
+import { LaceNotification, NotificationsTopic } from '@src/types/notifications-center';
 
 import styles from './NotificationsCenter.module.scss';
 import { WarningModal } from '@src/views/browser-view/components/WarningModal/WarningModal';
 
 export interface NotificationsCenterProps {
+  notifications: LaceNotification[];
   onBack: () => void;
   onMarkAllAsRead: () => void;
+  onMarkAsRead: (id: string) => void;
   popupView?: boolean;
+  topics: NotificationsTopic[];
+  unreadNotifications: number;
 }
 
 export const NotificationsCenter = ({
   onBack,
   onMarkAllAsRead,
-  popupView
+  popupView,
+  unreadNotifications
 }: NotificationsCenterProps): React.ReactElement => {
   const { t } = useTranslation();
   const [isRemoveNotificationModalVisible, setIsRemoveNotificationModalVisible] = useState(false);
@@ -45,7 +51,7 @@ export const NotificationsCenter = ({
         <Flex justifyContent="space-between" mb={'$44'}>
           <Box mb={'$0'}>
             <SectionTitle
-              sideText={`(${1})`}
+              sideText={unreadNotifications > 0 ? `(${unreadNotifications})` : undefined}
               title={
                 <Flex alignItems="center" gap="$8">
                   <NavigationButton icon="arrow" onClick={onBack} />
