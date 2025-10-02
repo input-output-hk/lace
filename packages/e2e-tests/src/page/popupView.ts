@@ -10,16 +10,11 @@ class PopupView extends LaceView implements Page {
   async setPopupWindowSize() {
     if ((await extensionUtils.getBrowser()) === 'chrome') {
       const ua = await extensionUtils.getUserAgent();
-      await browser.emulateDevice({
-        viewport: {
-          width: this.popupWidth,
-          height: this.popupHeight,
-          deviceScaleFactor: 1,
-          isMobile: false,
-          hasTouch: false,
-          isLandscape: false
-        },
-        userAgent: `${ua}`
+      await browser.emulate('userAgent', `${ua}`);
+      await browser.setViewport({
+        width: this.popupWidth,
+        height: this.popupHeight,
+        devicePixelRatio: 1
       });
     } else {
       await browser.setWindowSize(this.popupWidth, this.popupHeight + 150);

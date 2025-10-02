@@ -11,7 +11,8 @@ const chromeConfig = {
     {
       maxInstances: 1,
       browserName: 'chrome',
-      browserVersion: '132',
+      browserVersion: 'stable',
+      webSocketUrl: true,
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { hostname: 'localhost' }),
       ...(String(process.env.STANDALONE_DRIVER) === 'true' && { port: 4444 }),
       'goog:chromeOptions': {
@@ -31,14 +32,10 @@ const chromeConfig = {
           '--disable-search-engine-choice-screen',
           '--disable-infobars'
         ]
-      },
-      'wdio:devtoolsOptions': {
-        headless: false,
-        ignoreDefaultArgs: true
       }
     }
   ],
-  services: ['devtools', 'intercept']
+  services: ['intercept']
 };
 
 if (String(process.env.STANDALONE_DRIVER) === 'true') {
