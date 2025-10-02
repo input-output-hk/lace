@@ -2,21 +2,20 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router';
 import { Dropdown } from 'antd';
 
-import { usePostHogClientContext } from '@providers/PostHogClientProvider';
-import { ExperimentName } from '@lib/scripts/types/feature-flags';
 import { walletRoutePaths } from '@routes';
 
 import { NotificationsBell } from './NotificationsBell';
 import { NotificationsDropDown } from './NotificationsDropDown';
+import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
 
 export interface NotificationsCenterContainerProps {
   popupView?: boolean;
 }
 
 export const NotificationsBellContainer = ({ popupView }: NotificationsCenterContainerProps): React.ReactElement => {
-  const posthog = usePostHogClientContext();
   const history = useHistory();
   const [isOpen, setIsOpen] = useState(false);
+  const { isNotificationsCenterEnabled } = useNotificationsCenterConfig();
 
   // TODO Connect with notifications center
   const [notifications, setNotifications] = useState<string[]>([]);
@@ -44,7 +43,7 @@ export const NotificationsBellContainer = ({ popupView }: NotificationsCenterCon
   };
 
   return (
-    posthog?.isFeatureFlagEnabled(ExperimentName.NOTIFICATIONS_CENTER) && (
+    isNotificationsCenterEnabled && (
       <Dropdown
         onOpenChange={handleOpenChange}
         open={isOpen}
