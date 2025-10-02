@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router';
 import { Dropdown } from 'antd';
 
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
+import { walletRoutePaths } from '@routes';
 
 import { NotificationsBell } from './NotificationsBell';
 import { NotificationsDropDown } from './NotificationsDropDown';
@@ -13,7 +15,7 @@ export interface NotificationsCenterContainerProps {
 
 export const NotificationsBellContainer = ({ popupView }: NotificationsCenterContainerProps): React.ReactElement => {
   const posthog = usePostHogClientContext();
-
+  const history = useHistory();
   const [isOpen, setIsOpen] = useState(false);
 
   // TODO Connect with notifications center
@@ -38,6 +40,7 @@ export const NotificationsBellContainer = ({ popupView }: NotificationsCenterCon
 
   const handleViewAll = () => {
     setIsOpen(false);
+    history.push(walletRoutePaths.notifications);
   };
 
   return (
