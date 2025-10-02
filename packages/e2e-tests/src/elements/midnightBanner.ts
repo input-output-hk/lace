@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import { ChainablePromiseElement } from 'webdriverio';
 
 class MidnightBanner {

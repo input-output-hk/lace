@@ -1,20 +1,18 @@
 import { expect } from 'chai';
-import { readFromFile } from '../utils/fileUtils';
+import { t } from '../utils/translationService';
 import midnightBanner from '../elements/midnightBanner';
-
-const data: Record<string, string> = JSON.parse(
-  readFromFile(import.meta.dirname, '../../../translation/src/lib/translations/browser-extension-wallet/en.json')
-);
 
 class MidnightBannerAssert {
   async assertSeeMidnightBanner() {
     await midnightBanner.title.waitForDisplayed();
-    expect(await midnightBanner.title.getText()).to.equal(data['midnightEventBanner.title']);
+    expect(await midnightBanner.title.getText()).to.equal(await t('midnightEventBanner.title'));
     await midnightBanner.closeButton.waitForDisplayed();
-    await midnightBanner.learnMoreButton.waitForDisplayed();
-    await midnightBanner.remindMeLaterButton.waitForDisplayed();
     await midnightBanner.bannerDescriptionText.waitForDisplayed();
-    expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(data['midnightEventBanner.description']);
+    expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(await t('midnightEventBanner.description'));
+    await midnightBanner.learnMoreButton.waitForDisplayed();
+    expect(await midnightBanner.learnMoreButton.getText()).to.equal(await t('midnightEventBanner.learnMore'));
+    await midnightBanner.remindMeLaterButton.waitForDisplayed();
+    expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
   }
 
   async assertSeeMidnightURL() {
