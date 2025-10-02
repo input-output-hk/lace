@@ -107,7 +107,7 @@ export const config: WebdriverIO.Config = {
     batch16: [
       './src/features/SendTransactionBundlesExtended*.feature',
       './src/features/e2e/SignDataDAppE2E.feature',
-      './src/features/e2e/MidnightBanner.feature'
+      './src/features/MidnightBanner.feature'
     ]
   },
   automationProtocol: 'webdriver',
