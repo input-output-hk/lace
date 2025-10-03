@@ -27,7 +27,7 @@
     .controls {
       display: flex;
       align-items: center;
-      gap: size_unit(1);
+      gap: size_unit(0.75);
 
       .avatar {
         font-size: 20px;
