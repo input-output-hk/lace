@@ -56,6 +56,7 @@ export class PostHogClient<Action extends string = string> {
   hasPostHogInitialized$ = new BehaviorSubject(false);
   featureFlagsByNetwork: FeatureFlagsByNetwork = featureFlagsByNetworkInitialValue;
   featureFlagPayloads: FeatureFlagPayloads = featureFlagPayloadsInitialValue;
+  private ffOverride: Record<string, boolean> = {};
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -66,6 +67,19 @@ export class PostHogClient<Action extends string = string> {
   ) {
     if (!this.postHogHost) throw new Error('POSTHOG_HOST url has not been provided');
     void this.initialize();
+
+    try {
+      const ffOverride = JSON.parse(process.env.FF_OVERRIDE) as Record<string, string | number>;
+
+      for (const [key, value] of Object.entries(ffOverride)) {
+        if (!['false', 'False', 'FALSE', '0', 0, 'true', 'True', 'TRUE', '1', 1].includes(value))
+          throw new Error(`Invalid value for FF_OVERRIDE[${key}]: "${value}"`);
+
+        this.ffOverride[key] = ['true', 'True', 'TRUE', '1', 1].includes(value);
+      }
+    } catch (error) {
+      commonLogger.error('While parsing FF_OVERRIDE', error);
+    }
   }
 
   private async initialize() {
@@ -224,6 +238,8 @@ export class PostHogClient<Action extends string = string> {
   }
 
   isFeatureFlagEnabled(feature: FeatureFlag): boolean {
+    if (feature in this.ffOverride) return this.ffOverride[feature];
+
     const currentNetworkFeatureFlags =
       this.featureFlagsByNetwork[this.chain.networkMagic as Wallet.Cardano.NetworkMagics];
     return currentNetworkFeatureFlags[feature] || false;
