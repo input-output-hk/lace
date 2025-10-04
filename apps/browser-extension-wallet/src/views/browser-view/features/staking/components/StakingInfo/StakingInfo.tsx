@@ -8,7 +8,7 @@ import styles from './StakingInfo.module.scss';
 import { StakePoolInfo } from './StakePoolInfo';
 import { Stats } from './Stats';
 import { Tooltip } from './StatsTooltip';
-import { addEllipsis, getRandomIcon } from '@lace/common';
+import { addEllipsis, getRandomIcon, logger } from '@lace/common';
 import { formatLocaleNumber } from '@utils/format-number';
 
 const formatNumericValue = (val: number | string, suffix: number | string): React.ReactElement => (
@@ -57,6 +57,40 @@ export const StakingInfo = ({
 }: stakingInfoPanelProps): React.ReactElement => {
   const { t } = useTranslation();
   const ref = useRef();
+
+  // Debug logging for rewards display
+  logger.info('🔍 [STAKING_INFO_DEBUG] === STAKING INFO COMPONENT DEBUG ===');
+  logger.info('🔍 [STAKING_INFO_DEBUG] Component props:', {
+    totalRewards,
+    lastReward,
+    totalRewardsType: typeof totalRewards,
+    lastRewardType: typeof lastReward,
+    coinBalance,
+    id: id?.toString()
+  });
+
+  // Log the rewards values being displayed
+  if (totalRewards) {
+    logger.info('🔍 [STAKING_INFO_DEBUG] totalRewards details:', {
+      value: totalRewards,
+      type: typeof totalRewards,
+      stringValue: totalRewards.toString(),
+      isBigInt: typeof totalRewards === 'bigint',
+      isNumber: typeof totalRewards === 'number'
+    });
+  }
+
+  if (lastReward) {
+    logger.info('🔍 [STAKING_INFO_DEBUG] lastReward details:', {
+      value: lastReward,
+      type: typeof lastReward,
+      stringValue: lastReward.toString(),
+      isBigInt: typeof lastReward === 'bigint',
+      isNumber: typeof lastReward === 'number'
+    });
+  }
+
+  logger.info('🔍 [STAKING_INFO_DEBUG] === END STAKING INFO DEBUG ===');
 
   return (
     <div
@@ -120,7 +154,7 @@ export const StakingInfo = ({
               <Stats
                 text={t('browserView.staking.stakingInfo.totalRewards.title')}
                 value={
-                  <Tooltip title={Wallet.util.convertAdaToFiat({ ada: totalRewards.toString(), fiat })}>
+                  <Tooltip title={`Debug: Type=${typeof totalRewards}, Value=${totalRewards}`}>
                     <span>{totalRewards}</span>
                     <span className={styles.suffix}>{cardanoCoin.symbol}</span>
                   </Tooltip>
@@ -133,7 +167,7 @@ export const StakingInfo = ({
             <Stats
               text={t('browserView.staking.stakingInfo.lastReward.title')}
               value={
-                <Tooltip title={Wallet.util.convertAdaToFiat({ ada: lastReward.toString(), fiat })}>
+                <Tooltip title={`Debug: Type=${typeof lastReward}, Value=${lastReward}`}>
                   <span>{lastReward}</span>
                   <span className={styles.suffix}>{cardanoCoin.symbol}</span>
                 </Tooltip>
