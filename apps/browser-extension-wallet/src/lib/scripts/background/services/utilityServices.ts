@@ -362,7 +362,8 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
         },
         getAppVersion,
         backendFailures$,
-        unhandledError$
+        unhandledError$,
+        ping: async () => 'pong' as const
       }),
       baseChannel: BaseChannels.BACKGROUND_ACTIONS,
       properties: backgroundServiceProperties
