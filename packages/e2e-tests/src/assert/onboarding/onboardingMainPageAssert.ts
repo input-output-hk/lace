@@ -94,19 +94,22 @@ class OnboardingMainPageAssert extends OnboardingCommonAssert {
     await OnboardingMainPage.restoreWalletButton.waitForClickable();
   }
 
-  async assertSeeMainPage() {
+  async assertSeeMainPage(walletType: 'Cardano' | 'Midnight' = 'Cardano') {
     await this.assertSeeLogo();
     await this.assertSeeTitle();
     await this.assertSeeSubtitle();
     await this.assertSeeCreateWalletOption();
-    // Lack of support for hardware wallets on Firefox
-    await this.assertSeeHardwareWalletOption(!browser.isFirefox);
+    // Lack of support for hardware wallets on Firefox and on Midnight
+    await this.assertSeeHardwareWalletOption(!browser.isFirefox && walletType === 'Cardano');
     await this.assertSeeRestoreWalletOption();
     await this.assertSeeLegalLinks();
     await this.assertSeeHelpAndSupportButton();
     await this.assertSeeAgreementText();
     await this.assertSeeTermsOfServiceLink();
     await this.assertSeePrivacyPolicyLink();
+    if (walletType === 'Midnight') {
+      await this.assertSeeMidnightCompatibilityInfo();
+    }
   }
 }
 

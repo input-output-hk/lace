@@ -17,6 +17,7 @@ export class MenuHeader {
   private MENU_ADD_NEW_WALLET_BUTTON = '[data-testid="header-menu-new-wallet"]';
   private MENU_ADD_BITCOIN_WALLET_BUTTON = '[data-testid="header-menu-add-bitcoin-wallet"]';
   private MENU_ADD_SHARED_WALLET_BUTTON = '[data-testid="header-menu-add-shared-wallet"]';
+  private MENU_ADD_MIDNIGHT_WALLET_BUTTON = '[data-testid="header-menu-add-midnight-wallet"]';
   private MENU_SETTINGS_BUTTON = '//li[@data-testid="header-menu-settings"]';
   private MENU_SIGN_MESSAGE_BUTTON = '//li[@data-testid="header-menu-sign-message"]';
   private MENU_LOCK_BUTTON = '//li[@data-testid="header-menu-lock"]';
@@ -36,6 +37,10 @@ export class MenuHeader {
   private readonly RECEIVE_BUTTON = 'aside [data-testid="receive-button"]';
   private readonly SEND_BUTTON = 'aside [data-testid="send-button"]';
   private readonly CO_SIGN_BUTTON = '[data-testid="co-sign-button"]';
+  private readonly MIDNIGHT_LOGO = '[data-testid="midnight-logo"]';
+  private readonly MIDNIGHT_TITLE = '[data-testid="midnight-title"]';
+  private readonly MIDNIGHT_MENU_SYNC_STATUS = '[data-testid="menu-sync-status"]';
+  private readonly MIDNIGHT_RESYNC_ICON = '[data-testid="resync-icon"]';
 
   get avatarOnButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AVATAR_ON_BUTTON);
@@ -117,6 +122,10 @@ export class MenuHeader {
     return $(this.MENU_ADD_SHARED_WALLET_BUTTON);
   }
 
+  get menuAddMidnightWalletButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MENU_ADD_MIDNIGHT_WALLET_BUTTON);
+  }
+
   get menuSettingsButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.MENU_SETTINGS_BUTTON);
   }
@@ -169,6 +178,22 @@ export class MenuHeader {
     return $(this.RIGHT_SIDE_PANEL_BUTTON);
   }
 
+  get midnightLogo(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_LOGO);
+  }
+
+  get midnightTitle(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_TITLE);
+  }
+
+  get midnightSyncStatus(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_MENU_SYNC_STATUS);
+  }
+
+  get midnightResyncIcon(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_RESYNC_ICON);
+  }
+
   async clickOnExpandButton(): Promise<void> {
     await this.expandButton.click();
   }
@@ -202,6 +227,11 @@ export class MenuHeader {
   async clickOnAddSharedWalletOption(): Promise<void> {
     await this.menuAddSharedWalletButton.waitForClickable();
     await this.menuAddSharedWalletButton.click();
+  }
+
+  async clickOnAddMidnightWalletOption(): Promise<void> {
+    await this.menuAddMidnightWalletButton.waitForClickable();
+    await this.menuAddMidnightWalletButton.click();
   }
 
   async clickMenuButton(): Promise<void> {
@@ -271,6 +301,10 @@ export class MenuHeader {
 
   async clickRightSidePanelButton(): Promise<void> {
     await this.rightSidePanelButton.click();
+  }
+
+  async getWalletSyncStatusText(): Promise<string> {
+    return await this.midnightSyncStatus.getText();
   }
 }
 

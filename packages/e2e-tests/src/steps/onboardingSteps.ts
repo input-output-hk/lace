@@ -50,19 +50,23 @@ When(
   }
 );
 
-When(/^I click "(Back|Next)" button during wallet setup$/, async (button: 'Back' | 'Next') => {
-  const commonOnboardingElements = new CommonOnboardingElements();
-  switch (button) {
-    case 'Back':
-      await commonOnboardingElements.clickOnBackButton();
-      break;
-    case 'Next':
-      await commonOnboardingElements.clickOnNextButton();
-      break;
-    default:
-      throw new Error(`Unsupported button name: ${button}`);
+When(
+  /^I click "(Back|Next|Enter wallet)" button during wallet setup$/,
+  async (button: 'Back' | 'Next' | 'Enter wallet') => {
+    const commonOnboardingElements = new CommonOnboardingElements();
+    switch (button) {
+      case 'Back':
+        await commonOnboardingElements.clickOnBackButton();
+        break;
+      case 'Next':
+      case 'Enter wallet':
+        await commonOnboardingElements.clickOnNextButton();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
   }
-});
+);
 
 Then(/^I (see|do not see) "Are you sure you want to start again\?" modal$/, async (state: 'see' | 'do not see') => {
   await ModalAssert.assertSeeOnboardingStartAgainModal(state === 'see');
