@@ -13,7 +13,7 @@ import { BrowserViewSections } from '@lib/scripts/types';
 import { NetworkPill } from '@components/NetworkPill';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
-import { NotificationsBellContainer } from '@components/NotificationsCenter';
+import { NotificationsBellContainer } from '@src/features/notifications-center';
 
 export const MainHeader = (): React.ReactElement => {
   const { t } = useTranslation();

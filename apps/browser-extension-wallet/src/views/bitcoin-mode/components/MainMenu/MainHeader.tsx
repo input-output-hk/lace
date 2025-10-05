@@ -13,7 +13,7 @@ import { useAnalyticsContext, useBackgroundServiceAPIContext, useTheme } from '@
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
-import { NotificationsBellContainer } from '@components/NotificationsCenter/NotificationsBellContainer';
+import { NotificationsBellContainer } from '@src/features/notifications-center/NotificationsBellContainer';
 
 export const MainHeader = (): React.ReactElement => {
   const { t } = useTranslation();

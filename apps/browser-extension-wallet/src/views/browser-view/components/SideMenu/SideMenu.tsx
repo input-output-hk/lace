@@ -33,7 +33,7 @@ export const SideMenu = (): React.ReactElement => {
 
   const [currentHoveredItem, setCurrentHoveredItem] = useState<MenuItemList | undefined>();
 
-  const [tab, setTab] = useState(isPathAvailable(pathname) ? pathname : routes.assets);
+  const [tab, setTab] = useState(isPathAvailable(pathname) ? pathname : undefined);
 
   useEffect(() => {
     const unregisterListener = listen((location) => {

@@ -2,6 +2,7 @@
 @import '../../../../../packages/common/src/ui/styles/theme.scss';
 @import '../../../../../packages/common/src/ui/styles/abstracts/mixins';
 
+
 .container {
   background-color: var(--bg-color-container, #ffffff) !important;
   border: 1px var(--light-mode-light-grey) solid !important;
@@ -11,6 +12,12 @@
   max-height: 475px;
   padding: size_unit(1) !important;
   width: 310px;
+
+  &.isEmpty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   &.popupView {
     left: size_unit(-4);
@@ -22,4 +29,13 @@
   max-height: 350px;
   overflow-y: scroll;
   @include scroll-bar-style;
+}
+
+.notificationsListContainer {
+  background-color: var(--bg-color-container, #ffffff) !important;
+  border-radius: 0 !important;
+}
+
+.btn {
+  cursor: pointer;
 }

@@ -1,0 +1,71 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.infitineScroll {
+  background: var(--bg-color-body, #ffffff);
+  &::-webkit-scrollbar {
+    width: 0 !important;
+  }
+}
+
+.notificationsContainer {
+  background: var(--bg-color-body, #ffffff);
+  padding: 0 !important;
+  border-radius: 12px;
+  margin-bottom: 30px !important;
+  @media (max-width: $breakpoint-popup) {
+    margin-bottom: 0;
+  }
+  :global(.ant-list-header) {
+    border: none !important;
+    padding: 0 !important;
+  }
+}
+
+
+.listItem {
+  border-bottom: none !important;
+  padding-bottom: 8px !important;
+  padding-top: 8px !important;
+
+  &.withBorder {
+    border-bottom: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey)) !important;
+    &:last-child {
+      border-bottom: none !important;
+    }
+  }
+
+  &:first-child {
+    padding-top: 0 !important;
+  }
+
+  &:last-child {
+    padding-bottom: 0 !important;
+  }
+}
+
+:global(.ant-list-split) :local(.listItemWrapper) {
+  border-bottom: none !important;
+  padding: size_unit(2) size_unit(1);
+  margin-left: -#{size_unit(1)};
+  margin-right: -#{size_unit(1)};
+  &:hover {
+    background: var(--dark-mode-mid-grey, var(--data-light-grey, #f9f9f9));
+    border-radius: 16px;
+  }
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader {
+  animation: rotating 2s linear infinite;
+  width: 18px;
+  height: 18px;
+}
