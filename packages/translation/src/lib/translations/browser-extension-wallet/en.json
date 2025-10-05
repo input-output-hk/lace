@@ -794,6 +794,8 @@
   "notificationsCenter.removeNotification.description": "Are you sure you wish to remove this notification? it will not be possible to revert this action",
   "notificationsCenter.removeNotification.confirm": "Remove",
   "notificationsCenter.removeNotification.cancel": "Cancel",
+  "notificationsCenter.emptyState.title": "All clear",
+  "notificationsCenter.emptyState.description": "You don't have any notifications currently",
   "poolDetails.delegate": "Delegate to this pool",
   "poolDetails.sectionTitle": "Pool detail",
   "qrInfo.publicKey": "Show public key",

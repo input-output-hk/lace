@@ -4,10 +4,11 @@ import { Button } from '@lace/common';
 
 import styles from './NotificationsBell.module.scss';
 
-import NotificationBellIcon from '@lace/core/src/ui/assets/icons/notifications-bell.component.svg';
+import NotificationBellIcon from '../../assets/icons/notifications-bell.component.svg';
 
-// eslint-disable-next-line no-magic-numbers
-const formatNotificationCount = (count: number) => (count < 10 ? count.toString() : '9+');
+const MAX_NOTIFICATION_COUNT = 9;
+const formatNotificationCount = (count: number) =>
+  count < MAX_NOTIFICATION_COUNT ? count.toString() : `${MAX_NOTIFICATION_COUNT}+`;
 
 export interface NotificationsBellProps {
   onClick: () => void;
@@ -16,7 +17,7 @@ export interface NotificationsBellProps {
 
 export const NotificationsBell = ({ onClick, unreadNotifications }: NotificationsBellProps): React.ReactElement => (
   <Button className={styles.btn} block color="gradient" data-testid="notifications-bell" onClick={onClick}>
-    <NotificationBellIcon />
+    <NotificationBellIcon className={styles.icon} />
     {unreadNotifications > 0 && <span className={styles.badge}>{formatNotificationCount(unreadNotifications)}</span>}
   </Button>
 );

@@ -3,48 +3,58 @@ import classnames from 'classnames';
 import { useTranslation } from 'react-i18next';
 import { Menu } from 'antd';
 
-import { Divider, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Divider, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 
-import { LaceNotification } from '@src/types/notifications-center';
-
-import { NotificationsAllClear } from './NotificationsAllClear';
+import { EmptyState } from './EmptyState';
+import { NotificationsList } from './NotificationsList';
+import { useNotificationsCenter } from '@hooks/useNotificationsCenter';
 
 import styles from './NotificationsDropDown.module.scss';
 
 export interface NotificationsDropDownProps {
-  notifications: LaceNotification[];
-  onMarkAllAsRead: () => void;
-  onMarkAsRead: (id: string) => void;
   onViewAll: () => void;
   popupView?: boolean;
-  unreadNotifications: number;
 }
 
-export const NotificationsDropDown = ({
-  notifications,
-  onMarkAllAsRead,
-  onViewAll,
-  popupView,
-  unreadNotifications
-}: NotificationsDropDownProps): React.ReactElement => {
+export const NotificationsDropDown = ({ onViewAll, popupView }: NotificationsDropDownProps): React.ReactElement => {
   const { t } = useTranslation();
+  const { notifications, loadMore, isLoading, markAsRead, unreadNotifications } = useNotificationsCenter();
 
   return (
     <Menu className={classnames(styles.container, { [styles.popupView]: popupView })}>
-      <div className={styles.content}>
-        {notifications.length > 0 ? <div>Placeholder content</div> : <NotificationsAllClear />}
+      <div
+        id="notifications-dropdown-content"
+        className={classnames(styles.content, { [styles.isEmpty]: notifications?.length === 0 })}
+      >
+        {notifications?.length > 0 ? (
+          <NotificationsList
+            className={styles.notificationsListContainer}
+            notifications={notifications}
+            scrollableTarget="notifications-dropdown-content"
+            dataLength={notifications.length}
+            loadMore={loadMore}
+            isLoading={isLoading}
+            withBorder={false}
+            withDivider
+            popupView
+          />
+        ) : (
+          <EmptyState />
+        )}
       </div>
       <Divider my="$4" />
       <Flex justifyContent="space-between">
-        <Text.Body.Normal>
-          <a onClick={onViewAll}>
-            {t(`notificationsCenter.${notifications.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}
-          </a>
-        </Text.Body.Normal>
-        {unreadNotifications > 0 && (
-          <Text.Body.Normal>
-            <a onClick={onMarkAllAsRead}>{t('notificationsCenter.markAllAsRead')}</a>
+        <Box className={styles.btn} onClick={onViewAll} p="$8">
+          <Text.Body.Normal weight="$bold" color="highlight">
+            <span>{t(`notificationsCenter.${notifications?.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}</span>
           </Text.Body.Normal>
+        </Box>
+        {unreadNotifications > 0 && (
+          <Box className={styles.btn} onClick={() => markAsRead()} p="$8">
+            <Text.Body.Normal weight="$bold" color="highlight">
+              <span>{t('notificationsCenter.markAllAsRead')}</span>
+            </Text.Body.Normal>
+          </Box>
         )}
       </Flex>
     </Menu>

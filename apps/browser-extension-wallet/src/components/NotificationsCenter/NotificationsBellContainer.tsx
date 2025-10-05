@@ -15,9 +15,13 @@ export interface NotificationsCenterContainerProps {
 
 export const NotificationsBellContainer = ({ popupView }: NotificationsCenterContainerProps): React.ReactElement => {
   const { isNotificationsCenterEnabled } = useNotificationsCenterConfig();
-  const { markAsRead, notifications, unreadNotifications } = useNotificationsCenter();
+  const { unreadNotifications } = useNotificationsCenter();
   const history = useHistory();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleDropdownState = (openDropdown: boolean) => {
+    setIsOpen(openDropdown);
+  };
 
   const handleViewAll = () => {
     setIsOpen(false);
@@ -27,18 +31,9 @@ export const NotificationsBellContainer = ({ popupView }: NotificationsCenterCon
   return (
     isNotificationsCenterEnabled && (
       <Dropdown
-        onOpenChange={setIsOpen}
         open={isOpen}
-        dropdownRender={() => (
-          <NotificationsDropDown
-            notifications={notifications}
-            onMarkAllAsRead={() => markAsRead()}
-            onMarkAsRead={(id: string) => markAsRead(id)}
-            onViewAll={handleViewAll}
-            popupView={popupView}
-            unreadNotifications={unreadNotifications}
-          />
-        )}
+        onOpenChange={handleDropdownState}
+        dropdownRender={() => <NotificationsDropDown onViewAll={handleViewAll} popupView={popupView} />}
         placement="bottomRight"
         trigger={['click']}
       >

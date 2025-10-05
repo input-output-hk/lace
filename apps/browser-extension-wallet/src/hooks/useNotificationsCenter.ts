@@ -31,13 +31,34 @@ export const useNotificationsCenter = () => {
     [notifications]
   );
 
+  const mappedNotifications = useMemo(
+    () =>
+      notifications?.map((template) => ({
+        id: template.message.id,
+        title: template.message.title,
+        publisher: template.message.topic,
+        isRead: template.read,
+        onClick: () => {
+          // eslint-disable-next-line no-console
+          console.log(`Clicked notification ${template.message.id}`);
+        }
+      })),
+    [notifications]
+  );
+
   return {
-    notifications,
+    notifications: mappedNotifications,
     unreadNotifications,
     topics,
     subscribe,
     unsubscribe,
     markAsRead,
-    remove
+    remove,
+    // TODO: Implement loadMore and isLoading
+    loadMore: () => {
+      // eslint-disable-next-line no-console
+      console.log('loadMore');
+    },
+    isLoading: false
   };
 };

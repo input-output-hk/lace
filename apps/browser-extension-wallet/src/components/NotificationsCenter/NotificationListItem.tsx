@@ -5,17 +5,32 @@ import TrashOutlineComponent from '../../assets/icons/browser-view/trash-icon.co
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
 
+export type LaceMessage = {
+  id: string;
+  topic: string;
+  title: string;
+  body: string;
+  format: string;
+};
+
+export type LaceNotification = {
+  message: LaceMessage;
+  read?: boolean;
+};
+
 export interface NotificationListItemProps {
+  id: string;
   title: string;
   isRead?: boolean;
   popupView?: boolean;
   publisher: string;
-  onRemove?: () => void;
+  onRemove?: (id: string) => void;
   onClick: () => void;
   withBorder?: boolean;
 }
 
 export const NotificationListItem = ({
+  id,
   title,
   isRead = false,
   popupView = false,
@@ -28,7 +43,7 @@ export const NotificationListItem = ({
 
   const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    onRemove();
+    onRemove?.(id);
   };
 
   const PublisherTextComponent = popupView ? Text.Label : Text.Body.Small;
@@ -55,6 +70,7 @@ export const NotificationListItem = ({
       onClick={onClick}
       className={classnames(styles.container, withBorder && styles.withBorder)}
       p="$20"
+      w="$fill"
     >
       <Flex className={styles.content} justifyContent="center" alignItems="flex-start" flexDirection="column" gap="$8">
         <Flex alignItems="center" gap="$4" className={styles.copy}>
