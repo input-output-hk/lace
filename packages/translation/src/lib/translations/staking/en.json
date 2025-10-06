@@ -221,5 +221,7 @@
   "root.nav.browsePoolsTitle": "Browse pools",
   "root.nav.overviewTitle": "Overview",
   "root.nav.title": "Staking Navigation",
-  "root.title": "Staking"
+  "root.title": "Staking",
+  "details.editSavedRatio": "Edit saved ratio",
+  "details.ratio": "Ratio"
 }

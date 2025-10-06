@@ -91,11 +91,8 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
     <>
       <Flex gap="$32" flexDirection="column" h="$fill">
         <Flex gap="$8" flexDirection="column">
-          <Text.SubHeading>Import transaction</Text.SubHeading>
-          <Text.Body.Normal>
-            To co-sign a transaction initiated by another shared wallet member, upload the transaction JSON file you
-            received.
-          </Text.Body.Normal>
+          <Text.SubHeading>{t('core.sharedWallets.importTransaction')}</Text.SubHeading>
+          <Text.Body.Normal>{t('core.sharedWallets.importTransactionDescription')}</Text.Body.Normal>
         </Flex>
         <Flex h="$fill" w="$fill">
           <FileUpload
@@ -111,8 +108,8 @@ export const CoSignEntry = ({ onCancel, onContinue, onImportError }: CoSignEntry
             }
             accept="application/json"
             onChange={onFileChange}
-            supportedFormats="Supported formats: JSON"
-            removeButtonLabel="Remove"
+            supportedFormats={t('core.sharedWallets.importTransactionSupportedFormat')}
+            removeButtonLabel={t('core.sharedWallets.removeBtnLabel')}
             files={loadedFileName ? [loadedFileName] : undefined}
             onRemove={() => setLoadedFileName('')}
           />
