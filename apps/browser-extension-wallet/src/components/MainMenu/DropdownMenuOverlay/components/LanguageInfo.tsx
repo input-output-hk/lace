@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-null */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavigationButton, PostHogAction } from '@lace/common';
@@ -6,6 +7,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { Radio, RadioChangeEvent } from 'antd';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { storage as webStorage } from 'webextension-polyfill';
+import type { Language } from '@lace/translation';
 
 type LanguageChoiceProps = {
   onBack: () => void;
@@ -15,7 +17,7 @@ const LANG_CHOICES = ['en', 'ja']; // hardcoding for v1 only
 
 export const LanguageInfo = ({ onBack }: LanguageChoiceProps): React.ReactElement => {
   const { t } = useTranslation();
-  const [language, setLanguage] = useState('en'); // default
+  const [language, setLanguage] = useState<Language | null>(null);
   const posthog = usePostHogClientContext();
 
   const { getBackgroundStorage, handleChangeLanguage } = useBackgroundServiceAPIContext();

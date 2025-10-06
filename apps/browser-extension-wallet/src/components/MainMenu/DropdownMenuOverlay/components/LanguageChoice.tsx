@@ -13,15 +13,17 @@ export const LanguageChoice = ({ onClick }: LanguageChoiceProps): React.ReactEle
   const { t } = useTranslation();
   const { getBackgroundStorage } = useBackgroundServiceAPIContext();
   const [language, setLanguage] = useState<string>();
+  const [loadingLanguage, setLoadingLanguage] = useState(true);
 
   useEffect(() => {
     const getLanguage = async () => {
       const { languageChoice } = await getBackgroundStorage();
       if (languageChoice) setLanguage(languageChoice);
+      setLoadingLanguage(false);
     };
     getLanguage();
     webStorage.onChanged.addListener(getLanguage);
-  }, [getBackgroundStorage]);
+  }, [getBackgroundStorage, setLoadingLanguage]);
 
   return (
     <div
@@ -31,9 +33,11 @@ export const LanguageChoice = ({ onClick }: LanguageChoiceProps): React.ReactEle
     >
       <div className={styles.networkChoise}>
         <span data-testid="header-menu-language-choice-label">{t('browserView.topNavigationBar.links.language')}</span>
-        <span data-testid="header-menu-language-choice-value" className={styles.value}>
-          {language || 'en'}
-        </span>
+        {!loadingLanguage && (
+          <span data-testid="header-menu-language-choice-value" className={styles.value}>
+            {language || 'en'}
+          </span>
+        )}
       </div>
     </div>
   );
