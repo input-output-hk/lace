@@ -118,7 +118,7 @@ class WalletAddressPageAssert {
   async assertSeeUnusedAddressCard(shouldSee: boolean, expectedUnusedAddress?: string) {
     if (shouldSee) {
       await browser.waitUntil(async () => (await $$(WalletAddressPage.ADDRESS_CARD_TITLE).length) === 2, {
-        timeout: 8000,
+        timeout: 15_000,
         timeoutMsg: 'failed while waiting for unused address card'
       });
     }

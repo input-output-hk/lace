@@ -29,7 +29,12 @@ const PopupButtons = ({ translations, onLearnMore, onReminder }: Props): JSX.Ele
     })}
   >
     <Box mb="$10" w="$fill">
-      <Button.CallToAction label={translations.learnMore} w="$fill" onClick={onLearnMore} />
+      <Button.CallToAction
+        label={translations.learnMore}
+        w="$fill"
+        onClick={onLearnMore}
+        data-testid="learn-more-button-popup"
+      />
     </Box>
     <Box w="$fill">
       <Button.Secondary label={translations.reminder} w="$fill" onClick={onReminder} />
@@ -49,10 +54,18 @@ const FullScreenButtons = ({ translations, onLearnMore, onReminder }: Props): JS
     })}
   >
     <Box mr={'$20'}>
-      <Button.CallToAction label={translations.learnMore} onClick={onLearnMore} />
+      <Button.CallToAction
+        label={translations.learnMore}
+        onClick={onLearnMore}
+        data-testid="learn-more-button-extended"
+      />
     </Box>
     <Box>
-      <Button.Secondary label={translations.reminder} onClick={onReminder} />
+      <Button.Secondary
+        label={translations.reminder}
+        onClick={onReminder}
+        data-testid="remind-me-later-button-extended"
+      />
     </Box>
   </Box>
 );
@@ -70,6 +83,7 @@ const Title = ({ translations }: Props): JSX.Element => (
         })
       )}
       weight="$bold"
+      data-testid="midnight-event-banner-title"
     >
       {translations.title}
     </Text.SubHeading>
@@ -113,7 +127,7 @@ export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onRemi
     w="$fill"
   >
     <Box className={styles.close}>
-      <NavigationButton.Close onClick={onClose} />
+      <NavigationButton.Close onClick={onClose} data-testid="midnight-event-banner-close-button" />
     </Box>
     <Flex w="$fill" flexDirection="column">
       <Title translations={translations} />
@@ -126,7 +140,11 @@ export const MidnightEventBanner = ({ translations, onClose, onLearnMore, onRemi
           }
         })}
       >
-        <Text.Body.Normal className={styles.description} weight="$medium">
+        <Text.Body.Normal
+          className={styles.description}
+          weight="$medium"
+          data-testid="midnight-event-banner-description"
+        >
           {translations.description}
         </Text.Body.Normal>
       </Box>

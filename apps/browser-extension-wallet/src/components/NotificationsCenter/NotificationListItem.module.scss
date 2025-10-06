@@ -1,0 +1,63 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.container {
+  display: flex;
+  border-radius: size_unit(2);
+  border: none;
+  background: var(--bg-color-container);
+  color: var(--text-color-primary);
+  gap: size_unit(2);
+
+  &.withBorder {
+    border: 1px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey)) !important;
+  }
+
+  &:hover {
+    color: var(--text-color-primary);
+    cursor: pointer;
+    background-color: var(--light-mode-light-grey-56, var(--dark-mode-grey));
+
+    .actions {
+      display: flex;
+    }
+  }
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-default);
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.actions {
+  display: none;
+  flex-shrink: 0;
+  :hover {
+    .icon {
+      color: var(--text-color-primary);
+    }
+  }
+}
+
+.copy {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.icon {
+  width: size_unit(2);
+  height: size_unit(2);
+  color: var(--text-color-secondary);
+  path {
+    fill: none !important;
+  }
+}

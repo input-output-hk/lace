@@ -60,6 +60,15 @@ Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION
 
 > If you want to develop DApp Explorer please refer to the [Setting up local connection with DApp Radar API](apps/browser-extension-wallet/src/views/browser-view/features/dapp/README.md) page
 
+#### Configure Sentry for the local dev environment
+
+If you want to log errors to Sentry from you local dev environment you need to provide in your `.env` file Sentry [dsn](https://docs.sentry.io/platforms/javascript/configuration/options/#dsn) and [environment](https://docs.sentry.io/platforms/javascript/configuration/options/#environment) values.
+```
+SENTRY_DSN=<SENTRY_DSN>
+SENTRY_ENVIRONMENT=development
+```
+To get **Sentry dsn** log in to [Sentry](https://iohk-j4.sentry.io/) and go to `Settings -> Projects -> lace-extension-v1 -> Client Keys` or click [here](https://iohk-j4.sentry.io/settings/projects/lace-extension-v1/keys/).
+
 ### Build packages and extension
 
 ```sh
