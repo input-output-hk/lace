@@ -120,21 +120,37 @@ class NftAssert {
   async assertNftDisplayed(shouldBeDisplayed: boolean, nftItem: WebdriverIO.Element) {
     if (shouldBeDisplayed) {
       await nftItem.waitForDisplayed({ timeout: 20_000 });
+    } else if (nftItem) {
+      await nftItem.waitForDisplayed({ reverse: true, timeout: 10_000 });
     } else {
       expect(nftItem).to.be.undefined;
     }
   }
 
   async assertNftDisplayedOnNftsPage(nftName: string, shouldBeDisplayed: boolean) {
-    try {
-      await NftsPage.waitForNft(nftName);
-    } catch {
-      if (!shouldBeDisplayed) {
+    if (shouldBeDisplayed) {
+      try {
+        await NftsPage.waitForNft(nftName);
+      } catch {
+        // If waiting fails, continue to get the container and assert
+      }
+      const nftItem = await NftsPage.getNftContainer(nftName);
+      await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
+    } else {
+      // When element should NOT be displayed, wait for it to disappear
+      try {
+        await NftsPage.waitForNft(nftName);
+        const nftItem = await NftsPage.getNftContainer(nftName);
+        if (nftItem) {
+          await nftItem.waitForDisplayed({ reverse: true, timeout: 10_000 });
+        }
+      } catch {
+        // If waitForNft fails, element might already be gone - scroll to top
         await scrollToTheTop();
+        const nftItem = await NftsPage.getNftContainer(nftName);
+        await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
       }
     }
-    const nftItem = await NftsPage.getNftContainer(nftName);
-    await this.assertNftDisplayed(shouldBeDisplayed, nftItem);
   }
 
   async assertNftDisplayedInCoinSelector(nftName: string, shouldBeDisplayed: boolean) {
