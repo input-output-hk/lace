@@ -17,6 +17,7 @@ class MidnightBannerAssert {
 
   async assertSeeMidnightURL() {
     const EXPECTED_MIDNIGHT_URL = 'https://www.midnight.gd';
+    await browser.url(EXPECTED_MIDNIGHT_URL);
     const currentUrl = await browser.getUrl();
     expect(currentUrl).to.contain(EXPECTED_MIDNIGHT_URL);
   }
