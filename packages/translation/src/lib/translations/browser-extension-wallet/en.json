@@ -970,5 +970,11 @@
   "bitcoinSendMode.fee.average": "Average",
   "bitcoinSendMode.fee.slow": "Slow",
   "bitcoinSendMode.fee.custom": "Custom",
-  "bitcoinSendMode.previousTxSendError": "You cannot send transactions while previous transactions are still pending."
+  "bitcoinSendMode.previousTxSendError": "You cannot send transactions while previous transactions are still pending.",
+  "pgp.validPrivateKey": "valid PGP private key",
+  "generic.otherAssets": "other asset(s)",
+  "pgp.wrongQrCodeHeading": "Wrong QR code identified",
+  "pgp.scanWalletPrivateQrCode": "Scan paper wallet private QR code",
+  "pgp.unidentifiedQrCodeHeading": "Unidentified QR code",
+  "generic.transactionHash": "Transaction hash"
 }

@@ -26,6 +26,7 @@ import styles from './WalletOverview.module.scss';
 import { useAnalyticsContext } from '@providers';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useFetchCoinPrice } from '@hooks';
+import { useTranslation } from 'react-i18next';
 
 const TOAST_DEFAULT_DURATION = 3;
 
@@ -34,6 +35,7 @@ const handleOpenCoingeckoLink = () => {
 };
 
 export const WalletOverview = (): JSX.Element => {
+  const { t } = useTranslation();
   const coinPricing = useFetchCoinPrice();
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
@@ -136,10 +138,10 @@ export const WalletOverview = (): JSX.Element => {
 
     let subtitle = `${Wallet.util.lovelacesToAdaString(walletBalances.ada.toString())} ${adaSymbol}`;
     if (walletBalances.otherItems.size > 0) {
-      subtitle += ` +${walletBalances.otherItems.size} other asset(s)`;
+      subtitle += ` +${walletBalances.otherItems.size} ${t('generic.otherAssets')}`;
     }
     return subtitle;
-  }, [walletBalances.ada, walletBalances.otherItems, walletMetadata.chain, walletBalances.fetched, isLoading]);
+  }, [walletBalances.ada, walletBalances.otherItems, walletMetadata.chain, walletBalances.fetched, isLoading, t]);
 
   return (
     <WalletSetupStepLayoutRevamp

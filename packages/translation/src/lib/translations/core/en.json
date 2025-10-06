@@ -716,5 +716,9 @@
   "core.derivationType.ledgerDescription": "Select if connecting a Ledger-created wallet",
   "core.derivationType.selectDerivationType": "Derivation type",
   "core.derivationType.infoTooltip": "Determines how accounts and addresses are generated from your seed phrase.",
-  "asset.searchPlaceholder": "Search by ID or name"
+  "asset.searchPlaceholder": "Search by ID or name",
+  "core.sharedWallets.importTransaction": "Import transaction",
+  "core.sharedWallets.importTransactionDescription": "To co-sign a transaction initiated by another shared wallet member, upload the transaction JSON file you received.",
+  "core.sharedWallets.importTransactionSupportedFormat": "Supported formats: JSON",
+  "core.sharedWallets.removeBtnLabel": "Remove"
 }
