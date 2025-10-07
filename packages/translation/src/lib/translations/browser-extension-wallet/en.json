@@ -785,6 +785,8 @@
   "multiWallet.walletAlreadyExists": "Wallet already exists",
   "notificationsCenter.manageSubscriptions": "Manage subscriptions",
   "notificationsCenter.markAllAsRead": "Mark all as read",
+  "notificationsCenter.subscriptions": "Subscriptions",
+  "notificationsCenter.chooseSubject": "Choose the kind of subject you wish to get notifications",
   "notificationsCenter.title": "Notifications",
   "notificationsCenter.viewAll": "View all",
   "notificationsCenter.notificationListItem.remove": "Remove",

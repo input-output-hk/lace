@@ -11,6 +11,7 @@ import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 import { NavigationButton } from '@lace/common';
 import { useHistory } from 'react-router';
 import { SectionTitle } from '@components/Layout/SectionTitle';
+import { SubscriptionsContainer } from './SubscriptionsContainer';
 
 export const NotificationsCenter = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -52,22 +53,25 @@ export const NotificationsCenter = (): React.ReactElement => {
       }
       isLoading={isInitialLoad}
     >
-      <div>
-        {notifications?.length > 0 ? (
-          <NotificationsList
-            onClick={onGoToNotification}
-            notifications={notifications}
-            scrollableTarget="contentLayout"
-            dataLength={notifications.length}
-            onRemove={onShowRemoveNotificationModal}
-            popupView
-          />
-        ) : (
-          <Box mt="$96">
-            <EmptyState />
-          </Box>
-        )}
-      </div>
+      <Flex w="$fill" flexDirection="column" gap="$20">
+        <SubscriptionsContainer popupView />
+        <div style={{ width: '100%' }}>
+          {notifications?.length > 0 ? (
+            <NotificationsList
+              onClick={onGoToNotification}
+              notifications={notifications}
+              scrollableTarget="contentLayout"
+              dataLength={notifications.length}
+              onRemove={onShowRemoveNotificationModal}
+              popupView
+            />
+          ) : (
+            <Box mt="$96">
+              <EmptyState />
+            </Box>
+          )}
+        </div>
+      </Flex>
       <WarningModal
         visible={isRemoveNotificationModalVisible}
         header={t('notificationsCenter.removeNotification')}

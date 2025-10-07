@@ -16,6 +16,7 @@ import { useHistory } from 'react-router';
 import { Layout, SectionLayout } from '../../components/Layout';
 import { EducationalList } from '../../components';
 import { getEducationalList } from '@src/views/browser-view/features/assets/components/AssetEducationalList/AssetEducationalList';
+import { SubscriptionsContainer } from '@src/features/notifications-center/SubscriptionsContainer';
 
 export const NotificationsCenter = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -63,8 +64,8 @@ export const NotificationsCenter = (): React.ReactElement => {
           }}
         />
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <Box mb="$16" pl="$12">
-            <Flex h="$48" alignItems="center" justifyContent="space-between">
+          <Box mb="$16">
+            <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
               <Box mb={'$0'}>
                 <SectionTitle
                   sideText={`(${unreadNotifications})`}
@@ -77,17 +78,20 @@ export const NotificationsCenter = (): React.ReactElement => {
                   }
                 />
               </Box>
-              {unreadNotifications > 0 && (
-                <Button
-                  className={styles.button}
-                  block
-                  color="gradient"
-                  data-testid="notifications-bell"
-                  onClick={() => markAsRead()}
-                >
-                  {t('notificationsCenter.markAllAsRead')}
-                </Button>
-              )}
+              <Flex gap="$20">
+                <SubscriptionsContainer />
+                {unreadNotifications > 0 && (
+                  <Button
+                    className={styles.button}
+                    block
+                    color="gradient"
+                    data-testid="notifications-bell"
+                    onClick={() => markAsRead()}
+                  >
+                    {t('notificationsCenter.markAllAsRead')}
+                  </Button>
+                )}
+              </Flex>
             </Flex>
           </Box>
           {notifications?.length > 0 ? (

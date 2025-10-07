@@ -28,3 +28,8 @@
     }
   }
 }
+
+.header {
+  flex-wrap: wrap;
+  row-gap: size_unit(2);
+}
