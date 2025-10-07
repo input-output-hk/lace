@@ -13,7 +13,7 @@ type LanguageChoiceProps = {
   onBack: () => void;
 };
 
-const LANG_CHOICES = ['en', 'ja']; // hardcoding for v1 only
+const LANG_CHOICES = ['en', 'es']; // hardcoding for v1 only
 
 export const LanguageInfo = ({ onBack }: LanguageChoiceProps): React.ReactElement => {
   const { t } = useTranslation();
