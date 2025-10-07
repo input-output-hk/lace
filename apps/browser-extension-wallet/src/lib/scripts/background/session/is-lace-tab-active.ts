@@ -8,6 +8,12 @@ const windowRemoved$ = fromEventPattern<WindowId>(
   (handler) => windows.onRemoved.addListener(handler),
   (handler) => windows.onRemoved.removeListener(handler)
 );
+
+const windowFocusChanged$ = fromEventPattern<WindowId>(
+  (handler) => windows.onFocusChanged.addListener(handler),
+  (handler) => windows.onFocusChanged.removeListener(handler)
+);
+
 const tabUpdated$ = fromEventPattern(
   (handler) => tabs.onUpdated.addListener(handler),
   (handler) => tabs.onUpdated.removeListener(handler),
@@ -30,7 +36,7 @@ const getExtensionTabUrlPattern = () => {
   return `${url.origin}/*`;
 };
 
-export const isLaceTabActive$ = merge(windowRemoved$, tabUpdated$, tabActivated$).pipe(
+export const isLaceTabActive$ = merge(windowRemoved$, tabUpdated$, tabActivated$, windowFocusChanged$).pipe(
   switchMap(() =>
     from(
       catchAndBrandExtensionApiError(
