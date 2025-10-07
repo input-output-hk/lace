@@ -9,7 +9,7 @@ import styles from './SectionLayout.modules.scss';
 import { SidePanelButton } from '../SidePanelButton/SidePanelButton';
 import { CollapsiblePanelContainer } from '../CollapsiblePanelContainer/CollapsiblePanelContainer';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
-import { NotificationsBellContainer } from '@components/NotificationsCenter';
+import { NotificationsBellContainer } from '@src/features/notifications-center';
 
 export const CONTENT_ID = 'content';
 
