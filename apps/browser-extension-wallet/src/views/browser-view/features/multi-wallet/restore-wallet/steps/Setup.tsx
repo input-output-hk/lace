@@ -2,16 +2,16 @@ import { WalletSetupNamePasswordStepRevamp, WalletSetupNamePasswordSubmitParams 
 import React from 'react';
 import { useRestoreWallet } from '../context';
 import { useTranslation } from 'react-i18next';
-import { toast } from '@lace/common';
 import { useAnalyticsContext } from '@providers';
 import { WalletConflictError } from '@cardano-sdk/web-extension';
-import { TOAST_DEFAULT_DURATION } from '@hooks/useActionExecution';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
+import { useLocalStorage } from '@hooks';
 
 export const Setup = (): JSX.Element => {
   const { back, createWalletData, finalizeWalletRestoration, next } = useRestoreWallet();
   const analytics = useAnalyticsContext();
   const { forgotPasswordFlowActive, postHogActions } = useWalletOnboarding();
+  const [, { updateLocalStorage: setShowWalletConflictError }] = useLocalStorage('showWalletConflictError', false);
   const { t } = useTranslation();
 
   const translations = {
@@ -38,7 +38,7 @@ export const Setup = (): JSX.Element => {
       await finalizeWalletRestoration({ name: walletName });
     } catch (error) {
       if (error instanceof WalletConflictError) {
-        toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('multiWallet.walletAlreadyExists') });
+        setShowWalletConflictError(true);
       } else {
         throw error;
       }

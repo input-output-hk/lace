@@ -67,4 +67,5 @@ export interface ILocalStorage {
   isCustomSubmitApiEnabled?: Record<EnvironmentTypes, CustomSubmitApiConfig>;
   isReceiveInAdvancedMode?: boolean;
   hasUserAcknowledgedPrivacyPolicyUpdate?: boolean;
+  showWalletConflictError?: boolean;
 }

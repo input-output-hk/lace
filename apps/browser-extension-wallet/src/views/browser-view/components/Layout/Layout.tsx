@@ -12,12 +12,13 @@ import { useNetworkError } from '@hooks/useNetworkError';
 import { LeftSidePanel } from '../LeftSidePanel';
 import styles from './Layout.module.scss';
 import { PinExtension } from '@views/browser/features/wallet-setup/components/PinExtension';
-import { useLocalStorage } from '@hooks';
+import { TOAST_DEFAULT_DURATION, useLocalStorage } from '@hooks';
 import { useWalletStore } from '@stores';
 import { useOpenTransactionDrawer } from '@views/browser/features/send-transaction';
 import { useOpenReceiveDrawer } from '../TransactionCTAsBox/useOpenReceiveDrawer';
 import { useBitcoinSendDrawer } from '../TransactionCTAsBox/useBitcoinSendDrawer';
 import { useCurrentBlockchain, Blockchain } from '@src/multichain';
+import PlainCheckIcon from '@assets/icons/check-icon-plain.component.svg';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -45,6 +46,10 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
   const openTransactionDrawer = blockchain === Blockchain.Cardano ? openCardanoSendDrawer : openBitcoinSendDrawer;
 
   const [showPinExtension, { updateLocalStorage: setShowPinExtension }] = useLocalStorage('showPinExtension', true);
+  const [showWalletConflictError, { updateLocalStorage: setShowWalletConflictError }] = useLocalStorage(
+    'showWalletConflictError',
+    false
+  );
   const [showMultiAddressModal] = useLocalStorage('showMultiAddressModal', true);
 
   useEffect(() => {
@@ -87,6 +92,22 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
     // eslint-disable-next-line consistent-return
     return () => window.clearTimeout(timer);
   }, [setShowPinExtension, showMultiAddressModal, walletState?.addresses?.length]);
+
+  useEffect(() => {
+    if (!showWalletConflictError) return;
+    toast.notify({
+      duration: TOAST_DEFAULT_DURATION,
+      text: t('multiWallet.walletAlreadyExists'),
+      icon: PlainCheckIcon
+    });
+
+    const timer = setTimeout(() => {
+      setShowWalletConflictError(false);
+    }, TOAST_DEFAULT_DURATION);
+
+    // eslint-disable-next-line consistent-return
+    return () => clearTimeout(timer);
+  }, [setShowWalletConflictError, showWalletConflictError, t]);
 
   const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
   const showNetworkError = useCallback(
