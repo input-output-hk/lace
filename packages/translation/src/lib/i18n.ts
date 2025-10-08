@@ -27,13 +27,13 @@ for (const lang of Object.values(Language)) {
 
 const normalizeNavigatorLanguage = (input: Language | string): Language => {
   const code = String(input).toLowerCase();
-  const base = code.split(/[_-]/)[0]; // "en-GB" -> "en", "ja-JP" -> "ja"
+  const base = code.split(/[_-]/)[0]; // "en-GB" -> "en", "es-XX" -> "es"
   switch (base) {
     case 'en': {
       return Language.en;
     }
-    case 'ja': {
-      return Language.ja;
+    case 'es': {
+      return Language.es;
     }
     default: {
       return DEFAULT_LANG;
