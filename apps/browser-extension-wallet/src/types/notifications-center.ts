@@ -8,7 +8,7 @@ export interface LaceMessage {
   id: string;
   publisher: string;
   title: string;
-  topic: string;
+  topicId: NotificationsTopic['id'];
 }
 
 export interface LaceNotification {
@@ -16,7 +16,12 @@ export interface LaceNotification {
   read?: boolean;
 }
 
+export interface LaceNotificationWithTopicName extends LaceNotification {
+  topicName: string;
+}
+
 export interface NotificationsTopic {
+  id: string;
   name: string;
   subscribed?: boolean;
 }
@@ -29,8 +34,8 @@ export interface NotificationsCenterProperties {
   };
   topics: {
     topics$: Observable<NotificationsTopic[]>;
-    subscribe: (topic: string) => Promise<void>;
-    unsubscribe: (topic: string) => Promise<void>;
+    subscribe: (topic: Pick<NotificationsTopic, 'id'>) => Promise<void>;
+    unsubscribe: (topic: Pick<NotificationsTopic, 'id'>) => Promise<void>;
   };
 }
 

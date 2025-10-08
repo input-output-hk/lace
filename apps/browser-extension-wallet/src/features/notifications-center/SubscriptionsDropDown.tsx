@@ -27,14 +27,14 @@ export const SubscriptionsDropDown = ({
         <Text.Label color="secondary">{t('notificationsCenter.chooseSubject')}</Text.Label>
         <Flex w="$fill" gap="$24" flexDirection="column" justifyContent="space-between">
           {topics.map((topic) => (
-            <Flex w="$fill" key={topic.name} gap="$24" justifyContent="space-between">
+            <Flex w="$fill" key={topic.id} gap="$24" justifyContent="space-between">
               <Text.Label className={styles.toggleLabel} color="secondary">
                 {topic.name}
               </Text.Label>
               <ToggleSwitch
-                key={topic.name}
+                key={topic.id}
                 defaultChecked={topic.subscribed}
-                data-testid={`subscriptions-toggle-${topic.name}`}
+                data-testid={`subscriptions-toggle-${topic.id}`}
                 onCheckedChange={(isChecked) => onTopicChange(topic, isChecked)}
               />
             </Flex>

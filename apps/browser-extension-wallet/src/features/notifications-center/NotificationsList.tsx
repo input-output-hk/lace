@@ -8,7 +8,7 @@ import styles from './NotificationsList.module.scss';
 import isNumber from 'lodash/isNumber';
 import Loader from '../../assets/icons/loader.component.svg';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
-import { LaceNotification } from '@src/types/notifications-center';
+import { LaceNotificationWithTopicName } from '@src/types/notifications-center';
 
 const ESTIMATED_MIN_ITEM_HEIGHT = 96;
 
@@ -25,7 +25,7 @@ export const useItemsPageSize = (estimatedItemHeight = ESTIMATED_MIN_ITEM_HEIGHT
 
 export interface NotificationsListProps {
   className?: string;
-  notifications: LaceNotification[];
+  notifications: LaceNotificationWithTopicName[];
   scrollableTarget: string;
   endMessage?: React.ReactNode;
   dataLength: number;
@@ -86,7 +86,7 @@ export const NotificationsList = ({
           data-testid="notifications-list"
           itemLayout="horizontal"
           dataSource={notifications}
-          renderItem={(props: LaceNotification) => (
+          renderItem={(props: LaceNotificationWithTopicName) => (
             <List.Item
               data-testid="notification-list-item"
               className={cn(styles.listItem, className, { [styles.withBorder]: withDivider })}
@@ -97,7 +97,7 @@ export const NotificationsList = ({
                 withBorder={withBorder}
                 id={props.message.id}
                 title={props.message.title}
-                publisher={props.message.topic}
+                publisher={props.topicName}
                 isRead={props.read}
                 onClick={() => onClick?.(props.message.id)}
               />

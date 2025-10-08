@@ -1,5 +1,5 @@
 import { runtime } from 'webextension-polyfill';
-import { of, Subject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
 import { exposeApi } from '@cardano-sdk/web-extension';
 
 import {
@@ -19,7 +19,7 @@ const exposeNotificationsCenterAPI = (): void => {
         format: 'plain',
         id: 'id-1',
         publisher: 'Midnight',
-        topic: 'topic-1',
+        topicId: 'topic-1',
         title: 'The Glacier Drop phase 2 is live'
       }
     },
@@ -30,7 +30,7 @@ const exposeNotificationsCenterAPI = (): void => {
         format: 'plain',
         id: 'id-2',
         publisher: 'Midnight',
-        topic: 'topic-2',
+        topicId: 'topic-2',
         title: 'The new node version XYZ is out'
       }
     },
@@ -41,17 +41,20 @@ const exposeNotificationsCenterAPI = (): void => {
         format: 'plain',
         id: 'id-3',
         publisher: 'Governance',
-        topic: 'topic-1',
+        topicId: 'topic-1',
         title: 'The governance council has opened voting for governance action number 26'
       },
       read: true
     }
   ];
 
-  const topics: NotificationsTopic[] = [{ name: 'topic-1' }, { name: 'topic-2', subscribed: true }];
+  const topics: NotificationsTopic[] = [
+    { id: 'topic-1', name: 'Topic One' },
+    { id: 'topic-2', name: 'Topic Two', subscribed: true }
+  ];
 
-  const notifications$ = new Subject<LaceNotification[]>();
-  const topics$ = new Subject<NotificationsTopic[]>();
+  const notifications$ = new ReplaySubject<LaceNotification[]>(1);
+  const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
 
   const markAsRead = async (id?: string): Promise<void> => {
     for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;
@@ -69,16 +72,16 @@ const exposeNotificationsCenterAPI = (): void => {
     return Promise.resolve();
   };
 
-  const subscribe = async (topic: string): Promise<void> => {
-    for (const currTopic of topics) if (currTopic.name === topic) currTopic.subscribed = true;
+  const subscribe = async (topic: Pick<NotificationsTopic, 'id'>): Promise<void> => {
+    for (const currTopic of topics) if (currTopic.id === topic.id) currTopic.subscribed = true;
 
     topics$.next(topics);
 
     return Promise.resolve();
   };
 
-  const unsubscribe = async (topic: string): Promise<void> => {
-    for (const currTopic of topics) if (currTopic.name === topic) delete currTopic.subscribed;
+  const unsubscribe = async (topic: Pick<NotificationsTopic, 'id'>): Promise<void> => {
+    for (const currTopic of topics) if (currTopic.id === topic.id) delete currTopic.subscribed;
 
     topics$.next(topics);
 

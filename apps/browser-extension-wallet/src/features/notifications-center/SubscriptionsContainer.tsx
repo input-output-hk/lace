@@ -24,9 +24,9 @@ export const SubscriptionsContainer = ({ popupView }: SubscriptionsContainerProp
 
   const handleTopicChange = (topic: NotificationsTopic, shouldSubscribe: boolean) => {
     if (shouldSubscribe) {
-      subscribe(topic.name);
+      subscribe(topic);
     } else {
-      unsubscribe(topic.name);
+      unsubscribe(topic);
     }
   };
 
