@@ -1,5 +1,6 @@
 import { SearchBox } from '@input-output-hk/lace-ui-toolkit';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type SearchProps = {
   onChange?: (value: string) => void;
@@ -8,10 +9,11 @@ type SearchProps = {
 
 export const Search: React.FC<SearchProps> = ({ onChange, initialValue = '' }) => {
   const [searchValue, setSearchValue] = useState(initialValue);
+  const { t } = useTranslation();
   useEffect(() => onChange?.(searchValue), [onChange, searchValue]);
   return (
     <SearchBox
-      placeholder="Search by ID or name"
+      placeholder={t('asset.searchPlaceholder')}
       value={searchValue}
       onChange={setSearchValue}
       onClear={() => setSearchValue('')}

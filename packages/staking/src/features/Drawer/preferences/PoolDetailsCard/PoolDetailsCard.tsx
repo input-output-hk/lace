@@ -80,9 +80,11 @@ export const PoolDetailsCard = ({
           />
           <Flex gap="$28" p="$32" pt="$20" flexDirection="column" alignItems="center">
             <Flex justifyContent="space-between" alignItems="center" w="$fill">
-              <Text.Body.Large data-testid="pool-details-card-edit-ratio-title">Edit saved ratio</Text.Body.Large>
+              <Text.Body.Large data-testid="pool-details-card-edit-ratio-title">
+                {t('details.editSavedRatio')}
+              </Text.Body.Large>
               <Flex alignItems="center" gap="$12">
-                <Text.Body.Large data-testid="pool-details-card-ratio-title">Ratio</Text.Body.Large>
+                <Text.Body.Large data-testid="pool-details-card-ratio-title">{t('details.ratio')}</Text.Body.Large>
                 <RatioInput
                   onUpdate={updatePercentage}
                   value={localValue}

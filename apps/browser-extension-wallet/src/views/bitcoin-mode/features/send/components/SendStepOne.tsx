@@ -32,13 +32,6 @@ interface RecommendedFee {
   estimatedTime: string; // e.g. "~10 min"
 }
 
-const fees: RecommendedFee[] = [
-  { key: 'fast', label: 'High', feeRate: 10, estimatedTime: '~10 min' },
-  { key: 'standard', label: 'Average', feeRate: 5, estimatedTime: '~30 min' },
-  { key: 'slow', label: 'Slow', feeRate: 1, estimatedTime: '~60 min' },
-  { key: 'custom', label: 'Custom', estimatedTime: '~?? min' }
-];
-
 interface SendStepOneProps {
   amount: string;
   onAmountChange: (value: string) => void;
@@ -101,13 +94,23 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
   const [feeRate, setFeeRate] = useState<number>(1);
   const handleResolver = useHandleResolver();
 
+  const fees: RecommendedFee[] = useMemo(
+    () => [
+      { key: 'fast', label: t('bitcoinSendMode.fee.high'), feeRate: 10, estimatedTime: '~10 min' },
+      { key: 'standard', label: t('bitcoinSendMode.fee.average'), feeRate: 5, estimatedTime: '~30 min' },
+      { key: 'slow', label: t('bitcoinSendMode.fee.slow'), feeRate: 1, estimatedTime: '~60 min' },
+      { key: 'custom', label: t('bitcoinSendMode.fee.custom'), estimatedTime: '~?? min' }
+    ],
+    [t]
+  );
+
   const getFees = useCallback(
     () =>
       fees.map((fee) => ({
         ...fee,
         feeRate: fee.key !== 'custom' ? feeMarkets?.[fee.key]?.feeRate || fee.feeRate : fee.feeRate
       })),
-    [feeMarkets]
+    [feeMarkets, fees]
   );
 
   const [handleVerificationState, setHandleVerificationState] = useState<HandleVerificationState | undefined>();
@@ -332,11 +335,7 @@ export const SendStepOne: React.FC<SendStepOneProps> = ({
       <Flex flexDirection="column" w="$fill" className={mainStyles.container}>
         {isPopupView && <Text.Heading weight="$bold">{t('browserView.transaction.send.title')}</Text.Heading>}
         {hasUtxosInMempool && (
-          <InputError
-            marginBottom
-            error="You cannot send transactions while previous transactions are still pending."
-            isPopupView={isPopupView}
-          />
+          <InputError marginBottom error={t('bitcoinSendMode.previousTxSendError')} isPopupView={isPopupView} />
         )}
 
         <Search

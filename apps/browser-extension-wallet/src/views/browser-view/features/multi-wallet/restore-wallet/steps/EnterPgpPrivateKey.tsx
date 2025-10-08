@@ -19,6 +19,7 @@ import { TextArea } from '@lace/common';
 import { ShieldedPgpKeyData } from '@src/types';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useAnalyticsContext } from '@providers';
+import { useTranslation } from 'react-i18next';
 
 interface Validation {
   error?: string;
@@ -53,6 +54,7 @@ const decryptQrCodeMnemonicWithPrivateKey = async ({ pgpInfo }: DecryptProps): P
 };
 
 export const EnterPgpPrivateKey: VFC = () => {
+  const { t } = useTranslation();
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
   const { back, createWalletData, next, pgpInfo, setPgpInfo, setMnemonic } = useRestoreWallet();
@@ -74,7 +76,7 @@ export const EnterPgpPrivateKey: VFC = () => {
           pgpPrivateKey: e.target.value,
           privateKeyIsDecrypted: privateKey.isDecrypted()
         });
-        setValidation({ success: 'valid PGP private key' });
+        setValidation({ success: t('pgp.validPrivateKey') });
       } catch (error) {
         if (error.message === 'Misformed armored text') {
           setValidation({ error: i18n.t('pgp.error.misformedArmoredText') });
@@ -84,7 +86,7 @@ export const EnterPgpPrivateKey: VFC = () => {
         }
       }
     },
-    [setValidation, pgpInfo, setPgpInfo]
+    [setValidation, pgpInfo, setPgpInfo, t]
   );
 
   const handleNext = () => {
@@ -127,7 +129,7 @@ export const EnterPgpPrivateKey: VFC = () => {
                   pgpPrivateKey: fileinfo as string,
                   privateKeyIsDecrypted: pk.isDecrypted()
                 });
-                setValidation({ error: null, success: 'valid PGP private key' });
+                setValidation({ error: null, success: t('pgp.validPrivateKey') });
                 setPrivateKeyFile(keyFile?.name);
               })
               .catch((error) => {
@@ -145,7 +147,7 @@ export const EnterPgpPrivateKey: VFC = () => {
         setValidation({ error: error.message });
       }
     },
-    [setValidation, setPrivateKeyFile, setPgpInfo, pgpInfo]
+    [setValidation, setPrivateKeyFile, setPgpInfo, pgpInfo, t]
   );
 
   useEffect(() => {
