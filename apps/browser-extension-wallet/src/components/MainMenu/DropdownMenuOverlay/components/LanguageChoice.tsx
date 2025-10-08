@@ -12,7 +12,7 @@ type LanguageChoiceProps = {
 export const LanguageChoice = ({ onClick }: LanguageChoiceProps): React.ReactElement => {
   const { t } = useTranslation();
   const { getBackgroundStorage } = useBackgroundServiceAPIContext();
-  const [language, setLanguage] = useState<string>();
+  const [language, setLanguage] = useState<string>('en');
   const [loadingLanguage, setLoadingLanguage] = useState(true);
 
   useEffect(() => {

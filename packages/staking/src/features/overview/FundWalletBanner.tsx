@@ -65,7 +65,9 @@ export const FundWalletBanner = ({
       <div className={styles.copyButtonWrapper}>
         <Button
           data-testid="copy-address"
-          onClick={() => toast.notify({ duration: TOAST_DEFAULT_DURATION, text: 'Copied to clipboard' })}
+          onClick={() =>
+            toast.notify({ duration: TOAST_DEFAULT_DURATION, text: t('general.clipboard.copiedToClipboard') })
+          }
           color="secondary"
           className={styles.copyButton}
         >

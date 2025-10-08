@@ -177,7 +177,7 @@
   "core.assetActivityItem.entry.name.StakeVoteRegistrationDelegateCertificate": "Certificado de delegación del registro de voto de la staking",
   "core.assetActivityItem.entry.name.StakeVoteRegistrationDelegationCertificate": "Certificado de delegación del registro de voto de la staking",
   "core.assetActivityItem.entry.name.TreasuryWithdrawalsAction": "Acción de retiradas de la tesorería",
-  "core.assetActivityItem.entry.name.UnregisterDelegateRepresentativeCertificate": "Deregistración de un DRep",
+  "core.assetActivityItem.entry.name.UnregisterDelegateRepresentativeCertificate": "Deregistración de DRep",
   "core.assetActivityItem.entry.name.UpdateCommittee": "Acción de actualización del comité",
   "core.assetActivityItem.entry.name.UpdateDelegateRepresentativeCertificate": "Actualizar DRep",
   "core.assetActivityItem.entry.name.vote": "Firma de votos",
@@ -257,7 +257,7 @@
   "core.dappTransaction.fee": "Coste",
   "core.dappTransaction.fromAddress": "De dirección",
   "core.dappTransaction.insufficientFunds": "No tiene suficientes fondos para completar la transacción",
-  "core.dappTransaction.items": "item(s)",
+  "core.dappTransaction.items": "elemento(s)",
   "core.dappTransaction.mint": "Acuñar",
   "core.dappTransaction.nfts": "NFTs",
   "core.dappTransaction.noCollateral": "La billetera no debería poder firmar transacciones de la DApp sin tener garantía",
@@ -359,7 +359,7 @@
   "core.ProposalProcedure.dRepId": "Identificador del DRep",
   "core.ProposalProcedure.governanceAction.actionId.index": "Índice",
   "core.ProposalProcedure.governanceAction.actionId.title": "Identificador de acción",
-  "core.ProposalProcedure.governanceAction.actionId.txId": "Identificador de la transacción",
+  "core.ProposalProcedure.governanceAction.actionId.txId": "TX ID",
   "core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.major": "Versión de protocolo mayor",
   "core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.minor": "Versión de protocolo menor",
   "core.ProposalProcedure.governanceAction.hardForkInitiation.protocolVersion.patch": "Parche de la versión del protocolo",
@@ -485,7 +485,7 @@
   "core.Send.title": "Confirmar transacción",
   "core.transactionCtas.receive": "Recibir",
   "core.transactionCtas.send": "Enviar",
-  "core.transactionCtas.coSign": "Firmar conjuntamente",
+  "core.transactionCtas.coSign": "Firmar conjunta",
   "core.StakeRegistrationDelegation.depositPaid": "Depósito pagado",
   "core.StakeRegistrationDelegation.metadata": "Metadatos",
   "core.StakeRegistrationDelegation.poolId": "Identificador de la pool",
@@ -720,5 +720,6 @@
   "browserView.settings.wallet.collateral.autoSet.description": "Puede especificar 5 ada como garantía sin ninguna transacción adicional",
   "core.sharedWallets.importTransaction": "Importar la transacción",
   "core.sharedWallets.importTransactionDescription": "Para firmar conjuntamente una transacción iniciada por otra billetera compartida, suba el fichero JSON de la transacción que recibió",
-  "core.sharedWallets.importTransactionSupportedFormat": "Formatos compatibles: JSON"
+  "core.sharedWallets.importTransactionSupportedFormat": "Formatos compatibles: JSON",
+  "core.sharedWallets.removeBtnLabel": "Retirar"
 }

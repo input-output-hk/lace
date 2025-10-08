@@ -60,7 +60,7 @@ export const LanguageInfo = ({ onBack }: LanguageChoiceProps): React.ReactElemen
           data-testid={'language-choice-radio-group'}
         >
           {LANG_CHOICES.map((choice) => (
-            <Radio key={`language-choice-${choice}`} value={choice}>
+            <Radio key={`language-choice-${choice}`} value={choice} className={styles.radioLabel}>
               {choice}
             </Radio>
           ))}

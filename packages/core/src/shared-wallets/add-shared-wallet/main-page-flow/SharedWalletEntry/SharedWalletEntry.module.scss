@@ -11,6 +11,10 @@
   margin-bottom: size_unit(3);
 }
 
+.heading {
+  text-align: center;
+}
+
 .options {
   display: grid;
   grid-template-columns: 1fr 1px 1fr 1px 1fr;

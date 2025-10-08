@@ -1,21 +1,21 @@
-import { t } from 'i18next';
+import { SharedWalletsTranslationKey } from '@lace/translation';
 import { SharedWalletCreationStep } from './state-and-types';
 
-export const creationTimelineSteps = [
+export const creationTimelineSteps: { key: SharedWalletCreationStep; name: SharedWalletsTranslationKey }[] = [
   {
     key: SharedWalletCreationStep.Setup,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.walletName'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.walletName',
   },
   {
     key: SharedWalletCreationStep.CoSigners,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.addCosigners'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.addCosigners',
   },
   {
     key: SharedWalletCreationStep.Quorum,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.defineQuorum'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.defineQuorum',
   },
   {
     key: SharedWalletCreationStep.ShareDetails,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.walletDetails'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.walletDetails',
   },
 ];
