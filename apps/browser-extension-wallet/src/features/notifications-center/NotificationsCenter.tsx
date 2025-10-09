@@ -16,7 +16,7 @@ import { SubscriptionsContainer } from './SubscriptionsContainer';
 export const NotificationsCenter = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isRemoveNotificationModalVisible, setIsRemoveNotificationModalVisible] = useState(false);
-  const { notifications, remove, unreadNotifications } = useNotificationsCenter();
+  const { notifications, remove, unreadNotifications, markAsRead } = useNotificationsCenter();
   const [notificationIdToRemove, setNotificationIdToRemove] = useState<string | undefined>();
   const history = useHistory();
 
@@ -31,6 +31,7 @@ export const NotificationsCenter = (): React.ReactElement => {
   };
 
   const onGoToNotification = (id: string) => {
+    markAsRead(id);
     history.push(`/notification/${id}`);
   };
 

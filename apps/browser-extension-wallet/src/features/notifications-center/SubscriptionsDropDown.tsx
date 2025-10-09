@@ -27,7 +27,7 @@ export const SubscriptionsDropDown = ({
         <Text.Label color="secondary">{t('notificationsCenter.chooseSubject')}</Text.Label>
         <Flex w="$fill" gap="$24" flexDirection="column" justifyContent="space-between">
           {topics.map((topic) => (
-            <Flex w="$fill" key={topic.id} gap="$24" justifyContent="space-between">
+            <Flex className={styles.switch} w="$fill" key={topic.id} gap="$24" justifyContent="space-between">
               <Text.Label className={styles.toggleLabel} color="secondary">
                 {topic.name}
               </Text.Label>

@@ -41,6 +41,7 @@ export const NotificationsCenter = (): React.ReactElement => {
   };
 
   const goToNotification = (id: string) => {
+    markAsRead(id);
     history.push(`/notification/${id}`);
   };
 

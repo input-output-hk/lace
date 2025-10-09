@@ -1,0 +1,32 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.icon {
+  width: size_unit(2);
+  height: size_unit(2);
+  color: var(--text-color-secondary);
+  path {
+    fill: none !important;
+  }
+}
+
+.actions {
+  :hover {
+    .icon {
+      color: var(--text-color-primary);
+    }
+  }
+}
+
+.header {
+  flex-wrap: wrap;
+  row-gap: size_unit(2);
+}
+
+.button {
+  max-width: size_unit(25);
+}
+
+.sectionTitle {
+  margin-bottom: size_unit(0) !important;
+}

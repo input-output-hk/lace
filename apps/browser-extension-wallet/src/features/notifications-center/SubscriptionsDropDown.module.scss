@@ -34,3 +34,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+.switch {
+  button {
+    background: var(--light-mode-mid-grey, var(--dark-mode-dark-grey)) !important;
+  }
+  button[aria-checked="true"] {
+    background: var(--switch-checked-bg-color) !important;
+  }
+}
