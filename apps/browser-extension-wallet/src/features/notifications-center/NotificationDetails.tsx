@@ -6,6 +6,8 @@ import { Flex, Button as LaceButton, Text, Box, Divider } from '@input-output-hk
 import TrashOutlineComponent from '../../assets/icons/browser-view/trash-icon.component.svg';
 import { LaceNotification } from '@src/types/notifications-center';
 import styles from './NotificationDetails.module.scss';
+import { textToLink } from '@src/utils/text-to-link';
+import { useExternalLinkOpener } from '@providers';
 
 export interface NotificationDetailsProps {
   notification: LaceNotification;
@@ -19,7 +21,7 @@ export const NotificationDetails = ({
   popupView
 }: NotificationDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
-
+  const openExternalLink = useExternalLinkOpener();
   const PublisherTextComponent = popupView ? Text.Body.Normal : Text.Body.Small;
   const BodyTextComponent = popupView ? Text.Label : Text.Body.Large;
 
@@ -34,7 +36,9 @@ export const NotificationDetails = ({
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
         {notification.message.format === 'plain' ? (
-          <BodyTextComponent weight="$semibold">{notification.message.body}</BodyTextComponent>
+          <BodyTextComponent weight="$semibold">
+            {textToLink(notification.message.body, openExternalLink)}
+          </BodyTextComponent>
         ) : (
           <pre>{JSON.stringify(notification.message.body)}</pre>
         )}
