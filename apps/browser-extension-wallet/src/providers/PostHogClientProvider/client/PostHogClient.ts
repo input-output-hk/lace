@@ -45,6 +45,10 @@ const isNetworkOfExpectedSchema = (n: string): n is NetworksEnumSchema => networ
 
 const logger = contextLogger(commonLogger, 'PostHogClient');
 
+const FALSY_VALUES = ['false', 'False', 'FALSE', 'f', 'F', '0', 0, false];
+const TRUTHY_VALUES = ['true', 'True', 'TRUE', 't', 'T', '1', 1, true];
+const VALID_VALUES = new Set([...FALSY_VALUES, ...TRUTHY_VALUES]);
+
 /**
  * PostHog API reference:
  * https://posthog.com/docs/libraries/js
@@ -56,6 +60,7 @@ export class PostHogClient<Action extends string = string> {
   hasPostHogInitialized$ = new BehaviorSubject(false);
   featureFlagsByNetwork: FeatureFlagsByNetwork = featureFlagsByNetworkInitialValue;
   featureFlagPayloads: FeatureFlagPayloads = featureFlagPayloadsInitialValue;
+  private ffOverride: Record<string, boolean> = {};
 
   constructor(
     private chain: Wallet.Cardano.ChainId,
@@ -66,6 +71,18 @@ export class PostHogClient<Action extends string = string> {
   ) {
     if (!this.postHogHost) throw new Error('POSTHOG_HOST url has not been provided');
     void this.initialize();
+
+    if (typeof process.env.FF_OVERRIDE === 'string')
+      try {
+        const ffOverride = JSON.parse(process.env.FF_OVERRIDE) as Record<string, string | number | boolean>;
+
+        for (const [key, value] of Object.entries(ffOverride)) {
+          if (VALID_VALUES.has(value)) this.ffOverride[key] = TRUTHY_VALUES.includes(value);
+          else commonLogger.error(`Invalid value for FF_OVERRIDE[${key}]: "${value}"`);
+        }
+      } catch (error) {
+        commonLogger.error('While parsing FF_OVERRIDE', error);
+      }
   }
 
   private async initialize() {
@@ -224,6 +241,8 @@ export class PostHogClient<Action extends string = string> {
   }
 
   isFeatureFlagEnabled(feature: FeatureFlag): boolean {
+    if (feature in this.ffOverride) return this.ffOverride[feature];
+
     const currentNetworkFeatureFlags =
       this.featureFlagsByNetwork[this.chain.networkMagic as Wallet.Cardano.NetworkMagics];
     return currentNetworkFeatureFlags[feature] || false;
