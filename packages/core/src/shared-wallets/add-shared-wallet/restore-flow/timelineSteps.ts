@@ -1,13 +1,13 @@
-import { t } from 'i18next';
+import { SharedWalletsTranslationKey } from '@src/../../translation/dist';
 import { SharedWalletRestorationStep } from './types';
 
-export const restorationTimelineSteps = [
+export const restorationTimelineSteps: { key: SharedWalletRestorationStep; name: SharedWalletsTranslationKey }[] = [
   {
     key: SharedWalletRestorationStep.Import,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.importWallet'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.importWallet',
   },
   {
     key: SharedWalletRestorationStep.Done,
-    name: t('sharedWallets.addSharedWallet.layout.timelineStep.allDone'),
+    name: 'sharedWallets.addSharedWallet.layout.timelineStep.allDone',
   },
 ];

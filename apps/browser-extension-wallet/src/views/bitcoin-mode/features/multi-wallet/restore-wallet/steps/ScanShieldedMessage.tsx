@@ -18,7 +18,7 @@ import {
 } from '@input-output-hk/lace-ui-toolkit';
 import { i18n } from '@lace/translation';
 import jsQR, { QRCode } from 'jsqr';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styles from './ScanShieldedMessage.module.scss';
 import cn from 'classnames';
 import { useAnalyticsContext } from '@providers';
@@ -46,6 +46,7 @@ interface ByteChunk<T> {
 type ScannedCode = [ByteChunk<null>, ByteChunk<string>, ByteChunk<Wallet.ChainName>];
 
 export const ScanShieldedMessage: VFC = () => {
+  const { t } = useTranslation();
   const { postHogActions } = useWalletOnboarding();
   const analytics = useAnalyticsContext();
   const { back, next, pgpInfo, setPgpInfo, setWalletMetadata } = useRestoreWallet();
@@ -59,7 +60,7 @@ export const ScanShieldedMessage: VFC = () => {
 
   const endVideoTracks = () => {
     if (streamRef.current) {
-      streamRef.current.getVideoTracks().forEach((t) => t.stop());
+      streamRef.current.getVideoTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   };
@@ -155,7 +156,7 @@ export const ScanShieldedMessage: VFC = () => {
       // User may have scanned the wallet address QR code
       if (Wallet.Cardano.Address.fromString(code.data)) {
         setValidation({
-          error: { title: 'Wrong QR code identified', description: 'Scan paper wallet private QR code' }
+          error: { title: t('pgp.wrongQrCodeHeading'), description: t('pgp.scanWalletPrivateQrCode') }
         });
         void analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
       } else if (isCodeDataCorrectFormatForPaperWallet) {
@@ -164,12 +165,14 @@ export const ScanShieldedMessage: VFC = () => {
         next();
         // Immediately move to next step
       } else {
-        setValidation({ error: { title: 'Unidentified QR code', description: 'Scan your Lace paper wallet' } });
+        setValidation({
+          error: { title: t('pgp.unidentifiedQrCodeHeading'), description: t('pgp.scanWalletPrivateQrCode') }
+        });
         await analytics.sendEventToPostHog(postHogActions.restore.SCAN_QR_CODE_READ_ERROR);
       }
       setScanState('scanning');
     },
-    [next, setValidation, setScanState, onScanSuccess, analytics, postHogActions.restore.SCAN_QR_CODE_READ_ERROR]
+    [next, setValidation, setScanState, onScanSuccess, analytics, postHogActions.restore.SCAN_QR_CODE_READ_ERROR, t]
   );
 
   useEffect(() => {

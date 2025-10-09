@@ -25,6 +25,49 @@ for (const lang of Object.values(Language)) {
   });
 }
 
+const normalizeNavigatorLanguage = (input: Language | string): Language => {
+  const code = String(input).toLowerCase();
+  const base = code.split(/[_-]/)[0]; // "en-GB" -> "en", "es-XX" -> "es"
+  switch (base) {
+    case 'en': {
+      return Language.en;
+    }
+    case 'es': {
+      return Language.es;
+    }
+    default: {
+      return DEFAULT_LANG;
+    }
+  }
+};
+
+export const initI18n = async (
+  lang?: Language | string,
+): Promise<typeof i18n> => {
+  const resolved = normalizeNavigatorLanguage(lang ?? DEFAULT_LANG);
+
+  if (i18n.isInitialized) {
+    return i18n.changeLanguage(resolved).then(() => i18n);
+  }
+
+  return i18n
+    .use(initReactI18next)
+    .init({
+      lng: resolved,
+      fallbackLng: DEFAULT_LANG,
+      resources,
+      supportedLngs: Object.values(Language) as string[],
+      nonExplicitSupportedLngs: true,
+      lowerCaseLng: true,
+      interpolation: { escapeValue: false },
+      react: {
+        useSuspense: false,
+        transSupportBasicHtmlNodes: true,
+      },
+    })
+    .then(() => i18n);
+};
+
 i18n.use(initReactI18next).init({
   fallbackLng: DEFAULT_LANG,
   interpolation: {

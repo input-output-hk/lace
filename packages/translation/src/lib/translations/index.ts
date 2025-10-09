@@ -1,33 +1,49 @@
 import { Language } from '../../types';
 
-import { en as extension } from './browser-extension-wallet/en';
-import { en as cardano } from './cardano/en';
-import { en as core } from './core/en';
-import { en as sharedWallets } from './shared-wallets/en';
-import { en as staking } from './staking/en';
+import { en as enExtension } from './browser-extension-wallet/en';
+import { es as esExtension } from './browser-extension-wallet/es';
+import { en as enCardano } from './cardano/en';
+import { es as esCardano } from './cardano/es';
+import { en as enCore } from './core/en';
+import { es as esCore } from './core/es';
+import { en as enSharedWallets } from './shared-wallets/en';
+import { es as esSharedWallets } from './shared-wallets/es';
+import { en as enStaking } from './staking/en';
+import { es as esStaking } from './staking/es';
 
 export const allTranslations = {
   [Language.en]: {
-    ...core,
-    ...cardano,
-    ...extension,
-    ...staking,
-    ...sharedWallets,
+    ...enCore,
+    ...enCardano,
+    ...enExtension,
+    ...enStaking,
+    ...enSharedWallets,
+  },
+  [Language.es]: {
+    ...esCore,
+    ...esCardano,
+    ...esExtension,
+    ...esStaking,
+    ...esSharedWallets,
   },
 };
 
 export const coreTranslations = {
-  [Language.en]: core,
+  [Language.en]: enCore,
+  [Language.es]: esCore,
 };
 
 export const sharedWalletsTranslations = {
-  [Language.en]: sharedWallets,
+  [Language.en]: enSharedWallets,
+  [Language.es]: esSharedWallets,
 };
 
 export const extensionTranslations = {
-  [Language.en]: extension,
+  [Language.en]: enExtension,
+  [Language.es]: esExtension,
 };
 
 export const stakingTranslations = {
-  [Language.en]: staking,
+  [Language.en]: enStaking,
+  [Language.es]: esStaking,
 };

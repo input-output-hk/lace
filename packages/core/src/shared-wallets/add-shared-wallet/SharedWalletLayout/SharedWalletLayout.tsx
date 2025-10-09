@@ -1,5 +1,6 @@
 import { Box, Button, Flex, LoadingComponent, ScrollArea, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Timeline } from '@lace/common';
+import { SharedWalletsTranslationKey } from '@lace/translation';
 import cn from 'classnames';
 import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,7 @@ import { LayoutNavigationProps } from './type';
 
 export type TimelineStep<Key extends string> = {
   key: Key;
-  name: string;
+  name: SharedWalletsTranslationKey;
 };
 
 const parseTimelineSteps = <Key extends string>(timelineSteps: TimelineStep<Key>[], timelineCurrentStep: Key) => {
@@ -92,7 +93,7 @@ export const SharedWalletLayout = <Key extends string>(props: SharedWalletLayout
       <Timeline className={styles.timeline}>
         {parseTimelineSteps(timelineSteps, timelineCurrentStep).map(({ current, marked, name }) => (
           <Timeline.Item key={name} active={marked} data-testid={`${marked ? 'active' : 'inactive'}-onboarding-step`}>
-            <Box className={cn({ [`${styles.activeText}`]: current })}>{name}</Box>
+            <Box className={cn({ [`${styles.activeText}`]: current })}>{t(name)}</Box>
           </Timeline.Item>
         ))}
       </Timeline>
