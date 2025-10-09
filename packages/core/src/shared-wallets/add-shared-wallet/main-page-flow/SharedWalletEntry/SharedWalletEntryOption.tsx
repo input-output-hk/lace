@@ -26,6 +26,7 @@ export const SharedWalletEntryOption = ({
     <Icon className={cn(styles.icon, { [`${styles.disabled}`]: disabled })} data-testid={`${testId}-icon`} />
     <Text.Body.Normal
       className={cn(
+        styles.heading,
         sx({
           color: '$text_primary',
         }),
