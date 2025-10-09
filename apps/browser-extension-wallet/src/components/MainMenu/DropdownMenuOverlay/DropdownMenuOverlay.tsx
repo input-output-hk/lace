@@ -138,9 +138,9 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
-  const hasLinkedSharedWallet = wallets?.some(
-    (w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet.walletId
-  );
+  const hasLinkedSharedWallet =
+    !isBitcoinWallet &&
+    wallets?.some((w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet?.walletId);
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
   const showAddBitcoinWalletLink = bitcoinWalletsEnabled;
   const showAddMidnightWalletLink = midnightWalletsEnabled && midnightWallets && midnightWallets.length === 0;
