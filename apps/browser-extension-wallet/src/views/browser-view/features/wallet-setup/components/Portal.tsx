@@ -6,7 +6,7 @@ import { walletRoutePaths } from '@routes/wallet-paths';
 import { useLocation } from 'react-router-dom';
 
 type PathKeys = keyof typeof walletRoutePaths.setup;
-type PathValues = typeof walletRoutePaths.setup[PathKeys];
+type PathValues = (typeof walletRoutePaths.setup)[PathKeys];
 
 const portalPerRouteMap: Record<Partial<PathValues>, string> = {
   [walletRoutePaths.setup.home]: portal
@@ -20,9 +20,9 @@ export const Portal = ({ children }: PortalProps): React.ReactElement => {
   const { pathname } = useLocation<{ pathname: string }>();
 
   return (
-    <>
+    <div className={styles.portalContainer}>
       <img className={styles.portal} src={portalPerRouteMap[pathname] || portal2} />
-      {children}
-    </>
+      <div className={styles.portalContent}>{children}</div>
+    </div>
   );
 };
