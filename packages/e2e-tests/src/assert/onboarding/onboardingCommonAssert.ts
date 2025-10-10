@@ -10,6 +10,10 @@ class OnboardingCommonAssert {
     this.commonOnboardingElements = new CommonOnboardingElements();
   }
 
+  async assertSeeTopLaceLogo(): Promise<void> {
+    await this.commonOnboardingElements.laceLogo.waitForDisplayed();
+  }
+
   async assertSeeStepTitle(expectedTitle: string): Promise<void> {
     await this.commonOnboardingElements.stepTitle.waitForStable();
     expect(await this.commonOnboardingElements.stepTitle.getText()).to.equal(expectedTitle);
@@ -80,6 +84,16 @@ class OnboardingCommonAssert {
         throw new Error(`Unsupported step: ${step}`);
     }
     expect(await this.commonOnboardingElements.activeStepIndicator.getText()).to.equal(expectedStepTitle);
+  }
+
+  async assertSeeMidnightCompatibilityInfo(): Promise<void> {
+    await this.commonOnboardingElements.compatibilityLabel.waitForDisplayed();
+    expect(await this.commonOnboardingElements.compatibilityLabel.getText()).to.equal(
+      await t('onboarding.compatible-with')
+    );
+    await this.commonOnboardingElements.midnightSymbol.waitForDisplayed();
+    await this.commonOnboardingElements.midnightLabel.waitForDisplayed();
+    expect(await this.commonOnboardingElements.midnightLabel.getText()).to.equal(await t('onboarding.midnight.label'));
   }
 }
 

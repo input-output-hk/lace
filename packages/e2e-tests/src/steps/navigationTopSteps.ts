@@ -119,6 +119,10 @@ When(/^I click on "Add shared wallet" option$/, async () => {
   await MenuHeader.clickOnAddSharedWalletOption();
 });
 
+When(/^I click on "Add Midnight wallet" option$/, async () => {
+  await MenuHeader.clickOnAddMidnightWalletOption();
+});
+
 When(/^I click on then network sub-menu back button$/, async () => {
   await menuHeaderNetwork.backButton.click();
 });

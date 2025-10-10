@@ -2,16 +2,24 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 export default class CommonOnboardingElements {
-  private STEP_HEADER = '[data-testid="wallet-setup-step-header"]';
-  private STEP_HEADER_TITLE = '[data-testid="wallet-setup-step-title"]';
-  private STEP_HEADER_SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
-  private BACK_BUTTON = '[data-testid="wallet-setup-step-btn-back"]';
-  private NEXT_BUTTON = '[data-testid="wallet-setup-step-btn-next"]';
-  private HELP_AND_SUPPORT_BUTTON = '[data-testid="help-and-support-button"]';
-  private COOKIE_POLICY_LINK = '[data-testid="cookie-policy-link"]';
-  private PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
-  private TERMS_OF_SERVICE_LINK = '[data-testid="terms-of-service-link"]';
-  private ACTIVE_STEP_INDICATOR = '[data-testid="active-onboarding-step"]';
+  private readonly LACE_LOGO = '[data-testid="lace-logo"]';
+  private readonly STEP_HEADER = '[data-testid="wallet-setup-step-header"]';
+  private readonly STEP_HEADER_TITLE = '[data-testid="wallet-setup-step-title"]';
+  private readonly STEP_HEADER_SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
+  private readonly BACK_BUTTON = '[data-testid="wallet-setup-step-btn-back"]';
+  private readonly NEXT_BUTTON = '[data-testid="wallet-setup-step-btn-next"]';
+  private readonly HELP_AND_SUPPORT_BUTTON = '[data-testid="help-and-support-button"]';
+  private readonly COOKIE_POLICY_LINK = '[data-testid="cookie-policy-link"]';
+  private readonly PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
+  private readonly TERMS_OF_SERVICE_LINK = '[data-testid="terms-of-service-link"]';
+  private readonly ACTIVE_STEP_INDICATOR = '[data-testid="active-onboarding-step"]';
+  private readonly COMPATIBILITY_LABEL = '[data-testid="compatibility-label"]';
+  private readonly MIDNIGHT_SYMBOL = '[data-testid="midnight-symbol"]';
+  private readonly MIDNIGHT_LABEL = '[data-testid="midnight-label"]';
+
+  get laceLogo(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.LACE_LOGO);
+  }
 
   get stepHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STEP_HEADER);
@@ -51,6 +59,18 @@ export default class CommonOnboardingElements {
 
   get activeStepIndicator(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACTIVE_STEP_INDICATOR);
+  }
+
+  get compatibilityLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.COMPATIBILITY_LABEL);
+  }
+
+  get midnightSymbol(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_SYMBOL);
+  }
+
+  get midnightLabel(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_LABEL);
   }
 
   async clickOnNextButton(): Promise<void> {
