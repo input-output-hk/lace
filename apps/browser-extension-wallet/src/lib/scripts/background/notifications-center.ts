@@ -56,7 +56,7 @@ const exposeNotificationsCenterAPI = (): void => {
   const notifications$ = new ReplaySubject<LaceNotification[]>(1);
   const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
 
-  const markAsRead = async (id?: string): Promise<void> => {
+  const markAsRead = async (id?: LaceNotification['message']['id']): Promise<void> => {
     for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;
 
     notifications$.next(notifications);
@@ -64,7 +64,7 @@ const exposeNotificationsCenterAPI = (): void => {
     return Promise.resolve();
   };
 
-  const remove = async (id: string): Promise<void> => {
+  const remove = async (id: LaceNotification['message']['id']): Promise<void> => {
     notifications = notifications.filter((notification) => notification.message.id !== id);
 
     notifications$.next(notifications);
@@ -72,16 +72,16 @@ const exposeNotificationsCenterAPI = (): void => {
     return Promise.resolve();
   };
 
-  const subscribe = async (topic: Pick<NotificationsTopic, 'id'>): Promise<void> => {
-    for (const currTopic of topics) if (currTopic.id === topic.id) currTopic.subscribed = true;
+  const subscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
+    for (const topic of topics) if (topic.id === topicId) topic.subscribed = true;
 
     topics$.next(topics);
 
     return Promise.resolve();
   };
 
-  const unsubscribe = async (topic: Pick<NotificationsTopic, 'id'>): Promise<void> => {
-    for (const currTopic of topics) if (currTopic.id === topic.id) delete currTopic.subscribed;
+  const unsubscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
+    for (const topic of topics) if (topic.id === topicId) delete topic.subscribed;
 
     topics$.next(topics);
 

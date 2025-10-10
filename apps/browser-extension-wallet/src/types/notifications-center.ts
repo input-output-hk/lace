@@ -1,6 +1,12 @@
 import { Observable } from 'rxjs';
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 
+export interface NotificationsTopic {
+  id: string;
+  name: string;
+  subscribed?: boolean;
+}
+
 export interface LaceMessage {
   body: string;
   chain: string;
@@ -20,12 +26,6 @@ export interface LaceNotificationWithTopicName extends LaceNotification {
   topicName: string;
 }
 
-export interface NotificationsTopic {
-  id: string;
-  name: string;
-  subscribed?: boolean;
-}
-
 export interface NotificationsCenterProperties {
   notifications: {
     markAsRead: (id?: string) => Promise<void>; // markAsRead() marks all as read
@@ -33,9 +33,9 @@ export interface NotificationsCenterProperties {
     remove: (id: string) => Promise<void>;
   };
   topics: {
+    subscribe: (topicId: NotificationsTopic['id']) => Promise<void>;
     topics$: Observable<NotificationsTopic[]>;
-    subscribe: (topic: Pick<NotificationsTopic, 'id'>) => Promise<void>;
-    unsubscribe: (topic: Pick<NotificationsTopic, 'id'>) => Promise<void>;
+    unsubscribe: (topicId: NotificationsTopic['id']) => Promise<void>;
   };
 }
 
