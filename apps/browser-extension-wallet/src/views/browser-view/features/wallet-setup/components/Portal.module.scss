@@ -1,10 +1,26 @@
-.portal {
-  bottom: 0;
-  display: block;
-  height: 100%;
+.portalContainer {
+  position: fixed;
+  top: 0;
   left: 0;
-  object-fit: cover;
-  position: absolute;
   width: 100%;
-  z-index: -1;
+  height: 100%;
+  z-index: 1000;
+  background-color: var(--bg-color-body, #ffffff) !important;
+}
+
+.portal {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.portalContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
 }
