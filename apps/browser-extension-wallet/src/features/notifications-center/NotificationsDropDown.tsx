@@ -28,6 +28,7 @@ export const NotificationsDropDown = ({
   const history = useHistory();
 
   const onGoToNotification = (id: string) => {
+    markAsRead(id);
     history.push(`/notification/${id}`);
     onClose();
   };

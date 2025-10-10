@@ -48,7 +48,7 @@ import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
-import { NotificationDetails, NotificationsCenter } from '../features/notifications-center';
+import { NotificationDetailsContainer, NotificationsCenter } from '../features/notifications-center';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -93,7 +93,7 @@ export const defaultRoutes: RouteMap = [
   },
   {
     path: routes.notification,
-    component: NotificationDetails
+    component: NotificationDetailsContainer
   }
 ];
 
