@@ -1,27 +1,29 @@
+import { consumeRemoteApi } from '@cardano-sdk/web-extension';
+import { backgroundServiceProperties } from './background/config';
+import { BackgroundService, BaseChannels } from './types';
 import { runtime } from 'webextension-polyfill';
 import { logger } from '@lace/common';
 
-const TIMEOUT_DURATION = 5000;
+const PING_INTERVAL = 5000; // 5 seconds - same as original
 
-const setupKeepAliveConnection = () => {
-  const port = runtime.connect({ name: 'keepAlive' });
-  port.onDisconnect.addListener(setupKeepAliveConnection);
+const backgroundService = consumeRemoteApi<BackgroundService>(
+  {
+    baseChannel: BaseChannels.BACKGROUND_ACTIONS,
+    properties: backgroundServiceProperties
+  },
+  { runtime, logger }
+);
+
+const keepServiceWorkerAlive = () => {
+  setInterval(async () => {
+    try {
+      const response = await backgroundService.ping();
+      logger.debug('Keep-alive ping response:', response);
+    } catch (error) {
+      logger.error('Keep-alive ping failed:', error);
+    }
+  }, PING_INTERVAL);
 };
 
-const setupFirefoxWakeInterval = () => {
-  if (process.env.BROWSER === 'firefox') {
-    setInterval(() => {
-      runtime
-        .sendMessage('ping')
-        .then((response) => {
-          logger.debug('Response received:', response);
-        })
-        .catch((error) => {
-          logger.error('Connection error:', error);
-        });
-    }, TIMEOUT_DURATION);
-  }
-};
-
-setupKeepAliveConnection();
-setupFirefoxWakeInterval();
+// Start the keep-alive mechanism
+keepServiceWorkerAlive();
