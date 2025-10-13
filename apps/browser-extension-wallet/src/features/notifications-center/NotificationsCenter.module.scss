@@ -1,0 +1,9 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.navigationButton {
+  button {
+    width: size_unit(5) !important;
+    height: size_unit(5) !important;
+  }
+}

@@ -11,6 +11,9 @@
 }
 
 .actions {
+  button {
+    outline-width: 0 !important;
+  }
   :hover {
     .icon {
       color: var(--text-color-primary);

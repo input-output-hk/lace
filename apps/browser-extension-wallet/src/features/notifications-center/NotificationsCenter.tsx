@@ -12,11 +12,12 @@ import { NavigationButton } from '@lace/common';
 import { useHistory } from 'react-router';
 import { SectionTitle } from '@components/Layout/SectionTitle';
 import { SubscriptionsContainer } from './SubscriptionsContainer';
+import styles from './NotificationsCenter.module.scss';
 
 export const NotificationsCenter = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isRemoveNotificationModalVisible, setIsRemoveNotificationModalVisible] = useState(false);
-  const { notifications, remove, unreadNotifications, markAsRead } = useNotificationsCenter();
+  const { notifications, remove, markAsRead } = useNotificationsCenter();
   const [notificationIdToRemove, setNotificationIdToRemove] = useState<string | undefined>();
   const history = useHistory();
 
@@ -43,12 +44,12 @@ export const NotificationsCenter = (): React.ReactElement => {
         <SectionTitle
           isPopup
           title={
-            <Flex alignItems="center" gap="$8">
+            <Flex className={styles.navigationButton} py="$4" alignItems="center" gap="$8">
               <NavigationButton icon="arrow" onClick={() => history.goBack()} />
               {t('notificationsCenter.title')}
             </Flex>
           }
-          sideText={`(${unreadNotifications})`}
+          sideText={`(${notifications?.length ?? 0})`}
           data-testid="notifications-center-title"
         />
       }

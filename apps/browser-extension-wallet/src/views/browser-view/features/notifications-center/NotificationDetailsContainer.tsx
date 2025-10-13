@@ -70,7 +70,7 @@ export const NotificationDetailsContainer = (): React.ReactElement => {
               <SectionTitle
                 classname={styles.sectionTitle}
                 title={
-                  <Flex alignItems="center">
+                  <Flex className={styles.navigationButton} alignItems="center">
                     <NavigationButton icon="arrow" onClick={onBack} />
                   </Flex>
                 }

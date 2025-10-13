@@ -22,11 +22,16 @@ export const NotificationDetails = ({
 }: NotificationDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
-  const PublisherTextComponent = popupView ? Text.Body.Normal : Text.Body.Small;
-  const BodyTextComponent = popupView ? Text.Label : Text.Body.Large;
+  const PublisherTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
+  const bodyText = textToLink(notification.message.body, openExternalLink);
+  const bodyTextComponent = popupView ? (
+    <Text.Label>{bodyText}</Text.Label>
+  ) : (
+    <Text.Body.Large weight="$semibold">{bodyText}</Text.Body.Large>
+  );
 
   return (
-    <Flex pt="$20" flexDirection="column" w="$fill">
+    <Flex py="$20" flexDirection="column" w="$fill">
       <Flex px={popupView ? '$20' : '$0'} flexDirection="column" w="$fill">
         <Text.Heading weight="$bold" color="secondary">
           {notification.message.title}
@@ -36,9 +41,7 @@ export const NotificationDetails = ({
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
         {notification.message.format === 'plain' ? (
-          <BodyTextComponent weight="$semibold">
-            {textToLink(notification.message.body, openExternalLink)}
-          </BodyTextComponent>
+          bodyTextComponent
         ) : (
           <pre>{JSON.stringify(notification.message.body)}</pre>
         )}

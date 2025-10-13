@@ -57,14 +57,14 @@ export const NotificationsDropDown = ({
       <Divider my="$4" />
       <Flex justifyContent="space-between">
         <Box className={styles.btn} onClick={onViewAll} p="$8">
-          <Text.Body.Normal weight="$bold" color="highlight">
-            <span>{t(`notificationsCenter.${notifications?.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}</span>
+          <Text.Body.Normal weight="$semibold" color="highlight">
+            {t(`notificationsCenter.${notifications?.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}
           </Text.Body.Normal>
         </Box>
         {unreadNotifications > 0 && (
           <Box className={styles.btn} onClick={() => markAsRead()} p="$8">
-            <Text.Body.Normal weight="$bold" color="highlight">
-              <span>{t('notificationsCenter.markAllAsRead')}</span>
+            <Text.Body.Normal weight="$semibold" color="highlight">
+              {t('notificationsCenter.markAllAsRead')}
             </Text.Body.Normal>
           </Box>
         )}

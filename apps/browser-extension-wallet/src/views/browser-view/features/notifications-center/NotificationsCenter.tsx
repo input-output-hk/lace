@@ -69,10 +69,10 @@ export const NotificationsCenter = (): React.ReactElement => {
             <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
               <Box mb={'$0'}>
                 <SectionTitle
-                  sideText={`(${unreadNotifications})`}
+                  sideText={`(${notifications?.length ?? 0})`}
                   classname={styles.sectionTitle}
                   title={
-                    <Flex alignItems="center" gap="$8">
+                    <Flex className={styles.navigationButton} alignItems="center" gap="$8">
                       <NavigationButton icon="arrow" onClick={onBack} />
                       {t('notificationsCenter.title')}
                     </Flex>

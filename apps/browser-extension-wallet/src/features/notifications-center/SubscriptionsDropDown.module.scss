@@ -35,10 +35,11 @@
   white-space: nowrap;
 }
 
-
 .switch {
   button {
     background: var(--light-mode-mid-grey, var(--dark-mode-dark-grey)) !important;
+    outline-width: 0 !important;
+    cursor: pointer;
   }
   button[aria-checked="true"] {
     background: var(--switch-checked-bg-color) !important;
