@@ -1,5 +1,6 @@
+/* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-useless-undefined */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Flex } from '@input-output-hk/lace-ui-toolkit';
 
@@ -18,32 +19,110 @@ import { EducationalList } from '../../components';
 import { getEducationalList } from '@src/views/browser-view/features/assets/components/AssetEducationalList/AssetEducationalList';
 import { SubscriptionsContainer } from '@src/features/notifications-center/SubscriptionsContainer';
 
-export const NotificationsCenter = (): React.ReactElement => {
+const listWrapperStyles = { height: '100%', display: 'flex', flexDirection: 'column' as const };
+
+const NotificationsCenterContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const educationalItems = getEducationalList(t);
   const [isRemoveNotificationModalVisible, setIsRemoveNotificationModalVisible] = useState(false);
   const { notifications, markAsRead, remove, unreadNotifications } = useNotificationsCenter();
   const [notificationIdToRemove, setNotificationIdToRemove] = useState<string | undefined>();
 
-  const onBack = () => {
+  const onBack = useCallback(() => {
     history.goBack();
-  };
+  }, [history]);
 
-  const onShowRemoveNotificationModal = (id: string) => {
-    setNotificationIdToRemove(id);
-    setIsRemoveNotificationModalVisible(true);
-  };
+  const onShowRemoveNotificationModal = useCallback(
+    (id: string) => {
+      setNotificationIdToRemove(id);
+      setIsRemoveNotificationModalVisible(true);
+    },
+    [setNotificationIdToRemove, setIsRemoveNotificationModalVisible]
+  );
 
-  const onHideRemoveNotificationModal = () => {
+  const onHideRemoveNotificationModal = useCallback(() => {
     setNotificationIdToRemove(undefined);
     setIsRemoveNotificationModalVisible(false);
-  };
+  }, [setNotificationIdToRemove, setIsRemoveNotificationModalVisible]);
 
-  const goToNotification = (id: string) => {
-    markAsRead(id);
-    history.push(`/notification/${id}`);
-  };
+  const goToNotification = useCallback(
+    (id: string) => {
+      markAsRead(id);
+      history.push(`/notification/${id}`);
+    },
+    [markAsRead, history]
+  );
+
+  const markAllAsRead = useCallback(() => {
+    markAsRead();
+  }, [markAsRead]);
+
+  return (
+    <>
+      <WarningModal
+        visible={isRemoveNotificationModalVisible}
+        header={t('notificationsCenter.removeNotification')}
+        content={t('notificationsCenter.removeNotification.description')}
+        onCancel={onHideRemoveNotificationModal}
+        cancelLabel={t('notificationsCenter.removeNotification.cancel')}
+        confirmLabel={t('notificationsCenter.removeNotification.confirm')}
+        onConfirm={() => {
+          remove(notificationIdToRemove);
+          onHideRemoveNotificationModal();
+        }}
+      />
+      <div style={listWrapperStyles}>
+        <Box mb="$16">
+          <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
+            <Box mb={'$0'}>
+              <SectionTitle
+                sideText={`(${notifications?.length ?? 0})`}
+                classname={styles.sectionTitle}
+                title={
+                  <Flex className={styles.navigationButton} alignItems="center" gap="$8">
+                    <NavigationButton icon="arrow" onClick={onBack} />
+                    {t('notificationsCenter.title')}
+                  </Flex>
+                }
+              />
+            </Box>
+            <Flex gap="$20">
+              <SubscriptionsContainer />
+              {unreadNotifications > 0 && (
+                <Button
+                  className={styles.button}
+                  block
+                  color="gradient"
+                  data-testid="mark-all-as-read-button"
+                  onClick={markAllAsRead}
+                >
+                  {t('notificationsCenter.markAllAsRead')}
+                </Button>
+              )}
+            </Flex>
+          </Flex>
+        </Box>
+        {notifications?.length > 0 ? (
+          <NotificationsList
+            notifications={notifications}
+            scrollableTarget={LACE_APP_ID}
+            dataLength={notifications.length}
+            onRemove={onShowRemoveNotificationModal}
+            onClick={goToNotification}
+          />
+        ) : (
+          <Box mt="$120">
+            <EmptyState />
+          </Box>
+        )}
+      </div>
+    </>
+  );
+};
+
+export const NotificationsCenter = (): React.ReactElement => {
+  const { t } = useTranslation();
+  const educationalItems = getEducationalList(t);
 
   return (
     <Layout>
@@ -52,63 +131,7 @@ export const NotificationsCenter = (): React.ReactElement => {
           <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutYourWallet')} />
         }
       >
-        <WarningModal
-          visible={isRemoveNotificationModalVisible}
-          header={t('notificationsCenter.removeNotification')}
-          content={t('notificationsCenter.removeNotification.description')}
-          onCancel={onHideRemoveNotificationModal}
-          cancelLabel={t('notificationsCenter.removeNotification.cancel')}
-          confirmLabel={t('notificationsCenter.removeNotification.confirm')}
-          onConfirm={() => {
-            remove(notificationIdToRemove);
-            onHideRemoveNotificationModal();
-          }}
-        />
-        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <Box mb="$16">
-            <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
-              <Box mb={'$0'}>
-                <SectionTitle
-                  sideText={`(${notifications?.length ?? 0})`}
-                  classname={styles.sectionTitle}
-                  title={
-                    <Flex className={styles.navigationButton} alignItems="center" gap="$8">
-                      <NavigationButton icon="arrow" onClick={onBack} />
-                      {t('notificationsCenter.title')}
-                    </Flex>
-                  }
-                />
-              </Box>
-              <Flex gap="$20">
-                <SubscriptionsContainer />
-                {unreadNotifications > 0 && (
-                  <Button
-                    className={styles.button}
-                    block
-                    color="gradient"
-                    data-testid="notifications-bell"
-                    onClick={() => markAsRead()}
-                  >
-                    {t('notificationsCenter.markAllAsRead')}
-                  </Button>
-                )}
-              </Flex>
-            </Flex>
-          </Box>
-          {notifications?.length > 0 ? (
-            <NotificationsList
-              notifications={notifications}
-              scrollableTarget={LACE_APP_ID}
-              dataLength={notifications.length}
-              onRemove={onShowRemoveNotificationModal}
-              onClick={goToNotification}
-            />
-          ) : (
-            <Box mt="$120">
-              <EmptyState />
-            </Box>
-          )}
-        </div>
+        <NotificationsCenterContent />
       </SectionLayout>
     </Layout>
   );

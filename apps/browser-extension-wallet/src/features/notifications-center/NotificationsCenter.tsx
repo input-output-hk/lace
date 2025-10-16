@@ -1,6 +1,7 @@
+/* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-useless-undefined */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types, promise/catch-or-return, sonarjs/cognitive-complexity, no-magic-numbers, unicorn/no-null */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { ContentLayout } from '@src/components/Layout';
 import { useTranslation } from 'react-i18next';
 import { WarningModal } from '@src/views/browser-view/components';
@@ -14,7 +15,9 @@ import { SectionTitle } from '@components/Layout/SectionTitle';
 import { SubscriptionsContainer } from './SubscriptionsContainer';
 import styles from './NotificationsCenter.module.scss';
 
-export const NotificationsCenter = (): React.ReactElement => {
+const listWrapperStyles = { width: '100%' };
+
+const NotificationsCenterContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const [isRemoveNotificationModalVisible, setIsRemoveNotificationModalVisible] = useState(false);
   const { notifications, remove, markAsRead } = useNotificationsCenter();
@@ -26,38 +29,24 @@ export const NotificationsCenter = (): React.ReactElement => {
     setIsRemoveNotificationModalVisible(true);
   };
 
-  const onHideRemoveNotificationModal = () => {
+  const onHideRemoveNotificationModal = useCallback(() => {
     setNotificationIdToRemove(undefined);
     setIsRemoveNotificationModalVisible(false);
-  };
+  }, [setNotificationIdToRemove, setIsRemoveNotificationModalVisible]);
 
-  const onGoToNotification = (id: string) => {
-    markAsRead(id);
-    history.push(`/notification/${id}`);
-  };
-
-  const isInitialLoad = typeof notifications === 'undefined';
+  const onGoToNotification = useCallback(
+    (id: string) => {
+      markAsRead(id);
+      history.push(`/notification/${id}`);
+    },
+    [markAsRead, history]
+  );
 
   return (
-    <ContentLayout
-      title={
-        <SectionTitle
-          isPopup
-          title={
-            <Flex className={styles.navigationButton} py="$4" alignItems="center" gap="$8">
-              <NavigationButton icon="arrow" onClick={() => history.goBack()} />
-              {t('notificationsCenter.title')}
-            </Flex>
-          }
-          sideText={`(${notifications?.length ?? 0})`}
-          data-testid="notifications-center-title"
-        />
-      }
-      isLoading={isInitialLoad}
-    >
+    <>
       <Flex w="$fill" flexDirection="column" gap="$20">
         <SubscriptionsContainer popupView />
-        <div style={{ width: '100%' }}>
+        <div style={listWrapperStyles}>
           {notifications?.length > 0 ? (
             <NotificationsList
               onClick={onGoToNotification}
@@ -87,6 +76,35 @@ export const NotificationsCenter = (): React.ReactElement => {
         }}
         isPopupView
       />
+    </>
+  );
+};
+
+export const NotificationsCenter = (): React.ReactElement => {
+  const { t } = useTranslation();
+  const { notifications } = useNotificationsCenter();
+  const history = useHistory();
+
+  const isInitialLoad = typeof notifications === 'undefined';
+
+  return (
+    <ContentLayout
+      title={
+        <SectionTitle
+          isPopup
+          title={
+            <Flex className={styles.navigationButton} py="$4" alignItems="center" gap="$8">
+              <NavigationButton icon="arrow" onClick={() => history.goBack()} />
+              {t('notificationsCenter.title')}
+            </Flex>
+          }
+          sideText={`(${notifications?.length ?? 0})`}
+          data-testid="notifications-center-title"
+        />
+      }
+      isLoading={isInitialLoad}
+    >
+      <NotificationsCenterContent />
     </ContentLayout>
   );
 };
