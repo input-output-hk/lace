@@ -10,6 +10,7 @@ import { WalletCreateStep } from './types';
 import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
+import { AnyWallet } from '@cardano-sdk/web-extension';
 
 type OnNameChange = (state: { name: string }) => void;
 interface PgpValidation {
@@ -29,6 +30,12 @@ interface State {
   setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>;
   pgpValidation: PgpValidation;
   setPgpValidation: React.Dispatch<React.SetStateAction<PgpValidation>>;
+  walletToReuse: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null;
+  setWalletToReuse: React.Dispatch<
+    React.SetStateAction<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null>
+  >;
+  showRecoveryPhraseError: () => void;
+  setMnemonic: (mnemonic: string[]) => void;
 }
 
 interface Props {
@@ -62,6 +69,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const [step, setStep] = useState<WalletCreateStep>(
     paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
   );
+  const [walletToReuse, setWalletToReuse] = useState<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null>(
+    null
+  );
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
   const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>(INITIAL_PGP_STATE);
   const [pgpValidation, setPgpValidation] = useState<PgpValidation>({ error: null, success: null });
@@ -80,6 +90,16 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     console.error('finalizeBitcoinWalletCreation');
   }, []);
 
+  const showRecoveryPhraseError = useCallback(() => setStep(WalletCreateStep.RecoveryPhraseError), [setStep]);
+  const setMnemonic = useCallback(
+    (mnemonic: string[]) =>
+      setCreateWalletData((prevState) => ({
+        ...prevState,
+        mnemonic
+      })),
+    [setCreateWalletData]
+  );
+
   const finalizeWalletCreation = useCallback(
     async (params: Partial<CreateWalletParams>) => {
       const wallet = await createHotWallet(params);
@@ -95,6 +115,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   );
 
   const next: State['next'] = useCallback(
+    // eslint-disable-next-line max-statements
     async (state) => {
       if (state) {
         setCreateWalletData((prevState) => ({ ...prevState, ...state }));
@@ -102,10 +123,21 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       switch (step) {
         case WalletCreateStep.ChooseRecoveryMethod: {
           if (recoveryMethod === 'mnemonic' || recoveryMethod === 'mnemonic-bitcoin') {
-            setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+            setStep(WalletCreateStep.ReuseRecoveryPhrase);
             break;
           }
           setStep(WalletCreateStep.SecurePaperWallet);
+          break;
+        }
+        case WalletCreateStep.ReuseRecoveryPhrase: {
+          setStep(WalletCreateStep.EnterWalletPassword);
+          break;
+        }
+        case WalletCreateStep.EnterWalletPassword:
+          setStep(WalletCreateStep.Setup);
+          break;
+        case WalletCreateStep.RecoveryPhraseError: {
+          setStep(WalletCreateStep.RecoveryPhraseWriteDown);
           break;
         }
         case WalletCreateStep.RecoveryPhraseWriteDown: {
@@ -168,8 +200,20 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
           : history.push(walletRoutePaths.newWallet.root);
         break;
       }
+      case WalletCreateStep.ReuseRecoveryPhrase: {
+        setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+        break;
+      }
       case WalletCreateStep.SecurePaperWallet: {
         setStep(WalletCreateStep.ChooseRecoveryMethod);
+        break;
+      }
+      case WalletCreateStep.EnterWalletPassword: {
+        setStep(WalletCreateStep.ReuseRecoveryPhrase);
+        break;
+      }
+      case WalletCreateStep.RecoveryPhraseError: {
+        setStep(WalletCreateStep.ReuseRecoveryPhrase);
         break;
       }
       case WalletCreateStep.RecoveryPhraseInput: {
@@ -205,7 +249,11 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       pgpInfo,
       setPgpInfo,
       pgpValidation,
-      setPgpValidation
+      setPgpValidation,
+      setWalletToReuse,
+      walletToReuse,
+      showRecoveryPhraseError,
+      setMnemonic
     }),
     [
       back,
@@ -218,7 +266,11 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       pgpInfo,
       setPgpInfo,
       pgpValidation,
-      setPgpValidation
+      setPgpValidation,
+      setWalletToReuse,
+      walletToReuse,
+      showRecoveryPhraseError,
+      setMnemonic
     ]
   );
 

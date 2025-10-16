@@ -889,6 +889,8 @@
   "walletSetup.setupOptions.restoreWallet": "Recuperar la billetera",
   "walletSetup.walletName.pleaseNameYourWallet": "Dé nombre a su billetera, por favor",
   "walletSetup.walletName.walletNameDescription": "Lorem ipsum dolor sit amet",
+  "walletSetup.reuseRecoveryPhrase.walletAlreadyExists": "Esta billetera ya existe",
+  "walletSetup.reuseRecoveryPhrase.invalidPassword": "Contraseña inválida",
   "midnightEventBanner.title": "Descubra la distribución de tokens de Midnight",
   "midnightEventBanner.description": "La distribución gratuita en múltiples fases de tokens NIGHT, con objetivo de empoderar a una comunidad amplia y diversa a construir el futuro de la red Midnight",
   "midnightEventBanner.learnMore": "Aprender más",

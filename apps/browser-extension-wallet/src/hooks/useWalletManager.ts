@@ -206,6 +206,10 @@ export interface UseWalletManager {
   reloadWallet: () => Promise<void>;
   addAccount: (props: WalletManagerAddAccountProps) => Promise<void>;
   getMnemonic: (passphrase: Uint8Array) => Promise<string[]>;
+  getMnemonicForWallet: (
+    wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>,
+    passphrase: Uint8Array
+  ) => Promise<string[]>;
   getSharedWalletExtendedPublicKey: (passphrase: Uint8Array) => Promise<Wallet.Cardano.Cip1854ExtendedAccountPublicKey>;
   enableCustomNode: (network: EnvironmentTypes, value: string) => Promise<void>;
   generateSharedWalletKey: GenerateSharedWalletKeyFn;
@@ -1235,6 +1239,28 @@ export const useWalletManager = (): UseWalletManager => {
     }
   };
 
+  const getMnemonicForWallet = useCallback(
+    async (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, passphrase: Uint8Array) => {
+      switch (wallet.type) {
+        case WalletType.InMemory: {
+          const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
+            Buffer.from(wallet.encryptedSecrets.keyMaterial, 'hex'),
+            passphrase
+          );
+          const keyMaterialBuffer = Buffer.from(keyMaterialBytes);
+          const mnemonic = keyMaterialBuffer.toString('utf8').split(' ');
+          clearBytes(passphrase);
+          clearBytes(keyMaterialBytes);
+          return mnemonic;
+        }
+        case WalletType.Ledger:
+        case WalletType.Trezor:
+          throw new Error('Mnemonic is not available for hardware wallets');
+      }
+    },
+    []
+  );
+
   const getMnemonic = useCallback(
     async (passphrase: Uint8Array) => {
       const { activeBlockchain } = await backgroundService.getBackgroundStorage();
@@ -1254,27 +1280,9 @@ export const useWalletManager = (): UseWalletManager => {
         throw new Error('Wallet not found');
       }
 
-      switch (wallet.type) {
-        case WalletType.InMemory: {
-          const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
-            Buffer.from(wallet.encryptedSecrets.keyMaterial, 'hex'),
-            passphrase
-          );
-
-          const keyMaterialBuffer = Buffer.from(keyMaterialBytes);
-
-          const mnemonic = keyMaterialBuffer.toString('utf8').split(' ');
-          clearBytes(passphrase);
-          clearBytes(keyMaterialBytes);
-          clearBytes(keyMaterialBuffer);
-          return mnemonic;
-        }
-        case WalletType.Ledger:
-        case WalletType.Trezor:
-          throw new Error('Mnemonic is not available for hardware wallets');
-      }
+      return getMnemonicForWallet(wallet, passphrase);
     },
-    [backgroundService]
+    [backgroundService, getMnemonicForWallet]
   );
 
   const getSharedWalletExtendedPublicKey = useCallback(
@@ -1469,6 +1477,7 @@ export const useWalletManager = (): UseWalletManager => {
     bitcoinWalletManager,
     bitcoinWallet,
     getMnemonic,
+    getMnemonicForWallet,
     enableCustomNode,
     generateSharedWalletKey,
     createMultiSigAccount,
