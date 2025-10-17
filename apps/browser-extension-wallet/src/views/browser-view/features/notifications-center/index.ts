@@ -1,2 +1,2 @@
 export * from './NotificationsCenter';
-export * from './NotificationDetails';
+export * from './NotificationDetailsContainer';
