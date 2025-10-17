@@ -1,0 +1,34 @@
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.chevron {
+  color: var(--dark-mode-light-grey, var(--light-mode-dark-grey, #878e9e)) !important;
+  font-size: 11px;
+  margin-left: 10px;
+  margin-right: 7px;
+  &.open {
+    transform: rotateX(180deg);
+  }
+}
+
+.subscriptionsButton {
+  &.popupView {
+    width: 100%;
+  }
+  & > button {
+    min-width: 210px !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    outline-width: 0 !important;
+    & > div {
+      flex-direction: row-reverse !important;
+      justify-content: space-between !important;
+      & > div {
+        padding-right: 0px !important;
+        & > svg {
+          margin-right: 0px !important;
+          margin-left: 0px !important;
+        }
+      }
+    }
+  }
+}

@@ -46,8 +46,7 @@ export const NotificationListItem = ({
     onRemove?.(id);
   };
 
-  const PublisherTextComponent = popupView ? Text.Label : Text.Body.Small;
-  const TitleTextComponent = popupView ? Text.Label : Text.Body.Large;
+  const TitleTextComponent = popupView ? Text.Body.Small : Text.Body.Large;
   const removeButton = popupView ? (
     <IconButton.Primary
       icon={<TrashOutlineComponent className={styles.icon} />}
@@ -72,12 +71,12 @@ export const NotificationListItem = ({
       p="$20"
       w="$fill"
     >
-      <Flex className={styles.content} justifyContent="center" alignItems="flex-start" flexDirection="column" gap="$8">
+      <Flex className={styles.content} justifyContent="space-between" alignItems="flex-start" flexDirection="column">
         <Flex alignItems="center" gap="$4" className={styles.copy}>
           {!isRead && <div className={styles.dot} />}
-          <PublisherTextComponent weight="$medium" color="secondary">
+          <Text.Body.Small weight="$medium" color="secondary">
             {publisher}
-          </PublisherTextComponent>
+          </Text.Body.Small>
         </Flex>
         <TitleTextComponent weight="$semibold" className={styles.copy}>
           {title}

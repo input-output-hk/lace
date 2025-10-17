@@ -1,0 +1,47 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/mixins';
+
+.container {
+  background-color: var(--bg-color-container, #ffffff) !important;
+  border: 1px var(--light-mode-light-grey) solid !important;
+  border-radius: size_unit(2) !important;
+  box-shadow: 0 0 16px 0 rgba(167, 143, 160, 0.2);
+  margin-top: size_unit(0.5) !important;
+  max-height: 272px;
+  padding: size_unit(3) !important;
+  width: 210px;
+
+  &.popupView {
+    width: calc(100% - 28px);
+    left: 14px;
+  }
+}
+
+.content {
+  overflow-y: scroll;
+  max-height: 225px;
+  margin-right: -12px;
+  padding-right: 6px;
+  padding-bottom: 5px;
+  @include scroll-bar-style;
+}
+
+.toggleLabel {
+  max-width: 60% !important;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.switch {
+  button {
+    background: var(--light-mode-mid-grey, var(--dark-mode-dark-grey)) !important;
+    outline-width: 0 !important;
+    cursor: pointer;
+  }
+  button[aria-checked="true"] {
+    background: var(--switch-checked-bg-color) !important;
+  }
+}
