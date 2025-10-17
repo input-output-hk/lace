@@ -1,5 +1,6 @@
+/* eslint-disable react/no-multi-comp */
 /* eslint-disable unicorn/no-useless-undefined */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import { SectionLayout, WarningModal, EducationalList } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
@@ -18,22 +19,21 @@ import { Layout } from '@src/views/browser-view/components/Layout';
 import styles from './NotificationsCenter.module.scss';
 import { getEducationalList } from '../assets/components/AssetEducationalList/AssetEducationalList';
 
-export const NotificationDetailsContainer = (): React.ReactElement => {
+const NotificationDetailsContent = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
-  const educationalItems = getEducationalList(t);
   const { notifications, remove } = useNotificationsCenter();
   const [notificationIdToRemove, setNotificationIdToRemove] = useState<string | undefined>();
   const { id: notificationId } = useParams<{ id: string }>();
   const notification = notifications?.find(({ message }) => message.id === notificationId);
 
-  const onBack = () => {
+  const onBack = useCallback(() => {
     history.goBack();
-  };
+  }, [history]);
 
-  const onViewAllNotification = () => {
+  const onViewAllNotification = useCallback(() => {
     history.push(walletRoutePaths.notifications);
-  };
+  }, [history]);
 
   useEffect(() => {
     if (!notification && notifications?.length > 0) {
@@ -59,46 +59,55 @@ export const NotificationDetailsContainer = (): React.ReactElement => {
           setNotificationIdToRemove(undefined);
         }}
       />
-      <Layout>
-        <SectionLayout
-          sidePanelContent={
-            <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutYourWallet')} />
-          }
-        >
-          <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
-            <Box mb={'$0'}>
-              <SectionTitle
-                classname={styles.sectionTitle}
-                title={
-                  <Flex className={styles.navigationButton} alignItems="center">
-                    <NavigationButton icon="arrow" onClick={onBack} />
-                  </Flex>
-                }
-              />
-            </Box>
-            <Flex className={styles.actions} gap="$20">
-              <LaceButton.Secondary
-                size="medium"
-                onClick={() => setNotificationIdToRemove(notificationId)}
-                data-testid="view-all-button"
-                label={t('notificationsCenter.removeNotification.confirm')}
-                color="secondary"
-                icon={<TrashOutlineComponent className={styles.icon} data-testid="trash-icon" />}
-              />
-              <Button
-                className={styles.button}
-                block
-                color="gradient"
-                data-testid="view-all-button"
-                onClick={onViewAllNotification}
-              >
-                {t('notificationsCenter.notificationDetails.viewAll')}
-              </Button>
-            </Flex>
-          </Flex>
-          <NotificationDetails notification={notification} />
-        </SectionLayout>
-      </Layout>
+      <Flex alignItems="center" justifyContent="space-between" className={styles.header}>
+        <Box mb={'$0'}>
+          <SectionTitle
+            classname={styles.sectionTitle}
+            title={
+              <Flex className={styles.navigationButton} alignItems="center">
+                <NavigationButton icon="arrow" onClick={onBack} />
+              </Flex>
+            }
+          />
+        </Box>
+        <Flex className={styles.actions} gap="$20">
+          <LaceButton.Secondary
+            size="medium"
+            onClick={() => setNotificationIdToRemove(notificationId)}
+            data-testid="view-all-button"
+            label={t('notificationsCenter.removeNotification.confirm')}
+            color="secondary"
+            icon={<TrashOutlineComponent className={styles.icon} data-testid="trash-icon" />}
+          />
+          <Button
+            className={styles.button}
+            block
+            color="gradient"
+            data-testid="view-all-button"
+            onClick={onViewAllNotification}
+          >
+            {t('notificationsCenter.notificationDetails.viewAll')}
+          </Button>
+        </Flex>
+      </Flex>
+      <NotificationDetails notification={notification} />
     </>
+  );
+};
+
+export const NotificationDetailsContainer = (): React.ReactElement => {
+  const { t } = useTranslation();
+  const educationalItems = getEducationalList(t);
+
+  return (
+    <Layout>
+      <SectionLayout
+        sidePanelContent={
+          <EducationalList items={educationalItems} title={t('browserView.sidePanel.aboutYourWallet')} />
+        }
+      >
+        <NotificationDetailsContent />
+      </SectionLayout>
+    </Layout>
   );
 };
