@@ -34,7 +34,7 @@ export const NotificationsDropDown = ({
   };
 
   return (
-    <Menu className={classnames(styles.container, { [styles.popupView]: popupView })}>
+    <Menu className={classnames(styles.container, { [styles.popupView]: popupView })} data-testid="notifications-menu">
       <div
         id="notifications-dropdown-content"
         className={classnames(styles.content, { [styles.isEmpty]: notifications?.length === 0 })}
@@ -57,13 +57,25 @@ export const NotificationsDropDown = ({
       <Divider my="$4" />
       <Flex justifyContent="space-between">
         <Box className={styles.btn} onClick={onViewAll} p="$8">
-          <Text.Body.Normal weight="$semibold" color="highlight">
+          <Text.Body.Normal
+            weight="$semibold"
+            color="highlight"
+            data-testid={
+              notifications?.length > 0
+                ? 'notifications-menu-view-all-button'
+                : 'notifications-menu-manage-subscriptions-button'
+            }
+          >
             {t(`notificationsCenter.${notifications?.length > 0 ? 'viewAll' : 'manageSubscriptions'}`)}
           </Text.Body.Normal>
         </Box>
         {unreadNotifications > 0 && (
           <Box className={styles.btn} onClick={() => markAsRead()} p="$8">
-            <Text.Body.Normal weight="$semibold" color="highlight">
+            <Text.Body.Normal
+              weight="$semibold"
+              color="highlight"
+              data-testid="notifications-menu-mark-all-as-read-button"
+            >
               {t('notificationsCenter.markAllAsRead')}
             </Text.Body.Normal>
           </Box>
