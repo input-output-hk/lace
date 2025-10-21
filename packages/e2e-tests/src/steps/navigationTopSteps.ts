@@ -25,6 +25,7 @@ Then(/all buttons and images in the top navigation are present/, async () => {
   await topNavigationAssert.assertLogoPresent();
   await topNavigationAssert.assertSeeReceiveButton();
   await topNavigationAssert.assertSeeSendButton();
+  await topNavigationAssert.assertSeeNotificationsButton();
   await topNavigationAssert.assertSeeMenuButton();
 });
 
@@ -140,20 +141,27 @@ When(/^I close header menu$/, async () => {
   await MenuHeader.closeUserMenu();
 });
 
-When(/^I click "(Receive|Send)" button on page header$/, async (button: 'Receive' | 'Send') => {
-  switch (button) {
-    case 'Receive':
-      await MenuHeader.receiveButton.waitForClickable();
-      await MenuHeader.receiveButton.click();
-      break;
-    case 'Send':
-      await MenuHeader.sendButton.waitForClickable();
-      await MenuHeader.sendButton.click();
-      break;
-    default:
-      throw new Error(`Unsupported button name: ${button}`);
+When(
+  /^I click "(Receive|Send|Notifications)" button on page header$/,
+  async (button: 'Receive' | 'Send' | 'Notifications') => {
+    switch (button) {
+      case 'Receive':
+        await MenuHeader.receiveButton.waitForClickable();
+        await MenuHeader.receiveButton.click();
+        break;
+      case 'Send':
+        await MenuHeader.sendButton.waitForClickable();
+        await MenuHeader.sendButton.click();
+        break;
+      case 'Notifications':
+        await MenuHeader.notificationsButton.waitForClickable();
+        await MenuHeader.notificationsButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
   }
-});
+);
 
 Then(/^I (see|do not see) a button to open the right side panel$/, async (shouldSee: 'see' | 'do not see') => {
   await topNavigationAssert.assertSeeRightSidePanelButton(shouldSee === 'see');

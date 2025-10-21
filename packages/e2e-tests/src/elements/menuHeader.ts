@@ -36,6 +36,8 @@ export class MenuHeader {
   private readonly RECEIVE_BUTTON = 'aside [data-testid="receive-button"]';
   private readonly SEND_BUTTON = 'aside [data-testid="send-button"]';
   private readonly CO_SIGN_BUTTON = '[data-testid="co-sign-button"]';
+  private readonly NOTIFICATIONS_BUTTON = '[data-testid="notifications-bell"]';
+  private readonly UNREAD_NOTIFICATIONS_COUNTER = '[data-testid="unread-notifications-counter"]';
 
   get avatarOnButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.AVATAR_ON_BUTTON);
@@ -79,6 +81,14 @@ export class MenuHeader {
 
   get coSignButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CO_SIGN_BUTTON);
+  }
+
+  get notificationsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.NOTIFICATIONS_BUTTON);
+  }
+
+  get unreadNotificationsCounter(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.UNREAD_NOTIFICATIONS_COUNTER);
   }
 
   get menuButton(): ChainablePromiseElement<WebdriverIO.Element> {
