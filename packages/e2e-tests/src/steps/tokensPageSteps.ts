@@ -227,3 +227,7 @@ When(/^I search for token: "([^"]*)"$/, async (tokenName: string) => {
 Then(/^I see only token with name: "([^"]*)"$/, async (tokenName: string) => {
   await tokensPageAssert.assertSeeOnlyFilteredToken(tokenName);
 });
+
+Then(/^"Send" button is (enabled|disabled) on page header$/, async (state: 'disabled' | 'enabled') => {
+  await tokensPageAssert.assertSendButtonEnabled(state === 'enabled');
+});

@@ -88,6 +88,11 @@ class TopNavigationAssert {
         await t('browserView.sideMenu.links.addSharedWallet')
       );
     }
+    // TODO: uncomment when LW-13474 is merged
+    // await MenuHeader.menuAddMidnightWalletButton.waitForDisplayed();
+    // expect(await MenuHeader.menuAddMidnightWalletButton.getText()).to.equal(
+    //   await t('browserView.sideMenu.links.addMidnightWallet')
+    // );
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addressBook')
@@ -258,6 +263,23 @@ class TopNavigationAssert {
 
   async assertSeeAddSharedWalletOption(shouldBeDisplayed: boolean) {
     await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertMidnightWalletIsInSyncedStatus() {
+    await MenuHeader.midnightLogo.waitForDisplayed();
+    await MenuHeader.midnightTitle.waitForDisplayed();
+    await MenuHeader.midnightSyncStatus.waitForDisplayed();
+    await this.assertMidnightSyncStatus('app.sync-status.synced');
+    await MenuHeader.midnightResyncIcon.waitForEnabled();
+  }
+
+  async assertMidnightSyncStatus(status: string) {
+    const expectedStatus = (await t(status)) ?? status;
+    await browser.waitUntil(async () => (await MenuHeader.getWalletSyncStatusText()) === expectedStatus, {
+      timeout: 180_000,
+      interval: 500,
+      timeoutMsg: `expected sync status "${expectedStatus}" was not displayed`
+    });
   }
 }
 
