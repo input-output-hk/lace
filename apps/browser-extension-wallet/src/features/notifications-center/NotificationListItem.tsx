@@ -52,6 +52,7 @@ export const NotificationListItem = ({
       icon={<TrashOutlineComponent className={styles.icon} />}
       onClick={handleRemove}
       color="secondary"
+      data-testid="notification-list-item-remove-button"
     />
   ) : (
     <Button.Secondary
@@ -60,6 +61,7 @@ export const NotificationListItem = ({
       label={popupView ? '' : t('notificationsCenter.notificationListItem.remove')}
       color="secondary"
       onClick={handleRemove}
+      data-testid="notification-list-item-remove-button"
     />
   );
 
@@ -73,12 +75,12 @@ export const NotificationListItem = ({
     >
       <Flex className={styles.content} justifyContent="space-between" alignItems="flex-start" flexDirection="column">
         <Flex alignItems="center" gap="$4" className={styles.copy}>
-          {!isRead && <div className={styles.dot} />}
-          <Text.Body.Small weight="$medium" color="secondary">
+          {!isRead && <div className={styles.dot} data-testid="notification-list-item-dot" />}
+          <Text.Body.Small weight="$medium" color="secondary" data-testid="notification-list-item-publisher">
             {publisher}
           </Text.Body.Small>
         </Flex>
-        <TitleTextComponent weight="$semibold" className={styles.copy}>
+        <TitleTextComponent weight="$semibold" className={styles.copy} data-testid="notification-list-item-title">
           {title}
         </TitleTextComponent>
       </Flex>

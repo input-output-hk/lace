@@ -18,6 +18,10 @@ export interface NotificationsBellProps {
 export const NotificationsBell = ({ onClick, unreadNotifications }: NotificationsBellProps): React.ReactElement => (
   <Button className={styles.btn} block color="gradient" data-testid="notifications-bell" onClick={onClick}>
     <NotificationBellIcon className={styles.icon} />
-    {unreadNotifications > 0 && <span className={styles.badge}>{formatNotificationCount(unreadNotifications)}</span>}
+    {unreadNotifications > 0 && (
+      <span className={styles.badge} data-testid="unread-notifications-counter">
+        {formatNotificationCount(unreadNotifications)}
+      </span>
+    )}
   </Button>
 );

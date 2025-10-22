@@ -28,6 +28,15 @@ class TopNavigationAssert {
     expect(await MenuHeader.coSignButton.getText()).to.equal(await t('core.transactionCtas.coSign'));
   }
 
+  async assertSeeNotificationsButton() {
+    await MenuHeader.notificationsButton.waitForDisplayed();
+  }
+
+  async assertSeeUnreadNotificationsCounter(expectedCount: number) {
+    await MenuHeader.unreadNotificationsCounter.waitForDisplayed();
+    expect(await MenuHeader.unreadNotificationsCounter.getText()).to.equal(expectedCount > 9 ? '9+' : expectedCount);
+  }
+
   async assertLogoPresent() {
     await MenuHeader.logo.waitForDisplayed({ timeout: 180_000 });
   }
