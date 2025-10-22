@@ -80,7 +80,7 @@ const NotificationsCenterContent = (): React.ReactElement => {
                 classname={styles.sectionTitle}
                 title={
                   <Flex className={styles.navigationButton} alignItems="center" gap="$8">
-                    <NavigationButton icon="arrow" onClick={onBack} />
+                    <NavigationButton icon="arrow" onClick={onBack} data-testid="notifications-center-back-button" />
                     {t('notificationsCenter.title')}
                   </Flex>
                 }

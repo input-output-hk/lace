@@ -69,9 +69,9 @@ export const NotificationDetailsContainer = (): React.ReactElement => {
     <ContentLayout>
       <Flex justifyContent="space-between" alignItems="center" gap="$8">
         <Box className={styles.navigationButton}>
-          <NavigationButton icon="arrow" onClick={onBack} />
+          <NavigationButton icon="arrow" onClick={onBack} data-testid="notification-details-back-button" />
         </Box>
-        <Button color="gradient" data-testid="view-all-button" onClick={onViewAllNotification}>
+        <Button color="gradient" data-testid="notification-details-view-all-button" onClick={onViewAllNotification}>
           {t('notificationsCenter.viewAll')}
         </Button>
       </Flex>

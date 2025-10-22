@@ -65,7 +65,7 @@ const NotificationDetailsContent = (): React.ReactElement => {
             classname={styles.sectionTitle}
             title={
               <Flex className={styles.navigationButton} alignItems="center">
-                <NavigationButton icon="arrow" onClick={onBack} />
+                <NavigationButton icon="arrow" onClick={onBack} data-testid="notification-details-back-button" />
               </Flex>
             }
           />
@@ -74,7 +74,7 @@ const NotificationDetailsContent = (): React.ReactElement => {
           <LaceButton.Secondary
             size="medium"
             onClick={() => setNotificationIdToRemove(notificationId)}
-            data-testid="view-all-button"
+            data-testid="notification-details-remove-button"
             label={t('notificationsCenter.removeNotification.confirm')}
             color="secondary"
             icon={<TrashOutlineComponent className={styles.icon} data-testid="trash-icon" />}
@@ -83,7 +83,7 @@ const NotificationDetailsContent = (): React.ReactElement => {
             className={styles.button}
             block
             color="gradient"
-            data-testid="view-all-button"
+            data-testid="notification-details-view-all-button"
             onClick={onViewAllNotification}
           >
             {t('notificationsCenter.notificationDetails.viewAll')}
