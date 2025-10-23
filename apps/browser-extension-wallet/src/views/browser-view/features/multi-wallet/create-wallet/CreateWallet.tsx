@@ -6,6 +6,7 @@ import { WalletCreateStep } from './types';
 import { ChooseRecoveryMethod } from './steps/ChooseRecoveryMethod';
 import { SecurePaperWallet } from './steps/SecurePaperWallet';
 import { SavePaperWallet } from './steps/SavePaperWallet';
+import { SelectBlockchain } from './steps/SelectBlockchain';
 
 export const CreateWallet = (): JSX.Element => (
   <CreateWalletProvider>
@@ -25,6 +26,8 @@ export const CreateWallet = (): JSX.Element => (
         // Common steps
         case WalletCreateStep.Setup:
           return <Setup />;
+        case WalletCreateStep.SelectBlockchain:
+          return <SelectBlockchain />;
         default:
           return <ChooseRecoveryMethod />;
       }

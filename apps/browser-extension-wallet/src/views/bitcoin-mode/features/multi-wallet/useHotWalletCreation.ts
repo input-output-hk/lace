@@ -26,7 +26,8 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
-    name: ''
+    name: '',
+    blockchain: 'Bitcoin'
   });
 
   useEffect(() => {

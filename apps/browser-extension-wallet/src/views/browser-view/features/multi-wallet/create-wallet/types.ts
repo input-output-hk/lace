@@ -1,10 +1,3 @@
-import { Subject } from 'rxjs';
-
-export interface Providers {
-  generateMnemonicWords: () => string[];
-  shouldShowConfirmationDialog$: Subject<boolean>;
-}
-
 export enum WalletCreateStep {
   // Legacy
   RecoveryPhraseInput = 'RecoveryPhraseInput',
@@ -14,5 +7,6 @@ export enum WalletCreateStep {
   SecurePaperWallet = 'SecurePaperWallet',
   SavePaperWallet = 'SavePaperWallet',
   // Common
-  Setup = 'Setup'
+  Setup = 'Setup',
+  SelectBlockchain = 'SelectBlockchain'
 }

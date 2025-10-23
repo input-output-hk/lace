@@ -10,3 +10,4 @@ export { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 export { WalletSetupNamePasswordStepRevamp } from './WalletSetupNamePasswordStepRevamp';
 export { WalletSetupConnectHardwareWalletStepRevamp } from './WalletSetupConnectHardwareWalletStepRevamp';
 export { WalletSetupHWCreationStep } from './WalletSetupHWCreationStep';
+export { WalletSetupSelectBlockchain } from './WalletSetupSelectBlockchain';
