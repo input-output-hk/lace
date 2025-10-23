@@ -406,7 +406,7 @@ jobs:
           " > environment.properties
 
       - name: Publish allure report to S3
-        uses: andrcuns/allure-publish-action@v2.9.0
+        uses: andrcuns/allure-publish-action@v2.10.0
         if: always()
         env:
           GITHUB_AUTH_TOKEN: ${{ secrets.GH_TOKEN }}
