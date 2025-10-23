@@ -24,7 +24,6 @@ import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { config } from '@src/config';
 import { Portal } from '../features/wallet-setup/components/Portal';
 import { MultiWallet } from '../features/multi-wallet';
-import { MultiWallet as BitcoinMultiWallet } from '../../bitcoin-mode/features/multi-wallet/MultiWallet';
 import { MainLoader } from '@components/MainLoader';
 import { useAppInit, useLocalStorage } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
@@ -336,7 +335,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
         {page && (
           <Switch>
             <Route path={routes.newWallet.root} component={MultiWallet} />
-            <Route path={routes.newBitcoinWallet.root} component={BitcoinMultiWallet} />
             <Route path={routes.sharedWallet.root} component={SharedWallet} />
           </Switch>
         )}
