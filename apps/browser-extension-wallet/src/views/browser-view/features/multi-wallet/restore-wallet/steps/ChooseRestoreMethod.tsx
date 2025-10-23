@@ -11,7 +11,7 @@ const FAQ_URL = `${process.env.FAQ_URL}?question=what-is-paper-wallet`;
 
 export const ChooseRestoreMethod: VFC = () => {
   const { postHogActions } = useWalletOnboarding();
-  const { back, next, recoveryMethod, setRecoveryMethod } = useRestoreWallet();
+  const { back, next, recoveryMethod, setRecoveryMethod, selectedBlockchain } = useRestoreWallet();
   const analytics = useAnalyticsContext();
 
   const handleNext = () => {
@@ -35,6 +35,7 @@ export const ChooseRestoreMethod: VFC = () => {
       recoveryMethod={recoveryMethod}
       setRecoveryMethod={setRecoveryMethod}
       flow="create"
+      showPaperWalletOption={selectedBlockchain === 'Cardano'}
     />
   );
 };

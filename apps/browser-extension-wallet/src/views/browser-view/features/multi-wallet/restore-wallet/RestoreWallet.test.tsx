@@ -44,9 +44,10 @@ jest.mock('@providers/PostHogClientProvider', () => ({
 }));
 
 const recoveryPhraseStep = async () => {
+  await screen.findByTestId('wallet-setup-step-btn-next');
+  fireEvent.click(getNextButton());
+  fireEvent.click(getNextButton());
   await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
-  const nextButton = getNextButton();
-  fireEvent.click(nextButton);
   await screen.findByText("Let's set up your new wallet");
 };
 

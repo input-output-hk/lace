@@ -1,0 +1,42 @@
+@import '../../styles/theme.scss';
+
+.blockchainCard {
+  cursor: pointer;
+  border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+
+  &:hover {
+    border: 2px solid var(--primary-accent) !important;
+  }
+
+  &.selected {
+    border: 2px solid var(--primary-accent) !important;
+  }
+}
+
+.icon {
+  color: var(--text-color-primary) !important;
+  height: 40px;
+  width: 40px;
+}
+
+.badge {
+  border-radius: size_unit(2);
+  padding: 0 size_unit(1);
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.primaryBadge {
+  @extend .badge;
+  background: var(--primary-default);
+}
+
+.gradientBadge {
+  @extend .badge;
+  background: var(--primary-gradient);
+}
+
+.badgeText {
+  color: white !important;
+}

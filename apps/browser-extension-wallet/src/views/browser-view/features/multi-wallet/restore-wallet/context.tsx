@@ -12,6 +12,7 @@ import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ShieldedPgpKeyData } from '@src/types';
 import { Wallet } from '@lace/cardano';
+import { Blockchain } from '@cardano-sdk/web-extension';
 
 type OnNameChange = (state: { name: string }) => void;
 type OnRecoveryPhraseLengthChange = (length: RecoveryPhraseLength) => void;
@@ -35,6 +36,8 @@ interface State {
   setPgpInfo: React.Dispatch<React.SetStateAction<ShieldedPgpKeyData>>;
   walletMetadata: WalletSummaryInfo;
   setWalletMetadata: React.Dispatch<React.SetStateAction<WalletSummaryInfo>>;
+  selectedBlockchain: Blockchain;
+  setSelectedBlockchain: React.Dispatch<React.SetStateAction<Blockchain>>;
 }
 
 interface Props {
@@ -64,10 +67,8 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
   const { forgotPasswordFlowActive, postHogActions, setFormDirty } = useWalletOnboarding();
   const posthog = usePostHogClientContext();
   const paperWalletEnabled = posthog?.isFeatureFlagEnabled('restore-paper-wallet');
-
-  const [step, setStep] = useState<WalletRestoreStep>(
-    paperWalletEnabled ? WalletRestoreStep.ChooseRecoveryMethod : WalletRestoreStep.RecoveryPhrase
-  );
+  const [step, setStep] = useState<WalletRestoreStep>(WalletRestoreStep.SelectBlockchain);
+  const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain>('Cardano');
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
   const [pgpInfo, setPgpInfo] = useState<ShieldedPgpKeyData>(INITIAL_PGP_INFO_STATE);
   const [walletMetadata, setWalletMetadata] = useState<WalletSummaryInfo>({
@@ -103,12 +104,12 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
 
   const finalizeWalletRestoration = useCallback(
     async (params: Partial<CreateWalletParams>) => {
-      const { source, wallet } = await createWallet(params);
+      const { source, wallet } = await createWallet({ ...params, blockchain: selectedBlockchain });
       await sendPostWalletAddAnalytics({
         extendedAccountPublicKey: source.account.extendedAccountPublicKey,
         postHogActionHdWallet: postHogActions.restore.HD_WALLET,
         postHogActionWalletAdded: postHogActions.restore.WALLET_ADDED,
-        wallet
+        ...(selectedBlockchain === 'Cardano' && wallet)
       });
       pgpInfo.pgpKeyPassphrase = '';
       pgpInfo.pgpPrivateKey = '';
@@ -120,17 +121,21 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
     },
     [
       createWallet,
-      forgotPasswordFlowActive,
+      selectedBlockchain,
+      sendPostWalletAddAnalytics,
       postHogActions.restore.HD_WALLET,
       postHogActions.restore.WALLET_ADDED,
-      sendPostWalletAddAnalytics,
-      setPgpInfo,
-      pgpInfo
+      pgpInfo,
+      forgotPasswordFlowActive
     ]
   );
 
   const next = useCallback(async () => {
     switch (step) {
+      case WalletRestoreStep.SelectBlockchain: {
+        setStep(paperWalletEnabled ? WalletRestoreStep.ChooseRecoveryMethod : WalletRestoreStep.RecoveryPhrase);
+        break;
+      }
       case WalletRestoreStep.ChooseRecoveryMethod: {
         if (recoveryMethod === 'mnemonic') {
           setStep(WalletRestoreStep.RecoveryPhrase);
@@ -156,13 +161,17 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
         window.location.reload();
         break;
     }
-  }, [history, step, recoveryMethod]);
+  }, [step, history, paperWalletEnabled, recoveryMethod]);
 
   const back = useCallback(() => {
     switch (step) {
+      case WalletRestoreStep.SelectBlockchain: {
+        history.push(walletRoutePaths.newWallet.root);
+        break;
+      }
       case WalletRestoreStep.ChooseRecoveryMethod: {
         setFormDirty(false);
-        history.push(walletRoutePaths.newWallet.root);
+        setStep(WalletRestoreStep.SelectBlockchain);
         break;
       }
       case WalletRestoreStep.RecoveryPhrase: {
@@ -208,7 +217,9 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       pgpInfo,
       setPgpInfo,
       walletMetadata,
-      setWalletMetadata
+      setWalletMetadata,
+      selectedBlockchain,
+      setSelectedBlockchain
     }),
     [
       back,
@@ -224,7 +235,9 @@ export const RestoreWalletProvider = ({ children }: Props): React.ReactElement =
       pgpInfo,
       setPgpInfo,
       walletMetadata,
-      setWalletMetadata
+      setWalletMetadata,
+      selectedBlockchain,
+      setSelectedBlockchain
     ]
   );
 
