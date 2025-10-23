@@ -1,7 +1,0 @@
-@import '../../../../../../../../../packages/common/src/ui/styles/abstracts/mixins';
-
-.textArea {
-  height: 182px !important;
-  overflow-y: auto;
-  @include scroll-bar-style;
-}

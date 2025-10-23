@@ -4,7 +4,6 @@ import { Menu, MenuProps } from 'antd';
 import {
   AddNewWalletLink,
   AddressBookLink,
-  AddNewBitcoinWalletLink,
   Links,
   LockWallet,
   NetworkChoise,
@@ -65,7 +64,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const { midnightWallets } = useLMP();
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
-  const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const midnightWalletsEnabled = posthog?.isFeatureFlagEnabled('midnight-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
@@ -142,7 +140,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     !isBitcoinWallet &&
     wallets?.some((w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet?.walletId);
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
-  const showAddBitcoinWalletLink = bitcoinWalletsEnabled;
   const showAddMidnightWalletLink = midnightWalletsEnabled && midnightWallets && midnightWallets.length === 0;
 
   const handleNamiModeChange = async (activated: boolean) => {
@@ -198,7 +195,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
             {!isBitcoinWallet && showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
-            {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
             {showAddMidnightWalletLink && <AddNewMidnightWalletLink />}
             {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />

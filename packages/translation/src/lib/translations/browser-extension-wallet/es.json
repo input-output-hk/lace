@@ -379,7 +379,6 @@
   "browserView.sideMenu.dapps.header": "Abrir DApps",
   "browserView.sideMenu.links.activity": "Actividad",
   "browserView.sideMenu.links.addNewWallet": "Agregar nueva billetera",
-  "browserView.sideMenu.links.addBitcoinWallet": "Agregar billetera de bitcoin",
   "browserView.sideMenu.links.addressBook": "Agenda",
   "browserView.sideMenu.links.addSharedWallet": "Agregar billetera compartida",
   "browserView.sideMenu.links.dappExplorer": "DApps",
