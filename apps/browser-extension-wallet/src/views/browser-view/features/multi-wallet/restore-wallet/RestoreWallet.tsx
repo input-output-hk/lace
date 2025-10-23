@@ -7,12 +7,13 @@ import { ChooseRestoreMethod } from './steps/ChooseRestoreMethod';
 import { ScanShieldedMessage } from './steps/ScanShieldedMessage';
 import { EnterPgpPrivateKey } from './steps/EnterPgpPrivateKey';
 import { WalletOverview } from './steps/WalletOverview';
+import { SelectBlockchain } from './steps/SelectBlockchain';
 
 export const RestoreWallet = (): JSX.Element => (
   <RestoreWalletProvider>
     {({ step }) => {
       switch (step) {
-        // Paper wallet seteps
+        // Paper wallet steps
         case WalletRestoreStep.ChooseRecoveryMethod:
           return <ChooseRestoreMethod />;
         case WalletRestoreStep.ScanQrCode:
@@ -27,6 +28,8 @@ export const RestoreWallet = (): JSX.Element => (
         // Common steps
         case WalletRestoreStep.Setup:
           return <Setup />;
+        case WalletRestoreStep.SelectBlockchain:
+          return <SelectBlockchain />;
         default:
           return <ChooseRestoreMethod />;
       }

@@ -29,6 +29,7 @@ export interface WalletSetupStepLayoutRevampProps {
 
 const getTimelineSteps = (currentStep: WalletTimelineSteps, isHardwareWallet: boolean) => {
   const inMemoryWalletSteps = [
+    { key: WalletTimelineSteps.SELECT_BLOCKCHAIN, name: i18n.t('core.walletSetup.selectBlockchain') },
     { key: WalletTimelineSteps.CHOOSE_RECOVERY_METHOD, name: i18n.t('core.walletSetup.recoveryMethod') },
     { key: WalletTimelineSteps.RECOVERY_DETAILS, name: i18n.t('core.walletSetup.recoveryDetails') },
     { key: WalletTimelineSteps.WALLET_SETUP, name: i18n.t('core.walletSetupStep.walletSetup') }

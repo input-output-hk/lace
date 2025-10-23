@@ -27,7 +27,8 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
   const { aliasEventRequired, mergeEventRequired } = useWalletOnboarding();
   const [createWalletData, setCreateWalletData] = useState<CreateWalletParams>({
     mnemonic: initialMnemonic,
-    name: ''
+    name: '',
+    blockchain: 'Cardano'
   });
 
   useEffect(() => {
@@ -40,11 +41,12 @@ export const useHotWalletCreation = ({ initialMnemonic }: UseSoftwareWalletCreat
     })();
   }, [createWalletData.name, walletManager.walletRepository, setCreateWalletData]);
 
-  const createWallet = async (newData: Partial<CreateWalletParams>) =>
-    await walletManager.createWallet({
-      ...createWalletData,
-      ...newData
-    });
+  const createWallet = async (newData: Partial<CreateWalletParams>) => {
+    const data = { ...createWalletData, ...newData };
+    return await (newData.blockchain === 'Cardano'
+      ? walletManager.createWallet(data)
+      : walletManager.createBitcoinWallet(data));
+  };
 
   const sendPostWalletAddAnalytics = async ({
     extendedAccountPublicKey,

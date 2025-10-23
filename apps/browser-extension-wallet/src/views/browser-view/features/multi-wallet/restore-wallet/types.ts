@@ -1,9 +1,3 @@
-import { Subject } from 'rxjs';
-
-export interface Providers {
-  shouldShowConfirmationDialog$: Subject<boolean>;
-}
-
 export enum WalletRestoreStep {
   // Legacy
   RecoveryPhrase = 'RecoveryPhrase',
@@ -13,5 +7,6 @@ export enum WalletRestoreStep {
   SummaryWalletInfo = 'SummaryWalletInfo',
   PrivatePgpKeyEntry = 'PrivatePgpKeyEntry',
   // Common
-  Setup = 'Setup'
+  Setup = 'Setup',
+  SelectBlockchain = 'SelectBlockchain'
 }
