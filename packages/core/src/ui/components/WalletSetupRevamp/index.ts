@@ -10,3 +10,6 @@ export { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 export { WalletSetupNamePasswordStepRevamp } from './WalletSetupNamePasswordStepRevamp';
 export { WalletSetupConnectHardwareWalletStepRevamp } from './WalletSetupConnectHardwareWalletStepRevamp';
 export { WalletSetupHWCreationStep } from './WalletSetupHWCreationStep';
+export { WalletSetupReuseMnemonicStep } from './WalletSetupReuseMnemonicStep';
+export { WalletSetupEnterPasswordStep } from './WalletSetupEnterPasswordStep';
+export { WalletSetupMnemonicErrorStep } from './WalletSetupMnemonicErrorStep';
