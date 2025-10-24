@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import { ChainablePromiseElement } from 'webdriverio';
 
 export default class CommonOnboardingElements {
@@ -12,6 +12,7 @@ export default class CommonOnboardingElements {
   private PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
   private TERMS_OF_SERVICE_LINK = '[data-testid="terms-of-service-link"]';
   private ACTIVE_STEP_INDICATOR = '[data-testid="active-onboarding-step"]';
+  private CLOSE_BUTTON = '[data-testid="navigation-button-cross"]';
 
   get stepHeader(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.STEP_HEADER);
@@ -51,6 +52,10 @@ export default class CommonOnboardingElements {
 
   get activeStepIndicator(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.ACTIVE_STEP_INDICATOR);
+  }
+
+  get addNewWalletCloseButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.CLOSE_BUTTON);
   }
 
   async clickOnNextButton(): Promise<void> {

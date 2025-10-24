@@ -81,6 +81,14 @@ class OnboardingCommonAssert {
     }
     expect(await this.commonOnboardingElements.activeStepIndicator.getText()).to.equal(expectedStepTitle);
   }
+
+  async assertSeeAddNewWalletCloseButton(shouldBeDisplayed: boolean): Promise<void> {
+    await this.commonOnboardingElements.addNewWalletCloseButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
+  }
+
+  async assertAddNewWalletCloseButtonIsEnabled(shouldBeEnabled: boolean): Promise<void> {
+    await this.commonOnboardingElements.addNewWalletCloseButton.waitForEnabled({ reverse: !shouldBeEnabled });
+  }
 }
 
 export default OnboardingCommonAssert;

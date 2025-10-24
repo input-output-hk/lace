@@ -8,7 +8,7 @@ Feature: Add new wallet - Create wallet
   Scenario: Extended-view - Multi-wallet - "Add new wallet" option click in user menu
     When I open header menu
     And I click on "Add new wallet" option
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then I see the main onboarding page for the "Add new wallet" flow in extended view
 
   @LW-9335
   Scenario: Popup-view - Multi-wallet - "Add new wallet" option click in user menu
@@ -16,7 +16,7 @@ Feature: Add new wallet - Create wallet
     And I open header menu
     And I click on "Add new wallet" option
     And I switch to last window
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then I see the main onboarding page for the "Add new wallet" flow in extended view
 
   @LW-9336
   Scenario: Extended-view - Multi-wallet - Create - Create button click
