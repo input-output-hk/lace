@@ -2,18 +2,18 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import AddNewWalletAssert from '../assert/AddNewWalletAssert';
 import MenuHeader from '../elements/menuHeader';
 import OnboardingMainPage from '../elements/onboarding/mainPage';
-import AddNewWalletMainModal from '../elements/addNewWallet/MainModal';
 import CancelAddingNewWalletDialog from '../elements/addNewWallet/CancelAddingNewWalletDialog';
 import SecureYourPaperWalletPageAssert from '../assert/onboarding/SecureYourPaperWalletPageAssert';
 import ChooseRecoveryMethodPageAssert from '../assert/onboarding/ChooseRecoveryMethodPageAssert';
 import SaveYourPaperWalletPageAssert from '../assert/onboarding/SaveYourPaperWalletPageAssert';
+import CommonOnboardingElements from '../elements/onboarding/commonOnboardingElements';
 
-Then(/^I see onboarding main screen within modal over the active Lace page in expanded view$/, async () => {
-  await AddNewWalletAssert.assertMainModalIsDisplayedInExtendedMode();
+Then(/^I see the main onboarding page for the "Add new wallet" flow in extended view$/, async () => {
+  await AddNewWalletAssert.assertMainPageForAddNewWalletFlowIsDisplayedInExtendedMode();
 });
 
-Then(/^"Add new wallet" modal is not displayed$/, async () => {
-  await AddNewWalletAssert.assertMainModalIsNotDisplayed();
+Then(/^"Add new wallet" page is not displayed$/, async () => {
+  await AddNewWalletAssert.assertMainPageForAddNewWalletIsNotDisplayed();
 });
 
 Given(
@@ -26,19 +26,20 @@ Given(
 );
 
 Then(
-  /^"Let's set up your new wallet" page is displayed in modal for "(Create|Create paper wallet|Restore)" flow$/,
+  /^"Let's set up your new wallet" page is displayed for "(Create|Create paper wallet|Restore)" flow while adding another wallet$/,
   async (flow: 'Create' | 'Create paper wallet' | 'Restore') => {
-    await AddNewWalletAssert.assertSeeWalletSetupPageInModal(flow);
+    await AddNewWalletAssert.assertSeeWalletSetupPage(flow);
   }
 );
 
-Then(/^"Connect your device" page is displayed in modal$/, async () => {
-  await AddNewWalletAssert.asserSeeConnectYourDevicePageInModal();
+Then(/^"Connect your device" page is displayed in "Add new wallet" flow$/, async () => {
+  await AddNewWalletAssert.asserSeeConnectYourDevicePage();
 });
 
-When(/^I click "X" button on "Add new wallet" modal$/, async () => {
-  await AddNewWalletMainModal.closeButton.waitForClickable();
-  await AddNewWalletMainModal.closeButton.click();
+When(/^I click "X" button on "Add new wallet" flow$/, async () => {
+  const closeButton = await new CommonOnboardingElements().addNewWalletCloseButton;
+  await closeButton.waitForClickable();
+  await closeButton.click();
 });
 
 Then(
@@ -47,11 +48,6 @@ Then(
     await AddNewWalletAssert.assertSeeStartOverDialog(state === 'is');
   }
 );
-
-When(/^I click outside "Add new wallet" modal$/, async () => {
-  await AddNewWalletMainModal.modalMask.moveTo({ xOffset: 0, yOffset: 0 });
-  await browser.action('pointer').down().perform();
-});
 
 When(
   /^I click "(Go back|Proceed)" button on "Are you sure you want to cancel adding a new wallet\?" dialog$/,

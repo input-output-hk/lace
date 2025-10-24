@@ -4,15 +4,15 @@ Feature: Add new wallet - Connect hardware wallet
   @LW-9358
   Scenario: Extended-view - Multi-wallet - Connect - Create button click
     When I opened "Connect" flow via "Add new wallet" feature
-    Then "Connect your device" page is displayed in modal
+    Then "Connect your device" page is displayed in "Add new wallet" flow
     And "Connect device" step is marked as active on progress timeline
 
   @LW-9359
   Scenario: Extended-view - Multi-wallet - Connect - Back button click
     Given I opened "Connect" flow via "Add new wallet" feature
-    And "Connect your device" page is displayed in modal
+    And "Connect your device" page is displayed in "Add new wallet" flow
     When I click "Back" button during wallet setup
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then I see the main onboarding page for the "Add new wallet" flow in extended view
 
   @LW-10965
   Scenario: Extended-view - Multi-wallet - Connect - "No hardware wallet device was chosen." error

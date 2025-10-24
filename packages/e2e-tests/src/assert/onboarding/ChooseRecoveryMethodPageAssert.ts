@@ -3,17 +3,14 @@ import ChooseRecoveryMethodPage from '../../elements/onboarding/ChooseRecoveryMe
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
 import { TimelineSteps } from '../../enums/Onboarding';
-import AddNewWalletMainModal from '../../elements/addNewWallet/MainModal';
 
 class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
-  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore', isModal = false) {
-    if (isModal) {
-      await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-      await AddNewWalletMainModal.closeButton.waitForEnabled();
-    } else {
-      await this.assertSeeHelpAndSupportButton();
-      await this.assertSeeLegalLinks();
+  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore', isMultiWallet = false) {
+    if (isMultiWallet) {
+      await ChooseRecoveryMethodPage.addNewWalletCloseButton.waitForEnabled();
     }
+    await this.assertSeeHelpAndSupportButton();
+    await this.assertSeeLegalLinks();
     await this.assertSeeStepTitle(await t('paperWallet.chooseRecoveryMethod.title'));
     const expectedDescription =
       flowType === 'Create'

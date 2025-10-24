@@ -1,4 +1,3 @@
-import AddNewWalletMainModal from '../elements/addNewWallet/MainModal';
 import OnboardingMainPageAssert from './onboarding/onboardingMainPageAssert';
 import OnboardingWalletSetupPageAssert from './onboarding/onboardingWalletSetupPageAssert';
 import { t } from '../utils/translationService';
@@ -7,12 +6,13 @@ import { expect } from 'chai';
 import ConnectYourDevicePage from '../elements/onboarding/ConnectYourDevicePage';
 import ConnectYourDevicePageAssert from './onboarding/ConnectYourDevicePageAssert';
 import CancelAddingNewWalletDialog from '../elements/addNewWallet/CancelAddingNewWalletDialog';
+import OnboardingCommonAssert from './onboarding/onboardingCommonAssert';
 
 class AddNewWalletAssert {
-  async assertMainModalIsDisplayedInExtendedMode() {
+  async assertMainPageForAddNewWalletFlowIsDisplayedInExtendedMode() {
     expect(await isPopupMode()).to.be.false;
-    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-    await AddNewWalletMainModal.closeButton.waitForEnabled();
+    expect(await browser.getUrl()).to.include('#/new-wallet');
+    await OnboardingMainPageAssert.assertSeeAddNewWalletCloseButton(true);
     await OnboardingMainPageAssert.assertSeeLogo();
     await OnboardingMainPageAssert.assertSeeTitle();
     await OnboardingMainPageAssert.assertSeeSubtitle();
@@ -21,13 +21,14 @@ class AddNewWalletAssert {
     await OnboardingMainPageAssert.assertSeeRestoreWalletOption();
   }
 
-  async assertMainModalIsNotDisplayed() {
-    await AddNewWalletMainModal.container.waitForDisplayed({ reverse: true });
+  async assertMainPageForAddNewWalletIsNotDisplayed() {
+    const commonOnboardingAssert = new OnboardingCommonAssert();
+    await commonOnboardingAssert.assertSeeAddNewWalletCloseButton(false);
+    expect(await browser.getUrl()).to.not.include('#/new-wallet');
   }
 
-  async assertSeeWalletSetupPageInModal(flow: 'Create' | 'Create paper wallet' | 'Restore') {
-    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-    await AddNewWalletMainModal.closeButton.waitForEnabled();
+  async assertSeeWalletSetupPage(flow: 'Create' | 'Create paper wallet' | 'Restore') {
+    await OnboardingWalletSetupPageAssert.assertSeeAddNewWalletCloseButton(true);
     await OnboardingWalletSetupPageAssert.assertSeeStepTitle(await t('core.walletNameAndPasswordSetupStep.title'));
     await OnboardingWalletSetupPageAssert.assertSeeStepSubtitle(
       await t('core.walletNameAndPasswordSetupStep.description')
@@ -38,9 +39,8 @@ class AddNewWalletAssert {
     await OnboardingWalletSetupPageAssert.assertSeeEnterWalletButton(flow === 'Create paper wallet');
   }
 
-  async asserSeeConnectYourDevicePageInModal() {
-    await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-    await AddNewWalletMainModal.closeButton.waitForEnabled();
+  async asserSeeConnectYourDevicePage() {
+    await ConnectYourDevicePageAssert.assertSeeAddNewWalletCloseButton(true);
     await ConnectYourDevicePageAssert.assertSeeStepTitle(
       await t('core.walletSetupConnectHardwareWalletStepRevamp.title')
     );

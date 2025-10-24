@@ -3,17 +3,12 @@ import { TimelineSteps } from '../../enums/Onboarding';
 import { t } from '../../utils/translationService';
 import SecureYourPaperWalletPage from '../../elements/onboarding/SecureYourPaperWalletPage';
 import { expect } from 'chai';
-import AddNewWalletMainModal from '../../elements/addNewWallet/MainModal';
 
 class SecureYourPaperWalletPageAssert extends OnboardingCommonAssert {
-  async assertSeeSecureYourPaperWalletPage(isModal = false) {
-    if (isModal) {
-      await AddNewWalletMainModal.container.waitForDisplayed({ timeout: 5000 });
-      await AddNewWalletMainModal.closeButton.waitForEnabled();
-    } else {
-      await this.assertSeeHelpAndSupportButton();
-      await this.assertSeeLegalLinks();
-    }
+  async assertSeeSecureYourPaperWalletPage(isMultiWallet = false) {
+    await this.assertAddNewWalletCloseButtonIsDisplayed(isMultiWallet);
+    await this.assertSeeHelpAndSupportButton();
+    await this.assertSeeLegalLinks();
 
     await this.assertSeeStepTitle(await t('paperWallet.securePaperWallet.title'));
     await this.assertSeeStepSubtitle(await t('paperWallet.securePaperWallet.description'));
