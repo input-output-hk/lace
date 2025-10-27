@@ -15,6 +15,11 @@ class MidnightBannerAssert {
     expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
   }
 
+  async assertNotSeeMidnightBanner() {
+    const isBannerInvisible = await midnightBanner.title.waitForDisplayed({ reverse: true });
+    expect(isBannerInvisible).to.be.true;
+  }
+
   async assertSeeMidnightURL() {
     const currentUrl = await browser.getUrl();
     // the exact URL might change because of redirection, so just check that it contains 'midnight'

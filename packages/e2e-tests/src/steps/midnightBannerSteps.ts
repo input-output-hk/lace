@@ -11,7 +11,15 @@ When(/^I click on "Learn more" button on "Discover the Midnight Token Distributi
   await midnightBanner.clickOnLearnMoreButton();
 });
 
+When(/^I click on "Remind me later" button on "Discover the Midnight Token Distribution" banner$/, async () => {
+  await midnightBanner.clickOnRemindMeLaterButton();
+});
+
 Then(/^"www.midnight.gd" page is displayed in new tab$/, async () => {
   await switchToLastWindow();
   await midnightBannerAssert.assertSeeMidnightURL();
+});
+
+Then(/^"Discover the Midnight Token Distribution" banner is not displayed$/, async () => {
+  await midnightBannerAssert.assertNotSeeMidnightBanner();
 });
