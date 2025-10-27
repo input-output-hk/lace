@@ -20,7 +20,7 @@ Feature: Add new wallet - Create paper wallet
   Scenario: Add new wallet - Create - Choose recovery method - Paper Wallet - click "Back" button
     When I opened "Create" flow via "Add new wallet" feature
     And I click "Back" button during wallet setup
-    Then I see onboarding main screen within modal over the active Lace page in expanded view
+    Then I see the main onboarding page for the "Add new wallet" flow in extended view
 
   @LW-11332
   Scenario: Add new wallet - Create - Secure your paper wallet - click "Back" button
@@ -61,7 +61,7 @@ Feature: Add new wallet - Create paper wallet
     And I enter "Paper Wallet Test 1" into "PGP key name" input
     And I enter valid key into "Your PUBLIC PGP key block" input
     And I click "Next" button during wallet setup
-    Then "Let's set up your new wallet" page is displayed in modal for "Create paper wallet" flow
+    Then "Let's set up your new wallet" page is displayed for "Create paper wallet" flow while adding another wallet
 
   @LW-11337 @memory-snapshot
   Scenario: Add new wallet - Create - Paper Wallet - Let's set up your new wallet - click "Generate paper wallet" button
