@@ -37,7 +37,7 @@ jobs:
       - name: Execute unit tests
         uses: ./.github/actions/test/unit
       - name: Upload build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Lace (Developer Preview)
           path: apps/browser-extension-wallet/dist
