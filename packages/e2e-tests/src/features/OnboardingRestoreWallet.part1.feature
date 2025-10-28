@@ -33,6 +33,7 @@ Feature: Onboarding - Restore wallet
   Scenario: Restore Wallet - Name your wallet - happy path to "Enter wallet step"
     Given I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     And I enter 24 correct mnemonic words on "Mnemonic verification" page
     And I click "Next" button during wallet setup
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"

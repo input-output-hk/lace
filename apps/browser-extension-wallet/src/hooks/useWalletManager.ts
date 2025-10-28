@@ -34,6 +34,7 @@ import {
   AnyBip32Wallet,
   AnyWallet,
   Bip32WalletAccount,
+  Blockchain,
   WalletId,
   WalletManagerActivateProps,
   WalletManagerApi,
@@ -81,6 +82,7 @@ export interface BitcoinWallet {
 export interface CreateWalletParams {
   name: string;
   mnemonic: string[];
+  blockchain: Blockchain;
   chainId?: Wallet.Cardano.ChainId;
 }
 

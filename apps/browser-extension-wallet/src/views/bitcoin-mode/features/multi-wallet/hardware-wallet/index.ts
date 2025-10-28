@@ -1,1 +1,0 @@
-export { HardwareWallet } from './HardwareWallet';

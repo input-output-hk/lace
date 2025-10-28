@@ -17,7 +17,7 @@ jest.doMock('@hooks/useWalletManager', () => ({
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
   DEFAULT_MNEMONIC_LENGTH,
   createAssetsRoute,
@@ -72,11 +72,10 @@ jest.mock('@lace/cardano', () => {
 });
 
 const recoveryPhraseStep = async () => {
-  let nextButton = getNextButton();
-  fireEvent.click(nextButton);
+  await screen.findByTestId('wallet-setup-step-btn-next');
+  fireEvent.click(getNextButton());
+  fireEvent.click(getNextButton());
   await fillMnemonic(0, DEFAULT_MNEMONIC_LENGTH);
-  nextButton = getNextButton();
-  fireEvent.click(nextButton);
   await screen.findByText("Let's set up your new wallet");
 };
 
@@ -101,6 +100,7 @@ describe('Multi Wallet Setup/Create Wallet', () => {
     );
 
     history.push(walletRoutePaths.newWallet.create);
+    await screen.findByTestId('wallet-setup-step-btn-next');
     await recoveryPhraseStep();
     await setupStep();
   });
@@ -126,15 +126,15 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
+    await screen.findByTestId('wallet-setup-step-btn-next');
     expect(formDirty).toBe(false);
 
     const nextButton = getNextButton();
     fireEvent.click(nextButton);
-    expect(formDirty).toBe(true);
+    await waitFor(() => expect(formDirty).toBe(true));
 
     const backButton = getBackButton();
     fireEvent.click(backButton);
-    fireEvent.click(screen.queryByTestId('delete-address-modal-confirm'));
-    expect(formDirty).toBe(false);
+    await waitFor(() => expect(formDirty).toBe(false));
   });
 });
