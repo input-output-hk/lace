@@ -92,23 +92,33 @@ export const WalletSetupSelectBlockchain = ({
                 <Radio
                   checked={selectedBlockchain === option.value}
                   onChange={() => setSelectedBlockchain(option.value)}
+                  data-testid={`${option.value.toLowerCase()}-option-radio-button`}
                 />
                 <Flex flexDirection="column" gap="$8">
                   <Flex gap="$8" alignItems="center" justifyContent="center">
-                    <Text.Body.Large weight="$bold">{option.title}</Text.Body.Large>
+                    <Text.Body.Large weight="$bold" data-testid={`${option.value.toLowerCase()}-option-title`}>
+                      {option.title}
+                    </Text.Body.Large>
                     <div
                       className={cn({
                         [styles.primaryBadge]: option.badge?.type === 'primary',
                         [styles.gradientBadge]: option.badge?.type === 'gradient'
                       })}
                     >
-                      <Text.Label className={styles.badgeText}>{option.badge?.text}</Text.Label>
+                      <Text.Label
+                        className={styles.badgeText}
+                        data-testid={`${option.value.toLowerCase()}-option-badge`}
+                      >
+                        {option.badge?.text}
+                      </Text.Label>
                     </div>
                   </Flex>
-                  <Text.Body.Normal color="secondary">{option.description}</Text.Body.Normal>
+                  <Text.Body.Normal color="secondary" data-testid={`${option.value.toLowerCase()}-option-description`}>
+                    {option.description}
+                  </Text.Body.Normal>
                 </Flex>
                 <div style={{ alignSelf: 'center' }}>
-                  <Icon className={styles.icon} />
+                  <Icon className={styles.icon} data-testid={`${option.value.toLowerCase()}-option-icon`} />
                 </div>
               </Flex>
             </Card.Outlined>
