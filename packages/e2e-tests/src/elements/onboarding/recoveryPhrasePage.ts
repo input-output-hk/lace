@@ -10,6 +10,7 @@ import { setClipboardReadPermission } from '../../utils/browserPermissionsUtils'
 import clipboard from 'clipboardy';
 import ChooseRecoveryMethodPage from './ChooseRecoveryMethodPage';
 import utils from '../../utils/utils';
+import SelectBlockchainPage from './SelectBlockchainPage';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -180,9 +181,9 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
     mnemonicWords: string[] = [],
     fillValues = false
   ): Promise<void> {
+    await SelectBlockchainPage.nextButton.click();
     await ChooseRecoveryMethodPage.nextButton.click();
     if (flowType === 'Create') {
-      await this.nextButton.click();
       await this.clickOnCopyToClipboardButton();
       await this.nextButton.click();
     }

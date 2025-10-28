@@ -22,6 +22,7 @@ Feature: Add new wallet - Create wallet
   Scenario: Extended-view - Multi-wallet - Create - Create button click
     When I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     Then "Mnemonic writedown" page is displayed with 24 words
     And "Recovery setup" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process
@@ -29,6 +30,7 @@ Feature: Add new wallet - Create wallet
   @LW-9344
   Scenario: Extended-view - Multi-wallet - Create - "Start by saving your recovery phrase" page - open/close "Keeping your wallet secure" modal
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I click on "Watch video" link on "Mnemonic writedown" page
     Then I see "Watch video" modal
@@ -39,6 +41,7 @@ Feature: Add new wallet - Create wallet
   Scenario: Extended-view - Multi-wallet - Create - "Start by saving your recovery phrase" page - Back button click
     Given I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
     Then "Choose recovery method" page is displayed in modal for "Create" flow
 
@@ -47,6 +50,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     When I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     And I click "Back" button during wallet setup
     Then I see "Are you sure you want to start again?" modal
 
@@ -54,6 +58,7 @@ Feature: Add new wallet - Create wallet
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Back button click - "Are you sure you want to start again?" modal - cancel
     Given I opened "Create" flow via "Add new wallet" feature
     When I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     And I click "Back" button during wallet setup
     Then I see "Are you sure you want to start again?" modal
@@ -65,6 +70,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     When I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     And I click "Back" button during wallet setup
     Then I see "Are you sure you want to start again?" modal
     When I click "OK" button on "Are you sure you want to start again?" modal
@@ -73,6 +79,7 @@ Feature: Add new wallet - Create wallet
   @LW-9351
   Scenario: Extended-view - Multi-wallet - Create - "Start by saving your recovery phrase" page - "Keeping your wallet secure" modal - "Read more" link click
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I click on "Watch video" link on "Mnemonic writedown" page
     Then I see "Watch video" modal
@@ -84,6 +91,7 @@ Feature: Add new wallet - Create wallet
     Given I opened "Create" flow via "Add new wallet" feature
     When I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
     And "Recovery setup" step is marked as active on progress timeline
     And "Next" button is disabled during onboarding process
@@ -91,6 +99,7 @@ Feature: Add new wallet - Create wallet
   @LW-9353
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - paste from clipboard
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
     And I click "Next" button during wallet setup

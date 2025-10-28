@@ -24,7 +24,8 @@ class SelectBlockchainPagePageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeBitcoinOption() {
-    await SelectBlockchainPage.bitcoinOptionRadioButton.waitForDisplayed();
+    await SelectBlockchainPage.bitcoinOptionRadioButton.waitForExist();
+    await SelectBlockchainPage.bitcoinOptionRadioButton.parentElement().waitForDisplayed(); // radio input is hidden, but it is wrapped with the visible span element
     await SelectBlockchainPage.bitcoinOptionTitle.waitForDisplayed();
     expect(await SelectBlockchainPage.bitcoinOptionTitle.getText()).to.equal(
       await t('core.WalletSetupSelectBlockchain.bitcoin')
@@ -41,7 +42,8 @@ class SelectBlockchainPagePageAssert extends OnboardingCommonAssert {
   }
 
   async assertSeeCardanoOption() {
-    await SelectBlockchainPage.cardanoOptionRadioButton.waitForDisplayed();
+    await SelectBlockchainPage.cardanoOptionRadioButton.waitForExist();
+    await SelectBlockchainPage.cardanoOptionRadioButton.parentElement().waitForDisplayed(); // radio input is hidden, but it is wrapped with the visible span element
     await SelectBlockchainPage.cardanoOptionTitle.waitForDisplayed();
     expect(await SelectBlockchainPage.cardanoOptionTitle.getText()).to.equal(
       await t('core.WalletSetupSelectBlockchain.cardano')
