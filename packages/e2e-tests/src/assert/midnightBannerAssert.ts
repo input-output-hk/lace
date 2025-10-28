@@ -15,7 +15,7 @@ class MidnightBannerAssert {
       await midnightBanner.remindMeLaterButton.waitForDisplayed();
       expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
     } else {
-      midnightBanner.title.waitForDisplayed({ reverse: true });
+      await midnightBanner.title.waitForDisplayed({ reverse: true });
     }
   }
 
