@@ -3,21 +3,20 @@ import { t } from '../utils/translationService';
 import midnightBanner from '../elements/midnightBanner';
 
 class MidnightBannerAssert {
-  async assertSeeMidnightBanner() {
-    await midnightBanner.title.waitForDisplayed();
-    expect(await midnightBanner.title.getText()).to.equal(await t('midnightEventBanner.title'));
-    await midnightBanner.closeButton.waitForDisplayed();
-    await midnightBanner.bannerDescriptionText.waitForDisplayed();
-    expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(await t('midnightEventBanner.description'));
-    await midnightBanner.learnMoreButton.waitForDisplayed();
-    expect(await midnightBanner.learnMoreButton.getText()).to.equal(await t('midnightEventBanner.learnMore'));
-    await midnightBanner.remindMeLaterButton.waitForDisplayed();
-    expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
-  }
-
-  async assertNotSeeMidnightBanner() {
-    const isBannerInvisible = await midnightBanner.title.waitForDisplayed({ reverse: true });
-    expect(isBannerInvisible).to.be.true;
+  async assertSeeMidnightBanner(shouldBeDisplayed: boolean) {
+    if (shouldBeDisplayed) {
+      await midnightBanner.title.waitForDisplayed();
+      expect(await midnightBanner.title.getText()).to.equal(await t('midnightEventBanner.title'));
+      await midnightBanner.closeButton.waitForDisplayed();
+      await midnightBanner.bannerDescriptionText.waitForDisplayed();
+      expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(await t('midnightEventBanner.description'));
+      await midnightBanner.learnMoreButton.waitForDisplayed();
+      expect(await midnightBanner.learnMoreButton.getText()).to.equal(await t('midnightEventBanner.learnMore'));
+      await midnightBanner.remindMeLaterButton.waitForDisplayed();
+      expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
+    } else {
+      midnightBanner.title.waitForDisplayed({ reverse: true });
+    }
   }
 
   async assertSeeMidnightURL() {
