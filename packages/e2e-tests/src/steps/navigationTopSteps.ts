@@ -112,10 +112,6 @@ When(/^I click on "Add new wallet" option$/, async () => {
   await MenuHeader.clickOnAddNewWalletOption();
 });
 
-When(/^I click on "Add Bitcoin wallet" option$/, async () => {
-  await MenuHeader.clickOnAddBitcoinWalletOption();
-});
-
 When(/^I click on "Add shared wallet" option$/, async () => {
   await MenuHeader.clickOnAddSharedWalletOption();
 });

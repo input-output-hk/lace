@@ -8,6 +8,7 @@ Feature: Add new wallet - Create wallet
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - invalid all words
     Given I opened "Create" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     When I save mnemonic words
     And I click "Next" button during wallet setup
     And I fill passphrase fields using saved 24 words mnemonic in incorrect order
@@ -19,6 +20,7 @@ Feature: Add new wallet - Create wallet
   @LW-9356
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - invalid word
     Given I opened "Create" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I save mnemonic words
     And I click "Next" button during wallet setup

@@ -5,4 +5,5 @@ export type TimelineStep =
   | 'Connect device'
   | 'Recovery details'
   | 'Recovery method'
-  | 'Recovery setup';
+  | 'Recovery setup'
+  | 'Select a blockchain';

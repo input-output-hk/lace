@@ -4,11 +4,13 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11152
   Scenario: Onboarding - Create - "Choose recovery method" page is displayed
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     Then "Choose recovery method" page is displayed on "Create" flow
 
   @LW-11153
   Scenario: Onboarding - Create - Choose a recovery method - Paper Wallet - click "Next" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     Then "Secure your paper wallet" page is displayed
@@ -16,13 +18,15 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11154
   Scenario: Onboarding - Create - Choose a recovery method - Paper Wallet - click "Back" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Back" button during wallet setup
-    Then "Get started" page is displayed
+    Then The "Select a blockchain" page is displayed while adding the first wallet
 
   @LW-11164
   Scenario: Onboarding - Create - Choose a recovery method - Paper Wallet - click "Learn more" link
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Learn more" link on "Choose recovery method" page
     Then FAQ page is displayed
@@ -30,6 +34,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11155
   Scenario: Onboarding - Create - Paper Wallet - Secure your paper wallet - click "Back" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I click "Back" button during wallet setup
@@ -39,6 +44,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11156
   Scenario: Onboarding - Create - Paper Wallet - Secure your paper wallet - enter valid public PGP key
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter valid key into "Your PUBLIC PGP key block" input
@@ -48,6 +54,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11157
   Scenario Outline: Onboarding - Create - Paper Wallet - Secure your paper wallet - enter invalid public PGP key - <error_case>
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter <error_case> into "Your PUBLIC PGP key block" input
@@ -62,6 +69,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11158
   Scenario: Onboarding - Create - Paper Wallet - Secure your paper wallet - click "Next" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter "Paper Wallet Test 1" into "PGP key name" input
@@ -72,6 +80,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11159 @memory-snapshot
   Scenario: Onboarding - Create - Paper Wallet - Let's set up your new wallet - click "Generate paper wallet" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter valid key into "Your PUBLIC PGP key block" input
@@ -86,6 +95,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11160
   Scenario: Onboarding - Create - Paper Wallet - Let's set up your wallet - click "Back" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter valid key into "Your PUBLIC PGP key block" input
@@ -99,6 +109,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   @LW-11163
   Scenario: Onboarding - Create - Paper Wallet - Save your paper wallet - click "Open wallet" button
     When I click "Create" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I enter valid key into "Your PUBLIC PGP key block" input
