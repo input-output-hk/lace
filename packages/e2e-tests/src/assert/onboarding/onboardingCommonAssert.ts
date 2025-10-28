@@ -76,6 +76,9 @@ class OnboardingCommonAssert {
       case 'Recovery setup':
         expectedStepTitle = await t('core.walletSetup.recoveryDetails');
         break;
+      case 'Select a blockchain':
+        expectedStepTitle = await t('core.walletSetup.selectBlockchain');
+        break;
       default:
         throw new Error(`Unsupported step: ${step}`);
     }

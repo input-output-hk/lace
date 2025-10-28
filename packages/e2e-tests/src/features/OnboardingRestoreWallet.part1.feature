@@ -5,6 +5,7 @@ Feature: Onboarding - Restore wallet
   Scenario: Restore Wallet - Mnemonic writedown page - next button
     Given I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     And "Next" button is disabled during onboarding process
 
@@ -83,6 +84,7 @@ Feature: Onboarding - Restore wallet
   Scenario: Restore Wallet - autofill words
     Given I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "s"
     Then I see following autocomplete options:
@@ -114,6 +116,7 @@ Feature: Onboarding - Restore wallet
   @LW-4612
   Scenario: Restore Wallet - Mnemonic verification - mnemonic length limited to 10 characters - paste word exceeding the limit
     Given I click "Restore" button on wallet setup page
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     And "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I fill mnemonic input with "abcdefghijklmnopqrstuvwxyz"

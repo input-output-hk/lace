@@ -35,6 +35,8 @@ import ScanYourPrivateQrCodePageAssert from '../assert/onboarding/ScanYourPrivat
 import PinWalletExtensionNotificationAssert from '../assert/PinWalletExtensionNotificationAssert';
 import LocalStorageInitializer from '../fixture/localStorageInitializer';
 import { switchNetworkAndCloseDrawer } from '../utils/networkUtils';
+import SelectBlockchainPageAssert from '../assert/onboarding/SelectBlockchainPageAssert';
+import SelectBlockchainPage from '../elements/onboarding/SelectBlockchainPage';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -555,3 +557,24 @@ Then(/^"Pin the wallet extension" notification is displayed$/, async () => {
 Then(/^"Pin the wallet extension" notification disappears after 5 seconds$/, async () => {
   await PinWalletExtensionNotificationAssert.assertDoNotSeeNotificationAfter(5);
 });
+
+Then(
+  /^The "Select a blockchain" page is displayed while adding (the first|another) wallet$/,
+  async (option: 'the first' | 'another') => {
+    await SelectBlockchainPageAssert.assertSeeSelectBlockchainPage(option === 'another');
+  }
+);
+
+When(
+  /^I select "(Bitcoin|Cardano)" blockchain on the "Select a blockchain" page$/,
+  async (blockchain: 'Bitcoin' | 'Cardano') => {
+    await SelectBlockchainPage.selectBlockchain(blockchain);
+  }
+);
+
+Then(
+  /^"(Bitcoin|Cardano)" blockchain is selected on the "Select a blockchain" page$/,
+  async (blockchain: 'Bitcoin' | 'Cardano') => {
+    await SelectBlockchainPageAssert.assertSelectedBlockchain(blockchain);
+  }
+);

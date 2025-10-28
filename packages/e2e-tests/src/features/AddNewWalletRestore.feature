@@ -7,6 +7,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9368
   Scenario: Extended-view - Multi-wallet - Restore - Restore button click
     When I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     Then "Choose recovery method" page is displayed in modal for "Restore" flow
     And "Recovery method" step is marked as active on progress timeline
     And "Next" button is enabled during onboarding process
@@ -14,6 +15,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9381
   Scenario: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - Back button click
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I click "Back" button during wallet setup
     Then "Choose recovery method" page is displayed in modal for "Restore" flow
@@ -23,6 +25,7 @@ Feature: Add new wallet - Restore wallet
     Given I saved test mnemonic for "AddNewWallet" to clipboard
     And I opened "Restore" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     When I click on "Paste from clipboard" button
     Then I do not see incorrect passphrase error displayed
     And "Next" button is enabled during onboarding process
@@ -30,6 +33,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9384
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid word
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
@@ -45,6 +49,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9385
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Enter your recovery phrase" page - <mnemonicLength>-word mnemonic - invalid all words
     Given I opened "Restore" flow via "Add new wallet" feature
+    And I click "Next" button during wallet setup
     And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     And I enter <mnemonicLength> incorrect mnemonic words on "Mnemonic verification" page
@@ -116,6 +121,7 @@ Feature: Add new wallet - Restore wallet
   Scenario Outline: Extended-view - Multi-wallet - Restore - <mnemonicLength>-word mnemonic - happy path
     Given I opened "Restore" flow via "Add new wallet" feature
     And I click "Next" button during wallet setup
+    And I click "Next" button during wallet setup
     When I select <mnemonicLength> word passphrase length
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with <mnemonicLength> words
     When I enter <mnemonicLength> correct mnemonic words on "Mnemonic verification" page
@@ -166,9 +172,9 @@ Feature: Add new wallet - Restore wallet
     Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
     And <step>
     Examples:
-      | page                  | step                                                                               |
-      | Mnemonic verification | "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words |
-      | Wallet setup          | "Let's set up your new wallet" page is displayed in modal for "Create" flow        |
+      | page                  | step                                                                                           |
+      | Mnemonic verification | "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words             |
+      | Wallet setup          | "Let's set up your new wallet" page is displayed for "Create" flow while adding another wallet |
 
   @LW-9248
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - proceed

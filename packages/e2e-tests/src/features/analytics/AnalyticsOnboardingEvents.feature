@@ -16,6 +16,8 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     When I click "Restore" button on wallet setup page
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
+    # TODO: add event validation when LW-13754 is completed
+    When I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet revamp paper wallet | choose mode | next | click"
     When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
     And I click "Next" button during wallet setup
@@ -34,6 +36,8 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     And I set up request interception for posthog analytics request(s)
     And I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
+    When I click "Next" button during wallet setup
+    # TODO: add event validation when LW-13754 is completed
     When I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click"
