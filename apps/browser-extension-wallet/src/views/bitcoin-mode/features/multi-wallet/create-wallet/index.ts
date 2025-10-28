@@ -1,1 +1,0 @@
-export { CreateWallet } from './CreateWallet';

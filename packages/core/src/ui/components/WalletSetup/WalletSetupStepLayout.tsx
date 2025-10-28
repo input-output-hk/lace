@@ -20,6 +20,7 @@ export enum WalletTimelineSteps {
   // Common
   NAME_WALLET,
   WALLET_SETUP,
+  SELECT_BLOCKCHAIN,
   ALL_DONE
 }
 

@@ -10,6 +10,7 @@ import { WalletCreateStep } from './types';
 import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
+import { Blockchain } from '@cardano-sdk/web-extension';
 
 type OnNameChange = (state: { name: string }) => void;
 interface PgpValidation {
@@ -29,6 +30,8 @@ interface State {
   setPgpInfo: React.Dispatch<React.SetStateAction<PublicPgpKeyData>>;
   pgpValidation: PgpValidation;
   setPgpValidation: React.Dispatch<React.SetStateAction<PgpValidation>>;
+  selectedBlockchain: Blockchain;
+  setSelectedBlockchain: React.Dispatch<React.SetStateAction<Blockchain>>;
 }
 
 interface Props {
@@ -59,9 +62,8 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   } = useHotWalletCreation({
     initialMnemonic: Wallet.KeyManagement.util.generateMnemonicWords()
   });
-  const [step, setStep] = useState<WalletCreateStep>(
-    paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
-  );
+  const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain>('Cardano');
+  const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.SelectBlockchain);
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
   const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>(INITIAL_PGP_STATE);
   const [pgpValidation, setPgpValidation] = useState<PgpValidation>({ error: null, success: null });
@@ -82,7 +84,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
 
   const finalizeWalletCreation = useCallback(
     async (params: Partial<CreateWalletParams>) => {
-      const wallet = await createHotWallet(params);
+      const wallet = await createHotWallet({ ...params, blockchain: selectedBlockchain });
       await sendPostWalletAddAnalytics({
         extendedAccountPublicKey: wallet.source.account.extendedAccountPublicKey,
         postHogActionWalletAdded: postHogActions.create.WALLET_ADDED
@@ -91,15 +93,23 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       pgpInfo.pgpKeyReference = '';
       setPgpInfo(INITIAL_PGP_STATE);
     },
-    [createHotWallet, postHogActions.create.WALLET_ADDED, sendPostWalletAddAnalytics, pgpInfo, setPgpInfo]
+    [createHotWallet, selectedBlockchain, sendPostWalletAddAnalytics, postHogActions.create.WALLET_ADDED, pgpInfo]
   );
 
   const next: State['next'] = useCallback(
+    // eslint-disable-next-line max-statements
     async (state) => {
       if (state) {
         setCreateWalletData((prevState) => ({ ...prevState, ...state }));
       }
       switch (step) {
+        case WalletCreateStep.SelectBlockchain: {
+          setFormDirty(true);
+          setStep(
+            paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
+          );
+          break;
+        }
         case WalletCreateStep.ChooseRecoveryMethod: {
           if (recoveryMethod === 'mnemonic' || recoveryMethod === 'mnemonic-bitcoin') {
             setStep(WalletCreateStep.RecoveryPhraseWriteDown);
@@ -146,23 +156,31 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       }
     },
     [
+      step,
+      setCreateWalletData,
+      paperWalletEnabled,
+      recoveryMethod,
+      setFormDirty,
       finalizeWalletCreation,
       history,
-      setFormDirty,
-      step,
-      recoveryMethod,
-      setCreateWalletData,
       finalizeBitcoinWalletCreation
     ]
   );
 
   const back = useCallback(() => {
     switch (step) {
-      case WalletCreateStep.ChooseRecoveryMethod: {
+      case WalletCreateStep.SelectBlockchain: {
+        setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
       }
+      case WalletCreateStep.ChooseRecoveryMethod: {
+        setFormDirty(false);
+        setStep(WalletCreateStep.SelectBlockchain);
+        break;
+      }
       case WalletCreateStep.RecoveryPhraseWriteDown: {
+        setFormDirty(false);
         paperWalletEnabled
           ? setStep(WalletCreateStep.ChooseRecoveryMethod)
           : history.push(walletRoutePaths.newWallet.root);
@@ -205,7 +223,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       pgpInfo,
       setPgpInfo,
       pgpValidation,
-      setPgpValidation
+      setPgpValidation,
+      selectedBlockchain,
+      setSelectedBlockchain
     }),
     [
       back,
@@ -218,7 +238,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       pgpInfo,
       setPgpInfo,
       pgpValidation,
-      setPgpValidation
+      setPgpValidation,
+      selectedBlockchain,
+      setSelectedBlockchain
     ]
   );
 

@@ -182,6 +182,7 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   ): Promise<void> {
     await ChooseRecoveryMethodPage.nextButton.click();
     if (flowType === 'Create') {
+      await this.nextButton.click();
       await this.clickOnCopyToClipboardButton();
       await this.nextButton.click();
     }

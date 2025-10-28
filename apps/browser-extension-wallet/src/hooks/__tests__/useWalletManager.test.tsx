@@ -43,7 +43,13 @@ import * as localStorage from '@src/utils/local-storage';
 import * as AppSettings from '@providers/AppSettings';
 import * as walletApiUi from '@src/lib/wallet-api-ui';
 import { of } from 'rxjs';
-import { AnyBip32Wallet, AnyWallet, WalletManagerActivateProps, WalletType } from '@cardano-sdk/web-extension';
+import {
+  AnyBip32Wallet,
+  AnyWallet,
+  Blockchain,
+  WalletManagerActivateProps,
+  WalletType
+} from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { PasswordObj as Password } from '@lace/core';
 import { logger } from '@lace/common';
@@ -424,6 +430,7 @@ describe('Testing useWalletManager hook', () => {
       const mnemonic = [
         'vacant violin soft weird deliver render brief always monitor general maid smart jelly core drastic erode echo there clump dizzy card filter option defense'
       ];
+      const blockchain = 'Cardano' as Blockchain;
       mockUseSecrets.password = { value: 'passwoprd' } as Password;
       const chainId = {
         networkId: 0,
@@ -450,7 +457,7 @@ describe('Testing useWalletManager hook', () => {
       });
 
       expect(createWallet).toBeDefined();
-      expect(await createWallet({ name, mnemonic, chainId })).toEqual(
+      expect(await createWallet({ name, mnemonic, chainId, blockchain })).toEqual(
         expect.objectContaining({
           name,
           source: expect.objectContaining({
