@@ -10,7 +10,7 @@ Feature: Midnight - banner view
     Given "Discover the Midnight Token Distribution" banner is displayed
     When I click on "Learn more" button on "Discover the Midnight Token Distribution" banner
     Then "www.midnight.gd" page is displayed in new tab
-    
+
   @LW-13629
   Scenario: "Discover the Midnight Token Distribution" banner - click on "Remind me later" button
     When I click on "Remind me later" button on "Discover the Midnight Token Distribution" banner
