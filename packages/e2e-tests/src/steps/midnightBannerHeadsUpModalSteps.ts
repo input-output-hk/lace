@@ -8,4 +8,6 @@ When(/^I click on "Cancel" button on "Heads up" modal$/, async () => {
 
 Then(/^I see "Heads up" modal$/, async () => {
   await midnightBannerHeadsUpModalAssert.assertSeeHeadsUpModalTitle();
+  await midnightBannerHeadsUpModalAssert.assertSeeHeadsUpModalDescription();
+  await midnightBannerHeadsUpModalAssert.assertSeeHeadsUpModalButtons();
 });

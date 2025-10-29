@@ -9,6 +9,18 @@ class MidnightBannerHeadsUpModalAssert {
       await t('midnightEventBanner.dialog.title')
     );
   }
+
+  async assertSeeHeadsUpModalDescription() {
+    await midnightBannerHeadsUpModal.headsUpModalDescription.waitForDisplayed();
+    expect(await midnightBannerHeadsUpModal.headsUpModalDescription.getText()).to.equal(
+      await t('midnightEventBanner.dialog.description')
+    );
+  }
+
+  async assertSeeHeadsUpModalButtons() {
+    await midnightBannerHeadsUpModal.headsUpModalCancelButton.waitForDisplayed();
+    await midnightBannerHeadsUpModal.headsUpModalConfirmButton.waitForDisplayed();
+  }
 }
 
 export default new MidnightBannerHeadsUpModalAssert();
