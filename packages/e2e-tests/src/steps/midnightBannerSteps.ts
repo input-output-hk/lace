@@ -10,16 +10,21 @@ Given(
   }
 );
 
-When(/^I click on "(.*)" button on "Discover the Midnight Token Distribution" banner$/, async (buttonLabel: string) => {
-  const actions: Record<string, () => Promise<void>> = {
-    'Learn more': async () => midnightBanner.clickOnLearnMoreButton(),
-    'Remind me later': async () => midnightBanner.clickOnRemindMeLaterButton()
-  };
-
-  const action = actions[buttonLabel];
-  if (!action) throw new Error(`Button "${buttonLabel}" not found on midnight banner`);
-  await action();
-});
+When(
+  /^I click on "(Learn more|Remind me later)" button on "Discover the Midnight Token Distribution" banner$/,
+  async (button: 'Learn more' | 'Remind me later') => {
+    switch (button) {
+      case 'Learn more':
+        await midnightBanner.clickOnLearnMoreButton();
+        break;
+      case 'Remind me later':
+        await midnightBanner.clickOnRemindMeLaterButton();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
 
 Then(/^"www.midnight.gd" page is displayed in new tab$/, async () => {
   await switchToLastWindow();
