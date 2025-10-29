@@ -15,6 +15,7 @@ class MidnightBanner {
   get learnMoreButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.LEARN_MORE_BUTTON);
   }
+
   get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.CLOSE_BUTTON);
   }
@@ -30,6 +31,11 @@ class MidnightBanner {
   async clickOnLearnMoreButton() {
     await this.learnMoreButton.waitForClickable();
     await this.learnMoreButton.click();
+  }
+
+  async clickOnRemindMeLaterButton() {
+    await this.remindMeLaterButton.waitForClickable();
+    await this.remindMeLaterButton.click();
   }
 
   async clickOnCloseButton() {
