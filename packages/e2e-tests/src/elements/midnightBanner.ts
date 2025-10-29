@@ -31,6 +31,11 @@ class MidnightBanner {
     await this.learnMoreButton.waitForClickable();
     await this.learnMoreButton.click();
   }
+  
+  async clickOnRemindMeLaterButton() {
+    await this.remindMeLaterButton.waitForClickable();
+    await this.remindMeLaterButton.click();
+  }
 
   async clickOnCloseButton() {
     await this.closeButton.waitForClickable();
