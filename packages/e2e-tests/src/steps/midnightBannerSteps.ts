@@ -3,9 +3,12 @@ import midnightBanner from '../elements/midnightBanner';
 import midnightBannerAssert from '../assert/midnightBannerAssert';
 import { switchToLastWindow } from '../utils/window';
 
-Given(/^"Discover the Midnight Token Distribution" banner is displayed$/, async () => {
-  await midnightBannerAssert.assertSeeMidnightBanner();
-});
+Given(
+  /^"Discover the Midnight Token Distribution" banner (is|is not) displayed$/,
+  async (shouldBeDisplayed: 'is' | 'is not') => {
+    await midnightBannerAssert.assertSeeMidnightBanner(shouldBeDisplayed === 'is');
+  }
+);
 
 When(
   /^I click on "(Learn more|Close)" button on "Discover the Midnight Token Distribution" banner$/,

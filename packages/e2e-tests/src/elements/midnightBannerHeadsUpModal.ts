@@ -26,6 +26,11 @@ class MidnightBannerHeadsUpModal {
     await this.headsUpModalCancelButton.waitForClickable();
     await this.headsUpModalCancelButton.click();
   }
+
+  async clickOnConfirmButton() {
+    await this.headsUpModalConfirmButton.waitForClickable();
+    await this.headsUpModalConfirmButton.click();
+  }
 }
 
 export default new MidnightBannerHeadsUpModal();
