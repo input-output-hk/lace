@@ -30,3 +30,4 @@ Feature: Midnight - banner view
     When I click on "Close" button on "Discover the Midnight Token Distribution" banner
     Then I see "Heads up" modal
     When I click on "Confirm" button on "Heads up" modal
+    Then "Discover the Midnight Token Distribution" banner is not displayed
