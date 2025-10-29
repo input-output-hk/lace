@@ -31,6 +31,11 @@ class MidnightBanner {
     await this.learnMoreButton.waitForClickable();
     await this.learnMoreButton.click();
   }
+
+  async clickOnCloseButton() {
+    await this.closeButton.waitForClickable();
+    await this.closeButton.click();
+  }
 }
 
 export default new MidnightBanner();
