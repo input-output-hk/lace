@@ -17,4 +17,3 @@ Feature: Midnight - banner view
     Then I see "Heads up" modal
     When I click on "Cancel" button on "Heads up" modal
     Then "Discover the Midnight Token Distribution" banner is displayed
-  
