@@ -3,13 +3,28 @@ import midnightBanner from '../elements/midnightBanner';
 import midnightBannerAssert from '../assert/midnightBannerAssert';
 import { switchToLastWindow } from '../utils/window';
 
-Given(/^"Discover the Midnight Token Distribution" banner is displayed$/, async () => {
-  await midnightBannerAssert.assertSeeMidnightBanner();
-});
+Given(
+  /^"Discover the Midnight Token Distribution" banner (is|is not) displayed$/,
+  async (shouldBeDisplayed: 'is' | 'is not') => {
+    await midnightBannerAssert.assertSeeMidnightBanner(shouldBeDisplayed === 'is');
+  }
+);
 
-When(/^I click on "Learn more" button on "Discover the Midnight Token Distribution" banner$/, async () => {
-  await midnightBanner.clickOnLearnMoreButton();
-});
+When(
+  /^I click on "(Learn more|Remind me later)" button on "Discover the Midnight Token Distribution" banner$/,
+  async (button: 'Learn more' | 'Remind me later') => {
+    switch (button) {
+      case 'Learn more':
+        await midnightBanner.clickOnLearnMoreButton();
+        break;
+      case 'Remind me later':
+        await midnightBanner.clickOnRemindMeLaterButton();
+        break;
+      default:
+        throw new Error(`Unsupported button name: ${button}`);
+    }
+  }
+);
 
 Then(/^"www.midnight.gd" page is displayed in new tab$/, async () => {
   await switchToLastWindow();
