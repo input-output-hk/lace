@@ -203,13 +203,16 @@ Then(/^I open wallet: "([^"]*)" in: (extended|popup) mode$/, async (walletName: 
   await clearWalletRepository();
   // Quick fix for: "no such window: no such window: target window already closed from unknown error: web view not found" thrown by next line of code
   // TODO: recheck when LW-12520 (as it can be related)
-  await browser.switchWindow(/Lace/);
+  await browser.refresh();
+  const handles = await browser.getWindowHandles();
+  await browser.switchToWindow(handles[0]);
   await localStorageManager.cleanLocalStorage();
 
   await (walletName === 'newCreatedWallet'
     ? addAndActivateWalletInRepository(String(testContext.load('newCreatedWallet')))
     : addAndActivateWalletsInRepository([walletName as TestWalletName]));
-
+  // Quick fix for: "no such window: no such window: target window already closed from unknown error: web view not found" thrown by the next lines of code
+  await browser.switchWindow(/Lace/);
   await localStorageInitializer.initialiseBasicLocalStorageData(walletName);
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
   if (mode === 'popup') {
