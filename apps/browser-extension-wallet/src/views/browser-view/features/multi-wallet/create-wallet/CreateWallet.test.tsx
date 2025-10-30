@@ -126,15 +126,25 @@ describe('Multi Wallet Setup/Create Wallet', () => {
       </AppSettingsProvider>
     );
 
+    // Initial state - on SelectBlockchain step
     await screen.findByTestId('wallet-setup-step-btn-next');
     expect(formDirty).toBe(false);
 
+    // Navigate to RecoveryPhraseWriteDown step
     const nextButton = getNextButton();
     fireEvent.click(nextButton);
+    await screen.findByTestId('wallet-setup-step-btn-next');
+    expect(formDirty).toBe(false);
+
+    // Navigate to RecoveryPhraseInput step - this marks form as dirty
+    const nextButton2 = getNextButton();
+    fireEvent.click(nextButton2);
     await waitFor(() => expect(formDirty).toBe(true));
 
+    // Go back to RecoveryPhraseWriteDown - form should still be dirty
     const backButton = getBackButton();
     fireEvent.click(backButton);
-    await waitFor(() => expect(formDirty).toBe(false));
+    await screen.findByTestId('wallet-setup-step-btn-next');
+    expect(formDirty).toBe(true);
   });
 });
