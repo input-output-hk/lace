@@ -20,6 +20,8 @@ const notificationsCenterApi = consumeRemoteApi<NotificationsCenterProperties>(
   { logger, runtime }
 );
 
+(globalThis as Record<string, unknown>).notificationsCenterApi = notificationsCenterApi;
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useNotificationsCenter = () => {
   const { markAsRead, notifications$, remove } = notificationsCenterApi.notifications;

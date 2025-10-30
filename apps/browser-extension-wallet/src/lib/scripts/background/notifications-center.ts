@@ -1,4 +1,4 @@
-import { runtime } from 'webextension-polyfill';
+import { runtime, storage } from 'webextension-polyfill';
 import { of, ReplaySubject } from 'rxjs';
 import { exposeApi } from '@cardano-sdk/web-extension';
 
@@ -10,7 +10,7 @@ import {
 } from '@src/types/notifications-center';
 import { logger } from '@lace/common';
 
-const exposeNotificationsCenterAPI = (): void => {
+const initData = async () => {
   let notifications: LaceNotification[] = [
     {
       message: {
@@ -48,13 +48,44 @@ const exposeNotificationsCenterAPI = (): void => {
     }
   ];
 
-  const topics: NotificationsTopic[] = [
+  let topics: NotificationsTopic[] = [
     { id: 'topic-1', name: 'Topic One' },
     { id: 'topic-2', name: 'Topic Two', subscribed: true }
   ];
 
+  const notificationsStorageKey = 'notifications-center-mock';
+  const notificationsStorage = (await storage.local.get(notificationsStorageKey)) as {
+    [key: string]: {
+      notifications: LaceNotification[];
+      topics: NotificationsTopic[];
+    };
+  };
+
+  if (notificationsStorage[notificationsStorageKey]) {
+    ({ notifications, topics } = notificationsStorage[notificationsStorageKey]);
+
+    await storage.local.remove(notificationsStorageKey);
+  }
+
+  return { notifications, topics };
+};
+
+const exposeNotificationsCenterAPI = async (): Promise<void> => {
+  const { notifications, topics } = await initData();
+
   const notifications$ = new ReplaySubject<LaceNotification[]>(1);
   const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
+
+  const add = async (notification: LaceNotification): Promise<void> => {
+    const topic = topics.find((t) => t.id === notification.message.topicId);
+
+    if (topic?.subscribed) {
+      notifications.unshift(notification);
+      notifications$.next(notifications);
+    }
+
+    return Promise.resolve();
+  };
 
   const markAsRead = async (id?: LaceNotification['message']['id']): Promise<void> => {
     for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;
@@ -65,9 +96,12 @@ const exposeNotificationsCenterAPI = (): void => {
   };
 
   const remove = async (id: LaceNotification['message']['id']): Promise<void> => {
-    notifications = notifications.filter((notification) => notification.message.id !== id);
+    const index = notifications.findIndex((notification) => notification.message.id === id);
 
-    notifications$.next(notifications);
+    if (index !== -1) {
+      notifications.splice(index, 1);
+      notifications$.next(notifications);
+    }
 
     return Promise.resolve();
   };
@@ -91,7 +125,7 @@ const exposeNotificationsCenterAPI = (): void => {
   exposeApi<NotificationsCenterProperties>(
     {
       api$: of({
-        notifications: { markAsRead, notifications$, remove },
+        notifications: { add, markAsRead, notifications$, remove },
         topics: { topics$, subscribe, unsubscribe }
       }),
       baseChannel: 'notifications-center',
@@ -104,4 +138,4 @@ const exposeNotificationsCenterAPI = (): void => {
   topics$.next(topics);
 };
 
-if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI();
+if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI().catch(console.error);

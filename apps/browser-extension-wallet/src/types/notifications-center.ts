@@ -28,6 +28,7 @@ export interface LaceNotificationWithTopicName extends LaceNotification {
 
 export interface NotificationsCenterProperties {
   notifications: {
+    add: (notification: LaceNotification) => Promise<void>;
     markAsRead: (id?: string) => Promise<void>; // markAsRead() marks all as read
     notifications$: Observable<LaceNotification[]>;
     remove: (id: string) => Promise<void>;
@@ -41,6 +42,7 @@ export interface NotificationsCenterProperties {
 
 export const notificationsCenterProperties: RemoteApiProperties<NotificationsCenterProperties> = {
   notifications: {
+    add: RemoteApiPropertyType.MethodReturningPromise,
     markAsRead: RemoteApiPropertyType.MethodReturningPromise,
     notifications$: RemoteApiPropertyType.HotObservable,
     remove: RemoteApiPropertyType.MethodReturningPromise
