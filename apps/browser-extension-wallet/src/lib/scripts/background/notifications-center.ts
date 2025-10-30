@@ -48,13 +48,33 @@ const exposeNotificationsCenterAPI = (): void => {
     }
   ];
 
-  const topics: NotificationsTopic[] = [
+  let topics: NotificationsTopic[] = [
     { id: 'topic-1', name: 'Topic One' },
     { id: 'topic-2', name: 'Topic Two', subscribed: true }
   ];
 
   const notifications$ = new ReplaySubject<LaceNotification[]>(1);
   const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
+
+  const add = async (notification: LaceNotification): Promise<void> => {
+    const topic = topics.find((t) => t.id === notification.message.topicId);
+
+    if (topic?.subscribed) {
+      notifications.unshift(notification);
+      notifications$.next(notifications);
+    }
+
+    return Promise.resolve();
+  };
+
+  const init = async (data: { topics: NotificationsTopic[]; notifications: LaceNotification[] }): Promise<void> => {
+    ({ notifications, topics } = data);
+
+    notifications$.next(notifications);
+    topics$.next(topics);
+
+    return Promise.resolve();
+  };
 
   const markAsRead = async (id?: LaceNotification['message']['id']): Promise<void> => {
     for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;
@@ -92,6 +112,7 @@ const exposeNotificationsCenterAPI = (): void => {
     {
       api$: of({
         notifications: { markAsRead, notifications$, remove },
+        test: { add, init },
         topics: { topics$, subscribe, unsubscribe }
       }),
       baseChannel: 'notifications-center',

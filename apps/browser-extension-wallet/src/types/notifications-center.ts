@@ -32,6 +32,10 @@ export interface NotificationsCenterProperties {
     notifications$: Observable<LaceNotification[]>;
     remove: (id: string) => Promise<void>;
   };
+  test: {
+    add: (notification: LaceNotification) => Promise<void>;
+    init: (data: { topics: NotificationsTopic[]; notifications: LaceNotification[] }) => Promise<void>;
+  };
   topics: {
     subscribe: (topicId: NotificationsTopic['id']) => Promise<void>;
     topics$: Observable<NotificationsTopic[]>;
@@ -45,9 +49,13 @@ export const notificationsCenterProperties: RemoteApiProperties<NotificationsCen
     notifications$: RemoteApiPropertyType.HotObservable,
     remove: RemoteApiPropertyType.MethodReturningPromise
   },
+  test: {
+    add: RemoteApiPropertyType.MethodReturningPromise,
+    init: RemoteApiPropertyType.MethodReturningPromise
+  },
   topics: {
-    topics$: RemoteApiPropertyType.HotObservable,
     subscribe: RemoteApiPropertyType.MethodReturningPromise,
+    topics$: RemoteApiPropertyType.HotObservable,
     unsubscribe: RemoteApiPropertyType.MethodReturningPromise
   }
 };
