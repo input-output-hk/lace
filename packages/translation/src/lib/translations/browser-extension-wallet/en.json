@@ -907,6 +907,8 @@
   "walletSetup.setupOptions.restoreWallet": "Restore wallet",
   "walletSetup.walletName.pleaseNameYourWallet": "Please name your wallet",
   "walletSetup.walletName.walletNameDescription": "Lorem ipsum dolor sit amet",
+  "walletSetup.reuseRecoveryPhrase.walletAlreadyExists": "This wallet already exists",
+  "walletSetup.reuseRecoveryPhrase.invalidPassword": "Invalid password",
   "midnightEventBanner.title": "Discover the Midnight Token Distribution",
   "midnightEventBanner.description": "The free, multi-phase distribution of NIGHT tokens aimed at empowering a broad, diverse community to build the future of the Midnight network",
   "midnightEventBanner.learnMore": "Learn more",

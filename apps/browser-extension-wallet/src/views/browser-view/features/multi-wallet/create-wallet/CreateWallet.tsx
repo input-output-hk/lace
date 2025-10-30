@@ -7,6 +7,9 @@ import { ChooseRecoveryMethod } from './steps/ChooseRecoveryMethod';
 import { SecurePaperWallet } from './steps/SecurePaperWallet';
 import { SavePaperWallet } from './steps/SavePaperWallet';
 import { SelectBlockchain } from './steps/SelectBlockchain';
+import { ReuseRecoveryPhrase } from './steps/ReuseRecoveryPhrase';
+import { EnterWalletPassword } from './steps/EnterWalletPassword';
+import { RecoveryPhraseError } from './steps/RecoveryPhraseError';
 
 export const CreateWallet = (): JSX.Element => (
   <CreateWalletProvider>
@@ -23,6 +26,12 @@ export const CreateWallet = (): JSX.Element => (
         case WalletCreateStep.RecoveryPhraseWriteDown:
         case WalletCreateStep.RecoveryPhraseInput:
           return <NewRecoveryPhrase />;
+        case WalletCreateStep.ReuseRecoveryPhrase:
+          return <ReuseRecoveryPhrase />;
+        case WalletCreateStep.EnterWalletPassword:
+          return <EnterWalletPassword />;
+        case WalletCreateStep.RecoveryPhraseError:
+          return <RecoveryPhraseError />;
         // Common steps
         case WalletCreateStep.Setup:
           return <Setup />;
