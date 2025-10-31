@@ -17,3 +17,17 @@ Feature: Midnight - banner view
     Then "Discover the Midnight Token Distribution" banner is not displayed
     When I refresh the page
     Then "Discover the Midnight Token Distribution" banner is not displayed
+
+  @LW-13630
+  Scenario: "Discover the Midnight Token Distribution" banner - click on "Close" button - Cancel
+    When I click on "Close" button on "Discover the Midnight Token Distribution" banner
+    Then I see "Heads up" modal
+    When I click on "Cancel" button on "Heads up" modal
+    Then "Discover the Midnight Token Distribution" banner is displayed
+
+  @LW-13631
+  Scenario: "Discover the Midnight Token Distribution" banner - click on "Close" button - Confirm
+    When I click on "Close" button on "Discover the Midnight Token Distribution" banner
+    Then I see "Heads up" modal
+    When I click on "Confirm" button on "Heads up" modal
+    Then "Discover the Midnight Token Distribution" banner is not displayed
