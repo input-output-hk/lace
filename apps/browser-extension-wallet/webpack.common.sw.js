@@ -25,6 +25,13 @@ module.exports = () =>
     },
     // The background script in Firefox is a hidden DOM page, so target is web
     target: process.env.BROWSER === 'firefox' ? 'web' : 'webworker',
+    resolve: {
+      // Force PubNub to use Node.js version instead of browser version
+      // Browser version requires window object which is not available in service workers
+      alias: {
+        pubnub: path.resolve(__dirname, '../../node_modules/pubnub/lib/node/index.js')
+      }
+    },
     module: {
       // configuration regarding modules
       rules: [
