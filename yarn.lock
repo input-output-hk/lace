@@ -12657,7 +12657,7 @@ __metadata:
   resolution: "@lace/e2e-tests@workspace:packages/e2e-tests"
   dependencies:
     "@rpii/wdio-report-events": 8.0.2
-    "@types/chai": 5.2.2
+    "@types/chai": 5.2.3
     "@types/chai-sorted": 0.2.3
     "@types/chai-string": 1.4.5
     "@types/flat": 5.0.5
@@ -12676,7 +12676,7 @@ __metadata:
     "@wdio/spec-reporter": 8.43.0
     "@wdio/types": 8.41.0
     allure-commandline: 2.33.0
-    chai: 6.0.1
+    chai: 6.2.0
     chai-sorted: 0.2.0
     chai-string: 1.6.0
     clipboardy: 4.0.0
@@ -21931,12 +21931,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/chai@npm:5.2.2":
-  version: 5.2.2
-  resolution: "@types/chai@npm:5.2.2"
+"@types/chai@npm:5.2.3":
+  version: 5.2.3
+  resolution: "@types/chai@npm:5.2.3"
   dependencies:
     "@types/deep-eql": "*"
-  checksum: 386887bd55ba684572cececd833ed91aba6cce2edd8cc1d8cefa78800b3a74db6dbf5c5c41af041d1d1f3ce672ea30b45c9520f948cdc75431eb7df3fbba8405
+    assertion-error: ^2.0.1
+  checksum: eb4c2da9ec38b474a983f39bfb5ec4fbcceb5e5d76d184094d2cbc4c41357973eb5769c8972cedac665a233251b0ed754f1e338fcf408d381968af85cdecc596
   languageName: node
   linkType: hard
 
@@ -26328,6 +26329,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"assertion-error@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "assertion-error@npm:2.0.1"
+  checksum: a0789dd882211b87116e81e2648ccb7f60340b34f19877dd020b39ebb4714e475eb943e14ba3e22201c221ef6645b7bfe10297e76b6ac95b48a9898c1211ce66
+  languageName: node
+  linkType: hard
+
 "assign-symbols@npm:^1.0.0":
   version: 1.0.0
   resolution: "assign-symbols@npm:1.0.0"
@@ -28723,10 +28731,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chai@npm:6.0.1":
-  version: 6.0.1
-  resolution: "chai@npm:6.0.1"
-  checksum: 70fb4f9bfdd6f7720c99e0a6dadeeb650ffc15e0c02326577ad0e39d12313c61b8231e5b7b2c96a8c946a46435c0b2fa0f126b92b044e0eb28c2e00b98f1b713
+"chai@npm:6.2.0":
+  version: 6.2.0
+  resolution: "chai@npm:6.2.0"
+  checksum: 4a2a2ef9b44a26a9e561ac0447ecfafdad9083642e52f6be7c7d9ecf548eef07df6858641e148dd06e3eb82e515145218308e16700d399effcee38301eb4d531
   languageName: node
   linkType: hard
 
