@@ -156,6 +156,7 @@ When(
       default:
         throw new Error(`Unsupported button name: ${button}`);
     }
+    await browser.pause(1000); // small delay to ensure the menu is filled with data
   }
 );
 

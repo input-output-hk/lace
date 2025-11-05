@@ -25,19 +25,23 @@ export const NotificationDetails = ({
   const PublisherTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
   const bodyText = textToLink(notification.message.body, openExternalLink);
   const bodyTextComponent = popupView ? (
-    <Text.Label>{bodyText}</Text.Label>
+    <Text.Label data-testid="notification-details-body">{bodyText}</Text.Label>
   ) : (
-    <Text.Body.Large weight="$semibold">{bodyText}</Text.Body.Large>
+    <Text.Body.Large weight="$semibold" data-testid="notification-details-body">
+      {bodyText}
+    </Text.Body.Large>
   );
 
   return (
     <Flex py="$20" flexDirection="column" w="$fill">
       <Flex px={popupView ? '$20' : '$0'} flexDirection="column" w="$fill">
-        <Text.Heading weight="$bold" color="secondary">
+        <Text.Heading weight="$bold" color="secondary" data-testid="notification-details-title">
           {notification.message.title}
         </Text.Heading>
         <Box mt={popupView ? '$8' : '$18'}>
-          <PublisherTextComponent weight="$semibold">{notification.message.publisher}</PublisherTextComponent>
+          <PublisherTextComponent weight="$semibold" data-testid="notification-details-publisher">
+            {notification.message.publisher}
+          </PublisherTextComponent>
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
         {notification.message.format === 'plain' ? (
@@ -55,6 +59,7 @@ export const NotificationDetails = ({
             label={t('notificationsCenter.removeNotification.confirm')}
             icon={<TrashOutlineComponent className={styles.icon} />}
             onClick={onRemoveNotification}
+            data-testid="remove-button"
           />
         </Flex>
       )}

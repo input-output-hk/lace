@@ -4,10 +4,11 @@ import { browser } from '@wdio/globals';
 import MenuMainExtended from '../elements/menuMainExtended';
 import MenuHeader from '../elements/menuHeader';
 import MenuMainPopup from '../elements/menuMainPopup';
+import NotificationsMenu from '../elements/notifications/NotificationsMenu';
 
 // eslint-disable-next-line complexity
 const visitPageInExtendedMode = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting' | 'Notifications',
   viaURL = false
   // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
@@ -36,6 +37,14 @@ const visitPageInExtendedMode = async (
     case 'Voting':
       viaURL ? await ExtendedView.visitVotingCenter() : await MenuMainExtended.clickOnVotingButton();
       break;
+    case 'Notifications':
+      if (viaURL) {
+        await ExtendedView.visitNotificationsPage();
+      } else {
+        await MenuHeader.notificationsButton.click();
+        await NotificationsMenu.clickOnButton('View all');
+      }
+      break;
     default:
       throw new Error(`Unsupported targetPage: ${page}`);
   }
@@ -43,7 +52,7 @@ const visitPageInExtendedMode = async (
 
 // eslint-disable-next-line complexity
 const visitPageInPopupMode = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting' | 'Notifications',
   viaURL = false
   // eslint-disable-next-line sonarjs/cognitive-complexity
 ) => {
@@ -72,13 +81,21 @@ const visitPageInPopupMode = async (
     case 'Voting':
       viaURL ? await PopupView.visitVotingCenter() : await MenuMainPopup.clickOnVotingButton();
       break;
+    case 'Notifications':
+      if (viaURL) {
+        await PopupView.visitNotificationsPage();
+      } else {
+        await MenuHeader.notificationsButton.click();
+        await NotificationsMenu.clickOnButton('View all');
+      }
+      break;
     default:
       throw new Error(`Unsupported targetPage: ${page}`);
   }
 };
 
 export const visit = async (
-  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
+  page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting' | 'Notifications',
   mode: 'extended' | 'popup',
   viaURL = false
 ): Promise<void> => {
