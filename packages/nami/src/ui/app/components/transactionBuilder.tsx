@@ -29,6 +29,7 @@ import {
   ModalFooter,
 } from '@chakra-ui/react';
 import { Wallet } from '@lace/cardano';
+import { Ellipsis, logger } from '@lace/common';
 import { FaRegFileCode } from 'react-icons/fa';
 import { GoStop } from 'react-icons/go';
 
@@ -39,14 +40,13 @@ import { ERROR } from '../../../config/config';
 import { Events } from '../../../features/analytics/events';
 import { useCaptureEvent } from '../../../features/analytics/hooks';
 import { useCommonOutsideHandles } from '../../../features/common-outside-handles-provider';
+import { StakingErrorType } from '../../../features/outside-handles-provider';
 import { useOutsideHandles } from '../../../features/outside-handles-provider/useOutsideHandles';
 
 import ConfirmModal from './confirmModal';
 import UnitDisplay from './unitDisplay';
 
 import type { ConfirmModalRef } from './confirmModal';
-import { StakingErrorType } from '../../../features/outside-handles-provider';
-import {Ellipsis, logger} from '@lace/common';
 
 type States = 'DONE' | 'EDITING' | 'ERROR' | 'LOADING';
 const PoolStates: Record<States, States> = {
@@ -254,13 +254,13 @@ const TransactionBuilder = (undefined, ref) => {
       collateralRef.current?.openModal();
 
       try {
-        if (!hasEnoughAdaForCollateral) {
+        if (hasEnoughAdaForCollateral) {
+          await initializeCollateral();
+        } else {
           setData(d => ({
             ...d,
             error: 'Transaction not possible (maybe insufficient balance)',
           }));
-        } else {
-          await initializeCollateral();
         }
       } catch {
         setData(d => ({
@@ -278,11 +278,13 @@ const TransactionBuilder = (undefined, ref) => {
   };
 
   const error = data.error || data.pool.error;
-  const lockedRewardAccounts = stakingError === StakingErrorType.REWARDS_LOCKED && accountsWithLockedRewards?.length
-    ? accountsWithLockedRewards
-    : [];
+  const lockedRewardAccounts =
+    stakingError === StakingErrorType.REWARDS_LOCKED &&
+    accountsWithLockedRewards?.length
+      ? accountsWithLockedRewards
+      : [];
 
-  if (lockedRewardAccounts.length) {
+  if (lockedRewardAccounts.length > 0) {
     return (
       <Modal
         size="xs"
@@ -300,40 +302,49 @@ const TransactionBuilder = (undefined, ref) => {
             </Box>
             <Box h="4" />
             <Text fontSize="sm">
-              Due to Cardano protocol rules, some of your stake keys cannot be de-registered as they have pending
-              rewards. To withdraw the rewards, you must first delegate the voting power of those stake keys using
-              {' '}<Link
+              Due to Cardano protocol rules, some of your stake keys cannot be
+              de-registered as they have pending rewards. To withdraw the
+              rewards, you must first delegate the voting power of those stake
+              keys using{' '}
+              <Link
                 fontWeight="semibold"
                 onClick={() => {
                   openExternalLink(govToolsUrl);
                 }}
               >
                 Gov.tools
-              </Link>
-              {' '}portal. Once delegated, you will be able to de-register the keys.
+              </Link>{' '}
+              portal. Once delegated, you will be able to de-register the keys.
             </Text>
-            <UnorderedList mt='10px'>
+            <UnorderedList mt="10px">
               {lockedRewardAccounts.map(({ cbor, key }) => (
                 <ListItem key={key}>
-                <Box display={'flex'}>
-                  <Ellipsis withTooltip={false} text={key} beforeEllipsis={12} afterEllipsis={6} />
-                  {!!cbor && (
-                    <>
-                      &nbsp;(
-                      <Ellipsis withTooltip={false} text={cbor} beforeEllipsis={6} afterEllipsis={6} />)
-                    </>
-                  )}
-                </Box>
+                  <Box display={'flex'}>
+                    <Ellipsis
+                      withTooltip={false}
+                      text={key}
+                      beforeEllipsis={12}
+                      afterEllipsis={6}
+                    />
+                    {!!cbor && (
+                      <>
+                        &nbsp;(
+                        <Ellipsis
+                          withTooltip={false}
+                          text={cbor}
+                          beforeEllipsis={6}
+                          afterEllipsis={6}
+                        />
+                        )
+                      </>
+                    )}
+                  </Box>
                 </ListItem>
               ))}
             </UnorderedList>
           </ModalBody>
           <ModalFooter>
-            <Button
-              mr={3}
-              variant="ghost"
-              onClick={handleClose}
-            >
+            <Button mr={3} variant="ghost" onClick={handleClose}>
               Close
             </Button>
           </ModalFooter>
