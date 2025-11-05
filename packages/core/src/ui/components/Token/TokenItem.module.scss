@@ -1,6 +1,11 @@
 @import '../../../../../common/src/ui/styles/theme.scss';
 @import '../../../../../common/src/ui/styles/abstracts/typography';
 
+.disabled {
+  opacity: 70%;
+  cursor: unset;
+}
+
 .tokenContainer {
   width: 100%;
   padding: size_unit(1);
