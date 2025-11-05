@@ -48,6 +48,7 @@ import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsPro
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
 import { NotificationDetailsContainer, NotificationsCenter } from '../features/notifications-center';
+import { SwapsProvider } from '../features/swaps';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -93,6 +94,10 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.notification,
     component: NotificationDetailsContainer
+  },
+  {
+    path: routes.swaps,
+    component: SwapsProvider
   }
 ];
 

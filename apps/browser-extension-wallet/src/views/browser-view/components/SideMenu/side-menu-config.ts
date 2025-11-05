@@ -25,6 +25,9 @@ import DappExplorerIconActive from '@assets/icons/tiles-solid-gradient.component
 import VotingIconDefault from '@assets/icons/voting-icon.component.svg';
 import VotingIconHover from '@assets/icons/hover-voting-icon.component.svg';
 
+import SwapIconDefault from '@assets/icons/trending-up.component.svg';
+import SwapIconHover from '@assets/icons/hover-trending-up.component.svg';
+
 import { SideMenuItemConfig } from '@types';
 
 export const sideMenuConfig: SideMenuItemConfig[] = [
@@ -82,6 +85,15 @@ export const sideMenuConfig: SideMenuItemConfig[] = [
     regularIcon: DappExplorerIconDefault,
     hoverIcon: DappExplorerIconHover,
     activeIcon: DappExplorerIconActive
+  },
+  {
+    id: MenuItemList.SWAPS,
+    label: 'browserView.sideMenu.links.swapsCenter',
+    testId: 'item-swaps',
+    path: routes.swaps,
+    regularIcon: SwapIconDefault,
+    hoverIcon: SwapIconHover,
+    activeIcon: SwapIconHover
   }
 ];
 
