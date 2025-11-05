@@ -8,7 +8,7 @@ class NotificationListItem {
   private readonly PUBLISHER_SELECTOR = '[data-testid="notification-list-item-publisher"]';
   private readonly REMOVE_BUTTON_SELECTOR = '[data-testid="notification-list-item-remove-button"]';
   private readonly ANT_DROPDOWN_MENU = '.ant-dropdown-menu';
-  private readonly PAGE_CONTENT = '#content';
+  private readonly PAGE_CONTENT = ':is(#content, #contentLayout)';
 
   private readonly index: number; // Index of the notification in the list, starting from 1 (CSS selectors in use)
   private readonly location: 'menu' | 'page';
