@@ -10,6 +10,7 @@ import { en as enSharedWallets } from './shared-wallets/en';
 import { es as esSharedWallets } from './shared-wallets/es';
 import { en as enStaking } from './staking/en';
 import { es as esStaking } from './staking/es';
+import { en as enSwaps } from './swaps/en';
 
 export const allTranslations = {
   [Language.en]: {
@@ -18,6 +19,7 @@ export const allTranslations = {
     ...enExtension,
     ...enStaking,
     ...enSharedWallets,
+    ...enSwaps,
   },
   [Language.es]: {
     ...esCore,
@@ -46,4 +48,8 @@ export const extensionTranslations = {
 export const stakingTranslations = {
   [Language.en]: enStaking,
   [Language.es]: esStaking,
+};
+
+export const swapsTranslations = {
+  [Language.en]: enSwaps,
 };
