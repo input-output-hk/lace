@@ -101,7 +101,7 @@ const SwapsContext = createContext<SwapProvider | null>(null);
 
 export const useSwaps = (): SwapProvider => {
   const context = useContext(SwapsContext);
-  if (context === null) throw new Error('ThemeContext not defined');
+  if (context === null) throw new Error('SwapsContext not defined');
   return context;
 };
 
