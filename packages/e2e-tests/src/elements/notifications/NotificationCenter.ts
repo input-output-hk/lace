@@ -6,7 +6,7 @@ class NotificationCenter {
   private readonly SECTION_TITLE = '[data-testid="section-title"]';
   private readonly NAVIGATION_BUTTON_BACK = '[data-testid="navigation-button-arrow"]';
   private readonly SECTION_TITLE_COUNTER = '[data-testid="section-title-counter"]';
-  private readonly SUBSCRIPTIONS_DROPDOWN = '[data-testid="subscriptions"]';
+  private readonly SUBSCRIPTIONS_BUTTON = '[data-testid="subscriptions"]';
   private readonly MARK_ALL_AS_READ_BUTTON = '[data-testid="mark-all-as-read-button"]';
   private readonly NOTIFICATIONS_LIST = '[data-testid="notifications-list"]';
 
@@ -22,8 +22,8 @@ class NotificationCenter {
     return $(this.SECTION_TITLE_COUNTER);
   }
 
-  get subscriptionsDropdown(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.SUBSCRIPTIONS_DROPDOWN);
+  get subscriptionsButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SUBSCRIPTIONS_BUTTON);
   }
 
   get markAllAsReadButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -34,19 +34,23 @@ class NotificationCenter {
     return $(this.NOTIFICATIONS_LIST);
   }
 
-  async clickBackButton(): Promise<void> {
-    await this.navigationButtonBack.waitForClickable();
-    await this.navigationButtonBack.click();
-  }
-
-  async clickSubscriptionsDropdown(): Promise<void> {
-    await this.subscriptionsDropdown.waitForClickable();
-    await this.subscriptionsDropdown.click();
-  }
-
-  async clickMarkAllAsReadButton(): Promise<void> {
-    await this.markAllAsReadButton.waitForClickable();
-    await this.markAllAsReadButton.click();
+  async clickOnButton(button: 'Back' | 'Subscriptions' | 'Mark all as read') {
+    switch (button) {
+      case 'Back':
+        await this.navigationButtonBack.waitForClickable();
+        await this.navigationButtonBack.click();
+        break;
+      case 'Subscriptions':
+        await this.subscriptionsButton.waitForClickable();
+        await this.subscriptionsButton.click();
+        break;
+      case 'Mark all as read':
+        await this.markAllAsReadButton.waitForClickable();
+        await this.markAllAsReadButton.click();
+        break;
+      default:
+        throw new Error(`Unsupported button: ${button}`);
+    }
   }
 
   async getCounterValue(): Promise<number> {

@@ -33,8 +33,14 @@ class TopNavigationAssert {
   }
 
   async assertSeeUnreadNotificationsCounter(expectedCount: number) {
-    await MenuHeader.unreadNotificationsCounter.waitForDisplayed();
-    expect(await MenuHeader.unreadNotificationsCounter.getText()).to.equal(expectedCount > 9 ? '9+' : expectedCount);
+    if (expectedCount === 0) {
+      await MenuHeader.unreadNotificationsCounter.waitForDisplayed({ reverse: true });
+    } else {
+      await MenuHeader.unreadNotificationsCounter.waitForDisplayed();
+      expect(await MenuHeader.unreadNotificationsCounter.getText()).to.equal(
+        expectedCount > 9 ? '9+' : expectedCount.toString()
+      );
+    }
   }
 
   async assertLogoPresent() {

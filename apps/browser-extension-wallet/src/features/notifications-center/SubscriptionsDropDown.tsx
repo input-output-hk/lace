@@ -22,9 +22,14 @@ export const SubscriptionsDropDown = ({
   const { t } = useTranslation();
 
   return (
-    <Menu className={classnames(styles.container, { [styles.popupView]: popupView })}>
+    <Menu
+      className={classnames(styles.container, { [styles.popupView]: popupView })}
+      data-testid="subscriptions-dropdown"
+    >
       <Flex className={styles.content} gap="$24" flexDirection="column" justifyContent="space-between">
-        <Text.Label color="secondary">{t('notificationsCenter.chooseSubject')}</Text.Label>
+        <Text.Label color="secondary" data-testid="subscriptions-dropdown-description">
+          {t('notificationsCenter.chooseSubject')}
+        </Text.Label>
         <Flex w="$fill" gap="$24" flexDirection="column" justifyContent="space-between">
           {topics.map((topic) => (
             <Flex
@@ -35,13 +40,18 @@ export const SubscriptionsDropDown = ({
               alignItems="center"
               justifyContent="space-between"
             >
-              <Text.Body.Normal weight="$medium" className={styles.toggleLabel} color="secondary">
+              <Text.Body.Normal
+                weight="$medium"
+                className={styles.toggleLabel}
+                color="secondary"
+                data-testid="subscriptions-toggle-topic-name"
+              >
                 {topic.name}
               </Text.Body.Normal>
               <ToggleSwitch
                 key={topic.id}
                 defaultChecked={topic.subscribed}
-                data-testid={`subscriptions-toggle-${topic.id}`}
+                testId={`subscriptions-${topic.id}-`}
                 onCheckedChange={(isChecked) => onTopicChange(topic, isChecked)}
               />
             </Flex>

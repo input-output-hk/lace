@@ -42,6 +42,10 @@ class NotificationsMenuAssert {
 
     return { unreadCount, readCount };
   }
+
+  async assertSeeMarkAllAsReadButton(shouldSee: boolean) {
+    await NotificationsMenu.markAllAsReadButton.waitForDisplayed({ reverse: !shouldSee });
+  }
 }
 
 export default new NotificationsMenuAssert();
