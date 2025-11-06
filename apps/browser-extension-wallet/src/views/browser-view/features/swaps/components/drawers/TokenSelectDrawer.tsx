@@ -128,10 +128,9 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
               icon="sad-face"
             />
           )}
-          {!searchResult?.tokens ||
-            (searchResult?.tokens.length === 0 && (
-              <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
-            ))}
+          {(!searchResult?.tokens || searchResult?.tokens.length === 0) && (
+            <ListEmptyState message={t('core.assetSelectorOverlay.noMatchingResult')} icon="sad-face" />
+          )}
           {searchResult.tokens?.length > 0 &&
             searchResult.tokens?.map((item, idx) => (
               <TokenItem
