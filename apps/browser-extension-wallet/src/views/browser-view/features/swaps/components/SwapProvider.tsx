@@ -284,8 +284,7 @@ export const SwapsProvider = (): React.ReactElement => {
         setDexTokenList(response);
       })
       .catch((error) => {
-        logger.error('Failed to fetch swappable tokens list:', error);
-        toast.notify({ duration: 3, text: t('swaps.error.unableToFetchTokenList') });
+        throw new Error(error);
       });
   };
 
