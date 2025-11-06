@@ -64,6 +64,7 @@ export interface BuildSwapProps extends BaseEstimate {
   address: Wallet.Cardano.Address;
   slippage: number;
   forwardAddress: Wallet.Cardano.Address | string; // string must be empty unless it's
+  // Note: feeAdust is intentionally misspelled as required by the SteelSwap API
   feeAdust: true;
   collateral: string[];
   pAddress: string;

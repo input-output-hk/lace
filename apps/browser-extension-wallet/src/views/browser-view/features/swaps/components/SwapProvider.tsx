@@ -83,6 +83,7 @@ export const createSwapRequestBody = ({
       address,
       slippage: Number(targetSlippage) * 100,
       forwardAddress: '',
+      // Note: feeAdust is intentionally misspelled as required by the SteelSwap API
       feeAdust: true,
       collateral: collateral.map((core) => Serialization.TransactionUnspentOutput.fromCore(core).toCbor()),
       pAddress: '$lace@steelswap',
