@@ -276,8 +276,8 @@ export const SwapsContainer = (): React.ReactElement => {
                       {t('swaps.label.youReceive')}
                     </Text.Body.Normal>
                     <Text.SubHeading weight="$bold">
-                      {tokenB && estimate
-                        ? (estimate.quantityB / Math.pow(10, tokenB?.decimals)).toFixed(tokenB?.decimals)
+                      {tokenB && estimate && tokenB.decimals > 0
+                        ? (estimate.quantityB / Math.pow(10, tokenB.decimals)).toFixed(tokenB.decimals)
                         : '0.00'}
                     </Text.SubHeading>
                   </Flex>

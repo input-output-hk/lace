@@ -148,7 +148,9 @@ export const SwapReviewDrawer = (): JSX.Element => {
               </Flex>
               <Flex flexDirection="column">
                 <Text.Body.Large color="primary" weight="$semibold">
-                  {(estimate.quantityB / Math.pow(10, tokenB?.decimals)).toFixed(tokenB?.decimals)}
+                  {tokenB.decimals > 0
+                    ? (estimate.quantityB / Math.pow(10, tokenB.decimals)).toFixed(tokenB.decimals)
+                    : estimate.quantityB.toString()}
                 </Text.Body.Large>
               </Flex>
             </Flex>
