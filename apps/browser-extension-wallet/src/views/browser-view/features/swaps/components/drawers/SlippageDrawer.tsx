@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ReactElement, useState, useEffect } from 'react';
+import React, { ReactElement, useState, useEffect, useRef } from 'react';
 import { Drawer, PostHogAction } from '@lace/common';
 import { Button, Flex, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 
@@ -22,7 +22,7 @@ export const SwapSlippageDrawer = (): ReactElement => {
   // Sync innerSlippage with targetSlippage when drawer opens and reset error state
   // Only sync when drawer transitions from closed to open, not on every targetSlippage change
   // Use a ref to track previous drawer state to detect transitions
-  const prevDrawerOpenRef = React.useRef(false);
+  const prevDrawerOpenRef = useRef(false);
   useEffect(() => {
     // Only sync when drawer transitions from closed to open
     if (isDrawerOpen && !prevDrawerOpenRef.current) {
