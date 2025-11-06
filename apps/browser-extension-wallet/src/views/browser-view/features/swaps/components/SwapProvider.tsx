@@ -188,6 +188,8 @@ export const SwapsProvider = (): React.ReactElement => {
   }, [swapCenterFeatureFlagPayload, isSwapsEnabled]);
 
   const fetchEstimate = useCallback(async () => {
+    // Don't fetch new estimates if we already have a built transaction
+    // User should clear the transaction first if they want updated quotes
     if (unsignedTx) return;
     // https://apidev.steelswap.io/docs#/swap/steel_swap_swap_estimate__post
 
@@ -221,13 +223,17 @@ export const SwapsProvider = (): React.ReactElement => {
   }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog]);
 
   useEffect(() => {
-    let id: NodeJS.Timeout;
+    let id: NodeJS.Timeout | undefined;
     if (estimate) {
       id = setInterval(() => {
         fetchEstimate();
       }, ESTIMATE_VALIDITY_INTERVAL);
     }
-    return () => clearInterval(id);
+    return () => {
+      if (id !== undefined) {
+        clearInterval(id);
+      }
+    };
   }, [estimate, fetchEstimate]);
 
   useEffect(() => {
@@ -236,7 +242,7 @@ export const SwapsProvider = (): React.ReactElement => {
     } else {
       fetchEstimate();
     }
-  }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate, excludedDexs]);
+  }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
   const fetchDexList = () => {
     getDexList(t)
