@@ -146,8 +146,10 @@ export const SwapsProvider = (): React.ReactElement => {
     const loadPersistedSlippage = async () => {
       try {
         const data = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
-        if (data[SWAPS_TARGET_SLIPPAGE] !== undefined) {
-          setTargetSlippage(data[SWAPS_TARGET_SLIPPAGE]);
+        const persistedValue = data[SWAPS_TARGET_SLIPPAGE];
+        // Validate that the stored value is a valid number
+        if (persistedValue !== undefined && typeof persistedValue === 'number' && !Number.isNaN(persistedValue)) {
+          setTargetSlippage(persistedValue);
           slippageInitializedRef.current = true;
         }
       } catch (error) {
