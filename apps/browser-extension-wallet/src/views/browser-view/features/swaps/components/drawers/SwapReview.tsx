@@ -42,16 +42,25 @@ export const SwapReviewDrawer = (): JSX.Element => {
     setBuildResponse
   } = useSwaps();
 
-  const unsignedTxFromCbor = Serialization.Transaction.fromCbor(unsignedTx.tx);
+  // unsignedTx is guaranteed to be non-null due to conditional rendering in SwapContainer,
+  // but add defensive check for type safety
+  const unsignedTxFromCbor = unsignedTx ? Serialization.Transaction.fromCbor(unsignedTx.tx) : null;
 
-  const details = useMemo(
-    () => ({
+  const details = useMemo(() => {
+    if (!unsignedTxFromCbor || !estimate) {
+      return { quoteRatio: '0', networkFee: '0', serviceFee: '0' };
+    }
+    return {
       quoteRatio: estimate.price,
       networkFee: Wallet.util.lovelacesToAdaString(unsignedTxFromCbor.body().fee().toString()),
       serviceFee: Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())
-    }),
-    [estimate, unsignedTxFromCbor]
-  );
+    };
+  }, [estimate, unsignedTxFromCbor]);
+
+  // Early return after hooks
+  if (!unsignedTx || !estimate || !unsignedTxFromCbor) {
+    return <></>;
+  }
 
   return (
     <Drawer
