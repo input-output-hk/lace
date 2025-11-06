@@ -21,13 +21,16 @@ export const SwapSlippageDrawer = (): ReactElement => {
 
   // Sync innerSlippage with targetSlippage when drawer opens and reset error state
   // Only sync when drawer transitions from closed to open, not on every targetSlippage change
+  // Use a ref to track previous drawer state to detect transitions
+  const prevDrawerOpenRef = React.useRef(false);
   useEffect(() => {
-    if (isDrawerOpen) {
+    // Only sync when drawer transitions from closed to open
+    if (isDrawerOpen && !prevDrawerOpenRef.current) {
       setInnerSlippage(targetSlippage);
       setSlippageError(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDrawerOpen]);
+    prevDrawerOpenRef.current = isDrawerOpen;
+  }, [isDrawerOpen, targetSlippage]);
 
   const handleCustomSlippageChange = (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => {
     const inputValue = event.target.value;
