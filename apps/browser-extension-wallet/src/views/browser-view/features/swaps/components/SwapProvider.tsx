@@ -300,13 +300,18 @@ export const SwapsProvider = (): React.ReactElement => {
       if (!response.ok) {
         try {
           const { detail } = await response.json();
+          // 406 status indicates a specific error that should be shown to user
           if (response.status === 406) {
             toast.notify({ duration: 3, text: detail });
             return;
           }
-        } catch {
+          // For other error statuses, show generic error and log details
+          logger.error('Failed to build swap:', { status: response.status, detail });
           toast.notify({ duration: 3, text: t('swaps.error.unableToBuild') });
-          throw new Error('Unable to build swap');
+          return;
+        } catch {
+          logger.error('Failed to build swap: unable to parse error response');
+          toast.notify({ duration: 3, text: t('swaps.error.unableToBuild') });
         }
       } else {
         posthog.sendEvent(PostHogAction.SwapsBuildQuote, {
