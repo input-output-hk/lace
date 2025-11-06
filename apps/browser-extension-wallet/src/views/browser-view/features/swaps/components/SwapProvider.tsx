@@ -32,17 +32,15 @@ import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
 import { SWAPS_TARGET_SLIPPAGE } from '@lib/scripts/types/storage';
 
-// TODO: remove as soon as the lace steelswap proxy is correctly configured
 export const createSteelswapApiHeaders = (): HeadersInit => ({
   Accept: 'application/json, text/plain, */*',
-  token: process.env.STEELSWAP_TOKEN,
   'Content-Type': 'application/json'
 });
 
 const convertAdaQuantityToLovelace = (quantity: string): string => Wallet.util.adaToLovelacesString(quantity);
 
 export const getDexList = async (t: TFunction): Promise<string[]> => {
-  // https://apidev.steelswap.io/docs#/dex/available_dexs_dex_list__get
+  // /docs#/dex/available_dexs_dex_list__get
   const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/dex/list/`, { method: 'GET' });
   if (!response.ok) {
     toast.notify({ duration: 3, text: t('swaps.error.unableToFetchDexList') });
@@ -52,7 +50,7 @@ export const getDexList = async (t: TFunction): Promise<string[]> => {
 };
 
 export const getSwappableTokensList = async (): Promise<TokenListFetchResponse[]> => {
-  // https://apidev.steelswap.io/docs#/tokens/get_tokens_tokens_list__get
+  // /docs#/tokens/get_tokens_tokens_list__get
   const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/tokens/list/`, { method: 'GET' });
 
   if (!response.ok) {
@@ -202,7 +200,7 @@ export const SwapsProvider = (): React.ReactElement => {
     // Don't fetch new estimates if we already have a built transaction
     // User should clear the transaction first if they want updated quotes
     if (unsignedTx) return;
-    // https://apidev.steelswap.io/docs#/swap/steel_swap_swap_estimate__post
+    // /docs#/swap/steel_swap_swap_estimate__post
 
     const postBody = JSON.stringify(
       createSwapRequestBody({
@@ -296,7 +294,7 @@ export const SwapsProvider = (): React.ReactElement => {
 
   const buildSwap = useCallback(
     async (cb?: () => void) => {
-      // https://apidev.steelswap.io/docs#/swap/build_swap_swap_build__post
+      // /docs#/swap/build_swap_swap_build__post
       const postBody = JSON.stringify(
         createSwapRequestBody({
           tokenA: tokenA.id,
