@@ -30,6 +30,7 @@ export const AUTHORIZED_DAPPS_KEY = 'authorizedDapps';
 export const ABOUT_EXTENSION_KEY = 'aboutExtension';
 export const MIDNIGHT_EVENT_BANNER_KEY = 'midnightEventBanner';
 export const SWAPS_DISCLAIMER_ACKNOWLEDGED = 'swapsDisclaimerAcknowledged';
+export const SWAPS_TARGET_SLIPPAGE = 'swapsTargetSlippage';
 
 export interface BackgroundStorage {
   message?: Message;

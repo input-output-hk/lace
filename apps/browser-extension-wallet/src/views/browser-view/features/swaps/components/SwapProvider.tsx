@@ -2,7 +2,7 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { PostHogAction, toast, useObservable } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { Serialization } from '@cardano-sdk/core';
@@ -23,6 +23,8 @@ import { DropdownList } from './drawers';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
+import { storage } from 'webextension-polyfill';
+import { SWAPS_TARGET_SLIPPAGE } from '@lib/scripts/types/storage';
 
 // TODO: remove as soon as the lace steelswap proxy is correctly configured
 export const createSteelswapApiHeaders = (): HeadersInit => ({
@@ -125,6 +127,9 @@ export const SwapsProvider = (): React.ReactElement => {
   const [slippagePercentages, setSlippagePercentages] = useState<number[]>(SLIPPAGE_PERCENTAGES);
   const [maxSlippagePercentage, setMaxSlippagePercentage] = useState<number>(MAX_SLIPPAGE_PERCENTAGE);
 
+  // Track if slippage has been initialized to prevent feature flag from overwriting user settings
+  const slippageInitializedRef = useRef(false);
+
   // estimate swap
   const [estimate, setEstimate] = useState<SwapEstimateResponse | null>();
 
@@ -136,10 +141,30 @@ export const SwapsProvider = (): React.ReactElement => {
   const isSwapsEnabled = posthog?.isFeatureFlagEnabled('swap-center');
   const swapCenterFeatureFlagPayload = posthog?.getFeatureFlagPayload('swap-center');
 
+  // Load persisted slippage setting on mount
   useEffect(() => {
-    if (isSwapsEnabled && swapCenterFeatureFlagPayload) {
+    const loadPersistedSlippage = async () => {
+      try {
+        const data = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
+        if (data[SWAPS_TARGET_SLIPPAGE] !== undefined) {
+          setTargetSlippage(data[SWAPS_TARGET_SLIPPAGE]);
+          slippageInitializedRef.current = true;
+        }
+      } catch (error) {
+        // If storage fails, continue with default
+        console.error('Failed to load persisted slippage:', error);
+      }
+    };
+
+    loadPersistedSlippage();
+  }, []);
+
+  // Initialize slippage from feature flag only if not already set by user
+  useEffect(() => {
+    if (isSwapsEnabled && swapCenterFeatureFlagPayload && !slippageInitializedRef.current) {
       if (swapCenterFeatureFlagPayload?.initialSlippagePercentage) {
         setTargetSlippage(swapCenterFeatureFlagPayload.initialSlippagePercentage);
+        slippageInitializedRef.current = true;
       }
       if (swapCenterFeatureFlagPayload?.defaultSlippagePercentages) {
         setSlippagePercentages(swapCenterFeatureFlagPayload.defaultSlippagePercentages);
@@ -287,6 +312,19 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [unsignedTx, inMemoryWallet, setStage, t, posthog]);
 
+  // Wrapper for setTargetSlippage that persists to storage
+  const setTargetSlippagePersisted = useCallback((value: number | ((prev: number) => number)) => {
+    setTargetSlippage((prev) => {
+      const newValue = typeof value === 'function' ? value(prev) : value;
+      // Persist to storage
+      storage.local.set({ [SWAPS_TARGET_SLIPPAGE]: newValue }).catch((error) => {
+        console.error('Failed to persist slippage setting:', error);
+      });
+      slippageInitializedRef.current = true;
+      return newValue;
+    });
+  }, []);
+
   const contextValue: SwapProvider = {
     tokenA,
     setTokenA,
@@ -303,7 +341,7 @@ export const SwapsProvider = (): React.ReactElement => {
     setBuildResponse,
     buildSwap,
     targetSlippage,
-    setTargetSlippage,
+    setTargetSlippage: setTargetSlippagePersisted,
     signAndSubmitSwapRequest,
     excludedDexs,
     setExcludedDexs,
