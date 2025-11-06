@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@src/*": ["../src/*"]
+    },
+    "baseUrl": ".",
+    "rootDir": "..",
+    "outDir": "../dist-test",
+    "noEmit": false
+  },
+  "include": ["../src/*", "./**/*"]
+}
