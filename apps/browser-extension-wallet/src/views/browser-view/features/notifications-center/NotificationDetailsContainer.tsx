@@ -74,7 +74,7 @@ const NotificationDetailsContent = (): React.ReactElement => {
           <LaceButton.Secondary
             size="medium"
             onClick={() => setNotificationIdToRemove(notificationId)}
-            data-testid="view-all-button"
+            data-testid="remove-button"
             label={t('notificationsCenter.removeNotification.confirm')}
             color="secondary"
             icon={<TrashOutlineComponent className={styles.icon} data-testid="trash-icon" />}

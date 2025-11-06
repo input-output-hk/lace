@@ -93,6 +93,12 @@ class PopupView extends LaceView implements Page {
     await browser.url(`${await this.getBaseUrl()}`);
     await this.setPopupWindowSize();
   }
+
+  async visitNotificationsPage() {
+    await browser.url(`${await this.getBaseUrl()}#/notifications`);
+    await this.setPopupWindowSize();
+    await this.waitForPreloaderToDisappear();
+  }
 }
 
 export default new PopupView();

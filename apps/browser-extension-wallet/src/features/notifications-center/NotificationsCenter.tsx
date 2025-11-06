@@ -99,7 +99,7 @@ export const NotificationsCenter = (): React.ReactElement => {
             </Flex>
           }
           sideText={`(${notifications?.length ?? 0})`}
-          data-testid="notifications-center-title"
+          data-testid="section-title"
         />
       }
       isLoading={isInitialLoad}

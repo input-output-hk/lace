@@ -108,10 +108,19 @@ Then(/^I expect wallet repository and local storage to (not be|be) empty$/, asyn
 });
 
 When(
-  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApps|Voting) (extended|popup) page$/,
+  /^I (navigate to|am on) (Tokens|NFTs|Activity|Staking|Address Book|Settings|DApps|Voting|Notifications) (extended|popup) page$/,
   async (
     _ignored: string,
-    targetPage: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
+    targetPage:
+      | 'Tokens'
+      | 'NFTs'
+      | 'Activity'
+      | 'Staking'
+      | 'Settings'
+      | 'Address Book'
+      | 'DApps'
+      | 'Voting'
+      | 'Notifications',
     mode: 'extended' | 'popup'
   ) => {
     await visit(targetPage, mode, false);
@@ -119,9 +128,18 @@ When(
 );
 
 When(
-  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApps|Voting) page in (extended|popup) mode$/,
+  /^I visit (Tokens|NFTs|Activity|Staking|Settings|Address Book|DApps|Voting|Notifications) page in (extended|popup) mode$/,
   async (
-    page: 'Tokens' | 'NFTs' | 'Activity' | 'Staking' | 'Settings' | 'Address Book' | 'DApps' | 'Voting',
+    page:
+      | 'Tokens'
+      | 'NFTs'
+      | 'Activity'
+      | 'Staking'
+      | 'Settings'
+      | 'Address Book'
+      | 'DApps'
+      | 'Voting'
+      | 'Notifications',
     mode: 'extended' | 'popup'
   ) => {
     await visit(page, mode, true);
