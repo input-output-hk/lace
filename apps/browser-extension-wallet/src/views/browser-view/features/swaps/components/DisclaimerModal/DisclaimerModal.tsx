@@ -11,7 +11,7 @@ export const DisclaimerModal = (): React.ReactElement => {
   useEffect(() => {
     const loadStorage = async () => {
       const data = await storage.local.get(SWAPS_DISCLAIMER_ACKNOWLEDGED);
-      setShowDisclaimer(!data[SWAPS_DISCLAIMER_ACKNOWLEDGED] ?? true);
+      setShowDisclaimer(!(data[SWAPS_DISCLAIMER_ACKNOWLEDGED] ?? false));
     };
 
     loadStorage();
