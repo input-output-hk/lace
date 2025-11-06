@@ -9,6 +9,7 @@ import { ListEmptyState, TokenItem, TokenItemProps } from '@lace/core';
 import styles from './TokenSelectDrawer.module.scss';
 import { useTranslation } from 'react-i18next';
 import { SwapStage } from '../../types';
+import { TOKEN_LIST_PAGE_SIZE } from '../../const';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Skeleton } from 'antd';
@@ -31,9 +32,9 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
   const { t } = useTranslation();
   const [value, setValue] = useState<string>();
   const [focus, setFocus] = useState(false);
-  const [searchResult, setSearchResult] = useState({ tokens: tokens.slice(0, 20) });
+  const [searchResult, setSearchResult] = useState({ tokens: tokens.slice(0, TOKEN_LIST_PAGE_SIZE) });
   const [isSearching, setIsSearching] = useState(false);
-  const [innerTokens, setInnerTokens] = useState({ tokens: tokens.slice(0, 20) });
+  const [innerTokens, setInnerTokens] = useState({ tokens: tokens.slice(0, TOKEN_LIST_PAGE_SIZE) });
   const handleSearch = (search: string) => setValue(search.toLowerCase());
   const [isLoadingMoreTokens, setIsLoadingMoreTokens] = useState(false);
   const handleTokenClick = useCallback(
@@ -72,7 +73,7 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
     setInnerTokens({
       tokens: [
         ...(innerTokens?.tokens || []),
-        ...tokens.slice(innerTokens.tokens.length, innerTokens.tokens.length + 20)
+        ...tokens.slice(innerTokens.tokens.length, innerTokens.tokens.length + TOKEN_LIST_PAGE_SIZE)
       ]
     });
     setIsLoadingMoreTokens(false);

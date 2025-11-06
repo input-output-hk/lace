@@ -17,7 +17,13 @@ import {
   SwapStage
 } from '../types';
 import { Wallet } from '@lace/cardano';
-import { ESTIMATE_VALIDITY_INTERVAL, INITIAL_SLIPPAGE, MAX_SLIPPAGE_PERCENTAGE, SLIPPAGE_PERCENTAGES } from '../const';
+import {
+  ESTIMATE_VALIDITY_INTERVAL,
+  INITIAL_SLIPPAGE,
+  MAX_SLIPPAGE_PERCENTAGE,
+  SLIPPAGE_PERCENTAGES,
+  SWAP_TRANSACTION_TTL
+} from '../const';
 import { SwapsContainer } from './SwapContainer';
 import { DropdownList } from './drawers';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
@@ -95,7 +101,7 @@ export const createSwapRequestBody = ({
       collateral: collateral.map((core) => Serialization.TransactionUnspentOutput.fromCore(core).toCbor()),
       pAddress: '$lace@steelswap',
       utxos: utxos.map((core) => Serialization.TransactionUnspentOutput.fromCore(core).toCbor()),
-      ttl: 900
+      ttl: SWAP_TRANSACTION_TTL
     };
   }
 
