@@ -301,6 +301,12 @@ export const SwapsProvider = (): React.ReactElement => {
   );
 
   const signAndSubmitSwapRequest = useCallback(async () => {
+    if (!unsignedTx) {
+      toast.notify({ duration: 3, text: t('swaps.error.unableToSign') });
+      posthog.sendEvent(PostHogAction.SwapsSignFailure);
+      setStage(SwapStage.Failure);
+      return;
+    }
     try {
       const finalTx = await inMemoryWallet.finalizeTx({ tx: unsignedTx.tx });
       const unsignedTxFromCbor = Serialization.Transaction.fromCbor(unsignedTx.tx);
