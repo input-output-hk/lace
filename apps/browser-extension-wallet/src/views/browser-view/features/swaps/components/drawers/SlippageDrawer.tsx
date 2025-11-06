@@ -27,11 +27,30 @@ export const SwapSlippageDrawer = (): ReactElement => {
   }, [isDrawerOpen, targetSlippage]);
 
   const handleCustomSlippageChange = (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => {
+    const inputValue = event.target.value;
     setSlippageError(false);
-    if (Number(event.target.value) > maxSlippagePercentage) {
-      setSlippageError(true);
+
+    // Handle empty string - allow it for better UX while typing
+    if (inputValue === '') {
+      setInnerSlippage(0);
+      return;
     }
-    setInnerSlippage(Number(event.target.value));
+
+    const numValue = Number(inputValue);
+
+    // Validate: must be a valid number and positive
+    if (Number.isNaN(numValue) || numValue < 0) {
+      setSlippageError(true);
+      return;
+    }
+
+    if (numValue > maxSlippagePercentage) {
+      setSlippageError(true);
+      setInnerSlippage(numValue);
+      return;
+    }
+
+    setInnerSlippage(numValue);
   };
 
   const handleSaveSlippage = () => {
@@ -57,7 +76,7 @@ export const SwapSlippageDrawer = (): ReactElement => {
             style={{ flex: 1 }}
             w="$fill"
             label={t('swaps.slippage.customAmountLabel')}
-            value={innerSlippage?.toString()}
+            value={innerSlippage > 0 ? innerSlippage.toString() : ''}
             onChange={handleCustomSlippageChange}
             type="number"
           />
