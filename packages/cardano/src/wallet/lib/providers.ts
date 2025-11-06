@@ -90,6 +90,7 @@ interface ProvidersConfig {
   logger: Logger;
   experiments: {
     useWebSocket?: boolean;
+    useBlockfrostCredentialQueries?: boolean;
   };
   extensionLocalStorage: Storage.LocalStorageArea;
 }
@@ -140,7 +141,7 @@ export const createProviders = ({
   chainName,
   env: { baseCardanoServicesUrl: baseUrl, baseKoraLabsServicesUrl, customSubmitTxUrl, blockfrostConfig },
   logger,
-  experiments: { useWebSocket },
+  experiments: { useWebSocket, useBlockfrostCredentialQueries },
   extensionLocalStorage
 }: ProvidersConfig): WalletProvidersDependencies => {
   const httpProviderConfig: CreateHttpProviderConfig<Provider> = { baseUrl, logger, adapter: axiosAdapter };
@@ -150,17 +151,20 @@ export const createProviders = ({
   });
   const assetProvider = new BlockfrostAssetProvider(blockfrostClient, logger);
   const networkInfoProvider = new BlockfrostNetworkInfoProvider(blockfrostClient, logger);
-  const chainHistoryProvider = new BlockfrostChainHistoryProvider({
-    client: blockfrostClient,
-    cache: createPersistentCacheStorage({
-      extensionLocalStorage,
-      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.chainHistoryProvider].count,
-      resourceName: CacheName.chainHistoryProvider,
-      quotaInBytes: cacheAssignment[CacheName.chainHistoryProvider].size
-    }),
-    networkInfoProvider,
-    logger
-  });
+  const chainHistoryProvider = new BlockfrostChainHistoryProvider(
+    { queryTxsByCredentials: useBlockfrostCredentialQueries },
+    {
+      client: blockfrostClient,
+      cache: createPersistentCacheStorage({
+        extensionLocalStorage,
+        fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.chainHistoryProvider].count,
+        resourceName: CacheName.chainHistoryProvider,
+        quotaInBytes: cacheAssignment[CacheName.chainHistoryProvider].size
+      }),
+      networkInfoProvider,
+      logger
+    }
+  );
   const rewardsProvider = new BlockfrostRewardsProvider(blockfrostClient, logger);
   const stakePoolProvider = initStakePoolService({
     blockfrostClient,
@@ -231,16 +235,19 @@ export const createProviders = ({
     };
   }
 
-  const utxoProvider = new BlockfrostUtxoProvider({
-    cache: createPersistentCacheStorage({
-      extensionLocalStorage,
-      fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.utxoProvider].count,
-      resourceName: CacheName.utxoProvider,
-      quotaInBytes: cacheAssignment[CacheName.utxoProvider].size
-    }),
-    client: blockfrostClient,
-    logger
-  });
+  const utxoProvider = new BlockfrostUtxoProvider(
+    { queryUtxosByCredentials: useBlockfrostCredentialQueries },
+    {
+      cache: createPersistentCacheStorage({
+        extensionLocalStorage,
+        fallbackMaxCollectionItemsGuard: cacheAssignment[CacheName.utxoProvider].count,
+        resourceName: CacheName.utxoProvider,
+        quotaInBytes: cacheAssignment[CacheName.utxoProvider].size
+      }),
+      client: blockfrostClient,
+      logger
+    }
+  );
 
   return {
     assetProvider,
