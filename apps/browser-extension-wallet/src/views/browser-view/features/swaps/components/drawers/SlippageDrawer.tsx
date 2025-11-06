@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, useEffect } from 'react';
 import { Drawer, PostHogAction } from '@lace/common';
 import { Button, Flex, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 
@@ -16,6 +16,15 @@ export const SwapSlippageDrawer = (): ReactElement => {
   const [slippageError, setSlippageError] = useState<boolean>(false);
   const [innerSlippage, setInnerSlippage] = useState(targetSlippage);
   const posthog = usePostHogClientContext();
+
+  const isDrawerOpen = stage === SwapStage.AdjustSlippage;
+
+  // Sync innerSlippage with targetSlippage when drawer opens
+  useEffect(() => {
+    if (isDrawerOpen) {
+      setInnerSlippage(targetSlippage);
+    }
+  }, [isDrawerOpen, targetSlippage]);
 
   const handleCustomSlippageChange = (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => {
     setSlippageError(false);
@@ -33,7 +42,7 @@ export const SwapSlippageDrawer = (): ReactElement => {
 
   return (
     <Drawer
-      open={stage === SwapStage.AdjustSlippage}
+      open={isDrawerOpen}
       footer={<Button.CallToAction w={'$fill'} label="confirm" onClick={handleSaveSlippage} />}
       maskClosable
     >
