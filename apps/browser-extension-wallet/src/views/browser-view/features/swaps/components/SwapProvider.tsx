@@ -229,6 +229,18 @@ export const SwapsProvider = (): React.ReactElement => {
         excludedDexs
       });
       const parsedResponse = (await response.json()) as SwapEstimateResponse;
+      // Basic validation: ensure response has required fields
+      if (
+        !parsedResponse ||
+        typeof parsedResponse.quantityB !== 'number' ||
+        typeof parsedResponse.price !== 'number' ||
+        !Array.isArray(parsedResponse.splitGroup)
+      ) {
+        const errorMessage = 'Invalid estimate response structure';
+        logger.error(errorMessage, parsedResponse);
+        toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
+        throw new Error(errorMessage);
+      }
       setEstimate(parsedResponse);
     }
   }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog]);
@@ -280,6 +292,7 @@ export const SwapsProvider = (): React.ReactElement => {
   useEffect(() => {
     fetchSwappableTokensList();
     fetchDexList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const buildSwap = useCallback(
@@ -303,6 +316,7 @@ export const SwapsProvider = (): React.ReactElement => {
         headers: createSteelswapApiHeaders(),
         body: postBody
       });
+      const unableToBuildErrorText = t('swaps.error.unableToBuild');
       if (!response.ok) {
         try {
           const { detail } = await response.json();
@@ -313,11 +327,11 @@ export const SwapsProvider = (): React.ReactElement => {
           }
           // For other error statuses, show generic error and log details
           logger.error('Failed to build swap:', { status: response.status, detail });
-          toast.notify({ duration: 3, text: t('swaps.error.unableToBuild') });
+          toast.notify({ duration: 3, text: unableToBuildErrorText });
           return;
         } catch {
           logger.error('Failed to build swap: unable to parse error response');
-          toast.notify({ duration: 3, text: t('swaps.error.unableToBuild') });
+          toast.notify({ duration: 3, text: unableToBuildErrorText });
         }
       } else {
         posthog.sendEvent(PostHogAction.SwapsBuildQuote, {
@@ -327,6 +341,13 @@ export const SwapsProvider = (): React.ReactElement => {
           excludedDexs
         });
         const parsedResponse = (await response.json()) as BuildSwapResponse;
+        // Basic validation: ensure response has required fields
+        if (!parsedResponse || typeof parsedResponse.tx !== 'string' || typeof parsedResponse.p !== 'boolean') {
+          const errorMessage = 'Invalid build swap response structure';
+          logger.error(errorMessage, parsedResponse);
+          toast.notify({ duration: 3, text: unableToBuildErrorText });
+          return;
+        }
         setBuildResponse(parsedResponse);
         cb();
       }
