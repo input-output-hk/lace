@@ -234,13 +234,19 @@ export const SwapsContainer = (): React.ReactElement => {
                         <>
                           <TextLink
                             onClick={() => {
-                              setQuantity(assetsBalance?.assets?.get(tokenA?.id).toString());
+                              const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
+                              if (assetBalance !== undefined) {
+                                setQuantity(assetBalance.toString());
+                              }
                             }}
                             label={t('swaps.label.selectMaxTokens')}
                           />
                           <TextLink
                             onClick={() => {
-                              setQuantity((assetsBalance?.assets?.get(tokenA?.id) / BigInt(2)).toString());
+                              const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
+                              if (assetBalance !== undefined) {
+                                setQuantity((assetBalance / BigInt(2)).toString());
+                              }
                             }}
                             label={t('swaps.label.selectHalfTokens')}
                           />
@@ -427,7 +433,7 @@ export const SwapsContainer = (): React.ReactElement => {
               };
             })}
             doesWalletHaveTokens={dexTokenList?.length > 0}
-            selectedToken={tokenB?.policyId + tokenB?.policyName}
+            selectedToken={tokenB ? `${tokenB.policyId}${tokenB.policyName}` : undefined}
             selectionType="in"
             onTokenSelect={(token) => {
               const matchedToken = dexTokenList.find(
