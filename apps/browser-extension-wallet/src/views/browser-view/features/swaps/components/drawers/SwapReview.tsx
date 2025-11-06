@@ -152,7 +152,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
               <Text.Body.Normal weight="$semibold">{t('swaps.quoteSourceRoute.detail')}</Text.Body.Normal>
               <Text.Body.Normal>
-                Steelswap {t('swaps.quoteSourceRoute.via', { swapRoutes: getSwapQuoteSources(estimate.splitGroup) })}
+                SteelSwap {t('swaps.quoteSourceRoute.via', { swapRoutes: getSwapQuoteSources(estimate.splitGroup) })}
               </Text.Body.Normal>
             </Flex>
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
