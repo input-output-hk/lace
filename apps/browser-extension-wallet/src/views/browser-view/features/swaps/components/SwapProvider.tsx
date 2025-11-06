@@ -255,7 +255,8 @@ export const SwapsProvider = (): React.ReactElement => {
         setDexList(response);
       })
       .catch((error) => {
-        throw new Error(error);
+        console.error('Failed to fetch DEX list:', error);
+        // Error already shown via toast in getDexList, just log for debugging
       });
   };
 
@@ -265,7 +266,8 @@ export const SwapsProvider = (): React.ReactElement => {
         setDexTokenList(response);
       })
       .catch((error) => {
-        throw new Error(error);
+        console.error('Failed to fetch swappable tokens list:', error);
+        toast.notify({ duration: 3, text: t('swaps.error.unableToFetchTokenList') });
       });
   };
 
