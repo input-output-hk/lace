@@ -67,10 +67,15 @@ export const createSwapRequestBody = ({
   utxos
 }: CreateSwapRequestBodySwaps): BuildSwapProps | BaseEstimate => {
   // Estimate
+  const quantityValue = tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : quantity;
+  const quantityNumber = Number(quantityValue);
+  if (Number.isNaN(quantityNumber)) {
+    throw new TypeError(`Invalid quantity value: ${quantityValue}`);
+  }
   const baseBody = {
     tokenA,
     tokenB,
-    quantity: Number(tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : quantity),
+    quantity: quantityNumber,
     predictFromOutputAmount: false,
     ignoreDexes: ignoredDexs,
     partner: 'lace-aggregator',
