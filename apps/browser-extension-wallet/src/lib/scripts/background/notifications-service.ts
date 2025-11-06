@@ -2,8 +2,8 @@ import { LaceMessage, LaceNotification, NotificationsTopic } from '@src/types/no
 import PubNub from 'pubnub';
 import { ReplaySubject } from 'rxjs';
 
-const SUBSCRIBE_KEY = 'sub-c-95c77e55-b9e9-4f62-9584-6c907b0976c0';
-const USER_ID = 'lace-user-uuid-to-be-replaced';
+const SUBSCRIBE_KEY = process.env.PUBNUB_SUBSCRIBE_KEY;
+const USER_ID = process.env.PUBNUB_USER_ID;
 
 export class NotificationsService {
   private pubnub: PubNub;
