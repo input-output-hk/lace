@@ -19,10 +19,11 @@ export const SwapSlippageDrawer = (): ReactElement => {
 
   const isDrawerOpen = stage === SwapStage.AdjustSlippage;
 
-  // Sync innerSlippage with targetSlippage when drawer opens
+  // Sync innerSlippage with targetSlippage when drawer opens and reset error state
   useEffect(() => {
     if (isDrawerOpen) {
       setInnerSlippage(targetSlippage);
+      setSlippageError(false);
     }
   }, [isDrawerOpen, targetSlippage]);
 
