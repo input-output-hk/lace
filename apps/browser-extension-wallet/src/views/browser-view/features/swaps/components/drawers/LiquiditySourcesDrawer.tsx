@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, ReactElement } from 'react';
+import React, { useState, useCallback, useEffect, useRef, ReactElement } from 'react';
 import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerHeader, DrawerNavigation, Switch, PostHogAction } from '@lace/common';
 import { SwapStage } from '../../types';
@@ -16,10 +16,14 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
   const isDrawerOpen = stage === SwapStage.SelectLiquiditySources;
 
   // Sync localExcludedDexs with excludedDexs when drawer opens
+  // Use a ref to track previous drawer state to detect transitions
+  const prevDrawerOpenRef = useRef(false);
   useEffect(() => {
-    if (isDrawerOpen) {
+    // Only sync when drawer transitions from closed to open
+    if (isDrawerOpen && !prevDrawerOpenRef.current) {
       setLocalExcludedDexs(excludedDexs);
     }
+    prevDrawerOpenRef.current = isDrawerOpen;
   }, [isDrawerOpen, excludedDexs]);
   const handleConfirmDexChoices = useCallback(() => {
     setExcludedDexs(localExcludedDexs);
