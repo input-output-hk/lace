@@ -54,6 +54,12 @@ export const SwapSlippageDrawer = (): ReactElement => {
   };
 
   const handleSaveSlippage = () => {
+    // Validate before saving
+    if (Number.isNaN(innerSlippage) || innerSlippage <= 0 || innerSlippage > maxSlippagePercentage) {
+      setSlippageError(true);
+      return;
+    }
+
     setTargetSlippage(innerSlippage);
     posthog.sendEvent(PostHogAction.SwapsAdjustSlippage, { customSlippage: innerSlippage.toString() });
     setStage(SwapStage.Initial);
