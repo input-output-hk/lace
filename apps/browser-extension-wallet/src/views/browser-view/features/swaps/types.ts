@@ -96,7 +96,7 @@ export enum SwapStage {
   AdjustSlippage = 'adjustSlippage',
   SignTx = 'signTx',
   Success = 'signSuccess',
-  Failure = 'signSuccess'
+  Failure = 'signFailure'
 }
 
 export interface SwapProvider {
