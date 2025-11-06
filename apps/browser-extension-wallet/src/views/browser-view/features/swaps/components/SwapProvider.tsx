@@ -162,19 +162,29 @@ export const SwapsProvider = (): React.ReactElement => {
   }, []);
 
   // Initialize slippage from feature flag only if not already set by user
+  // Wait for storage load to complete before applying feature flag defaults
   useEffect(() => {
-    if (isSwapsEnabled && swapCenterFeatureFlagPayload && !slippageInitializedRef.current) {
-      if (swapCenterFeatureFlagPayload?.initialSlippagePercentage) {
-        setTargetSlippage(swapCenterFeatureFlagPayload.initialSlippagePercentage);
-        slippageInitializedRef.current = true;
+    // Only apply feature flag if storage load has completed (checked via ref)
+    // This prevents race condition where feature flag might overwrite user's persisted setting
+    const applyFeatureFlagDefaults = async () => {
+      // Small delay to allow storage load to complete first
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      if (isSwapsEnabled && swapCenterFeatureFlagPayload && !slippageInitializedRef.current) {
+        if (swapCenterFeatureFlagPayload?.initialSlippagePercentage) {
+          setTargetSlippage(swapCenterFeatureFlagPayload.initialSlippagePercentage);
+          slippageInitializedRef.current = true;
+        }
+        if (swapCenterFeatureFlagPayload?.defaultSlippagePercentages) {
+          setSlippagePercentages(swapCenterFeatureFlagPayload.defaultSlippagePercentages);
+        }
+        if (swapCenterFeatureFlagPayload?.maxSlippagePercentage) {
+          setMaxSlippagePercentage(swapCenterFeatureFlagPayload.maxSlippagePercentage);
+        }
       }
-      if (swapCenterFeatureFlagPayload?.defaultSlippagePercentages) {
-        setSlippagePercentages(swapCenterFeatureFlagPayload.defaultSlippagePercentages);
-      }
-      if (swapCenterFeatureFlagPayload?.maxSlippagePercentage) {
-        setMaxSlippagePercentage(swapCenterFeatureFlagPayload.maxSlippagePercentage);
-      }
-    }
+    };
+
+    applyFeatureFlagDefaults();
   }, [swapCenterFeatureFlagPayload, isSwapsEnabled]);
 
   const fetchEstimate = useCallback(async () => {
