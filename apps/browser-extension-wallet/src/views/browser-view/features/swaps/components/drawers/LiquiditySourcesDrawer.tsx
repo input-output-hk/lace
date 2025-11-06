@@ -1,4 +1,4 @@
-import React, { useState, useCallback, ReactElement } from 'react';
+import React, { useState, useCallback, useEffect, ReactElement } from 'react';
 import { Button, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerHeader, DrawerNavigation, Switch, PostHogAction } from '@lace/common';
 import { SwapStage } from '../../types';
@@ -12,6 +12,15 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
   const { stage, setStage, setExcludedDexs, dexList, excludedDexs } = useSwaps();
 
   const [localExcludedDexs, setLocalExcludedDexs] = useState(excludedDexs);
+
+  const isDrawerOpen = stage === SwapStage.SelectLiquiditySources;
+
+  // Sync localExcludedDexs with excludedDexs when drawer opens
+  useEffect(() => {
+    if (isDrawerOpen) {
+      setLocalExcludedDexs(excludedDexs);
+    }
+  }, [isDrawerOpen, excludedDexs]);
   const handleConfirmDexChoices = useCallback(() => {
     setExcludedDexs(localExcludedDexs);
     posthog.sendEvent(PostHogAction.SwapsAdjustSources, {
@@ -22,7 +31,7 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
 
   return (
     <Drawer
-      open={stage === SwapStage.SelectLiquiditySources}
+      open={isDrawerOpen}
       maskClosable
       onClose={() => setStage(SwapStage.Initial)}
       title={<DrawerHeader title={t('swaps.liquiditySourcesDrawer.heading')} />}
