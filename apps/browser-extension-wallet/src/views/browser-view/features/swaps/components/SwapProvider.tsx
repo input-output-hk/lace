@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
-import { PostHogAction, toast, useObservable } from '@lace/common';
+import { PostHogAction, toast, useObservable, logger } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { Serialization } from '@cardano-sdk/core';
 import {
@@ -159,7 +159,7 @@ export const SwapsProvider = (): React.ReactElement => {
         }
       } catch (error) {
         // If storage fails, continue with default
-        console.error('Failed to load persisted slippage:', error);
+        logger.error('Failed to load persisted slippage:', error);
       }
     };
 
@@ -255,7 +255,7 @@ export const SwapsProvider = (): React.ReactElement => {
         setDexList(response);
       })
       .catch((error) => {
-        console.error('Failed to fetch DEX list:', error);
+        logger.error('Failed to fetch DEX list:', error);
         // Error already shown via toast in getDexList, just log for debugging
       });
   };
@@ -266,7 +266,7 @@ export const SwapsProvider = (): React.ReactElement => {
         setDexTokenList(response);
       })
       .catch((error) => {
-        console.error('Failed to fetch swappable tokens list:', error);
+        logger.error('Failed to fetch swappable tokens list:', error);
         toast.notify({ duration: 3, text: t('swaps.error.unableToFetchTokenList') });
       });
   };
@@ -349,7 +349,7 @@ export const SwapsProvider = (): React.ReactElement => {
       const newValue = typeof value === 'function' ? value(prev) : value;
       // Persist to storage
       storage.local.set({ [SWAPS_TARGET_SLIPPAGE]: newValue }).catch((error) => {
-        console.error('Failed to persist slippage setting:', error);
+        logger.error('Failed to persist slippage setting:', error);
       });
       slippageInitializedRef.current = true;
       return newValue;
