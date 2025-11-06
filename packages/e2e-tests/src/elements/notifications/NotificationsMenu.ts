@@ -5,7 +5,6 @@ import NotificationListItem from './NotificationListItem';
 class NotificationsMenu {
   private readonly NOTIFICATIONS_MENU_COMPONENT = '[data-testid="notifications-menu"]';
   private readonly NOTIFICATIONS_LIST = '[data-testid="notifications-list"]';
-  private readonly NOTIFICATIONS_LIST_ITEM = '[data-testid="notification-list-item"]';
   private readonly VIEW_ALL_BUTTON = '[data-testid="notifications-menu-view-all-button"]';
   private readonly MARK_ALL_AS_READ_BUTTON = '[data-testid="notifications-menu-mark-all-as-read-button"]';
   private readonly MANAGE_SUBSCRIPTIONS_BUTTON = '[data-testid="notifications-menu-manage-subscriptions-button"]';
@@ -47,10 +46,6 @@ class NotificationsMenu {
       default:
         throw new Error(`Unsupported button: ${button}`);
     }
-  }
-
-  async getNotificationCount(): Promise<number> {
-    return $$(this.NOTIFICATIONS_LIST_ITEM).length;
   }
 
   async getNotification(index: number) {

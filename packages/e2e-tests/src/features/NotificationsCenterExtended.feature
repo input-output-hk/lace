@@ -44,3 +44,34 @@ Feature: Notification Center - extended view
       | location | navigation_step                               |
       | menu     | I click "Notifications" button on page header |
       | center   | I visit Notifications page in extended mode   |
+
+  @LW-tbd5
+  Scenario: Extended View - Notification Center - remove notification from the list
+    And I add a new notification dynamically
+    And I visit Notifications page in extended mode
+    Then the dynamically added notification is displayed in the "Notifications center" with unread marker
+    When I click on remove button for notification number 1 in the "Notifications center"
+    Then Remove notification modal is displayed
+    When I click "Remove" button in the remove notification modal
+    Then the dynamically added notification is not displayed in the "Notifications center" with unread marker
+
+  @LW-tbd6
+  Scenario: Extended View - Notification Center - remove notification from details view
+    And I add a new notification dynamically
+    And I visit Notifications page in extended mode
+    Then the dynamically added notification is displayed in the "Notifications center" with unread marker
+    When I click on notification number 1 in the "Notifications center"
+    And I click on remove button in the Notification details view
+    Then Remove notification modal is displayed
+    When I click "Remove" button in the remove notification modal
+    Then the dynamically added notification is not displayed in the "Notifications center" with unread marker
+
+  @LW-tbd7
+  Scenario: Extended View - Notification Center - cancel notification removal
+    And I add a new notification dynamically
+    And I visit Notifications page in extended mode
+    Then the dynamically added notification is displayed in the "Notifications center" with unread marker
+    When I click on remove button for notification number 1 in the "Notifications center"
+    Then Remove notification modal is displayed
+    When I click "Cancel" button in the remove notification modal
+    Then the dynamically added notification is displayed in the "Notifications center" with unread marker

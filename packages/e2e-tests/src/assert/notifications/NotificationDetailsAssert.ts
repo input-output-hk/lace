@@ -11,8 +11,7 @@ class NotificationDetailsAssert {
       await t('notificationsCenter.notificationListItem.remove')
     );
 
-    let translationKey = '';
-    translationKey =
+    const translationKey =
       mode === 'extended' ? 'notificationsCenter.notificationDetails.viewAll' : 'notificationsCenter.viewAll';
     await NotificationDetails.viewAllButton.waitForDisplayed();
     expect(await NotificationDetails.viewAllButton.getText()).to.equal(await t(translationKey));

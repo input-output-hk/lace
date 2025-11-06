@@ -3,10 +3,13 @@ import topNavigationAssert from '../assert/topNavigationAssert';
 import NotificationsMenuAssert from '../assert/notifications/NotificationsMenuAssert';
 import NotificationCenterAssert from '../assert/notifications/NotificationCenterAssert';
 import NotificationDetailsAssert from '../assert/notifications/NotificationDetailsAssert';
+import RemoveNotificationModalAssert from '../assert/notifications/RemoveNotificationModalAssert';
 import NotificationsMenu from '../elements/notifications/NotificationsMenu';
-import { NotificationsManager, Topic, Notification } from '../utils/NotificationsManager';
 import NotificationCenter from '../elements/notifications/NotificationCenter';
 import NotificationDetails from '../elements/notifications/NotificationDetails';
+import RemoveNotificationModal from '../elements/notifications/RemoveNotificationModal';
+import NotificationListItem from '../elements/notifications/NotificationListItem';
+import { NotificationsManager, Topic, Notification } from '../utils/NotificationsManager';
 
 const TEST_TOPICS: Topic[] = [
   { id: 'topic-1', name: 'System Updates', subscribed: true },
@@ -116,6 +119,7 @@ Then(
     const location = where === 'menu' ? 'menu' : 'page';
     const isRead = readStatus === 'read';
 
+    await NotificationCenterAssert.waitForNonEmptyNotification(location);
     await NotificationCenterAssert.assertSeeFirstUnreadNotificationWithTopicAndTitle(
       topic?.name || '',
       DYNAMIC_NOTIFICATION.message.title,
@@ -148,3 +152,24 @@ Then(
     );
   }
 );
+
+When(
+  /^I click on remove button for notification number (\d+) in the "Notifications (menu|center)"$/,
+  async (index: number, location: 'menu' | 'center') => {
+    const notification = new NotificationListItem(location === 'menu' ? 'menu' : 'page', index);
+    await notification.clickOnRemoveButton();
+  }
+);
+
+When(/^I click on remove button in the Notification details view$/, async () => {
+  await NotificationDetails.clickRemoveButton();
+});
+
+Then(/^Remove notification modal is displayed$/, async () => {
+  await RemoveNotificationModalAssert.assertSeeRemoveNotificationModal();
+});
+
+When(/^I click "(Cancel|Remove)" button in the remove notification modal$/, async (button: 'Cancel' | 'Remove') => {
+  await (button === 'Cancel' ? RemoveNotificationModal.clickCancel() : RemoveNotificationModal.clickConfirm());
+  await browser.pause(1000); // small delay to give some time for removal to complete
+});

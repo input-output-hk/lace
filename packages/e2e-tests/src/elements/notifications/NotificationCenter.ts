@@ -9,7 +9,6 @@ class NotificationCenter {
   private readonly SUBSCRIPTIONS_DROPDOWN = '[data-testid="subscriptions"]';
   private readonly MARK_ALL_AS_READ_BUTTON = '[data-testid="mark-all-as-read-button"]';
   private readonly NOTIFICATIONS_LIST = '[data-testid="notifications-list"]';
-  private readonly NOTIFICATION_LIST_ITEM = '[data-testid="notification-list-item"]';
 
   get sectionTitle(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.SECTION_TITLE);
@@ -48,10 +47,6 @@ class NotificationCenter {
   async clickMarkAllAsReadButton(): Promise<void> {
     await this.markAllAsReadButton.waitForClickable();
     await this.markAllAsReadButton.click();
-  }
-
-  async getNotificationCount(): Promise<number> {
-    return $$(this.NOTIFICATION_LIST_ITEM).length;
   }
 
   async getCounterValue(): Promise<number> {

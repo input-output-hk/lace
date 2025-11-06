@@ -2,7 +2,6 @@ import NotificationCenter from '../../elements/notifications/NotificationCenter'
 import { expect } from 'chai';
 import { t } from '../../utils/translationService';
 import NotificationListItem from '../../elements/notifications/NotificationListItem';
-import NotificationsMenu from '../../elements/notifications/NotificationsMenu';
 
 class NotificationCenterAssert {
   async assertSeeNotificationCenter(mode: 'popup' | 'extended') {
@@ -36,11 +35,7 @@ class NotificationCenterAssert {
     isRead = false
   ) {
     if (!isDisplayed) {
-      // Validate that notification with a given topic and title does NOT exist
-      let notificationCount = 0;
-      notificationCount = await (location === 'page'
-        ? NotificationCenter.getNotificationCount()
-        : NotificationsMenu.getNotificationCount());
+      const notificationCount = await NotificationListItem.getNotificationCount(location);
 
       for (let i = 1; i <= notificationCount; i++) {
         const notification = new NotificationListItem(location, i);
@@ -84,6 +79,23 @@ class NotificationCenterAssert {
       const isUnread = await notification.isUnread();
       expect(isUnread).to.be.true;
     }
+  }
+
+  async waitForNonEmptyNotification(location: 'menu' | 'page', index = 1): Promise<void> {
+    const notification = new NotificationListItem(location, index);
+    await notification.container.waitForDisplayed();
+
+    await browser.waitUntil(
+      async () => {
+        const title = await notification.getTitle();
+        const publisher = await notification.getPublisher();
+        return title.length > 0 && publisher.length > 0;
+      },
+      {
+        timeout: 1000,
+        timeoutMsg: `Notification at location '${location}' (index ${index}) did not have non-empty text within timeout`
+      }
+    );
   }
 }
 

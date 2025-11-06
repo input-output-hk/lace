@@ -22,13 +22,13 @@ class NotificationsMenuAssert {
       expect(notificationStatest.unreadCount).to.be.greaterThan(0);
     }
     if (notificationsStatus === 'all read') {
-      const totalNotifications = await NotificationsMenu.getNotificationCount();
+      const totalNotifications = await NotificationListItem.getNotificationCount('menu');
       expect(notificationStatest.readCount).to.be.equal(totalNotifications);
     }
   }
 
   private async getNotificationStates() {
-    const notificationsCount = await NotificationsMenu.getNotificationCount();
+    const notificationsCount = await NotificationListItem.getNotificationCount('menu');
     let unreadCount = 0;
     let readCount = 0;
     for (let i = 1; i <= notificationsCount; i++) {
