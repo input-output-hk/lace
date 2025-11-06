@@ -71,7 +71,7 @@ export const SwapSlippageDrawer = (): ReactElement => {
   return (
     <Drawer
       open={isDrawerOpen}
-      footer={<Button.CallToAction w={'$fill'} label="Confirm" onClick={handleSaveSlippage} />}
+      footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleSaveSlippage} />}
       maskClosable
     >
       <Flex flexDirection={'column'} w="$fill" gap={'$28'}>
