@@ -72,7 +72,7 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
     setInnerTokens({
       tokens: [
         ...(innerTokens?.tokens || []),
-        ...tokens.splice(innerTokens.tokens.length, innerTokens.tokens.length + 20)
+        ...tokens.slice(innerTokens.tokens.length, innerTokens.tokens.length + 20)
       ]
     });
     setIsLoadingMoreTokens(false);
