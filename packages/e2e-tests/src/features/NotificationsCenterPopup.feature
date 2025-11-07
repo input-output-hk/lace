@@ -27,7 +27,7 @@ Feature: Notification Center - popup view
     And I click "Notifications" button on page header
     When I click on "View all" button in the "Notifications menu"
     Then "Notification center" is displayed in popup mode
-    And "Notifications page" contains 3 unread notifications with all details
+    And "Notifications center" contains 3 unread notifications with all details
     And the dynamically added notification is displayed in the "Notifications center" with unread marker
 
   @LW-tbd4
@@ -74,4 +74,47 @@ Feature: Notification Center - popup view
     When I click on remove button for notification number 1 in the "Notifications center"
     Then Remove notification modal is displayed
     When I click "Cancel" button in the remove notification modal
+    Then the dynamically added notification is displayed in the "Notifications center" with unread marker
+
+  @LW-tbd8
+  Scenario: Popup View - Notification Center - remove all notifications and verify empty state
+    And I visit Notifications page in popup mode
+    And "Notifications center" contains 2 unread notifications with all details
+    And I click on remove button for notification number 1 in the "Notifications center"
+    And I click "Remove" button in the remove notification modal
+    And I click on remove button for notification number 1 in the "Notifications center"
+    When I click "Remove" button in the remove notification modal
+    Then Notifications empty state is displayed in the "Notifications center"
+    When I click "Notifications" button on page header
+    Then Notifications empty state is displayed in the "Notifications menu"
+
+  @LW-tbd9
+  Scenario: Popup View - Notification Center - mark all notifications as read from menu
+    And I add a new notification dynamically
+    And "Notifications" button indicates 3 unread notifications
+    And I click "Notifications" button on page header
+    And "Notifications menu" contains 3 unread notifications with all details
+    When I click on "Mark all as read" button in the "Notifications menu"
+    And I do not see "Mark all as read" button in "Notifications menu"
+    Then "Notifications menu" contains 3 read notifications with all details
+    And "Notifications" button indicates 0 unread notifications
+
+  @LW-tbd10
+  Scenario: Popup View - Notification Center - manage topic subscriptions and verify notification filtering
+    And I visit Notifications page in popup mode
+    And "Notifications center" contains 2 unread notifications with all details
+    When I click on "Subscriptions" button in the "Notifications center"
+    Then Subscriptions dropdown is displayed
+    And topic "topic-1" is enabled in subscriptions dropdown
+    And topic "topic-2" is enabled in subscriptions dropdown
+    When I disable topic "topic-2" in subscriptions dropdown
+    Then topic "topic-2" is disabled in subscriptions dropdown
+    And I click on "Subscriptions" button in the "Notifications center"
+    When I add a new notification dynamically
+    Then the dynamically added notification is not displayed in the "Notifications center" with unread marker
+    And I click on "Subscriptions" button in the "Notifications center"
+    When I enable topic "topic-2" in subscriptions dropdown
+    And topic "topic-2" is enabled in subscriptions dropdown
+    And I click on "Subscriptions" button in the "Notifications center"
+    And I add a new notification dynamically
     Then the dynamically added notification is displayed in the "Notifications center" with unread marker

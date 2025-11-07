@@ -4,11 +4,14 @@ import NotificationsMenuAssert from '../assert/notifications/NotificationsMenuAs
 import NotificationCenterAssert from '../assert/notifications/NotificationCenterAssert';
 import NotificationDetailsAssert from '../assert/notifications/NotificationDetailsAssert';
 import RemoveNotificationModalAssert from '../assert/notifications/RemoveNotificationModalAssert';
+import NotificationsEmptyStateAssert from '../assert/notifications/NotificationsEmptyStateAssert';
+import SubscriptionsDropdownAssert from '../assert/notifications/SubscriptionsDropdownAssert';
 import NotificationsMenu from '../elements/notifications/NotificationsMenu';
 import NotificationCenter from '../elements/notifications/NotificationCenter';
 import NotificationDetails from '../elements/notifications/NotificationDetails';
 import RemoveNotificationModal from '../elements/notifications/RemoveNotificationModal';
 import NotificationListItem from '../elements/notifications/NotificationListItem';
+import SubscriptionsDropdown from '../elements/notifications/SubscriptionsDropdown';
 import { NotificationsManager, Topic, Notification } from '../utils/NotificationsManager';
 
 const TEST_TOPICS: Topic[] = [
@@ -55,11 +58,11 @@ const DYNAMIC_NOTIFICATION: Notification = {
 
 Then(
   /^"Notifications" button indicates (\d) unread notifications$/,
-  async (unreadCount: number) => await topNavigationAssert.assertSeeUnreadNotificationsCounter(unreadCount)
+  async (unreadCount: string) => await topNavigationAssert.assertSeeUnreadNotificationsCounter(Number(unreadCount))
 );
 
 Then(
-  /^"Notifications menu" is displayed with (all read|some unread) messages$/,
+  /^"Notifications menu" is displayed with (all read|some unread|no) messages$/,
   async (messagesStatus: 'all read' | 'some unread' | 'no') => {
     await NotificationsMenuAssert.assertSeeNotificationsMenu(messagesStatus);
   }
@@ -69,6 +72,22 @@ When(
   /^I click on "(View all|Mark all as read|Manage subscriptions)" button in the "Notifications menu"$/,
   async (button: 'View all' | 'Mark all as read' | 'Manage subscriptions') => {
     await NotificationsMenu.clickOnButton(button);
+  }
+);
+
+When(
+  /^I click on "(Back|Subscriptions|Mark all as read)" button in the "Notifications center"$/,
+  async (button: 'Back' | 'Subscriptions' | 'Mark all as read') => {
+    await NotificationCenter.clickOnButton(button);
+  }
+);
+
+Then(
+  /^I (see|do not see) "Mark all as read" button in "Notifications (menu|center)"$/,
+  async (shouldSee: 'see' | 'do not see', location: 'menu' | 'center') => {
+    await (location === 'menu'
+      ? NotificationsMenuAssert.assertSeeMarkAllAsReadButton(shouldSee === 'see')
+      : NotificationCenterAssert.assertSeeMarkAllAsReadButton(shouldSee === 'see'));
   }
 );
 
@@ -118,7 +137,6 @@ Then(
     const topic = TEST_TOPICS.find((t) => t.id === DYNAMIC_NOTIFICATION.message.topicId);
     const location = where === 'menu' ? 'menu' : 'page';
     const isRead = readStatus === 'read';
-
     await NotificationCenterAssert.waitForNonEmptyNotification(location);
     await NotificationCenterAssert.assertSeeFirstUnreadNotificationWithTopicAndTitle(
       topic?.name || '',
@@ -135,9 +153,13 @@ Then(/^"Notification center" is displayed in (popup|extended) mode$/, async (mod
 });
 
 Then(
-  /^"Notifications (menu|page)" contains (\d+) unread notifications with all details$/,
-  async (location: 'menu' | 'page', expectedCount: number) => {
-    await NotificationCenterAssert.assertSeeExpectedNumberOfUnreadNotifications(expectedCount, location);
+  /^"Notifications (menu|center)" contains (\d+) (unread|read) notifications with all details$/,
+  async (location: 'menu' | 'center', expectedCount: number, readStatus: 'unread' | 'read') => {
+    await NotificationCenterAssert.assertSeeExpectedNumberOfNotifications(
+      expectedCount,
+      location === 'menu' ? 'menu' : 'page',
+      readStatus
+    );
   }
 );
 
@@ -173,3 +195,30 @@ When(/^I click "(Cancel|Remove)" button in the remove notification modal$/, asyn
   await (button === 'Cancel' ? RemoveNotificationModal.clickCancel() : RemoveNotificationModal.clickConfirm());
   await browser.pause(1000); // small delay to give some time for removal to complete
 });
+
+Then(
+  /^Notifications empty state is displayed in the "Notifications (menu|center)"$/,
+  async (location: 'menu' | 'center') => {
+    await NotificationsEmptyStateAssert.assertSeeEmptyState(location === 'menu' ? 'menu' : 'page');
+  }
+);
+
+Then(/^Subscriptions dropdown is displayed$/, async () => {
+  await SubscriptionsDropdownAssert.assertSeeSubscriptionsDropdown();
+});
+
+When(
+  /^I (enable|disable) topic "(topic-\d+)" in subscriptions dropdown$/,
+  async (action: 'enable' | 'disable', topicId: string) => {
+    await (action === 'enable'
+      ? SubscriptionsDropdown.enableTopic(topicId)
+      : SubscriptionsDropdown.disableTopic(topicId));
+  }
+);
+
+Then(
+  /^topic "(topic-\d+)" is (enabled|disabled) in subscriptions dropdown$/,
+  async (topicId: string, state: 'enabled' | 'disabled') => {
+    await SubscriptionsDropdownAssert.assertTopicSubscriptionState(topicId, state === 'enabled');
+  }
+);

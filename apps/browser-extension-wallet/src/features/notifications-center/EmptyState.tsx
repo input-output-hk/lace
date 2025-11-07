@@ -9,10 +9,12 @@ export const EmptyState = (): React.ReactElement => {
 
   return (
     <Flex flexDirection="column" gap="$20" alignItems="center" justifyContent="center" data-testid="empty-state">
-      <SmileyFaceIcon className={styles.icon} />
+      <SmileyFaceIcon data-testid="empty-state-image" className={styles.icon} />
       <Flex alignItems="center" flexDirection="column" gap="$0">
-        <Text.Body.Large>{t('notificationsCenter.emptyState.title')}</Text.Body.Large>
-        <Text.Body.Small color="secondary">{t('notificationsCenter.emptyState.description')}</Text.Body.Small>
+        <Text.Body.Large data-testid="empty-state-title">{t('notificationsCenter.emptyState.title')}</Text.Body.Large>
+        <Text.Body.Small color="secondary" data-testid="empty-state-description">
+          {t('notificationsCenter.emptyState.description')}
+        </Text.Body.Small>
       </Flex>
     </Flex>
   );

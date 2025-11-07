@@ -13,8 +13,8 @@ class NotificationCenterAssert {
     await NotificationCenter.sectionTitleCounter.waitForDisplayed();
     expect(await NotificationCenter.getCounterValue()).to.be.greaterThan(0);
 
-    await NotificationCenter.subscriptionsDropdown.waitForDisplayed();
-    expect(await NotificationCenter.subscriptionsDropdown.getText()).to.equal(
+    await NotificationCenter.subscriptionsButton.waitForDisplayed();
+    expect(await NotificationCenter.subscriptionsButton.getText()).to.equal(
       await t('notificationsCenter.subscriptions')
     );
     if (mode === 'extended') {
@@ -65,7 +65,11 @@ class NotificationCenterAssert {
     }
   }
 
-  async assertSeeExpectedNumberOfUnreadNotifications(expectedCount: number, location: 'menu' | 'page') {
+  async assertSeeExpectedNumberOfNotifications(
+    expectedCount: number,
+    location: 'menu' | 'page',
+    status: 'read' | 'unread'
+  ) {
     for (let i = 1; i <= expectedCount; i++) {
       const notification = new NotificationListItem(location, i);
       await notification.title.waitForDisplayed();
@@ -77,7 +81,7 @@ class NotificationCenterAssert {
       expect(publisher).to.not.be.empty;
 
       const isUnread = await notification.isUnread();
-      expect(isUnread).to.be.true;
+      expect(isUnread).to.equal(status === 'unread');
     }
   }
 
@@ -96,6 +100,10 @@ class NotificationCenterAssert {
         timeoutMsg: `Notification at location '${location}' (index ${index}) did not have non-empty text within timeout`
       }
     );
+  }
+
+  async assertSeeMarkAllAsReadButton(shouldSee: boolean) {
+    await NotificationCenter.markAllAsReadButton.waitForDisplayed({ reverse: !shouldSee });
   }
 }
 
