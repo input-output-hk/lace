@@ -100,6 +100,14 @@ export const SwapsContainer = (): React.ReactElement => {
     return mapSwappableTokens(dexTokenList, [CardanoCoin, ...swappableTokens]);
   }, [swappableTokens, dexTokenList, assetsBalance?.coins]);
 
+  const receivedAmount = useMemo(() => {
+    if (!tokenB || !estimate) return '0.00';
+    if (tokenB.decimals > 0) {
+      return (estimate.quantityB / Math.pow(10, tokenB.decimals)).toFixed(tokenB.decimals);
+    }
+    return estimate.quantityB.toString();
+  }, [tokenB, estimate]);
+
   const FooterButton: React.ReactElement = useMemo((): React.ReactElement => {
     if (estimate) {
       return (
@@ -275,11 +283,7 @@ export const SwapsContainer = (): React.ReactElement => {
                     <Text.Body.Normal weight="$semibold" color="secondary">
                       {t('swaps.label.youReceive')}
                     </Text.Body.Normal>
-                    <Text.SubHeading weight="$bold">
-                      {tokenB && estimate && tokenB.decimals > 0
-                        ? (estimate.quantityB / Math.pow(10, tokenB.decimals)).toFixed(tokenB.decimals)
-                        : '0.00'}
-                    </Text.SubHeading>
+                    <Text.SubHeading weight="$bold">{receivedAmount}</Text.SubHeading>
                   </Flex>
                   <Flex flexDirection="column">
                     <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$8">
