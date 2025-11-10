@@ -353,8 +353,9 @@ export const SwapsProvider = (): React.ReactElement => {
   );
 
   const signAndSubmitSwapRequest = useCallback(async () => {
+    const unableToSignErrorText = t('swaps.error.unableToSign');
     if (!unsignedTx) {
-      toast.notify({ duration: 3, text: t('swaps.error.unableToSign') });
+      toast.notify({ duration: 3, text: unableToSignErrorText });
       posthog.sendEvent(PostHogAction.SwapsSignFailure);
       setStage(SwapStage.Failure);
       return;
@@ -365,8 +366,9 @@ export const SwapsProvider = (): React.ReactElement => {
       unsignedTxFromCbor.setWitnessSet(Serialization.TransactionWitnessSet.fromCore(finalTx.witness));
       await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
       posthog.sendEvent(PostHogAction.SwapsSignSuccess);
-    } catch {
-      toast.notify({ duration: 3, text: t('swaps.error.unableToSign') });
+    } catch (error) {
+      logger.error('Failed to sign and submit swap:', error);
+      toast.notify({ duration: 3, text: unableToSignErrorText });
       posthog.sendEvent(PostHogAction.SwapsSignFailure);
       setStage(SwapStage.Failure);
     }
