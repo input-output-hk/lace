@@ -100,7 +100,10 @@ export const SwapReviewDrawer = (): JSX.Element => {
             <Flex w="$fill" justifyContent="space-between" flexDirection="row" alignItems="center">
               <Flex gap="$24" alignItems="center">
                 <div style={ITEM_STYLE}>
-                  <img src={getAssetImageUrl(tokenA.logo)} style={{ width: 48, height: 48, borderRadius: '100%' }} />
+                  <img
+                    src={tokenA.description === 'ADA' ? CardanoLogo : getAssetImageUrl(tokenA.logo)}
+                    style={{ width: 48, height: 48, borderRadius: '100%' }}
+                  />
                 </div>
                 <Flex flexDirection="column">
                   <Text.Body.Large color="primary" weight="$semibold">
