@@ -361,9 +361,18 @@ export const SwapsProvider = (): React.ReactElement => {
       return;
     }
     try {
-      const finalTx = await inMemoryWallet.finalizeTx({ tx: unsignedTx.tx });
-      const unsignedTxFromCbor = Serialization.Transaction.fromCbor(unsignedTx.tx);
-      unsignedTxFromCbor.setWitnessSet(Serialization.TransactionWitnessSet.fromCore(finalTx.witness));
+      // Preserve the original transaction body and only update the witnesses
+      // This ensures the protocol parameters view hash remains correct
+      const unsignedTxFromCbor = Serialization.Transaction.fromCbor(unsignedTx.tx as unknown as Serialization.TxCBOR);
+      const finalTx = await inMemoryWallet.finalizeTx({
+        tx: unsignedTx.tx as unknown as Serialization.TxCBOR
+      });
+      // Update the witness set on the original transaction to preserve the body
+      const witness = unsignedTxFromCbor.witnessSet();
+      witness.setVkeys(
+        Serialization.CborSet.fromCore([...finalTx.witness.signatures.entries()], Serialization.VkeyWitness.fromCore)
+      );
+      unsignedTxFromCbor.setWitnessSet(witness);
       await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
       posthog.sendEvent(PostHogAction.SwapsSignSuccess);
     } catch (error) {
