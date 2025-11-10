@@ -144,6 +144,14 @@ export const SwapsProvider = (): React.ReactElement => {
 
   // Build swap
   const [unsignedTx, setBuildResponse] = useState<BuildSwapResponse | null>();
+  const [transactionHash, setTransactionHash] = useState<string | null>(null);
+
+  // Reset transaction hash when starting a new swap
+  useEffect(() => {
+    if (stage === SwapStage.Initial && transactionHash !== null) {
+      setTransactionHash(null);
+    }
+  }, [stage, transactionHash]);
 
   // Feature Flag data
   const posthog = usePostHogClientContext();
@@ -373,8 +381,10 @@ export const SwapsProvider = (): React.ReactElement => {
         Serialization.CborSet.fromCore([...finalTx.witness.signatures.entries()], Serialization.VkeyWitness.fromCore)
       );
       unsignedTxFromCbor.setWitnessSet(witness);
-      await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
+      const txId = await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
+      setTransactionHash(txId.toString());
       posthog.sendEvent(PostHogAction.SwapsSignSuccess);
+      setStage(SwapStage.Success);
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
@@ -420,7 +430,8 @@ export const SwapsProvider = (): React.ReactElement => {
     setStage,
     collateral,
     slippagePercentages,
-    maxSlippagePercentage
+    maxSlippagePercentage,
+    transactionHash
   };
 
   return (

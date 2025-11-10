@@ -452,7 +452,7 @@ export const SwapsContainer = (): React.ReactElement => {
         )}
         {stage === SwapStage.SelectLiquiditySources && <LiquiditySourcesDrawer />}
         {stage === SwapStage.SwapReview && unsignedTx && <SwapReviewDrawer />}
-        {stage === SwapStage.SignTx && <SignTxDrawer />}
+        {(stage === SwapStage.SignTx || stage === SwapStage.Success) && <SignTxDrawer />}
         {stage === SwapStage.AdjustSlippage && <SwapSlippageDrawer />}
         <WarningModal
           content={t('browserView.settings.wallet.collateral.amountDescription')}

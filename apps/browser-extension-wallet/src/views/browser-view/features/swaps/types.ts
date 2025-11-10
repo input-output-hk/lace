@@ -124,4 +124,5 @@ export interface SwapProvider {
   collateral: Wallet.Cardano.Utxo[];
   slippagePercentages: number[];
   maxSlippagePercentage: number;
+  transactionHash: string | null;
 }
