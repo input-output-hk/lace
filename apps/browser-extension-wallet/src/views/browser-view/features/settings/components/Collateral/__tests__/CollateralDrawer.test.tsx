@@ -177,7 +177,7 @@ describe('Testing CollateralDrawer component', () => {
       isInMemoryWallet: true,
       isHardwareWallet: false,
       walletUI: {} as WalletStore['walletUI'],
-      inMemoryWallet: { assetInfo$ } as unknown as WalletStore['inMemoryWallet']
+      inMemoryWallet: { assetInfo$, utxo: {} } as unknown as WalletStore['inMemoryWallet']
     } as WalletStore;
     mockUseWalletStore.mockImplementation(() => walletStore);
     mockUseSections.mockReturnValue({
