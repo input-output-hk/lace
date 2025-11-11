@@ -1,11 +1,8 @@
 /* eslint-disable sonarjs/cognitive-complexity */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable complexity */
-/* eslint-disable no-console */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
-/* eslint-disable react/no-multi-comp */
 import React, { useCallback, useMemo } from 'react';
 import { Layout, SectionLayout, EducationalList, WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
@@ -138,12 +135,9 @@ export const SwapsContainer = (): React.ReactElement => {
     );
   }, [estimate, tokenA, setStage, buildSwap, t, quantity, tokenB]);
 
-  // TODO: decide what the educational content + links are
   const sidePanel = useMemo(() => {
     const titles = {
-      glossary: t('educationalBanners.title.glossary'),
-      faq: t('educationalBanners.title.faq'),
-      video: t('educationalBanners.title.video')
+      faq: t('educationalBanners.title.faq')
     };
 
     const educationalItems = [
@@ -151,19 +145,25 @@ export const SwapsContainer = (): React.ReactElement => {
         title: titles.faq,
         subtitle: t('swaps.educationalContent.whatAreSwaps'),
         src: LightBulb,
-        link: `${process.env.WEBSITE_URL}/faq?question=what-are-swaps`
+        link: `${process.env.WEBSITE_URL}/faq?question=what-is-a-token-swap`
       },
       {
         title: titles.faq,
-        subtitle: t('swaps.educationalContent.canICancelASwap'),
+        subtitle: t('swaps.educationalContent.howToPerformSwap'),
         src: LightBulb,
-        link: `${process.env.WEBSITE_URL}/faq?question=can-swaps-be-cancelled`
+        link: `${process.env.WEBSITE_URL}/faq?question=how-do-i-perform-a-swap-in-lace`
+      },
+      {
+        title: titles.faq,
+        subtitle: t('swaps.educationalContent.doINeedTokensToSwap'),
+        src: LightBulb,
+        link: `${process.env.WEBSITE_URL}/faq?question=do-i-need-tokens-in-my-wallet-to-swap`
       },
       {
         title: titles.faq,
         subtitle: t('swaps.educationalContent.whatIsSlippage'),
         src: LightBulb,
-        link: `${process.env.WEBSITE_URL}/faq?question=what-is-slippage`
+        link: `${process.env.WEBSITE_URL}/faq?question=what-is-slippage-tolerance-and-why-does-it-matter`
       }
     ];
 

@@ -1,7 +1,8 @@
 {
   "swaps.pageHeading": "Swap",
-  "swaps.educationalContent.whatAreSwaps": "What are swaps?",
-  "swaps.educationalContent.canICancelASwap": "Can I cancel a swap?",
+  "swaps.educationalContent.whatAreSwaps": "What is a token swap?",
+  "swaps.educationalContent.howToPerformSwap": "How do I perform a swap in Lace?",
+  "swaps.educationalContent.doINeedTokensToSwap": "Do I need tokens in my wallet to swap?",
   "swaps.educationalContent.whatIsSlippage": "What is slippage?",
   "swaps.educationalContent.heading": "About trading",
   "swaps.btn.selectTokens": "Select Tokens",
