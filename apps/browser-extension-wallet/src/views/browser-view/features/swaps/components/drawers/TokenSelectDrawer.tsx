@@ -49,7 +49,7 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
         onTokenSelect(token);
         posthog.sendEvent(PostHogAction.SwapsAdjustSlippage, {
           selectionType,
-          token: token.description ?? token.name
+          selectedToken: token.description ?? token.name
         });
       }
       setStage(SwapStage.Initial);
