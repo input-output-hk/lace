@@ -48,13 +48,13 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
       dataTestId="swap-liquidity-sources-drawer"
       footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleConfirmDexChoices} />}
     >
-      <div>
+      <Flex mb={'$24'} flexDirection="column" gap={'$8'}>
         <Text.Body.Normal>{t('swaps.liquiditySourcesDrawer.subtitle')}</Text.Body.Normal>
         <Flex flexDirection={'column'} w="$fill" gap={'$8'}>
           {dexList.length > 0 &&
             dexList.map((dex) => (
               <Flex key={dex} w={'$fill'} justifyContent={'space-between'}>
-                <Text.Body.Normal>{dex}</Text.Body.Normal>
+                <Text.Body.Normal weight="$semibold">{dex}</Text.Body.Normal>
                 <Switch
                   checked={!localExcludedDexs?.includes(dex)}
                   onChange={(checked) =>
@@ -67,7 +67,7 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
               </Flex>
             ))}
         </Flex>
-      </div>
+      </Flex>
     </Drawer>
   );
 };

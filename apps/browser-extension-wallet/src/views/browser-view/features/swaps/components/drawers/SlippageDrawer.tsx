@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ReactElement, useState, useEffect, useRef } from 'react';
-import { Drawer, PostHogAction } from '@lace/common';
+import { Drawer, DrawerNavigation, PostHogAction } from '@lace/common';
 import { Button, Flex, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 
 import { useSwaps } from '../SwapProvider';
@@ -103,6 +103,10 @@ export const SwapSlippageDrawer = (): ReactElement => {
       open={isDrawerOpen}
       footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleSaveSlippage} />}
       maskClosable
+      onClose={() => setStage(SwapStage.Initial)}
+      navigation={
+        <DrawerNavigation title={t('swaps.pageHeading')} onCloseIconClick={() => setStage(SwapStage.Initial)} />
+      }
     >
       <Flex flexDirection={'column'} w="$fill" gap={'$28'}>
         <Flex flexDirection={'column'} gap="$8" w={'$fill'}>

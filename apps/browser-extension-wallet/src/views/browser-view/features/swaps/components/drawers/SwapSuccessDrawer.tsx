@@ -34,6 +34,7 @@ export const SwapSuccessDrawer = (): React.ReactElement => {
       onClose={handleClose}
       navigation={<DrawerNavigation title={t('swaps.pageHeading')} onCloseIconClick={handleClose} />}
       dataTestId="swap-success-drawer"
+      maskClosable
       footer={
         <Flex flexDirection="column" gap="$16" w="$fill">
           <Button.CallToAction

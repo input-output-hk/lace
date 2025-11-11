@@ -89,6 +89,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
           }}
         />
       }
+      maskClosable
     >
       <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch" gap="$8">
         <Flex flexDirection="column" gap="$8" w="$fill">
