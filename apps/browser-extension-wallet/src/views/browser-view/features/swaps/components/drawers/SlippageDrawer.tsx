@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 const MIN_SLIPPAGE_PERCENTAGE = 0.1;
+const MAX_INPUT_LENGTH = 10;
 
 export const SwapSlippageDrawer = (): ReactElement => {
   const { t } = useTranslation();
@@ -47,13 +48,23 @@ export const SwapSlippageDrawer = (): ReactElement => {
       return;
     }
 
-    // Allow only valid numeric input (digits, single decimal point)
-    // Pattern: optional leading digits, optional single decimal point, optional trailing digits
-    // Examples: "0", "0.", "0.5", "1", "1.2", etc.
-    // The ? in \.? prevents multiple decimal points (0 or 1 occurrence)
-    const numericPattern = /^\d*\.?\d*$/;
-    if (!numericPattern.test(newInputValue)) {
-      // Invalid input, don't update
+    // Prevent excessively long input
+    if (newInputValue.length > MAX_INPUT_LENGTH) {
+      return;
+    }
+
+    // Allow only valid numeric input: digits and at most one decimal point
+    // Use simple checks to avoid regex backtracking issues
+    const decimalCount = (newInputValue.match(/\./g) || []).length;
+    if (decimalCount > 1) {
+      // Multiple decimal points not allowed
+      return;
+    }
+
+    // Check if all characters are digits or a decimal point
+    // eslint-disable-next-line wrap-regex
+    if (!/^[\d.]+$/.test(newInputValue)) {
+      // Contains invalid characters
       return;
     }
 
