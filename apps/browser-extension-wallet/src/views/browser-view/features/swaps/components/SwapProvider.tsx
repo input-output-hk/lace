@@ -1,6 +1,5 @@
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-null */
-/* eslint-disable no-console */
 /* eslint-disable no-magic-numbers */
 import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { PostHogAction, toast, useObservable, logger } from '@lace/common';
@@ -31,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
 import { SWAPS_TARGET_SLIPPAGE } from '@lib/scripts/types/storage';
+import { HttpStatusCode } from 'axios';
 
 export const createSteelswapApiHeaders = (): HeadersInit => ({
   Accept: 'application/json, text/plain, */*',
@@ -326,7 +326,7 @@ export const SwapsProvider = (): React.ReactElement => {
         try {
           const { detail } = await response.json();
           // 406 status indicates a specific error that should be shown to user
-          if (response.status === 406) {
+          if (response.status === HttpStatusCode.NotAcceptable) {
             toast.notify({ duration: 3, text: detail });
             return;
           }

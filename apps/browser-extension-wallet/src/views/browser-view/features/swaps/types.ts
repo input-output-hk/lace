@@ -1,11 +1,12 @@
+import { Cardano } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { DropdownList } from './components/drawers';
 
 export interface TokenListFetchResponse {
   ticker: string;
   name: string;
-  policyId: string;
-  policyName: string;
+  policyId: Cardano.PolicyId;
+  policyName: Cardano.AssetName;
   decimals: number;
   priceNumerator: number;
   priceDenominator: number;
