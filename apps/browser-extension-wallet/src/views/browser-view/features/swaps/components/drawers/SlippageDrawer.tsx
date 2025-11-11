@@ -10,11 +10,14 @@ import { SwapStage } from '../../types';
 import { useTranslation } from 'react-i18next';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
+const MIN_SLIPPAGE_PERCENTAGE = 0.1;
+
 export const SwapSlippageDrawer = (): ReactElement => {
   const { t } = useTranslation();
   const { targetSlippage, setTargetSlippage, stage, setStage, slippagePercentages, maxSlippagePercentage } = useSwaps();
   const [slippageError, setSlippageError] = useState<boolean>(false);
   const [innerSlippage, setInnerSlippage] = useState(targetSlippage);
+  const [inputValue, setInputValue] = useState<string>(targetSlippage.toString());
   const posthog = usePostHogClientContext();
 
   const isDrawerOpen = stage === SwapStage.AdjustSlippage;
@@ -27,42 +30,66 @@ export const SwapSlippageDrawer = (): ReactElement => {
     // Only sync when drawer transitions from closed to open
     if (isDrawerOpen && !prevDrawerOpenRef.current) {
       setInnerSlippage(targetSlippage);
+      setInputValue(targetSlippage.toString());
       setSlippageError(false);
     }
     prevDrawerOpenRef.current = isDrawerOpen;
   }, [isDrawerOpen, targetSlippage]);
 
   const handleCustomSlippageChange = (event: Readonly<React.ChangeEvent<HTMLInputElement>>) => {
-    const inputValue = event.target.value;
+    const newInputValue = event.target.value;
     setSlippageError(false);
 
-    // Handle empty string - allow it for better UX while typing
-    if (inputValue === '') {
+    // Allow empty string
+    if (newInputValue === '') {
+      setInputValue('');
       setInnerSlippage(0);
       return;
     }
 
-    const numValue = Number(inputValue);
-
-    // Validate: must be a valid number and positive
-    if (Number.isNaN(numValue) || numValue < 0) {
-      setSlippageError(true);
+    // Allow only valid numeric input (digits, single decimal point)
+    // Pattern: optional leading digits, optional single decimal point, optional trailing digits
+    // Examples: "0", "0.", "0.5", "1", "1.2", etc.
+    // The ? in \.? prevents multiple decimal points (0 or 1 occurrence)
+    const numericPattern = /^\d*\.?\d*$/;
+    if (!numericPattern.test(newInputValue)) {
+      // Invalid input, don't update
       return;
     }
 
-    if (numValue > maxSlippagePercentage) {
-      setSlippageError(true);
+    // Update the input value to allow typing "0", "0.", "0.5", etc.
+    setInputValue(newInputValue);
+
+    // Convert to number for validation and storage
+    const numValue = Number(newInputValue);
+
+    // If it's a valid number, update innerSlippage
+    if (!Number.isNaN(numValue)) {
       setInnerSlippage(numValue);
-      return;
-    }
 
-    setInnerSlippage(numValue);
+      // Show error if value exceeds maximum
+      // Don't show error for values less than min while typing, as user might be entering a decimal
+      if (numValue > maxSlippagePercentage) {
+        setSlippageError(true);
+      }
+    } else if (newInputValue === '.') {
+      // Allow typing just "." as intermediate state
+      setInnerSlippage(0);
+    }
+    // Note: We don't validate against MIN_SLIPPAGE_PERCENTAGE here to allow typing intermediate values
+    // Final validation happens in handleSaveSlippage
+  };
+
+  const validateSlippage = (value: number): boolean => {
+    const isValid = !Number.isNaN(value) && value >= MIN_SLIPPAGE_PERCENTAGE && value <= maxSlippagePercentage;
+
+    setSlippageError(!isValid);
+    return isValid;
   };
 
   const handleSaveSlippage = () => {
     // Validate before saving
-    if (Number.isNaN(innerSlippage) || innerSlippage <= 0 || innerSlippage > maxSlippagePercentage) {
-      setSlippageError(true);
+    if (!validateSlippage(innerSlippage)) {
       return;
     }
 
@@ -88,9 +115,11 @@ export const SwapSlippageDrawer = (): ReactElement => {
             style={{ flex: 1 }}
             w="$fill"
             label={t('swaps.slippage.customAmountLabel')}
-            value={innerSlippage > 0 ? innerSlippage.toString() : ''}
+            value={inputValue}
             onChange={handleCustomSlippageChange}
-            type="number"
+            type="text"
+            inputMode="decimal"
+            pattern="[0-9]*\.?[0-9]*"
           />
           <Flex gap="$8">
             {slippagePercentages.map((suggestedPercentage) => {
@@ -99,7 +128,11 @@ export const SwapSlippageDrawer = (): ReactElement => {
                 <Component
                   w={'$fill'}
                   key={`suggested-percentage-${suggestedPercentage}`}
-                  onClick={() => setInnerSlippage(suggestedPercentage)}
+                  onClick={() => {
+                    setInnerSlippage(suggestedPercentage);
+                    setInputValue(suggestedPercentage.toString());
+                    setSlippageError(false); // Clear error when selecting a suggested value
+                  }}
                   label={`${suggestedPercentage.toString()}%`}
                   style={{ minWidth: 'unset' }}
                 />
