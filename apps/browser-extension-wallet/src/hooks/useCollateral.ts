@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable unicorn/no-useless-undefined */
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { logger, useObservable } from '@lace/common';
@@ -21,7 +20,7 @@ export type UseCollateralReturn = {
   txFee: Cardano.Lovelace;
   hasEnoughAda: boolean;
   txBuilder?: TxBuilder;
-  availableUtxoCollateral?: Cardano.Utxo[];
+  pureUtxoWithEnoughCoinToUseForCollateral?: Cardano.Utxo[];
 };
 
 export const useCollateral = (): UseCollateralReturn => {
@@ -35,7 +34,7 @@ export const useCollateral = (): UseCollateralReturn => {
   const walletAddress = addresses?.[0]?.address;
   const hasEnoughAda = useHasEnoughCollateral();
   const isSyncingForTheFirstTime = useSyncingTheFirstTime(); // here we check wallet is syncing for the first time
-  const [availableUtxoCollateral, setAvailableUtxoCollateral] = useState<Cardano.Utxo[]>();
+  const [pureUtxoWithEnoughCoinToUseForCollateral, setPureUtxoWithEnoughCoin] = useState<Cardano.Utxo[]>();
   const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
 
@@ -61,7 +60,7 @@ export const useCollateral = (): UseCollateralReturn => {
         )
       );
       if (utxo.length > 0) {
-        setAvailableUtxoCollateral([utxo]);
+        setPureUtxoWithEnoughCoin([utxo]);
       }
     };
     checkCollateral();
@@ -128,6 +127,6 @@ export const useCollateral = (): UseCollateralReturn => {
     txFee,
     hasEnoughAda,
     txBuilder,
-    availableUtxoCollateral
+    pureUtxoWithEnoughCoinToUseForCollateral
   };
 };

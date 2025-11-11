@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import React, { useCallback, useEffect, useState } from 'react';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
@@ -15,9 +14,7 @@ import styles from './Collateral.module.scss';
 import { Sections } from './types';
 import { useSections } from './store';
 import { MainLoader } from '@components/MainLoader';
-import {
-  APP_MODE_POPUP // COLLATERAL_AMOUNT_LOVELACES
-} from '@src/utils/constants';
+import { APP_MODE_POPUP } from '@src/utils/constants';
 import { CollateralFooterSend } from './send/CollateralFooterSend';
 import { TransactionSuccess } from '@src/views/browser-view/features/send-transaction/components/TransactionSuccess';
 import { TransactionFail } from '@src/views/browser-view/features/send-transaction/components/TransactionFail';
@@ -25,9 +22,7 @@ import { useBuiltTxState } from '@src/views/browser-view/features/send-transacti
 import { FooterHW } from './hardware-wallet/FooterHW';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useSecrets } from '@lace/core';
-/* import { filter, firstValueFrom, map, take } from 'rxjs';
-import { isNotNil } from '@cardano-sdk/util';
-import { Wallet } from '@lace/cardano';*/
+
 interface CollateralDrawerProps {
   visible: boolean;
   onClose: () => void;
@@ -62,21 +57,21 @@ export const CollateralDrawer = ({
     isSubmitting,
     hasEnoughAda,
     txFee,
-    availableUtxoCollateral
+    pureUtxoWithEnoughCoinToUseForCollateral
   } = useCollateral();
   const { builtTxData, clearBuiltTxData } = useBuiltTxState();
   const readyToOperate = !isWalletSyncingForTheFirstTime && unspendableLoaded;
 
   const autoSetCollateralWithoutTx = useCallback(() => {
     inMemoryWallet.utxo
-      .setUnspendable(availableUtxoCollateral)
+      .setUnspendable(pureUtxoWithEnoughCoinToUseForCollateral)
       .then(() => onClose())
       .catch(() =>
         setSection({
           currentSection: Sections.FAIL_TX
         })
       );
-  }, [availableUtxoCollateral, inMemoryWallet.utxo, setSection, onClose]);
+  }, [pureUtxoWithEnoughCoinToUseForCollateral, inMemoryWallet.utxo, setSection, onClose]);
 
   const handleClose = useCallback(async () => {
     sendAnalyticsEvent(PostHogAction.SettingsCollateralXClick);
@@ -105,10 +100,17 @@ export const CollateralDrawer = ({
       setSection({ currentSection: Sections.RECLAIM });
     } else {
       setSection({
-        currentSection: availableUtxoCollateral?.length > 0 ? Sections.AUTO_SET : Sections.SEND
+        currentSection: pureUtxoWithEnoughCoinToUseForCollateral?.length > 0 ? Sections.AUTO_SET : Sections.SEND
       });
     }
-  }, [hasCollateral, isInMemoryWallet, setSection, readyToOperate, availableUtxoCollateral, inMemoryWallet.utxo]);
+  }, [
+    hasCollateral,
+    isInMemoryWallet,
+    setSection,
+    readyToOperate,
+    pureUtxoWithEnoughCoinToUseForCollateral,
+    inMemoryWallet.utxo
+  ]);
 
   // handle drawer states for hw
   useEffect(() => {
