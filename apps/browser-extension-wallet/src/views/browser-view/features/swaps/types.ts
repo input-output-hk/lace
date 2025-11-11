@@ -74,7 +74,7 @@ export interface BuildSwapProps extends BaseEstimate {
 }
 export interface BuildSwapResponse {
   tx: string; // A hex encoded, unsigned transaction.
-  p: boolean; // , whether to use partial signing.
+  p: boolean; // whether to use partial signing.
 }
 
 export type CreateSwapRequestBodySwaps = {
