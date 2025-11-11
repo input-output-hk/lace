@@ -16,6 +16,7 @@ import { getSwapQuoteSources } from '../../util';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { Wallet } from '@lace/cardano';
 import CardanoLogo from '../../../../../../assets/icons/browser-view/cardano-logo.svg';
+import { withSignTxConfirmation } from '@lib/wallet-api-ui';
 
 const ITEM_STYLE = {
   borderRadius: '100%',
@@ -85,7 +86,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
           w="$fill"
           onClick={() => {
             posthog.sendEvent(PostHogAction.SwapsReviewQuote);
-            isHardwareWallet ? signAndSubmitSwapRequest() : setStage(SwapStage.SignTx);
+            isHardwareWallet ? withSignTxConfirmation(() => signAndSubmitSwapRequest()) : setStage(SwapStage.SignTx);
           }}
         />
       }
