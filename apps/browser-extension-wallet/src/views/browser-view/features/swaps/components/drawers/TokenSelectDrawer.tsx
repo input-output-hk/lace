@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import cn from 'classnames';
-import { Drawer, Search } from '@lace/common';
+import { Drawer, DrawerNavigation, PostHogAction, Search } from '@lace/common';
 import { useSwaps } from '../SwapProvider';
 import { ListEmptyState, TokenItem, TokenItemProps } from '@lace/core';
 import styles from './TokenSelectDrawer.module.scss';
@@ -13,6 +13,7 @@ import { TOKEN_LIST_PAGE_SIZE } from '../../const';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { Box } from '@input-output-hk/lace-ui-toolkit';
 import { Skeleton } from 'antd';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 type TokenSelectProps = {
   selectionType: 'in' | 'out';
@@ -37,6 +38,8 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
   const [innerTokens, setInnerTokens] = useState({ tokens: tokens.slice(0, TOKEN_LIST_PAGE_SIZE) });
   const handleSearch = (search: string) => setValue(search.toLowerCase());
   const [isLoadingMoreTokens, setIsLoadingMoreTokens] = useState(false);
+  const posthog = usePostHogClientContext();
+
   const handleTokenClick = useCallback(
     (token: DropdownList) => {
       if (token?.id === selectedToken) {
@@ -44,11 +47,14 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
         onTokenSelect(null);
       } else {
         onTokenSelect(token);
+        posthog.sendEvent(PostHogAction.SwapsAdjustSlippage, {
+          selectionType,
+          token: token.description ?? token.name
+        });
       }
       setStage(SwapStage.Initial);
-      // TODO analytic event
     },
-    [selectedToken, setStage, onTokenSelect]
+    [selectedToken, setStage, onTokenSelect, posthog, selectionType]
   );
 
   const filterAssets = useCallback(async () => {
@@ -99,7 +105,14 @@ export const TokenSelectDrawer = (props: TokenSelectProps): React.ReactElement =
   }, [stage, selectionType]);
 
   return (
-    <Drawer open={isDrawerOpen} maskClosable onClose={() => setStage(SwapStage.Initial)}>
+    <Drawer
+      open={isDrawerOpen}
+      maskClosable
+      onClose={() => setStage(SwapStage.Initial)}
+      navigation={
+        <DrawerNavigation title={t('swaps.pageHeading')} onCloseIconClick={() => setStage(SwapStage.Initial)} />
+      }
+    >
       <div data-testid="swap-asset-selector" className={cn(styles.assetsContainer)}>
         <Search
           showClear={focus || !!value}

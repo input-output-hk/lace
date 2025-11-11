@@ -337,7 +337,8 @@ export enum PostHogAction {
   SwapsAdjustSources = 'swaps | adjust sources',
   SwapsAdjustSlippage = 'swaps | adjust slippage',
   SwapsSignSuccess = 'swaps | sign success',
-  SwapsSignFailure = 'swaps | sign failure'
+  SwapsSignFailure = 'swaps | sign failure',
+  SwapsSelectToken = 'swaps | select token'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
