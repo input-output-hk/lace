@@ -389,7 +389,7 @@ export const SwapsProvider = (): React.ReactElement => {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
       posthog.sendEvent(PostHogAction.SwapsSignFailure);
-      setStage(SwapStage.Failure);
+      setStage(SwapStage.Initial);
     }
   }, [unsignedTx, inMemoryWallet, setStage, t, posthog]);
 

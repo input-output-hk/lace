@@ -53,7 +53,7 @@ export const useCollateral = (): UseCollateralReturn => {
     const checkCollateral = async () => {
       // if there aren't any utxos, this will never complete
       const utxo = await firstValueFrom(
-        inMemoryWallet.utxo.available$.pipe(
+        inMemoryWallet?.utxo?.available$?.pipe(
           map((utxos) => utxos.find((o) => !o[1].value?.assets && o[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES)),
           filter(isNotNil),
           take(1)
@@ -64,7 +64,7 @@ export const useCollateral = (): UseCollateralReturn => {
       }
     };
     checkCollateral();
-  }, [hasEnoughAda, hasCollateral, inMemoryWallet.utxo.available$, unspendable]);
+  }, [hasEnoughAda, hasCollateral, inMemoryWallet?.utxo?.available$, unspendable]);
 
   const initializeCollateralTx = useCallback(async () => {
     // if the wallet has not been synced at least once or has no balance don't initialize Tx
