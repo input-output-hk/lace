@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Drawer, DrawerHeader, DrawerNavigation } from '@lace/common';
 import { useTranslation } from 'react-i18next';
-import { CollateralStepSend, CollateralStepReclaim, CollateralFooterReclaim } from './';
+import {
+  CollateralStepSend,
+  CollateralStepReclaim,
+  CollateralFooterReclaim,
+  CollateralFooterAutoSet,
+  CollateralStepAutoSet
+} from './';
 import { useCollateral, useSyncingTheFirstTime } from '@hooks';
 import { useWalletStore } from '@src/stores';
 import styles from './Collateral.module.scss';
@@ -35,6 +41,7 @@ export const CollateralDrawer = ({
   const { t } = useTranslation();
   const { currentSection: section, setSection } = useSections();
   const {
+    inMemoryWallet,
     isInMemoryWallet,
     walletType,
     walletUI: { appMode }
@@ -43,10 +50,28 @@ export const CollateralDrawer = ({
   const secretsUtil = useSecrets();
   const [isPasswordValid, setIsPasswordValid] = useState<boolean>(true);
   const isWalletSyncingForTheFirstTime = useSyncingTheFirstTime();
-  const { initializeCollateralTx, submitCollateralTx, isInitializing, isSubmitting, hasEnoughAda, txFee } =
-    useCollateral();
+  const {
+    initializeCollateralTx,
+    submitCollateralTx,
+    isInitializing,
+    isSubmitting,
+    hasEnoughAda,
+    txFee,
+    pureUtxoWithEnoughCoinToUseForCollateral
+  } = useCollateral();
   const { builtTxData, clearBuiltTxData } = useBuiltTxState();
   const readyToOperate = !isWalletSyncingForTheFirstTime && unspendableLoaded;
+
+  const autoSetCollateralWithoutTx = useCallback(() => {
+    inMemoryWallet.utxo
+      .setUnspendable(pureUtxoWithEnoughCoinToUseForCollateral)
+      .then(() => onClose())
+      .catch(() =>
+        setSection({
+          currentSection: Sections.FAIL_TX
+        })
+      );
+  }, [pureUtxoWithEnoughCoinToUseForCollateral, inMemoryWallet.utxo, setSection, onClose]);
 
   const handleClose = useCallback(async () => {
     sendAnalyticsEvent(PostHogAction.SettingsCollateralXClick);
@@ -70,9 +95,22 @@ export const CollateralDrawer = ({
 
   // handle drawer states for inMemory(non-hardware) wallets
   useEffect(() => {
-    if (!isInMemoryWallet || !readyToOperate) return;
-    setSection({ currentSection: hasCollateral ? Sections.RECLAIM : Sections.SEND });
-  }, [hasCollateral, isInMemoryWallet, setSection, readyToOperate]);
+    if (!isInMemoryWallet || !readyToOperate || !inMemoryWallet.utxo) return;
+    if (hasCollateral) {
+      setSection({ currentSection: Sections.RECLAIM });
+    } else {
+      setSection({
+        currentSection: pureUtxoWithEnoughCoinToUseForCollateral?.length > 0 ? Sections.AUTO_SET : Sections.SEND
+      });
+    }
+  }, [
+    hasCollateral,
+    isInMemoryWallet,
+    setSection,
+    readyToOperate,
+    pureUtxoWithEnoughCoinToUseForCollateral,
+    inMemoryWallet.utxo
+  ]);
 
   // handle drawer states for hw
   useEffect(() => {
@@ -113,6 +151,7 @@ export const CollateralDrawer = ({
         hasEnoughAda={hasEnoughAda}
       />
     ),
+    [Sections.AUTO_SET]: <CollateralStepAutoSet popupView={popupView} />,
     [Sections.SUCCESS_TX]: <TransactionSuccess />,
     [Sections.FAIL_TX]: <TransactionFail />
   };
@@ -128,6 +167,7 @@ export const CollateralDrawer = ({
         isSubmitting={isSubmitting}
       />
     ),
+    [Sections.AUTO_SET]: <CollateralFooterAutoSet handleAutoSetCollateral={autoSetCollateralWithoutTx} />,
     [Sections.SEND]: (
       <CollateralFooterSend
         setCurrentStep={setSection}

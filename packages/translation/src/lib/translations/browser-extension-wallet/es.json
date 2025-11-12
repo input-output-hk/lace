@@ -974,5 +974,6 @@
   "browserView.settings.wallet.language.drawerDescription": "Elija el idioma",
   "browserView.settings.wallet.language.title": "Idioma",
   "browserView.sideMenu.mode.language": "Idioma",
-  "browserView.topNavigationBar.links.language": "Idioma"
+  "browserView.topNavigationBar.links.language": "Idioma",
+  "browserView.settings.wallet.collateral.autoSet.description": "Tiene cinco ada que puede usar como garantía sin ninguna otra transacción"
 }

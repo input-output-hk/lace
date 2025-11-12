@@ -328,7 +328,17 @@ export enum PostHogAction {
   RenameWalletCancelClick = 'rename wallet | cancel | click',
   // Voting Center
   VotingClick = 'voting | voting | click',
-  VotingBannerButtonClick = 'voting | voting | banner | button | click'
+  VotingBannerButtonClick = 'voting | voting | banner | button | click',
+  // Swaps
+  SwapsClick = 'swaps | click',
+  SwapsFetchEstimate = 'swaps | fetch estimate',
+  SwapsBuildQuote = 'swaps | build tx',
+  SwapsReviewQuote = 'swaps | review tx',
+  SwapsAdjustSources = 'swaps | adjust sources',
+  SwapsAdjustSlippage = 'swaps | adjust slippage',
+  SwapsSignSuccess = 'swaps | sign success',
+  SwapsSignFailure = 'swaps | sign failure',
+  SwapsSelectToken = 'swaps | select token'
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

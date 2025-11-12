@@ -41,7 +41,15 @@ const available$ = new BehaviorSubject([utxo]);
 
 const inMemoryWallet = {
   addresses$,
-  createTxBuilder: mockCreateTxBuilder
+  createTxBuilder: mockCreateTxBuilder,
+  utxo: {
+    available$
+  },
+  balance: {
+    utxo: {
+      unspendable$: new BehaviorSubject({ coins: BigInt(0) })
+    }
+  }
 };
 
 jest.mock('@src/stores', () => ({

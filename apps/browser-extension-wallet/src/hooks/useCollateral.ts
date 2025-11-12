@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-useless-undefined */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { logger, useObservable } from '@lace/common';
 import { firstValueFrom } from 'rxjs';
 import { map, take, filter } from 'rxjs/operators';
@@ -20,6 +20,7 @@ export type UseCollateralReturn = {
   txFee: Cardano.Lovelace;
   hasEnoughAda: boolean;
   txBuilder?: TxBuilder;
+  pureUtxoWithEnoughCoinToUseForCollateral?: Cardano.Utxo[];
 };
 
 export const useCollateral = (): UseCollateralReturn => {
@@ -33,6 +34,11 @@ export const useCollateral = (): UseCollateralReturn => {
   const walletAddress = addresses?.[0]?.address;
   const hasEnoughAda = useHasEnoughCollateral();
   const isSyncingForTheFirstTime = useSyncingTheFirstTime(); // here we check wallet is syncing for the first time
+  const [pureUtxoWithEnoughCoinToUseForCollateral, setPureUtxoWithEnoughCoinToUseForCollateral] =
+    useState<Cardano.Utxo[]>();
+  const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
+  const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
+
   const output: Cardano.TxOut = useMemo(
     () => ({
       address: walletAddress && Cardano.PaymentAddress(walletAddress),
@@ -42,6 +48,30 @@ export const useCollateral = (): UseCollateralReturn => {
     }),
     [walletAddress]
   );
+
+  useEffect(() => {
+    if (hasCollateral) return;
+
+    const isPureUtxoWithEnoughCoins = (utxo: Cardano.Utxo): boolean =>
+      !utxo[1].value?.assets && utxo[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES;
+
+    const checkCollateral = async (): Promise<void> => {
+      if (!inMemoryWallet?.utxo?.available$) return;
+
+      // if there aren't any utxos, this will never complete
+      const utxo = await firstValueFrom(
+        inMemoryWallet.utxo.available$.pipe(
+          map((utxos) => utxos.find((o) => isPureUtxoWithEnoughCoins(o))),
+          filter(isNotNil),
+          take(1)
+        )
+      );
+
+      setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
+    };
+
+    checkCollateral();
+  }, [hasEnoughAda, hasCollateral, inMemoryWallet?.utxo?.available$, unspendable]);
 
   const initializeCollateralTx = useCallback(async () => {
     // if the wallet has not been synced at least once or has no balance don't initialize Tx
@@ -103,6 +133,7 @@ export const useCollateral = (): UseCollateralReturn => {
     isSubmitting,
     txFee,
     hasEnoughAda,
-    txBuilder
+    txBuilder,
+    pureUtxoWithEnoughCoinToUseForCollateral
   };
 };

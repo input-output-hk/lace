@@ -47,8 +47,17 @@ export const glacierDropSchema = commonSchema.merge(
   })
 );
 
+export const swapCenterSchema = commonSchema.merge(
+  z.object({
+    defaultSlippagePercentages: z.array(z.number()),
+    initialSlippagePercentage: z.number(),
+    maxSlippagePercentage: z.number()
+  })
+);
+
 export const featureFlagSchema = {
   common: z.preprocess(parseJsonPreprocessor, commonSchema),
   dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema),
-  glacierDrop: z.preprocess(parseJsonPreprocessor, glacierDropSchema)
+  glacierDrop: z.preprocess(parseJsonPreprocessor, glacierDropSchema),
+  swapCenter: z.preprocess(parseJsonPreprocessor, swapCenterSchema)
 };

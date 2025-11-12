@@ -53,7 +53,8 @@ export enum BrowserViewSections {
   ADD_SHARED_WALLET = 'add_shared_wallet',
   NAMI_MIGRATION = 'nami_migration',
   NAMI_HW_FLOW = 'nami_hw_flow',
-  DAPP_EXPLORER = 'dapp-explorer'
+  DAPP_EXPLORER = 'dapp-explorer',
+  SWAPS = 'swaps'
 }
 
 export interface OpenBrowserData {

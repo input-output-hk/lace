@@ -33,7 +33,8 @@ import {
   FeatureFlagsByNetwork,
   FeatureFlags,
   RawFeatureFlagPayloads,
-  FeatureFlagGlacierDropSchema
+  FeatureFlagGlacierDropSchema,
+  FeatureFlagSwapCenterSchema
 } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
 import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
@@ -335,6 +336,11 @@ export class PostHogClient<Action extends string = string> {
 
         if (featureFlag === ExperimentName.GLACIER_DROP) {
           payloadsByFeature[featureFlag] = featureFlagSchema.glacierDrop.parse(payload) as FeatureFlagGlacierDropSchema;
+          continue;
+        }
+
+        if (featureFlag === ExperimentName.SWAP_CENTER) {
+          payloadsByFeature[featureFlag] = featureFlagSchema.swapCenter.parse(payload) as FeatureFlagSwapCenterSchema;
           continue;
         }
 
