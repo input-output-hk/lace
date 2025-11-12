@@ -383,14 +383,14 @@ export const SwapsProvider = (): React.ReactElement => {
       // Preserve the original transaction body and only update the witnesses
       // This ensures the protocol parameters view hash remains correct
       const unsignedTxFromCbor = Serialization.Transaction.fromCbor(unsignedTx.tx as unknown as Serialization.TxCBOR);
-      const finalTx = await inMemoryWallet.finalizeTx({
+      const {
+        witness: { signatures }
+      } = await inMemoryWallet.finalizeTx({
         tx: unsignedTx.tx as unknown as Serialization.TxCBOR
       });
       // Update the witness set on the original transaction to preserve the body
       const witness = unsignedTxFromCbor.witnessSet();
-      witness.setVkeys(
-        Serialization.CborSet.fromCore([...finalTx.witness.signatures.entries()], Serialization.VkeyWitness.fromCore)
-      );
+      witness.setVkeys(Serialization.CborSet.fromCore([...signatures.entries()], Serialization.VkeyWitness.fromCore));
       unsignedTxFromCbor.setWitnessSet(witness);
       const txId = await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
       setTransactionHash(txId.toString());
