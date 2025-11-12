@@ -1,7 +1,7 @@
 /* eslint-disable max-statements */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
-import React, { createContext, useCallback, useContext, useEffect, useState, useRef } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, useRef } from 'react';
 import { PostHogAction, toast, useObservable, logger } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import { Serialization } from '@cardano-sdk/core';
@@ -273,7 +273,7 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
-  const fetchDexList = () => {
+  const fetchDexList = useCallback(() => {
     getDexList(t)
       .then((response) => {
         setDexList(response);
@@ -282,9 +282,9 @@ export const SwapsProvider = (): React.ReactElement => {
         logger.error('Failed to fetch DEX list:', error);
         // Error already shown via toast in getDexList, just log for debugging
       });
-  };
+  }, [t]);
 
-  const fetchSwappableTokensList = () => {
+  const fetchSwappableTokensList = useCallback(() => {
     getSwappableTokensList()
       .then((response) => {
         setDexTokenList(response);
@@ -292,7 +292,7 @@ export const SwapsProvider = (): React.ReactElement => {
       .catch((error) => {
         throw new Error(error);
       });
-  };
+  }, []);
 
   useEffect(() => {
     fetchSwappableTokensList();
@@ -420,33 +420,62 @@ export const SwapsProvider = (): React.ReactElement => {
     });
   }, []);
 
-  const contextValue: SwapProvider = {
-    tokenA,
-    setTokenA,
-    tokenB,
-    setTokenB,
-    quantity,
-    setQuantity,
-    dexList,
-    dexTokenList,
-    fetchDexList,
-    fetchSwappableTokensList,
-    estimate,
-    unsignedTx,
-    setUnsignedTx,
-    buildSwap,
-    targetSlippage,
-    setTargetSlippage: setTargetSlippagePersisted,
-    signAndSubmitSwapRequest,
-    excludedDexs,
-    setExcludedDexs,
-    stage,
-    setStage,
-    collateral,
-    slippagePercentages,
-    maxSlippagePercentage,
-    transactionHash
-  };
+  const contextValue: SwapProvider = useMemo(
+    () => ({
+      tokenA,
+      setTokenA,
+      tokenB,
+      setTokenB,
+      quantity,
+      setQuantity,
+      dexList,
+      dexTokenList,
+      fetchDexList,
+      fetchSwappableTokensList,
+      estimate,
+      unsignedTx,
+      setUnsignedTx,
+      buildSwap,
+      targetSlippage,
+      setTargetSlippage: setTargetSlippagePersisted,
+      signAndSubmitSwapRequest,
+      excludedDexs,
+      setExcludedDexs,
+      stage,
+      setStage,
+      collateral,
+      slippagePercentages,
+      maxSlippagePercentage,
+      transactionHash
+    }),
+    [
+      tokenA,
+      setTokenA,
+      tokenB,
+      setTokenB,
+      quantity,
+      setQuantity,
+      dexList,
+      dexTokenList,
+      fetchDexList,
+      fetchSwappableTokensList,
+      estimate,
+      unsignedTx,
+      setUnsignedTx,
+      buildSwap,
+      targetSlippage,
+      setTargetSlippagePersisted,
+      signAndSubmitSwapRequest,
+      excludedDexs,
+      setExcludedDexs,
+      stage,
+      setStage,
+      collateral,
+      slippagePercentages,
+      maxSlippagePercentage,
+      transactionHash
+    ]
+  );
 
   return (
     <SwapsContext.Provider value={contextValue}>
