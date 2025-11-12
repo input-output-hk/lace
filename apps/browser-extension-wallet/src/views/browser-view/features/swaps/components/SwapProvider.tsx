@@ -41,7 +41,7 @@ const convertAdaQuantityToLovelace = (quantity: string): string => Wallet.util.a
 
 export const getDexList = async (t: TFunction): Promise<string[]> => {
   // /docs#/dex/available_dexs_dex_list__get
-  const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/dex/list/`, { method: 'GET' });
+  const response = await globalThis.fetch(`${process.env.STEELSWAP_API_URL}/dex/list/`, { method: 'GET' });
   if (!response.ok) {
     toast.notify({ duration: 3, text: t('swaps.error.unableToFetchDexList') });
     throw new Error('Unable to fetch dex list');
@@ -51,7 +51,7 @@ export const getDexList = async (t: TFunction): Promise<string[]> => {
 
 export const getSwappableTokensList = async (): Promise<TokenListFetchResponse[]> => {
   // /docs#/tokens/get_tokens_tokens_list__get
-  const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/tokens/list/`, { method: 'GET' });
+  const response = await globalThis.fetch(`${process.env.STEELSWAP_API_URL}/tokens/list/`, { method: 'GET' });
 
   if (!response.ok) {
     throw new Error('Unable to fetch token list');
@@ -219,7 +219,7 @@ export const SwapsProvider = (): React.ReactElement => {
       })
     );
     if (tokenA && tokenB && quantity) {
-      const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/swap/estimate/`, {
+      const response = await globalThis.fetch(`${process.env.STEELSWAP_API_URL}/swap/estimate/`, {
         method: 'POST',
         headers: createSteelswapApiHeaders(),
         body: postBody
@@ -316,7 +316,7 @@ export const SwapsProvider = (): React.ReactElement => {
         })
       );
 
-      const response = await window.fetch(`${process.env.STEELSWAP_API_URL}/swap/build/`, {
+      const response = await globalThis.fetch(`${process.env.STEELSWAP_API_URL}/swap/build/`, {
         method: 'POST',
         headers: createSteelswapApiHeaders(),
         body: postBody
