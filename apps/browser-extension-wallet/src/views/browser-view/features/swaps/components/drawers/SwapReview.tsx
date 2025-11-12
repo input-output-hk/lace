@@ -52,11 +52,11 @@ export const SwapReviewDrawer = (): JSX.Element => {
       return { quoteRatio: '0', networkFee: '0', serviceFee: '0' };
     }
     return {
-      quoteRatio: estimate.price,
+      quoteRatio: `${Number(estimate.price.toFixed(5))} per ${tokenA.description}`,
       networkFee: Wallet.util.lovelacesToAdaString(unsignedTxFromCbor.body().fee().toString()),
       serviceFee: Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())
     };
-  }, [estimate, unsignedTxFromCbor]);
+  }, [estimate, unsignedTxFromCbor, tokenA]);
 
   // Early return after hooks
   if (!unsignedTx || !estimate || !unsignedTxFromCbor) {
