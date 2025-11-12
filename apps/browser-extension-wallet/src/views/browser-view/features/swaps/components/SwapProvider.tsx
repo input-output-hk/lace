@@ -60,6 +60,13 @@ export const getSwappableTokensList = async (): Promise<TokenListFetchResponse[]
   return (await response.json()) as TokenListFetchResponse[];
 };
 
+const getFormattedQuantity = (quantity: string, decimals?: number) => {
+  if (decimals) {
+    return Number(quantity) * Math.pow(10, decimals);
+  }
+  return quantity;
+};
+
 export const createSwapRequestBody = ({
   tokenA,
   tokenB,
@@ -73,7 +80,7 @@ export const createSwapRequestBody = ({
 }: CreateSwapRequestBodySwaps): BuildSwapProps | BaseEstimate => {
   // Estimate
   const quantityValue =
-    tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : Number(quantity) * Math.pow(10, decimals);
+    tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : getFormattedQuantity(quantity, decimals);
   const quantityNumber = Number(quantityValue);
   if (Number.isNaN(quantityNumber)) {
     throw new TypeError(`Invalid quantity value: ${quantityValue}`);

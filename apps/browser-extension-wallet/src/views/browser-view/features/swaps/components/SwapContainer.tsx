@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
 /* eslint-disable sonarjs/no-duplicate-string */
@@ -33,13 +34,15 @@ import { getSwapQuoteSources } from '../util';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
 import { validateNumericValue } from '@lace/core';
 
+const CARDANO_ASSET_ID = '537c34d1695c4303e293d7a5b19813f0d51c3c71259842e773b0b4e6';
+
 const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTokens: NonNFTAsset[]) => {
   const swappableAssetIds = new Set();
   dexTokenList.forEach((token) => {
     swappableAssetIds.add(`${token.policyId}${token.policyName}`);
   });
 
-  swappableAssetIds.add('537c34d1695c4303e293d7a5b19813f0d51c3c71259842e773b0b4e6'); // Add cardano as default
+  swappableAssetIds.add(CARDANO_ASSET_ID); // Add cardano as default
 
   return swappableTokens
     .map((token) => ({
@@ -195,7 +198,7 @@ export const SwapsContainer = (): React.ReactElement => {
                     </Text.Body.Normal>
                     <TextBox
                       label=""
-                      value={quantity ? quantity : '0.00'}
+                      value={quantity || '0.00'}
                       id="swap-token-input"
                       onChange={(e) => {
                         const changedValue = e.target.value;
@@ -331,13 +334,20 @@ export const SwapsContainer = (): React.ReactElement => {
                         {!!tokenB && (
                           <Text.Body.Normal color="secondary">
                             {t('swaps.quote.balance', {
-                              assetBalance:
-                                tokenB.ticker === 'ADA'
-                                  ? Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString())
-                                  : Wallet.util.calculateAssetBalance(
-                                      assetsBalance?.assets?.get(`${tokenB?.policyId}${tokenB.policyName}`)?.toString(),
-                                      { tokenMetadata: { decimals: tokenB.decimals } } as Wallet.Asset.AssetInfo
-                                    ) ?? '0'
+                              assetBalance: (() => {
+                                if (tokenB.ticker === 'ADA') {
+                                  return Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString());
+                                }
+                                const rawBalance = assetsBalance?.assets?.get(
+                                  `${tokenB?.policyId}${tokenB.policyName}`
+                                );
+                                if (rawBalance !== undefined) {
+                                  return Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                                    tokenMetadata: { decimals: tokenB.decimals }
+                                  } as Wallet.Asset.AssetInfo);
+                                }
+                                return '0';
+                              })()
                             })}
                           </Text.Body.Normal>
                         )}

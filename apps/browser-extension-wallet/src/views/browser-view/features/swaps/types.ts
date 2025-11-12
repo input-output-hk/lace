@@ -86,7 +86,7 @@ export type CreateSwapRequestBodySwaps = {
   targetSlippage?: number;
   collateral?: Wallet.Cardano.Utxo[];
   utxos?: Wallet.Cardano.Utxo[];
-  decimals: number;
+  decimals?: number;
 };
 
 export enum SwapStage {
