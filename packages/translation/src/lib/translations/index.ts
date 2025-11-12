@@ -56,3 +56,44 @@ export const swapsTranslations = {
   [Language.en]: enSwaps,
   [Language.es]: esSwaps,
 };
+
+// Use tsc (typecheck) to verify that translation files are in sync
+// for V1 use granular detail for each main file
+// @ts-expect-error - remove once LW-13833 is completed
+const _enExtension: typeof enExtension = esExtension;
+// @ts-expect-error - remove once LW-13833 is completed
+const _esExtension: typeof esExtension = enExtension;
+const _enCardano: typeof enCardano = esCardano;
+const _esCardano: typeof esCardano = enCardano;
+const _enCore: typeof enCore = esCore;
+const _esCore: typeof esCore = enCore;
+const _enSharedWallets: typeof enSharedWallets = esSharedWallets;
+const _esSharedWallets: typeof esSharedWallets = enSharedWallets;
+const _enStaking: typeof enStaking = esStaking;
+const _esStaking: typeof esStaking = enStaking;
+const _enSwaps: typeof enSwaps = esSwaps;
+const _esSwaps: typeof esSwaps = enSwaps;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enExtension;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esExtension;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enCardano;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esCardano;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enCore;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esCore;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enSharedWallets;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esSharedWallets;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enStaking;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esStaking;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enSwaps;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_esSwaps;

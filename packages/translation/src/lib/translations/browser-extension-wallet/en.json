@@ -983,5 +983,12 @@
   "pgp.scanWalletPrivateQrCode": "Scan paper wallet private QR code",
   "pgp.unidentifiedQrCodeHeading": "Unidentified QR code",
   "generic.transactionHash": "Transaction hash",
-  "browserView.settings.wallet.collateral.autoSet.description": "You have 5 ADA you can set as collateral without any further transaction."
+  "browserView.settings.wallet.collateral.autoSet.description": "You have 5 ADA you can set as collateral without any further transaction.",
+  "dappCategory.games": "Games",
+  "dappCategory.defi": "DeFi",
+  "dappCategory.collectibles": "Collectibles",
+  "dappCategory.marketplaces": "Marketplaces",
+  "dappCategory.exchanges": "Exchanges",
+  "dappCategory.social": "Social",
+  "dappCategory.other": "Other"
 }

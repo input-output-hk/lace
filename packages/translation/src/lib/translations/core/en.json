@@ -744,5 +744,6 @@
   "core.sharedWallets.importTransaction": "Import transaction",
   "core.sharedWallets.importTransactionDescription": "To co-sign a transaction initiated by another shared wallet member, upload the transaction JSON file you received.",
   "core.sharedWallets.importTransactionSupportedFormat": "Supported formats: JSON",
-  "core.sharedWallets.removeBtnLabel": "Remove"
+  "core.sharedWallets.removeBtnLabel": "Remove",
+  "browserView.settings.wallet.collateral.autoSet.description": "You have 5 ADA you can set as collateral without any further transaction."
 }
