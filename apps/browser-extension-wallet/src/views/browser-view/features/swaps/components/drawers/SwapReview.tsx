@@ -193,16 +193,14 @@ export const SwapReviewDrawer = (): JSX.Element => {
                 <Text.Body.Normal>{details?.networkFee} ADA</Text.Body.Normal>
               </Flex>
             </Flex>
-            {!!details?.serviceFee && Number(details?.serviceFee) > 0 && (
-              <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
-                <Text.Body.Normal weight="$semibold">
-                  {t('swaps.reviewStage.transactionsCosts.serviceFee')}
-                </Text.Body.Normal>
-                <Flex>
-                  <Text.Body.Normal>{details?.serviceFee} ADA</Text.Body.Normal>
-                </Flex>
+            <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
+              <Text.Body.Normal weight="$semibold">
+                {t('swaps.reviewStage.transactionsCosts.serviceFee')}
+              </Text.Body.Normal>
+              <Flex>
+                <Text.Body.Normal>{details?.serviceFee} ADA</Text.Body.Normal>
               </Flex>
-            )}
+            </Flex>
           </Flex>
         </Flex>
         <Divider />

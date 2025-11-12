@@ -385,7 +385,7 @@ export const SwapsContainer = (): React.ReactElement => {
                 </Card.Greyed>
                 <Flex flexDirection={'row'} w="$fill" justifyContent="space-between">
                   <Text.Body.Normal color="secondary" weight="$semibold">
-                    {t('swaps.label.swapFee')}
+                    {t('swaps.reviewStage.transactionsCosts.serviceFee')}
                   </Text.Body.Normal>
                   <Text.Body.Normal weight="$semibold">
                     {Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())} ADA
