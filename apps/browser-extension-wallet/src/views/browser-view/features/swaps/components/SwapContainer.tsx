@@ -31,6 +31,7 @@ import { getAssetImageUrl } from '@utils/get-asset-image-url';
 import { DisclaimerModal as SwapsDisclaimerModal } from './DisclaimerModal/DisclaimerModal';
 import { getSwapQuoteSources } from '../util';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
+import { validateNumericValue } from '@lace/core';
 
 const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTokens: NonNFTAsset[]) => {
   const swappableAssetIds = new Set();
