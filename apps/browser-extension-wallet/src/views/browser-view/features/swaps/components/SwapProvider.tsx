@@ -143,7 +143,7 @@ export const SwapsProvider = (): React.ReactElement => {
   const [estimate, setEstimate] = useState<SwapEstimateResponse | null>();
 
   // Build swap
-  const [unsignedTx, setBuildResponse] = useState<BuildSwapResponse | null>();
+  const [unsignedTx, setUnsignedTx] = useState<BuildSwapResponse | null>();
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
   // Reset transaction hash when starting a new swap
@@ -353,7 +353,7 @@ export const SwapsProvider = (): React.ReactElement => {
           toast.notify({ duration: 3, text: unableToBuildErrorText });
           return;
         }
-        setBuildResponse(parsedResponse);
+        setUnsignedTx(parsedResponse);
         cb();
       }
     },
@@ -433,7 +433,7 @@ export const SwapsProvider = (): React.ReactElement => {
     fetchSwappableTokensList,
     estimate,
     unsignedTx,
-    setBuildResponse,
+    setUnsignedTx,
     buildSwap,
     targetSlippage,
     setTargetSlippage: setTargetSlippagePersisted,

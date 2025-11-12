@@ -117,7 +117,7 @@ export interface SwapProvider {
   targetSlippage: number;
   setTargetSlippage: React.Dispatch<React.SetStateAction<number>>;
   unsignedTx?: BuildSwapResponse;
-  setBuildResponse: React.Dispatch<React.SetStateAction<BuildSwapResponse | null>>;
+  setUnsignedTx: React.Dispatch<React.SetStateAction<BuildSwapResponse | null>>;
   excludedDexs: string[];
   setExcludedDexs: React.Dispatch<React.SetStateAction<string[]>>;
   stage: SwapStage;

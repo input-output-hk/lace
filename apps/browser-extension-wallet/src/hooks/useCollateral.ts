@@ -34,7 +34,8 @@ export const useCollateral = (): UseCollateralReturn => {
   const walletAddress = addresses?.[0]?.address;
   const hasEnoughAda = useHasEnoughCollateral();
   const isSyncingForTheFirstTime = useSyncingTheFirstTime(); // here we check wallet is syncing for the first time
-  const [pureUtxoWithEnoughCoinToUseForCollateral, setPureUtxoWithEnoughCoin] = useState<Cardano.Utxo[]>();
+  const [pureUtxoWithEnoughCoinToUseForCollateral, setPureUtxoWithEnoughCoinToUseForCollateral] =
+    useState<Cardano.Utxo[]>();
   const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
   const hasCollateral = useMemo(() => unspendable?.coins >= COLLATERAL_AMOUNT_LOVELACES, [unspendable?.coins]);
 
@@ -60,7 +61,7 @@ export const useCollateral = (): UseCollateralReturn => {
         )
       );
       if (utxo.length > 0) {
-        setPureUtxoWithEnoughCoin([utxo]);
+        setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
       }
     };
     checkCollateral();

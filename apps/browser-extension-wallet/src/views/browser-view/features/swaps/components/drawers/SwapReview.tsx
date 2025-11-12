@@ -40,7 +40,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
     unsignedTx,
     signAndSubmitSwapRequest,
     targetSlippage,
-    setBuildResponse
+    setUnsignedTx
   } = useSwaps();
 
   // unsignedTx is guaranteed to be non-null due to conditional rendering in SwapContainer,
@@ -68,14 +68,14 @@ export const SwapReviewDrawer = (): JSX.Element => {
       open={stage === SwapStage.SwapReview}
       onClose={() => {
         setStage(SwapStage.Initial);
-        setBuildResponse(null);
+        setUnsignedTx(null);
       }}
       navigation={
         <DrawerNavigation
           title={t('swaps.pageHeading')}
           onCloseIconClick={() => {
             setStage(SwapStage.Initial);
-            setBuildResponse(null);
+            setUnsignedTx(null);
           }}
         />
       }
