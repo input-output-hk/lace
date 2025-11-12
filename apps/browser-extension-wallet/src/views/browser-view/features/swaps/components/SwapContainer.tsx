@@ -225,6 +225,7 @@ export const SwapsContainer = (): React.ReactElement => {
                           >
                             {tokenA ? (
                               <img
+                                alt={tokenA.name}
                                 src={tokenA.description === 'ADA' ? CardanoLogo : getAssetImageUrl(tokenA.logo)}
                                 style={{ width: 24, height: 24, borderRadius: '100%' }}
                               />
@@ -303,6 +304,7 @@ export const SwapsContainer = (): React.ReactElement => {
                             <div className={styles.swapTokenIcon}>
                               {tokenB ? (
                                 <img
+                                  alt={tokenB.name}
                                   src={
                                     tokenB.ticker === 'ADA'
                                       ? CardanoLogo

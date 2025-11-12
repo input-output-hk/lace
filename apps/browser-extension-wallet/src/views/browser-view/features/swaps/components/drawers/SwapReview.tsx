@@ -103,6 +103,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
               <Flex gap="$24" alignItems="center">
                 <div style={ITEM_STYLE}>
                   <img
+                    alt={tokenA.name}
                     src={tokenA.description === 'ADA' ? CardanoLogo : getAssetImageUrl(tokenA.logo)}
                     style={{ width: 48, height: 48, borderRadius: '100%' }}
                   />
@@ -131,6 +132,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
               <Flex gap={'$24'} alignItems="center">
                 <div style={ITEM_STYLE}>
                   <img
+                    alt={tokenB.name}
                     src={
                       tokenB.ticker === 'ADA'
                         ? CardanoLogo
