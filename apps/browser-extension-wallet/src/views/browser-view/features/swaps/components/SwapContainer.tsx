@@ -381,7 +381,7 @@ export const SwapsContainer = (): React.ReactElement => {
                       </Flex>
                       <Flex gap={'$16'} alignItems="center">
                         <Text.Body.Normal weight="$semibold">
-                          {Number(estimate.price).toFixed(5)} per {tokenA.description}
+                          {Number(estimate.price).toFixed(5)} per {tokenA?.description}
                         </Text.Body.Normal>
                         <IconButton.Secondary
                           icon={<AdjustmentsIcon />}
