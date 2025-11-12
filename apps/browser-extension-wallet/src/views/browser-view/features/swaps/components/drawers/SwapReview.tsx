@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
 import React, { useMemo } from 'react';
-import { Button, Card, Divider, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Button, Card, Divider, Flex, Text, InfoComponent, Tooltip } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation, PostHogAction } from '@lace/common';
 import { useWalletStore } from '@src/stores';
 import styles from '../SwapContainer.module.scss';
@@ -164,11 +164,21 @@ export const SwapReviewDrawer = (): JSX.Element => {
           </Card.Greyed>
           <Flex flexDirection="column" gap="$16" w={'$fill'}>
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
-              <Text.Body.Normal weight="$semibold">{t('swaps.reviewStage.detail.slippage')}</Text.Body.Normal>
+              <Flex gap="$8">
+                <Text.Body.Normal weight="$semibold">{t('swaps.reviewStage.detail.slippage')}</Text.Body.Normal>
+                <Tooltip label={t('swaps.reviewStage.tooltip.slippage')} align="start" side="bottom">
+                  <InfoComponent data-testid="slippage-info" />
+                </Tooltip>
+              </Flex>
               <Text.Body.Normal>{targetSlippage}%</Text.Body.Normal>
             </Flex>
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
-              <Text.Body.Normal weight="$semibold">{t('swaps.quoteSourceRoute.detail')}</Text.Body.Normal>
+              <Flex gap="$8">
+                <Text.Body.Normal weight="$semibold">{t('swaps.quoteSourceRoute.detail')}</Text.Body.Normal>
+                <Tooltip label={t('swaps.reviewStage.tooltip.swapRoute')} align="start" side="bottom">
+                  <InfoComponent data-testid="swap-route-info" />
+                </Tooltip>
+              </Flex>
               <Text.Body.Normal>
                 SteelSwap {t('swaps.quoteSourceRoute.via', { swapRoutes: getSwapQuoteSources(estimate.splitGroup) })}
               </Text.Body.Normal>
@@ -186,17 +196,27 @@ export const SwapReviewDrawer = (): JSX.Element => {
           <Text.SubHeading weight="$bold">{t('swaps.reviewStage.transactionCosts.heading')}</Text.SubHeading>
           <Flex flexDirection="column" w={'$fill'}>
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
-              <Text.Body.Normal weight="$semibold">
-                {t('swaps.reviewStage.transactionsCosts.networkFee')}
-              </Text.Body.Normal>
+              <Flex gap="$8">
+                <Text.Body.Normal weight="$semibold">
+                  {t('swaps.reviewStage.transactionsCosts.networkFee')}
+                </Text.Body.Normal>
+                <Tooltip label={t('swaps.reviewStage.tooltip.networkFee')} align="start" side="bottom">
+                  <InfoComponent data-testid="network-fee-info" />
+                </Tooltip>
+              </Flex>
               <Flex>
                 <Text.Body.Normal>{details?.networkFee} ADA</Text.Body.Normal>
               </Flex>
             </Flex>
             <Flex alignItems="center" justifyContent="space-between" w={'$fill'}>
-              <Text.Body.Normal weight="$semibold">
-                {t('swaps.reviewStage.transactionsCosts.serviceFee')}
-              </Text.Body.Normal>
+              <Flex gap="$8">
+                <Text.Body.Normal weight="$semibold">
+                  {t('swaps.reviewStage.transactionsCosts.serviceFee')}
+                </Text.Body.Normal>
+                <Tooltip label={t('swaps.reviewStage.tooltip.serviceFee')} align="start" side="bottom">
+                  <InfoComponent data-testid="service-fee-info" />
+                </Tooltip>
+              </Flex>
               <Flex>
                 <Text.Body.Normal>{details?.serviceFee} ADA</Text.Body.Normal>
               </Flex>

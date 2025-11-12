@@ -13,7 +13,17 @@ import ArrowDown from '@assets/icons/arrow-down.component.svg';
 import AdjustmentsIcon from '@assets/icons/adjustments.component.svg';
 import styles from './SwapContainer.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
-import { TextLink, Button, Card, Flex, Text, TextBox, IconButton } from '@input-output-hk/lace-ui-toolkit';
+import {
+  TextLink,
+  Button,
+  Card,
+  Flex,
+  Text,
+  TextBox,
+  IconButton,
+  Tooltip,
+  InfoComponent
+} from '@input-output-hk/lace-ui-toolkit';
 import LightBulb from '@src/assets/icons/light.svg';
 import { getTokenList, NonNFTAsset } from '@src/utils/get-token-list';
 import { useObservable } from '@lace/common';
@@ -402,9 +412,14 @@ export const SwapsContainer = (): React.ReactElement => {
                   </Flex>
                 </Card.Greyed>
                 <Flex flexDirection={'row'} w="$fill" justifyContent="space-between">
-                  <Text.Body.Normal color="secondary" weight="$semibold">
-                    {t('swaps.reviewStage.transactionsCosts.serviceFee')}
-                  </Text.Body.Normal>
+                  <Flex gap="$8">
+                    <Text.Body.Normal color="secondary" weight="$semibold">
+                      {t('swaps.reviewStage.transactionsCosts.serviceFee')}
+                    </Text.Body.Normal>
+                    <Tooltip label={t('swaps.reviewStage.tooltip.serviceFee')} align="start" side="bottom">
+                      <InfoComponent data-testid="service-fee-info" />
+                    </Tooltip>
+                  </Flex>
                   <Text.Body.Normal weight="$semibold">
                     {Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())} ADA
                   </Text.Body.Normal>
