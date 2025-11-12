@@ -196,7 +196,12 @@ export const SwapsContainer = (): React.ReactElement => {
                       label=""
                       value={quantity ? quantity : '0.00'}
                       id="swap-token-input"
-                      onChange={(e) => setQuantity(e.target.value)}
+                      onChange={(e) => {
+                        const changedValue = e.target.value;
+                        if (validateNumericValue(changedValue, { isFloat: true })) {
+                          setQuantity(changedValue);
+                        }
+                      }}
                       containerClassName={styles.swapTokenATextbox}
                     />
                   </Flex>
