@@ -162,6 +162,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
     if (route.path === routes.voting && !isVotingCenterEnabled) return false;
+    if ((route.path === routes.swaps && isSharedWallet) || (route.path === routes.swaps && chainName !== 'Mainnet')) {
+      return false;
+    }
+
     if ([routes.notifications, routes.notification].includes(route.path) && !isNotificationsCenterEnabled) return false;
     return true;
   });
