@@ -402,7 +402,8 @@ export const SwapsContainer = (): React.ReactElement => {
           <TokenSelectDrawer
             tokens={mappedSwappableTokens.map((token) => ({
               ...token,
-              id: token.assetId
+              id: token.assetId,
+              ...(tokenB && { disabled: token.assetId === `${tokenB.policyId}${tokenB.policyName}` })
             }))}
             selectionType="out"
             doesWalletHaveTokens={mappedSwappableTokens?.length > 0}
@@ -437,7 +438,8 @@ export const SwapsContainer = (): React.ReactElement => {
                 description: token.ticker,
                 decimals: token.decimals,
                 id: token.policyId + token.policyName,
-                logo: logoUrl
+                logo: logoUrl,
+                ...(tokenA && { disabled: token.policyId + token.policyName === tokenA.id })
               };
             })}
             doesWalletHaveTokens={dexTokenList?.length > 0}
