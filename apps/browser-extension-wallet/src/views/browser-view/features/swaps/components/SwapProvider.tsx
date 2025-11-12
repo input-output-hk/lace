@@ -68,10 +68,12 @@ export const createSwapRequestBody = ({
   address,
   targetSlippage,
   collateral,
-  utxos
+  utxos,
+  decimals
 }: CreateSwapRequestBodySwaps): BuildSwapProps | BaseEstimate => {
   // Estimate
-  const quantityValue = tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : quantity;
+  const quantityValue =
+    tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : Number(quantity) * Math.pow(10, decimals);
   const quantityNumber = Number(quantityValue);
   if (Number.isNaN(quantityNumber)) {
     throw new TypeError(`Invalid quantity value: ${quantityValue}`);
@@ -215,7 +217,8 @@ export const SwapsProvider = (): React.ReactElement => {
         tokenA: tokenA.id,
         tokenB: tokenB.policyId + tokenB.policyName,
         quantity,
-        ignoredDexs: excludedDexs
+        ignoredDexs: excludedDexs,
+        decimals: tokenA.decimals
       })
     );
     if (tokenA && tokenB && quantity) {
@@ -312,7 +315,8 @@ export const SwapsProvider = (): React.ReactElement => {
           address: addresses?.[0]?.address,
           targetSlippage,
           collateral,
-          utxos
+          utxos,
+          decimals: tokenA.decimals
         })
       );
 

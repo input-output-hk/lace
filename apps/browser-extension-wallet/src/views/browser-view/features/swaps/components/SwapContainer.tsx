@@ -242,8 +242,9 @@ export const SwapsContainer = (): React.ReactElement => {
                           <TextLink
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
-                              if (assetBalance !== undefined) {
-                                setQuantity(assetBalance.toString());
+                              if (assetBalance !== undefined && tokenA.decimals !== undefined) {
+                                const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals);
+                                setQuantity(formattedBalance.toString());
                               }
                             }}
                             label={t('swaps.label.selectMaxTokens')}
@@ -251,8 +252,9 @@ export const SwapsContainer = (): React.ReactElement => {
                           <TextLink
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
-                              if (assetBalance !== undefined) {
-                                setQuantity((assetBalance / BigInt(2)).toString());
+                              if (assetBalance !== undefined && tokenA.decimals !== undefined) {
+                                const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals) / 2;
+                                setQuantity(formattedBalance.toString());
                               }
                             }}
                             label={t('swaps.label.selectHalfTokens')}
@@ -436,8 +438,19 @@ export const SwapsContainer = (): React.ReactElement => {
                 logoUrl = token.ticker === 'ADA' ? CardanoLogo : undefined;
               }
 
+              const rawBalance = assetsBalance?.assets?.get(token.policyId + token.policyName);
+              let formattedAmount = '-';
+
+              if (token.ticker === 'ADA') {
+                formattedAmount = Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString());
+              } else if (rawBalance !== undefined) {
+                formattedAmount = Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                  tokenMetadata: { decimals: token.decimals }
+                } as Wallet.Asset.AssetInfo);
+              }
+
               return {
-                amount: assetsBalance?.assets?.get(token.policyId + token.policyName)?.toString(),
+                amount: formattedAmount,
                 name: token.name,
                 description: token.ticker,
                 decimals: token.decimals,
