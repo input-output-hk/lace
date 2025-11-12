@@ -46,7 +46,14 @@ export const LiquiditySourcesDrawer = (): ReactElement => {
         />
       }
       dataTestId="swap-liquidity-sources-drawer"
-      footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleConfirmDexChoices} />}
+      footer={
+        <Button.CallToAction
+          disabled={localExcludedDexs.length === dexList.length}
+          w={'$fill'}
+          label={t('general.button.confirm')}
+          onClick={handleConfirmDexChoices}
+        />
+      }
     >
       <Flex mb={'$24'} flexDirection="column" gap={'$8'}>
         <Text.Body.Normal>{t('swaps.liquiditySourcesDrawer.subtitle')}</Text.Body.Normal>
