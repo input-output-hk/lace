@@ -51,19 +51,25 @@ export const useCollateral = (): UseCollateralReturn => {
 
   useEffect(() => {
     if (hasCollateral) return;
-    const checkCollateral = async () => {
+
+    const isPureUtxoWithEnoughCoins = (utxo: Cardano.Utxo): boolean =>
+      !utxo[1].value?.assets && utxo[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES;
+
+    const checkCollateral = async (): Promise<void> => {
+      if (!inMemoryWallet?.utxo?.available$) return;
+
       // if there aren't any utxos, this will never complete
       const utxo = await firstValueFrom(
-        inMemoryWallet?.utxo?.available$?.pipe(
-          map((utxos) => utxos.find((o) => !o[1].value?.assets && o[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES)),
+        inMemoryWallet.utxo.available$.pipe(
+          map((utxos) => utxos.find((o) => isPureUtxoWithEnoughCoins(o))),
           filter(isNotNil),
           take(1)
         )
       );
-      if (utxo.length > 0) {
-        setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
-      }
+
+      setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
     };
+
     checkCollateral();
   }, [hasEnoughAda, hasCollateral, inMemoryWallet?.utxo?.available$, unspendable]);
 
