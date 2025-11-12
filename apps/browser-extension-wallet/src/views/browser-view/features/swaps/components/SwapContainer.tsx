@@ -34,7 +34,7 @@ import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.s
 
 const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTokens: NonNFTAsset[]) => {
   const swappableAssetIds = new Set();
-  dexTokenList.map((token) => {
+  dexTokenList.forEach((token) => {
     swappableAssetIds.add(`${token.policyId}${token.policyName}`);
   });
 
