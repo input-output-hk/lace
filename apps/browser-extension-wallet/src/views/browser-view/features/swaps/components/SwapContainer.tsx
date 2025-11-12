@@ -219,15 +219,7 @@ export const SwapsContainer = (): React.ReactElement => {
                         alignItems="center"
                       >
                         <Flex gap="$8" alignItems="center">
-                          <div
-                            style={{
-                              borderRadius: '100%',
-                              padding: 8,
-                              backgroundColor: '#FFF',
-                              display: 'flex',
-                              justifyContent: 'center'
-                            }}
-                          >
+                          <div className={styles.swapTokenIcon}>
                             {tokenA ? (
                               <img
                                 alt={tokenA.name}
