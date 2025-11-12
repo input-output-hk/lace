@@ -360,11 +360,22 @@ export const SwapsProvider = (): React.ReactElement => {
     [addresses, tokenA, tokenB, quantity, targetSlippage, collateral, excludedDexs, utxos, t, posthog]
   );
 
+  const sendSuccessPosthogEvent = useCallback(() => {
+    posthog.sendEvent(PostHogAction.SwapsSignSuccess, {
+      tokenIn: tokenB,
+      tokenOut: tokenA,
+      quantity,
+      targetSlippage: targetSlippage.toString()
+    });
+  }, [tokenA, tokenB, posthog, quantity, targetSlippage]);
+
   const signAndSubmitSwapRequest = useCallback(async () => {
     const unableToSignErrorText = t('swaps.error.unableToSign');
     if (!unsignedTx) {
       toast.notify({ duration: 3, text: unableToSignErrorText });
-      posthog.sendEvent(PostHogAction.SwapsSignFailure);
+      posthog.sendEvent(PostHogAction.SwapsSignFailure, {
+        reason: 'internal code, no unsigned tx'
+      });
       setStage(SwapStage.Failure);
       return;
     }
@@ -383,15 +394,18 @@ export const SwapsProvider = (): React.ReactElement => {
       unsignedTxFromCbor.setWitnessSet(witness);
       const txId = await inMemoryWallet.submitTx(unsignedTxFromCbor.toCbor());
       setTransactionHash(txId.toString());
-      posthog.sendEvent(PostHogAction.SwapsSignSuccess);
+      sendSuccessPosthogEvent();
       setStage(SwapStage.Success);
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
-      posthog.sendEvent(PostHogAction.SwapsSignFailure);
+      const standardError = new Error(error);
+      posthog.sendEvent(PostHogAction.SwapsSignFailure, {
+        reason: standardError.message
+      });
       setStage(SwapStage.Initial);
     }
-  }, [unsignedTx, inMemoryWallet, setStage, t, posthog]);
+  }, [unsignedTx, inMemoryWallet, setStage, t, posthog, sendSuccessPosthogEvent]);
 
   // Wrapper for setTargetSlippage that persists to storage
   const setTargetSlippagePersisted = useCallback((value: number | ((prev: number) => number)) => {
