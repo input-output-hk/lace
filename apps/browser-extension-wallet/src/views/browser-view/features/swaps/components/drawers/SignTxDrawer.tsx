@@ -73,7 +73,12 @@ export const SignTxDrawer = (): React.ReactElement => {
             />
           </Flex>
         ) : (
-          <Button.CallToAction w={'$fill'} label={t('dapp.transactions.confirm.title')} onClick={handleConfirm} />
+          <Button.CallToAction
+            disabled={!password.value}
+            w={'$fill'}
+            label={t('dapp.transactions.confirm.title')}
+            onClick={handleConfirm}
+          />
         )
       }
     >
@@ -86,8 +91,8 @@ export const SignTxDrawer = (): React.ReactElement => {
           {transactionHash && <TransactionHashBox hash={transactionHash} />}
         </div>
       ) : (
-        <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch" gap="$8">
-          <Flex flexDirection="column" gap="$8" w="$fill">
+        <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch" gap="$8" h={'$fill'}>
+          <Flex flexDirection="column" gap="$8">
             <Text.SubHeading>{t('browserView.transaction.send.confirmationTitle')}</Text.SubHeading>
             <Text.Body.Normal>{t('browserView.transaction.send.signTransactionWithPassword')}</Text.Body.Normal>
           </Flex>
@@ -97,7 +102,6 @@ export const SignTxDrawer = (): React.ReactElement => {
                 event.preventDefault();
                 handleConfirm();
               }}
-              disabled={!!password.value}
               label={t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
               onChange={setPassword}
             />
