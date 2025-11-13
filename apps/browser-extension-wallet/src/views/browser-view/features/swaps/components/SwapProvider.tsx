@@ -283,6 +283,14 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
+  useEffect(() => {
+    // reset everything if the wallet changes
+    setQuantity('0.00');
+    setTokenA(null);
+    setTokenB(null);
+    setStage(SwapStage.Initial);
+  }, [addresses]);
+
   const fetchDexList = useCallback(() => {
     getDexList(t)
       .then((response) => {
