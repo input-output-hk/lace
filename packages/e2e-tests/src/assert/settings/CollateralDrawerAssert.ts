@@ -3,7 +3,6 @@ import { browser } from '@wdio/globals';
 import { t } from '../../utils/translationService';
 import CollateralDrawer from '../../elements/settings/CollateralDrawer';
 import SettingsPage from '../../elements/settings/SettingsPage';
-import { TestnetPatterns } from '../../support/patterns';
 
 class CollateralDrawerAssert {
   async assertSeeCollateralDrawer(state: 'Active' | 'Inactive') {
@@ -11,37 +10,16 @@ class CollateralDrawerAssert {
     expect(await CollateralDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );
-    await CollateralDrawer.collateralDescription.waitForDisplayed();
-    await CollateralDrawer.collateralBannerDescription.waitForDisplayed();
     await CollateralDrawer.collateralButton.waitForDisplayed();
+    await CollateralDrawer.collateralBannerDescription.waitForDisplayed({ reverse: state === 'Inactive' });
     if (state === 'Inactive') {
-      expect(await CollateralDrawer.collateralDescription.getText()).to.equal(
-        await t('browserView.settings.wallet.collateral.amountDescription')
-      );
-      expect(await CollateralDrawer.collateralBannerDescription.getText()).to.equal(
-        await t('browserView.settings.wallet.collateral.reclaimBanner')
-      );
-      await CollateralDrawer.passwordInputContainer.waitForDisplayed();
       expect(await CollateralDrawer.collateralButton.getText()).to.equal(
         await t('browserView.settings.wallet.collateral.confirm')
       );
-
-      await CollateralDrawer.transactionFeeLabel.waitForDisplayed();
-      expect(await CollateralDrawer.transactionFeeLabel.getText()).to.equal(await t('core.outputSummaryList.txFee'));
-      expect((await CollateralDrawer.transactionFeeAmount.getText()) as string).to.match(
-        TestnetPatterns.ADA_LITERAL_VALUE_REGEX
-      );
-      expect((await CollateralDrawer.transactionFeeFiat.getText()) as string).to.match(TestnetPatterns.USD_VALUE_REGEX);
     } else {
-      expect(await CollateralDrawer.collateralDescription.getText()).to.equal(
-        await t('browserView.settings.wallet.collateral.reclaimDescription')
-      );
       expect(await CollateralDrawer.collateralBannerDescription.getText()).to.equal(
         await t('browserView.settings.wallet.collateral.reclaimBanner')
       );
-      await CollateralDrawer.passwordInputContainer.waitForDisplayed({
-        reverse: true
-      });
       expect(await CollateralDrawer.collateralButton.getText()).to.equal(
         await t('browserView.settings.wallet.collateral.reclaimCollateral')
       );
@@ -50,9 +28,6 @@ class CollateralDrawerAssert {
 
   async assertSeeCollateralNotEnoughAdaDrawer() {
     await CollateralDrawer.collateralButton.waitForClickable();
-    await CollateralDrawer.passwordInputContainer.waitForClickable({
-      reverse: true
-    });
     expect(await CollateralDrawer.drawerHeaderTitle.getText()).to.equal(
       await t('browserView.settings.wallet.collateral.title')
     );

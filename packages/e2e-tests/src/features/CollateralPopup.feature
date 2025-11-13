@@ -11,7 +11,7 @@ Feature: Collateral - popup view
     Then I see collateral as: "Inactive" in settings
     When I click on "Collateral" setting
     Then all elements of Inactive collateral drawer are displayed
-    When I fill correct password and confirm collateral
+    When I click "Confirm" button on collateral drawer
     Then I see collateral as: "Active" in settings
     When I navigate to Activity popup page
     And I can see transaction 1 with type "Self Transaction"
@@ -25,10 +25,8 @@ Feature: Collateral - popup view
   Scenario: Popup View - Settings -  Collateral - state of collateral is separated and saved during network switching
     And I am on Settings popup page
     When I click on "Collateral" setting
-    And I fill correct password and confirm collateral
+    And I click "Confirm" button on collateral drawer
     Then I see collateral as: "Active" in settings
-    And I see a toast with text: "Collateral added"
-    And I close a toast message
     And I navigate to Activity popup page
     And I can see transaction 1 with type "Self Transaction"
     When I switch network to: "Preview" in popup mode
