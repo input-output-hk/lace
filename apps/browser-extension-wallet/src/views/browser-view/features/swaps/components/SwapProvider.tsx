@@ -213,15 +213,10 @@ export const SwapsProvider = (): React.ReactElement => {
     applyFeatureFlagDefaults();
   }, [swapCenterFeatureFlagPayload, isSwapsEnabled]);
 
-  useEffect(() => {
-    // reset quanitity every time we change our input token
-    setQuantity('0.00');
-  }, [tokenA, setQuantity]);
-
   const fetchEstimate = useCallback(async () => {
     // Don't fetch new estimates if we already have a built transaction
     // User should clear the transaction first if they want updated quotes
-    if (unsignedTx) return;
+    if (unsignedTx || Number(quantity) === 0) return;
     // /docs#/swap/steel_swap_swap_estimate__post
 
     const postBody = JSON.stringify(
@@ -281,7 +276,7 @@ export const SwapsProvider = (): React.ReactElement => {
   }, [estimate, fetchEstimate]);
 
   useEffect(() => {
-    if (!quantity || !tokenA || !tokenB) {
+    if (!quantity || Number(quantity) === 0 || !tokenA || !tokenB) {
       setEstimate(null);
     } else {
       fetchEstimate();

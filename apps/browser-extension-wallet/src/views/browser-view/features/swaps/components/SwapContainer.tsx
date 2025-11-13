@@ -131,7 +131,7 @@ export const SwapsContainer = (): React.ReactElement => {
         />
       );
     }
-    if (!estimate && tokenA && tokenB && quantity) {
+    if (!estimate && tokenA && tokenB && quantity && Number(quantity) > 0) {
       return <Button.CallToAction icon label={t('swaps.btn.fetchingEstimate')} w="$fill" disabled />;
     }
     return (
@@ -203,10 +203,23 @@ export const SwapsContainer = (): React.ReactElement => {
         setQuantity('0.00');
       }
     };
-    if (inputElement) inputElement.addEventListener('blur', handleBlur);
+
+    const handleFocus = () => {
+      if (quantity === '0.00') {
+        setQuantity('');
+      }
+    };
+
+    if (inputElement) {
+      inputElement.addEventListener('blur', handleBlur);
+      inputElement.addEventListener('focus', handleFocus);
+    }
 
     return () => {
-      if (inputElement) inputElement.removeEventListener('blur', handleBlur);
+      if (inputElement) {
+        inputElement.removeEventListener('blur', handleBlur);
+        inputElement.removeEventListener('focus', handleFocus);
+      }
     };
   }, [quantity, setQuantity]);
 
@@ -232,7 +245,12 @@ export const SwapsContainer = (): React.ReactElement => {
                         onChange={(e) => {
                           const changedValue = e.target.value;
                           if (!changedValue) setQuantity('');
-                          if (validateNumericValue(changedValue, { isFloat: true })) {
+                          if (
+                            validateNumericValue(changedValue, {
+                              isFloat: !!tokenA?.decimals ?? true,
+                              ...(!!tokenA?.decimals && { maxDecimals: tokenA.decimals.toString() })
+                            })
+                          ) {
                             setQuantity(changedValue);
                           }
                         }}
@@ -469,6 +487,7 @@ export const SwapsContainer = (): React.ReactElement => {
             doesWalletHaveTokens={mappedSwappableTokens?.length > 0}
             onTokenSelect={(token) => {
               setTokenA(token);
+              setQuantity('0.00');
             }}
             selectedToken={tokenA?.id}
             searchTokens={(item, value) =>
