@@ -29,7 +29,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
-import { SWAPS_TARGET_SLIPPAGE } from '@lib/scripts/types/storage';
+import { SWAPS_TARGET_SLIPPAGE, SWAPS_EXCLUDED_LIQUIDITY_SOURCES } from '@lib/scripts/types/storage';
 import { HttpStatusCode } from 'axios';
 
 export const createSteelswapApiHeaders = (): HeadersInit => ({
@@ -147,6 +147,8 @@ export const SwapsProvider = (): React.ReactElement => {
 
   // Track if slippage has been initialized to prevent feature flag from overwriting user settings
   const slippageInitializedRef = useRef(false);
+  // Track if excluded dexs have been initialized to prevent feature flag from overwriting user settings
+  const liquiditySourcesInitializedRef = useRef(false);
 
   // estimate swap
   const [estimate, setEstimate] = useState<SwapEstimateResponse | null>();
@@ -171,16 +173,38 @@ export const SwapsProvider = (): React.ReactElement => {
   useEffect(() => {
     const loadPersistedSlippage = async () => {
       try {
-        const data = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
-        const persistedValue = data[SWAPS_TARGET_SLIPPAGE];
+        const storedSlippageData = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
+        const persistedSlippageValue = storedSlippageData[SWAPS_TARGET_SLIPPAGE];
         // Validate that the stored value is a valid number
-        if (persistedValue !== undefined && typeof persistedValue === 'number' && !Number.isNaN(persistedValue)) {
-          setTargetSlippage(persistedValue);
+        if (
+          persistedSlippageValue !== undefined &&
+          typeof persistedSlippageValue === 'number' &&
+          !Number.isNaN(persistedSlippageValue)
+        ) {
+          setTargetSlippage(persistedSlippageValue);
           slippageInitializedRef.current = true;
         }
       } catch (error) {
         // If storage fails, continue with default
         logger.error('Failed to load persisted slippage:', error);
+      }
+
+      try {
+        const storedLiquiditySourcesData = await storage.local.get(SWAPS_EXCLUDED_LIQUIDITY_SOURCES);
+        const persistedLiquiditySourcesValue = storedLiquiditySourcesData[SWAPS_EXCLUDED_LIQUIDITY_SOURCES];
+
+        // Validate that the stored value is a valid number
+        if (
+          storedLiquiditySourcesData !== undefined &&
+          Array.isArray(persistedLiquiditySourcesValue) &&
+          persistedLiquiditySourcesValue.length > 0
+        ) {
+          setExcludedDexs(persistedLiquiditySourcesValue);
+          liquiditySourcesInitializedRef.current = true;
+        }
+      } catch (error) {
+        // If storage fails, continue with default
+        logger.error('Failed to load persisted excluded dexs:', error);
       }
     };
 
@@ -446,6 +470,18 @@ export const SwapsProvider = (): React.ReactElement => {
     });
   }, []);
 
+  const setExcludedDexsPersisted = useCallback((value: string[] | ((prev: string[]) => string[])) => {
+    setExcludedDexs((prev) => {
+      const newValue = typeof value === 'function' ? value(prev) : value;
+      // Persist to storage
+      storage.local.set({ [SWAPS_EXCLUDED_LIQUIDITY_SOURCES]: newValue }).catch((error) => {
+        logger.error('Failed to persist excluded dex setting:', error);
+      });
+      liquiditySourcesInitializedRef.current = true;
+      return newValue;
+    });
+  }, []);
+
   const contextValue: SwapProvider = useMemo(
     () => ({
       tokenA,
@@ -466,7 +502,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTargetSlippage: setTargetSlippagePersisted,
       signAndSubmitSwapRequest,
       excludedDexs,
-      setExcludedDexs,
+      setExcludedDexs: setExcludedDexsPersisted,
       stage,
       setStage,
       collateral,
@@ -493,7 +529,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTargetSlippagePersisted,
       signAndSubmitSwapRequest,
       excludedDexs,
-      setExcludedDexs,
+      setExcludedDexsPersisted,
       stage,
       setStage,
       collateral,

@@ -31,6 +31,7 @@ export const ABOUT_EXTENSION_KEY = 'aboutExtension';
 export const MIDNIGHT_EVENT_BANNER_KEY = 'midnightEventBanner';
 export const SWAPS_DISCLAIMER_ACKNOWLEDGED = 'swapsDisclaimerAcknowledged';
 export const SWAPS_TARGET_SLIPPAGE = 'swapsTargetSlippage';
+export const SWAPS_EXCLUDED_LIQUIDITY_SOURCES = 'swapsExcludedLiquiditySources';
 
 export interface BackgroundStorage {
   message?: Message;
