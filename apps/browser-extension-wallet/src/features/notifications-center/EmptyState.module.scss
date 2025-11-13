@@ -1,0 +1,11 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.icon {
+  width: size_unit(10.5);
+  height: size_unit(10.5);
+}
+
+.header {
+  flex-wrap: wrap;
+}

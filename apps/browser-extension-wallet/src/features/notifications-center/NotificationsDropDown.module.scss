@@ -1,0 +1,41 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/abstracts/mixins';
+
+
+.container {
+  background-color: var(--bg-color-container, #ffffff) !important;
+  border: 1px var(--light-mode-light-grey) solid !important;
+  border-radius: size_unit(2) !important;
+  box-shadow: 0 0 16px 0 rgba(167, 143, 160, 0.2);
+  margin-top: size_unit(0.5) !important;
+  max-height: 475px;
+  padding: size_unit(1) !important;
+  width: 310px;
+
+  &.isEmpty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &.popupView {
+    left: size_unit(-4);
+  }
+}
+
+.content {
+  min-height: 200px;
+  max-height: 350px;
+  overflow-y: scroll;
+  @include scroll-bar-style;
+}
+
+.notificationsListContainer {
+  background-color: var(--bg-color-container, #ffffff) !important;
+  border-radius: 0 !important;
+}
+
+.btn {
+  cursor: pointer;
+}

@@ -53,12 +53,21 @@ yarn install
 ### Setup environment variables
 
 ```sh
-cp ./apps/.env.defaults ./apps/.env
+cp ./apps/browser-extension-wallet/.env.defaults ./apps/browser-extension-wallet/.env
 ```
 
-Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION_KEY`
+Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION_KEY`, `BLOCKFROST_PROJECT_ID_PREVIEW`, `BLOCKFROST_PROJECT_ID_PREPROD`, `BLOCKFROST_PROJECT_ID_MAINNET`, `MAESTRO_PROJECT_ID_MAINNET`, and `MAESTRO_PROJECT_ID_TESTNET`.
 
-> If you want to develop DApp Explorer please refer to the [Setting up local connection with DApp Radar API](apps/browser-extension-wallet/src/views/browser-view/features/dapp/README.md) page
+> If you want to develop or test DApp Explorer please refer to the [Setting up local connection with DApp Radar API](apps/browser-extension-wallet/src/views/browser-view/features/dapp/README.md) page and update the `DAPP_RADAR_API_KEY` env variable.
+
+#### Configure Sentry for the local dev environment
+
+If you want to log errors to Sentry from you local dev environment you need to provide in your `.env` file Sentry [dsn](https://docs.sentry.io/platforms/javascript/configuration/options/#dsn) and [environment](https://docs.sentry.io/platforms/javascript/configuration/options/#environment) values.
+```
+SENTRY_DSN=<SENTRY_DSN>
+SENTRY_ENVIRONMENT=development
+```
+To get **Sentry dsn** log in to [Sentry](https://iohk-j4.sentry.io/) and go to `Settings -> Projects -> lace-extension-v1 -> Client Keys` or click [here](https://iohk-j4.sentry.io/settings/projects/lace-extension-v1/keys/).
 
 ### Build packages and extension
 

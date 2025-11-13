@@ -16,7 +16,18 @@ import {
   UnhandledError,
   WalletMode
 } from '../../types';
-import { Subject, of, BehaviorSubject, merge, map, fromEvent, Observable } from 'rxjs';
+import {
+  Subject,
+  of,
+  BehaviorSubject,
+  merge,
+  map,
+  fromEvent,
+  Observable,
+  filter,
+  withLatestFrom,
+  interval
+} from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { ActiveWallet, exposeApi } from '@cardano-sdk/web-extension';
@@ -30,6 +41,8 @@ import { logger } from '@lace/common';
 import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { initCardanoTokenPrices } from './cardanoTokenPrices';
+import { pollController$ } from '../session/poll-controller';
+import { Language } from '@lace/translation';
 
 export const requestMessage$ = new Subject<Message>();
 export const backendFailures$ = new BehaviorSubject(0);
@@ -169,6 +182,8 @@ const closeAllTabsAndOpenPopup = async () => {
 
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
 
+const handleChangeLanguage = (data: Language) => requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data });
+
 const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
@@ -180,7 +195,19 @@ const fetchAdaPrice = (coinPrices: CoinPrices) => {
     `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=cardano&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
-      const { cardano: prices } = await response.json();
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ADA price: HTTP ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Check if we have valid cardano price data
+      if (!responseData.cardano) {
+        throw new Error('Invalid ADA price response: missing cardano data');
+      }
+
+      const { cardano: prices } = responseData;
       // save the last fetched ada price in background storage
       await setBackgroundStorage({
         fiatPrices: {
@@ -222,8 +249,20 @@ const fetchBitcoinPrice = (coinPrices: CoinPrices) => {
     `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?ids=bitcoin&vs_currencies=${vsCurrencies}&include_24hr_change=true`
   )
     .then(async (response) => {
-      const { bitcoin: prices } = await response.json();
-      // save the last fetched ada price in background storage
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Bitcoin price: HTTP ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Check if we have valid bitcoin price data
+      if (!responseData.bitcoin) {
+        throw new Error('Invalid Bitcoin price response: missing bitcoin data');
+      }
+
+      const { bitcoin: prices } = responseData;
+      // save the last fetched bitcoin price in background storage
       await setBackgroundStorage({
         fiatBitcoinPrices: {
           prices,
@@ -296,8 +335,15 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
     fetchAdaPrice(coinPrices);
     fetchBitcoinPrice(coinPrices);
   };
+  // Fetch the prices initially, regardless of the session status
   updatePrices();
-  setInterval(updatePrices, ADA_PRICE_CHECK_INTERVAL);
+  // Fetch the prices periodically, only if the session is active
+  interval(ADA_PRICE_CHECK_INTERVAL)
+    .pipe(
+      withLatestFrom(pollController$),
+      filter(([, isActive]) => isActive)
+    )
+    .subscribe(updatePrices);
 
   exposeApi<BackgroundService>(
     {
@@ -309,6 +355,7 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
         migrationState$,
         coinPrices,
         handleChangeTheme,
+        handleChangeLanguage,
         handleChangeMode,
         clearBackgroundStorage,
         getBackgroundStorage,

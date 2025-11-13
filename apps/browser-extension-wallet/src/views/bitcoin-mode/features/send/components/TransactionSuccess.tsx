@@ -42,7 +42,7 @@ export const TransactionSuccess: React.FC<TransactionSuccessProps> = ({
                 <SummaryExpander
                   onClick={() => setIsSummaryOpen(!isSummaryOpen)}
                   open={isSummaryOpen}
-                  title="Transaction hash"
+                  title={t('generic.transactionHash')}
                   plain
                 >
                   <Flex justifyContent="center">

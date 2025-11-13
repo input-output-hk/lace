@@ -3,6 +3,7 @@ import { themes } from '@providers/ThemeProvider';
 import { BackgroundStorage, MigrationState } from './storage';
 import { CoinPrices } from './prices';
 import type { clearBackgroundStorage } from '../background/storage';
+import { Language } from '@lace/translation';
 
 export enum BaseChannels {
   BACKGROUND_ACTIONS = 'background-actions'
@@ -31,7 +32,8 @@ export enum MessageTypes {
   HTTP_CONNECTION = 'http-connnection',
   WS_CONNECTION = 'ws-connnection',
   OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings',
-  CHANGE_MODE = 'change-mode'
+  CHANGE_MODE = 'change-mode',
+  CHANGE_LANGUAGE = 'change-language'
 }
 
 export enum BrowserViewSections {
@@ -84,12 +86,22 @@ interface ChangeMode {
   type: MessageTypes.CHANGE_MODE;
   data: ChangeModeData;
 }
+interface ChangeThemeMessage {
+  type: MessageTypes.CHANGE_THEME;
+  data: ChangeThemeData;
+}
+
+interface ChangeLanguageMessage {
+  type: MessageTypes.CHANGE_LANGUAGE;
+  data: Language;
+}
 export type Message =
   | ChangeThemeMessage
   | HTTPConnectionMessage
   | WSConnectionMessage
   | OpenBrowserMessage
-  | ChangeMode;
+  | ChangeMode
+  | ChangeLanguageMessage;
 
 export type UnhandledError = {
   type: 'error' | 'unhandledrejection';
@@ -104,6 +116,7 @@ export type BackgroundService = {
   migrationState$: BehaviorSubject<MigrationState | undefined>;
   coinPrices: CoinPrices;
   handleChangeTheme: (data: ChangeThemeData) => void;
+  handleChangeLanguage: (data: Language) => void;
   handleChangeMode: (data: ChangeModeData) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;

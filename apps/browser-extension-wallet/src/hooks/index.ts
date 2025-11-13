@@ -26,3 +26,4 @@ export * from './useActionExecution';
 export * from './useCustomSubmitApi';
 export * from './useCurrentWallet';
 export * from './useHasEnoughCollateral';
+export * from './useLMP';

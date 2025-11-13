@@ -13,6 +13,7 @@ import { useAnalyticsContext, useBackgroundServiceAPIContext, useTheme } from '@
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useTranslation } from 'react-i18next';
 import { BrowserViewSections } from '@lib/scripts/types';
+import { NotificationsBellContainer } from '@src/features/notifications-center/NotificationsBellContainer';
 
 export const MainHeader = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -59,6 +60,7 @@ export const MainHeader = (): React.ReactElement => {
             label={t('expandPopup')}
             onClick={() => backgroundServices.handleOpenBrowser({ section: locationBrowserSection[location.pathname] })}
           />
+          <NotificationsBellContainer popupView />
           <DropdownMenu isPopup />
         </div>
       </div>

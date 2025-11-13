@@ -3,7 +3,7 @@
 /* eslint-disable complexity */
 /* eslint-disable sonarjs/cognitive-complexity */
 import { useCallback, useMemo } from 'react';
-import { Wallet } from '@lace/cardano';
+import { Wallet, DerivationType } from '@lace/cardano';
 import { EnvironmentTypes, useWalletStore } from '@stores';
 import { useAppSettingsContext } from '@providers/AppSettings';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
@@ -44,6 +44,7 @@ import { deepEquals, HexBlob } from '@cardano-sdk/util';
 import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
+import { useLMP } from '@hooks/useLMP';
 import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
@@ -94,6 +95,7 @@ export type ExtendedAccountPublicKeyParams = {
   accountIndex: number;
   passphrase?: Uint8Array;
   purpose?: KeyManagement.KeyPurpose;
+  derivationType?: DerivationType;
 };
 
 export type CreateWalletParamsBase = {
@@ -156,6 +158,7 @@ type WalletManagerAddAccountProps = {
   metadata: Wallet.AccountMetadata;
   accountIndex: number;
   passphrase?: Uint8Array;
+  derivationType?: DerivationType;
 };
 
 type ActivateWalletProps = Omit<WalletManagerActivateProps, 'chainId'>;
@@ -164,6 +167,7 @@ type CreateHardwareWalletRevampedParams = {
   accountIndexes: number[];
   name: string;
   connection: Wallet.HardwareWalletConnection;
+  derivationType?: DerivationType;
 };
 
 type CreateHardwareWalletRevamped = (params: CreateHardwareWalletRevampedParams) => Promise<Wallet.CardanoWallet>;
@@ -251,7 +255,8 @@ const getExtendedAccountPublicKey = async ({
   wallet,
   accountIndex,
   passphrase,
-  purpose = KeyManagement.KeyPurpose.STANDARD
+  purpose = KeyManagement.KeyPurpose.STANDARD,
+  derivationType
 }: ExtendedAccountPublicKeyParams) => {
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (wallet.type) {
@@ -280,7 +285,8 @@ const getExtendedAccountPublicKey = async ({
       return await Wallet.getHwExtendedAccountPublicKey({
         walletType: wallet.type,
         accountIndex,
-        purpose
+        purpose,
+        derivationType
       });
   }
 };
@@ -354,7 +360,7 @@ export const connectHardwareWallet = async (model: Wallet.HardwareWallets): Prom
   await Wallet.connectDevice(model);
 
 const connectHardwareWalletRevamped = async (usbDevice: USBDevice): Promise<Wallet.HardwareWalletConnection> =>
-  Wallet.connectDeviceRevamped(usbDevice);
+  await Wallet.connectDeviceRevamped(usbDevice);
 
 // eslint-disable-next-line max-statements
 export const useWalletManager = (): UseWalletManager => {
@@ -391,6 +397,7 @@ export const useWalletManager = (): UseWalletManager => {
     const storedChain = getValueFromLocalStorage('appSettings');
     return (storedChain?.chainName && chainIdFromName(storedChain.chainName)) || DEFAULT_CHAIN_ID;
   }, [currentChain]);
+  const { midnightWallets, switchToLMP } = useLMP();
 
   const getWalletInfo = useCallback(async (): Promise<Wallet.WalletDisplayInfo | undefined> => {
     const { activeBlockchain } = await backgroundService.getBackgroundStorage();
@@ -418,7 +425,7 @@ export const useWalletManager = (): UseWalletManager => {
   }, [backgroundService]);
 
   const createHardwareWalletRevamped = useCallback<CreateHardwareWalletRevamped>(
-    async ({ accountIndexes, connection, name }) => {
+    async ({ accountIndexes, connection, name, derivationType = 'ICARUS' }) => {
       const accounts: Bip32WalletAccount<Wallet.AccountMetadata>[] = [];
       for (const accountIndex of accountIndexes) {
         let extendedAccountPublicKey;
@@ -426,7 +433,8 @@ export const useWalletManager = (): UseWalletManager => {
           extendedAccountPublicKey = await Wallet.getHwExtendedAccountPublicKey({
             walletType: connection.type,
             accountIndex,
-            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined
+            ledgerConnection: connection.type === WalletType.Ledger ? connection.value : undefined,
+            derivationType
           });
         } catch (error: unknown) {
           throw error;
@@ -439,7 +447,7 @@ export const useWalletManager = (): UseWalletManager => {
       }
 
       const addWalletProps: AddWalletProps<Wallet.WalletMetadata, Wallet.AccountMetadata> = {
-        metadata: { name, lastActiveAccountIndex: accountIndexes[0] },
+        metadata: { name, lastActiveAccountIndex: accountIndexes[0], trezorConfig: { derivationType } },
         type: connection.type,
         accounts
       };
@@ -1115,6 +1123,10 @@ export const useWalletManager = (): UseWalletManager => {
       for (const network of [BtcWallet.Network.Mainnet, BtcWallet.Network.Testnet]) {
         await bitcoinWalletManager.destroyData(walletToDelete.walletId, network);
       }
+
+      if (midnightWallets && midnightWallets?.length > 0) {
+        switchToLMP();
+      }
     },
     [
       resetWalletLock,
@@ -1125,7 +1137,9 @@ export const useWalletManager = (): UseWalletManager => {
       clearAddressBook,
       clearNftsFolders,
       getCurrentChainId,
-      activateWallet
+      activateWallet,
+      midnightWallets,
+      switchToLMP
     ]
   );
 
@@ -1269,11 +1283,14 @@ export const useWalletManager = (): UseWalletManager => {
       if (wallet.type === WalletType.Script) throw new Error('Xpub keys not available for shared wallet');
 
       const accountIndex = 0;
+      // Respect wallet derivation type (e.g. ICARUS_TREZOR) when deriving shared wallet keys
+      const derivationType = wallet.metadata?.trezorConfig?.derivationType;
       const bip32AccountPublicKey = await getExtendedAccountPublicKey({
         wallet,
         accountIndex,
         passphrase,
-        purpose: KeyManagement.KeyPurpose.MULTI_SIG
+        purpose: KeyManagement.KeyPurpose.MULTI_SIG,
+        derivationType
       });
       return Wallet.Cardano.Cip1854ExtendedAccountPublicKey.fromBip32PublicKeyHex(bip32AccountPublicKey);
     },
@@ -1386,8 +1403,22 @@ export const useWalletManager = (): UseWalletManager => {
   );
 
   const addAccount = useCallback(
-    async ({ wallet, accountIndex, metadata, passphrase }: WalletManagerAddAccountProps): Promise<void> => {
-      const extendedAccountPublicKey = await getExtendedAccountPublicKey({ wallet, accountIndex, passphrase });
+    async ({
+      wallet,
+      accountIndex,
+      metadata,
+      passphrase,
+      derivationType
+    }: WalletManagerAddAccountProps): Promise<void> => {
+      // Get derivation type from wallet metadata if not provided
+      const walletDerivationType = derivationType || wallet.metadata?.trezorConfig?.derivationType;
+
+      const extendedAccountPublicKey = await getExtendedAccountPublicKey({
+        wallet,
+        accountIndex,
+        passphrase,
+        derivationType: walletDerivationType
+      });
       await walletRepository.addAccount({
         accountIndex,
         extendedAccountPublicKey,

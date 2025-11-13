@@ -8,6 +8,8 @@ import {
   Links,
   LockWallet,
   NetworkChoise,
+  LanguageChoice,
+  LanguageInfo,
   RenameWalletDrawer,
   Separator,
   SettingsLink,
@@ -33,8 +35,9 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { useBackgroundServiceAPIContext } from '@providers';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
-import { useCurrentWallet, useWalletManager } from '@hooks';
+import { useCurrentWallet, useWalletManager, useLMP } from '@hooks';
 import { useCurrentBlockchain } from '@src/multichain';
+import { AddNewMidnightWalletLink } from './components/AddNewMidnightWalletLink';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -44,7 +47,7 @@ interface Props extends MenuProps {
   open: boolean;
 }
 
-// eslint-disable-next-line complexity
+// eslint-disable-next-line complexity, max-statements
 export const DropdownMenuOverlay: VFC<Props> = ({
   isPopup,
   lockWalletButton = <LockWallet />,
@@ -59,9 +62,11 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const { walletRepository } = useWalletManager();
   const currentWallet = useCurrentWallet();
   const wallets = useObservable(walletRepository.wallets$);
+  const { midnightWallets } = useLMP();
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
   const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
+  const midnightWalletsEnabled = posthog?.isFeatureFlagEnabled('midnight-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
   const { blockchain } = useCurrentBlockchain();
@@ -93,6 +98,11 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const handleNetworkChoise = () => {
     setCurrentSection(Sections.NetworkInfo);
     sendAnalyticsEvent(PostHogAction.UserWalletProfileNetworkClick);
+  };
+
+  const handleLanguageChoice = () => {
+    setCurrentSection(Sections.Language);
+    sendAnalyticsEvent(PostHogAction.UserWalletProfileLanguageClick);
   };
 
   const goBackToMainSection = useCallback(() => setCurrentSection(Sections.Main), []);
@@ -128,11 +138,12 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     [isPopup, walletType]
   );
 
-  const hasLinkedSharedWallet = wallets?.some(
-    (w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet.walletId
-  );
+  const hasLinkedSharedWallet =
+    !isBitcoinWallet &&
+    wallets?.some((w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet?.walletId);
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
   const showAddBitcoinWalletLink = bitcoinWalletsEnabled;
+  const showAddMidnightWalletLink = midnightWalletsEnabled && midnightWallets && midnightWallets.length === 0;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';
@@ -188,6 +199,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
             )}
             {!isBitcoinWallet && showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
             {showAddBitcoinWalletLink && <AddNewBitcoinWalletLink isPopup={isPopup} />}
+            {showAddMidnightWalletLink && <AddNewMidnightWalletLink />}
             {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />
             <Separator />
@@ -204,6 +216,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
                 />
               </div>
             )}
+            <LanguageChoice onClick={handleLanguageChoice} />
             <NetworkChoise onClick={handleNetworkChoise} />
             {lockWalletButton && (
               <>
@@ -214,6 +227,7 @@ export const DropdownMenuOverlay: VFC<Props> = ({
         </div>
       )}
       {currentSection === Sections.NetworkInfo && <NetworkInfo onBack={goBackToMainSection} />}
+      {currentSection === Sections.Language && <LanguageInfo onBack={goBackToMainSection} />}
       {currentSection === Sections.WalletAccounts && <WalletAccounts onBack={goBackToMainSection} isPopup={isPopup} />}
       {isRenamingWallet && (
         <RenameWalletDrawer open={isRenamingWallet} popupView={isPopup} onClose={() => setIsRenamingWallet(false)} />

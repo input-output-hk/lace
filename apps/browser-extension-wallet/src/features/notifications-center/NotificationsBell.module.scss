@@ -1,0 +1,32 @@
+@import '../../../../../packages/core/src/ui/styles/theme.scss';
+@import '../../../../../packages/common/src/ui/styles/theme.scss';
+
+.badge {
+  position: absolute;
+  top: size_unit(-2);
+  right: size_unit(-2);
+  background: #7f5af0;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 2px;
+  font-size: size_unit(1.5);
+  font-weight: bold;
+  min-width: size_unit(2.5);
+  height: size_unit(2.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Proxima Nova', Arial, Helvetica, sans-serif;
+}
+
+.btn {
+  max-width: size_unit(6);
+  min-width: size_unit(6) !important;
+  padding: size_unit(1) size_unit(2.75) !important;
+  position: relative;
+}
+
+.icon {
+  width: size_unit(2);
+  height: size_unit(2);
+}

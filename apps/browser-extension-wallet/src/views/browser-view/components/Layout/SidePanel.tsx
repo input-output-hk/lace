@@ -9,6 +9,7 @@ import styles from './SectionLayout.modules.scss';
 import { SidePanelButton } from '../SidePanelButton/SidePanelButton';
 import { CollapsiblePanelContainer } from '../CollapsiblePanelContainer/CollapsiblePanelContainer';
 import { BREAKPOINT_SMALL } from '@src/styles/constants';
+import { NotificationsBellContainer } from '@src/features/notifications-center';
 
 export const CONTENT_ID = 'content';
 
@@ -65,6 +66,7 @@ export const SidePanel = ({ sidePanelContent, isSidePanelFixed = true }: Section
       })}
     >
       <TransactionCTAsBox />
+      <NotificationsBellContainer />
       <DropdownMenu />
       {!!sidePanelContent && isScreenTooSmallForSidePanel && (
         <SidePanelButton active={isPanelVisible} onClick={toggleSidePanelVisibility} />

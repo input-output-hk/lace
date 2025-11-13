@@ -21,6 +21,7 @@ const mockLedgerGetXpub = jest.fn();
 const mockTrezorGetXpub = jest.fn();
 const mockInitializeTrezorTransport = jest.fn();
 const mockLedgerCreateWithDevice = jest.fn();
+const mockUseLMP = jest.fn();
 const mockUseAppSettingsContext = jest.fn().mockReturnValue([{}, jest.fn()]);
 const mockUseSecrets = {
   password: {} as Partial<Password>,
@@ -116,6 +117,11 @@ jest.mock('@providers/AnalyticsProvider/getUserIdService', () => {
   };
 });
 
+jest.mock('@hooks/useLMP', () => ({
+  __esModule: true,
+  useLMP: mockUseLMP
+}));
+
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
   ({ children }: { children: React.ReactNode }) =>
@@ -153,6 +159,7 @@ const walletDisplayInfoMockData = {
 describe('Testing useWalletManager hook', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    mockUseLMP.mockReturnValue({ midnightWallets: [], switchToLMP: jest.fn() });
     jest.spyOn(AppSettings, 'useAppSettingsContext').mockReturnValue([{}, jest.fn()]);
     jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({}));
   });
@@ -853,7 +860,7 @@ describe('Testing useWalletManager hook', () => {
                 '8403cf9d8267a7169381dd476f4fda48e1926fec8942ec51892e428e152fbed4835711cccb7efcae379627f477abb46c883f6b0c221f3aea40f9d931d2e8fdc69f85f16eb91ca380fc2e1edc2543e4dd71c1866208ea6c6960bca99f974e25776067e9a242b0e4066b96bd4d89ca99db5bd77bb65573b9cbeef85222ceed6d5a4dc516213ace986f03b183365505119b9a0abdc4375bfdf2363d7433'
             }
           },
-          passphrase: Buffer.from('passphrase1'),
+          passphrase: new Uint8Array(Buffer.from('passphrase1')),
           prepare: () => {
             mockEmip3decrypt.mockImplementationOnce(
               jest.requireActual('@lace/cardano').Wallet.KeyManagement.emip3decrypt
@@ -885,6 +892,10 @@ describe('Testing useWalletManager hook', () => {
           walletType: 'InMemory'
         });
         walletApiUi.walletRepository.updateWalletMetadata = jest.fn().mockResolvedValueOnce(void 0);
+        // Mock the observables required by activateWallet
+        walletApiUi.walletManager.activeWalletId$ = of({ walletId: 'otherId' } as WalletManagerActivateProps<any, any>);
+        walletApiUi.bitcoinWalletManager.activeWalletId$ = of(null);
+        (walletApiUi.walletManager as any).activate = jest.fn().mockResolvedValue(undefined);
       });
 
       it.each(walletTypes)(

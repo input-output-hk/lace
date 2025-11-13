@@ -10,6 +10,7 @@ import {
   sx,
 } from '@input-output-hk/lace-ui-toolkit';
 import { toast } from '@lace/common';
+import cn from 'classnames';
 import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styles from './SharedWalletEntry.module.scss';
@@ -128,9 +129,12 @@ export const SharedWalletEntry = ({
           </Text.Heading>
           <Box mt="$8">
             <Text.Body.Normal
-              className={sx({
-                color: '$text_secondary',
-              })}
+              className={cn(
+                styles.heading,
+                sx({
+                  color: '$text_secondary',
+                }),
+              )}
               weight="$semibold"
               data-testid="shared-wallet-setup-subtitle"
             >

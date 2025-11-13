@@ -13,9 +13,11 @@ export enum ExperimentName {
   DAPP_EXPLORER = 'dapp-explorer',
   SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',
   BITCOIN_WALLETS = 'bitcoin-wallets',
+  MIDNIGHT_WALLETS = 'midnight-wallets',
   NFTPRINTLAB = 'nftprintlab',
   GLACIER_DROP = 'glacier-drop',
-  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market'
+  MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
+  NOTIFICATIONS_CENTER = 'notifications-center'
 }
 
 export type FeatureFlag = `${ExperimentName}`;

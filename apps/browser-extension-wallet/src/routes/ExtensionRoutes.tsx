@@ -15,12 +15,15 @@ import { NftDetail, Nfts } from '@src/features/nfts';
 import { useWalletStore } from '@stores';
 import { config } from '@src/config';
 import { Voting } from '@src/features/voting-beta/components';
+import { NotificationsCenter, NotificationDetailsContainer } from '@src/features/notifications-center';
+import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
 
 const { GOV_TOOLS_URLS } = config();
 
 export const ExtensionRoutes = (): React.ReactElement => {
   const { isSharedWallet, environmentName } = useWalletStore();
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
+  const { isNotificationsCenterEnabled } = useNotificationsCenterConfig();
 
   return (
     <MainLayout>
@@ -30,6 +33,12 @@ export const ExtensionRoutes = (): React.ReactElement => {
         <Route exact path={walletRoutePaths.activity} component={Activity} />
         <Route exact path={walletRoutePaths.send} component={Send} />
         <Route exact path={walletRoutePaths.nftDetail} component={NftDetail} />
+        {isNotificationsCenterEnabled && (
+          <Route exact path={walletRoutePaths.notifications} component={NotificationsCenter} />
+        )}
+        {isNotificationsCenterEnabled && (
+          <Route exact path={walletRoutePaths.notification} component={NotificationDetailsContainer} />
+        )}
         {!isSharedWallet && <Route exact path={walletRoutePaths.earn} component={DelegationContainer} />}
         <Route exact path={walletRoutePaths.addressBook} component={AddressBook} />
         <Route exact path={walletRoutePaths.settings} component={Settings} />

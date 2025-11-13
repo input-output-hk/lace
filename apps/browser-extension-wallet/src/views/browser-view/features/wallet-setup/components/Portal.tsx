@@ -20,9 +20,9 @@ export const Portal = ({ children }: PortalProps): React.ReactElement => {
   const { pathname } = useLocation<{ pathname: string }>();
 
   return (
-    <>
+    <div className={styles.portalContainer}>
       <img className={styles.portal} src={portalPerRouteMap[pathname] || portal2} />
-      {children}
-    </>
+      <div className={styles.portalContent}>{children}</div>
+    </div>
   );
 };
