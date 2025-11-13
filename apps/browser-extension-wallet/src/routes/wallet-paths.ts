@@ -50,7 +50,7 @@ export const walletRoutePaths = {
     allDone: '/nami/migration/all-done',
     hwFlow: '/nami/nami-mode/hwTab'
   },
-  swaps: '/swaps'
+  swap: '/swap'
 };
 
 export const dAppRoutePaths = {

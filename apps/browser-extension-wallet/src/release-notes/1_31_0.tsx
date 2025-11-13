@@ -14,7 +14,7 @@ const ReleaseNote_1_31_0 = (): React.ReactElement => (
       <li>
         <strong>Bitcoin general availability</strong>
       </li>
-      <li>Bitcoin wallets are now out of beta.</li>
+      <li>Bitcoin wallets are now out of beta, and we're incrementally rolling out availability</li>
     </ul>
     <p>
       <strong>Improvements</strong>

@@ -29,7 +29,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
-import { SWAPS_TARGET_SLIPPAGE } from '@lib/scripts/types/storage';
+import { SWAPS_TARGET_SLIPPAGE, SWAPS_EXCLUDED_LIQUIDITY_SOURCES } from '@lib/scripts/types/storage';
 import { HttpStatusCode } from 'axios';
 
 export const createSteelswapApiHeaders = (): HeadersInit => ({
@@ -60,6 +60,13 @@ export const getSwappableTokensList = async (): Promise<TokenListFetchResponse[]
   return (await response.json()) as TokenListFetchResponse[];
 };
 
+const getFormattedQuantity = (quantity: string, decimals?: number) => {
+  if (decimals) {
+    return Number(quantity) * Math.pow(10, decimals);
+  }
+  return quantity;
+};
+
 export const createSwapRequestBody = ({
   tokenA,
   tokenB,
@@ -68,10 +75,12 @@ export const createSwapRequestBody = ({
   address,
   targetSlippage,
   collateral,
-  utxos
+  utxos,
+  decimals
 }: CreateSwapRequestBodySwaps): BuildSwapProps | BaseEstimate => {
   // Estimate
-  const quantityValue = tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : quantity;
+  const quantityValue =
+    tokenA === 'lovelace' ? convertAdaQuantityToLovelace(quantity) : getFormattedQuantity(quantity, decimals);
   const quantityNumber = Number(quantityValue);
   if (Number.isNaN(quantityNumber)) {
     throw new TypeError(`Invalid quantity value: ${quantityValue}`);
@@ -125,7 +134,7 @@ export const SwapsProvider = (): React.ReactElement => {
   // swaps interface
   const [tokenA, setTokenA] = useState<DropdownList>();
   const [tokenB, setTokenB] = useState<TokenListFetchResponse>();
-  const [quantity, setQuantity] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('0.00');
   const [dexTokenList, setDexTokenList] = useState<TokenListFetchResponse[]>([]);
   const [stage, setStage] = useState<SwapStage>(SwapStage.Initial);
 
@@ -138,6 +147,8 @@ export const SwapsProvider = (): React.ReactElement => {
 
   // Track if slippage has been initialized to prevent feature flag from overwriting user settings
   const slippageInitializedRef = useRef(false);
+  // Track if excluded dexs have been initialized to prevent feature flag from overwriting user settings
+  const liquiditySourcesInitializedRef = useRef(false);
 
   // estimate swap
   const [estimate, setEstimate] = useState<SwapEstimateResponse | null>();
@@ -162,16 +173,38 @@ export const SwapsProvider = (): React.ReactElement => {
   useEffect(() => {
     const loadPersistedSlippage = async () => {
       try {
-        const data = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
-        const persistedValue = data[SWAPS_TARGET_SLIPPAGE];
+        const storedSlippageData = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
+        const persistedSlippageValue = storedSlippageData[SWAPS_TARGET_SLIPPAGE];
         // Validate that the stored value is a valid number
-        if (persistedValue !== undefined && typeof persistedValue === 'number' && !Number.isNaN(persistedValue)) {
-          setTargetSlippage(persistedValue);
+        if (
+          persistedSlippageValue !== undefined &&
+          typeof persistedSlippageValue === 'number' &&
+          !Number.isNaN(persistedSlippageValue)
+        ) {
+          setTargetSlippage(persistedSlippageValue);
           slippageInitializedRef.current = true;
         }
       } catch (error) {
         // If storage fails, continue with default
         logger.error('Failed to load persisted slippage:', error);
+      }
+
+      try {
+        const storedLiquiditySourcesData = await storage.local.get(SWAPS_EXCLUDED_LIQUIDITY_SOURCES);
+        const persistedLiquiditySourcesValue = storedLiquiditySourcesData[SWAPS_EXCLUDED_LIQUIDITY_SOURCES];
+
+        // Validate that the stored value is a valid number
+        if (
+          storedLiquiditySourcesData !== undefined &&
+          Array.isArray(persistedLiquiditySourcesValue) &&
+          persistedLiquiditySourcesValue.length > 0
+        ) {
+          setExcludedDexs(persistedLiquiditySourcesValue);
+          liquiditySourcesInitializedRef.current = true;
+        }
+      } catch (error) {
+        // If storage fails, continue with default
+        logger.error('Failed to load persisted excluded dexs:', error);
       }
     };
 
@@ -207,7 +240,7 @@ export const SwapsProvider = (): React.ReactElement => {
   const fetchEstimate = useCallback(async () => {
     // Don't fetch new estimates if we already have a built transaction
     // User should clear the transaction first if they want updated quotes
-    if (unsignedTx) return;
+    if (unsignedTx || Number(quantity) === 0) return;
     // /docs#/swap/steel_swap_swap_estimate__post
 
     const postBody = JSON.stringify(
@@ -215,7 +248,8 @@ export const SwapsProvider = (): React.ReactElement => {
         tokenA: tokenA.id,
         tokenB: tokenB.policyId + tokenB.policyName,
         quantity,
-        ignoredDexs: excludedDexs
+        ignoredDexs: excludedDexs,
+        decimals: tokenA.decimals
       })
     );
     if (tokenA && tokenB && quantity) {
@@ -226,6 +260,7 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       if (!response.ok) {
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
+        setQuantity('0.00');
         throw new Error('Unexpected response');
       }
       posthog.sendEvent(PostHogAction.SwapsFetchEstimate, {
@@ -249,7 +284,7 @@ export const SwapsProvider = (): React.ReactElement => {
       }
       setEstimate(parsedResponse);
     }
-  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog]);
+  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setQuantity]);
 
   useEffect(() => {
     let id: NodeJS.Timeout | undefined;
@@ -266,12 +301,25 @@ export const SwapsProvider = (): React.ReactElement => {
   }, [estimate, fetchEstimate]);
 
   useEffect(() => {
-    if (!quantity || !tokenA || !tokenB) {
+    if (!quantity || Number(quantity) === 0 || !tokenA || !tokenB) {
       setEstimate(null);
     } else {
       fetchEstimate();
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
+
+  const resetSwapState = useCallback(() => {
+    setQuantity('0.00');
+    setTokenA(null);
+    setTokenB(null);
+    setStage(SwapStage.Initial);
+    setUnsignedTx(null);
+  }, [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]);
+
+  useEffect(() => {
+    // reset everything if the wallet changes
+    resetSwapState();
+  }, [addresses, resetSwapState]);
 
   const fetchDexList = useCallback(() => {
     getDexList(t)
@@ -312,7 +360,8 @@ export const SwapsProvider = (): React.ReactElement => {
           address: addresses?.[0]?.address,
           targetSlippage,
           collateral,
-          utxos
+          utxos,
+          decimals: tokenA.decimals
         })
       );
 
@@ -396,6 +445,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTransactionHash(txId.toString());
       sendSuccessPosthogEvent();
       setStage(SwapStage.Success);
+      resetSwapState();
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
@@ -405,7 +455,7 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       setStage(SwapStage.Initial);
     }
-  }, [unsignedTx, inMemoryWallet, setStage, t, posthog, sendSuccessPosthogEvent]);
+  }, [unsignedTx, inMemoryWallet, setStage, t, posthog, sendSuccessPosthogEvent, resetSwapState]);
 
   // Wrapper for setTargetSlippage that persists to storage
   const setTargetSlippagePersisted = useCallback((value: number | ((prev: number) => number)) => {
@@ -416,6 +466,18 @@ export const SwapsProvider = (): React.ReactElement => {
         logger.error('Failed to persist slippage setting:', error);
       });
       slippageInitializedRef.current = true;
+      return newValue;
+    });
+  }, []);
+
+  const setExcludedDexsPersisted = useCallback((value: string[] | ((prev: string[]) => string[])) => {
+    setExcludedDexs((prev) => {
+      const newValue = typeof value === 'function' ? value(prev) : value;
+      // Persist to storage
+      storage.local.set({ [SWAPS_EXCLUDED_LIQUIDITY_SOURCES]: newValue }).catch((error) => {
+        logger.error('Failed to persist excluded dex setting:', error);
+      });
+      liquiditySourcesInitializedRef.current = true;
       return newValue;
     });
   }, []);
@@ -440,7 +502,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTargetSlippage: setTargetSlippagePersisted,
       signAndSubmitSwapRequest,
       excludedDexs,
-      setExcludedDexs,
+      setExcludedDexs: setExcludedDexsPersisted,
       stage,
       setStage,
       collateral,
@@ -467,7 +529,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTargetSlippagePersisted,
       signAndSubmitSwapRequest,
       excludedDexs,
-      setExcludedDexs,
+      setExcludedDexsPersisted,
       stage,
       setStage,
       collateral,

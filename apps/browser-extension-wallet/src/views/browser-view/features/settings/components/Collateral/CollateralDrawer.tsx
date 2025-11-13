@@ -63,7 +63,7 @@ export const CollateralDrawer = ({
   const readyToOperate = !isWalletSyncingForTheFirstTime && unspendableLoaded;
 
   const autoSetCollateralWithoutTx = useCallback(() => {
-    inMemoryWallet.utxo
+    inMemoryWallet?.utxo
       .setUnspendable(pureUtxoWithEnoughCoinToUseForCollateral)
       .then(() => onClose())
       .catch(() =>
@@ -71,7 +71,7 @@ export const CollateralDrawer = ({
           currentSection: Sections.FAIL_TX
         })
       );
-  }, [pureUtxoWithEnoughCoinToUseForCollateral, inMemoryWallet.utxo, setSection, onClose]);
+  }, [pureUtxoWithEnoughCoinToUseForCollateral, inMemoryWallet?.utxo, setSection, onClose]);
 
   const handleClose = useCallback(async () => {
     sendAnalyticsEvent(PostHogAction.SettingsCollateralXClick);
@@ -95,7 +95,7 @@ export const CollateralDrawer = ({
 
   // handle drawer states for inMemory(non-hardware) wallets
   useEffect(() => {
-    if (!isInMemoryWallet || !readyToOperate || !inMemoryWallet.utxo) return;
+    if (!isInMemoryWallet || !readyToOperate || !inMemoryWallet?.utxo) return;
     if (hasCollateral) {
       setSection({ currentSection: Sections.RECLAIM });
     } else {
@@ -109,7 +109,7 @@ export const CollateralDrawer = ({
     setSection,
     readyToOperate,
     pureUtxoWithEnoughCoinToUseForCollateral,
-    inMemoryWallet.utxo
+    inMemoryWallet?.utxo
   ]);
 
   // handle drawer states for hw

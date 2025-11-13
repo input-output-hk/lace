@@ -84,7 +84,7 @@ export enum MenuItemList {
   STAKING = 'staking',
   DAPPS = 'dapps',
   VOTING = 'voting',
-  SWAPS = 'swaps'
+  SWAP = 'swap'
 }
 
 export const POPUP_WINDOW = {

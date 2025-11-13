@@ -91,7 +91,7 @@
 .swapTokenIcon {
   border-radius: 100%;
   padding: size_unit(1);
-  background-color: 'white';
+  background-color: var(--bg-color-body);
   display: flex;
   justify-content: center;
 }

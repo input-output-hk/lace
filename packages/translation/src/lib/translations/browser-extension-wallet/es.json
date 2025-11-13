@@ -382,6 +382,7 @@
   "browserView.sideMenu.links.addressBook": "Agenda",
   "browserView.sideMenu.links.addSharedWallet": "Agregar billetera compartida",
   "browserView.sideMenu.links.dappExplorer": "DApps",
+  "browserView.sideMenu.links.swapsCenter": "Intercambio",
   "browserView.sideMenu.links.general": "General",
   "browserView.sideMenu.links.nfts": "NFTs",
   "browserView.sideMenu.links.staking": "staking",
