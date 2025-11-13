@@ -11,7 +11,7 @@ export const CollateralFooterAutoSet = ({ handleAutoSetCollateral }: AutoSetFoot
   const { t } = useTranslation();
   return (
     <Button
-      data-testid="collateral-autoset-confirmation-btn"
+      data-testid="collateral-confirmation-btn"
       block
       className={styles.confirmBtn}
       size="large"

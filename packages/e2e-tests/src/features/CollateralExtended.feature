@@ -11,7 +11,7 @@ Feature: Collateral - extended view
     Then I see collateral as: "Inactive" in settings
     When I click on "Collateral" setting
     Then all elements of Inactive collateral drawer are displayed
-    When I fill correct password and confirm collateral
+    When I click "Confirm" button on collateral drawer
     Then I see collateral as: "Active" in settings
     And valid password is not in snapshot
     When I navigate to Activity extended page
@@ -26,7 +26,7 @@ Feature: Collateral - extended view
   Scenario: Extended View - Settings -  Collateral - state of collateral is separated and saved during network switching
     And I am on Settings extended page
     When I click on "Collateral" setting
-    And I fill correct password and confirm collateral
+    And I click "Confirm" button on collateral drawer
     Then I see collateral as: "Active" in settings
     And I navigate to Activity extended page
     And I can see transaction 1 with type "Self Transaction"
