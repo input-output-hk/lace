@@ -49,6 +49,7 @@ import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analy
 import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfig';
 import { NotificationDetailsContainer, NotificationsCenter } from '../features/notifications-center';
 import { SwapsProvider } from '../features/swaps';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -148,7 +149,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     cardanoWallet,
     initialHdDiscoveryCompleted,
     isSharedWallet,
-    environmentName
+    environmentName,
+    isBitcoinWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
@@ -162,7 +164,10 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
     if (route.path === routes.voting && !isVotingCenterEnabled) return false;
-    if ((route.path === routes.swap && isSharedWallet) || (route.path === routes.swap && chainName !== 'Mainnet')) {
+    if (
+      route.path === routes.swap &&
+      (isSharedWallet || isBitcoinWallet || chainName !== 'Mainnet' || walletType === WalletType.Trezor)
+    ) {
       return false;
     }
 

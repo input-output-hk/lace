@@ -12,6 +12,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
 import { useCurrentBlockchain, Blockchain } from '@src/multichain';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { GOV_TOOLS_URLS } = config();
 
@@ -28,7 +29,7 @@ export const SideMenu = (): React.ReactElement => {
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
   const isSwapCenterEnabled = posthog.isFeatureFlagEnabled(ExperimentName.SWAP_CENTER);
 
-  const { isSharedWallet, environmentName } = useWalletStore();
+  const { isSharedWallet, environmentName, walletType, isBitcoinWallet } = useWalletStore();
   const { blockchain } = useCurrentBlockchain();
 
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
@@ -91,7 +92,7 @@ export const SideMenu = (): React.ReactElement => {
   if (!isVotingCenterEnabled) {
     excludeItems.push(MenuItemList.VOTING);
   }
-  if (!isSwapCenterEnabled) {
+  if (!isSwapCenterEnabled || walletType === WalletType.Trezor || isBitcoinWallet || isSharedWallet) {
     excludeItems.push(MenuItemList.SWAP);
   }
   const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
