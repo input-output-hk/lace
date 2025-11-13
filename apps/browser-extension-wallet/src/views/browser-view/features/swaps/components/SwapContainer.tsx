@@ -247,7 +247,7 @@ export const SwapsContainer = (): React.ReactElement => {
                           if (!changedValue) setQuantity('');
                           if (
                             validateNumericValue(changedValue, {
-                              isFloat: !!tokenA?.decimals ?? true,
+                              isFloat: !!tokenA?.decimals || true,
                               ...(!!tokenA?.decimals && { maxDecimals: tokenA.decimals.toString() })
                             })
                           ) {
