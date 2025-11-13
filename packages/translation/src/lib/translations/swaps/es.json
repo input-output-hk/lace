@@ -43,8 +43,8 @@
   "swaps.error.unableToFetchDexList": "No se pudo obtener los DEXs disponibles",
   "swaps.disclaimer.heading": "Aviso legal",
   "swaps.quote.balance": "Balance: {{assetBalance}}",
-  "swaps.reviewStage.tooltip.slippage": "The maximum price difference you'll accept between the quote and the executed swap.",
-  "swaps.reviewStage.tooltip.swapRoute": "The sequence of liquidity sources and DEXs used to complete your swap efficiently.",
-  "swaps.reviewStage.tooltip.networkFee": "A blockchain transaction fee paid to validators for confirming and processing your swap.",
-  "swaps.reviewStage.tooltip.serviceFee": "A fee charged by our DEX aggregator partner for routing and executing your trade."
+  "swaps.reviewStage.tooltip.slippage": "La diferencia máxima que aceptará entre el precio de la cotización y el intercambio ejecutado",
+  "swaps.reviewStage.tooltip.swapRoute": "La secuencia de fuentes de liquidez y DEXs utilizadas para completar con eficacia su intercambio",
+  "swaps.reviewStage.tooltip.networkFee": "Una comisión por transacción de blockchain que se paga a los validadores por confirmar y procesar su intercambio",
+  "swaps.reviewStage.tooltip.serviceFee": "Una comisión que cobra nuestro socio agregador de DEX por enrutar y ejecutar su operación."
 }
