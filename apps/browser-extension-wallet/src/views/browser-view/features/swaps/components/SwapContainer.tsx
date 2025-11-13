@@ -255,9 +255,13 @@ export const SwapsContainer = (): React.ReactElement => {
                           <TextLink
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
-                              if (assetBalance !== undefined && tokenA.decimals !== undefined) {
-                                const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals);
-                                setQuantity(formattedBalance.toString());
+                              if (assetBalance !== undefined) {
+                                if (tokenA.decimals !== undefined) {
+                                  const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals);
+                                  setQuantity(formattedBalance.toString());
+                                } else {
+                                  setQuantity(assetBalance.toString());
+                                }
                               }
                             }}
                             label={t('swaps.label.selectMaxTokens')}
@@ -265,9 +269,13 @@ export const SwapsContainer = (): React.ReactElement => {
                           <TextLink
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
-                              if (assetBalance !== undefined && tokenA.decimals !== undefined) {
-                                const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals) / 2;
-                                setQuantity(formattedBalance.toString());
+                              if (assetBalance !== undefined) {
+                                if (tokenA.decimals !== undefined) {
+                                  const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals) / 2;
+                                  setQuantity(formattedBalance.toString());
+                                } else {
+                                  setQuantity((assetBalance / BigInt(2)).toString());
+                                }
                               }
                             }}
                             label={t('swaps.label.selectHalfTokens')}
