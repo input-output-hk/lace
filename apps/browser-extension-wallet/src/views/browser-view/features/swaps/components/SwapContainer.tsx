@@ -329,7 +329,7 @@ export const SwapsContainer = (): React.ReactElement => {
                                 ? Wallet.util.lovelacesToAdaString(assetsBalance?.coins?.toString())
                                 : Wallet.util.calculateAssetBalance(
                                     assetsBalance?.assets?.get(tokenA?.id)?.toString(),
-                                    { tokenMetadata: { decimals: tokenA.decimals } } as Wallet.Asset.AssetInfo
+                                    { tokenMetadata: { decimals: tokenA?.decimals } } as Wallet.Asset.AssetInfo
                                   )
                           })}
                         </Text.Body.Normal>
