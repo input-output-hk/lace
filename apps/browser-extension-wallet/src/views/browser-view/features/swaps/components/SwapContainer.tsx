@@ -297,7 +297,7 @@ export const SwapsContainer = (): React.ReactElement => {
                               if (assetBalance !== undefined) {
                                 if (tokenA.decimals !== undefined) {
                                   const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals);
-                                  setQuantity(formattedBalance.toString());
+                                  setQuantity(formattedBalance.toFixed(tokenA.decimals).toString());
                                 } else {
                                   setQuantity(assetBalance.toString());
                                 }
@@ -311,7 +311,7 @@ export const SwapsContainer = (): React.ReactElement => {
                               if (assetBalance !== undefined) {
                                 if (tokenA.decimals !== undefined) {
                                   const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals) / 2;
-                                  setQuantity(formattedBalance.toString());
+                                  setQuantity(formattedBalance.toFixed(tokenA.decimals).toString());
                                 } else {
                                   setQuantity((assetBalance / BigInt(2)).toString());
                                 }
