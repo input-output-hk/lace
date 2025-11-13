@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Flex, PasswordBox } from '@input-output-hk/lace-ui-toolkit';
+import { Button, Flex, PasswordBox, Text } from '@input-output-hk/lace-ui-toolkit';
 import { Drawer, DrawerNavigation, PostHogAction } from '@lace/common';
 import { ResultMessage } from '@components/ResultMessage';
 import { TransactionHashBox } from '@components/TransactionHashBox';
@@ -86,15 +86,22 @@ export const SignTxDrawer = (): React.ReactElement => {
           {transactionHash && <TransactionHashBox hash={transactionHash} />}
         </div>
       ) : (
-        <Flex flexDirection="column" justifyContent="center" alignItems="center" w="$fill" h="$fill">
-          <PasswordBox
-            onSubmit={(event) => {
-              event.preventDefault();
-              handleConfirm();
-            }}
-            label={t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
-            onChange={setPassword}
-          />
+        <Flex flexDirection="column" justifyContent="space-between" alignItems="stretch" gap="$8">
+          <Flex flexDirection="column" gap="$8" w="$fill">
+            <Text.SubHeading>{t('browserView.transaction.send.confirmationTitle')}</Text.SubHeading>
+            <Text.Body.Normal>{t('browserView.transaction.send.signTransactionWithPassword')}</Text.Body.Normal>
+          </Flex>
+          <Flex flexDirection="column" justifyContent="center" alignItems="center" w="$fill" h="$fill">
+            <PasswordBox
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleConfirm();
+              }}
+              disabled={!!password.value}
+              label={t('core.walletNameAndPasswordSetupStep.confirmPasswordInputLabel')}
+              onChange={setPassword}
+            />
+          </Flex>
         </Flex>
       )}
     </Drawer>
