@@ -50,8 +50,6 @@ export const useCollateral = (): UseCollateralReturn => {
   );
 
   useEffect(() => {
-    if (hasCollateral) return;
-
     const isPureUtxoWithEnoughCoins = (utxo: Cardano.Utxo): boolean =>
       !utxo[1].value?.assets && utxo[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES;
 
@@ -70,8 +68,16 @@ export const useCollateral = (): UseCollateralReturn => {
       setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
     };
 
-    checkCollateral();
-  }, [hasEnoughAda, hasCollateral, inMemoryWallet?.utxo?.available$, unspendable]);
+    if (!hasCollateral) checkCollateral();
+
+    return () => setPureUtxoWithEnoughCoinToUseForCollateral([]);
+  }, [
+    hasEnoughAda,
+    hasCollateral,
+    inMemoryWallet?.utxo?.available$,
+    unspendable,
+    setPureUtxoWithEnoughCoinToUseForCollateral
+  ]);
 
   const initializeCollateralTx = useCallback(async () => {
     // if the wallet has not been synced at least once or has no balance don't initialize Tx
