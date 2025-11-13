@@ -68,7 +68,7 @@ export const SideMenu = (): React.ReactElement => {
       case routes.nfts:
         sendAnalytics(PostHogAction.NFTsClick);
         break;
-      case routes.swaps:
+      case routes.swap:
         sendAnalytics(PostHogAction.SwapsClick);
     }
     push(field.key);
@@ -92,7 +92,7 @@ export const SideMenu = (): React.ReactElement => {
     excludeItems.push(MenuItemList.VOTING);
   }
   if (!isSwapCenterEnabled) {
-    excludeItems.push(MenuItemList.SWAPS);
+    excludeItems.push(MenuItemList.SWAP);
   }
   const menuItems = sideMenuConfig.filter((item) => !excludeItems.includes(item.id));
 

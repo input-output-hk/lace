@@ -96,7 +96,7 @@ export const defaultRoutes: RouteMap = [
     component: NotificationDetailsContainer
   },
   {
-    path: routes.swaps,
+    path: routes.swap,
     component: SwapsProvider
   }
 ];
@@ -162,7 +162,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
     if (route.path === routes.voting && !isVotingCenterEnabled) return false;
-    if ((route.path === routes.swaps && isSharedWallet) || (route.path === routes.swaps && chainName !== 'Mainnet')) {
+    if ((route.path === routes.swap && isSharedWallet) || (route.path === routes.swap && chainName !== 'Mainnet')) {
       return false;
     }
 

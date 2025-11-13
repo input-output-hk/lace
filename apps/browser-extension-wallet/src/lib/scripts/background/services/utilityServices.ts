@@ -113,8 +113,8 @@ const handleOpenBrowser = async (data: OpenBrowserData) => {
     case BrowserViewSections.DAPP_EXPLORER:
       path = walletRoutePaths.dapps;
       break;
-    case BrowserViewSections.SWAPS:
-      path = walletRoutePaths.swaps;
+    case BrowserViewSections.SWAP:
+      path = walletRoutePaths.swap;
       break;
   }
   const params = data.urlSearchParams ? `?${data.urlSearchParams}` : '';

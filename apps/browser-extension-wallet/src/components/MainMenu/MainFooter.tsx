@@ -103,8 +103,8 @@ export const MainFooter = (): React.ReactElement => {
         break;
     }
 
-    if (path === walletRoutePaths.swaps) {
-      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SWAPS });
+    if (path === walletRoutePaths.swap) {
+      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SWAP });
       return;
     }
 
@@ -191,12 +191,12 @@ export const MainFooter = (): React.ReactElement => {
         )}
         {isSwapCenterEnabled && (
           <button
-            onMouseEnter={() => onMouseEnterItem(MenuItemList.SWAPS)}
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.SWAP)}
             onMouseLeave={onMouseLeaveItem}
             data-testid="main-footer-swaps"
-            onClick={() => handleNavigation(walletRoutePaths.swaps)}
+            onClick={() => handleNavigation(walletRoutePaths.swap)}
           >
-            {currentLocation === walletRoutePaths.swaps ? (
+            {currentLocation === walletRoutePaths.swap ? (
               <SwapIconHover className={styles.icon} />
             ) : (
               <SwapIcon className={styles.icon} />
