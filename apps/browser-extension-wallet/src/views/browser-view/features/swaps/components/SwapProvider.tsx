@@ -213,6 +213,11 @@ export const SwapsProvider = (): React.ReactElement => {
     applyFeatureFlagDefaults();
   }, [swapCenterFeatureFlagPayload, isSwapsEnabled]);
 
+  useEffect(() => {
+    // reset quanitity every time we change our input token
+    setQuantity('');
+  }, [tokenA, setQuantity]);
+
   const fetchEstimate = useCallback(async () => {
     // Don't fetch new estimates if we already have a built transaction
     // User should clear the transaction first if they want updated quotes
