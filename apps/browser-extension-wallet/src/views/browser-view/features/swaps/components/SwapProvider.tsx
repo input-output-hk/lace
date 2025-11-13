@@ -283,13 +283,18 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
-  useEffect(() => {
-    // reset everything if the wallet changes
+  const resetSwapState = useCallback(() => {
     setQuantity('0.00');
     setTokenA(null);
     setTokenB(null);
     setStage(SwapStage.Initial);
-  }, [addresses]);
+    setUnsignedTx(null);
+  }, [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]);
+
+  useEffect(() => {
+    // reset everything if the wallet changes
+    resetSwapState();
+  }, [addresses, resetSwapState]);
 
   const fetchDexList = useCallback(() => {
     getDexList(t)
@@ -415,6 +420,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTransactionHash(txId.toString());
       sendSuccessPosthogEvent();
       setStage(SwapStage.Success);
+      resetSwapState();
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
@@ -424,7 +430,7 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       setStage(SwapStage.Initial);
     }
-  }, [unsignedTx, inMemoryWallet, setStage, t, posthog, sendSuccessPosthogEvent]);
+  }, [unsignedTx, inMemoryWallet, setStage, t, posthog, sendSuccessPosthogEvent, resetSwapState]);
 
   // Wrapper for setTargetSlippage that persists to storage
   const setTargetSlippagePersisted = useCallback((value: number | ((prev: number) => number)) => {
