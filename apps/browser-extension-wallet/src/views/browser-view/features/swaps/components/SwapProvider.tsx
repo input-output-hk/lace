@@ -134,7 +134,7 @@ export const SwapsProvider = (): React.ReactElement => {
   // swaps interface
   const [tokenA, setTokenA] = useState<DropdownList>();
   const [tokenB, setTokenB] = useState<TokenListFetchResponse>();
-  const [quantity, setQuantity] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('0.00');
   const [dexTokenList, setDexTokenList] = useState<TokenListFetchResponse[]>([]);
   const [stage, setStage] = useState<SwapStage>(SwapStage.Initial);
 
@@ -215,7 +215,7 @@ export const SwapsProvider = (): React.ReactElement => {
 
   useEffect(() => {
     // reset quanitity every time we change our input token
-    setQuantity('');
+    setQuantity('0.00');
   }, [tokenA, setQuantity]);
 
   const fetchEstimate = useCallback(async () => {

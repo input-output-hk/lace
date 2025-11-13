@@ -4,7 +4,7 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { Layout, SectionLayout, EducationalList, WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -69,6 +69,7 @@ const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTok
 export const SwapsContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     tokenA,
@@ -86,7 +87,6 @@ export const SwapsContainer = (): React.ReactElement => {
     unsignedTx,
     targetSlippage
   } = useSwaps();
-
   const { inMemoryWallet } = useWalletStore();
   const assetsInfo = useAssetInfo();
 
@@ -193,6 +193,23 @@ export const SwapsContainer = (): React.ReactElement => {
     [history]
   );
 
+  // Attach blur handler directly to the input element since TextBox doesn't forward onBlur
+  useEffect(() => {
+    const containerElement = inputRef.current;
+    const inputElement = containerElement?.querySelector('input');
+
+    const handleBlur = () => {
+      if (!quantity) {
+        setQuantity('0.00');
+      }
+    };
+    if (inputElement) inputElement.addEventListener('blur', handleBlur);
+
+    return () => {
+      if (inputElement) inputElement.removeEventListener('blur', handleBlur);
+    };
+  }, [quantity, setQuantity]);
+
   return (
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
@@ -206,19 +223,22 @@ export const SwapsContainer = (): React.ReactElement => {
                     <Text.Body.Normal weight="$semibold" color="secondary">
                       {t('swaps.label.youSell')}
                     </Text.Body.Normal>
-                    <TextBox
-                      label=""
-                      value={quantity || '0.00'}
-                      id="swap-token-input"
-                      onChange={(e) => {
-                        const changedValue = e.target.value;
-                        if (!changedValue) setQuantity('');
-                        if (validateNumericValue(changedValue, { isFloat: true })) {
-                          setQuantity(changedValue);
-                        }
-                      }}
-                      containerClassName={styles.swapTokenATextbox}
-                    />
+                    <div ref={inputRef}>
+                      <TextBox
+                        label=""
+                        value={quantity}
+                        defaultValue="0.00"
+                        id="swap-token-input"
+                        onChange={(e) => {
+                          const changedValue = e.target.value;
+                          if (!changedValue) setQuantity('');
+                          if (validateNumericValue(changedValue, { isFloat: true })) {
+                            setQuantity(changedValue);
+                          }
+                        }}
+                        containerClassName={styles.swapTokenATextbox}
+                      />
+                    </div>
                   </Flex>
                   <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$8">
                     <Card.Outlined
