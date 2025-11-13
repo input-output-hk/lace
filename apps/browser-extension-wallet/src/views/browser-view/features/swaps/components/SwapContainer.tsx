@@ -212,6 +212,7 @@ export const SwapsContainer = (): React.ReactElement => {
                       id="swap-token-input"
                       onChange={(e) => {
                         const changedValue = e.target.value;
+                        if (!changedValue) setQuantity('');
                         if (validateNumericValue(changedValue, { isFloat: true })) {
                           setQuantity(changedValue);
                         }
