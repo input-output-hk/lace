@@ -62,10 +62,12 @@ export const SettingsRemoveWallet = ({ popupView }: { popupView?: boolean }): Re
     const { walletId: nextActiveWalletId } = (await deleteWallet()) || {};
     const nextActiveWallet = wallets?.find(({ walletId }) => walletId === nextActiveWalletId);
     setDeletingWallet(false);
-    toast.notify({
-      duration: TOAST_DEFAULT_DURATION,
-      text: t('multiWallet.activated.wallet', { walletName: nextActiveWallet.metadata.name })
-    });
+
+    if (nextActiveWallet?.metadata?.name)
+      toast.notify({
+        duration: TOAST_DEFAULT_DURATION,
+        text: t('multiWallet.activated.wallet', { walletName: nextActiveWallet.metadata.name })
+      });
     if (nextActiveWallet) return;
     if (popupView) await backgroundServices.handleOpenBrowser({ section: BrowserViewSections.HOME });
     // force reload to ensure all stores are cleaned up
