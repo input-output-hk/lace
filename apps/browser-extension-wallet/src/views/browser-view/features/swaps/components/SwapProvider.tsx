@@ -236,6 +236,7 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       if (!response.ok) {
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
+        setQuantity('0.00');
         throw new Error('Unexpected response');
       }
       posthog.sendEvent(PostHogAction.SwapsFetchEstimate, {
@@ -259,7 +260,7 @@ export const SwapsProvider = (): React.ReactElement => {
       }
       setEstimate(parsedResponse);
     }
-  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog]);
+  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setQuantity]);
 
   useEffect(() => {
     let id: NodeJS.Timeout | undefined;
