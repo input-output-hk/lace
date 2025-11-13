@@ -324,13 +324,18 @@ export const SwapsContainer = (): React.ReactElement => {
                       {!!tokenA?.description && (
                         <Text.Body.Normal color="secondary">
                           {t('swaps.quote.balance', {
-                            assetBalance:
-                              tokenA?.description === 'ADA'
-                                ? Wallet.util.lovelacesToAdaString(assetsBalance?.coins?.toString())
-                                : Wallet.util.calculateAssetBalance(
-                                    assetsBalance?.assets?.get(tokenA?.id)?.toString(),
-                                    { tokenMetadata: { decimals: tokenA?.decimals } } as Wallet.Asset.AssetInfo
-                                  )
+                            assetBalance: (() => {
+                              if (tokenA?.description === 'ADA') {
+                                return Wallet.util.lovelacesToAdaString(assetsBalance?.coins?.toString());
+                              }
+                              const rawBalance = assetsBalance?.assets?.get(tokenA?.id);
+                              if (rawBalance !== undefined) {
+                                return Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                                  tokenMetadata: { decimals: tokenA?.decimals }
+                                } as Wallet.Asset.AssetInfo);
+                              }
+                              return '0';
+                            })()
                           })}
                         </Text.Body.Normal>
                       )}
