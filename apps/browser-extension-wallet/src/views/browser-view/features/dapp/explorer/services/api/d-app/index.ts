@@ -4,7 +4,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
 import { logger } from '@lace/common';
 
-const dappRadarApiUrl = process.env.DAPP_RADAR_API_URL;
+const dappRadarApiUrl = process.env.DAPP_EXPLORER_URL;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 
 export type PaginationInput = {

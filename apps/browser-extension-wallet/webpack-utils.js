@@ -56,7 +56,7 @@ const transformManifest = (content, mode, jsAssets = []) => {
       .replace('$POSTHOG_HOST', process.env.POSTHOG_HOST)
       .replace('$MEMPOOLSPACE_URL', process.env.MEMPOOLSPACE_URL)
       .replace('$SENTRY_URL', constructSentryConnectSrc(process.env.SENTRY_DSN))
-      .replace('$DAPP_RADAR_APPI_URL', process.env.DAPP_RADAR_API_URL)
+      .replace('$DAPP_EXPLORER_URL', process.env.DAPP_EXPLORER_URL)
       .replace('$STEELSWAP_API_URL', process.env.STEELSWAP_API_URL)
       .replace('$ASSET_CDN_URL', process.env.ASSET_CDN_URL);
 

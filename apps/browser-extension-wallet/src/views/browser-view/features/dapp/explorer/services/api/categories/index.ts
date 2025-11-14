@@ -8,7 +8,7 @@ type FetchCategoriesResult = {
   data: string[];
 };
 
-const dappRadarCategoriesUrl = `${process.env.DAPP_RADAR_API_URL}/v2/dapps/categories`;
+const dappRadarCategoriesUrl = `${process.env.DAPP_EXPLORER_URL}/v2/dapps/categories`;
 const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
