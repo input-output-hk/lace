@@ -327,13 +327,16 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
-  const resetSwapState = useCallback(() => {
-    setQuantity('0.00');
-    setTokenA(null);
-    setTokenB(null);
-    setStage(SwapStage.Initial);
-    setUnsignedTx(null);
-  }, [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]);
+  const resetSwapState = useCallback(
+    (resetStage = true) => {
+      setQuantity('0.00');
+      setTokenA(null);
+      setTokenB(null);
+      resetStage && setStage(SwapStage.Initial);
+      setUnsignedTx(null);
+    },
+    [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]
+  );
 
   useEffect(() => {
     // reset everything if the wallet changes
@@ -464,7 +467,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTransactionHash(txId.toString());
       sendSuccessPosthogEvent();
       setStage(SwapStage.Success);
-      resetSwapState();
+      resetSwapState(false);
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
