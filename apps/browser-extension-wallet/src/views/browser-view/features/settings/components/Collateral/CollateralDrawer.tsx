@@ -85,11 +85,13 @@ export const CollateralDrawer = ({
     if (!visible) return;
     clearBuiltTxData();
     initializeCollateralTx();
-    // Reset section when drawer opens to allow wallet-specific effects to determine correct section
+  }, [initializeCollateralTx, visible, clearBuiltTxData]);
+
+  useEffect(() => {
     setSection({
       currentSection: Sections.RECLAIM
     });
-  }, [initializeCollateralTx, visible, clearBuiltTxData, setSection]);
+  }, [setSection]);
 
   // handle drawer states for inMemory(non-hardware) wallets
   useEffect(() => {
