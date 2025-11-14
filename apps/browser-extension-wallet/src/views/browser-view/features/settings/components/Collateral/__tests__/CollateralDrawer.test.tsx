@@ -129,25 +129,26 @@ const testIds = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <AppSettingsProvider>
-      <DatabaseProvider>
-        <StoreProvider appMode={APP_MODE_BROWSER}>
-          <I18nextProvider i18n={i18n}>
-            <CurrencyStoreProvider>
-              <BackgroundServiceAPIProvider value={backgroundService}>
-                <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                  <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                    {children}
-                  </AnalyticsProvider>
-                </PostHogClientProvider>
-              </BackgroundServiceAPIProvider>
-            </CurrencyStoreProvider>
-          </I18nextProvider>
-        </StoreProvider>
-      </DatabaseProvider>
-    </AppSettingsProvider>
-  );
+  ({ children }: { children: React.ReactNode }) =>
+    (
+      <AppSettingsProvider>
+        <DatabaseProvider>
+          <StoreProvider appMode={APP_MODE_BROWSER}>
+            <I18nextProvider i18n={i18n}>
+              <CurrencyStoreProvider>
+                <BackgroundServiceAPIProvider value={backgroundService}>
+                  <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                    <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                      {children}
+                    </AnalyticsProvider>
+                  </PostHogClientProvider>
+                </BackgroundServiceAPIProvider>
+              </CurrencyStoreProvider>
+            </I18nextProvider>
+          </StoreProvider>
+        </DatabaseProvider>
+      </AppSettingsProvider>
+    );
 
 describe('Testing CollateralDrawer component', () => {
   window.ResizeObserver = ResizeObserver;
