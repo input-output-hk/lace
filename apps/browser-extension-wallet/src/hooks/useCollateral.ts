@@ -56,21 +56,22 @@ export const useCollateral = (): UseCollateralReturn => {
     const checkCollateral = async (): Promise<void> => {
       if (!inMemoryWallet?.utxo?.available$) return;
 
-      // if there aren't any utxos, this will never complete
-      const utxo = await firstValueFrom(
-        inMemoryWallet.utxo.available$.pipe(
-          map((utxos) => utxos.find((o) => isPureUtxoWithEnoughCoins(o))),
-          filter(isNotNil),
-          take(1)
-        )
-      );
+      // Get the first emission of available UTXOs and check if any match
+      const utxos = await firstValueFrom(inMemoryWallet.utxo.available$.pipe(take(1)));
+      const matchingUtxo = utxos.find((o) => isPureUtxoWithEnoughCoins(o));
 
-      setPureUtxoWithEnoughCoinToUseForCollateral([utxo]);
+      if (matchingUtxo) {
+        setPureUtxoWithEnoughCoinToUseForCollateral([matchingUtxo]);
+      } else {
+        // No suitable UTXO found - set empty array to indicate check is complete
+        setPureUtxoWithEnoughCoinToUseForCollateral([]);
+      }
     };
 
     if (!hasCollateral) checkCollateral();
+    else setPureUtxoWithEnoughCoinToUseForCollateral([]);
 
-    return () => setPureUtxoWithEnoughCoinToUseForCollateral([]);
+    return () => setPureUtxoWithEnoughCoinToUseForCollateral(undefined);
   }, [
     hasEnoughAda,
     hasCollateral,

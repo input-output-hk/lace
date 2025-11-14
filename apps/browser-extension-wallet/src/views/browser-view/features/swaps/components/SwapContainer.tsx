@@ -85,7 +85,9 @@ export const SwapsContainer = (): React.ReactElement => {
     setStage,
     stage,
     unsignedTx,
-    targetSlippage
+    targetSlippage,
+    disclaimerAcknowledged,
+    fetchingQuote
   } = useSwaps();
   const { inMemoryWallet } = useWalletStore();
   const assetsInfo = useAssetInfo();
@@ -131,7 +133,7 @@ export const SwapsContainer = (): React.ReactElement => {
         />
       );
     }
-    if (!estimate && tokenA && tokenB && quantity && Number(quantity) > 0) {
+    if (fetchingQuote) {
       return <Button.CallToAction icon label={t('swaps.btn.fetchingEstimate')} w="$fill" disabled />;
     }
     return (
@@ -147,7 +149,7 @@ export const SwapsContainer = (): React.ReactElement => {
         }}
       />
     );
-  }, [estimate, tokenA, setStage, buildSwap, t, quantity, tokenB]);
+  }, [estimate, tokenA, setStage, buildSwap, t, fetchingQuote]);
 
   const sidePanel = useMemo(() => {
     const titles = {
@@ -558,7 +560,7 @@ export const SwapsContainer = (): React.ReactElement => {
         <WarningModal
           content={t('browserView.settings.wallet.collateral.amountDescription')}
           header={t('swaps.warningModal.collateral.header')}
-          visible={collateral?.length === 0}
+          visible={collateral?.length === 0 && typeof disclaimerAcknowledged === 'boolean' && disclaimerAcknowledged}
           onConfirm={navigateToCollateralSetting}
           confirmLabel={t('announcement.cta')}
         />
