@@ -29,7 +29,11 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
-import { SWAPS_TARGET_SLIPPAGE, SWAPS_EXCLUDED_LIQUIDITY_SOURCES } from '@lib/scripts/types/storage';
+import {
+  SWAPS_TARGET_SLIPPAGE,
+  SWAPS_EXCLUDED_LIQUIDITY_SOURCES,
+  SWAPS_DISCLAIMER_ACKNOWLEDGED
+} from '@lib/scripts/types/storage';
 import { HttpStatusCode } from 'axios';
 
 export const createSteelswapApiHeaders = (): HeadersInit => ({
@@ -137,6 +141,7 @@ export const SwapsProvider = (): React.ReactElement => {
   const [quantity, setQuantity] = useState<string>('0.00');
   const [dexTokenList, setDexTokenList] = useState<TokenListFetchResponse[]>([]);
   const [stage, setStage] = useState<SwapStage>(SwapStage.Initial);
+  const [fetchingQuote, setFetchingQuote] = useState(false);
 
   // settings
   const [dexList, setDexList] = useState([]);
@@ -157,6 +162,9 @@ export const SwapsProvider = (): React.ReactElement => {
   const [unsignedTx, setUnsignedTx] = useState<BuildSwapResponse | null>();
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
+  // Legal disclaimer acceptance, one time acceptance
+  const [disclaimerAcknowledged, setDisclaimerAcknowleged] = useState<boolean | null>(null);
+
   // Reset transaction hash when starting a new swap
   useEffect(() => {
     if (stage === SwapStage.Initial && transactionHash !== null) {
@@ -171,7 +179,7 @@ export const SwapsProvider = (): React.ReactElement => {
 
   // Load persisted slippage setting on mount
   useEffect(() => {
-    const loadPersistedSlippage = async () => {
+    const loadPersistedSlippageAndLiquiditySources = async () => {
       try {
         const storedSlippageData = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
         const persistedSlippageValue = storedSlippageData[SWAPS_TARGET_SLIPPAGE];
@@ -208,7 +216,19 @@ export const SwapsProvider = (): React.ReactElement => {
       }
     };
 
-    loadPersistedSlippage();
+    const loadDisclaimerAcknowledgement = async () => {
+      try {
+        const storedAcknowledgementData = await storage.local.get(SWAPS_DISCLAIMER_ACKNOWLEDGED);
+        const persistedAcknowledgementValue = storedAcknowledgementData[SWAPS_DISCLAIMER_ACKNOWLEDGED];
+        setDisclaimerAcknowleged(persistedAcknowledgementValue ?? false);
+      } catch (error) {
+        // If storage fails, continue with default
+        logger.error('Failed to load persisted swaps dislaimer:', error);
+      }
+    };
+
+    loadPersistedSlippageAndLiquiditySources();
+    loadDisclaimerAcknowledgement();
   }, []);
 
   // Initialize slippage from feature flag only if not already set by user
@@ -242,7 +262,7 @@ export const SwapsProvider = (): React.ReactElement => {
     // User should clear the transaction first if they want updated quotes
     if (unsignedTx || Number(quantity) === 0) return;
     // /docs#/swap/steel_swap_swap_estimate__post
-
+    setFetchingQuote(true);
     const postBody = JSON.stringify(
       createSwapRequestBody({
         tokenA: tokenA.id,
@@ -260,7 +280,8 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       if (!response.ok) {
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
-        setQuantity('0.00');
+        setEstimate(null);
+        setFetchingQuote(false);
         throw new Error('Unexpected response');
       }
       posthog.sendEvent(PostHogAction.SwapsFetchEstimate, {
@@ -280,11 +301,14 @@ export const SwapsProvider = (): React.ReactElement => {
         const errorMessage = 'Invalid estimate response structure';
         logger.error(errorMessage, parsedResponse);
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
+        setFetchingQuote(false);
         throw new Error(errorMessage);
       }
+      setFetchingQuote(false);
       setEstimate(parsedResponse);
     }
-  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setQuantity]);
+    setFetchingQuote(false);
+  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setFetchingQuote]);
 
   useEffect(() => {
     let id: NodeJS.Timeout | undefined;
@@ -308,13 +332,16 @@ export const SwapsProvider = (): React.ReactElement => {
     }
   }, [tokenA, tokenB, quantity, fetchEstimate, setEstimate]);
 
-  const resetSwapState = useCallback(() => {
-    setQuantity('0.00');
-    setTokenA(null);
-    setTokenB(null);
-    setStage(SwapStage.Initial);
-    setUnsignedTx(null);
-  }, [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]);
+  const resetSwapState = useCallback(
+    (resetStage = true) => {
+      setQuantity('0.00');
+      setTokenA(null);
+      setTokenB(null);
+      resetStage && setStage(SwapStage.Initial);
+      setUnsignedTx(null);
+    },
+    [setQuantity, setTokenA, setTokenB, setStage, setUnsignedTx]
+  );
 
   useEffect(() => {
     // reset everything if the wallet changes
@@ -445,7 +472,7 @@ export const SwapsProvider = (): React.ReactElement => {
       setTransactionHash(txId.toString());
       sendSuccessPosthogEvent();
       setStage(SwapStage.Success);
-      resetSwapState();
+      resetSwapState(false);
     } catch (error) {
       logger.error('Failed to sign and submit swap:', error);
       toast.notify({ duration: 3, text: unableToSignErrorText });
@@ -482,6 +509,14 @@ export const SwapsProvider = (): React.ReactElement => {
     });
   }, []);
 
+  const handleAcknowledgeDisclaimer = async () => {
+    await storage.local.set({
+      [SWAPS_DISCLAIMER_ACKNOWLEDGED]: true
+    });
+
+    setDisclaimerAcknowleged(true);
+  };
+
   const contextValue: SwapProvider = useMemo(
     () => ({
       tokenA,
@@ -508,7 +543,10 @@ export const SwapsProvider = (): React.ReactElement => {
       collateral,
       slippagePercentages,
       maxSlippagePercentage,
-      transactionHash
+      transactionHash,
+      disclaimerAcknowledged,
+      handleAcknowledgeDisclaimer,
+      fetchingQuote
     }),
     [
       tokenA,
@@ -535,7 +573,9 @@ export const SwapsProvider = (): React.ReactElement => {
       collateral,
       slippagePercentages,
       maxSlippagePercentage,
-      transactionHash
+      transactionHash,
+      disclaimerAcknowledged,
+      fetchingQuote
     ]
   );
 

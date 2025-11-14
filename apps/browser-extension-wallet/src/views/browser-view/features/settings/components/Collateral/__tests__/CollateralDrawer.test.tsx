@@ -129,26 +129,25 @@ const testIds = {
 
 const getWrapper =
   ({ backgroundService }: { backgroundService?: BackgroundServiceAPIProviderProps['value'] }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <AppSettingsProvider>
-        <DatabaseProvider>
-          <StoreProvider appMode={APP_MODE_BROWSER}>
-            <I18nextProvider i18n={i18n}>
-              <CurrencyStoreProvider>
-                <BackgroundServiceAPIProvider value={backgroundService}>
-                  <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
-                    <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
-                      {children}
-                    </AnalyticsProvider>
-                  </PostHogClientProvider>
-                </BackgroundServiceAPIProvider>
-              </CurrencyStoreProvider>
-            </I18nextProvider>
-          </StoreProvider>
-        </DatabaseProvider>
-      </AppSettingsProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <AppSettingsProvider>
+      <DatabaseProvider>
+        <StoreProvider appMode={APP_MODE_BROWSER}>
+          <I18nextProvider i18n={i18n}>
+            <CurrencyStoreProvider>
+              <BackgroundServiceAPIProvider value={backgroundService}>
+                <PostHogClientProvider postHogCustomClient={postHogClientMocks as any}>
+                  <AnalyticsProvider analyticsDisabled tracker={mockAnalyticsTracker as any}>
+                    {children}
+                  </AnalyticsProvider>
+                </PostHogClientProvider>
+              </BackgroundServiceAPIProvider>
+            </CurrencyStoreProvider>
+          </I18nextProvider>
+        </StoreProvider>
+      </DatabaseProvider>
+    </AppSettingsProvider>
+  );
 
 describe('Testing CollateralDrawer component', () => {
   window.ResizeObserver = ResizeObserver;
@@ -306,7 +305,7 @@ describe('Testing CollateralDrawer component', () => {
       }
     );
 
-    expect(setSection).toBeCalledTimes(2);
+    expect(setSection).toBeCalledTimes(1);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.RECLAIM });
 
     mockUseSyncingTheFirstTime.mockReset();
@@ -321,7 +320,7 @@ describe('Testing CollateralDrawer component', () => {
       />
     );
 
-    expect(setSection).toBeCalledTimes(3);
+    expect(setSection).toBeCalledTimes(2);
     expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SEND });
   });
 
@@ -361,7 +360,7 @@ describe('Testing CollateralDrawer component', () => {
         <CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />
       );
 
-      expect(setSection).toBeCalledTimes(2);
+      expect(setSection).toBeCalledTimes(3);
     }
   );
 
@@ -393,7 +392,7 @@ describe('Testing CollateralDrawer component', () => {
         }
       );
 
-      expect(setSection).toBeCalledTimes(2);
+      expect(setSection).toBeCalledTimes(3);
       expect(setSection.mock.calls[0][0]).toEqual({ currentSection: Sections.RECLAIM });
       expect(setSection).toHaveBeenLastCalledWith({ currentSection: Sections.SUCCESS_TX });
 
@@ -401,7 +400,7 @@ describe('Testing CollateralDrawer component', () => {
         <CollateralDrawer visible hasCollateral unspendableLoaded onClose={jest.fn()} sendAnalyticsEvent={jest.fn()} />
       );
 
-      expect(setSection).toBeCalledTimes(2);
+      expect(setSection).toBeCalledTimes(4);
     }
   );
 
