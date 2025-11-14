@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ISectionCardItem } from '@views/browser/features/dapp/explorer/services/helpers/apis-formatter/types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { logger } from '@lace/common';
-import { getCachedDapps } from '@views/browser/features/dapp/explorer/services/api/static/dataSource';
+import { getCachedDapps, getLogoUrl } from '@views/browser/features/dapp/explorer/services/api/static/dataSource';
 import type { DAppRadarDappItem } from '@views/browser/features/dapp/explorer/services/api/static/dataSource';
 
 const mapResponse = (
@@ -20,7 +20,7 @@ const mapResponse = (
       categories: dapp.categories,
       title: dapp.name,
       image: {
-        src: dapp.logo,
+        src: getLogoUrl(dapp.logo),
         alt: dapp.name
       },
       shortDescription: dapp.description,
