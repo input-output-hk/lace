@@ -1,15 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
-import { cacheRequest } from '@views/browser/features/dapp/explorer/services/cache';
-import { logger } from '@lace/common';
+import { getCachedCategories } from '@views/browser/features/dapp/explorer/services/api/static/dataSource';
 
 type FetchCategoriesResult = {
   loading: boolean;
   data: string[];
 };
-
-const dappRadarCategoriesUrl = `${process.env.DAPP_RADAR_API_URL}/v2/dapps/categories`;
-const dappRadarApiKey = process.env.DAPP_RADAR_API_KEY;
 
 export const useCategoriesFetcher = (): FetchCategoriesResult => {
   const [loading, setLoading] = useState(true);
@@ -25,38 +21,12 @@ export const useCategoriesFetcher = (): FetchCategoriesResult => {
   );
 
   useEffect(() => {
-    (async () => {
-      if (!dappRadarApiKey) {
-        setLoading(false);
-        return;
-      }
+    setLoading(true);
 
-      let categories: string[] = [];
-      try {
-        categories = await cacheRequest(dappRadarCategoriesUrl, async () => {
-          const response = await window.fetch(dappRadarCategoriesUrl, {
-            headers: {
-              Accept: 'application/json',
-              'x-api-key': dappRadarApiKey
-            }
-          });
+    const categories = getCachedCategories().filter((category) => !disallowedDappCategories.has(category));
 
-          if (!response.ok) {
-            throw new Error('Unexpected response');
-          }
-
-          const result = (await response.json()) as { categories: string[] };
-          return result.categories;
-        });
-      } catch (error) {
-        logger.error('Failed to fetch dapp categories.', error);
-      }
-
-      categories = categories.filter((category) => !disallowedDappCategories.has(category));
-
-      setData(categories);
-      setLoading(false);
-    })();
+    setData(categories);
+    setLoading(false);
   }, [disallowedDappCategories]);
 
   return { loading, data };
