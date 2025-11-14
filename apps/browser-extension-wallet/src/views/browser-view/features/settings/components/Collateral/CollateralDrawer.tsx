@@ -85,17 +85,15 @@ export const CollateralDrawer = ({
     if (!visible) return;
     clearBuiltTxData();
     initializeCollateralTx();
-  }, [initializeCollateralTx, visible, clearBuiltTxData]);
-
-  useEffect(() => {
+    // Reset section when drawer opens to allow wallet-specific effects to determine correct section
     setSection({
       currentSection: Sections.RECLAIM
     });
-  }, [setSection]);
+  }, [initializeCollateralTx, visible, clearBuiltTxData, setSection]);
 
   // handle drawer states for inMemory(non-hardware) wallets
   useEffect(() => {
-    if (!isInMemoryWallet || !readyToOperate || !inMemoryWallet?.utxo) return;
+    if (!isInMemoryWallet || !readyToOperate || !visible) return;
     if (hasCollateral) {
       setSection({ currentSection: Sections.RECLAIM });
     } else {
@@ -109,18 +107,29 @@ export const CollateralDrawer = ({
     setSection,
     readyToOperate,
     pureUtxoWithEnoughCoinToUseForCollateral,
-    inMemoryWallet?.utxo
+    inMemoryWallet?.utxo,
+    visible
   ]);
 
   // handle drawer states for hw
   useEffect(() => {
-    if (isInMemoryWallet || !readyToOperate) return;
-    if (!hasCollateral && section.currentSection === Sections.RECLAIM) {
+    if (isInMemoryWallet || !readyToOperate || !inMemoryWallet?.utxo || !visible) return;
+    if (hasCollateral) {
+      setSection({ currentSection: Sections.RECLAIM });
+    } else {
       setSection({
-        currentSection: Sections.SEND
+        currentSection: pureUtxoWithEnoughCoinToUseForCollateral?.length > 0 ? Sections.AUTO_SET : Sections.SEND
       });
     }
-  }, [hasCollateral, isInMemoryWallet, section.currentSection, setSection, readyToOperate]);
+  }, [
+    hasCollateral,
+    isInMemoryWallet,
+    setSection,
+    readyToOperate,
+    pureUtxoWithEnoughCoinToUseForCollateral,
+    inMemoryWallet?.utxo,
+    visible
+  ]);
 
   // show tx success screen for hw flow
   useEffect(() => {
