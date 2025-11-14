@@ -108,7 +108,8 @@ export const config: WebdriverIO.Config = {
       './src/features/SendTransactionBundlesExtended*.feature',
       './src/features/e2e/SignDataDAppE2E.feature',
       './src/features/MidnightBanner.feature',
-      './src/features/NotificationsCenter*.feature'
+      './src/features/NotificationsCenter*.feature',
+      './src/features/BitcoinWalletPopup.feature'
     ]
   },
   automationProtocol: 'webdriver',
