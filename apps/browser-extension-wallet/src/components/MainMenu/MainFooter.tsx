@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { walletRoutePaths } from '../../routes';
 
@@ -37,6 +37,7 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { ExperimentName } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
+import { WalletType } from '@cardano-sdk/web-extension';
 
 const { GOV_TOOLS_URLS } = config();
 
@@ -47,12 +48,17 @@ export const MainFooter = (): React.ReactElement => {
   const location = useLocation<{ pathname: string }>();
   const history = useHistory();
   const analytics = useAnalyticsContext();
-  const { isSharedWallet, environmentName } = useWalletStore();
+  const { isSharedWallet, environmentName, walletType, isBitcoinWallet } = useWalletStore();
   const posthog = usePostHogClientContext();
   const backgroundServices = useBackgroundServiceAPIContext();
 
   const isDappExplorerEnabled = posthog.isFeatureFlagEnabled(ExperimentName.DAPP_EXPLORER);
-  const isSwapCenterEnabled = posthog.isFeatureFlagEnabled(ExperimentName.SWAP_CENTER);
+
+  const isSwapCenterEnabled: boolean = useMemo(() => {
+    const isFeatureEnabled = posthog.isFeatureFlagEnabled(ExperimentName.SWAP_CENTER);
+    return isFeatureEnabled && !isSharedWallet && !isBitcoinWallet && walletType !== WalletType.Trezor;
+  }, [posthog, isSharedWallet, walletType, isBitcoinWallet]);
+
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
   const currentLocation = location?.pathname;
   const isWalletIconActive =
@@ -103,8 +109,8 @@ export const MainFooter = (): React.ReactElement => {
         break;
     }
 
-    if (path === walletRoutePaths.swaps) {
-      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SWAPS });
+    if (path === walletRoutePaths.swap) {
+      backgroundServices.handleOpenBrowser({ section: BrowserViewSections.SWAP });
       return;
     }
 
@@ -191,12 +197,12 @@ export const MainFooter = (): React.ReactElement => {
         )}
         {isSwapCenterEnabled && (
           <button
-            onMouseEnter={() => onMouseEnterItem(MenuItemList.SWAPS)}
+            onMouseEnter={() => onMouseEnterItem(MenuItemList.SWAP)}
             onMouseLeave={onMouseLeaveItem}
             data-testid="main-footer-swaps"
-            onClick={() => handleNavigation(walletRoutePaths.swaps)}
+            onClick={() => handleNavigation(walletRoutePaths.swap)}
           >
-            {currentLocation === walletRoutePaths.swaps ? (
+            {currentLocation === walletRoutePaths.swap ? (
               <SwapIconHover className={styles.icon} />
             ) : (
               <SwapIcon className={styles.icon} />

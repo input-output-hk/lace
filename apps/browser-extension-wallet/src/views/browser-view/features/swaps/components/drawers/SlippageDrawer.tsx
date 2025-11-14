@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ReactElement, useState, useEffect, useRef } from 'react';
+import React, { ReactElement, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Drawer, DrawerNavigation, PostHogAction } from '@lace/common';
 import { Button, Flex, Text, TextBox } from '@input-output-hk/lace-ui-toolkit';
 
@@ -91,12 +91,15 @@ export const SwapSlippageDrawer = (): ReactElement => {
     // Final validation happens in handleSaveSlippage
   };
 
-  const validateSlippage = (value: number): boolean => {
-    const isValid = !Number.isNaN(value) && value >= MIN_SLIPPAGE_PERCENTAGE && value <= maxSlippagePercentage;
+  const validateSlippage = useCallback(
+    (value: number): boolean => {
+      const isValid = !Number.isNaN(value) && value >= MIN_SLIPPAGE_PERCENTAGE && value <= maxSlippagePercentage;
 
-    setSlippageError(!isValid);
-    return isValid;
-  };
+      setSlippageError(!isValid);
+      return isValid;
+    },
+    [maxSlippagePercentage]
+  );
 
   const handleSaveSlippage = () => {
     // Validate before saving
@@ -109,10 +112,19 @@ export const SwapSlippageDrawer = (): ReactElement => {
     setStage(SwapStage.Initial);
   };
 
+  const isSlippageValid = useMemo(() => validateSlippage(innerSlippage), [innerSlippage, validateSlippage]);
+
   return (
     <Drawer
       open={isDrawerOpen}
-      footer={<Button.CallToAction w={'$fill'} label={t('general.button.confirm')} onClick={handleSaveSlippage} />}
+      footer={
+        <Button.CallToAction
+          disabled={!isSlippageValid}
+          w={'$fill'}
+          label={t('general.button.confirm')}
+          onClick={handleSaveSlippage}
+        />
+      }
       maskClosable
       onClose={() => setStage(SwapStage.Initial)}
       navigation={

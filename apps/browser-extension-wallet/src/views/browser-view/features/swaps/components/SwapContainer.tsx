@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable sonarjs/cognitive-complexity */
 /* eslint-disable complexity */
 /* eslint-disable sonarjs/no-duplicate-string */
 /* eslint-disable unicorn/no-null */
 /* eslint-disable no-magic-numbers */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef } from 'react';
 import { Layout, SectionLayout, EducationalList, WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
 import { PlusCircleOutlined } from '@ant-design/icons';
@@ -12,7 +13,17 @@ import ArrowDown from '@assets/icons/arrow-down.component.svg';
 import AdjustmentsIcon from '@assets/icons/adjustments.component.svg';
 import styles from './SwapContainer.module.scss';
 import { SectionTitle } from '@components/Layout/SectionTitle';
-import { TextLink, Button, Card, Flex, Text, TextBox, IconButton } from '@input-output-hk/lace-ui-toolkit';
+import {
+  TextLink,
+  Button,
+  Card,
+  Flex,
+  Text,
+  TextBox,
+  IconButton,
+  Tooltip,
+  InfoComponent
+} from '@input-output-hk/lace-ui-toolkit';
 import LightBulb from '@src/assets/icons/light.svg';
 import { getTokenList, NonNFTAsset } from '@src/utils/get-token-list';
 import { useObservable } from '@lace/common';
@@ -31,6 +42,9 @@ import { getAssetImageUrl } from '@utils/get-asset-image-url';
 import { DisclaimerModal as SwapsDisclaimerModal } from './DisclaimerModal/DisclaimerModal';
 import { getSwapQuoteSources } from '../util';
 import CardanoLogo from '../../../../../assets/icons/browser-view/cardano-logo.svg';
+import { validateNumericValue } from '@lace/core';
+
+const CARDANO_ASSET_ID = '537c34d1695c4303e293d7a5b19813f0d51c3c71259842e773b0b4e6';
 
 const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTokens: NonNFTAsset[]) => {
   const swappableAssetIds = new Set();
@@ -38,7 +52,7 @@ const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTok
     swappableAssetIds.add(`${token.policyId}${token.policyName}`);
   });
 
-  swappableAssetIds.add('537c34d1695c4303e293d7a5b19813f0d51c3c71259842e773b0b4e6'); // Add cardano as default
+  swappableAssetIds.add(CARDANO_ASSET_ID); // Add cardano as default
 
   return swappableTokens
     .map((token) => ({
@@ -55,6 +69,7 @@ const mapSwappableTokens = (dexTokenList: TokenListFetchResponse[], swappableTok
 export const SwapsContainer = (): React.ReactElement => {
   const { t } = useTranslation();
   const history = useHistory();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     tokenA,
@@ -72,7 +87,6 @@ export const SwapsContainer = (): React.ReactElement => {
     unsignedTx,
     targetSlippage
   } = useSwaps();
-
   const { inMemoryWallet } = useWalletStore();
   const assetsInfo = useAssetInfo();
 
@@ -117,7 +131,7 @@ export const SwapsContainer = (): React.ReactElement => {
         />
       );
     }
-    if (!estimate && tokenA && tokenB && quantity) {
+    if (!estimate && tokenA && tokenB && quantity && Number(quantity) > 0) {
       return <Button.CallToAction icon label={t('swaps.btn.fetchingEstimate')} w="$fill" disabled />;
     }
     return (
@@ -179,6 +193,36 @@ export const SwapsContainer = (): React.ReactElement => {
     [history]
   );
 
+  // Attach blur handler directly to the input element since TextBox doesn't forward onBlur
+  useEffect(() => {
+    const containerElement = inputRef.current;
+    const inputElement = containerElement?.querySelector('input');
+
+    const handleBlur = () => {
+      if (!quantity) {
+        setQuantity('0.00');
+      }
+    };
+
+    const handleFocus = () => {
+      if (quantity === '0.00') {
+        setQuantity('');
+      }
+    };
+
+    if (inputElement) {
+      inputElement.addEventListener('blur', handleBlur);
+      inputElement.addEventListener('focus', handleFocus);
+    }
+
+    return () => {
+      if (inputElement) {
+        inputElement.removeEventListener('blur', handleBlur);
+        inputElement.removeEventListener('focus', handleFocus);
+      }
+    };
+  }, [quantity, setQuantity]);
+
   return (
     <Layout>
       <SectionLayout sidePanelContent={sidePanel}>
@@ -192,13 +236,27 @@ export const SwapsContainer = (): React.ReactElement => {
                     <Text.Body.Normal weight="$semibold" color="secondary">
                       {t('swaps.label.youSell')}
                     </Text.Body.Normal>
-                    <TextBox
-                      label=""
-                      value={quantity ? quantity : '0.00'}
-                      id="swap-token-input"
-                      onChange={(e) => setQuantity(e.target.value)}
-                      containerClassName={styles.swapTokenATextbox}
-                    />
+                    <div ref={inputRef}>
+                      <TextBox
+                        label=""
+                        value={quantity}
+                        defaultValue="0.00"
+                        id="swap-token-input"
+                        onChange={(e) => {
+                          const changedValue = e.target.value;
+                          if (!changedValue) setQuantity('');
+                          if (
+                            validateNumericValue(changedValue, {
+                              isFloat: !!tokenA?.decimals || true,
+                              ...(!!tokenA?.decimals && { maxDecimals: tokenA.decimals.toString() })
+                            })
+                          ) {
+                            setQuantity(changedValue);
+                          }
+                        }}
+                        containerClassName={styles.swapTokenATextbox}
+                      />
+                    </div>
                   </Flex>
                   <Flex flexDirection="column" w="$fill" alignItems="flex-end" gap="$8">
                     <Card.Outlined
@@ -214,15 +272,7 @@ export const SwapsContainer = (): React.ReactElement => {
                         alignItems="center"
                       >
                         <Flex gap="$8" alignItems="center">
-                          <div
-                            style={{
-                              borderRadius: '100%',
-                              padding: 8,
-                              backgroundColor: '#FFF',
-                              display: 'flex',
-                              justifyContent: 'center'
-                            }}
-                          >
+                          <div className={styles.swapTokenIcon}>
                             {tokenA ? (
                               <img
                                 alt={tokenA.name}
@@ -245,7 +295,12 @@ export const SwapsContainer = (): React.ReactElement => {
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
                               if (assetBalance !== undefined) {
-                                setQuantity(assetBalance.toString());
+                                if (tokenA.decimals !== undefined) {
+                                  const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals);
+                                  setQuantity(formattedBalance.toFixed(tokenA.decimals).toString());
+                                } else {
+                                  setQuantity(assetBalance.toString());
+                                }
                               }
                             }}
                             label={t('swaps.label.selectMaxTokens')}
@@ -254,7 +309,12 @@ export const SwapsContainer = (): React.ReactElement => {
                             onClick={() => {
                               const assetBalance = assetsBalance?.assets?.get(tokenA?.id);
                               if (assetBalance !== undefined) {
-                                setQuantity((assetBalance / BigInt(2)).toString());
+                                if (tokenA.decimals !== undefined) {
+                                  const formattedBalance = Number(assetBalance) / Math.pow(10, tokenA.decimals) / 2;
+                                  setQuantity(formattedBalance.toFixed(tokenA.decimals).toString());
+                                } else {
+                                  setQuantity((assetBalance / BigInt(2)).toString());
+                                }
                               }
                             }}
                             label={t('swaps.label.selectHalfTokens')}
@@ -264,10 +324,18 @@ export const SwapsContainer = (): React.ReactElement => {
                       {!!tokenA?.description && (
                         <Text.Body.Normal color="secondary">
                           {t('swaps.quote.balance', {
-                            assetBalance:
-                              tokenA?.description === 'ADA'
-                                ? Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString())
-                                : assetsBalance?.assets?.get(tokenA?.id)?.toString()
+                            assetBalance: (() => {
+                              if (tokenA?.description === 'ADA') {
+                                return Wallet.util.lovelacesToAdaString(assetsBalance?.coins?.toString());
+                              }
+                              const rawBalance = assetsBalance?.assets?.get(tokenA?.id);
+                              if (rawBalance !== undefined) {
+                                return Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                                  tokenMetadata: { decimals: tokenA?.decimals }
+                                } as Wallet.Asset.AssetInfo);
+                              }
+                              return '0';
+                            })()
                           })}
                         </Text.Body.Normal>
                       )}
@@ -328,10 +396,20 @@ export const SwapsContainer = (): React.ReactElement => {
                         {!!tokenB && (
                           <Text.Body.Normal color="secondary">
                             {t('swaps.quote.balance', {
-                              assetBalance:
-                                tokenB.ticker === 'ADA'
-                                  ? Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString())
-                                  : assetsBalance?.assets?.get(tokenB?.policyId + tokenB?.policyName)?.toString() ?? '0'
+                              assetBalance: (() => {
+                                if (tokenB.ticker === 'ADA') {
+                                  return Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString());
+                                }
+                                const rawBalance = assetsBalance?.assets?.get(
+                                  `${tokenB?.policyId}${tokenB.policyName}`
+                                );
+                                if (rawBalance !== undefined) {
+                                  return Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                                    tokenMetadata: { decimals: tokenB.decimals }
+                                  } as Wallet.Asset.AssetInfo);
+                                }
+                                return '0';
+                              })()
                             })}
                           </Text.Body.Normal>
                         )}
@@ -364,7 +442,9 @@ export const SwapsContainer = (): React.ReactElement => {
                         </Text.Body.Normal>
                       </Flex>
                       <Flex gap={'$16'} alignItems="center">
-                        <Text.Body.Normal weight="$semibold">{estimate.price}</Text.Body.Normal>
+                        <Text.Body.Normal weight="$semibold">
+                          {Number(estimate.price).toFixed(5)} per {tokenA?.description}
+                        </Text.Body.Normal>
                         <IconButton.Secondary
                           icon={<AdjustmentsIcon />}
                           onClick={() => setStage(SwapStage.SelectLiquiditySources)}
@@ -384,9 +464,14 @@ export const SwapsContainer = (): React.ReactElement => {
                   </Flex>
                 </Card.Greyed>
                 <Flex flexDirection={'row'} w="$fill" justifyContent="space-between">
-                  <Text.Body.Normal color="secondary" weight="$semibold">
-                    {t('swaps.label.swapFee')}
-                  </Text.Body.Normal>
+                  <Flex gap="$8">
+                    <Text.Body.Normal color="secondary" weight="$semibold">
+                      {t('swaps.reviewStage.transactionsCosts.serviceFee')}
+                    </Text.Body.Normal>
+                    <Tooltip label={t('swaps.reviewStage.tooltip.serviceFee')} align="start" side="bottom">
+                      <InfoComponent data-testid="service-fee-info" />
+                    </Tooltip>
+                  </Flex>
                   <Text.Body.Normal weight="$semibold">
                     {Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())} ADA
                   </Text.Body.Normal>
@@ -400,12 +485,14 @@ export const SwapsContainer = (): React.ReactElement => {
           <TokenSelectDrawer
             tokens={mappedSwappableTokens.map((token) => ({
               ...token,
-              id: token.assetId
+              id: token.assetId,
+              ...(tokenB && { disabled: token.assetId === `${tokenB.policyId}${tokenB.policyName}` })
             }))}
             selectionType="out"
             doesWalletHaveTokens={mappedSwappableTokens?.length > 0}
             onTokenSelect={(token) => {
               setTokenA(token);
+              setQuantity('0.00');
             }}
             selectedToken={tokenA?.id}
             searchTokens={(item, value) =>
@@ -429,13 +516,25 @@ export const SwapsContainer = (): React.ReactElement => {
                 logoUrl = token.ticker === 'ADA' ? CardanoLogo : undefined;
               }
 
+              const rawBalance = assetsBalance?.assets?.get(token.policyId + token.policyName);
+              let formattedAmount = '-';
+
+              if (token.ticker === 'ADA') {
+                formattedAmount = Wallet.util.lovelacesToAdaString(assetsBalance?.coins.toString());
+              } else if (rawBalance !== undefined) {
+                formattedAmount = Wallet.util.calculateAssetBalance(rawBalance.toString(), {
+                  tokenMetadata: { decimals: token.decimals }
+                } as Wallet.Asset.AssetInfo);
+              }
+
               return {
-                amount: assetsBalance?.assets?.get(token.policyId + token.policyName)?.toString(),
+                amount: formattedAmount,
                 name: token.name,
                 description: token.ticker,
                 decimals: token.decimals,
                 id: token.policyId + token.policyName,
-                logo: logoUrl
+                logo: logoUrl,
+                ...(tokenA && { disabled: token.policyId + token.policyName === tokenA.id })
               };
             })}
             doesWalletHaveTokens={dexTokenList?.length > 0}

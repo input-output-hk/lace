@@ -303,16 +303,8 @@ When(/^I click "Copy" button on "Show public key" page$/, async () => {
   await WalletAddressPage.copyButton.click();
 });
 
-When(/^I fill (correct|incorrect) password and confirm collateral$/, async (type: string) => {
-  const password =
-    type === 'correct' ? String(getTestWallet(TestWalletName.TestAutomationWallet).password) : 'somePassword';
-  await CollateralDrawer.passwordInput.waitForClickable();
-  await CollateralDrawer.passwordInput.setValue(password);
-  await CollateralDrawer.collateralButton.waitForClickable();
-  await CollateralDrawer.collateralButton.click();
-});
-
-When(/^I click "Reclaim collateral" button on collateral drawer$/, async () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+When(/^I click "(Confirm|Reclaim collateral)" button on collateral drawer$/, async (_ignored) => {
   await CollateralDrawer.collateralButton.waitForClickable();
   await CollateralDrawer.collateralButton.click();
 });

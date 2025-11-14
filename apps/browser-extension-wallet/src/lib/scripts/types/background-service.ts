@@ -54,7 +54,7 @@ export enum BrowserViewSections {
   NAMI_MIGRATION = 'nami_migration',
   NAMI_HW_FLOW = 'nami_hw_flow',
   DAPP_EXPLORER = 'dapp-explorer',
-  SWAPS = 'swaps'
+  SWAP = 'swap'
 }
 
 export interface OpenBrowserData {

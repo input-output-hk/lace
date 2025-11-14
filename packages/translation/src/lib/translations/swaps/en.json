@@ -42,5 +42,9 @@
   "swaps.error.unableToRetrieveQuote": "unable to fetch quote.",
   "swaps.error.unableToFetchDexList": "Unable to fetch available DEXs",
   "swaps.disclaimer.heading": "Disclaimer",
-  "swaps.quote.balance": "Balance: {{assetBalance}}"
+  "swaps.quote.balance": "Balance: {{assetBalance}}",
+  "swaps.reviewStage.tooltip.slippage": "The maximum price difference you'll accept between the quote and the executed swap.",
+  "swaps.reviewStage.tooltip.swapRoute": "The sequence of liquidity sources and DEXs used to complete your swap efficiently.",
+  "swaps.reviewStage.tooltip.networkFee": "A blockchain transaction fee paid to validators for confirming and processing your swap.",
+  "swaps.reviewStage.tooltip.serviceFee": "A fee charged by our DEX aggregator partner for routing and executing your trade."
 }
