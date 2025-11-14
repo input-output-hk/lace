@@ -86,7 +86,8 @@ export const SwapsContainer = (): React.ReactElement => {
     stage,
     unsignedTx,
     targetSlippage,
-    disclaimerAcknowledged
+    disclaimerAcknowledged,
+    fetchingQuote
   } = useSwaps();
   const { inMemoryWallet } = useWalletStore();
   const assetsInfo = useAssetInfo();
@@ -132,7 +133,7 @@ export const SwapsContainer = (): React.ReactElement => {
         />
       );
     }
-    if (!estimate && tokenA && tokenB && quantity && Number(quantity) > 0) {
+    if (fetchingQuote) {
       return <Button.CallToAction icon label={t('swaps.btn.fetchingEstimate')} w="$fill" disabled />;
     }
     return (
@@ -148,7 +149,7 @@ export const SwapsContainer = (): React.ReactElement => {
         }}
       />
     );
-  }, [estimate, tokenA, setStage, buildSwap, t, quantity, tokenB]);
+  }, [estimate, tokenA, setStage, buildSwap, t, fetchingQuote]);
 
   const sidePanel = useMemo(() => {
     const titles = {

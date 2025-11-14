@@ -141,6 +141,7 @@ export const SwapsProvider = (): React.ReactElement => {
   const [quantity, setQuantity] = useState<string>('0.00');
   const [dexTokenList, setDexTokenList] = useState<TokenListFetchResponse[]>([]);
   const [stage, setStage] = useState<SwapStage>(SwapStage.Initial);
+  const [fetchingQuote, setFetchingQuote] = useState(false);
 
   // settings
   const [dexList, setDexList] = useState([]);
@@ -261,7 +262,7 @@ export const SwapsProvider = (): React.ReactElement => {
     // User should clear the transaction first if they want updated quotes
     if (unsignedTx || Number(quantity) === 0) return;
     // /docs#/swap/steel_swap_swap_estimate__post
-
+    setFetchingQuote(true);
     const postBody = JSON.stringify(
       createSwapRequestBody({
         tokenA: tokenA.id,
@@ -279,7 +280,8 @@ export const SwapsProvider = (): React.ReactElement => {
       });
       if (!response.ok) {
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
-        setQuantity('0.00');
+        setEstimate(null);
+        setFetchingQuote(false);
         throw new Error('Unexpected response');
       }
       posthog.sendEvent(PostHogAction.SwapsFetchEstimate, {
@@ -299,11 +301,14 @@ export const SwapsProvider = (): React.ReactElement => {
         const errorMessage = 'Invalid estimate response structure';
         logger.error(errorMessage, parsedResponse);
         toast.notify({ duration: 3, text: t('swaps.error.unableToRetrieveQuote') });
+        setFetchingQuote(false);
         throw new Error(errorMessage);
       }
+      setFetchingQuote(false);
       setEstimate(parsedResponse);
     }
-  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setQuantity]);
+    setFetchingQuote(false);
+  }, [tokenA, tokenB, quantity, excludedDexs, unsignedTx, t, posthog, setFetchingQuote]);
 
   useEffect(() => {
     let id: NodeJS.Timeout | undefined;
@@ -540,7 +545,8 @@ export const SwapsProvider = (): React.ReactElement => {
       maxSlippagePercentage,
       transactionHash,
       disclaimerAcknowledged,
-      handleAcknowledgeDisclaimer
+      handleAcknowledgeDisclaimer,
+      fetchingQuote
     }),
     [
       tokenA,
@@ -568,7 +574,8 @@ export const SwapsProvider = (): React.ReactElement => {
       slippagePercentages,
       maxSlippagePercentage,
       transactionHash,
-      disclaimerAcknowledged
+      disclaimerAcknowledged,
+      fetchingQuote
     ]
   );
 

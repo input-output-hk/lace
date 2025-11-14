@@ -129,4 +129,5 @@ export interface SwapProvider {
   transactionHash: string | null;
   disclaimerAcknowledged: boolean;
   handleAcknowledgeDisclaimer: () => void;
+  fetchingQuote: boolean;
 }
