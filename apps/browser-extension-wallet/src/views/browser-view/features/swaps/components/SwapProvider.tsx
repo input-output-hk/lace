@@ -178,7 +178,7 @@ export const SwapsProvider = (): React.ReactElement => {
 
   // Load persisted slippage setting on mount
   useEffect(() => {
-    const loadPersistedSlippage = async () => {
+    const loadPersistedSlippageAndLiquiditySources = async () => {
       try {
         const storedSlippageData = await storage.local.get(SWAPS_TARGET_SLIPPAGE);
         const persistedSlippageValue = storedSlippageData[SWAPS_TARGET_SLIPPAGE];
@@ -215,7 +215,6 @@ export const SwapsProvider = (): React.ReactElement => {
       }
     };
 
-    loadPersistedSlippage();
     const loadDisclaimerAcknowledgement = async () => {
       try {
         const storedAcknowledgementData = await storage.local.get(SWAPS_DISCLAIMER_ACKNOWLEDGED);
@@ -227,6 +226,7 @@ export const SwapsProvider = (): React.ReactElement => {
       }
     };
 
+    loadPersistedSlippageAndLiquiditySources();
     loadDisclaimerAcknowledgement();
   }, []);
 
