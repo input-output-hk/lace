@@ -29,7 +29,11 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
-import { SWAPS_TARGET_SLIPPAGE, SWAPS_EXCLUDED_LIQUIDITY_SOURCES } from '@lib/scripts/types/storage';
+import {
+  SWAPS_TARGET_SLIPPAGE,
+  SWAPS_EXCLUDED_LIQUIDITY_SOURCES,
+  SWAPS_DISCLAIMER_ACKNOWLEDGED
+} from '@lib/scripts/types/storage';
 import { HttpStatusCode } from 'axios';
 
 export const createSteelswapApiHeaders = (): HeadersInit => ({
@@ -157,6 +161,9 @@ export const SwapsProvider = (): React.ReactElement => {
   const [unsignedTx, setUnsignedTx] = useState<BuildSwapResponse | null>();
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
 
+  // Legal disclaimer acceptance, one time acceptance
+  const [disclaimerAcknowledged, setDisclaimerAcknowleged] = useState<boolean | null>(null);
+
   // Reset transaction hash when starting a new swap
   useEffect(() => {
     if (stage === SwapStage.Initial && transactionHash !== null) {
@@ -209,6 +216,18 @@ export const SwapsProvider = (): React.ReactElement => {
     };
 
     loadPersistedSlippage();
+    const loadDisclaimerAcknowledgement = async () => {
+      try {
+        const storedAcknowledgementData = await storage.local.get(SWAPS_DISCLAIMER_ACKNOWLEDGED);
+        const persistedAcknowledgementValue = storedAcknowledgementData[SWAPS_DISCLAIMER_ACKNOWLEDGED];
+        setDisclaimerAcknowleged(persistedAcknowledgementValue ?? false);
+      } catch (error) {
+        // If storage fails, continue with default
+        logger.error('Failed to load persisted swaps dislaimer:', error);
+      }
+    };
+
+    loadDisclaimerAcknowledgement();
   }, []);
 
   // Initialize slippage from feature flag only if not already set by user
@@ -482,6 +501,14 @@ export const SwapsProvider = (): React.ReactElement => {
     });
   }, []);
 
+  const handleAcknowledgeDisclaimer = async () => {
+    await storage.local.set({
+      [SWAPS_DISCLAIMER_ACKNOWLEDGED]: true
+    });
+
+    setDisclaimerAcknowleged(true);
+  };
+
   const contextValue: SwapProvider = useMemo(
     () => ({
       tokenA,
@@ -508,7 +535,9 @@ export const SwapsProvider = (): React.ReactElement => {
       collateral,
       slippagePercentages,
       maxSlippagePercentage,
-      transactionHash
+      transactionHash,
+      disclaimerAcknowledged,
+      handleAcknowledgeDisclaimer
     }),
     [
       tokenA,
@@ -535,7 +564,8 @@ export const SwapsProvider = (): React.ReactElement => {
       collateral,
       slippagePercentages,
       maxSlippagePercentage,
-      transactionHash
+      transactionHash,
+      disclaimerAcknowledged
     ]
   );
 

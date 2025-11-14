@@ -127,4 +127,6 @@ export interface SwapProvider {
   slippagePercentages: number[];
   maxSlippagePercentage: number;
   transactionHash: string | null;
+  disclaimerAcknowledged: boolean;
+  handleAcknowledgeDisclaimer: () => void;
 }
