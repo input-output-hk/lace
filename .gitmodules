@@ -1,0 +1,3 @@
+[submodule "lace-platform"]
+	path = apps/lace-platform
+	url = git@github.com:input-output-hk/lace-platform.git
