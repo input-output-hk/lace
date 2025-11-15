@@ -4,7 +4,7 @@ import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-ext
 export interface NotificationsTopic {
   id: string;
   name: string;
-  subscribed?: boolean;
+  isSubscribed?: boolean;
 }
 
 export interface LaceMessage {
@@ -34,7 +34,7 @@ export interface NotificationsCenterProperties {
   };
   test: {
     add: (notification: LaceNotification) => Promise<void>;
-    init: (data: { topics: NotificationsTopic[]; notifications: LaceNotification[] }) => Promise<void>;
+    init: (data: { notifications: LaceNotification[]; topics: NotificationsTopic[] }) => Promise<void>;
   };
   topics: {
     subscribe: (topicId: NotificationsTopic['id']) => Promise<void>;

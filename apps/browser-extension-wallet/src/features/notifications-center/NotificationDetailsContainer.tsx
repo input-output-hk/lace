@@ -21,10 +21,10 @@ export const NotificationDetailsContent = (): React.ReactElement => {
   const notification = notifications?.find(({ message }) => message.id === notificationId);
 
   useEffect(() => {
-    if (!notification && notifications?.length > 0) {
-      history.push(walletRoutePaths.notifications);
+    if (!notification && notifications) {
+      history.goBack();
     }
-  }, [notification, history, notifications?.length]);
+  }, [notification, history, notifications]);
 
   const onRemoveNotification = useCallback(() => {
     setNotificationIdToRemove(notificationId);
