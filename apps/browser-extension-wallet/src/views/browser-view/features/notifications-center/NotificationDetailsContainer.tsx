@@ -36,10 +36,10 @@ const NotificationDetailsContent = (): React.ReactElement => {
   }, [history]);
 
   useEffect(() => {
-    if (!notification && notifications?.length > 0) {
+    if (!notification && notifications) {
       history.push(walletRoutePaths.notifications);
     }
-  }, [notification, history, notifications?.length]);
+  }, [notification, history, notifications]);
 
   if (!notification) {
     return <></>;
