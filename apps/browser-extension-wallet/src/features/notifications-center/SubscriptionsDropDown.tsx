@@ -50,7 +50,7 @@ export const SubscriptionsDropDown = ({
               </Text.Body.Normal>
               <ToggleSwitch
                 key={topic.id}
-                defaultChecked={topic.subscribed}
+                defaultChecked={topic.isSubscribed}
                 testId={`subscriptions-${topic.id}-`}
                 onCheckedChange={(isChecked) => onTopicChange(topic, isChecked)}
               />
