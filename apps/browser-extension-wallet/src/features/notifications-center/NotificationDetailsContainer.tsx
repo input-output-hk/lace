@@ -22,7 +22,7 @@ export const NotificationDetailsContent = (): React.ReactElement => {
 
   useEffect(() => {
     if (!notification && notifications) {
-      history.push(walletRoutePaths.notifications);
+      history.goBack();
     }
   }, [notification, history, notifications]);
 
