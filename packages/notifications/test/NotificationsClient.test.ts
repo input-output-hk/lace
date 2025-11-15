@@ -9,6 +9,11 @@ import { PubNubProvider } from '../src/providers/PubNub/PubNubProvider';
 import type { NotificationsLogger, Topic } from '../src/types';
 import type { NotificationsProvider, ProviderInitOptions } from '../src/providers';
 import { ConnectionStatus } from '../src/ConnectionStatus';
+// Mock uuid v4 to return a fixed value for testing
+jest.mock('uuid', () => ({
+  ...jest.requireActual('uuid'),
+  v4: jest.fn(() => 'test-user')
+}));
 // Mock PubNub to avoid loading it (it requires TextEncoder)
 // We don't use this mock in tests, we only mock PubNubProvider
 jest.mock('pubnub', () =>
@@ -41,11 +46,12 @@ describe('NotificationsClient', () => {
   let mockOnTopics: jest.Mock;
   let client: NotificationsClient;
   let connectionStatus: ConnectionStatus;
+  let initPromise: Promise<Topic[]>;
   let initShouldThrow: boolean;
+  let initTopics: Topic[];
   let onConnectionStatusChange: (error?: Error) => void;
   let onConnectionStatusChangePromise: Promise<unknown>;
 
-  const userId = 'test-user-id';
   const subscribeKey = 'test-subscribe-key';
 
   /**
@@ -80,24 +86,18 @@ describe('NotificationsClient', () => {
    */
   const waitForClientInit = async (): Promise<void> => {
     // Wait for init to be called
-    const initCalledPromise = new Promise<void>((resolve) => {
-      if (mockProvider.init.mock.calls.length > 0) {
-        resolve();
-        return;
-      }
-      const originalMock = mockProvider.init;
-      mockProvider.init = jest.fn().mockImplementation((options: ProviderInitOptions) => {
-        const result = originalMock(options);
-        resolve();
-        return result;
-      }) as jest.MockedFunction<typeof originalMock>;
-    });
-    await initCalledPromise;
+    await initPromise;
 
-    // Wait for the init promise to resolve
-    if (mockProvider.init.mock.results.length > 0) {
-      await mockProvider.init.mock.results[0].value;
-    }
+    let err;
+    do {
+      err = undefined;
+      try {
+        client.ensureIsOperational();
+      } catch (error) {
+        err = error;
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      }
+    } while (err);
   };
 
   beforeEach(() => {
@@ -110,16 +110,20 @@ describe('NotificationsClient', () => {
     mockOnNotification = jest.fn();
     mockOnTopics = jest.fn();
     initShouldThrow = false;
+    initTopics = [];
 
-    mockProvider = {
-      close: jest.fn().mockResolvedValue(undefined),
-      init: jest.fn().mockImplementation((options: ProviderInitOptions) => {
-        connectionStatus = options.connectionStatus;
-        return initShouldThrow ? Promise.reject(new Error('Init failed')) : Promise.resolve([]);
-      }),
-      subscribe: jest.fn().mockResolvedValue(undefined),
-      unsubscribe: jest.fn().mockResolvedValue(undefined)
-    };
+    initPromise = new Promise<Topic[]>((resolve, reject) => {
+      mockProvider = {
+        close: jest.fn().mockResolvedValue(undefined),
+        init: jest.fn().mockImplementation((options: ProviderInitOptions) => {
+          connectionStatus = options.connectionStatus;
+          initShouldThrow ? reject(new Error('Init failed')) : resolve(initTopics);
+          return initPromise;
+        }),
+        subscribe: jest.fn().mockResolvedValue(undefined),
+        unsubscribe: jest.fn().mockResolvedValue(undefined)
+      };
+    });
 
     (PubNubProvider as jest.Mock).mockClear();
     (PubNubProvider as jest.Mock).mockImplementation(() => mockProvider);
@@ -154,8 +158,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(client).toBeInstanceOf(NotificationsClient);
@@ -185,8 +188,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(client).toBeInstanceOf(NotificationsClient);
@@ -210,8 +212,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(client).toBeInstanceOf(NotificationsClient);
@@ -230,8 +231,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(client).toBeInstanceOf(NotificationsClient);
@@ -248,8 +248,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(PubNubProvider).toHaveBeenCalledWith(
@@ -272,8 +271,7 @@ describe('NotificationsClient', () => {
             subscribeKey,
             heartbeatInterval: 30
           }
-        },
-        userId
+        }
       });
 
       expect(PubNubProvider).toHaveBeenCalledWith(
@@ -301,8 +299,7 @@ describe('NotificationsClient', () => {
           storage: mockStorage,
           // @ts-expect-error Testing invalid input
           // eslint-disable-next-line unicorn/no-null
-          provider: null,
-          userId
+          provider: null
         });
       }).toThrow('provider must be an object');
     });
@@ -315,8 +312,7 @@ describe('NotificationsClient', () => {
           onTopics: mockOnTopics,
           storage: mockStorage,
           // @ts-expect-error Testing invalid input
-          provider: 'invalid',
-          userId
+          provider: 'invalid'
         });
       }).toThrow('provider must be an object');
     });
@@ -332,8 +328,7 @@ describe('NotificationsClient', () => {
             name: 'PubNub',
             // @ts-expect-error Testing invalid input
             configuration: 'invalid'
-          },
-          userId
+          }
         });
       }).toThrow('provider.configuration must be an object');
     });
@@ -351,8 +346,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('logger must be an object');
     });
@@ -370,8 +364,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('logger.info must be a function');
     });
@@ -389,8 +382,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('logger.warn must be a function');
     });
@@ -408,8 +400,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('logger.error must be a function');
     });
@@ -427,8 +418,7 @@ describe('NotificationsClient', () => {
           },
           onNotification: mockOnNotification,
           onTopics: mockOnTopics,
-          storage: mockStorage,
-          userId
+          storage: mockStorage
         });
       }).toThrow('provider.name must be a string');
     });
@@ -446,8 +436,7 @@ describe('NotificationsClient', () => {
           },
           onNotification: mockOnNotification,
           onTopics: mockOnTopics,
-          storage: mockStorage,
-          userId
+          storage: mockStorage
         });
       }).toThrow('provider.name must be one of the following: PubNub');
     });
@@ -466,8 +455,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('onConnectionStatusChange must be a function');
     });
@@ -485,8 +473,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('onNotification must be a function');
     });
@@ -504,8 +491,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('onTopics must be a function');
     });
@@ -523,8 +509,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('storage must be an object');
     });
@@ -542,8 +527,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('storage.getItem must be a function');
     });
@@ -561,8 +545,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('storage.setItem must be a function');
     });
@@ -580,8 +563,7 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('storage.removeItem must be a function');
     });
@@ -600,29 +582,9 @@ describe('NotificationsClient', () => {
             configuration: {
               subscribeKey
             }
-          },
-          userId
+          }
         });
       }).toThrow('storageKeysPrefix must be a string');
-    });
-
-    test('should throw error when userId is not a string', () => {
-      expect(() => {
-        new NotificationsClient({
-          logger: mockLogger,
-          onNotification: mockOnNotification,
-          onTopics: mockOnTopics,
-          storage: mockStorage,
-          provider: {
-            name: 'PubNub',
-            configuration: {
-              subscribeKey
-            }
-          },
-          // @ts-expect-error Testing invalid input
-          userId: 123
-        });
-      }).toThrow('userId must be a string');
     });
 
     test('should throw error when heartbeatInterval is not a number', () => {
@@ -639,8 +601,7 @@ describe('NotificationsClient', () => {
               // @ts-expect-error Testing invalid input
               heartbeatInterval: 'invalid'
             }
-          },
-          userId
+          }
         });
       }).toThrow('provider.configuration.heartbeatInterval must be a number');
     });
@@ -659,8 +620,7 @@ describe('NotificationsClient', () => {
               // @ts-expect-error Testing invalid input
               skipAuthentication: 'invalid'
             }
-          },
-          userId
+          }
         });
       }).toThrow('provider.configuration.skipAuthentication must be a boolean');
     });
@@ -678,8 +638,7 @@ describe('NotificationsClient', () => {
               // @ts-expect-error Testing invalid input
               subscribeKey: 123
             }
-          },
-          userId
+          }
         });
       }).toThrow('provider.configuration.subscribeKey must be a string');
     });
@@ -698,8 +657,7 @@ describe('NotificationsClient', () => {
               // @ts-expect-error Testing invalid input
               tokenEndpoint: 123
             }
-          },
-          userId
+          }
         });
       }).toThrow('provider.configuration.tokenEndpoint must be a string');
     });
@@ -717,8 +675,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       try {
@@ -744,8 +701,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -777,8 +733,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       expect(() => {
@@ -797,8 +752,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -816,7 +770,7 @@ describe('NotificationsClient', () => {
     const topic2 = createTopic('topic-2');
 
     beforeEach(async () => {
-      mockProvider.init.mockResolvedValueOnce([topic1, topic2]);
+      initTopics = [topic1, topic2];
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -828,8 +782,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       // Wait for initialization
@@ -865,7 +818,7 @@ describe('NotificationsClient', () => {
     const topic2 = createTopic('topic-2');
 
     beforeEach(async () => {
-      mockProvider.init.mockResolvedValueOnce([topic1, topic2]);
+      initTopics = [topic1, topic2];
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -877,8 +830,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       // Wait for initialization
@@ -915,7 +867,7 @@ describe('NotificationsClient', () => {
   describe('init', () => {
     test('should initialize with topics from provider', async () => {
       const topics = [createTopic('topic-1'), createTopic('topic-2')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -927,8 +879,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -939,7 +890,7 @@ describe('NotificationsClient', () => {
 
     test('should restore subscribed topics from storage', async () => {
       const topics = [createTopic('topic-1'), createTopic('topic-2')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
       await mockStorage.setItem('notifications:subscribedTopics', ['topic-1']);
       await mockStorage.setItem('notifications:unsubscribedTopics', []);
 
@@ -955,8 +906,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -967,7 +917,7 @@ describe('NotificationsClient', () => {
 
     test('should auto-subscribe to topics with autoSubscribe flag', async () => {
       const topics = [createTopic('topic-1', true), createTopic('topic-2', false)];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
 
       const subscribePromise = waitForSubscribe();
 
@@ -981,8 +931,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -994,7 +943,7 @@ describe('NotificationsClient', () => {
 
     test('should handle invalid subscribed topics from storage', async () => {
       const topics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
       await mockStorage.setItem('notifications:subscribedTopics', 'invalid' as any);
       await mockStorage.setItem('notifications:unsubscribedTopics', []);
 
@@ -1008,8 +957,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1019,7 +967,7 @@ describe('NotificationsClient', () => {
 
     test('should handle invalid unsubscribed topics from storage', async () => {
       const topics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
       await mockStorage.setItem('notifications:subscribedTopics', []);
       await mockStorage.setItem('notifications:unsubscribedTopics', 123 as any);
 
@@ -1033,8 +981,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1046,7 +993,7 @@ describe('NotificationsClient', () => {
   describe('trackTopics', () => {
     test('should handle new topics with autoSubscribe', async () => {
       const initialTopics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(initialTopics);
+      initTopics = initialTopics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1058,8 +1005,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1078,7 +1024,7 @@ describe('NotificationsClient', () => {
 
     test('should filter out removed topics', async () => {
       const initialTopics = [createTopic('topic-1'), createTopic('topic-2')];
-      mockProvider.init.mockResolvedValueOnce(initialTopics);
+      initTopics = initialTopics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1090,8 +1036,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1114,7 +1059,7 @@ describe('NotificationsClient', () => {
 
     test('should retry subscribe when connection is restored after error', async () => {
       const initialTopics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(initialTopics);
+      initTopics = initialTopics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1126,8 +1071,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1184,7 +1128,7 @@ describe('NotificationsClient', () => {
 
     test('should catch and log error when storage fails during updateTopics', async () => {
       const initialTopics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(initialTopics);
+      initTopics = initialTopics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1196,8 +1140,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       await waitForClientInit();
@@ -1225,7 +1168,7 @@ describe('NotificationsClient', () => {
   describe('notifyTopics', () => {
     test('should notify topics when they change', async () => {
       const topics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1237,8 +1180,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       // Wait for init to complete
@@ -1249,7 +1191,7 @@ describe('NotificationsClient', () => {
 
     test('should handle error in onTopics callback', async () => {
       const topics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(topics);
+      initTopics = topics;
 
       const errorCallback = jest.fn(() => {
         throw new Error('Callback error');
@@ -1265,8 +1207,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       // Wait for init to complete
@@ -1277,7 +1218,7 @@ describe('NotificationsClient', () => {
 
     test('should not notify when provider calls onTopics twice with same value', async () => {
       const initialTopics = [createTopic('topic-1')];
-      mockProvider.init.mockResolvedValueOnce(initialTopics);
+      initTopics = initialTopics;
 
       client = new NotificationsClient({
         logger: mockLogger,
@@ -1289,8 +1230,7 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
 
       // Wait for init to complete
@@ -1349,9 +1289,10 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
+
+      await waitForClientInit();
 
       connectionStatus.setOk();
 
@@ -1372,13 +1313,118 @@ describe('NotificationsClient', () => {
           configuration: {
             subscribeKey
           }
-        },
-        userId
+        }
       });
+
+      await waitForClientInit();
 
       connectionStatus.setError(connectionError);
 
       await expect(onConnectionStatusChangePromise).resolves.toBe(connectionError);
+    });
+  });
+
+  describe('getUserId', () => {
+    test('should throw error when userId in storage is not a string', async () => {
+      await mockStorage.setItem('notifications:userId', 123 as any);
+
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            subscribeKey
+          }
+        }
+      });
+
+      // Wait for init to complete (it will fail)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Verify error was logged
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient: User ID got from storage is not a string',
+        123
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient: Failed to initialize notifications client',
+        expect.any(TypeError)
+      );
+    });
+
+    test('should throw error when userId in storage is not a valid UUID', async () => {
+      await mockStorage.setItem('notifications:userId', 'invalid-uuid');
+
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            subscribeKey
+          }
+        }
+      });
+
+      // Wait for init to complete (it will fail)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Verify error was logged
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient: Failed to initialize notifications client',
+        expect.any(Error)
+      );
+      const errorCall = mockLogger.error.mock.calls.find(
+        (call) => call[0] === 'NotificationsClient: Failed to initialize notifications client'
+      );
+      expect(errorCall).toBeDefined();
+      if (errorCall) {
+        expect(errorCall[1]).toBeInstanceOf(Error);
+        expect((errorCall[1] as Error).message).toBe(
+          'NotificationsClient: User ID got from storage is not a valid UUID: invalid-uuid'
+        );
+      }
+    });
+
+    test('should not fail when userId in storage is a valid UUID', async () => {
+      const validUserId = '550e8400-e29b-41d4-a716-446655440000';
+      await mockStorage.setItem('notifications:userId', validUserId);
+
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            subscribeKey
+          }
+        }
+      });
+
+      // Wait for init to complete
+      await waitForClientInit();
+
+      // Verify no errors were logged
+      expect(mockLogger.error).not.toHaveBeenCalledWith(
+        'NotificationsClient: User ID got from storage is not a string',
+        expect.anything()
+      );
+      expect(mockLogger.error).not.toHaveBeenCalledWith(
+        'NotificationsClient: Failed to initialize notifications client',
+        expect.any(Error)
+      );
+
+      // Verify init was called successfully
+      expect(mockProvider.init).toHaveBeenCalled();
+      const initCall = mockProvider.init.mock.calls[0][0] as ProviderInitOptions;
+      expect(initCall.userId).toBe(validUserId);
     });
   });
 });

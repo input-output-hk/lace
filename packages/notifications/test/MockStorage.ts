@@ -7,6 +7,10 @@ import type { NotificationsStorage } from '../src/types';
 export class MockStorage implements NotificationsStorage {
   private readonly store = new Map<string, unknown>();
 
+  constructor(userId?: string) {
+    if (userId) this.store.set('notifications:userId', userId);
+  }
+
   getItem<T>(key: string): Promise<T | undefined> {
     return Promise.resolve(this.store.get(key) as T | undefined);
   }

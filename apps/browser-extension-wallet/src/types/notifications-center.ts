@@ -34,7 +34,7 @@ export interface NotificationsCenterProperties {
   };
   test: {
     add: (notification: LaceNotification) => Promise<void>;
-    init: (data: { topics: NotificationsTopic[]; notifications: LaceNotification[] }) => Promise<void>;
+    init: (data: { notifications: LaceNotification[]; topics: NotificationsTopic[] }) => Promise<void>;
   };
   topics: {
     subscribe: (topicId: NotificationsTopic['id']) => Promise<void>;

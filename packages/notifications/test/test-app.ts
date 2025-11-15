@@ -4,7 +4,8 @@ import { MockStorage } from './MockStorage';
 
 const controlChannel = 'control.topics';
 
-const storage = new MockStorage();
+const userId = 'test-user-id';
+const storage = new MockStorage(userId);
 
 const log = (...args: unknown[]) => {
   // eslint-disable-next-line no-console
@@ -18,8 +19,6 @@ process.on('exit', (code) => {
 
 // eslint-disable-next-line max-statements
 (async () => {
-  const userId = 'test-user-id';
-
   log('Starting test app; userId', userId);
 
   const publishKey = process.env.PUBNUB_PUBLISH_KEY;
@@ -78,8 +77,7 @@ process.on('exit', (code) => {
       name: 'PubNub',
       configuration: { skipAuthentication: true, subscribeKey }
     },
-    storage,
-    userId
+    storage
   });
 
   await new Promise((resolve) => setTimeout(resolve, 2000));

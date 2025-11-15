@@ -42,8 +42,6 @@ export interface PubNubProviderOptions extends PubNubProviderConfiguration {
   storage: NotificationsStorage;
   /** Storage keys manager for generating storage key names. */
   storageKeys: StorageKeys;
-  /** User ID for PubNub authentication. */
-  userId: string;
 }
 
 /**
@@ -173,7 +171,6 @@ export class PubNubProvider implements NotificationsProvider {
   private storageKeys: StorageKeys;
   private tokenEndpoint: string;
   private topics: Topic[] = [];
-  private userId: string;
 
   /**
    * Creates a new PubNubProvider instance.
@@ -181,7 +178,7 @@ export class PubNubProvider implements NotificationsProvider {
    * @param options - Configuration options for the provider
    */
   constructor(options: PubNubProviderOptions) {
-    const { heartbeatInterval, logger, skipAuthentication, storage, storageKeys, subscribeKey, userId } = {
+    const { heartbeatInterval, logger, skipAuthentication, storage, storageKeys, subscribeKey } = {
       heartbeatInterval: 15,
       // TODO: Replace with production subscribe key once available
       subscribeKey: 'production subscribe key',
@@ -197,14 +194,12 @@ export class PubNubProvider implements NotificationsProvider {
     this.storage = storage;
     this.storageKeys = storageKeys;
     this.tokenEndpoint = tokenEndpoint;
-    this.userId = userId;
     this.config = {
       // authKey,
       autoNetworkDetection: true,
       heartbeatInterval,
       restore: true,
-      subscribeKey,
-      userId
+      subscribeKey
     };
   }
 
@@ -348,12 +343,12 @@ export class PubNubProvider implements NotificationsProvider {
    *
    * @returns Promise that resolves to the authentication token
    */
-  private async getAuthKey(): Promise<string> {
+  private async getAuthKey(userId: string): Promise<string> {
     const tokenManager = new TokenManager(
       new PubNubFunctionClient(this.tokenEndpoint),
       this.storage,
       this.storageKeys,
-      this.userId
+      userId
     );
 
     const token = await tokenManager.getValidToken();
@@ -405,10 +400,10 @@ export class PubNubProvider implements NotificationsProvider {
    * @returns Promise that resolves to an array of available topics
    */
   async init(options: ProviderInitOptions): Promise<Topic[]> {
-    const { connectionStatus, onNotification, onTopics } = options;
-    const authKey = this.skipAuthentication ? undefined : await this.getAuthKey();
+    const { connectionStatus, onNotification, onTopics, userId } = options;
+    const authKey = this.skipAuthentication ? undefined : await this.getAuthKey(userId);
 
-    this.pubnub = new PubNub({ ...this.config, authKey });
+    this.pubnub = new PubNub({ ...this.config, authKey, userId });
     this.onNotification = onNotification;
     this.onTopics = onTopics;
     this.addListeners(connectionStatus);

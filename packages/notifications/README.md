@@ -40,7 +40,6 @@ const storage = {
 
 // Create the client
 const client = new NotificationsClient({
-  userId: 'user-123',
   storage,
   provider: {
     name: 'PubNub',
@@ -90,7 +89,6 @@ new NotificationsClient(options: NotificationsClientOptions)
 
 **Options:**
 
-- `userId` (required): User ID for provider authentication
 - `storage` (required): Storage adapter for persisting state
 - `provider` (required): Provider configuration
   - `name` (required): Provider name (currently only `'PubNub'` is supported)
@@ -105,6 +103,8 @@ new NotificationsClient(options: NotificationsClientOptions)
 - `onConnectionStatusChange` (optional): Callback invoked when connection status changes
 - `logger` (optional): Logger instance (defaults to `console`)
 - `storageKeysPrefix` (optional): Prefix for storage keys (default: `'notifications'`)
+
+**Note:** The client automatically generates and manages a user ID (UUID v4) for provider authentication. The user ID is stored in storage under the key `{prefix}:userId` and persists across sessions. If an invalid user ID is found in storage, the client will throw an error during initialization.
 
 #### Methods
 
@@ -361,6 +361,7 @@ Authentication is handled automatically via PubNub Functions. The client request
 
 The client stores the following keys in your storage adapter:
 
+- `{prefix}:userId` - User ID (UUID v4) for provider authentication, automatically generated on first use
 - `{prefix}:subscribedTopics` - Array of subscribed topic IDs
 - `{prefix}:unsubscribedTopics` - Array of unsubscribed topic IDs
 

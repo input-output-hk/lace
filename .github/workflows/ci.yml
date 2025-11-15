@@ -83,6 +83,12 @@ jobs:
           DIR: packages/bitcoin
           NAME: packages-bitcoin
 
+      - name: Build notifications
+        uses: ./.github/actions/build/package
+        with:
+          DIR: packages/notifications
+          NAME: packages-notifications
+
   unitTests:
     name: Unit tests
     runs-on: ubuntu-22.04
@@ -139,6 +145,12 @@ jobs:
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
+
+      - name: Download packages-notifications
+        uses: actions/download-artifact@v5
+        with:
+          name: packages-notifications
+          path: packages/notifications/dist
 
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -204,6 +216,12 @@ jobs:
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
+
+      - name: Download packages-notifications
+        uses: actions/download-artifact@v5
+        with:
+          name: packages-notifications
+          path: packages/notifications/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -287,6 +305,12 @@ jobs:
         with:
           name: packages-bitcoin
           path: packages/bitcoin/dist
+
+      - name: Download packages-notifications
+        uses: actions/download-artifact@v5
+        with:
+          name: packages-notifications
+          path: packages/notifications/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
