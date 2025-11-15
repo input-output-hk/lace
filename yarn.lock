@@ -12629,6 +12629,7 @@ __metadata:
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
     "@lace/nami": ^0.1.0
+    "@lace/notifications": 0.1.0
     "@lace/staking": 0.1.0
     "@lace/translation": 0.1.0
     "@openpgp/web-stream-tools": 0.0.11-patch-0
@@ -12957,7 +12958,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/notifications@workspace:packages/notifications":
+"@lace/notifications@0.1.0, @lace/notifications@workspace:packages/notifications":
   version: 0.0.0-use.local
   resolution: "@lace/notifications@workspace:packages/notifications"
   dependencies:

@@ -75,6 +75,7 @@
     "@lace/common": "0.1.0",
     "@lace/core": "0.1.0",
     "@lace/nami": "^0.1.0",
+    "@lace/notifications": "0.1.0",
     "@lace/staking": "0.1.0",
     "@lace/translation": "0.1.0",
     "@pdfme/generator": "^4.0.2",
