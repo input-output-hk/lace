@@ -29,7 +29,7 @@ const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
   const add = async (notification: LaceNotification): Promise<void> => {
     const topic = topics.find((t) => t.id === notification.message.topicId);
 
-    if (topic?.subscribed) {
+    if (topic?.isSubscribed) {
       notifications.unshift(notification);
       notifications$.next(notifications);
     }
@@ -54,7 +54,7 @@ const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
   };
 
   const subscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
-    for (const topic of topics) if (topic.id === topicId) topic.subscribed = true;
+    for (const topic of topics) if (topic.id === topicId) topic.isSubscribed = true;
 
     topics$.next(topics);
 
@@ -62,7 +62,7 @@ const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
   };
 
   const unsubscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
-    for (const topic of topics) if (topic.id === topicId) delete topic.subscribed;
+    for (const topic of topics) if (topic.id === topicId) delete topic.isSubscribed;
 
     topics$.next(topics);
 
