@@ -1,0 +1,51 @@
+{
+  "name": "@lace/notifications",
+  "version": "0.1.0",
+  "description": "Notifications package for Lace",
+  "homepage": "https://github.com/input-output-hk/lace/blob/master/packages/notifications/README.md",
+  "bugs": {
+    "url": "https://github.com/input-output-hk/lace/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/input-output-hk/lace.git"
+  },
+  "license": "Apache-2.0",
+  "author": "IOHK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/index.d.ts",
+  "directories": {
+    "lib": "src",
+    "test": "test"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "run -T rollup -c rollup.config.js",
+    "cleanup": "yarn exec rm -rf dist node_modules",
+    "format-check": "echo \"@lace/notifications: no format-check command specified\"",
+    "lint": "cd ../.. && yarn eslint-cmd \"packages/notifications/**/*.{js,ts,tsx}\"",
+    "prepack": "yarn build",
+    "prepare": "ts-patch install -s",
+    "prestart": "yarn build",
+    "start": "node dist/index.js",
+    "test": "NODE_ENV=test run -T jest -c ./test/jest.config.js",
+    "test:app": "tsx test/test-app.ts",
+    "test:app:watch": "tsx watch test/test-app.ts",
+    "type-check": "echo \"@lace/notifications: no type-check command specified\"",
+    "watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "pubnub": "^10.2.1"
+  },
+  "devDependencies": {
+    "@types/pubnub": "^7.4.2",
+    "tsx": "^4.20.6",
+    "typescript": "^4.9.5"
+  }
+}
