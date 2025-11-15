@@ -45,6 +45,13 @@ e2eNotificationsCenter = {
     if (typeof notification.message !== 'object' || notification.message === null)
       return 'notification.message must be an object';
 
+    for (const key in notification)
+      if (!['message', 'read'].includes(key)) return `Unknown attribute in notification: ${key}`;
+
+    for (const key in notification.message)
+      if (!['id', 'title', 'body', 'publisher', 'chain', 'format', 'topicId'].includes(key))
+        return `Unknown attribute in notification.message: ${key}`;
+
     const { message } = notification;
 
     if (typeof message.id !== 'string') return 'notification.message.id must be a string';
@@ -69,9 +76,13 @@ e2eNotificationsCenter = {
 
   validateTopic: (topic) => {
     if (typeof topic !== 'object' || topic === null) return 'topic must be an object';
+
+    for (const key in topic)
+      if (!['id', 'name', 'isSubscribed'].includes(key)) return `Unknown attribute in topic: ${key}`;
+
     if (typeof topic.id !== 'string') return 'topic.id must be a string';
     if (typeof topic.name !== 'string') return 'topic.name must be a string';
-    if (topic.subscribed !== undefined && typeof topic.subscribed !== 'boolean')
-      return 'topic.subscribed must be a boolean';
+    if (topic.isSubscribed !== undefined && typeof topic.isSubscribed !== 'boolean')
+      return 'topic.isSubscribed must be a boolean';
   }
 };
