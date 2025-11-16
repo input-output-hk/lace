@@ -1,0 +1,4736 @@
+{
+  "/categories": {
+    "data": ["games", "defi", "collectibles", "marketplaces", "high-risk", "gambling", "exchanges", "social", "other"]
+  },
+  "/dapps": {
+    "data": [
+      {
+        "dappId": 47712,
+        "name": "DexHunter",
+        "description": "DexHunter - Biggest Cardano DEX Aggregator for Optimal DeFi Trading🏹",
+        "fullDescription": "<p>Explore<strong> DexHunter</strong> for seamless, efficient DeFi trading on Cardano. Access top DEXs, find the best swap rates &amp; enhance your DeFi experience.</p>",
+        "logo": "assets/dexhunter.png",
+        "website": "https://app.dexhunter.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/Csbx3bhanG",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/DexHunterIO",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 37034,
+          "transactionsPercentageChange": -13.09,
+          "uaw": 5170,
+          "uawPercentageChange": -16.04,
+          "newUAW": 947,
+          "volume": 100813.91,
+          "volumePercentageChange": -29.23,
+          "balance": 1760.58,
+          "balancePercentageChange": -12.61
+        }
+      },
+      {
+        "dappId": 18510,
+        "name": "Minswap",
+        "description": "Minswap is a decentralized exchange on Cardano where you can trade your favorite tokens.",
+        "fullDescription": "<p>Explore the Minswap Way!</p>\n<p>Main features:&nbsp;</p>\n<p>- Trade your favourite tokens from your mobile with MinWallet.&nbsp;</p>\n<p>- Provide Liquidity or Zap to earn trade fees.&nbsp;</p>\n<p>- MIN Farms and Double Farms: Stake your tokens on Minswap’s Farms to get rewards.&nbsp;</p>\n<p>- Portfolio : Keeping track of all of your liquidity.</p>\n<p>- Launch Bowl: Get exclusive access to farm new tokens by being a liquidity provider!</p>",
+        "logo": "assets/minswap.png",
+        "website": "https://app.minswap.org/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/minswap",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/minswap",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://minswap-labs.medium.com",
+            "type": "medium"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/MinswapMafia",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/MinswapDEX",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": 13366,
+          "transactionsPercentageChange": 7.87,
+          "uaw": 2512,
+          "uawPercentageChange": -3.64,
+          "newUAW": 428,
+          "volume": 2006271.17,
+          "volumePercentageChange": -12.49,
+          "balance": 6621439.55,
+          "balancePercentageChange": -15.08
+        }
+      },
+      {
+        "dappId": 19446,
+        "name": "Wingriders",
+        "description": "WingRiders is an Automated Market Maker (AMM) Decentralized EXchange (DEX) built on top of the Cardano using the eUTxO model on the main chain.",
+        "fullDescription": "<p>WingRiders is an Automated Market Maker (AMM) Decentralized EXchange (DEX) built on top of the Cardano using the eUTxO model on the main chain. WingRiders’ objective is to be an infrastructure element for the whole Cardano ecosystem, with simple integration into any wallet or Dapp. Accessible via many platforms, supporting connectors and hardware wallets such as Ledger and Trezor. The platform is fully decentralized and trustless, supporting swaps between Cardano native tokens. Plans exceed the AMM, L1 and potentially even Cardano itself</p>",
+        "logo": "assets/wingriders.png",
+        "website": "https://www.wingriders.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/wingriders",
+            "type": "discord"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/WingRidersChat",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/wingriderscom",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UC1eo9BYlzkc3sU6F3Zo3sKw",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 9958,
+          "transactionsPercentageChange": 13.31,
+          "uaw": 1448,
+          "uawPercentageChange": 12.34,
+          "newUAW": 288,
+          "volume": 1069663.68,
+          "volumePercentageChange": -25.45,
+          "balance": 364904.02,
+          "balancePercentageChange": -20.96
+        }
+      },
+      {
+        "dappId": 18492,
+        "name": "JPG Store",
+        "description": "Discover artwork, explore communities, and\nsupport artists on Cardano.",
+        "fullDescription": "<p>JPG store is a Cardano NFT marketplace that allows you to discover artwork, support creators and join communities on a decentralized blockchain.</p>\n<p>On JPG, you can buy &amp; sell Cardano NFTs, make offers, customize your profile, and much more to make the Cardano NFT experience even better!</p>\n<p>For creators, JPG store has a Launchpad to support artists in the Cardano community as well as a minting feature that enables artists to turn their artwork into an NFT!</p>",
+        "logo": "assets/jpg-store.png",
+        "website": "https://www.jpg.store/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/jpgstorenft",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/jpg.store",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/jpgstoreNFT",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/jpgstoreNFT",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "20",
+            "name": "Videos",
+            "slug": "videos"
+          },
+          {
+            "id": "22",
+            "name": "Metaverse",
+            "slug": "metaverse"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 6184,
+          "transactionsPercentageChange": -6.87,
+          "uaw": 1053,
+          "uawPercentageChange": -13.05,
+          "newUAW": 93,
+          "volume": 93.83,
+          "volumePercentageChange": 27.33,
+          "balance": 480114.09,
+          "balancePercentageChange": -22.8
+        }
+      },
+      {
+        "dappId": 35836,
+        "name": "NMKR Minting",
+        "description": "Create, Mint & Sell NFTs on your own website.",
+        "fullDescription": "<p><strong>NMKR is a leading provider of NFT minting infrastructure on the Cardano blockchain.&nbsp;</strong></p>\n<p>With a suite of innovative tools, the company helps brands, companies, and enterprises launch custom Cardano NFT projects with ease. As the largest NFT infrastructure provider on the Cardano blockchain, NMKR has successfully minted over 1.6 million NFTs to date.&nbsp;</p>\n<p>Using NMKR, brands, companies, and artists can quickly and easily mint their NFTs. NMKR's cutting-edge technology enables hassle-free and swift <strong>NFT Minting</strong> with a strong focus on accessibility. Its reputation and partnerships with prominent entities in the Cardano blockchain space make it a trusted and reliable partner for all NFT minting endeavours.</p>",
+        "logo": "assets/nmkr-minting.png",
+        "website": "https://www.nmkr.io/minting",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "blog",
+            "url": "https://www.nmkr.io/blog",
+            "type": "blog"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/G6edujdbSU",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/nftmakerio",
+            "type": "github"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/nmkrtoken",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/nmkr_io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@nmkr_io",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "11",
+            "name": "Content Creation",
+            "slug": "content-creation"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 1085,
+          "transactionsPercentageChange": 11.17,
+          "uaw": 1006,
+          "uawPercentageChange": 11.28,
+          "newUAW": 999,
+          "volume": 44125.14,
+          "volumePercentageChange": 778.81,
+          "balance": 24401.84,
+          "balancePercentageChange": -30.68
+        }
+      },
+      {
+        "dappId": 19472,
+        "name": "SundaeSwap",
+        "description": "We contribute to the Sweetest Decentralized Exchange on Cardano 🍨 LIVE ON MAINNET!",
+        "fullDescription": "<p>SundaeSwap is a decentralized exchange built for the Cardano blockchain. It allows participants of the blockchain to provide liq- uidity and create a market for others to exchange their native tokens. In return, swappers pay a small fee and liquidity providers earn a re- turn on their deposit. This and future whitepapers will outline an initial product modeled after the protocol popularized by Uniswap, with several innovative adaptations for the Cardano blockchain.</p>",
+        "logo": "assets/sundaeswap.png",
+        "website": "https://sundaeswap.finance",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/Sundae",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://sundaeswap-finance.medium.com",
+            "type": "medium"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/SundaeSwap",
+            "type": "reddit"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/SundaeSwap",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 2220,
+          "transactionsPercentageChange": -2.5,
+          "uaw": 520,
+          "uawPercentageChange": 4.63,
+          "newUAW": 140,
+          "volume": 680811.1,
+          "volumePercentageChange": -2.9,
+          "balance": 47420.73,
+          "balancePercentageChange": -19.98
+        }
+      },
+      {
+        "dappId": 51327,
+        "name": "ADA Handle",
+        "description": "ADA Handle is the leading naming solution on Cardano. An NFT that resolves to an address wherever it resides in.\nover 68k holders and 250k + mints.",
+        "fullDescription": "<p><strong>ADA Handle</strong> is the leading naming solution on <strong>Cardano</strong>. An NFT that resolves to an address wherever it resides in. User-friendly, memorable name that acts as a proxy for a complex Cardano wallet address, allowing users to send and receive cryptocurrency on the Cardano blockchain using a simple, human-readable identifier instead of a long string of numbers and letters; essentially, it's like a domain name for your Cardano wallet address, making transactions easier to manage.</p>\n<p><br></p>\n<p><strong>Over 68k holders and 255k minted Handles.</strong></p>",
+        "logo": "assets/ada-handle.png",
+        "website": "https://handle.me",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles", "marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/nwbZxANayw",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/koralabs",
+            "type": "github"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/adahandle",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/adahandle",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@ada.handle",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 263,
+          "transactionsPercentageChange": -40.5,
+          "uaw": 142,
+          "uawPercentageChange": -26.8,
+          "newUAW": 85,
+          "volume": 5294.33,
+          "volumePercentageChange": -46.44,
+          "balance": 19861.51,
+          "balancePercentageChange": -1.37
+        }
+      },
+      {
+        "dappId": 51490,
+        "name": "Liqwid Finance",
+        "description": "Liqwid is a lending and borrowing protocol on Cardano. Users can supply assets, earn interests and open overcollateralized loans without intermediaries.",
+        "fullDescription": "<p>Liqwid is a non-custodial liquidity protocol designed for lending and borrowing Cardano native assets. The protocol is built on Cardano using Plutus, the smart contract programming language of the Cardano blockchain. It comprises decentralized and audited smart contracts that empower users to deposit liquidity in a money market, earn interest, and open overcollateralized loans directly, all without intermediaries. This approach ensures a permissionless and secure financial environment.</p>",
+        "logo": "assets/liqwid-finance.png",
+        "website": "https://liqwid.finance/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/liqwid-finance",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/PZ3GUWamY8",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/liqwid-labs",
+            "type": "github"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/liqwidfinance",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@LiqwidLabs",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": 1267,
+          "transactionsPercentageChange": 22.18,
+          "uaw": 142,
+          "uawPercentageChange": 4.41,
+          "newUAW": 40,
+          "volume": 340348245.4,
+          "volumePercentageChange": -3.29,
+          "balance": 2912356.2,
+          "balancePercentageChange": 29.64
+        }
+      },
+      {
+        "dappId": 51428,
+        "name": "DANZO",
+        "description": "DANZO APP is a MEMEFI hub that offers a Game Theory arena where holders can compete with each other, get a loan and have fun with our DANZO themed games!",
+        "fullDescription": "<p>DANZO APP consists of the DANZO ARENA:</p>\n<p><br></p>\n<p>The DANZO ARENA is exclusive to DANZO holders. Holders deposit their tokens and receive the appropriate amount of $HODLDANZO, which allows them to swap back to DANZO when they withdraw.</p>\n<p>After the deposit, the tokens are added to the DANZO ARENA TVL together with other players’ tokens. There is a standard withdrawal fee equal to 10% of the deposit. Of this fee, 8% is split among all the other players still in the game, and 2% is burned forever.</p>\n<p><br></p>\n<p>Besides the basic function of the DANZO ARENA, which is live right now, DANZO ARENA participants will have the option to BORROW DANZO up to 30% of their ARENA POSITION with a fixed interest rate and loan duration.</p>\n<p>Collateral for these loans is the amount of DANZO deposited plus the profits from people exiting the arena. This ensures a healthy and safe borrow-to-collateral ratio since we are operating with the same pair. Price fluctuations do not matter, and liquidation only occurs when the loan duration expires.</p>\n<p>This gives the ability to DANZO ARENA participants to either short DANZO if they dare, take advantage of LP farming etc.</p>\n<p><br></p>\n<p>Besides the ARENA and LOANS DANZO APP also offers a variety of games where you can play using your favorite CNTs!&nbsp;</p>",
+        "logo": "assets/danzo.png",
+        "website": "https://www.danzo.gg/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games", "defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/WpRg8YGQa3",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@danzocoinada",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/DanZoADA",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          }
+        ],
+        "metrics": {
+          "transactions": 522,
+          "transactionsPercentageChange": -30.59,
+          "uaw": 106,
+          "uawPercentageChange": -3.64,
+          "newUAW": 49,
+          "volume": 40188.96,
+          "volumePercentageChange": -17.98,
+          "balance": 75857.85,
+          "balancePercentageChange": -53.5
+        }
+      },
+      {
+        "dappId": 21133,
+        "name": "Fluidtokens",
+        "description": "Lend and borrow using your NFTs on Cardano's NFT-DeFi bridge.",
+        "fullDescription": "<ul>\n  <li><strong>Unlock your NFT potential</strong></li>\n  <li>Intrinsic Value of NFTs can finally be unlocked and used as liquidity for DeFi operations</li>\n  <li><strong>Permissionless Strategy</strong></li>\n  <li>Your NFTs, your rules, choose the time and the rate of your loans: rules are 100% decentralized</li>\n  <li><strong>DeFi innovation</strong></li>\n  <li>A bridge between the NFT world and the powerful DeFi ecosystem, a new era of blockchain innovation</li>\n  <li><strong>Permissionless</strong></li>\n  <li>Anybody can list NFTs without permission. Anybody can lend ADA without KYC.</li>\n</ul>",
+        "logo": "assets/fluidtokens.png",
+        "website": "https://fluidtokens.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/C5jPwKdjXg",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/FluidTokens",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 521,
+          "transactionsPercentageChange": -24.82,
+          "uaw": 95,
+          "uawPercentageChange": -16.67,
+          "newUAW": 36,
+          "volume": 109664.35,
+          "volumePercentageChange": -37.61,
+          "balance": 9189465.94,
+          "balancePercentageChange": -25.87
+        }
+      },
+      {
+        "dappId": 51456,
+        "name": "Cardexscan",
+        "description": "Cardexscan is a DEX aggregator on Cardano, optimizing token trading with advanced routing and real-time data to reduce slippage, and improve trading.",
+        "fullDescription": "<p><i><strong>Overview</strong></i>&nbsp;</p>\n<p><br></p>\n<p>Cardexscan operates as a DEX aggregator on the Cardano blockchain, utilizing a sophisticated routing algorithm to optimize trade execution. The platform integrates with various DEXs to aggregate liquidity and provide users with the best available rates.</p>\n<p><br></p>\n<p><i><strong>Key Components:</strong></i></p>\n<p><br></p>\n<ul>\n  <li><strong>Aggregator/Routing Engine</strong>: The core of Cardexscan’s functionality, responsible for routing trades through the most efficient paths across multiple DEXs. The engine dynamically evaluates trading routes to minimize slippage and ensure optimal execution.</li>\n  <li><strong>Real-Time Data Feeds</strong>: Integration with real-time data sources allows Cardexscan to provide up-to-date market information, including price changes, trading volumes, and liquidity availability.</li>\n  <li><strong>User Interface</strong>: An intuitive interface that displays real-time charts, trading options, and analytics, enabling users to make informed trading decisions with ease.</li>\n  <li><strong>Security Protocols</strong>: Robust security measures are implemented to protect user data and ensure safe transactions. This includes smart contract auditing and secure key management practices.</li>\n</ul>",
+        "logo": "assets/cardexscan.png",
+        "website": "https://cardexscan.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges", "other"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/6kCzDKmRRq",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@cardexscan",
+            "type": "medium"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/cardexscan",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/cardexscan",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 803,
+          "transactionsPercentageChange": 307.61,
+          "uaw": 90,
+          "uawPercentageChange": 136.84,
+          "newUAW": 66,
+          "volume": 510.89,
+          "volumePercentageChange": 227.44,
+          "balance": 742.41,
+          "balancePercentageChange": 80.58
+        }
+      },
+      {
+        "dappId": 34817,
+        "name": "Indigo Protocol",
+        "description": "Tokenizing the real world economy.\nIndigo Protocol bridges the real world to the blockchain, giving everybody equal access to financial opportunities.",
+        "fullDescription": "<p>Indigo Protocol is an autonomous synthetics protocol for on-chain price exposure to real-world assets, built on Cardano.</p>\n<p></p>\n<p>Indigo &nbsp;Protocol allows anyone to create synthetic assets, known as iAssets. iAssets can be created using currencies such as stablecoins and ADA. They have the same price effect as holding the asset being replicated. This allows you to gain profit from the increase in price of an asset without owning the original asset itself.</p>\n<p></p>\n<p>Synthetic Assets give users exposure to a variety of assets without the need to actually own the underlying asset. These assets can be anything that has value in the real world. With its transparency, efficiency, low barriers to entry, and decentralized traits, the Blockchain can smoothly deliver all these assets to anyone with access to the Internet.</p>",
+        "logo": "assets/indigo-protocol.png",
+        "website": "https://indigoprotocol.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "cmc",
+            "url": "https://coinmarketcap.com/currencies/indigo-protocol/",
+            "type": "cmc"
+          },
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/indigo-protocol",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.gg/gVqDRNg7VH",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/IndigoProtocol",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@indigoprotocol1",
+            "type": "medium"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/indigoprotocol/",
+            "type": "reddit"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/indigo_protocol",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/Indigo_protocol",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@IndigoLabs1",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "18",
+            "name": "Discussions",
+            "slug": "discussions"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": 7308,
+          "transactionsPercentageChange": 1.4,
+          "uaw": 85,
+          "uawPercentageChange": -2.3,
+          "newUAW": 13,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 938.05,
+          "balancePercentageChange": -23.97
+        }
+      },
+      {
+        "dappId": 51144,
+        "name": "Splash",
+        "description": "Splash is a DeFi infrastructure for efficient market-making and advanced trading of Cardano Native Assets (CNTs). It combines an order book with AMMs",
+        "fullDescription": "<p>Splash is a DeFi infrastructure for efficient market-making and advanced trading of Cardano Native Assets (CNTs). It combines an order book with various Constant Product Automated Market Makers (AMMs), allowing the aggregation of all liquidity sources in a single operation to find the best deals for traders.</p>\n<p><br></p>\n<p>The execution of trading orders occurs off-chain, facilitated by the distributed Execution Engine, which can be launched and run by anyone. A notable feature of Splash is the ability to automate decentralized exchange (DEX) operations using Autonomous Account technology. Market-makers can employ pre-defined or custom automated strategies, including Spread Market Making and Trend Follow, to achieve their goals. In the meantime, traders can automate their operations using tools like DCA and more.</p>\n<p><br></p>\n<p>The core of the platform is written in Plutarch (Plutus V2 DSL) and Aiken smart contract languages, while the Execution Engine is crafted in pure Rust.</p>\n<p>Splash operates under the governance of locked SPLASH tokens. Participants in the governance system can manage the protocol treasury, vote for protocol changes, collect DAO fees, and decide on further SPLASH inflation.</p>",
+        "logo": "assets/splash.png",
+        "website": "https://app.splash.trade/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/splashprotocol",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/splashprotocol",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 14096,
+          "transactionsPercentageChange": 3.15,
+          "uaw": 55,
+          "uawPercentageChange": 223.53,
+          "newUAW": 37,
+          "volume": 3275359.27,
+          "volumePercentageChange": -29.78,
+          "balance": 3040600.8,
+          "balancePercentageChange": -23.66
+        }
+      },
+      {
+        "dappId": 51491,
+        "name": "Danogo",
+        "description": "Danogo Yield Aggregator, the Best place to Supply & Borrow on Cardano",
+        "fullDescription": "<p>Danogo provides a yield aggregator built on Cardano, helping users maximize returns from lending, borrowing, and liquidity pools. With DeFi expanding rapidly, tracking the best opportunities across platforms can be overwhelming. Danogo simplifies this by aggregating real-time data, ensuring users always access the most profitable options.</p>\n<p><br></p>\n<p><strong>Key Features:</strong></p>\n<p><strong>- Fixed Pool Lending</strong>: Lock in a fixed interest rate for a set term, giving lenders predictable returns and borrowers stable borrowing costs. This feature helps manage volatility while ensuring certainty for both sides of the market.</p>\n<ul>\n  <li><strong>- Flexible Pool Lending</strong>: Enjoy dynamic lending with the freedom to supply or withdraw anytime. Rates adjust based on market demand, giving users liquidity and adaptability while still earning competitive returns.</li>\n</ul>\n<p>- <strong>Yield Aggregator</strong>: Easily discover and compare yield products across multiple DeFi platforms through a simple, user-friendly interface. Seamlessly interact with lending and borrowing protocols and process transactions without the hassle of switching between platforms.</p>\n<p>- <strong>Danogo Staking Bond</strong>: As a Lending and Borrowing protocol, Danogo allows users to lend and borrow ADA staking rights via Danogo Staking Bond.</p>",
+        "logo": "assets/danogo.png",
+        "website": "https://danogo.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/tb9K8sjmuq",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/Danogo2023",
+            "type": "github"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/danogo_2023",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 238,
+          "transactionsPercentageChange": -52.78,
+          "uaw": 54,
+          "uawPercentageChange": -16.92,
+          "newUAW": 16,
+          "volume": 1737501.55,
+          "volumePercentageChange": -56.59,
+          "balance": 2953788.09,
+          "balancePercentageChange": 2.15
+        }
+      },
+      {
+        "dappId": 52452,
+        "name": "Open Djed",
+        "description": "Mint and burn DJED, Cardano's overcollateralized stablecoin, with our open-source platform. Transparent alternative to DJED.xyz - accessible 24/7 anywhere.",
+        "fullDescription": "<p>Mint and burn <strong>DJED</strong>, Cardano's overcollateralized stablecoin, with our open-source platform. Transparent alternative to DJED.xyz - accessible 24/7 anywhere. Built by <u>Artifi Labs</u> for the Cardano community.</p>",
+        "logo": "assets/open-djed.png",
+        "website": "https://djed.artifi.finance",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/MhYP7w8n8p",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/artifi_labs/",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 1437,
+          "transactionsPercentageChange": 0,
+          "uaw": 41,
+          "uawPercentageChange": 32.26,
+          "newUAW": 16,
+          "volume": 4991016.34,
+          "volumePercentageChange": 136.35,
+          "balance": 1,
+          "balancePercentageChange": -23.6
+        }
+      },
+      {
+        "dappId": 19648,
+        "name": "Clay Nation",
+        "description": "CLAY NATION is a collection of 10,000 digital characters with algorithmically assembled, handcrafted clay traits.",
+        "fullDescription": "<p>CLAY NATION<strong> </strong>is a collection of 10,000 digital characters with algorithmically assembled, handcrafted clay traits. Each unique character is a one-of-a kind NFT, stored on the Cardano blockchain. Just like in the non-clay world, no two members of Clay Nation are the same.</p>",
+        "logo": "assets/clay-nation.png",
+        "website": "https://www.claynation.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/F24tA7Eyed",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/the_claymates/",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/claymates",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCE2hX-yGE7ejMcjdUXxAIJQ",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "11",
+            "name": "Content Creation",
+            "slug": "content-creation"
+          },
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "19",
+            "name": "Photos",
+            "slug": "photos"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "20",
+            "name": "Videos",
+            "slug": "videos"
+          }
+        ],
+        "metrics": {
+          "transactions": 47,
+          "transactionsPercentageChange": -12.96,
+          "uaw": 38,
+          "uawPercentageChange": 18.75,
+          "newUAW": 11,
+          "volume": 172.92,
+          "volumePercentageChange": -50.97,
+          "balance": 210.2,
+          "balancePercentageChange": 194.05
+        }
+      },
+      {
+        "dappId": 48785,
+        "name": "CSWAP",
+        "description": "A progressive DEX for the Cardano Ecosystem, merging next generation DEX capabilities with NFTfi.",
+        "fullDescription": "<p>Our innovative strategy to merge the functionality of a DEX with the powerful capabilities of NFTfi will give us a huge advantage over any other DEX in the space. Our platform utilizes an advanced Automated Market Maker (AMM) / orderbook hybrid, and is powered by the CSWAP community, one of strongest communities in the Cardano space.</p>\n<p><br></p>\n<p>CSWAP's NFT DEX is the first of its kind on Cardano, and is the second largest NFT marketplace on the chain. It is available via app.cswap.fi.</p>\n<p><br></p>\n<p>The CSWAP fungible token DEX is actively being developed and is slated to be publicly released in Q2-Q3 2024.</p>",
+        "logo": "assets/cswap.png",
+        "website": "https://cswap.fi",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces", "exchanges", "defi"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/CswapDEX",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@CswapDEX",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 260,
+          "transactionsPercentageChange": 13.54,
+          "uaw": 37,
+          "uawPercentageChange": 32.14,
+          "newUAW": 8,
+          "volume": 5594.85,
+          "volumePercentageChange": 16.48,
+          "balance": 15931.01,
+          "balancePercentageChange": -17.15
+        }
+      },
+      {
+        "dappId": 43962,
+        "name": "Cardano Casino",
+        "description": "Leading CARDANO gambling solution with low house-edge, no fee and no commission from winnings. \nInstant Deposits & Withdrawals.",
+        "fullDescription": "<p>🎰 <strong>Cardano Casino</strong> – Where Blockchain Meets High-Stakes Thrills!</p>\n<p><br></p>\n<p>Step into the future of online gaming with Cardano Casino - a fast, fair, and decentralized casino built on the power of the Cardano blockchain.</p>\n<p><br></p>\n<p>Enjoy lightning-fast, low-fee transactions, provably fair games, true ownership of your winnings and instant Deposits &amp; Withdrawals!</p>\n<p>Whether you’re spinning slots, playing poker, or rolling dice, Cardano Casino brings transparency, security, and fun to the table. Bet smarter. Play fair. Win big – all on-chain.</p>\n<p><br></p>\n<p>Regular Free Spins For All Active Users!</p>",
+        "logo": "assets/cardano-casino.png",
+        "website": "https://cardanocasino.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["gambling"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/CardanoCasino",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "14",
+            "name": "Gambling",
+            "slug": "gambling"
+          },
+          {
+            "id": "27",
+            "name": "Casino",
+            "slug": "casino"
+          }
+        ],
+        "metrics": {
+          "transactions": 927,
+          "transactionsPercentageChange": 5.46,
+          "uaw": 36,
+          "uawPercentageChange": -20,
+          "newUAW": 7,
+          "volume": 74247.52,
+          "volumePercentageChange": 35.07,
+          "balance": 44723.67,
+          "balancePercentageChange": -19.11
+        }
+      },
+      {
+        "dappId": 18829,
+        "name": "Aada.finance",
+        "description": "Fully decentralized lending and borrowing protocol backed with NFT’s and built on Cardano blockchain",
+        "fullDescription": "<p>Fully decentralized peer-to-peer lending and borrowing protocol backed with NFT’s and built on Cardano blockchain</p>",
+        "logo": "assets/aada-finance.png",
+        "website": "https://app.aada.finance/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/UjFMbbXN",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/aadafinance",
+            "type": "github"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/aadacommunity",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/AadaFinance",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/c/Aadafinance",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 191,
+          "transactionsPercentageChange": 4.37,
+          "uaw": 31,
+          "uawPercentageChange": -34.04,
+          "newUAW": 5,
+          "volume": 983784.46,
+          "volumePercentageChange": -22.53,
+          "balance": 71595.13,
+          "balancePercentageChange": -4.16
+        }
+      },
+      {
+        "dappId": 51328,
+        "name": "Lenfi",
+        "description": "Lenfi (formerly known as Aada Finance) is a lending and borrowing protocol on Cardano that leverages tokenizing loan positions using \"NFT bonds.\"",
+        "fullDescription": "<p>Lenfi (formerly known as Aada Finance) is a lending and borrowing protocol built on the Cardano blockchain. The platform consists of two dApps - Aada Finance (V1), which offers p2p loans, and Lenfi (V2), which features isolated pool markets. Both dApps leverage NFT bonds as a form of loan tokenization, which allows lenders and borrowers to freely transfer and trade their loans.</p>",
+        "logo": "assets/lenfi.png",
+        "website": "https://lenfi.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/LenfiOfficial",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@LenfiOfficial",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 204,
+          "transactionsPercentageChange": 9.68,
+          "uaw": 25,
+          "uawPercentageChange": -30.56,
+          "newUAW": 4,
+          "volume": 2753777.11,
+          "volumePercentageChange": 66.95,
+          "balance": 2304880.26,
+          "balancePercentageChange": -43.65
+        }
+      },
+      {
+        "dappId": 18831,
+        "name": "MuesliSwap",
+        "description": "Cardano's leading DeFi ecosystem featuring orderbook trading, liquidity pools, staking and a DEX aggregator.",
+        "fullDescription": "<p>On November 26, 2021, MuesliSwap successfully launched a decentralized exchange on Cardano mainnet, making it the first among many competitors to leap into this new era of DeFi on Cardano.</p>\n<p>With MuesliSwap, a novel approach for modelling and implementing a DEX on Cardano is proposed by revisiting the traditional order book model. The exchange protocol draws from game-theoretic concepts and distinguishes itself from alternatives through simplicity, modularity, self-regulation, and full decentralization. Moreover, MuesliSwap also features a DEX aggregator f</p>\n<p>The approach to token trading by the MuesliSwap Team distinguishes itself from the popular approaches to trading, taking into account the Cardano transaction model.&nbsp;</p>\n<p>The EUTxO model of the Cardano blockchain makes it possible to use the order book model as a decentralized exchange, in contrast to the AMM model used on other blockchains. MuesliSwap support limit orders bringing full control to your investments. What's more, the innovative protocol offers liquidity pools that provide liquidity to the orderbook while letting users earn pasive income through trading fees and yield farming.</p>\n<p>MILK is the utility token that powers the Cardano MuesliSwap ecosystem.</p>",
+        "logo": "assets/muesliswap.png",
+        "website": "https://muesliswap.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/vHzSXRWBJR",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@muesliswap",
+            "type": "medium"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/MuesliSwapADA/",
+            "type": "reddit"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/muesliswapADA",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/MuesliSwapTeam",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 79,
+          "transactionsPercentageChange": -48.03,
+          "uaw": 19,
+          "uawPercentageChange": -24,
+          "newUAW": 1,
+          "volume": 3648.61,
+          "volumePercentageChange": -98.06,
+          "balance": 102895.47,
+          "balancePercentageChange": -58.31
+        }
+      },
+      {
+        "dappId": 52879,
+        "name": "Sōkosumi",
+        "description": "An AI Agent Marketplace running on the decentralized Masumi Protocol. Hire AI Agents with the click of a button.",
+        "fullDescription": "<p>What is Sōkosumi? Built on the Masumi Protocol</p>\n<p><strong>Sōkosumi</strong> is a decentralized marketplace purpose-built for AI agents to buy, sell, and exchange services, data, and capabilities with each other. It runs on <strong>Masumi</strong>, a blockchain protocol designed specifically for the AI Agent Economy, providing secure payments, decision logging, decentralized identity, and high scalability. Together, Sōkosumi and Masumi create the infrastructure for a new kind of economy, where autonomous software agents transact and collaborate without human bottlenecks.</p>\n<p>Sōkosumi is a marketplace that enables:</p>\n<ul>\n  <li>AI agents to list services, discover other agents, negotiate contracts, and settle payments autonomously.</li>\n  <li>Buyers, whether human or agent, to trust every transaction through transparent audit logs and on-chain reputations.</li>\n</ul>\n<p>It abstracts the complexities of trust, compliance, and payments, letting participants focus on delivering and consuming value.</p>\n<p><strong>Masumi</strong> provides the secure foundation for Sōkosumi by offering:</p>\n<ul>\n  <li><strong>Agent Payments:</strong> Each agent has a blockchain wallet, enabling automated payments, microtransactions, and usage-based billing.</li>\n  <li><strong>Decision Logging:</strong> Actions are anchored on-chain or cryptographically hashed, creating tamper-proof audit trails.</li>\n  <li><strong>Decentralized Identity (DIDs):</strong> Every agent has a verifiable identity and can hold credentials, supporting trust and compliance.</li>\n  <li><strong>Massive Scalability:</strong> Starting on Cardano, evolving toward a dedicated Layer 2 to handle millions of daily transactions.</li>\n</ul>\n<p>This makes Masumi uniquely suited to power an economy of autonomous agents operating at global scale.</p>",
+        "logo": "assets/s-kosumi.png",
+        "website": "https://sokosumi.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/MasumiNetwork",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "33",
+            "name": "AI",
+            "slug": "ai"
+          }
+        ],
+        "metrics": {
+          "transactions": 5646,
+          "transactionsPercentageChange": 36.81,
+          "uaw": 19,
+          "uawPercentageChange": -5,
+          "newUAW": 1,
+          "volume": 15274.52,
+          "volumePercentageChange": 44.36,
+          "balance": 4802.08,
+          "balancePercentageChange": 22.97
+        }
+      },
+      {
+        "dappId": 51851,
+        "name": "WALKERS",
+        "description": "Walkers is a lifestyle ecosystem that seamlessly blends GameFi elements with an innovative “move-to-earn” model, rewarding users for the distance they walk.",
+        "fullDescription": "<p>Walkers is a lifestyle ecosystem that seamlessly blends GameFi elements with an innovative “move-to-earn” model, rewarding users for the distance they walk. Through the Walkers App, users enhance their well-being while immersing themselves in an engaging GameFi experience. Walkers holders can accumulate XP and earn valuable points, which can be exchanged for $WLK tokens and additional partner tokens.</p>\n<p>Set in the year 3030, the Walkers story unfolds in a cyberpunk-inspired world, where the Walkers are lost in a labyrinth, struggling to find their way out. This futuristic narrative not only captivates but also inspires, turning fitness into a life-changing adventure.</p>\n<p>Walkers App users enjoy multiple <strong>earning opportunities</strong>, including<strong> passive rewards</strong>, participation in <strong>airdrop campaigns</strong>, entry into <strong>raffles</strong>, and the chance to win exciting <strong>giveaways</strong>. &nbsp;The Walkers rewarding economy is designed to encourage active engagement within the ecosystem, fostering a sustainable, long-term economic model that benefits all participants</p>\n<p><strong>Embrace the philosophy that every step holds significance, motivating users to recognize the inherent value in their walks, creating a sense of purpose and accomplishment.</strong></p>",
+        "logo": "assets/walkers.png",
+        "website": "https://walkerscardano.xyz/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games", "collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/tQQAuaPHUs",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/walkerscnft/?hl=en",
+            "type": "instagram"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@walkerscardano",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/WalkersCNFT",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "21",
+            "name": "Move to Earn",
+            "slug": "move-to-earn"
+          },
+          {
+            "id": "23",
+            "name": "Sports",
+            "slug": "sports"
+          },
+          {
+            "id": "24",
+            "name": "Social",
+            "slug": "social"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": 85,
+          "transactionsPercentageChange": 32.81,
+          "uaw": 12,
+          "uawPercentageChange": 33.33,
+          "newUAW": 2,
+          "volume": 11128.08,
+          "volumePercentageChange": 259.76,
+          "balance": 2158.86,
+          "balancePercentageChange": 15475.54
+        }
+      },
+      {
+        "dappId": 38567,
+        "name": "VyFinance",
+        "description": "VyFinance is Decentralized Finance protocol built on Cardano that includes features such as a DEx, BAR, governance, lottery and token/NFT Vaults.",
+        "fullDescription": "About VyFinance\n<p>What is VyFi? VyFi is a Cardano Native Token (CNT), designed for decentralized finance (DeFi) applications. We are constructing a DeFi platform designed for new and experienced users alike, bringing a new approach to the user interface, and a distributive mechanism being managed by our Auto-Harvester. Backed by a proprietary trading firm, we are able to combine crypto with a real-world operation. We will also be focusing on education, and providing information on on-boarding new users to the world of DeFi.</p>\n<p>What distinguishes VyFi? VyFi plans to bring Auto-Harvesting to Cardano, which will be made as efficient as possible thanks to our Neural Net. The Neural Net will be used to measure risk across yield-farms, using impermanent loss, and a self-improving algorithm, to find the best Yield Farm’s to Auto-Harvest! The Vy Ecosystem This consists of 4 components, all linked through smart contracts. The Auto-Harvester, The DEX (decentralized exchange), The Bar and LMS (Learning Management System). Auto-Harvester (AH) The Auto-Harvester is a smart contract that will manage yield farming/liquidity pool investing across multiple platforms. Users will deposit their Cardano into our AH, and will be given access to our dashboard. This will contain all the information regarding their deposit, current portfolio value, and pending harvest. The auto-harvester distributes rewards once weekly, and 15% of all earnings are shared to the VyFi Bar.</p>\n<p>Decentralized Exchange (DEX) Our DEX will allow users to swap between tokens across the Cardano ecosystem. We will also be hosting pools where users can stake VYFI to earn other CNT’s. Our principal method for releasing our token (85% of supply) will be through the process of yield-farming, where we reward those that provide assets to our liquidity pool for exchange.</p>\n<p></p>\n<p>The team supply is only 2.5%, and this is vested over 4 years.</p>",
+        "logo": "assets/vyfinance.png",
+        "website": "https://app.vyfi.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://t.co/eokrpzFlAi",
+            "type": "discord"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/VyFinance",
+            "type": "facebook"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/VyFiOfficial",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 9,
+          "transactionsPercentageChange": 0,
+          "uaw": 6,
+          "uawPercentageChange": 50,
+          "newUAW": 1,
+          "volume": 245.24,
+          "volumePercentageChange": 13.43,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 51406,
+        "name": "Snek.fun",
+        "description": "Cardano's premier token launchpad.",
+        "fullDescription": "<p>Launch a token that is instantly tradeable with no need to seed liquidity.&nbsp;</p>",
+        "logo": "assets/snek-fun.png",
+        "website": "https://www.snek.fun/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 14966,
+          "transactionsPercentageChange": -4.98,
+          "uaw": 4,
+          "uawPercentageChange": -20,
+          "newUAW": 1,
+          "volume": 525204.31,
+          "volumePercentageChange": -37.55,
+          "balance": 210849.24,
+          "balancePercentageChange": -25.08
+        }
+      },
+      {
+        "dappId": 51739,
+        "name": "Yamfore",
+        "description": "Yamfore is a decentralized, non-custodial lending and borrowing protocol built specifically for Cardano's eUTXO account model.",
+        "fullDescription": "<p>Yamfore is a decentralized, non-custodial lending and borrowing protocol built specifically for Cardano's eUTXO account model. The platform enables users to securely lend and borrow digital assets without intermediaries, leveraging smart contracts to automate transactions and manage collateral.</p>",
+        "logo": "assets/yamfore.png",
+        "website": "https://www.yamfore.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/yamfore",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 10,
+          "transactionsPercentageChange": 42.86,
+          "uaw": 4,
+          "uawPercentageChange": 0,
+          "newUAW": 1,
+          "volume": 28318.8,
+          "volumePercentageChange": 672.71,
+          "balance": 215400.59,
+          "balancePercentageChange": -40.81
+        }
+      },
+      {
+        "dappId": 18825,
+        "name": "DEADPXLZ",
+        "description": "Home to the best deals on Genesis PXL NFTs.",
+        "fullDescription": "<p>The PXL Explorer (aka the PXL Marketplace) is the main hub for both PXL and metaPXLZ collectors as it allows for both buying, selling and bidding on Genesis PXLZ in a decentralised way as well as minting metaPXLZ if your Genesis PXL is eligible.</p>\n<p><strong>The PXL Explorer offers the lowest trading fees</strong> on the Cardano NFT market and the best place to find good deals on PXLZ! Visit the Explorer at <strong>https://pxlz.org/explorer</strong>.</p>",
+        "logo": "assets/deadpxlz.png",
+        "website": "https://pxlz.org/explorer/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/PXLZ",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/DEADPXLZ",
+            "type": "github"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/pxlzNFT",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UC3IiKn01hqk2eT7EXABu3yA",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 3,
+          "transactionsPercentageChange": 100,
+          "uaw": 3,
+          "uawPercentageChange": 100,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 8724.1,
+          "balancePercentageChange": -23.37
+        }
+      },
+      {
+        "dappId": 20754,
+        "name": "Chibidango Heroes",
+        "description": "The first Idle Heroes P2E game on Cardano.",
+        "fullDescription": "<p>Chibidango Heroes is a Play to Earn Idle Hero Game on Cardano Blockchain. Collect, Battle and Summon your Heroes, use them in various activities through out the Chibiway Galaxy to earn rewards, items and resources. Chibidango Heroes Universe is filled with Heroes of different races, monsters, pets and other creatures that players can collect or battle against.</p>\n<p>Players aim to battle, summon, collect, craft items and upgrade village buildings for their Heroes. Community owned economy is built as the core for players to buy, sell and trade resources in the game universe through skill and contributions to the ecosystem.</p>",
+        "logo": "assets/chibidango-heroes.png",
+        "website": "https://chibidangoheroes.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/chibidangoheroes",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/ChibidangoNFT",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 7,
+          "transactionsPercentageChange": 133.33,
+          "uaw": 2,
+          "uawPercentageChange": 0,
+          "newUAW": 1,
+          "volume": 5.78,
+          "volumePercentageChange": 82.47,
+          "balance": 516.05,
+          "balancePercentageChange": -30.92
+        }
+      },
+      {
+        "dappId": 53039,
+        "name": "GoldMine Arcade",
+        "description": "GoldMine Arcade is a retro-style web3 gaming platform where gaming meets rewards. Play free games or Grab a Game Pass and start earning $DGOLD & $DSLVR tokens.",
+        "fullDescription": "<p><strong>GoldMine Arcade — Where Retro Fun Meets Real Rewards&nbsp;</strong></p>\n<p><br></p>\n<p>Welcome to <strong>GoldMine Arcade</strong>, the ultimate web3 gaming experience built for players who love classic arcade thrills <i>and</i> crypto rewards. Step into a digital frontier where every game is a chance to win — no gimmicks, just skill-based fun with real payouts.</p>\n<p><br></p>\n<p><strong>What is GoldMine Arcade?</strong><br>\nGoldMine Arcade is a browser-based arcade featuring a growing collection of retro-style games designed with a modern web3 twist. From action-packed shooters to addictive drop games like <strong>GoldMiners Plinko</strong>, players compete for high scores and crypto rewards. No downloads, no installs — just pure gameplay.</p>\n<p><br></p>\n<p><strong>Play Free. Win Crypto.</strong><br>\nAll players can enjoy games for free every day. But with a <strong>Game Pass NFT</strong> and a <strong>connected Cardano wallet</strong>, you unlock the real magic:</p>\n<p><br></p>\n<ul>\n  <li>🎯 <strong>Earn Digital Silver Tokens ($DSLVR)</strong> for hitting score goals</li>\n  <li>🏆 <strong>Compete on leaderboards</strong> to win monthly Digital Gold prizes</li>\n  <li>💎 <strong>Discover hidden bonuses</strong> and collectibles across different games</li>\n</ul>\n<p><br></p>\n<p><strong>Features:</strong><br>\n✅ Retro-inspired mobile &amp; browser games<br>\n✅ Everyone plays free!<br>\n✅ Real crypto rewards powered by Cardano<br>\n✅ Secure wallet connection<br>\n✅ Mobile and desktop compatible<br>\n✅ Constantly expanding game library</p>\n<p><br></p>\n<p><strong>Who Can Play?</strong><br>\nEveryone! Whether you’re a casual player or a crypto enthusiast, GoldMine Arcade offers fun and rewards for all skill levels. No crypto knowledge needed to start !<br>\n</p>\n<p>Play. Win. Collect.<br>\nThe mines are open, and fortune favors the bold.</p>",
+        "logo": "assets/goldmine-arcade.png",
+        "website": "https://www.digitalgoldecosystem.com/goldminearcade",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/DigitalGold2022",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/watch?v=usMOea5L-y8",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": 4,
+          "transactionsPercentageChange": 100,
+          "uaw": 2,
+          "uawPercentageChange": 100,
+          "newUAW": 0,
+          "volume": 0.76,
+          "volumePercentageChange": -17.83,
+          "balance": 8.7,
+          "balancePercentageChange": -46.66
+        }
+      },
+      {
+        "dappId": 19717,
+        "name": "CNFT.io",
+        "description": "CNFT.IO is a marketplace for Cardano Non-Fungible Tokens, launched in July 2021.",
+        "fullDescription": "<p>CNFT.IO is a marketplace for Cardano Non-Fungible Tokens, launched in July 2021 from a team decentralised across the world, we can officially say we are the first marketplace on Cardano. Connect your wallet today and buy your first NFT. Earn $CNFT for every NFT you buy and sell.</p>",
+        "logo": "assets/cnft-io.png",
+        "website": "https://cnft.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/wUANm4ZHFU",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/Cardano-NFTs",
+            "type": "github"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/cnftio",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/CNFT_IO",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCBNdd4cZJ6V3teZ-HmKYEBg",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "11",
+            "name": "Content Creation",
+            "slug": "content-creation"
+          },
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 1,
+          "transactionsPercentageChange": 100,
+          "uaw": 1,
+          "uawPercentageChange": 100,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 33246.06,
+          "balancePercentageChange": -24
+        }
+      },
+      {
+        "dappId": 46356,
+        "name": "Crashr",
+        "description": "An advanced digital asset trading platform.",
+        "fullDescription": "<p>To revolutionize the industry with a seamless, decentralized platform for digital asset transactions. Emphasizing a community-driven approach, we're committed to fostering an environment 'for the community, by the community’, making every interaction more than just a trade—a transformative experience.</p>",
+        "logo": "assets/crashr.png",
+        "website": "https://Crashr.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/Crashr",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@Crashr",
+            "type": "medium"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/Crashr/",
+            "type": "reddit"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/crashr_io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@Crashr_io",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 2,
+          "transactionsPercentageChange": 100,
+          "uaw": 1,
+          "uawPercentageChange": 100,
+          "newUAW": 1,
+          "volume": 0.71,
+          "volumePercentageChange": 100,
+          "balance": 269.3,
+          "balancePercentageChange": -27.33
+        }
+      },
+      {
+        "dappId": 47484,
+        "name": "Orcfax",
+        "description": "Decentralized Oracle Feeds for Cardano. Validating real-world data from multiple sources with full audit logs to deliver authentic & accurate data.",
+        "fullDescription": "<p>Orcfax is a decentralized blockchain oracle.</p>\n<p><br></p>\n<p>A chain is only as strong as its weakest link. For blockchains, that link is their connection to the off-chain world. Oracles bridge this gap by bringing external data on-chain.</p>\n<p><br></p>\n<p>But that’s only part of the solution; the data must also be trustworthy, verifiably accurate, authentic, and factual. This challenge is known as the oracle problem.</p>\n<p><br></p>\n<p><strong>Orcfax is more than just an oracle.</strong></p>\n<p><br></p>\n<p>It is a decentralized truth machine for verifiable, auditable, and permanent statements of fact.</p>",
+        "logo": "assets/orcfax.png",
+        "website": "https://orcfax.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "cmc",
+            "url": "https://coinmarketcap.com/currencies/orcfax/",
+            "type": "cmc"
+          },
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/orcfax",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://dsc.gg/orcfax",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@orcfax",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://www.youtube.com/@Orcfax",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@Orcfax",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 1,
+          "transactionsPercentageChange": 100,
+          "uaw": 1,
+          "uawPercentageChange": 100,
+          "newUAW": 0,
+          "volume": 1349.48,
+          "volumePercentageChange": 100,
+          "balance": 542.38,
+          "balancePercentageChange": -2.55
+        }
+      },
+      {
+        "dappId": 48791,
+        "name": "Clarity",
+        "description": "Clarity provides a no-code community management & dao tooling platform built for Cardano projects.",
+        "fullDescription": "<p>Clarity provides a no-code community management &amp; dao tooling platform built for Cardano projects. Clarity allows a variety of governance tools from off-chain snapshot polling and forums to fully on-chain, smart contract-driven DAO Proposals.</p>",
+        "logo": "assets/clarity.png",
+        "website": "https://clarity.community/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/clarity_dao",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@ClarityProtocol",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": 3,
+          "transactionsPercentageChange": 100,
+          "uaw": 1,
+          "uawPercentageChange": 100,
+          "newUAW": 1,
+          "volume": 0.85,
+          "volumePercentageChange": 100,
+          "balance": 1.02,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 51451,
+        "name": "Claim Bert",
+        "description": "Claim Bert is a DApp built on the Cardano blockchain, designed as a game/experiment with features like halving mechanism and claim window.",
+        "fullDescription": "<p><strong>Claim Bert</strong> is a decentralized, community-driven application built on the Cardano blockchain, designed to empower users by allowing them to claim rewards directly from a smart contract. With built in features in the smart contract like halving mechanism and a claim window, the DApp creates an incentive for users to participate in the protocol. With a total supply of 69 billion units securely locked within the contract, <strong>Claim Bert</strong> ensures complete fairness by eliminating reserved allocations for developers or early investors, making all rewards accessible to the community. The platform leverages Cardano’s advanced eUTXO model to handle high concurrency through innovative mechanisms like UTXO Splitting and Randomized UTXO Assignment, ensuring scalable and seamless interactions without compromising decentralization.</p>\n<p>A standout feature of the Claim Bert DApp is its built-in halving mechanism, inspired by Bitcoin, which progressively reduces the reward per claim every three months for the first nine months, promoting a balanced and sustainable distribution of rewards over time. Additionally, BERT employs a Claim Window system, allowing users to claim rewards during specific 20-second intervals every 10 minutes, ensuring an equitable and orderly distribution process for all participants. By maintaining transparency and decentralization, BERT offers a fair launch initiative where every member of the community has an equal opportunity to engage and benefit from the ecosystem.</p>",
+        "logo": "assets/claim-bert.png",
+        "website": "https://www.claimbert.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/CardanoBert",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          }
+        ],
+        "metrics": {
+          "transactions": 4,
+          "transactionsPercentageChange": 100,
+          "uaw": 1,
+          "uawPercentageChange": 100,
+          "newUAW": 1,
+          "volume": 1.56,
+          "volumePercentageChange": 100,
+          "balance": 18.84,
+          "balancePercentageChange": -18.09
+        }
+      },
+      {
+        "dappId": 18506,
+        "name": "StellarHoodNFT",
+        "description": "Fully on-chain gamified interactive next gen Cardano NFT - The first of its kind",
+        "fullDescription": "<p>Stellar Hood is the first ever truely on-chain NFT! Everything from the thumbnail to the interactive NFT application is placed fully on the Cardano blockchain. <strong>There is no external storage</strong> like webserver or IPFS. This is the first NFT that can never go offline!</p>",
+        "logo": "assets/stellarhoodnft.png",
+        "website": "https://stellarhood.com/?show=home",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/wmNYBVsW5Q",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/StellarHoodNFT",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 1633.86,
+          "balancePercentageChange": -23.36
+        }
+      },
+      {
+        "dappId": 18509,
+        "name": "Fort Gotten",
+        "description": "Inspiring the next generation of Creators. The First Transmedia NFT Universe on Cardano",
+        "fullDescription": "<p>Minting:&nbsp;The LabRediscover your Creative&nbsp;Side A Cardano NFT Project about reconnecting with our inner kidz</p>",
+        "logo": "assets/fort-gotten.png",
+        "website": "https://www.fort-gotten.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.fort-gotten.com/",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "http://instagram.com/fortgotten",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/fortgotten",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 13.69,
+          "balancePercentageChange": -23.7
+        }
+      },
+      {
+        "dappId": 18511,
+        "name": "Genius Yield official",
+        "description": "The all-in-one DeFi platform, that combines concentrated liquidity DEX with an automated yield optimizer.",
+        "fullDescription": "<p><strong>While DeFi provides many investment opportunities, managing capital is both complex and time-consuming. Genius Yield is your all-in-one solution to benefit from advanced algorithmic trading strategies and yield optimization opportunities. Our Smart Liquidity Management protocol is intuitive, hassle-free, and secure. Genius Yield minimizes risk and maximizes profits.</strong></p>",
+        "logo": "assets/genius-yield-official.png",
+        "website": "https://www.geniusyield.co/?lng=en",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/TNHf4fs626",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://geniusyield.medium.com/",
+            "type": "medium"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/geniusyield_official",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/GeniusyieldO",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UC0Lw_flS1WokWYH9ZHIQv2g",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 18843,
+        "name": "Lending Pond",
+        "description": "Provide and Receive ADA through Cardano's first lending and borrowing platform.",
+        "fullDescription": "<p>Lending Pond brings DEFI utility to NFTs by facilitating the lending and borrowing of ADA using NFTs as collateral with no KYC and credit checks. Lenders are able to loan their ADA to other members for a return. Borrowers are able to retrieve liquidity which would have otherwise been locked up in their NFT.</p>",
+        "logo": "assets/lending-pond.png",
+        "website": "https://lendingpond.app/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": null,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 239.08,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 18861,
+        "name": "SpaceBudz",
+        "description": "Let's go on an adventure, where will your SpaceBudz take you?",
+        "fullDescription": "<p>SpaceBudz is an NFT collection on Cardano consisting of 10,000 unique little astronauts. We make use of Cardano's multi asset ledger for the NFTs and Plutus contracts for the marketplace.</p>\n<p>The marketplace consists of these four main functionalities:</p>\n<p>Bid</p>\n<p>Bids can be opened on any SpaceBudz. The bid amount is locked inside the contract. The bid amount stays as long in the contract until the bid is either accepted, the bid is canceled or someone else overbids the current bidder. The current bidder gets automatically refunded.</p>\n<p>Listing</p>\n<p>Listings can be made by the current holders of the SpaceBudz. The SpaceBud will be locked inside the contract. The SpaceBud stays as long in the contract until the listing is accepted or the the listing is canceled.</p>\n<p>Buy</p>\n<p>A listed SpaceBud can be bought. The buyer needs to send the requested ADA to the offerer in order to claim the SpaceBud from the contract (happens all in the contract transaction of course).</p>\n<p>Sell</p>\n<p>A bid on SpaceBud can be sold by the owner. The seller needs to send the right SpaceBud to the bidder in order to claim the ADA amount from the contract (happens all in the contract transaction of course).</p>",
+        "logo": "assets/spacebudz.png",
+        "website": "https://spacebudz.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/spacebudzNFT",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": -100,
+          "uaw": 0,
+          "uawPercentageChange": -100,
+          "newUAW": 1,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 9035.45,
+          "balancePercentageChange": -23.36
+        }
+      },
+      {
+        "dappId": 19475,
+        "name": "Labs by Mutants",
+        "description": "We want to deliver useful utility, great art, and a strong community with us. \n\nBuilding on the Cardano blockchain.\n\nhttp://linktr.ee/mutantcnfts",
+        "fullDescription": "<p>The next-generation platform for NFT holders and creators.</p>\n<p>Best staking and raffle service for NFTs on Cardano.</p>\n<p>By Mutants</p>\n<p>http://linktr.ee/mutantcnfts</p>",
+        "logo": "assets/labs-by-mutants.png",
+        "website": "https://labs.mutant-nft.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/mutantnft",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/MutantNFTs",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": -100,
+          "uaw": 0,
+          "uawPercentageChange": -100,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 6365.73,
+          "balancePercentageChange": -23.8
+        }
+      },
+      {
+        "dappId": 19664,
+        "name": "Cardahub",
+        "description": "One-stop shop for everything NFT on Cardano blockchain.",
+        "fullDescription": "<p>Cardahub is a Smart-Contract based NFT Platform on Cardano blockchain, aiming at creating an one-stop shop for everything Cardano NFT (CNFT). Currently, Cardahub has been providing several smart-contract based services including a NFT minting, a fully decentralized NFT marketplace, and an advanced launchpad program or NFT distribution on Cardano. We are also proud to be the only CNFT marketplace that offers an innovative feature called dual listing and a flexible fee model to any NFT sale on Cardahub CNFT marketplace. We have also built and provided free Tool called Multi-Send Tool that allows users to send their ADA to multi addresses in JUST 1 TRANSACTION. It would help them save transaction fee. In our upcoming release, we will be launching and introducing to Cardano community another new unique feature where our marketplace will support Native Token on the Cardano blockchain. This unique feature will take the Cardano ecosystem to a whole new level, by allowing our users to buy and sell their NFTs with any supported token other than just ADA.</p>\n<p>Website: https://cardahub.io Twitter: https://twitter.com/cardahubio Discord: https://discord.gg/yEB4ENcQ8B Telegram: https://t.me/cardahub</p>",
+        "logo": "assets/cardahub.png",
+        "website": "https://cardahub.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/yEB4ENcQ8B",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/cardahubio",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCo1azV6jABF7IbQcOHZzxKg",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 956.82,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 19772,
+        "name": "Bad Fox Motorcycle Club",
+        "description": "Bad Fox Motorcycle Club is a large collective of NFT fans who are working to innovate fund redistribution to the community and integrations into metaverses.",
+        "fullDescription": "<p>We're focused on rewarding 100% of holders. There will be no raffle to top rare ranks, or any of that bullsh*t. You hold, you earn, simple as that.</p>\n<p>At the beginning of our roadmap, holders will be earning ADA through royalty distributions, and through other events. Later on we'll have a burn event allowing participants to get lifetime access to metaverse content and assets through airdrops.</p>",
+        "logo": "assets/bad-fox-motorcycle-club.png",
+        "website": "https://badfoxmc.com",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/BadFoxMC",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/belferink1996/bad-fox-mc-website",
+            "type": "github"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/BadFoxMC",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "22",
+            "name": "Metaverse",
+            "slug": "metaverse"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 133.72,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 19922,
+        "name": "Artano",
+        "description": "Artano is a community-curated NFT marketplace for artists and collectors on the Cardano blockchain!",
+        "fullDescription": "<p><strong>Home to high-quality, 1/1 NFTs in the Cardano community!</strong></p>",
+        "logo": "assets/artano.png",
+        "website": "https://artano.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/6NPc9FhCYX",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/artano.io/",
+            "type": "instagram"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/Artano/",
+            "type": "reddit"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/artano__io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UC1u1iwH6i8iuj4AapnwGaSw",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 3.5,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 20176,
+        "name": "CardanoLands",
+        "description": "First NFT DeFi Platform on cardano blockchain. Stake unused NFTs from favourite collections and start exploring the mysteries of CardanoLands.",
+        "fullDescription": "<p>Cardano Lands is a <strong>NFT DeFi platform</strong> where users can stake NFTs from supported collections to earn passive income.&nbsp;</p>\n<p>Make your CNFTs work for you instead of letting them sit in your wallet! When staking supported CNFTs you generate daily \"Hexonium'' rewards that you can claim.</p>\n<p><strong>CardanoLands</strong> building a virtual economy based on a fantasy world that promotes real interaction between numerous projects, including NFT collections, exchanges, wallets, and staking pools. The game has various built-in mechanics that stimulate engagement and cooperation between projects and their communities, while also maintaining a strong economy.</p>\n<p><u><strong>Whitepaper</strong></u></p>\n<p>https://whitepaper.cardanolands.com/&nbsp;</p>",
+        "logo": "assets/cardanolands.png",
+        "website": "https://cardanolands.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/cardanolands",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@CardanoLands",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/cardanolands",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCVb7eGlNak1eoGr2QCN0HUw",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "22",
+            "name": "Metaverse",
+            "slug": "metaverse"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 3.34,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 27302,
+        "name": "MDCC",
+        "description": "The Mad Dog Token (MD Token) is fundamentally designed as a native utility and governance token. Community-led governance on the Cardano Blockchain.",
+        "fullDescription": "<p>Not custodial raffles using Cardano Smart Contracts</p>",
+        "logo": "assets/mdcc.png",
+        "website": "https://mdtoken.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/MadDogCarClub",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 36.54,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 29691,
+        "name": "EarthNode",
+        "description": "EarthNode  NFTs (ENNFTs), unique non-fungible tokens for EarthNode Operators which  represent their ownership of an EarthNode.",
+        "fullDescription": "<p>EarthNode &nbsp;NFTs (ENNFTs), unique non-fungible tokens for EarthNode Operators which &nbsp;represent their ownership of an EarthNode. EarthNodes are the brain &nbsp;powering the Sharing Economy of World Mobile, the first mobile network &nbsp;owned by the people and built on blockchain. Connecting the unconnected &nbsp;🌍📱</p>",
+        "logo": "assets/earthnode.png",
+        "website": "https://worldmobile.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/worldmobile",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/WorldMobileTeam/",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/WorldMobileTeam",
+            "type": "twitter"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 35877,
+        "name": "Saturn NFT",
+        "description": "Saturn NFT is the #1 NFT minting platform on Cardano. Saturn mints state of the art Cardano NFTs by leveraging smart contracts and the new CIP-68 standard",
+        "fullDescription": "<p>Saturn NFT is the #1 NFT minting full NFT business development platform on Cardano. Unlike other minting platforms in the Cardano ecosystem, Saturn mints using secure smart contracts and are the only platform minting the most up to date CIP-68 dynamic metadata standard.</p>\n<p></p>\n<p>Saturn also provides services for converting old CIP-25 NFTs to the new CIP-68 standard along with staking and custom smart contract services.</p>\n<p></p>\n<p></p>",
+        "logo": "assets/saturn-nft.png",
+        "website": "https://saturnnft.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/SaturnNFTio",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 81842.22,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 36198,
+        "name": "KubePay",
+        "description": "Instantly make purchases with digital assets, from your everyday coffee to your next international flight. Paying digitally has never been easier.",
+        "fullDescription": "<p>KubePay: Payments made easy.</p>\n<p></p>\n<p>Instantly make purchases with digital assets, from your everyday coffee to your next international flight. Paying digitally has never been easier.</p>\n<p></p>\n<p>EVERYDAY DEFI PAYMENTS</p>\n<p></p>\n<p>Welcome to the DeFi payments revolution with real-world use. Use our platform to instantly purchase products and services on our Marketplace. KubePay gives digital currencies the push they need to decisively become an integral part of daily life.</p>\n<p></p>\n<p>YOUR MONEY, YOUR WAY</p>\n<p></p>\n<p>Interact with your favorite tokens in just one click: store, send, receive, buy, sell, swap, stake and trade. Featuring KubeCoin (KUBE), Cardano (ADA), Revuto (REVU), World Mobile Token (WMT), MELD and ADAX, KubePay is the all-in-one app for your blockchain and Web3 transactions.</p>\n<p></p>\n<p>FIAT FRIENDLY</p>\n<p></p>\n<p>Use fiat currencies and your credit/debit card to instantly buy KUBE (utility token). Thanks to our SWAP, there are zero intermediaries.</p>\n<p></p>\n<p>EARN REWARDS</p>\n<p></p>\n<p>Start earning rewards on your digital assets in KUBE and ADA with our staking protocol. HODL, stake and earn up to 7.77% APY, all without having to lock up your tokens.</p>\n<p></p>\n<p>MADE FOR EVERY TYPE OF USER</p>\n<p></p>\n<p>Our innovative App eliminates blockchain complexities to make it user-friendly every step of the way, whether you’re an experienced DeFi user or just starting out. Easily access our app using Face or Touch ID.</p>\n<p></p>\n<p>API INTEGRATION FOR BUSINESSES</p>\n<p></p>\n<p>Simply incorporate our API to start receiving decentralized payments and bring the future of digital currencies to your business.</p>",
+        "logo": "assets/kubepay.png",
+        "website": "https://kubepay.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "cmc",
+            "url": "https://coinmarketcap.com/currencies/kubecoin/",
+            "type": "cmc"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/kubecoin/",
+            "type": "facebook"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/kubecoin",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/KubePay",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/c/KubeCoin",
+            "type": "youtube"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 44121,
+        "name": "Toolheads",
+        "description": "Toolheads - An NFT Collection from CNFT Tools.",
+        "fullDescription": "<p>Toolheads - An NFT Collection from CNFT Tools. Earn $TOOL. Have fun.</p>",
+        "logo": "assets/toolheads.png",
+        "website": "https://toolheads.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/cnfttools",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/cnfttools",
+            "type": "twitter"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 47307,
+        "name": "Cardano Cafe",
+        "description": "CardanoCafe is a High Performance Cardano Stake Pool powered by multiple green-energy bare-metal servers",
+        "fullDescription": "<p>CardanoCafe is a High Performance Cardano Stake Pool powered by multiple green-energy bare-metal servers, operated by a team that is passionate about delivering the best reliable staking rewards to our delegators. CardanoCafe strives to help heal the environmental wounds of our planet by supporting multiple charitable organizations that work tirelessly for the benefit of nature, wildlife, and mankind.</p>",
+        "logo": "assets/cardano-cafe.png",
+        "website": "https://cardanocafe.org/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/CafeCardano",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 47308,
+        "name": "Sandstone",
+        "description": "Professional Staking\nMaximum Rewards",
+        "fullDescription": "<p>Our mission is to provide the most reliable stake pool on the Cardano blockchain that consistently make blocks every epoch and delivers the best staking rewards possible for our delegators. Sandstone's architecture is incredibly sophisticated with no expense spared when it comes to ensuring the best security and reliability possible.</p>\n<p>We're committed to being a force for good in the world, pledging support to the causes we believe in, while providing our knowledge to enhance the wider Cardano ecosystem. We stand for a professional, reliable service, delivered with integrity.</p>",
+        "logo": "assets/sandstone.png",
+        "website": "https://www.sandstone.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/sandstonepool",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 47309,
+        "name": "Bloom Pool",
+        "description": "At Bloom, we are committed to providing top-quality ADA staking services",
+        "fullDescription": "<p>At Bloom, we are committed to providing top-quality ADA staking services to all of our delegates. We practice continual improvement to maximize pool efficiency in block-producing capability and transaction processing, allowing us to offer competitive returns to our delegates while maintaining the most secure, reliable, distributed network of nodes.</p>",
+        "logo": "assets/bloom-pool.png",
+        "website": "https://bloompool.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/R8hy3YC",
+            "type": "discord"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/BloomPool.io",
+            "type": "facebook"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/c/bigpey/",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 47311,
+        "name": "Sunshine Stake Pool",
+        "description": "Committed to prividing the best Cardano staking experience\nat the most competitive rates",
+        "fullDescription": "<p>The Sunshine Stake Pool was one of the top performing Cardano Stake Pools on the ITN! Our delegators experienced great ROS because we made over 96% of the blocks assigned to our pool. On mainnet we will continue to do whatever it takes to ensure we make as many blocks as the protocol will allow! Thank you for Staking with us!</p>",
+        "logo": "assets/sunshine-stake-pool.png",
+        "website": "https://sunnyada.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/sunnycardano",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 47654,
+        "name": "ViperSwap",
+        "description": "ViperSwap is the all-in-one trading platform on Cardano, offering cross-chain swaps and a state-of-the-art DEX Aggregator.",
+        "fullDescription": "<p>Introducing ViperSwap: The All-In-One Trading Platform</p>\n<p><br></p>\n<p>ViperSwap is your gateway to a seamless transition into the Cardano blockchain community, serving as the ultimate onboarding tool with a wide array of services!</p>\n<p><br></p>\n<p>Features:</p>\n<p>1.) Swaps: Buy and sell Cardano native tokens</p>\n<p>2.) Cross-Chain Swaps: Convert BTC, ETH, SOL, USDT, and many more to ADA&nbsp;</p>\n<p>3.) P2P NFT/CNT Trades: Trade directly with buyers and sellers securely (COMING SOON)&nbsp;</p>\n<p><br></p>\n<p>Benefits of ViperSwap:&nbsp;</p>\n<p>1.) ViperSwap offers some of the lowest rates on the market&nbsp;</p>\n<p>2.) ViperSwap is built with battle-tested code Vipers can rely on&nbsp;</p>\n<p>3.) ViperSwap does not collect personal information or require KYC</p>",
+        "logo": "assets/viperswap.png",
+        "website": "https://viperswap.co",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges", "defi"],
+        "socialLinks": [
+          {
+            "title": "cmc",
+            "url": "https://coinmarketcap.com/dexscan/cardano/7ab955652d871bea27119656d3fd72bc5fdf037c3d1e79ddc5a7ee8bfa95c094/",
+            "type": "cmc"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.gg/vipercoin",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/vipercoincto",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 49419,
+        "name": "CyberVerse",
+        "description": "CyberVerse is a free-to-play, cross-chain, P2E MMORPG currently available in beta on both the Ergo and Cardano blockchains.",
+        "fullDescription": "<p>CyberVerse is a free-to-play, cross-chain, play-to-earn, pixel-based MMORPG currently available in beta on both the Ergo and Cardano blockchains.&nbsp;</p>\n<p><br></p>\n<p>Players can explore Cyberia city, engage in a variety of mini-games, and earn CYPX.&nbsp;</p>\n<p>Activities include DJing, car racing, and gardening. Players can also collect daily rewards, complete quests, level up, and customize NFT apartments they own.&nbsp;</p>\n<p><br></p>\n<p>The game includes features such as global chat, leaderboards, and loot boxes, with a multiplayer mode that enhances collaborative play and so much more!</p>\n<p><br></p>\n<p>Now available on Browser!</p>",
+        "logo": "assets/cyberverse.png",
+        "website": "https://www.cyberversegame.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["games", "collectibles"],
+        "socialLinks": [
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/cyberpixels",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/cyberversegame",
+            "type": "discord"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/CyberVerse_io/",
+            "type": "reddit"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/CyberVersegame",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/CyberVerseGame",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@cyberversegame",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "22",
+            "name": "Metaverse",
+            "slug": "metaverse"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 1.12,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 51430,
+        "name": "Optim Finance",
+        "description": "Optim Finance is a suite of DeFi protocols focused on yield optimization for the Cardano blockchain.",
+        "fullDescription": "<p>Optimize your yield and scale your vision with our decentralized suite of products.</p>\n<p><br></p>\n<p><strong>OADA</strong></p>\n<p>ADA synthetic always backed 1:1 with ADA . Superior yields, enhanced governance, and DeFi composability. Stake with sOADA, trade with OADA - always redeemable for ADA.</p>\n<p><br></p>\n<p><strong>Liquidity Bonds</strong></p>\n<p>Borrow + lend ADA staking rights, all on-chain and trustless. Boost staking power for SPOs &amp; ISPOs. Lenders earn more. Borrowers further decentralization and fund projects.</p>\n<p><br></p>\n<p><br></p>\n<p><br></p>",
+        "logo": "assets/optim-finance.png",
+        "website": "https://www.optim.finance/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/YjzZX2wgUT",
+            "type": "discord"
+          },
+          {
+            "title": "gitbook",
+            "url": "https://optim-finance.gitbook.io/optim-finance",
+            "type": "gitbook"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/OptimFinance",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://optim-labs.medium.com/",
+            "type": "medium"
+          },
+          {
+            "title": "telegram",
+            "url": "https://telegram.me/Optim_Fi",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/OptimFi",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 51439,
+        "name": "Empowa",
+        "description": "Empowa - enabling financially excluded communities to improve living conditions and create wealth through access to affordable and climate smart housing.",
+        "fullDescription": "<p><strong>Empowa</strong> - enabling financially excluded communities to improve living conditions and create wealth through access to affordable and climate smart housing.</p>\n<p><br></p>\n<p>Utilising the <strong>Cardano</strong> blockchain Empowa is an ecosystem providing access to <strong>affordable </strong>and <strong>green </strong>home loans for the <strong>underbanked </strong>in Africa.</p>\n<p><br></p>\n<p><strong>Empowa's Collateral NFTs</strong> are digital assets that allow token holders to support housing developers by providing collateral for their projects. Here's a brief overview:</p>",
+        "logo": "assets/empowa.png",
+        "website": "https://empowa.io",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi", "marketplaces", "collectibles"],
+        "socialLinks": [
+          {
+            "title": "cmc",
+            "url": "https://coinmarketcap.com/currencies/empowa/",
+            "type": "cmc"
+          },
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/empowa",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.gg/etXfBwWX8v",
+            "type": "discord"
+          },
+          {
+            "title": "telegram",
+            "url": "https://telegram.com/empowa_chat",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/empowa_io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://youtube.com/empowa_io",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 1,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 15.18,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 51448,
+        "name": "Levvy Finance",
+        "description": "A Peer-to-Peer lending protocol on Cardano that enables NFT and Fungible Token owners to access instant liquidity from lenders at efficient market rates.",
+        "fullDescription": "<p>Levvy is an innovative Peer-to-Peer lending protocol that allows NFT and Fungible Token owners to access instant liquidity from lenders at efficient market rates on Cardano. Borrowers can use their assets as collateral to secure $ADA loans, while lenders earn interest by providing liquidity. Unlike traditional lending, Levvy operates more like an options market, where borrowers manage risk, and lenders take on potential collateral in case of default. This creates a dynamic ecosystem for both liquidity access and yield generation, making Levvy a powerful tool for DeFi users on Cardano.</p>",
+        "logo": "assets/levvy-finance.png",
+        "website": "https://levvy.fi",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/angelfinance",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/levvyfinance",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 0,
+          "balancePercentageChange": 0
+        }
+      },
+      {
+        "dappId": 51454,
+        "name": "Bodega Market",
+        "description": "Bodega Market is building a new dex (V3) on Cardano Blockchain. (pivoting to dex)",
+        "fullDescription": "<p>Bodega Market is an open-source DEX on the Cardano blockchain It allows users to create, participate, and trade in markets based on the outcomes of future events. By leveraging the unique capabilities of Cardano’s smart contract infrastructure, Bodega Market provides a secure, low-cost, and highly scalable platform for forecasting real-world outcomes. The protocol aims to redefine trading by ensuring trustlessness, transparency, and accessibility for users worldwide.</p>",
+        "logo": "assets/bodega-market.png",
+        "website": "https://www.bodegamarket.xyz/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["exchanges"],
+        "socialLinks": [
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/bodega",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.gg/hfpmjC9x4A",
+            "type": "discord"
+          },
+          {
+            "title": "gitbook",
+            "url": "https://docs.bodegacardano.org/",
+            "type": "gitbook"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/bodega-market",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@bodegacardano",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/BodegaCardano",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 7620.65,
+          "balancePercentageChange": -24.93
+        }
+      },
+      {
+        "dappId": 51504,
+        "name": "Black Flag Pirates",
+        "description": "A unique dashboard that lets you view the collection, see the Pirates you own, check their rankings, filter by traits, and access a crew page! Assemble today!",
+        "fullDescription": "<p>A unique dashboard that lets you view the collection, see the Pirates you own, check their rankings, filter by traits, and access a crew page! Assemble today!</p>",
+        "logo": "assets/black-flag-pirates.png",
+        "website": "https://dash.blackflagnft.pro/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/9KYhndrEbv",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/BlackFlag_NFT",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 3.3,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 53076,
+        "name": "GyroSwap",
+        "description": "GyroSwap is the first Cardano Charity Launchpad!\nPowering real-world aid by funding food and education, while boosting $GYROS buys and liquidity.",
+        "fullDescription": "<p><strong>$GYROS</strong> is a <strong>meme-driven, community-powered cryptocurrency</strong> with real-world impact. Combining <strong>fun, trading, and charity</strong>, $GYROS brings value to both holders and those in need. Through <strong>NFT burns, liquidity boosts, and charitable donations</strong>, we aim to prove that crypto can be both <strong>entertaining and a force for good</strong>, by directing most of our revenue toward <strong>food and education for people who cannot afford it</strong>.</p>\n<p>With the <strong>GyroSwap dApp</strong>, the token sees <strong>increased buy pressure and liquidity</strong>, while <strong>charities raise funds at the same time!</strong></p>\n<p>In addition, the $GYROS project leverages <strong>Greek cuisine and tourism</strong> as an engaging and accessible way to <strong>onboard people to the Cardano blockchain</strong>, with upcoming partnerships across <strong>Gyros restaurants and Hotels in Greece.</strong></p>",
+        "logo": "assets/gyroswap.png",
+        "website": "https://landing.gyroswap.app/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["collectibles", "other"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://x.com/GyrosCoinAda",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          }
+        ],
+        "metrics": {
+          "transactions": 0,
+          "transactionsPercentageChange": 0,
+          "uaw": 0,
+          "uawPercentageChange": 0,
+          "newUAW": 0,
+          "volume": 0,
+          "volumePercentageChange": 0,
+          "balance": 16.72,
+          "balancePercentageChange": -23.96
+        }
+      },
+      {
+        "dappId": 18515,
+        "name": "Blueshift",
+        "description": "Blueshift introduces a new portfolio-based AMM and asset manager.",
+        "fullDescription": "<p>A novel portfolio-based asset management&nbsp;protocol with unprecedented APRs</p>",
+        "logo": "assets/blueshift.png",
+        "website": "https://blueshift.fi/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/KQsP9jzvcM",
+            "type": "discord"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/BlueshiftGroup",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/blueshiftfi",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 18745,
+        "name": "GetBlock",
+        "description": "GetBlock is one of the largest blockchain infrastructure providers.",
+        "fullDescription": "<p><strong>Overview: </strong>&nbsp;GetBlock is a blockchain infrastructure provider that offers access to full nodes and APIs for over 50 blockchain networks, including Bitcoin, Ethereum, Binance Smart Chain, Polkadot, and more.</p>\n<p>GetBlock's services include both JSON-RPC and RESTful APIs, which allow users to query blockchain data, broadcast transactions, and perform other operations. GetBlock aims to simplify the process of building blockchain-based applications and services, and to provide a reliable and scalable infrastructure for users of all skill levels. <strong>Products: </strong>GetBlock Nodes, GetBlock Explorer, GetBlock Tracker <strong>What is GetBlock?</strong></p>\n<p>GetBlock is one of the largest blockchain infrastructure providers. With GetBlock, teams of crypto applications don’t need to run their own blockchain nodes: instead, they can get connected to blockchains via ready-made API endpoints. To meet the requirements of various dApps, GetBlock offers free and paid packages.</p>",
+        "logo": "assets/getblock.png",
+        "website": "https://getblock.io",
+        "isActive": true,
+        "chains": ["avalanche", "bnb-chain", "cardano", "ethereum", "fantom", "near", "optimism", "polygon", "tron"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/T2hbgqfEnv",
+            "type": "discord"
+          },
+          {
+            "title": "reddit",
+            "url": "https://www.reddit.com/r/getblockio/",
+            "type": "reddit"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/getblockio_eng",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/getblockio",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/c/GetBlock",
+            "type": "youtube"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 18803,
+        "name": "Jungle",
+        "description": "Cardano NFT Analytics database & sniping utilities",
+        "fullDescription": "<p>The current Jungle ecosystem consists of:</p>\n<ul>\n  <li><strong>Jungle Web </strong>- web platform that allows users to make better trading decisions based on available data and real time updates</li>\n  <li><strong>Jungle Mobile </strong>- jungle in your pocket, with events, watchlist and news notifications as well as portfolio updates</li>\n  <li><strong>Predator </strong>- sniping browser extension and advancement of marketplace UI with rarity information and asset valuation</li>\n  <li><strong>Developer API (in-development) </strong>- everything from transaction breakdown till<u> </u>to marketplace volumes. &nbsp;Every data developers need to have reliable and rich data in order to launch their apps faster</li>\n</ul>",
+        "logo": "assets/jungle.png",
+        "website": "https://cnftjungle.io",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/BVyDqKDehY",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@cnftpredator",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/CNFTJungle",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "15",
+            "name": "Knowledge",
+            "slug": "knowledge"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 19473,
+        "name": "MELD",
+        "description": "MELD is a Layer 1 blockchain and DeFi protocol for web3 finance, providing cross-chain lending, borrowing and staking with integrated fiat banking by MELD.FI.",
+        "fullDescription": "<p>MELD is a non-custodial DeFi protocol for web3 finance that enables users to have full control of their assets without intermediaries. It offers cross-chain lending, borrowing, staking, and integrated fiat banking services on the MELD blockchain.&nbsp;</p>\n<p><br></p>\n<p>MELD supports six leading blockchains, allowing seamless asset transfer, and bridging is integrated into the MELDapp. Overall, MELD is a comprehensive DeFi protocol that empowers users to take control of their finances through a single platform. It is positioned to become a leading player in the DeFi space with its cross-chain capabilities and integrated fiat banking services.</p>",
+        "logo": "assets/meld.png",
+        "website": "https://www.app.meld.com",
+        "isActive": false,
+        "chains": ["avalanche", "cardano", "ethereum"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/caDXKq75ys",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/MELD-labs",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/meld-labs",
+            "type": "medium"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/meld_notifications",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/MELD_Defi",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 19658,
+        "name": "flipr",
+        "description": "The most feature rich and decentralised NFT hub on Cardano. Community grown.",
+        "fullDescription": "<p>Rewarding NFT&nbsp;communities and keeping the spirit of crypto at our core. Like it should be. 1. Cutting edge features 2. Evolving experience 3. Highlighting Cardano</p>\n<p>Access to the latest and greatest features that change the day to day trading of NFTs on Cardano.</p>\n<p>A unique take on what it is to be a trading hub and NFT marketplace. Seamless trading will build our foundation, while we build features you need.</p>\n<p>We will show the world what Cardano can offer. From artists, to creators, we want to build a hub for everyone.</p>",
+        "logo": "assets/flipr.png",
+        "website": "https://flipr.io",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/UkF6TSsV9q",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/flipr_io",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "22",
+            "name": "Metaverse",
+            "slug": "metaverse"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 19795,
+        "name": "Mocossi Planet",
+        "description": "The first P&E virtual pet and farming simulation game on Cardano.",
+        "fullDescription": "<p><strong>Mocossi Planet</strong> is one of the first play-and-earn games on the Cardano blockchain. It is different from other traditional virtual pet games in that it incorporates both virtual pet and farming simulation elements and implements smart contracts in its in-game ecosystem. Apart from being entertained, players can earn real money as a reward for their contribution to the growth of our ecosystem (e.g., lands, houses, and Mocomons).</p>\n<p><strong>Mocomon holders</strong> have several benefits that increase with time as the game develops. Previously, <strong>Genesis Mocomon</strong> (currently <strong>ITOs</strong>) holders enjoyed early access to the game, <strong>$MCOS</strong> token airdrops, in-game earnings, exclusive NFTs, and discounted lands. For non-Genesis (currently <strong>ITO2s</strong>) holders, the benefits included in-game earnings, participation in the DAO, and the right to vote on whether or not the breeding feature would be added to ITO2. More details can be found in our whitepaper.</p>\n<p><strong>Mocossi Planet game</strong> incorporates both virtual pet and farming simulation elements. The starting point for players is to <strong>raise</strong> and <strong>bond</strong> with their <strong>Mocomons</strong> through the five main activities: feeding, bathing, boo-booing and sleeping and entertaining. Strongly bonded relationships will be rewarded with ‘mood points’ that can be used to farm and deliver products. The more mood points a Mocomon has, the more farming ability it can get. Then you can use mood points to complete tasks such as farming, mining stone, cutting wood, and deliver products according to order board.</p>",
+        "logo": "assets/mocossi-planet.png",
+        "website": "https://mocossi.com/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "blog",
+            "url": "https://mocossi.substack.com/",
+            "type": "blog"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/officialmocossi/",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/officialmocossi/",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 19796,
+        "name": "ADAX PRO",
+        "description": "State of the Art Decentralized Digital Asset Exchange built on Cardano Blockchain",
+        "fullDescription": "<p>ADAX is an automated liquidity protocol that facilitates trades within the Cardano ecosystem in a completely decentralized and non-custodial way. ADAX has no order book -- we eliminate all intermediaries, complexity, and cumbersome procedures from the equation, offering users untrammeled freedom to trade without censorship or loss of control over their assets. Users can maintain full control of their tokens and are not required to give up their private keys so that their orders can be logged as they are on a centralized exchange.</p>",
+        "logo": "assets/adax-pro.png",
+        "website": "https://adax.pro",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/",
+            "type": "discord"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/adaxcommunity",
+            "type": "telegram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/adax_pro",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 20115,
+        "name": "SmartClaimz",
+        "description": "FreeLoaderz SmartClaimz is a novel reward distribution platform that aims to be the premier token claiming Web3 dApp for end users.",
+        "fullDescription": "<p>FreeLoaderz SmartClaimz is a novel reward distribution platform that aims to be the &nbsp;premier token claiming Web3 dApp for end users. Decentralized &nbsp;autonomous organizations (DAOs), token projects, NFT projects, video &nbsp;game projects, and more will be able to offer their tokens through &nbsp;SmartClaimz to their users.</p>\n<p>To speed up the &nbsp;transactions, SmartClaimz submits them to the FreeLoaderz Load &nbsp;Balancers. The Load Balancers pass the transaction to Cardano Submit API &nbsp;enabled Relays. Each of these Relays are run by members of the &nbsp;FreeLoaderz Coalition.</p>\n<p>Follow these basic instructions to claim tokens on SmartClaimz:</p>\n<ul>\n  <li>Connect your wallet using the \"Connect\" button in the Navigation Bar</li>\n  <li>Accept the Terms of Service</li>\n  <li>If you are delegated to a participating pool, you will see a list of tokens available.</li>\n  <li>Choose the tokens you want to claim</li>\n  <li>Click \"Submit Claimz\"</li>\n  <li>Sign the transaction</li>\n  <li>The tokens will appear in your wallet once the transaction is finalized by the network</li>\n</ul>\n<p>No &nbsp;matter how many tokens are made in a claim, every claim has a 1.7 ADA &nbsp;Service fee along with the nominal Cardano network fee. (We cannot &nbsp;control the Cardano network fee and it is variable.)</p>\n<p>Since tokens don't expire by default on SmartClaimz, a user can save on fees in the long run by not claiming every epoch.</p>",
+        "logo": "assets/smartclaimz.png",
+        "website": "https://smartclaimz.io",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/K9Q2mdCe3G",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/FreeLoaderz",
+            "type": "github"
+          },
+          {
+            "title": "medium",
+            "url": "https://freeloaderz.medium.com/",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/FreeLoaderz2022",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "10",
+            "name": "Layer 2",
+            "slug": "layer-2"
+          },
+          {
+            "id": "13",
+            "name": "Pools",
+            "slug": "pools"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 20117,
+        "name": "Cryplect",
+        "description": "Cryplect is a fantasy basketball game where fans can buy, trade, play, and earn prizes with licensed digital cards.",
+        "fullDescription": "<p>Cryplect is a fantasy basketball game where fans can buy, trade, play, and earn prizes with licensed digital cards.</p>",
+        "logo": "assets/cryplect.png",
+        "website": "https://www.cryplect.com/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/wYfzJG3W8X",
+            "type": "discord"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/cryplect",
+            "type": "facebook"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/cryplect/",
+            "type": "instagram"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@Cryplect",
+            "type": "medium"
+          },
+          {
+            "title": "tiktok",
+            "url": "https://www.tiktok.com/@cryplect",
+            "type": "tiktok"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/cryplect",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCpepgJeqKmvJjr0_ylH0RjQ/",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 22724,
+        "name": "Tuition Coins",
+        "description": "Tuition Coins are designed to power reward and compensation systems for Edtech platforms and other stakeholders in the education domain.",
+        "fullDescription": "<p>Tuition Coin is a social good coin designed to serve three purposes: 1. Digital Scholarships 2. Payment for Educators (Content Creators) 3. College Savings Tool Tuition Coins (TUITs) are the native assets based on the Cardano blockchain designed to power reward and compensation systems for Edtech platforms and other stakeholders in the education domain. A majority of these tokens are reserved only for educators, and they will be the faucets of token release into the market. The way we bank and conduct our transactions is changing with the rise of digital technologies, and cryptocurrencies are at the forefront of this revolution. But what can they do for the education sector? This white paper presents problems associated with the traditional educational system and why it is becoming more and more economically inefficient, we’ll explore how cryptocurrency can be used to finance education and make it more accessible for everyone.</p>",
+        "logo": "assets/tuition-coins.png",
+        "website": "https://tuitioncoins.org/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["other"],
+        "socialLinks": [
+          {
+            "title": "blog",
+            "url": "https://www.tumblr.com/tuitioncoin?_branch_match_id=1118423799708661313&_branch_referrer=H4sIAAAAAAAAA8soKSkottLXTyzRKynNTcop0kvOz9UvKc0syczPS87PzNM3K89PN8pJza7KyTUHABj3%2FLAuAAAA",
+            "type": "blog"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/profile.php?id=100087749204762",
+            "type": "facebook"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/tuition.coin/",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/tuition_coin",
+            "type": "twitter"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 27122,
+        "name": "NMKR Custom NFT Marketplaces",
+        "description": "Launch your own NFT Marketplace.",
+        "fullDescription": "<p>With NMKRs <strong>Custom NFT Marketplace solution</strong>, you can create NFT products that reach your target audience.</p>\n<p>NMKR is an NFT Creation, Minting &amp; Trading Infrastructure provider on the Cardano blockchain, offering tools that help brands, companies and enterprises launch Whitelabel custom Cardano NFT projects.&nbsp;</p>\n<p>With a strong focus on accessibility, NMKR has created a mix of development APIs and No-Code building blocks, which can be combined modularly to integrate NFT Minting and NFT Marketplace Trading functionalities on websites quickly and easily.</p>\n<p>NMKR is the largest NFT infrastructure provider on the Cardano blockchain, being responsible for Minting millions of NFTs. NMKR has launched NFTs with celebrities such as Martin Lawrence and all three founding entities of the Cardano Blockchain: IOHK (IOG), Emurgo and the Cardano Foundation. Using NMKR, brands, companies, and artists can quickly and easily mint their NFTs.</p>",
+        "logo": "assets/nmkr-custom-nft-marketplaces.png",
+        "website": "https://www.nmkr.io/nft-marketplace",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "blog",
+            "url": "https://www.nmkr.io/blog",
+            "type": "blog"
+          },
+          {
+            "title": "coingecko",
+            "url": "https://www.coingecko.com/en/coins/nmkr",
+            "type": "coingecko"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/G6edujdbSU",
+            "type": "discord"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/nmkr_io/",
+            "type": "instagram"
+          },
+          {
+            "title": "other",
+            "url": "https://coinmarketcap.com/currencies/nft-maker/",
+            "type": "other"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/nmkr_io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@nmkr_io",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "19",
+            "name": "Photos",
+            "slug": "photos"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "20",
+            "name": "Videos",
+            "slug": "videos"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 27700,
+        "name": "ADA TheInkWhale",
+        "description": "ADA TheInkWhale is the first ₳ Dapp Merch Store.",
+        "fullDescription": "<p>ADA TheInkWhale is the first ₳ Dapp Merch Store. We sell Crypto-related products because we believe in the Future of Cardano &amp; its Community!</p>",
+        "logo": "assets/ada-theinkwhale.png",
+        "website": "https://ada.theinkwhale.com",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/AdaTheInkWhale",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 38701,
+        "name": "T Minus One",
+        "description": "Your one-stop decentralized solution to mint, vest, sell and launch your project on Cardano!",
+        "fullDescription": "<p>T Minus One (T-1) is a decentralized token launchpad on Cardano. It serves as an all-inclusive service for founding projects, providing services for token minting, initial sale, vesting, tokenomics, and more. The features are entirely governed through Smart Contracts, which removes a crucial component of risk for investors. The Smart Contracts verify that the sale is correctly implemented, vesting schedules are adhered to and liquidity is provided correctly on DEXs. Overall, T-1 revolutionizes the currently cumbersome and error-prone practice of token launches on Cardano by providing unified and standardized tooling.</p>\n<p></p>\n<p>T-1 offers an all-inclusive solution for token launch on the Cardano blockchain. Our services encompass:</p>\n<p></p>\n<ul>\n  <li><strong>Minting Services:</strong> We provide straightforward token creation capabilities.</li>\n  <li><strong>Fundraising Tools:</strong> T-1 assists with Initial Token Offerings (ITOs), Initial Stake Pool Offerings (ISPOs), and reverse ISPOs (rISPOs).</li>\n  <li><strong>Liquidity Provision:</strong> We facilitate seamless integration with major decentralized exchanges (DEXs).</li>\n  <li><strong>Team Vesting:</strong> T-1 offers a mechanism to ensure the long-term commitment of team members through token vesting.</li>\n  <li><strong>Verified Tokenomics:</strong> T-1 provides a platform for transparent and auditable token economies.</li>\n</ul>\n<p></p>\n<p>In the bustling arena of cryptocurrencies, characterized by a diverse range of coins and tokens, each with their unique applications, T-1 carves out a unique niche. The vision steering T-1 is to simplify the inherently complex process of launching a token on the Cardano blockchain. This complexity often poses significant hurdles to projects, detracting them from their primary aim of delivering value, as they navigate the technical intricacies of minting, selling, and managing tokens.</p>",
+        "logo": "assets/t-minus-one.png",
+        "website": "https://tminusone.pro",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi", "social"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/TMinusOnePro",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "18",
+            "name": "Discussions",
+            "slug": "discussions"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 41398,
+        "name": "JamOnBread",
+        "description": "JamOnBread | decentralized NFT marketplace on Cardano",
+        "fullDescription": "<p>JamOnBread is decentralized NFT marketplace built on Cardano launched at the end of 2021. Our platform offers a revolutionary smart contract solution that facilitates fair profit distribution among users, projects, and marketplaces.</p>\n<p><br></p>\n<ul>\n  <li>Fair smart contract sharing revenue between all sale contributors</li>\n  <li>Bringing first on-chain affiliate</li>\n</ul>",
+        "logo": "assets/jamonbread.png",
+        "website": "https://jamonbread.io/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["marketplaces"],
+        "socialLinks": [
+          {
+            "title": "blog",
+            "url": "https://blog.jamonbread.io/en",
+            "type": "blog"
+          },
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/GTZ9rj6QNf",
+            "type": "discord"
+          },
+          {
+            "title": "facebook",
+            "url": "https://www.facebook.com/JamOnBread.io",
+            "type": "facebook"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/jamonbread_io/",
+            "type": "instagram"
+          },
+          {
+            "title": "tiktok",
+            "url": "https://www.instagram.com/jamonbread_io/",
+            "type": "tiktok"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/JamOnBread_io",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/@jamonbreadio",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "11",
+            "name": "Content Creation",
+            "slug": "content-creation"
+          },
+          {
+            "id": "12",
+            "name": "Art",
+            "slug": "art"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 46835,
+        "name": "Conkis",
+        "description": "Conkis it's competitive Free to Play Turn-based Tactical Game Built on top of a blockchain where you can buy, earn and trade NFT cards that enhance your games.",
+        "fullDescription": "<p>WHAT IS CONKIS?</p>\n<p>In Conkis, players command medieval-like armies in a turn-based tactical battle to achieve victory through capturing flags, destroying towers, or annihilating enemy forces. The game takes inspiration from both Chess and the Age of Empires series.</p>",
+        "logo": "assets/conkis.png",
+        "website": "https://conkis.com/",
+        "isActive": true,
+        "chains": ["arbitrum", "bnb-chain", "cardano", "ethereum", "polygon"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/Nf5PYuaWKA",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/conkisgame",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCW6xmyYLzHRQgR3_FlI791g",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "15",
+            "name": "Knowledge",
+            "slug": "knowledge"
+          },
+          {
+            "id": "1",
+            "name": "NFT",
+            "slug": "nft"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          },
+          {
+            "id": "7",
+            "name": "Play to Earn",
+            "slug": "play-to-earn"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 47310,
+        "name": "wafflepool",
+        "description": "Maximize your rewards by delegating with us!",
+        "fullDescription": "<p>Here at Waffle Pool, we are committed to the vision of the Cardano Project, we believe in the future worldwide impact of the Cardano Protocols, we believe in decentralization and democratization, and therefore, we dedicate ourselves to running an optimal stake pool, with a heavy focus on performance and security</p>",
+        "logo": "assets/wafflepool.png",
+        "website": "https://www.wafflepool.org/",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "instagram",
+            "url": "http://instagram.com/waffle.pool",
+            "type": "instagram"
+          }
+        ],
+        "tags": [
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 47483,
+        "name": "Cerra.io",
+        "description": "Decentralized Profit-Sharing Finance Hub on Cardano",
+        "fullDescription": "<p><strong>Passive Income with Cerra.io: Join the Future of Cardano DeFi</strong><br>\n</p>\n<p>Cerra stands as a decentralized finance (DeFi) platform where users have ownership, fueled by the CERRA utility token, which operates on the Cardano blockchain. CERRA utility token serves as the primary catalyst for the Cerra economic activities and represents a share of ownership in the platform. The platform's profits are distributed among CERRA token holders through staking, ensuring that all circulating tokens are entitled to receive 100% of the platform's earnings. Holding CERRA tokens guarantees a lifetime of passive income.</p>",
+        "logo": "assets/cerra-io.png",
+        "website": "https://app.cerra.io",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["exchanges", "defi"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/NAhSpAvg4a",
+            "type": "discord"
+          },
+          {
+            "title": "github",
+            "url": "https://github.com/cerraio/lending-plutus",
+            "type": "github"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/Cerra_io",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "2",
+            "name": "Exchanges",
+            "slug": "exchanges"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 48522,
+        "name": "STEAK Protocol",
+        "description": "Sustainable PoS randomness source on the Cardano blockchain, enhancing security and scalability.",
+        "fullDescription": "<p>We present the STEAK protocol, a proof of stake (PoS) protocol designed to serve as a sustainable and efficient source of randomness for dApps on the Cardano blockchain. The protocol is based on the Ouroboros protocol (the same protocol powering Cardano itself) and is implemented on top of Cardano using smart contracts. It aims to address the limitations of existing randomness solutions based on proof of work (PoW), such as the Fortuna protocol. By utilizing PoS instead of PoW, STEAK inherits all the advantages associated with PoS, including greater energy efficiency, reduced environmental impact, and enhanced scalability. STEAK allows stakeholders to register their stake in the network by creating stake pools and rewards them for creating blocks with a small share of the stake token. DApps can rely on frequently produced blocks that contain non-manipulable and unpredictable hashes. The protocol ensures sustainability, randomness, and security through its design and governance mechanisms.</p>",
+        "logo": "assets/steak-protocol.png",
+        "website": "https://steakprotocol.com",
+        "isActive": false,
+        "chains": ["cardano"],
+        "categories": ["high-risk"],
+        "socialLinks": [
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/steakTokenADA",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "16",
+            "name": "Farming",
+            "slug": "farming"
+          },
+          {
+            "id": "18",
+            "name": "Discussions",
+            "slug": "discussions"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 50315,
+        "name": "Machiavellic",
+        "description": "The next-gen community-driven sandbox MMO. Bridging Web2 and Web3 for an immersive gaming on Cardano and WAX.",
+        "fullDescription": "<p>Step into the dark world of Ozzar with Machiavellic, a strategic game by FGL. Players command their officers, outwit their rivals, and navigate political intrigue in a bid for dominance. Are you prepared to rise as the next Overlord?</p>",
+        "logo": "assets/machiavellic.png",
+        "website": "https://machiavellic.io/",
+        "isActive": true,
+        "chains": ["cardano", "wax"],
+        "categories": ["games"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.gg/xCmcP3fmtc",
+            "type": "discord"
+          },
+          {
+            "title": "medium",
+            "url": "https://medium.com/@machiavellic_io",
+            "type": "medium"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/Machiavellic_io",
+            "type": "twitter"
+          }
+        ],
+        "tags": [],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 51024,
+        "name": "Rainbet",
+        "description": "Rainbet is an innovative and fast-growing platform in the casino, sports betting, and cryptocurrency space.",
+        "fullDescription": "<p>Rainbet is an innovative and fast-growing platform in the casino, sports betting, and cryptocurrency space.</p>",
+        "logo": "assets/rainbet.png",
+        "website": "https://www.rainbet.com",
+        "isActive": true,
+        "chains": ["bnb-chain", "cardano", "ethereum", "ton", "tron"],
+        "categories": ["gambling"],
+        "socialLinks": [
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/rainbetcom",
+            "type": "instagram"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/rainbetcom",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "14",
+            "name": "Gambling",
+            "slug": "gambling"
+          },
+          {
+            "id": "23",
+            "name": "Sports",
+            "slug": "sports"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 51237,
+        "name": "Wecazoo",
+        "description": "Wecazoo is a crypto casino. Wecazoo crypto casino is known for being one of the most rewarding crypto casinos, with a vip level up bonus up to $1M.",
+        "fullDescription": "<p><strong>Wecazoo </strong>is a <strong>Finnish-Costa Rican online crypto casino</strong> founded in 2023 by a Finnish web3 entrepreneur, Wecazoo is licensed and registered in Costa Rica. Wecazoo has offices in Finland, Japan and in San José, Costa Rica.</p>\n<p><br></p>\n<p>Wecazoo.com was developed by web3 developers from Japan.</p>\n<p><br></p>\n<p><strong>Wecazoo</strong> is one of the <strong>most rewarding</strong> crypto casinos on the market with great deposit bonuses and even better vip bonuses for it's players, wecazoo also give $1M just as a level up bonus if a player reaches the highest vip rank on the crypto casino (Emerald III).</p>\n<p><br></p>\n<p><strong>Wecazoo</strong> has a nickname similar to some other crypto casinos and wecazoo's nickname is <strong>\"zoo\",</strong> which was made for wecazoo by one of the first streamers that signed with the crypto casino.</p>\n<p><br></p>\n<p><strong>Wecazoo</strong> has a relatively strong prescence on social media, most notibly on instagram, wecazoo's username on instagram is simply @wecazoo with roughly +110k followers on there.</p>\n<p><br></p>\n<p>Wecazoo offers a vast number of <strong>live casino games</strong> from game providers like pragmatic play live &amp; evolution gaming and also <strong>slots</strong> from game providers such as pragmatic play, evoplay, habanero and a few others.</p>\n<p><br></p>\n<p>Wecazoo is also know for <strong>accepting more cryptocurrencies</strong> <strong>as a form of deposit</strong> than most other crypto casinos on the market, meaning wecazoo accepts more cryptocurrencies a form of deposit than crypto casinos like stake, roobet, duelbits and bc game.</p>\n<p><br></p>",
+        "logo": "assets/wecazoo.png",
+        "website": "https://wecazoo.com",
+        "isActive": false,
+        "chains": [
+          "arbitrum",
+          "avalanche",
+          "bnb-chain",
+          "cardano",
+          "ethereum",
+          "hedera",
+          "near",
+          "optimism",
+          "polygon",
+          "solana",
+          "stellar",
+          "ton",
+          "tron",
+          "xrpl"
+        ],
+        "categories": ["gambling"],
+        "socialLinks": [
+          {
+            "title": "facebook",
+            "url": "https://m.facebook.com/p/Wecazoo-61571177068417/",
+            "type": "facebook"
+          },
+          {
+            "title": "instagram",
+            "url": "https://www.instagram.com/wecazoo/",
+            "type": "instagram"
+          },
+          {
+            "title": "telegram",
+            "url": "https://t.me/wecazoo",
+            "type": "telegram"
+          },
+          {
+            "title": "tiktok",
+            "url": "https://www.tiktok.com/@wecazoo.com?_t=ZN-8t5KuV1ZEiU&_r=1",
+            "type": "tiktok"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/wecazoo_com",
+            "type": "twitter"
+          },
+          {
+            "title": "youtube",
+            "url": "https://www.youtube.com/channel/UCtmCg-KdIrQ3UlRSfiWjy2g",
+            "type": "youtube"
+          }
+        ],
+        "tags": [
+          {
+            "id": "14",
+            "name": "Gambling",
+            "slug": "gambling"
+          },
+          {
+            "id": "6",
+            "name": "Games",
+            "slug": "games"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 52047,
+        "name": "L4VA",
+        "description": "L4VA Protocol is an open source DeFi protocol allowing market-makers to fractionalize digital assets and giving investors unique access to new opportunities.",
+        "fullDescription": "<p>L4VA is a community driven DeFi project on a mission to provide decentralized liquidity solutions across NFT, RWA, and FT crypto asset types.</p>\n<p><br></p>\n<p>We are currently in development of our L4VA Protocol v1 with the goal of releasing to main-net in Q2 2025.</p>\n<p><br></p>\n<p>Our Firepaper at L4VA.com expands on themes and ideas in our previous Firepapers to include the (1) RWA fractionalization functionality and (2) creator driven configuration settings to support a range of other tokenized asset market making and liquidity solutions.</p>\n<p><br></p>\n<p>We appreciate your interest in L4VA and look forward to having you join our community!</p>",
+        "logo": "assets/l4va.png",
+        "website": "https://l4va.com/",
+        "isActive": true,
+        "chains": ["cardano"],
+        "categories": ["defi", "collectibles"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/mBbTUfAzuS",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://twitter.com/lava_protocol",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "26",
+            "name": "RWA",
+            "slug": "rwa"
+          },
+          {
+            "id": "3",
+            "name": "Staking",
+            "slug": "staking"
+          },
+          {
+            "id": "4",
+            "name": "Yield",
+            "slug": "yield"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "9",
+            "name": "Governance",
+            "slug": "governance"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      },
+      {
+        "dappId": 52158,
+        "name": "Coinfident",
+        "description": "Coinfident is a real-time crypto analytics platform with AI agents, offering AI-detected trading signals and rankings of top crypto voices.",
+        "fullDescription": "<p>Coinfident, a Swiss research-based startup, is revolutionizing the crypto intelligence experience by transforming social and market data into actionable insights, powered by AI agents. It offers a unique AI-driven platform for Web3 traders seeking clarity in a noisy crypto landscape.<br>\nAt the core of its innovation is the Social Prediction Signal (SPS) — a proprietary index that uses advanced AI models to analyze posts from over 3,700 verified influencers and 75 trusted news sources on X (formerly Twitter) to deliver hourly <i>buy</i> or <i>not-buy</i> signals.</p>\n<p>Through a streamlined analytics dashboard, users access real-time social and market data, combining technical indicators, SPS history, and sentiment analysis for top coins. Key tools include:</p>\n<ul>\n  <li>AI-Detected SPS Signals</li>\n  <li>Technical Analysis: Coinfident aggregates multiple technical indicators into simplified signals, helping users spot trading opportunities with ease.</li>\n  <li>Targeted Alerts: Custom alerts based on social and on-chain signals, tailored to user preferences.</li>\n</ul>\n<p><br></p>\n<p>Coinfident also introduces CAVA, its autonomous virtual agent. This AI assistant is designed for natural language queries and allows seamless exploration of crypto data, delivering in-depth analytics on influencer signals, price trends, technical indicators, security risks, and more.</p>\n<p>The Influencers Leaderboard is another powerful feature. It analyzes top crypto voices on X and ranks authentic influencers across multiple key metrics — including the historical accuracy of their Buy/Not-Buy signals, the emotional sentiment of their tweets, engagement levels, and more. Users can apply filters to find the most relevant accounts for each coin.</p>\n<p>Coinfident’s human-in-the-loop AI approach ensures credibility by involving crypto experts in model training, filtering out noise, and statistically validating predictions against real market performance.</p>\n<p><br></p>\n<p><br></p>",
+        "logo": "assets/coinfident.png",
+        "website": "https://app.coinfident.ai/",
+        "isActive": true,
+        "chains": ["bnb-chain", "cardano", "ethereum", "hedera", "polygon", "solana", "tron"],
+        "categories": ["defi", "other"],
+        "socialLinks": [
+          {
+            "title": "discord",
+            "url": "https://discord.com/invite/7VHgv3XmNp",
+            "type": "discord"
+          },
+          {
+            "title": "twitter",
+            "url": "https://x.com/Coinfident_ai",
+            "type": "twitter"
+          }
+        ],
+        "tags": [
+          {
+            "id": "15",
+            "name": "Knowledge",
+            "slug": "knowledge"
+          },
+          {
+            "id": "24",
+            "name": "Social",
+            "slug": "social"
+          },
+          {
+            "id": "5",
+            "name": "DeFi",
+            "slug": "defi"
+          },
+          {
+            "id": "8",
+            "name": "Marketplaces",
+            "slug": "marketplaces"
+          }
+        ],
+        "metrics": {
+          "transactions": null,
+          "transactionsPercentageChange": null,
+          "uaw": null,
+          "uawPercentageChange": null,
+          "newUAW": null,
+          "volume": null,
+          "volumePercentageChange": null,
+          "balance": null,
+          "balancePercentageChange": null
+        }
+      }
+    ],
+    "timestamp": 1763154646851
+  }
+}
