@@ -40,7 +40,7 @@ import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/D
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/ErrorBoundary';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
-import { logger } from '@lace/common';
+import { logger, useObservable } from '@lace/common';
 import { VotingLayout } from '../features/voting-beta';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
@@ -50,6 +50,7 @@ import { useNotificationsCenterConfig } from '@hooks/useNotificationsCenterConfi
 import { NotificationDetailsContainer, NotificationsCenter } from '../features/notifications-center';
 import { SwapsProvider } from '../features/swaps';
 import { WalletType } from '@cardano-sdk/web-extension';
+import { autoReclaimLargeCollateralUtxos } from '@src/utils/collateral-utils';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -150,7 +151,8 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     initialHdDiscoveryCompleted,
     isSharedWallet,
     environmentName,
-    isBitcoinWallet
+    isBitcoinWallet,
+    inMemoryWallet
   } = useWalletStore();
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
@@ -160,6 +162,12 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const location = useLocation<{ background?: Location<unknown> }>();
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
   const { isNotificationsCenterEnabled } = useNotificationsCenterConfig();
+
+  const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
+
+  useEffect(() => {
+    autoReclaimLargeCollateralUtxos(inMemoryWallet);
+  }, [unspendable, inMemoryWallet]);
 
   const availableRoutes = routesMap.filter((route) => {
     if (route.path === routes.staking && isSharedWallet) return false;
