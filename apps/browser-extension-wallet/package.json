@@ -55,7 +55,8 @@
     "watch": " run-s cleanup:dist watch:project",
     "watch:app": "run -T webpack --config webpack.app.dev.js --progress --watch",
     "watch:sw": "run -T webpack --config webpack.sw.dev.js --progress --watch",
-    "watch:project": "run-p watch:sw watch:app"
+    "watch:project": "run-p watch:sw watch:app",
+    "build:bundle:prepare": "yarn cleanup:dist && WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw && WEBPACK_PUBLIC_PATH=/app/ yarn build:app && WEBPACK_PUBLIC_PATH=/app/ yarn build:cs"
   },
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
