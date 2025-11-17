@@ -26,6 +26,7 @@ import {
 import { SwapsContainer } from './SwapContainer';
 import { DropdownList } from './drawers';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 import { storage } from 'webextension-polyfill';
@@ -134,6 +135,8 @@ export const SwapsProvider = (): React.ReactElement => {
   const utxos = useObservable(inMemoryWallet.utxo.available$);
   const collateral = useObservable(inMemoryWallet.utxo.unspendable$);
   const addresses = useObservable(inMemoryWallet.addresses$);
+  const { coinPrices } = useBackgroundServiceAPIContext();
+  const tokenPrices = useObservable(coinPrices.tokenPrices$);
 
   // swaps interface
   const [tokenA, setTokenA] = useState<DropdownList>();
@@ -437,13 +440,26 @@ export const SwapsProvider = (): React.ReactElement => {
   );
 
   const sendSuccessPosthogEvent = useCallback(() => {
+    let totalValueTransferInAda = 0;
+
+    // If swapping from ADA, the quantity is already in ADA
+    if (tokenA.id === 'lovelace') {
+      totalValueTransferInAda = Number(quantity);
+    } else {
+      // For other tokens, get the token price in ADA and multiply by quantity
+      const tokenPrice = tokenPrices?.tokens.get(tokenA.id as Wallet.Cardano.AssetId);
+      const priceInAda = tokenPrice?.price?.priceInAda || 0;
+      totalValueTransferInAda = Number(quantity) * priceInAda;
+    }
+
     posthog.sendEvent(PostHogAction.SwapsSignSuccess, {
       tokenIn: tokenB,
       tokenOut: tokenA,
       quantity,
-      targetSlippage: targetSlippage.toString()
+      targetSlippage: targetSlippage.toString(),
+      totalValueTransferInAda: totalValueTransferInAda.toString()
     });
-  }, [tokenA, tokenB, posthog, quantity, targetSlippage]);
+  }, [tokenA, tokenB, posthog, quantity, targetSlippage, tokenPrices]);
 
   const signAndSubmitSwapRequest = useCallback(async () => {
     const unableToSignErrorText = t('swaps.error.unableToSign');
