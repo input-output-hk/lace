@@ -130,6 +130,13 @@ module.exports = () =>
           {
             from: path.resolve(__dirname, '../../packages/common/src/ui/assets/icons/loader.png'),
             to: '../assets/[name][ext]'
+          },
+          {
+            from: path.resolve(
+              __dirname,
+              'src/views/browser-view/features/dapp/explorer/services/api/static/assets/*.png'
+            ),
+            to: '../assets/[name][ext]'
           }
         ]
       })
