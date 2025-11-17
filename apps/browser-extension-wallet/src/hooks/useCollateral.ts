@@ -51,7 +51,7 @@ export const useCollateral = (): UseCollateralReturn => {
 
   useEffect(() => {
     const isPureUtxoWithEnoughCoins = (utxo: Cardano.Utxo): boolean =>
-      !utxo[1].value?.assets && utxo[1].value.coins >= COLLATERAL_AMOUNT_LOVELACES;
+      !utxo[1].value?.assets && utxo[1].value.coins === COLLATERAL_AMOUNT_LOVELACES;
 
     const checkCollateral = async (): Promise<void> => {
       if (!inMemoryWallet?.utxo?.available$) return;
