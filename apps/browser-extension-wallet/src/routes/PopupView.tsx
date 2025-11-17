@@ -18,6 +18,8 @@ import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
 import { useAnalyticsContext } from '@providers';
+import { useObservable } from '@lace/common';
+import { autoReclaimLargeCollateralUtxos } from '@src/utils/collateral-utils';
 
 dayjs.extend(duration);
 
@@ -40,6 +42,12 @@ export const PopupView = (): React.ReactElement => {
     walletState,
     initialHdDiscoveryCompleted
   } = useWalletStore();
+
+  const unspendable = useObservable(inMemoryWallet?.balance?.utxo.unspendable$);
+
+  useEffect(() => {
+    autoReclaimLargeCollateralUtxos(inMemoryWallet);
+  }, [unspendable, inMemoryWallet]);
 
   const [{ lastMnemonicVerification, mnemonicVerificationFrequency, chainName }] = useAppSettingsContext();
   const backgroundServices = useBackgroundServiceAPIContext();
