@@ -18,8 +18,13 @@ const isUnspendableWithTooHighCoinLockup = (utxo: Cardano.Utxo): boolean =>
  * @param inMemoryWallet - The wallet instance
  */
 export const autoReclaimLargeCollateralUtxos = async (inMemoryWallet: ObservableWallet): Promise<void> => {
+  // Guard: return early if wallet is not available
+  if (!inMemoryWallet?.utxo?.unspendable$) {
+    return;
+  }
+
   // if we've got utxos OVER COLLATERAL_AMOUNT_LOVELACES automatically reclaim them
-  const collateral = await firstValueFrom(inMemoryWallet?.utxo?.unspendable$.pipe(take(1)));
+  const collateral = await firstValueFrom(inMemoryWallet.utxo.unspendable$.pipe(take(1)));
   const matchingUnspendableUtxos = collateral.filter((o) => isUnspendableWithTooHighCoinLockup(o));
 
   if (matchingUnspendableUtxos.length > 0) {
