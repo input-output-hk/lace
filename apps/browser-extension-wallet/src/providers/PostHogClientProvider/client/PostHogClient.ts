@@ -123,13 +123,17 @@ export class PostHogClient<Action extends string = string> {
         featureFlags: storage?.initialPosthogFeatureFlags,
         featureFlagPayloads: storage?.initialPosthogFeatureFlagPayloads
       },
-      property_blacklist: [
+      // Use property_denylist instead of deprecated property_blacklist
+      property_denylist: [
         '$autocapture_disabled_server_side',
         '$console_log_recording_enabled_server_side',
         '$device_id',
         '$session_recording_recorder_version_server_side',
         '$time'
-      ]
+        // Note: $ip is intentionally NOT in this list to allow GeoIP enrichment
+      ],
+      // Explicitly enable IP capture for GeoIP enrichment, which is not stored and removed from the data pipeline
+      ip: true
     });
   }
 
