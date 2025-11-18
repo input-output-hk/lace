@@ -7,7 +7,8 @@
   "author": "",
   "main": "index.js",
   "scripts": {
-    "build:bundle:v1": "yarn workspace @lace/browser-extension-wallet build:bundle:prepare",
+    "workspace:ext": "yarn workspace @lace/browser-extension-wallet",
+    "build:bundle:v1": "yarn workspace:ext cleanup:dist && WEBPACK_PUBLIC_PATH=/sw/ yarn workspace:ext build:sw && WEBPACK_PUBLIC_PATH=/app/ yarn workspace:ext build:app && WEBPACK_PUBLIC_PATH=/app/ yarn workspace:ext build:cs",
     "build:webpack": "webpack -c bundle-webpack.config.js",
     "build:bundle:merge": "rm -rf ./dist && yarn run build:webpack",
     "build:bundle:full": "run-s build:bundle:v1 build:bundle:merge"
