@@ -6,8 +6,8 @@ module.exports = {
   mode: 'development',
   devtool: 'source-map',
   entry: {
-    'sw-bundle': path.join(__dirname, 'lmp-bundler', 'sw-bundle.js'),
-    'popup-bundle': path.join(__dirname, 'lmp-bundler', 'popup-bundle.js')
+    'sw-bundle': path.join(__dirname, 'src', 'sw-bundle.js'),
+    'popup-bundle': path.join(__dirname, 'src', 'popup-bundle.js')
   },
   output: {
     filename: '[name].js',
@@ -36,7 +36,7 @@ module.exports = {
         },
         // Copy entire V1 dist
         {
-          from: path.join(__dirname, 'apps', 'browser-extension-wallet', 'dist'),
+          from: path.join(__dirname, '..', 'browser-extension-wallet', 'dist'),
           to: path.join(__dirname, 'dist'),
           globOptions: {
             ignore: ['**/manifest.json', '**/popup.html', '**/load-popup.js']

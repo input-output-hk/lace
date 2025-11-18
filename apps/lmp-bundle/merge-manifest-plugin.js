@@ -24,7 +24,7 @@ class MergeManifestPlugin {
           }
 
           // Read v1 manifest as base
-          const v1ManifestPath = path.join(__dirname, 'apps', 'browser-extension-wallet', 'dist', 'manifest.json');
+          const v1ManifestPath = path.join(__dirname, '..', 'browser-extension-wallet', 'dist', 'manifest.json');
           const v1Manifest = JSON.parse(fs.readFileSync(v1ManifestPath, 'utf-8'));
 
           // Read LMP manifest for CSP merging

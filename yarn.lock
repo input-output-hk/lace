@@ -12694,6 +12694,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@lace/lmp-bundle@workspace:apps/lmp-bundle":
+  version: 0.0.0-use.local
+  resolution: "@lace/lmp-bundle@workspace:apps/lmp-bundle"
+  dependencies:
+    copy-webpack-plugin: 9.0.1
+    npm-run-all: ^4.1.5
+    webpack: ^5.94.0
+    webpack-cli: 4.7.2
+  languageName: unknown
+  linkType: soft
+
 "@lace/nami@^0.1.0, @lace/nami@workspace:packages/nami":
   version: 0.0.0-use.local
   resolution: "@lace/nami@workspace:packages/nami"
@@ -45496,7 +45507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"npm-run-all@npm:4.1.5":
+"npm-run-all@npm:4.1.5, npm-run-all@npm:^4.1.5":
   version: 4.1.5
   resolution: "npm-run-all@npm:4.1.5"
   dependencies:
