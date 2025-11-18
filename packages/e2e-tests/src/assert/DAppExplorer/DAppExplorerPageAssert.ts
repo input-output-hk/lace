@@ -1,7 +1,12 @@
 import DAppExplorerPage from '../../elements/DAppExplorer/DAppExplorerPage';
 import { t } from '../../utils/translationService';
 import { expect } from 'chai';
-import { getAllDAppNamesFromLocalStorage, getDAppNamesFromLocalStorageByCategory } from '../../utils/DAppsUtils';
+import {
+  getAllDAppNamesFromHardcodedFile,
+  getAllDAppNamesFromLocalStorage,
+  getDAppNamesFromHardcodedFileByCategory,
+  getDAppNamesFromLocalStorageByCategory
+} from '../../utils/DAppsUtils';
 import { DAppCard } from '../../elements/DAppExplorer/DAppCard';
 import type { DAppCategories } from '../../types/dappCategories';
 
@@ -67,21 +72,31 @@ class DAppExplorerPageAssert {
     expect(await DAppExplorerPage.categoryOther.getText()).to.equal('Other');
   }
 
-  async assertSeeDAppCards(category: DAppCategories | 'Show All') {
-    await browser.waitUntil(() => browser.execute(() => document.readyState === 'complete'), {
-      timeout: 5000,
-      timeoutMsg: 'Page did not load within the given time'
-    });
+  async assertSeeDAppCards(category: DAppCategories | 'Show All', useLocalStorageData = false) {
+    if (useLocalStorageData) {
+      await browser.waitUntil(() => browser.execute(() => document.readyState === 'complete'), {
+        timeout: 5000,
+        timeoutMsg: 'Page did not load within the given time'
+      });
+    }
     await DAppExplorerPage.skeleton.waitForDisplayed({ reverse: true });
-    const dappNamesFromLocalStorage =
-      category === 'Show All'
-        ? await getAllDAppNamesFromLocalStorage()
-        : await getDAppNamesFromLocalStorageByCategory(category);
-    expect(dappNamesFromLocalStorage.length).to.be.greaterThan(0);
-    expect(dappNamesFromLocalStorage.length).to.be.lessThanOrEqual(100);
+    let expectedDAppNames: string[];
+    if (useLocalStorageData) {
+      expectedDAppNames =
+        category === 'Show All'
+          ? await getAllDAppNamesFromLocalStorage()
+          : await getDAppNamesFromLocalStorageByCategory(category);
+    } else {
+      expectedDAppNames =
+        category === 'Show All'
+          ? await getAllDAppNamesFromHardcodedFile()
+          : await getDAppNamesFromHardcodedFileByCategory(category);
+    }
+    expect(expectedDAppNames.length).to.be.greaterThan(0);
+    expect(expectedDAppNames.length).to.be.lessThanOrEqual(100);
     const displayedDApps = await DAppExplorerPage.dappCards;
-    expect(displayedDApps.length).to.equal(dappNamesFromLocalStorage.length);
-    for (const dappName of dappNamesFromLocalStorage) {
+    expect(displayedDApps.length).to.equal(expectedDAppNames.length);
+    for (const dappName of expectedDAppNames) {
       const dappCard = new DAppCard(dappName);
       await dappCard.container.scrollIntoView();
       await dappCard.container.waitForDisplayed();
@@ -89,7 +104,7 @@ class DAppExplorerPageAssert {
       await dappCard.title.waitForDisplayed();
       await dappCard.category.waitForDisplayed();
       if (category !== 'Show All') {
-        expect(await dappCard.category.getText()).to.equal(category);
+        expect(await dappCard.category.getText()).to.include(category);
       }
     }
   }

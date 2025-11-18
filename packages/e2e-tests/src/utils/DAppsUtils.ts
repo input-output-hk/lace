@@ -1,6 +1,8 @@
 import LocalStorageManager from './localStorageManager';
 import { DAppCategories } from '../types/dappCategories';
 import { browser } from '@wdio/globals';
+// eslint-disable-next-line prettier/prettier
+import dappExplorerDataCache from '../../../../apps/browser-extension-wallet/src/views/browser-view/features/dapp/explorer/services/api/static/dapp-explorer-data-cache.json' assert { type: 'json' };
 
 const STORAGE_KEY = 'dapp-explorer-data-cache';
 // Values taken from PostHog
@@ -46,3 +48,20 @@ export const getDAppNamesFromLocalStorageByCategory = async (category: DAppCateg
   const dapps = await getDAppsFromLocalStorage(targetKey, 100);
   return dapps.map((dapp) => String(dapp?.name));
 };
+
+// excluded categories and DApp IDs are defined in PostHog: https://eu.posthog.com/project/6621/feature_flags/47576
+const excludedCategories = new Set(['gambling', 'high-risk']);
+const disallowedDApps = new Set([51_430, 27_302, 19_473, 19_796, 19_717, 18_803, 22_724, 20_115, 19_922]);
+
+export const getAllDAppNamesFromHardcodedFile = async (): Promise<string[]> =>
+  dappExplorerDataCache['/dapps'].data
+    .filter((dapp) => !dapp.categories?.some((category: string) => excludedCategories.has(category)))
+    .filter((dapp) => !disallowedDApps.has(dapp.dappId))
+    .map((dapp) => String(dapp.name));
+
+export const getDAppNamesFromHardcodedFileByCategory = async (expectedCategory: DAppCategories): Promise<string[]> =>
+  dappExplorerDataCache['/dapps'].data
+    .filter((dapp) => !dapp.categories?.some((category: string) => excludedCategories.has(category)))
+    .filter((dapp) => !disallowedDApps.has(dapp.dappId))
+    .filter((dapp) => dapp.categories?.includes(expectedCategory.toLowerCase()))
+    .map((dapp) => String(dapp.name));
