@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
+    "module": "esnext",
     "types": [
       "node",
       "@wdio/globals/types",
@@ -19,7 +20,10 @@
     "esModuleInterop": true,
     "rootDir": "../../"
   },
-  "include": ["."],
+  "include": [
+    ".",
+    "../../apps/browser-extension-wallet/src/views/browser-view/features/dapp/explorer/services/api/static/dapp-explorer-data-cache.json"
+  ],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node",
