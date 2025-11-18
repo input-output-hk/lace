@@ -155,6 +155,7 @@
   "browserView.assets.topupWallet.disclaimer.full.part1": "If you click the “CONTINUE” button below, you will be redirected to Banxa's website and you also understand and acknowledge that Lace is not responsible for the services provided by Banxa (a third-party service provider) or on",
   "browserView.assets.topupWallet.disclaimer.full.part2": "Please contact Banxa for all questions and support inquiries regarding services provided by Banxa or on",
   "browserView.assets.topupWallet.disclaimer.full.banxaLinkCaption": "Banxa’s website",
+  "browserView.assets.topupWallet.modal.content": "",
   "browserView.assets.topupWallet.modal.continue": "Continue",
   "browserView.assets.topupWallet.modal.goBack": "Go Back",
   "browserView.assets.topupWallet.modal.title": "You’re leaving Lace for Banxa",
