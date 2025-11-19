@@ -1,6 +1,6 @@
 /* eslint-disable no-magic-numbers */
 import { PubNubFunctionClient } from '../../../src/providers/PubNub/PubnubFunctionClient';
-import type { TokenResponse } from '../../../src/providers/PubNub/types';
+import type { AuthToken } from '../../../src/providers/PubNub/types';
 import { getNow } from '../../../src/utils';
 
 describe('PubNubFunctionClient', () => {
@@ -27,9 +27,10 @@ describe('PubNubFunctionClient', () => {
 
   describe('requestToken', () => {
     const userId = 'test-user-id';
-    const validTokenResponse: TokenResponse = {
+    const validTokenResponse: AuthToken = {
       token: 'test-token',
-      expiresAt: getNow() + 3600 // 1 hour from now
+      expiresAt: getNow() + 3600, // 1 hour from now
+      refreshMargin: 60
     };
 
     test('should successfully request token with valid response', async () => {
@@ -172,9 +173,10 @@ describe('PubNubFunctionClient', () => {
 
     test('should throw error when token is already expired', async () => {
       client = new PubNubFunctionClient(testEndpoint);
-      const expiredTokenResponse: TokenResponse = {
+      const expiredTokenResponse: AuthToken = {
         token: 'expired-token',
-        expiresAt: getNow() - 1 // 1 second ago
+        expiresAt: getNow() - 1, // 1 second ago
+        refreshMargin: 60
       };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -187,9 +189,10 @@ describe('PubNubFunctionClient', () => {
     test('should throw error when token expiresAt equals current time', async () => {
       client = new PubNubFunctionClient(testEndpoint);
       const currentTime = getNow();
-      const expiredTokenResponse: TokenResponse = {
+      const expiredTokenResponse: AuthToken = {
         token: 'expired-token',
-        expiresAt: currentTime
+        expiresAt: currentTime,
+        refreshMargin: 60
       };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -201,9 +204,10 @@ describe('PubNubFunctionClient', () => {
 
     test('should include token details in error when token is expired', async () => {
       client = new PubNubFunctionClient(testEndpoint);
-      const expiredTokenResponse: TokenResponse = {
+      const expiredTokenResponse: AuthToken = {
         token: 'expired-token',
-        expiresAt: getNow() - 1
+        expiresAt: getNow() - 1,
+        refreshMargin: 60
       };
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -226,9 +230,10 @@ describe('PubNubFunctionClient', () => {
       client = new PubNubFunctionClient(testEndpoint);
       const futureExpiry = getNow() + 1; // 1 second in the future
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      const validTokenResponse: TokenResponse = {
+      const validTokenResponse: AuthToken = {
         token: 'test-token',
-        expiresAt: futureExpiry
+        expiresAt: futureExpiry,
+        refreshMargin: 60
       };
       mockFetch.mockResolvedValueOnce({
         ok: true,

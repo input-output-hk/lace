@@ -1,15 +1,7 @@
-import type { TokenAuthClient, TokenResponse, StoredToken } from './types';
+import type { TokenAuthClient, AuthToken } from './types';
 import type { NotificationsStorage } from '../../types';
 import type { StorageKeys } from '../../StorageKeys';
 import { getNow } from '../../utils';
-
-/**
- * Token refresh margin in seconds.
- * Tokens are refreshed this amount of time before expiry to avoid edge cases.
- * This is because PubNub tokens are valid for 1 hour.
- */
-// eslint-disable-next-line no-magic-numbers
-const TOKEN_REFRESH_MARGIN = 59 * 60; // 59 minutes
 
 /**
  * Manages authentication token lifecycle.
@@ -22,7 +14,7 @@ const TOKEN_REFRESH_MARGIN = 59 * 60; // 59 minutes
  * - Storage abstraction for platform independence
  */
 export class TokenManager {
-  private tokenRefreshPromise: Promise<TokenResponse> | undefined = undefined;
+  private tokenRefreshPromise: Promise<AuthToken> | undefined = undefined;
 
   /**
    * Creates a new TokenManager instance.
@@ -46,12 +38,12 @@ export class TokenManager {
    * @throws {AuthenticationError} When token fetch/refresh fails
    * @throws {StorageError} When storage operations fail
    */
-  async getValidToken(): Promise<TokenResponse> {
+  async getValidToken(): Promise<AuthToken> {
     // If a refresh is already in progress, wait for it
     if (this.tokenRefreshPromise) return this.tokenRefreshPromise;
 
     // Try to load token from storage
-    const storedToken = await this.storage.getItem<StoredToken>(this.storageKeys.getToken());
+    const storedToken = await this.storage.getItem<AuthToken>(this.storageKeys.getToken());
 
     // Check if token is valid and not expiring soon
     if (storedToken && this.isTokenValid(storedToken)) return storedToken;
@@ -66,12 +58,12 @@ export class TokenManager {
    * @param token - Stored token to validate
    * @returns true if token is valid and has sufficient remaining lifetime
    */
-  private isTokenValid(token: StoredToken): boolean {
+  private isTokenValid(token: AuthToken): boolean {
     const now = getNow();
     const timeUntilExpiry = token.expiresAt - now;
 
     // Token is valid if it hasn't expired and has more time than the refresh margin
-    return timeUntilExpiry > TOKEN_REFRESH_MARGIN;
+    return timeUntilExpiry > token.refreshMargin;
   }
 
   /**
@@ -82,7 +74,7 @@ export class TokenManager {
    * @throws {AuthenticationError} When token request fails
    * @throws {StorageError} When storage write fails
    */
-  private async refreshToken(): Promise<TokenResponse> {
+  private async refreshToken(): Promise<AuthToken> {
     // Deduplicate concurrent refresh requests
     if (this.tokenRefreshPromise) {
       return this.tokenRefreshPromise;
@@ -106,19 +98,13 @@ export class TokenManager {
    * @throws {AuthenticationError} When token request fails
    * @throws {StorageError} When storage write fails
    */
-  private async performTokenRefresh(): Promise<TokenResponse> {
+  private async performTokenRefresh(): Promise<AuthToken> {
     if (!this.userId) throw new Error('User ID is not set');
 
     // Request new token from auth service
     const tokenResponse = await this.authClient.requestToken(this.userId);
 
-    // Store token in storage
-    const storedToken: StoredToken = {
-      token: tokenResponse.token,
-      expiresAt: tokenResponse.expiresAt
-    };
-
-    await this.storage.setItem(this.storageKeys.getToken(), storedToken);
+    await this.storage.setItem(this.storageKeys.getToken(), tokenResponse);
 
     return tokenResponse;
   }

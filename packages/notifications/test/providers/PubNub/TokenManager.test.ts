@@ -1,19 +1,21 @@
 /* eslint-disable unicorn/no-useless-undefined */
 /* eslint-disable no-magic-numbers */
 import { TokenManager } from '../../../src/providers/PubNub/TokenManager';
-import type { TokenAuthClient, TokenResponse, StoredToken } from '../../../src/providers/PubNub/types';
+import type { TokenAuthClient, AuthToken } from '../../../src/providers/PubNub/types';
 import type { NotificationsStorage } from '../../../src/types';
 import type { StorageKeys } from '../../../src/StorageKeys';
 import { getNow } from '../../../src/utils';
 
-const createValidToken = (additionalTimeS: number = 2 * 60 * 60): StoredToken => ({
+const createValidToken = (additionalTimeS: number = 2 * 60 * 60): AuthToken => ({
   token: 'valid-token',
-  expiresAt: getNow() + additionalTimeS
+  expiresAt: getNow() + additionalTimeS,
+  refreshMargin: 60
 });
 
-const createTokenResponse = (additionalTimeS: number = 2 * 60 * 60): TokenResponse => ({
+const createTokenResponse = (additionalTimeS: number = 2 * 60 * 60): AuthToken => ({
   token: 'new-token',
-  expiresAt: getNow() + additionalTimeS
+  expiresAt: getNow() + additionalTimeS,
+  refreshMargin: 60
 });
 
 describe('TokenManager', () => {
@@ -75,10 +77,7 @@ describe('TokenManager', () => {
       expect(mockAuthClient.requestToken).toHaveBeenCalledTimes(1);
       expect(mockAuthClient.requestToken).toHaveBeenCalledWith(userId);
       expect(mockStorage.setItem).toHaveBeenCalledTimes(1);
-      expect(mockStorage.setItem).toHaveBeenCalledWith(tokenKey, {
-        token: newTokenResponse.token,
-        expiresAt: newTokenResponse.expiresAt
-      });
+      expect(mockStorage.setItem).toHaveBeenCalledWith(tokenKey, newTokenResponse);
     });
 
     test('should refresh token when stored token is expired', async () => {
@@ -96,8 +95,8 @@ describe('TokenManager', () => {
     });
 
     test('should refresh token when stored token is expiring soon (within refresh margin)', async () => {
-      // Token expires in 30 minutes, which is less than the 1 hour refresh margin
-      const expiringSoonToken = createValidToken(30 * 60);
+      // Token expires in 30 seconds, which is less than the 1 minute refresh margin
+      const expiringSoonToken = createValidToken(30);
       mockStorage.getItem.mockResolvedValueOnce(expiringSoonToken);
       const newTokenResponse = createTokenResponse();
       mockAuthClient.requestToken.mockResolvedValueOnce(newTokenResponse);
@@ -126,8 +125,8 @@ describe('TokenManager', () => {
       const newTokenResponse = createTokenResponse();
 
       // Create a promise that doesn't resolve immediately to ensure tokenRefreshPromise is set
-      let resolveTokenRequest: (value: TokenResponse) => void;
-      const delayedTokenPromise = new Promise<TokenResponse>((resolve) => {
+      let resolveTokenRequest: (value: AuthToken) => void;
+      const delayedTokenPromise = new Promise<AuthToken>((resolve) => {
         resolveTokenRequest = resolve;
       });
       mockAuthClient.requestToken.mockReturnValueOnce(delayedTokenPromise);
@@ -163,15 +162,15 @@ describe('TokenManager', () => {
       const newTokenResponse = createTokenResponse();
 
       // Create a delayed promise for getItem to ensure tokenRefreshPromise is set before second call
-      let resolveGetItem: (value: StoredToken | undefined) => void;
-      const delayedGetItemPromise = new Promise<StoredToken | undefined>((resolve) => {
+      let resolveGetItem: (value: AuthToken | undefined) => void;
+      const delayedGetItemPromise = new Promise<AuthToken | undefined>((resolve) => {
         resolveGetItem = resolve;
       });
       mockStorage.getItem.mockReturnValueOnce(delayedGetItemPromise);
 
       // Create a promise that doesn't resolve immediately to ensure tokenRefreshPromise is set
-      let resolveTokenRequest: (value: TokenResponse) => void;
-      const delayedTokenPromise = new Promise<TokenResponse>((resolve) => {
+      let resolveTokenRequest: (value: AuthToken) => void;
+      const delayedTokenPromise = new Promise<AuthToken>((resolve) => {
         resolveTokenRequest = resolve;
       });
       mockAuthClient.requestToken.mockReturnValueOnce(delayedTokenPromise);
@@ -292,19 +291,17 @@ describe('TokenManager', () => {
 
     test('should store token correctly after refresh', async () => {
       mockStorage.getItem.mockResolvedValueOnce(undefined);
-      const newTokenResponse: TokenResponse = {
+      const newTokenResponse: AuthToken = {
         token: 'stored-token',
-        expiresAt: getNow() + 3600
+        expiresAt: getNow() + 3600,
+        refreshMargin: 60
       };
       mockAuthClient.requestToken.mockResolvedValueOnce(newTokenResponse);
       mockStorage.setItem.mockResolvedValueOnce(undefined);
 
       await tokenManager.getValidToken();
 
-      expect(mockStorage.setItem).toHaveBeenCalledWith(tokenKey, {
-        token: 'stored-token',
-        expiresAt: newTokenResponse.expiresAt
-      });
+      expect(mockStorage.setItem).toHaveBeenCalledWith(tokenKey, newTokenResponse);
     });
   });
 
