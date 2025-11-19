@@ -59,9 +59,7 @@ export const swapsTranslations = {
 
 // Use tsc (typecheck) to verify that translation files are in sync
 // for V1 use granular detail for each main file
-// @ts-expect-error - remove once LW-13833 is completed
 const _enExtension: typeof enExtension = esExtension;
-// @ts-expect-error - remove once LW-13833 is completed
 const _esExtension: typeof esExtension = enExtension;
 const _enCardano: typeof enCardano = esCardano;
 const _esCardano: typeof esCardano = enCardano;
