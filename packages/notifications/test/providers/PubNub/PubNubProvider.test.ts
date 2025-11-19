@@ -52,21 +52,19 @@ describe('PubNubProvider', () => {
   let mockPubNub: any;
 
   const subscribeKey = 'test-subscribe-key';
-  const userId = 'test-user-id';
 
   const defaultTopics = [
     { id: 'topic-1', name: 'Topic 1', custom: {} },
     { id: 'topic-2', name: 'Topic 2', custom: {} }
   ];
 
-  const setupProvider = async (channels: any[] = []): Promise<void> => {
+  const setupProvider = async (channels: any[] = [], userId = 'test-user-id'): Promise<void> => {
     provider = new PubNubProvider({
       logger: mockLogger,
       skipAuthentication: true,
       storage: mockStorage,
       storageKeys: mockStorageKeys,
-      subscribeKey,
-      userId
+      subscribeKey
     });
 
     mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
@@ -76,7 +74,8 @@ describe('PubNubProvider', () => {
     await provider.init({
       connectionStatus: mockConnectionStatus,
       onNotification: mockOnNotification,
-      onTopics: mockOnTopics
+      onTopics: mockOnTopics,
+      userId
     });
   };
 
@@ -118,8 +117,7 @@ describe('PubNubProvider', () => {
         logger: mockLogger,
         storage: mockStorage,
         storageKeys: mockStorageKeys,
-        subscribeKey,
-        userId
+        subscribeKey
       });
 
       expect(provider).toBeInstanceOf(PubNubProvider);
@@ -132,8 +130,7 @@ describe('PubNubProvider', () => {
         logger: mockLogger,
         storage: mockStorage,
         storageKeys: mockStorageKeys,
-        subscribeKey,
-        userId
+        subscribeKey
       });
 
       expect(provider).toBeInstanceOf(PubNubProvider);
@@ -145,8 +142,7 @@ describe('PubNubProvider', () => {
         skipAuthentication: true,
         storage: mockStorage,
         storageKeys: mockStorageKeys,
-        subscribeKey,
-        userId
+        subscribeKey
       });
 
       expect(provider).toBeInstanceOf(PubNubProvider);
@@ -182,8 +178,7 @@ describe('PubNubProvider', () => {
         logger: mockLogger,
         storage: mockStorage,
         storageKeys: mockStorageKeys,
-        subscribeKey,
-        userId
+        subscribeKey
       });
 
       mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
@@ -197,14 +192,14 @@ describe('PubNubProvider', () => {
         skipAuthentication: true,
         storage: mockStorage,
         storageKeys: mockStorageKeys,
-        subscribeKey,
-        userId
+        subscribeKey
       });
 
       const topics = await provider.init({
         connectionStatus: mockConnectionStatus,
         onNotification: mockOnNotification,
-        onTopics: mockOnTopics
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
       });
 
       expect(PubNub as unknown as jest.Mock).toHaveBeenCalledWith({
@@ -212,7 +207,7 @@ describe('PubNubProvider', () => {
         heartbeatInterval: 15,
         restore: true,
         subscribeKey,
-        userId,
+        userId: 'test-user-id',
         authKey: undefined
       });
       expect(mockPubNub.addListener).toHaveBeenCalled();
@@ -223,7 +218,8 @@ describe('PubNubProvider', () => {
       const topics = await provider.init({
         connectionStatus: mockConnectionStatus,
         onNotification: mockOnNotification,
-        onTopics: mockOnTopics
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
       });
 
       expect(PubNub as unknown as jest.Mock).toHaveBeenCalledWith(
@@ -239,7 +235,8 @@ describe('PubNubProvider', () => {
       const topics = await provider.init({
         connectionStatus: mockConnectionStatus,
         onNotification: mockOnNotification,
-        onTopics: mockOnTopics
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
       });
 
       expect(topics).toEqual([
@@ -264,7 +261,8 @@ describe('PubNubProvider', () => {
       await provider.init({
         connectionStatus: mockConnectionStatus,
         onNotification: mockOnNotification,
-        onTopics: mockOnTopics
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
       });
 
       expect(mockPubNub.subscribe).toHaveBeenCalledWith({ channels: ['control.other'] });
@@ -285,7 +283,8 @@ describe('PubNubProvider', () => {
       const topics = await provider.init({
         connectionStatus: mockConnectionStatus,
         onNotification: mockOnNotification,
-        onTopics: mockOnTopics
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
       });
 
       expect(topics).toHaveLength(4);

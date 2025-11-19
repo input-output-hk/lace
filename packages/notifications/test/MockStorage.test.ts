@@ -9,6 +9,31 @@ describe('MockStorage', () => {
     storage = new MockStorage();
   });
 
+  describe('constructor', () => {
+    test('should initialize with empty storage when no userId is provided', () => {
+      const emptyStorage = new MockStorage();
+
+      expect(emptyStorage.keys()).toEqual([]);
+      expect(emptyStorage.getStore().size).toBe(0);
+    });
+
+    test('should initialize with userId when provided', async () => {
+      const userId = '550e8400-e29b-41d4-a716-446655440000';
+      const storageWithUserId = new MockStorage(userId);
+
+      const storedUserId = await storageWithUserId.getItem<string>('notifications:userId');
+      expect(storedUserId).toBe(userId);
+      expect(storageWithUserId.keys()).toContain('notifications:userId');
+    });
+
+    test('should not set userId when undefined is passed', () => {
+      const storageWithUndefined = new MockStorage(undefined);
+
+      expect(storageWithUndefined.keys()).toEqual([]);
+      expect(storageWithUndefined.getStore().size).toBe(0);
+    });
+  });
+
   describe('getItem', () => {
     test('should return undefined for non-existent key', async () => {
       const result = await storage.getItem('non-existent');

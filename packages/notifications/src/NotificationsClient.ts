@@ -1,3 +1,5 @@
+import { validate, v4 } from 'uuid';
+
 import { StorageKeys } from './StorageKeys';
 import { Notification, NotificationsLogger, NotificationsStorage, Topic } from './types';
 import {
@@ -28,8 +30,6 @@ export interface NotificationsClientOptions {
   storage: NotificationsStorage;
   /** Prefix for storage keys. Defaults to 'notifications'. */
   storageKeysPrefix?: string;
-  /** User ID for provider authentication. */
-  userId: string;
 }
 
 /**
@@ -69,13 +69,12 @@ export class NotificationsClient {
     )
       throw new TypeError('provider.configuration must be an object');
 
-    const { logger, provider, onConnectionStatusChange, onNotification, onTopics, storage, storageKeysPrefix, userId } =
-      {
-        logger: console,
-        onConnectionStatusChange: unused,
-        storageKeysPrefix: 'notifications',
-        ...options
-      };
+    const { logger, provider, onConnectionStatusChange, onNotification, onTopics, storage, storageKeysPrefix } = {
+      logger: console,
+      onConnectionStatusChange: unused,
+      storageKeysPrefix: 'notifications',
+      ...options
+    };
 
     // TODO: Use Zod to validate the options
     if (typeof logger !== 'object' || logger === null) throw new TypeError('logger must be an object');
@@ -94,7 +93,6 @@ export class NotificationsClient {
     if (typeof storage.removeItem !== 'function') throw new TypeError('storage.removeItem must be a function');
     if (typeof storage.setItem !== 'function') throw new TypeError('storage.setItem must be a function');
     if (typeof storageKeysPrefix !== 'string') throw new TypeError('storageKeysPrefix must be a string');
-    if (typeof userId !== 'string') throw new TypeError('userId must be a string');
 
     this.logger = logger;
     this.onNotification = onNotification;
@@ -124,7 +122,6 @@ export class NotificationsClient {
         logger,
         storage,
         storageKeys: this.storageKeys,
-        userId,
         ...configuration
       });
     }
@@ -162,6 +159,58 @@ export class NotificationsClient {
   }
 
   /**
+   * Retrieves channel names from storage, validating the format.
+   *
+   * @param key - Storage key to retrieve
+   * @returns Promise that resolves to an array of channel names, or empty array if invalid
+   */
+  private async getChannelsNames(key: string): Promise<string[]> {
+    const value = await this.storage.getItem<string[]>(key);
+
+    if (value === undefined) return [];
+
+    if (!isArrayOfStrings(value)) {
+      this.logger.warn('NotificationsClient: Got an invalid channels list from storage', { key, value });
+
+      return [];
+    }
+
+    return value;
+  }
+
+  /**
+   * Retrieves the user ID from storage or generates a new one if not found.
+   * Validates that the stored user ID is a valid UUID v4.
+   *
+   * @returns Promise that resolves to a valid UUID v4 string
+   * @throws {TypeError} If the stored user ID is not a string
+   * @throws {Error} If the stored user ID is not a valid UUID
+   */
+  private async getUserId(): Promise<string> {
+    const userId = await this.storage.getItem<string>(this.storageKeys.getUserId());
+
+    if (userId !== undefined) {
+      if (typeof userId !== 'string') {
+        const message = 'NotificationsClient: User ID got from storage is not a string';
+
+        this.logger.error(message, userId);
+
+        throw new TypeError(message);
+      }
+
+      if (validate(userId)) return userId;
+
+      throw new Error(`NotificationsClient: User ID got from storage is not a valid UUID: ${userId}`);
+    }
+
+    const newUserId = v4();
+
+    await this.storage.setItem(this.storageKeys.getUserId(), newUserId);
+
+    return newUserId;
+  }
+
+  /**
    * Ensures the client is initialized and not closed.
    * Throws an error if the client is not ready for operations.
    *
@@ -180,38 +229,15 @@ export class NotificationsClient {
    * @returns Promise that resolves when initialization is complete
    */
   private async init(): Promise<void> {
-    const { connectionStatus, logger, onNotification, provider, storage, storageKeys, trackTopics } = this;
+    const { connectionStatus, onNotification, provider, storageKeys, trackTopics } = this;
 
-    /**
-     * Retrieves channel names from storage, validating the format.
-     *
-     * @param key - Storage key to retrieve
-     * @returns Promise that resolves to an array of channel names, or empty array if invalid
-     */
-    const getChannelsNames = async (key: string): Promise<string[]> => {
-      const value = await storage.getItem<string[]>(key);
-
-      if (value === undefined) return [];
-
-      if (!isArrayOfStrings(value)) {
-        logger.warn(
-          'NotificationsClient: Got an invalid item from storage for key, defaulting to empty array',
-          key,
-          value
-        );
-
-        return [];
-      }
-
-      return value;
-    };
-
+    const userId = await this.getUserId();
     const subscribedTopicsKey = storageKeys.getSubscribedTopics();
     const unsubscribedTopicsKey = storageKeys.getUnsubscribedTopics();
     const [topics, subscribedTopics, unsubscribedTopics] = await Promise.all([
-      provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this) }),
-      getChannelsNames(subscribedTopicsKey),
-      getChannelsNames(unsubscribedTopicsKey)
+      provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this), userId }),
+      this.getChannelsNames(subscribedTopicsKey),
+      this.getChannelsNames(unsubscribedTopicsKey)
     ]);
 
     this.notifyTopics(topics);

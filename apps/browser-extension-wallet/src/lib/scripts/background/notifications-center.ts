@@ -1,57 +1,27 @@
-import { runtime } from 'webextension-polyfill';
-import { of, ReplaySubject } from 'rxjs';
+import { runtime, storage } from 'webextension-polyfill';
+import { ReplaySubject } from 'rxjs';
 import { exposeApi } from '@cardano-sdk/web-extension';
 
 import {
   LaceNotification,
   NotificationsCenterProperties,
-  notificationsCenterProperties,
+  notificationsCenterProperties as properties,
   NotificationsTopic
 } from '@src/types/notifications-center';
 import { logger } from '@lace/common';
+import { NotificationsClient, NotificationsStorage } from '@lace/notifications';
 
-const exposeNotificationsCenterAPI = (): void => {
-  let notifications: LaceNotification[] = [
-    {
-      message: {
-        body: 'The Glacier Drop phase 2 is live',
-        chain: 'Midnight',
-        format: 'plain',
-        id: 'id-1',
-        publisher: 'Midnight',
-        topicId: 'topic-1',
-        title: 'The Glacier Drop phase 2 is live'
-      }
-    },
-    {
-      message: {
-        body: 'The new node version XYZ is out',
-        chain: 'Midnight',
-        format: 'plain',
-        id: 'id-2',
-        publisher: 'Midnight',
-        topicId: 'topic-2',
-        title: 'The new node version XYZ is out'
-      }
-    },
-    {
-      message: {
-        body: 'The governance council has opened voting for governance action number 26.\nNIGHT holders are welcome to cast their votes until Aug-31 via the portal at\n\nhttps://governance.midnight.network',
-        chain: 'Cardano',
-        format: 'plain',
-        id: 'id-3',
-        publisher: 'Governance',
-        topicId: 'topic-1',
-        title: 'The governance council has opened voting for governance action number 26'
-      },
-      read: true
-    }
-  ];
+export const STORAGE_KEY = 'redux:persist:notificationsCenter';
 
-  let topics: NotificationsTopic[] = [
-    { id: 'topic-1', name: 'Topic One' },
-    { id: 'topic-2', name: 'Topic Two', subscribed: true }
-  ];
+interface TestProperties {
+  api$: ReplaySubject<NotificationsCenterProperties>;
+}
+
+const baseChannel = 'notifications-center';
+
+const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
+  let notifications: LaceNotification[] = [];
+  let topics: NotificationsTopic[] = [];
 
   const notifications$ = new ReplaySubject<LaceNotification[]>(1);
   const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
@@ -59,19 +29,10 @@ const exposeNotificationsCenterAPI = (): void => {
   const add = async (notification: LaceNotification): Promise<void> => {
     const topic = topics.find((t) => t.id === notification.message.topicId);
 
-    if (topic?.subscribed) {
+    if (topic?.isSubscribed) {
       notifications.unshift(notification);
       notifications$.next(notifications);
     }
-
-    return Promise.resolve();
-  };
-
-  const init = async (data: { topics: NotificationsTopic[]; notifications: LaceNotification[] }): Promise<void> => {
-    ({ notifications, topics } = data);
-
-    notifications$.next(notifications);
-    topics$.next(topics);
 
     return Promise.resolve();
   };
@@ -93,7 +54,7 @@ const exposeNotificationsCenterAPI = (): void => {
   };
 
   const subscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
-    for (const topic of topics) if (topic.id === topicId) topic.subscribed = true;
+    for (const topic of topics) if (topic.id === topicId) topic.isSubscribed = true;
 
     topics$.next(topics);
 
@@ -101,28 +62,113 @@ const exposeNotificationsCenterAPI = (): void => {
   };
 
   const unsubscribe = async (topicId: NotificationsTopic['id']): Promise<void> => {
-    for (const topic of topics) if (topic.id === topicId) delete topic.subscribed;
+    for (const topic of topics) if (topic.id === topicId) delete topic.isSubscribed;
 
     topics$.next(topics);
 
     return Promise.resolve();
   };
 
-  exposeApi<NotificationsCenterProperties>(
-    {
-      api$: of({
-        notifications: { markAsRead, notifications$, remove },
-        test: { add, init },
-        topics: { topics$, subscribe, unsubscribe }
-      }),
-      baseChannel: 'notifications-center',
-      properties: notificationsCenterProperties
+  const init = async (data: { notifications: LaceNotification[]; topics: NotificationsTopic[] }): Promise<void> => {
+    ({ notifications, topics } = data);
+
+    api$.next({
+      notifications: { markAsRead, notifications$, remove },
+      test: { add, init },
+      topics: { topics$, subscribe, unsubscribe }
+    });
+
+    notifications$.next(notifications);
+    topics$.next(topics);
+
+    return Promise.resolve();
+  };
+
+  return init;
+};
+
+const add = () => {
+  throw new Error('Call init in order to call add');
+};
+
+const exposeNotificationsCenterAPI = async () => {
+  const { local: localStorage } = storage;
+  let { notifications, topics } = {
+    notifications: [],
+    topics: [],
+    ...(
+      await (localStorage.get(STORAGE_KEY) as Promise<{
+        [STORAGE_KEY]: { notifications: LaceNotification[]; topics: NotificationsTopic[] };
+      }>)
+    )[STORAGE_KEY]
+  };
+
+  const save = async () =>
+    localStorage.set({ [STORAGE_KEY]: { notifications, topics, _persist: '{"version":1,"rehydrated":true}' } });
+
+  const api$ = new ReplaySubject<NotificationsCenterProperties>(1);
+  const notifications$ = new ReplaySubject<LaceNotification[]>(1);
+  const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
+  // TODO: LW-13891 Expose test APIs only for tests builds.
+  const init = exposeTestNotificationsCenterAPI({ api$ });
+
+  const notificationsStorage: NotificationsStorage = {
+    getItem: async (key) => (await localStorage.get(key))[key],
+    removeItem: (key) => localStorage.remove(key),
+    setItem: (key, value) => localStorage.set({ [key]: value })
+  };
+
+  const notificationsClient = new NotificationsClient({
+    provider: {
+      name: 'PubNub',
+      configuration: {
+        skipAuthentication: process.env.PUBNUB_SKIP_AUTHENTICATION === 'true',
+        subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY
+      }
     },
-    { logger, runtime }
-  );
+    storage: notificationsStorage,
+    onNotification: (message) => {
+      notifications.unshift({ message } as unknown as LaceNotification);
+      notifications$.next(notifications);
+      save().catch((error) => logger.error('Failed to save notifications', error));
+    },
+    onTopics: (newTopics) => {
+      topics$.next((topics = newTopics));
+      save().catch((error) => logger.error('Failed to save topics', error));
+    }
+  });
+
+  const markAsRead = (id?: LaceNotification['message']['id']) => {
+    for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;
+
+    notifications$.next(notifications);
+    return save();
+  };
+
+  const remove = (id: LaceNotification['message']['id']) => {
+    notifications = notifications.filter((notification) => notification.message.id !== id);
+
+    notifications$.next(notifications);
+    return save();
+  };
+
+  const subscribe = (topicId: NotificationsTopic['id']) => notificationsClient.subscribe(topicId);
+  const unsubscribe = (topicId: NotificationsTopic['id']) => notificationsClient.unsubscribe(topicId);
+
+  exposeApi<NotificationsCenterProperties>({ api$, baseChannel, properties }, { logger, runtime });
+
+  api$.next({
+    notifications: { markAsRead, notifications$, remove },
+    test: { add, init },
+    topics: { topics$, subscribe, unsubscribe }
+  });
 
   notifications$.next(notifications);
   topics$.next(topics);
 };
 
-if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI();
+// if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI();
+
+exposeNotificationsCenterAPI().catch((error) => {
+  logger.error('Failed to expose notifications center API', error);
+});

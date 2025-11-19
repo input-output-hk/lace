@@ -27,18 +27,15 @@ export const useNotificationsCenter = () => {
   const { markAsRead, notifications$, remove } = notificationsCenterApi.notifications;
   const { topics$, subscribe, unsubscribe } = notificationsCenterApi.topics;
 
-  const topics = useObservable<NotificationsTopic[]>(topics$);
-
   const notificationsWithTopics$ = useMemo(
     () =>
       combineLatest([notifications$, topics$]).pipe(
-        map(([notificationsList, topicsList]) =>
-          notificationsList.map(
-            (notification): LaceNotificationWithTopicName => ({
-              ...notification,
-              topicName:
-                topicsList.find((topic) => topic.id === notification.message.topicId)?.name ||
-                notification.message.topicId
+        map(([notifications, topics]) =>
+          notifications.map(
+            ({ message, ...rest }): LaceNotificationWithTopicName => ({
+              ...rest,
+              message,
+              topicName: topics.find(({ id }) => id === message.topicId)?.name || message.topicId
             })
           )
         )
@@ -47,6 +44,7 @@ export const useNotificationsCenter = () => {
   );
 
   const notifications = useObservable<LaceNotificationWithTopicName[]>(notificationsWithTopics$);
+  const topics = useObservable<NotificationsTopic[]>(topics$);
 
   const unreadNotifications = useMemo(
     () => notifications?.reduce((unreadCounter, { read }) => unreadCounter + (read ? 0 : 1), 0) ?? 0,

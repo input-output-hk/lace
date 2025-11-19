@@ -11,6 +11,8 @@ export interface ProviderInitOptions {
   onNotification: (notification: Notification) => void;
   /** Callback invoked when the topics list changes. */
   onTopics: (topics: Topic[]) => void;
+  /** User ID for provider authentication. */
+  userId: string;
 }
 
 /**
