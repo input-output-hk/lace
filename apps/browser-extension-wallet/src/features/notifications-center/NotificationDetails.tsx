@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
 import { Flex, Button as LaceButton, Text, Box, Divider } from '@input-output-hk/lace-ui-toolkit';
 import TrashOutlineComponent from '../../assets/icons/browser-view/trash-icon.component.svg';
-import { LaceNotification } from '@src/types/notifications-center';
+import { LaceNotificationWithTopicName } from '@src/types/notifications-center';
 import styles from './NotificationDetails.module.scss';
 import { textToLink } from '@src/utils/text-to-link';
-import { useExternalLinkOpener } from '@providers';
+import { useExternalLinkOpener, useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
+import { sanitizeForPostHog } from '@src/utils/format-string';
 
 export interface NotificationDetailsProps {
-  notification: LaceNotification;
+  notification: LaceNotificationWithTopicName;
   onRemoveNotification?: () => void;
   popupView?: boolean;
 }
@@ -22,8 +24,21 @@ export const NotificationDetails = ({
 }: NotificationDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
-  const PublisherTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
+  const analytics = useAnalyticsContext();
+  const TopicNameTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
   const bodyText = textToLink(notification.message.body, openExternalLink);
+
+  useEffect(() => {
+    void analytics.sendEventToPostHog(PostHogAction.NotificationsOpen, {
+      // eslint-disable-next-line camelcase
+      topic_id: notification.message.topicId,
+      // eslint-disable-next-line camelcase
+      message_id: notification.message.id,
+      // eslint-disable-next-line camelcase
+      message_title: sanitizeForPostHog(notification.message.title)
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification.message.id]);
   const bodyTextComponent = popupView ? (
     <Text.Label data-testid="notification-details-body">{bodyText}</Text.Label>
   ) : (
@@ -39,12 +54,12 @@ export const NotificationDetails = ({
           {notification.message.title}
         </Text.Heading>
         <Box mt={popupView ? '$8' : '$18'}>
-          <PublisherTextComponent weight="$semibold" data-testid="notification-details-publisher">
-            {notification.message.publisher}
-          </PublisherTextComponent>
+          <TopicNameTextComponent weight="$semibold" data-testid="notification-details-topic-name">
+            {notification.topicName}
+          </TopicNameTextComponent>
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
-        {notification.message.format === 'plain' ? (
+        {notification.message.format === 'plain' || !notification.message.format ? (
           bodyTextComponent
         ) : (
           <pre>{JSON.stringify(notification.message.body)}</pre>

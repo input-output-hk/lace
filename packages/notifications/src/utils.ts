@@ -25,3 +25,14 @@ export const isArrayOfStrings = (value: unknown): value is string[] =>
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const unused = (..._args: unknown[]): undefined => void 0;
+
+/**
+ * Gets the current PubNub timetoken.
+ * PubNub timetokens are in 100-nanosecond units (17 digits).
+ * Converts current time in milliseconds to PubNub timetoken format.
+ *
+ * @returns Current timetoken as a string
+ */
+export const getCurrentTimetoken = (): string =>
+  // eslint-disable-next-line no-magic-numbers
+  (Date.now() * 10_000).toString();
