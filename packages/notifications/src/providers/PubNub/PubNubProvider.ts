@@ -4,7 +4,7 @@ import { NotificationsProvider, ProviderInitOptions } from '../types';
 import PubNub from 'pubnub';
 import { ConnectionStatus } from '../../ConnectionStatus';
 import { TokenManager } from './TokenManager';
-import { PubNubFunctionClient } from './pubnub-function-client';
+import { PubNubFunctionClient } from './PubnubFunctionClient';
 import { StorageKeys } from '../../StorageKeys';
 
 const CHANNELS_CONTROL_CHANNEL = 'control.topics';

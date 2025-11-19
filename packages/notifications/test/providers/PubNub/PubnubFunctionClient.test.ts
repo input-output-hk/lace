@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers */
-import { PubNubFunctionClient } from '../../../src/providers/PubNub/pubnub-function-client';
+import { PubNubFunctionClient } from '../../../src/providers/PubNub/PubnubFunctionClient';
 import type { TokenResponse } from '../../../src/providers/PubNub/types';
 import { getNow } from '../../../src/utils';
 

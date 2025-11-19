@@ -36,7 +36,7 @@ jest.mock('../../../src/providers/PubNub/TokenManager', () => ({
   }))
 }));
 
-jest.mock('../../../src/providers/PubNub/pubnub-function-client', () => ({
+jest.mock('../../../src/providers/PubNub/PubnubFunctionClient', () => ({
   PubNubFunctionClient: jest.fn()
 }));
 
