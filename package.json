@@ -44,11 +44,7 @@
     "type-check": "yarn workspaces foreach -ptv run type-check",
     "version": "standard-version",
     "watch": "yarn base-command-for-build-scripts --done-criteria 'created|(webpack [\\d\\.]+ compiled)|(.*STAKING.*CJS.*Build success)' -c watch",
-    "watch-deps": "EXCLUDE_APP=true yarn watch",
-    "build:bundle:v1": "yarn workspace @lace/browser-extension-wallet build:bundle:prepare",
-    "build:webpack": "webpack -c apps/lmp-bundle/bundle-webpack.config.js",
-    "build:bundle:merge": "rm -rf ./dist && yarn run build:webpack",
-    "build:bundle:full": "run-s build:bundle:v1 build:bundle:merge"
+    "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
     "*(apps/**/*.{js,ts,tsx}|packages/!(translation|nami)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
