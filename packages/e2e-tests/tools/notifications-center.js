@@ -1,6 +1,9 @@
 e2eNotificationsCenter = {
   add: async (notification) => {
     const topics = await firstValueFrom(notificationsCenterApi.topics.topics$);
+
+    if (topics.length === 0) throw new Error('No topics found, call init with some topics first');
+
     const result = e2eNotificationsCenter.validateNotification(notification, topics);
 
     if (result) throw new Error(result);
