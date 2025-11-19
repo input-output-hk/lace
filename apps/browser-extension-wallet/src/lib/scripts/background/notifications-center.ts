@@ -13,13 +13,9 @@ import { NotificationsClient, NotificationsStorage } from '@lace/notifications';
 
 export const STORAGE_KEY = 'redux:persist:notificationsCenter';
 
-interface TestProperties {
-  api$: ReplaySubject<NotificationsCenterProperties>;
-}
-
 const baseChannel = 'notifications-center';
 
-const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
+const exposeTestNotificationsCenterAPI = (api$: ReplaySubject<NotificationsCenterProperties>) => {
   let notifications: LaceNotification[] = [];
   let topics: NotificationsTopic[] = [];
 
@@ -69,29 +65,40 @@ const exposeTestNotificationsCenterAPI = ({ api$ }: TestProperties) => {
     return Promise.resolve();
   };
 
-  const init = async (data: { notifications: LaceNotification[]; topics: NotificationsTopic[] }): Promise<void> => {
-    ({ notifications, topics } = data);
-
+  const expose = (test: NotificationsCenterProperties['test']) => {
     api$.next({
       notifications: { markAsRead, notifications$, remove },
-      test: { add, init },
+      test,
       topics: { topics$, subscribe, unsubscribe }
     });
 
     notifications$.next(notifications);
     topics$.next(topics);
+  };
+
+  const init = async (data: { notifications: LaceNotification[]; topics: NotificationsTopic[] }): Promise<void> => {
+    ({ notifications, topics } = data);
+
+    expose({ add, init });
 
     return Promise.resolve();
   };
 
-  return init;
+  expose({
+    add: () => {
+      throw new Error('Call init in order to call add');
+    },
+    init
+  });
+
+  return Promise.resolve();
 };
 
-const add = () => {
-  throw new Error('Call init in order to call add');
+const production = () => {
+  throw new Error('Not enabled');
 };
 
-const exposeNotificationsCenterAPI = async () => {
+const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<NotificationsCenterProperties>) => {
   const { local: localStorage } = storage;
   let { notifications, topics } = {
     notifications: [],
@@ -103,14 +110,11 @@ const exposeNotificationsCenterAPI = async () => {
     )[STORAGE_KEY]
   };
 
-  const save = async () =>
+  const save = () =>
     localStorage.set({ [STORAGE_KEY]: { notifications, topics, _persist: '{"version":1,"rehydrated":true}' } });
 
-  const api$ = new ReplaySubject<NotificationsCenterProperties>(1);
   const notifications$ = new ReplaySubject<LaceNotification[]>(1);
   const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
-  // TODO: LW-13891 Expose test APIs only for tests builds.
-  const init = exposeTestNotificationsCenterAPI({ api$ });
 
   const notificationsStorage: NotificationsStorage = {
     getItem: async (key) => (await localStorage.get(key))[key],
@@ -155,16 +159,24 @@ const exposeNotificationsCenterAPI = async () => {
   const subscribe = (topicId: NotificationsTopic['id']) => notificationsClient.subscribe(topicId);
   const unsubscribe = (topicId: NotificationsTopic['id']) => notificationsClient.unsubscribe(topicId);
 
-  exposeApi<NotificationsCenterProperties>({ api$, baseChannel, properties }, { logger, runtime });
-
   api$.next({
     notifications: { markAsRead, notifications$, remove },
-    test: { add, init },
+    test: { add: production, init: production },
     topics: { topics$, subscribe, unsubscribe }
   });
 
   notifications$.next(notifications);
   topics$.next(topics);
+};
+
+const exposeNotificationsCenterAPI = () => {
+  const api$ = new ReplaySubject<NotificationsCenterProperties>(1);
+
+  exposeApi<NotificationsCenterProperties>({ api$, baseChannel, properties }, { logger, runtime });
+
+  return process.env.NOTIFICATION_CENTER_USE_TEST_API === 'true'
+    ? exposeTestNotificationsCenterAPI(api$)
+    : exposeProductionNotificationsCenterAPI(api$);
 };
 
 // if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI();

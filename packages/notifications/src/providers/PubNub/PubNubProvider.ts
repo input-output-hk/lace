@@ -81,6 +81,8 @@ interface PendingAction {
   reject: (reason: unknown) => void;
 }
 
+const ignoredErrors = new Set(['node_fetch_1.AbortError is not a constructor', 'U.AbortError is not a constructor']);
+
 /**
  * Maps a PubNub channel metadata object to a Topic.
  * Handles validation, control channels, and extracts custom properties.
@@ -241,15 +243,11 @@ export class PubNubProvider implements NotificationsProvider {
         if (category === 'PNReconnectedCategory') return;
 
         // Not severe error on heartbeat which can be ignored as it happens only once
-        if (
-          category === 'PNBadRequestCategory' &&
-          'errorData' in statusEvent &&
-          // eslint-disable-next-line unicorn/consistent-destructuring
-          statusEvent.errorData instanceof TypeError &&
-          // eslint-disable-next-line unicorn/consistent-destructuring
-          statusEvent.errorData.message === 'node_fetch_1.AbortError is not a constructor'
-        )
-          return;
+        if ('errorData' in statusEvent) {
+          const { errorData } = statusEvent;
+
+          if (errorData instanceof Error && ignoredErrors.has(errorData.message)) return;
+        }
 
         if (category === 'PNNetworkIssuesCategory') {
           const { errorData } = statusEvent as unknown as { errorData: unknown };
