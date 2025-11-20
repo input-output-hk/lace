@@ -264,6 +264,8 @@ export class NotificationsClient {
       }
     }
 
+    await this.updateTopics();
+
     this.isInitialized = true;
     this.unsubscribedTopics = [...subscribedTopics, ...unsubscribedTopics];
 
