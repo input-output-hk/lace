@@ -24,6 +24,7 @@ The `PubNubProvider` manages PubNub connections, channel subscriptions, and mess
    - Fetches all channel metadata from PubNub
    - Maps channels to topics
    - Automatically subscribes to control channels (channels starting with `control.`)
+   - Sets up periodic channel refresh (every 24 hours)
    - Returns initial list of topics
 
 ### Topic Management
@@ -36,7 +37,9 @@ Topics are stored in the `topics` array and represent PubNub channels. Each topi
 - `chain`: Blockchain identifier
 - `isSubscribed`: Current subscription status
 
-Topics are initially loaded from PubNub channel metadata during initialization. They can be dynamically updated via the `control.topics` channel.
+Topics are initially loaded from PubNub channel metadata during initialization. They can be dynamically updated via:
+- The `control.topics` channel (real-time updates)
+- The `refreshChannels()` method (periodic refresh every 24 hours)
 
 ### Control Channel Protocol
 
@@ -153,6 +156,21 @@ The `mapChannelToTopic()` function converts PubNub channel metadata to `Topic` o
 - Validates and extracts `autoSubscribe` and `chain` from custom fields
 - Returns `undefined` for invalid channels (logged as warnings)
 
+The `channelsToTopics()` function processes an array of channels and filters out invalid ones, returning only valid Topic objects.
+
+### Periodic Channel Refresh
+
+The provider automatically refreshes the channel list every 24 hours via the `refreshChannels()` method:
+
+1. Fetches all channel metadata from PubNub
+2. Converts channels to topics using `channelsToTopics()`
+3. Compares new topics with current topics using JSON stringification
+4. If topics have changed: Updates the topics array and calls `onTopics()` callback
+5. If topics are unchanged: No callback is triggered (avoids unnecessary updates)
+6. Errors during refresh are logged but do not interrupt the provider's operation
+
+This ensures the provider stays in sync with PubNub channel metadata even if control channel messages are missed or if channels are modified directly in PubNub.
+
 ## Key Implementation Details
 
 ### Pending Actions
@@ -178,6 +196,7 @@ When a PUT action updates an existing topic, the `isSubscribed` status is preser
 - Network errors reject all pending operations and clear pending maps
 - Invalid channel metadata is logged and filtered out
 - Unexpected status events are logged as warnings
+- Channel refresh errors are logged but do not throw exceptions (provider continues operating)
 
 ## Testing
 

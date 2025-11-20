@@ -10,6 +10,12 @@ import { StorageKeys } from '../../StorageKeys';
 const CHANNELS_CONTROL_CHANNEL = 'control.topics';
 
 /**
+ * Interval in milliseconds to refresh channels.
+ */
+// eslint-disable-next-line no-magic-numbers
+const REFRESH_CHANNEL_INTERVAL = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+
+/**
  * Checks if a channel ID is a control channel.
  * Control channels start with 'control.' prefix.
  *
@@ -156,6 +162,24 @@ const mapChannelToTopic = (
 };
 
 /**
+ * Converts an array of PubNub channel metadata objects to an array of Topic objects.
+ * Filters out invalid channels and control channels.
+ *
+ * @param channels - Array of PubNub channel metadata objects
+ * @param pubnub - The PubNub instance for subscribing to control channels
+ * @param logger - Logger instance for warning messages
+ * @returns Array of valid Topic objects
+ */
+const channelsToTopics = (
+  channels: PubNub.AppContext.ChannelMetadataObject<PubNub.AppContext.CustomData>[],
+  pubnub: PubNub,
+  logger: NotificationsLogger
+): Topic[] =>
+  channels
+    .map((channel) => mapChannelToTopic(channel, pubnub, logger))
+    .filter((topic): topic is Topic => topic !== undefined);
+
+/**
  * PubNub implementation of the NotificationsProvider interface.
  * Handles PubNub connection, channel subscription, and message routing.
  */
@@ -168,6 +192,7 @@ export class PubNubProvider implements NotificationsProvider {
   private pendingSubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pendingUnsubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pubnub: PubNub;
+  private refreshChannelsInterval: NodeJS.Timeout | undefined = undefined;
   private skipAuthentication?: boolean;
   private storage: NotificationsStorage;
   private storageKeys: StorageKeys;
@@ -330,6 +355,8 @@ export class PubNubProvider implements NotificationsProvider {
    */
   async close(): Promise<void> {
     return new Promise<void>((resolve) => {
+      if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
+
       this.closeResolve = resolve;
       this.pubnub.unsubscribeAll();
     });
@@ -405,14 +432,13 @@ export class PubNubProvider implements NotificationsProvider {
     this.onNotification = onNotification;
     this.onTopics = onTopics;
     this.addListeners(connectionStatus);
+    this.refreshChannelsInterval = setInterval(this.refreshChannels.bind(this), REFRESH_CHANNEL_INTERVAL);
 
     const { data: channels } = await this.pubnub.objects.getAllChannelMetadata({
       include: { customFields: true }
     });
 
-    return (this.topics = channels
-      .map((channel) => mapChannelToTopic(channel, this.pubnub, this.logger))
-      .filter((topic): topic is Topic => topic !== undefined));
+    return (this.topics = channelsToTopics(channels, this.pubnub, this.logger));
   }
 
   /**
@@ -430,6 +456,26 @@ export class PubNubProvider implements NotificationsProvider {
       this.pubnub.subscribe({ channels: [topicId] });
       this.pendingSubscriptions.set(topicId, { resolve, reject });
     });
+  }
+
+  /**
+   * Refreshes the list of available topics by fetching channel metadata from PubNub.
+   * Compares the new topics with the current ones and only calls onTopics callback if there are changes.
+   * This method is called periodically (every 24 hours) to keep topics in sync with PubNub.
+   * Errors during refresh are logged but do not throw exceptions.
+   */
+  refreshChannels(): void {
+    this.pubnub.objects
+      .getAllChannelMetadata({ include: { customFields: true } })
+      .then(({ data: channels }) => {
+        const topics = channelsToTopics(channels, this.pubnub, this.logger);
+
+        if (JSON.stringify(topics) !== JSON.stringify(this.topics)) {
+          this.topics = topics;
+          this.onTopics(topics);
+        }
+      })
+      .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh channels', error));
   }
 
   /**

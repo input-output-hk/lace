@@ -803,4 +803,83 @@ describe('PubNubProvider', () => {
       expect(mockPubNub.stop).toHaveBeenCalled();
     });
   });
+
+  describe('refreshChannels', () => {
+    beforeEach(async () => {
+      await setupProvider([
+        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-2', name: 'Topic 2', custom: {} }
+      ]);
+    });
+
+    test('should call onTopics callback when topics change', async () => {
+      mockOnTopics.mockClear();
+
+      const newChannels = [
+        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-2', name: 'Topic 2', custom: {} },
+        { id: 'topic-3', name: 'Topic 3', custom: {} }
+      ];
+
+      mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
+        data: newChannels
+      });
+
+      provider.refreshChannels();
+
+      // Wait for promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.objects.getAllChannelMetadata).toHaveBeenCalledWith({
+        include: { customFields: true }
+      });
+      expect(mockOnTopics).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'topic-1' }),
+          expect.objectContaining({ id: 'topic-2' }),
+          expect.objectContaining({ id: 'topic-3' })
+        ])
+      );
+      expect(mockOnTopics).toHaveBeenCalledTimes(1);
+    });
+
+    test('should not call onTopics callback when topics are unchanged', async () => {
+      mockOnTopics.mockClear();
+
+      const sameChannels = [
+        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-2', name: 'Topic 2', custom: {} }
+      ];
+
+      mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
+        data: sameChannels
+      });
+
+      provider.refreshChannels();
+
+      // Wait for promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.objects.getAllChannelMetadata).toHaveBeenCalledWith({
+        include: { customFields: true }
+      });
+      expect(mockOnTopics).not.toHaveBeenCalled();
+    });
+
+    test('should log error when refresh fails', async () => {
+      const error = new Error('Network error');
+      mockPubNub.objects.getAllChannelMetadata.mockRejectedValue(error);
+
+      provider.refreshChannels();
+
+      // Wait for promise to reject
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to refresh channels',
+        error
+      );
+      expect(mockOnTopics).not.toHaveBeenCalled();
+    });
+  });
 });
