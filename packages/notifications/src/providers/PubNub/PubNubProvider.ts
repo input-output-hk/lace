@@ -161,6 +161,15 @@ const mapChannelToTopic = (
   return { autoSubscribe, chain, id, isSubscribed: false, name };
 };
 
+/**
+ * Converts an array of PubNub channel metadata objects to an array of Topic objects.
+ * Filters out invalid channels and control channels.
+ *
+ * @param channels - Array of PubNub channel metadata objects
+ * @param pubnub - The PubNub instance for subscribing to control channels
+ * @param logger - Logger instance for warning messages
+ * @returns Array of valid Topic objects
+ */
 const channelsToTopics = (
   channels: PubNub.AppContext.ChannelMetadataObject<PubNub.AppContext.CustomData>[],
   pubnub: PubNub,
@@ -449,6 +458,12 @@ export class PubNubProvider implements NotificationsProvider {
     });
   }
 
+  /**
+   * Refreshes the list of available topics by fetching channel metadata from PubNub.
+   * Compares the new topics with the current ones and only calls onTopics callback if there are changes.
+   * This method is called periodically (every 24 hours) to keep topics in sync with PubNub.
+   * Errors during refresh are logged but do not throw exceptions.
+   */
   refreshChannels(): void {
     this.pubnub.objects
       .getAllChannelMetadata({ include: { customFields: true } })
