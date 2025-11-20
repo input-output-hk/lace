@@ -126,6 +126,7 @@ export type BackgroundService = {
   getAppVersion: () => Promise<string>;
   backendFailures$: BehaviorSubject<number>;
   unhandledError$: Observable<UnhandledError>;
+  ping: () => Promise<'pong'>;
 };
 
 export type WalletMode = {
