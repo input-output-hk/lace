@@ -20,7 +20,7 @@ export interface Notification {
 export interface Topic {
   id: string;
   name: string;
-  subscribed?: boolean;
+  isSubscribed?: boolean;
 }
 
 export interface NotificationCenterState {
