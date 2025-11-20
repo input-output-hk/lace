@@ -15,8 +15,8 @@ import SubscriptionsDropdown from '../elements/notifications/SubscriptionsDropdo
 import { NotificationsManager, Topic, Notification } from '../utils/NotificationsManager';
 
 const TEST_TOPICS: Topic[] = [
-  { id: 'topic-1', name: 'System Updates', subscribed: true },
-  { id: 'topic-2', name: 'Transaction Alerts', subscribed: true }
+  { id: 'topic-1', name: 'System Updates', isSubscribed: true },
+  { id: 'topic-2', name: 'Transaction Alerts', isSubscribed: true }
 ];
 
 const TEST_NOTIFICATIONS: Notification[] = [
