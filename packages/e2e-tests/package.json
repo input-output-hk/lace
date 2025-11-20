@@ -10,7 +10,7 @@
     "allure:generate": "yarn allure generate -c ./reports/allure/results -o ./reports/allure/report",
     "allure:open": "allure open ./reports/allure/report/",
     "build": "yarn exec echo 'No build required'",
-    "cleanup": "rm -rf logs node_modules reports screenshots",
+    "cleanup": "rm -rf logs node_modules reports screenshots metrics",
     "lint": "run -T eslint -c .eslintrc.cjs .",
     "lint:fix": "run -T eslint -c .eslintrc.cjs . --fix",
     "pack-chrome-extension": "node ./src/utils/packExtension.ts",
