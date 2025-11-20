@@ -133,6 +133,12 @@ Linking **UI Toolkit** on package level, allows you to develop components in iso
 [shared-wallets]: ./packages/shared-wallets
 [staking]: ./packages/staking
 
+## Creating an LMP Bundle Build 
+To create an LMP bundle for Lace:
+- Place the LMP build at the repository root in `./lmp-build`
+- From the repository root run `yarn build:bundle:full`
+- The command will produce a `.dist` file in the repository root.
+
 ## Audit
 
 Lace has been independently audited and manually verified by external auditor, [FYEO](https://www.fyeo.io/), so the Lace team can improve code quality and security – giving you greater peace of mind. You can view the full report at [lace.io/lace-audit-report](https://lace.io/lace-audit-report)

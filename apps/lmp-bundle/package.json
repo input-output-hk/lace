@@ -1,0 +1,22 @@
+{
+  "name": "@lace/lmp-bundle",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
+  "scripts": {
+    "workspace:ext": "yarn workspace @lace/browser-extension-wallet",
+    "build:bundle:v1": "yarn workspace:ext cleanup:dist && WEBPACK_PUBLIC_PATH=/sw/ yarn workspace:ext build:sw && WEBPACK_PUBLIC_PATH=/app/ yarn workspace:ext build:app && WEBPACK_PUBLIC_PATH=/app/ yarn workspace:ext build:cs",
+    "build:webpack": "webpack -c bundle-webpack.config.js",
+    "build:bundle:merge": "rm -rf ./dist && yarn run build:webpack",
+    "build:bundle:full": "run-s build:bundle:v1 build:bundle:merge"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "9.0.1",
+    "npm-run-all": "^4.1.5",
+    "webpack": "^5.94.0",
+    "webpack-cli": "4.7.2"
+  }
+}
