@@ -4,10 +4,16 @@ import { NotificationsProvider, ProviderInitOptions } from '../types';
 import PubNub from 'pubnub';
 import { ConnectionStatus } from '../../ConnectionStatus';
 import { TokenManager } from './TokenManager';
-import { PubNubFunctionClient } from './pubnub-function-client';
+import { PubNubFunctionClient } from './PubnubFunctionClient';
 import { StorageKeys } from '../../StorageKeys';
 
 const CHANNELS_CONTROL_CHANNEL = 'control.topics';
+
+/**
+ * Interval in milliseconds to refresh channels.
+ */
+// eslint-disable-next-line no-magic-numbers
+const REFRESH_CHANNEL_INTERVAL = 1000 * 60 * 60 * 24; // 1 day in milliseconds
 
 /**
  * Checks if a channel ID is a control channel.
@@ -83,6 +89,54 @@ interface PendingAction {
 
 const ignoredErrors = new Set(['node_fetch_1.AbortError is not a constructor', 'U.AbortError is not a constructor']);
 
+const mapChannelCustomData = (
+  custom: PubNub.AppContext.CustomData | null,
+  channelName: string,
+  logger: NotificationsLogger
+): { autoSubscribe: boolean; chain: string; publisher: string } => {
+  let autoSubscribe = false;
+  let chain = '';
+  let publisher = channelName;
+
+  if (typeof custom === 'object') {
+    const {
+      autoSubscribe: customAutoSubscribe,
+      chain: customChain,
+      publisher: customPublisher
+    } = {
+      autoSubscribe,
+      chain,
+      publisher,
+      ...custom
+    };
+
+    if ([false, true, undefined].includes(customAutoSubscribe)) autoSubscribe = customAutoSubscribe === true;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid autoSubscribe: using false instead',
+        custom
+      );
+
+    if (typeof customChain === 'string') chain = customChain;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid chain: using empty chain instead',
+        custom
+      );
+
+    if (typeof customPublisher === 'string') publisher = customPublisher;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid publisher: using channel name as publisher instead',
+        custom,
+        channelName
+      );
+  } else if (custom !== null)
+    logger.warn("NotificationsClient:PubNubProvider: Got a channel with invalid custom: can't set them", custom);
+
+  return { autoSubscribe, chain, publisher };
+};
+
 /**
  * Maps a PubNub channel metadata object to a Topic.
  * Handles validation, control channels, and extracts custom properties.
@@ -118,8 +172,6 @@ const mapChannelToTopic = (
     return;
   }
 
-  let autoSubscribe = false;
-  let chain = '';
   let name = '';
 
   if (typeof channelName === 'string') name = channelName;
@@ -129,31 +181,28 @@ const mapChannelToTopic = (
       channel
     );
 
-  if (typeof custom === 'object') {
-    const { autoSubscribe: customAutoSubscribe, chain: customChain } = {
-      autoSubscribe: false,
-      chain: '',
-      ...custom
-    };
+  const { autoSubscribe, chain, publisher } = mapChannelCustomData(custom, name, logger);
 
-    if ([false, true, undefined].includes(customAutoSubscribe)) autoSubscribe = customAutoSubscribe === true;
-    else
-      logger.warn(
-        'NotificationsClient:PubNubProvider: Got a channel with an invalid autoSubscribe: using false instead',
-        channel
-      );
-
-    if (typeof customChain === 'string') chain = customChain;
-    else
-      logger.warn(
-        'NotificationsClient:PubNubProvider: Got a channel with an invalid chain: using empty chain instead',
-        channel
-      );
-  } else if (custom !== null)
-    logger.warn("NotificationsClient:PubNubProvider: Got a channel with invalid custom: can't set them", channel);
-
-  return { autoSubscribe, chain, id, isSubscribed: false, name };
+  return { autoSubscribe, chain, id, isSubscribed: false, name, publisher };
 };
+
+/**
+ * Converts an array of PubNub channel metadata objects to an array of Topic objects.
+ * Filters out invalid channels and control channels.
+ *
+ * @param channels - Array of PubNub channel metadata objects
+ * @param pubnub - The PubNub instance for subscribing to control channels
+ * @param logger - Logger instance for warning messages
+ * @returns Array of valid Topic objects
+ */
+const channelsToTopics = (
+  channels: PubNub.AppContext.ChannelMetadataObject<PubNub.AppContext.CustomData>[],
+  pubnub: PubNub,
+  logger: NotificationsLogger
+): Topic[] =>
+  channels
+    .map((channel) => mapChannelToTopic(channel, pubnub, logger))
+    .filter((topic): topic is Topic => topic !== undefined);
 
 /**
  * PubNub implementation of the NotificationsProvider interface.
@@ -168,6 +217,7 @@ export class PubNubProvider implements NotificationsProvider {
   private pendingSubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pendingUnsubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pubnub: PubNub;
+  private refreshChannelsInterval: NodeJS.Timeout | undefined = undefined;
   private skipAuthentication?: boolean;
   private storage: NotificationsStorage;
   private storageKeys: StorageKeys;
@@ -216,13 +266,15 @@ export class PubNubProvider implements NotificationsProvider {
       message: (messageEvent) => {
         connectionStatus.setOk();
 
-        const { channel, message } = messageEvent;
+        const { channel, message, timetoken } = messageEvent;
 
         if (isControlChannel(channel)) {
           if (channel === CHANNELS_CONTROL_CHANNEL)
             this.handleChannelsControl(message as unknown as ChannelsControlMessage);
-        } else if (this.topics.some(({ id, isSubscribed }) => id === channel && isSubscribed))
-          this.onNotification(message as unknown as Notification);
+        } else
+          this.processNotification(channel, message, timetoken).catch((error) =>
+            this.logger.error('NotificationsClient:PubNubProvider: Failed to process notification', error)
+          );
       },
       // eslint-disable-next-line sonarjs/cognitive-complexity, max-statements, complexity
       status: (statusEvent) => {
@@ -330,9 +382,34 @@ export class PubNubProvider implements NotificationsProvider {
    */
   async close(): Promise<void> {
     return new Promise<void>((resolve) => {
+      if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
+
       this.closeResolve = resolve;
       this.pubnub.unsubscribeAll();
     });
+  }
+
+  /**
+   * Fetches missed messages for subscribed topics.
+   * Retrieves messages that arrived while the client was offline or disconnected.
+   * Processes messages for topics that are either currently subscribed or were previously subscribed
+   * (stored in subscribedTopics). Uses the last sync timestamp to fetch only new messages.
+   *
+   * @returns Promise that resolves when all missed messages have been fetched and processed
+   */
+  private async fetchMissedMessages(): Promise<void> {
+    const subscribedTopics = (await this.storage.getItem<Topic['id'][]>(this.storageKeys.getSubscribedTopics())) || [];
+
+    for (const topic of this.topics)
+      if (topic.isSubscribed || subscribedTopics.includes(topic.id)) {
+        const end = (await this.storage.getItem<string>(this.storageKeys.getLastSync(topic.id))) || '0';
+        const response = await this.pubnub.fetchMessages({ channels: [topic.id], count: 100, end });
+        const messages = response.channels[topic.id];
+
+        if (messages)
+          for (const { channel, message, timetoken } of messages)
+            await this.processNotification(channel, message, timetoken.toString());
+      }
   }
 
   /**
@@ -405,14 +482,52 @@ export class PubNubProvider implements NotificationsProvider {
     this.onNotification = onNotification;
     this.onTopics = onTopics;
     this.addListeners(connectionStatus);
+    this.refreshChannelsInterval = setInterval(this.refreshChannels.bind(this), REFRESH_CHANNEL_INTERVAL);
 
     const { data: channels } = await this.pubnub.objects.getAllChannelMetadata({
       include: { customFields: true }
     });
 
-    return (this.topics = channels
-      .map((channel) => mapChannelToTopic(channel, this.pubnub, this.logger))
-      .filter((topic): topic is Topic => topic !== undefined));
+    this.topics = channelsToTopics(channels, this.pubnub, this.logger);
+
+    this.fetchMissedMessages().catch((error) =>
+      this.logger.error('NotificationsClient:PubNubProvider: Failed to fetch missed messages', error)
+    );
+
+    return this.topics;
+  }
+
+  /**
+   * Processes a notification message from a topic channel.
+   * Validates the notification object, adds the topicId, calls the onNotification callback,
+   * and stores the last sync timestamp for the topic.
+   *
+   * @param topicId - The ID of the topic (channel) the notification came from
+   * @param notification - The notification message object (must be a non-null object)
+   * @param timetoken - The PubNub timetoken for the message
+   * @returns Promise that resolves when the notification is processed and timestamp is stored
+   * @throws Error if the notification is not a valid object
+   */
+  private processNotification(topicId: Topic['id'], notification: unknown, timetoken: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (typeof notification !== 'object' || notification === null) {
+        const msg = 'NotificationsClient:PubNubProvider: Invalid notification';
+
+        this.logger.error(msg, notification);
+
+        reject(new Error(msg));
+      } else
+        resolve(
+          this.onNotification({
+            ...notification,
+            // eslint-disable-next-line no-magic-numbers
+            timestamp: new Date(Number(timetoken) / 10_000).toISOString(),
+            topicId
+          } as Notification)
+        );
+    }).then(() =>
+      this.storage.setItem(this.storageKeys.getLastSync(topicId), (BigInt(timetoken) + BigInt(1)).toString())
+    );
   }
 
   /**
@@ -430,6 +545,23 @@ export class PubNubProvider implements NotificationsProvider {
       this.pubnub.subscribe({ channels: [topicId] });
       this.pendingSubscriptions.set(topicId, { resolve, reject });
     });
+  }
+
+  /**
+   * Refreshes the list of available topics by fetching channel metadata from PubNub.
+   * Compares the new topics with the current ones and only calls onTopics callback if there are changes.
+   * This method is called periodically (every 24 hours) to keep topics in sync with PubNub.
+   * Errors during refresh are logged but do not throw exceptions.
+   */
+  refreshChannels(): void {
+    this.pubnub.objects
+      .getAllChannelMetadata({ include: { customFields: true } })
+      .then(({ data: channels }) => {
+        const topics = channelsToTopics(channels, this.pubnub, this.logger);
+
+        if (JSON.stringify(topics) !== JSON.stringify(this.topics)) this.onTopics((this.topics = topics));
+      })
+      .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh channels', error));
   }
 
   /**

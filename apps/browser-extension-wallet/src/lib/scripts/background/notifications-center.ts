@@ -132,7 +132,7 @@ const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<Notifi
     },
     storage: notificationsStorage,
     onNotification: (message) => {
-      notifications.unshift({ message } as unknown as LaceNotification);
+      notifications.unshift({ message });
       notifications$.next(notifications);
       save().catch((error) => logger.error('Failed to save notifications', error));
     },

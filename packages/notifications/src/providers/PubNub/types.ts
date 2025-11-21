@@ -2,11 +2,13 @@
  * Authentication token response from PubNub Function.
  * This matches the expected API contract from LW-13729.
  */
-export type TokenResponse = {
+export type AuthToken = {
   /** PubNub authentication token (TTL encoded) */
   token: string;
   /** Token expiry timestamp in Unix seconds */
   expiresAt: number;
+  /** Token refresh margin in seconds */
+  refreshMargin: number;
 };
 
 /**
@@ -28,15 +30,5 @@ export interface TokenAuthClient {
    * @returns Promise resolving to token response
    * @throws {AuthenticationError} When token request fails
    */
-  requestToken(userId: string): Promise<TokenResponse>;
+  requestToken(userId: string): Promise<AuthToken>;
 }
-
-/**
- * Stored authentication token data.
- */
-export type StoredToken = {
-  /** PubNub authentication token */
-  token: string;
-  /** Token expiry timestamp (Unix seconds) */
-  expiresAt: number;
-};

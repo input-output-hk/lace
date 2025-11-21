@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { Flex, Button as LaceButton, Text, Box, Divider } from '@input-output-hk/lace-ui-toolkit';
 import TrashOutlineComponent from '../../assets/icons/browser-view/trash-icon.component.svg';
-import { LaceNotification } from '@src/types/notifications-center';
+import { LaceNotificationWithTopicName } from '@src/types/notifications-center';
 import styles from './NotificationDetails.module.scss';
 import { textToLink } from '@src/utils/text-to-link';
 import { useExternalLinkOpener } from '@providers';
 
 export interface NotificationDetailsProps {
-  notification: LaceNotification;
+  notification: LaceNotificationWithTopicName;
   onRemoveNotification?: () => void;
   popupView?: boolean;
 }
@@ -40,7 +40,7 @@ export const NotificationDetails = ({
         </Text.Heading>
         <Box mt={popupView ? '$8' : '$18'}>
           <PublisherTextComponent weight="$semibold" data-testid="notification-details-publisher">
-            {notification.message.publisher}
+            {notification.publisher}
           </PublisherTextComponent>
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />

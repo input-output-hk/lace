@@ -1,4 +1,4 @@
-import type { TokenAuthClient, TokenRequest, TokenResponse } from './types';
+import type { TokenAuthClient, TokenRequest, AuthToken } from './types';
 import { getNow } from '../../utils';
 
 /**
@@ -19,7 +19,7 @@ export class PubNubFunctionClient implements TokenAuthClient {
    * @returns Promise resolving to token response with token and expiry
    * @throws {AuthenticationError} When request fails or response is invalid
    */
-  async requestToken(userId: string): Promise<TokenResponse> {
+  async requestToken(userId: string): Promise<AuthToken> {
     const request: TokenRequest = { userId };
 
     const response = await fetch(this.endpoint, {
@@ -38,7 +38,7 @@ export class PubNubFunctionClient implements TokenAuthClient {
       throw new Error(`Token request failed: ${details}`);
     }
 
-    const data = (await response.json()) as TokenResponse;
+    const data = (await response.json()) as AuthToken;
 
     // Validate response structure
     if (!data.token || !data.expiresAt) {
@@ -55,6 +55,12 @@ export class PubNubFunctionClient implements TokenAuthClient {
 
       throw new Error(`Invalid token response: token already expired: ${details}`);
     }
+
+    // eslint-disable-next-line no-magic-numbers
+    const refreshMargin = Math.floor((data.expiresAt - currentTime) * 0.01); // 1% of the time until expiry
+
+    // eslint-disable-next-line no-magic-numbers
+    data.refreshMargin = Math.min(60, refreshMargin); // 1% margin, or 60 seconds if greater
 
     return data;
   }

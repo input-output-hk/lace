@@ -21,7 +21,8 @@ jest.mock('pubnub', () =>
     subscribe: jest.fn(),
     unsubscribe: jest.fn(),
     unsubscribeAll: jest.fn(),
-    stop: jest.fn()
+    stop: jest.fn(),
+    fetchMessages: jest.fn()
   }))
 );
 
@@ -36,7 +37,7 @@ jest.mock('../../../src/providers/PubNub/TokenManager', () => ({
   }))
 }));
 
-jest.mock('../../../src/providers/PubNub/pubnub-function-client', () => ({
+jest.mock('../../../src/providers/PubNub/PubnubFunctionClient', () => ({
   PubNubFunctionClient: jest.fn()
 }));
 
@@ -102,7 +103,8 @@ describe('PubNubProvider', () => {
       subscribe: jest.fn(),
       unsubscribe: jest.fn(),
       unsubscribeAll: jest.fn(),
-      stop: jest.fn()
+      stop: jest.fn(),
+      fetchMessages: jest.fn()
     };
     (PubNub as unknown as jest.Mock).mockImplementation(() => mockPubNub);
   });
@@ -156,7 +158,8 @@ describe('PubNubProvider', () => {
         name: 'Topic 1',
         custom: {
           autoSubscribe: true,
-          chain: 'mainnet'
+          chain: 'mainnet',
+          publisher: 'Test Publisher 1'
         }
       },
       {
@@ -164,7 +167,8 @@ describe('PubNubProvider', () => {
         name: 'Topic 2',
         custom: {
           autoSubscribe: false,
-          chain: 'testnet'
+          chain: 'testnet',
+          publisher: 'Test Publisher 2'
         }
       },
       {
@@ -245,14 +249,16 @@ describe('PubNubProvider', () => {
           name: 'Topic 1',
           autoSubscribe: true,
           chain: 'mainnet',
-          isSubscribed: false
+          isSubscribed: false,
+          publisher: 'Test Publisher 1'
         },
         {
           id: 'topic-2',
           name: 'Topic 2',
           autoSubscribe: false,
           chain: 'testnet',
-          isSubscribed: false
+          isSubscribed: false,
+          publisher: 'Test Publisher 2'
         }
       ]);
     });
@@ -276,7 +282,8 @@ describe('PubNubProvider', () => {
           { id: 'valid-topic', name: 123 }, // invalid name
           { id: 'valid-topic-2', custom: 'invalid' }, // invalid custom
           { id: 'valid-topic-3', custom: { autoSubscribe: 'invalid' } }, // invalid autoSubscribe
-          { id: 'valid-topic-4', custom: { chain: 123 } } // invalid chain
+          { id: 'valid-topic-4', custom: { chain: 123 } }, // invalid chain
+          { id: 'valid-topic-5', custom: { publisher: 123 } } // invalid publisher
         ]
       });
 
@@ -287,7 +294,7 @@ describe('PubNubProvider', () => {
         userId: 'test-user-id'
       });
 
-      expect(topics).toHaveLength(4);
+      expect(topics).toHaveLength(5);
       expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
@@ -436,7 +443,7 @@ describe('PubNubProvider', () => {
   describe('message handling', () => {
     beforeEach(async () => {
       await setupProvider([
-        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
         { id: 'control.topics', name: 'Control', custom: {} }
       ]);
     });
@@ -451,12 +458,10 @@ describe('PubNubProvider', () => {
       });
       await subscribePromise;
 
-      const notification: Notification = {
+      const pubnubMessage = {
         id: 'notification-1',
-        message: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z',
-        title: 'Test',
-        topicId: 'topic-1'
+        body: 'Test message',
+        title: 'Test'
       };
 
       const notificationPromise = new Promise<unknown[]>((resolve) => {
@@ -467,33 +472,20 @@ describe('PubNubProvider', () => {
 
       listener.message({
         channel: 'topic-1',
-        message: notification
+        timetoken: '17637246906038441',
+        message: pubnubMessage
       });
 
       const notificationArgs = await notificationPromise;
 
-      expect(notificationArgs[0]).toEqual(notification);
-    });
-
-    test('should not handle notification messages for unsubscribed topics', async () => {
-      const listener = mockPubNub.addListener.mock.calls[0][0];
       const notification: Notification = {
         id: 'notification-1',
-        message: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z',
+        body: 'Test message',
+        timestamp: '2025-11-21T11:31:30.603Z',
         title: 'Test',
         topicId: 'topic-1'
       };
-
-      listener.message({
-        channel: 'topic-1',
-        message: notification
-      });
-
-      // Wait a bit to ensure callback is not called
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(mockOnNotification).not.toHaveBeenCalled();
+      expect(notificationArgs[0]).toEqual(notification);
     });
 
     test('should handle control channel messages', async () => {
@@ -801,6 +793,419 @@ describe('PubNubProvider', () => {
       await closePromise;
 
       expect(mockPubNub.stop).toHaveBeenCalled();
+    });
+  });
+
+  describe('refreshChannels', () => {
+    beforeEach(async () => {
+      await setupProvider([
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } }
+      ]);
+    });
+
+    test('should call onTopics callback when topics change', async () => {
+      mockOnTopics.mockClear();
+
+      const newChannels = [
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } },
+        { id: 'topic-3', name: 'Topic 3', custom: { publisher: 'Test Publisher 3' } }
+      ];
+
+      mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
+        data: newChannels
+      });
+
+      provider.refreshChannels();
+
+      // Wait for promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.objects.getAllChannelMetadata).toHaveBeenCalledWith({
+        include: { customFields: true }
+      });
+      expect(mockOnTopics).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'topic-1' }),
+          expect.objectContaining({ id: 'topic-2' }),
+          expect.objectContaining({ id: 'topic-3' })
+        ])
+      );
+      expect(mockOnTopics).toHaveBeenCalledTimes(1);
+    });
+
+    test('should not call onTopics callback when topics are unchanged', async () => {
+      mockOnTopics.mockClear();
+
+      const sameChannels = [
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } }
+      ];
+
+      mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
+        data: sameChannels
+      });
+
+      provider.refreshChannels();
+
+      // Wait for promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.objects.getAllChannelMetadata).toHaveBeenCalledWith({
+        include: { customFields: true }
+      });
+      expect(mockOnTopics).not.toHaveBeenCalled();
+    });
+
+    test('should log error when refresh fails', async () => {
+      const error = new Error('Network error');
+      mockPubNub.objects.getAllChannelMetadata.mockRejectedValue(error);
+
+      provider.refreshChannels();
+
+      // Wait for promise to reject
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to refresh channels',
+        error
+      );
+      expect(mockOnTopics).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('fetchMissedMessages', () => {
+    beforeEach(async () => {
+      await setupProvider([
+        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-2', name: 'Topic 2', custom: {} }
+      ]);
+    });
+
+    test('should fetch missed messages for topics in subscribedTopics storage', async () => {
+      mockStorage.setItem(mockStorageKeys.getSubscribedTopics(), ['topic-2']);
+      mockStorage.setItem(mockStorageKeys.getLastSync('topic-2'), '1000');
+
+      const messages = [
+        {
+          channel: 'topic-2',
+          message: { id: 'msg-2', title: 'Test 2', timestamp: '2023-01-01T00:00:00Z' },
+          timetoken: '12345678900000001'
+        }
+      ];
+
+      mockPubNub.fetchMessages.mockResolvedValue({
+        channels: {
+          'topic-2': messages
+        }
+      });
+
+      // Re-initialize to trigger fetchMissedMessages
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Wait for async fetchMissedMessages
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.fetchMessages).toHaveBeenCalledWith({
+        channels: ['topic-2'],
+        count: 100,
+        end: '1000'
+      });
+    });
+
+    test('should process messages from fetchMessages', async () => {
+      mockStorage.setItem(mockStorageKeys.getSubscribedTopics(), ['topic-1']);
+      mockStorage.setItem(mockStorageKeys.getLastSync('topic-1'), 0);
+
+      const notification = {
+        id: 'msg-1',
+        title: 'Test',
+        body: 'Test message'
+      };
+
+      const messages = [
+        {
+          channel: 'topic-1',
+          message: notification,
+          timetoken: '12345678900000000'
+        }
+      ];
+
+      mockPubNub.fetchMessages.mockResolvedValue({
+        channels: {
+          'topic-1': messages
+        }
+      });
+
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Wait for async fetchMissedMessages
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockOnNotification).toHaveBeenCalledWith({
+        ...notification,
+        timestamp: '2009-02-13T23:31:30.000Z',
+        topicId: 'topic-1'
+      });
+      const storedValue = await mockStorage.getItem<number>(mockStorageKeys.getLastSync('topic-1'));
+      expect(storedValue).toBe('12345678900000001');
+    });
+
+    test('should handle topics with no messages', async () => {
+      mockStorage.setItem(mockStorageKeys.getSubscribedTopics(), ['topic-1']);
+      mockStorage.setItem(mockStorageKeys.getLastSync('topic-1'), 0);
+
+      mockPubNub.fetchMessages.mockResolvedValue({
+        channels: {
+          'topic-1': []
+        }
+      });
+
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Wait for async fetchMissedMessages
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.fetchMessages).toHaveBeenCalled();
+      expect(mockOnNotification).not.toHaveBeenCalled();
+    });
+
+    test('should handle topics with undefined messages in response', async () => {
+      mockStorage.setItem(mockStorageKeys.getSubscribedTopics(), ['topic-1']);
+      mockStorage.setItem(mockStorageKeys.getLastSync('topic-1'), 0);
+
+      mockPubNub.fetchMessages.mockResolvedValue({
+        channels: {
+          'topic-1': undefined
+        }
+      });
+
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Wait for async fetchMissedMessages
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockPubNub.fetchMessages).toHaveBeenCalled();
+      expect(mockOnNotification).not.toHaveBeenCalled();
+    });
+
+    test('should handle error in fetchMissedMessages during init', async () => {
+      mockStorage.setItem(mockStorageKeys.getSubscribedTopics(), ['topic-1']);
+      mockStorage.setItem(mockStorageKeys.getLastSync('topic-1'), 0);
+
+      const error = new Error('Fetch error');
+      mockPubNub.fetchMessages.mockRejectedValue(error);
+
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Wait for async fetchMissedMessages
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to fetch missed messages',
+        error
+      );
+    });
+  });
+
+  describe('processNotification', () => {
+    beforeEach(async () => {
+      await setupProvider([{ id: 'topic-1', name: 'Topic 1', custom: {} }]);
+    });
+
+    test('should handle error for invalid notification (null)', async () => {
+      const listener = mockPubNub.addListener.mock.calls[0][0];
+
+      // Subscribe first
+      const subscribePromise = provider.subscribe('topic-1');
+      listener.status({
+        operation: 'PNSubscribeOperation',
+        affectedChannels: ['topic-1']
+      });
+      await subscribePromise;
+
+      // Clear previous error calls
+      mockLogger.error.mockClear();
+
+      // The error will be thrown and caught by the message handler's .catch()
+      listener.message({
+        channel: 'topic-1',
+        message: null,
+        timetoken: '12345678900000000'
+      });
+
+      // Wait for async processing and error handling
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify both error logs were called (invalid notification + failed to process)
+      expect(mockLogger.error).toHaveBeenCalledWith('NotificationsClient:PubNubProvider: Invalid notification', null);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to process notification',
+        expect.any(Error)
+      );
+    });
+
+    test('should handle error for invalid notification (non-object)', async () => {
+      const listener = mockPubNub.addListener.mock.calls[0][0];
+
+      // Subscribe first
+      const subscribePromise = provider.subscribe('topic-1');
+      listener.status({
+        operation: 'PNSubscribeOperation',
+        affectedChannels: ['topic-1']
+      });
+      await subscribePromise;
+
+      // Clear previous error calls
+      mockLogger.error.mockClear();
+
+      // The error will be thrown and caught by the message handler's .catch()
+      listener.message({
+        channel: 'topic-1',
+        message: 'invalid string',
+        timetoken: '12345678900000000'
+      });
+
+      // Wait for async processing and error handling
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Verify both error logs were called (invalid notification + failed to process)
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Invalid notification',
+        'invalid string'
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to process notification',
+        expect.any(Error)
+      );
+    });
+
+    test('should handle error when processNotification fails in message handler', async () => {
+      const listener = mockPubNub.addListener.mock.calls[0][0];
+
+      // Subscribe first
+      const subscribePromise = provider.subscribe('topic-1');
+      listener.status({
+        operation: 'PNSubscribeOperation',
+        affectedChannels: ['topic-1']
+      });
+      await subscribePromise;
+
+      // Create a new storage instance with a failing setItem
+      const failingStorage = new MockStorage();
+      failingStorage.setItem = jest.fn().mockRejectedValue(new Error('Storage error'));
+
+      // Re-initialize provider with failing storage
+      provider = new PubNubProvider({
+        logger: mockLogger,
+        skipAuthentication: true,
+        storage: failingStorage,
+        storageKeys: mockStorageKeys,
+        subscribeKey
+      });
+
+      mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
+        data: [{ id: 'topic-1', name: 'Topic 1', custom: {} }]
+      });
+
+      await provider.init({
+        connectionStatus: mockConnectionStatus,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        userId: 'test-user-id'
+      });
+
+      // Get the new listener
+      const newListener = mockPubNub.addListener.mock.calls[mockPubNub.addListener.mock.calls.length - 1][0];
+
+      // Subscribe again
+      const subscribePromise2 = provider.subscribe('topic-1');
+      newListener.status({
+        operation: 'PNSubscribeOperation',
+        affectedChannels: ['topic-1']
+      });
+      await subscribePromise2;
+
+      const notification = {
+        id: 'msg-1',
+        title: 'Test',
+        timestamp: '2023-01-01T00:00:00Z'
+      };
+
+      newListener.message({
+        channel: 'topic-1',
+        message: notification,
+        timetoken: '12345678900000000'
+      });
+
+      // Wait for async processing
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient:PubNubProvider: Failed to process notification',
+        expect.any(Error)
+      );
+    });
+
+    test('should process valid notification and store timetoken', async () => {
+      const listener = mockPubNub.addListener.mock.calls[0][0];
+
+      // Subscribe first
+      const subscribePromise = provider.subscribe('topic-1');
+      listener.status({
+        operation: 'PNSubscribeOperation',
+        affectedChannels: ['topic-1']
+      });
+      await subscribePromise;
+
+      const notification = {
+        id: 'msg-1',
+        title: 'Test',
+        body: 'Test message'
+      };
+
+      listener.message({
+        channel: 'topic-1',
+        message: notification,
+        timetoken: '12345678900000000'
+      });
+
+      // Wait for async processing
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(mockOnNotification).toHaveBeenCalledWith({
+        ...notification,
+        timestamp: '2009-02-13T23:31:30.000Z',
+        topicId: 'topic-1'
+      });
+      const storedTimestamp = await mockStorage.getItem<number>(mockStorageKeys.getLastSync('topic-1'));
+      expect(storedTimestamp).toBe('12345678900000001');
     });
   });
 });
