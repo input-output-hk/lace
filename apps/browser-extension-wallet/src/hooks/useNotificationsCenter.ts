@@ -31,13 +31,12 @@ export const useNotificationsCenter = () => {
     () =>
       combineLatest([notifications$, topics$]).pipe(
         map(([notifications, topics]) =>
-          notifications.map(
-            ({ message, ...rest }): LaceNotificationWithTopicName => ({
-              ...rest,
-              message,
-              topicName: topics.find(({ id }) => id === message.topicId)?.name || message.topicId
-            })
-          )
+          notifications.map(({ message, ...rest }): LaceNotificationWithTopicName => {
+            const topic = topics.find(({ id }) => id === message.topicId);
+            const topicName = topic?.name || message.topicId;
+            const publisher = topic?.publisher || topicName;
+            return { ...rest, message, topicName, publisher };
+          })
         )
       ),
     [notifications$, topics$]
