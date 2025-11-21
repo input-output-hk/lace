@@ -30,7 +30,7 @@ export type Notification = {
   /** Unique identifier for the notification. */
   id: string;
   /** Message content of the notification. */
-  message: string;
+  body: string;
   /** Timestamp of the notification. */
   timestamp: string;
   /** Title of the notification. */
