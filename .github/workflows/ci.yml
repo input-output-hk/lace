@@ -44,49 +44,49 @@ jobs:
       - name: Build common
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/common
+          DIR: v1/packages/common
           NAME: packages-common
 
       - name: Build cardano
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/cardano
+          DIR: v1/packages/cardano
           NAME: packages-cardano
 
       - name: Build translation
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/translation
+          DIR: v1/packages/translation
           NAME: packages-translation
 
       - name: Build core
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/core
+          DIR: v1/packages/core
           NAME: packages-core
 
       - name: Build staking
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/staking
+          DIR: v1/packages/staking
           NAME: packages-staking
 
       - name: Build nami
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/nami
+          DIR: v1/packages/nami
           NAME: packages-nami
 
       - name: Build bitcoin
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/bitcoin
+          DIR: v1/packages/bitcoin
           NAME: packages-bitcoin
 
       - name: Build notifications
         uses: ./.github/actions/build/package
         with:
-          DIR: packages/notifications
+          DIR: v1/packages/notifications
           NAME: packages-notifications
 
   unitTests:
@@ -108,49 +108,49 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: packages-common
-          path: packages/common/dist
+          path: v1/packages/common/dist
 
       - name: Download packages-cardano
         uses: actions/download-artifact@v5
         with:
           name: packages-cardano
-          path: packages/cardano/dist
+          path: v1/packages/cardano/dist
 
       - name: Download packages-translation
         uses: actions/download-artifact@v5
         with:
           name: packages-translation
-          path: packages/translation/dist
+          path: v1/packages/translation/dist
 
       - name: Download packages-core
         uses: actions/download-artifact@v5
         with:
           name: packages-core
-          path: packages/core/dist
+          path: v1/packages/core/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v5
         with:
           name: packages-staking
-          path: packages/staking/dist
+          path: v1/packages/staking/dist
 
       - name: Download packages-nami
         uses: actions/download-artifact@v5
         with:
           name: packages-nami
-          path: packages/nami/dist
+          path: v1/packages/nami/dist
 
       - name: Download packages-bitcoin
         uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
-          path: packages/bitcoin/dist
+          path: v1/packages/bitcoin/dist
 
       - name: Download packages-notifications
         uses: actions/download-artifact@v5
         with:
           name: packages-notifications
-          path: packages/notifications/dist
+          path: v1/packages/notifications/dist
 
       - name: Collect Workflow Telemetry Unit Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -179,49 +179,49 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: packages-common
-          path: packages/common/dist
+          path: v1/packages/common/dist
 
       - name: Download packages-cardano
         uses: actions/download-artifact@v5
         with:
           name: packages-cardano
-          path: packages/cardano/dist
+          path: v1/packages/cardano/dist
 
       - name: Download packages-translation
         uses: actions/download-artifact@v5
         with:
           name: packages-translation
-          path: packages/translation/dist
+          path: v1/packages/translation/dist
 
       - name: Download packages-core
         uses: actions/download-artifact@v5
         with:
           name: packages-core
-          path: packages/core/dist
+          path: v1/packages/core/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v5
         with:
           name: packages-staking
-          path: packages/staking/dist
+          path: v1/packages/staking/dist
 
       - name: Download packages-nami
         uses: actions/download-artifact@v5
         with:
           name: packages-nami
-          path: packages/nami/dist
+          path: v1/packages/nami/dist
 
       - name: Download packages-bitcoin
         uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
-          path: packages/bitcoin/dist
+          path: v1/packages/bitcoin/dist
 
       - name: Download packages-notifications
         uses: actions/download-artifact@v5
         with:
           name: packages-notifications
-          path: packages/notifications/dist
+          path: v1/packages/notifications/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -236,7 +236,7 @@ jobs:
           BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
           MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
           MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
-          DIR: apps/browser-extension-wallet
+          DIR: v1/apps/browser-extension-wallet
           NAME: lace-chrome-browser-extension
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
@@ -269,49 +269,49 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: packages-common
-          path: packages/common/dist
+          path: v1/packages/common/dist
 
       - name: Download packages-cardano
         uses: actions/download-artifact@v5
         with:
           name: packages-cardano
-          path: packages/cardano/dist
+          path: v1/packages/cardano/dist
 
       - name: Download packages-translation
         uses: actions/download-artifact@v5
         with:
           name: packages-translation
-          path: packages/translation/dist
+          path: v1/packages/translation/dist
 
       - name: Download packages-core
         uses: actions/download-artifact@v5
         with:
           name: packages-core
-          path: packages/core/dist
+          path: v1/packages/core/dist
 
       - name: Download packages-staking
         uses: actions/download-artifact@v5
         with:
           name: packages-staking
-          path: packages/staking/dist
+          path: v1/packages/staking/dist
 
       - name: Download packages-nami
         uses: actions/download-artifact@v5
         with:
           name: packages-nami
-          path: packages/nami/dist
+          path: v1/packages/nami/dist
 
       - name: Download packages-bitcoin
         uses: actions/download-artifact@v5
         with:
           name: packages-bitcoin
-          path: packages/bitcoin/dist
+          path: v1/packages/bitcoin/dist
 
       - name: Download packages-notifications
         uses: actions/download-artifact@v5
         with:
           name: packages-notifications
-          path: packages/notifications/dist
+          path: v1/packages/notifications/dist
 
       - name: Collect Workflow Telemetry Smoke Tests
         uses: catchpoint/workflow-telemetry-action@v2
@@ -327,7 +327,7 @@ jobs:
           BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
           MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
           MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
-          DIR: apps/browser-extension-wallet
+          DIR: v1/apps/browser-extension-wallet
           NAME: lace-firefox-browser-extension
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
           POSTHOG_PRODUCTION_TOKEN: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.POSTHOG_PRODUCTION_TOKEN || '' }}
@@ -372,7 +372,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
+          path: ./v1/apps/browser-extension-wallet/dist
 
   smokeTests:
     name: Smoke e2e tests
@@ -396,7 +396,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
+          path: ./v1/apps/browser-extension-wallet/dist
 
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
@@ -423,7 +423,7 @@ jobs:
       - name: Create allure properties
         shell: bash
         if: always()
-        working-directory: ./reports/allure/results
+        working-directory: .
         run: |
           echo "
           branch=${{ github.ref_name }}
@@ -455,9 +455,9 @@ jobs:
         with:
           name: test-artifacts
           path: |
-            ./packages/e2e-tests/screenshots
-            ./packages/e2e-tests/logs
-            ./packages/e2e-tests/reports
+            ./screenshots
+            ./logs
+            ./reports
           retention-days: 5
 
       - run: |

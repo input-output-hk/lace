@@ -33,6 +33,8 @@ jobs:
           PRODUCTION_MODE_TRACKING: 'false'
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          MAESTRO_PROJECT_ID_MAINNET: ''
+          MAESTRO_PROJECT_ID_TESTNET: ''
       - name: Check for linter issues
         run: yarn lint
       - name: Execute unit tests
@@ -41,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Lace (Developer Preview)
-          path: apps/browser-extension-wallet/dist
+          path: v1/apps/browser-extension-wallet/dist
