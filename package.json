@@ -4,10 +4,27 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cleanup:dist": "rm -rf dist",
+    "build:dev:app:lmp": "make build-dev-lmp-app",
+    "build:dev:app:v1": "make build-dev-v1-app",
+    "build:prod:app:lmp": "make build-prod-lmp-app",
+    "build:prod:app:v1": "make build-prod-v1-app",
+    "build:dev:apps": "run-s build:dev:app:lmp build:dev:app:v1",
+    "build:prod:apps": "run-s build:prod:app:lmp build:prod:app:v1",
+    "build:bundle": "run-s cleanup:dist build:webpack",
+    "build:dev": "run-s build:dev:apps build:bundle",
+    "build:prod": "run-s build:prod:apps build:bundle",
+    "build:webpack": "webpack"
   },
   "devDependencies": {
-    "husky": "^7.0.1"
+    "copy-webpack-plugin": "^13.0.1",
+    "husky": "^7.0.1",
+    "npm-run-all": "^4.1.5",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
   },
   "keywords": [],
   "author": "",

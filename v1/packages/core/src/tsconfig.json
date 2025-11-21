@@ -24,6 +24,9 @@
   "references": [
     {
       "path": "../../common/src"
+    },
+    {
+      "path": "../../translation"
     }
   ],
   "exclude": ["dist/"],
