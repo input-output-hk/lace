@@ -32,6 +32,8 @@ jobs:
           CARDANO_SERVICES_URL_SANCHONET: 'https://live-sanchonet.lw.iog.io'
           PRODUCTION_MODE_TRACKING: 'false'
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          MAESTRO_PROJECT_ID_MAINNET: ''
+          MAESTRO_PROJECT_ID_TESTNET: ''
       - name: Check for linter issues
         run: yarn lint
       - name: Execute unit tests
@@ -40,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Lace (Developer Preview)
-          path: apps/browser-extension-wallet/dist
+          path: v1/apps/browser-extension-wallet/dist

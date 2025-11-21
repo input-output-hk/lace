@@ -2,15 +2,15 @@
 
 # Browser extension
 browser:
-  - any: ['apps/browser-extension-wallet/**/*']
+  - any: ['v1/apps/browser-extension-wallet/**/*']
 # Staking
 staking:
-  - any: ['packages/staking/**/*']
+  - any: ['v1/packages/staking/**/*']
   - any: ['.github/workflows/packages-staking.yml']
 
 # E2E
 e2e:
-  - any: ['packages/e2e-tests/**/*']
+  - any: ['v1/packages/e2e-tests/**/*']
 # Docs
 documentation:
   - any: ['docs/**/*', '**/*.md']
