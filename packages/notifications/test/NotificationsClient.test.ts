@@ -35,7 +35,8 @@ const createTopic = (id: string, autoSubscribe = false): Topic => ({
   name: `Topic ${id}`,
   autoSubscribe,
   chain: 'mainnet',
-  isSubscribed: false
+  isSubscribed: false,
+  publisher: `Test Publisher ${id}`
 });
 
 describe('NotificationsClient', () => {

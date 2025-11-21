@@ -10,8 +10,8 @@ export interface NotificationsTopic {
 
 export interface LaceMessage {
   body: string;
-  chain: string;
-  format: string;
+  chain?: string;
+  format?: string;
   id: string;
   title: string;
   topicId: NotificationsTopic['id'];
