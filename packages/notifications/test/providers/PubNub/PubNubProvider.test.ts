@@ -156,7 +156,8 @@ describe('PubNubProvider', () => {
         name: 'Topic 1',
         custom: {
           autoSubscribe: true,
-          chain: 'mainnet'
+          chain: 'mainnet',
+          publisher: 'Test Publisher 1'
         }
       },
       {
@@ -164,7 +165,8 @@ describe('PubNubProvider', () => {
         name: 'Topic 2',
         custom: {
           autoSubscribe: false,
-          chain: 'testnet'
+          chain: 'testnet',
+          publisher: 'Test Publisher 2'
         }
       },
       {
@@ -245,14 +247,16 @@ describe('PubNubProvider', () => {
           name: 'Topic 1',
           autoSubscribe: true,
           chain: 'mainnet',
-          isSubscribed: false
+          isSubscribed: false,
+          publisher: 'Test Publisher 1'
         },
         {
           id: 'topic-2',
           name: 'Topic 2',
           autoSubscribe: false,
           chain: 'testnet',
-          isSubscribed: false
+          isSubscribed: false,
+          publisher: 'Test Publisher 2'
         }
       ]);
     });
@@ -436,7 +440,7 @@ describe('PubNubProvider', () => {
   describe('message handling', () => {
     beforeEach(async () => {
       await setupProvider([
-        { id: 'topic-1', name: 'Topic 1', custom: {} },
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
         { id: 'control.topics', name: 'Control', custom: {} }
       ]);
     });
@@ -451,12 +455,10 @@ describe('PubNubProvider', () => {
       });
       await subscribePromise;
 
-      const notification: Notification = {
+      const pubnubMessage = {
         id: 'notification-1',
-        message: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z',
-        title: 'Test',
-        topicId: 'topic-1'
+        body: 'Test message',
+        title: 'Test'
       };
 
       const notificationPromise = new Promise<unknown[]>((resolve) => {
@@ -467,11 +469,19 @@ describe('PubNubProvider', () => {
 
       listener.message({
         channel: 'topic-1',
-        message: notification
+        timetoken: '17637246906038441',
+        message: pubnubMessage
       });
 
       const notificationArgs = await notificationPromise;
 
+      const notification: Notification = {
+        id: 'notification-1',
+        body: 'Test message',
+        timestamp: '2023-01-01T00:00:00Z',
+        title: 'Test',
+        topicId: 'topic-1'
+      };
       expect(notificationArgs[0]).toEqual(notification);
     });
 
@@ -479,7 +489,7 @@ describe('PubNubProvider', () => {
       const listener = mockPubNub.addListener.mock.calls[0][0];
       const notification: Notification = {
         id: 'notification-1',
-        message: 'Test message',
+        body: 'Test message',
         timestamp: '2023-01-01T00:00:00Z',
         title: 'Test',
         topicId: 'topic-1'
@@ -807,8 +817,8 @@ describe('PubNubProvider', () => {
   describe('refreshChannels', () => {
     beforeEach(async () => {
       await setupProvider([
-        { id: 'topic-1', name: 'Topic 1', custom: {} },
-        { id: 'topic-2', name: 'Topic 2', custom: {} }
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } }
       ]);
     });
 
@@ -816,9 +826,9 @@ describe('PubNubProvider', () => {
       mockOnTopics.mockClear();
 
       const newChannels = [
-        { id: 'topic-1', name: 'Topic 1', custom: {} },
-        { id: 'topic-2', name: 'Topic 2', custom: {} },
-        { id: 'topic-3', name: 'Topic 3', custom: {} }
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } },
+        { id: 'topic-3', name: 'Topic 3', custom: { publisher: 'Test Publisher 3' } }
       ];
 
       mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({
@@ -847,8 +857,8 @@ describe('PubNubProvider', () => {
       mockOnTopics.mockClear();
 
       const sameChannels = [
-        { id: 'topic-1', name: 'Topic 1', custom: {} },
-        { id: 'topic-2', name: 'Topic 2', custom: {} }
+        { id: 'topic-1', name: 'Topic 1', custom: { publisher: 'Test Publisher 1' } },
+        { id: 'topic-2', name: 'Topic 2', custom: { publisher: 'Test Publisher 2' } }
       ];
 
       mockPubNub.objects.getAllChannelMetadata.mockResolvedValue({

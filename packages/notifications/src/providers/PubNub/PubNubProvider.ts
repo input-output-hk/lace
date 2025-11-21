@@ -266,13 +266,37 @@ export class PubNubProvider implements NotificationsProvider {
       message: (messageEvent) => {
         connectionStatus.setOk();
 
-        const { channel, message } = messageEvent;
+        const { channel, message, timetoken: timestamp } = messageEvent;
 
         if (isControlChannel(channel)) {
           if (channel === CHANNELS_CONTROL_CHANNEL)
             this.handleChannelsControl(message as unknown as ChannelsControlMessage);
-        } else if (this.topics.some(({ id, isSubscribed }) => id === channel && isSubscribed))
-          this.onNotification(message as unknown as Notification);
+        } else if (this.topics.some(({ id, isSubscribed }) => id === channel && isSubscribed)) {
+          /*
+           * messageEvent structure is:
+           * {
+              "channel": "data.lace-wallet",
+              "subscription": "data.lace-wallet",
+              "actualChannel": "data.lace-wallet",
+              "subscribedChannel": "data.lace-wallet",
+              "timetoken": "17637246906038441",
+              "message": {
+                  "title": "Hello2",
+                  "body": "from the lace wallet community2",
+                  "id": "638cf6eb-e56e-4a27-9bc0-d5f5d609ae91"
+              }
+          */
+          const { id, title, body } = message as unknown as { id: string; title: string; body: string };
+          const notification: Notification = {
+            id,
+            body,
+            title,
+            topicId: channel,
+            timestamp
+          };
+
+          this.onNotification(notification);
+        }
       },
       // eslint-disable-next-line sonarjs/cognitive-complexity, max-statements, complexity
       status: (statusEvent) => {
