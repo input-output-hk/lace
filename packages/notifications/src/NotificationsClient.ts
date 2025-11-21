@@ -176,8 +176,8 @@ export class NotificationsClient {
    * @param key - Storage key to retrieve
    * @returns Promise that resolves to an array of channel names, or empty array if invalid
    */
-  private async getChannelsNames(key: string): Promise<string[]> {
-    const value = await this.storage.getItem<string[]>(key);
+  private async getChannelsNames(key: string): Promise<Topic['id'][]> {
+    const value = await this.storage.getItem<Topic['id'][]>(key);
 
     if (value === undefined) return [];
 
@@ -246,11 +246,11 @@ export class NotificationsClient {
     const userId = await this.getUserId();
     const subscribedTopicsKey = storageKeys.getSubscribedTopics();
     const unsubscribedTopicsKey = storageKeys.getUnsubscribedTopics();
-    const [topics, subscribedTopics, unsubscribedTopics] = await Promise.all([
-      provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this), userId }),
+    const [subscribedTopics, unsubscribedTopics] = await Promise.all([
       this.getChannelsNames(subscribedTopicsKey),
       this.getChannelsNames(unsubscribedTopicsKey)
     ]);
+    const topics = await provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this), userId });
 
     this.notifyTopics(topics);
 

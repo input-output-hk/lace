@@ -25,6 +25,7 @@ The `PubNubProvider` manages PubNub connections, channel subscriptions, and mess
    - Maps channels to topics
    - Automatically subscribes to control channels (channels starting with `control.`)
    - Sets up periodic channel refresh (every 24 hours)
+   - Fetches missed messages for subscribed topics (runs asynchronously, errors are logged)
    - Returns initial list of topics
 
 ### Topic Management
@@ -91,7 +92,28 @@ Removes a topic from the list.
 The provider handles two types of messages:
 
 1. **Control Channel Messages**: Messages on channels starting with `control.` are routed to `handleChannelsControl()`
-2. **Notification Messages**: Messages on subscribed topic channels are routed to `onNotification()` callback
+2. **Notification Messages**: Messages on subscribed topic channels are processed via `processNotification()` which:
+   - Validates the notification object
+   - Adds the `topicId` to the notification
+   - Calls `onNotification()` callback
+   - Stores the last sync timestamp (timetoken + 1) for the topic
+
+### Message Synchronization
+
+The provider implements message synchronization to ensure no notifications are missed:
+
+1. **On Initialization**: After loading topics, `fetchMissedMessages()` is called to retrieve any messages that arrived while the client was offline
+2. **Message Processing**: All incoming messages are processed via `processNotification()` which:
+   - Validates the notification structure
+   - Updates the last sync timestamp in storage
+   - Ensures notifications are delivered even if processing fails (errors are logged)
+
+The `fetchMissedMessages()` method:
+- Retrieves subscribed topics from storage
+- For each topic that is either currently subscribed or was previously subscribed (stored in `subscribedTopics`):
+  - Fetches up to 100 messages from PubNub using the last sync timestamp
+  - Processes each message via `processNotification()`
+- Handles topics that may have been subscribed before but are not in the current topics list
 
 ### Subscription Management
 
@@ -197,6 +219,9 @@ When a PUT action updates an existing topic, the `isSubscribed` status is preser
 - Invalid channel metadata is logged and filtered out
 - Unexpected status events are logged as warnings
 - Channel refresh errors are logged but do not throw exceptions (provider continues operating)
+- Invalid notification objects throw errors and are logged (processing continues for other messages)
+- Message processing errors are caught and logged without interrupting the provider
+- `fetchMissedMessages()` errors are caught and logged during initialization (provider continues operating)
 
 ## Testing
 
