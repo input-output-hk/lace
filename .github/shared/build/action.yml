@@ -155,6 +155,7 @@ runs:
 
     - name: Build dist version
       shell: bash
+      working-directory: ./v1/apps/browser-extension-wallet
       env:
         NODE_OPTIONS: '--max_old_space_size=8192'
         BUILD_DEV_PREVIEW: ${{ inputs.BUILD_DEV_PREVIEW }}
@@ -185,4 +186,4 @@ runs:
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
-      run: yarn browser build
+      run: yarn build

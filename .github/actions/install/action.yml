@@ -53,7 +53,7 @@ runs:
       shell: bash
 
     - name: Decrypt test data
-      working-directory: ./packages/e2e-tests
+      working-directory: ./v1/packages/e2e-tests
       run: ./decrypt_secret.sh
       shell: bash
       env:
