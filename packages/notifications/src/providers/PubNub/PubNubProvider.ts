@@ -271,35 +271,10 @@ export class PubNubProvider implements NotificationsProvider {
         if (isControlChannel(channel)) {
           if (channel === CHANNELS_CONTROL_CHANNEL)
             this.handleChannelsControl(message as unknown as ChannelsControlMessage);
-        } else {
-          /*
-           * messageEvent structure is:
-           * {
-              "channel": "data.lace-wallet",
-              "subscription": "data.lace-wallet",
-              "actualChannel": "data.lace-wallet",
-              "subscribedChannel": "data.lace-wallet",
-              "timetoken": "17637246906038441",
-              "message": {
-                  "title": "Hello2",
-                  "body": "from the lace wallet community2",
-                  "id": "638cf6eb-e56e-4a27-9bc0-d5f5d609ae91"
-              }
-          */
-          const { id, title, body } = message as unknown as { id: string; title: string; body: string };
-          const notification: Notification = {
-            id,
-            body,
-            title,
-            topicId: channel,
-            // eslint-disable-next-line no-magic-numbers
-            timestamp: new Date(Number(timetoken) / 10_000).toISOString()
-          };
-
-          this.processNotification(channel, notification, timetoken).catch((error) =>
+        } else
+          this.processNotification(channel, message, timetoken).catch((error) =>
             this.logger.error('NotificationsClient:PubNubProvider: Failed to process notification', error)
           );
-        }
       },
       // eslint-disable-next-line sonarjs/cognitive-complexity, max-statements, complexity
       status: (statusEvent) => {
@@ -541,7 +516,15 @@ export class PubNubProvider implements NotificationsProvider {
         this.logger.error(msg, notification);
 
         reject(new Error(msg));
-      } else resolve(this.onNotification({ ...notification, topicId } as Notification));
+      } else
+        resolve(
+          this.onNotification({
+            ...notification,
+            // eslint-disable-next-line no-magic-numbers
+            timestamp: new Date(Number(timetoken) / 10_000).toISOString(),
+            topicId
+          } as Notification)
+        );
     }).then(() =>
       this.storage.setItem(this.storageKeys.getLastSync(topicId), (BigInt(timetoken) + BigInt(1)).toString())
     );

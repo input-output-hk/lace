@@ -282,7 +282,8 @@ describe('PubNubProvider', () => {
           { id: 'valid-topic', name: 123 }, // invalid name
           { id: 'valid-topic-2', custom: 'invalid' }, // invalid custom
           { id: 'valid-topic-3', custom: { autoSubscribe: 'invalid' } }, // invalid autoSubscribe
-          { id: 'valid-topic-4', custom: { chain: 123 } } // invalid chain
+          { id: 'valid-topic-4', custom: { chain: 123 } }, // invalid chain
+          { id: 'valid-topic-5', custom: { publisher: 123 } } // invalid publisher
         ]
       });
 
@@ -293,7 +294,7 @@ describe('PubNubProvider', () => {
         userId: 'test-user-id'
       });
 
-      expect(topics).toHaveLength(4);
+      expect(topics).toHaveLength(5);
       expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
@@ -480,7 +481,7 @@ describe('PubNubProvider', () => {
       const notification: Notification = {
         id: 'notification-1',
         body: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z',
+        timestamp: '2025-11-21T11:31:30.603Z',
         title: 'Test',
         topicId: 'topic-1'
       };
@@ -925,8 +926,7 @@ describe('PubNubProvider', () => {
       const notification = {
         id: 'msg-1',
         title: 'Test',
-        message: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z'
+        body: 'Test message'
       };
 
       const messages = [
@@ -955,6 +955,7 @@ describe('PubNubProvider', () => {
 
       expect(mockOnNotification).toHaveBeenCalledWith({
         ...notification,
+        timestamp: '2009-02-13T23:31:30.000Z',
         topicId: 'topic-1'
       });
       const storedValue = await mockStorage.getItem<number>(mockStorageKeys.getLastSync('topic-1'));
@@ -1186,8 +1187,7 @@ describe('PubNubProvider', () => {
       const notification = {
         id: 'msg-1',
         title: 'Test',
-        message: 'Test message',
-        timestamp: '2023-01-01T00:00:00Z'
+        body: 'Test message'
       };
 
       listener.message({
@@ -1201,6 +1201,7 @@ describe('PubNubProvider', () => {
 
       expect(mockOnNotification).toHaveBeenCalledWith({
         ...notification,
+        timestamp: '2009-02-13T23:31:30.000Z',
         topicId: 'topic-1'
       });
       const storedTimestamp = await mockStorage.getItem<number>(mockStorageKeys.getLastSync('topic-1'));
