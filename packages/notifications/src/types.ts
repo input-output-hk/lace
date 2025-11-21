@@ -16,6 +16,8 @@ export type Topic = {
   isSubscribed: boolean;
   /** Name of the topic. */
   name: string;
+  /** Publisher name (e.g. "Midnight Foundation"). */
+  publisher: string;
 } & Record<string, unknown>;
 
 /**
