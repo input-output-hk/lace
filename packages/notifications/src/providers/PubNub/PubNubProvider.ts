@@ -89,6 +89,54 @@ interface PendingAction {
 
 const ignoredErrors = new Set(['node_fetch_1.AbortError is not a constructor', 'U.AbortError is not a constructor']);
 
+const mapChannelCustomData = (
+  custom: PubNub.AppContext.CustomData | null,
+  channelName: string,
+  logger: NotificationsLogger
+): { autoSubscribe: boolean; chain: string; publisher: string } => {
+  let autoSubscribe = false;
+  let chain = '';
+  let publisher = channelName;
+
+  if (typeof custom === 'object') {
+    const {
+      autoSubscribe: customAutoSubscribe,
+      chain: customChain,
+      publisher: customPublisher
+    } = {
+      autoSubscribe,
+      chain,
+      publisher,
+      ...custom
+    };
+
+    if ([false, true, undefined].includes(customAutoSubscribe)) autoSubscribe = customAutoSubscribe === true;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid autoSubscribe: using false instead',
+        custom
+      );
+
+    if (typeof customChain === 'string') chain = customChain;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid chain: using empty chain instead',
+        custom
+      );
+
+    if (typeof customPublisher === 'string') publisher = customPublisher;
+    else
+      logger.warn(
+        'NotificationsClient:PubNubProvider: Got a channel with an invalid publisher: using channel name as publisher instead',
+        custom,
+        channelName
+      );
+  } else if (custom !== null)
+    logger.warn("NotificationsClient:PubNubProvider: Got a channel with invalid custom: can't set them", custom);
+
+  return { autoSubscribe, chain, publisher };
+};
+
 /**
  * Maps a PubNub channel metadata object to a Topic.
  * Handles validation, control channels, and extracts custom properties.
@@ -124,8 +172,6 @@ const mapChannelToTopic = (
     return;
   }
 
-  let autoSubscribe = false;
-  let chain = '';
   let name = '';
 
   if (typeof channelName === 'string') name = channelName;
@@ -135,30 +181,9 @@ const mapChannelToTopic = (
       channel
     );
 
-  if (typeof custom === 'object') {
-    const { autoSubscribe: customAutoSubscribe, chain: customChain } = {
-      autoSubscribe: false,
-      chain: '',
-      ...custom
-    };
+  const { autoSubscribe, chain, publisher } = mapChannelCustomData(custom, name, logger);
 
-    if ([false, true, undefined].includes(customAutoSubscribe)) autoSubscribe = customAutoSubscribe === true;
-    else
-      logger.warn(
-        'NotificationsClient:PubNubProvider: Got a channel with an invalid autoSubscribe: using false instead',
-        channel
-      );
-
-    if (typeof customChain === 'string') chain = customChain;
-    else
-      logger.warn(
-        'NotificationsClient:PubNubProvider: Got a channel with an invalid chain: using empty chain instead',
-        channel
-      );
-  } else if (custom !== null)
-    logger.warn("NotificationsClient:PubNubProvider: Got a channel with invalid custom: can't set them", channel);
-
-  return { autoSubscribe, chain, id, isSubscribed: false, name };
+  return { autoSubscribe, chain, id, isSubscribed: false, name, publisher };
 };
 
 /**
