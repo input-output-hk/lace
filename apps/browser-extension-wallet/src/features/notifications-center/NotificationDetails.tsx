@@ -22,7 +22,7 @@ export const NotificationDetails = ({
 }: NotificationDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
-  const PublisherTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
+  const TopicNameTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
   const bodyText = textToLink(notification.message.body, openExternalLink);
   const bodyTextComponent = popupView ? (
     <Text.Label data-testid="notification-details-body">{bodyText}</Text.Label>
@@ -39,9 +39,9 @@ export const NotificationDetails = ({
           {notification.message.title}
         </Text.Heading>
         <Box mt={popupView ? '$8' : '$18'}>
-          <PublisherTextComponent weight="$semibold" data-testid="notification-details-publisher">
-            {notification.publisher}
-          </PublisherTextComponent>
+          <TopicNameTextComponent weight="$semibold" data-testid="notification-details-topic-name">
+            {notification.topicName}
+          </TopicNameTextComponent>
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
         {notification.message.format === 'plain' ? (

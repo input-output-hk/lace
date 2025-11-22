@@ -97,6 +97,7 @@ export const NotificationsList = ({
                 withBorder={withBorder}
                 id={props.message.id}
                 title={props.message.title}
+                topicName={props.topicName}
                 publisher={props.publisher}
                 isRead={props.read}
                 onClick={() => onClick?.(props.message.id)}
