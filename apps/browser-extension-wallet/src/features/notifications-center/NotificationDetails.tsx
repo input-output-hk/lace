@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
@@ -7,7 +7,8 @@ import TrashOutlineComponent from '../../assets/icons/browser-view/trash-icon.co
 import { LaceNotificationWithTopicName } from '@src/types/notifications-center';
 import styles from './NotificationDetails.module.scss';
 import { textToLink } from '@src/utils/text-to-link';
-import { useExternalLinkOpener } from '@providers';
+import { useExternalLinkOpener, useAnalyticsContext } from '@providers';
+import { PostHogAction } from '@lace/common';
 
 export interface NotificationDetailsProps {
   notification: LaceNotificationWithTopicName;
@@ -22,8 +23,17 @@ export const NotificationDetails = ({
 }: NotificationDetailsProps): React.ReactElement => {
   const { t } = useTranslation();
   const openExternalLink = useExternalLinkOpener();
+  const analytics = useAnalyticsContext();
   const TopicNameTextComponent = popupView ? Text.Body.Small : Text.Body.Normal;
   const bodyText = textToLink(notification.message.body, openExternalLink);
+
+  useEffect(() => {
+    void analytics.sendEventToPostHog(PostHogAction.NotificationsOpen, {
+      // eslint-disable-next-line camelcase
+      topic_id: notification.message.topicId
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notification.message.id]);
   const bodyTextComponent = popupView ? (
     <Text.Label data-testid="notification-details-body">{bodyText}</Text.Label>
   ) : (

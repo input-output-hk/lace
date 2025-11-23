@@ -1,16 +1,17 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
 import { runtime } from 'webextension-polyfill';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { consumeRemoteApi } from '@cardano-sdk/web-extension';
-import { logger, useObservable } from '@lace/common';
+import { logger, useObservable, PostHogAction } from '@lace/common';
 import {
   LaceNotificationWithTopicName,
   notificationsCenterProperties,
   NotificationsCenterProperties,
   NotificationsTopic
 } from '@src/types/notifications-center';
+import { useAnalyticsContext } from '@providers';
 
 const notificationsCenterApi = consumeRemoteApi<NotificationsCenterProperties>(
   {
@@ -25,7 +26,8 @@ const notificationsCenterApi = consumeRemoteApi<NotificationsCenterProperties>(
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useNotificationsCenter = () => {
   const { markAsRead, notifications$, remove } = notificationsCenterApi.notifications;
-  const { topics$, subscribe, unsubscribe } = notificationsCenterApi.topics;
+  const { topics$, subscribe: originalSubscribe, unsubscribe: originalUnsubscribe } = notificationsCenterApi.topics;
+  const analytics = useAnalyticsContext();
 
   const notificationsWithTopics$ = useMemo(
     () =>
@@ -48,6 +50,48 @@ export const useNotificationsCenter = () => {
   const unreadNotifications = useMemo(
     () => notifications?.reduce((unreadCounter, { read }) => unreadCounter + (read ? 0 : 1), 0) ?? 0,
     [notifications]
+  );
+
+  const subscribe = useCallback(
+    async (topicId: NotificationsTopic['id']) => {
+      // Calculate current subscribed topics before the change
+      const currentSubscribedTopicIds = topics?.filter((topic) => topic.isSubscribed).map((topic) => topic.id) || [];
+
+      await originalSubscribe(topicId);
+
+      // Add the newly subscribed topic if not already in the list
+      const updatedSubscribedTopics = currentSubscribedTopicIds.includes(topicId)
+        ? currentSubscribedTopicIds
+        : [...currentSubscribedTopicIds, topicId];
+
+      await analytics.sendEventToPostHog(PostHogAction.NotificationsSubscribe, {
+        // eslint-disable-next-line camelcase
+        topic_id: topicId,
+        // eslint-disable-next-line camelcase
+        $set: { subscribed_topics: updatedSubscribedTopics }
+      });
+    },
+    [originalSubscribe, topics, analytics]
+  );
+
+  const unsubscribe = useCallback(
+    async (topicId: NotificationsTopic['id']) => {
+      // Calculate current subscribed topics before the change
+      const currentSubscribedTopicIds = topics?.filter((topic) => topic.isSubscribed).map((topic) => topic.id) || [];
+
+      await originalUnsubscribe(topicId);
+
+      // Remove the unsubscribed topic
+      const updatedSubscribedTopics = currentSubscribedTopicIds.filter((id) => id !== topicId);
+
+      await analytics.sendEventToPostHog(PostHogAction.NotificationsUnsubscribe, {
+        // eslint-disable-next-line camelcase
+        topic_id: topicId,
+        // eslint-disable-next-line camelcase
+        $set: { subscribed_topics: updatedSubscribedTopics }
+      });
+    },
+    [originalUnsubscribe, topics, analytics]
   );
 
   return {
