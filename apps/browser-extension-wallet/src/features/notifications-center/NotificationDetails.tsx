@@ -9,6 +9,7 @@ import styles from './NotificationDetails.module.scss';
 import { textToLink } from '@src/utils/text-to-link';
 import { useExternalLinkOpener, useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
+import { sanitizeForPostHog } from '@src/utils/format-string';
 
 export interface NotificationDetailsProps {
   notification: LaceNotificationWithTopicName;
@@ -30,7 +31,11 @@ export const NotificationDetails = ({
   useEffect(() => {
     void analytics.sendEventToPostHog(PostHogAction.NotificationsOpen, {
       // eslint-disable-next-line camelcase
-      topic_id: notification.message.topicId
+      topic_id: notification.message.topicId,
+      // eslint-disable-next-line camelcase
+      message_id: notification.message.id,
+      // eslint-disable-next-line camelcase
+      message_title: sanitizeForPostHog(notification.message.title)
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification.message.id]);
