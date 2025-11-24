@@ -134,7 +134,7 @@ describe('NotificationsClient', () => {
   });
 
   afterEach(async () => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
 
     // Clean up client if it exists
     if (client) {
@@ -987,6 +987,57 @@ describe('NotificationsClient', () => {
       await waitForClientInit();
 
       expect(mockLogger.warn).toHaveBeenCalled();
+    });
+
+    it('should retry init when it fails', async () => {
+      const init = jest
+        .spyOn(NotificationsClient.prototype as any, 'init')
+        .mockRejectedValueOnce(new Error('Init failed'))
+        .mockResolvedValueOnce(undefined);
+      jest.spyOn(NotificationsClient.prototype as any, 'initRetryPause').mockResolvedValueOnce(undefined);
+
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            subscribeKey
+          }
+        }
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(init).toHaveBeenCalledTimes(2);
+    });
+
+    it('should log init retry error', async () => {
+      jest
+        .spyOn(NotificationsClient.prototype as any, 'initTillSuccess')
+        .mockRejectedValueOnce(new Error('Init failed'));
+
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            subscribeKey
+          }
+        }
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'NotificationsClient: Failed while retrying to initialize notifications client',
+        expect.any(Error)
+      );
     });
   });
 

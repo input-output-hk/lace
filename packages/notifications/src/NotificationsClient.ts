@@ -13,6 +13,18 @@ import { PendingCommands } from './PendingCommands';
 import { isArrayOfStrings, unused } from './utils';
 
 /**
+ * Pause duration in milliseconds between initialization retry attempts.
+ * Set to 1 minute (60,000 ms).
+ */
+const INIT_RETRY_PAUSE = 60_000; // 1 minute
+
+/**
+ * Multiplier for the pause duration between initialization retry attempts.
+ * Set to 2.
+ */
+const INIT_RETRY_PAUSE_MULTIPLIER = 2;
+
+/**
  * Options for creating a NotificationsClient instance.
  */
 export interface NotificationsClientOptions {
@@ -134,8 +146,8 @@ export class NotificationsClient {
       if (!error) this.pendingCommands.onConnectionRestored();
     });
 
-    this.init().catch((error) => {
-      logger.error('NotificationsClient: Failed to initialize notifications client', error);
+    this.initTillSuccess().catch((error) => {
+      logger.error('NotificationsClient: Failed while retrying to initialize notifications client', error);
     });
   }
 
@@ -256,6 +268,44 @@ export class NotificationsClient {
     this.unsubscribedTopics = [...subscribedTopics, ...unsubscribedTopics];
 
     for (const topic of topics.filter(({ isSubscribed }) => isSubscribed)) await this.subscribe(topic.id);
+  }
+
+  /**
+   * Pauses execution for a specified duration.
+   * Used to wait between initialization retry attempts.
+   *
+   * @param ms - Number of milliseconds to pause
+   * @returns Promise that resolves after the specified delay
+   */
+  private async initRetryPause(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Initializes the notifications client with automatic retry logic.
+   * Retries initialization on failure, removing the stored token before each retry attempt
+   * and pausing for {@link INIT_RETRY_PAUSE} milliseconds between attempts.
+   * Continues retrying until initialization succeeds.
+   *
+   * @returns Promise that resolves when initialization succeeds
+   */
+  private async initTillSuccess(): Promise<void> {
+    let retry = false;
+    let retryPause = INIT_RETRY_PAUSE;
+
+    do {
+      try {
+        if (retry) await this.storage.removeItem(this.storageKeys.getToken());
+
+        retry = false;
+        await this.init();
+      } catch (error) {
+        retry = true;
+        this.logger.error('NotificationsClient: Failed to initialize notifications client', error);
+        await this.initRetryPause(retryPause);
+        retryPause *= INIT_RETRY_PAUSE_MULTIPLIER;
+      }
+    } while (retry);
   }
 
   /**
