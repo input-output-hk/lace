@@ -6,6 +6,7 @@ export class StorageKeys {
   private lastSync: string;
   private subscribedTopics: string;
   private token: string;
+  private topics: string;
   private unsubscribedTopics: string;
   private userId: string;
 
@@ -17,6 +18,7 @@ export class StorageKeys {
     this.lastSync = `${prefix}:lastSync:`;
     this.subscribedTopics = `${prefix}:subscribedTopics`;
     this.token = `${prefix}:token`;
+    this.topics = `${prefix}:topics`;
     this.unsubscribedTopics = `${prefix}:unsubscribedTopics`;
     this.userId = `${prefix}:userId`;
   }
@@ -44,6 +46,14 @@ export class StorageKeys {
    */
   public getToken(): string {
     return this.token;
+  }
+
+  /**
+   * Returns the storage key for topics.
+   * @returns The storage key in the format '{prefix}:topics'
+   */
+  public getTopics(): string {
+    return this.topics;
   }
 
   /**

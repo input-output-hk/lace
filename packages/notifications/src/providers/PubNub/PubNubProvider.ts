@@ -73,6 +73,16 @@ export interface ChannelsControlMessagePUT {
 }
 
 /**
+ * Cached topics with last fetch timestamp.
+ */
+export interface CachedTopics {
+  /** Last fetch timestamp. */
+  lastFetch: number;
+  /** Topics. */
+  topics: Topic[];
+}
+
+/**
  * Union type for all control channel messages.
  */
 export type ChannelsControlMessage = ChannelsControlMessageDEL | ChannelsControlMessagePUT;
@@ -218,6 +228,7 @@ export class PubNubProvider implements NotificationsProvider {
   private pendingUnsubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pubnub: PubNub;
   private refreshChannelsInterval: NodeJS.Timeout | undefined = undefined;
+  private refreshChannelsTimeout: NodeJS.Timeout | undefined = undefined;
   private skipAuthentication?: boolean;
   private storage: NotificationsStorage;
   private storageKeys: StorageKeys;
@@ -383,6 +394,7 @@ export class PubNubProvider implements NotificationsProvider {
   async close(): Promise<void> {
     return new Promise<void>((resolve) => {
       if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
+      if (this.refreshChannelsTimeout) clearTimeout(this.refreshChannelsTimeout);
 
       this.closeResolve = resolve;
       this.pubnub.unsubscribeAll();
@@ -482,13 +494,19 @@ export class PubNubProvider implements NotificationsProvider {
     this.onNotification = onNotification;
     this.onTopics = onTopics;
     this.addListeners(connectionStatus);
-    this.refreshChannelsInterval = setInterval(this.refreshChannels.bind(this), REFRESH_CHANNEL_INTERVAL);
 
-    const { data: channels } = await this.pubnub.objects.getAllChannelMetadata({
-      include: { customFields: true }
-    });
+    const cachedTopics = await this.storage.getItem<CachedTopics>(this.storageKeys.getTopics());
 
-    this.topics = channelsToTopics(channels, this.pubnub, this.logger);
+    if (!cachedTopics || cachedTopics.lastFetch < Date.now() - REFRESH_CHANNEL_INTERVAL)
+      this.topics = await this.refreshChannels();
+    else {
+      this.onTopics((this.topics = cachedTopics.topics));
+
+      this.refreshChannelsTimeout = setTimeout(
+        this.refreshChannels.bind(this),
+        REFRESH_CHANNEL_INTERVAL - (Date.now() - cachedTopics.lastFetch)
+      );
+    }
 
     this.fetchMissedMessages().catch((error) =>
       this.logger.error('NotificationsClient:PubNubProvider: Failed to fetch missed messages', error)
@@ -549,16 +567,33 @@ export class PubNubProvider implements NotificationsProvider {
 
   /**
    * Refreshes the list of available topics by fetching channel metadata from PubNub.
-   * Compares the new topics with the current ones and only calls onTopics callback if there are changes.
+   * Fetches all channel metadata, converts them to topics, and stores them in cache.
+   * Sets up a periodic refresh interval if one doesn't already exist.
    * This method is called periodically (every 24 hours) to keep topics in sync with PubNub.
+   *
+   * @returns Promise that resolves to an array of available topics
+   */
+  async refreshChannels(): Promise<Topic[]> {
+    const { data: channels } = await this.pubnub.objects.getAllChannelMetadata({ include: { customFields: true } });
+    const topics = channelsToTopics(channels, this.pubnub, this.logger);
+
+    this.storage.setItem(this.storageKeys.getTopics(), { lastFetch: Date.now(), topics });
+
+    if (!this.refreshChannelsInterval)
+      this.refreshChannelsInterval = setInterval(this.refreshChannelsOnInterval.bind(this), REFRESH_CHANNEL_INTERVAL);
+
+    return topics;
+  }
+
+  /**
+   * Periodic callback for refreshing channels.
+   * Called by the interval timer set up in {@link refreshChannels}.
+   * Refreshes the topics list and notifies listeners if topics have changed.
    * Errors during refresh are logged but do not throw exceptions.
    */
-  refreshChannels(): void {
-    this.pubnub.objects
-      .getAllChannelMetadata({ include: { customFields: true } })
-      .then(({ data: channels }) => {
-        const topics = channelsToTopics(channels, this.pubnub, this.logger);
-
+  refreshChannelsOnInterval(): void {
+    this.refreshChannels()
+      .then((topics) => {
         if (JSON.stringify(topics) !== JSON.stringify(this.topics)) this.onTopics((this.topics = topics));
       })
       .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh channels', error));
