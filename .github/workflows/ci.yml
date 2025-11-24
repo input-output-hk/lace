@@ -8,6 +8,10 @@ on:
       - main
       - 'release/**'
 
+defaults:
+  run:
+    working-directory: ./v1
+
 permissions:
   pull-requests: write
   actions: read
