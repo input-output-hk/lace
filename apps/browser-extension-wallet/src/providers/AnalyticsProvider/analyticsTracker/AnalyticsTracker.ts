@@ -4,6 +4,7 @@ import {
   UserTrackingType,
   PostHogAction,
   PostHogProperties,
+  PostHogPersonProperties,
   IAnalyticsTracker
 } from './types';
 import { Wallet } from '@lace/cardano';
@@ -106,6 +107,10 @@ export class AnalyticsTracker implements IAnalyticsTracker<Action> {
     await this.userIdService?.extendLifespan();
     await this.checkNewSessionStarted();
     await this.postHogClient?.sendEvent(action, properties);
+  }
+
+  async updatePersonProperties(personProperties: { $set: Partial<PostHogPersonProperties['$set']> }): Promise<void> {
+    await this.postHogClient?.updatePersonProperties(personProperties);
   }
 
   setChain(chain: Wallet.Cardano.ChainId): void {
