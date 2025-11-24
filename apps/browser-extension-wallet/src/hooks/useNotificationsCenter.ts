@@ -54,44 +54,26 @@ export const useNotificationsCenter = () => {
 
   const subscribe = useCallback(
     async (topicId: NotificationsTopic['id']) => {
-      // Calculate current subscribed topics before the change
-      const currentSubscribedTopicIds = topics?.filter((topic) => topic.isSubscribed).map((topic) => topic.id) || [];
-
       await originalSubscribe(topicId);
-
-      // Add the newly subscribed topic if not already in the list
-      const updatedSubscribedTopics = currentSubscribedTopicIds.includes(topicId)
-        ? currentSubscribedTopicIds
-        : [...currentSubscribedTopicIds, topicId];
 
       await analytics.sendEventToPostHog(PostHogAction.NotificationsSubscribe, {
         // eslint-disable-next-line camelcase
-        topic_id: topicId,
-        // eslint-disable-next-line camelcase
-        $set: { subscribed_topics: updatedSubscribedTopics }
+        topic_id: topicId
       });
     },
-    [originalSubscribe, topics, analytics]
+    [originalSubscribe, analytics]
   );
 
   const unsubscribe = useCallback(
     async (topicId: NotificationsTopic['id']) => {
-      // Calculate current subscribed topics before the change
-      const currentSubscribedTopicIds = topics?.filter((topic) => topic.isSubscribed).map((topic) => topic.id) || [];
-
       await originalUnsubscribe(topicId);
-
-      // Remove the unsubscribed topic
-      const updatedSubscribedTopics = currentSubscribedTopicIds.filter((id) => id !== topicId);
 
       await analytics.sendEventToPostHog(PostHogAction.NotificationsUnsubscribe, {
         // eslint-disable-next-line camelcase
-        topic_id: topicId,
-        // eslint-disable-next-line camelcase
-        $set: { subscribed_topics: updatedSubscribedTopics }
+        topic_id: topicId
       });
     },
-    [originalUnsubscribe, topics, analytics]
+    [originalUnsubscribe, analytics]
   );
 
   return {
