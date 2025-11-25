@@ -9,7 +9,6 @@ import Telegram from '../../../../assets/icons/telegram-icon.component.svg';
 import GitHub from '../../../../assets/icons/github-icon.component.svg';
 import Twitter from '../../../../assets/icons/twitter-icon.component.svg';
 import Youtube from '../../../../assets/icons/youtube-icon.component.svg';
-import Discord from '../../../../assets/icons/discord-logo.component.svg';
 
 const normalizeHref = (href: string) =>
   href && !href.startsWith('https://') ? `https://${href.replace(/^\/+/, '')}` : href;
@@ -21,8 +20,7 @@ export enum SocialNetwork {
   TELEGRAM,
   GITHUB,
   TWITTER,
-  YOUTUBE,
-  DISCORD
+  YOUTUBE
 }
 
 export const iconsMap: Record<SocialNetwork, React.FC<React.SVGProps<SVGSVGElement>>> = {
@@ -32,8 +30,7 @@ export const iconsMap: Record<SocialNetwork, React.FC<React.SVGProps<SVGSVGEleme
   [SocialNetwork.TELEGRAM]: Telegram,
   [SocialNetwork.GITHUB]: GitHub,
   [SocialNetwork.TWITTER]: Twitter,
-  [SocialNetwork.YOUTUBE]: Youtube,
-  [SocialNetwork.DISCORD]: Discord
+  [SocialNetwork.YOUTUBE]: Youtube
 };
 
 export type socialNetworkIconProps = {

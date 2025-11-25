@@ -16,7 +16,6 @@ const socialNetworks = [
   { name: SocialNetwork.WEBSITE, href: process.env.WEBSITE_URL },
   { name: SocialNetwork.TWITTER, href: process.env.TWITTER_URL },
   { name: SocialNetwork.YOUTUBE, href: process.env.YOUTUBE_URL },
-  { name: SocialNetwork.DISCORD, href: process.env.DISCORD_URL },
   { name: SocialNetwork.GITHUB, href: process.env.GITHUB_URL }
 ];
 
