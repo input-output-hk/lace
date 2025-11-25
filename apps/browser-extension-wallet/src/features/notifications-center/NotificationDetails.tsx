@@ -59,7 +59,7 @@ export const NotificationDetails = ({
           </TopicNameTextComponent>
         </Box>
         <Divider w="$fill" mt={popupView ? '$16' : '$18'} mb={popupView ? '$16' : '$32'} />
-        {notification.message.format === 'plain' ? (
+        {notification.message.format === 'plain' || !notification.message.format ? (
           bodyTextComponent
         ) : (
           <pre>{JSON.stringify(notification.message.body)}</pre>
