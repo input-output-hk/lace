@@ -353,7 +353,12 @@ describe('PubNubProvider', () => {
     test('should subscribe to a topic', async () => {
       const subscribePromise = provider.subscribe('topic-1');
 
-      expect(mockPubNub.subscribe).toHaveBeenCalledWith({ channels: ['topic-1'] });
+      expect(mockPubNub.subscribe).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channels: ['topic-1'],
+          timetoken: expect.any(String)
+        })
+      );
       expect(mockOnTopics).toHaveBeenCalled();
 
       // Simulate successful subscription

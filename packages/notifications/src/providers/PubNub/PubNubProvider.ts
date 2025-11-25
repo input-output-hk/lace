@@ -1,4 +1,4 @@
-import { isArrayOfStrings, unused } from '../../utils';
+import { getCurrentTimetoken, isArrayOfStrings, unused } from '../../utils';
 import { Notification, NotificationsLogger, NotificationsStorage, Topic } from '../../types';
 import { NotificationsProvider, ProviderInitOptions } from '../types';
 import PubNub from 'pubnub';
@@ -560,7 +560,7 @@ export class PubNubProvider implements NotificationsProvider {
       for (const topic of this.topics) if (topic.id === topicId) topic.isSubscribed = true;
 
       this.onTopics(this.topics);
-      this.pubnub.subscribe({ channels: [topicId] });
+      this.pubnub.subscribe({ channels: [topicId], timetoken: getCurrentTimetoken() });
       this.pendingSubscriptions.set(topicId, { resolve, reject });
     });
   }
