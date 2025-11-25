@@ -254,7 +254,7 @@ describe('NotificationsClient', () => {
 
       expect(PubNubProvider).toHaveBeenCalledWith(
         expect.objectContaining({
-          heartbeatInterval: 15
+          heartbeatInterval: 60
         })
       );
       await Promise.resolve();

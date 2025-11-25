@@ -115,7 +115,7 @@ export class NotificationsClient {
     // Currently the only supported provider is PubNub
     if (provider.name === 'PubNub') {
       const configuration = {
-        heartbeatInterval: 15,
+        heartbeatInterval: 60,
         ...provider.configuration
       };
       const { heartbeatInterval, skipAuthentication, subscribeKey, tokenEndpoint } = configuration;

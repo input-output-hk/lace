@@ -208,7 +208,7 @@ describe('PubNubProvider', () => {
 
       expect(PubNub as unknown as jest.Mock).toHaveBeenCalledWith({
         autoNetworkDetection: true,
-        heartbeatInterval: 15,
+        heartbeatInterval: 60,
         restore: true,
         subscribeKey,
         userId: 'test-user-id',

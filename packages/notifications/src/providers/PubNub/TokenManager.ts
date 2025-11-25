@@ -38,7 +38,7 @@ export class TokenManager {
    * @throws {AuthenticationError} When token fetch/refresh fails
    * @throws {StorageError} When storage operations fail
    */
-  async getValidToken(): Promise<AuthToken> {
+  async getValidToken(ignoreCache = false): Promise<AuthToken> {
     // If a refresh is already in progress, wait for it
     if (this.tokenRefreshPromise) return this.tokenRefreshPromise;
 
@@ -46,7 +46,7 @@ export class TokenManager {
     const storedToken = await this.storage.getItem<AuthToken>(this.storageKeys.getToken());
 
     // Check if token is valid and not expiring soon
-    if (storedToken && this.isTokenValid(storedToken)) return storedToken;
+    if (!ignoreCache && storedToken && this.isTokenValid(storedToken)) return storedToken;
 
     // Token is missing, expired, or expiring soon - refresh it
     return await this.refreshToken();

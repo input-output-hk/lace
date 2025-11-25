@@ -1,4 +1,4 @@
-import { getCurrentTimetoken, isArrayOfStrings, unused } from '../../utils';
+import { getCurrentTimetoken, getNow, isArrayOfStrings, unused } from '../../utils';
 import { Notification, NotificationsLogger, NotificationsStorage, Topic } from '../../types';
 import { NotificationsProvider, ProviderInitOptions } from '../types';
 import PubNub from 'pubnub';
@@ -28,7 +28,7 @@ const isControlChannel = (channelId: string): boolean => channelId.startsWith('c
  * Configuration options for PubNub provider.
  */
 export interface PubNubProviderConfiguration {
-  /** Heartbeat interval in seconds. Defaults to 15. */
+  /** Heartbeat interval in seconds. Defaults to 60. */
   heartbeatInterval?: number;
   /** Test only! Whether to skip authentication. If true, no auth token will be requested. */
   skipAuthentication?: boolean;
@@ -229,6 +229,7 @@ export class PubNubProvider implements NotificationsProvider {
   private pubnub: PubNub;
   private refreshChannelsInterval: NodeJS.Timeout | undefined = undefined;
   private refreshChannelsTimeout: NodeJS.Timeout | undefined = undefined;
+  private refreshTokenTimeout: NodeJS.Timeout | undefined = undefined;
   private skipAuthentication?: boolean;
   private storage: NotificationsStorage;
   private storageKeys: StorageKeys;
@@ -242,7 +243,7 @@ export class PubNubProvider implements NotificationsProvider {
    */
   constructor(options: PubNubProviderOptions) {
     const { heartbeatInterval, logger, skipAuthentication, storage, storageKeys, subscribeKey } = {
-      heartbeatInterval: 15,
+      heartbeatInterval: 60,
       // TODO: Replace with production subscribe key once available
       subscribeKey: 'production subscribe key',
       ...options
@@ -395,6 +396,7 @@ export class PubNubProvider implements NotificationsProvider {
     return new Promise<void>((resolve) => {
       if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
       if (this.refreshChannelsTimeout) clearTimeout(this.refreshChannelsTimeout);
+      if (this.refreshTokenTimeout) clearTimeout(this.refreshTokenTimeout);
 
       this.closeResolve = resolve;
       this.pubnub.unsubscribeAll();
@@ -439,6 +441,12 @@ export class PubNubProvider implements NotificationsProvider {
     );
 
     const token = await tokenManager.getValidToken();
+
+    this.refreshTokenTimeout = setTimeout(
+      this.refreshToken.bind(this, userId),
+      // eslint-disable-next-line no-magic-numbers
+      (token.expiresAt - getNow() - 60) * 1000 // 60 seconds before expiry
+    );
 
     return token.token;
   }
@@ -597,6 +605,29 @@ export class PubNubProvider implements NotificationsProvider {
         if (JSON.stringify(topics) !== JSON.stringify(this.topics)) this.onTopics((this.topics = topics));
       })
       .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh channels', error));
+  }
+
+  private refreshToken(userId: string): void {
+    let nextCallIn = 1000;
+    this.refreshTokenTimeout = undefined;
+
+    void (async () => {
+      const tokenManager = new TokenManager(
+        new PubNubFunctionClient(this.tokenEndpoint),
+        this.storage,
+        this.storageKeys,
+        userId
+      );
+
+      const token = await tokenManager.getValidToken(true);
+
+      this.pubnub.setToken(token.token);
+
+      // eslint-disable-next-line no-magic-numbers
+      nextCallIn = (token.expiresAt - getNow() - 60) * 1000; // 60 seconds before expiry
+    })()
+      .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh token', error))
+      .finally(() => (this.refreshTokenTimeout = setTimeout(this.refreshToken.bind(this, userId), nextCallIn)));
   }
 
   /**
