@@ -34,7 +34,7 @@ Feature: Add new wallet - Create wallet
   @LW-9337
   Scenario: Extended-view - Multi-wallet - Create - "Let's set up your new wallet" page - Back button click
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     And I click "Next" button during wallet setup
     Then "Let's set up your new wallet" page is displayed for "Create" flow while adding another wallet
     And "Wallet setup" step is marked as active on progress timeline
@@ -44,7 +44,7 @@ Feature: Add new wallet - Create wallet
   @LW-9338
   Scenario: Extended-view - Multi-wallet - Create - "Let's set up your new wallet" page - Password confirmation input appearing
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     And I click "Next" button during wallet setup
     Then empty password confirmation input is not displayed
     When I enter wallet password "N_8J@bne87A"
@@ -53,7 +53,7 @@ Feature: Add new wallet - Create wallet
   @LW-9339
   Scenario: Extended-view - Multi-wallet - Create - "Let's set up your new wallet" page - Too long name
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Create" wallet flow and fill values
+    When I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
     And I enter wallet name with size of: 21 characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" is displayed
     And "Next" button is disabled during onboarding process
@@ -61,7 +61,7 @@ Feature: Add new wallet - Create wallet
   @LW-9340 @LW-9341
   Scenario Outline: Extended-view - Multi-wallet - Create - "Let's set up your new wallet" page - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Create" wallet flow
+    When I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
     And I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -75,7 +75,7 @@ Feature: Add new wallet - Create wallet
   @LW-9342
   Scenario: Extended-view - Multi-wallet - Create - "Let's set up your new wallet" page - Password show/hide button
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Create" wallet flow and fill values
+    When I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
     And I click on "Show password" for "Password" input field
@@ -90,7 +90,7 @@ Feature: Add new wallet - Create wallet
   @LW-9357 @memory-snapshot
   Scenario: Extended-view - Multi-wallet - Create - Add new wallet - happy path
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Create" wallet flow
+    When I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
     And I enter wallet name: "Wallet 2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
     And I wait for main loader to disappear

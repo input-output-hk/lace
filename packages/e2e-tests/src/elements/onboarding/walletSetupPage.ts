@@ -116,9 +116,10 @@ class WalletSetupPage extends CommonOnboardingElements {
   async goToWalletSetupPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = false
+    fillValues = false,
+    blockchain: 'Cardano' | 'Bitcoin'
   ): Promise<void> {
-    await recoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicWords, true);
+    await recoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicWords, true, blockchain);
     await recoveryPhrasePage.nextButton.waitForClickable();
     await recoveryPhrasePage.nextButton.click();
     if (fillValues) {

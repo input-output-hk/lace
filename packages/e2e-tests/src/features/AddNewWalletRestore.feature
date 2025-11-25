@@ -64,7 +64,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9369
   Scenario: Extended-view - Multi-wallet - Restore - "Let's set up your new wallet" page - Back button click
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values for Cardano chain
     And I click "Next" button during wallet setup
     Then "Let's set up your new wallet" page is displayed for "Create" flow while adding another wallet
     And "Wallet setup" step is marked as active on progress timeline
@@ -74,7 +74,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9370
   Scenario: Extended-view - Multi-wallet - Restore - "Let's set up your new wallet" page - Password confirmation input appearing
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values for Cardano chain
     And I click "Next" button during wallet setup
     Then empty password confirmation input is not displayed
     When I enter wallet password "N_8J@bne87A"
@@ -83,7 +83,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9371
   Scenario: Extended-view - Multi-wallet - Restore - "Let's set up your new wallet" page - Too long name
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Restore" wallet flow and fill values
+    When I go to "Wallet setup" page from "Restore" wallet flow and fill values for Cardano chain
     And I enter wallet name with size of: 21 characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" is displayed
     And "Next" button is disabled during onboarding process
@@ -91,7 +91,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9372 @LW-9373
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Let's set up your new wallet" page - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Restore" wallet flow
+    When I go to "Wallet setup" page from "Restore" wallet flow for Cardano chain
     And I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -105,7 +105,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9374
   Scenario: Extended-view - Multi-wallet - Restore - "Let's set up your new wallet" page - Password show/hide button
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "Wallet setup" page from "Restore" wallet flow and fill values
+    When I go to "Wallet setup" page from "Restore" wallet flow and fill values for Cardano chain
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
     And I click on "Show password" for "Password" input field
@@ -144,7 +144,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9245
   Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page without any user input interaction - <action>
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "<page>" page from "Restore" wallet flow and not fill values
+    When I go to "<page>" page from "Restore" wallet flow and not fill values for Cardano chain
     And <action>
     Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
     And "Add new wallet" page is not displayed
@@ -155,7 +155,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9246
   Scenario Outline: Extended-view - Multi-wallet - Restore - "<page>" page with any user input interaction - <action>
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "<page>" page from "Restore" wallet flow and fill values
+    When I go to "<page>" page from "Restore" wallet flow and fill values for Cardano chain
     And <action>
     Then "Are you sure you want to cancel adding a new wallet?" dialog is displayed
     Examples:
@@ -166,7 +166,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9247
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - go back
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "<page>" page from "Restore" wallet flow and fill values
+    When I go to "<page>" page from "Restore" wallet flow and fill values for Cardano chain
     And I click "X" button on "Add new wallet" flow
     And I click "Go back" button on "Are you sure you want to cancel adding a new wallet?" dialog
     Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed
@@ -179,7 +179,7 @@ Feature: Add new wallet - Restore wallet
   @LW-9248
   Scenario Outline: Extended-view - Multi-wallet - Restore - "Add new wallet" - <page> - "Are you sure you want to cancel adding a new wallet?" dialog - proceed
     Given I opened "Restore" flow via "Add new wallet" feature
-    When I go to "<page>" page from "Restore" wallet flow and fill values
+    When I go to "<page>" page from "Restore" wallet flow and fill values for Cardano chain
     And I click "X" button on "Add new wallet" flow
     And I click "Proceed" button on "Are you sure you want to cancel adding a new wallet?" dialog
     Then "Are you sure you want to cancel adding a new wallet?" dialog is not displayed

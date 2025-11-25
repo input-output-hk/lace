@@ -110,5 +110,5 @@ Feature: Add new wallet - Create wallet
   @LW-9354
   Scenario: Extended-view - Multi-wallet - Create - "Enter your recovery phrase" page - Mnemonic fill - enter correct mnemonic
     Given I opened "Create" flow via "Add new wallet" feature
-    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    When I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     Then "Next" button is enabled during onboarding process
