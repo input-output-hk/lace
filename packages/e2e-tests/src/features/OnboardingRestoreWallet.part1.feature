@@ -12,20 +12,20 @@ Feature: Onboarding - Restore wallet
   @LW-2459
   Scenario: Restore Wallet - happy path to "Name your wallet" page
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow for Cardano chain
     And "Wallet setup" page is displayed
 
   @LW-2460
   Scenario: Restore Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values for Cardano chain
     When I add characters "asd" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2461
   Scenario: Restore Wallet - Name your wallet - back button
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow for Cardano chain
     And "Wallet setup" page is displayed
     When I click "Back" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
@@ -43,7 +43,7 @@ Feature: Onboarding - Restore wallet
   @LW-2977
   Scenario Outline: Restore Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow and not fill values
+    And I go to "Wallet setup" page from "Restore" wallet flow and not fill values for Cardano chain
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:
@@ -57,7 +57,7 @@ Feature: Onboarding - Restore wallet
   @LW-2464 @LW-10208 @memory-snapshot
   Scenario: Restore Wallet - All done page - happy path
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values for Cardano chain
     When I click "Enter wallet" button
     Then I see LW homepage
     And "Pin the wallet extension" notification is displayed
@@ -67,7 +67,7 @@ Feature: Onboarding - Restore wallet
   @LW-3063
   Scenario: Extended view - Settings - Analytics enabled/disabled when restoring a wallet
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values for Cardano chain
     When I click "Enter wallet" button
     Then I see LW homepage
     When I confirm multi-address discovery modal
@@ -75,7 +75,7 @@ Feature: Onboarding - Restore wallet
     And I click on Remove wallet button
     And I click "Remove wallet" button on "Remove wallet" modal
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow and fill values
+    And I go to "Wallet setup" page from "Restore" wallet flow and fill values for Cardano chain
     When I click "Enter wallet" button
     Then I see LW homepage
     When I confirm multi-address discovery modal

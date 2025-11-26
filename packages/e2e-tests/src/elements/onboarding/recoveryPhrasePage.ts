@@ -11,6 +11,7 @@ import clipboard from 'clipboardy';
 import ChooseRecoveryMethodPage from './ChooseRecoveryMethodPage';
 import utils from '../../utils/utils';
 import SelectBlockchainPage from './SelectBlockchainPage';
+import BitcoinWarningModal from './BitcoinWarningModal';
 
 class RecoveryPhrasePage extends CommonOnboardingElements {
   private MNEMONIC_WORD = '[data-testid="mnemonic-word-writedown"]';
@@ -179,9 +180,14 @@ class RecoveryPhrasePage extends CommonOnboardingElements {
   async goToMnemonicVerificationPage(
     flowType: 'Create' | 'Restore',
     mnemonicWords: string[] = [],
-    fillValues = false
+    fillValues = false,
+    blockchain: 'Cardano' | 'Bitcoin'
   ): Promise<void> {
+    await SelectBlockchainPage.selectBlockchain(blockchain);
     await SelectBlockchainPage.nextButton.click();
+    if (blockchain === 'Bitcoin') {
+      await BitcoinWarningModal.clickUnderstoodButton();
+    }
     await ChooseRecoveryMethodPage.nextButton.click();
     if (flowType === 'Create') {
       await this.clickOnCopyToClipboardButton();

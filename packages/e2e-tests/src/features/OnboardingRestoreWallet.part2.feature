@@ -15,7 +15,7 @@ Feature: Onboarding - Restore wallet
   @LW-4546 @LW-4549
   Scenario Outline: Restore wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow for Cardano chain
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
     And "Next" button is <is_disabled> during onboarding process
@@ -27,9 +27,7 @@ Feature: Onboarding - Restore wallet
   @LW-4743
   Scenario: Restore wallet - Enter button support
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values for Cardano chain
     When I press keyboard Enter button
     And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -39,18 +37,16 @@ Feature: Onboarding - Restore wallet
   @LW-5835
   Scenario: Restore Wallet - "Recovery phrase page" displayed
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values for Cardano chain
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 
   @LW-5842
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values for Cardano chain
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Restore" flow
+    Then "Choose recovery method" page is displayed on "Restore" flow for Cardano chain
 
   @LW-6080 @LW-5839 @LW-5838
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
@@ -123,4 +119,4 @@ Feature: Onboarding - Restore wallet
   Scenario: Onboarding - Restore - "Choose a recovery method" page is displayed
     When I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Restore" flow
+    Then "Choose recovery method" page is displayed on "Restore" flow for Cardano chain

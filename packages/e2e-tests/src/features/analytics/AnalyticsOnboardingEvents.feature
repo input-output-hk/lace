@@ -7,7 +7,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     Then Local Storage "analyticsStatus" key has "ACCEPTED" value
     When I set up request interception for posthog analytics request(s)
     And I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and fill values
+    And I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
     Then I validate that 6 analytics event(s) have been sent
 
   @LW-7363
@@ -19,7 +19,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     # TODO: add event validation when LW-13754 is completed
     When I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet revamp paper wallet | choose mode | next | click"
-    When I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I enter 24 correct mnemonic words on "Mnemonic verification" page
     And I click "Next" button during wallet setup
     Then "Wallet setup" page is displayed
     And I validate latest analytics single event "onboarding | restore wallet revamp |  enter your recovery phrase  | next | click"

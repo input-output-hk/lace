@@ -5,7 +5,7 @@ Feature: Onboarding - Paper Wallet - Create wallet
   Scenario: Onboarding - Create - "Choose recovery method" page is displayed
     When I click "Create" button on wallet setup page
     And I click "Next" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Create" flow
+    Then "Choose recovery method" page is displayed on "Create" flow for Cardano chain
 
   @LW-11153
   Scenario: Onboarding - Create - Choose a recovery method - Paper Wallet - click "Next" button
@@ -38,8 +38,8 @@ Feature: Onboarding - Paper Wallet - Create wallet
     And I select "Paper wallet" as a recovery method
     And I click "Next" button during wallet setup
     And I click "Back" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Create" flow
-    And "Paper wallet" is selected as a recovery method
+    Then "Choose recovery method" page is displayed on "Create" flow for Cardano chain
+    And "Paper wallet" is selected as a recovery method for Cardano chain
 
   @LW-11156
   Scenario: Onboarding - Create - Paper Wallet - Secure your paper wallet - enter valid public PGP key
