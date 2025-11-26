@@ -218,6 +218,16 @@ export class PostHogClient<Action extends string = string> {
     posthog.capture(String(action), payload);
   }
 
+  async updatePersonProperties(personProperties: { $set: Partial<PostHogPersonProperties['$set']> }): Promise<void> {
+    const distinctId = posthog.get_distinct_id();
+    if (!distinctId) {
+      logger.debug('Cannot update person properties: distinct_id not found');
+      return;
+    }
+
+    posthog.identify(distinctId, personProperties);
+  }
+
   setChain(chain: Wallet.Cardano.ChainId): void {
     const token = this.getApiToken();
     this.chain = chain;

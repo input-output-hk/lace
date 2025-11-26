@@ -6,7 +6,7 @@ class NotificationDetails {
   private readonly REMOVE_BUTTON = '[data-testid="remove-button"]';
   private readonly VIEW_ALL_BUTTON = '[data-testid="view-all-button"]';
   private readonly NOTIFICATION_TITLE = '[data-testid="notification-details-title"]';
-  private readonly NOTIFICATION_PUBLISHER = '[data-testid="notification-details-publisher"]';
+  private readonly NOTIFICATION_TOPIC_NAME = '[data-testid="notification-details-topic-name"]';
   private readonly NOTIFICATION_BODY = '[data-testid="notification-details-body"]';
 
   get navigationButtonArrow(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -26,7 +26,7 @@ class NotificationDetails {
   }
 
   get notificationPublisher(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.NOTIFICATION_PUBLISHER);
+    return $(this.NOTIFICATION_TOPIC_NAME);
   }
 
   get notificationBody(): ChainablePromiseElement<WebdriverIO.Element> {

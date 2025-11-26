@@ -35,7 +35,8 @@ const createTopic = (id: string, autoSubscribe = false): Topic => ({
   name: `Topic ${id}`,
   autoSubscribe,
   chain: 'mainnet',
-  isSubscribed: false
+  isSubscribed: false,
+  publisher: `Test Publisher ${id}`
 });
 
 describe('NotificationsClient', () => {
@@ -253,7 +254,7 @@ describe('NotificationsClient', () => {
 
       expect(PubNubProvider).toHaveBeenCalledWith(
         expect.objectContaining({
-          heartbeatInterval: 15
+          heartbeatInterval: 60
         })
       );
       await Promise.resolve();

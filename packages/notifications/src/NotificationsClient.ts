@@ -10,7 +10,7 @@ import {
 } from './providers';
 import { ConnectionStatus } from './ConnectionStatus';
 import { PendingCommands } from './PendingCommands';
-import { isArrayOfStrings, unused } from './utils';
+import { getCurrentTimetoken, isArrayOfStrings, unused } from './utils';
 
 /**
  * Pause duration in milliseconds between initialization retry attempts.
@@ -115,7 +115,7 @@ export class NotificationsClient {
     // Currently the only supported provider is PubNub
     if (provider.name === 'PubNub') {
       const configuration = {
-        heartbeatInterval: 15,
+        heartbeatInterval: 60,
         ...provider.configuration
       };
       const { heartbeatInterval, skipAuthentication, subscribeKey, tokenEndpoint } = configuration;
@@ -176,8 +176,8 @@ export class NotificationsClient {
    * @param key - Storage key to retrieve
    * @returns Promise that resolves to an array of channel names, or empty array if invalid
    */
-  private async getChannelsNames(key: string): Promise<string[]> {
-    const value = await this.storage.getItem<string[]>(key);
+  private async getChannelsNames(key: string): Promise<Topic['id'][]> {
+    const value = await this.storage.getItem<Topic['id'][]>(key);
 
     if (value === undefined) return [];
 
@@ -241,16 +241,18 @@ export class NotificationsClient {
    * @returns Promise that resolves when initialization is complete
    */
   private async init(): Promise<void> {
-    const { connectionStatus, onNotification, provider, storageKeys, trackTopics } = this;
+    const { connectionStatus, onNotification, provider, storageKeys, trackTopics, storage } = this;
 
     const userId = await this.getUserId();
     const subscribedTopicsKey = storageKeys.getSubscribedTopics();
     const unsubscribedTopicsKey = storageKeys.getUnsubscribedTopics();
-    const [topics, subscribedTopics, unsubscribedTopics] = await Promise.all([
-      provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this), userId }),
+    const [subscribedTopics, unsubscribedTopics] = await Promise.all([
       this.getChannelsNames(subscribedTopicsKey),
       this.getChannelsNames(unsubscribedTopicsKey)
     ]);
+    this.subscribedTopics = subscribedTopics;
+    this.unsubscribedTopics = unsubscribedTopics;
+    const topics = await provider.init({ connectionStatus, onNotification, onTopics: trackTopics.bind(this), userId });
 
     this.notifyTopics(topics);
 
@@ -259,15 +261,17 @@ export class NotificationsClient {
       else if (!unsubscribedTopics.includes(topic.id)) {
         if (topic.autoSubscribe) {
           topic.isSubscribed = true;
+          await storage.setItem(storageKeys.getLastSync(topic.id), getCurrentTimetoken());
           subscribedTopics.push(topic.id);
         } else unsubscribedTopics.push(topic.id);
       }
     }
 
-    this.isInitialized = true;
-    this.unsubscribedTopics = [...subscribedTopics, ...unsubscribedTopics];
+    await this.updateTopics();
 
-    for (const topic of topics.filter(({ isSubscribed }) => isSubscribed)) await this.subscribe(topic.id);
+    this.isInitialized = true;
+
+    for (const topic of topics.filter(({ isSubscribed }) => isSubscribed)) await this.subscribe(topic.id, true);
   }
 
   /**
@@ -347,10 +351,12 @@ export class NotificationsClient {
       if (!knownTopicIds.has(topic.id)) {
         this.unsubscribedTopics.push(topic.id);
 
-        if (topic.autoSubscribe)
-          this.subscribe(topic.id).catch((error) =>
-            this.logger.error('NotificationsClient: Failed to subscribe to topic', topic.id, error)
-          );
+        if (topic.autoSubscribe) {
+          this.storage
+            .setItem(this.storageKeys.getLastSync(topic.id), getCurrentTimetoken())
+            .then(() => this.subscribe(topic.id))
+            .catch((error) => this.logger.error('NotificationsClient: Failed to subscribe to topic', topic.id, error));
+        }
       }
 
     this.updateTopics()
@@ -379,15 +385,19 @@ export class NotificationsClient {
    * @returns Promise that resolves when subscription is complete
    * @throws {Error} If the client is not operational, topic is already subscribed, or topic is unknown
    */
-  async subscribe(topicId: Topic['id']): Promise<void> {
+  async subscribe(topicId: Topic['id'], fromInit = false): Promise<void> {
     this.ensureIsOperational();
 
-    if (this.subscribedTopics.includes(topicId))
-      throw new Error(`NotificationsClient: Topic already subscribed ${topicId}`);
-    if (!this.unsubscribedTopics.includes(topicId)) throw new Error(`NotificationsClient: Unknown topic ${topicId}`);
+    if (!fromInit) {
+      if (this.subscribedTopics.includes(topicId))
+        throw new Error(`NotificationsClient: Topic already subscribed ${topicId}`);
+      if (!this.unsubscribedTopics.includes(topicId)) throw new Error(`NotificationsClient: Unknown topic ${topicId}`);
 
-    this.subscribedTopics.push(topicId);
-    this.unsubscribedTopics.splice(this.unsubscribedTopics.indexOf(topicId), 1);
+      this.subscribedTopics.push(topicId);
+      this.unsubscribedTopics.splice(this.unsubscribedTopics.indexOf(topicId), 1);
+
+      await this.storage.setItem(this.storageKeys.getLastSync(topicId), getCurrentTimetoken());
+    }
 
     await this.updateTopics();
 

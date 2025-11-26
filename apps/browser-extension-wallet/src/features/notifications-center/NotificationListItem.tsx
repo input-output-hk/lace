@@ -23,6 +23,7 @@ export interface NotificationListItemProps {
   title: string;
   isRead?: boolean;
   popupView?: boolean;
+  topicName: string;
   publisher: string;
   onRemove?: (id: string) => void;
   onClick: () => void;
@@ -34,7 +35,7 @@ export const NotificationListItem = ({
   title,
   isRead = false,
   popupView = false,
-  publisher,
+  topicName,
   onRemove,
   onClick,
   withBorder = true
@@ -77,7 +78,7 @@ export const NotificationListItem = ({
         <Flex alignItems="center" gap="$4" className={styles.copy}>
           {!isRead && <div className={styles.dot} data-testid="notification-list-item-dot" />}
           <Text.Body.Small weight="$medium" color="secondary" data-testid="notification-list-item-publisher">
-            {publisher}
+            {topicName}
           </Text.Body.Small>
         </Flex>
         <TitleTextComponent weight="$semibold" className={styles.copy} data-testid="notification-list-item-title">
