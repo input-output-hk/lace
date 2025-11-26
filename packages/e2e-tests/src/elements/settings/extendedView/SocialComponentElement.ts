@@ -6,8 +6,7 @@ export enum SocialComponentEnum {
   Twitter = 'TWITTER',
   Website = 'WEBSITE',
   Github = 'GITHUB',
-  Youtube = 'YOUTUBE',
-  Discord = 'DISCORD'
+  Youtube = 'YOUTUBE'
 }
 
 export class SocialComponentElement {
