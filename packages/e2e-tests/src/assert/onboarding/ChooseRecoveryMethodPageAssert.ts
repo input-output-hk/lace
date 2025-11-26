@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { TimelineSteps } from '../../enums/Onboarding';
 
 class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
-  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore', isMultiWallet = false) {
+  async assertSeeChooseRecoveryMethodPage(flowType: 'Create' | 'Restore', isMultiWallet = false, isBtcWallet = false) {
     if (isMultiWallet) {
       await ChooseRecoveryMethodPage.addNewWalletCloseButton.waitForEnabled();
     }
@@ -23,8 +23,9 @@ class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
     }
 
     await this.assertSeeRecoveryPhraseOption();
-    await this.assertSeePaperWalletOption(flowType);
-
+    if (!isBtcWallet) {
+      await this.assertSeePaperWalletOption(flowType);
+    }
     await this.assertSeeActiveStepOnProgressTimeline(TimelineSteps.RECOVERY_METHOD);
 
     await this.assertSeeBackButton();
@@ -68,13 +69,15 @@ class ChooseRecoveryMethodPageAssert extends OnboardingCommonAssert {
     await ChooseRecoveryMethodPage.recoveryPhraseIcon.waitForDisplayed();
   }
 
-  async assertRecoveryMethodIsSelected(method: 'Recovery phrase' | 'Paper wallet') {
+  async assertRecoveryMethodIsSelected(method: 'Recovery phrase' | 'Paper wallet', isBtcWallet = false) {
     expect(await ChooseRecoveryMethodPage.recoveryPhraseRadioButton.getAttribute('data-state')).to.equal(
       method === 'Recovery phrase' ? 'checked' : 'unchecked'
     );
-    expect(await ChooseRecoveryMethodPage.paperWalletRadioButton.getAttribute('data-state')).to.equal(
-      method === 'Paper wallet' ? 'checked' : 'unchecked'
-    );
+    if (!isBtcWallet) {
+      expect(await ChooseRecoveryMethodPage.paperWalletRadioButton.getAttribute('data-state')).to.equal(
+        method === 'Paper wallet' ? 'checked' : 'unchecked'
+      );
+    }
   }
 }
 

@@ -4,19 +4,19 @@ Feature: Onboarding - Create wallet
   @LW-2443
   Scenario: Create Wallet - Mnemonic verification - fill all fields - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     Then "Next" button is enabled during onboarding process
 
   @LW-3212
   Scenario: Create Wallet - Mnemonic verification - all empty fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and not fill values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and not fill values for Cardano chain
     Then "Next" button is disabled during onboarding process
 
   @LW-3213
   Scenario: Create Wallet - Mnemonic verification - clear one of fields - next disabled
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     Then "Next" button is enabled during onboarding process
     And I clear one random field
     Then "Next" button is disabled during onboarding process
@@ -24,14 +24,14 @@ Feature: Onboarding - Create wallet
   @LW-2444
   Scenario: Create Wallet - Mnemonic verification - fill all fields - wrong mnemonic
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
   @LW-2445 @LW-10208 @Smoke @memory-snapshot
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and fill values
+    And I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
     When I click "Enter wallet" button
     Then I see LW homepage
     And "Pin the wallet extension" notification is displayed
@@ -76,7 +76,7 @@ Feature: Onboarding - Create wallet
   @LW-4543 @LW-4548
   Scenario Outline: Create wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     When I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
     Then "Wallet setup" page is displayed
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
@@ -129,7 +129,7 @@ Feature: Onboarding - Create wallet
   @LW-8500
   Scenario: Create Wallet - Mnemonic verification - incorrect word
     Given I click "Create" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Create" wallet flow and fill values for Cardano chain
     And I change one random field
     Then I see incorrect passphrase error displayed
     And "Next" button is disabled during onboarding process

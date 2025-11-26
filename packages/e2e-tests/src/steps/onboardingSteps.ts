@@ -37,6 +37,8 @@ import LocalStorageInitializer from '../fixture/localStorageInitializer';
 import { switchNetworkAndCloseDrawer } from '../utils/networkUtils';
 import SelectBlockchainPageAssert from '../assert/onboarding/SelectBlockchainPageAssert';
 import SelectBlockchainPage from '../elements/onboarding/SelectBlockchainPage';
+import BitcoinWarningModalAssert from '../assert/onboarding/BitcoinWarningModalAssert';
+import BitcoinWarningModal from '../elements/onboarding/BitcoinWarningModal';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -196,7 +198,7 @@ Given(/^I create new wallet and save wallet information$/, async () => {
   // issue LW-11288 - please remove when it will be fixed / check on CI is needed
   await browser.pause(1000);
   await OnboardingMainPage.createWalletButton.click();
-  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true);
+  await OnboardingWalletSetupPage.goToWalletSetupPage('Create', mnemonicWords, true, 'Cardano');
   await OnboardingWalletSetupPageAssert.assertSeeWalletSetupPage();
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
@@ -242,7 +244,8 @@ Given(/^I restore a wallet$/, async () => {
   await OnboardingWalletSetupPage.goToWalletSetupPage(
     'Restore',
     getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [],
-    true
+    true,
+    'Cardano'
   );
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
@@ -252,7 +255,12 @@ Given(/^I restore the "([^"]*)" wallet$/, async (walletName: string) => {
   await LocalStorageInitializer.initializeAppSettings(); // Set network
   await browser.refresh();
   await OnboardingMainPage.restoreWalletButton.click();
-  await OnboardingWalletSetupPage.goToWalletSetupPage('Restore', getTestWallet(walletName).mnemonic ?? [], true);
+  await OnboardingWalletSetupPage.goToWalletSetupPage(
+    'Restore',
+    getTestWallet(walletName).mnemonic ?? [],
+    true,
+    'Cardano'
+  );
   await OnboardingWalletSetupPage.clickEnterWalletButton();
   await TopNavigationAssert.assertLogoPresent();
 });
@@ -284,21 +292,32 @@ When(/^I restore previously changed mnemonic word$/, async () => {
 });
 
 Given(
-  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and (fill|not fill) values)?$/,
+  /^I go to "(Mnemonic verification|Wallet setup)" page(?: with wallet ([^"]*))? from "(Create|Restore)" wallet flow(?: and (fill|not fill) values)? for (Cardano|Bitcoin) chain$/,
   async (
     endPage: 'Mnemonic verification' | 'Wallet setup',
     walletName: string,
     flowType: 'Create' | 'Restore',
-    fillValues: 'fill' | 'not fill'
+    fillValues: 'fill' | 'not fill',
+    blockchain: 'Cardano' | 'Bitcoin'
   ) => {
     let mnemonicsToUse = mnemonicWords;
     if (walletName) mnemonicsToUse = getTestWallet(walletName).mnemonic ?? [];
     switch (endPage) {
       case 'Mnemonic verification':
-        await RecoveryPhrasePage.goToMnemonicVerificationPage(flowType, mnemonicsToUse, fillValues === 'fill');
+        await RecoveryPhrasePage.goToMnemonicVerificationPage(
+          flowType,
+          mnemonicsToUse,
+          fillValues === 'fill',
+          blockchain
+        );
         break;
       case 'Wallet setup':
-        await OnboardingWalletSetupPage.goToWalletSetupPage(flowType, mnemonicsToUse, fillValues === 'fill');
+        await OnboardingWalletSetupPage.goToWalletSetupPage(
+          flowType,
+          mnemonicsToUse,
+          fillValues === 'fill',
+          blockchain
+        );
         break;
       default:
         throw new Error(`Unsupported page name: ${endPage}`);
@@ -456,9 +475,12 @@ When(/^I saved test mnemonic for "([^"]*)" to clipboard$/, async (walletName: st
   await clipboard.write(mnemonic);
 });
 
-Then(/^"Choose recovery method" page is displayed on "(Create|Restore)" flow$/, async (flow: 'Create' | 'Restore') => {
-  await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage(flow);
-});
+Then(
+  /^"Choose recovery method" page is displayed on "(Create|Restore)" flow for (Cardano|Bitcoin) chain$/,
+  async (flow: 'Create' | 'Restore', chain: 'Cardano' | 'Bitcoin') => {
+    await ChooseRecoveryMethodPageAssert.assertSeeChooseRecoveryMethodPage(flow, false, chain === 'Bitcoin');
+  }
+);
 
 When(
   /^I select "(Recovery phrase|Paper wallet)" as a recovery method$/,
@@ -468,9 +490,9 @@ When(
 );
 
 Then(
-  /^"(Recovery phrase|Paper wallet)" is selected as a recovery method$/,
-  async (method: 'Recovery phrase' | 'Paper wallet') => {
-    await ChooseRecoveryMethodPageAssert.assertRecoveryMethodIsSelected(method);
+  /^"(Recovery phrase|Paper wallet)" is selected as a recovery method for (Cardano|Bitcoin) chain$/,
+  async (method: 'Recovery phrase' | 'Paper wallet', chain: 'Cardano' | 'Bitcoin') => {
+    await ChooseRecoveryMethodPageAssert.assertRecoveryMethodIsSelected(method, chain === 'Bitcoin');
   }
 );
 
@@ -578,3 +600,24 @@ Then(
     await SelectBlockchainPageAssert.assertSelectedBlockchain(blockchain);
   }
 );
+
+When(/^"Select a Blockchain" screen is displayed$/, async () => {
+  await SelectBlockchainPageAssert.assertSeeSelectBlockchainPage(false);
+});
+
+When(/^I see "Bitcoin warning" modal$/, async () => {
+  await BitcoinWarningModalAssert.assertSeeModal(true);
+});
+
+When(/^I click "(Cancel|Understood)" button on "Bitcoin warning" modal$/, async (button: 'Cancel' | 'Understood') => {
+  switch (button) {
+    case 'Cancel':
+      await BitcoinWarningModal.clickCancelButton();
+      break;
+    case 'Understood':
+      await BitcoinWarningModal.clickUnderstoodButton();
+      break;
+    default:
+      throw new Error(`Unsupported button: ${button}`);
+  }
+});
