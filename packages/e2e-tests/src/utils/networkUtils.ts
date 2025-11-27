@@ -1,6 +1,5 @@
 import MainLoader from '../elements/MainLoader';
 import Modal from '../elements/modal';
-import PrivacyPolicyUpdateBanner from '../elements/PrivacyPolicyUpdateBanner';
 import ToastMessage from '../elements/toastMessage';
 import MenuHeader from '../elements/menuHeader';
 import NetworkDrawer from '../elements/settings/NetworkDrawer';
@@ -12,8 +11,6 @@ export const waitUntilHdWalletSynced = async (): Promise<void> => {
   await MainLoader.waitUntilLoaderDisappears();
   await Modal.waitUntilSyncingModalDisappears();
   await ToastMessage.closeWalletSyncedToast();
-  await PrivacyPolicyUpdateBanner.closePrivacyPolicyUpdateBanner();
-  await Modal.confirmMultiAddressModal();
 };
 
 export const switchNetworkWithoutClosingDrawer = async (network: NetworkType): Promise<void> => {
@@ -31,4 +28,5 @@ export const switchNetworkAndCloseDrawer = async (network: NetworkType, mode: 'e
   await switchNetworkWithoutClosingDrawer(network);
   await waitUntilHdWalletSynced();
   await (mode === 'extended' ? NetworkDrawer.clickCloseDrawerButton() : NetworkDrawer.clickBackDrawerButton());
+  await Modal.confirmMultiAddressModal();
 };

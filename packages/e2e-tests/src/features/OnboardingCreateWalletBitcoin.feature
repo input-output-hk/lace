@@ -1,7 +1,7 @@
 @OnboardingCreateWalletBitcoin @Onboarding @Testnet @Mainnet
 Feature: Onboarding - Create Bitcoin wallet
 
-  @LW-13956 @Smoke
+  @LW-13956 @LW-13740 @Smoke
   Scenario: Create Bitcoin Wallet - Happy path
     Given I click "Create" button on wallet setup page
     And "Select a Blockchain" screen is displayed

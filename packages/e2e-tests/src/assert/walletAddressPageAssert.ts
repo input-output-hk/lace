@@ -173,11 +173,32 @@ class WalletAddressPageAssert {
     }
   }
 
+  async waitForWalletNameToBeNotEmpty() {
+    await browser.waitUntil(async () => (await WalletAddressPage.walletName.getText()) !== '', {
+      timeout: 3000,
+      timeoutMsg: 'failed while waiting for wallet name'
+    });
+  }
+
   async assertSeeWalletNameAndAddress(wallet: WalletRepositoryConfig, mode: 'extended' | 'popup') {
+    await this.waitForWalletNameToBeNotEmpty();
     expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
     const address = String(extensionUtils.isMainnet() ? wallet.accounts[0].mainnetAddress : wallet.accounts[0].address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
     expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+  }
+
+  async assertSeeBitcoinWalletNameAndAddress(wallet: WalletRepositoryConfig, addressShouldMatch: boolean) {
+    await this.waitForWalletNameToBeNotEmpty();
+    expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
+    const expectedAddress = String(
+      extensionUtils.isMainnet() ? wallet.bitCoinMainnetAddress : wallet.bitCoinTestnetAddress
+    );
+    if (addressShouldMatch) {
+      expect(await WalletAddressPage.walletAddress.getText()).to.equal(expectedAddress);
+    } else {
+      expect(await WalletAddressPage.walletAddress.getText()).to.not.equal(expectedAddress);
+    }
   }
 
   async assertSeeWalletNameAccountAndAddress(

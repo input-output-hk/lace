@@ -87,7 +87,7 @@ Feature: Add new wallet - Create wallet
     Then password value is hidden for "Password" input field
     And password value is hidden for "Confirm password" input field
 
-  @LW-9357 @memory-snapshot
+  @LW-9357 @LW-13744 @memory-snapshot
   Scenario: Extended-view - Multi-wallet - Create - Add new wallet - happy path
     Given I opened "Create" flow via "Add new wallet" feature
     When I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
