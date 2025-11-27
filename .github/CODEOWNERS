@@ -4,14 +4,14 @@ yarn.lock               @input-output-hk/lace-core
 
 # Packages Teams
 
-/packages/bitcoin/      @input-output-hk/lace-core
-/packages/cardano/      @input-output-hk/lace-core
-/packages/common/       @input-output-hk/lace-core
-/packages/core/         @input-output-hk/lace-core
-/packages/e2e-tests/    @input-output-hk/xsy-lace-test-engineers
-/packages/nami/         @input-output-hk/lace-core
-/packages/staking/      @input-output-hk/lace-core
-/packages/translation/  @input-output-hk/lace-core
+/v1/packages/bitcoin/      @input-output-hk/lace-core
+/v1/packages/cardano/      @input-output-hk/lace-core
+/v1/packages/common/       @input-output-hk/lace-core
+/v1/packages/core/         @input-output-hk/lace-core
+/v1/packages/e2e-tests/    @input-output-hk/xsy-lace-test-engineers
+/v1/packages/nami/         @input-output-hk/lace-core
+/v1/packages/staking/      @input-output-hk/lace-core
+/v1/packages/translation/  @input-output-hk/lace-core
 
 # Apps
-/apps/                  @input-output-hk/lace-core
+/v1/apps/                  @input-output-hk/lace-core

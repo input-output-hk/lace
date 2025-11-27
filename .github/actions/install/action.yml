@@ -16,7 +16,10 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version-file: '.nvmrc'
-        cache: 'yarn'
+
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
 
     - name: Configure Yarn to use GitHub Packages
       run: |
@@ -46,14 +49,19 @@ runs:
         path: |
           node_modules
           **/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+        key: ${{ runner.os }}-${{ hashFiles('yarn.lock', 'v1/yarn.lock') }}
 
-    - name: Install dependencies
+    - name: Install root dependencies
       run: yarn install --immutable --inline-builds
       shell: bash
 
+    - name: Install v1 dependencies
+      run: yarn install --immutable --inline-builds
+      working-directory: ./v1
+      shell: bash
+
     - name: Decrypt test data
-      working-directory: ./packages/e2e-tests
+      working-directory: ./v1/packages/e2e-tests
       run: ./decrypt_secret.sh
       shell: bash
       env:
