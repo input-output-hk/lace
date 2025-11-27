@@ -25,7 +25,7 @@ class NotificationDetails {
     return $(this.NOTIFICATION_TITLE);
   }
 
-  get notificationPublisher(): ChainablePromiseElement<WebdriverIO.Element> {
+  get notificationTopicName(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NOTIFICATION_TOPIC_NAME);
   }
 
@@ -52,8 +52,8 @@ class NotificationDetails {
     return await this.notificationTitle.getText();
   }
 
-  async getPublisher(): Promise<string> {
-    return await this.notificationPublisher.getText();
+  async getTopicName(): Promise<string> {
+    return await this.notificationTopicName.getText();
   }
 
   async getBody(): Promise<string> {

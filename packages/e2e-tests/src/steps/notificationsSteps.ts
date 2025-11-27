@@ -169,7 +169,7 @@ Then(
     await NotificationDetailsAssert.assertSeeNotificationHeader(mode);
     await NotificationDetailsAssert.assertNotificationDetailsContent(
       DYNAMIC_NOTIFICATION.message.title,
-      DYNAMIC_NOTIFICATION.message.publisher,
+      TEST_TOPICS[1].name,
       DYNAMIC_NOTIFICATION.message.body
     );
   }
