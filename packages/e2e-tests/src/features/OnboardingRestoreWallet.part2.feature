@@ -120,3 +120,30 @@ Feature: Onboarding - Restore wallet
     When I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
     Then "Choose recovery method" page is displayed on "Restore" flow for Cardano chain
+
+  @LW-13739
+  Scenario: Extended-view - Multi-wallet - Restore/Create Cardano Wallet - Use same recovery phrase
+    Given I click "Restore" button on wallet setup page
+    And I select "Bitcoin" blockchain on the "Select a blockchain" page
+    And I click "Next" button during wallet setup
+    And I click "Understood" button on "Bitcoin warning" modal
+    And I click "Next" button during wallet setup
+    And I enter 24 correct mnemonic words on "Mnemonic verification" page
+    And I click "Next" button during wallet setup
+    And I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Enter wallet" button
+    Then I see LW homepage
+    When I opened "Create" flow via "Add new wallet" feature
+    And I select "Cardano" blockchain on the "Select a blockchain" page
+    And I click "Next" button during wallet setup
+    When I click "Next" button during wallet setup
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I enter password: "N_8J@bne87A" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
+    When I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Enter wallet" button
+    Then I see LW homepage
+    And I switch network to: "Preprod" in extended mode
+    When I click "Receive" button on page header
+    Then I see Cardano wallet name and address for wallet "TestAutomationWallet" in the Receive drawer

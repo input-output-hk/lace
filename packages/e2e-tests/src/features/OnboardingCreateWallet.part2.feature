@@ -28,7 +28,7 @@ Feature: Onboarding - Create wallet
     When I add characters "qwe" in word 7
     Then "Next" button is disabled during onboarding process
 
-  @LW-2445 @LW-10208 @Smoke @memory-snapshot
+  @LW-2445 @LW-10208 @LW-13740 @Smoke @memory-snapshot
   Scenario: Create Wallet - All done page - happy path
     Given I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
