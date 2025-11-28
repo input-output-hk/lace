@@ -163,3 +163,22 @@ When(/^I see tooltip for "Advanced mode" toggle info icon$/, async () => {
 Then(/^I see "([^"]*)" name on main address card$/, async (name: string) => {
   await walletAddressPageAssert.assertSeeWalletName(name);
 });
+
+When(
+  /^I see (Cardano|Bitcoin) wallet name (and|but no) address for wallet "([^"]*)" in the Receive drawer$/,
+  async (chain: 'Cardano' | 'Bitcoin', addressShouldMatch: 'and' | 'but no', walletName: string) => {
+    switch (chain) {
+      case 'Bitcoin':
+        await walletAddressPageAssert.assertSeeBitcoinWalletNameAndAddress(
+          getTestWallet(walletName),
+          addressShouldMatch === 'and'
+        );
+        break;
+      case 'Cardano':
+        await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(walletName), 'extended');
+        break;
+      default:
+        throw new Error(`Unsupported chain: ${chain}`);
+    }
+  }
+);

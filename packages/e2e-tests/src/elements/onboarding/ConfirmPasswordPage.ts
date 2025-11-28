@@ -1,11 +1,11 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import CommonOnboardingElements from './commonOnboardingElements';
 import type { ChainablePromiseElement } from 'webdriverio';
 import { setInputFieldValue } from '../../utils/inputFieldUtils';
 
 class ConfirmPasswordPage extends CommonOnboardingElements {
-  private PASSWORD_INPUT = 'input[type="password"]';
-  private PASSWORD_ERROR = '[data-testid="wallet-setup-step-content"] form span';
+  private PASSWORD_INPUT = '[data-testid="wallet-setup-enter-password-input"]';
+  private PASSWORD_ERROR = '[data-testid="wallet-setup-enter-password-input-error"]';
 
   get passwordInput(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.PASSWORD_INPUT);

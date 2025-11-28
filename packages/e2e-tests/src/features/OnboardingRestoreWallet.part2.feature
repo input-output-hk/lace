@@ -137,10 +137,10 @@ Feature: Onboarding - Restore wallet
     And I select "Cardano" blockchain on the "Select a blockchain" page
     And I click "Next" button during wallet setup
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    When I click "Use same recovery phrase" button
-    When I enter password: "N_8J@bne87A" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I enter password: "N_8J@bne87A" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     When I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
     Then I see LW homepage

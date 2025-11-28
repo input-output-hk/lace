@@ -173,7 +173,7 @@ class WalletAddressPageAssert {
     }
   }
 
-  async waitForWalletNameToBeNotEmpty() {
+  async waitUntilWalletNameIsNotEmpty() {
     await browser.waitUntil(async () => (await WalletAddressPage.walletName.getText()) !== '', {
       timeout: 3000,
       timeoutMsg: 'failed while waiting for wallet name'
@@ -181,7 +181,7 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeWalletNameAndAddress(wallet: WalletRepositoryConfig, mode: 'extended' | 'popup') {
-    await this.waitForWalletNameToBeNotEmpty();
+    await this.waitUntilWalletNameIsNotEmpty();
     expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
     const address = String(extensionUtils.isMainnet() ? wallet.accounts[0].mainnetAddress : wallet.accounts[0].address);
     const expectedAddress = mode === 'extended' ? address : `${address.slice(0, 7)}...${address.slice(-8)}`;
@@ -189,7 +189,7 @@ class WalletAddressPageAssert {
   }
 
   async assertSeeBitcoinWalletNameAndAddress(wallet: WalletRepositoryConfig, addressShouldMatch: boolean) {
-    await this.waitForWalletNameToBeNotEmpty();
+    await this.waitUntilWalletNameIsNotEmpty();
     expect(await WalletAddressPage.walletName.getText()).to.equal(wallet.name);
     const expectedAddress = String(
       extensionUtils.isMainnet() ? wallet.bitCoinMainnetAddress : wallet.bitCoinTestnetAddress

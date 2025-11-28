@@ -110,6 +110,10 @@ inputs:
       description: ' ADA handle cache lifetime'
       required: false
       default: 600000
+  NOTIFICATION_CENTER_USE_TEST_API:
+    description: 'Use test API for Notification Center instead of the production PubNub service'
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -185,4 +189,5 @@ runs:
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
+        NOTIFICATION_CENTER_USE_TEST_API: ${{ inputs.NOTIFICATION_CENTER_USE_TEST_API }}
       run: yarn browser build

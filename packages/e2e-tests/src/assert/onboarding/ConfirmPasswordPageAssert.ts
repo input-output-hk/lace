@@ -25,13 +25,8 @@ class ConfirmPasswordPageAssert extends OnboardingCommonAssert {
     );
   }
 
-  async assertConfirmButtonIsEnabled() {
-    await ConfirmPasswordPage.nextButton.waitForClickable();
-    expect(await ConfirmPasswordPage.nextButton.isEnabled()).to.be.true;
-  }
-
-  async assertConfirmButtonIsDisabled() {
-    expect(await ConfirmPasswordPage.nextButton.isEnabled()).to.be.false;
+  async assertConfirmButtonIsEnabled(shouldBeEnabled: boolean) {
+    await ConfirmPasswordPage.nextButton.waitForEnabled({ reverse: !shouldBeEnabled });
   }
 
   async assertSeePasswordError() {

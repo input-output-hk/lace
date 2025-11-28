@@ -13,11 +13,11 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "Choose recovery method" page is displayed on "Create" flow for Bitcoin chain
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    When I click "Use same recovery phrase" button
-    Then "Confirm your password" screen is displayed for wallet "MultiWallet2"
-    When I enter valid password for wallet "MultiWallet2" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    Then "Confirm your password" page is displayed for wallet "MultiWallet2"
+    When I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     Then "Wallet setup" page is displayed
     When I enter wallet name: "MultiWallet2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
@@ -34,8 +34,8 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "Choose recovery method" page is displayed on "Create" flow for Bitcoin chain
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    When I click "Create a new one" button
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Create a new one" button on "Reuse your Recovery Phrase" page
     Then "Mnemonic writedown" page is displayed with 24 words
     When I save mnemonic words
     And I click "Next" button during wallet setup
@@ -59,14 +59,14 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "Choose recovery method" page is displayed on "Create" flow for Bitcoin chain
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    When I click "Use same recovery phrase" button
-    Then "Confirm your password" screen is displayed for wallet "TwelveWordsMnemonic"
-    When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    Then "Confirm your password" page is displayed for wallet "TwelveWordsMnemonic"
+    When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     Then I see incompatible recovery phrase error page
     When I click "Select another wallet" button on incompatible recovery phrase error page
-    Then "Reuse your Recovery Phrase?" screen is displayed
+    Then "Reuse your Recovery Phrase" page is displayed
 
   @LW-13747
   Scenario: Extended-view - Multi-wallet - Create Bitcoin Wallet - Only 24 words allowed - Create new recovery phrase
@@ -78,11 +78,11 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "Choose recovery method" page is displayed on "Create" flow for Bitcoin chain
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    When I click "Use same recovery phrase" button
-    Then "Confirm your password" screen is displayed for wallet "TwelveWordsMnemonic"
-    When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    Then "Confirm your password" page is displayed for wallet "TwelveWordsMnemonic"
+    When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     Then I see incompatible recovery phrase error page
     When I click "Create a new one" button on incompatible recovery phrase error page
     Then "Mnemonic writedown" page is displayed with 24 words
@@ -105,29 +105,29 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "Choose recovery method" page is displayed on "Create" flow for Bitcoin chain
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
-    Then "Reuse your Recovery Phrase?" screen is displayed
-    And "MultiWallet2" wallet name is selected on "Reuse your Recovery Phrase" screen
-    When I select "MultiWallet1" wallet name on "Reuse your Recovery Phrase" screen
-    Then "MultiWallet1" wallet name is selected on "Reuse your Recovery Phrase" screen
-    When I select "MultiWallet2" wallet name on "Reuse your Recovery Phrase" screen
-    Then "MultiWallet2" wallet name is selected on "Reuse your Recovery Phrase" screen
-    When I click "Use same recovery phrase" button
-    Then "Confirm your password" screen is displayed for wallet "MultiWallet2"
-    When I enter invalid password for wallet "MultiWallet2" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
-    Then I see password error on "Confirm your password" screen
-    And "Confirm" button is disabled on "Confirm your password" screen
+    Then "Reuse your Recovery Phrase" page is displayed
+    And "MultiWallet2" wallet name is selected on "Reuse your Recovery Phrase" page
+    When I select "MultiWallet1" wallet name on "Reuse your Recovery Phrase" page
+    Then "MultiWallet1" wallet name is selected on "Reuse your Recovery Phrase" page
+    When I select "MultiWallet2" wallet name on "Reuse your Recovery Phrase" page
+    Then "MultiWallet2" wallet name is selected on "Reuse your Recovery Phrase" page
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    Then "Confirm your password" page is displayed for wallet "MultiWallet2"
+    When I enter invalid password for wallet "MultiWallet2" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
+    Then I see password error on "Confirm your password" page
+    And "Confirm" button is disabled on "Confirm your password" page
 
   @LW-13741
-  Scenario: Extended-view - Multi-wallet - Trying to reuse the same mnemonic twice
+  Scenario: Extended-view - Multi-wallet - Trying to reuse the same mnemonic
     When I opened "Create" flow via "Add new wallet" feature
     And I select "Bitcoin" blockchain on the "Select a blockchain" page
     And I click "Next" button during wallet setup
     And I click "Understood" button on "Bitcoin warning" modal
     And I click "Next" button during wallet setup
-    And I click "Use same recovery phrase" button
-    And I enter valid password for wallet "MultiWallet2" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    And I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    And I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     And I enter wallet name: "MultiWallet2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
     Then I see LW homepage
@@ -139,9 +139,9 @@ Feature: Add new wallet - Create Bitcoin wallet
     And I click "Next" button during wallet setup
     And I click "Understood" button on "Bitcoin warning" modal
     And I click "Next" button during wallet setup
-    And I click "Use same recovery phrase" button
-    And I enter valid password for wallet "MultiWallet2" on "Confirm your password" screen
-    And I click "Confirm" button on "Confirm your password" screen
+    And I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    And I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
     And I enter wallet name: "MultiWallet2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
     And I click "Enter wallet" button
     Then I see LW homepage

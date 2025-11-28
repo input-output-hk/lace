@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* global WebdriverIO */
 import CommonOnboardingElements from './commonOnboardingElements';
 import type { ChainablePromiseElement } from 'webdriverio';
 

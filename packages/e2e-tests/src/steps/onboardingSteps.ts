@@ -45,7 +45,6 @@ import ConfirmPasswordPageAssert from '../assert/onboarding/ConfirmPasswordPageA
 import ConfirmPasswordPage from '../elements/onboarding/ConfirmPasswordPage';
 import IncompatibleRecoveryPhraseErrorPageAssert from '../assert/onboarding/IncompatibleRecoveryPhraseErrorPageAssert';
 import IncompatibleRecoveryPhraseErrorPage from '../elements/onboarding/IncompatibleRecoveryPhraseErrorPage';
-import walletAddressPageAssert from '../assert/walletAddressPageAssert';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -608,7 +607,7 @@ Then(
   }
 );
 
-When(/^"Select a Blockchain" screen is displayed$/, async () => {
+When(/^"Select a Blockchain" page is displayed$/, async () => {
   await SelectBlockchainPageAssert.assertSeeSelectBlockchainPage(false);
 });
 
@@ -629,56 +628,54 @@ When(/^I click "(Cancel|Understood)" button on "Bitcoin warning" modal$/, async 
   }
 });
 
-Then(/^"Reuse your Recovery Phrase\?" screen is displayed$/, async () => {
+Then(/^"Reuse your Recovery Phrase" page is displayed$/, async () => {
   await ReuseRecoveryPhrasePageAssert.assertSeeReuseRecoveryPhrasePage();
 });
 
-When(/^I click "Use same recovery phrase" button$/, async () => {
+When(/^I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page$/, async () => {
   await ReuseRecoveryPhrasePage.clickUseSamePhraseButton();
 });
 
-When(/^I click "Create a new one" button$/, async () => {
+When(/^I click "Create a new one" button on "Reuse your Recovery Phrase" page$/, async () => {
   await ReuseRecoveryPhrasePage.clickCreateNewButton();
 });
 
-When(/^I select "([^"]*)" wallet name on "Reuse your Recovery Phrase" screen$/, async (walletName: string) => {
+When(/^I select "([^"]*)" wallet name on "Reuse your Recovery Phrase" page$/, async (walletName: string) => {
   await ReuseRecoveryPhrasePage.selectWallet(walletName);
 });
 
-Then(/^"([^"]*)" wallet name is selected on "Reuse your Recovery Phrase" screen$/, async (walletName: string) => {
+Then(/^"([^"]*)" wallet name is selected on "Reuse your Recovery Phrase" page$/, async (walletName: string) => {
   await ReuseRecoveryPhrasePageAssert.assertWalletIsSelected(walletName);
 });
 
-Then(/^"Confirm your password" screen is displayed for wallet "([^"]*)"$/, async (walletName: string) => {
+Then(/^"Confirm your password" page is displayed for wallet "([^"]*)"$/, async (walletName: string) => {
   await ConfirmPasswordPageAssert.assertSeeConfirmPasswordPage(walletName);
 });
 
 When(
-  /^I enter (valid|invalid) password for wallet "([^"]*)" on "Confirm your password" screen$/,
+  /^I enter (valid|invalid) password for wallet "([^"]*)" on "Confirm your password" page$/,
   async (password: 'valid' | 'invalid', walletName: string) => {
     const expectedWalletPassword = password === 'valid' ? getTestWallet(walletName).password ?? '' : 'invalidPassword';
     await ConfirmPasswordPage.setPasswordInput(expectedWalletPassword);
   }
 );
 
-When(/^I enter password: "([^"]*)" on "Confirm your password" screen$/, async (password: string) => {
+When(/^I enter password: "([^"]*)" on "Confirm your password" page$/, async (password: string) => {
   await ConfirmPasswordPage.setPasswordInput(password);
 });
 
-When(/^I click "Confirm" button on "Confirm your password" screen$/, async () => {
+When(/^I click "Confirm" button on "Confirm your password" page$/, async () => {
   await ConfirmPasswordPage.clickConfirmButton();
 });
 
-Then(/^I see password error on "Confirm your password" screen$/, async () => {
+Then(/^I see password error on "Confirm your password" page$/, async () => {
   await ConfirmPasswordPageAssert.assertSeePasswordError();
 });
 
 Then(
-  /^"Confirm" button is (enabled|disabled) on "Confirm your password" screen$/,
+  /^"Confirm" button is (enabled|disabled) on "Confirm your password" page$/,
   async (state: 'enabled' | 'disabled') => {
-    await (state === 'enabled'
-      ? ConfirmPasswordPageAssert.assertConfirmButtonIsEnabled()
-      : ConfirmPasswordPageAssert.assertConfirmButtonIsDisabled());
+    await ConfirmPasswordPageAssert.assertConfirmButtonIsEnabled(state === 'enabled');
   }
 );
 
@@ -693,22 +690,3 @@ When(/^I click "Select another wallet" button on incompatible recovery phrase er
 When(/^I click "Create a new one" button on incompatible recovery phrase error page$/, async () => {
   await IncompatibleRecoveryPhraseErrorPage.clickCreateNewButton();
 });
-
-When(
-  /^I see (Cardano|Bitcoin) wallet name (and|but no) address for wallet "([^"]*)" in the Receive drawer$/,
-  async (chain: 'Cardano' | 'Bitcoin', addressShouldMatch: 'and' | 'but no', walletName: string) => {
-    switch (chain) {
-      case 'Bitcoin':
-        await walletAddressPageAssert.assertSeeBitcoinWalletNameAndAddress(
-          getTestWallet(walletName),
-          addressShouldMatch === 'and'
-        );
-        break;
-      case 'Cardano':
-        await walletAddressPageAssert.assertSeeWalletNameAndAddress(getTestWallet(walletName), 'extended');
-        break;
-      default:
-        throw new Error(`Unsupported chain: ${chain}`);
-    }
-  }
-);

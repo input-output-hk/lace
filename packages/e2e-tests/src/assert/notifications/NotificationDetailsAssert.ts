@@ -17,12 +17,12 @@ class NotificationDetailsAssert {
     expect(await NotificationDetails.viewAllButton.getText()).to.equal(await t(translationKey));
   }
 
-  async assertNotificationDetailsContent(expectedTitle: string, expectedPublisher: string, expectedBody: string) {
+  async assertNotificationDetailsContent(expectedTitle: string, expectedTopicName: string, expectedBody: string) {
     const actualTitle = await NotificationDetails.getTitle();
     expect(actualTitle).to.equal(expectedTitle);
 
-    const actualPublisher = await NotificationDetails.getPublisher();
-    expect(actualPublisher).to.equal(expectedPublisher);
+    const actualTopicName = await NotificationDetails.getTopicName();
+    expect(actualTopicName).to.equal(expectedTopicName);
 
     const actualBody = await NotificationDetails.getBody();
     expect(actualBody).to.equal(expectedBody);
