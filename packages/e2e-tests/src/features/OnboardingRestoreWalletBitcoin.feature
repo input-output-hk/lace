@@ -4,7 +4,7 @@ Feature: Onboarding - Restore Bitcoin wallet
   @LW-13961 @Smoke
   Scenario: Restore Bitcoin Wallet - Happy path
     Given I click "Restore" button on wallet setup page
-    And "Select a Blockchain" screen is displayed
+    And "Select a Blockchain" page is displayed
     And I select "Bitcoin" blockchain on the "Select a blockchain" page
     Then "Bitcoin" blockchain is selected on the "Select a blockchain" page
     And I click "Next" button during wallet setup
@@ -25,7 +25,7 @@ Feature: Onboarding - Restore Bitcoin wallet
   @LW-13962
   Scenario: Restore Bitcoin Wallet - Select Bitcoin blockchain
     Given I click "Restore" button on wallet setup page
-    When "Select a Blockchain" screen is displayed
+    When "Select a Blockchain" page is displayed
     Then "Cardano" blockchain is selected on the "Select a blockchain" page
     When I select "Bitcoin" blockchain on the "Select a blockchain" page
     Then "Bitcoin" blockchain is selected on the "Select a blockchain" page
@@ -34,18 +34,18 @@ Feature: Onboarding - Restore Bitcoin wallet
   @LW-13963
   Scenario: Restore Bitcoin Wallet - Bitcoin warning modal - Cancel button
     Given I click "Restore" button on wallet setup page
-    When "Select a Blockchain" screen is displayed
+    When "Select a Blockchain" page is displayed
     And I select "Bitcoin" blockchain on the "Select a blockchain" page
     And I click "Next" button during wallet setup
     When I see "Bitcoin warning" modal
     And I click "Cancel" button on "Bitcoin warning" modal
-    Then "Select a Blockchain" screen is displayed
+    Then "Select a Blockchain" page is displayed
     And "Bitcoin" blockchain is selected on the "Select a blockchain" page
 
   @LW-13964
   Scenario: Restore Bitcoin Wallet - Bitcoin warning modal - Understood button
     Given I click "Restore" button on wallet setup page
-    When "Select a Blockchain" screen is displayed
+    When "Select a Blockchain" page is displayed
     And I select "Bitcoin" blockchain on the "Select a blockchain" page
     And I click "Next" button during wallet setup
     When I see "Bitcoin warning" modal
@@ -60,6 +60,6 @@ Feature: Onboarding - Restore Bitcoin wallet
     And I click "Understood" button on "Bitcoin warning" modal
     Then "Choose recovery method" page is displayed on "Restore" flow for Bitcoin chain
     When I click "Back" button during wallet setup
-    Then "Select a Blockchain" screen is displayed
+    Then "Select a Blockchain" page is displayed
     And "Bitcoin" blockchain is selected on the "Select a blockchain" page
 

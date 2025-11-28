@@ -165,7 +165,7 @@ Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
-Before({ tags: '@OwnTags-Extended' }, async () => {
+Before({ tags: '@OwnTags-Extended or @AddNewWalletCreateBitcoin' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
@@ -271,7 +271,9 @@ Before(
 );
 
 Before(
-  { tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet' },
+  {
+    tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet'
+  },
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();

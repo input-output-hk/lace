@@ -39,6 +39,12 @@ import SelectBlockchainPageAssert from '../assert/onboarding/SelectBlockchainPag
 import SelectBlockchainPage from '../elements/onboarding/SelectBlockchainPage';
 import BitcoinWarningModalAssert from '../assert/onboarding/BitcoinWarningModalAssert';
 import BitcoinWarningModal from '../elements/onboarding/BitcoinWarningModal';
+import ReuseRecoveryPhrasePageAssert from '../assert/onboarding/ReuseRecoveryPhrasePageAssert';
+import ReuseRecoveryPhrasePage from '../elements/onboarding/ReuseRecoveryPhrasePage';
+import ConfirmPasswordPageAssert from '../assert/onboarding/ConfirmPasswordPageAssert';
+import ConfirmPasswordPage from '../elements/onboarding/ConfirmPasswordPage';
+import IncompatibleRecoveryPhraseErrorPageAssert from '../assert/onboarding/IncompatibleRecoveryPhraseErrorPageAssert';
+import IncompatibleRecoveryPhraseErrorPage from '../elements/onboarding/IncompatibleRecoveryPhraseErrorPage';
 
 const mnemonicWords: string[] = getTestWallet(TestWalletName.TestAutomationWallet).mnemonic ?? [];
 const invalidMnemonicWords: string[] = getTestWallet(TestWalletName.InvalidMnemonic).mnemonic ?? [];
@@ -601,7 +607,7 @@ Then(
   }
 );
 
-When(/^"Select a Blockchain" screen is displayed$/, async () => {
+When(/^"Select a Blockchain" page is displayed$/, async () => {
   await SelectBlockchainPageAssert.assertSeeSelectBlockchainPage(false);
 });
 
@@ -620,4 +626,67 @@ When(/^I click "(Cancel|Understood)" button on "Bitcoin warning" modal$/, async 
     default:
       throw new Error(`Unsupported button: ${button}`);
   }
+});
+
+Then(/^"Reuse your Recovery Phrase" page is displayed$/, async () => {
+  await ReuseRecoveryPhrasePageAssert.assertSeeReuseRecoveryPhrasePage();
+});
+
+When(/^I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page$/, async () => {
+  await ReuseRecoveryPhrasePage.clickUseSamePhraseButton();
+});
+
+When(/^I click "Create a new one" button on "Reuse your Recovery Phrase" page$/, async () => {
+  await ReuseRecoveryPhrasePage.clickCreateNewButton();
+});
+
+When(/^I select "([^"]*)" wallet name on "Reuse your Recovery Phrase" page$/, async (walletName: string) => {
+  await ReuseRecoveryPhrasePage.selectWallet(walletName);
+});
+
+Then(/^"([^"]*)" wallet name is selected on "Reuse your Recovery Phrase" page$/, async (walletName: string) => {
+  await ReuseRecoveryPhrasePageAssert.assertWalletIsSelected(walletName);
+});
+
+Then(/^"Confirm your password" page is displayed for wallet "([^"]*)"$/, async (walletName: string) => {
+  await ConfirmPasswordPageAssert.assertSeeConfirmPasswordPage(walletName);
+});
+
+When(
+  /^I enter (valid|invalid) password for wallet "([^"]*)" on "Confirm your password" page$/,
+  async (password: 'valid' | 'invalid', walletName: string) => {
+    const expectedWalletPassword = password === 'valid' ? getTestWallet(walletName).password ?? '' : 'invalidPassword';
+    await ConfirmPasswordPage.setPasswordInput(expectedWalletPassword);
+  }
+);
+
+When(/^I enter password: "([^"]*)" on "Confirm your password" page$/, async (password: string) => {
+  await ConfirmPasswordPage.setPasswordInput(password);
+});
+
+When(/^I click "Confirm" button on "Confirm your password" page$/, async () => {
+  await ConfirmPasswordPage.clickConfirmButton();
+});
+
+Then(/^I see password error on "Confirm your password" page$/, async () => {
+  await ConfirmPasswordPageAssert.assertSeePasswordError();
+});
+
+Then(
+  /^"Confirm" button is (enabled|disabled) on "Confirm your password" page$/,
+  async (state: 'enabled' | 'disabled') => {
+    await ConfirmPasswordPageAssert.assertConfirmButtonIsEnabled(state === 'enabled');
+  }
+);
+
+Then(/^I see incompatible recovery phrase error page$/, async () => {
+  await IncompatibleRecoveryPhraseErrorPageAssert.assertSeeIncompatibleRecoveryPhraseErrorPage();
+});
+
+When(/^I click "Select another wallet" button on incompatible recovery phrase error page$/, async () => {
+  await IncompatibleRecoveryPhraseErrorPage.clickSelectAnotherWalletButton();
+});
+
+When(/^I click "Create a new one" button on incompatible recovery phrase error page$/, async () => {
+  await IncompatibleRecoveryPhraseErrorPage.clickCreateNewButton();
 });
