@@ -27,6 +27,7 @@ const onboardingActions = {
     PIN_EXTENSION_CLICK: makeOnboardingEvent('lace main view | pin the wallet extension | click')
   },
   create: {
+    CHOSE_BLOCKCHAIN_CLICK: makeOnboardingCreateEvent('select a blockchain | next | click'),
     CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | recovery phrase | click'),
     CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | paper wallet | click'),
     CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingCreateEvent('choose mode | next | click'),
@@ -63,6 +64,7 @@ const onboardingActions = {
   },
   restore: {
     WALLET_SETUP_PAGEVIEW: makePaperWalletOnboardingCreateEvent('step: wallet info | pageview'),
+    CHOSE_BLOCKCHAIN_CLICK: makeOnboardingRestoreEvent('select a blockchain | next | click'),
     CHOOSE_RECOVERY_MODE_MNEMONIC_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | recovery phrase | click'),
     CHOOSE_RECOVERY_MODE_PAPER_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | paper wallet | click'),
     CHOOSE_RECOVERY_MODE_NEXT_CLICK: makePaperWalletOnboardingRestoreEvent('choose mode | next | click'),
