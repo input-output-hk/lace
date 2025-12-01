@@ -248,6 +248,7 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
+          PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
 
   release-firefox-pkg:
     name: Release Firefox package
@@ -338,6 +339,7 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
+          PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
 
   build:
     name: Build Lace for E2E Tests
@@ -364,6 +366,7 @@ jobs:
           SENTRY_PROJECT: ${{ startsWith(github.ref, 'refs/heads/release') && vars.SENTRY_PROJECT || ''}}
           SENTRY_ENVIRONMENT: 'smoke-tests'
           WALLET_POLLING_INTERVAL_IN_SEC: 5
+          PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
