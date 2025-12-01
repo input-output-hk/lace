@@ -2,6 +2,8 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
+const DIST_LOCATION = '../../../dist';
+
 const edgeConfig = {
   capabilities: [
     {
@@ -18,7 +20,7 @@ const edgeConfig = {
           '--enable-automation',
           '--no-first-run',
           '--no-default-browser-check',
-          `--load-extension=${import.meta.dirname}/../../apps/browser-extension-wallet/dist`,
+          `--load-extension=${import.meta.dirname}/${DIST_LOCATION}`,
           '--allow-insecure-localhost',
           '--window-size=1920,1080',
           '--allow-file-access-from-files',
