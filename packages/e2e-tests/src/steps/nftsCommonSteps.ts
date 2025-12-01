@@ -106,6 +106,7 @@ Given(
         walletToLoad = mode === 'extended' ? getNonActiveNftWalletName() : getNonActiveNft2WalletName();
       }
       await localStorageInitializer.reInitializeWallet(walletToLoad);
+      await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
       if (mode === 'popup') await popupView.visit();
       await topNavigationAssert.assertWalletIsInSyncedStatus();
       await visit('NFTs', mode);
@@ -152,6 +153,7 @@ When(/^I open NFT receiving wallet in (popup|extended) mode$/, async (mode: 'ext
 When(/^I open NFT receiving HD wallet$/, async () => {
   const walletToLoad = getNonActiveNftHdWalletName();
   await localStorageInitializer.reInitializeWallet(walletToLoad);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 When(/^I save all NFTs that I have$/, async () => {
