@@ -65,6 +65,7 @@ class LocalStorageInitializer {
     await extendedView.visit();
     await this.initialiseBasicLocalStorageData(walletName);
     await addAndActivateWalletsInRepository([walletName as TestWalletName]);
+    await this.initializeShowMultiAddressDiscoveryModal(false);
     await browser.refresh();
     await closeAllTabsExceptOriginalOne();
   };
