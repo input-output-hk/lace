@@ -1,4 +1,4 @@
-.PHONY: build-dev-v1-app build-dev-lmp-app build-prod-v1-app build-prod-lmp-app init-submodules install-dependencies create-dot-env setup build-prod build-dev build-bundle
+.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app init-submodules install-dependencies create-dot-env setup build-prod build-dev build-bundle build-prod-firefox build-dev-firefox
 
 # Reusable functions
 define get-extension-id
@@ -6,13 +6,13 @@ $(shell cat v1/apps/browser-extension-wallet/.env.defaults | grep LACE_EXTENSION
 endef
 
 define build-v1-app
-	@echo "🔨 Building Lace v1 ($(1))..."
+	@echo "🔨 Building Lace v1 (env=$(1), browser=$(2))..."
 	bash -c 'source $$NVM_DIR/nvm.sh && cd v1 && (nvm use || true) && EXCLUDE_BROWSER=true yarn build && \
 		cd apps/browser-extension-wallet && \
 		yarn cleanup:dist && \
-		$(2)WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw && \
-		$(2)WEBPACK_PUBLIC_PATH=/app/ yarn build:app && \
-		$(2)WEBPACK_PUBLIC_PATH=/app/ yarn build:cs'
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw && \
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/app/ yarn build:app && \
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/app/ yarn build:cs'
 	@echo "✅ Built to ./v1/apps/browser-extension-wallet/dist"
 endef
 
@@ -47,14 +47,20 @@ setup: init-submodules install-dependencies create-dot-env
 
 # Development builds
 build-dev-v1-app:
-	$(call build-v1-app,development,WEBPACK_ENV=dev )
+	$(call build-v1-app,dev,chrome)
+
+build-dev-v1-app-firefox:
+	$(call build-v1-app,dev,firefox)
 
 build-dev-lmp-app:
 	$(call build-lmp-app,development,build:dev:app,build:dev:sw)
 
 # Production builds
 build-prod-v1-app:
-	$(call build-v1-app,production,)
+	$(call build-v1-app,prod,chrome)
+
+build-prod-v1-app-firefox:
+	$(call build-v1-app,prod,firefox)
 
 build-prod-lmp-app:
 	$(call build-lmp-app,production,build:app,build:sw)
@@ -64,9 +70,16 @@ build-bundle:
 	yarn build:bundle
 	@echo "✅ Bundle built"
 
-# Full builds
+# Full builds (Chrome)
 build-prod: build-prod-lmp-app build-prod-v1-app build-bundle
-	@echo "✅ Production build complete"
+	@echo "✅ Production build complete (Chrome)"
 
 build-dev: build-dev-lmp-app build-dev-v1-app build-bundle
-	@echo "✅ Development build complete"
+	@echo "✅ Development build complete (Chrome)"
+
+# Full builds (Firefox)
+build-prod-firefox: build-prod-lmp-app build-prod-v1-app-firefox build-bundle
+	@echo "✅ Production build complete (Firefox)"
+
+build-dev-firefox: build-dev-lmp-app build-dev-v1-app-firefox build-bundle
+	@echo "✅ Development build complete (Firefox)"
