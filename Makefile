@@ -32,6 +32,8 @@ init-submodules:
 	@echo "✅ Submodules initialized"
 
 install-dependencies:
+	yarn install
+	@echo "✅ Root dependencies installed"
 	bash -c 'source $$NVM_DIR/nvm.sh && cd v1 && nvm use && yarn'
 	@echo "✅ v1 dependencies installed"
 	bash -c 'source $$NVM_DIR/nvm.sh && cd v2 && nvm use && npm i'
