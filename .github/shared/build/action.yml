@@ -114,6 +114,9 @@ inputs:
     description: 'Use test API for Notification Center instead of the production PubNub service'
     required: false
     default: 'false'
+  PUBNUB_SUBSCRIBE_KEY:
+    description: 'PubNub subscribe key for notifications'
+    required: true
 runs:
   using: 'composite'
   steps:
@@ -190,4 +193,5 @@ runs:
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
         NOTIFICATION_CENTER_USE_TEST_API: ${{ inputs.NOTIFICATION_CENTER_USE_TEST_API }}
+        PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
       run: yarn browser build

@@ -70,6 +70,9 @@ inputs:
     description: 'Browser target to build for. Options are [chromium | firefox]'
     required: false
     default: 'chromium'
+  PUBNUB_SUBSCRIBE_KEY:
+    description: 'PubNub subscribe key for notifications'
+    required: true
 
 runs:
   using: 'composite'
@@ -102,6 +105,7 @@ runs:
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
+        PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
 
     - name: Upload Chrome artifact
       if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
