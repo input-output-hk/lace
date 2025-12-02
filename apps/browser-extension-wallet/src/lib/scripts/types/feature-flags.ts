@@ -22,7 +22,7 @@ export enum ExperimentName {
   NFTPRINTLAB = 'nftprintlab',
   GLACIER_DROP = 'glacier-drop',
   MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
-  NOTIFICATIONS_CENTER = 'notifications-center',
+  NOTIFICATIONS_CENTER = 'lace-messaging-center',
   BLOCKFROST_CREDENTIAL_QUERIES = 'blockfrost-credential-queries',
   SWAP_CENTER = 'swap-center'
 }
