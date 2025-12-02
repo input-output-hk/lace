@@ -134,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
-          path: ./apps/browser-extension-wallet/dist
+          path: ./v1/apps/browser-extension-wallet/dist
 
   tests:
     name: E2E tests
@@ -162,7 +162,7 @@ jobs:
         run: |
           ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
           curl -v -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-          unzip build_artifact.zip -d ./apps/browser-extension-wallet/dist
+          unzip build_artifact.zip -d ./v1/apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
 
       - name: Setup Firefox Developer Edition
@@ -201,12 +201,12 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v5
         with:
-          path: ./artifacts
+          path: ./v1/artifacts
           pattern: 'runner-artifacts-*'
           merge-multiple: true
 
       - name: Create allure properties
-        working-directory: './artifacts/reports/allure/results'
+        working-directory: './v1/artifacts/reports/allure/results'
         run: |
           echo "
           branch=${BRANCH}
@@ -225,7 +225,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './artifacts/reports/allure/results'
+          resultsGlob: './v1/artifacts/reports/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'all/linux/${BROWSER}/${RUN}'
           copyLatest: true
@@ -258,10 +258,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: allure-results
-          path: ./artifacts/reports/allure/results
+          path: ./v1/artifacts/reports/allure/results
 
       - name: Upload performance metrics
         uses: actions/upload-artifact@v4
         with:
           name: performance-metrics
-          path: ./artifacts/metrics
+          path: ./v1/artifacts/metrics

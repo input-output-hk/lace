@@ -8,6 +8,7 @@ runs:
     - name: Unit tests
       run: yarn test
       shell: bash
+      working-directory: v1
       env:
         AVAILABLE_CHAINS: 'Preprod,Preview,Mainnet'
         DEFAULT_CHAIN: 'Preprod'
