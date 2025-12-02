@@ -9,7 +9,7 @@ import { Logger } from './logger';
 const execAsync = promisify(exec);
 
 interface UsageData {
-  timestamp: string;
+  timestamp: number;
   cpu: number;
   memory: number;
 }
@@ -81,7 +81,7 @@ class PidMonitor {
       try {
         const stats = await pidusage(this.pid);
         this._data.push({
-          timestamp: new Date().toISOString(),
+          timestamp: Date.now(),
           cpu: stats.cpu,
           memory: stats.memory
         });
