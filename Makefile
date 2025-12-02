@@ -34,9 +34,9 @@ init-submodules:
 install-dependencies:
 	yarn install
 	@echo "✅ Root dependencies installed"
-	bash -c 'source $$NVM_DIR/nvm.sh && cd v1 && nvm use && yarn'
+	bash -c 'source $$NVM_DIR/nvm.sh && cd v1 && nvm install && nvm use && yarn'
 	@echo "✅ v1 dependencies installed"
-	bash -c 'source $$NVM_DIR/nvm.sh && cd v2 && nvm use && npm i'
+	bash -c 'source $$NVM_DIR/nvm.sh && cd v2 && nvm install && nvm use && npm i'
 	@echo "✅ v2 dependencies installed"
 
 create-dot-env:
