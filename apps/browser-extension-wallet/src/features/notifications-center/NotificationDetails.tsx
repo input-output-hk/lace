@@ -40,9 +40,11 @@ export const NotificationDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification.message.id]);
   const bodyTextComponent = popupView ? (
-    <Text.Label data-testid="notification-details-body">{bodyText}</Text.Label>
+    <Text.Label data-testid="notification-details-body" className={styles.bodyText}>
+      {bodyText}
+    </Text.Label>
   ) : (
-    <Text.Body.Large weight="$semibold" data-testid="notification-details-body">
+    <Text.Body.Large weight="$semibold" data-testid="notification-details-body" className={styles.bodyText}>
       {bodyText}
     </Text.Body.Large>
   );
