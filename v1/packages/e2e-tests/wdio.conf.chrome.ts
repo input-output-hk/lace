@@ -3,7 +3,8 @@
 
 import { config as baseConfig } from './wdio.conf.base';
 
-const DIST_LOCATION = '../../../dist';
+const DIST_LOCATION =
+  String(process.env.LMP_BUNDLE) === 'true' ? '../../../dist' : '../../apps/browser-extension-wallet/dist';
 
 const chromeConfig = {
   capabilities: [

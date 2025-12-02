@@ -162,7 +162,7 @@ jobs:
         run: |
           ART_ID=$(curl "https://api.github.com/repos/input-output-hk/lace/actions/artifacts?name=${{ env.BUILD_ARTIFACT_NAME }}" | jq -r .artifacts[0].id)
           curl -v -o build_artifact.zip --location "https://api.github.com/repos/input-output-hk/lace/actions/artifacts/${ART_ID}/zip" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}"
-          unzip build_artifact.zip -d ./dist
+          unzip build_artifact.zip -d ./v1/apps/browser-extension-wallet/dist
           echo "Build artifact found and downloaded"
 
       - name: Setup Firefox Developer Edition

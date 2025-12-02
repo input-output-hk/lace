@@ -7,12 +7,17 @@ type Translations = { [index: string]: any };
 const loadTranslations = async function (translationOrigin: TranslationsOrigin) {
   const language = process.env.LACE_LOCALE ?? 'en';
 
-  const extensionTranslationPath = `../../../translation/src/lib/translations/browser-extension-wallet/${language}.json`;
-  const coreTranslationPath = `../../..//translation/src/lib/translations/core/${language}.json`;
-  const cardanoTranslationPath = `../../..//translation/src/lib/translations/cardano/${language}.json`;
-  const sharedWalletsTranslationPath = `../../..//translation/src/lib/translations/shared-wallets/${language}.json`;
-  const stakingTranslationPath = `../../../translation/src/lib/translations/staking/${language}.json`;
-  const midnightTranslationPath = `../../../../../v2/packages/contract/i18n/src/translations/${language}.json`;
+  const extensionTranslationPath = `../../../../packages/translation/src/lib/translations/browser-extension-wallet/${language}.json`;
+  const coreTranslationPath = `../../../../packages/translation/src/lib/translations/core/${language}.json`;
+  const cardanoTranslationPath = `../../../../packages/translation/src/lib/translations/cardano/${language}.json`;
+  const sharedWalletsTranslationPath = `../../../../packages/translation/src/lib/translations/shared-wallets/${language}.json`;
+  const stakingTranslationPath = `../../../../packages/translation/src/lib/translations/staking/${language}.json`;
+
+  let midnight: Translations = {};
+  if (String(process.env.LMP_BUNDLE) === 'true') {
+    const midnightTranslationPath = `../../../../../lace-platform/packages/contract/i18n/src/translations/${language}.json`;
+    midnight = await flatten(JSON.parse(readFromFile(import.meta.dirname, midnightTranslationPath).toString()));
+  }
 
   const extension: Translations = await flatten(
     JSON.parse(readFromFile(import.meta.dirname, extensionTranslationPath).toString())
@@ -28,9 +33,6 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
   );
   const staking: Translations = await flatten(
     JSON.parse(readFromFile(import.meta.dirname, stakingTranslationPath).toString())
-  );
-  const midnight: Translations = await flatten(
-    JSON.parse(readFromFile(import.meta.dirname, midnightTranslationPath).toString())
   );
   const baseTranslations = {
     ...cardano,
