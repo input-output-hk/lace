@@ -243,7 +243,7 @@ export class PubNubProvider implements NotificationsProvider {
    */
   constructor(options: PubNubProviderOptions) {
     const { heartbeatInterval, logger, skipAuthentication, storage, storageKeys, subscribeKey } = {
-      heartbeatInterval: 60,
+      heartbeatInterval: 0,
       // TODO: Replace with production subscribe key once available
       subscribeKey: 'production subscribe key',
       ...options
