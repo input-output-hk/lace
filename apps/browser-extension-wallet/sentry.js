@@ -12,7 +12,7 @@ const NEAR_QUOTA_THRESHOLD = STANDARD_QUOTA_LIMIT * 0.8; // 80% of quota
 const checkStorageQuota = async () => {
   try {
     const bytesInUse = await storage.local.getBytesInUse(null);
-    const hasUnlimitedStorage = typeof storage?.local?.QUOTA_BYTES === 'undefined';
+    const hasUnlimitedStorage = storage.local.QUOTA_BYTES === 'undefined';
     const isNearQuota = bytesInUse > NEAR_QUOTA_THRESHOLD;
     const exceedsStandardQuota = bytesInUse > STANDARD_QUOTA_LIMIT;
 
