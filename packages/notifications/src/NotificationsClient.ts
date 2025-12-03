@@ -6,7 +6,9 @@ import {
   NotificationsProvider,
   NotificationsProviderOptions,
   NotificationsProviders,
-  PubNubProvider
+  PubNubPollingProvider,
+  PubNubProvider,
+  PubNubProviderOptions
 } from './providers';
 import { ConnectionStatus } from './ConnectionStatus';
 import { PendingCommands } from './PendingCommands';
@@ -115,27 +117,30 @@ export class NotificationsClient {
     // Currently the only supported provider is PubNub
     if (provider.name === 'PubNub') {
       const configuration = {
-        heartbeatInterval: 60,
+        heartbeatInterval: 0,
+        usePollingMode: true,
         ...provider.configuration
       };
-      const { heartbeatInterval, skipAuthentication, subscribeKey, tokenEndpoint } = configuration;
+      const { heartbeatInterval, skipAuthentication, subscribeKey, tokenEndpoint, usePollingMode } = configuration;
 
       // TODO: Use Zod to validate the options
       if (typeof heartbeatInterval !== 'number')
         throw new TypeError('provider.configuration.heartbeatInterval must be a number');
       if (skipAuthentication !== undefined && typeof skipAuthentication !== 'boolean')
         throw new TypeError('provider.configuration.skipAuthentication must be a boolean');
-      if (subscribeKey !== undefined && typeof subscribeKey !== 'string')
-        throw new TypeError('provider.configuration.subscribeKey must be a string');
+      if (typeof subscribeKey !== 'string') throw new TypeError('provider.configuration.subscribeKey must be a string');
       if (tokenEndpoint !== undefined && typeof tokenEndpoint !== 'string')
         throw new TypeError('provider.configuration.tokenEndpoint must be a string');
 
-      this.provider = new PubNubProvider({
+      const configOptions: PubNubProviderOptions = {
         logger,
         storage,
         storageKeys: this.storageKeys,
+        subscribeKey,
         ...configuration
-      });
+      };
+
+      this.provider = usePollingMode ? new PubNubPollingProvider(configOptions) : new PubNubProvider(configOptions);
     }
 
     this.pendingCommands = new PendingCommands(this.provider);
@@ -433,5 +438,19 @@ export class NotificationsClient {
     await this.provider.unsubscribe(topicId);
 
     done();
+  }
+
+  /**
+   * Updates the interval for fetching missed messages.
+   * Only works if the provider is PubNubPollingProvider.
+   *
+   * @param intervalMinutes - New interval in minutes
+   */
+  updateFetchMissedMessagesInterval(intervalMinutes: number): void {
+    if (this.provider instanceof PubNubPollingProvider) {
+      if (typeof intervalMinutes !== 'number' || intervalMinutes <= 0)
+        throw new TypeError('NotificationsClient: intervalMinutes must be a positive number');
+      this.provider.updateFetchMissedMessagesInterval(intervalMinutes);
+    }
   }
 }

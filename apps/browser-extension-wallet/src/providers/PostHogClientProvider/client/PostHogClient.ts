@@ -34,7 +34,8 @@ import {
   FeatureFlags,
   RawFeatureFlagPayloads,
   FeatureFlagGlacierDropSchema,
-  FeatureFlagSwapCenterSchema
+  FeatureFlagSwapCenterSchema,
+  FeatureFlagLaceMessagingCenterSchema
 } from '@lib/scripts/types/feature-flags';
 import { config } from '@src/config';
 import { featureFlagSchema, networksEnumSchema, NetworksEnumSchema } from '../schema';
@@ -351,6 +352,13 @@ export class PostHogClient<Action extends string = string> {
 
         if (featureFlag === ExperimentName.SWAP_CENTER) {
           payloadsByFeature[featureFlag] = featureFlagSchema.swapCenter.parse(payload) as FeatureFlagSwapCenterSchema;
+          continue;
+        }
+
+        if (featureFlag === ExperimentName.NOTIFICATIONS_CENTER) {
+          payloadsByFeature[featureFlag] = featureFlagSchema.laceMessagingCenter.parse(
+            payload
+          ) as FeatureFlagLaceMessagingCenterSchema;
           continue;
         }
 
