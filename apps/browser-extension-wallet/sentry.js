@@ -31,45 +31,60 @@ const checkStorageQuota = async () => {
 /**
  * Reports storage quota warning to Sentry if quota is exceeded or near limit
  * Only samples 10% of quota-related errors to reduce noise
+ * Uses Sentry.flush() to ensure the message is sent before application shutdown
  */
 const reportQuotaWarningIfNeeded = async (errorMessage) => {
-  const quotaStatus = await checkStorageQuota();
+  try {
+    const quotaStatus = await checkStorageQuota();
 
-  if (!quotaStatus) {
-    return; // Diagnostic check failed, skip reporting
+    if (!quotaStatus) {
+      return; // Diagnostic check failed, skip reporting
+    }
+
+    // Only report if quota is actually an issue
+    if (!quotaStatus.exceedsStandardQuota && !quotaStatus.isNearQuota) {
+      return; // Quota is fine, likely not the cause
+    }
+
+    // Sample rate: 10% (send 1 out of 10 quota-related errors)
+    const shouldSample = Math.random() < 0.1;
+    if (!shouldSample) {
+      return;
+    }
+
+    const diagnosticData = {
+      bytesInUse: quotaStatus.bytesInUse,
+      bytesInUseMB: (quotaStatus.bytesInUse / (1024 * 1024)).toFixed(2),
+      hasUnlimitedStorage: quotaStatus.hasUnlimitedStorage,
+      isNearQuota: quotaStatus.isNearQuota,
+      exceedsStandardQuota: quotaStatus.exceedsStandardQuota,
+      usagePercent: ((quotaStatus.bytesInUse / STANDARD_QUOTA_LIMIT) * 100).toFixed(2),
+      originalError: errorMessage,
+      timestamp: new Date().toISOString()
+    };
+
+    Sentry.captureMessage('Storage Quota Warning - LevelDB Write Failed', {
+      level: 'warning',
+      tags: {
+        error_type: 'storage_quota',
+        quota_exceeded: quotaStatus.exceedsStandardQuota,
+        unlimited_storage_enabled: quotaStatus.hasUnlimitedStorage
+      },
+      extra: diagnosticData
+    });
+
+    // Flush Sentry to ensure the message is sent before potential shutdown
+    // This is critical since beforeSend is synchronous and doesn't await async operations
+    await Sentry.flush(2000); // Wait up to 2 seconds for flush to complete
+  } catch (error) {
+    console.error('Failed to report quota warning:', error);
+    // Attempt to flush even on error to ensure any partial message is sent
+    try {
+      await Sentry.flush(1000);
+    } catch (flushError) {
+      console.error('Failed to flush Sentry:', flushError);
+    }
   }
-
-  // Only report if quota is actually an issue
-  if (!quotaStatus.exceedsStandardQuota && !quotaStatus.isNearQuota) {
-    return; // Quota is fine, likely not the cause
-  }
-
-  // Sample rate: 10% (send 1 out of 10 quota-related errors)
-  const shouldSample = Math.random() < 0.1;
-  if (!shouldSample) {
-    return;
-  }
-
-  const diagnosticData = {
-    bytesInUse: quotaStatus.bytesInUse,
-    bytesInUseMB: (quotaStatus.bytesInUse / (1024 * 1024)).toFixed(2),
-    hasUnlimitedStorage: quotaStatus.hasUnlimitedStorage,
-    isNearQuota: quotaStatus.isNearQuota,
-    exceedsStandardQuota: quotaStatus.exceedsStandardQuota,
-    usagePercent: ((quotaStatus.bytesInUse / STANDARD_QUOTA_LIMIT) * 100).toFixed(2),
-    originalError: errorMessage,
-    timestamp: new Date().toISOString()
-  };
-
-  Sentry.captureMessage('Storage Quota Warning - LevelDB Write Failed', {
-    level: 'warning',
-    tags: {
-      error_type: 'storage_quota',
-      quota_exceeded: quotaStatus.exceedsStandardQuota,
-      unlimited_storage_enabled: quotaStatus.hasUnlimitedStorage
-    },
-    extra: diagnosticData
-  });
 };
 
 Sentry.init({
@@ -96,8 +111,14 @@ Sentry.init({
     if (errorMessage.includes('Unable to create writable file') && errorMessage.includes('.ldb')) {
       // Trigger async quota check (non-blocking)
       // This will sample and report quota-related issues separately
+      // Note: beforeSend is synchronous, so we can't await this. The async function
+      // uses Sentry.flush() internally to ensure the message is sent before shutdown.
       reportQuotaWarningIfNeeded(errorMessage).catch((error) => {
         console.error('Failed to report quota warning:', error);
+        // Attempt flush even on error to ensure any partial message is sent
+        Sentry.flush(1000).catch((flushError) => {
+          console.error('Failed to flush Sentry after error:', flushError);
+        });
       });
 
       // Always filter the original LevelDB error from error tracking
