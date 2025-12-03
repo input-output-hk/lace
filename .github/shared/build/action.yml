@@ -110,10 +110,10 @@ inputs:
       description: ' ADA handle cache lifetime'
       required: false
       default: 600000
-  NOTIFICATION_CENTER_USE_TEST_API:
-    description: 'Use test API for Notification Center instead of the production PubNub service'
+  NOTIFICATION_CENTER_MODE:
+    description: 'Notifications center service mode: "noop" (default, no service), "test" (test API for injecting notifications), or "production" (PubNub service)'
     required: false
-    default: 'false'
+    default: 'noop'
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true
@@ -201,6 +201,6 @@ runs:
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         E2E_FORCE_TREZOR_PICKED: ${{ inputs.E2E_FORCE_TREZOR_PICKED }}
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
-        NOTIFICATION_CENTER_USE_TEST_API: ${{ inputs.NOTIFICATION_CENTER_USE_TEST_API }}
+        NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
       run: yarn browser build
