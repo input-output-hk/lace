@@ -20,6 +20,13 @@ The built extension will be in the `dist/` directory.
 
 See [package.json](./package.json) for additional build scripts.
 
+## Updating v2 submodule
+
+To update the v2 submodule to the latest commit on `main` branch, run:
+```bash
+git submodule update --remote v2
+```
+
 ## Architecture
 
 For technical details about the project structure and bundling approach, see [ARCHITECTURE.md](./ARCHITECTURE.md).
