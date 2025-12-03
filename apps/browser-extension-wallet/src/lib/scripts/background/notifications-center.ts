@@ -15,7 +15,32 @@ export const STORAGE_KEY = 'redux:persist:notificationsCenter';
 
 const baseChannel = 'notifications-center';
 
+const production = () => {
+  throw new Error('Not enabled');
+};
+
+const noop = (): Promise<void> => Promise.resolve();
+
+const exposeDisabledNotificationsCenterAPI = (api$: ReplaySubject<NotificationsCenterProperties>) => {
+  logger.info('Notifications Center: disabled (no-op API)');
+
+  const notifications$ = new ReplaySubject<LaceNotification[]>(1);
+  const topics$ = new ReplaySubject<NotificationsTopic[]>(1);
+
+  api$.next({
+    notifications: { markAsRead: noop, notifications$, remove: noop },
+    test: { add: production, init: production },
+    topics: { topics$, subscribe: noop, unsubscribe: noop }
+  });
+
+  notifications$.next([]);
+  topics$.next([]);
+
+  return Promise.resolve();
+};
+
 const exposeTestNotificationsCenterAPI = (api$: ReplaySubject<NotificationsCenterProperties>) => {
+  logger.info('Notifications Center: test API enabled');
   let notifications: LaceNotification[] = [];
   let topics: NotificationsTopic[] = [];
 
@@ -94,11 +119,9 @@ const exposeTestNotificationsCenterAPI = (api$: ReplaySubject<NotificationsCente
   return Promise.resolve();
 };
 
-const production = () => {
-  throw new Error('Not enabled');
-};
-
 const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<NotificationsCenterProperties>) => {
+  logger.info('Notifications Center: production API enabled');
+
   const { local: localStorage } = storage;
   let { notifications, topics } = {
     notifications: [],
@@ -175,9 +198,17 @@ const exposeNotificationsCenterAPI = () => {
 
   exposeApi<NotificationsCenterProperties>({ api$, baseChannel, properties }, { logger, runtime });
 
-  return process.env.NOTIFICATION_CENTER_USE_TEST_API === 'true'
-    ? exposeTestNotificationsCenterAPI(api$)
-    : exposeProductionNotificationsCenterAPI(api$);
+  const mode = process.env.NOTIFICATION_CENTER_MODE || 'noop';
+
+  switch (mode) {
+    case 'test':
+      return exposeTestNotificationsCenterAPI(api$);
+    case 'production':
+      return exposeProductionNotificationsCenterAPI(api$);
+    case 'noop':
+    default:
+      return exposeDisabledNotificationsCenterAPI(api$);
+  }
 };
 
 // if (!(globalThis as unknown as { LMP_BUNDLE: boolean }).LMP_BUNDLE) exposeNotificationsCenterAPI();
