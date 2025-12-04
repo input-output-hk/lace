@@ -52,11 +52,12 @@ const api: BundleAppApi = {
     map((wallets) =>
       wallets.map(
         (wallet): LmpBundleWallet => ({
-          // TODO: icon should be different based on wallet type (same as in v1 dropdown menu)
           walletIcon: isBitcoinWallet(wallet) ? bitcoinLogo : cardanoLogo,
           walletId: wallet.walletId,
           walletName: wallet.metadata.name,
-          encryptedRecoveryPhrase: isInMemoryWallet(wallet) ? wallet.encryptedSecrets.keyMaterial : undefined
+          encryptedRecoveryPhrase: isInMemoryWallet(wallet) ? wallet.encryptedSecrets.keyMaterial : undefined,
+          blockchain: isBitcoinWallet(wallet) ? 'Bitcoin' : 'Cardano',
+          walletType: wallet.type
         })
       )
     )
