@@ -1,4 +1,4 @@
-import { PubNubProviderConfiguration } from './PubNub/PubNubProvider';
+import type { PubNubProviderConfiguration } from './PubNub/types';
 
 /**
  * Array of available notification provider names.
