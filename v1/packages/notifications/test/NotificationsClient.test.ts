@@ -157,6 +157,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -187,6 +188,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -211,6 +213,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -230,6 +233,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -247,6 +251,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -254,7 +259,7 @@ describe('NotificationsClient', () => {
 
       expect(PubNubProvider).toHaveBeenCalledWith(
         expect.objectContaining({
-          heartbeatInterval: 60
+          heartbeatInterval: 0
         })
       );
       await Promise.resolve();
@@ -269,6 +274,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey,
             heartbeatInterval: 30
           }
@@ -432,6 +438,7 @@ describe('NotificationsClient', () => {
             // @ts-expect-error Testing invalid input
             name: 'InvalidProvider',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           },
@@ -454,6 +461,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -472,6 +480,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -490,6 +499,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -508,6 +518,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -526,6 +537,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -544,6 +556,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -562,6 +575,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -581,6 +595,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey
             }
           }
@@ -598,6 +613,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey,
               // @ts-expect-error Testing invalid input
               heartbeatInterval: 'invalid'
@@ -617,6 +633,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey,
               // @ts-expect-error Testing invalid input
               skipAuthentication: 'invalid'
@@ -636,6 +653,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               // @ts-expect-error Testing invalid input
               subscribeKey: 123
             }
@@ -654,6 +672,7 @@ describe('NotificationsClient', () => {
           provider: {
             name: 'PubNub',
             configuration: {
+              usePollingMode: false,
               subscribeKey,
               // @ts-expect-error Testing invalid input
               tokenEndpoint: 123
@@ -674,6 +693,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -700,6 +720,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -732,6 +753,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -751,6 +773,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -781,6 +804,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -829,6 +853,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -878,6 +903,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -905,6 +931,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -930,6 +957,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -956,6 +984,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -980,6 +1009,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1005,6 +1035,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1028,6 +1059,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1055,6 +1087,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1086,6 +1119,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1121,6 +1155,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1190,6 +1225,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1230,6 +1266,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1257,6 +1294,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1280,6 +1318,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1339,6 +1378,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1363,6 +1403,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1388,6 +1429,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1418,6 +1460,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }
@@ -1455,6 +1498,7 @@ describe('NotificationsClient', () => {
         provider: {
           name: 'PubNub',
           configuration: {
+            usePollingMode: false,
             subscribeKey
           }
         }

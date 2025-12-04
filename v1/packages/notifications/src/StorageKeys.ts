@@ -3,6 +3,7 @@
  * Provides methods to retrieve storage keys for various notification-related data.
  */
 export class StorageKeys {
+  private lastFetchMissedMessages: string;
   private lastSync: string;
   private subscribedTopics: string;
   private token: string;
@@ -15,12 +16,21 @@ export class StorageKeys {
    * @param prefix - The prefix to use for all storage keys (e.g., 'notifications')
    */
   constructor(prefix: string) {
+    this.lastFetchMissedMessages = `${prefix}:lastFetchMissedMessages`;
     this.lastSync = `${prefix}:lastSync:`;
     this.subscribedTopics = `${prefix}:subscribedTopics`;
     this.token = `${prefix}:token`;
     this.topics = `${prefix}:topics`;
     this.unsubscribedTopics = `${prefix}:unsubscribedTopics`;
     this.userId = `${prefix}:userId`;
+  }
+
+  /**
+   * Returns the storage key for the last fetch timestamp of missed messages.
+   * @returns The storage key in the format '{prefix}:lastFetchMissedMessages'
+   */
+  public getLastFetchMissedMessages(): string {
+    return this.lastFetchMissedMessages;
   }
 
   /**
