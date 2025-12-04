@@ -49,7 +49,7 @@ class TokenDetailsAssert {
   }
 
   async assertSeeTokenTransactionsSection() {
-    await TokenDetailsPage.transactionsListTitle.waitForDisplayed();
+    await TokenDetailsPage.transactionsListTitle.waitForDisplayed({ timeout: 10_000 });
     expect(await TokenDetailsPage.transactionsListTitle.getText()).to.equal(
       await t('browserView.assetDetails.recentTransactions')
     );

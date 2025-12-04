@@ -2,27 +2,78 @@
 
 A browser extension wallet for Cardano, Bitcoin and Midnight.
 
-## Setup
+> **Note:** `lace-platform`, the code repository for Lace v2 and Lace Midnight Preview, is linked as a git submodule, named `v2`, to support the integration of Midnight in v1.
 
-After cloning the repo, you can run `make setup` to setup the repo. It will initialize git submodules and install dependencies.
+## Make Commands
 
-## Build
+### Setup
+
+**Prerequisite:** `nvm` or `fnm` node version manager is required.
 
 ```bash
-# Development build
-yarn build:dev
-
-# Production build
-yarn build:prod
+make setup
 ```
 
-The built extension will be in the `dist/` directory.
+Then create `v1/apps/browser-extension-wallet/.env` with the following variables:
 
-See [package.json](./package.json) for additional build scripts.
+```
+BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key
+BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key
+BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
+```
+
+Or use the command:
+
+```bash
+make create-v1-dot-env \
+  BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key \
+  BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key \
+  BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
+```
+
+### Build
+
+```bash
+make build-dev      # Development build (Chrome)
+make build-prod     # Production build (Chrome)
+make build-dev-firefox   # Development build (Firefox)
+make build-prod-firefox  # Production build (Firefox)
+```
+
+The build command creates three builds:
+- The build in the root `/dist` is the bundle that combines v1 and LMP
+- The build in `v1/apps/browser-extension-wallet/dist` folder only contains Lace v1 without the LMP
+- The build in `v2/apps/midnight-extension/dist` folder only contains LMP
+
+### Local Development with v2 Submodule
+
+When working on the `v2` submodule in a separate IDE/directory, you can symlink it to avoid working inside the nested submodule:
+
+```bash
+make link-v2 REPO_PATH=~/my-work-dir/lace-platform
+```
+
+This backs up `v2` to `v2.bak`, creates a symlink to your standalone repo, and configures git to ignore the symlink.
+
+To restore the original submodule:
+
+```bash
+make unlink-v2
+```
+
+**Workflow:**
+1. Clone lace-platform to a separate directory
+2. Run `make link-v2 REPO_PATH=~/path/to/lace-platform`
+3. Open lace-platform in IDE 1, lace in IDE 2
+4. Changes in IDE 1 are instantly visible in IDE 2
+5. Build/test in lace as normal
+6. When done, push changes from lace-platform first
+7. Run `make unlink-v2` to restore and update the submodule reference
 
 ## Updating v2 submodule
 
 To update the v2 submodule to the latest commit on `main` branch, run:
+
 ```bash
 git submodule update --remote v2
 ```
