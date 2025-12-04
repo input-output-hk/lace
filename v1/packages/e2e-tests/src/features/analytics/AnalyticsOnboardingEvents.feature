@@ -8,7 +8,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     When I set up request interception for posthog analytics request(s)
     And I click "Create" button on wallet setup page
     And I go to "Wallet setup" page from "Create" wallet flow and fill values for Cardano chain
-    Then I validate that 6 analytics event(s) have been sent
+    Then I validate that 7 analytics event(s) have been sent
 
   @LW-7363
   Scenario: Analytics - Restore wallet events / check that alias event is assigning same id in posthog
@@ -16,7 +16,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     When I click "Restore" button on wallet setup page
     Then I validate latest analytics single event "onboarding | restore wallet revamp | restore | click"
     When I click "Next" button during wallet setup
-    # TODO: add event validation when LW-13754 is completed
+    Then I validate latest analytics single event "onboarding | restore wallet revamp | select a blockchain | next | click"
     When I click "Next" button during wallet setup
     Then I validate latest analytics single event "onboarding | restore wallet revamp paper wallet | choose mode | next | click"
     And I enter 24 correct mnemonic words on "Mnemonic verification" page
@@ -37,7 +37,7 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     And I click "Create" button on wallet setup page
     Then I validate latest analytics single event "onboarding | new wallet revamp | create | click"
     When I click "Next" button during wallet setup
-    # TODO: add event validation when LW-13754 is completed
+    Then I validate latest analytics single event "onboarding | new wallet revamp | select a blockchain | next | click"
     When I click "Next" button during wallet setup
     When I click on "Copy to clipboard" button
     Then I validate latest analytics single event "onboarding | new wallet revamp | save your recovery phrase | copy to clipboard | click"
@@ -53,5 +53,5 @@ Feature: Analytics - PostHog - Onboarding - Extended View
     Then I validate latest analytics multiple events:
       | onboarding \| new wallet revamp \| let's set up your new wallet \| enter wallet \| click |
       | onboarding \| new wallet revamp \| added                                                 |
-    And I validate that 8 analytics event(s) have been sent
+    And I validate that 9 analytics event(s) have been sent
     And "$create_alias" PostHog event was sent
