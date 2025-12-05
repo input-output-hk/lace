@@ -40,7 +40,14 @@ make build-dev-firefox   # Development build (Firefox)
 make build-prod-firefox  # Production build (Firefox)
 ```
 
-The build command creates three builds:
+For faster rebuilds when only the extension app code changed (skips v1 packages and v2):
+
+```bash
+make build-dev-ext  # Fast development rebuild (Chrome)
+make build-ext      # Fast production rebuild (Chrome)
+```
+
+The full build command creates three builds:
 - The build in the root `/dist` is the bundle that combines v1 and LMP
 - The build in `v1/apps/browser-extension-wallet/dist` folder only contains Lace v1 without the LMP
 - The build in `v2/apps/midnight-extension/dist` folder only contains LMP
