@@ -1,90 +1,138 @@
 # Lace
 
-A browser extension wallet for Cardano, Bitcoin and Midnight.
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=input-output-hk_lace&metric=alert_status&token=98802db7b585471a39ab75e8baf01cff96c561db)](https://sonarcloud.io/summary/new_code?id=input-output-hk_lace)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=input-output-hk_lace&metric=security_rating&token=98802db7b585471a39ab75e8baf01cff96c561db)](https://sonarcloud.io/summary/new_code?id=input-output-hk_lace)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=input-output-hk_lace&metric=vulnerabilities&token=98802db7b585471a39ab75e8baf01cff96c561db)](https://sonarcloud.io/summary/new_code?id=input-output-hk_lace)
 
-> **Note:** `lace-platform`, the code repository for Lace v2 and Lace Midnight Preview, is linked as a git submodule, named `v2`, to support the integration of Midnight in v1.
+## Project structure
 
-## Make Commands
+### Apps
 
-### Setup
+- [browser-extension-wallet]
 
-**Prerequisite:** `nvm` or `fnm` node version manager is required.
+### Packages
 
-```bash
-make setup
+- [cardano]
+- [common]
+- [core]
+- [shared-wallets]
+- [staking]
+
+## Getting started
+
+### Authorize to GitHub Package Registry
+
+Lace depends on `@input-output-hk/lace-ui-toolkit` package, which is published from [lace-ui-toolkit](https://github.com/input-output-hk/lace-ui-toolkit) repository to [Github Package Registry](https://github.com/input-output-hk/lace-ui-toolkit/pkgs/npm/lace-ui-toolkit). In order to install dependencies from GitHub Package Registry, Personal Access Token needs to be provided.
+
+> [!IMPORTANT]
+>
+> **It is required to generate Personal Access Token (PAT) to be able to authorize to Github Package Registry** prior to installing projects dependencies. For more details follow this link: [Working with the npm registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+
+#### How to authorize to GitHub Package Registry
+
+1. Go to [Profile/Settings/Developer Settings/Personal access tokens/Tokens (classic)](https://github.com/settings/tokens/new) to generate a new PAT
+2. Select at least `read:packages` permissions to be able to download packages from GitHub Package Registry
+3. Create `~/.yarnrc.yml` file in your home directory and insert:
+
+```yaml
+npmScopes:
+  input-output-hk:
+    npmAlwaysAuth: true
+    npmAuthToken: YOUR_GITHUB_PAT
+    npmRegistryServer: 'https://npm.pkg.github.com'
 ```
 
-Then create `v1/apps/browser-extension-wallet/.env` with the following variables:
+For more details check GitHub's guide: [Authenticating with personal access token](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-with-a-personal-access-token)
 
-```
-BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key
-BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key
-BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
-```
+### Install dependencies
 
-Or use the command:
-
-```bash
-make create-v1-dot-env \
-  BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key \
-  BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key \
-  BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
+```sh
+yarn install
 ```
 
-### Build
+### Setup environment variables
 
-```bash
-make build-dev      # Development build (Chrome)
-make build-prod     # Production build (Chrome)
-make build-dev-firefox   # Development build (Firefox)
-make build-prod-firefox  # Production build (Firefox)
+```sh
+cp ./apps/browser-extension-wallet/.env.defaults ./apps/browser-extension-wallet/.env
 ```
 
-For faster rebuilds when only the extension app code changed (skips v1 packages and v2):
+Once `.env` files is created adjust it to your needs, and update `LACE_EXTENSION_KEY`, `BLOCKFROST_PROJECT_ID_PREVIEW`, `BLOCKFROST_PROJECT_ID_PREPROD`, `BLOCKFROST_PROJECT_ID_MAINNET`, `MAESTRO_PROJECT_ID_MAINNET`, and `MAESTRO_PROJECT_ID_TESTNET`.
 
-```bash
-make build-dev-ext  # Fast development rebuild (Chrome)
-make build-ext      # Fast production rebuild (Chrome)
+> If you want to develop or test DApp Explorer please refer to the [Setting up local connection with DApp Radar API](apps/browser-extension-wallet/src/views/browser-view/features/dapp/README.md) page and update the `DAPP_RADAR_API_KEY` env variable.
+
+#### Configure Sentry for the local dev environment
+
+If you want to log errors to Sentry from you local dev environment you need to provide in your `.env` file Sentry [dsn](https://docs.sentry.io/platforms/javascript/configuration/options/#dsn) and [environment](https://docs.sentry.io/platforms/javascript/configuration/options/#environment) values.
+```
+SENTRY_DSN=<SENTRY_DSN>
+SENTRY_ENVIRONMENT=development
+```
+To get **Sentry dsn** log in to [Sentry](https://iohk-j4.sentry.io/) and go to `Settings -> Projects -> lace-extension-v1 -> Client Keys` or click [here](https://iohk-j4.sentry.io/settings/projects/lace-extension-v1/keys/).
+
+### Build packages and extension
+
+```sh
+yarn build
 ```
 
-The full build command creates three builds:
-- The build in the root `/dist` is the bundle that combines v1 and LMP
-- The build in `v1/apps/browser-extension-wallet/dist` folder only contains Lace v1 without the LMP
-- The build in `v2/apps/midnight-extension/dist` folder only contains LMP
+## Install Lace extension in Chrome / MS Edge browser
 
-### Local Development with v2 Submodule
+1. Go to `chrome://extensions/` or `edge://extensions/` in selected web browser
+2. Enable **Developer mode**
+3. Click **Load unpacked** and point out `dist` folder from `apps/browser-extension-wallet` which is built in previous step
+4. Extension should be visible in **Extensions** and ready to use.
 
-When working on the `v2` submodule in a separate IDE/directory, you can symlink it to avoid working inside the nested submodule:
+## Dev commands
 
-```bash
-make link-v2 REPO_PATH=~/my-work-dir/lace-platform
+```sh
+yarn [app] [command]
 ```
 
-This backs up `v2` to `v2.bak`, creates a symlink to your standalone repo, and configures git to ignore the symlink.
+Available `[app]` options:
 
-To restore the original submodule:
+- `browser` ([./apps/browser-extension-wallet](./apps/browser-extension-wallet))
+- `staking` ([./packages/staking](./packages/staking))
 
-```bash
-make unlink-v2
-```
+Available `[command]` options:
 
-**Workflow:**
-1. Clone lace-platform to a separate directory
-2. Run `make link-v2 REPO_PATH=~/path/to/lace-platform`
-3. Open lace-platform in IDE 1, lace in IDE 2
-4. Changes in IDE 1 are instantly visible in IDE 2
-5. Build/test in lace as normal
-6. When done, push changes from lace-platform first
-7. Run `make unlink-v2` to restore and update the submodule reference
+- `build`
+- `build-deps` - build only dependencies of a given app
+- `watch` - build and watch
+- `watch-deps` - build and watch only dependencies of a given app
 
-## Updating v2 submodule
+You can mix them together.
 
-To update the v2 submodule to the latest commit on `main` branch, run:
+**Examples:**
 
-```bash
-git submodule update --remote v2
-```
+- `yarn browser watch` runs the `watch` command for all dependent workspaces of the [browser-extension-wallet] package and for the [browser-extension-wallet]
+  app itself.
+- `yarn staking build-deps` builds all dependent workspaces of the [staking] package except the [staking] package itself.
 
-## Architecture
+## Working with UI Toolkit
 
-For technical details about the project structure and bundling approach, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+In this workspace **UI Toolkit** is used in 4 places:
+
+- apps/browser-extension-wallet
+- packages/core
+- packages/shared-wallets
+- packages/staking
+
+Based on the specific use case we can link it on:
+
+- **app level**, check [Working with UI Toolkit on an app level](./apps/README.md#working-with-ui-toolkit-on-an-app-level)
+- **package level**, check: [Working with UI Toolkit on a package level](./packages/README.md#working-with-ui-toolkit-on-a-package-level)
+
+Linking **UI Toolkit** on app level, allows you to see all changes in app and packages using it.
+
+Linking **UI Toolkit** on package level, allows you to develop components in isolation using for example Storybook.
+
+[browser-extension-wallet]: ./apps/browser-extension-wallet
+[common]: ./packages/common
+[core]: ./packages/core
+[cardano]: ./packages/cardano
+[shared-wallets]: ./packages/shared-wallets
+[staking]: ./packages/staking
+
+## Audit
+
+Lace has been independently audited and manually verified by external auditor, [FYEO](https://www.fyeo.io/), so the Lace team can improve code quality and security – giving you greater peace of mind. You can view the full report at [lace.io/lace-audit-report](https://lace.io/lace-audit-report)
