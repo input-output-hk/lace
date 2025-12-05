@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { BundleAppApi, LmpBundleWallet, v1ApiGlobalProperty } from '@src/utils/lmp';
-import { firstValueFrom, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { bitcoinWalletManager, walletManager, walletRepository } from '../wallet';
 import { AnyBip32Wallet, AnyWallet, InMemoryWallet, WalletType } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
 import { Wallet } from '@lace/cardano';
-import { setBackgroundStorage } from '../storage';
+import { getBackgroundStorage, setBackgroundStorage } from '../storage';
 import { Bitcoin } from '@lace/bitcoin';
+import { Language } from '@lace/translation';
+import { requestMessage$ } from './utilityServices';
+import { MessageTypes } from '../../types';
 
 const cardanoLogo = require('../../../../assets/icons/browser-view/cardano-logo.svg').default;
 const bitcoinLogo = require('../../../../assets/icons/browser-view/bitcoin-logo.svg').default;
@@ -21,6 +24,28 @@ const isBip32Wallet = (
 const isInMemoryWallet = (
   wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>
 ): wallet is InMemoryWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> => wallet.type === WalletType.InMemory;
+
+// BehaviorSubject for language state, initialized with default 'en'
+export const language$ = new BehaviorSubject<Language>(Language.en);
+
+// Initialize language from storage on startup
+(async () => {
+  try {
+    const storage = await getBackgroundStorage();
+    if (storage.languageChoice) {
+      language$.next(storage.languageChoice);
+    }
+  } catch (error) {
+    logger.error('Failed to initialize language from storage:', error);
+  }
+})();
+
+// Subscribe to v1 UI language changes via requestMessage$
+requestMessage$.subscribe(({ type, data }) => {
+  if (type === MessageTypes.CHANGE_LANGUAGE) {
+    language$.next(data as Language);
+  }
+});
 
 const api: BundleAppApi = {
   wallets$: walletRepository.wallets$.pipe(
@@ -81,6 +106,12 @@ const api: BundleAppApi = {
         });
       }
     }
+  },
+  language$,
+  setLanguage: async (language: Language): Promise<void> => {
+    language$.next(language);
+    await setBackgroundStorage({ languageChoice: language });
+    requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data: language });
   }
 };
 
