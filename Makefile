@@ -1,4 +1,4 @@
-.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app init-submodules install-dependencies create-v1-dot-env create-v2-dot-env setup build-prod build-dev build-bundle build-prod-firefox build-dev-firefox link-v2 unlink-v2
+.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app init-submodules install-dependencies create-v1-dot-env create-v2-dot-env setup build-prod build-dev build-bundle build-prod-firefox build-dev-firefox build-ext build-dev-ext link-v2 unlink-v2
 
 # Submodule symlink configuration
 SUBMODULE_PATH := v2
@@ -112,6 +112,27 @@ build-prod-lmp-app:
 build-bundle:
 	yarn build:bundle
 	@echo "✅ Bundle built"
+
+# Fast rebuild (browser-extension-wallet only, skips v1 packages and v2)
+define rebuild-v1-app-only
+	@echo "🔨 Rebuilding browser-extension-wallet only (env=$(1), browser=$(2))..."
+	bash -c 'cd v1/apps/browser-extension-wallet && $(setup-node-env) && \
+		yarn cleanup:dist && \
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw && \
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/app/ yarn build:app && \
+		WEBPACK_ENV=$(1) BROWSER=$(2) WEBPACK_PUBLIC_PATH=/app/ yarn build:cs'
+	@echo "✅ Built to ./v1/apps/browser-extension-wallet/dist"
+endef
+
+build-ext:
+	$(call rebuild-v1-app-only,prod,chrome)
+	$(MAKE) build-bundle
+	@echo "✅ Extension build complete (Chrome)"
+
+build-dev-ext:
+	$(call rebuild-v1-app-only,dev,chrome)
+	$(MAKE) build-bundle
+	@echo "✅ Extension dev build complete (Chrome)"
 
 # Full builds (Chrome)
 build-prod: build-prod-lmp-app build-prod-v1-app build-bundle
