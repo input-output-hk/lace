@@ -196,7 +196,7 @@ export const UserInfo = ({
   );
 
   const renderLmpWallet = useCallback(
-    ({ walletIcon, walletId, walletName }: LmpBundleWallet, isLast: boolean) => (
+    ({ walletId, walletName }: LmpBundleWallet, isLast: boolean) => (
       <div key={walletId}>
         <ProfileDropdown.WalletOption
           style={{ textAlign: 'left' }}
@@ -204,11 +204,7 @@ export const UserInfo = ({
           title={shortenWalletName(walletName, WALLET_OPTION_NAME_MAX_LENGTH)}
           id={`wallet-option-${walletId}`}
           onClick={switchToLMP}
-          type={'hot'}
-          profile={{
-            fallbackText: walletName,
-            imageSrc: walletIcon
-          }}
+          type="midnight"
         />
         {isLast ? undefined : <Separator />}
       </div>
