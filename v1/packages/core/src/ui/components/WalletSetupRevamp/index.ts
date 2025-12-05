@@ -12,5 +12,6 @@ export { WalletSetupConnectHardwareWalletStepRevamp } from './WalletSetupConnect
 export { WalletSetupHWCreationStep } from './WalletSetupHWCreationStep';
 export { WalletSetupSelectBlockchain } from './WalletSetupSelectBlockchain';
 export { WalletSetupReuseMnemonicStep } from './WalletSetupReuseMnemonicStep';
+export type { WalletWithMnemonic } from './WalletSetupReuseMnemonicStep';
 export { WalletSetupEnterPasswordStep } from './WalletSetupEnterPasswordStep';
 export { WalletSetupMnemonicErrorStep } from './WalletSetupMnemonicErrorStep';

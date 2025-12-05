@@ -11,6 +11,16 @@
   &.selected {
     border: 2px solid var(--primary-accent) !important;
   }
+
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    background: var(--light-mode-light-grey, var(--dark-mode-dark-grey, #1a1a1a)) !important;
+
+    &:hover {
+      border: 2px solid var(--light-mode-light-grey-plus, var(--dark-mode-mid-grey, #333333)) !important;
+    }
+  }
 }
 
 .icon {
@@ -35,6 +45,11 @@
 .gradientBadge {
   @extend .badge;
   background: var(--primary-gradient);
+}
+
+.secondaryBadge {
+  @extend .badge;
+  background: var(--light-mode-dark-grey, var(--dark-mode-light-grey, #666666));
 }
 
 .badgeText {

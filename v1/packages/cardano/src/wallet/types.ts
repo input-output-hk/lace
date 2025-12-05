@@ -2,6 +2,17 @@ import { Cardano, Paginated } from '@cardano-sdk/core';
 import type { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
 import { WalletType } from '@cardano-sdk/web-extension';
 
+export type BlockchainName = 'Bitcoin' | 'Cardano' | 'Midnight';
+
+export type LmpBundleWallet = {
+  walletId: string;
+  walletName: string;
+  walletIcon: string;
+  encryptedRecoveryPhrase?: string;
+  blockchain: BlockchainName;
+  walletType: WalletType;
+};
+
 export type LedgerConnection = LedgerKeyAgent['deviceConnection'];
 
 export type DeviceConnection = LedgerConnection | boolean;

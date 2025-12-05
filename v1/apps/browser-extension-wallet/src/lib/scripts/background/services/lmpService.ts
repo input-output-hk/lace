@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { BundleAppApi, LmpBundleWallet, v1ApiGlobalProperty } from '@src/utils/lmp';
+import { BundleAppApi, v1ApiGlobalProperty } from '@src/utils/lmp';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
 import { bitcoinWalletManager, walletManager, walletRepository } from '../wallet';
 import { AnyBip32Wallet, AnyWallet, InMemoryWallet, WalletType } from '@cardano-sdk/web-extension';
@@ -51,7 +51,7 @@ const api: BundleAppApi = {
   wallets$: walletRepository.wallets$.pipe(
     map((wallets) =>
       wallets.map(
-        (wallet): LmpBundleWallet => ({
+        (wallet): Wallet.LmpBundleWallet => ({
           walletIcon: isBitcoinWallet(wallet) ? bitcoinLogo : cardanoLogo,
           walletId: wallet.walletId,
           walletName: wallet.metadata.name,

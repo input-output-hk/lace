@@ -8,6 +8,7 @@ import { useBackgroundServiceAPIContext } from '@providers';
 import { BrowserViewSections } from '@lib/scripts/types';
 import { useBackgroundPage } from '@providers/BackgroundPageProvider';
 import { PostHogAction } from '@lace/common';
+import { cameFromLmpStorage } from '@src/utils/lmp';
 
 interface Props {
   isPopup?: boolean;
@@ -22,6 +23,7 @@ export const AddNewWalletLink = ({ isPopup, sendAnalyticsEvent }: Props): React.
 
   const openNewWallet = () => {
     sendAnalyticsEvent(PostHogAction.UserWalletProfileAddNewWalletClick);
+    cameFromLmpStorage.clear();
     if (isPopup) {
       backgroundServices.handleOpenBrowser({ section: BrowserViewSections.NEW_WALLET });
     } else {

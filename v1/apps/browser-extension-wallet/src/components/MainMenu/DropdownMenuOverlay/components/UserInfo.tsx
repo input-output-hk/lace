@@ -19,7 +19,6 @@ import { Separator } from './Separator';
 import { getUiWalletType } from '@src/utils/get-ui-wallet-type';
 import { isScriptWallet } from '@lace/core';
 import { useCurrentBlockchain } from '@src/multichain';
-import { LmpBundleWallet } from '@src/utils/lmp';
 
 const ADRESS_FIRST_PART_LENGTH = 10;
 const ADRESS_LAST_PART_LENGTH = 5;
@@ -196,14 +195,14 @@ export const UserInfo = ({
   );
 
   const renderLmpWallet = useCallback(
-    ({ walletId, walletName }: LmpBundleWallet, isLast: boolean) => (
+    ({ walletId, walletName }: Wallet.LmpBundleWallet, isLast: boolean) => (
       <div key={walletId}>
         <ProfileDropdown.WalletOption
           style={{ textAlign: 'left' }}
           key={walletId}
           title={shortenWalletName(walletName, WALLET_OPTION_NAME_MAX_LENGTH)}
           id={`wallet-option-${walletId}`}
-          onClick={switchToLMP}
+          onClick={() => switchToLMP()}
           type={'hot'}
           profile={{
             customProfileComponent: (

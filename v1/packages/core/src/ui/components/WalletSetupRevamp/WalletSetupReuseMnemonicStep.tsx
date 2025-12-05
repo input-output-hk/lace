@@ -1,24 +1,30 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
-import { Box, Flex, Select, Text } from '@input-output-hk/lace-ui-toolkit';
+import { Box, Flex, Select, Text, TextLink } from '@input-output-hk/lace-ui-toolkit';
 import { AnyWallet } from '@cardano-sdk/web-extension';
 import { Wallet } from '@lace/cardano';
 import { useTranslation } from 'react-i18next';
 
+type CardanoWallet = AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>;
+export type WalletWithMnemonic = CardanoWallet | Wallet.LmpBundleWallet;
+
+const getWalletName = (wallet: WalletWithMnemonic): string =>
+  'metadata' in wallet ? wallet.metadata.name : wallet.walletName;
+
 type WalletSetupReuseMnemonicStepProps = {
-  wallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[];
-  setWalletToReuse: React.Dispatch<
-    React.SetStateAction<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | undefined>
-  >;
-  onBack: () => void;
-  onNext: () => void;
+  wallets: WalletWithMnemonic[];
+  setWalletToReuse: React.Dispatch<React.SetStateAction<WalletWithMnemonic | undefined>>;
+  onSkip: () => void;
+  onReuse: () => void;
+  onBack?: () => void;
 };
 
 export const WalletSetupReuseMnemonicStep = ({
   wallets = [],
   setWalletToReuse,
-  onNext,
+  onReuse,
+  onSkip,
   onBack
 }: WalletSetupReuseMnemonicStepProps): ReactElement => {
   const [selectedWallet, setSelectedWallet] = useState<string | undefined>(wallets[0]?.walletId);
@@ -40,11 +46,17 @@ export const WalletSetupReuseMnemonicStep = ({
       title={t('core.walletSetupReuseRecoveryPhrase.title')}
       description={t('core.walletSetupReuseRecoveryPhrase.description')}
       onBack={onBack}
-      onNext={onNext}
-      nextLabel={t('core.walletSetupReuseRecoveryPhrase.useSameRecoveryPhrase')}
-      backLabel={t('core.walletSetupReuseRecoveryPhrase.createNewOne')}
+      onNext={onReuse}
+      nextLabel={t('core.walletSetupReuseRecoveryPhrase.reuse')}
       isNextEnabled={!!selectedWallet}
       currentTimelineStep={WalletTimelineSteps.RECOVERY_DETAILS}
+      customAction={
+        <TextLink
+          label={t('core.walletSetupReuseRecoveryPhrase.skip')}
+          onClick={onSkip}
+          data-testid="wallet-setup-step-btn-skip"
+        />
+      }
     >
       <Flex flexDirection="column" mt="$52" gap="$16" w="$fill">
         <Text.Body.Normal>{t('core.walletSetupReuseRecoveryPhrase.selectWallet')}</Text.Body.Normal>
@@ -59,8 +71,8 @@ export const WalletSetupReuseMnemonicStep = ({
             zIndex={1000}
             fullWidth
           >
-            {wallets.map(({ walletId, metadata }) => (
-              <Select.Item key={walletId} value={walletId} title={metadata.name} />
+            {wallets.map((wallet) => (
+              <Select.Item key={wallet.walletId} value={wallet.walletId} title={getWalletName(wallet)} />
             ))}
           </Select.Root>
         </Box>
