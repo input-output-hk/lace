@@ -217,7 +217,7 @@ const exposeNotificationsCenterAPI = () => {
 
   exposeApi<NotificationsCenterProperties>({ api$, baseChannel, properties }, { logger, runtime });
 
-  const mode = process.env.NOTIFICATION_CENTER_MODE || 'noop';
+  const mode = process.env.NOTIFICATION_CENTER_MODE || 'production';
 
   switch (mode) {
     case 'test':

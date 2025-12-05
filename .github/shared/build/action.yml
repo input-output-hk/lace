@@ -111,9 +111,9 @@ inputs:
       required: false
       default: 600000
   NOTIFICATION_CENTER_MODE:
-    description: 'Notifications center service mode: "noop" (default, no service), "test" (test API for injecting notifications), or "production" (PubNub service)'
+    description: 'Notifications center service mode: "production" (default, PubNub service), "test" (test API for injecting notifications), or "noop" (no service)'
     required: false
-    default: 'noop'
+    default: 'production'
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true

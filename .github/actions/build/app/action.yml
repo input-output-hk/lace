@@ -70,6 +70,10 @@ inputs:
     description: 'Browser target to build for. Options are [chromium | firefox]'
     required: false
     default: 'chromium'
+  NOTIFICATION_CENTER_MODE:
+    description: 'Notifications center service mode: "production" (default, PubNub service), "test" (test API for injecting notifications), or "noop" (no service)'
+    required: false
+    default: 'production'
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true
@@ -105,6 +109,7 @@ runs:
         SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
         SENTRY_ENVIRONMENT: ${{ inputs.SENTRY_ENVIRONMENT }}
         BROWSER: ${{ inputs.BROWSER_TARGET }}
+        NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
 
     - name: Upload Chrome artifact
