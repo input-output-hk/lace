@@ -2,6 +2,7 @@
 import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { Observable } from 'rxjs';
 import { storage } from 'webextension-polyfill';
+import { Language } from '@lace/translation';
 
 export type LmpBundleWallet = {
   walletId: string;
@@ -13,10 +14,14 @@ export type LmpBundleWallet = {
 export type BundleAppApi = {
   wallets$: Observable<LmpBundleWallet[]>;
   activate(walletId: string): Promise<void>;
+  language$: Observable<Language>;
+  setLanguage(language: Language): Promise<void>;
 };
 export const bundleAppApiProps: RemoteApiProperties<BundleAppApi> = {
   wallets$: RemoteApiPropertyType.HotObservable,
-  activate: RemoteApiPropertyType.MethodReturningPromise
+  activate: RemoteApiPropertyType.MethodReturningPromise,
+  language$: RemoteApiPropertyType.HotObservable,
+  setLanguage: RemoteApiPropertyType.MethodReturningPromise
 };
 export const lmpApiBaseChannel = 'bundle-lmp';
 export const v1ApiGlobalProperty = 'bundleV1';
