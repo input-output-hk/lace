@@ -104,7 +104,7 @@ jobs:
     needs: setup
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Build Lace artifact
         if: needs.setup.outputs.build_exists == 'false'
@@ -148,7 +148,7 @@ jobs:
       actions: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js and install dependencies
         uses: ./.github/actions/install
