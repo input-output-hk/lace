@@ -1,4 +1,4 @@
-import { getCurrentTimetoken, getNow, isArrayOfStrings, unused } from '../../utils';
+import { getNow, unused } from '../../utils';
 import { Notification, NotificationsLogger, NotificationsStorage, Topic } from '../../types';
 import { NotificationsProvider, ProviderInitOptions } from '../types';
 import PubNub from 'pubnub';
@@ -6,15 +6,39 @@ import { ConnectionStatus } from '../../ConnectionStatus';
 import { TokenManager } from './TokenManager';
 import { PubNubFunctionClient } from './PubnubFunctionClient';
 import { StorageKeys } from '../../StorageKeys';
-import { CachedTopics, ChannelsControlMessage, ChannelsControlMessagePUT, PubNubProviderOptions } from './types';
+import { CachedTopics, PubNubProviderOptions } from './types';
 
-const CHANNELS_CONTROL_CHANNEL = 'control.topics';
+/**
+ * Conversion factor: seconds per minute.
+ */
+// eslint-disable-next-line no-magic-numbers
+const SECONDS_PER_MINUTE = 60;
+
+/**
+ * Conversion factor: milliseconds per second.
+ */
+// eslint-disable-next-line no-magic-numbers
+const MILLISECONDS_PER_SECOND = 1000;
 
 /**
  * Interval in milliseconds to refresh channels.
  */
 // eslint-disable-next-line no-magic-numbers
-const REFRESH_CHANNEL_INTERVAL = 1000 * 60 * 60 * 24; // 1 day in milliseconds
+const REFRESH_CHANNEL_INTERVAL = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * 60 * 24; // 1 day in milliseconds
+
+/**
+ * Default interval in minutes to fetch missed messages.
+ */
+// eslint-disable-next-line no-magic-numbers
+const DEFAULT_FETCH_MISSED_MESSAGES_INTERVAL_MINUTES = 6 * 60; // 6h in minutes
+
+/**
+ * Converts minutes to milliseconds.
+ *
+ * @param minutes - Interval in minutes
+ * @returns Interval in milliseconds
+ */
+const minutesToMilliseconds = (minutes: number): number => minutes * SECONDS_PER_MINUTE * MILLISECONDS_PER_SECOND;
 
 /**
  * Checks if a channel ID is a control channel.
@@ -24,16 +48,6 @@ const REFRESH_CHANNEL_INTERVAL = 1000 * 60 * 60 * 24; // 1 day in milliseconds
  * @returns True if the channel is a control channel, false otherwise
  */
 const isControlChannel = (channelId: string): boolean => channelId.startsWith('control.');
-
-/**
- * Represents a pending subscription or unsubscription action.
- */
-interface PendingAction {
-  /** Callback to resolve the pending action. */
-  resolve: () => void;
-  /** Callback to reject the pending action with an error. */
-  reject: (reason: unknown) => void;
-}
 
 const ignoredErrors = new Set(['node_fetch_1.AbortError is not a constructor', 'U.AbortError is not a constructor']);
 
@@ -156,23 +170,23 @@ const channelsToTopics = (
  * PubNub implementation of the NotificationsProvider interface.
  * Handles PubNub connection, channel subscription, and message routing.
  */
-export class PubNubProvider implements NotificationsProvider {
-  private config: PubNub.PubNubConfiguration;
-  private closeResolve: (() => void) | undefined = undefined;
-  private logger: NotificationsLogger;
+export class PubNubPollingProvider implements NotificationsProvider {
+  private readonly config: PubNub.PubNubConfiguration;
+  private readonly logger: NotificationsLogger;
   private onNotification: (notification: Notification) => void = unused;
   private onTopics: (topics: Topic[]) => void = unused;
-  private pendingSubscriptions: Map<Topic['id'], PendingAction> = new Map();
-  private pendingUnsubscriptions: Map<Topic['id'], PendingAction> = new Map();
   private pubnub: PubNub;
+  private fetchMissedMessagesIntervalMinutes: number;
+  private fetchMissedMessagesTimeout: NodeJS.Timeout | undefined = undefined;
   private refreshChannelsInterval: NodeJS.Timeout | undefined = undefined;
   private refreshChannelsTimeout: NodeJS.Timeout | undefined = undefined;
   private refreshTokenTimeout: NodeJS.Timeout | undefined = undefined;
-  private skipAuthentication?: boolean;
-  private storage: NotificationsStorage;
-  private storageKeys: StorageKeys;
-  private tokenEndpoint: string;
+  private readonly skipAuthentication?: boolean;
+  private readonly storage: NotificationsStorage;
+  private readonly storageKeys: StorageKeys;
+  private readonly tokenEndpoint: string;
   private topics: Topic[] = [];
+  private isClosed = false;
 
   /**
    * Creates a new PubNubProvider instance.
@@ -180,7 +194,15 @@ export class PubNubProvider implements NotificationsProvider {
    * @param options - Configuration options for the provider
    */
   constructor(options: PubNubProviderOptions) {
-    const { heartbeatInterval, logger, skipAuthentication, storage, storageKeys, subscribeKey } = {
+    const {
+      heartbeatInterval,
+      logger,
+      skipAuthentication,
+      storage,
+      storageKeys,
+      subscribeKey,
+      fetchMissedMessagesIntervalMinutes
+    } = {
       heartbeatInterval: 0,
       ...options
     };
@@ -194,6 +216,8 @@ export class PubNubProvider implements NotificationsProvider {
     this.storage = storage;
     this.storageKeys = storageKeys;
     this.tokenEndpoint = tokenEndpoint;
+    this.fetchMissedMessagesIntervalMinutes =
+      fetchMissedMessagesIntervalMinutes ?? DEFAULT_FETCH_MISSED_MESSAGES_INTERVAL_MINUTES;
     this.config = {
       // authKey,
       autoNetworkDetection: true,
@@ -210,22 +234,11 @@ export class PubNubProvider implements NotificationsProvider {
    * @param connectionStatus - Connection status manager for reporting status changes
    */
   private addListeners(connectionStatus: ConnectionStatus): void {
+    // No events were received during tests of the polling mode. This whole section is probably not needed.
     this.pubnub.addListener({
-      message: (messageEvent) => {
-        connectionStatus.setOk();
-
-        const { channel, message, timetoken } = messageEvent;
-
-        if (isControlChannel(channel)) {
-          if (channel === CHANNELS_CONTROL_CHANNEL)
-            this.handleChannelsControl(message as unknown as ChannelsControlMessage);
-        } else
-          this.processNotification(channel, message, timetoken).catch((error) =>
-            this.logger.error('NotificationsClient:PubNubProvider: Failed to process notification', error)
-          );
-      },
       // eslint-disable-next-line sonarjs/cognitive-complexity, max-statements, complexity
       status: (statusEvent) => {
+        this.logger.info('[DEBUG] PubNubPollingProvider: statusEvent', statusEvent);
         const { category, operation } = statusEvent;
 
         if (operation === 'PNHeartbeatOperation') return;
@@ -253,68 +266,9 @@ export class PubNubProvider implements NotificationsProvider {
           const { errorData } = statusEvent as unknown as { errorData: unknown };
           const error = errorData instanceof Error ? errorData : new Error(JSON.stringify(errorData));
 
-          for (const { reject } of this.pendingSubscriptions.values()) reject(error);
-          for (const { reject } of this.pendingUnsubscriptions.values()) reject(error);
-          this.pendingSubscriptions.clear();
-          this.pendingUnsubscriptions.clear();
-
           connectionStatus.setError(error);
 
           return;
-        }
-
-        if (operation === 'PNSubscribeOperation') {
-          const { affectedChannels } = statusEvent;
-
-          if (isArrayOfStrings(affectedChannels)) {
-            for (const channelId of affectedChannels) {
-              const pendingSubscription = this.pendingSubscriptions.get(channelId);
-
-              if (pendingSubscription) {
-                pendingSubscription.resolve();
-                this.pendingSubscriptions.delete(channelId);
-              }
-            }
-
-            connectionStatus.setOk();
-
-            return;
-          }
-
-          this.logger.warn('NotificationsClient:PubNubProvider: Got an unexpected affected channels', affectedChannels);
-        } else if (operation === 'PNUnsubscribeOperation') {
-          const { affectedChannels } = statusEvent;
-
-          if (isArrayOfStrings(affectedChannels)) {
-            if (affectedChannels.includes(CHANNELS_CONTROL_CHANNEL)) {
-              if (this.closeResolve) {
-                this.pubnub.stop();
-                this.closeResolve();
-
-                return;
-              }
-
-              this.logger.warn(
-                'NotificationsClient:PubNubProvider: Got unexpected unsubscription from control.topics channel'
-              );
-            } else {
-              for (const channelId of affectedChannels) {
-                const pendingUnsubscription = this.pendingUnsubscriptions.get(channelId);
-
-                // eslint-disable-next-line max-depth
-                if (pendingUnsubscription) {
-                  pendingUnsubscription.resolve();
-                  this.pendingUnsubscriptions.delete(channelId);
-                }
-              }
-
-              connectionStatus.setOk();
-
-              return;
-            }
-          }
-
-          this.logger.warn('NotificationsClient:PubNubProvider: Got an unexpected affected channels', affectedChannels);
         }
 
         this.logger.warn('NotificationsClient:PubNubProvider: Unhandled status event', statusEvent);
@@ -329,14 +283,65 @@ export class PubNubProvider implements NotificationsProvider {
    * @returns Promise that resolves when the connection is closed
    */
   async close(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
-      if (this.refreshChannelsTimeout) clearTimeout(this.refreshChannelsTimeout);
-      if (this.refreshTokenTimeout) clearTimeout(this.refreshTokenTimeout);
+    this.isClosed = true;
+    if (this.fetchMissedMessagesTimeout) clearTimeout(this.fetchMissedMessagesTimeout);
+    if (this.refreshChannelsInterval) clearInterval(this.refreshChannelsInterval);
+    if (this.refreshChannelsTimeout) clearTimeout(this.refreshChannelsTimeout);
+    if (this.refreshTokenTimeout) clearTimeout(this.refreshTokenTimeout);
+    this.pubnub.destroy();
+  }
 
-      this.closeResolve = resolve;
-      this.pubnub.unsubscribeAll();
-    });
+  /**
+   * Calculates the time until the next fetch should occur.
+   * Returns 0 if lastFetchMissedMessages doesn't exist (fetch immediately).
+   * Otherwise calculates the remaining time until the next interval.
+   *
+   * @returns Promise that resolves to the time in milliseconds until next fetch (0 means fetch immediately)
+   */
+  private async calculateNextFetchTime(): Promise<number> {
+    const lastFetchMissedMessages = await this.storage.getItem<number>(this.storageKeys.getLastFetchMissedMessages());
+
+    if (!lastFetchMissedMessages) return 0;
+
+    const intervalMs = minutesToMilliseconds(this.fetchMissedMessagesIntervalMinutes);
+    const timeSinceLastFetch = Date.now() - lastFetchMissedMessages;
+
+    return Math.max(0, intervalMs - timeSinceLastFetch);
+  }
+
+  /**
+   * Schedules the next fetchMissedMessages call.
+   * Always uses setTimeout to ensure asynchronous execution, even when timeUntilNext is 0.
+   * This prevents potential synchronous recursion when called from within fetchMissedMessages.
+   *
+   * @param timeUntilNext - Time in milliseconds until next fetch (0 means schedule immediately but asynchronously)
+   */
+  private scheduleNextFetch(timeUntilNext: number): void {
+    if (this.isClosed || this.fetchMissedMessagesTimeout) {
+      // adready scheduled or closed, do nothing
+      return;
+    }
+    // Schedule fetch for the calculated time
+    this.fetchMissedMessagesTimeout = setTimeout(() => {
+      this.fetchMissedMessages();
+    }, timeUntilNext);
+  }
+
+  /**
+   * Fetches and processes missed messages for a single topic.
+   *
+   * @param topic - The topic to fetch messages for
+   * @returns Promise that resolves when messages are fetched and processed
+   */
+  private async fetchMessagesForTopic(topic: Topic): Promise<void> {
+    const end = (await this.storage.getItem<string>(this.storageKeys.getLastSync(topic.id))) || '0';
+    const response = await this.pubnub.fetchMessages({ channels: [topic.id], count: 100, end });
+    const messages = response.channels[topic.id];
+
+    if (messages) {
+      for (const { channel, message, timetoken } of messages)
+        await this.processNotification(channel, message, timetoken.toString());
+    }
   }
 
   /**
@@ -344,22 +349,37 @@ export class PubNubProvider implements NotificationsProvider {
    * Retrieves messages that arrived while the client was offline or disconnected.
    * Processes messages for topics that are either currently subscribed or were previously subscribed
    * (stored in subscribedTopics). Uses the last sync timestamp to fetch only new messages.
+   * Always reschedules the next fetch in the finally block, regardless of success or failure.
    *
    * @returns Promise that resolves when all missed messages have been fetched and processed
    */
   private async fetchMissedMessages(): Promise<void> {
-    const subscribedTopics = (await this.storage.getItem<Topic['id'][]>(this.storageKeys.getSubscribedTopics())) || [];
+    await this.storage.setItem(this.storageKeys.getLastFetchMissedMessages(), Date.now());
+    try {
+      const subscribedTopics =
+        (await this.storage.getItem<Topic['id'][]>(this.storageKeys.getSubscribedTopics())) || [];
 
-    for (const topic of this.topics)
-      if (topic.isSubscribed || subscribedTopics.includes(topic.id)) {
-        const end = (await this.storage.getItem<string>(this.storageKeys.getLastSync(topic.id))) || '0';
-        const response = await this.pubnub.fetchMessages({ channels: [topic.id], count: 100, end });
-        const messages = response.channels[topic.id];
-
-        if (messages)
-          for (const { channel, message, timetoken } of messages)
-            await this.processNotification(channel, message, timetoken.toString());
+      for (const topic of this.topics) {
+        if (topic.isSubscribed || subscribedTopics.includes(topic.id)) {
+          await this.fetchMessagesForTopic(topic);
+        }
       }
+    } catch (error) {
+      this.logger.error(
+        'NotificationsClient:PubNubProvider: Failed to fetch missed messages',
+        error instanceof Error ? error : new Error(String(error))
+      );
+    } finally {
+      // Always reschedule the next fetch, regardless of success or failure
+      // This ensures periodic fetching continues even after errors
+      if (this.fetchMissedMessagesTimeout) {
+        clearTimeout(this.fetchMissedMessagesTimeout);
+        this.fetchMissedMessagesTimeout = undefined;
+      }
+
+      const timeUntilNext = await this.calculateNextFetchTime();
+      this.scheduleNextFetch(timeUntilNext);
+    }
   }
 
   /**
@@ -388,42 +408,6 @@ export class PubNubProvider implements NotificationsProvider {
   }
 
   /**
-   * Handles control channel messages for topic management.
-   * Supports DEL (delete) and PUT (add/update) actions.
-   *
-   * @param message - The control message containing action and topic information
-   */
-  private handleChannelsControl(message: ChannelsControlMessage): void {
-    const { action, topicId } = message;
-    const index = this.topics.findIndex((topic) => topic.id === topicId);
-
-    if (action === 'DEL') {
-      if (index === -1) {
-        this.logger.warn('NotificationsClient:PubNubProvider: Topic not found', topicId, message);
-
-        return;
-      }
-
-      this.topics.splice(index, 1);
-    } else if (action === 'PUT') {
-      const topic = {
-        id: topicId,
-        isSubscribed: index === -1 ? false : this.topics[index].isSubscribed,
-        ...(message as ChannelsControlMessagePUT).details
-      } as Topic;
-
-      if (index === -1) this.topics.push(topic);
-      else this.topics[index] = topic;
-    } else {
-      this.logger.warn('NotificationsClient:PubNubProvider: Invalid action', action, message);
-
-      return;
-    }
-
-    this.onTopics(this.topics);
-  }
-
-  /**
    * Initializes the PubNub provider.
    * Sets up authentication, listeners, and retrieves all available topics.
    *
@@ -444,7 +428,8 @@ export class PubNubProvider implements NotificationsProvider {
     if (!cachedTopics || cachedTopics.lastFetch < Date.now() - REFRESH_CHANNEL_INTERVAL)
       this.topics = await this.refreshChannels();
     else {
-      this.onTopics((this.topics = cachedTopics.topics));
+      this.topics = cachedTopics.topics;
+      this.onTopics(this.topics);
 
       this.refreshChannelsTimeout = setTimeout(
         this.refreshChannels.bind(this),
@@ -452,9 +437,9 @@ export class PubNubProvider implements NotificationsProvider {
       );
     }
 
-    this.fetchMissedMessages().catch((error) =>
-      this.logger.error('NotificationsClient:PubNubProvider: Failed to fetch missed messages', error)
-    );
+    // Calculate when the next fetch should occur and schedule it
+    const timeUntilNext = await this.calculateNextFetchTime();
+    this.scheduleNextFetch(timeUntilNext);
 
     return this.topics;
   }
@@ -499,14 +484,9 @@ export class PubNubProvider implements NotificationsProvider {
    * @param topicId - The ID of the topic to subscribe to
    * @returns Promise that resolves when the subscription is confirmed
    */
-  subscribe(topicId: Topic['id']): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      for (const topic of this.topics) if (topic.id === topicId) topic.isSubscribed = true;
-
-      this.onTopics(this.topics);
-      this.pubnub.subscribe({ channels: [topicId], timetoken: getCurrentTimetoken() });
-      this.pendingSubscriptions.set(topicId, { resolve, reject });
-    });
+  async subscribe(topicId: Topic['id']): Promise<void> {
+    for (const topic of this.topics) if (topic.id === topicId) topic.isSubscribed = true;
+    this.onTopics(this.topics);
   }
 
   /**
@@ -538,9 +518,44 @@ export class PubNubProvider implements NotificationsProvider {
   refreshChannelsOnInterval(): void {
     this.refreshChannels()
       .then((topics) => {
-        if (JSON.stringify(topics) !== JSON.stringify(this.topics)) this.onTopics((this.topics = topics));
+        if (JSON.stringify(topics) !== JSON.stringify(this.topics)) {
+          this.topics = topics;
+          this.onTopics(this.topics);
+        }
       })
       .catch((error) => this.logger.error('NotificationsClient:PubNubProvider: Failed to refresh channels', error));
+  }
+
+  /**
+   * Updates the interval for fetching missed messages.
+   * Recalculates the next fetch time based on the new interval and reschedules the timeout.
+   *
+   * @param intervalMinutes - New interval in minutes
+   */
+  updateFetchMissedMessagesInterval(intervalMinutes: number): void {
+    // Clear existing timeout
+    if (this.fetchMissedMessagesTimeout) {
+      clearTimeout(this.fetchMissedMessagesTimeout);
+      this.fetchMissedMessagesTimeout = undefined;
+    }
+
+    // Update the interval
+    this.fetchMissedMessagesIntervalMinutes = intervalMinutes;
+
+    // Recalculate next fetch time with new interval and reschedule
+    void (async () => {
+      if (this.isClosed) {
+        return;
+      }
+      const timeUntilNext = await this.calculateNextFetchTime();
+      const intervalMs = minutesToMilliseconds(intervalMinutes);
+
+      this.logger.info(
+        `PubNubPollingProvider: Updated interval to ${intervalMinutes} minutes (${intervalMs}ms), next fetch in ${timeUntilNext}ms`
+      );
+
+      this.scheduleNextFetch(timeUntilNext);
+    })();
   }
 
   private refreshToken(userId: string): void {
@@ -574,12 +589,7 @@ export class PubNubProvider implements NotificationsProvider {
    * @returns Promise that resolves when the unsubscription is confirmed
    */
   async unsubscribe(topicId: Topic['id']): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      for (const topic of this.topics) if (topic.id === topicId) topic.isSubscribed = false;
-
-      this.onTopics(this.topics);
-      this.pubnub.unsubscribe({ channels: [topicId] });
-      this.pendingUnsubscriptions.set(topicId, { resolve, reject });
-    });
+    for (const topic of this.topics) if (topic.id === topicId) topic.isSubscribed = false;
+    this.onTopics(this.topics);
   }
 }

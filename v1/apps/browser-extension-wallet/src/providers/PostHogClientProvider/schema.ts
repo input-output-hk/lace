@@ -55,9 +55,16 @@ export const swapCenterSchema = commonSchema.merge(
   })
 );
 
+export const laceMessagingCenterSchema = commonSchema.merge(
+  z.object({
+    fetchMissedMessagesIntervalMinutes: z.number()
+  })
+);
+
 export const featureFlagSchema = {
   common: z.preprocess(parseJsonPreprocessor, commonSchema),
   dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema),
   glacierDrop: z.preprocess(parseJsonPreprocessor, glacierDropSchema),
-  swapCenter: z.preprocess(parseJsonPreprocessor, swapCenterSchema)
+  swapCenter: z.preprocess(parseJsonPreprocessor, swapCenterSchema),
+  laceMessagingCenter: z.preprocess(parseJsonPreprocessor, laceMessagingCenterSchema)
 };
