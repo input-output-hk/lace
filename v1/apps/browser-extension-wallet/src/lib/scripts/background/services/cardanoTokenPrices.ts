@@ -28,6 +28,7 @@ import Bottleneck from 'bottleneck';
 import { ActiveWallet } from '@cardano-sdk/web-extension';
 import { ObservableWallet } from '@cardano-sdk/wallet';
 import { Wallet } from '@lace/cardano';
+import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 
 /** The subset of token data from CoinGecko relevant for Lace to show token prices. */
 type PriceData = [priceInAda: number, priceVariationPercentage24h: number];
@@ -93,45 +94,62 @@ const tryStorePrices = (priceMap: PriceMap): void => {
     .catch((error) => console.warn('Error setting cached cardano token prices', error));
 };
 
-const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
+const fetchPrice = (assetId: Cardano.AssetId, ticker: string | undefined): Observable<PriceListItem> =>
   // TODO: replace with `fromFetch` (rxjs/fetch)
   from(
     (async (): Promise<PriceListItem> => {
       try {
-        const url = `${process.env.TOKEN_PRICES_URL}/cardano/tokens/${assetId}/pools`;
-        const response = await rateLimiter.schedule(() => fetch(url));
-        if (response.status === 404) {
+        // If no ticker is available, return not found
+        if (!ticker) {
           return [assetId, { lastFetchTime: Date.now(), notFound: true }];
         }
-        if (response.status === 429) {
+
+        const vsCurrencies =
+          (Object.keys(currenciesMap) as currencyCode[]).map((code) => code.toLowerCase()).join(',') || 'usd';
+
+        // Fetch token price from CoinGecko
+        const tokenUrl = `https://coingecko.live-mainnet.eks.lw.iog.io/api/v3/simple/price?symbols=${ticker.toLowerCase()}&vs_currencies=${vsCurrencies}&include_24hr_change=true`;
+        const tokenResponse = await rateLimiter.schedule(() => fetch(tokenUrl));
+
+        if (tokenResponse.status === 404) {
+          return [assetId, { lastFetchTime: Date.now(), notFound: true }];
+        }
+        if (tokenResponse.status === 429) {
+          /* eslint-disable-next-line sonarjs/no-duplicate-string */
           console.warn('Error fetching cardano token price', assetId, '(rate limit)');
           return [assetId, { lastFetchTime: Date.now() }];
         }
-        const body = await response.json();
-        const data = body.data?.[0]?.attributes;
-
-        // If not the expected data, return no price
-        if (typeof data === 'object') {
-          const {
-            base_token_price_native_currency: priceInAda,
-            price_change_percentage: { h24: h24Change }
-          } = data;
-
-          // If not the expected data, return no price
-          if (typeof priceInAda === 'string' && typeof h24Change === 'string') {
-            return [
-              assetId,
-              {
-                lastFetchTime: Date.now(),
-                price: {
-                  priceInAda: Number.parseFloat(priceInAda),
-                  priceVariationPercentage24h: Number.parseFloat(h24Change)
-                }
-              }
-            ];
-          }
+        if (!tokenResponse.ok) {
+          /* eslint-disable-next-line sonarjs/no-duplicate-string */
+          console.warn('Error fetching cardano token price', assetId, `HTTP ${tokenResponse.status}`);
+          return [assetId, { lastFetchTime: Date.now() }];
         }
+
+        const tokenBody = await tokenResponse.json();
+        const tokenData = tokenBody[ticker.toLowerCase()];
+
+        // If token data not found, return not found
+        if (!tokenData || typeof tokenData !== 'object') {
+          return [assetId, { lastFetchTime: Date.now(), notFound: true }];
+        }
+
+        const tokenUsdPrice = tokenData.usd;
+        const tokenUsd24hChange = tokenData.usd_24h_change;
+
+        const priceVariationPercentage24h = typeof tokenUsd24hChange === 'number' ? tokenUsd24hChange : 0;
+
+        return [
+          assetId,
+          {
+            lastFetchTime: Date.now(),
+            price: {
+              priceInAda: tokenUsdPrice,
+              priceVariationPercentage24h
+            }
+          }
+        ];
       } catch (error) {
+        /* eslint-disable-next-line sonarjs/no-duplicate-string */
         console.warn('Error fetching cardano token price', assetId, error);
       }
       return [assetId, { lastFetchTime: Date.now() }];
@@ -141,7 +159,12 @@ const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
 const fungibleTokenAssetIds = (wallet: ObservableWallet) =>
   combineLatest([wallet.balance.utxo.total$, wallet.assetInfo$]).pipe(
     mergeMap(([{ assets = new Map() }, assetInfoMap]) =>
-      [...assets.keys()].filter((assetId) => !Wallet.util.mayBeNFT(assetInfoMap.get(assetId)))
+      [...assets.keys()]
+        .filter((assetId) => !Wallet.util.mayBeNFT(assetInfoMap.get(assetId)))
+        .map((assetId) => ({
+          assetId,
+          ticker: assetInfoMap.get(assetId)?.tokenMetadata?.ticker
+        }))
     )
   );
 
@@ -166,11 +189,15 @@ const waitTilPriceUpdateIsDue =
       })
     );
 
-const trackTokenPrice = (assetId: Cardano.AssetId, knownPrices$: Observable<PriceMap>): Observable<PriceListItem> =>
+const trackTokenPrice = (
+  assetId: Cardano.AssetId,
+  ticker: string | undefined,
+  knownPrices$: Observable<PriceMap>
+): Observable<PriceListItem> =>
   lastKnownPrice(assetId, knownPrices$).pipe(
     waitTilPriceUpdateIsDue(),
     mergeMap((knownPrice) =>
-      fetchPrice(assetId).pipe(
+      fetchPrice(assetId, ticker).pipe(
         repeatWhen(() => timer(TOKEN_PRICE_CHECK_INTERVAL)),
         // do not retry 404s on interval; will try again when SW is restarted
         takeWhile(([, { notFound }]) => !notFound, true),
@@ -186,7 +213,7 @@ const trackWalletAssetPrices = (
   wallet: ObservableWallet,
   knownPrices$: Observable<PriceMap>
 ): Observable<PriceListItem> =>
-  fungibleTokenAssetIds(wallet).pipe(mergeMap((assetId) => trackTokenPrice(assetId, knownPrices$)));
+  fungibleTokenAssetIds(wallet).pipe(mergeMap(({ assetId, ticker }) => trackTokenPrice(assetId, ticker, knownPrices$)));
 
 const trackActiveWalletAssetPrices = (wallet$: Observable<ActiveWallet>, knownPrices$: Observable<PriceMap>) =>
   wallet$.pipe(
