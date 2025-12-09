@@ -18,7 +18,9 @@ import {
   ReplaySubject,
   take,
   of,
-  filter
+  filter,
+  delay,
+  defer
 } from 'rxjs';
 import { storage } from 'webextension-polyfill';
 import { TokenPrices, Status, MaybeTokenPrice } from '../../types';
@@ -95,47 +97,51 @@ const tryStorePrices = (priceMap: PriceMap): void => {
 
 const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
   // TODO: replace with `fromFetch` (rxjs/fetch)
-  from(
-    (async (): Promise<PriceListItem> => {
-      try {
-        const url = `${process.env.TOKEN_PRICES_URL}/cardano/tokens/${assetId}/pools`;
-        const response = await rateLimiter.schedule(() => fetch(url));
-        if (response.status === 404) {
-          return [assetId, { lastFetchTime: Date.now(), notFound: true }];
-        }
-        if (response.status === 429) {
-          console.warn('Error fetching cardano token price', assetId, '(rate limit)');
-          return [assetId, { lastFetchTime: Date.now() }];
-        }
-        const body = await response.json();
-        const data = body.data?.[0]?.attributes;
-
-        // If not the expected data, return no price
-        if (typeof data === 'object') {
-          const {
-            base_token_price_native_currency: priceInAda,
-            price_change_percentage: { h24: h24Change }
-          } = data;
+  // Using defer to execute the fetch every time the observable is subscribed to, allowing repeatWhen to function correctly.
+  // Otherwise the fetch would be executed only once and the price would not be updated by the resubscription from repeatWhen.
+  defer(() =>
+    from(
+      (async (): Promise<PriceListItem> => {
+        try {
+          const url = `${process.env.TOKEN_PRICES_URL}/cardano/tokens/${assetId}/pools`;
+          const response = await rateLimiter.schedule(() => fetch(url));
+          if (response.status === 404) {
+            return [assetId, { lastFetchTime: Date.now(), notFound: true }];
+          }
+          if (response.status === 429) {
+            console.warn('Error fetching cardano token price', assetId, '(rate limit)');
+            return [assetId, { lastFetchTime: Date.now() }];
+          }
+          const body = await response.json();
+          const data = body.data?.[0]?.attributes;
 
           // If not the expected data, return no price
-          if (typeof priceInAda === 'string' && typeof h24Change === 'string') {
-            return [
-              assetId,
-              {
-                lastFetchTime: Date.now(),
-                price: {
-                  priceInAda: Number.parseFloat(priceInAda),
-                  priceVariationPercentage24h: Number.parseFloat(h24Change)
+          if (typeof data === 'object') {
+            const {
+              base_token_price_native_currency: priceInAda,
+              price_change_percentage: { h24: h24Change }
+            } = data;
+
+            // If not the expected data, return no price
+            if (typeof priceInAda === 'string' && typeof h24Change === 'string') {
+              return [
+                assetId,
+                {
+                  lastFetchTime: Date.now(),
+                  price: {
+                    priceInAda: Number.parseFloat(priceInAda),
+                    priceVariationPercentage24h: Number.parseFloat(h24Change)
+                  }
                 }
-              }
-            ];
+              ];
+            }
           }
+        } catch (error) {
+          console.warn('Error fetching cardano token price', assetId, error);
         }
-      } catch (error) {
-        console.warn('Error fetching cardano token price', assetId, error);
-      }
-      return [assetId, { lastFetchTime: Date.now() }];
-    })()
+        return [assetId, { lastFetchTime: Date.now() }];
+      })()
+    )
   );
 
 const fungibleTokenAssetIds = (wallet: ObservableWallet) =>
@@ -171,7 +177,9 @@ const trackTokenPrice = (assetId: Cardano.AssetId, knownPrices$: Observable<Pric
     waitTilPriceUpdateIsDue(),
     mergeMap((knownPrice) =>
       fetchPrice(assetId).pipe(
-        repeatWhen(() => timer(TOKEN_PRICE_CHECK_INTERVAL)),
+        // Using repeatWhen(() => timer(TOKEN_PRICE_CHECK_INTERVAL)) would only repeat once, not continuously.
+        // Here, `notifications` emits each time the fetchPrice observable completes; delaying this causes fetchPrice to repeat after the interval.
+        repeatWhen((notifications) => notifications.pipe(delay(TOKEN_PRICE_CHECK_INTERVAL))),
         // do not retry 404s on interval; will try again when SW is restarted
         takeWhile(([, { notFound }]) => !notFound, true),
         // if we failed to fetch the price, only emit when
