@@ -1,14 +1,18 @@
 // mostly duplicated in v1 and lmp module, could be a shared library
-import { RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { RemoteApiProperties, RemoteApiPropertyType, WalletType } from '@cardano-sdk/web-extension';
 import { Observable } from 'rxjs';
 import { storage } from 'webextension-polyfill';
 import { Language } from '@lace/translation';
+
+export type BlockchainName = 'Bitcoin' | 'Cardano' | 'Midnight';
 
 export type LmpBundleWallet = {
   walletId: string;
   walletName: string;
   walletIcon: string;
   encryptedRecoveryPhrase?: string;
+  blockchain: BlockchainName;
+  walletType: WalletType;
 };
 
 export type BundleAppApi = {
