@@ -1,0 +1,467 @@
+name: Release Lace Bundle
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'ci/release-bundle'
+
+permissions:
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  prepare:
+    name: Build v1 Packages
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build v1 packages
+        working-directory: v1
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+          EXCLUDE_BROWSER: 'true'
+        run: yarn build
+
+      - name: Upload v1 packages artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-packages
+          path: |
+            v1/packages/common/dist
+            v1/packages/cardano/dist
+            v1/packages/translation/dist
+            v1/packages/core/dist
+            v1/packages/staking/dist
+            v1/packages/nami/dist
+            v1/packages/bitcoin/dist
+            v1/packages/notifications/dist
+
+  checksV1:
+    name: V1 Code Quality Checks
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Format check
+        run: yarn format-check
+        working-directory: v1/apps/browser-extension-wallet
+
+      - name: Lint check
+        run: yarn lint
+        working-directory: v1/apps/browser-extension-wallet
+
+      - name: Type check
+        run: yarn type-check
+        working-directory: v1/apps/browser-extension-wallet
+
+  unitTestsV1:
+    name: V1 Unit Tests
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Execute unit tests
+        uses: ./.github/actions/test/unit
+
+  build-lace-v1-extension:
+    name: Build Lace v1 Extension
+    runs-on: ubuntu-22.04
+    needs: [checksV1, unitTestsV1]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Build v1 Extension
+        working-directory: v1/apps/browser-extension-wallet
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+          WEBPACK_ENV: prod
+          BROWSER: chrome
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
+          MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
+          POSTHOG_PRODUCTION_TOKEN: ${{ secrets.POSTHOG_PRODUCTION_TOKEN }}
+          PRODUCTION_MODE_TRACKING: 'true'
+          BANXA_LACE_URL: ${{ vars.BANXA_LACE_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
+          NOTIFICATION_CENTER_MODE: 'production'
+          PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+        run: |
+          yarn cleanup:dist
+          WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw
+          WEBPACK_PUBLIC_PATH=/app/ yarn build:app
+          WEBPACK_PUBLIC_PATH=/app/ yarn build:cs
+
+      - name: Upload v1 Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-extension-dist
+          path: v1/apps/browser-extension-wallet/dist
+          retention-days: 1
+          if-no-files-found: error
+
+  checksV2:
+    name: V2 Code Quality Checks
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js for v2
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'v2/.nvmrc'
+
+      - name: Configure npm registries
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+          echo "engine-strict=true" >> ~/.npmrc
+
+      - name: Install v2 dependencies
+        run: npm ci
+        working-directory: v2
+
+      - name: Check code formatting
+        run: npm run check:format
+        working-directory: v2
+
+      - name: Lint check
+        run: npx nx lint midnight-extension --max-warnings=0
+        working-directory: v2
+
+      - name: Type check
+        run: npx nx run-many --target=type-check-src,type-check-test --projects=midnight-extension
+        working-directory: v2
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+
+  unitTestsV2:
+    name: V2 Unit Tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js for v2
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'v2/.nvmrc'
+
+      - name: Configure npm registries
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+          echo "engine-strict=true" >> ~/.npmrc
+
+      - name: Install v2 dependencies
+        run: npm ci
+        working-directory: v2
+
+      - name: Run unit tests
+        run: npx nx test midnight-extension
+        working-directory: v2
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+
+  build-midnight-extension:
+    name: Build Midnight Extension (v2)
+    runs-on: ubuntu-22.04
+    needs: [checksV2, unitTestsV2]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js for v2
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'v2/.nvmrc'
+
+      - name: Configure npm registries
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+          echo "engine-strict=true" >> ~/.npmrc
+
+      - name: Install v2 dependencies
+        run: npm ci
+        working-directory: v2
+
+      - name: Get v1 extension ID
+        id: get-extension-id
+        run: |
+          EXTENSION_ID=$(cat v1/apps/browser-extension-wallet/.env.defaults | grep LACE_EXTENSION_ID | cut -d'=' -f2)
+          echo "extension_id=$EXTENSION_ID" >> $GITHUB_OUTPUT
+
+      - name: Create feature flags override for release
+        run: |
+          # Copy default feature flags to override file
+          cp v2/apps/midnight-extension/src/feature-flags.ts v2/apps/midnight-extension/src/feature-flags.override.ts
+
+          # Replace FEATURES_DEV with FEATURES_POSTHOG in the override file
+          sed -i "s/FeatureFlagKey('FEATURES_DEV')/FeatureFlagKey('FEATURES_POSTHOG')/g" v2/apps/midnight-extension/src/feature-flags.override.ts
+
+          echo "Created feature flags override for release build"
+
+      - name: Build Midnight Extension (v2)
+        working-directory: v2/apps/midnight-extension
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+          # Bundle-specific: v2 must use the same extension id as the bundled (v1) extension.
+          EXTENSION_ID: ${{ steps.get-extension-id.outputs.extension_id }}
+
+          BLOCKFROST_PROJECT_ID_MAINNET: notused
+          BLOCKFROST_PROJECT_ID_PREPROD: notused
+          BLOCKFROST_PROJECT_ID_PREVIEW: notused
+          MAESTRO_PROJECT_ID_TESTNET: notused
+          MAESTRO_PROJECT_ID_MAINNET: notused
+          EXTRA_FEATURE_FLAGS: FEATURES_POSTHOG,BLOCKCHAIN_MIDNIGHT,LMP_BUNDLE
+          DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID: ${{ vars.DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID || 'undeployed' }}
+          DEFAULT_NETWORK: ${{ vars.DEFAULT_NETWORK || 'testnet' }}
+          NODE_ENV: production
+          POSTHOG_API_TOKEN: ${{ secrets.POSTHOG_API_TOKEN_V2 }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN_V2 }}
+          SENTRY_DSN: ${{ vars.SENTRY_DSN_V2 }}
+          SENTRY_ENVIRONMENT: production
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT_ID: ${{ vars.SENTRY_PROJECT_ID_V2 }}
+        run: |
+          rm -rf ./dist
+          npm run build:app
+          WEBPACK_PUBLIC_PATH=/js/sw/ npm run build:sw
+
+      - name: Upload Midnight Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: midnight-extension-dist
+          path: v2/apps/midnight-extension/dist
+          retention-days: 1
+          if-no-files-found: error
+
+  bundle:
+    name: Create Bundle
+    runs-on: ubuntu-22.04
+    needs: [build-lace-v1-extension, build-midnight-extension]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install root dependencies
+        run: yarn install --immutable --inline-builds
+
+      - name: Download v1 Extension artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-extension-dist
+          path: v1/apps/browser-extension-wallet/dist
+
+      - name: Download Midnight Extension artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: midnight-extension-dist
+          path: v2/apps/midnight-extension/dist
+
+      - name: Build Bundle
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+        run: yarn build:bundle
+
+      - name: Verify bundle exists
+        run: |
+          echo "Bundle contents:"
+          ls -la ./dist
+          echo "Manifest:"
+          cat ./dist/manifest.json | head -20
+
+      - name: Upload Chrome Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lace-bundle-chrome
+          path: ./dist
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Prepare MS Edge Bundle
+        run: |
+          jq 'del(.key)' dist/manifest.json | jq -c . > dist/manifest.tmp.json
+          mv dist/manifest.tmp.json dist/manifest.json
+
+      - name: Upload MS Edge Bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lace-bundle-edge
+          path: ./dist
+          retention-days: 90
+          if-no-files-found: error
+
+  smokeTests:
+    name: E2E Smoke Tests
+    runs-on: ubuntu-22.04
+    needs: bundle
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace Bundle artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: lace-bundle-chrome
+          path: ./v1/apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
+        uses: ./.github/actions/test/e2e
+        with:
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
+
+  processReports:
+    name: Process E2E Test Reports
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+
+    steps:
+      - name: Download all smoke tests artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: .
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        run: |
+          echo "
+          branch=${{ github.ref_name }}
+          browser= 'Chrome'
+          tags= '@Smoke'
+          platform=Linux
+          workflow=release-lace-bundle
+          " > environment.properties
+
+      - name: Publish allure report to S3 (disabled)
+        if: false
+        run: echo "Allure publishing disabled"
+
+      - name: Check smoke tests result
+        run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
