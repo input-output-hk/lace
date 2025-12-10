@@ -1,4 +1,4 @@
-name: Release Lace Bundle
+name: Release LMP Bundle
 
 on:
   workflow_dispatch:
@@ -140,7 +140,7 @@ jobs:
           DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
           NOTIFICATION_CENTER_MODE: 'production'
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
-          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT }} 
+          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT }}
         run: |
           yarn cleanup:dist
           WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw
@@ -374,3 +374,57 @@ jobs:
           path: ./dist
           retention-days: 90
           if-no-files-found: error
+
+  smokeTests:
+    name: E2E Smoke Tests
+    runs-on: ubuntu-22.04
+    needs: bundle
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace Bundle artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: lace-bundle-chrome
+          path: ./dist
+
+      - name: Execute E2E tests
+        uses: ./.github/actions/test/e2e
+        with:
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
+          LMP_BUNDLE: true
+
+  verifyTests:
+    name: Verify Test Results
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+
+    steps:
+      - name: Check smoke tests result
+        run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
