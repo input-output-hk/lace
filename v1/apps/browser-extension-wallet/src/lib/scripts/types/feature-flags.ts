@@ -6,7 +6,8 @@ import {
   commonSchema,
   dappExplorerSchema,
   glacierDropSchema,
-  swapCenterSchema
+  swapCenterSchema,
+  laceMessagingCenterSchema
 } from '@providers/PostHogClientProvider/schema';
 
 export enum ExperimentName {
@@ -41,6 +42,7 @@ export type FeatureFlagCommonSchema = DeepRequired<z.infer<typeof commonSchema>>
 export type FeatureFlagDappExplorerSchema = DeepRequired<z.infer<typeof dappExplorerSchema>>;
 export type FeatureFlagGlacierDropSchema = DeepRequired<z.infer<typeof glacierDropSchema>>;
 export type FeatureFlagSwapCenterSchema = DeepRequired<z.infer<typeof swapCenterSchema>>;
+export type FeatureFlagLaceMessagingCenterSchema = DeepRequired<z.infer<typeof laceMessagingCenterSchema>>;
 
 // Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
 // strict null checks enabled so `false` is a replacement for `undefined` in this case
@@ -51,6 +53,7 @@ type FeatureFlagCustomPayloads = {
   [ExperimentName.DAPP_EXPLORER]: FeatureFlagPayload<FeatureFlagDappExplorerSchema>;
   [ExperimentName.GLACIER_DROP]: FeatureFlagPayload<FeatureFlagGlacierDropSchema>;
   [ExperimentName.SWAP_CENTER]: FeatureFlagPayload<FeatureFlagSwapCenterSchema>;
+  [ExperimentName.NOTIFICATIONS_CENTER]: FeatureFlagPayload<FeatureFlagLaceMessagingCenterSchema>;
 };
 
 export type FeatureFlagPayloads = {
