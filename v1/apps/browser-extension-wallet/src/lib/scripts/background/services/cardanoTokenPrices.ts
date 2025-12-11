@@ -172,11 +172,19 @@ const waitTilPriceUpdateIsDue =
       })
     );
 
-const trackTokenPrice = (assetId: Cardano.AssetId, knownPrices$: Observable<PriceMap>): Observable<PriceListItem> =>
+export const trackTokenPrice = ({
+  assetId,
+  knownPrices$,
+  fetchPriceFn = fetchPrice
+}: {
+  assetId: Cardano.AssetId;
+  knownPrices$: Observable<PriceMap>;
+  fetchPriceFn?: (assetId: Cardano.AssetId) => Observable<PriceListItem>;
+}): Observable<PriceListItem> =>
   lastKnownPrice(assetId, knownPrices$).pipe(
     waitTilPriceUpdateIsDue(),
     mergeMap((knownPrice) =>
-      fetchPrice(assetId).pipe(
+      fetchPriceFn(assetId).pipe(
         // Using repeatWhen(() => timer(TOKEN_PRICE_CHECK_INTERVAL)) would only repeat once, not continuously.
         // Here, `notifications` emits each time the fetchPrice observable completes; delaying this causes fetchPrice to repeat after the interval.
         repeatWhen((notifications) => notifications.pipe(delay(TOKEN_PRICE_CHECK_INTERVAL))),
@@ -194,7 +202,7 @@ const trackWalletAssetPrices = (
   wallet: ObservableWallet,
   knownPrices$: Observable<PriceMap>
 ): Observable<PriceListItem> =>
-  fungibleTokenAssetIds(wallet).pipe(mergeMap((assetId) => trackTokenPrice(assetId, knownPrices$)));
+  fungibleTokenAssetIds(wallet).pipe(mergeMap((assetId) => trackTokenPrice({ assetId, knownPrices$ })));
 
 const trackActiveWalletAssetPrices = (wallet$: Observable<ActiveWallet>, knownPrices$: Observable<PriceMap>) =>
   wallet$.pipe(
