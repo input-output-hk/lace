@@ -19,14 +19,17 @@ const hasStorageChangeForKey = <T extends keyof ExtensionStorage>(
 ): changes is Record<T, ExtensionStorageChange<T>> => key in changes;
 
 /**
- * Extracts the fetchMissedMessagesIntervalMinutes value from a feature flag payload.
+ * Extracts the latestMessageTimestamp value from a feature flag payload.
  *
  * @param payload - Feature flag payload
- * @returns Interval in minutes, or undefined if not found
+ * @returns ISO timestamp string, or undefined if not found
  */
-const extractIntervalFromPayload = (payload: unknown): number | undefined => {
-  if (payload && typeof payload === 'object' && 'fetchMissedMessagesIntervalMinutes' in payload) {
-    return (payload as { fetchMissedMessagesIntervalMinutes: number }).fetchMissedMessagesIntervalMinutes;
+const extractLatestMessageTimestamp = (payload: unknown): string | undefined => {
+  if (payload && typeof payload === 'object' && 'latestMessageTimestamp' in payload) {
+    const timestamp = payload.latestMessageTimestamp;
+    if (typeof timestamp === 'string' && timestamp.length > 0) {
+      return timestamp;
+    }
   }
   // eslint-disable-next-line consistent-return
   return undefined;
@@ -34,26 +37,28 @@ const extractIntervalFromPayload = (payload: unknown): number | undefined => {
 
 /**
  * Handles changes to the lace-messaging-center feature flag payload.
- * Updates the fetchMissedMessagesIntervalMinutes when the feature flag payload changes.
+ * Updates the latestMessageTimestamp when the feature flag payload changes.
  *
  * @param oldPayload - Previous feature flag payload value
  * @param newPayload - New feature flag payload value
  */
 const handleLaceMessagingCenterPayloadChange = (oldPayload: unknown, newPayload: unknown): void => {
-  const oldInterval = extractIntervalFromPayload(oldPayload);
-  const newInterval = extractIntervalFromPayload(newPayload);
+  const oldTimestamp = extractLatestMessageTimestamp(oldPayload);
+  const newTimestamp = extractLatestMessageTimestamp(newPayload);
 
-  if (oldInterval !== newInterval && newInterval !== undefined) {
+  if (oldTimestamp !== newTimestamp && newTimestamp !== undefined) {
     const notificationsClient = getNotificationsClient();
     if (notificationsClient) {
-      try {
-        notificationsClient.updateFetchMissedMessagesInterval(newInterval);
-        logger.debug(`Successfully called updateFetchMissedMessagesInterval(${newInterval}) on notifications client`);
-      } catch (error) {
-        logger.error('Failed to update fetch missed messages interval to newInterval', newInterval, error);
-      }
+      notificationsClient
+        .updateLatestMessageTimestamp(newTimestamp)
+        .then(() => {
+          logger.debug(`Successfully called updateLatestMessageTimestamp(${newTimestamp}) on notifications client`);
+        })
+        .catch((error) => {
+          logger.error('Failed to update latest message timestamp', newTimestamp, error);
+        });
     } else {
-      logger.debug('Notifications client not available, cannot update interval from PostHog');
+      logger.debug('Notifications client not available, cannot update timestamp from PostHog');
     }
   }
 };

@@ -64,7 +64,7 @@ export class NotificationsClient {
   private storageKeys: StorageKeys;
   private subscribedTopics: Topic['id'][] = [];
   private unsubscribedTopics: Topic['id'][] = [];
-
+  private lastMessageTimestamp: string | undefined = undefined;
   /**
    * Creates a new NotificationsClient instance.
    * Validates options, initializes the provider, and starts the initialization process.
@@ -151,9 +151,17 @@ export class NotificationsClient {
       if (!error) this.pendingCommands.onConnectionRestored();
     });
 
-    this.initTillSuccess().catch((error) => {
-      logger.error('NotificationsClient: Failed while retrying to initialize notifications client', error);
-    });
+    this.initTillSuccess()
+      .then(async () => {
+        // Apply cached timestamp only after init is fully successful (outside retry mechanism)
+        if (this.lastMessageTimestamp !== undefined) {
+          await this.updateLatestMessageTimestamp(this.lastMessageTimestamp);
+          this.lastMessageTimestamp = undefined;
+        }
+      })
+      .catch((error) => {
+        logger.error('NotificationsClient: Failed while retrying to initialize notifications client', error);
+      });
   }
 
   /**
@@ -441,16 +449,19 @@ export class NotificationsClient {
   }
 
   /**
-   * Updates the interval for fetching missed messages.
+   * Updates the latest message timestamp from PostHog.
    * Only works if the provider is PubNubPollingProvider.
    *
-   * @param intervalMinutes - New interval in minutes
+   * @param isoTimestamp - ISO 8601 string timestamp from PostHog
    */
-  updateFetchMissedMessagesInterval(intervalMinutes: number): void {
-    if (this.provider instanceof PubNubPollingProvider) {
-      if (typeof intervalMinutes !== 'number' || intervalMinutes <= 0)
-        throw new TypeError('NotificationsClient: intervalMinutes must be a positive number');
-      this.provider.updateFetchMissedMessagesInterval(intervalMinutes);
+  async updateLatestMessageTimestamp(isoTimestamp: string): Promise<void> {
+    if (typeof this.provider.updateLatestMessageTimestamp === 'function') {
+      if (typeof isoTimestamp !== 'string' || isoTimestamp.length === 0)
+        throw new TypeError('NotificationsClient: isoTimestamp must be a non-empty string');
+      await this.provider.updateLatestMessageTimestamp(isoTimestamp);
+    } else {
+      // Method called before init(). Storing the timestamp to use it on init().
+      this.lastMessageTimestamp = isoTimestamp;
     }
   }
 }

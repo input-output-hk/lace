@@ -50,8 +50,6 @@ export interface PubNubProviderConfiguration {
   tokenEndpoint?: string;
   /** Whether to use polling mode. Defaults to false. */
   usePollingMode?: boolean;
-  /** Interval in minutes to fetch missed messages. Defaults to 1440 minutes (1 day). */
-  fetchMissedMessagesIntervalMinutes?: number;
 }
 
 /**

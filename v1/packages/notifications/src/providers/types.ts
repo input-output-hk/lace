@@ -45,4 +45,12 @@ export interface NotificationsProvider {
    * @returns Promise that resolves when the unsubscription is successful
    */
   unsubscribe(topicId: Topic['id']): Promise<void>;
+
+  /**
+   * Updates the latest message timestamp (optional method).
+   * Only some providers support this functionality.
+   * @param isoTimestamp - ISO 8601 string timestamp
+   * @returns Promise that resolves when the timestamp is updated
+   */
+  updateLatestMessageTimestamp?(isoTimestamp: string): Promise<void>;
 }

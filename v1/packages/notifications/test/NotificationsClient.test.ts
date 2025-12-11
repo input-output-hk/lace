@@ -6,6 +6,7 @@
 import { NotificationsClient } from '../src/NotificationsClient';
 import { MockStorage } from './MockStorage';
 import { PubNubProvider } from '../src/providers/PubNub/PubNubProvider';
+import { PubNubPollingProvider } from '../src/providers/PubNub/PubNubPollingProvider';
 import type { NotificationsLogger, Topic } from '../src/types';
 import type { NotificationsProvider, ProviderInitOptions } from '../src/providers';
 import { ConnectionStatus } from '../src/ConnectionStatus';
@@ -29,6 +30,8 @@ jest.mock('pubnub', () =>
 
 // Mock only PubNubProvider
 jest.mock('../src/providers/PubNub/PubNubProvider');
+// Mock PubNubPollingProvider
+jest.mock('../src/providers/PubNub/PubNubPollingProvider');
 
 const createTopic = (id: string, autoSubscribe = false): Topic => ({
   id,
@@ -1521,6 +1524,72 @@ describe('NotificationsClient', () => {
       expect(mockProvider.init).toHaveBeenCalled();
       const initCall = mockProvider.init.mock.calls[0][0] as ProviderInitOptions;
       expect(initCall.userId).toBe(validUserId);
+    });
+  });
+
+  describe('updateLatestMessageTimestamp', () => {
+    let mockPollingProvider: jest.Mocked<NotificationsProvider> & { updateLatestMessageTimestamp: jest.Mock };
+
+    beforeEach(() => {
+      initTopics = [createTopic('topic-1')];
+    });
+
+    test('should cache timestamp when called before init and apply it during init', async () => {
+      const testTimestamp = '2024-01-01T00:00:00.000Z';
+
+      // Get the actual PubNubPollingProvider class to use its prototype for instanceof checks
+      const ActualPubNubPollingProvider = jest.requireActual<
+        typeof import('../src/providers/PubNub/PubNubPollingProvider')
+      >('../src/providers/PubNub/PubNubPollingProvider').PubNubPollingProvider;
+
+      // Setup mock provider with updateLatestMessageTimestamp method
+      // Create an object with PubNubPollingProvider prototype so instanceof checks pass
+      initPromise = new Promise<Topic[]>((resolve) => {
+        mockPollingProvider = Object.create(ActualPubNubPollingProvider.prototype) as typeof mockPollingProvider;
+        mockPollingProvider.close = jest.fn().mockResolvedValue(undefined);
+        mockPollingProvider.init = jest.fn().mockImplementation((options: ProviderInitOptions) => {
+          connectionStatus = options.connectionStatus;
+          resolve(initTopics);
+          return initPromise;
+        });
+        mockPollingProvider.subscribe = jest.fn().mockResolvedValue(undefined);
+        mockPollingProvider.unsubscribe = jest.fn().mockResolvedValue(undefined);
+        mockPollingProvider.updateLatestMessageTimestamp = jest.fn().mockResolvedValue(undefined);
+      });
+
+      (PubNubPollingProvider as jest.Mock).mockClear();
+      (PubNubPollingProvider as jest.Mock).mockImplementation(() => mockPollingProvider);
+
+      // Create client with usePollingMode: true
+      client = new NotificationsClient({
+        logger: mockLogger,
+        onNotification: mockOnNotification,
+        onTopics: mockOnTopics,
+        storage: mockStorage,
+        provider: {
+          name: 'PubNub',
+          configuration: {
+            usePollingMode: true,
+            subscribeKey
+          }
+        }
+      });
+
+      // Call updateLatestMessageTimestamp before init completes
+      // At this point, the provider exists but userId is not set yet,
+      // so the provider's updateLatestMessageTimestamp would return early.
+      // The timestamp should be cached in lastMessageTimestamp.
+      await client.updateLatestMessageTimestamp(testTimestamp);
+
+      // Wait for initialization to complete
+      // During init, after provider.init() completes, the cached timestamp
+      // should be applied by calling updateLatestMessageTimestamp again.
+      await waitForClientInit();
+
+      // Verify that updateLatestMessageTimestamp was called on the provider with the cached timestamp
+      // It should be called once during init (after provider.init() completes)
+      expect(mockPollingProvider.updateLatestMessageTimestamp).toHaveBeenCalledTimes(1);
+      expect(mockPollingProvider.updateLatestMessageTimestamp).toHaveBeenCalledWith(testTimestamp);
     });
   });
 });
