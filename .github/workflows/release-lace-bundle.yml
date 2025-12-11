@@ -162,6 +162,8 @@ jobs:
         with:
           name: v1-extension-dist
           path: v1/apps/browser-extension-wallet/dist
+          retention-days: 1
+          if-no-files-found: error
 
   build-v2:
     name: Build v2 Extension
@@ -223,6 +225,8 @@ jobs:
         with:
           name: v2-extension-dist
           path: v2/apps/midnight-extension/dist
+          retention-days: 1
+          if-no-files-found: error
 
   bundle:
     name: Create Bundle
@@ -261,11 +265,20 @@ jobs:
           NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn build:bundle
 
+      - name: Verify bundle exists
+        run: |
+          echo "Bundle contents:"
+          ls -la ./dist
+          echo "Manifest:"
+          cat ./dist/manifest.json | head -20
+
       - name: Upload Chrome Bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: lace-bundle-chrome
           path: ./dist
+          retention-days: 90
+          if-no-files-found: error
 
       - name: Prepare MS Edge Bundle
         run: |
@@ -277,6 +290,8 @@ jobs:
         with:
           name: lace-bundle-edge
           path: ./dist
+          retention-days: 90
+          if-no-files-found: error
 
   smokeTests:
     name: E2E Smoke Tests
