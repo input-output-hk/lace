@@ -441,16 +441,16 @@ export class NotificationsClient {
   }
 
   /**
-   * Updates the interval for fetching missed messages.
+   * Updates the latest message timestamp from PostHog.
    * Only works if the provider is PubNubPollingProvider.
    *
-   * @param intervalMinutes - New interval in minutes
+   * @param isoTimestamp - ISO 8601 string timestamp from PostHog
    */
-  updateFetchMissedMessagesInterval(intervalMinutes: number): void {
+  async updateLatestMessageTimestamp(isoTimestamp: string): Promise<void> {
     if (this.provider instanceof PubNubPollingProvider) {
-      if (typeof intervalMinutes !== 'number' || intervalMinutes <= 0)
-        throw new TypeError('NotificationsClient: intervalMinutes must be a positive number');
-      this.provider.updateFetchMissedMessagesInterval(intervalMinutes);
+      if (typeof isoTimestamp !== 'string' || isoTimestamp.length === 0)
+        throw new TypeError('NotificationsClient: isoTimestamp must be a non-empty string');
+      await this.provider.updateLatestMessageTimestamp(isoTimestamp);
     }
   }
 }

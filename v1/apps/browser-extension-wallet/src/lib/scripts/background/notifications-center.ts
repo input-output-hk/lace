@@ -150,23 +150,12 @@ const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<Notifi
     setItem: (key, value) => localStorage.set({ [key]: value })
   };
 
-  // Read feature flag payload to get fetchMissedMessagesIntervalMinutes
-  const backgroundStorage = await getBackgroundStorage();
-  const featureFlagPayload = backgroundStorage?.featureFlagPayloads?.[ExperimentName.NOTIFICATIONS_CENTER];
-  const fetchMissedMessagesIntervalMinutes =
-    featureFlagPayload &&
-    typeof featureFlagPayload === 'object' &&
-    'fetchMissedMessagesIntervalMinutes' in featureFlagPayload
-      ? (featureFlagPayload.fetchMissedMessagesIntervalMinutes as number)
-      : undefined;
-
   const notificationsClient = new NotificationsClient({
     provider: {
       name: 'PubNub',
       configuration: {
         skipAuthentication: process.env.PUBNUB_SKIP_AUTHENTICATION === 'true',
-        subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY,
-        ...(fetchMissedMessagesIntervalMinutes !== undefined && { fetchMissedMessagesIntervalMinutes })
+        subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY
       }
     },
     storage: notificationsStorage,
@@ -184,6 +173,28 @@ const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<Notifi
 
   // Store reference for dynamic updates
   notificationsClientInstance = notificationsClient;
+
+  // Check PostHog feature flag for latestMessageTimestamp and trigger fetch if newer
+  const backgroundStorage = await getBackgroundStorage();
+  const featureFlagPayload = backgroundStorage?.featureFlagPayloads?.[ExperimentName.NOTIFICATIONS_CENTER];
+  const latestMessageTimestamp =
+    featureFlagPayload &&
+    typeof featureFlagPayload === 'object' &&
+    'latestMessageTimestamp' in featureFlagPayload &&
+    typeof featureFlagPayload.latestMessageTimestamp === 'string'
+      ? featureFlagPayload.latestMessageTimestamp
+      : undefined;
+
+  if (latestMessageTimestamp) {
+    try {
+      await notificationsClient.updateLatestMessageTimestamp(latestMessageTimestamp);
+      logger.debug(
+        `Successfully called updateLatestMessageTimestamp(${latestMessageTimestamp}) on notifications client during init`
+      );
+    } catch (error) {
+      logger.error('Failed to update latest message timestamp during init', latestMessageTimestamp, error);
+    }
+  }
 
   const markAsRead = (id?: LaceNotification['message']['id']) => {
     for (const notification of notifications) if (notification.message.id === id || !id) notification.read = true;

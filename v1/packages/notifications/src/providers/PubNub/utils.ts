@@ -1,5 +1,6 @@
 import PubNub from 'pubnub';
 import { NotificationsLogger, Topic } from '../../types';
+import type { RetryBackoffConfig } from 'backoff-rxjs';
 
 /**
  * Conversion factor: seconds per minute.
@@ -18,6 +19,22 @@ const MILLISECONDS_PER_SECOND = 1000;
  */
 // eslint-disable-next-line no-magic-numbers
 export const REFRESH_CHANNEL_INTERVAL = MILLISECONDS_PER_SECOND * SECONDS_PER_MINUTE * 60 * 24; // 1 day in milliseconds
+
+/**
+ * Maximum interval multiplier for token retry backoff.
+ */
+// eslint-disable-next-line no-magic-numbers
+const MAX_RETRY_INTERVAL_MULTIPLIER = 16;
+
+/**
+ * Retry configuration for token retrieval using retryBackoff operator.
+ * Implements exponential backoff: 1s, 2s, 4s, 8s, 16s (5 retries total).
+ */
+export const TOKEN_RETRY_CONFIG: RetryBackoffConfig = {
+  initialInterval: MILLISECONDS_PER_SECOND, // Start with 1 second
+  maxInterval: MILLISECONDS_PER_SECOND * MAX_RETRY_INTERVAL_MULTIPLIER, // Cap at 16 seconds
+  maxRetries: 5 // Total of 6 attempts: 1 initial + 5 retries
+};
 
 /**
  * Checks if a channel ID is a control channel.
