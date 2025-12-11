@@ -29,7 +29,7 @@ Before({ tags: '@pending or @Pending' }, async () => 'skipped');
 
 Before(
   {
-    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet or @OnboardingRestorePaperWallet or @NetworkRequestsCounting'
+    tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet or @OnboardingRestorePaperWallet or @NetworkRequestsCounting or @OnboardingCreateWalletBitcoin or @OnboardingRestoreWalletBitcoin'
   },
   async () => {
     await extendedView.visit();
@@ -121,6 +121,7 @@ Before(
 Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, async () => {
   await popupViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before(
@@ -165,10 +166,11 @@ Before({ tags: '@Staking-NonDelegatedFunds-Popup' }, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
-Before({ tags: '@OwnTags-Extended' }, async () => {
+Before({ tags: '@OwnTags-Extended or @AddNewWalletCreateBitcoin' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.MultiWallet1, TestWalletName.MultiWallet2]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
 });
 
 Before({ tags: '@OwnTags-Popup' }, async () => {
@@ -198,10 +200,10 @@ Before({ tags: '@Multidelegation-SwitchingPools-Extended-E2E' }, async () => {
   await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
-Before(
-  { tags: '@HdWallet-extended' },
-  async () => await extendedViewRepositoryWalletInitialization([TestWalletName.HdWalletReadOnly1])
-);
+Before({ tags: '@HdWallet-extended' }, async () => {
+  await extendedViewRepositoryWalletInitialization([TestWalletName.HdWalletReadOnly1]);
+  await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+});
 
 Before({ tags: '@SendNftHdWallet-Extended-E2E' }, async () => {
   await extendedViewRepositoryWalletInitialization([TestWalletName.WalletSendNftHdWalletE2E]);
@@ -271,7 +273,9 @@ Before(
 );
 
 Before(
-  { tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet' },
+  {
+    tags: '@AddNewWalletCreate or @AddNewWalletRestore or @AddNewWalletConnect or @AddNewWalletCreatePaperWallet'
+  },
   async () => {
     await extendedViewRepositoryWalletInitialization([TestWalletName.AddNewWallet]);
     await localStorageInitializer.disableShowingMultidelegationBetaBanner();

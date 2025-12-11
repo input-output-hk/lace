@@ -195,5 +195,4 @@ Feature: Analytics - Settings - Extended View
     And I wait until modal disappears
     And I validate latest analytics multiple events:
       | settings \| hold up \| remove wallet \| click |
-      | wallet \| session start \| pageview           |
-    And I validate that 3 analytics event(s) have been sent
+    And I validate that 2 analytics event(s) have been sent

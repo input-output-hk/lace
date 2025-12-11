@@ -18,21 +18,21 @@ Feature: Onboarding - Create wallet
   @LW-2433
   Scenario: Create Wallet - Wallet setup page - back button
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
     When I click "Back" button during wallet setup
     Then "Mnemonic verification" page is displayed from "Create wallet" flow with 24 words
 
   @LW-2434
   Scenario: Create Wallet - Name your wallet - Enter wallet button disabled for empty wallet name
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow
+    And I go to "Wallet setup" page from "Create" wallet flow for Cardano chain
     When I enter wallet name: "empty"
     Then "Next" button is disabled during onboarding process
 
   @LW-2975
   Scenario Outline: Create Wallet - Set password - Recommendation for password: <passw_err>, password: <password>, password confirmation: <password_conf>
     Given I click "Create" button on wallet setup page
-    And I go to "Wallet setup" page from "Create" wallet flow and not fill values
+    And I go to "Wallet setup" page from "Create" wallet flow and not fill values for Cardano chain
     When I enter wallet name: "wallet", password: "<password>" and password confirmation: "<password_conf>"
     Then Password recommendation: "<passw_err>", complexity bar level: "<complex_bar_lvl>" and password confirmation error: "<passw_conf_err>" are displayed
     Examples:

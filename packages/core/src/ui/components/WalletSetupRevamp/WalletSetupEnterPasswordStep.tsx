@@ -54,7 +54,7 @@ export const WalletSetupEnterPasswordStep = ({
         label={t('core.walletSetupReuseRecoveryPhrase.insertPassword')}
         onSubmit={() => handleOnNext()}
         onChange={(target) => setPassword(target)}
-        data-testid="wallet-setup-enter-password-input"
+        testId="wallet-setup-enter-password-input"
         errorMessage={errorMessage}
         autoFocus
       />

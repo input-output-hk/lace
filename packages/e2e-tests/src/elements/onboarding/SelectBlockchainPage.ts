@@ -58,11 +58,9 @@ class SelectBlockchainPage extends CommonOnboardingElements {
   async selectBlockchain(blockchain: 'Cardano' | 'Bitcoin') {
     switch (blockchain) {
       case 'Cardano':
-        await this.cardanoOptionRadioButton.waitForClickable();
         await this.cardanoOptionRadioButton.click();
         break;
       case 'Bitcoin':
-        await this.bitcoinOptionRadioButton.waitForClickable();
         await this.bitcoinOptionRadioButton.click();
         break;
       default:

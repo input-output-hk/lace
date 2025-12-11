@@ -15,7 +15,7 @@ Feature: Onboarding - Restore wallet
   @LW-4546 @LW-4549
   Scenario Outline: Restore wallet - Limit the wallet name input - Realtime error when inputs name with size of <value> character
     Given I click "Restore" button on wallet setup page
-    And I go to "Wallet setup" page from "Restore" wallet flow
+    And I go to "Wallet setup" page from "Restore" wallet flow for Cardano chain
     When I enter wallet name with size of: <value> characters
     Then wallet name error "core.walletSetupRegisterStep.nameMaxLength" <is_displayed> displayed
     And "Next" button is <is_disabled> during onboarding process
@@ -27,9 +27,7 @@ Feature: Onboarding - Restore wallet
   @LW-4743
   Scenario: Restore wallet - Enter button support
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and fill values for Cardano chain
     When I press keyboard Enter button
     And "Wallet setup" page is displayed
     And I enter wallet name: "ValidName", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -39,18 +37,16 @@ Feature: Onboarding - Restore wallet
   @LW-5835
   Scenario: Restore Wallet - "Recovery phrase page" displayed
     Given I click "Restore" button on wallet setup page
-    And I click "Next" button during wallet setup
-    And I click "Next" button during wallet setup
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values for Cardano chain
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
 
   @LW-5842
   Scenario: Restore Wallet - "Recovery phrase length page" back button
     Given I click "Restore" button on wallet setup page
-    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values
+    And I go to "Mnemonic verification" page from "Restore" wallet flow and not fill values for Cardano chain
     Then "Mnemonic verification" page is displayed from "Restore wallet" flow with 24 words
     When I click "Back" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Restore" flow
+    Then "Choose recovery method" page is displayed on "Restore" flow for Cardano chain
 
   @LW-6080 @LW-5839 @LW-5838
   Scenario Outline: Restore Wallet - "Recovery phrase length page" restore <mnemonicLength> words happy path
@@ -123,4 +119,31 @@ Feature: Onboarding - Restore wallet
   Scenario: Onboarding - Restore - "Choose a recovery method" page is displayed
     When I click "Restore" button on wallet setup page
     And I click "Next" button during wallet setup
-    Then "Choose recovery method" page is displayed on "Restore" flow
+    Then "Choose recovery method" page is displayed on "Restore" flow for Cardano chain
+
+  @LW-13739
+  Scenario: Extended-view - Multi-wallet - Restore/Create Cardano Wallet - Use same recovery phrase
+    Given I click "Restore" button on wallet setup page
+    And I select "Bitcoin" blockchain on the "Select a blockchain" page
+    And I click "Next" button during wallet setup
+    And I click "Understood" button on "Bitcoin warning" modal
+    And I click "Next" button during wallet setup
+    And I enter 24 correct mnemonic words on "Mnemonic verification" page
+    And I click "Next" button during wallet setup
+    And I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Enter wallet" button
+    Then I see LW homepage
+    When I opened "Create" flow via "Add new wallet" feature
+    And I select "Cardano" blockchain on the "Select a blockchain" page
+    And I click "Next" button during wallet setup
+    When I click "Next" button during wallet setup
+    Then "Reuse your Recovery Phrase" page is displayed
+    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I enter password: "N_8J@bne87A" on "Confirm your password" page
+    And I click "Confirm" button on "Confirm your password" page
+    When I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
+    And I click "Enter wallet" button
+    Then I see LW homepage
+    And I switch network to: "Preprod" in extended mode
+    When I click "Receive" button on page header
+    Then I see Cardano wallet name and address for wallet "TestAutomationWallet" in the Receive drawer
