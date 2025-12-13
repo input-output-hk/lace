@@ -251,11 +251,7 @@ const first64AsciiBytesToHex = (input: string): string => {
   return resultBuffer.toString('hex');
 };
 
-const clearBytes = (bytes: Uint8Array) => {
-  for (let i = 0; i < bytes.length; i++) {
-    bytes[i] = 0;
-  }
-};
+const { clearBytes } = Wallet.util;
 
 const getExtendedAccountPublicKey = async ({
   wallet,
@@ -1245,14 +1241,8 @@ export const useWalletManager = (): UseWalletManager => {
     async (wallet: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>, passphrase: Uint8Array) => {
       switch (wallet.type) {
         case WalletType.InMemory: {
-          const keyMaterialBytes = await Wallet.KeyManagement.emip3decrypt(
-            Buffer.from(wallet.encryptedSecrets.keyMaterial, 'hex'),
-            passphrase
-          );
-          const keyMaterialBuffer = Buffer.from(keyMaterialBytes);
-          const mnemonic = keyMaterialBuffer.toString('utf8').split(' ');
+          const mnemonic = await Wallet.util.decryptMnemonic(wallet.encryptedSecrets.keyMaterial, passphrase);
           clearBytes(passphrase);
-          clearBytes(keyMaterialBytes);
           return mnemonic;
         }
         case WalletType.Ledger:

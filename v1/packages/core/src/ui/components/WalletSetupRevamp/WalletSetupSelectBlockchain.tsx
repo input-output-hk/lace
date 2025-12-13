@@ -1,9 +1,10 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { WalletSetupStepLayoutRevamp } from './WalletSetupStepLayoutRevamp';
 import { WalletTimelineSteps } from '@ui/components/WalletSetup';
 import { Card, Flex, Text } from '@input-output-hk/lace-ui-toolkit';
 import { ReactComponent as CardanoIcon } from '../../assets/icons/cardano.svg';
 import { ReactComponent as BitcoinIcon } from '../../assets/icons/bitcoin.svg';
+import { ReactComponent as MidnightIcon } from '../../assets/icons/midnight.svg';
 import { Radio } from '@lace/common';
 import styles from './WalletSetupSelectBlockchain.module.scss';
 import cn from 'classnames';
@@ -11,15 +12,17 @@ import { Blockchain } from '@cardano-sdk/web-extension';
 import { useTranslation } from 'react-i18next';
 import { TFunction } from 'i18next';
 
+type BlockchainSelection = Blockchain | 'Midnight';
+
 interface BlockchainOption {
-  value: Blockchain;
+  value: BlockchainSelection;
   title: string;
   description: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   testId: string;
   badge?: {
     text: string;
-    type: 'primary' | 'gradient';
+    type: 'primary' | 'gradient' | 'secondary';
   };
 }
 
@@ -33,6 +36,17 @@ const getBlockchainOptions = (t: TFunction): BlockchainOption[] => [
     badge: {
       text: t('core.WalletSetupSelectBlockchain.defaultBadge'),
       type: 'primary'
+    }
+  },
+  {
+    value: 'Midnight',
+    title: t('core.WalletSetupSelectBlockchain.midnight'),
+    description: t('core.WalletSetupSelectBlockchain.midnight.description'),
+    icon: MidnightIcon,
+    testId: 'midnight-blockchain-card',
+    badge: {
+      text: t('core.WalletSetupSelectBlockchain.newBadge'),
+      type: 'gradient'
     }
   },
   {
@@ -54,6 +68,10 @@ interface WalletSetupSelectBlockchainProps {
   selectedBlockchain: Blockchain;
   setSelectedBlockchain: (blockchain: Blockchain) => void;
   showBitcoinOption?: boolean;
+  showMidnightOption?: boolean;
+  midnightDisabled?: boolean;
+  midnightDisabledReason?: string;
+  onMidnightSelect?: () => void;
 }
 
 export const WalletSetupSelectBlockchain = ({
@@ -61,37 +79,94 @@ export const WalletSetupSelectBlockchain = ({
   next,
   setSelectedBlockchain,
   selectedBlockchain,
-  showBitcoinOption = true
+  showBitcoinOption = true,
+  showMidnightOption = false,
+  midnightDisabled = false,
+  midnightDisabledReason,
+  onMidnightSelect
 }: WalletSetupSelectBlockchainProps): ReactElement => {
   const { t } = useTranslation();
-  const blockchainOptionsToShow = showBitcoinOption
-    ? getBlockchainOptions(t)
-    : getBlockchainOptions(t).filter((option) => option.value !== 'Bitcoin');
+  const [isMidnightSelected, setIsMidnightSelected] = useState(false);
+
+  const blockchainOptionsToShow = getBlockchainOptions(t).filter((option) => {
+    if (option.value === 'Bitcoin' && !showBitcoinOption) return false;
+    if (option.value === 'Midnight' && !showMidnightOption) return false;
+    return true;
+  });
+
+  const isOptionDisabled = (value: string): boolean => value === 'Midnight' && midnightDisabled;
+
+  const getDisabledDescription = (option: BlockchainOption): string => {
+    if (option.value === 'Midnight' && midnightDisabled && midnightDisabledReason) {
+      return midnightDisabledReason;
+    }
+    return option.description;
+  };
+
+  const getDisabledBadge = (option: BlockchainOption): BlockchainOption['badge'] => {
+    if (option.value === 'Midnight' && midnightDisabled) {
+      return {
+        text: t('core.WalletSetupSelectBlockchain.midnight.alreadyHaveWallet'),
+        type: 'secondary'
+      };
+    }
+    return option.badge;
+  };
+
+  const handleSelect = (value: BlockchainSelection) => {
+    if (isOptionDisabled(value)) return;
+
+    if (value === 'Midnight') {
+      setIsMidnightSelected(true);
+    } else {
+      setIsMidnightSelected(false);
+      setSelectedBlockchain(value);
+    }
+  };
+
+  const handleNext = () => {
+    if (isMidnightSelected && onMidnightSelect) {
+      onMidnightSelect();
+    } else {
+      next();
+    }
+  };
+
+  const isSelected = (value: BlockchainSelection): boolean => {
+    if (value === 'Midnight') return isMidnightSelected;
+    return !isMidnightSelected && selectedBlockchain === value;
+  };
 
   return (
     <WalletSetupStepLayoutRevamp
       title={t('core.WalletSetupSelectBlockchain.title')}
       onBack={back}
-      onNext={next}
+      onNext={handleNext}
       description={t('core.WalletSetupSelectBlockchain.description')}
       currentTimelineStep={WalletTimelineSteps.SELECT_BLOCKCHAIN}
     >
-      <Flex flexDirection="column" gap="$16">
+      <Flex flexDirection="column" gap="$12">
         {blockchainOptionsToShow.map((option) => {
           const Icon = option.icon;
+          const disabled = isOptionDisabled(option.value);
+          const badge = getDisabledBadge(option);
+          const description = getDisabledDescription(option);
+
           return (
             <Card.Outlined
               key={option.value}
               data-testid={option.testId}
-              onClick={() => setSelectedBlockchain(option.value)}
+              onClick={() => handleSelect(option.value)}
               className={cn(styles.blockchainCard, {
-                [styles.selected]: selectedBlockchain === option.value
+                [styles.selected]: isSelected(option.value),
+                [styles.disabled]: disabled
               })}
             >
-              <Flex gap="$16" alignItems="flex-start" px="$16" py="$16">
+              <Flex gap="$16" alignItems="flex-start" px="$16" py="$12">
                 <Radio
-                  checked={selectedBlockchain === option.value}
-                  onChange={() => setSelectedBlockchain(option.value)}
+                  checked={isSelected(option.value)}
+                  onChange={() => handleSelect(option.value)}
+                  disabled={disabled}
                   data-testid={`${option.value.toLowerCase()}-option-radio-button`}
                 />
                 <Flex flexDirection="column" gap="$8">
@@ -99,22 +174,25 @@ export const WalletSetupSelectBlockchain = ({
                     <Text.Body.Large weight="$bold" data-testid={`${option.value.toLowerCase()}-option-title`}>
                       {option.title}
                     </Text.Body.Large>
-                    <div
-                      className={cn({
-                        [styles.primaryBadge]: option.badge?.type === 'primary',
-                        [styles.gradientBadge]: option.badge?.type === 'gradient'
-                      })}
-                    >
-                      <Text.Label
-                        className={styles.badgeText}
-                        data-testid={`${option.value.toLowerCase()}-option-badge`}
+                    {badge && (
+                      <div
+                        className={cn({
+                          [styles.primaryBadge]: badge.type === 'primary',
+                          [styles.gradientBadge]: badge.type === 'gradient',
+                          [styles.secondaryBadge]: badge.type === 'secondary'
+                        })}
                       >
-                        {option.badge?.text}
-                      </Text.Label>
-                    </div>
+                        <Text.Label
+                          className={styles.badgeText}
+                          data-testid={`${option.value.toLowerCase()}-option-badge`}
+                        >
+                          {badge.text}
+                        </Text.Label>
+                      </div>
+                    )}
                   </Flex>
                   <Text.Body.Normal color="secondary" data-testid={`${option.value.toLowerCase()}-option-description`}>
-                    {option.description}
+                    {description}
                   </Text.Body.Normal>
                 </Flex>
                 <div style={{ alignSelf: 'center' }}>

@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-null, complexity */
-import { CreateWalletParams, useLocalStorage } from '@hooks';
+import { CreateWalletParams, useLocalStorage, useLMP } from '@hooks';
 import { Wallet } from '@lace/cardano';
 import { walletRoutePaths } from '@routes';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
@@ -10,10 +10,11 @@ import { WalletCreateStep } from './types';
 import { RecoveryMethod } from '../types';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { PublicPgpKeyData } from '@src/types';
-import { Blockchain, AnyWallet, WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
+import { Blockchain, WalletConflictError, WalletType } from '@cardano-sdk/web-extension';
 import { useObservable } from '@lace/common';
 import { walletRepository } from '@lib/wallet-api-ui';
 import { getWalletBlockchain } from './get-wallet-blockchain';
+import { WalletWithMnemonic } from '@lace/core';
 
 type OnNameChange = (state: { name: string }) => void;
 interface PgpValidation {
@@ -35,13 +36,12 @@ interface State {
   setPgpValidation: React.Dispatch<React.SetStateAction<PgpValidation>>;
   selectedBlockchain: Blockchain;
   setSelectedBlockchain: React.Dispatch<React.SetStateAction<Blockchain>>;
-  walletToReuse: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null;
-  setWalletToReuse: React.Dispatch<
-    React.SetStateAction<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null>
-  >;
+  walletToReuse: WalletWithMnemonic | null;
+  setWalletToReuse: React.Dispatch<React.SetStateAction<WalletWithMnemonic | null>>;
   showRecoveryPhraseError: () => void;
   setMnemonic: (mnemonic: string[]) => void;
-  nonSelectedBlockchainWallets: AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata>[] | undefined;
+  nonSelectedBlockchainWallets: WalletWithMnemonic[] | undefined;
+  setStep: React.Dispatch<React.SetStateAction<WalletCreateStep>>;
 }
 
 interface Props {
@@ -75,10 +75,9 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
   const [, { updateLocalStorage: setShowWalletConflictError }] = useLocalStorage('showWalletConflictError', false);
   const [selectedBlockchain, setSelectedBlockchain] = useState<Blockchain>('Cardano');
   const [step, setStep] = useState<WalletCreateStep>(WalletCreateStep.SelectBlockchain);
-  const [walletToReuse, setWalletToReuse] = useState<AnyWallet<Wallet.WalletMetadata, Wallet.AccountMetadata> | null>(
-    null
-  );
+  const [walletToReuse, setWalletToReuse] = useState<WalletWithMnemonic | null>(null);
   const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod>('mnemonic');
+  const { midnightWallets } = useLMP();
   const [pgpInfo, setPgpInfo] = useState<PublicPgpKeyData>(INITIAL_PGP_STATE);
   const [pgpValidation, setPgpValidation] = useState<PgpValidation>({ error: null, success: null });
   const wallets = useObservable(walletRepository.wallets$);
@@ -98,15 +97,23 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     console.error('finalizeBitcoinWalletCreation');
   }, []);
 
-  const nonSelectedBlockchainWallets = useMemo(
-    () =>
+  const nonSelectedBlockchainWallets = useMemo((): WalletWithMnemonic[] | undefined => {
+    // Filter v1 wallets that are not the selected blockchain and are in-memory (have recovery phrase)
+    const v1Wallets =
       wallets?.filter(
         (wallet) =>
           getWalletBlockchain(wallet).toLowerCase() !== selectedBlockchain.toLowerCase() &&
           wallet.type === WalletType.InMemory
-      ),
-    [selectedBlockchain, wallets]
-  );
+      ) ?? [];
+
+    // Include Midnight wallets that have encrypted recovery phrase
+    const filteredMidnightWallets: WalletWithMnemonic[] = midnightWallets
+      ? midnightWallets.filter((w) => w.encryptedRecoveryPhrase)
+      : [];
+
+    const combined = [...v1Wallets, ...filteredMidnightWallets];
+    return combined.length > 0 ? combined : undefined;
+  }, [selectedBlockchain, wallets, midnightWallets]);
 
   const showRecoveryPhraseError = useCallback(() => setStep(WalletCreateStep.RecoveryPhraseError), [setStep]);
   const setMnemonic = useCallback(
@@ -156,6 +163,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
     [recoveryMethod, finalizeWalletCreation, finalizeBitcoinWalletCreation, history, setShowWalletConflictError]
   );
 
+  // eslint-disable-next-line max-statements, sonarjs/cognitive-complexity
   const next: State['next'] = useCallback(
     async (state) => {
       if (state) {
@@ -163,6 +171,7 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       }
       switch (step) {
         case WalletCreateStep.SelectBlockchain: {
+          // Note: Midnight redirects to v2 directly from SelectBlockchain component
           setStep(
             paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : WalletCreateStep.RecoveryPhraseWriteDown
           );
@@ -170,11 +179,11 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
         }
         case WalletCreateStep.ChooseRecoveryMethod: {
           if (recoveryMethod === 'mnemonic' || recoveryMethod === 'mnemonic-bitcoin') {
-            const nextStep =
-              nonSelectedBlockchainWallets.length > 0
-                ? WalletCreateStep.ReuseRecoveryPhrase
-                : WalletCreateStep.RecoveryPhraseWriteDown;
-            setStep(nextStep);
+            if (nonSelectedBlockchainWallets && nonSelectedBlockchainWallets.length > 0) {
+              setStep(WalletCreateStep.ReuseRecoveryPhrase);
+            } else {
+              setStep(WalletCreateStep.RecoveryPhraseWriteDown);
+            }
             break;
           }
           setStep(WalletCreateStep.SecurePaperWallet);
@@ -220,68 +229,58 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       setFormDirty,
       paperWalletEnabled,
       recoveryMethod,
-      nonSelectedBlockchainWallets?.length,
+      nonSelectedBlockchainWallets,
       handleSetupStep,
       finalizeWalletCreation,
       history
     ]
   );
 
+  // eslint-disable-next-line max-statements
   const back = useCallback(() => {
     switch (step) {
-      case WalletCreateStep.SelectBlockchain: {
+      case WalletCreateStep.SelectBlockchain:
         setFormDirty(false);
         history.push(walletRoutePaths.newWallet.root);
         break;
-      }
-      case WalletCreateStep.ChooseRecoveryMethod: {
+      case WalletCreateStep.ChooseRecoveryMethod:
         setFormDirty(false);
         setStep(WalletCreateStep.SelectBlockchain);
         break;
-      }
-      case WalletCreateStep.RecoveryPhraseWriteDown: {
+      case WalletCreateStep.RecoveryPhraseWriteDown:
         setFormDirty(false);
-        paperWalletEnabled
-          ? setStep(WalletCreateStep.ChooseRecoveryMethod)
-          : history.push(walletRoutePaths.newWallet.root);
+        setStep(paperWalletEnabled ? WalletCreateStep.ChooseRecoveryMethod : undefined);
+        if (!paperWalletEnabled) history.push(walletRoutePaths.newWallet.root);
         break;
-      }
-      case WalletCreateStep.ReuseRecoveryPhrase: {
+      case WalletCreateStep.ReuseRecoveryPhrase:
         setStep(WalletCreateStep.RecoveryPhraseWriteDown);
         break;
-      }
-      case WalletCreateStep.SecurePaperWallet: {
+      case WalletCreateStep.SecurePaperWallet:
         setStep(WalletCreateStep.ChooseRecoveryMethod);
         break;
-      }
-      case WalletCreateStep.EnterWalletPassword: {
+      case WalletCreateStep.EnterWalletPassword:
+      case WalletCreateStep.RecoveryPhraseError:
         setStep(WalletCreateStep.ReuseRecoveryPhrase);
         break;
-      }
-      case WalletCreateStep.RecoveryPhraseError: {
-        setStep(WalletCreateStep.ReuseRecoveryPhrase);
-        break;
-      }
-      case WalletCreateStep.RecoveryPhraseInput: {
+      case WalletCreateStep.RecoveryPhraseInput:
         setFormDirty(false);
         generateMnemonic();
         setStep(WalletCreateStep.RecoveryPhraseWriteDown);
         break;
-      }
-      case WalletCreateStep.Setup: {
-        if (recoveryMethod === 'mnemonic') {
-          setStep(WalletCreateStep.RecoveryPhraseInput);
-          break;
+      case WalletCreateStep.Setup:
+        if (walletToReuse) {
+          setStep(WalletCreateStep.EnterWalletPassword);
+        } else {
+          setStep(
+            recoveryMethod === 'mnemonic' ? WalletCreateStep.RecoveryPhraseInput : WalletCreateStep.SecurePaperWallet
+          );
         }
-        setStep(WalletCreateStep.SecurePaperWallet);
         break;
-      }
-      case WalletCreateStep.SavePaperWallet: {
+      case WalletCreateStep.SavePaperWallet:
         setStep(WalletCreateStep.Setup);
         break;
-      }
     }
-  }, [generateMnemonic, history, setFormDirty, step, recoveryMethod, paperWalletEnabled]);
+  }, [generateMnemonic, history, setFormDirty, step, recoveryMethod, paperWalletEnabled, walletToReuse]);
 
   const state = useMemo(
     (): State => ({
@@ -302,7 +301,8 @@ export const CreateWalletProvider = ({ children }: Props): React.ReactElement =>
       walletToReuse,
       showRecoveryPhraseError,
       setMnemonic,
-      nonSelectedBlockchainWallets
+      nonSelectedBlockchainWallets,
+      setStep
     }),
     [
       back,

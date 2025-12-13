@@ -179,6 +179,8 @@ export const ChooseRecoveryMethod: VFC = () => {
     next();
   };
 
+  // Paper wallet option only available for Cardano
+  // (Midnight redirects to v2 immediately from SelectBlockchain, never reaches this step)
   return (
     <ChooseRecoveryMethodBase
       title={i18n.t('paperWallet.chooseRecoveryMethod.title')}

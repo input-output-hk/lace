@@ -8,3 +8,4 @@ export * from './voter';
 export * from './derive-ed25519-key-hash-from-bip32-public-key';
 export * from './is-nft';
 export * from './cose-key-to-raw';
+export * from './mnemonic-utils';

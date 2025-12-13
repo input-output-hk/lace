@@ -16,13 +16,11 @@ class ReuseRecoveryPhrasePageAssert extends OnboardingCommonAssert {
     await ReuseRecoveryPhrasePage.walletSelectInput.waitForDisplayed();
 
     await ReuseRecoveryPhrasePage.backButton.waitForDisplayed();
-    expect(await ReuseRecoveryPhrasePage.backButton.getText()).to.equal(
-      await t('core.walletSetupReuseRecoveryPhrase.createNewOne')
-    );
+    expect(await ReuseRecoveryPhrasePage.backButton.getText()).to.equal(await t('core.walletSetupStep.back'));
 
     await ReuseRecoveryPhrasePage.nextButton.waitForDisplayed();
     expect(await ReuseRecoveryPhrasePage.nextButton.getText()).to.equal(
-      await t('core.walletSetupReuseRecoveryPhrase.useSameRecoveryPhrase')
+      await t('core.walletSetupReuseRecoveryPhrase.reuse')
     );
   }
 

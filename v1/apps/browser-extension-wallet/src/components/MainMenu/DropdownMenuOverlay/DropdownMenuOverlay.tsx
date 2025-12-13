@@ -34,9 +34,8 @@ import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/backgro
 import { useBackgroundServiceAPIContext } from '@providers';
 import { WarningModal } from '@src/views/browser-view/components';
 import { useTranslation } from 'react-i18next';
-import { useCurrentWallet, useWalletManager, useLMP } from '@hooks';
+import { useCurrentWallet, useWalletManager } from '@hooks';
 import { useCurrentBlockchain } from '@src/multichain';
-import { AddNewMidnightWalletLink } from './components/AddNewMidnightWalletLink';
 
 interface Props extends MenuProps {
   isPopup?: boolean;
@@ -61,10 +60,8 @@ export const DropdownMenuOverlay: VFC<Props> = ({
   const { walletRepository } = useWalletManager();
   const currentWallet = useCurrentWallet();
   const wallets = useObservable(walletRepository.wallets$);
-  const { midnightWallets } = useLMP();
 
   const sharedWalletsEnabled = posthog?.isFeatureFlagEnabled('shared-wallets');
-  const midnightWalletsEnabled = posthog?.isFeatureFlagEnabled('midnight-wallets');
   const [currentSection, setCurrentSection] = useState<Sections>(Sections.Main);
   const { environmentName, setManageAccountsWallet, walletType, isSharedWallet } = useWalletStore();
   const { blockchain } = useCurrentBlockchain();
@@ -140,7 +137,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
     !isBitcoinWallet &&
     wallets?.some((w) => w.type === WalletType.Script && w.ownSigners[0].walletId === currentWallet?.walletId);
   const showAddSharedWalletLink = sharedWalletsEnabled && !isSharedWallet && !hasLinkedSharedWallet;
-  const showAddMidnightWalletLink = midnightWalletsEnabled && midnightWallets && midnightWallets.length === 0;
 
   const handleNamiModeChange = async (activated: boolean) => {
     const mode = activated ? 'nami' : 'lace';
@@ -195,7 +191,6 @@ export const DropdownMenuOverlay: VFC<Props> = ({
               <AddNewWalletLink isPopup={isPopup} sendAnalyticsEvent={sendAnalyticsEvent} />
             )}
             {!isBitcoinWallet && showAddSharedWalletLink && <AddSharedWalletLink isPopup={isPopup} />}
-            {showAddMidnightWalletLink && <AddNewMidnightWalletLink />}
             {!isBitcoinWallet && <AddressBookLink />}
             <SettingsLink />
             <Separator />
