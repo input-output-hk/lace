@@ -15,7 +15,7 @@ const loadTranslations = async function (translationOrigin: TranslationsOrigin) 
 
   let midnight: Translations = {};
   if (String(process.env.LMP_BUNDLE) === 'true') {
-    const midnightTranslationPath = `../../../../../lace-platform/packages/contract/i18n/src/translations/${language}.json`;
+    const midnightTranslationPath = `../../../../../v2/packages/contract/i18n/src/translations/${language}.json`;
     midnight = await flatten(JSON.parse(readFromFile(import.meta.dirname, midnightTranslationPath).toString()));
   }
 
