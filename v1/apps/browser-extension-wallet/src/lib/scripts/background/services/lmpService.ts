@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { BundleAppApi, v1ApiGlobalProperty } from '@src/utils/lmp';
-import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
+import { BundleAppApi, bundleAppApiProps, lmpApiBaseChannel, v1ApiGlobalProperty } from '@src/utils/lmp';
+import { BehaviorSubject, firstValueFrom, map, of } from 'rxjs';
 import { bitcoinWalletManager, walletManager, walletRepository } from '../wallet';
-import { AnyBip32Wallet, AnyWallet, InMemoryWallet, WalletType } from '@cardano-sdk/web-extension';
+import { AnyBip32Wallet, AnyWallet, exposeApi, InMemoryWallet, WalletType } from '@cardano-sdk/web-extension';
 import { logger } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { getBackgroundStorage, setBackgroundStorage } from '../storage';
@@ -10,6 +10,7 @@ import { Bitcoin } from '@lace/bitcoin';
 import { Language } from '@lace/translation';
 import { requestMessage$ } from './utilityServices';
 import { MessageTypes } from '../../types';
+import { runtime } from 'webextension-polyfill';
 
 const cardanoLogo = require('../../../../assets/icons/browser-view/cardano-logo.svg').default;
 const bitcoinLogo = require('../../../../assets/icons/browser-view/bitcoin-logo.svg').default;
@@ -48,6 +49,8 @@ requestMessage$.subscribe(({ type, data }) => {
 });
 
 const api: BundleAppApi = {
+  colorScheme$: of({ colorScheme: 'light', syncedWithV1: false }),
+  isBundle$: of(true),
   wallets$: walletRepository.wallets$.pipe(
     map((wallets) =>
       wallets.map(
@@ -109,6 +112,7 @@ const api: BundleAppApi = {
     }
   },
   language$,
+  setColorScheme: () => Promise.resolve(),
   setLanguage: async (language: Language): Promise<void> => {
     language$.next(language);
     await setBackgroundStorage({ languageChoice: language });
@@ -116,5 +120,27 @@ const api: BundleAppApi = {
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(globalThis as any)[v1ApiGlobalProperty] = api;
+export const globalBundle = globalThis as unknown as { [v1ApiGlobalProperty]: BundleAppApi; LMP_BUNDLE: boolean };
+
+globalBundle[v1ApiGlobalProperty] = api;
+
+if (!globalBundle.LMP_BUNDLE) {
+  const noop = () => Promise.resolve();
+
+  exposeApi(
+    {
+      api$: of({
+        colorScheme$: of({ colorScheme: 'light', syncedWithV1: false }),
+        isBundle$: of(false),
+        language$: of(Language.en),
+        wallets$: of([]),
+        activate: noop,
+        setLanguage: noop,
+        setColorScheme: noop
+      }),
+      baseChannel: lmpApiBaseChannel,
+      properties: bundleAppApiProps
+    },
+    { logger, runtime }
+  );
+}

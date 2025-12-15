@@ -4,6 +4,7 @@ import { Wallet } from '@lace/cardano';
 import {
   APP_MODE,
   bundleAppApiProps,
+  ColorSchemeV1Sync,
   lmpApiBaseChannel,
   lmpModeStorage,
   onboardingParamsStorage
@@ -45,6 +46,17 @@ const startMidnightRestore = (): void =>
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useLMP = () => {
-  const midnightWallets = useObservable<Wallet.LmpBundleWallet[] | undefined>(lmpApi.wallets$);
-  return { midnightWallets, switchToLMP, startMidnightCreate, startMidnightRestore };
+  const { colorScheme$, isBundle$, setColorScheme, wallets$ } = lmpApi;
+  const colorScheme = useObservable<ColorSchemeV1Sync | undefined>(colorScheme$);
+  const isBundle = useObservable<boolean | undefined>(isBundle$);
+  const midnightWallets = useObservable<Wallet.LmpBundleWallet[] | undefined>(wallets$);
+  return {
+    colorScheme,
+    isBundle,
+    midnightWallets,
+    setColorScheme,
+    startMidnightCreate,
+    startMidnightRestore,
+    switchToLMP
+  };
 };
