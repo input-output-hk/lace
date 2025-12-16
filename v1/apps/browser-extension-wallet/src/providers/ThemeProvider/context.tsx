@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 import merge from 'lodash/merge';
 import type { Theme, ThemeInstance, themes as themeTypes } from './types';
 import { defaultTheme } from './constants';
+import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI/context';
+import { logger } from '@lace/common';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -35,6 +37,14 @@ export const ThemeProvider = ({ children, customTheme, defaultThemeName }: Theme
   );
 
   const [theme, setTheme] = useState<ThemeInstance>(themes[getThemeName(defaultThemeName)]);
+  const { getBackgroundStorage } = useBackgroundServiceAPIContext();
+  const [colorSchemeFromStorage, setColorSchemeFromStorage] = useState<themeTypes | undefined>();
+
+  useEffect(() => {
+    getBackgroundStorage()
+      .then(({ colorScheme }) => setColorSchemeFromStorage(colorScheme))
+      .catch((error) => logger.error('Failed to get background storage', error));
+  }, [getBackgroundStorage]);
 
   const changeTheme = useCallback(
     (name?: themeTypes) => {
@@ -53,13 +63,13 @@ export const ThemeProvider = ({ children, customTheme, defaultThemeName }: Theme
 
   // eslint-disable-next-line consistent-return
   useEffect(() => {
-    const preferedTheme = localStorage.getItem('mode') as themeTypes;
+    const preferredTheme = colorSchemeFromStorage || (localStorage.getItem('mode') as themeTypes);
     let userAgentColorScheme: themeTypes = 'light';
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')?.matches) {
       userAgentColorScheme = 'dark';
     }
 
-    changeTheme(getThemeName(preferedTheme || userAgentColorScheme));
+    changeTheme(getThemeName(preferredTheme || userAgentColorScheme));
     if (window.matchMedia('(prefers-color-scheme)')?.media !== 'not all') {
       const media = window.matchMedia('(prefers-color-scheme: dark)');
       const change = (e: MediaQueryListEvent) => changeTheme(e.matches ? 'dark' : 'light');
@@ -67,7 +77,7 @@ export const ThemeProvider = ({ children, customTheme, defaultThemeName }: Theme
 
       return () => media.removeEventListener('change', change);
     }
-  }, [getThemeName, defaultThemeName, changeTheme]);
+  }, [changeTheme, colorSchemeFromStorage, defaultThemeName, getThemeName]);
 
   const contextValue: ThemeProvider = {
     theme,

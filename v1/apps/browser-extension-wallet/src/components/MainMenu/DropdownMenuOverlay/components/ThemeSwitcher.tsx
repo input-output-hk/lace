@@ -37,7 +37,7 @@ interface Props {
   section?: 'settings' | 'user_profile';
 }
 
-export const ThemeSwitch = ({ isPopup, section = 'user_profile' }: Props): React.ReactElement => {
+export const ThemeSwitch = ({ section = 'user_profile' }: Props): React.ReactElement => {
   const { theme, setTheme } = useTheme();
   const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
@@ -46,9 +46,7 @@ export const ThemeSwitch = ({ isPopup, section = 'user_profile' }: Props): React
     const pickedTheme = theme.name === 'light' ? 'dark' : 'light';
     setTheme(pickedTheme);
 
-    if (isPopup) {
-      backgroundServices.handleChangeTheme({ theme: pickedTheme });
-    }
+    backgroundServices.handleChangeTheme({ theme: pickedTheme });
     const posthogEvent = section === 'settings' ? settingsThemeEvent : userWalletProfileThemeEvent;
     analytics.sendEventToPostHog(posthogEvent[pickedTheme]);
   };

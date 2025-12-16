@@ -183,7 +183,11 @@ const closeAllTabsAndOpenPopup = async () => {
   }
 };
 
-const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
+const handleChangeTheme = (data: ChangeThemeData) => {
+  requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
+
+  return setBackgroundStorage({ colorScheme: data.theme });
+};
 
 const handleChangeLanguage = (data: Language) => requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data });
 
