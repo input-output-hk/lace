@@ -50,8 +50,8 @@ jobs:
             v1/packages/bitcoin/dist
             v1/packages/notifications/dist
 
-  checks:
-    name: Code Quality Checks
+  checksV1:
+    name: V1 Code Quality Checks
     runs-on: ubuntu-22.04
     needs: prepare
 
@@ -83,8 +83,8 @@ jobs:
         run: yarn type-check
         working-directory: v1/apps/browser-extension-wallet
 
-  unitTests:
-    name: Unit Tests
+  unitTestsV1:
+    name: V1 Unit Tests
     runs-on: ubuntu-22.04
     needs: prepare
 
@@ -110,7 +110,7 @@ jobs:
   build-lace-v1-extension:
     name: Build Lace v1 Extension
     runs-on: ubuntu-22.04
-    needs: [checks, unitTests]
+    needs: [checksV1, unitTestsV1]
 
     steps:
       - name: Checkout repository
@@ -165,10 +165,90 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
+  checksV2:
+    name: V2 Code Quality Checks
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js for v2
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'v2/.nvmrc'
+
+      - name: Configure npm registries
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+          echo "engine-strict=true" >> ~/.npmrc
+
+      - name: Install v2 dependencies
+        run: npm ci
+        working-directory: v2
+
+      - name: Check code formatting
+        run: npm run check:format
+        working-directory: v2
+
+      - name: Lint check
+        run: npm run check:lint
+        working-directory: v2
+
+      - name: Type check
+        run: npx nx run-many --target=type-check-src,type-check-test
+        working-directory: v2
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+
+  unitTestsV2:
+    name: V2 Unit Tests
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Node.js for v2
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: 'v2/.nvmrc'
+
+      - name: Configure npm registries
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+          echo "engine-strict=true" >> ~/.npmrc
+
+      - name: Install v2 dependencies
+        run: npm ci
+        working-directory: v2
+
+      - name: Run unit tests
+        run: npx nx run-many --target=test
+        working-directory: v2
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+
   build-midnight-extension:
     name: Build Midnight Extension (v2)
     runs-on: ubuntu-22.04
-    needs: prepare
+    needs: [checksV2, unitTestsV2]
 
     steps:
       - name: Checkout repository
@@ -319,7 +399,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [9, 10]
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 
     steps:
       - name: Checkout repository
