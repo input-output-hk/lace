@@ -4,7 +4,7 @@ import React from 'react';
 const ReleaseNote_1_32_5 = (): React.ReactElement => (
   <>
     <ul style={{ listStyleType: 'disc', margin: 0 }}>
-      <li>Performance improvements</li>
+      <li>Reduce network traffic related to notifications feature</li>
     </ul>
   </>
 );
