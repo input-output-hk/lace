@@ -1,9 +1,6 @@
 import { useWalletStore } from '@src/stores';
 import debounce from 'lodash/debounce';
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import { runtime } from 'webextension-polyfill';
-import { consumeRemoteApi } from '@cardano-sdk/web-extension';
-import { logger } from '@lace/common';
 import { AnalyticsTracker } from './analyticsTracker';
 import { ExtensionViews } from './analyticsTracker/types';
 import shallow from 'zustand/shallow';
@@ -16,11 +13,6 @@ import {
   sendConfirmedTransactionAnalytics,
   useOnChainEventAnalytics
 } from './onChain';
-import {
-  notificationsCenterProperties,
-  NotificationsCenterProperties,
-  NotificationsTopic
-} from '@src/types/notifications-center';
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -32,15 +24,6 @@ interface AnalyticsProviderProps {
 }
 
 const PAGE_VIEW_DEBOUNCE_DELAY = 100;
-
-// Subscribe to notifications center topics to update person properties
-const notificationsCenterApi = consumeRemoteApi<NotificationsCenterProperties>(
-  {
-    baseChannel: 'notifications-center',
-    properties: notificationsCenterProperties
-  },
-  { logger, runtime }
-);
 
 type AnalyticsTrackerInstance = AnalyticsTracker;
 
@@ -106,25 +89,6 @@ export const AnalyticsProvider = ({
         saveUnconfirmedTransactionsFn: saveUnconfirmedTransactions
       })
   });
-
-  // Subscribe to topics$ to update person properties when subscriptions change
-  useEffect(() => {
-    if (analyticsDisabled) {
-      return () => {
-        // No-op cleanup when analytics is disabled
-      };
-    }
-
-    const subscription = notificationsCenterApi.topics.topics$.subscribe((topics: NotificationsTopic[]) => {
-      const subscribedTopicIds = topics.filter((topic) => topic.isSubscribed).map((topic) => topic.id);
-      analyticsTracker.updatePersonProperties({
-        // eslint-disable-next-line camelcase
-        $set: { subscribed_topics: subscribedTopicIds }
-      });
-    });
-
-    return () => subscription.unsubscribe();
-  }, [analyticsTracker, analyticsDisabled]);
 
   return <AnalyticsContext.Provider value={analyticsTracker}>{children}</AnalyticsContext.Provider>;
 };
