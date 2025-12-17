@@ -218,12 +218,12 @@ jobs:
           DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID: ${{ vars.DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID || 'undeployed' }}
           DEFAULT_NETWORK: ${{ vars.DEFAULT_NETWORK || 'testnet' }}
           NODE_ENV: production
-          POSTHOG_API_TOKEN: ${{ secrets.POSTHOG_PRODUCTION_TOKEN }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          POSTHOG_API_TOKEN: ${{ secrets.POSTHOG_API_TOKEN_V2 }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN_V2 }}
+          SENTRY_DSN: ${{ vars.SENTRY_DSN_V2 }}
           SENTRY_ENVIRONMENT: production
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
-          SENTRY_PROJECT_ID: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_PROJECT_ID: ${{ vars.SENTRY_PROJECT_ID_V2 }}
         run: |
           rm -rf ./dist
           npm run build:app
