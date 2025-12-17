@@ -202,6 +202,16 @@ jobs:
           EXTENSION_ID=$(cat v1/apps/browser-extension-wallet/.env.defaults | grep LACE_EXTENSION_ID | cut -d'=' -f2)
           echo "extension_id=$EXTENSION_ID" >> $GITHUB_OUTPUT
 
+      - name: Create feature flags override for release
+        run: |
+          # Copy default feature flags to override file
+          cp v2/apps/midnight-extension/src/feature-flags.ts v2/apps/midnight-extension/src/feature-flags.override.ts
+
+          # Replace FEATURES_DEV with FEATURES_POSTHOG in the override file
+          sed -i "s/FeatureFlagKey('FEATURES_DEV')/FeatureFlagKey('FEATURES_POSTHOG')/g" v2/apps/midnight-extension/src/feature-flags.override.ts
+
+          echo "Created feature flags override for release build"
+
       - name: Build Midnight Extension (v2)
         working-directory: v2/apps/midnight-extension
         env:
