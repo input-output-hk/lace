@@ -1,5 +1,5 @@
 import { walletRoutePaths } from '@routes/wallet-paths';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { deleteFromLocalStorage, getValueFromLocalStorage } from '@utils/local-storage';
 import { Portal } from './Portal';
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
@@ -9,10 +9,24 @@ import { postHogOnboardingActions } from '@providers/AnalyticsProvider/analytics
 import { WalletOnboardingFlows } from '@views/browser/features/multi-wallet/WalletOnboardingFlows';
 import { WalletSetupLayout } from '@views/browser/components';
 import { usePostHogClientContext } from '@providers/PostHogClientProvider';
+import { NavigationButton } from '@lace/common';
+import { APP_MODE, cameFromLmpStorage, lmpModeStorage } from '@src/utils/lmp';
+import styles from '@views/browser/features/multi-wallet/MultiWallet.module.scss';
 
 export const WalletSetup = (): React.ReactElement => {
   const isForgotPasswordFlow = getValueFromLocalStorage('isForgotPasswordFlow');
   const posthogClient = usePostHogClientContext();
+  const [cameFromLMP, setCameFromLMP] = useState(false);
+
+  useEffect(() => {
+    const checkCameFromLMP = async () => {
+      const result = await cameFromLmpStorage.get();
+      if (result) {
+        setCameFromLMP(true);
+      }
+    };
+    void checkCameFromLMP();
+  }, []);
 
   useEffect(() => {
     if (!isForgotPasswordFlow) return () => void 0;
@@ -32,20 +46,33 @@ export const WalletSetup = (): React.ReactElement => {
     };
   }, [isForgotPasswordFlow]);
 
+  const handleCloseOnboarding = useCallback(async () => {
+    await cameFromLmpStorage.clear();
+    await lmpModeStorage.set(APP_MODE.LMP);
+    window.location.href = '/tab.html';
+  }, []);
+
   return (
     <Portal>
       <WalletSetupLayout>
-        <WalletOnboardingFlows
-          aliasEventRequired
-          flowsEnabled={!!posthogClient.featureFlagsByNetwork}
-          forgotPasswordFlowActive={isForgotPasswordFlow}
-          postHogActions={{
-            ...postHogOnboardingActions,
-            hardware: postHogOnboardingActions.hw
-          }}
-          renderHome={() => <WalletSetupMainPage />}
-          urlPath={walletRoutePaths.setup}
-        />
+        <div className={styles.contentWrapper}>
+          {cameFromLMP && (
+            <div className={styles.closeButton}>
+              <NavigationButton icon="cross" onClick={handleCloseOnboarding} />
+            </div>
+          )}
+          <WalletOnboardingFlows
+            aliasEventRequired
+            flowsEnabled={!!posthogClient.featureFlagsByNetwork}
+            forgotPasswordFlowActive={isForgotPasswordFlow}
+            postHogActions={{
+              ...postHogOnboardingActions,
+              hardware: postHogOnboardingActions.hw
+            }}
+            renderHome={() => <WalletSetupMainPage />}
+            urlPath={walletRoutePaths.setup}
+          />
+        </div>
       </WalletSetupLayout>
     </Portal>
   );
