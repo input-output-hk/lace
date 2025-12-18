@@ -415,7 +415,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lace-bundle-chrome
-          path: ./v1/apps/browser-extension-wallet/dist
+          path: ./dist
 
       - name: Execute E2E tests
         uses: ./.github/actions/test/e2e
@@ -425,6 +425,7 @@ jobs:
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: true
+          LMP_BUNDLE: true
 
   processReports:
     name: Process E2E Test Reports
