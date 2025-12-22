@@ -35,6 +35,10 @@ inputs:
   FIREFOX_BINARY:
     description: 'Location of the Firefox binary'
     required: false
+  LMP_BUNDLE:
+    description: 'Run tests on LMP bundle'
+    required: false
+    default: 'false'
 
 runs:
   using: 'composite'
@@ -60,6 +64,7 @@ runs:
         BATCH: ${{ inputs.BATCH }}
         SERVICE_WORKER_LOGS: ${{ inputs.SERVICE_WORKER_LOGS }}
         FIREFOX_BINARY:  ${{ inputs.FIREFOX_BINARY }}
+        LMP_BUNDLE: ${{ inputs.LMP_BUNDLE }}
       run: |
         commonTags="@Testnet and not @Pending"
         tagsToRun="'${commonTags}'"
