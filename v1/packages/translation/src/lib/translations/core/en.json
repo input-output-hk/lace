@@ -688,6 +688,7 @@
   "core.WalletSetupSelectBlockchain.midnight.disabledReason": "At this moment only one Midnight wallet is supported. Please remove the existing wallet if you want to create a new one.",
   "core.WalletSetupSelectBlockchain.defaultBadge": "Default",
   "core.WalletSetupSelectBlockchain.newBadge": "New",
+  "core.WalletSetupSelectBlockchain.midnight.networkLabel": "(Preview/PreProd networks)",
   "core.walletSetupReuseRecoveryPhrase.title": "Reuse your Recovery Phrase?",
   "core.walletSetupReuseRecoveryPhrase.description": "Do you wish to use the same passphrase as the wallet below, or wish to create a new one?",
   "core.walletSetupReuseRecoveryPhrase.reuse": "Reuse",

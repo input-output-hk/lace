@@ -17,6 +17,7 @@ type BlockchainSelection = Blockchain | 'Midnight';
 interface BlockchainOption {
   value: BlockchainSelection;
   title: string;
+  subtitle?: string;
   description: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   testId: string;
@@ -41,6 +42,7 @@ const getBlockchainOptions = (t: TFunction): BlockchainOption[] => [
   {
     value: 'Midnight',
     title: t('core.WalletSetupSelectBlockchain.midnight'),
+    subtitle: t('core.WalletSetupSelectBlockchain.midnight.networkLabel'),
     description: t('core.WalletSetupSelectBlockchain.midnight.description'),
     icon: MidnightIcon,
     testId: 'midnight-blockchain-card',
@@ -113,6 +115,9 @@ export const WalletSetupSelectBlockchain = ({
     return option.badge;
   };
 
+  const getSubtitle = (option: BlockchainOption): string | undefined =>
+    option.value === 'Midnight' && midnightDisabled ? undefined : option.subtitle;
+
   const handleSelect = (value: BlockchainSelection) => {
     if (isOptionDisabled(value)) return;
 
@@ -151,6 +156,7 @@ export const WalletSetupSelectBlockchain = ({
           const disabled = isOptionDisabled(option.value);
           const badge = getDisabledBadge(option);
           const description = getDisabledDescription(option);
+          const subtitle = getSubtitle(option);
 
           return (
             <Card.Outlined
@@ -171,8 +177,9 @@ export const WalletSetupSelectBlockchain = ({
                 />
                 <Flex flexDirection="column" gap="$8">
                   <Flex gap="$8" alignItems="center" justifyContent="center">
-                    <Text.Body.Large weight="$bold" data-testid={`${option.value.toLowerCase()}-option-title`}>
-                      {option.title}
+                    <Text.Body.Large data-testid={`${option.value.toLowerCase()}-option-title`}>
+                      <span style={{ fontWeight: 'bold' }}>{option.title}</span>
+                      {subtitle && ` ${subtitle}`}
                     </Text.Body.Large>
                     {badge && (
                       <div

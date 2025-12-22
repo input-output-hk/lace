@@ -688,6 +688,7 @@
   "core.WalletSetupSelectBlockchain.midnight.disabledReason": "En este momento solo se admite una billetera Midnight. Elimina la billetera existente si deseas crear una nueva.",
   "core.WalletSetupSelectBlockchain.defaultBadge": "Predeterminado",
   "core.WalletSetupSelectBlockchain.newBadge": "Nuevo",
+  "core.WalletSetupSelectBlockchain.midnight.networkLabel": "(Redes Preview/PreProd)",
   "core.walletSetupReuseRecoveryPhrase.title": "¿Reutilizar su frase de recuperación?",
   "core.walletSetupReuseRecoveryPhrase.description": "¿Desea usar la misma frase de recuperación que la billetera a continuación, o desea crear una nueva?",
   "core.walletSetupReuseRecoveryPhrase.reuse": "Reutilizar",
