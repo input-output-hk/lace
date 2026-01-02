@@ -187,16 +187,22 @@ jobs:
         run: npm ci
         working-directory: v2
 
+      - name: Decrypt test data for Midnight extension e2e
+        working-directory: v2/apps/midnight-extension-e2e
+        run: ./decrypt_secret.sh
+        env:
+          WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+
       - name: Check code formatting
         run: npm run check:format
         working-directory: v2
 
       - name: Lint check
-        run: npm run check:lint
+        run: npx nx lint midnight-extension midnight-extension-e2e --max-warnings=0
         working-directory: v2
 
       - name: Type check
-        run: npx nx run-many --target=type-check-src,type-check-test
+        run: npx nx run-many --target=type-check-src,type-check-test --projects=midnight-extension,midnight-extension-e2e
         working-directory: v2
         env:
           NODE_OPTIONS: '--max_old_space_size=8192'
@@ -232,7 +238,7 @@ jobs:
         working-directory: v2
 
       - name: Run unit tests
-        run: npx nx run-many --target=test
+        run: npx nx test midnight-extension
         working-directory: v2
         env:
           NODE_OPTIONS: '--max_old_space_size=8192'
