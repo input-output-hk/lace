@@ -66,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download v1 packages artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: v1-packages
           path: v1/packages
@@ -99,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download v1 packages artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: v1-packages
           path: v1/packages
@@ -123,7 +123,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download v1 packages artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: v1-packages
           path: v1/packages
@@ -348,13 +348,13 @@ jobs:
         run: yarn install --immutable --inline-builds
 
       - name: Download v1 Extension artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: v1-extension-dist
           path: v1/apps/browser-extension-wallet/dist
 
       - name: Download Midnight Extension artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: midnight-extension-dist
           path: v2/apps/midnight-extension/dist
@@ -412,7 +412,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Download Lace Bundle artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: lace-bundle-chrome
           path: ./dist
@@ -435,7 +435,7 @@ jobs:
 
     steps:
       - name: Download all smoke tests artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           pattern: 'runner-artifacts-*'
