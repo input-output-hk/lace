@@ -412,34 +412,13 @@ jobs:
           SERVICE_WORKER_LOGS: true
           LMP_BUNDLE: true
 
-  processReports:
-    name: Process E2E Test Reports
+  verifyTests:
+    name: Verify Test Results
     runs-on: ubuntu-22.04
     needs: smokeTests
     if: always()
 
     steps:
-      - name: Download all smoke tests artifacts
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          pattern: 'runner-artifacts-*'
-          merge-multiple: true
-
-      - name: Create allure properties
-        run: |
-          echo "
-          branch=${{ github.ref_name }}
-          browser= 'Chrome'
-          tags= '@Smoke'
-          platform=Linux
-          workflow=release-lace-bundle
-          " > environment.properties
-
-      - name: Publish allure report to S3 (disabled)
-        if: false
-        run: echo "Allure publishing disabled"
-
       - name: Check smoke tests result
         run: |
           if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
