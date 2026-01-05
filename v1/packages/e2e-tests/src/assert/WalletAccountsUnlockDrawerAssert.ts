@@ -9,6 +9,7 @@ class WalletAccountsUnlockDrawerAssert {
     if (shouldSee) {
       if (mode === 'extended') {
         await WalletAccountsUnlockDrawer.drawerNavigationTitle.waitForDisplayed();
+        await WalletAccountsUnlockDrawer.drawerNavigationTitle.waitForStable();
         expect(await WalletAccountsUnlockDrawer.drawerNavigationTitle.getText()).to.equal(
           await t('account.enable.title')
         );

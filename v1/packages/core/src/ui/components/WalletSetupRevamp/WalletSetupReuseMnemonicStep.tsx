@@ -54,7 +54,7 @@ export const WalletSetupReuseMnemonicStep = ({
         <TextLink
           label={t('core.walletSetupReuseRecoveryPhrase.skip')}
           onClick={onSkip}
-          data-testid="wallet-setup-step-btn-skip"
+          testId="wallet-setup-step-btn-skip"
         />
       }
     >

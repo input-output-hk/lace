@@ -54,6 +54,7 @@ class Modal {
   }
 
   async confirmMultiAddressModal() {
+    await browser.pause(500);
     if (await this.container.isDisplayed()) {
       expect(await this.confirmButton.getText()).to.equal(await t('modals.beta.button'));
       await this.confirmButton.click();

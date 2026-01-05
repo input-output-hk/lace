@@ -632,13 +632,24 @@ Then(/^"Reuse your Recovery Phrase" page is displayed$/, async () => {
   await ReuseRecoveryPhrasePageAssert.assertSeeReuseRecoveryPhrasePage();
 });
 
-When(/^I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page$/, async () => {
-  await ReuseRecoveryPhrasePage.clickUseSamePhraseButton();
-});
-
-When(/^I click "Create a new one" button on "Reuse your Recovery Phrase" page$/, async () => {
-  await ReuseRecoveryPhrasePage.clickCreateNewButton();
-});
+When(
+  /^I click "(Back|Reuse|Skip)" button on "Reuse your Recovery Phrase" page$/,
+  async (button: 'Back' | 'Reuse' | 'Skip') => {
+    switch (button) {
+      case 'Back':
+        await ReuseRecoveryPhrasePage.clickBackButton();
+        break;
+      case 'Reuse':
+        await ReuseRecoveryPhrasePage.clickReuseButton();
+        break;
+      case 'Skip':
+        await ReuseRecoveryPhrasePage.clickSkipButton();
+        break;
+      default:
+        throw new Error(`Unsupported button: ${button}`);
+    }
+  }
+);
 
 When(/^I select "([^"]*)" wallet name on "Reuse your Recovery Phrase" page$/, async (walletName: string) => {
   await ReuseRecoveryPhrasePage.selectWallet(walletName);

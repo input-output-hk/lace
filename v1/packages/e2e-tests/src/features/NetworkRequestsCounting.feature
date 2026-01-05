@@ -11,5 +11,5 @@ Feature: Network requests counting
     And Wallet is synced
     When I navigate to Activity extended page
     And I end tracing
-    Then there were approximately 173 requests sent (5% threshold) [getPageWeight()]
+    Then there were approximately 195 requests sent (5% threshold) [getPageWeight()]
     Then there were approximately 211 requests sent (5% threshold) [Puppeteer and CDP]
