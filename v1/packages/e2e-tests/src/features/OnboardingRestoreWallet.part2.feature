@@ -138,7 +138,7 @@ Feature: Onboarding - Restore wallet
     And I click "Next" button during wallet setup
     When I click "Next" button during wallet setup
     Then "Reuse your Recovery Phrase" page is displayed
-    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I click "Reuse" button on "Reuse your Recovery Phrase" page
     When I enter password: "N_8J@bne87A" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
     When I enter wallet name: "TestAutomationWallet", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
