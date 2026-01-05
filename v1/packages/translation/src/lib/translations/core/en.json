@@ -702,6 +702,7 @@
   "core.walletSetupReuseRecoveryPhrase.supportedRecoveryPhrase": "Only 24-word recovery phrases are supported.",
   "core.walletSetupReuseRecoveryPhrase.createNewRecoveryPhrase": "Please create a new recovery phrase or select a different wallet",
   "core.walletSetupReuseRecoveryPhrase.selectAnotherWallet": "Select another wallet",
+  "core.walletSetupReuseRecoveryPhrase.createNewOne": "Create a new one",
   "core.nftDetail.directory": "Folder",
   "core.walletSetup.selectBlockchain": "Select a blockchain",
   "core.walletSetup.recoveryMethod": "Recovery method",
