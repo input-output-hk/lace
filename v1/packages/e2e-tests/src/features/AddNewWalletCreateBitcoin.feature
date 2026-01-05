@@ -14,7 +14,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
     Then "Reuse your Recovery Phrase" page is displayed
-    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I click "Reuse" button on "Reuse your Recovery Phrase" page
     Then "Confirm your password" page is displayed for wallet "MultiWallet2"
     When I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
@@ -35,7 +35,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
     Then "Reuse your Recovery Phrase" page is displayed
-    When I click "Create a new one" button on "Reuse your Recovery Phrase" page
+    When I click "Skip" button on "Reuse your Recovery Phrase" page
     Then "Mnemonic writedown" page is displayed with 24 words
     When I save mnemonic words
     And I click "Next" button during wallet setup
@@ -60,7 +60,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
     Then "Reuse your Recovery Phrase" page is displayed
-    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I click "Reuse" button on "Reuse your Recovery Phrase" page
     Then "Confirm your password" page is displayed for wallet "TwelveWordsMnemonic"
     When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
@@ -79,7 +79,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And "Recovery phrase" is selected as a recovery method for Bitcoin chain
     When I click "Next" button during wallet setup
     Then "Reuse your Recovery Phrase" page is displayed
-    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I click "Reuse" button on "Reuse your Recovery Phrase" page
     Then "Confirm your password" page is displayed for wallet "TwelveWordsMnemonic"
     When I enter valid password for wallet "TwelveWordsMnemonic" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
@@ -111,7 +111,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     Then "MultiWallet1" wallet name is selected on "Reuse your Recovery Phrase" page
     When I select "MultiWallet2" wallet name on "Reuse your Recovery Phrase" page
     Then "MultiWallet2" wallet name is selected on "Reuse your Recovery Phrase" page
-    When I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    When I click "Reuse" button on "Reuse your Recovery Phrase" page
     Then "Confirm your password" page is displayed for wallet "MultiWallet2"
     When I enter invalid password for wallet "MultiWallet2" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
@@ -125,7 +125,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And I click "Next" button during wallet setup
     And I click "Understood" button on "Bitcoin warning" modal
     And I click "Next" button during wallet setup
-    And I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    And I click "Reuse" button on "Reuse your Recovery Phrase" page
     And I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
     And I enter wallet name: "MultiWallet2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"
@@ -139,7 +139,7 @@ Feature: Add new wallet - Create Bitcoin wallet
     And I click "Next" button during wallet setup
     And I click "Understood" button on "Bitcoin warning" modal
     And I click "Next" button during wallet setup
-    And I click "Use same recovery phrase" button on "Reuse your Recovery Phrase" page
+    And I click "Reuse" button on "Reuse your Recovery Phrase" page
     And I enter valid password for wallet "MultiWallet2" on "Confirm your password" page
     And I click "Confirm" button on "Confirm your password" page
     And I enter wallet name: "MultiWallet2", password: "N_8J@bne87A" and password confirmation: "N_8J@bne87A"

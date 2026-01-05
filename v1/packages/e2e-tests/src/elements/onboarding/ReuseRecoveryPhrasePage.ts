@@ -9,14 +9,19 @@ class ReuseRecoveryPhrasePage extends CommonOnboardingElements {
     return $(this.WALLET_SELECT_INPUT);
   }
 
-  async clickUseSamePhraseButton(): Promise<void> {
+  async clickReuseButton(): Promise<void> {
     await this.nextButton.waitForClickable();
     await this.nextButton.click();
   }
 
-  async clickCreateNewButton(): Promise<void> {
+  async clickBackButton(): Promise<void> {
     await this.backButton.waitForClickable();
     await this.backButton.click();
+  }
+
+  async clickSkipButton(): Promise<void> {
+    await this.skipButton.waitForClickable();
+    await this.skipButton.click();
   }
 
   async selectWallet(walletName: string): Promise<void> {

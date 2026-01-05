@@ -7,6 +7,7 @@ export default class CommonOnboardingElements {
   private STEP_HEADER_SUBTITLE = '[data-testid="wallet-setup-step-subtitle"]';
   private BACK_BUTTON = '[data-testid="wallet-setup-step-btn-back"]';
   private NEXT_BUTTON = '[data-testid="wallet-setup-step-btn-next"]';
+  private SKIP_BUTTON = '[data-testid="wallet-setup-step-btn-skip"]';
   private HELP_AND_SUPPORT_BUTTON = '[data-testid="help-and-support-button"]';
   private COOKIE_POLICY_LINK = '[data-testid="cookie-policy-link"]';
   private PRIVACY_POLICY_LINK = '[data-testid="privacy-policy-link"]';
@@ -32,6 +33,10 @@ export default class CommonOnboardingElements {
 
   get nextButton(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.NEXT_BUTTON);
+  }
+
+  get skipButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.SKIP_BUTTON);
   }
 
   get helpAndSupportButton(): ChainablePromiseElement<WebdriverIO.Element> {
