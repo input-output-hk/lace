@@ -122,6 +122,7 @@ Before({ tags: '@Staking-DelegatedFunds-Popup or @NetworkSwitching-popup' }, asy
   await popupViewRepositoryWalletInitialization([TestWalletName.TAWalletDelegatedFunds]);
   await localStorageInitializer.disableShowingMultidelegationBetaBanner();
   await localStorageInitializer.initializeShowMultiAddressDiscoveryModal(false);
+  await localStorageInitializer.disableShowingMultidelegationDAppsIssueModal();
 });
 
 Before(
