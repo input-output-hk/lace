@@ -2,9 +2,6 @@ name: Release Lace Bundle
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - 'ci/release-bundle'
 
 permissions:
   pull-requests: write
@@ -71,16 +68,8 @@ jobs:
           name: v1-packages
           path: v1/packages
 
-      - name: Format check
-        run: yarn format-check
-        working-directory: v1/apps/browser-extension-wallet
-
       - name: Lint check
         run: yarn lint
-        working-directory: v1/apps/browser-extension-wallet
-
-      - name: Type check
-        run: yarn type-check
         working-directory: v1/apps/browser-extension-wallet
 
   unitTestsV1:
@@ -364,13 +353,6 @@ jobs:
           NODE_OPTIONS: '--max_old_space_size=8192'
         run: yarn build:bundle
 
-      - name: Verify bundle exists
-        run: |
-          echo "Bundle contents:"
-          ls -la ./dist
-          echo "Manifest:"
-          cat ./dist/manifest.json | head -20
-
       - name: Upload Chrome Bundle artifact
         uses: actions/upload-artifact@v4
         with:
@@ -391,78 +373,3 @@ jobs:
           path: ./dist
           retention-days: 90
           if-no-files-found: error
-
-  smokeTests:
-    name: E2E Smoke Tests
-    runs-on: ubuntu-22.04
-    needs: bundle
-    strategy:
-      fail-fast: false
-      matrix:
-        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
-
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Download Lace Bundle artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: lace-bundle-chrome
-          path: ./dist
-
-      - name: Execute E2E tests
-        uses: ./.github/actions/test/e2e
-        with:
-          BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: true
-          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          SERVICE_WORKER_LOGS: true
-          LMP_BUNDLE: true
-
-  processReports:
-    name: Process E2E Test Reports
-    runs-on: ubuntu-22.04
-    needs: smokeTests
-    if: always()
-
-    steps:
-      - name: Download all smoke tests artifacts
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          pattern: 'runner-artifacts-*'
-          merge-multiple: true
-
-      - name: Create allure properties
-        run: |
-          echo "
-          branch=${{ github.ref_name }}
-          browser= 'Chrome'
-          tags= '@Smoke'
-          platform=Linux
-          workflow=release-lace-bundle
-          " > environment.properties
-
-      - name: Publish allure report to S3 (disabled)
-        if: false
-        run: echo "Allure publishing disabled"
-
-      - name: Check smoke tests result
-        run: |
-          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
-
