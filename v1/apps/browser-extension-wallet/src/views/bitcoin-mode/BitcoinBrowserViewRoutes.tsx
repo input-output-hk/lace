@@ -40,6 +40,7 @@ import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { SettingsLayout } from '../../features/settings';
 import { ENHANCED_ANALYTICS_OPT_IN_STATUS_LS_KEY } from '@providers/AnalyticsProvider/config';
 import { EnhancedAnalyticsOptInStatus } from '@providers/AnalyticsProvider/analyticsTracker';
+import { NotificationDetailsContainer, NotificationsCenter } from '../browser-view/features/notifications-center';
 
 export const defaultRoutes: RouteMap = [
   {
@@ -53,6 +54,14 @@ export const defaultRoutes: RouteMap = [
   {
     path: routes.activity,
     component: ActivityLayout
+  },
+  {
+    path: routes.notifications,
+    component: NotificationsCenter
+  },
+  {
+    path: routes.notification,
+    component: NotificationDetailsContainer
   }
 ];
 
