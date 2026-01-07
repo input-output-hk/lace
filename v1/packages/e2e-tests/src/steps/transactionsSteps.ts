@@ -10,6 +10,7 @@ import { Logger } from '../support/logger';
 import { TransactionType } from '../types/transactionType';
 import { TransactionStyle } from '../types/transactionStyle';
 import { visit } from '../utils/pageUtils';
+import extensionUtils from '../utils/utils';
 
 Given(/^I am on the Activity page - (extended|popup) view$/, async (mode: 'extended' | 'popup') => {
   await visit('Activity', mode);
@@ -208,6 +209,24 @@ Then(
     const expectedTransactionRowAssetDetailsSent: ExpectedTransactionRowAssetDetails = {
       type: transactionType,
       tokensAmount: `${tokenValue}`,
+      tokensCount: Number(tokenCount)
+    };
+    await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
+  }
+);
+
+Then(
+  /^the (Received|Sent) transaction is displayed with base value "([^"]*)" plus DApp transaction fee and tokens count (\d)$/,
+  async (transactionType: 'Received' | 'Sent', baseValue: string, tokenCount: number) => {
+    const feeValue = String(testContext.load('feeValueDAppTx'));
+    const baseAmount = Number.parseFloat(baseValue);
+    const fee = Number.parseFloat(feeValue);
+    const totalValue = (baseAmount + fee).toFixed(2);
+    const tokenValue = `-${totalValue} ${extensionUtils.isMainnet() ? 'ADA' : 'tADA'}`;
+
+    const expectedTransactionRowAssetDetailsSent: ExpectedTransactionRowAssetDetails = {
+      type: transactionType,
+      tokensAmount: tokenValue,
       tokensCount: Number(tokenCount)
     };
     await transactionsPageAssert.assertSeeTransactionRowWithAssetDetails(0, expectedTransactionRowAssetDetailsSent);
