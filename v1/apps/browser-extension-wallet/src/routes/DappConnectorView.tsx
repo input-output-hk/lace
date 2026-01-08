@@ -127,7 +127,7 @@ export const DappConnectorView = (): React.ReactElement => {
 
   if (hasNoAvailableWallet) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
+      <MainLayout useSimpleHeader hideFooter>
         <DappError
           title={t('dapp.noWallet.heading')}
           description={t('dapp.noWallet.description')}
@@ -143,7 +143,7 @@ export const DappConnectorView = (): React.ReactElement => {
     );
   } else if (isSharedWallet) {
     return (
-      <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
+      <MainLayout useSimpleHeader hideFooter>
         <DappError
           title={t('dapp.sharedWallet.heading')}
           description={t('dapp.sharedWallet.description')}
@@ -179,7 +179,7 @@ export const DappConnectorView = (): React.ReactElement => {
   console.log(location);
 
   return (
-    <MainLayout useSimpleHeader hideFooter showAnnouncement={false}>
+    <MainLayout useSimpleHeader hideFooter>
       <Switch>
         <Route exact path={dAppRoutePaths.dappConnect} component={DappConnect} />
         {matchSignTxRoutes && <DappSignTxRoutes />}
