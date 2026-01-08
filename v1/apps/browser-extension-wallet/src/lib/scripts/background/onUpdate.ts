@@ -1,10 +1,8 @@
 import { Runtime, runtime, storage } from 'webextension-polyfill';
 import { checkMigrations } from '../migrations';
-import { ABOUT_EXTENSION_KEY, ExtensionUpdateData, MigrationState } from '../types';
+import { MigrationState } from '../types';
 import { initMigrationState } from './storage';
 import { logger } from '@lace/common';
-
-type UpdateType = 'downgrade' | 'update';
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
@@ -19,31 +17,7 @@ const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) 
   }
 };
 
-const compareVersions = (v1 = '', v2 = '') => v1.localeCompare(v2, undefined, { numeric: true, sensitivity: 'base' });
-
-// extension updates announcements
-const displayReleaseAnnouncements = async ({ reason }: Runtime.OnInstalledDetailsType) => {
-  logger.debug('[onUpdate] checking for updates:', reason);
-  const { version: currentVersion } = runtime.getManifest();
-
-  const { aboutExtension } = (await storage.local.get(ABOUT_EXTENSION_KEY)) || {};
-  const previousVersion = aboutExtension?.version;
-
-  logger.debug('[onUpdate] checking for updates:', previousVersion, currentVersion);
-  if (reason === 'update' && currentVersion !== previousVersion) {
-    const updateType: UpdateType = compareVersions(currentVersion, previousVersion) < 0 ? 'downgrade' : 'update';
-
-    await storage.local.set({
-      [ABOUT_EXTENSION_KEY]: { version: currentVersion, acknowledged: false, reason: updateType } as ExtensionUpdateData
-    });
-
-    logger.debug('[onUpdate] extension got updated due to reason:', updateType);
-  }
-};
-
 // Only add an event listener if it doesn't exist
-if (!runtime.onInstalled.hasListener(displayReleaseAnnouncements))
-  runtime.onInstalled.addListener(displayReleaseAnnouncements);
 if (!runtime.onInstalled.hasListener(checkMigrationsOnUpdate)) runtime.onInstalled.addListener(checkMigrationsOnUpdate);
 
 const updateToVersionCallback = (details: Runtime.OnUpdateAvailableDetailsType) => {
