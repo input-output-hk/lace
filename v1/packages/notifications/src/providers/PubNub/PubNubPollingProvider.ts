@@ -216,6 +216,8 @@ export class PubNubPollingProvider implements NotificationsProvider {
     this.storage = storage;
     this.storageKeys = storageKeys;
     this.tokenEndpoint = tokenEndpoint;
+    // Log which endpoint is being used
+    this.logger.info(`PubNubPollingProvider: Using token endpoint: ${this.tokenEndpoint}`);
     this.fetchMissedMessagesIntervalMinutes =
       fetchMissedMessagesIntervalMinutes ?? DEFAULT_FETCH_MISSED_MESSAGES_INTERVAL_MINUTES;
     this.config = {

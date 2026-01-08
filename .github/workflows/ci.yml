@@ -249,6 +249,7 @@ jobs:
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT || '' }}
 
   release-firefox-pkg:
     name: Release Firefox package
@@ -340,6 +341,7 @@ jobs:
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT || '' }}
 
   build:
     name: Build Lace for E2E Tests
