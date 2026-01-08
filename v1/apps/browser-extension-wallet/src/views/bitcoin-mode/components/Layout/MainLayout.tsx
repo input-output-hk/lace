@@ -30,7 +30,7 @@ export const MainLayout = ({
   children,
   useSimpleHeader = false,
   hideFooter,
-  showAnnouncement = true
+  showAnnouncement = false
 }: MainLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const [aboutExtension, setAboutExtension] = useState({} as ExtensionUpdateData);

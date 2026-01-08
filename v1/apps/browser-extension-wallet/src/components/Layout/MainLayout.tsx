@@ -31,7 +31,7 @@ export const MainLayout = ({
   children,
   useSimpleHeader = false,
   hideFooter,
-  showAnnouncement = true,
+  showAnnouncement = false,
   showBetaPill = false
 }: MainLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
