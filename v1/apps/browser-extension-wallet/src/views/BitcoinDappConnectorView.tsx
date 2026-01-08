@@ -29,7 +29,7 @@ export const BitcoinDappConnectorView = (): ReactElement => {
   }, [analytics, enhancedAnalyticsStatus, setDoesUserAllowAnalytics]);
 
   return (
-    <MainLayout showBetaPill useSimpleHeader hideFooter showAnnouncement={false}>
+    <MainLayout showBetaPill useSimpleHeader hideFooter>
       <DappError
         title={t('dapp.connector.btc.error.title')}
         description={t('dapp.connector.btc.error.description')}
