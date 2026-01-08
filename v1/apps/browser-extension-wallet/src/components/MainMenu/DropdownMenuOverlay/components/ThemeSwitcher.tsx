@@ -6,7 +6,6 @@ import styles from '../DropdownMenuOverlay.module.scss';
 import { useTheme } from '@providers/ThemeProvider/context';
 import SunIcon from '../../../../assets/icons/sun.component.svg';
 import MoonIcon from '../../../../assets/icons/moon.component.svg';
-import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { themes, useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@providers/AnalyticsProvider/analyticsTracker';
 import type { TranslationKey } from '@lace/translation';
@@ -37,18 +36,14 @@ interface Props {
   section?: 'settings' | 'user_profile';
 }
 
-export const ThemeSwitch = ({ isPopup, section = 'user_profile' }: Props): React.ReactElement => {
+export const ThemeSwitch = ({ section = 'user_profile' }: Props): React.ReactElement => {
   const { theme, setTheme } = useTheme();
-  const backgroundServices = useBackgroundServiceAPIContext();
   const analytics = useAnalyticsContext();
 
   const handleCurrentTheme = () => {
     const pickedTheme = theme.name === 'light' ? 'dark' : 'light';
     setTheme(pickedTheme);
 
-    if (isPopup) {
-      backgroundServices.handleChangeTheme({ theme: pickedTheme });
-    }
     const posthogEvent = section === 'settings' ? settingsThemeEvent : userWalletProfileThemeEvent;
     analytics.sendEventToPostHog(posthogEvent[pickedTheme]);
   };

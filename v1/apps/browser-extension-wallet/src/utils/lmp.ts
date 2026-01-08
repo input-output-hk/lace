@@ -3,18 +3,23 @@ import { Wallet } from '@lace/cardano';
 import { Observable } from 'rxjs';
 import { storage } from 'webextension-polyfill';
 import { Language } from '@lace/translation';
+import type { themes as ColorScheme } from '../providers/ThemeProvider/types';
 
 export type BundleAppApi = {
   wallets$: Observable<Wallet.LmpBundleWallet[]>;
   activate(walletId: string): Promise<void>;
   language$: Observable<Language>;
   setLanguage(language: Language): Promise<void>;
+  colorScheme$: Observable<ColorScheme>;
+  setColorScheme(colorScheme: ColorScheme): Promise<void>;
 };
 export const bundleAppApiProps: RemoteApiProperties<BundleAppApi> = {
   wallets$: RemoteApiPropertyType.HotObservable,
   activate: RemoteApiPropertyType.MethodReturningPromise,
   language$: RemoteApiPropertyType.HotObservable,
-  setLanguage: RemoteApiPropertyType.MethodReturningPromise
+  setLanguage: RemoteApiPropertyType.MethodReturningPromise,
+  colorScheme$: RemoteApiPropertyType.HotObservable,
+  setColorScheme: RemoteApiPropertyType.MethodReturningPromise
 };
 
 export const lmpApiBaseChannel = 'bundle-lmp';

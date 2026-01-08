@@ -9,6 +9,7 @@ import {
 } from '@lib/scripts/types/feature-flags';
 import { LogLevelString } from '@lace/common';
 import { Language } from '@lace/translation';
+import type { themes } from '@providers/ThemeProvider/types';
 
 export interface PendingMigrationState {
   from: string;
@@ -54,6 +55,7 @@ export interface BackgroundStorage {
   optedInBeta?: boolean;
   logLevel?: LogLevelString;
   languageChoice?: Language;
+  colorScheme?: themes;
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

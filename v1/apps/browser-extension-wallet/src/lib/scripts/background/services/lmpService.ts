@@ -11,6 +11,9 @@ import { Language } from '@lace/translation';
 import { requestMessage$ } from './utilityServices';
 import { MessageTypes } from '../../types';
 
+import type { themes as ColorScheme } from '../../../../providers/ThemeProvider/types';
+import type { ChangeThemeData } from '../../types/background-service';
+
 const cardanoLogo = require('../../../../assets/icons/browser-view/cardano-logo.svg').default;
 const bitcoinLogo = require('../../../../assets/icons/browser-view/bitcoin-logo.svg').default;
 
@@ -27,6 +30,7 @@ const isInMemoryWallet = (
 
 // BehaviorSubject for language state, initialized with default 'en'
 export const language$ = new BehaviorSubject<Language>(Language.en);
+export const colorScheme$ = new BehaviorSubject<ColorScheme>('light');
 
 // Initialize language from storage on startup
 (async () => {
@@ -34,6 +38,9 @@ export const language$ = new BehaviorSubject<Language>(Language.en);
     const storage = await getBackgroundStorage();
     if (storage.languageChoice) {
       language$.next(storage.languageChoice);
+    }
+    if (storage.colorScheme) {
+      colorScheme$.next(storage.colorScheme);
     }
   } catch (error) {
     logger.error('Failed to initialize language from storage:', error);
@@ -44,6 +51,9 @@ export const language$ = new BehaviorSubject<Language>(Language.en);
 requestMessage$.subscribe(({ type, data }) => {
   if (type === MessageTypes.CHANGE_LANGUAGE) {
     language$.next(data as Language);
+  }
+  if (type === MessageTypes.CHANGE_THEME) {
+    colorScheme$.next((data as ChangeThemeData).theme);
   }
 });
 
@@ -113,6 +123,12 @@ const api: BundleAppApi = {
     language$.next(language);
     await setBackgroundStorage({ languageChoice: language });
     requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data: language });
+  },
+  colorScheme$,
+  setColorScheme: async (colorScheme: ColorScheme): Promise<void> => {
+    colorScheme$.next(colorScheme);
+    await setBackgroundStorage({ colorScheme });
+    requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data: { theme: colorScheme } });
   }
 };
 
