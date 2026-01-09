@@ -32,7 +32,8 @@ Before(
     tags: '@OnboardingCreateWallet or @Staking-initial-E2E or @OnboardingRestoreWallet or @OnboardingHardwareWallet or @TrezorOnboarding or @OnboardingCreatePaperWallet or @OnboardingRestorePaperWallet or @NetworkRequestsCounting or @OnboardingCreateWalletBitcoin or @OnboardingRestoreWalletBitcoin'
   },
   async () => {
-    await extendedView.visit();
+    // Onboarding tests don't have a wallet yet, so don't wait for wallet APIs
+    await extendedView.visitForOnboarding();
   }
 );
 

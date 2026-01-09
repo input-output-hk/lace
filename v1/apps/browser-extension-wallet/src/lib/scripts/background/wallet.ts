@@ -425,9 +425,23 @@ export const walletManager = new WalletManager(
     managerStorage: webStorage.local
   }
 );
+// Service worker initialization state for E2E tests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const swGlobal = globalThis as any;
+swGlobal.WALLET_MANAGER_READY = false;
+swGlobal.WALLET_MANAGER_ERROR = null;
+swGlobal.WALLET_MANAGER_INIT_START = Date.now();
+
+logger.info('[SW] Starting walletManager.initialize()...');
+console.log('[SW] Starting walletManager.initialize()...'); // Also log to console for E2E visibility
+
 walletManager
   .initialize()
   .then(() => {
+    const initDuration = Date.now() - swGlobal.WALLET_MANAGER_INIT_START;
+    logger.info(`[SW] walletManager.initialize() completed in ${initDuration}ms`);
+    console.log(`[SW] walletManager.initialize() completed in ${initDuration}ms`);
+
     exposeApi(
       {
         api$: of(walletRepository),
@@ -464,6 +478,9 @@ walletManager
       { logger, runtime }
     );
 
+    logger.info('[SW] Cardano wallet APIs exposed');
+    console.log('[SW] Cardano wallet APIs exposed');
+
     bitcoinWalletManager.initialize().then(() => {
       exposeApi(
         {
@@ -491,10 +508,22 @@ walletManager
         },
         { logger, runtime }
       );
+
+      // Mark service worker as fully ready
+      swGlobal.WALLET_MANAGER_READY = true;
+      const totalDuration = Date.now() - swGlobal.WALLET_MANAGER_INIT_START;
+      logger.info(`[SW] All wallet APIs ready in ${totalDuration}ms`);
+      console.log(`[SW] All wallet APIs ready in ${totalDuration}ms`);
+    }).catch((error) => {
+      swGlobal.WALLET_MANAGER_ERROR = `Bitcoin wallet init failed: ${error?.message || error}`;
+      logger.error('[SW] Failed to initialize bitcoin wallet manager', error);
+      console.error('[SW] Failed to initialize bitcoin wallet manager', error);
     });
   })
   .catch((error) => {
-    logger.error('Failed to initialize wallet manager', error);
+    swGlobal.WALLET_MANAGER_ERROR = `Wallet manager init failed: ${error?.message || error}`;
+    logger.error('[SW] Failed to initialize wallet manager', error);
+    console.error('[SW] Failed to initialize wallet manager', error);
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
