@@ -7,6 +7,7 @@ import allure from '@wdio/allure-reporter';
 import testContext from '../utils/testContext';
 import PidMonitor from '../support/PidMonitor';
 import { Logger } from '../support/logger';
+import networkManager from '../utils/networkManager';
 
 const monitor = PidMonitor.getInstance();
 
@@ -33,6 +34,11 @@ After({ tags: 'not @Pending and not @pending' }, async (scenario) => {
     monitor.clear();
   }
   testContext.clearContext();
+  
+  // Close Chrome DevTools Protocol sessions before reloading to prevent TargetCloseError
+  await networkManager.closeOpenedCdpSessions();
+  await consoleManager.closeOpenedCdpSessions();
+  
   await browser.reloadSession();
 });
 

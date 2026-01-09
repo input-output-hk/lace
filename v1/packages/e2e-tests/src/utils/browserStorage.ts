@@ -17,6 +17,22 @@ const verifyBrowserStorageSupport: any = async () => {
 export const getBackgroundStorage: any = async (): Promise<any> => {
   await verifyBrowserStorageSupport();
   try {
+    // Wait for chrome.storage to be available (important for bundle mode)
+    await browser.waitUntil(
+      async () => {
+        const isAvailable = await browser.execute(() => {
+          return typeof chrome !== 'undefined' && 
+                 chrome.storage !== undefined && 
+                 chrome.storage.local !== undefined;
+        });
+        return isAvailable;
+      },
+      {
+        timeout: 10000,
+        timeoutMsg: 'chrome.storage.local API not available after 10 seconds'
+      }
+    );
+
     return await browser.execute(`
       return (async () => {
         const response = await chrome.storage.local.get("BACKGROUND_STORAGE");

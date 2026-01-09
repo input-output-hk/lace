@@ -21,21 +21,23 @@ export class NetworkManager {
         const targets = puppeteer
           .targets()
           .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
-        targets.map(async (target) => {
-          const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-          NetworkManager.cdpSessions.push(client);
-          await client.send('Fetch.enable', {
-            patterns: [{ urlPattern }]
-          });
-          client.on('Fetch.requestPaused', async ({ requestId, request }) => {
-            Logger.log(`found request: ${request.url}, returning response code: ${responseCode} `);
-            await client.send('Fetch.fulfillRequest', {
-              requestId,
-              responseCode: Number(responseCode),
-              body: Buffer.from('{"__type": "Error"}').toString('base64')
+        await Promise.all(
+          targets.map(async (target) => {
+            const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
+            NetworkManager.cdpSessions.push(client);
+            await client.send('Fetch.enable', {
+              patterns: [{ urlPattern }]
             });
-          });
-        });
+            client.on('Fetch.requestPaused', async ({ requestId, request }) => {
+              Logger.log(`found request: ${request.url}, returning response code: ${responseCode} `);
+              await client.send('Fetch.fulfillRequest', {
+                requestId,
+                responseCode: Number(responseCode),
+                body: Buffer.from('{"__type": "Error"}').toString('base64')
+              });
+            });
+          })
+        );
       });
     } else {
       Logger.log('request interception not available in Firefox');
@@ -49,20 +51,22 @@ export class NetworkManager {
         const targets = puppeteer
           .targets()
           .filter((target) => ['page', 'service_worker', 'other'].includes(target.type()));
-        targets.map(async (target) => {
-          const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-          NetworkManager.cdpSessions.push(client);
-          await client.send('Fetch.enable', {
-            patterns: [{ urlPattern }]
-          });
-          client.on('Fetch.requestPaused', async ({ requestId, request }) => {
-            Logger.log(`found request: ${request.url}, failing request`);
-            await client.send('Fetch.failRequest', {
-              requestId,
-              errorReason: 'Failed'
+        await Promise.all(
+          targets.map(async (target) => {
+            const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
+            NetworkManager.cdpSessions.push(client);
+            await client.send('Fetch.enable', {
+              patterns: [{ urlPattern }]
             });
-          });
-        });
+            client.on('Fetch.requestPaused', async ({ requestId, request }) => {
+              Logger.log(`found request: ${request.url}, failing request`);
+              await client.send('Fetch.failRequest', {
+                requestId,
+                errorReason: 'Failed'
+              });
+            });
+          })
+        );
       });
     } else {
       Logger.log('request interception not available in Firefox');
@@ -78,24 +82,26 @@ export class NetworkManager {
           .filter(
             (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
           );
-        targets.map(async (target) => {
-          const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-          NetworkManager.cdpSessions.push(client);
-          await client.send(this.NETWORK_ENABLE);
-          client.on('Network.responseReceived', async (request) => {
-            if (request.response.status >= 400) {
-              const requestPayload = await this.getRequestPostData(client, request.requestId);
-              const responseBody = await this.getResponseBody(client, request.requestId);
-              const approximateTimestamp = new Date().toString();
-              const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${responseBody}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
-              allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
-              console.error(
-                'Failed request',
-                `URL: ${request.response.url}  |  RESPONSE CODE: ${request.response.status}`
-              );
-            }
-          });
-        });
+        await Promise.all(
+          targets.map(async (target) => {
+            const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
+            NetworkManager.cdpSessions.push(client);
+            await client.send(this.NETWORK_ENABLE);
+            client.on('Network.responseReceived', async (request) => {
+              if (request.response.status >= 400) {
+                const requestPayload = await this.getRequestPostData(client, request.requestId);
+                const responseBody = await this.getResponseBody(client, request.requestId);
+                const approximateTimestamp = new Date().toString();
+                const combinedFailedRequestInfo = `URL:\n${request.response.url}\n\nRESPONSE CODE:\n${request.response.status}\n\nAPPROXIMATE TIME:\n${approximateTimestamp}\n\nRESPONSE BODY:\n${responseBody}\n\nREQUEST PAYLOAD:\n${requestPayload}`;
+                allure.addAttachment('Failed request', combinedFailedRequestInfo, 'text/plain');
+                console.error(
+                  'Failed request',
+                  `URL: ${request.response.url}  |  RESPONSE CODE: ${request.response.status}`
+                );
+              }
+            });
+          })
+        );
       });
     } else {
       Logger.log('requests logging not available in Firefox');
@@ -146,9 +152,11 @@ export class NetworkManager {
 
   closeOpenedCdpSessions = async (): Promise<void> => {
     if ((await extensionUtils.getBrowser()) !== 'firefox') {
-      NetworkManager.cdpSessions.map(async (session) => {
-        if (session.connection()) await session.detach();
-      });
+      await Promise.all(
+        NetworkManager.cdpSessions.map(async (session) => {
+          if (session.connection()) await session.detach();
+        })
+      );
       NetworkManager.cdpSessions = [];
     }
   };

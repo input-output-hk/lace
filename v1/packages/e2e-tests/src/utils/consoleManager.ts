@@ -27,14 +27,16 @@ export class ConsoleManager {
           .filter(
             (target) => target.type() === 'page' || target.type() === 'service_worker' || target.type() === 'other'
           );
-        targets.map(async (target) => {
-          const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
-          ConsoleManager.cdpSessions.push(client);
-          await client.send(this.CONSOLE_ENABLE);
-          client.on('Console.messageAdded', async (entry: any) => {
-            ConsoleManager.capturedLogs.push(entry.message);
-          });
-        });
+        await Promise.all(
+          targets.map(async (target) => {
+            const client: CDPSession = (await target.createCDPSession()) as unknown as CDPSession;
+            ConsoleManager.cdpSessions.push(client);
+            await client.send(this.CONSOLE_ENABLE);
+            client.on('Console.messageAdded', async (entry: any) => {
+              ConsoleManager.capturedLogs.push(entry.message);
+            });
+          })
+        );
       });
     } else {
       Logger.log('Logs collection not available in Firefox');
@@ -53,9 +55,11 @@ export class ConsoleManager {
   closeOpenedCdpSessions = async (): Promise<void> => {
     if ((await extensionUtils.getBrowser()) !== 'firefox') {
       await this.clearLogs();
-      ConsoleManager.cdpSessions.map(async (session) => {
-        if (session.connection()) await session.detach();
-      });
+      await Promise.all(
+        ConsoleManager.cdpSessions.map(async (session) => {
+          if (session.connection()) await session.detach();
+        })
+      );
       ConsoleManager.cdpSessions = [];
     }
   };
