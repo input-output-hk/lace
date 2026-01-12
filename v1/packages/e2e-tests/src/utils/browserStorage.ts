@@ -44,6 +44,22 @@ export const setUsePersistentUserId = async (): Promise<void> => {
   }
 };
 
+export const setColorScheme = async (colorScheme: string): Promise<void> => {
+  await verifyBrowserStorageSupport();
+
+  const backgroundStorage = await getBackgroundStorage();
+  backgroundStorage.colorScheme = colorScheme;
+  try {
+    await browser.execute(`
+      return (async () => { await chrome.storage.local.set({ BACKGROUND_STORAGE: ${JSON.stringify(
+        backgroundStorage
+      )}}) })()
+    `);
+  } catch (error) {
+    throw new Error(`Setting browser storage failed: ${error}`);
+  }
+};
+
 export const cleanBrowserStorage: any = async (): Promise<void> => {
   await verifyBrowserStorageSupport();
 

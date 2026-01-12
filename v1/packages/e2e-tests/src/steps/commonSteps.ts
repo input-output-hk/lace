@@ -14,7 +14,8 @@ import clipboard from 'clipboardy';
 import {
   shiftBackFiatPriceFetchedTimeInBrowserStorage,
   cleanBrowserStorage,
-  deleteFiatPriceTimestampFromBackgroundStorage
+  deleteFiatPriceTimestampFromBackgroundStorage,
+  setColorScheme
 } from '../utils/browserStorage';
 import BackgroundStorageAssert from '../assert/backgroundStorageAssert';
 import topNavigationAssert from '../assert/topNavigationAssert';
@@ -372,6 +373,7 @@ When(/^I reopen the page$/, async () => {
 
 When(/^I set (light|dark) theme mode in Local Storage$/, async (mode: 'light' | 'dark') => {
   await localStorageInitializer.initializeMode(mode);
+  await setColorScheme(mode);
   await browser.refresh();
 });
 
