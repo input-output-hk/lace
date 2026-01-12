@@ -117,6 +117,10 @@ inputs:
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true
+  PUBNUB_TOKEN_ENDPOINT:
+    description: 'PubNub token endpoint URL for authentication. If not provided, uses default PubNub endpoint'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -203,4 +207,5 @@ runs:
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
         NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
+        PUBNUB_TOKEN_ENDPOINT: ${{ inputs.PUBNUB_TOKEN_ENDPOINT }}
       run: yarn browser build

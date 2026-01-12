@@ -140,6 +140,7 @@ jobs:
           DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
           NOTIFICATION_CENTER_MODE: 'production'
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT }} 
         run: |
           yarn cleanup:dist
           WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw
