@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload build artifact
         if: needs.setup.outputs.build_exists == 'false'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: '${{ env.BUILD_ARTIFACT_NAME }}'
           path: ./v1/apps/browser-extension-wallet/dist
@@ -255,13 +255,13 @@ jobs:
           eval "$runCommand";
 
       - name: Upload allure tests results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: allure-results
           path: ./v1/artifacts/reports/allure/results
 
       - name: Upload performance metrics
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: performance-metrics
           path: ./v1/artifacts/metrics
