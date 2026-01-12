@@ -166,6 +166,7 @@ const exposeProductionNotificationsCenterAPI = async (api$: ReplaySubject<Notifi
       configuration: {
         skipAuthentication: process.env.PUBNUB_SKIP_AUTHENTICATION === 'true',
         subscribeKey: process.env.PUBNUB_SUBSCRIBE_KEY,
+        ...(process.env.PUBNUB_TOKEN_ENDPOINT && { tokenEndpoint: process.env.PUBNUB_TOKEN_ENDPOINT }),
         ...(fetchMissedMessagesIntervalMinutes !== undefined && { fetchMissedMessagesIntervalMinutes })
       }
     },

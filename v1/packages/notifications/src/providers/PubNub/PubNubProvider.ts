@@ -194,6 +194,8 @@ export class PubNubProvider implements NotificationsProvider {
     this.storage = storage;
     this.storageKeys = storageKeys;
     this.tokenEndpoint = tokenEndpoint;
+    // Log which endpoint is being used
+    this.logger.info(`PubNubProvider: Using token endpoint: ${this.tokenEndpoint}`);
     this.config = {
       // authKey,
       autoNetworkDetection: true,
