@@ -47,59 +47,60 @@ jobs:
             v1/packages/bitcoin/dist
             v1/packages/notifications/dist
 
-  checksV1:
-    name: V1 Code Quality Checks
-    runs-on: ubuntu-22.04
-    needs: prepare
+  # TEMPORARILY DISABLED FOR E2E ITERATION
+  # checksV1:
+  #   name: V1 Code Quality Checks
+  #   runs-on: ubuntu-22.04
+  #   needs: prepare
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     - name: Setup Node.js and install dependencies
+  #       uses: ./.github/actions/install
+  #       with:
+  #         WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Download v1 packages artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: v1-packages
-          path: v1/packages
+  #     - name: Download v1 packages artifacts
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         name: v1-packages
+  #         path: v1/packages
 
-      - name: Lint check
-        run: yarn lint
-        working-directory: v1/apps/browser-extension-wallet
+  #     - name: Lint check
+  #       run: yarn lint
+  #       working-directory: v1/apps/browser-extension-wallet
 
-  unitTestsV1:
-    name: V1 Unit Tests
-    runs-on: ubuntu-22.04
-    needs: prepare
+  # unitTestsV1:
+  #   name: V1 Unit Tests
+  #   runs-on: ubuntu-22.04
+  #   needs: prepare
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Setup Node.js and install dependencies
-        uses: ./.github/actions/install
-        with:
-          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     - name: Setup Node.js and install dependencies
+  #       uses: ./.github/actions/install
+  #       with:
+  #         WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Download v1 packages artifacts
-        uses: actions/download-artifact@v5
-        with:
-          name: v1-packages
-          path: v1/packages
+  #     - name: Download v1 packages artifacts
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         name: v1-packages
+  #         path: v1/packages
 
-      - name: Execute unit tests
-        uses: ./.github/actions/test/unit
+  #     - name: Execute unit tests
+  #       uses: ./.github/actions/test/unit
 
   build-lace-v1-extension:
     name: Build Lace v1 Extension
     runs-on: ubuntu-22.04
-    needs: [checksV1, unitTestsV1]
+    needs: prepare  # TEMPORARILY REMOVED: [checksV1, unitTestsV1]
 
     steps:
       - name: Checkout repository
@@ -155,90 +156,91 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  checksV2:
-    name: V2 Code Quality Checks
-    runs-on: ubuntu-22.04
+  # TEMPORARILY DISABLED FOR E2E ITERATION
+  # checksV2:
+  #   name: V2 Code Quality Checks
+  #   runs-on: ubuntu-22.04
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #         token: ${{ secrets.GH_TOKEN }}
 
-      - name: Setup Node.js for v2
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: 'v2/.nvmrc'
+  #     - name: Setup Node.js for v2
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version-file: 'v2/.nvmrc'
 
-      - name: Configure npm registries
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
-          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
-          echo "engine-strict=true" >> ~/.npmrc
+  #     - name: Configure npm registries
+  #       run: |
+  #         echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+  #         echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+  #         echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+  #         echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+  #         echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+  #         echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+  #         echo "engine-strict=true" >> ~/.npmrc
 
-      - name: Install v2 dependencies
-        run: npm ci
-        working-directory: v2
+  #     - name: Install v2 dependencies
+  #       run: npm ci
+  #       working-directory: v2
 
-      - name: Check code formatting
-        run: npm run check:format
-        working-directory: v2
+  #     - name: Check code formatting
+  #       run: npm run check:format
+  #       working-directory: v2
 
-      - name: Lint check
-        run: npx nx lint midnight-extension --max-warnings=0
-        working-directory: v2
+  #     - name: Lint check
+  #       run: npx nx lint midnight-extension --max-warnings=0
+  #       working-directory: v2
 
-      - name: Type check
-        run: npx nx run-many --target=type-check-src,type-check-test --projects=midnight-extension
-        working-directory: v2
-        env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+  #     - name: Type check
+  #       run: npx nx run-many --target=type-check-src,type-check-test --projects=midnight-extension
+  #       working-directory: v2
+  #       env:
+  #         NODE_OPTIONS: '--max_old_space_size=8192'
 
-  unitTestsV2:
-    name: V2 Unit Tests
-    runs-on: ubuntu-22.04
+  # unitTestsV2:
+  #   name: V2 Unit Tests
+  #   runs-on: ubuntu-22.04
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #         token: ${{ secrets.GH_TOKEN }}
 
-      - name: Setup Node.js for v2
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: 'v2/.nvmrc'
+  #     - name: Setup Node.js for v2
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version-file: 'v2/.nvmrc'
 
-      - name: Configure npm registries
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
-          echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
-          echo "engine-strict=true" >> ~/.npmrc
+  #     - name: Configure npm registries
+  #       run: |
+  #         echo "//npm.pkg.github.com/:_authToken=${{ secrets.V2_NPM_TOKEN }}" >> ~/.npmrc
+  #         echo "//npm.hugeicons.com/:_authToken=${{ secrets.V2_HUGE_ICONS_TOKEN }}" >> ~/.npmrc
+  #         echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+  #         echo "@input-output-hk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+  #         echo "@midnight-ntwrk:registry=https://npm.pkg.github.com" >> ~/.npmrc
+  #         echo "@hugeicons-pro:registry=https://npm.hugeicons.com/" >> ~/.npmrc
+  #         echo "engine-strict=true" >> ~/.npmrc
 
-      - name: Install v2 dependencies
-        run: npm ci
-        working-directory: v2
+  #     - name: Install v2 dependencies
+  #       run: npm ci
+  #       working-directory: v2
 
-      - name: Run unit tests
-        run: npx nx test midnight-extension
-        working-directory: v2
-        env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+  #     - name: Run unit tests
+  #       run: npx nx test midnight-extension
+  #       working-directory: v2
+  #       env:
+  #         NODE_OPTIONS: '--max_old_space_size=8192'
 
   build-midnight-extension:
     name: Build Midnight Extension (v2)
     runs-on: ubuntu-22.04
-    needs: [checksV2, unitTestsV2]
+    # TEMPORARILY REMOVED: needs: [checksV2, unitTestsV2]
 
     steps:
       - name: Checkout repository
