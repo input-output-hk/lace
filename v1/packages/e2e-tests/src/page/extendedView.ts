@@ -19,7 +19,9 @@ class ExtendedView extends LaceView implements Page {
   }
 
   async visit() {
-    await browser.url(await this.getBaseUrl());
+    const targetUrl = await this.getBaseUrl();
+    await browser.url(targetUrl);
+    await this.waitForExtensionPage(targetUrl);
     await this.waitForPreloaderToDisappear();
   }
 

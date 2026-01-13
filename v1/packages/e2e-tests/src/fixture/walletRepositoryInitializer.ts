@@ -100,7 +100,7 @@ export const clearWalletRepository = async (): Promise<void> => {
   let attempts = 0;
   let lastStatus: any = null;
   
-  // Wait for walletRepository API to be functional (not just the proxy to exist)
+  // Wait for walletRepository API to be functional (including removeWallet and walletManager.deactivate methods)
   try {
     await browser.waitUntil(
       async () => {
@@ -112,12 +112,15 @@ export const clearWalletRepository = async (): Promise<void> => {
                 hasWalletRepository: typeof window.walletRepository !== 'undefined',
                 hasWalletManager: typeof window.walletManager !== 'undefined',
                 hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
+                hasRemoveWallet: typeof window.walletRepository?.removeWallet === 'function',
+                hasDeactivate: typeof window.walletManager?.deactivate === 'function',
                 documentReady: document.readyState,
                 ready: false,
                 error: null
               };
               
-              if (!status.hasWalletRepository || !status.hasWalletManager || !status.hasFirstValueFrom) {
+              if (!status.hasWalletRepository || !status.hasWalletManager || !status.hasFirstValueFrom ||
+                  !status.hasRemoveWallet || !status.hasDeactivate) {
                 return status;
               }
               
@@ -213,34 +216,62 @@ export const getWalletsFromRepository = async (): Promise<any[]> => {
 };
 
 const addWalletInRepository = async (wallet: string): Promise<void> => {
-  // Wait for walletRepository API to be functional
+  const startTime = Date.now();
+  let attempts = 0;
+  let lastStatus: any = null;
+
+  // Wait for walletRepository API to be fully functional (including addWallet method)
   await browser.waitUntil(
     async () => {
+      attempts++;
       try {
         const result = await browser.execute(`
           return (async () => {
-            if (typeof window.walletRepository === 'undefined' || 
-                typeof window.firstValueFrom === 'undefined') {
-              return { ready: false };
+            const status = {
+              hasWalletRepository: typeof window.walletRepository !== 'undefined',
+              hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
+              hasAddWallet: typeof window.walletRepository?.addWallet === 'function',
+              ready: false,
+              error: null
+            };
+            
+            if (!status.hasWalletRepository || !status.hasFirstValueFrom || !status.hasAddWallet) {
+              return status;
             }
+            
             try {
               await window.firstValueFrom(window.walletRepository.wallets$);
-              return { ready: true };
+              status.ready = true;
             } catch (e) {
-              return { ready: false };
+              status.error = e.message;
             }
+            return status;
           })()
         `);
+        
+        lastStatus = result;
+        
+        if (attempts === 1 || attempts % 5 === 0 || result?.ready) {
+          Logger.log(`[addWalletInRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+        }
+        
         return result && result.ready;
-      } catch {
+      } catch (e) {
+        lastStatus = { executeError: String(e) };
+        if (attempts === 1 || attempts % 5 === 0) {
+          Logger.log(`[addWalletInRepository] Attempt ${attempts} failed: ${e}`);
+        }
         return false;
       }
     },
     {
       timeout: 30000,
-      timeoutMsg: 'walletRepository API not functional after 30 seconds'
+      interval: 500,
+      timeoutMsg: `walletRepository.addWallet API not functional after 30 seconds. Last status: ${JSON.stringify(lastStatus)}`
     }
   );
+
+  Logger.log(`[addWalletInRepository] API ready after ${Date.now() - startTime}ms`);
 
   await browser.execute(
     `
@@ -253,35 +284,65 @@ const addWalletInRepository = async (wallet: string): Promise<void> => {
 };
 
 export const addAndActivateWalletInRepository = async (wallet: string): Promise<void> => {
-  // Wait for walletRepository API to be functional
+  const startTime = Date.now();
+  let attempts = 0;
+  let lastStatus: any = null;
+
+  // Wait for walletRepository API to be fully functional (including addWallet method and walletManager.activate)
   await browser.waitUntil(
     async () => {
+      attempts++;
       try {
         const result = await browser.execute(`
           return (async () => {
-            if (typeof window.walletRepository === 'undefined' || 
-                typeof window.walletManager === 'undefined' ||
-                typeof window.firstValueFrom === 'undefined') {
-              return { ready: false };
+            const status = {
+              hasWalletRepository: typeof window.walletRepository !== 'undefined',
+              hasWalletManager: typeof window.walletManager !== 'undefined',
+              hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
+              hasAddWallet: typeof window.walletRepository?.addWallet === 'function',
+              hasActivate: typeof window.walletManager?.activate === 'function',
+              ready: false,
+              error: null
+            };
+            
+            if (!status.hasWalletRepository || !status.hasWalletManager || 
+                !status.hasFirstValueFrom || !status.hasAddWallet || !status.hasActivate) {
+              return status;
             }
+            
             try {
               await window.firstValueFrom(window.walletRepository.wallets$);
-              return { ready: true };
+              status.ready = true;
             } catch (e) {
-              return { ready: false };
+              status.error = e.message;
             }
+            return status;
           })()
         `);
+        
+        lastStatus = result;
+        
+        if (attempts === 1 || attempts % 5 === 0 || result?.ready) {
+          Logger.log(`[addAndActivateWalletInRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+        }
+        
         return result && result.ready;
-      } catch {
+      } catch (e) {
+        lastStatus = { executeError: String(e) };
+        if (attempts === 1 || attempts % 5 === 0) {
+          Logger.log(`[addAndActivateWalletInRepository] Attempt ${attempts} failed: ${e}`);
+        }
         return false;
       }
     },
     {
       timeout: 30000,
-      timeoutMsg: 'walletRepository API not functional after 30 seconds'
+      interval: 500,
+      timeoutMsg: `walletRepository/walletManager API not functional after 30 seconds. Last status: ${JSON.stringify(lastStatus)}`
     }
   );
+
+  Logger.log(`[addAndActivateWalletInRepository] API ready after ${Date.now() - startTime}ms`);
 
   await browser.execute(
     `

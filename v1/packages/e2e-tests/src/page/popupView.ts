@@ -37,7 +37,9 @@ class PopupView extends LaceView implements Page {
     if (resize) {
       await this.setPopupWindowSize();
     }
-    await browser.url(await this.getBaseUrl());
+    const targetUrl = await this.getBaseUrl();
+    await browser.url(targetUrl);
+    await this.waitForExtensionPage(targetUrl);
     await this.waitForPreloaderToDisappear();
   }
 
