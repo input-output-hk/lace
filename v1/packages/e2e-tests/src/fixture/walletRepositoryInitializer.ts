@@ -6,88 +6,174 @@ import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 export const getNumWalletsInRepository = async (): Promise<number> => {
   // Wait for walletRepository API to be functional (not just the proxy to exist)
   // In bundle mode, the service worker may not have exposed the API yet
-  await browser.waitUntil(
-    async () => {
-      try {
-        const result = await browser.execute(`
-          return (async () => {
-            if (typeof window.walletRepository === 'undefined' || 
-                typeof window.firstValueFrom === 'undefined') {
-              return { ready: false };
-            }
-            try {
-              // Actually test that the API works, not just that the proxy exists
-              const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
-              return { ready: true, length: wallets.length };
-            } catch (e) {
-              return { ready: false, error: e.message };
-            }
-          })()
-        `);
-        return result && result.ready;
-      } catch {
-        return false;
+  const startTime = Date.now();
+  const currentUrl = await browser.getUrl();
+  const windowTitle = await browser.getTitle();
+  
+  Logger.log(`[getNumWalletsInRepository] START - URL: ${currentUrl}, Title: ${windowTitle}`);
+  
+  let attempts = 0;
+  let lastStatus: any = null;
+  
+  try {
+    await browser.waitUntil(
+      async () => {
+        attempts++;
+        try {
+          const result = await browser.execute(`
+            return (async () => {
+              const status = {
+                hasWalletRepository: typeof window.walletRepository !== 'undefined',
+                hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
+                hasWalletManager: typeof window.walletManager !== 'undefined',
+                documentReady: document.readyState,
+                windowLocation: window.location.href,
+                ready: false,
+                error: null
+              };
+              
+              if (!status.hasWalletRepository || !status.hasFirstValueFrom) {
+                return status;
+              }
+              
+              try {
+                // Actually test that the API works, not just that the proxy exists
+                const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
+                status.ready = true;
+                status.walletCount = wallets.length;
+              } catch (e) {
+                status.error = e.message;
+                status.errorStack = e.stack?.split('\\n').slice(0, 3).join(' | ');
+              }
+              return status;
+            })()
+          `);
+          
+          lastStatus = result;
+          
+          // Log first attempt, every 5th, and when ready
+          if (attempts === 1 || attempts % 5 === 0 || result?.ready) {
+            Logger.log(`[getNumWalletsInRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+          }
+          
+          return result && result.ready;
+        } catch (e) {
+          lastStatus = { executeError: String(e) };
+          if (attempts === 1 || attempts % 5 === 0) {
+            Logger.log(`[getNumWalletsInRepository] Attempt ${attempts} execute failed: ${e}`);
+          }
+          return false;
+        }
+      },
+      {
+        timeout: 30000,
+        interval: 500,
+        timeoutMsg: `walletRepository API not functional after 30 seconds. Last status: ${JSON.stringify(lastStatus)}`
       }
-    },
-    {
-      timeout: 30000,
-      timeoutMsg: 'walletRepository API not functional after 30 seconds - service worker may not have initialized'
-    }
-  );
+    );
 
-  return await browser.execute(`
-    return (async () => {
-      const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
-      return wallets.length;
-    })()
-  `);
+    Logger.log(`[getNumWalletsInRepository] SUCCESS after ${Date.now() - startTime}ms and ${attempts} attempts`);
+
+    return await browser.execute(`
+      return (async () => {
+        const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
+        return wallets.length;
+      })()
+    `);
+  } catch (e) {
+    Logger.error(`[getNumWalletsInRepository] FAILED after ${Date.now() - startTime}ms and ${attempts} attempts`);
+    Logger.error(`[getNumWalletsInRepository] Last status: ${JSON.stringify(lastStatus)}`);
+    Logger.error(`[getNumWalletsInRepository] URL: ${currentUrl}, Title: ${windowTitle}`);
+    throw e;
+  }
 };
 
 export const clearWalletRepository = async (): Promise<void> => {
-  Logger.log('Removing wallets');
+  const startTime = Date.now();
+  Logger.log('[clearWalletRepository] START - Removing wallets');
   await switchToWindowWithLace(0);
+  
+  const currentUrl = await browser.getUrl();
+  const windowTitle = await browser.getTitle();
+  Logger.log(`[clearWalletRepository] Switched to Lace - URL: ${currentUrl}, Title: ${windowTitle}`);
 
+  let attempts = 0;
+  let lastStatus: any = null;
+  
   // Wait for walletRepository API to be functional (not just the proxy to exist)
-  await browser.waitUntil(
-    async () => {
-      try {
-        const result = await browser.execute(`
-          return (async () => {
-            if (typeof window.walletRepository === 'undefined' || 
-                typeof window.walletManager === 'undefined' ||
-                typeof window.firstValueFrom === 'undefined') {
-              return { ready: false };
-            }
-            try {
-              await window.firstValueFrom(window.walletRepository.wallets$);
-              return { ready: true };
-            } catch (e) {
-              return { ready: false, error: e.message };
-            }
-          })()
-        `);
-        return result && result.ready;
-      } catch {
-        return false;
+  try {
+    await browser.waitUntil(
+      async () => {
+        attempts++;
+        try {
+          const result = await browser.execute(`
+            return (async () => {
+              const status = {
+                hasWalletRepository: typeof window.walletRepository !== 'undefined',
+                hasWalletManager: typeof window.walletManager !== 'undefined',
+                hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
+                documentReady: document.readyState,
+                ready: false,
+                error: null
+              };
+              
+              if (!status.hasWalletRepository || !status.hasWalletManager || !status.hasFirstValueFrom) {
+                return status;
+              }
+              
+              try {
+                await window.firstValueFrom(window.walletRepository.wallets$);
+                status.ready = true;
+              } catch (e) {
+                status.error = e.message;
+              }
+              return status;
+            })()
+          `);
+          
+          lastStatus = result;
+          
+          if (attempts === 1 || attempts % 5 === 0 || result?.ready) {
+            Logger.log(`[clearWalletRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+          }
+          
+          return result && result.ready;
+        } catch (e) {
+          lastStatus = { executeError: String(e) };
+          if (attempts === 1 || attempts % 5 === 0) {
+            Logger.log(`[clearWalletRepository] Attempt ${attempts} failed: ${e}`);
+          }
+          return false;
+        }
+      },
+      {
+        timeout: 30000,
+        interval: 500,
+        timeoutMsg: `walletRepository API not functional after 30 seconds. Last status: ${JSON.stringify(lastStatus)}`
       }
-    },
-    {
-      timeout: 30000,
-      timeoutMsg: 'walletRepository API not functional after 30 seconds'
-    }
-  );
+    );
 
-  await browser.execute(`
-    return (async () => {
-      const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
-      // reversing in order to delete shared wallets before dependent wallets
-      for (const wallet of wallets.reverse()) {
-        await window.walletRepository.removeWallet(wallet.walletId);
-      }
-      await window.walletManager.deactivate();
-      return JSON.stringify(wallets);
-    })()
-  `);
+    Logger.log(`[clearWalletRepository] API ready after ${Date.now() - startTime}ms`);
+
+    await browser.execute(`
+      return (async () => {
+        const wallets = await window.firstValueFrom(window.walletRepository.wallets$);
+        // reversing in order to delete shared wallets before dependent wallets
+        for (const wallet of wallets.reverse()) {
+          await window.walletRepository.removeWallet(wallet.walletId);
+        }
+        await window.walletManager.deactivate();
+        return JSON.stringify(wallets);
+      })()
+    `);
+    
+    Logger.log(`[clearWalletRepository] SUCCESS - completed in ${Date.now() - startTime}ms`);
+  } catch (e) {
+    Logger.error(`[clearWalletRepository] FAILED after ${Date.now() - startTime}ms`);
+    Logger.error(`[clearWalletRepository] Last status: ${JSON.stringify(lastStatus)}`);
+    Logger.error(`[clearWalletRepository] URL: ${currentUrl}, Title: ${windowTitle}`);
+    throw e;
+  }
 };
 
 export const getWalletsFromRepository = async (): Promise<any[]> => {

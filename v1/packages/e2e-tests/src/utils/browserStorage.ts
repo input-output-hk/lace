@@ -16,22 +16,48 @@ const verifyBrowserStorageSupport: any = async () => {
 
 export const getBackgroundStorage: any = async (): Promise<any> => {
   await verifyBrowserStorageSupport();
+  
+  const startTime = Date.now();
+  const currentUrl = await browser.getUrl();
+  const windowTitle = await browser.getTitle();
+  
+  Logger.log(`[getBackgroundStorage] START - URL: ${currentUrl}, Title: ${windowTitle}`);
+  
+  let attempts = 0;
+  let lastStatus: any = null;
+  
   try {
     // Wait for chrome.storage to be available (important for bundle mode)
     await browser.waitUntil(
       async () => {
-        const isAvailable = await browser.execute(() => {
-          return typeof chrome !== 'undefined' && 
-                 chrome.storage !== undefined && 
-                 chrome.storage.local !== undefined;
+        attempts++;
+        const result = await browser.execute(() => {
+          return {
+            hasChrome: typeof chrome !== 'undefined',
+            hasStorage: typeof chrome !== 'undefined' && chrome.storage !== undefined,
+            hasLocal: typeof chrome !== 'undefined' && chrome.storage !== undefined && chrome.storage.local !== undefined,
+            documentReady: document.readyState,
+            isExtensionPage: window.location.protocol === 'chrome-extension:'
+          };
         });
+        
+        lastStatus = result;
+        const isAvailable = result.hasChrome && result.hasStorage && result.hasLocal;
+        
+        if (attempts === 1 || attempts % 5 === 0 || isAvailable) {
+          Logger.log(`[getBackgroundStorage] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+        }
+        
         return isAvailable;
       },
       {
-        timeout: 10000,
-        timeoutMsg: 'chrome.storage.local API not available after 10 seconds'
+        timeout: 15000,
+        interval: 500,
+        timeoutMsg: `chrome.storage.local API not available after 15 seconds. Last status: ${JSON.stringify(lastStatus)}`
       }
     );
+
+    Logger.log(`[getBackgroundStorage] chrome.storage.local available after ${Date.now() - startTime}ms`);
 
     return await browser.execute(`
       return (async () => {
@@ -40,6 +66,9 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
       })()
       `);
   } catch (error) {
+    Logger.error(`[getBackgroundStorage] FAILED after ${Date.now() - startTime}ms and ${attempts} attempts`);
+    Logger.error(`[getBackgroundStorage] Last status: ${JSON.stringify(lastStatus)}`);
+    Logger.error(`[getBackgroundStorage] URL: ${currentUrl}, Title: ${windowTitle}`);
     throw new Error(`Getting browser storage failed: ${error}`);
   }
 };
