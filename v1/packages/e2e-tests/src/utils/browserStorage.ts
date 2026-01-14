@@ -19,17 +19,17 @@ const CHROME_EXTENSION_URL = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflm
 
 export const getBackgroundStorage: any = async (): Promise<any> => {
   await verifyBrowserStorageSupport();
-  
+
   const startTime = Date.now();
   let currentUrl = await browser.getUrl();
   let windowTitle = await browser.getTitle();
-  
+
   Logger.log(`[getBackgroundStorage] START - URL: ${currentUrl}, Title: ${windowTitle}`);
-  
+
   // If not on extension page, try to switch to Lace window or navigate to extension
   if (!currentUrl.startsWith('chrome-extension://') && !currentUrl.startsWith('moz-extension://')) {
     Logger.warn(`[getBackgroundStorage] Not on extension page, attempting to switch to Lace window...`);
-    
+
     let switchedSuccessfully = false;
     try {
       await browser.switchWindow(/^Lace$/);
@@ -40,22 +40,39 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
     } catch (switchError) {
       Logger.warn(`[getBackgroundStorage] Failed to switch to Lace window: ${switchError}`);
     }
-    
+
     // If switch failed or didn't land on extension page, navigate directly to extension URL
     if (!switchedSuccessfully) {
       Logger.log(`[getBackgroundStorage] No Lace window found, navigating directly to extension URL...`);
       try {
         await browser.url(CHROME_EXTENSION_URL);
-        // Wait for navigation to complete
+        // Wait for navigation to complete AND page to be fully loaded
         await browser.waitUntil(
           async () => {
-            const url = await browser.getUrl();
-            return url.startsWith('chrome-extension://') || url.startsWith('moz-extension://');
+            const status = await browser.execute(() => {
+              const isExtensionPage = window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:';
+              const isReady = document.readyState === 'complete';
+              const hasRoot = !!document.querySelector('#root');
+              const rootHasContent = (document.querySelector('#root')?.children?.length || 0) > 0;
+              return {
+                isExtensionPage,
+                isReady,
+                hasRoot,
+                rootHasContent,
+                ready: isExtensionPage && isReady && hasRoot && rootHasContent
+              };
+            });
+
+            if (!status.ready) {
+              Logger.log(`[getBackgroundStorage] Waiting for page load: ${JSON.stringify(status)}`);
+            }
+
+            return status.ready;
           },
           {
             timeout: 15000,
             interval: 500,
-            timeoutMsg: 'Failed to navigate to extension URL'
+            timeoutMsg: 'Failed to navigate to extension URL or page did not load'
           }
         );
         currentUrl = await browser.getUrl();
@@ -66,10 +83,10 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
       }
     }
   }
-  
+
   let attempts = 0;
   let lastStatus: any = null;
-  
+
   try {
     // Wait for chrome.storage to be available (important for bundle mode)
     await browser.waitUntil(
@@ -85,14 +102,14 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
             currentUrl: window.location.href
           };
         });
-        
+
         lastStatus = result;
         const isAvailable = result.hasChrome && result.hasStorage && result.hasLocal;
-        
+
         if (attempts === 1 || attempts % 5 === 0 || isAvailable) {
           Logger.log(`[getBackgroundStorage] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
         }
-        
+
         return isAvailable;
       },
       {

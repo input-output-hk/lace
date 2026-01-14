@@ -3,6 +3,21 @@ import { Logger } from '../support/logger';
 import { switchToWindowWithLace } from '../utils/window';
 import { getTestWallet, TestWalletName } from '../support/walletConfiguration';
 
+// Crash screen selector
+const CRASH_SCREEN_SELECTOR = '[data-testid="crash-reload"]';
+
+/**
+ * Check for app crash and throw immediately if detected
+ */
+const checkForCrashAndThrow = async (context: string): Promise<void> => {
+  const hasCrash = await $(CRASH_SCREEN_SELECTOR).isExisting();
+  if (hasCrash) {
+    const url = await browser.getUrl();
+    Logger.error(`[${context}] CRASH DETECTED! App crashed at URL: ${url}`);
+    throw new Error(`App crashed during ${context}. Crash screen detected at ${url}`);
+  }
+};
+
 export const getNumWalletsInRepository = async (): Promise<number> => {
   // Wait for walletRepository API to be functional (not just the proxy to exist)
   // In bundle mode, the service worker may not have exposed the API yet
@@ -293,6 +308,9 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
     async () => {
       attempts++;
       try {
+        // Check for crash first - fail fast
+        await checkForCrashAndThrow('addAndActivateWalletInRepository');
+        
         const result = await browser.execute(`
           return (async () => {
             const status = {
@@ -301,9 +319,16 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
               hasFirstValueFrom: typeof window.firstValueFrom !== 'undefined',
               hasAddWallet: typeof window.walletRepository?.addWallet === 'function',
               hasActivate: typeof window.walletManager?.activate === 'function',
+              hasCrash: !!document.querySelector('[data-testid="crash-reload"]'),
               ready: false,
               error: null
             };
+            
+            // Fail fast if crash detected
+            if (status.hasCrash) {
+              status.error = 'CRASH_DETECTED';
+              return status;
+            }
             
             if (!status.hasWalletRepository || !status.hasWalletManager || 
                 !status.hasFirstValueFrom || !status.hasAddWallet || !status.hasActivate) {
@@ -322,12 +347,22 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
         
         lastStatus = result;
         
+        // Check for crash in result
+        if (result?.hasCrash || result?.error === 'CRASH_DETECTED') {
+          Logger.error(`[addAndActivateWalletInRepository] CRASH DETECTED in app!`);
+          throw new Error('App crashed - crash screen detected');
+        }
+        
         if (attempts === 1 || attempts % 5 === 0 || result?.ready) {
           Logger.log(`[addAndActivateWalletInRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
         }
         
         return result && result.ready;
-      } catch (e) {
+      } catch (e: any) {
+        // Re-throw crash errors immediately
+        if (e.message?.includes('crash') || e.message?.includes('CRASH')) {
+          throw e;
+        }
         lastStatus = { executeError: String(e) };
         if (attempts === 1 || attempts % 5 === 0) {
           Logger.log(`[addAndActivateWalletInRepository] Attempt ${attempts} failed: ${e}`);
