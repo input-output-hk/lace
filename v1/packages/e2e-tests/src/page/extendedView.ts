@@ -4,12 +4,7 @@ import extensionUtils from '../utils/utils';
 import { getExtensionUUID } from '../utils/firefoxUtils';
 
 class ExtendedView extends LaceView implements Page {
-  async waitForPreloaderToDisappear() {
-    await browser.waitUntil(async () => {
-      const preloaderExists = await $('#preloader').isExisting();
-      return !preloaderExists;
-    });
-  }
+  // Uses base class waitForPreloaderToDisappear() with proper timeout, logging, and crash detection
 
   async getBaseUrl() {
     if ((await extensionUtils.getBrowser()) !== 'firefox') {

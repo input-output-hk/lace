@@ -57,9 +57,10 @@ export abstract class LaceView {
         // This prevents returning true before app starts loading
         if (!preloaderExists && !sawPreloader) {
           const hasAppContent = await browser.execute(() => {
-            const hasRoot = !!document.querySelector('#root');
-            const rootHasChildren = (document.querySelector('#root')?.children?.length || 0) > 0;
-            return hasRoot && rootHasChildren;
+            // Lace app uses #lace-app, not #root
+            const hasLaceApp = !!document.querySelector('#lace-app');
+            const laceAppHasChildren = (document.querySelector('#lace-app')?.children?.length || 0) > 0;
+            return hasLaceApp && laceAppHasChildren;
           });
           
           if (!hasAppContent) {
@@ -83,18 +84,25 @@ export abstract class LaceView {
   /**
    * Verifies browser navigated to extension page successfully and page is fully loaded.
    * Retries navigation if browser is still on non-extension page.
+   * Refreshes page if React app doesn't mount within expected time.
    * Fails fast if crash is detected.
    */
   async waitForExtensionPage(targetUrl: string): Promise<void> {
     const startTime = Date.now();
-    let attempts = 0;
-    const maxAttempts = 3;
+    let navAttempts = 0;
+    let refreshAttempts = 0;
+    const maxNavAttempts = 3;
+    const maxRefreshAttempts = 2;
+    const REFRESH_AFTER_MS = 10000; // Refresh if laceAppChildren stays 0 for 10s
+    let lastZeroChildrenTime = 0;
 
     await browser.waitUntil(
       async () => {
         try {
           const status = await browser.execute(() => {
             const crashElement = document.querySelector('[data-testid="crash-reload"]');
+            // Lace app uses #lace-app, not #root
+            const laceAppElement = document.querySelector('#lace-app');
             return {
               url: window.location.href,
               isExtensionPage: window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:',
@@ -102,8 +110,8 @@ export abstract class LaceView {
               hasBody: !!document.body,
               bodyChildCount: document.body?.children?.length || 0,
               hasCrash: !!crashElement,
-              hasRoot: !!document.querySelector('#root'),
-              rootChildCount: document.querySelector('#root')?.children?.length || 0
+              hasLaceApp: !!laceAppElement,
+              laceAppChildCount: laceAppElement?.children?.length || 0
             };
           });
 
@@ -113,26 +121,50 @@ export abstract class LaceView {
             throw new Error(`App crashed during navigation. URL: ${status.url}`);
           }
 
-          // Check if on extension page AND document is loaded AND has content
-          if (status.isExtensionPage && status.readyState === 'complete' && status.rootChildCount > 0) {
-            Logger.log(`[waitForExtensionPage] SUCCESS after ${Date.now() - startTime}ms - URL: ${status.url}, rootChildren: ${status.rootChildCount}`);
+          // Check if on extension page AND document is loaded AND #lace-app has content
+          if (status.isExtensionPage && status.readyState === 'complete' && status.laceAppChildCount > 0) {
+            Logger.log(`[waitForExtensionPage] SUCCESS after ${Date.now() - startTime}ms - URL: ${status.url}, laceAppChildren: ${status.laceAppChildCount}`);
             return true;
           }
 
           // If not on extension page, retry navigation
           if (!status.isExtensionPage) {
-            attempts++;
-            Logger.warn(`[waitForExtensionPage] Attempt ${attempts} - Not on extension page. Current: ${status.url}, Expected: ${targetUrl}`);
+            navAttempts++;
+            Logger.warn(`[waitForExtensionPage] Attempt ${navAttempts} - Not on extension page. Current: ${status.url}, Expected: ${targetUrl}`);
 
-            if (attempts <= maxAttempts) {
+            if (navAttempts <= maxNavAttempts) {
               Logger.log(`[waitForExtensionPage] Retrying navigation to ${targetUrl}...`);
               await browser.url(targetUrl);
               await browser.pause(1000);
+              lastZeroChildrenTime = 0; // Reset refresh timer after navigation
             }
           } else {
-            // On extension page but not ready yet - log progress
-            if ((Date.now() - startTime) % 3000 < 500) {
-              Logger.log(`[waitForExtensionPage] Loading... readyState: ${status.readyState}, hasRoot: ${status.hasRoot}, rootChildren: ${status.rootChildCount}`);
+            // On extension page but React hasn't mounted yet
+            const elapsed = Date.now() - startTime;
+            
+            // Track how long laceAppChildren has been 0
+            if (status.laceAppChildCount === 0) {
+              if (lastZeroChildrenTime === 0) {
+                lastZeroChildrenTime = Date.now();
+              }
+              
+              const zeroChildrenDuration = Date.now() - lastZeroChildrenTime;
+              
+              // If React hasn't mounted for REFRESH_AFTER_MS, try refreshing
+              if (zeroChildrenDuration > REFRESH_AFTER_MS && refreshAttempts < maxRefreshAttempts) {
+                refreshAttempts++;
+                Logger.warn(`[waitForExtensionPage] React not mounted after ${zeroChildrenDuration}ms, refreshing page (attempt ${refreshAttempts}/${maxRefreshAttempts})...`);
+                await browser.refresh();
+                await browser.pause(2000); // Wait for page to reload
+                lastZeroChildrenTime = Date.now(); // Reset timer after refresh
+              }
+            } else {
+              lastZeroChildrenTime = 0; // Reset if we see any children
+            }
+            
+            // Log progress periodically
+            if (elapsed % 3000 < 500) {
+              Logger.log(`[waitForExtensionPage] Loading... readyState: ${status.readyState}, hasLaceApp: ${status.hasLaceApp}, laceAppChildren: ${status.laceAppChildCount}, elapsed: ${elapsed}ms`);
             }
           }
 
@@ -147,9 +179,9 @@ export abstract class LaceView {
         }
       },
       {
-        timeout: 30000,
+        timeout: 60000, // Increased to 60s to allow for refresh retries
         interval: 500,
-        timeoutMsg: `Failed to navigate to extension page after ${maxAttempts} attempts. Target: ${targetUrl}`
+        timeoutMsg: `Failed to load extension page after ${navAttempts} nav attempts and ${refreshAttempts} refresh attempts. Target: ${targetUrl}`
       }
     );
   }

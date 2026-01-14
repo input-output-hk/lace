@@ -52,14 +52,15 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
             const status = await browser.execute(() => {
               const isExtensionPage = window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:';
               const isReady = document.readyState === 'complete';
-              const hasRoot = !!document.querySelector('#root');
-              const rootHasContent = (document.querySelector('#root')?.children?.length || 0) > 0;
+              // Lace app uses #lace-app, not #root
+              const hasLaceApp = !!document.querySelector('#lace-app');
+              const laceAppHasContent = (document.querySelector('#lace-app')?.children?.length || 0) > 0;
               return {
                 isExtensionPage,
                 isReady,
-                hasRoot,
-                rootHasContent,
-                ready: isExtensionPage && isReady && hasRoot && rootHasContent
+                hasLaceApp,
+                laceAppHasContent,
+                ready: isExtensionPage && isReady && hasLaceApp && laceAppHasContent
               };
             });
 
