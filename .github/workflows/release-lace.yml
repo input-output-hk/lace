@@ -7,6 +7,14 @@ permissions:
   pull-requests: write
   actions: read
 
+env:
+  BROWSER: chrome
+  NETWORK: preprod
+  RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
+  NODE_OPTIONS: --max-old-space-size=16384
+  BRANCH: ${{ github.ref_name }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -212,3 +220,80 @@ jobs:
           else
             exit 1
           fi
+
+  processReports:
+    name: Process e2e test reports
+    needs: smokeTests
+    runs-on: ubuntu-22.04
+    if: ${{ success() || failure() }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        working-directory: './v1/artifacts/reports/allure/results'
+        run: |
+          echo "
+          branch=${BRANCH}
+          env=${NETWORK}
+          browser=${BROWSER}
+          platform=Linux
+          smoke_only=true
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.10.0
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './v1/artifacts/reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'release/linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Add link to summary
+        run: |
+          echo "TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: true" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload allure tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: ./v1/artifacts/reports/allure/results
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: ./v1/artifacts/metrics
+
+  collectE2EReports:
+    name: Collect E2E Reports
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: ${{ success() || failure() }}
+
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Upload combined e2e reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: ./v1/artifacts
+          retention-days: 30
