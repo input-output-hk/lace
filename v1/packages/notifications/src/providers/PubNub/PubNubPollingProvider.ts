@@ -7,6 +7,7 @@ import { TokenManager } from './TokenManager';
 import { PubNubFunctionClient } from './PubnubFunctionClient';
 import { StorageKeys } from '../../StorageKeys';
 import { CachedTopics, PubNubProviderOptions } from './types';
+import { withNetworkErrorHandling } from './transformNetworkError';
 
 /**
  * Conversion factor: seconds per minute.
@@ -337,7 +338,9 @@ export class PubNubPollingProvider implements NotificationsProvider {
    */
   private async fetchMessagesForTopic(topic: Topic): Promise<void> {
     const end = (await this.storage.getItem<string>(this.storageKeys.getLastSync(topic.id))) || '0';
-    const response = await this.pubnub.fetchMessages({ channels: [topic.id], count: 100, end });
+    const response = await withNetworkErrorHandling(() =>
+      this.pubnub.fetchMessages({ channels: [topic.id], count: 100, end })
+    );
     const messages = response.channels[topic.id];
 
     if (messages) {
@@ -500,7 +503,9 @@ export class PubNubPollingProvider implements NotificationsProvider {
    * @returns Promise that resolves to an array of available topics
    */
   async refreshChannels(): Promise<Topic[]> {
-    const { data: channels } = await this.pubnub.objects.getAllChannelMetadata({ include: { customFields: true } });
+    const { data: channels } = await withNetworkErrorHandling(() =>
+      this.pubnub.objects.getAllChannelMetadata({ include: { customFields: true } })
+    );
     const topics = channelsToTopics(channels, this.pubnub, this.logger);
 
     this.storage.setItem(this.storageKeys.getTopics(), { lastFetch: Date.now(), topics });
