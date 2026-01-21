@@ -1,0 +1,299 @@
+name: Release Lace
+
+on:
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  actions: read
+
+env:
+  BROWSER: chrome
+  NETWORK: preprod
+  RUN: ${{ github.run_number }}
+  DISPLAY: ':99.0'
+  NODE_OPTIONS: --max-old-space-size=16384
+  BRANCH: ${{ github.ref_name }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  prepare:
+    name: Build v1 Packages
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Build v1 packages
+        working-directory: v1
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+          EXCLUDE_BROWSER: 'true'
+        run: yarn build
+
+      - name: Upload v1 packages artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: v1-packages
+          path: |
+            v1/packages/common/dist
+            v1/packages/cardano/dist
+            v1/packages/translation/dist
+            v1/packages/core/dist
+            v1/packages/staking/dist
+            v1/packages/nami/dist
+            v1/packages/bitcoin/dist
+            v1/packages/notifications/dist
+
+  checksV1:
+    name: V1 Code Quality Checks
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Lint check
+        run: yarn lint
+        working-directory: v1/apps/browser-extension-wallet
+
+  unitTestsV1:
+    name: V1 Unit Tests
+    runs-on: ubuntu-22.04
+    needs: prepare
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Execute unit tests
+        uses: ./.github/actions/test/unit
+
+  build-lace-extension:
+    name: Build Lace Extension
+    runs-on: ubuntu-22.04
+    needs: [checksV1, unitTestsV1]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download v1 packages artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: v1-packages
+          path: v1/packages
+
+      - name: Build Lace Extension
+        working-directory: v1/apps/browser-extension-wallet
+        env:
+          NODE_OPTIONS: '--max_old_space_size=8192'
+          WEBPACK_ENV: prod
+          BROWSER: chrome
+          LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
+          BLOCKFROST_PROJECT_ID_MAINNET: ${{ secrets.BLOCKFROST_PROJECT_ID_MAINNET }}
+          BLOCKFROST_PROJECT_ID_PREPROD: ${{ secrets.BLOCKFROST_PROJECT_ID_PREPROD }}
+          BLOCKFROST_PROJECT_ID_PREVIEW: ${{ secrets.BLOCKFROST_PROJECT_ID_PREVIEW }}
+          MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
+          MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
+          POSTHOG_PRODUCTION_TOKEN: ${{ secrets.POSTHOG_PRODUCTION_TOKEN }}
+          PRODUCTION_MODE_TRACKING: 'true'
+          BANXA_LACE_URL: ${{ vars.BANXA_LACE_URL }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_ENVIRONMENT: 'production'
+          DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
+          NOTIFICATION_CENTER_MODE: 'production'
+          PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT }}
+        run: yarn build
+
+      - name: Upload Chrome Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lace-chrome
+          path: v1/apps/browser-extension-wallet/dist
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Prepare MS Edge Extension
+        run: |
+          jq 'del(.key)' v1/apps/browser-extension-wallet/dist/manifest.json | jq -c . > v1/apps/browser-extension-wallet/dist/manifest.tmp.json
+          mv v1/apps/browser-extension-wallet/dist/manifest.tmp.json v1/apps/browser-extension-wallet/dist/manifest.json
+
+      - name: Upload MS Edge Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lace-edge
+          path: v1/apps/browser-extension-wallet/dist
+          retention-days: 90
+          if-no-files-found: error
+
+  smokeTests:
+    name: E2E Smoke Tests
+    runs-on: ubuntu-22.04
+    needs: build-lace-extension
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/install
+        with:
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Download Lace Extension artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: lace-chrome
+          path: v1/apps/browser-extension-wallet/dist
+
+      - name: Execute E2E tests
+        uses: ./.github/actions/test/e2e
+        with:
+          BATCH: ${{ matrix.batch }}
+          SMOKE_ONLY: true
+          TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
+          WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
+          SERVICE_WORKER_LOGS: true
+
+  verifyTests:
+    name: Verify Test Results
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: always()
+
+    steps:
+      - name: Check smoke tests result
+        run: |
+          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
+  processReports:
+    name: Process e2e test reports
+    needs: smokeTests
+    runs-on: ubuntu-22.04
+    if: ${{ success() || failure() }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        working-directory: './v1/artifacts/reports/allure/results'
+        run: |
+          echo "
+          branch=${BRANCH}
+          env=${NETWORK}
+          browser=${BROWSER}
+          platform=Linux
+          smoke_only=true
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.10.0
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './v1/artifacts/reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'release/linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Add link to summary
+        run: |
+          echo "TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | smoke only: true" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload allure tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: ./v1/artifacts/reports/allure/results
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: ./v1/artifacts/metrics
+
+  collectE2EReports:
+    name: Collect E2E Reports
+    runs-on: ubuntu-22.04
+    needs: smokeTests
+    if: ${{ success() || failure() }}
+
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Upload combined e2e reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: ./v1/artifacts
+          retention-days: 30
