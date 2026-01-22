@@ -167,7 +167,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Setup Node.js for v2
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: 'v2/.nvmrc'
 
@@ -211,7 +211,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Setup Node.js for v2
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: 'v2/.nvmrc'
 
@@ -248,7 +248,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Setup Node.js for v2
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: 'v2/.nvmrc'
 
@@ -327,7 +327,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
 
