@@ -249,6 +249,7 @@ jobs:
           SENTRY_ENVIRONMENT: 'production'
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          POSTHOG_HOST: 'https://dev-e.lw.iog.io'
 
   release-firefox-pkg:
     name: Release Firefox package

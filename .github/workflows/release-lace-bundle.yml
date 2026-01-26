@@ -140,6 +140,7 @@ jobs:
           DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
           NOTIFICATION_CENTER_MODE: 'production'
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
+          POSTHOG_HOST: 'https://dev-e.lw.iog.io'
         run: |
           yarn cleanup:dist
           WEBPACK_PUBLIC_PATH=/sw/ yarn build:sw
@@ -303,6 +304,7 @@ jobs:
           SENTRY_ENVIRONMENT: production
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT_ID: ${{ vars.SENTRY_PROJECT_ID_V2 }}
+          POSTHOG_API_URL: 'https://dev-e.lw.iog.io'
         run: |
           rm -rf ./dist
           npm run build:app

@@ -117,6 +117,10 @@ inputs:
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true
+  POSTHOG_HOST:
+    description: 'posthog host url'
+    required: true
+    default: 'https://dev-e.lw.iog.io'
 runs:
   using: 'composite'
   steps:
@@ -203,4 +207,5 @@ runs:
         HANDLE_RESOLUTION_CACHE_LIFETIME: ${{ inputs.HANDLE_RESOLUTION_CACHE_LIFETIME }}
         NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
+        POSTHOG_HOST: ${{ inputs.POSTHOG_HOST }}
       run: yarn browser build
