@@ -77,6 +77,10 @@ inputs:
   PUBNUB_SUBSCRIBE_KEY:
     description: 'PubNub subscribe key for notifications'
     required: true
+  POSTHOG_HOST:
+    description: 'posthog host url'
+    required: true
+    default: 'https://dev-e.lw.iog.io'
 
 runs:
   using: 'composite'
@@ -111,6 +115,7 @@ runs:
         BROWSER: ${{ inputs.BROWSER_TARGET }}
         NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
+        POSTHOG_HOST: ${{ inputs.POSTHOG_HOST }}
 
     - name: Upload Chrome artifact
       if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
