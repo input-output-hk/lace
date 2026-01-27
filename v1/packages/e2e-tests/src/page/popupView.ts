@@ -2,6 +2,7 @@ import { LaceView, Page } from './page';
 import extensionUtils from '../utils/utils';
 import { browser } from '@wdio/globals';
 import { getExtensionUUID } from '../utils/firefoxUtils';
+import { Logger } from '../support/logger';
 
 class PopupView extends LaceView implements Page {
   popupWidth = 360;
@@ -33,14 +34,44 @@ class PopupView extends LaceView implements Page {
     return `moz-extension://${await getExtensionUUID()}/popup.html`;
   }
 
-  async visit(resize = true) {
+  /**
+   * Visit popup and wait for wallet APIs to be available.
+   * @param resize - If true, resize window to popup dimensions (default: true)
+   * @param waitForApis - If true, wait for wallet APIs after page load (default: true)
+   */
+  async visit(resize = true, waitForApis = true) {
+    const startTime = Date.now();
     if (resize) {
       await this.setPopupWindowSize();
     }
     const targetUrl = await this.getBaseUrl();
+    Logger.log(`[popupView.visit] START - navigating to: ${targetUrl} (waitForApis: ${waitForApis})`);
     await browser.url(targetUrl);
     await this.waitForExtensionPage(targetUrl);
     await this.waitForPreloaderToDisappear();
+    
+    // Wait for wallet APIs - critical for tests that inject wallets programmatically
+    if (waitForApis) {
+      await this.waitForWalletAPIs(30000);
+    }
+    
+    Logger.log(`[popupView.visit] COMPLETE after ${Date.now() - startTime}ms`);
+  }
+
+  /**
+   * Visit without waiting for wallet APIs - use for onboarding tests where no wallet exists yet
+   */
+  async visitForOnboarding(resize = true) {
+    const startTime = Date.now();
+    if (resize) {
+      await this.setPopupWindowSize();
+    }
+    const targetUrl = await this.getBaseUrl();
+    Logger.log(`[popupView.visitForOnboarding] START - navigating to: ${targetUrl}`);
+    await browser.url(targetUrl);
+    await this.waitForExtensionPage(targetUrl);
+    await this.waitForPreloaderToDisappear();
+    Logger.log(`[popupView.visitForOnboarding] COMPLETE after ${Date.now() - startTime}ms`);
   }
 
   async visitTokensPage() {

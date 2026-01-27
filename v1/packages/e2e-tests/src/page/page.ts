@@ -12,6 +12,67 @@ export abstract class LaceView {
   abstract getBaseUrl(): Promise<string>;
 
   /**
+   * Wait for wallet APIs to be available in the page context.
+   * These APIs (walletRepository, walletManager, firstValueFrom) are exposed by wallet-api-ui.ts
+   * which is imported by DataCheckContainer when the main app routes mount.
+   * 
+   * On a fresh session, the app may redirect to /setup, but the APIs should still be available
+   * once the React app fully initializes - we just need to wait for them.
+   */
+  async waitForWalletAPIs(timeoutMs: number = 30000): Promise<void> {
+    const startTime = Date.now();
+    let attempts = 0;
+    let lastStatus: any = null;
+
+    Logger.log(`[waitForWalletAPIs] START - waiting for wallet APIs to be exposed (timeout: ${timeoutMs}ms)`);
+
+    await browser.waitUntil(
+      async () => {
+        attempts++;
+        try {
+          const status = await browser.execute(() => {
+            return {
+              hasWalletRepository: typeof (window as any).walletRepository !== 'undefined',
+              hasWalletManager: typeof (window as any).walletManager !== 'undefined',
+              hasFirstValueFrom: typeof (window as any).firstValueFrom !== 'undefined',
+              hasAddWallet: typeof (window as any).walletRepository?.addWallet === 'function',
+              hasActivate: typeof (window as any).walletManager?.activate === 'function',
+              currentPath: window.location.hash,
+              documentReady: document.readyState
+            };
+          });
+
+          lastStatus = status;
+
+          // Log progress periodically
+          if (attempts === 1 || (Date.now() - startTime) % 3000 < 500) {
+            Logger.log(`[waitForWalletAPIs] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(status)}`);
+          }
+
+          // Success: all APIs are available and functional
+          const ready = status.hasWalletRepository && status.hasWalletManager && 
+                       status.hasFirstValueFrom && status.hasAddWallet && status.hasActivate;
+          
+          if (ready) {
+            Logger.log(`[waitForWalletAPIs] SUCCESS after ${Date.now() - startTime}ms - APIs available at path: ${status.currentPath}`);
+          }
+
+          return ready;
+        } catch (e: any) {
+          lastStatus = { error: e.message };
+          return false;
+        }
+      },
+      {
+        timeout: timeoutMs,
+        interval: 300,
+        timeoutMsg: `Wallet APIs not available after ${timeoutMs}ms. Last status: ${JSON.stringify(lastStatus)}. ` +
+          `This may indicate the React app didn't fully initialize or wallet-api-ui.ts wasn't loaded.`
+      }
+    );
+  }
+
+  /**
    * Checks for app errors/crashes and returns diagnostic info
    */
   private async checkForAppErrors(): Promise<{ hasCrash: boolean; consoleErrors: string[] }> {
@@ -35,6 +96,8 @@ export abstract class LaceView {
   async waitForPreloaderToDisappear(): Promise<void> {
     const startTime = Date.now();
     let sawPreloader = false;
+    
+    Logger.log(`[waitForPreloaderToDisappear] START`);
     
     await browser.waitUntil(
       async () => {
@@ -95,6 +158,8 @@ export abstract class LaceView {
     const maxRefreshAttempts = 2;
     const REFRESH_AFTER_MS = 10000; // Refresh if laceAppChildren stays 0 for 10s
     let lastZeroChildrenTime = 0;
+
+    Logger.log(`[waitForExtensionPage] START - target: ${targetUrl}`);
 
     await browser.waitUntil(
       async () => {
