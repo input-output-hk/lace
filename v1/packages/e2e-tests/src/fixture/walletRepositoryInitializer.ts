@@ -20,6 +20,7 @@ const checkForCrashAndThrow = async (context: string): Promise<void> => {
 
 /**
  * Check service worker status - both bundle loading and wallet API readiness.
+ * Uses chrome.runtime.sendMessage to query the SW directly (since globalThis is not shared).
  * Returns detailed status for fast-fail diagnostics.
  */
 const checkServiceWorkerStatus = async (): Promise<{
@@ -36,62 +37,91 @@ const checkServiceWorkerStatus = async (): Promise<{
   hasFirstValueFrom: boolean;
   unhandledErrors: any[];
   error: string | null;
+  messageError: string | null;
 }> => {
   try {
     const result = await browser.execute(() => {
-      const status = {
-        bundleReady: false,
-        v1Loaded: false,
-        v2Loaded: false,
-        v1Error: null as string | null,
-        v2Error: null as string | null,
-        walletApiReady: false,
-        walletManagerReady: false,
-        walletManagerError: null as string | null,
-        hasWalletRepository: false,
-        hasWalletManager: false,
-        hasFirstValueFrom: false,
-        unhandledErrors: [] as any[],
-        error: null as string | null
-      };
+      return new Promise((resolve) => {
+        const status = {
+          bundleReady: false,
+          v1Loaded: false,
+          v2Loaded: false,
+          v1Error: null as string | null,
+          v2Error: null as string | null,
+          walletApiReady: false,
+          walletManagerReady: false,
+          walletManagerError: null as string | null,
+          hasWalletRepository: false,
+          hasWalletManager: false,
+          hasFirstValueFrom: false,
+          unhandledErrors: [] as any[],
+          error: null as string | null,
+          messageError: null as string | null
+        };
 
-      // Check bundle state (set by sw-bundle.js)
-      const swState = (globalThis as any).SW_BUNDLE_STATE;
-      if (swState) {
-        status.bundleReady = swState.ready === true;
-        status.v1Loaded = swState.v1Loaded === true;
-        status.v2Loaded = swState.v2Loaded === true;
-        status.v1Error = swState.v1Error || null;
-        status.v2Error = swState.v2Error || null;
-        // Get any unhandled errors from SW
-        status.unhandledErrors = swState.unhandledErrors || [];
-      }
+        // Check if wallet APIs are exposed to window (page context)
+        status.hasWalletRepository = typeof (window as any).walletRepository !== 'undefined';
+        status.hasWalletManager = typeof (window as any).walletManager !== 'undefined';
+        status.hasFirstValueFrom = typeof (window as any).firstValueFrom !== 'undefined';
 
-      // Check wallet manager ready state (set by wallet.ts after initialize())
-      status.walletManagerReady = (globalThis as any).WALLET_MANAGER_READY === true;
-      status.walletManagerError = (globalThis as any).WALLET_MANAGER_ERROR || null;
-
-      // Check if wallet APIs are exposed to window
-      status.hasWalletRepository = typeof (window as any).walletRepository !== 'undefined';
-      status.hasWalletManager = typeof (window as any).walletManager !== 'undefined';
-      status.hasFirstValueFrom = typeof (window as any).firstValueFrom !== 'undefined';
-
-      // Check if wallet API is actually functional (not just proxy)
-      if (status.hasWalletRepository && status.hasWalletManager && status.hasFirstValueFrom) {
-        try {
-          const walletRepo = (window as any).walletRepository;
-          if (walletRepo && typeof walletRepo.wallets$ !== 'undefined') {
-            status.walletApiReady = true;
+        // Check if wallet API is actually functional (not just proxy)
+        if (status.hasWalletRepository && status.hasWalletManager && status.hasFirstValueFrom) {
+          try {
+            const walletRepo = (window as any).walletRepository;
+            if (walletRepo && typeof walletRepo.wallets$ !== 'undefined') {
+              status.walletApiReady = true;
+            }
+          } catch (e: any) {
+            status.error = e.message;
           }
-        } catch (e: any) {
-          status.error = e.message;
         }
-      }
 
-      return status;
+        // Query SW status via chrome.runtime.sendMessage
+        // This is the proper way to communicate between page and service worker contexts
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          try {
+            chrome.runtime.sendMessage({ type: 'GET_SW_BUNDLE_STATUS' }, (response) => {
+              if (chrome.runtime.lastError) {
+                // SW not ready or message failed - this is expected during startup
+                status.messageError = chrome.runtime.lastError.message || 'Unknown error';
+                resolve(status);
+                return;
+              }
+
+              if (response) {
+                // Merge SW status into our status object
+                status.bundleReady = response.bundleReady || false;
+                status.v1Loaded = response.v1Loaded || false;
+                status.v2Loaded = response.v2Loaded || false;
+                status.v1Error = response.v1Error || null;
+                status.v2Error = response.v2Error || null;
+                status.walletManagerReady = response.walletManagerReady || false;
+                status.walletManagerError = response.walletManagerError || null;
+                status.unhandledErrors = response.unhandledErrors || [];
+              }
+
+              resolve(status);
+            });
+          } catch (e: any) {
+            status.messageError = `sendMessage failed: ${e.message}`;
+            resolve(status);
+          }
+        } else {
+          status.messageError = 'chrome.runtime.sendMessage not available';
+          resolve(status);
+        }
+
+        // Timeout fallback - resolve after 2s if no response
+        setTimeout(() => {
+          if (!status.bundleReady && !status.messageError) {
+            status.messageError = 'Timeout waiting for SW response';
+          }
+          resolve(status);
+        }, 2000);
+      });
     });
 
-    return result;
+    return result as any;
   } catch (e: any) {
     return {
       bundleReady: false,
@@ -106,22 +136,24 @@ const checkServiceWorkerStatus = async (): Promise<{
       hasWalletManager: false,
       hasFirstValueFrom: false,
       unhandledErrors: [],
-      error: `Failed to check SW status: ${e.message}`
+      error: `Failed to check SW status: ${e.message}`,
+      messageError: null
     };
   }
 };
 
 /**
  * Wait for service workers to be fully ready. Fails fast on errors.
- * Short timeout (10s) - if SWs aren't ready by then, something is wrong.
+ * Short timeout (15s) - if SWs aren't ready by then, something is wrong.
  */
-const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 10000): Promise<void> => {
+const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 15000): Promise<void> => {
   const startTime = Date.now();
   let lastStatus: any = null;
   let attempts = 0;
+  let swCommunicationEstablished = false;
 
   Logger.log(`[${context}] ========================================`);
-  Logger.log(`[${context}] Checking service worker status (timeout: ${timeoutMs}ms)`);
+  Logger.log(`[${context}] Checking service worker status via chrome.runtime.sendMessage (timeout: ${timeoutMs}ms)`);
 
   while (Date.now() - startTime < timeoutMs) {
     attempts++;
@@ -131,6 +163,12 @@ const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 10
     
     const status = await checkServiceWorkerStatus();
     lastStatus = status;
+
+    // Track if we've established communication with SW
+    if (!swCommunicationEstablished && !status.messageError && status.bundleReady !== undefined) {
+      swCommunicationEstablished = true;
+      Logger.log(`[${context}] SW communication established after ${Date.now() - startTime}ms`);
+    }
 
     // FAIL FAST: Check for unhandled errors in service workers
     if (status.unhandledErrors && status.unhandledErrors.length > 0) {
@@ -165,14 +203,22 @@ const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 10
 
     // Log detailed status on first attempt and every 2 seconds
     if (attempts === 1 || (Date.now() - startTime) % 2000 < 300) {
+      const msgStatus = status.messageError ? `, msgErr="${status.messageError}"` : ', msgOK';
       Logger.log(`[${context}] SW Status (${Date.now() - startTime}ms): ` +
         `bundle=${status.bundleReady}, v1=${status.v1Loaded}, v2=${status.v2Loaded}, ` +
-        `walletMgrReady=${status.walletManagerReady}, walletApiReady=${status.walletApiReady}`);
+        `walletMgrReady=${status.walletManagerReady}, walletApiReady=${status.walletApiReady}${msgStatus}`);
     }
 
-    // SUCCESS: All systems ready
+    // SUCCESS: All systems ready (SW responded AND wallet APIs are functional)
     if (status.bundleReady && status.walletManagerReady && status.walletApiReady) {
-      Logger.log(`[${context}] ✓ Service workers ready after ${Date.now() - startTime}ms`);
+      Logger.log(`[${context}] ✓ Service workers ready after ${Date.now() - startTime}ms (${attempts} checks)`);
+      Logger.log(`[${context}] ========================================`);
+      return;
+    }
+
+    // Alternative success: SW message failed but wallet APIs work (non-bundle mode or SW restarted)
+    if (status.walletApiReady && status.messageError && (Date.now() - startTime) > 5000) {
+      Logger.log(`[${context}] ✓ Wallet APIs ready (SW message failed: ${status.messageError}) after ${Date.now() - startTime}ms`);
       Logger.log(`[${context}] ========================================`);
       return;
     }
@@ -182,7 +228,7 @@ const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 10
 
   // Timeout - provide detailed diagnostics
   Logger.error(`[${context}] ========================================`);
-  Logger.error(`[${context}] SERVICE WORKER TIMEOUT after ${timeoutMs}ms`);
+  Logger.error(`[${context}] SERVICE WORKER TIMEOUT after ${timeoutMs}ms (${attempts} checks)`);
   Logger.error(`[${context}] Last status: ${JSON.stringify(lastStatus, null, 2)}`);
   
   // Log any unhandled errors even on timeout
@@ -192,20 +238,34 @@ const waitForServiceWorkerReady = async (context: string, timeoutMs: number = 10
       Logger.error(`[${context}]   ${err.type}: ${err.message || err.reason}`);
     }
   }
+  
+  // Log message communication issues
+  if (lastStatus?.messageError) {
+    Logger.error(`[${context}] SW MESSAGE ERROR: ${lastStatus.messageError}`);
+  }
   Logger.error(`[${context}] ========================================`);
   
   // Provide specific failure reason
   let failureReason = 'Unknown';
-  if (!lastStatus?.v1Loaded) failureReason = 'V1 (Lace) service worker not loaded';
-  else if (!lastStatus?.v2Loaded) failureReason = 'V2 (Midnight) service worker not loaded';
-  else if (!lastStatus?.bundleReady) failureReason = 'Bundle not ready';
-  else if (!lastStatus?.walletManagerReady) failureReason = 'Wallet manager not initialized - check SW logs for errors';
-  else if (!lastStatus?.walletApiReady) failureReason = 'Wallet API not functional - proxy exists but API not exposed';
+  if (lastStatus?.messageError && !lastStatus?.v1Loaded && !lastStatus?.v2Loaded) {
+    failureReason = `Cannot communicate with SW: ${lastStatus.messageError}. SW may not be running.`;
+  } else if (!lastStatus?.v1Loaded) {
+    failureReason = 'V1 (Lace) service worker not loaded';
+  } else if (!lastStatus?.v2Loaded) {
+    failureReason = 'V2 (Midnight) service worker not loaded';
+  } else if (!lastStatus?.bundleReady) {
+    failureReason = 'Bundle not ready (both scripts loaded but bundle marked not ready)';
+  } else if (!lastStatus?.walletManagerReady) {
+    failureReason = 'Wallet manager not initialized - check SW console logs for errors';
+  } else if (!lastStatus?.walletApiReady) {
+    failureReason = 'Wallet API not functional - SW ready but APIs not exposed to page';
+  }
 
   throw new Error(
     `Service worker not ready after ${timeoutMs}ms. Reason: ${failureReason}. ` +
     `Status: v1=${lastStatus?.v1Loaded}, v2=${lastStatus?.v2Loaded}, ` +
-    `walletMgrReady=${lastStatus?.walletManagerReady}, walletApiReady=${lastStatus?.walletApiReady}`
+    `walletMgrReady=${lastStatus?.walletManagerReady}, walletApiReady=${lastStatus?.walletApiReady}, ` +
+    `msgErr=${lastStatus?.messageError || 'none'}`
   );
 };
 

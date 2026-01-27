@@ -45,6 +45,34 @@ globalThis.onunhandledrejection = function(event) {
   if (event.reason?.stack) console.error('[SW-BUNDLE] Stack:', event.reason.stack);
 };
 
+// Message handler for page-to-SW communication (used by E2E tests)
+// This allows the page to query SW status since globalThis is not shared between contexts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message && message.type === 'GET_SW_BUNDLE_STATUS') {
+    const status = {
+      // Bundle loading state
+      bundleReady: globalThis.SW_BUNDLE_STATE.ready,
+      v1Loaded: globalThis.SW_BUNDLE_STATE.v1Loaded,
+      v2Loaded: globalThis.SW_BUNDLE_STATE.v2Loaded,
+      v1Error: globalThis.SW_BUNDLE_STATE.v1Error,
+      v2Error: globalThis.SW_BUNDLE_STATE.v2Error,
+      unhandledErrors: globalThis.SW_BUNDLE_STATE.unhandledErrors,
+      // Wallet manager state (set by wallet.ts)
+      walletManagerReady: globalThis.WALLET_MANAGER_READY || false,
+      walletManagerError: globalThis.WALLET_MANAGER_ERROR || null,
+      // Timing info
+      loadDuration: Date.now() - globalThis.SW_BUNDLE_STATE.startTime,
+      timestamp: new Date().toISOString()
+    };
+    console.log('[SW-BUNDLE] Status requested, responding:', JSON.stringify(status));
+    sendResponse(status);
+    return true; // Keep channel open for async response
+  }
+  return false; // Not handled by this listener
+});
+
+console.log('[SW-BUNDLE] Message handler registered for GET_SW_BUNDLE_STATUS');
+
 console.log('[SW-BUNDLE] ========================================');
 console.log('[SW-BUNDLE] Starting service worker bundle initialization');
 console.log('[SW-BUNDLE] Timestamp:', new Date().toISOString());
