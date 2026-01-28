@@ -192,17 +192,51 @@ export abstract class LaceView {
             return true;
           }
 
-          // If not on extension page, retry navigation
+          // If not on extension page, retry navigation with verification
           if (!status.isExtensionPage) {
             navAttempts++;
             Logger.warn(`[waitForExtensionPage] Attempt ${navAttempts} - Not on extension page. Current: ${status.url}, Expected: ${targetUrl}`);
 
             if (navAttempts <= maxNavAttempts) {
               Logger.log(`[waitForExtensionPage] Retrying navigation to ${targetUrl}...`);
+              
+              // Navigate
               await browser.url(targetUrl);
-              await browser.pause(1000);
+              
+              // Immediately verify URL changed (catch silent failures)
+              const urlAfterNav = await browser.getUrl();
+              const isOnExtension = urlAfterNav.startsWith('chrome-extension://') || urlAfterNav.startsWith('moz-extension://');
+              
+              if (!isOnExtension) {
+                Logger.error(`[waitForExtensionPage] NAVIGATION FAILED SILENTLY - requested: ${targetUrl}, got: ${urlAfterNav}`);
+                
+                // Try harder: wait for extension to be ready, then navigate again
+                if (navAttempts === 1) {
+                  Logger.log(`[waitForExtensionPage] Waiting 2s for extension to load before retry...`);
+                  await browser.pause(2000);
+                  await browser.url(targetUrl);
+                  const urlAfterSecondNav = await browser.getUrl();
+                  Logger.log(`[waitForExtensionPage] After second navigation: ${urlAfterSecondNav}`);
+                }
+              } else {
+                Logger.log(`[waitForExtensionPage] Navigation verified - now on: ${urlAfterNav}`);
+              }
+              
+              await browser.pause(500);
             } else {
-              throw new Error(`Failed to navigate to extension page after ${navAttempts} attempts. Browser stuck on: ${status.url}`);
+              // Collect diagnostics on final failure
+              const diagInfo = await browser.execute(() => {
+                return {
+                  url: window.location.href,
+                  protocol: window.location.protocol,
+                  hasChromeRuntime: typeof chrome !== 'undefined' && !!chrome.runtime,
+                  hasChromeTabs: typeof chrome !== 'undefined' && !!chrome.tabs,
+                  documentReady: document.readyState,
+                  bodyHTML: document.body?.innerHTML?.slice(0, 200) || 'NO BODY'
+                };
+              });
+              Logger.error(`[waitForExtensionPage] Navigation diagnostics: ${JSON.stringify(diagInfo)}`);
+              throw new Error(`Failed to navigate to extension page after ${navAttempts} attempts. Browser stuck on: ${status.url}. Extension may not be loaded.`);
             }
           } else {
             // On extension page but React hasn't mounted yet
@@ -213,7 +247,8 @@ export abstract class LaceView {
               Logger.log(`[waitForExtensionPage] React not mounted after ${elapsed}ms, checking SW status...`);
               
               try {
-                const swStatus = await browser.execute(() => {
+                // Use Promise.race to add timeout to the entire browser.execute call
+                const swCheckPromise = browser.execute(() => {
                   return new Promise((resolve) => {
                     if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
                       resolve({ error: 'chrome.runtime.sendMessage not available' });
@@ -240,6 +275,13 @@ export abstract class LaceView {
                   });
                 });
                 
+                // Timeout the entire browser.execute call after 5s
+                const timeoutPromise = new Promise((_, reject) => 
+                  setTimeout(() => reject(new Error('browser.execute timeout (5s) - browser may be unresponsive')), 5000)
+                );
+                
+                const swStatus = await Promise.race([swCheckPromise, timeoutPromise]);
+                
                 Logger.log(`[waitForExtensionPage] SW status: ${JSON.stringify(swStatus)}`);
                 
                 // If SW is not ready/responding, fail fast
@@ -258,10 +300,10 @@ export abstract class LaceView {
                 // SW is OK but React not mounted - give it a bit more time
                 Logger.log(`[waitForExtensionPage] SW OK (bundleReady=${(swStatus as any).bundleReady}), waiting for React...`);
               } catch (swCheckError: any) {
-                if (swCheckError.message?.includes('Service worker')) {
-                  throw swCheckError;
-                }
-                Logger.warn(`[waitForExtensionPage] SW check failed: ${swCheckError.message}`);
+                // Fail fast on SW check errors - don't just warn
+                Logger.error(`[waitForExtensionPage] SW check failed: ${swCheckError.message || swCheckError}`);
+                Logger.error(`[waitForExtensionPage] Stack: ${swCheckError.stack?.split('\n').slice(0, 3).join(' | ')}`);
+                throw new Error(`Extension health check failed after ${elapsed}ms: ${swCheckError.message}. Browser or extension may be unresponsive.`);
               }
             }
             
