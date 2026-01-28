@@ -8,9 +8,12 @@ import testContext from '../utils/testContext';
 import PidMonitor from '../support/PidMonitor';
 import { Logger } from '../support/logger';
 import networkManager from '../utils/networkManager';
-import { getServiceWorkerCrashLog, checkServiceWorkerAlive } from '../fixture/walletRepositoryInitializer';
+import { getServiceWorkerCrashLog, checkServiceWorkerAlive, reloadExtensionFromExtensionsPage } from '../fixture/walletRepositoryInitializer';
 
 const monitor = PidMonitor.getInstance();
+
+// Extension ID - used for reloading extension after session restart
+const CHROME_EXTENSION_ID = 'gafhhkghbfjjkeiendhlofajokpaflmk';
 
 // eslint-disable-next-line no-unused-vars
 Before(async (scenario) => {
@@ -41,6 +44,13 @@ After({ tags: 'not @Pending and not @pending' }, async (scenario) => {
   await consoleManager.closeOpenedCdpSessions();
   
   await browser.reloadSession();
+  
+  // After reloadSession(), the extension context is often broken - scripts load but don't execute.
+  // This is a known Chrome issue: extensions need to be manually reloaded after browser restart.
+  // See: https://courtneyzhan.medium.com/reloading-a-chrome-extension-using-selenium-webdriver-85ac0e0faa97
+  if (browser.isChromium) {
+    await reloadExtensionFromExtensionsPage(CHROME_EXTENSION_ID);
+  }
 });
 
 AfterStep(async (scenario) => {

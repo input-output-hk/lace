@@ -157,6 +157,7 @@ export abstract class LaceView {
     const SW_CHECK_AFTER_MS = 5000; // Check SW status if React not mounted after 5s
     const FAIL_FAST_AFTER_MS = 10000; // Fail fast if React still not mounted after 10s
     let swChecked = false;
+    let bfcacheRefreshDone = false;
 
     Logger.log(`[waitForExtensionPage] START - target: ${targetUrl}`);
 
@@ -168,8 +169,12 @@ export abstract class LaceView {
           const status = await browser.execute(() => {
             const crashElement = document.querySelector('[data-testid="crash-reload"]');
             const laceAppElement = document.querySelector('#lace-app');
+            // Check if load-app.js has run (it sets __SCRIPT_LOAD_STATUS__)
+            const scriptStatus = (window as any).__SCRIPT_LOAD_STATUS__;
             return {
               url: window.location.href,
+              // bfcache detection: if on extension page but load-app.js hasn't set status, might be bfcache
+              needsBfcacheRefresh: window.location.protocol === 'chrome-extension:' && !scriptStatus,
               isExtensionPage: window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:',
               readyState: document.readyState,
               hasBody: !!document.body,
@@ -184,6 +189,19 @@ export abstract class LaceView {
           if (status.hasCrash) {
             Logger.error(`[waitForExtensionPage] CRASH DETECTED at ${status.url}`);
             throw new Error(`App crashed during navigation. URL: ${status.url}`);
+          }
+
+          // Detect potential bfcache issue: on extension page but load-app.js hasn't run
+          // This can happen after reloadSession() when browser restores from cache
+          if (status.needsBfcacheRefresh && !bfcacheRefreshDone && elapsed > 2000) {
+            bfcacheRefreshDone = true;
+            Logger.warn(`[waitForExtensionPage] Potential bfcache issue detected - forcing hard refresh`);
+            await browser.execute(() => {
+              // Force a true reload, bypassing cache
+              window.location.reload();
+            });
+            await browser.pause(1000);
+            return false; // Continue waiting
           }
 
           // Check if on extension page AND document is loaded AND #lace-app has content
@@ -330,6 +348,8 @@ export abstract class LaceView {
                     // Check if main bundle loaded
                     hasReact: typeof (window as any).React !== 'undefined',
                     hasWalletRepository: typeof (window as any).walletRepository !== 'undefined',
+                    // Capture script load status (set by load-app.js)
+                    scriptLoadStatus: (window as any).__SCRIPT_LOAD_STATUS__ || null,
                     // Capture JS init errors (set by options.js)
                     initErrors: (window as any).__LACE_INIT_ERRORS__ || [],
                     // Check webpack chunk status
@@ -360,6 +380,24 @@ export abstract class LaceView {
                 Logger.error(`  Webpack chunks loaded: ${diagnostics.webpackChunksLoaded}`);
                 Logger.error(`  #lace-app HTML: ${diagnostics.laceAppHTML}`);
                 Logger.error(`  hasReact: ${diagnostics.hasReact}, hasWalletRepository: ${diagnostics.hasWalletRepository}`);
+                
+                // Log script load status (critical for debugging)
+                if (diagnostics.scriptLoadStatus) {
+                  const sls = diagnostics.scriptLoadStatus;
+                  Logger.error(`  *** SCRIPT LOAD STATUS ***`);
+                  Logger.error(`    trigger: ${sls.trigger || 'NOT SET'}`);
+                  Logger.error(`    optionsRequested: ${sls.optionsRequested}`);
+                  Logger.error(`    optionsLoaded: ${sls.optionsLoaded}`);
+                  Logger.error(`    optionsExecuted: ${sls.optionsExecuted}`);
+                  if (sls.executionError) {
+                    Logger.error(`    *** EXECUTION ERROR: ${sls.executionError} ***`);
+                  }
+                  if (sls.optionsError) {
+                    Logger.error(`    *** OPTIONS.JS LOAD ERROR: ${JSON.stringify(sls.optionsError)} ***`);
+                  }
+                } else {
+                  Logger.error(`  Script Load Status: NOT SET (load-app.js may not have run)`);
+                }
                 
                 // Log JS init errors (most important for debugging)
                 if (diagnostics.initErrors && diagnostics.initErrors.length > 0) {

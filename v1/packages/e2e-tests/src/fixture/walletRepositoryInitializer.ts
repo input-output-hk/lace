@@ -19,6 +19,84 @@ const checkForCrashAndThrow = async (context: string): Promise<void> => {
 };
 
 /**
+ * Reload the Chrome extension from chrome://extensions page.
+ * This is needed after browser.reloadSession() because extensions sometimes
+ * don't fully initialize until manually reloaded.
+ * 
+ * Reference: https://courtneyzhan.medium.com/reloading-a-chrome-extension-using-selenium-webdriver-85ac0e0faa97
+ */
+export const reloadExtensionFromExtensionsPage = async (extensionId: string): Promise<void> => {
+  const startTime = Date.now();
+  Logger.log(`[reloadExtension] Starting extension reload for ID: ${extensionId}`);
+  
+  try {
+    // Navigate to chrome://extensions
+    await browser.url('chrome://extensions');
+    await browser.pause(500);
+    
+    // The extensions page uses Shadow DOM extensively
+    // We need to traverse: extensions-manager -> extensions-item-list -> extensions-item
+    const reloaded = await browser.execute((extId: string) => {
+      try {
+        // Get the extensions-manager element
+        const manager = document.querySelector('extensions-manager');
+        if (!manager || !manager.shadowRoot) {
+          return { success: false, error: 'extensions-manager not found' };
+        }
+        
+        // Get the item list from manager's shadow DOM
+        const itemList = manager.shadowRoot.querySelector('extensions-item-list');
+        if (!itemList || !itemList.shadowRoot) {
+          return { success: false, error: 'extensions-item-list not found' };
+        }
+        
+        // Find our extension by ID
+        const items = itemList.shadowRoot.querySelectorAll('extensions-item');
+        for (const item of items) {
+          if (item.id === extId) {
+            // Found the extension, now find the reload button in its shadow DOM
+            const shadowRoot = item.shadowRoot;
+            if (!shadowRoot) {
+              return { success: false, error: 'extension item shadow root not found' };
+            }
+            
+            // The reload button has id="dev-reload-button" 
+            const reloadButton = shadowRoot.querySelector('#dev-reload-button') as HTMLElement;
+            if (reloadButton) {
+              reloadButton.click();
+              return { success: true, error: null };
+            }
+            
+            // Alternative: try cr-icon-button with iron-icon[icon="cr:refresh"]
+            const iconButton = shadowRoot.querySelector('cr-icon-button[id="dev-reload-button"]') as HTMLElement;
+            if (iconButton) {
+              iconButton.click();
+              return { success: true, error: null };
+            }
+            
+            return { success: false, error: 'reload button not found in extension item' };
+          }
+        }
+        
+        return { success: false, error: `extension with ID ${extId} not found` };
+      } catch (e: any) {
+        return { success: false, error: e.message };
+      }
+    }, extensionId);
+    
+    if (reloaded.success) {
+      Logger.log(`[reloadExtension] Extension reloaded successfully in ${Date.now() - startTime}ms`);
+      // Wait for extension to reinitialize
+      await browser.pause(1000);
+    } else {
+      Logger.warn(`[reloadExtension] Could not reload extension: ${reloaded.error}`);
+    }
+  } catch (error: any) {
+    Logger.error(`[reloadExtension] Error during extension reload: ${error.message}`);
+  }
+};
+
+/**
  * Check service worker status - both bundle loading and wallet API readiness.
  * Uses chrome.runtime.sendMessage to query the SW directly (since globalThis is not shared).
  * Returns detailed status for fast-fail diagnostics.
