@@ -164,7 +164,45 @@ class TopNavigationAssert {
     const exists = await menuButton.isExisting();
     const displayed = exists ? await menuButton.isDisplayed() : false;
     const enabled = exists ? await menuButton.isEnabled() : false;
-    console.log(`[assertWalletIsInSyncedStatus] Menu button state: exists=${exists}, displayed=${displayed}, enabled=${enabled}`);
+    const isClickable = exists ? await menuButton.isClickable() : false;
+    console.log(`[assertWalletIsInSyncedStatus] Menu button state: exists=${exists}, displayed=${displayed}, enabled=${enabled}, isClickable=${isClickable}`);
+    
+    // Capture overlapping elements info
+    const overlayInfo = await browser.execute(() => {
+      const btn = document.querySelector('[data-testid="profile-dropdown-trigger-menu"]') as HTMLElement;
+      if (!btn) return { error: 'button not found' };
+      
+      const rect = btn.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const elementAtCenter = document.elementFromPoint(centerX, centerY);
+      
+      // Check for common overlays
+      const overlays = {
+        mainLoader: !!document.querySelector('[data-testid="main-loader"]'),
+        modal: !!document.querySelector('[class*="modal"]'),
+        toast: !!document.querySelector('[class*="toast"], [class*="Toast"], [data-testid*="toast"]'),
+        overlay: !!document.querySelector('[class*="overlay"], [class*="Overlay"]'),
+        drawer: !!document.querySelector('[class*="drawer"], [class*="Drawer"]'),
+        backdrop: !!document.querySelector('[class*="backdrop"], [class*="Backdrop"]'),
+        spinner: !!document.querySelector('[class*="spinner"], [class*="Spinner"], [class*="loading"]')
+      };
+      
+      return {
+        buttonRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+        center: { x: centerX, y: centerY },
+        elementAtCenter: elementAtCenter ? {
+          tagName: elementAtCenter.tagName,
+          id: elementAtCenter.id,
+          className: elementAtCenter.className?.toString?.()?.slice(0, 100),
+          testId: elementAtCenter.getAttribute('data-testid'),
+          isButton: elementAtCenter === btn
+        } : null,
+        overlays,
+        viewportSize: { width: window.innerWidth, height: window.innerHeight }
+      };
+    });
+    console.log(`[assertWalletIsInSyncedStatus] Overlay info: ${JSON.stringify(overlayInfo)}`);
     
     if (!exists) {
       // Capture page state for debugging

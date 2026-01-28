@@ -54,6 +54,8 @@ class LocalStorageInitializer {
     testContext.saveWithOverride('activeWallet', walletName);
 
     await this.initializeShowDAppBetaModal(false);
+    await this.initializeShowMultiAddressDiscoveryModal(false);
+    await this.disableShowingMultidelegationBetaBanner();
     await this.initializeAppSettings();
     await this.disableShowPinExtension();
     await localStorageManager.setItem('wallet', `{"name":"${walletName}"}`);
