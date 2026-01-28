@@ -147,26 +147,26 @@ export abstract class LaceView {
   /**
    * Verifies browser navigated to extension page successfully and page is fully loaded.
    * Retries navigation if browser is still on non-extension page.
-   * Refreshes page if React app doesn't mount within expected time.
+   * Checks SW status early to fail fast if extension is broken.
    * Fails fast if crash is detected.
    */
   async waitForExtensionPage(targetUrl: string): Promise<void> {
     const startTime = Date.now();
     let navAttempts = 0;
-    let refreshAttempts = 0;
-    const maxNavAttempts = 3;
-    const maxRefreshAttempts = 2;
-    const REFRESH_AFTER_MS = 10000; // Refresh if laceAppChildren stays 0 for 10s
-    let lastZeroChildrenTime = 0;
+    const maxNavAttempts = 2;
+    const SW_CHECK_AFTER_MS = 5000; // Check SW status if React not mounted after 5s
+    const FAIL_FAST_AFTER_MS = 10000; // Fail fast if React still not mounted after 10s
+    let swChecked = false;
 
     Logger.log(`[waitForExtensionPage] START - target: ${targetUrl}`);
 
     await browser.waitUntil(
       async () => {
         try {
+          const elapsed = Date.now() - startTime;
+          
           const status = await browser.execute(() => {
             const crashElement = document.querySelector('[data-testid="crash-reload"]');
-            // Lace app uses #lace-app, not #root
             const laceAppElement = document.querySelector('#lace-app');
             return {
               url: window.location.href,
@@ -188,7 +188,7 @@ export abstract class LaceView {
 
           // Check if on extension page AND document is loaded AND #lace-app has content
           if (status.isExtensionPage && status.readyState === 'complete' && status.laceAppChildCount > 0) {
-            Logger.log(`[waitForExtensionPage] SUCCESS after ${Date.now() - startTime}ms - URL: ${status.url}, laceAppChildren: ${status.laceAppChildCount}`);
+            Logger.log(`[waitForExtensionPage] SUCCESS after ${elapsed}ms - URL: ${status.url}, laceAppChildren: ${status.laceAppChildCount}`);
             return true;
           }
 
@@ -201,42 +201,148 @@ export abstract class LaceView {
               Logger.log(`[waitForExtensionPage] Retrying navigation to ${targetUrl}...`);
               await browser.url(targetUrl);
               await browser.pause(1000);
-              lastZeroChildrenTime = 0; // Reset refresh timer after navigation
+            } else {
+              throw new Error(`Failed to navigate to extension page after ${navAttempts} attempts. Browser stuck on: ${status.url}`);
             }
           } else {
             // On extension page but React hasn't mounted yet
-            const elapsed = Date.now() - startTime;
             
-            // Track how long laceAppChildren has been 0
-            if (status.laceAppChildCount === 0) {
-              if (lastZeroChildrenTime === 0) {
-                lastZeroChildrenTime = Date.now();
+            // After 5s, check if SW is responsive - fail fast if not
+            if (elapsed > SW_CHECK_AFTER_MS && !swChecked) {
+              swChecked = true;
+              Logger.log(`[waitForExtensionPage] React not mounted after ${elapsed}ms, checking SW status...`);
+              
+              try {
+                const swStatus = await browser.execute(() => {
+                  return new Promise((resolve) => {
+                    if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+                      resolve({ error: 'chrome.runtime.sendMessage not available' });
+                      return;
+                    }
+                    
+                    const timeout = setTimeout(() => {
+                      resolve({ error: 'SW message timeout (3s)' });
+                    }, 3000);
+                    
+                    try {
+                      chrome.runtime.sendMessage({ type: 'GET_SW_BUNDLE_STATUS' }, (response) => {
+                        clearTimeout(timeout);
+                        if (chrome.runtime.lastError) {
+                          resolve({ error: chrome.runtime.lastError.message });
+                          return;
+                        }
+                        resolve(response || { error: 'No response from SW' });
+                      });
+                    } catch (e: any) {
+                      clearTimeout(timeout);
+                      resolve({ error: e.message });
+                    }
+                  });
+                });
+                
+                Logger.log(`[waitForExtensionPage] SW status: ${JSON.stringify(swStatus)}`);
+                
+                // If SW is not ready/responding, fail fast
+                if ((swStatus as any).error) {
+                  Logger.error(`[waitForExtensionPage] SW NOT RESPONDING: ${(swStatus as any).error}`);
+                  throw new Error(`Service worker not responding after ${elapsed}ms: ${(swStatus as any).error}. Extension may be broken.`);
+                }
+                
+                // If SW reports errors, fail fast
+                if ((swStatus as any).v1Error || (swStatus as any).v2Error) {
+                  const swErr = (swStatus as any).v1Error || (swStatus as any).v2Error;
+                  Logger.error(`[waitForExtensionPage] SW LOAD ERROR: ${swErr}`);
+                  throw new Error(`Service worker load error: ${swErr}`);
+                }
+                
+                // SW is OK but React not mounted - give it a bit more time
+                Logger.log(`[waitForExtensionPage] SW OK (bundleReady=${(swStatus as any).bundleReady}), waiting for React...`);
+              } catch (swCheckError: any) {
+                if (swCheckError.message?.includes('Service worker')) {
+                  throw swCheckError;
+                }
+                Logger.warn(`[waitForExtensionPage] SW check failed: ${swCheckError.message}`);
+              }
+            }
+            
+            // After 10s, fail fast - something is seriously wrong
+            if (elapsed > FAIL_FAST_AFTER_MS && status.laceAppChildCount === 0) {
+              Logger.error(`[waitForExtensionPage] React not mounted after ${elapsed}ms - collecting diagnostics...`);
+              
+              // Collect diagnostic information before failing
+              try {
+                const diagnostics = await browser.execute(() => {
+                  const result: any = {
+                    url: window.location.href,
+                    title: document.title,
+                    readyState: document.readyState,
+                    // Check for visible errors
+                    bodyText: document.body?.innerText?.slice(0, 1000) || '',
+                    // Count scripts (should be several for React app)
+                    scriptCount: document.querySelectorAll('script').length,
+                    scriptSrcs: Array.from(document.querySelectorAll('script[src]')).map((s: any) => s.src).slice(0, 5),
+                    // Check #lace-app state
+                    laceAppHTML: document.querySelector('#lace-app')?.innerHTML?.slice(0, 200) || 'NOT FOUND',
+                    // Check for error elements
+                    hasErrorElement: !!document.querySelector('[data-testid="error"]') || !!document.querySelector('.error'),
+                    // Check if main bundle loaded
+                    hasReact: typeof (window as any).React !== 'undefined',
+                    hasWalletRepository: typeof (window as any).walletRepository !== 'undefined',
+                  };
+                  
+                  // Try to get SW crash log if available
+                  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                    return new Promise((resolve) => {
+                      chrome.storage.local.get(['SW_CRASH_LOG'], (storageResult) => {
+                        result.swCrashLog = storageResult.SW_CRASH_LOG || null;
+                        resolve(result);
+                      });
+                      // Timeout fallback
+                      setTimeout(() => resolve(result), 1000);
+                    });
+                  }
+                  return result;
+                });
+                
+                Logger.error(`[waitForExtensionPage] DIAGNOSTICS:`);
+                Logger.error(`  URL: ${diagnostics.url}`);
+                Logger.error(`  Title: ${diagnostics.title}`);
+                Logger.error(`  Scripts loaded: ${diagnostics.scriptCount}`);
+                Logger.error(`  Script sources: ${JSON.stringify(diagnostics.scriptSrcs)}`);
+                Logger.error(`  #lace-app HTML: ${diagnostics.laceAppHTML}`);
+                Logger.error(`  hasReact: ${diagnostics.hasReact}, hasWalletRepository: ${diagnostics.hasWalletRepository}`);
+                
+                if (diagnostics.bodyText.toLowerCase().includes('error')) {
+                  Logger.error(`  Body text (contains 'error'): ${diagnostics.bodyText.slice(0, 500)}`);
+                }
+                
+                if (diagnostics.swCrashLog) {
+                  Logger.error(`  SW Crash Log: ${JSON.stringify(diagnostics.swCrashLog)}`);
+                  if (diagnostics.swCrashLog.errors?.length > 0) {
+                    Logger.error(`  SW Errors:`);
+                    for (const err of diagnostics.swCrashLog.errors.slice(-5)) {
+                      Logger.error(`    - ${err.timestamp}: ${err.type} - ${err.message || err.reason}`);
+                    }
+                  }
+                }
+              } catch (diagError) {
+                Logger.error(`[waitForExtensionPage] Failed to collect diagnostics: ${diagError}`);
               }
               
-              const zeroChildrenDuration = Date.now() - lastZeroChildrenTime;
-              
-              // If React hasn't mounted for REFRESH_AFTER_MS, try refreshing
-              if (zeroChildrenDuration > REFRESH_AFTER_MS && refreshAttempts < maxRefreshAttempts) {
-                refreshAttempts++;
-                Logger.warn(`[waitForExtensionPage] React not mounted after ${zeroChildrenDuration}ms, refreshing page (attempt ${refreshAttempts}/${maxRefreshAttempts})...`);
-                await browser.refresh();
-                await browser.pause(2000); // Wait for page to reload
-                lastZeroChildrenTime = Date.now(); // Reset timer after refresh
-              }
-            } else {
-              lastZeroChildrenTime = 0; // Reset if we see any children
+              throw new Error(`React app failed to mount after ${elapsed}ms. hasLaceApp: ${status.hasLaceApp}, children: ${status.laceAppChildCount}. Extension JS may have failed to execute.`);
             }
             
             // Log progress periodically
-            if (elapsed % 3000 < 500) {
+            if (elapsed % 2000 < 500) {
               Logger.log(`[waitForExtensionPage] Loading... readyState: ${status.readyState}, hasLaceApp: ${status.hasLaceApp}, laceAppChildren: ${status.laceAppChildCount}, elapsed: ${elapsed}ms`);
             }
           }
 
           return false;
         } catch (e: any) {
-          // Re-throw crash errors
-          if (e.message?.includes('crashed')) {
+          // Re-throw all errors to fail fast
+          if (e.message?.includes('crashed') || e.message?.includes('Service worker') || 
+              e.message?.includes('React app failed') || e.message?.includes('Failed to navigate')) {
             throw e;
           }
           Logger.warn(`[waitForExtensionPage] Check failed: ${e}`);
@@ -244,9 +350,9 @@ export abstract class LaceView {
         }
       },
       {
-        timeout: 60000, // Increased to 60s to allow for refresh retries
+        timeout: 15000, // Reduced from 60s - fail fast
         interval: 500,
-        timeoutMsg: `Failed to load extension page after ${navAttempts} nav attempts and ${refreshAttempts} refresh attempts. Target: ${targetUrl}`
+        timeoutMsg: `Failed to load extension page after ${Date.now() - startTime}ms. Target: ${targetUrl}`
       }
     );
   }
