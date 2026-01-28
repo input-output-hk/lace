@@ -144,4 +144,19 @@ export class PubNubRxWrapper {
       catchError((error: unknown) => this.errorClassifier.throwForStatus(error))
     );
   }
+
+  /**
+   * Sets the authentication token for PubNub client.
+   * @param token - The authentication token string
+   */
+  setToken(token: string): void {
+    this.pubnub.setToken(token);
+  }
+
+  /**
+   * Stops the PubNub client and releases resources.
+   */
+  stop(): void {
+    this.pubnub.stop();
+  }
 }

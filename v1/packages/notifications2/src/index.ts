@@ -27,14 +27,14 @@ export {
   NotificationError,
   UnknownError
 } from './errors';
-export type { ErrorClassifier, ErrorDiscriminator } from './errors';
+export type { ErrorDiscriminator } from './errors';
 
 // PubNub implementation
 export {
+  createPubNubWrapper,
   PubNubAuthProvider,
-  PubNubErrorClassifier,
   PubNubErrorDiscriminator,
   PubNubPollingProvider,
   PubNubRxWrapper
-} from './pubnub';
-export type { PubNubAuthConfig, PubNubPollingConfig } from './pubnub';
+} from './PubNubProviders';
+export type { CreatePubNubWrapperConfig, PubNubAuthConfig, PubNubPollingConfig } from './PubNubProviders';

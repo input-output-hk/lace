@@ -1,32 +1,50 @@
 import { Observable } from 'rxjs';
-import { AuthToken, Notification, Topic } from './types';
+import { AuthToken, Notification, StoredTopic } from './types';
 
 /**
  * Provider interface for notification delivery.
  * Abstracts the underlying notification mechanism (polling, real-time, hybrid).
  *
- * Layer 1 responsibilities:
+ * Responsibilities:
+ * - Manage topic storage with subscription state
  * - Transform provider-specific data to common Notification/Topic types
- * - Cache observables per topic to prevent duplicates
- * - No knowledge of subscription state (that's Layer 2)
+ * - Handle subscription/unsubscription lifecycle
+ * - Emit all notifications on a single observable
  */
 export interface NotificationProvider {
   /**
-   * Returns an observable that emits notifications for a specific topic.
-   * Must maintain internal Map<topicId, Observable> with shareReplay() to prevent duplicates.
+   * Returns an observable that emits notifications for ALL subscribed topics.
+   * Single observable instead of per-topic observables.
    *
-   * @param topicId - Topic identifier (PubNub channel name)
-   * @returns Observable emitting notifications for the topic
+   * @returns Observable emitting notifications from all subscribed topics
    */
-  notifications$(topicId: string): Observable<Notification>;
+  readonly notifications$: Observable<Notification>;
 
   /**
-   * Returns an observable that emits available topics from the provider.
-   * Topics include metadata only (NO isSubscribed flag).
+   * Returns an observable that emits available topics with subscription status.
+   * Topics include both metadata and isSubscribed state.
    *
-   * @returns Observable emitting array of topic metadata
+   * @returns Observable emitting array of stored topics with subscription status
    */
-  topics$(): Observable<Topic[]>;
+  readonly topics$: Observable<StoredTopic[]>;
+
+  /**
+   * Subscribes to a topic by setting isSubscribed=true.
+   * Initializes lastSync to current timestamp (messages from now onwards).
+   *
+   * @param topicId - Topic identifier to subscribe to
+   * @returns Observable completing when subscription is persisted
+   */
+  subscribe(topicId: string): Observable<void>;
+
+  /**
+   * Unsubscribes from a topic by setting isSubscribed=false.
+   * Clears lastSync timestamp.
+   *
+   * @param topicId - Topic identifier to unsubscribe from
+   * @returns Observable completing when unsubscription is persisted
+   */
+  unsubscribe(topicId: string): Observable<void>;
 
   /**
    * Closes the provider and releases resources.
