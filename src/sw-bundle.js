@@ -14,6 +14,45 @@ globalThis.SW_BUNDLE_STATE = {
   unhandledErrors: []
 };
 
+// Persist errors to chrome.storage.local so they survive SW crashes
+// This is async but fire-and-forget - we want to capture as much as possible
+const persistError = (errorInfo) => {
+  try {
+    chrome.storage.local.get(['SW_CRASH_LOG'], (result) => {
+      const log = result.SW_CRASH_LOG || { errors: [], lastHeartbeat: null, crashCount: 0 };
+      log.errors.push(errorInfo);
+      // Keep only last 50 errors to avoid storage bloat
+      if (log.errors.length > 50) {
+        log.errors = log.errors.slice(-50);
+      }
+      chrome.storage.local.set({ SW_CRASH_LOG: log });
+    });
+  } catch (e) {
+    // Storage might not be available during crash - best effort
+    console.error('[SW-BUNDLE] Failed to persist error:', e);
+  }
+};
+
+// Heartbeat to detect SW alive status - persisted so page can detect if SW died
+const updateHeartbeat = () => {
+  try {
+    chrome.storage.local.get(['SW_CRASH_LOG'], (result) => {
+      const log = result.SW_CRASH_LOG || { errors: [], lastHeartbeat: null, crashCount: 0 };
+      log.lastHeartbeat = Date.now();
+      log.swStartTime = globalThis.SW_BUNDLE_STATE.startTime;
+      log.swReady = globalThis.SW_BUNDLE_STATE.ready;
+      chrome.storage.local.set({ SW_CRASH_LOG: log });
+    });
+  } catch (e) {
+    // Ignore heartbeat errors
+  }
+};
+
+// Update heartbeat every 5 seconds
+setInterval(updateHeartbeat, 5000);
+// Initial heartbeat
+updateHeartbeat();
+
 // Global error handler - capture ALL unhandled errors
 globalThis.onerror = function(message, source, lineno, colno, error) {
   const errorInfo = {
@@ -23,9 +62,11 @@ globalThis.onerror = function(message, source, lineno, colno, error) {
     line: lineno,
     col: colno,
     stack: error?.stack,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    swUptime: Date.now() - globalThis.SW_BUNDLE_STATE.startTime
   };
   globalThis.SW_BUNDLE_STATE.unhandledErrors.push(errorInfo);
+  persistError(errorInfo); // Persist to survive crash
   console.error('[SW-BUNDLE] UNHANDLED ERROR:', message);
   console.error('[SW-BUNDLE] Source:', source, 'Line:', lineno);
   if (error?.stack) console.error('[SW-BUNDLE] Stack:', error.stack);
@@ -38,9 +79,11 @@ globalThis.onunhandledrejection = function(event) {
     type: 'unhandledrejection',
     reason: event.reason?.message || String(event.reason),
     stack: event.reason?.stack,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    swUptime: Date.now() - globalThis.SW_BUNDLE_STATE.startTime
   };
   globalThis.SW_BUNDLE_STATE.unhandledErrors.push(errorInfo);
+  persistError(errorInfo); // Persist to survive crash
   console.error('[SW-BUNDLE] UNHANDLED REJECTION:', event.reason);
   if (event.reason?.stack) console.error('[SW-BUNDLE] Stack:', event.reason.stack);
 };

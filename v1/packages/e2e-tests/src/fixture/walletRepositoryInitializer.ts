@@ -716,3 +716,115 @@ export const addAndActivateWalletsInRepository = async (wallets: TestWalletName[
   }
   await addAndActivateWalletInRepository(walletsRepositoryArray[0]);
 };
+
+/**
+ * Read the SW crash log from chrome.storage.local.
+ * This log persists across SW restarts and can reveal errors that occurred before a crash.
+ * Call this after a failure to get diagnostic information.
+ */
+export const getServiceWorkerCrashLog = async (): Promise<{
+  errors: Array<{
+    type: string;
+    message?: string;
+    reason?: string;
+    source?: string;
+    line?: number;
+    stack?: string;
+    timestamp: string;
+    swUptime?: number;
+  }>;
+  lastHeartbeat: number | null;
+  swStartTime?: number;
+  swReady?: boolean;
+  crashCount: number;
+  heartbeatAge?: number;
+} | null> => {
+  try {
+    const result = await browser.execute(() => {
+      return new Promise((resolve) => {
+        if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+          resolve(null);
+          return;
+        }
+        
+        chrome.storage.local.get(['SW_CRASH_LOG'], (result) => {
+          if (chrome.runtime.lastError) {
+            resolve(null);
+            return;
+          }
+          
+          const log = result.SW_CRASH_LOG || null;
+          if (log && log.lastHeartbeat) {
+            log.heartbeatAge = Date.now() - log.lastHeartbeat;
+          }
+          resolve(log);
+        });
+      });
+    });
+    
+    return result as any;
+  } catch (e) {
+    Logger.warn(`[getServiceWorkerCrashLog] Failed to read crash log: ${e}`);
+    return null;
+  }
+};
+
+/**
+ * Clear the SW crash log from chrome.storage.local.
+ * Call this at the start of a test to ensure we only see errors from the current test.
+ */
+export const clearServiceWorkerCrashLog = async (): Promise<void> => {
+  try {
+    await browser.execute(() => {
+      return new Promise((resolve) => {
+        if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+          resolve(undefined);
+          return;
+        }
+        
+        chrome.storage.local.remove(['SW_CRASH_LOG'], () => {
+          resolve(undefined);
+        });
+      });
+    });
+    Logger.log('[clearServiceWorkerCrashLog] Crash log cleared');
+  } catch (e) {
+    Logger.warn(`[clearServiceWorkerCrashLog] Failed to clear crash log: ${e}`);
+  }
+};
+
+/**
+ * Check if SW appears to have crashed by checking heartbeat age.
+ * If heartbeat is older than threshold, SW likely crashed.
+ */
+export const checkServiceWorkerAlive = async (maxHeartbeatAgeMs: number = 10000): Promise<{
+  alive: boolean;
+  heartbeatAge: number | null;
+  lastErrors: any[];
+}> => {
+  const crashLog = await getServiceWorkerCrashLog();
+  
+  if (!crashLog) {
+    return { alive: false, heartbeatAge: null, lastErrors: [] };
+  }
+  
+  const heartbeatAge = crashLog.heartbeatAge || null;
+  const alive = heartbeatAge !== null && heartbeatAge < maxHeartbeatAgeMs;
+  
+  if (!alive && crashLog.errors && crashLog.errors.length > 0) {
+    Logger.error(`[checkServiceWorkerAlive] SW appears DEAD! Heartbeat age: ${heartbeatAge}ms`);
+    Logger.error(`[checkServiceWorkerAlive] Last ${crashLog.errors.length} errors before crash:`);
+    for (const err of crashLog.errors.slice(-5)) {
+      Logger.error(`[checkServiceWorkerAlive]   ${err.timestamp} - ${err.type}: ${err.message || err.reason}`);
+      if (err.stack) {
+        Logger.error(`[checkServiceWorkerAlive]     Stack: ${err.stack.split('\n')[0]}`);
+      }
+    }
+  }
+  
+  return {
+    alive,
+    heartbeatAge,
+    lastErrors: crashLog.errors || []
+  };
+};

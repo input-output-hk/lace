@@ -29,7 +29,13 @@ const chromeConfig = {
           '--disable-dev-shm-usage',
           '--remote-allow-origins=*',
           '--disable-search-engine-choice-screen',
-          '--disable-infobars'
+          '--disable-infobars',
+          // Crash debugging
+          '--enable-crash-reporter',
+          '--crash-dumps-dir=/tmp/chrome-crashes',
+          '--enable-logging',
+          '--log-file=/tmp/chrome-debug.log',
+          '--v=1'
         ]
       },
       'wdio:devtoolsOptions': {

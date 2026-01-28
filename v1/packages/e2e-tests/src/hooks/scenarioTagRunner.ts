@@ -8,6 +8,7 @@ import testContext from '../utils/testContext';
 import PidMonitor from '../support/PidMonitor';
 import { Logger } from '../support/logger';
 import networkManager from '../utils/networkManager';
+import { getServiceWorkerCrashLog, checkServiceWorkerAlive } from '../fixture/walletRepositoryInitializer';
 
 const monitor = PidMonitor.getInstance();
 
@@ -52,6 +53,24 @@ AfterStep(async (scenario) => {
         allure.addAttachment('Service worker logs', logs, 'text/plain');
       }
     }
+    
+    // Check for SW crash and capture crash log
+    try {
+      const swStatus = await checkServiceWorkerAlive(10000);
+      if (!swStatus.alive) {
+        Logger.error(`[AfterStep] SERVICE WORKER APPEARS CRASHED! Heartbeat age: ${swStatus.heartbeatAge}ms`);
+        
+        const crashLog = await getServiceWorkerCrashLog();
+        if (crashLog) {
+          const crashLogStr = JSON.stringify(crashLog, null, 2);
+          Logger.error(`[AfterStep] SW Crash Log:\n${crashLogStr}`);
+          allure.addAttachment('Service worker crash log', crashLogStr, 'application/json');
+        }
+      }
+    } catch (e) {
+      Logger.warn(`[AfterStep] Failed to check SW crash status: ${e}`);
+    }
+    
     await consoleManager.clearLogs();
     await consoleManager.closeOpenedCdpSessions();
   }

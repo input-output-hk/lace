@@ -80,13 +80,26 @@ class PidMonitor {
 
       try {
         const stats = await pidusage(this.pid);
-        this._data.push({
+        const dataPoint = {
           timestamp: new Date().toISOString(),
           cpu: stats.cpu,
           memory: stats.memory
-        });
+        };
+        this._data.push(dataPoint);
+        
+        // Warn if memory is getting high (> 1GB)
+        const memoryMB = stats.memory / 1024 / 1024;
+        if (memoryMB > 1000) {
+          Logger.warn(`[PidMonitor] HIGH MEMORY: ${memoryMB.toFixed(0)}MB, CPU: ${stats.cpu.toFixed(1)}%`);
+        }
       } catch (error) {
-        Logger.error(`pidusage failed: ${error}`);
+        // Log last known state before crash
+        const lastData = this._data[this._data.length - 1];
+        if (lastData) {
+          const memoryMB = lastData.memory / 1024 / 1024;
+          Logger.error(`[PidMonitor] CHROME CRASHED! Last known state: memory=${memoryMB.toFixed(0)}MB, cpu=${lastData.cpu.toFixed(1)}%`);
+        }
+        Logger.error(`[PidMonitor] pidusage failed (PID ${this.pid}): ${error}`);
         this.stop();
       }
     }, this.intervalMs);

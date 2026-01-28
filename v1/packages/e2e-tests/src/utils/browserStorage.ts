@@ -122,12 +122,45 @@ export const getBackgroundStorage: any = async (): Promise<any> => {
 
     Logger.log(`[getBackgroundStorage] chrome.storage.local available after ${Date.now() - startTime}ms`);
 
-    return await browser.execute(`
-      return (async () => {
-        const response = await chrome.storage.local.get("BACKGROUND_STORAGE");
-        return response.BACKGROUND_STORAGE;
-      })()
-      `);
+    // Fetch storage with retry - Chrome can sometimes crash between availability check and fetch
+    let fetchAttempts = 0;
+    const maxFetchAttempts = 3;
+    let lastFetchError: any = null;
+    
+    while (fetchAttempts < maxFetchAttempts) {
+      fetchAttempts++;
+      try {
+        const result = await browser.execute(`
+          return (async () => {
+            const response = await chrome.storage.local.get("BACKGROUND_STORAGE");
+            return response.BACKGROUND_STORAGE;
+          })()
+        `);
+        return result;
+      } catch (fetchError: any) {
+        lastFetchError = fetchError;
+        Logger.warn(`[getBackgroundStorage] Fetch attempt ${fetchAttempts}/${maxFetchAttempts} failed: ${fetchError.message}`);
+        
+        if (fetchAttempts < maxFetchAttempts) {
+          // Brief pause before retry
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          
+          // Check if we're still on extension page
+          const checkUrl = await browser.getUrl();
+          if (!checkUrl.startsWith('chrome-extension://') && !checkUrl.startsWith('moz-extension://')) {
+            Logger.warn(`[getBackgroundStorage] No longer on extension page (${checkUrl}), attempting to navigate back...`);
+            try {
+              await browser.url(CHROME_EXTENSION_URL);
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+            } catch (navErr) {
+              Logger.error(`[getBackgroundStorage] Failed to navigate back: ${navErr}`);
+            }
+          }
+        }
+      }
+    }
+    
+    throw new Error(`Storage fetch failed after ${maxFetchAttempts} attempts: ${lastFetchError?.message}`);
   } catch (error) {
     Logger.error(`[getBackgroundStorage] FAILED after ${Date.now() - startTime}ms and ${attempts} attempts`);
     Logger.error(`[getBackgroundStorage] Last status: ${JSON.stringify(lastStatus)}`);
