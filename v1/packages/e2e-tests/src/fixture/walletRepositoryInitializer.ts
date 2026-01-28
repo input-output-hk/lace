@@ -587,6 +587,7 @@ const addWalletInRepository = async (wallet: string): Promise<void> => {
               currentPath,
               ready: false,
               added: false,
+              walletExists: false,
               error: null
             };
             
@@ -596,13 +597,25 @@ const addWalletInRepository = async (wallet: string): Promise<void> => {
             
             try {
               // Verify API is functional
-              await window.firstValueFrom(window.walletRepository.wallets$);
+              const existingWallets = await window.firstValueFrom(window.walletRepository.wallets$);
               status.ready = true;
               
-              // Add wallet in same execution context to avoid race condition
               const walletsObj = JSON.parse(walletData);
-              await window.walletRepository.addWallet(walletsObj[0]);
-              status.added = true;
+              const walletToAdd = walletsObj[0];
+              
+              // Check if wallet already exists
+              const walletExists = existingWallets.some(w => w.walletId === walletToAdd.walletId);
+              status.walletExists = walletExists;
+              
+              if (walletExists) {
+                // Wallet already exists - consider it "added"
+                status.added = true;
+                console.log('[addWalletInRepository] Wallet already exists, skipping add');
+              } else {
+                // Add wallet in same execution context to avoid race condition
+                await window.walletRepository.addWallet(walletToAdd);
+                status.added = true;
+              }
             } catch (e) {
               status.error = e.message;
             }
@@ -628,7 +641,8 @@ const addWalletInRepository = async (wallet: string): Promise<void> => {
         }
         
         if (attempts === 1 || attempts % 5 === 0 || result?.added) {
-          Logger.log(`[addWalletInRepository] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
+          const walletStatus = result?.walletExists ? '(already exists)' : '(newly added)';
+          Logger.log(`[addWalletInRepository] Attempt ${attempts} ${walletStatus} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
         }
         
         return result && result.added;
@@ -689,6 +703,7 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
               ready: false,
               added: false,
               activated: false,
+              walletExists: false,
               error: null
             };
             
@@ -705,21 +720,32 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
             
             try {
               // Verify API is functional
-              await window.firstValueFrom(window.walletRepository.wallets$);
+              const existingWallets = await window.firstValueFrom(window.walletRepository.wallets$);
               status.ready = true;
               
-              // Add wallet in same execution context to avoid race condition
               const walletsObj = JSON.parse(walletData);
-              await window.walletRepository.addWallet(walletsObj[0]);
-              status.added = true;
+              const walletToAdd = walletsObj[0];
               
-              // Wait for Lace to auto-activate the added wallet
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              // Check if wallet already exists
+              const walletExists = existingWallets.some(w => w.walletId === walletToAdd.walletId);
+              
+              if (walletExists) {
+                // Wallet already exists - just need to activate it
+                status.added = true; // Consider it "added" since it's already there
+                console.log('[addAndActivateWalletInRepository] Wallet already exists, skipping add');
+              } else {
+                // Add wallet in same execution context to avoid race condition
+                await window.walletRepository.addWallet(walletToAdd);
+                status.added = true;
+                
+                // Wait for Lace to register the added wallet
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
               
               // Activate with desired network
               await window.walletManager.activate({
-                walletId: walletsObj[0].walletId,
-                accountIndex: walletsObj[0].accounts[0].accountIndex,
+                walletId: walletToAdd.walletId,
+                accountIndex: walletToAdd.accounts[0].accountIndex,
                 chainId: { networkId: 0, networkMagic: 1 }
               });
               status.activated = true;
