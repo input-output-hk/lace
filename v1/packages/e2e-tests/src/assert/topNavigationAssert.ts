@@ -145,13 +145,45 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
+    const startTime = Date.now();
+    console.log(`[assertWalletIsInSyncedStatus] START - URL: ${await browser.getUrl()}`);
+    
     if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
       throw new Error('Crash screen occurred!');
     }
+    
+    console.log(`[assertWalletIsInSyncedStatus] Waiting for HD wallet sync...`);
     await waitUntilHdWalletSynced();
+    console.log(`[assertWalletIsInSyncedStatus] HD wallet synced after ${Date.now() - startTime}ms`);
+    
     await this.assertLogoPresent();
-    await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });
-    await MenuHeader.menuButton.click();
+    console.log(`[assertWalletIsInSyncedStatus] Logo present, URL: ${await browser.getUrl()}`);
+    
+    // Check button state before waiting
+    const menuButton = MenuHeader.menuButton;
+    const exists = await menuButton.isExisting();
+    const displayed = exists ? await menuButton.isDisplayed() : false;
+    const enabled = exists ? await menuButton.isEnabled() : false;
+    console.log(`[assertWalletIsInSyncedStatus] Menu button state: exists=${exists}, displayed=${displayed}, enabled=${enabled}`);
+    
+    if (!exists) {
+      // Capture page state for debugging
+      const pageState = await browser.execute(() => {
+        return {
+          url: window.location.href,
+          title: document.title,
+          bodyHTML: document.body?.innerHTML?.slice(0, 500) || 'NO BODY',
+          hasLoader: !!document.querySelector('[data-testid="main-loader"]'),
+          hasModal: !!document.querySelector('[class*="modal"]'),
+          headerHTML: document.querySelector('header')?.innerHTML?.slice(0, 300) || 'NO HEADER'
+        };
+      });
+      console.log(`[assertWalletIsInSyncedStatus] PAGE STATE: ${JSON.stringify(pageState)}`);
+    }
+    
+    await menuButton.waitForClickable({ timeout: 10_000 });
+    console.log(`[assertWalletIsInSyncedStatus] Menu button clickable after ${Date.now() - startTime}ms`);
+    await menuButton.click();
     await this.assertSeeWalletStatusComponent();
     await this.assertSyncStatusValid('browserView.topNavigationBar.walletStatus.walletSynced');
     await MenuHeader.menuButton.click();

@@ -732,23 +732,50 @@ export const addAndActivateWalletInRepository = async (wallet: string): Promise<
               if (walletExists) {
                 // Wallet already exists - just need to activate it
                 status.added = true; // Consider it "added" since it's already there
+                status.walletExists = true;
                 console.log('[addAndActivateWalletInRepository] Wallet already exists, skipping add');
               } else {
-                // Add wallet in same execution context to avoid race condition
-                await window.walletRepository.addWallet(walletToAdd);
-                status.added = true;
+                // Try to add wallet - handle "already exists" error gracefully
+                // (can happen if repository hasn't loaded from storage yet but wallet exists in manager)
+                try {
+                  await window.walletRepository.addWallet(walletToAdd);
+                  status.added = true;
+                } catch (addError) {
+                  if (addError.message && addError.message.includes('already exists')) {
+                    console.log('[addAndActivateWalletInRepository] Wallet already exists (caught), skipping add');
+                    status.added = true;
+                    status.walletExists = true;
+                  } else {
+                    throw addError;
+                  }
+                }
                 
-                // Wait for Lace to register the added wallet
-                await new Promise(resolve => setTimeout(resolve, 500));
+                // Wait for Lace to register the added wallet (increased from 500ms)
+                await new Promise(resolve => setTimeout(resolve, 1000));
               }
               
-              // Activate with desired network
-              await window.walletManager.activate({
-                walletId: walletToAdd.walletId,
-                accountIndex: walletToAdd.accounts[0].accountIndex,
-                chainId: { networkId: 0, networkMagic: 1 }
-              });
-              status.activated = true;
+              // Activate with desired network - retry if wallet not found yet
+              let activateAttempts = 0;
+              const maxActivateAttempts = 3;
+              while (activateAttempts < maxActivateAttempts) {
+                activateAttempts++;
+                try {
+                  await window.walletManager.activate({
+                    walletId: walletToAdd.walletId,
+                    accountIndex: walletToAdd.accounts[0].accountIndex,
+                    chainId: { networkId: 0, networkMagic: 1 }
+                  });
+                  status.activated = true;
+                  break;
+                } catch (activateError) {
+                  if (activateError.message && activateError.message.includes('not found') && activateAttempts < maxActivateAttempts) {
+                    console.log('[addAndActivateWalletInRepository] Wallet not found, waiting and retrying activation...');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                  } else {
+                    throw activateError;
+                  }
+                }
+              }
             } catch (e) {
               status.error = e.message;
             }
