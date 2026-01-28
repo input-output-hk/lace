@@ -322,14 +322,20 @@ export abstract class LaceView {
                     bodyText: document.body?.innerText?.slice(0, 1000) || '',
                     // Count scripts (should be several for React app)
                     scriptCount: document.querySelectorAll('script').length,
-                    scriptSrcs: Array.from(document.querySelectorAll('script[src]')).map((s: any) => s.src).slice(0, 5),
+                    scriptSrcs: Array.from(document.querySelectorAll('script[src]')).map((s: any) => s.src).slice(0, 10),
                     // Check #lace-app state
-                    laceAppHTML: document.querySelector('#lace-app')?.innerHTML?.slice(0, 200) || 'NOT FOUND',
+                    laceAppHTML: document.querySelector('#lace-app')?.innerHTML?.slice(0, 500) || 'NOT FOUND',
                     // Check for error elements
                     hasErrorElement: !!document.querySelector('[data-testid="error"]') || !!document.querySelector('.error'),
                     // Check if main bundle loaded
                     hasReact: typeof (window as any).React !== 'undefined',
                     hasWalletRepository: typeof (window as any).walletRepository !== 'undefined',
+                    // Capture JS init errors (set by options.js)
+                    initErrors: (window as any).__LACE_INIT_ERRORS__ || [],
+                    // Check webpack chunk status
+                    webpackChunksLoaded: typeof (window as any).webpackChunklace_browser_extension_wallet !== 'undefined' 
+                      ? (window as any).webpackChunklace_browser_extension_wallet.length 
+                      : 'NOT_FOUND',
                   };
                   
                   // Try to get SW crash log if available
@@ -351,11 +357,25 @@ export abstract class LaceView {
                 Logger.error(`  Title: ${diagnostics.title}`);
                 Logger.error(`  Scripts loaded: ${diagnostics.scriptCount}`);
                 Logger.error(`  Script sources: ${JSON.stringify(diagnostics.scriptSrcs)}`);
+                Logger.error(`  Webpack chunks loaded: ${diagnostics.webpackChunksLoaded}`);
                 Logger.error(`  #lace-app HTML: ${diagnostics.laceAppHTML}`);
                 Logger.error(`  hasReact: ${diagnostics.hasReact}, hasWalletRepository: ${diagnostics.hasWalletRepository}`);
                 
-                if (diagnostics.bodyText.toLowerCase().includes('error')) {
-                  Logger.error(`  Body text (contains 'error'): ${diagnostics.bodyText.slice(0, 500)}`);
+                // Log JS init errors (most important for debugging)
+                if (diagnostics.initErrors && diagnostics.initErrors.length > 0) {
+                  Logger.error(`  *** JS INIT ERRORS (${diagnostics.initErrors.length}): ***`);
+                  for (const err of diagnostics.initErrors) {
+                    Logger.error(`    - ${err.type}: ${err.message}`);
+                    if (err.stack) {
+                      Logger.error(`      Stack: ${err.stack.split('\n').slice(0, 3).join(' | ')}`);
+                    }
+                  }
+                } else {
+                  Logger.error(`  JS Init Errors: none captured`);
+                }
+                
+                if (diagnostics.bodyText.toLowerCase().includes('error') || diagnostics.bodyText.toLowerCase().includes('failed')) {
+                  Logger.error(`  Body text (contains error/failed): ${diagnostics.bodyText.slice(0, 500)}`);
                 }
                 
                 if (diagnostics.swCrashLog) {
