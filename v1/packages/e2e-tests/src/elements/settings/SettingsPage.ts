@@ -247,18 +247,22 @@ class SettingsPage extends CommonDrawerElements {
       await this.passphraseVerificationLink.element.click();
     },
     FAQs: async () => {
+      await this.faqsLink.element.scrollIntoView({ block: 'center' });
       await this.faqsLink.element.waitForClickable();
       await this.faqsLink.element.click();
     },
     Help: async () => {
+      await this.helpLink.element.scrollIntoView({ block: 'center' });
       await this.helpLink.element.waitForClickable();
       await this.helpLink.element.click();
     },
     'Terms and conditions': async () => {
+      await this.tncLink.element.scrollIntoView({ block: 'center' });
       await this.tncLink.element.waitForClickable();
       await this.tncLink.element.click();
     },
     'Privacy policy': async () => {
+      await this.privacyPolicyLink.element.scrollIntoView({ block: 'center' });
       await this.privacyPolicyLink.element.waitForClickable();
       await this.privacyPolicyLink.element.click();
     },
@@ -267,6 +271,7 @@ class SettingsPage extends CommonDrawerElements {
       await this.collateralLink.element.click();
     },
     'Cookie policy': async () => {
+      await this.cookiePolicy.element.scrollIntoView({ block: 'center' });
       await this.cookiePolicy.element.waitForClickable();
       await this.cookiePolicy.element.click();
     },
