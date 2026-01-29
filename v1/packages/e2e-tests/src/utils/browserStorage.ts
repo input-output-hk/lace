@@ -14,157 +14,16 @@ const verifyBrowserStorageSupport: any = async () => {
   return Promise.reject('Unsupported browser');
 };
 
-// Default extension URL for Chrome
-const CHROME_EXTENSION_URL = 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/app.html';
-
 export const getBackgroundStorage: any = async (): Promise<any> => {
   await verifyBrowserStorageSupport();
-
-  const startTime = Date.now();
-  let currentUrl = await browser.getUrl();
-  let windowTitle = await browser.getTitle();
-
-  Logger.log(`[getBackgroundStorage] START - URL: ${currentUrl}, Title: ${windowTitle}`);
-
-  // If not on extension page, try to switch to Lace window or navigate to extension
-  if (!currentUrl.startsWith('chrome-extension://') && !currentUrl.startsWith('moz-extension://')) {
-    Logger.warn(`[getBackgroundStorage] Not on extension page, attempting to switch to Lace window...`);
-
-    let switchedSuccessfully = false;
-    try {
-      await browser.switchWindow(/^Lace$/);
-      currentUrl = await browser.getUrl();
-      windowTitle = await browser.getTitle();
-      Logger.log(`[getBackgroundStorage] Switched to Lace - URL: ${currentUrl}, Title: ${windowTitle}`);
-      switchedSuccessfully = currentUrl.startsWith('chrome-extension://') || currentUrl.startsWith('moz-extension://');
-    } catch (switchError) {
-      Logger.warn(`[getBackgroundStorage] Failed to switch to Lace window: ${switchError}`);
-    }
-
-    // If switch failed or didn't land on extension page, navigate directly to extension URL
-    if (!switchedSuccessfully) {
-      Logger.log(`[getBackgroundStorage] No Lace window found, navigating directly to extension URL...`);
-      try {
-        await browser.url(CHROME_EXTENSION_URL);
-        // Wait for navigation to complete AND page to be fully loaded
-        await browser.waitUntil(
-          async () => {
-            const status = await browser.execute(() => {
-              const isExtensionPage = window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:';
-              const isReady = document.readyState === 'complete';
-              // Lace app uses #lace-app, not #root
-              const hasLaceApp = !!document.querySelector('#lace-app');
-              const laceAppHasContent = (document.querySelector('#lace-app')?.children?.length || 0) > 0;
-              return {
-                isExtensionPage,
-                isReady,
-                hasLaceApp,
-                laceAppHasContent,
-                ready: isExtensionPage && isReady && hasLaceApp && laceAppHasContent
-              };
-            });
-
-            if (!status.ready) {
-              Logger.log(`[getBackgroundStorage] Waiting for page load: ${JSON.stringify(status)}`);
-            }
-
-            return status.ready;
-          },
-          {
-            timeout: 15000,
-            interval: 500,
-            timeoutMsg: 'Failed to navigate to extension URL or page did not load'
-          }
-        );
-        currentUrl = await browser.getUrl();
-        windowTitle = await browser.getTitle();
-        Logger.log(`[getBackgroundStorage] Navigated to extension - URL: ${currentUrl}, Title: ${windowTitle}`);
-      } catch (navError) {
-        Logger.error(`[getBackgroundStorage] Failed to navigate to extension URL: ${navError}`);
-      }
-    }
-  }
-
-  let attempts = 0;
-  let lastStatus: any = null;
-
   try {
-    // Wait for chrome.storage to be available (important for bundle mode)
-    await browser.waitUntil(
-      async () => {
-        attempts++;
-        const result = await browser.execute(() => {
-          return {
-            hasChrome: typeof chrome !== 'undefined',
-            hasStorage: typeof chrome !== 'undefined' && chrome.storage !== undefined,
-            hasLocal: typeof chrome !== 'undefined' && chrome.storage !== undefined && chrome.storage.local !== undefined,
-            documentReady: document.readyState,
-            isExtensionPage: window.location.protocol === 'chrome-extension:' || window.location.protocol === 'moz-extension:',
-            currentUrl: window.location.href
-          };
-        });
-
-        lastStatus = result;
-        const isAvailable = result.hasChrome && result.hasStorage && result.hasLocal;
-
-        if (attempts === 1 || attempts % 5 === 0 || isAvailable) {
-          Logger.log(`[getBackgroundStorage] Attempt ${attempts} (${Date.now() - startTime}ms): ${JSON.stringify(result)}`);
-        }
-
-        return isAvailable;
-      },
-      {
-        timeout: 15000,
-        interval: 500,
-        timeoutMsg: `chrome.storage.local API not available after 15 seconds. Last status: ${JSON.stringify(lastStatus)}`
-      }
-    );
-
-    Logger.log(`[getBackgroundStorage] chrome.storage.local available after ${Date.now() - startTime}ms`);
-
-    // Fetch storage with retry - Chrome can sometimes crash between availability check and fetch
-    let fetchAttempts = 0;
-    const maxFetchAttempts = 3;
-    let lastFetchError: any = null;
-    
-    while (fetchAttempts < maxFetchAttempts) {
-      fetchAttempts++;
-      try {
-        const result = await browser.execute(`
-          return (async () => {
-            const response = await chrome.storage.local.get("BACKGROUND_STORAGE");
-            return response.BACKGROUND_STORAGE;
-          })()
-        `);
-        return result;
-      } catch (fetchError: any) {
-        lastFetchError = fetchError;
-        Logger.warn(`[getBackgroundStorage] Fetch attempt ${fetchAttempts}/${maxFetchAttempts} failed: ${fetchError.message}`);
-        
-        if (fetchAttempts < maxFetchAttempts) {
-          // Brief pause before retry
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          
-          // Check if we're still on extension page
-          const checkUrl = await browser.getUrl();
-          if (!checkUrl.startsWith('chrome-extension://') && !checkUrl.startsWith('moz-extension://')) {
-            Logger.warn(`[getBackgroundStorage] No longer on extension page (${checkUrl}), attempting to navigate back...`);
-            try {
-              await browser.url(CHROME_EXTENSION_URL);
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-            } catch (navErr) {
-              Logger.error(`[getBackgroundStorage] Failed to navigate back: ${navErr}`);
-            }
-          }
-        }
-      }
-    }
-    
-    throw new Error(`Storage fetch failed after ${maxFetchAttempts} attempts: ${lastFetchError?.message}`);
+    return await browser.execute(`
+      return (async () => {
+        const response = await chrome.storage.local.get("BACKGROUND_STORAGE");
+        return response.BACKGROUND_STORAGE;
+      })()
+      `);
   } catch (error) {
-    Logger.error(`[getBackgroundStorage] FAILED after ${Date.now() - startTime}ms and ${attempts} attempts`);
-    Logger.error(`[getBackgroundStorage] Last status: ${JSON.stringify(lastStatus)}`);
-    Logger.error(`[getBackgroundStorage] URL: ${currentUrl}, Title: ${windowTitle}`);
     throw new Error(`Getting browser storage failed: ${error}`);
   }
 };

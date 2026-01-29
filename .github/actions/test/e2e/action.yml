@@ -85,21 +85,6 @@ runs:
       run: |
         sudo dmesg > ./dmesg.log
 
-    - name: Collect Chrome crash dumps and logs
-      shell: bash
-      if: always()
-      run: |
-        mkdir -p ./v1/packages/e2e-tests/chrome-crashes
-        if [ -d /tmp/chrome-crashes ]; then
-          cp -r /tmp/chrome-crashes/* ./v1/packages/e2e-tests/chrome-crashes/ 2>/dev/null || true
-        fi
-        # Copy Chrome debug log
-        if [ -f /tmp/chrome-debug.log ]; then
-          cp /tmp/chrome-debug.log ./v1/packages/e2e-tests/chrome-debug.log 2>/dev/null || true
-        fi
-        # Check for OOM killer in dmesg
-        grep -i "killed process\|out of memory\|oom\|segfault" ./v1/packages/e2e-tests/dmesg.log > ./v1/packages/e2e-tests/crash-indicators.log 2>/dev/null || true
-
     - name: Publish artifacts (logs, reports, screenshots)
       if: always()
       uses: actions/upload-artifact@v4
@@ -113,7 +98,4 @@ runs:
           ./v1/packages/e2e-tests/reports/allure/results
           ./v1/packages/e2e-tests/dmesg.log
           ./v1/packages/e2e-tests/metrics
-          ./v1/packages/e2e-tests/chrome-crashes
-          ./v1/packages/e2e-tests/crash-indicators.log
-          ./v1/packages/e2e-tests/chrome-debug.log
         retention-days: 5

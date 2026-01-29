@@ -145,83 +145,13 @@ class TopNavigationAssert {
   }
 
   async assertWalletIsInSyncedStatus() {
-    const startTime = Date.now();
-    console.log(`[assertWalletIsInSyncedStatus] START - URL: ${await browser.getUrl()}`);
-    
     if (await CrashScreen.reloadExtensionButton.isDisplayed()) {
       throw new Error('Crash screen occurred!');
     }
-    
-    console.log(`[assertWalletIsInSyncedStatus] Waiting for HD wallet sync...`);
     await waitUntilHdWalletSynced();
-    console.log(`[assertWalletIsInSyncedStatus] HD wallet synced after ${Date.now() - startTime}ms`);
-    
     await this.assertLogoPresent();
-    console.log(`[assertWalletIsInSyncedStatus] Logo present, URL: ${await browser.getUrl()}`);
-    
-    // Check button state before waiting
-    const menuButton = MenuHeader.menuButton;
-    const exists = await menuButton.isExisting();
-    const displayed = exists ? await menuButton.isDisplayed() : false;
-    const enabled = exists ? await menuButton.isEnabled() : false;
-    const isClickable = exists ? await menuButton.isClickable() : false;
-    console.log(`[assertWalletIsInSyncedStatus] Menu button state: exists=${exists}, displayed=${displayed}, enabled=${enabled}, isClickable=${isClickable}`);
-    
-    // Capture overlapping elements info
-    const overlayInfo = await browser.execute(() => {
-      const btn = document.querySelector('[data-testid="profile-dropdown-trigger-menu"]') as HTMLElement;
-      if (!btn) return { error: 'button not found' };
-      
-      const rect = btn.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const elementAtCenter = document.elementFromPoint(centerX, centerY);
-      
-      // Check for common overlays
-      const overlays = {
-        mainLoader: !!document.querySelector('[data-testid="main-loader"]'),
-        modal: !!document.querySelector('[class*="modal"]'),
-        toast: !!document.querySelector('[class*="toast"], [class*="Toast"], [data-testid*="toast"]'),
-        overlay: !!document.querySelector('[class*="overlay"], [class*="Overlay"]'),
-        drawer: !!document.querySelector('[class*="drawer"], [class*="Drawer"]'),
-        backdrop: !!document.querySelector('[class*="backdrop"], [class*="Backdrop"]'),
-        spinner: !!document.querySelector('[class*="spinner"], [class*="Spinner"], [class*="loading"]')
-      };
-      
-      return {
-        buttonRect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
-        center: { x: centerX, y: centerY },
-        elementAtCenter: elementAtCenter ? {
-          tagName: elementAtCenter.tagName,
-          id: elementAtCenter.id,
-          className: elementAtCenter.className?.toString?.()?.slice(0, 100),
-          testId: elementAtCenter.getAttribute('data-testid'),
-          isButton: elementAtCenter === btn
-        } : null,
-        overlays,
-        viewportSize: { width: window.innerWidth, height: window.innerHeight }
-      };
-    });
-    console.log(`[assertWalletIsInSyncedStatus] Overlay info: ${JSON.stringify(overlayInfo)}`);
-    
-    if (!exists) {
-      // Capture page state for debugging
-      const pageState = await browser.execute(() => {
-        return {
-          url: window.location.href,
-          title: document.title,
-          bodyHTML: document.body?.innerHTML?.slice(0, 500) || 'NO BODY',
-          hasLoader: !!document.querySelector('[data-testid="main-loader"]'),
-          hasModal: !!document.querySelector('[class*="modal"]'),
-          headerHTML: document.querySelector('header')?.innerHTML?.slice(0, 300) || 'NO HEADER'
-        };
-      });
-      console.log(`[assertWalletIsInSyncedStatus] PAGE STATE: ${JSON.stringify(pageState)}`);
-    }
-    
-    await menuButton.waitForClickable({ timeout: 10_000 });
-    console.log(`[assertWalletIsInSyncedStatus] Menu button clickable after ${Date.now() - startTime}ms`);
-    await menuButton.click();
+    await MenuHeader.menuButton.waitForClickable({ timeout: 10_000 });
+    await MenuHeader.menuButton.click();
     await this.assertSeeWalletStatusComponent();
     await this.assertSyncStatusValid('browserView.topNavigationBar.walletStatus.walletSynced');
     await MenuHeader.menuButton.click();
