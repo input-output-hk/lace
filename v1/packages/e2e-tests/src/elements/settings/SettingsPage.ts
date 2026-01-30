@@ -294,6 +294,31 @@ class SettingsPage extends CommonDrawerElements {
 
     await action();
   };
+
+  private readonly elementSelectors: Record<SettingsElementName, () => WebdriverIO.Element> = {
+    About: () => this.aboutLink.element,
+    'Your keys': () => this.yourKeysLink.element,
+    Network: () => this.networkLink.element,
+    'Authorized DApps': () => this.authorizedDAppsLink.element,
+    'Show recovery phrase': () => this.showRecoveryPhraseLink.element,
+    'Passphrase verification': () => this.passphraseVerificationLink.element,
+    FAQs: () => this.faqsLink.element,
+    Help: () => this.helpLink.element,
+    'Terms and conditions': () => this.tncLink.element,
+    'Privacy policy': () => this.privacyPolicyLink.element,
+    Collateral: () => this.collateralLink.element,
+    'Cookie policy': () => this.cookiePolicy.element,
+    'Custom Submit API': () => this.customSubmitAPILink.element,
+    'Generate paper wallet': () => this.generatePaperWallet.element
+  };
+
+  waitForSettingsItem = async (elementName: SettingsElementName): Promise<void> => {
+    const getElement = this.elementSelectors[elementName];
+    if (!getElement) {
+      return; // Skip if element not mapped
+    }
+    await getElement().waitForExist({ timeout: 5000 });
+  };
 }
 
 export default new SettingsPage();

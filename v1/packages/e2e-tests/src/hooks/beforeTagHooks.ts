@@ -7,12 +7,15 @@ import networkManager from '../utils/networkManager';
 import { addAndActivateWalletsInRepository } from '../fixture/walletRepositoryInitializer';
 import { setUsePersistentUserId } from '../utils/browserStorage';
 import { checkAndStartEmulator } from '../utils/trezorEmulatorApiClient';
+import MenuHeader from '../elements/menuHeader';
 
 const extendedViewRepositoryWalletInitialization = async (walletNames: TestWalletName[]): Promise<void> => {
   await extendedView.visit();
   await localStorageInitializer.initialiseBasicLocalStorageData(walletNames[0] as TestWalletName);
   await setUsePersistentUserId();
   await addAndActivateWalletsInRepository(walletNames);
+  // Wait for React to navigate to main page after wallet activation
+  await MenuHeader.menuButton.waitForExist({ timeout: 15000 });
   await networkManager.logFailedRequests();
 };
 
@@ -21,6 +24,8 @@ const popupViewRepositoryWalletInitialization = async (walletNames: TestWalletNa
   await localStorageInitializer.initialiseBasicLocalStorageData(walletNames[0] as TestWalletName);
   await setUsePersistentUserId();
   await addAndActivateWalletsInRepository(walletNames);
+  // Wait for React to navigate to main page after wallet activation
+  await MenuHeader.menuButton.waitForExist({ timeout: 15000 });
   await popupView.visit();
   await networkManager.logFailedRequests();
 };

@@ -50,12 +50,20 @@ Then(/^I see collateral as: "(Active|Inactive)" in settings$/, async (state: 'Ac
 Then(
   /^click on the following settings in (extended|popup) view opens a drawer:$/,
   async (viewType: string, settings: DataTable) => {
-    for (const row of settings.rows()) {
-      await SettingsPage.clickSettingsItem((await t(row[0])) as SettingsElementName);
+    const drawer = new CommonDrawerElements();
+    const rows = settings.rows();
+    for (let i = 0; i < rows.length; i++) {
+      const currentItem = (await t(rows[i][0])) as SettingsElementName;
+      await SettingsPage.clickSettingsItem(currentItem);
       await drawerCommonExtendedAssert.assertSeeDrawer(true);
-      await (viewType === 'extended'
-        ? new CommonDrawerElements().clickCloseDrawerButton()
-        : new CommonDrawerElements().clickBackDrawerButton());
+      await (viewType === 'extended' ? drawer.clickCloseDrawerButton() : drawer.clickBackDrawerButton());
+      // Wait for drawer to disappear
+      await drawer.drawerBody.waitForExist({ reverse: true, timeout: 5000 });
+      // If there's a next item, wait for it to appear before continuing
+      if (i < rows.length - 1) {
+        const nextItem = (await t(rows[i + 1][0])) as SettingsElementName;
+        await SettingsPage.waitForSettingsItem(nextItem);
+      }
     }
   }
 );

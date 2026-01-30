@@ -5,6 +5,7 @@ import MenuHeader from '../elements/menuHeader';
 import WalletSettingsDrawerAssert from '../assert/WalletSettingsDrawerAssert';
 import WalletSettingsDrawer from '../elements/WalletSettingsDrawer';
 import { setInputFieldValue } from '../utils/inputFieldUtils';
+import SettingsPage from '../elements/settings/SettingsPage';
 
 Then(/^I open header menu$/, async () => {
   await MenuHeader.openUserMenu();
@@ -16,6 +17,8 @@ Then(/^I open address book from header menu$/, async () => {
 
 Then(/^I open settings from header menu$/, async () => {
   await MenuHeader.openSettings();
+  // Verify Settings page actually opened
+  await SettingsPage.mainTitle.waitForDisplayed({ timeout: 5000 });
 });
 
 When(/^I set theme switcher to (light|dark) mode$/, async (mode: 'light' | 'dark') => {
