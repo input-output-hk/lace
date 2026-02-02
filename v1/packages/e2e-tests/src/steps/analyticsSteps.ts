@@ -28,8 +28,8 @@ When(/^I set up request interception for posthog analytics request\(s\)$/, async
   await browser.pause(1000);
   await browser.setupInterceptor();
   await browser.excludeUrls([
-    new RegExp('^(?!https://e.lw.iog.io).*'),
-    new RegExp('https://e.lw.iog.io/decide/'),
+    new RegExp('^(?!https://dev-e.lw.iog.io).*'),
+    new RegExp('https://dev-e.lw.iog.io/decide/'),
     new RegExp('.+blockfrost.io.*')
   ]);
 });

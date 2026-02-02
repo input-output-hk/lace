@@ -81,6 +81,10 @@ inputs:
     description: 'PubNub token endpoint URL for authentication. If not provided, uses default PubNub endpoint'
     required: false
     default: ''
+  POSTHOG_HOST:
+    description: 'posthog host url'
+    required: true
+    default: 'https://dev-e.lw.iog.io'
 
 runs:
   using: 'composite'
@@ -116,6 +120,7 @@ runs:
         NOTIFICATION_CENTER_MODE: ${{ inputs.NOTIFICATION_CENTER_MODE }}
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
         PUBNUB_TOKEN_ENDPOINT: ${{ inputs.PUBNUB_TOKEN_ENDPOINT }}
+        POSTHOG_HOST: ${{ inputs.POSTHOG_HOST }}
 
     - name: Upload Chrome artifact
       if: ${{ inputs.BROWSER_TARGET == 'chromium' }}

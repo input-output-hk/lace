@@ -250,6 +250,7 @@ jobs:
           DAPP_RADAR_API_KEY: ${{ startsWith(github.ref, 'refs/heads/release') && secrets.DAPP_RADAR_API_KEY || '' }}
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
           PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT || '' }}
+          POSTHOG_HOST: 'https://dev-e.lw.iog.io'
 
   release-firefox-pkg:
     name: Release Firefox package
