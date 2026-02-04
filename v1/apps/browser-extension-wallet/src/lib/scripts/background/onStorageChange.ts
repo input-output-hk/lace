@@ -43,17 +43,12 @@ const handleLaceMessagingCenterPayloadChange = (oldPayload: unknown, newPayload:
   const oldInterval = extractIntervalFromPayload(oldPayload);
   const newInterval = extractIntervalFromPayload(newPayload);
 
-  if (oldInterval !== newInterval && newInterval !== undefined) {
-    const notificationsClient = getNotificationsClient();
-    if (notificationsClient) {
-      try {
-        notificationsClient.updateFetchMissedMessagesInterval(newInterval);
-        logger.debug(`Successfully called updateFetchMissedMessagesInterval(${newInterval}) on notifications client`);
-      } catch (error) {
-        logger.error('Failed to update fetch missed messages interval to newInterval', newInterval, error);
-      }
-    } else {
-      logger.debug('Notifications client not available, cannot update interval from PostHog');
+  if (newTimestamp !== undefined) {
+    try {
+      const api = await notificationsCenterApi;
+      await api.notifications.triggerNotificationSync(newTimestamp);
+    } catch (error) {
+      logger.warn('Failed to trigger notification sync', newTimestamp, error);
     }
   }
 };

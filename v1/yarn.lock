@@ -12629,7 +12629,7 @@ __metadata:
     "@lace/common": 0.1.0
     "@lace/core": 0.1.0
     "@lace/nami": ^0.1.0
-    "@lace/notifications": 0.1.0
+    "@lace/notifications2": 0.1.0
     "@lace/staking": 0.1.0
     "@lace/translation": 0.1.0
     "@openpgp/web-stream-tools": 0.0.11-patch-0
@@ -12958,12 +12958,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@lace/notifications@0.1.0, @lace/notifications@workspace:packages/notifications":
+"@lace/notifications2@0.1.0, @lace/notifications2@workspace:packages/notifications2":
+  version: 0.0.0-use.local
+  resolution: "@lace/notifications2@workspace:packages/notifications2"
+  dependencies:
+    "@types/pubnub": ^7.4.2
+    backoff-rxjs: ^7.0.0
+    pubnub: ^10.2.6
+    rxjs: ^7.4.0
+    typescript: ^4.9.5
+  languageName: unknown
+  linkType: soft
+
+"@lace/notifications@workspace:packages/notifications":
   version: 0.0.0-use.local
   resolution: "@lace/notifications@workspace:packages/notifications"
   dependencies:
     "@types/pubnub": ^7.4.2
+    backoff-rxjs: ^7.0.0
     pubnub: ^10.2.1
+    rxjs: ^7.8.1
     tsx: ^4.20.6
     typescript: ^4.9.5
   languageName: unknown
@@ -36045,6 +36059,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-text-encoding@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "fast-text-encoding@npm:1.0.6"
+  checksum: 9d58f694314b3283e785bf61954902536da228607ad246905e30256f9ab8331f780ac987e7222c9f5eafd04168d07e12b8054c85cedb76a2c05af0e82387a903
+  languageName: node
+  linkType: hard
+
 "fast-uri@npm:^3.0.1":
   version: 3.0.3
   resolution: "fast-uri@npm:3.0.3"
@@ -48868,6 +48889,25 @@ __metadata:
     react-native-url-polyfill: ^2.0.0
     text-encoding: ^0.7.0
   checksum: 9aa006d08abc643edb31624f70646e8e035ea594b692a81ed5b207f06e9f541abe3ad54e2f5bbf7efef680fd72036d2cffc63a807f7fe05235b4d5207e524546
+  languageName: node
+  linkType: hard
+
+"pubnub@npm:^10.2.6":
+  version: 10.2.6
+  resolution: "pubnub@npm:10.2.6"
+  dependencies:
+    agentkeepalive: ^3.5.2
+    buffer: ^6.0.3
+    cbor-js: ^0.1.0
+    cbor-sync: ^1.0.4
+    fast-text-encoding: ^1.0.6
+    fflate: ^0.8.2
+    form-data: ^4.0.4
+    lil-uuid: ^0.1.1
+    node-fetch: ^2.7.0
+    proxy-agent: ^6.3.0
+    react-native-url-polyfill: ^2.0.0
+  checksum: 259f7f91c01143b2ff0b0282ed92b184c449e48c642c8a318a480680327403a37e5ee706b2a257a92d3bede3a0c565d87a8d1f5b8f2b0a640656609697029e84
   languageName: node
   linkType: hard
 
