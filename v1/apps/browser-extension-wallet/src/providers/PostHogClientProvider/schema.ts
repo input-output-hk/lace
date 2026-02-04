@@ -63,7 +63,8 @@ export const swapCenterSchema = commonSchema.merge(
 
 export const laceMessagingCenterSchema = commonSchema.merge(
   z.object({
-    fetchMissedMessagesIntervalMinutes: z.number()
+    fetchMissedMessagesIntervalMinutes: z.number(),
+    latestMessageTimestamp: z.string().datetime()
   })
 );
 
