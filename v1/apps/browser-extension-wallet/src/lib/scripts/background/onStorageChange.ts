@@ -3,7 +3,7 @@ import { logger as commonLogger } from '@lace/common';
 import { ExtensionStorage } from '@lib/scripts/types';
 import { Wallet } from '@lace/cardano';
 import { contextLogger } from '@cardano-sdk/util';
-import { getNotificationsClient } from './notifications-center';
+import { notificationsCenterApi } from './notifications-center';
 import { ExperimentName } from '../types/feature-flags';
 
 const logger = contextLogger(commonLogger, 'Background:StorageListener');
@@ -19,14 +19,17 @@ const hasStorageChangeForKey = <T extends keyof ExtensionStorage>(
 ): changes is Record<T, ExtensionStorageChange<T>> => key in changes;
 
 /**
- * Extracts the fetchMissedMessagesIntervalMinutes value from a feature flag payload.
+ * Extracts the latestMessageTimestamp value from a feature flag payload.
  *
  * @param payload - Feature flag payload
- * @returns Interval in minutes, or undefined if not found
+ * @returns ISO timestamp string, or undefined if not found
  */
-const extractIntervalFromPayload = (payload: unknown): number | undefined => {
-  if (payload && typeof payload === 'object' && 'fetchMissedMessagesIntervalMinutes' in payload) {
-    return (payload as { fetchMissedMessagesIntervalMinutes: number }).fetchMissedMessagesIntervalMinutes;
+const extractLatestMessageTimestamp = (payload: unknown): string | undefined => {
+  if (payload && typeof payload === 'object' && 'latestMessageTimestamp' in payload) {
+    const timestamp = payload.latestMessageTimestamp;
+    if (typeof timestamp === 'string' && timestamp.length > 0) {
+      return timestamp;
+    }
   }
   // eslint-disable-next-line consistent-return
   return undefined;
@@ -34,14 +37,13 @@ const extractIntervalFromPayload = (payload: unknown): number | undefined => {
 
 /**
  * Handles changes to the lace-messaging-center feature flag payload.
- * Updates the fetchMissedMessagesIntervalMinutes when the feature flag payload changes.
+ * Triggers notification sync when the latestMessageTimestamp is set.
+ * Notifications library is responsible for detecting if the timestamp has changed and triggering a sync if it has.
  *
- * @param oldPayload - Previous feature flag payload value
- * @param newPayload - New feature flag payload value
+ * @param newPayload - feature flag payload value
  */
-const handleLaceMessagingCenterPayloadChange = (oldPayload: unknown, newPayload: unknown): void => {
-  const oldInterval = extractIntervalFromPayload(oldPayload);
-  const newInterval = extractIntervalFromPayload(newPayload);
+const handleLaceMessagingCenterPayloadChange = async (newPayload: unknown): Promise<void> => {
+  const newTimestamp = extractLatestMessageTimestamp(newPayload);
 
   if (newTimestamp !== undefined) {
     try {
@@ -73,10 +75,8 @@ const handleBackgroundStorageChange = (changes: ExtensionStorageChange<'BACKGROU
 
   // Handle changes to lace-messaging-center feature flag payload
   if (changes.newValue?.featureFlagPayloads) {
-    const oldPayload = changes.oldValue?.featureFlagPayloads?.[ExperimentName.NOTIFICATIONS_CENTER];
     const newPayload = changes.newValue.featureFlagPayloads[ExperimentName.NOTIFICATIONS_CENTER];
-
-    handleLaceMessagingCenterPayloadChange(oldPayload, newPayload);
+    handleLaceMessagingCenterPayloadChange(newPayload);
   }
 };
 

@@ -32,6 +32,8 @@ export interface NotificationsCenterProperties {
     markAsRead: (id?: string) => Promise<void>; // markAsRead() marks all as read
     notifications$: Observable<LaceNotification[]>;
     remove: (id: string) => Promise<void>;
+    /** timestamp is expected to be in iso format (YYYY-MM-DDTHH:MM:SS.SSSZ) */
+    triggerNotificationSync: (timestamp: string) => Promise<void>;
   };
   test: {
     add: (notification: LaceNotification) => Promise<void>;
@@ -48,7 +50,8 @@ export const notificationsCenterProperties: RemoteApiProperties<NotificationsCen
   notifications: {
     markAsRead: RemoteApiPropertyType.MethodReturningPromise,
     notifications$: RemoteApiPropertyType.HotObservable,
-    remove: RemoteApiPropertyType.MethodReturningPromise
+    remove: RemoteApiPropertyType.MethodReturningPromise,
+    triggerNotificationSync: RemoteApiPropertyType.MethodReturningPromise
   },
   test: {
     add: RemoteApiPropertyType.MethodReturningPromise,
