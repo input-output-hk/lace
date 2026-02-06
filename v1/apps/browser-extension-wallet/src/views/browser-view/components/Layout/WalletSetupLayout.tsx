@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
 import { useTheme } from '@providers/ThemeProvider/context';
 import { useExternalLinkOpener } from '@providers/ExternalLinkOpenerProvider';
+import { useV2 } from '@hooks';
 
 export interface WalletSetupLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,14 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
   const { theme } = useTheme();
   const openExternalLink = useExternalLinkOpener();
 
+  const { switchToV2 } = useV2();
+
+  const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (event.target.value === 'v2') {
+      switchToV2();
+    }
+  };
+
   return (
     <div className={styles.walletSetupLayout}>
       <div className={styles.header}>
@@ -28,14 +37,31 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
           data-testid="lace-logo"
         />
         {prompt || (
-          <Button
-            color="gradient"
-            onClick={() => openExternalLink(process.env.HELP_URL)}
-            data-testid="help-and-support-button"
-          >
-            <img src={QuestionMark} alt="question mark" />
-            {t('general.lock.helpAndSupport')}
-          </Button>
+          <>
+            <select
+              onChange={handleVersionChange}
+              defaultValue="v1"
+              style={{
+                padding: '4px 8px',
+                borderRadius: '4px',
+                border: '1px solid #ccc',
+                backgroundColor: '#fff',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              <option value="v1">V1</option>
+              <option value="v2">V2</option>
+            </select>
+            <Button
+              color="gradient"
+              onClick={() => openExternalLink(process.env.HELP_URL)}
+              data-testid="help-and-support-button"
+            >
+              <img src={QuestionMark} alt="question mark" />
+              {t('general.lock.helpAndSupport')}
+            </Button>
+          </>
         )}
       </div>
 
