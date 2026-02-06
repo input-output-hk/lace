@@ -1,4 +1,4 @@
-.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app init-submodules install-dependencies create-v1-dot-env create-v2-dot-env setup build-prod build-dev build-bundle build-prod-firefox build-dev-firefox build-ext build-dev-ext link-v2 unlink-v2
+.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-dev-v2-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app build-prod-v2-app init-submodules install-dependencies create-v1-dot-env create-lmp-dot-env create-v2-dot-env setup setup-with-v2 build-prod build-dev build-bundle build-prod-firefox build-dev-firefox build-prod-v2 build-dev-v2 build-ext build-dev-ext link-v2 unlink-v2
 
 # Submodule symlink configuration
 SUBMODULE_PATH := v2
@@ -43,6 +43,18 @@ define build-lmp-app
 	@echo "✅ Built to ./v2/apps/midnight-extension/dist"
 endef
 
+define build-v2-app
+	@echo "🔨 Building Lace Extension ($(1))..."
+	$(eval EXTENSION_ID := $(call get-extension-id))
+	bash -c 'cd v2 && $(setup-node-env) && cd apps/lace-extension && \
+	rm -rf ./dist && \
+	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run prepare:expo-env && \
+	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(2) && \
+	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(3) && \
+	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) EXTRA_FEATURE_FLAGS=V2_BUNDLE WEBPACK_PUBLIC_PATH=/js/sw/ npm run $(4)'
+	@echo "✅ Built to ./v2/apps/lace-extension/dist"
+endef
+
 # Prerequisites
 init-submodules:
 	@if [ -L "$(SUBMODULE_PATH)" ]; then \
@@ -79,14 +91,23 @@ create-v1-dot-env:
 		echo "📝 Created v1/apps/browser-extension-wallet/.env"; \
 	fi
 
-create-v2-dot-env:
+create-lmp-dot-env:
 	@echo "BLOCKFROST_PROJECT_ID_MAINNET=notused" > v2/apps/midnight-extension/webpack/.env
 	@echo "BLOCKFROST_PROJECT_ID_PREPROD=notused" >> v2/apps/midnight-extension/webpack/.env
 	@echo "BLOCKFROST_PROJECT_ID_PREVIEW=notused" >> v2/apps/midnight-extension/webpack/.env
 	@echo "📝 Created v2/apps/midnight-extension/webpack/.env"
 
-setup: init-submodules install-dependencies create-v2-dot-env
+create-v2-dot-env:
+	@echo "BLOCKFROST_PROJECT_ID_MAINNET=notused" > v2/apps/lace-extension/webpack/.env
+	@echo "BLOCKFROST_PROJECT_ID_PREPROD=notused" >> v2/apps/lace-extension/webpack/.env
+	@echo "BLOCKFROST_PROJECT_ID_PREVIEW=notused" >> v2/apps/lace-extension/webpack/.env
+	@echo "📝 Created v2/apps/lace-extension/webpack/.env"
+
+setup: init-submodules install-dependencies create-lmp-dot-env
 	@echo "✅ Setup complete"
+
+setup-with-v2: init-submodules install-dependencies create-v2-dot-env
+	@echo "✅ Setup complete with v2"
 
 # Development builds
 build-dev-v1-app:
@@ -98,6 +119,9 @@ build-dev-v1-app-firefox:
 build-dev-lmp-app:
 	$(call build-lmp-app,development,build:dev:app,build:dev:sw)
 
+build-dev-v2-app:
+	$(call build-v2-app,development,build:dev:tab,build:dev:app,build:dev:sw)
+
 # Production builds
 build-prod-v1-app:
 	$(call build-v1-app,prod,chrome)
@@ -108,10 +132,17 @@ build-prod-v1-app-firefox:
 build-prod-lmp-app:
 	$(call build-lmp-app,production,build:app,build:sw)
 
+build-prod-v2-app:
+	$(call build-v2-app,production,build:tab,build:app,build:sw)
+
 # Bundle
 build-bundle:
-	yarn build:bundle
+	BUILD_TARGET=lmp yarn build:bundle
 	@echo "✅ Bundle built"
+
+build-bundle-v2:
+	BUILD_TARGET=v2 yarn build:bundle
+	@echo "✅ Bundle built with v2"
 
 # Fast rebuild (browser-extension-wallet only, skips v1 packages and v2)
 define rebuild-v1-app-only
@@ -140,6 +171,13 @@ build-prod: build-prod-lmp-app build-prod-v1-app build-bundle
 
 build-dev: build-dev-lmp-app build-dev-v1-app build-bundle
 	@echo "✅ Development build complete (Chrome)"
+
+# Full builds with v2 (Chrome)
+build-prod-v2: build-prod-v2-app build-prod-v1-app build-bundle-v2
+	@echo "✅ Production build complete (Chrome) with v2"
+
+build-dev-v2: build-dev-v2-app build-dev-v1-app build-bundle-v2
+	@echo "✅ Development build complete (Chrome) with v2"
 
 # Full builds (Firefox)
 build-prod-firefox: build-prod-lmp-app build-prod-v1-app-firefox build-bundle
@@ -249,6 +287,6 @@ unlink-v2:
 		git submodule update --init "$(SUBMODULE_PATH)"; \
 		echo "📦 Reinstalling v2 dependencies..."; \
 		bash -c 'cd $(SUBMODULE_PATH) && $(setup-node-env) && npm i'; \
-		$(MAKE) create-v2-dot-env; \
+		$(MAKE) create-lmp-dot-env; \
 		echo "✅ Submodule unlinked and restored successfully"; \
 	fi

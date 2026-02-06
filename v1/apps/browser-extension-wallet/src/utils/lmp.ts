@@ -42,7 +42,8 @@ export const onboardingParamsStorage = {
 };
 export enum APP_MODE {
   LMP = 'LMP',
-  V1 = 'V1'
+  V1 = 'V1',
+  V2 = 'V2'
 }
 
 export const lmpModeStorage = {

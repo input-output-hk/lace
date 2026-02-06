@@ -11,34 +11,19 @@ A browser extension wallet for Cardano, Bitcoin and Midnight.
 **Prerequisite:** `nvm` or `fnm` node version manager is required.
 
 ```bash
-make setup
-```
-
-Then create `v1/apps/browser-extension-wallet/.env` with the following variables:
-
-```
-BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key
-BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key
-BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
-```
-
-Or use the command:
-
-```bash
-make create-v1-dot-env \
-  BLOCKFROST_PROJECT_ID_MAINNET=your_mainnet_key \
-  BLOCKFROST_PROJECT_ID_PREPROD=your_preprod_key \
-  BLOCKFROST_PROJECT_ID_PREVIEW=your_preview_key
+make setup # Installs dependencies and sets up the project
 ```
 
 ### Build
 
 ```bash
-make build-dev      # Development build (Chrome)
-make build-prod     # Production build (Chrome)
-make build-dev-firefox   # Development build (Firefox)
-make build-prod-firefox  # Production build (Firefox)
+yarn build:dev      # Development build with LMP (Chrome)
+yarn build:prod     # Production build with LMP (Chrome)
+yarn build:dev:v2  # Development build with Lace Extension (V2) (Chrome)
+yarn build:prod:v2 # Production build with Lace Extension (V2) (Chrome)
 ```
+
+Firefox does not current support the bundles
 
 For faster rebuilds when only the extension app code changed (skips v1 packages and v2):
 

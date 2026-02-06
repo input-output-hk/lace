@@ -5,4 +5,5 @@ export const STORAGE_KEY = {
 export const APP_MODE = {
   LMP: "LMP",
   V1: "V1",
+  V2: "V2",
 };
