@@ -34,9 +34,7 @@ export const waitUntilExpectedNumberOfHandles = async (expectedNumberOfHandles: 
   await browser.waitUntil(async () => (await browser.getWindowHandles()).length === expectedNumberOfHandles, {
     timeout: 20_000,
     timeoutMsg: `failed while waiting for ${expectedNumberOfHandles} window handles. Actual number of handles ${
-      (
-        await browser.getWindowHandles()
-      ).length
+      (await browser.getWindowHandles()).length
     }`
   });
 };
@@ -66,7 +64,7 @@ export const switchToWindowWithUrl = async (urlPattern: string, isPartialMatch =
 
 export const switchToWindowWithLace = async (delay = 1000): Promise<void> => {
   await browser.pause(delay);
-  await browser.switchWindow(/^Lace$/);
+  await browser.switchWindow(/^Lace Wallet$/);
 };
 
 export const switchToWindowWithTitle = async (url: string): Promise<boolean> => {
