@@ -8,7 +8,7 @@ jobs:
   block-fixup:
     name: Block fixup commits
     if: github.event.pull_request.draft == false
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - uses: actions/checkout@v4

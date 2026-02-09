@@ -22,7 +22,7 @@ concurrency:
 jobs:
   prepare:
     name: Build v1 Packages
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -57,7 +57,7 @@ jobs:
 
   checksV1:
     name: V1 Code Quality Checks
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -82,7 +82,7 @@ jobs:
 
   unitTestsV1:
     name: V1 Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -106,7 +106,7 @@ jobs:
 
   build-lace-extension:
     name: Build Lace Extension
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: [checksV1, unitTestsV1]
 
     steps:
@@ -174,7 +174,7 @@ jobs:
 
   smokeTests:
     name: E2E Smoke Tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: build-lace-extension
     strategy:
       fail-fast: false
@@ -208,7 +208,7 @@ jobs:
 
   verifyTests:
     name: Verify Test Results
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: smokeTests
     if: always()
 
@@ -224,7 +224,7 @@ jobs:
   processReports:
     name: Process e2e test reports
     needs: smokeTests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     if: ${{ success() || failure() }}
     steps:
       - name: Download all artifacts
@@ -279,7 +279,7 @@ jobs:
 
   collectE2EReports:
     name: Collect E2E Reports
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: smokeTests
     if: ${{ success() || failure() }}
 

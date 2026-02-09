@@ -27,10 +27,10 @@ on:
       runner:
         type: choice
         required: true
-        default: 'ubuntu-22.04'
+        default: 'lace-self-hosted'
         description: runner to use
         options:
-          - self-hosted
+          - lace-self-hosted
           - ubuntu-22.04
           - ubuntu-latest
       smoke_only:

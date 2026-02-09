@@ -22,7 +22,7 @@ env:
 jobs:
   prepare:
     name: Prepare
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -91,7 +91,7 @@ jobs:
 
   unitTests:
     name: Unit tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -162,7 +162,7 @@ jobs:
 
   release-chromium-pkg:
     name: Release Chromium package
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -253,7 +253,7 @@ jobs:
 
   release-firefox-pkg:
     name: Release Firefox package
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -345,7 +345,7 @@ jobs:
 
   build:
     name: Build Lace for E2E Tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -381,7 +381,7 @@ jobs:
 
   smokeTests:
     name: Smoke e2e tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: build
     strategy:
       fail-fast: false
@@ -414,7 +414,7 @@ jobs:
 
   processReports:
     name: Process smoke e2e test reports
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: smokeTests
     if: always()
     steps:

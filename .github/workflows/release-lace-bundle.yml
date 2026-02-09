@@ -14,7 +14,7 @@ concurrency:
 jobs:
   prepare:
     name: Build v1 Packages
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -49,7 +49,7 @@ jobs:
 
   checksV1:
     name: V1 Code Quality Checks
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -74,7 +74,7 @@ jobs:
 
   unitTestsV1:
     name: V1 Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: prepare
 
     steps:
@@ -98,7 +98,7 @@ jobs:
 
   build-lace-v1-extension:
     name: Build Lace v1 Extension
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: [checksV1, unitTestsV1]
 
     steps:
@@ -157,7 +157,7 @@ jobs:
 
   checksV2:
     name: V2 Code Quality Checks
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -201,7 +201,7 @@ jobs:
 
   unitTestsV2:
     name: V2 Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
 
     steps:
       - name: Checkout repository
@@ -237,7 +237,7 @@ jobs:
 
   build-midnight-extension:
     name: Build Midnight Extension (v2)
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: [checksV2, unitTestsV2]
 
     steps:
@@ -319,7 +319,7 @@ jobs:
 
   bundle:
     name: Create Bundle
-    runs-on: ubuntu-22.04
+    runs-on: lace-self-hosted
     needs: [build-lace-v1-extension, build-midnight-extension]
 
     steps:
