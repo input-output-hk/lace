@@ -31,6 +31,8 @@ const createJestConfig = (jestConfig) => {
     rootDir,
     preset: 'ts-jest',
     ...jestConfig,
+    // Limit workers in CI to avoid OOM on self-hosted runners (many CPUs → many workers → high memory)
+    ...(process.env.CI && { maxWorkers: 4 }),
     transform: {
       ...jestConfig.transform,
       ...esmExceptions.transform,
