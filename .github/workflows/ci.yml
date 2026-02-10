@@ -20,6 +20,7 @@ concurrency:
 
 env:
   BUILD_ARTIFACT_NAME: 'lace-chrome-browser-extension-for-smoke-tests-${{ github.sha }}'
+  NODE_OPTIONS: '--max-old-space-size=8192'
 
 jobs:
   prepare:
