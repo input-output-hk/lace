@@ -1,14 +1,21 @@
 import { logger, useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
-import { consumeRemoteApi } from '@cardano-sdk/web-extension';
-import { APP_MODE, bundleAppApiProps } from '@utils/lmp';
+import { consumeRemoteApi, RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
+import { APP_MODE, BundleAppApi } from '@utils/lmp';
 import { runtime } from 'webextension-polyfill';
 import { v2ApiBaseChannel, v2ModeStorage } from '@utils/v2';
 
-const v2Api = consumeRemoteApi(
+type V2BundleAppApi = Pick<BundleAppApi, 'wallets$' | 'activate'>;
+
+const v2BundleAppApiProps: RemoteApiProperties<V2BundleAppApi> = {
+  wallets$: RemoteApiPropertyType.HotObservable,
+  activate: RemoteApiPropertyType.MethodReturningPromise
+};
+
+const v2Api: V2BundleAppApi = consumeRemoteApi(
   {
     baseChannel: v2ApiBaseChannel,
-    properties: bundleAppApiProps
+    properties: v2BundleAppApiProps
   },
   { logger, runtime }
 );

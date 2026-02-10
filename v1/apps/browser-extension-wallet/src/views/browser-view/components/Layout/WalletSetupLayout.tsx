@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@lace/common';
 import { useTheme } from '@providers/ThemeProvider/context';
 import { useExternalLinkOpener } from '@providers/ExternalLinkOpenerProvider';
-import { useV2 } from '@hooks';
+import { WalletSelectorDropdown } from './WalletSelectorDropdown';
+import { Flex } from '@input-output-hk/lace-ui-toolkit';
 
 export interface WalletSetupLayoutProps {
   children: React.ReactNode;
@@ -19,14 +20,6 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
   const { theme } = useTheme();
   const openExternalLink = useExternalLinkOpener();
 
-  const { switchToV2 } = useV2();
-
-  const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    if (event.target.value === 'v2') {
-      switchToV2();
-    }
-  };
-
   return (
     <div className={styles.walletSetupLayout}>
       <div className={styles.header}>
@@ -37,22 +30,8 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
           data-testid="lace-logo"
         />
         {prompt || (
-          <>
-            <select
-              onChange={handleVersionChange}
-              defaultValue="v1"
-              style={{
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                backgroundColor: '#fff',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              <option value="v1">V1</option>
-              <option value="v2">V2</option>
-            </select>
+          <Flex gap="$16" alignItems="center">
+            <WalletSelectorDropdown />
             <Button
               color="gradient"
               onClick={() => openExternalLink(process.env.HELP_URL)}
@@ -61,7 +40,7 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
               <img src={QuestionMark} alt="question mark" />
               {t('general.lock.helpAndSupport')}
             </Button>
-          </>
+          </Flex>
         )}
       </div>
 

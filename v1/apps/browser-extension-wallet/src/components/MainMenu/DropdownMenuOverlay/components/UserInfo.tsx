@@ -9,7 +9,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { addEllipsis, toast, useObservable } from '@lace/common';
 import { WalletStatusContainer } from '@components/WalletStatus';
 import { UserAvatar } from './UserAvatar';
-import { useGetHandles, useWalletAvatar, useWalletManager, useLMP } from '@hooks';
+import { useGetHandles, useWalletAvatar, useWalletManager, useLMP, useV2 } from '@hooks';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction, WALLET_TYPE_KEY } from '@providers/AnalyticsProvider/analyticsTracker';
 import { ProfileDropdown } from '@input-output-hk/lace-ui-toolkit';
@@ -60,6 +60,7 @@ export const UserInfo = ({
   const analytics = useAnalyticsContext();
   const wallets = useObservable(walletRepository.wallets$, NO_WALLETS);
   const { midnightWallets = [], switchToLMP } = useLMP();
+  const { midnightWallets: v2MidnightWallets = [], switchToV2 } = useV2();
   const walletAddress = walletInfo ? walletInfo.addresses[0].address.toString() : '';
   const shortenedWalletAddress = addEllipsis(walletAddress, ADRESS_FIRST_PART_LENGTH, ADRESS_LAST_PART_LENGTH);
   const [fullWalletName, setFullWalletName] = useState<string>('');
@@ -125,7 +126,7 @@ export const UserInfo = ({
         ? {
             customProfileComponent: (
               <span className={styles.walletOptionBitcoin}>
-                <ProfileDropdown.WalletIcon type={walletType} testId={'wallet-option-icon'} />
+                <ProfileDropdown.WalletIcon type={walletType} testId="wallet-option-icon" />
               </span>
             )
           }
@@ -218,6 +219,31 @@ export const UserInfo = ({
     [switchToLMP]
   );
 
+  const renderV2Wallet = useCallback(
+    ({ walletId, walletName }: Wallet.LmpBundleWallet, isLast: boolean) => (
+      <div key={walletId}>
+        <ProfileDropdown.WalletOption
+          style={{ textAlign: 'left' }}
+          key={walletId}
+          title={shortenWalletName(walletName, WALLET_OPTION_NAME_MAX_LENGTH)}
+          subtitle="Account #0"
+          id={`wallet-option-${walletId}`}
+          onClick={() => switchToV2()}
+          type="hot"
+          profile={{
+            customProfileComponent: (
+              <span className={styles.walletOptionMidnightV2}>
+                <ProfileDropdown.WalletIcon type="hot" testId="v2-wallet-option-icon" />
+              </span>
+            )
+          }}
+        />
+        {isLast ? undefined : <Separator />}
+      </div>
+    ),
+    [switchToV2]
+  );
+
   const renderScriptWallet = useCallback(
     (wallet: ScriptWallet<Wallet.WalletMetadata>) => renderWalletOption({ wallet }),
     [renderWalletOption]
@@ -256,9 +282,15 @@ export const UserInfo = ({
           <>
             <div>
               {wallets.map((wallet, i) =>
-                renderWallet(wallet, i === wallets.length - 1 && midnightWallets.length === 0)
+                renderWallet(
+                  wallet,
+                  i === wallets.length - 1 && midnightWallets.length === 0 && v2MidnightWallets.length === 0
+                )
               )}
-              {midnightWallets.map((wallet, i) => renderLmpWallet(wallet, i === midnightWallets.length - 1))}
+              {midnightWallets.map((wallet, i) =>
+                renderLmpWallet(wallet, i === midnightWallets.length - 1 && v2MidnightWallets.length === 0)
+              )}
+              {v2MidnightWallets.map((wallet, i) => renderV2Wallet(wallet, i === v2MidnightWallets.length - 1))}
             </div>
           </>
         ) : (
