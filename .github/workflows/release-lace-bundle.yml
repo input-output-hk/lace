@@ -366,6 +366,8 @@ jobs:
         run: |
           jq 'del(.key)' dist/manifest.json | jq -c . > dist/manifest.tmp.json
           mv dist/manifest.tmp.json dist/manifest.json
+          sed -i 's#__webpack_require__\.p="chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/js/"#__webpack_require__.p="/js/"#g' dist/js/*.js
+          sed -i 's#chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk#extension://efeiemlfnahiidnjglmehaihacglceia#g' dist/js/*.js
 
       - name: Upload MS Edge Bundle artifact
         uses: actions/upload-artifact@v4
@@ -427,4 +429,3 @@ jobs:
           else
             exit 1
           fi
-
