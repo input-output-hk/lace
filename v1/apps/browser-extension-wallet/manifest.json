@@ -1,7 +1,7 @@
 {
   "name": "$WALLET_MANIFEST_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
-  "version": "1.34.0",
+  "version": "1.35.0",
   "manifest_version": 3,
   "icons": {
     "16": "icon16.png",
@@ -15,35 +15,62 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["webRequest", "storage", "tabs", "unlimitedStorage"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "webRequest",
+    "storage",
+    "tabs",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "content_security_policy": {
     "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; frame-src https://connect.trezor.io/ https://www.youtube-nocookie.com; script-src 'self' 'wasm-unsafe-eval'; font-src 'self' data: https://use.typekit.net; object-src 'self'; connect-src $MEMPOOLSPACE_URL $BLOCKFROST_URLS $MAESTRO_URLS $CARDANO_SERVICES_URLS $CARDANO_WS_SERVER_URLS $SENTRY_URL $DAPP_RADAR_APPI_URL $STEELSWAP_API_URL $ASSET_CDN_URL https://live-pubnub.lw.iog.io https://coingecko.live-mainnet.eks.lw.iog.io https://coingecko.live-mainnet.eks.lw.iog.io https://muesliswap.live-mainnet.eks.lw.iog.io $LOCALHOST_CONNECT_SRC $POSTHOG_HOST https://use.typekit.net https://api.handle.me/ https://*.api.handle.me/ https://*.pndsn.com/ data:; style-src * 'unsafe-inline'; img-src * data: blob:;"
   },
   "content_scripts": [
     {
-      "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./app/inject.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file://*/*"
+      ],
+      "js": [
+        "./app/inject.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN",
       "all_frames": true
     },
     {
-      "matches": ["http://*/*", "https://*/*", "file://*/*"],
-      "js": ["./app/content.js"],
+      "matches": [
+        "http://*/*",
+        "https://*/*",
+        "file://*/*"
+      ],
+      "js": [
+        "./app/content.js"
+      ],
       "run_at": "document_start",
       "all_frames": true
     },
     {
-      "matches": ["*://connect.trezor.io/*/popup.html*"],
-      "js": ["./app/trezor-content-script.js"],
+      "matches": [
+        "*://connect.trezor.io/*/popup.html*"
+      ],
+      "js": [
+        "./app/trezor-content-script.js"
+      ],
       "all_frames": true
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["*.js"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "*.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

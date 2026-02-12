@@ -38,7 +38,7 @@ define build-lmp-app
 	$(eval EXTENSION_ID := $(call get-extension-id))
 	bash -c 'cd v2 && $(setup-node-env) && cd apps/midnight-extension && \
 	rm -rf ./dist && \
-	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(2) && \
+	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) WEBPACK_PUBLIC_PATH=/js/ npm run $(2) && \
 	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) EXTRA_FEATURE_FLAGS=LMP_BUNDLE WEBPACK_PUBLIC_PATH=/js/sw/ npm run $(3)'
 	@echo "✅ Built to ./v2/apps/midnight-extension/dist"
 endef

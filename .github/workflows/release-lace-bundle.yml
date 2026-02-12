@@ -306,7 +306,7 @@ jobs:
           SENTRY_PROJECT_ID: ${{ vars.SENTRY_PROJECT_ID_V2 }}
         run: |
           rm -rf ./dist
-          npm run build:app
+          WEBPACK_PUBLIC_PATH=/js/ npm run build:app
           WEBPACK_PUBLIC_PATH=/js/sw/ npm run build:sw
 
       - name: Upload Midnight Extension artifact
@@ -427,4 +427,3 @@ jobs:
           else
             exit 1
           fi
-
