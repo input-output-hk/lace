@@ -17,6 +17,7 @@ export const SelectBlockchain = (): ReactElement => {
   const [isBitcoinDialogOpen, setIsBitcoinDialogOpen] = useState(false);
   const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const midnightWalletsEnabled = posthog?.isFeatureFlagEnabled('midnight-wallets');
+  const isV2BundleEnabled = posthog?.isFeatureFlagEnabled('v2-bundle');
   const analytics = useAnalyticsContext();
   const { postHogActions } = useWalletOnboarding();
   const { midnightWallets, startMidnightRestore } = useLMP();
@@ -58,7 +59,7 @@ export const SelectBlockchain = (): ReactElement => {
         selectedBlockchain={selectedBlockchain}
         setSelectedBlockchain={setSelectedBlockchain}
         showBitcoinOption={bitcoinWalletsEnabled}
-        showMidnightOption={midnightWalletsEnabled}
+        showMidnightOption={midnightWalletsEnabled || isV2BundleEnabled}
         midnightDisabled={hasMidnightWallet}
         midnightDisabledReason={t('core.WalletSetupSelectBlockchain.midnight.disabledReason')}
         onMidnightSelect={handleMidnightSelect}

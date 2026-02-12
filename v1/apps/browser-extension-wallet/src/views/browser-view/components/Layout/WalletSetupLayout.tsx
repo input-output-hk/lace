@@ -9,6 +9,7 @@ import { useTheme } from '@providers/ThemeProvider/context';
 import { useExternalLinkOpener } from '@providers/ExternalLinkOpenerProvider';
 import { WalletSelectorDropdown } from './WalletSelectorDropdown';
 import { Flex } from '@input-output-hk/lace-ui-toolkit';
+import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 
 export interface WalletSetupLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,8 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
   const { t } = useTranslation();
   const { theme } = useTheme();
   const openExternalLink = useExternalLinkOpener();
+  const posthog = usePostHogClientContext();
+  const isV2BundleEnabled = posthog?.isFeatureFlagEnabled('v2-bundle');
 
   return (
     <div className={styles.walletSetupLayout}>
@@ -31,7 +34,7 @@ export const WalletSetupLayout = ({ children, prompt }: WalletSetupLayoutProps):
         />
         {prompt || (
           <Flex gap="$16" alignItems="center">
-            <WalletSelectorDropdown />
+            {isV2BundleEnabled && <WalletSelectorDropdown />}
             <Button
               color="gradient"
               onClick={() => openExternalLink(process.env.HELP_URL)}

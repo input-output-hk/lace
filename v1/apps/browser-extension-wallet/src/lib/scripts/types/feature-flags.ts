@@ -25,7 +25,8 @@ export enum ExperimentName {
   MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
   NOTIFICATIONS_CENTER = 'lace-messaging-center',
   BLOCKFROST_CREDENTIAL_QUERIES = 'blockfrost-credential-queries',
-  SWAP_CENTER = 'swap-center'
+  SWAP_CENTER = 'swap-center',
+  V2_BUNDLE = 'v2-bundle'
 }
 
 export type FeatureFlag = `${ExperimentName}`;

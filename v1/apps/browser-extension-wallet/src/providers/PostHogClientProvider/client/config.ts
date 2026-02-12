@@ -43,7 +43,8 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.MEMPOOLSPACE_FEE_MARKET]: false,
   [ExperimentName.NOTIFICATIONS_CENTER]: false,
   [ExperimentName.BLOCKFROST_CREDENTIAL_QUERIES]: false,
-  [ExperimentName.SWAP_CENTER]: false
+  [ExperimentName.SWAP_CENTER]: false,
+  [ExperimentName.V2_BUNDLE]: false
 };
 
 export const featureFlagsByNetworkInitialValue: FeatureFlagsByNetwork = {
