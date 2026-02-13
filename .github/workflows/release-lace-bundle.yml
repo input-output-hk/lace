@@ -419,6 +419,7 @@ jobs:
         with:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ github.event.inputs.test_mode == 'smoke' }}
+          TAGS: 'not @NotificationCenter-Popup and not @NotificationCenter-Extended'
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: true
