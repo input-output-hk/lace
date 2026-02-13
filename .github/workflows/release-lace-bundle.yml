@@ -2,6 +2,16 @@ name: Release LMP Bundle
 
 on:
   workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'E2E test execution mode'
+        required: true
+        type: choice
+        default: 'all'
+        options:
+          - 'none'
+          - 'smoke'
+          - 'all'
 
 permissions:
   pull-requests: write
@@ -375,10 +385,11 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-  smokeTests:
-    name: E2E Smoke Tests
+  e2eTests:
+    name: E2E Tests (${{ github.event.inputs.test_mode }})
     runs-on: ubuntu-22.04
     needs: bundle
+    if: ${{ github.event.inputs.test_mode != 'none' }}
     strategy:
       fail-fast: false
       matrix:
@@ -407,7 +418,7 @@ jobs:
         uses: ./.github/actions/test/e2e
         with:
           BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: true
+          SMOKE_ONLY: ${{ github.event.inputs.test_mode == 'smoke' }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: true
@@ -416,13 +427,13 @@ jobs:
   verifyTests:
     name: Verify Test Results
     runs-on: ubuntu-22.04
-    needs: smokeTests
-    if: always()
+    needs: e2eTests
+    if: always() && github.event.inputs.test_mode != 'none'
 
     steps:
-      - name: Check smoke tests result
+      - name: Check e2e tests result
         run: |
-          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+          if [[ ${{ needs.e2eTests.result }} == "success" ]]; then
             exit 0
           else
             exit 1
