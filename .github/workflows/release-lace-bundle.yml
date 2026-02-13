@@ -2,10 +2,26 @@ name: Release LMP Bundle
 
 on:
   workflow_dispatch:
+    inputs:
+      test_mode:
+        description: 'E2E test execution mode'
+        required: true
+        type: choice
+        default: 'all'
+        options:
+          - 'none'
+          - 'smoke'
+          - 'all'
 
 permissions:
   pull-requests: write
   actions: read
+
+env:
+  BROWSER: chrome
+  NETWORK: preprod
+  RUN: ${{ github.run_number }}
+  BRANCH: ${{ github.ref_name }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -375,10 +391,11 @@ jobs:
           retention-days: 90
           if-no-files-found: error
 
-  smokeTests:
-    name: E2E Smoke Tests
+  e2eTests:
+    name: E2E Tests (${{ github.event.inputs.test_mode }})
     runs-on: ubuntu-22.04
     needs: bundle
+    if: ${{ github.event.inputs.test_mode != 'none' }}
     strategy:
       fail-fast: false
       matrix:
@@ -407,7 +424,8 @@ jobs:
         uses: ./.github/actions/test/e2e
         with:
           BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: true
+          SMOKE_ONLY: ${{ github.event.inputs.test_mode == 'smoke' }}
+          TAGS: 'not @NotificationCenter-Popup and not @NotificationCenter-Extended'
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: true
@@ -416,14 +434,103 @@ jobs:
   verifyTests:
     name: Verify Test Results
     runs-on: ubuntu-22.04
-    needs: smokeTests
-    if: always()
+    needs: e2eTests
+    if: always() && github.event.inputs.test_mode != 'none'
 
     steps:
-      - name: Check smoke tests result
+      - name: Check e2e tests result
         run: |
-          if [[ ${{ needs.smokeTests.result }} == "success" ]]; then
+          if [[ ${{ needs.e2eTests.result }} == "success" ]]; then
             exit 0
           else
             exit 1
           fi
+
+  processReports:
+    name: Process E2E Test Reports
+    runs-on: ubuntu-22.04
+    needs: e2eTests
+    if: ${{ (success() || failure()) && github.event.inputs.test_mode != 'none' }}
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Create allure properties
+        working-directory: './v1/artifacts/reports/allure/results'
+        run: |
+          echo "
+          branch=${BRANCH}
+          env=${NETWORK}
+          browser=${BROWSER}
+          platform=Linux
+          test_mode=${{ github.event.inputs.test_mode }}
+          bundle=true
+          " > environment.properties
+
+      - name: Publish allure report to S3
+        uses: andrcuns/allure-publish-action@v2.10.0
+        env:
+          GITHUB_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.E2E_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
+        with:
+          storageType: s3
+          resultsGlob: './v1/artifacts/reports/allure/results'
+          bucket: lace-e2e-test-results
+          prefix: 'release-bundle/linux/${BROWSER}/${RUN}'
+          copyLatest: true
+          ignoreMissingResults: true
+          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+
+      - name: Add link to summary
+        run: |
+          echo "TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ github.event.inputs.test_mode }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.3.3
+        env:
+          SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
+          SLACK_ICON_EMOJI: ':lace:'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ github.event.inputs.test_mode }}'
+          SLACK_TITLE: 'LMP Bundle test automation results :rocket:'
+          SLACK_USERNAME: lace-qa-bot
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: Upload allure tests results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: ./v1/artifacts/reports/allure/results
+
+      - name: Upload performance metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: ./v1/artifacts/metrics
+
+  collectE2EReports:
+    name: Collect E2E Reports
+    runs-on: ubuntu-22.04
+    needs: e2eTests
+    if: ${{ (success() || failure()) && github.event.inputs.test_mode != 'none' }}
+
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./v1/artifacts
+          pattern: 'runner-artifacts-*'
+          merge-multiple: true
+
+      - name: Upload combined e2e reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: ./v1/artifacts
+          retention-days: 30
