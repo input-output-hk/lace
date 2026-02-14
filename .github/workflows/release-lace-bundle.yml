@@ -34,7 +34,7 @@ jobs:
         run: yarn build
 
       - name: Upload v1 packages artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: v1-packages
           path: |
@@ -148,7 +148,7 @@ jobs:
           WEBPACK_PUBLIC_PATH=/app/ yarn build:cs
 
       - name: Upload v1 Extension artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: v1-extension-dist
           path: v1/apps/browser-extension-wallet/dist
@@ -310,7 +310,7 @@ jobs:
           WEBPACK_PUBLIC_PATH=/js/sw/ npm run build:sw
 
       - name: Upload Midnight Extension artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: midnight-extension-dist
           path: v2/apps/midnight-extension/dist
@@ -355,7 +355,7 @@ jobs:
         run: yarn build:bundle
 
       - name: Upload Chrome Bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lace-bundle-chrome
           path: ./dist
@@ -368,7 +368,7 @@ jobs:
           mv dist/manifest.tmp.json dist/manifest.json
 
       - name: Upload MS Edge Bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lace-bundle-edge
           path: ./dist
