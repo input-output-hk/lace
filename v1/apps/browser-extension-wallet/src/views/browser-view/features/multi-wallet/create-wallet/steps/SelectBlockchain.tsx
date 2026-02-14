@@ -6,8 +6,9 @@ import { usePostHogClientContext } from '@providers/PostHogClientProvider';
 import { logger } from '@lace/common';
 import { useWalletOnboarding } from '../../walletOnboardingContext';
 import { useAnalyticsContext } from '@providers/AnalyticsProvider';
-import { useLMP } from '@hooks';
+import { useLMP, useV2 } from '@hooks';
 import { useTranslation } from 'react-i18next';
+import { isV2Bundle } from '@utils/bundleDetection';
 
 export const SelectBlockchain = (): ReactElement => {
   const { t } = useTranslation();
@@ -16,11 +17,14 @@ export const SelectBlockchain = (): ReactElement => {
   const [isBitcoinDialogOpen, setIsBitcoinDialogOpen] = useState(false);
   const bitcoinWalletsEnabled = posthog?.isFeatureFlagEnabled('bitcoin-wallets');
   const midnightWalletsEnabled = posthog?.isFeatureFlagEnabled('midnight-wallets');
+  const isV2BundleEnabled = posthog?.isFeatureFlagEnabled('v2-bundle');
   const analytics = useAnalyticsContext();
   const { postHogActions } = useWalletOnboarding();
   const { midnightWallets, startMidnightCreate } = useLMP();
+  const { switchToV2, midnightWallets: v2MidnightWallets } = useV2();
 
-  const hasMidnightWallet = midnightWallets && midnightWallets.length > 0;
+  const hasMidnightWallet =
+    (midnightWallets && midnightWallets.length > 0) || (v2MidnightWallets && v2MidnightWallets.length > 0);
 
   // eslint-disable-next-line consistent-return
   const handleNext = () => {
@@ -40,8 +44,11 @@ export const SelectBlockchain = (): ReactElement => {
   };
 
   const handleMidnightSelect = () => {
-    // Redirect to v2 immediately - v2 handles the reuse step
-    startMidnightCreate();
+    if (isV2Bundle()) {
+      switchToV2();
+    } else {
+      startMidnightCreate();
+    }
     analytics
       .sendEventToPostHog(postHogActions.create.CHOSE_BLOCKCHAIN_CLICK, { blockchain: 'Midnight' })
       .catch((error) => logger.error('Error sending analytics', error));
@@ -55,7 +62,7 @@ export const SelectBlockchain = (): ReactElement => {
         selectedBlockchain={selectedBlockchain}
         setSelectedBlockchain={setSelectedBlockchain}
         showBitcoinOption={bitcoinWalletsEnabled}
-        showMidnightOption={midnightWalletsEnabled}
+        showMidnightOption={midnightWalletsEnabled || isV2BundleEnabled}
         midnightDisabled={hasMidnightWallet}
         midnightDisabledReason={t('core.WalletSetupSelectBlockchain.midnight.disabledReason')}
         onMidnightSelect={handleMidnightSelect}

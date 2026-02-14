@@ -5,16 +5,18 @@
   "main": "index.js",
   "scripts": {
     "cleanup:dist": "rm -rf dist",
+    "build:webpack": "webpack",
+    "build:bundle": "run-s cleanup:dist build:webpack",
     "build:dev:app:lmp": "make build-dev-lmp-app",
     "build:dev:app:v1": "make build-dev-v1-app",
+    "build:dev:app:v2": "make build-dev-v2-app",
     "build:prod:app:lmp": "make build-prod-lmp-app",
     "build:prod:app:v1": "make build-prod-v1-app",
-    "build:dev:apps": "run-s build:dev:app:lmp build:dev:app:v1",
-    "build:prod:apps": "run-s build:prod:app:lmp build:prod:app:v1",
-    "build:bundle": "run-s cleanup:dist build:webpack",
-    "build:dev": "run-s build:dev:apps build:bundle",
-    "build:prod": "run-s build:prod:apps build:bundle",
-    "build:webpack": "webpack"
+    "build:prod:app:v2": "make build-prod-v2-app",
+    "build:dev": "run-s build:dev:app:lmp build:dev:app:v1 build:bundle",
+    "build:prod": "run-s build:prod:app:lmp build:prod:app:v1 build:bundle",
+    "build:dev:v2": "BUILD_TARGET=v2 run-s build:dev:app:v2 build:dev:app:v1 build:bundle",
+    "build:prod:v2": "BUILD_TARGET=v2 run-s build:prod:app:v2 build:prod:app:v1 build:bundle"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^13.0.1",

@@ -6,5 +6,5 @@ globalThis.LMP_BUNDLE = true
 
 // v1
 importScripts("/sw/background.js");
-// LMP
+// LMP and v2
 importScripts("/js/sw/sw-script.js");
