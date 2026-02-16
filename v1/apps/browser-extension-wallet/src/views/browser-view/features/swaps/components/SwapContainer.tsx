@@ -475,7 +475,8 @@ export const SwapsContainer = (): React.ReactElement => {
                     </Tooltip>
                   </Flex>
                   <Text.Body.Normal weight="$semibold">
-                    {Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())} ADA
+                    {Wallet.util.lovelacesToAdaString((estimate.totalFee + (estimate.steelswapFee ?? 0)).toString())}{' '}
+                    ADA
                   </Text.Body.Normal>
                 </Flex>
               </Flex>

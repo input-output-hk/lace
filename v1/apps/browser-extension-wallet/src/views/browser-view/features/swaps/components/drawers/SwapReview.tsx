@@ -54,7 +54,7 @@ export const SwapReviewDrawer = (): JSX.Element => {
     return {
       quoteRatio: `${Number(estimate.price.toFixed(5))} per ${tokenA.description}`,
       networkFee: Wallet.util.lovelacesToAdaString(unsignedTxFromCbor.body().fee().toString()),
-      serviceFee: Wallet.util.lovelacesToAdaString(estimate.totalFee.toString())
+      serviceFee: Wallet.util.lovelacesToAdaString((estimate.totalFee + (estimate.steelswapFee ?? 0)).toString())
     };
   }, [estimate, unsignedTxFromCbor, tokenA]);
 
