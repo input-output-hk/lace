@@ -1,6 +1,12 @@
 name: Release LMP Bundle
 
 on:
+  push:
+    branches:
+      - 'release/**'
+  schedule:
+    # Run at 03:00 UTC on working days (Monday-Friday)
+    - cron: '0 3 * * 1-5'
   workflow_dispatch:
     inputs:
       test_mode:
@@ -22,6 +28,7 @@ env:
   NETWORK: preprod
   RUN: ${{ github.run_number }}
   BRANCH: ${{ github.ref_name }}
+  TEST_MODE: ${{ github.event.inputs.test_mode || (github.event_name == 'schedule' && 'smoke') || 'all' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -392,10 +399,10 @@ jobs:
           if-no-files-found: error
 
   e2eTests:
-    name: E2E Tests (${{ github.event.inputs.test_mode }})
+    name: E2E Tests (${{ env.TEST_MODE }})
     runs-on: ubuntu-22.04
     needs: bundle
-    if: ${{ github.event.inputs.test_mode != 'none' }}
+    if: ${{ env.TEST_MODE != 'none' }}
     strategy:
       fail-fast: false
       matrix:
@@ -424,7 +431,7 @@ jobs:
         uses: ./.github/actions/test/e2e
         with:
           BATCH: ${{ matrix.batch }}
-          SMOKE_ONLY: ${{ github.event.inputs.test_mode == 'smoke' }}
+          SMOKE_ONLY: ${{ env.TEST_MODE == 'smoke' }}
           TAGS: 'not @NotificationCenter-Popup and not @NotificationCenter-Extended'
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
@@ -435,7 +442,7 @@ jobs:
     name: Verify Test Results
     runs-on: ubuntu-22.04
     needs: e2eTests
-    if: always() && github.event.inputs.test_mode != 'none'
+    if: ${{ always() && env.TEST_MODE != 'none' }}
 
     steps:
       - name: Check e2e tests result
@@ -450,7 +457,7 @@ jobs:
     name: Process E2E Test Reports
     runs-on: ubuntu-22.04
     needs: e2eTests
-    if: ${{ (success() || failure()) && github.event.inputs.test_mode != 'none' }}
+    if: ${{ (success() || failure()) && env.TEST_MODE != 'none' }}
 
     steps:
       - name: Download all artifacts
@@ -468,7 +475,7 @@ jobs:
           env=${NETWORK}
           browser=${BROWSER}
           platform=Linux
-          test_mode=${{ github.event.inputs.test_mode }}
+          test_mode=${TEST_MODE}
           bundle=true
           " > environment.properties
 
@@ -490,14 +497,14 @@ jobs:
       - name: Add link to summary
         run: |
           echo "TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ github.event.inputs.test_mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.3
         env:
           SLACK_COLOR: "${{ contains(needs.*.result, 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
-          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ github.event.inputs.test_mode }}'
+          SLACK_MESSAGE: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ env.TEST_MODE }}'
           SLACK_TITLE: 'LMP Bundle test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -518,7 +525,7 @@ jobs:
     name: Collect E2E Reports
     runs-on: ubuntu-22.04
     needs: e2eTests
-    if: ${{ (success() || failure()) && github.event.inputs.test_mode != 'none' }}
+    if: ${{ (success() || failure()) && env.TEST_MODE != 'none' }}
 
     steps:
       - name: Download all test artifacts
