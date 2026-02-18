@@ -5,7 +5,7 @@ Feature: ADA handle - popup view
     Given Wallet is synced
     And all NFT folders are removed
 
-  @LW-7332
+  @LW-7332 @pending
   Scenario: Popup view - Add a valid ADA handle to the address book
     Given I am on Address Book popup page
     And I click "Add address" button on address book page
@@ -27,7 +27,7 @@ Feature: ADA handle - popup view
     And "Handle not found" error is displayed in address book form
     And "Save address" button is disabled on "Add new address" drawer
 
-  @LW-7336 @skip(browserName='firefox') @issue=LW-12440
+  @LW-7336 @skip(browserName='firefox') @issue=LW-12440 @pending
   Scenario: Popup view - Edit an ADA handle from the address book
     Given I have 2 addresses with ADA handle in my address book in popup mode
     And I click address on the list with name "Ada Handle 1"
@@ -50,7 +50,7 @@ Feature: ADA handle - popup view
     And Contact "empty" name error and "Handle not found" address error are displayed
     And "Done" button is disabled on "Edit address" drawer
 
-  @LW-7340
+  @LW-7340 @pending
   Scenario: Popup view - Edit an ADA handle from the address book with a duplicated handle
     Given I have 2 addresses with ADA handle in my address book in popup mode
     And I click address on the list with name "Ada Handle 1"
@@ -146,7 +146,7 @@ Feature: ADA handle - popup view
     And I see ADA handle NFT with custom image on the Select NFT page
     And the corresponding custom images are displayed
 
-  @LW-5023 @LW-5029 @LW-5033
+  @LW-5023 @LW-5029 @LW-5033 @pending
   @skip(browserName="firefox")
   Scenario: Popup View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on Tokens page in popup mode
@@ -165,7 +165,7 @@ Feature: ADA handle - popup view
     And "Handle not found" error is displayed under address input in "Send" drawer
     And "Add address" button is disabled in the bundle 1 recipient's address input
 
-  @LW-8747
+  @LW-8747 @pending
   Scenario: Popup View - Send flow - Add address - Valid ADA handle
     When I click "Send" button on Tokens page in popup mode
     And I enter "$test_handle_3" in the bundle 1 recipient's address

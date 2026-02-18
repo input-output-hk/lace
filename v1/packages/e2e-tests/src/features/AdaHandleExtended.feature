@@ -5,7 +5,7 @@ Feature: ADA handle - extended view
     Given Wallet is synced
     And all NFT folders are removed
 
-  @LW-7331
+  @LW-7331 @pending
   Scenario: Extended view - Add a valid ADA handle to the address book
     Given I am on Address Book extended page
     And I click "Add address" button on address book page
@@ -27,7 +27,7 @@ Feature: ADA handle - extended view
     And "Handle not found" error is displayed in address book form
     And "Save address" button is disabled on "Add new address" drawer
 
-  @LW-7335
+  @LW-7335 @pending
   Scenario: Extended view - Edit an ADA handle from the address book
     Given I have 2 addresses with ADA handle in my address book in extended mode
     And I click address on the list with name "Ada Handle 1"
@@ -50,7 +50,7 @@ Feature: ADA handle - extended view
     And Contact "empty" name error and "Handle not found" address error are displayed
     And "Done" button is disabled on "Edit address" drawer
 
-  @LW-7339
+  @LW-7339 @pending
   Scenario: Extended view - Edit an ADA handle from the address book with a duplicated handle
     Given I have 2 addresses with ADA handle in my address book in extended mode
     And I click address on the list with name "Ada Handle 1"
@@ -149,7 +149,7 @@ Feature: ADA handle - extended view
     And I see ADA handle NFT with custom image on the Select NFT page
     And the corresponding custom images are displayed
 
-  @LW-5025 @LW-5028 @LW-5030
+  @LW-5025 @LW-5028 @LW-5030 @pending
   @skip(browserName="firefox")
   Scenario: Extended View - Send flow - Enter ADA handle and confirm validated
     When I click "Send" button on page header
@@ -168,7 +168,7 @@ Feature: ADA handle - extended view
     And "Handle not found" error is displayed under address input in "Send" drawer
     And "Add address" button is disabled in the bundle 1 recipient's address input
 
-  @LW-8746
+  @LW-8746 @pending
   Scenario: Extended View - Send flow - Add address - Valid ADA handle
     When I click "Send" button on page header
     And I enter "$test_handle_3" in the bundle 1 recipient's address

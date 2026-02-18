@@ -41,6 +41,10 @@ class ExtensionUtils {
   isMainnet(): boolean {
     return this.getNetwork().name === 'Mainnet';
   }
+
+  isBundle(): boolean {
+    return process.env.LMP_BUNDLE === 'true';
+  }
 }
 
 export default new ExtensionUtils();

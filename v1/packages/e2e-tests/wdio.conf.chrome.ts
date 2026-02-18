@@ -2,9 +2,9 @@
 /* eslint-disable unicorn/prefer-module */
 
 import { config as baseConfig } from './wdio.conf.base';
+import utils from './src/utils/utils';
 
-const DIST_LOCATION =
-  String(process.env.LMP_BUNDLE) === 'true' ? '../../../dist' : '../../apps/browser-extension-wallet/dist';
+const DIST_LOCATION = utils.isBundle() ? '../../../dist' : '../../apps/browser-extension-wallet/dist';
 
 const chromeConfig = {
   capabilities: [

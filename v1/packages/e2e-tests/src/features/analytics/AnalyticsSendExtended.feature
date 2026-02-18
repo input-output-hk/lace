@@ -14,9 +14,13 @@ Feature: Analytics - Posthog - Sending - Extended View
       | type | assetName | ticker | amount |
       | ADA  | Cardano   | tADA   | 1.1234 |
     When I click "Add bundle" button on "Send" page
-    And I enter "$test_handle_1" in the bundle 2 recipient's address
-    And Green tick icon is displayed next to ADA handle
-    And I enter a value of: 1 to the "tADA" asset in bundle 2
+    # TODO re-enable when ada handles are functional on preprod
+    # And I enter "$test_handle_1" in the bundle 2 recipient's address
+    # And Green tick icon is displayed next to ADA handle
+    # And I enter a value of: 1 to the "tADA" asset in bundle 2
+    And I fill bundle 2 with "WalletAnalyticsReceiveSimpleTransactionE2E" main address with following assets:
+      | type | assetName | ticker | amount |
+      | ADA  | Cardano   | tADA   | 1      |
     And I click "Review transaction" button on "Send" page
     Then I validate latest analytics single event "send | transaction data | review transaction | click"
     And I click "Confirm" button on "Transaction summary" page
@@ -26,7 +30,7 @@ Feature: Analytics - Posthog - Sending - Extended View
     And I validate latest analytics multiple events:
       | send \| transaction confirmation \| confirm \| click |
       | send \| all done \| view                             |
-    And I validate that the "send | all done | view" event includes property "recipient_source" with value "not on address book,address book" in posthog
+    And I validate that the "send | all done | view" event includes property "recipient_source" with value "not on address book" in posthog
     And I click "View transaction" button on submitted transaction page
     And Local storage unconfirmedTransaction contains tx with type: "internal"
     And I validate latest analytics single event "send | all done | view transaction | click"

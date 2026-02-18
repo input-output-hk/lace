@@ -93,11 +93,14 @@ class TopNavigationAssert {
     expect(await MenuHeader.menuAddNewWalletButton.getText()).to.equal(
       await t('browserView.sideMenu.links.addNewWallet')
     );
-    await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: extensionUtils.isMainnet() });
-    if (!extensionUtils.isMainnet()) {
-      expect(await MenuHeader.menuAddSharedWalletButton.getText()).to.equal(
-        await t('browserView.sideMenu.links.addSharedWallet')
-      );
+    if (!extensionUtils.isBundle()) {
+      // in bundle mode, add shared wallet is available only if beta toggle is on
+      await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: extensionUtils.isMainnet() });
+      if (!extensionUtils.isMainnet()) {
+        expect(await MenuHeader.menuAddSharedWalletButton.getText()).to.equal(
+          await t('browserView.sideMenu.links.addSharedWallet')
+        );
+      }
     }
     await MenuHeader.menuAddressBookButton.waitForDisplayed();
     expect(await MenuHeader.menuAddressBookButton.getText()).to.equal(
