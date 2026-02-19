@@ -2,7 +2,7 @@ import testContext from './testContext';
 import { StakePool, StakePoolsData } from '../data/expectedStakePoolsData';
 import { PoolData } from '../assert/transactionDetailsAssert';
 
-const stakePoolsWithMetadata = [StakePoolsData.adaocean, StakePoolsData.canadaStakes];
+const stakePoolsWithMetadata = [StakePoolsData.alfaPool, StakePoolsData.canadaStakes];
 const stakePoolsWithoutMetadata = [StakePoolsData.noMetadataPool1, StakePoolsData.noMetadataPool2];
 
 const isStakePoolInUse = async (stakePoolID: string): Promise<boolean> => {

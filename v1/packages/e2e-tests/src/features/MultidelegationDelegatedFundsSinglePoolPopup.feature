@@ -28,7 +28,7 @@ Feature: Staking Page - Delegated funds - Single pool - Popup View
   @LW-9446 @Testnet
   Scenario Outline: Popup View - Staking - Stakepool details drawer - Close drawer by clicking <close_button> button
     Given I navigate to Staking popup page
-    And I click on the stake pool title: "ADA Ocean" in currently staking component
+    And I click on the stake pool title: "Alfa Pool" in currently staking component
     And Stake pool details drawer is opened
     When I close the drawer by clicking <close_button> button
     Then Stake pool details drawer is not opened

@@ -6,20 +6,21 @@ export interface StakePool {
   owners: string[];
 }
 
-const adaocean: StakePool = {
-  name: 'ADA Ocean',
-  ticker: 'OCEAN',
-  information: 'Cloud based reliable stake pool cluster',
-  poolId: 'pool129n0d9zrla7ntfjlwhqrtmn7halem0shcjd5mz5zhfym2auyu05',
-  owners: ['stake_test1uq3j8w969529ny6m3pazdtherkq5ekgx3v8z62s9aszcuhg7mfj0q']
-};
-
 const adacapitalMainnet: StakePool = {
   name: 'ADA Capital',
   ticker: 'ADACT',
   information: 'ADA Capital - Mainnet Pool',
   poolId: 'pool1y24nj4qdkg35nvvnfawukauggsxrxuy74876cplmxsee29w5axc',
   owners: ['stake1u8a9qstrmj4rvc3k5z8fems7f0j2vztz8det2klgakhfc8ce79fma']
+};
+
+const alfaPool: StakePool = {
+  name: 'Alfa Pool',
+  ticker: 'ALFA',
+  information:
+    'Alfa Cardano Pool. Professional operated high performance Baremetal Node with cloud Relays. 99,99% uptime! Support ADA decentralization.',
+  poolId: 'pool13la5erny3srx9u4fz9tujtl2490350f89r4w4qjhk0vdjmuv78v',
+  owners: ['stake_test1ur9pv4652sv524d5qdy9q5h354er45jc3s562jp6vjykwwqyz0kzj']
 };
 
 const azureAda: StakePool = {
@@ -56,9 +57,9 @@ const noMetadataPool2: StakePool = {
   owners: ['stake_test1ur97646x6f523xx9k89d6tt0c2td3pfvczw903zu2qa8syqal0s9h']
 };
 
-export const StakePoolsData = { adaocean, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet };
+export const StakePoolsData = { alfaPool, canadaStakes, noMetadataPool1, noMetadataPool2, adacapitalMainnet };
 const StakePoolsArray: StakePool[] = [
-  adaocean,
+  alfaPool,
   canadaStakes,
   noMetadataPool1,
   noMetadataPool2,

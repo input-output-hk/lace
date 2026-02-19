@@ -56,8 +56,8 @@ Feature: Staking Page - Extended View
     And I open Overview tab
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with ticker "OCEAN"
+    And I input "Alfa Pool" into stake pool search bar
+    And I click on the stake pool with ticker "ALFA"
     And I click on "Stake all on this pool" button on stake pool details drawer
     And I click on "Next" button on staking preferences drawer
     And I click on "Next" button on staking confirmation drawer
@@ -68,17 +68,17 @@ Feature: Staking Page - Extended View
     And I am on Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with ticker "OCEAN"
-    Then I see stake pool details drawer for "ADA Ocean" stake pool
+    And I input "Alfa Pool" into stake pool search bar
+    And I click on the stake pool with ticker "ALFA"
+    Then I see stake pool details drawer for "Alfa Pool" stake pool
 
   @LW-8438 @Testnet
   Scenario: Extended View - Staking - Stakepool details drawer - Close drawer
     And I am on Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I input "ADA Ocean" into stake pool search bar
-    And I click on the stake pool with ticker "OCEAN"
+    And I input "Alfa Pool" into stake pool search bar
+    And I click on the stake pool with ticker "ALFA"
     And Stake pool details drawer is opened
     When I close the drawer by clicking close button
     Then Stake pool details drawer is not opened

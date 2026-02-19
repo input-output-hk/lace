@@ -9,7 +9,7 @@ Feature: Staking Page - Delegated funds - Single pool - Extended View
     When I navigate to Staking extended page
     And I open Browse pools tab
     And I switch to list view on "Browse pools" tab
-    And I pick "1" pools for delegation from browse pools view: "OCEAN"
+    And I pick "1" pools for delegation from browse pools view: "ALFA"
     And I click "Next" button on staking portfolio bar
     And I click "Fine by me" button on "Changing staking preferences?" modal
     And I'm on a delegation flow "<delegationStep>"
