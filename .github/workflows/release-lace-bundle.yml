@@ -399,7 +399,7 @@ jobs:
           if-no-files-found: error
 
   laceV1E2eTests:
-    name: Lace v1 E2E Tests
+    name: Lace v1 E2E Tests (${{ github.event.inputs.test_mode }})
     runs-on: ubuntu-22.04
     needs: bundle
     if: ${{ github.event.inputs.test_mode != 'none' }}
@@ -587,7 +587,7 @@ jobs:
           retention-days: 30
 
   midnightE2eTests:
-    name: Midnight E2E Tests
+    name: Midnight E2E Tests (${{ github.event.inputs.test_mode }})
     runs-on: ubuntu-22.04
     needs: bundle
     if: ${{ github.event.inputs.test_mode != 'none' }}
