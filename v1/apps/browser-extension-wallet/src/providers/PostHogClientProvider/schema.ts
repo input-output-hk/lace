@@ -47,6 +47,12 @@ export const glacierDropSchema = commonSchema.merge(
   })
 );
 
+export const midnightLaunchSchema = commonSchema.merge(
+  z.object({
+    learnMoreUrl: z.string().url()
+  })
+);
+
 export const swapCenterSchema = commonSchema.merge(
   z.object({
     defaultSlippagePercentages: z.array(z.number()),
@@ -65,6 +71,7 @@ export const featureFlagSchema = {
   common: z.preprocess(parseJsonPreprocessor, commonSchema),
   dappExplorer: z.preprocess(parseJsonPreprocessor, dappExplorerSchema),
   glacierDrop: z.preprocess(parseJsonPreprocessor, glacierDropSchema),
+  midnightLaunch: z.preprocess(parseJsonPreprocessor, midnightLaunchSchema),
   swapCenter: z.preprocess(parseJsonPreprocessor, swapCenterSchema),
   laceMessagingCenter: z.preprocess(parseJsonPreprocessor, laceMessagingCenterSchema)
 };

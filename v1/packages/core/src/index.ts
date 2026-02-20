@@ -51,3 +51,4 @@ export * from '@ui/components/Password';
 export * from '@ui/components/PasswordVerification';
 export * from '@ui/components/NamiMigrationUpdatingYourWallet';
 export * from '@ui/components/NamiMigration';
+export * from '@ui/components/MidnightLaunchBaseBanner';

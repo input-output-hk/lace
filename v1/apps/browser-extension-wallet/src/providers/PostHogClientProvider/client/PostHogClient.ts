@@ -34,6 +34,7 @@ import {
   FeatureFlags,
   RawFeatureFlagPayloads,
   FeatureFlagGlacierDropSchema,
+  FeatureFlagMidnightLaunchSchema,
   FeatureFlagSwapCenterSchema,
   FeatureFlagLaceMessagingCenterSchema
 } from '@lib/scripts/types/feature-flags';
@@ -347,6 +348,13 @@ export class PostHogClient<Action extends string = string> {
 
         if (featureFlag === ExperimentName.GLACIER_DROP) {
           payloadsByFeature[featureFlag] = featureFlagSchema.glacierDrop.parse(payload) as FeatureFlagGlacierDropSchema;
+          continue;
+        }
+
+        if (featureFlag === ExperimentName.MIDNIGHT_LAUNCH) {
+          payloadsByFeature[featureFlag] = featureFlagSchema.midnightLaunch.parse(
+            payload
+          ) as FeatureFlagMidnightLaunchSchema;
           continue;
         }
 
