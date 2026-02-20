@@ -600,7 +600,7 @@ jobs:
           storageType: s3
           resultsGlob: './v1/artifacts/reports/allure/results'
           bucket: lace-e2e-test-results
-          prefix: 'release-bundle/linux/${BROWSER}/${RUN}'
+          prefix: 'release-bundle/v1/${BROWSER}/${RUN}'
           copyLatest: true
           ignoreMissingResults: true
           baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
@@ -623,10 +623,10 @@ jobs:
       - name: Add links to summary
         run: |
           echo "V1 TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | platform: linux | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/v1/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "MIDNIGHT TEST RESULTS:" >> $GITHUB_STEP_SUMMARY
-          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/midnight/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | platform: linux | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
+          echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/midnight/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2.3.3
@@ -634,9 +634,9 @@ jobs:
           SLACK_COLOR: "${{ (needs.laceV1E2eTests.result == 'failure' || needs.midnightE2eTests.result == 'failure') && 'failure' || 'good' }}"
           SLACK_ICON_EMOJI: ':lace:'
           SLACK_MESSAGE: |
-            *V1:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/linux/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.laceV1E2eTests.result }})
+            *V1:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/v1/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.laceV1E2eTests.result }})
             *Midnight:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/midnight/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.midnightE2eTests.result }})
-            browser: ${{ env.BROWSER }} | platform: linux | test_mode: ${{ env.TEST_MODE }}
+            browser: ${{ env.BROWSER }} | test_mode: ${{ env.TEST_MODE }}
           SLACK_TITLE: 'LMP Bundle test automation results :rocket:'
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
