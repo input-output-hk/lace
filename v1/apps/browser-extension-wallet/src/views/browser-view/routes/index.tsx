@@ -264,7 +264,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     }
     return () => {
       if (isHardwareWallet) {
-        tabs.onActivated.addListener(tabsOnActivatedCallback);
+        tabs.onActivated.removeListener(tabsOnActivatedCallback);
       }
     };
   });

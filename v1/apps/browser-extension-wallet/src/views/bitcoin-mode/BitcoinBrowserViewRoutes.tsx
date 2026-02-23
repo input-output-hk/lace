@@ -215,7 +215,7 @@ export const BitcoinBrowserViewRoutes = ({
     }
     return () => {
       if (isHardwareWallet) {
-        tabs.onActivated.addListener(tabsOnActivatedCallback);
+        tabs.onActivated.removeListener(tabsOnActivatedCallback);
       }
     };
   });
