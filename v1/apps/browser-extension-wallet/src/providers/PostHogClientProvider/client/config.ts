@@ -44,7 +44,8 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.NOTIFICATIONS_CENTER]: false,
   [ExperimentName.BLOCKFROST_CREDENTIAL_QUERIES]: false,
   [ExperimentName.SWAP_CENTER]: false,
-  [ExperimentName.V2_BUNDLE]: false
+  [ExperimentName.V2_BUNDLE]: false,
+  [ExperimentName.MIDNIGHT_LAUNCH]: false
 };
 
 export const featureFlagsByNetworkInitialValue: FeatureFlagsByNetwork = {

@@ -34,6 +34,7 @@ import { MidnightEventBanner } from './MidnightEventBanner';
 import { useCurrentBlockchain } from '@src/multichain';
 import { getNetworkName } from '@src/utils/get-network-name';
 import { Wallet } from '@lace/cardano';
+import { MidnightLaunchBanner } from './MidnightLaunchBanner';
 
 const LIST_ITEM_HEIGHT = 80;
 const SEND_COIN_OUTPUT_ID = 'output1';
@@ -309,6 +310,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
   return popupView ? (
     <>
       <ContentLayout hasCredit={fullAssetList?.length > 0}>
+        <MidnightLaunchBanner />
         <MidnightEventBanner />
         {assetsPortfolio}
       </ContentLayout>
@@ -325,6 +327,7 @@ export const Assets = ({ topSection }: AssetsProps): React.ReactElement => {
           </Flex>
         }
       >
+        <MidnightLaunchBanner />
         <MidnightEventBanner />
         {topSection}
         {assetsPortfolio}

@@ -6,6 +6,7 @@ import {
   commonSchema,
   dappExplorerSchema,
   glacierDropSchema,
+  midnightLaunchSchema,
   swapCenterSchema,
   laceMessagingCenterSchema
 } from '@providers/PostHogClientProvider/schema';
@@ -26,7 +27,8 @@ export enum ExperimentName {
   NOTIFICATIONS_CENTER = 'lace-messaging-center',
   BLOCKFROST_CREDENTIAL_QUERIES = 'blockfrost-credential-queries',
   SWAP_CENTER = 'swap-center',
-  V2_BUNDLE = 'v2-bundle'
+  V2_BUNDLE = 'v2-bundle',
+  MIDNIGHT_LAUNCH = 'midnight-launch'
 }
 
 export type FeatureFlag = `${ExperimentName}`;
@@ -44,6 +46,7 @@ export type FeatureFlagDappExplorerSchema = DeepRequired<z.infer<typeof dappExpl
 export type FeatureFlagGlacierDropSchema = DeepRequired<z.infer<typeof glacierDropSchema>>;
 export type FeatureFlagSwapCenterSchema = DeepRequired<z.infer<typeof swapCenterSchema>>;
 export type FeatureFlagLaceMessagingCenterSchema = DeepRequired<z.infer<typeof laceMessagingCenterSchema>>;
+export type FeatureFlagMidnightLaunchSchema = DeepRequired<z.infer<typeof midnightLaunchSchema>>;
 
 // Using `false` as a fallback type for the payload, as it can be optional, and we (sadly) don't have
 // strict null checks enabled so `false` is a replacement for `undefined` in this case
@@ -55,6 +58,7 @@ type FeatureFlagCustomPayloads = {
   [ExperimentName.GLACIER_DROP]: FeatureFlagPayload<FeatureFlagGlacierDropSchema>;
   [ExperimentName.SWAP_CENTER]: FeatureFlagPayload<FeatureFlagSwapCenterSchema>;
   [ExperimentName.NOTIFICATIONS_CENTER]: FeatureFlagPayload<FeatureFlagLaceMessagingCenterSchema>;
+  [ExperimentName.MIDNIGHT_LAUNCH]: FeatureFlagPayload<FeatureFlagMidnightLaunchSchema>;
 };
 
 export type FeatureFlagPayloads = {
