@@ -45,7 +45,6 @@ import { pollController$ } from '../session/poll-controller';
 import { Language } from '@lace/translation';
 
 export const requestMessage$ = new Subject<Message>();
-export const backendFailures$ = new BehaviorSubject(0);
 
 const initializeCoinPrices = (wallet$: Observable<ActiveWallet>): CoinPrices => ({
   adaPrices$: new BehaviorSubject({
@@ -368,7 +367,6 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
           await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
         },
         getAppVersion,
-        backendFailures$,
         unhandledError$
       }),
       baseChannel: BaseChannels.BACKGROUND_ACTIONS,

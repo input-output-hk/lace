@@ -41,7 +41,6 @@ import { useWalletState } from '@hooks/useWalletState';
 import { isKeyHashAddress } from '@cardano-sdk/wallet';
 import { BackgroundStorage } from '@lib/scripts/types';
 import { getWalletAccountsQtyString } from '@src/utils/get-wallet-count-string';
-import { useNetworkError } from '@hooks/useNetworkError';
 import { walletRoutePaths } from '@routes';
 import { StakingErrorType } from '@views/browser/features/staking/types';
 import { useTxHistoryLoader } from '@hooks/useTxHistoryLoader';
@@ -265,7 +264,6 @@ export const NamiView = withDappContext((): React.ReactElement => {
           withSignTxConfirmation,
           sendEventToPostHog,
           handleResolver,
-          useNetworkError,
           networkConnection: walletUI.networkConnection
         }}
       >

@@ -70,10 +70,6 @@ interface ChangeThemeMessage {
   type: MessageTypes.CHANGE_THEME;
   data: ChangeThemeData;
 }
-interface HTTPConnectionMessage {
-  type: MessageTypes.HTTP_CONNECTION;
-  data: HTTPConnectionStatus;
-}
 interface WSConnectionMessage {
   type: MessageTypes.WS_CONNECTION;
   data: WSConnectionStatus;
@@ -98,7 +94,6 @@ interface ChangeLanguageMessage {
 }
 export type Message =
   | ChangeThemeMessage
-  | HTTPConnectionMessage
   | WSConnectionMessage
   | OpenBrowserMessage
   | ChangeMode
@@ -124,7 +119,6 @@ export type BackgroundService = {
   clearBackgroundStorage: typeof clearBackgroundStorage;
   resetStorage: () => Promise<void>;
   getAppVersion: () => Promise<string>;
-  backendFailures$: BehaviorSubject<number>;
   unhandledError$: Observable<UnhandledError>;
 };
 

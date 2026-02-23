@@ -1,14 +1,12 @@
 /* eslint-disable react/no-multi-comp */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import classnames from 'classnames';
-import debounce from 'lodash/debounce';
 import { toast } from '@lace/common';
 import { useBackgroundServiceAPIContext } from '@providers/BackgroundServiceAPI';
 import { useTheme } from '@providers/ThemeProvider';
 import { BrowserViewSections, ChangeThemeData, Message, MessageTypes } from '@lib/scripts/types';
 import { DrawerContent, DrawerUIContainer } from '../Drawer';
-import { useNetworkError } from '@hooks/useNetworkError';
 import { LeftSidePanel } from '../LeftSidePanel';
 import styles from './Layout.module.scss';
 import { PinExtension } from '@views/browser/features/wallet-setup/components/PinExtension';
@@ -26,7 +24,6 @@ interface LayoutProps {
   drawerUIDefaultContent?: DrawerContent;
 }
 
-const toastThrottle = 500;
 const PIN_EXTENSION_TIMEOUT = 5000;
 
 export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: LayoutProps): React.ReactElement => {
@@ -108,14 +105,6 @@ export const Layout = ({ children, drawerUIDefaultContent, noAside = false }: La
     // eslint-disable-next-line consistent-return
     return () => clearTimeout(timer);
   }, [setShowWalletConflictError, showWalletConflictError, t]);
-
-  const debouncedToast = useMemo(() => debounce(toast.notify, toastThrottle), []);
-  const showNetworkError = useCallback(
-    () => debouncedToast({ text: t('general.errors.networkError') }),
-    [debouncedToast, t]
-  );
-
-  useNetworkError(showNetworkError);
 
   return (
     <div

@@ -2,7 +2,11 @@ import React from 'react';
 import type { Preview } from '@storybook/react';
 import '../src/ui/app/components/styles.css';
 import 'focus-visible/dist/focus-visible';
-import { ThemeColorScheme, ThemeProvider, colorSchemaDecorator } from '@input-output-hk/lace-ui-toolkit';
+import {
+  ThemeColorScheme,
+  ThemeProvider,
+  colorSchemaDecorator,
+} from '@input-output-hk/lace-ui-toolkit';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { theme } from '../src/ui/theme';
@@ -113,7 +117,6 @@ export const decorators = [
         sendEventToPostHog={noop}
         handleResolver={noop}
         withSignTxConfirmation={noop}
-        useNetworkError={noop}
         networkConnection={NetworkConnectionStates.CONNNECTED}
       >
         <ChakraProvider
@@ -140,7 +143,7 @@ export const decorators = [
         <Story />
       </ThemeProvider>
     );
-  }
+  },
 ];
 
 export default preview;

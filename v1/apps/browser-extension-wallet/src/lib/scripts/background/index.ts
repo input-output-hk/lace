@@ -1,5 +1,4 @@
 import './cip30';
-import './onError';
 import './onUpdate';
 import './services';
 import './services/expose';

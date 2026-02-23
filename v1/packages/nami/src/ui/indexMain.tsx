@@ -72,7 +72,6 @@ const App = () => {
     cardanoCoin,
     openHWFlow,
     walletType,
-    useNetworkError,
   } = useCommonOutsideHandles();
 
   const { currency, setCurrency } = useFiatCurrency(
@@ -176,8 +175,6 @@ const App = () => {
       }),
     [debouncedToast],
   );
-
-  useNetworkError(showNetworkError);
 
   if (isLoading) {
     return (

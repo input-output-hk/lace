@@ -20,7 +20,6 @@ import { Milliseconds } from '@cardano-sdk/core';
 import { Wallet } from '@lace/cardano';
 import { createWalletAssetProvider } from '@cardano-sdk/wallet';
 import { tryGetAssetInfos } from './utils';
-import { useNetworkError } from '@hooks/useNetworkError';
 import { useSecrets } from '@lace/core';
 import { getBackgroundStorage, setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useTxWitnessRequest } from '@providers/TxWitnessRequestProvider';
@@ -228,7 +227,6 @@ export const NamiDappConnectorView = withDappContext((): React.ReactElement => {
           withSignTxConfirmation,
           sendEventToPostHog,
           handleResolver,
-          useNetworkError,
           networkConnection: walletUI.networkConnection
         }}
       >

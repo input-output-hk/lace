@@ -16,12 +16,12 @@ interface NetworkPillProp {
 export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp): ReactElement => {
   const { environmentName } = useWalletStore();
   const { t } = useTranslation();
-  const { isOnline, isBackendFailing } = useNetwork();
+  const { isOnline } = useNetwork();
   const { blockchain } = useCurrentBlockchain();
 
   // eslint-disable-next-line complexity
   return useMemo(() => {
-    if (isOnline && !isBackendFailing && blockchain === Blockchain.Bitcoin && isBitcoinNetworkSwitchingDisabled()) {
+    if (isOnline && blockchain === Blockchain.Bitcoin && isBitcoinNetworkSwitchingDisabled()) {
       return (
         <div
           className={classnames(styles.networkPill, {
@@ -41,7 +41,7 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
       );
     }
 
-    if (isOnline && !isBackendFailing && environmentName !== 'Mainnet') {
+    if (isOnline && environmentName !== 'Mainnet') {
       return (
         <div
           className={classnames(styles.networkPill, {
@@ -78,24 +78,7 @@ export const NetworkPill = ({ isExpandable, isPopup = false }: NetworkPillProp):
         </Tooltip>
       );
     }
-    if (isBackendFailing) {
-      return (
-        <Tooltip title={t('general.networks.connectionUnavailable.error')} placement="rightBottom">
-          <div
-            className={classnames(styles.offlinePill, {
-              [styles.expandablePill]: isExpandable,
-              [styles.multiWallet]: process.env.USE_MULTI_WALLET === 'true' && isPopup
-            })}
-            data-testid="backend-pill"
-          >
-            <div className={styles.offlinePillText}>
-              <div className={styles.dot}>&#x2022;</div>
-              <div data-testid="network-poor-indicator">{t('general.networks.connectionUnavailable.title')}</div>
-            </div>
-          </div>
-        </Tooltip>
-      );
-    }
+
     return <></>;
-  }, [isOnline, isBackendFailing, environmentName, t, isExpandable, blockchain]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOnline, environmentName, t, isExpandable, blockchain]); // eslint-disable-line react-hooks/exhaustive-deps
 };
