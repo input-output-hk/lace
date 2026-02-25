@@ -167,10 +167,6 @@ When(/^I click on right side panel icon$/, async () => {
   await MenuHeader.clickRightSidePanelButton();
 });
 
-When(/^I click on "Nami mode" switch$/, async () => {
-  await MenuHeader.activateNamiMode();
-});
-
 Then(/^"Add shared wallet" (is|is not) displayed in menu$/, async (state: 'is' | 'is not') => {
   await topNavigationAssert.assertSeeAddSharedWalletOption(state === 'is');
 });

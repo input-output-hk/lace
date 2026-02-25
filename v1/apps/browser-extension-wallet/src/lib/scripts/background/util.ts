@@ -1,5 +1,5 @@
 /* eslint-disable no-magic-numbers, new-cap */
-import { POPUP_WINDOW, POPUP_WINDOW_NAMI, POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { POPUP_WINDOW } from '@src/utils/constants';
 import { runtime, Tabs, tabs, Windows, windows } from 'webextension-polyfill';
 import { Wallet } from '@lace/cardano';
 import { BackgroundStorage } from '../types';
@@ -83,8 +83,7 @@ export const launchCip30Popup = async (url: string): Promise<Tabs.Tab> => {
     }),
     'Failed to launch cip30 popup'
   );
-  const { namiMigration } = await getBackgroundStorage();
-  const windowSize = namiMigration?.mode === 'nami' ? POPUP_WINDOW_NAMI : POPUP_WINDOW;
+  const windowSize = POPUP_WINDOW;
 
   const newWindow = await createWindow(
     tab.id,
@@ -165,14 +164,11 @@ export const getActiveWallet = async ({
   return { wallet, account };
 };
 
-export const closeAllLaceOrNamiTabs = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
-  const openTabs = [
-    ...(await catchAndBrandExtensionApiError(tabs.query({ title: 'Lace' }), 'Failed to query lace tabs for closing')),
-    ...(await catchAndBrandExtensionApiError(
-      tabs.query({ title: POPUP_WINDOW_NAMI_TITLE }),
-      'Failed to query nami mode tabs for closing'
-    ))
-  ];
+export const closeAllLaceTabs = async (shouldRemoveTab?: (url: string) => boolean): Promise<void> => {
+  const openTabs = await catchAndBrandExtensionApiError(
+    tabs.query({ title: 'Lace' }),
+    'Failed to query lace tabs for closing'
+  );
   // Close all previously opened lace dapp connector windows
   for (const tab of openTabs) {
     if (!shouldRemoveTab || shouldRemoveTab(tab.url)) {
@@ -182,7 +178,7 @@ export const closeAllLaceOrNamiTabs = async (shouldRemoveTab?: (url: string) => 
 };
 
 export const ensureUiIsOpenAndLoaded = async (url?: string): Promise<Tabs.Tab> => {
-  await closeAllLaceOrNamiTabs((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
+  await closeAllLaceTabs((tabUrl) => DAPP_CONNECTOR_REGEX.test(tabUrl));
 
   const tab = await launchCip30Popup(url);
 

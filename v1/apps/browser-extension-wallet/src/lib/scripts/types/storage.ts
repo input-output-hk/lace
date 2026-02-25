@@ -49,10 +49,8 @@ export interface BackgroundStorage {
   customSubmitTxUrl?: string;
   namiMigration?: {
     completed: boolean;
-    mode: 'lace' | 'nami';
   };
   activeBlockchain?: 'cardano' | 'bitcoin';
-  dappInjectCompatibilityMode?: boolean;
   optedInBeta?: boolean;
   logLevel?: LogLevelString;
   languageChoice?: Language;

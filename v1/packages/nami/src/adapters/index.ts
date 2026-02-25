@@ -1,1 +1,0 @@
-export { getBalance } from './balance';

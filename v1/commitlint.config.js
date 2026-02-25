@@ -32,7 +32,6 @@ module.exports = {
         'extension',
         'staking',
         'ui',
-        'nami',
         'translation',
         // SRE
         'monitoring',

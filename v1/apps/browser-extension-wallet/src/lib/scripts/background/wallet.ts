@@ -26,7 +26,6 @@ import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address
 import { isBackgroundProcess } from '@cardano-sdk/util';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getMagicForChain } from '@utils/chain';
-import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { requestMessage$ } from './services/utilityServices';
@@ -495,8 +494,6 @@ walletManager
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
-
-cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;
 export const bitcoinWallet$ = bitcoinWalletManager.activeWallet$;

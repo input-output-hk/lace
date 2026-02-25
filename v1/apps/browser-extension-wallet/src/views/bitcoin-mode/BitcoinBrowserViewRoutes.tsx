@@ -24,17 +24,10 @@ import { MainLoader } from '@components/MainLoader';
 import { useAppInit, useLocalStorage, useWalletManager } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
-import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
-import LaceLogoMark from '@src/assets/branding/lace-logo-mark.svg';
-import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
-import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
-import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { Trans, useTranslation } from 'react-i18next';
-import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { useAnalyticsContext } from '@providers';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/ErrorBoundary';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
-import { logger } from '@lace/common';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
 import { SettingsLayout } from '../../features/settings';
@@ -79,13 +72,10 @@ const { CHAIN } = config();
  * @param {number} currentTabId - Tab not to discard (freeze)
  */
 const discardStaleTabs = async (currentTabId: number) => {
-  const allTabs = [
-    ...(await catchAndBrandExtensionApiError(tabs.query({ title: 'Lace' }), 'Failed to query for stale lace tabs')),
-    ...(await catchAndBrandExtensionApiError(
-      tabs.query({ title: POPUP_WINDOW_NAMI_TITLE }),
-      'Failed to query for stale nami mode tabs'
-    ))
-  ];
+  const allTabs = await catchAndBrandExtensionApiError(
+    tabs.query({ title: 'Lace' }),
+    'Failed to query for stale lace tabs'
+  );
   const isLaceOrigin = allTabs.find((tab) => tab.id === currentTabId);
   if (!isLaceOrigin) return;
   allTabs.forEach((tab) => {
@@ -117,7 +107,6 @@ export const BitcoinBrowserViewRoutes = ({
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
-  const { t } = useTranslation();
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
   const { getActiveWalletId } = useWalletManager();
@@ -127,29 +116,6 @@ export const BitcoinBrowserViewRoutes = ({
     if (route.path === routes.staking && isSharedWallet) return false;
     return true;
   });
-
-  const backgroundServices = useBackgroundServiceAPIContext();
-  const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
-
-  useEffect(() => {
-    getBackgroundStorage()
-      .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(logger.error);
-  }, []);
-
-  useEffect(() => {
-    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
-      if (type === MessageTypes.CHANGE_MODE && data.mode !== namiMigration?.mode) {
-        const migration: BackgroundStorage['namiMigration'] = {
-          ...namiMigration,
-          mode: data.mode
-        };
-
-        setNamiMigration(migration);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [backgroundServices, namiMigration]);
 
   useEffect(() => {
     const isCreatingWallet = [routes.newBitcoinWallet.root, routes.newWallet.root, routes.sharedWallet.root].some(
@@ -235,36 +201,16 @@ export const BitcoinBrowserViewRoutes = ({
     [posthogClientInitialized, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage, walletDisplayInfo]
   );
 
-  const isInNamiMode = useMemo(
-    () => namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet,
-    [cardanoWallet, isLoadingWalletInfo, namiMigration?.mode]
-  );
-
   const fatalError = useFatalError();
 
   useEffect(() => {
-    if (isLoaded || isOnboarding || isInNamiMode || fatalError) {
+    if (isLoaded || isOnboarding || fatalError) {
       removePreloaderIfExists();
     }
-  }, [isLoaded, isOnboarding, isInNamiMode, fatalError]);
+  }, [isLoaded, isOnboarding, fatalError]);
 
   if (fatalError) {
     return <Crash />;
-  }
-
-  if (isInNamiMode) {
-    return (
-      <Lock
-        message={t('general.lock.namiMode.message')}
-        description={
-          <Trans
-            i18nKey="general.lock.namiMode.description"
-            components={[<img key="lace-logo" src={LaceLogoMark} width="22" />]}
-          />
-        }
-        icon={warningIcon}
-      />
-    );
   }
 
   if (isWalletLocked()) {

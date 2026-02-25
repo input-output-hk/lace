@@ -44,12 +44,6 @@ export interface WalletMetadata {
 
 export interface AccountMetadata {
   name: string;
-  namiMode?: {
-    avatar: string;
-    balance?: Partial<Record<Wallet.ChainName, string>>;
-    address?: Partial<Record<Wallet.ChainName, string>>;
-    recentSendToAddress?: Partial<Record<Wallet.ChainName, string>>;
-  };
   bitcoin?: {
     extendedAccountPublicKeys: {
       mainnet: {

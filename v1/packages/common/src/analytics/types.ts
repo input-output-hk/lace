@@ -226,7 +226,6 @@ export enum PostHogAction {
   SettingsPaperWalletPasswordNextClick = 'settings | paper wallet - generate pdf | password | click',
   SettingsPaperWalletDownloadClick = 'settings | paper wallet - generate pdf | download | click',
   SettingsPaperWalletPrintClick = 'settings | paper wallet - generate pdf | print | click',
-  SettingsSwitchToNamiClick = 'nami mode | switch to nami mode | click',
   SettingsDebuggingOnClick = 'settings | debugging | on | click',
   SettingsDebuggingOffClick = 'settings | debugging | off | click',
   // Recieve section

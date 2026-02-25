@@ -97,7 +97,6 @@ export const config: WebdriverIO.Config = {
     ],
     batch14: [
       './src/features/Transactions*.feature',
-      './src/features/NamiMode*.feature',
       './src/features/VotingCenter*.feature',
       './src/features/WalletRenamingExtended.feature',
       './src/features/WalletRenamingPopup.feature',

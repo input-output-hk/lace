@@ -729,7 +729,6 @@
   "core.namiMigration.customize.title": "Mode selection",
   "core.namiMigration.customize.description": "Choose your wallet experience: Lace or Nami",
   "core.namiMigration.customize.lace": "By choosing Lace, you get access to a wealth of Web3 features, such as multi-delegation, multi-wallet support, enhanced transaction details, and DeFi services, allowing you to explore and enjoy new digital experiences",
-  "core.namiMigration.customize.nami": "By choosing Nami, you can continue using your familiar wallet, now powered by Lace infrastructure",
   "core.namiMigration.customize.back": "Back",
   "core.namiMigration.customize.done": "Done",
   "core.namiMigration.customize.next": "Next",
