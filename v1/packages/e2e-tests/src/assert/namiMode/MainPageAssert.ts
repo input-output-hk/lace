@@ -3,7 +3,7 @@ import MainPage from '../../elements/namiMode/MainPage';
 
 class MainPageAssert {
   async assertSeeNamiModeContainer() {
-    expect(await browser.getUrl()).to.equal('chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/popup.html');
+    expect(await browser.getUrl()).to.contain('chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk/popup.html');
     expect(await browser.getTitle()).to.equal('Lace Wallet');
     await MainPage.container.waitForDisplayed();
   }

@@ -3,6 +3,8 @@ Feature: Shared wallet - onboarding
 
   Background:
     Given Lace is ready for test
+    And I open settings from header menu
+    And I click on "Beta Program" switch
 
   @LW-11814
   Scenario Outline: Shared wallets - Add shared wallets option <is_displayed> when using <network> network

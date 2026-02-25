@@ -19,7 +19,10 @@ export const switchNetworkWithoutClosingDrawer = async (network: NetworkType): P
   if (!(await NetworkDrawer.isNetworkSelected(network))) {
     await NetworkDrawer.clickOnNetworkRadioButton(network);
     await browser.waitUntil(
-      async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network
+      async () => JSON.parse(await localStorageManager.getItem('appSettings')).chainName === network,
+      {
+        timeoutMsg: `Failed to switch network: expected localStorage appSettings.chainName to be "${network}"`
+      }
     );
   }
 };
