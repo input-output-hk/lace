@@ -1,4 +1,5 @@
 import { browser } from '@wdio/globals';
+import { Logger } from '../support/logger';
 
 export const switchToLastWindow = async (): Promise<void> => {
   await browser.pause(1000);
@@ -62,9 +63,31 @@ export const switchToWindowWithUrl = async (urlPattern: string, isPartialMatch =
   await browser.switchWindow(urlPattern);
 };
 
+export const printAllWindowHandles = async (): Promise<void> => {
+  const handles = await browser.getWindowHandles();
+  Logger.log('All window handles:');
+  for (const handle of handles) {
+    try {
+      await browser.switchToWindow(handle);
+      const title = await browser.getTitle();
+      const url = await browser.getUrl();
+      Logger.log(`- handle=${handle} title="${title}" url="${url}"`);
+    } catch (error) {
+      Logger.log(`- handle=${handle} (failed to read title/url: ${String(error)})`);
+    }
+  }
+};
+
 export const switchToWindowWithLace = async (delay = 1000): Promise<void> => {
   await browser.pause(delay);
-  await browser.switchWindow(/^Lace Wallet$/);
+
+  try {
+    await browser.switchWindow(/^Lace Wallet$/);
+  } catch (error) {
+    Logger.log('Failed to switch to "Lace Wallet" window');
+    await printAllWindowHandles();
+    throw error;
+  }
 };
 
 export const switchToWindowWithTitle = async (url: string): Promise<boolean> => {

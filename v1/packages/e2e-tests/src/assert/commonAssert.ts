@@ -16,8 +16,23 @@ class CommonAssert {
     expect(clipboardContent).to.contain(text);
   }
 
-  async assertSeeTabWithUrl(urlPart: string) {
-    await switchToWindowWithUrl(urlPart, true);
+  async assertSeeTabWithUrl(urlPart: string, timeout = 5000) {
+    await browser.waitUntil(
+      async () => {
+        try {
+          await switchToWindowWithUrl(urlPart, true);
+        } catch {
+          // ignore and keep waiting
+        }
+        return (await browser.getUrl()).includes(urlPart);
+      },
+      {
+        timeout,
+        interval: 250,
+        timeoutMsg: `Failed to see a tab with url including "${urlPart}" within ${timeout}ms`
+      }
+    );
+
     expect(await browser.getUrl()).to.contain(urlPart);
   }
 
