@@ -7,7 +7,7 @@ import { runtime, Tabs, tabs } from 'webextension-polyfill';
 import { cip30, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
-import { map, Observable, of } from 'rxjs';
+import { filter, map, Observable, of } from 'rxjs';
 import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
 import pDebounce from 'p-debounce';
 import { dappInfo$ } from './requestAccess';
@@ -70,7 +70,10 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 };
 
 const walletApi = walletCip30.createWalletApi(
-  wallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
+  wallet$.pipe(
+    map((activeWallet) => activeWallet?.observableWallet),
+    filter(Boolean)
+  ),
   confirmationCallback,
   { logger }
 );
