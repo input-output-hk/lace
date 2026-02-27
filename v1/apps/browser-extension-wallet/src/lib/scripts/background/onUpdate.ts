@@ -6,7 +6,7 @@ import { logger } from '@lace/common';
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
-  if (details.previousVersion === '1.85.1') {
+  if (details.previousVersion === '1.85.0' && details.reason === 'update') {
     chrome.storage.local.remove('featureFlags');
     chrome.runtime.reload();
   }
