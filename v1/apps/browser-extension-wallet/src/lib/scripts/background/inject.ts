@@ -31,9 +31,8 @@ export const initializeInjectedScript = async ({ logger }: cip30.InitializeInjec
     runtime: injectedRuntime
   };
 
-  const authenticator = consumeRemoteAuthenticatorApi(cip30WalletProperties, dependencies);
-  const walletApi = consumeRemoteWalletApi(cip30WalletProperties, dependencies);
-
+  const authenticator = consumeRemoteAuthenticatorApi({ ...cip30WalletProperties, lazy: true }, dependencies);
+  const walletApi = consumeRemoteWalletApi({ ...cip30WalletProperties, lazy: true }, dependencies);
   injectInLaceNs(walletApi, authenticator, logger);
 };
 

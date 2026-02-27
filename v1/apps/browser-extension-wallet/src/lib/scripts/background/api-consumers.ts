@@ -26,10 +26,12 @@ export const RemoteAuthenticatorMethodNames: Array<RemoteAuthenticatorMethod> = 
 
 export interface RemoteAuthenticatorApiProps {
   walletName: string;
+  lazy?: boolean;
 }
 
 export interface ConsumeRemoteWalletApiProps {
   walletName: string;
+  lazy?: boolean;
 }
 
 const authenticatorChannel = (walletName: string) => `authenticator-${walletName}`;
@@ -39,12 +41,13 @@ const cip30errorTypes = [ApiError, DataSignError, PaginateError, TxSendError, Tx
 
 // copied from sdk
 export const consumeRemoteAuthenticatorApi = (
-  { walletName }: RemoteAuthenticatorApiProps,
+  { walletName, lazy }: RemoteAuthenticatorApiProps,
   dependencies: MessengerDependencies
 ): RemoteAuthenticator & Shutdown =>
   consumeRemoteApi<RemoteAuthenticator>(
     {
       baseChannel: authenticatorChannel(walletName),
+      lazy,
       properties: fromPairs(
         RemoteAuthenticatorMethodNames.map((prop) => [prop, RemoteApiPropertyType.MethodReturningPromise])
       ) as RemoteApiProperties<RemoteAuthenticator>
@@ -54,12 +57,13 @@ export const consumeRemoteAuthenticatorApi = (
 
 // copied from sdk
 export const consumeRemoteWalletApi = (
-  { walletName }: ConsumeRemoteWalletApiProps,
+  { walletName, lazy }: ConsumeRemoteWalletApiProps,
   dependencies: MessengerDependencies
 ): WalletApi =>
   consumeRemoteApi(
     {
       baseChannel: walletApiChannel(walletName),
+      lazy,
       errorTypes: cip30errorTypes,
       properties: fromPairs(
         WalletApiMethodNames.map((prop) => [prop, RemoteApiPropertyType.MethodReturningPromise])

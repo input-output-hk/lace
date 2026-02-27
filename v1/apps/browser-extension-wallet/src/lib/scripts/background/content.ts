@@ -10,8 +10,8 @@ if (process.env.USE_DAPP_CONNECTOR === 'true') {
 
   const initializeContentScript = (walletName: string, dependencies: MessengerDependencies) => {
     const apis = [
-      consumeRemoteAuthenticatorApi({ walletName }, dependencies),
-      consumeRemoteWalletApi({ walletName }, dependencies)
+      consumeRemoteAuthenticatorApi({ walletName, lazy: true }, dependencies),
+      consumeRemoteWalletApi({ walletName, lazy: true }, dependencies)
     ];
 
     return runContentScriptMessageProxy(apis, dependencies.logger);
