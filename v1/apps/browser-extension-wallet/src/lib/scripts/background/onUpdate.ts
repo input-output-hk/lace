@@ -6,6 +6,11 @@ import { logger } from '@lace/common';
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
+  if (details.previousVersion === '1.85.1') {
+    chrome.storage.local.remove('featureFlags');
+    chrome.runtime.reload();
+  }
+
   logger.debug('[onUpdate] checking migration state:', details.reason, details.previousVersion);
   if (details.reason === 'update' || details.reason === 'install') {
     // Initialize migration state with not-loaded
