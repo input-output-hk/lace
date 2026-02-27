@@ -6,6 +6,14 @@ import { logger } from '@lace/common';
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
+  if (details.previousVersion === '1.35.1' && details.reason === 'update') {
+    const hasFeatureFlagsToDelete = await storage.local.get('featureFlags');
+    if (hasFeatureFlagsToDelete) {
+      await storage.local.remove('featureFlags');
+      runtime.reload();
+    }
+  }
+
   logger.debug('[onUpdate] checking migration state:', details.reason, details.previousVersion);
   if (details.reason === 'update' || details.reason === 'install') {
     // Initialize migration state with not-loaded
