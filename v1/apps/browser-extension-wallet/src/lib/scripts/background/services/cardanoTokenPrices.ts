@@ -23,7 +23,7 @@ import {
   defer
 } from 'rxjs';
 import { storage } from 'webextension-polyfill';
-import { TokenPrices, Status, MaybeTokenPrice } from '../../types';
+import { TokenPrice, TokenPrices, Status, MaybeTokenPrice } from '../../types';
 import { Cardano, Milliseconds } from '@cardano-sdk/core';
 import { config } from '@src/config';
 import Bottleneck from 'bottleneck';
@@ -95,6 +95,47 @@ const tryStorePrices = (priceMap: PriceMap): void => {
     .catch((error) => console.warn('Error setting cached cardano token prices', error));
 };
 
+/** Shape of a pool entry from the GeckoTerminal /tokens/{id}/pools response. */
+interface GeckoTerminalPool {
+  attributes?: {
+    /* eslint-disable camelcase */
+    base_token_price_native_currency?: string;
+    quote_token_price_native_currency?: string;
+    price_change_percentage?: { h24?: string };
+    /* eslint-enable camelcase */
+  };
+  relationships?: {
+    /* eslint-disable camelcase */
+    base_token?: { data?: { id?: string } };
+    /* eslint-enable camelcase */
+  };
+}
+
+/**
+ * Extracts the token price from a GeckoTerminal pool response.
+ * The pool may have the queried token as either the base or quote token,
+ * so we check the relationship to pick the correct price field.
+ */
+export const extractTokenPriceFromPool = (
+  pool: GeckoTerminalPool | undefined | null,
+  assetId: Cardano.AssetId
+): TokenPrice | undefined => {
+  const data = pool?.attributes;
+  // eslint-disable-next-line camelcase
+  const baseTokenId = data && pool?.relationships?.base_token?.data?.id;
+  const isBaseToken = typeof baseTokenId === 'string' && baseTokenId.includes(assetId);
+
+  const rawPrice = isBaseToken ? data?.base_token_price_native_currency : data?.quote_token_price_native_currency;
+  const h24Change = data?.price_change_percentage?.h24;
+
+  return typeof rawPrice === 'string' && typeof h24Change === 'string'
+    ? {
+        priceInAda: Number.parseFloat(rawPrice),
+        priceVariationPercentage24h: Number.parseFloat(h24Change)
+      }
+    : undefined;
+};
+
 const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
   // TODO: replace with `fromFetch` (rxjs/fetch)
   // Using defer to execute the fetch every time the observable is subscribed to, allowing repeatWhen to function correctly.
@@ -113,28 +154,11 @@ const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
             return [assetId, { lastFetchTime: Date.now() }];
           }
           const body = await response.json();
-          const data = body.data?.[0]?.attributes;
+          const pool = body.data?.[0];
+          const price = extractTokenPriceFromPool(pool, assetId);
 
-          // If not the expected data, return no price
-          if (typeof data === 'object') {
-            const {
-              base_token_price_native_currency: priceInAda,
-              price_change_percentage: { h24: h24Change }
-            } = data;
-
-            // If not the expected data, return no price
-            if (typeof priceInAda === 'string' && typeof h24Change === 'string') {
-              return [
-                assetId,
-                {
-                  lastFetchTime: Date.now(),
-                  price: {
-                    priceInAda: Number.parseFloat(priceInAda),
-                    priceVariationPercentage24h: Number.parseFloat(h24Change)
-                  }
-                }
-              ];
-            }
+          if (price) {
+            return [assetId, { lastFetchTime: Date.now(), price }];
           }
         } catch (error) {
           console.warn('Error fetching cardano token price', assetId, error);
