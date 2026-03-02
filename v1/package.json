@@ -47,13 +47,9 @@
     "watch-deps": "EXCLUDE_APP=true yarn watch"
   },
   "lint-staged": {
-    "*(apps/**/*.{js,ts,tsx}|packages/!(translation|nami)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
+    "*(apps/**/*.{js,ts,tsx}|packages/!(translation)/**/*.{js,ts,tsx}|stories/**/*.{js,ts,tsx})": [
       "eslint --cache --cache-location .cache/eslintcache --cache-strategy metadata --fix --ignore-path ./.eslintignore",
       "prettier --write"
-    ],
-    "*(packages/nami/**/*.{js,ts,tsx})": [
-      "yarn workspace @lace/nami lint --fix",
-      "yarn workspace @lace/nami format"
     ],
     "*(packages/translation/**/*.{js,ts,tsx})": [
       "yarn workspace @lace/translation lint --fix",
@@ -80,6 +76,7 @@
     "got": "^11.8.5",
     "http-cache-semantics": "^4.1.1",
     "json-schema": "^0.4.0",
+    "libsodium-sumo": "0.7.11",
     "minimist": "^1.2.6",
     "moment": "^2.29.4",
     "nan": "^2.17.0",

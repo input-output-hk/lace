@@ -73,11 +73,7 @@ const firefoxConfig = {
       './src/features/SettingsPagePopup*.feature',
       './src/features/WalletAddressPageExtended.feature'
     ],
-    batch14: [
-      './src/features/Transactions*.feature',
-      './src/features/NamiMode*.feature',
-      './src/features/VotingCenter*.feature'
-    ],
+    batch14: ['./src/features/Transactions*.feature', './src/features/VotingCenter*.feature'],
     batch15: ['./src/features/NFTsFolders*.feature', './src/features/SignMessage.feature'],
     batch16: ['./src/features/SendTransactionBundlesExtended*.feature']
   },

@@ -29,18 +29,12 @@ import { useAppInit, useLocalStorage } from '@hooks';
 import { SharedWallet } from '@views/browser/features/shared-wallet';
 import { MultiAddressBalanceVisibleModal } from '@views/browser/features/multi-address';
 import { SignMessageDrawer } from '@views/browser/features/sign-message/SignMessageDrawer';
-import warningIcon from '@src/assets/icons/browser-view/warning-icon.svg';
-import LaceLogoMark from '@src/assets/branding/lace-logo-mark.svg';
-import { useAnalyticsContext, useBackgroundServiceAPIContext } from '@providers';
-import { BackgroundStorage, Message, MessageTypes } from '@lib/scripts/types';
-import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { Trans, useTranslation } from 'react-i18next';
-import { POPUP_WINDOW_NAMI_TITLE } from '@src/utils/constants';
+import { useAnalyticsContext } from '@providers';
 import { DAppExplorer } from '@views/browser/features/dapp/explorer/components/DAppExplorer';
 import { useFatalError } from '@hooks/useFatalError';
 import { Crash } from '@components/ErrorBoundary';
 import { useIsPosthogClientInitialized } from '@providers/PostHogClientProvider/useIsPosthogClientInitialized';
-import { logger, useObservable } from '@lace/common';
+import { useObservable } from '@lace/common';
 import { VotingLayout } from '../features/voting-beta';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { removePreloaderIfExists } from '@utils/remove-reloader-if-exists';
@@ -117,13 +111,10 @@ const { CHAIN, GOV_TOOLS_URLS } = config();
  * @param {number} currentTabId - Tab not to discard (freeze)
  */
 const discardStaleTabs = async (currentTabId: number) => {
-  const allTabs = [
-    ...(await catchAndBrandExtensionApiError(tabs.query({ title: 'Lace' }), 'Failed to query for stale lace tabs')),
-    ...(await catchAndBrandExtensionApiError(
-      tabs.query({ title: POPUP_WINDOW_NAMI_TITLE }),
-      'Failed to query for stale nami mode tabs'
-    ))
-  ];
+  const allTabs = await catchAndBrandExtensionApiError(
+    tabs.query({ title: 'Lace' }),
+    'Failed to query for stale lace tabs'
+  );
   const isLaceOrigin = allTabs.find((tab) => tab.id === currentTabId);
   if (!isLaceOrigin) return;
   allTabs.forEach((tab) => {
@@ -157,7 +148,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
   const [{ chainName }] = useAppSettingsContext();
   const [isLoadingWalletInfo, setIsLoadingWalletInfo] = useState(true);
   const { page, setBackgroundPage } = useBackgroundPage();
-  const { t } = useTranslation();
   const posthogClientInitialized = useIsPosthogClientInitialized();
   const location = useLocation<{ background?: Location<unknown> }>();
   const isVotingCenterEnabled = !!GOV_TOOLS_URLS[environmentName];
@@ -182,29 +172,6 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     if ([routes.notifications, routes.notification].includes(route.path) && !isNotificationsCenterEnabled) return false;
     return true;
   });
-
-  const backgroundServices = useBackgroundServiceAPIContext();
-  const [namiMigration, setNamiMigration] = useState<BackgroundStorage['namiMigration']>();
-
-  useEffect(() => {
-    getBackgroundStorage()
-      .then((storage) => setNamiMigration(storage.namiMigration))
-      .catch(logger.error);
-  }, []);
-
-  useEffect(() => {
-    const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
-      if (type === MessageTypes.CHANGE_MODE && data.mode !== namiMigration?.mode) {
-        const migration: BackgroundStorage['namiMigration'] = {
-          ...namiMigration,
-          mode: data.mode
-        };
-
-        setNamiMigration(migration);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [backgroundServices, namiMigration]);
 
   useEffect(() => {
     const isCreatingWallet = [routes.newBitcoinWallet.root, routes.newWallet.root, routes.sharedWallet.root].some(
@@ -264,7 +231,7 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     }
     return () => {
       if (isHardwareWallet) {
-        tabs.onActivated.addListener(tabsOnActivatedCallback);
+        tabs.onActivated.removeListener(tabsOnActivatedCallback);
       }
     };
   });
@@ -296,36 +263,16 @@ export const BrowserViewRoutes = ({ routesMap = defaultRoutes }: { routesMap?: R
     [posthogClientInitialized, isLoadingWalletInfo, deletingWallet, cardanoWallet, stayOnAllDonePage]
   );
 
-  const isInNamiMode = useMemo(
-    () => namiMigration?.mode === 'nami' && !isLoadingWalletInfo && cardanoWallet,
-    [cardanoWallet, isLoadingWalletInfo, namiMigration?.mode]
-  );
-
   const fatalError = useFatalError();
 
   useEffect(() => {
-    if (isLoaded || isOnboarding || isInNamiMode || fatalError) {
+    if (isLoaded || isOnboarding || fatalError) {
       removePreloaderIfExists();
     }
-  }, [isLoaded, isOnboarding, isInNamiMode, fatalError]);
+  }, [isLoaded, isOnboarding, fatalError]);
 
   if (fatalError) {
     return <Crash />;
-  }
-
-  if (isInNamiMode) {
-    return (
-      <Lock
-        message={t('general.lock.namiMode.message')}
-        description={
-          <Trans
-            i18nKey="general.lock.namiMode.description"
-            components={[<img key="lace-logo" src={LaceLogoMark} width="22" />]}
-          />
-        }
-        icon={warningIcon}
-      />
-    );
   }
 
   if (isWalletLocked()) {

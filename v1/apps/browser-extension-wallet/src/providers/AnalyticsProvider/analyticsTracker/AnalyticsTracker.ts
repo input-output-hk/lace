@@ -16,15 +16,9 @@ import {
 import { getUserIdService } from '@providers/AnalyticsProvider/getUserIdService';
 import { UserIdService } from '@lib/scripts/types';
 import { PostHogMultiWalletAction, PostHogOnboardingAction, PostHogNamiMigrationAction } from './events';
-import { NamiModeActions } from '@lace/nami';
 import { logger } from '@lace/common';
 
-export type Action =
-  | PostHogAction
-  | PostHogMultiWalletAction
-  | PostHogOnboardingAction
-  | PostHogNamiMigrationAction
-  | NamiModeActions;
+export type Action = PostHogAction | PostHogMultiWalletAction | PostHogOnboardingAction | PostHogNamiMigrationAction;
 
 interface AnalyticsTrackerArgs {
   postHogClient?: PostHogClient<Action>;

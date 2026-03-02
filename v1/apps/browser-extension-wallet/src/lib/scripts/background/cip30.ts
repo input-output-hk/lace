@@ -3,16 +3,14 @@ import { ensureUiIsOpenAndLoaded } from './util';
 import { userPromptService } from './services/dappService';
 import { authenticator } from './authenticator';
 import { wallet$ } from './wallet';
-import { dAppConnectorActivity$ } from './session/poll-controller';
 import { runtime, Tabs, tabs } from 'webextension-polyfill';
 import { cip30, exposeApi, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { DAPP_CHANNELS } from '../../../utils/constants';
 import { DappDataService } from '../types';
-import { map, Observable, of } from 'rxjs';
+import { filter, map, Observable, of } from 'rxjs';
 import { ApiError, APIErrorCode } from '@cardano-sdk/dapp-connector';
 import pDebounce from 'p-debounce';
 import { dappInfo$ } from './requestAccess';
-import { notifyOnHaveAccessCall } from './session';
 import { logger } from '@lace/common';
 
 const DEBOUNCE_THROTTLE = 500;
@@ -72,7 +70,10 @@ export const confirmationCallback: walletCip30.CallbackConfirmation = {
 };
 
 const walletApi = walletCip30.createWalletApi(
-  wallet$.pipe(map((activeWallet) => activeWallet?.observableWallet || undefined)),
+  wallet$.pipe(
+    map((activeWallet) => activeWallet?.observableWallet),
+    filter(Boolean)
+  ),
   confirmationCallback,
   { logger }
 );
@@ -80,7 +81,7 @@ const walletApi = walletCip30.createWalletApi(
 cip30.initializeBackgroundScript(
   { walletName: process.env.WALLET_NAME },
   {
-    authenticator: notifyOnHaveAccessCall(authenticator, dAppConnectorActivity$.next.bind(dAppConnectorActivity$)),
+    authenticator,
     logger,
     runtime,
     walletApi

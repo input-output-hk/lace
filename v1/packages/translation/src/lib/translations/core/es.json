@@ -729,7 +729,6 @@
   "core.namiMigration.customize.title": "Selección de modo",
   "core.namiMigration.customize.description": "Elija su experience de billetera: Lace o Nami",
   "core.namiMigration.customize.lace": "Si elije Lace, obtiene acceso a una gran cantidad de funciones de Web3, incluyendo delegación múltiple, compatibilidad con billeteras múltiples, detalles avanzados de transacción, y servicios DeFi, permitiéndole explorar y disfrutar de nuevas experiencias digitales",
-  "core.namiMigration.customize.nami": "Si elije Nami, puede continuar usando su billetera que ya le es familiar, ahora impulsada por la infrastructura de Lace",
   "core.namiMigration.customize.back": "Volver",
   "core.namiMigration.customize.done": "Hecho",
   "core.namiMigration.customize.next": "Siguiente",

@@ -3,21 +3,21 @@ name: Release LMP Bundle
 on:
   push:
     branches:
-      - 'release/**'
+      - "release/**"
   schedule:
     # Run at 03:00 UTC on working days (Monday-Friday)
-    - cron: '0 3 * * 1-5'
+    - cron: "0 3 * * 1-5"
   workflow_dispatch:
     inputs:
       test_mode:
-        description: 'E2E test execution mode'
+        description: "E2E test execution mode"
         required: true
         type: choice
-        default: 'all'
+        default: "all"
         options:
-          - 'none'
-          - 'smoke'
-          - 'all'
+          - "none"
+          - "smoke"
+          - "all"
 
 permissions:
   pull-requests: write
@@ -52,8 +52,8 @@ jobs:
       - name: Build v1 packages
         working-directory: v1
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
-          EXCLUDE_BROWSER: 'true'
+          NODE_OPTIONS: "--max_old_space_size=8192"
+          EXCLUDE_BROWSER: "true"
         run: yarn build
 
       - name: Upload v1 packages artifacts
@@ -66,7 +66,6 @@ jobs:
             v1/packages/translation/dist
             v1/packages/core/dist
             v1/packages/staking/dist
-            v1/packages/nami/dist
             v1/packages/bitcoin/dist
             v1/packages/notifications/dist
 
@@ -143,7 +142,7 @@ jobs:
       - name: Build v1 Extension
         working-directory: v1/apps/browser-extension-wallet
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+          NODE_OPTIONS: "--max_old_space_size=8192"
           WEBPACK_ENV: prod
           BROWSER: chrome
           LACE_EXTENSION_KEY: ${{ secrets.MANIFEST_PUBLIC_KEY }}
@@ -153,15 +152,15 @@ jobs:
           MAESTRO_PROJECT_ID_MAINNET: ${{ secrets.MAESTRO_PROJECT_ID_MAINNET }}
           MAESTRO_PROJECT_ID_TESTNET: ${{ secrets.MAESTRO_PROJECT_ID_TESTNET }}
           POSTHOG_PRODUCTION_TOKEN: ${{ secrets.POSTHOG_PRODUCTION_TOKEN }}
-          PRODUCTION_MODE_TRACKING: 'true'
+          PRODUCTION_MODE_TRACKING: "true"
           BANXA_LACE_URL: ${{ vars.BANXA_LACE_URL }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
-          SENTRY_ENVIRONMENT: 'production'
+          SENTRY_ENVIRONMENT: "production"
           DAPP_RADAR_API_KEY: ${{ secrets.DAPP_RADAR_API_KEY }}
-          NOTIFICATION_CENTER_MODE: 'production'
+          NOTIFICATION_CENTER_MODE: "production"
           PUBNUB_SUBSCRIBE_KEY: ${{ secrets.PUBNUB_SUBSCRIBE_KEY }}
           PUBNUB_TOKEN_ENDPOINT: ${{ vars.PUBNUB_TOKEN_ENDPOINT }}
         run: |
@@ -192,7 +191,7 @@ jobs:
       - name: Setup Node.js for v2
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'v2/.nvmrc'
+          node-version-file: "v2/.nvmrc"
 
       - name: Configure npm registries
         run: |
@@ -220,7 +219,7 @@ jobs:
         run: npx nx run-many --target=type-check-src,type-check-test --projects=midnight-extension
         working-directory: v2
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+          NODE_OPTIONS: "--max_old_space_size=8192"
 
   unitTestsV2:
     name: V2 Unit Tests
@@ -236,7 +235,7 @@ jobs:
       - name: Setup Node.js for v2
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'v2/.nvmrc'
+          node-version-file: "v2/.nvmrc"
 
       - name: Configure npm registries
         run: |
@@ -256,7 +255,7 @@ jobs:
         run: npx nx test midnight-extension
         working-directory: v2
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+          NODE_OPTIONS: "--max_old_space_size=8192"
 
   build-midnight-extension:
     name: Build Midnight Extension (v2)
@@ -273,7 +272,7 @@ jobs:
       - name: Setup Node.js for v2
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'v2/.nvmrc'
+          node-version-file: "v2/.nvmrc"
 
       - name: Configure npm registries
         run: |
@@ -308,7 +307,7 @@ jobs:
       - name: Build Midnight Extension (v2)
         working-directory: v2/apps/midnight-extension
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+          NODE_OPTIONS: "--max_old_space_size=8192"
           # Bundle-specific: v2 must use the same extension id as the bundled (v1) extension.
           EXTENSION_ID: ${{ steps.get-extension-id.outputs.extension_id }}
 
@@ -352,7 +351,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Enable Corepack
         run: corepack enable
@@ -374,7 +373,7 @@ jobs:
 
       - name: Build Bundle
         env:
-          NODE_OPTIONS: '--max_old_space_size=8192'
+          NODE_OPTIONS: "--max_old_space_size=8192"
         run: yarn build:bundle
 
       - name: Upload Chrome Bundle artifact
@@ -432,7 +431,7 @@ jobs:
         with:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ env.TEST_MODE == 'smoke' }}
-          TAGS: 'not @NotificationCenter-Popup and not @NotificationCenter-Extended'
+          TAGS: "not @NotificationCenter-Popup and not @NotificationCenter-Extended"
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: true
@@ -469,7 +468,7 @@ jobs:
       - name: Setup Node.js for v2
         uses: actions/setup-node@v4
         with:
-          node-version-file: 'v2/.nvmrc'
+          node-version-file: "v2/.nvmrc"
 
       - name: Configure npm registries
         run: |
@@ -515,8 +514,8 @@ jobs:
         working-directory: v2/apps/midnight-extension-e2e
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
-          DISPLAY: ':99.0'
-          LMP_BUNDLE: 'true'
+          DISPLAY: ":99.0"
+          LMP_BUNDLE: "true"
           USE_CUSTOM_FEATURE_FLAGS: false
         run: npx wdio run wdio.conf.chrome.ts --spec=./src/features/ReleaseSmokeTest.feature
 
@@ -558,7 +557,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           path: ./v1/artifacts
-          pattern: 'runner-artifacts-*'
+          pattern: "runner-artifacts-*"
           merge-multiple: true
 
       - name: Download midnight test artifacts
@@ -568,7 +567,7 @@ jobs:
           name: midnight-runner-artifacts
 
       - name: Create v1 allure properties
-        working-directory: './v1/artifacts/reports/allure/results'
+        working-directory: "./v1/artifacts/reports/allure/results"
         run: |
           echo "
           branch=${BRANCH}
@@ -580,7 +579,7 @@ jobs:
           " > environment.properties
 
       - name: Create midnight allure properties
-        working-directory: './midnight/artifacts/reports/allure/results'
+        working-directory: "./midnight/artifacts/reports/allure/results"
         run: |
           echo "
           branch=${BRANCH}
@@ -598,12 +597,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './v1/artifacts/reports/allure/results'
+          resultsGlob: "./v1/artifacts/reports/allure/results"
           bucket: lace-e2e-test-results
-          prefix: 'release-bundle/v1/${BROWSER}/${RUN}'
+          prefix: "release-bundle/v1/${BROWSER}/${RUN}"
           copyLatest: true
           ignoreMissingResults: true
-          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+          baseUrl: "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}"
 
       - name: Publish midnight allure report to S3
         uses: andrcuns/allure-publish-action@v2.10.0
@@ -613,12 +612,12 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './midnight/artifacts/reports/allure/results'
+          resultsGlob: "./midnight/artifacts/reports/allure/results"
           bucket: lace-e2e-test-results
-          prefix: 'release-bundle/midnight/${BROWSER}/${RUN}'
+          prefix: "release-bundle/midnight/${BROWSER}/${RUN}"
           copyLatest: true
           ignoreMissingResults: true
-          baseUrl: 'https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}'
+          baseUrl: "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}"
 
       - name: Add links to summary
         run: |
@@ -632,12 +631,12 @@ jobs:
         uses: rtCamp/action-slack-notify@v2.3.3
         env:
           SLACK_COLOR: "${{ (needs.laceV1E2eTests.result == 'failure' || needs.midnightE2eTests.result == 'failure') && 'failure' || 'good' }}"
-          SLACK_ICON_EMOJI: ':lace:'
+          SLACK_ICON_EMOJI: ":lace:"
           SLACK_MESSAGE: |
             *V1:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/v1/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.laceV1E2eTests.result }})
             *Midnight:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-bundle/midnight/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.midnightE2eTests.result }})
             browser: ${{ env.BROWSER }} | test_mode: ${{ env.TEST_MODE }}
-          SLACK_TITLE: 'LMP Bundle test automation results :rocket:'
+          SLACK_TITLE: "LMP Bundle test automation results :rocket:"
           SLACK_USERNAME: lace-qa-bot
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
@@ -672,4 +671,3 @@ jobs:
           name: midnight-e2e-reports
           path: ./midnight/artifacts
           retention-days: 30
-

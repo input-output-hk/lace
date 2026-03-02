@@ -12,7 +12,7 @@ Given(
 
 When(
   /^I click on "(Learn more|Remind me later|Close)" button on "Discover the Midnight Token Distribution" banner$/,
-  async (button: 'Learn more' | 'Remind me later'| 'Close') => {
+  async (button: 'Learn more' | 'Remind me later' | 'Close') => {
     switch (button) {
       case 'Learn more':
         await midnightBanner.clickOnLearnMoreButton();

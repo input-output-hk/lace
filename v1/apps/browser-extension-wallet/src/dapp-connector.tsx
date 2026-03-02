@@ -11,13 +11,11 @@ import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from '@providers/ThemeProvider';
 import { UIThemeProvider } from '@providers/UIThemeProvider';
 import { BackgroundServiceAPIProvider } from '@providers/BackgroundServiceAPI';
-import { APP_MODE_POPUP, POPUP_WINDOW_NAMI_TITLE } from './utils/constants';
+import { APP_MODE_POPUP } from './utils/constants';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
 import { useEffect, useState } from 'react';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
-import { NamiDappConnector } from './views/nami-mode/indexInternal';
-import { storage } from 'webextension-polyfill';
 import { TxWitnessRequestProvider } from '@providers/TxWitnessRequestProvider';
 import { ErrorBoundary } from '@components/ErrorBoundary';
 import { BitcoinDappConnectorView } from './views/BitcoinDappConnectorView';
@@ -26,26 +24,15 @@ const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'bitcoin';
 
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami' | 'bitcoin'>(CARDANO_LACE);
-
-  storage.onChanged.addListener((changes) => {
-    const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
-    const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
-    if (oldModeValue?.mode !== newModeValue?.mode) {
-      setMode(newModeValue.mode);
-    }
-  });
+  const [mode, setMode] = useState<'lace' | 'bitcoin'>(CARDANO_LACE);
 
   useEffect(() => {
     (async () => {
-      const { namiMigration, activeBlockchain } = await getBackgroundStorage();
+      const { activeBlockchain } = await getBackgroundStorage();
       if (activeBlockchain === 'bitcoin') {
         setMode(BITCOIN_LACE);
       } else {
-        if (namiMigration?.mode === 'nami') {
-          document.title = POPUP_WINDOW_NAMI_TITLE;
-        }
-        setMode(namiMigration?.mode || CARDANO_LACE);
+        setMode(CARDANO_LACE);
       }
     })();
   }, []);
@@ -53,9 +40,6 @@ const App = (): React.ReactElement => {
   const getDappConnectorComponent = () => {
     if (mode === BITCOIN_LACE) {
       return <BitcoinDappConnectorView />;
-    }
-    if (mode === 'nami') {
-      return <NamiDappConnector />;
     }
     if (mode === CARDANO_LACE) {
       return <DappConnectorView />;

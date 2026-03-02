@@ -26,7 +26,6 @@ import { cacheActivatedWalletAddressSubscription } from './cache-wallets-address
 import { isBackgroundProcess } from '@cardano-sdk/util';
 import { SharedWalletScriptKind } from '@lace/core';
 import { getMagicForChain } from '@utils/chain';
-import { cacheNamiMetadataSubscription } from './cache-nami-metadata';
 import { logger } from '@lace/common';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { requestMessage$ } from './services/utilityServices';
@@ -35,7 +34,6 @@ import { ExtensionDocumentStore } from './storage/extension-document-store';
 import { ExtensionBlobKeyValueStore } from './storage/extension-blob-key-value-store';
 import { ExtensionBlobCollectionStore } from './storage/extension-blob-collection-store';
 import { migrateCollectionStore, migrateWalletStores, shouldAttemptWalletStoresMigration } from './storage/migrations';
-import { pollController$ } from './session/poll-controller';
 import { ExperimentName, FeatureFlags } from '../types/feature-flags';
 import { TX_HISTORY_LIMIT_SIZE } from '@utils/constants';
 import { Bitcoin } from '@lace/bitcoin';
@@ -135,7 +133,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
           paymentScript,
           stakingScript,
           stores,
-          pollController$,
           witnesser
         }
       );
@@ -179,7 +176,6 @@ const walletFactory: WalletFactory<Wallet.WalletMetadata, Wallet.AccountMetadata
         ...providers,
         stores,
         witnesser,
-        pollController$,
         bip32Account
       }
     );
@@ -272,7 +268,7 @@ const bitcoinWalletFactory: BitcoinWalletFactory<Wallet.WalletMetadata, Wallet.A
       20,
       walletInfo,
       network,
-      pollController$,
+      of(true),
       logger
     );
   }
@@ -498,8 +494,6 @@ walletManager
   });
 
 cacheActivatedWalletAddressSubscription(walletManager, walletRepository);
-
-cacheNamiMetadataSubscription({ walletManager, walletRepository });
 
 export const wallet$ = walletManager.activeWallet$;
 export const bitcoinWallet$ = bitcoinWalletManager.activeWallet$;

@@ -24,13 +24,11 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   closeAllTabsAndOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeTheme: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeLanguage: RemoteApiPropertyType.MethodReturningPromise,
-  handleChangeMode: RemoteApiPropertyType.MethodReturningPromise,
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   resetStorage: RemoteApiPropertyType.MethodReturningPromise,
   getAppVersion: RemoteApiPropertyType.MethodReturningPromise,
-  backendFailures$: RemoteApiPropertyType.HotObservable,
   unhandledError$: RemoteApiPropertyType.HotObservable
 };
 

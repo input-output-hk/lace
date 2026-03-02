@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { HashRouter } from 'react-router-dom';
-import { PopupView, walletRoutePaths } from '@routes';
+import { PopupView } from '@routes';
 import { StoreProvider } from '@stores';
 import { CurrencyStoreProvider } from '@providers/currency';
 import { AppSettingsProvider, DatabaseProvider, ThemeProvider, AnalyticsProvider } from '@providers';
@@ -21,7 +21,6 @@ import { DataCheckContainer } from '@components/DataCheckContainer';
 import { PostHogClientProvider } from '@providers/PostHogClientProvider';
 import { BackgroundPageProvider } from '@providers/BackgroundPageProvider';
 import { AddressesDiscoveryOverlay } from 'components/AddressesDiscoveryOverlay';
-import { NamiPopup } from './views/nami-mode';
 import { getBackgroundStorage } from '@lib/scripts/background/storage';
 import { runtime, Storage, storage } from 'webextension-polyfill';
 import { NamiMigrationGuard } from './features/nami-migration/NamiMigrationGuard';
@@ -35,12 +34,10 @@ import { BlockchainProvider, useCurrentBlockchain, Blockchain } from './multicha
 const CARDANO_LACE = 'lace';
 const BITCOIN_LACE = 'lace-bitcoin';
 
-const getPopupModeView = (mode: 'lace' | 'nami' | 'lace-bitcoin') => {
+const getPopupModeView = (mode: 'lace' | 'lace-bitcoin') => {
   switch (mode) {
     case 'lace':
       return <PopupView />;
-    case 'nami':
-      return <NamiPopup />;
     case 'lace-bitcoin':
       return <BitcoinPopupView />;
     default:
@@ -49,13 +46,11 @@ const getPopupModeView = (mode: 'lace' | 'nami' | 'lace-bitcoin') => {
 };
 
 const App = (): React.ReactElement => {
-  const [mode, setMode] = useState<'lace' | 'nami' | 'lace-bitcoin'>('lace');
+  const [mode, setMode] = useState<'lace' | 'lace-bitcoin'>('lace');
   const { setBlockchain } = useCurrentBlockchain();
 
   useEffect(() => {
     const handleStorageChange = async (changes: Record<string, Storage.StorageChange>) => {
-      const oldModeValue = changes.BACKGROUND_STORAGE?.oldValue?.namiMigration;
-      const newModeValue = changes.BACKGROUND_STORAGE?.newValue?.namiMigration;
       const activeBlockchainOldValue = changes.BACKGROUND_STORAGE?.oldValue?.activeBlockchain;
       const activeBlockchainNewValue = changes.BACKGROUND_STORAGE?.newValue?.activeBlockchain;
 
@@ -63,27 +58,18 @@ const App = (): React.ReactElement => {
         const isCardano = !activeBlockchainNewValue || activeBlockchainNewValue === 'cardano';
         setMode(isCardano ? CARDANO_LACE : BITCOIN_LACE);
         setBlockchain(isCardano ? Blockchain.Cardano : Blockchain.Bitcoin);
-        return;
-      }
-
-      if (oldModeValue?.mode !== newModeValue?.mode) {
-        setMode(newModeValue?.mode || CARDANO_LACE);
-        // Force back to original routing unless it is staking route
-        if (window.location.hash.split('#')[1] !== walletRoutePaths.earn) {
-          window.location.hash = '#';
-        }
       }
     };
 
     storage.onChanged.addListener(handleStorageChange);
 
     const getWalletMode = async () => {
-      const { namiMigration, activeBlockchain } = await getBackgroundStorage();
+      const { activeBlockchain } = await getBackgroundStorage();
       if (activeBlockchain === 'bitcoin') {
         setMode(BITCOIN_LACE);
         setBlockchain(Blockchain.Bitcoin);
       } else {
-        setMode(namiMigration?.mode || CARDANO_LACE);
+        setMode(CARDANO_LACE);
         setBlockchain(Blockchain.Cardano);
       }
     };

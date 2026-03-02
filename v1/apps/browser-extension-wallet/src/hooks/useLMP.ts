@@ -8,7 +8,7 @@ import {
   lmpModeStorage,
   onboardingParamsStorage
 } from '@src/utils/lmp';
-import { runtime } from 'webextension-polyfill';
+import { runtime, tabs } from 'webextension-polyfill';
 
 const lmpApi = consumeRemoteApi(
   {
@@ -20,7 +20,7 @@ const lmpApi = consumeRemoteApi(
 
 const navigateToLMP = (): void => {
   if (window.location.pathname.startsWith('/popup.html')) {
-    chrome.tabs.create({ url: '/tab.html' });
+    tabs.create({ url: '/tab.html' });
   } else {
     window.location.href = '/tab.html';
   }

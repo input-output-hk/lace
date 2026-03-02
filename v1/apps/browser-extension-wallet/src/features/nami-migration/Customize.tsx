@@ -18,40 +18,25 @@ export const Customize = (): JSX.Element => {
     analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP);
   }, [analytics]);
 
-  const completeMigrationAndRedirect = async (mode: 'lace' | 'nami') => {
-    await (mode === 'lace'
-      ? analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP_LACE_MODE_CLICK)
-      : analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP_NAMI_MODE_CLICK));
+  const completeMigrationAndRedirect = async () => {
+    await analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP_LACE_MODE_CLICK);
+
     await analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.MIGRATION_COMPLETE);
 
     // Actually complete migration
     await setBackgroundStorage({
       namiMigration: {
-        completed: true,
-        mode
+        completed: true
       }
     });
 
     laceMigrationClient.completeMigration();
 
-    if (mode === 'lace') {
-      history.push(walletRoutePaths.assets);
-    } else {
-      history.push(walletRoutePaths.namiMigration.allDone);
-    }
-  };
-
-  const onModeChange = (mode: 'lace' | 'nami') => {
-    if (mode === 'lace') {
-      analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP_LACE_TAB_CLICK);
-    } else {
-      analytics.sendEventToPostHog(postHogNamiMigrationActions.onboarding.CUSTOMIZE_STEP_NAMI_TAB_CLICK);
-    }
+    history.push(walletRoutePaths.assets);
   };
 
   return (
     <View
-      onChange={onModeChange}
       onBack={() => history.goBack()}
       onDone={completeMigrationAndRedirect}
       videosURL={{

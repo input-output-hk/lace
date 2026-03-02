@@ -3,7 +3,6 @@ import { BlockchainProviderSlice, SliceCreator, WalletInfoSlice } from '../types
 import { Wallet } from '@lace/cardano';
 import { ObservableWalletState } from '@hooks/useWalletState';
 import { isSharedWallet } from '@lace/core';
-import { isNamiWallet } from '@src/views/nami-mode/utils';
 
 /**
  * has all wallet info related actions and states
@@ -44,8 +43,7 @@ export const walletInfoSlice: SliceCreator<WalletInfoSlice & BlockchainProviderS
       walletType: wallet?.source.wallet.type,
       isInMemoryWallet: wallet?.source.wallet.type === WalletType.InMemory,
       isHardwareWallet: [WalletType.Ledger, WalletType.Trezor].includes(wallet?.source.wallet.type),
-      isSharedWallet: isSharedWallet(wallet),
-      isNamiWallet: isNamiWallet(wallet)
+      isSharedWallet: isSharedWallet(wallet)
     }),
   setWalletDisplayInfo: (info?: Wallet.WalletDisplayInfo) =>
     set({

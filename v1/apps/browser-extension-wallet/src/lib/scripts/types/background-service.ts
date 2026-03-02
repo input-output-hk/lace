@@ -21,11 +21,6 @@ export interface ChangeThemeData {
   theme: themes;
 }
 
-export interface ChangeModeData {
-  mode: 'lace' | 'nami';
-  completed?: boolean;
-}
-
 export enum MessageTypes {
   OPEN_BROWSER_VIEW = 'open-browser-view',
   CHANGE_THEME = 'change-theme',
@@ -70,10 +65,6 @@ interface ChangeThemeMessage {
   type: MessageTypes.CHANGE_THEME;
   data: ChangeThemeData;
 }
-interface HTTPConnectionMessage {
-  type: MessageTypes.HTTP_CONNECTION;
-  data: HTTPConnectionStatus;
-}
 interface WSConnectionMessage {
   type: MessageTypes.WS_CONNECTION;
   data: WSConnectionStatus;
@@ -83,10 +74,6 @@ interface OpenBrowserMessage {
   data: OpenBrowserData;
 }
 
-interface ChangeMode {
-  type: MessageTypes.CHANGE_MODE;
-  data: ChangeModeData;
-}
 interface ChangeThemeMessage {
   type: MessageTypes.CHANGE_THEME;
   data: ChangeThemeData;
@@ -96,13 +83,7 @@ interface ChangeLanguageMessage {
   type: MessageTypes.CHANGE_LANGUAGE;
   data: Language;
 }
-export type Message =
-  | ChangeThemeMessage
-  | HTTPConnectionMessage
-  | WSConnectionMessage
-  | OpenBrowserMessage
-  | ChangeMode
-  | ChangeLanguageMessage;
+export type Message = ChangeThemeMessage | WSConnectionMessage | OpenBrowserMessage | ChangeLanguageMessage;
 
 export type UnhandledError = {
   type: 'error' | 'unhandledrejection';
@@ -118,21 +99,10 @@ export type BackgroundService = {
   coinPrices: CoinPrices;
   handleChangeTheme: (data: ChangeThemeData) => void;
   handleChangeLanguage: (data: Language) => void;
-  handleChangeMode: (data: ChangeModeData) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;
   resetStorage: () => Promise<void>;
   getAppVersion: () => Promise<string>;
-  backendFailures$: BehaviorSubject<number>;
   unhandledError$: Observable<UnhandledError>;
-};
-
-export type WalletMode = {
-  mode: BackgroundStorage['namiMigration']['mode'] | Extract<BackgroundStorage['activeBlockchain'], 'bitcoin'>;
-  dappInjectCompatibilityMode: BackgroundStorage['dappInjectCompatibilityMode'];
-};
-
-export type LaceFeaturesApi = {
-  getMode: () => Promise<WalletMode>;
 };

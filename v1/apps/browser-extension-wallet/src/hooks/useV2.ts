@@ -2,7 +2,7 @@ import { logger, useObservable } from '@lace/common';
 import { Wallet } from '@lace/cardano';
 import { consumeRemoteApi, RemoteApiProperties, RemoteApiPropertyType } from '@cardano-sdk/web-extension';
 import { APP_MODE, BundleAppApi } from '@utils/lmp';
-import { runtime } from 'webextension-polyfill';
+import { runtime, tabs } from 'webextension-polyfill';
 import { v2ApiBaseChannel, v2ModeStorage } from '@utils/v2';
 
 type V2BundleAppApi = Pick<BundleAppApi, 'wallets$' | 'activate'>;
@@ -22,7 +22,7 @@ const v2Api: V2BundleAppApi = consumeRemoteApi(
 
 const navigateToV2 = (): void => {
   if (window.location.pathname.startsWith('/popup.html')) {
-    chrome.tabs.create({ url: '/tab.html' });
+    tabs.create({ url: '/tab.html' });
   } else {
     window.location.href = '/tab.html';
   }

@@ -212,18 +212,6 @@
   max-height: 600px;
 }
 
-.namiModeSwitch {
-  &:global(.ant-switch) {
-    background: var(--light-mode-mid-grey, var(--dark-mode-dark-grey)) !important;
-    &:focus {
-      box-shadow: none !important;
-    }
-  }
-  &:global(.ant-switch-checked) {
-    background: var(--switch-checked-bg-color) !important;
-  }
-}
-
 .walletOptionBitcoin > div {
   background: var(--data-orange);
 }

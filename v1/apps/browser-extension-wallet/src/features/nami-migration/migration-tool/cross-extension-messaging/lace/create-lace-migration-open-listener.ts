@@ -1,4 +1,4 @@
-import { closeAllLaceOrNamiTabs } from '@lib/scripts/background/util';
+import { closeAllLaceTabs } from '@lib/scripts/background/util';
 import { MessageSender, NamiMessages } from '../shared/types';
 import { logger } from '@lace/common';
 
@@ -9,7 +9,7 @@ export const createLaceMigrationOpenListener =
     if (message === NamiMessages.open && sender.id === namiExtensionId) {
       // First close all open lace tabs
       try {
-        await closeAllLaceOrNamiTabs();
+        await closeAllLaceTabs();
       } catch (error) {
         logger.error('[NAMI MIGRATION] createLaceMigrationOpenListener: failed to close all windows', error);
       }

@@ -1,3 +1,5 @@
+import { runtime } from 'webextension-polyfill';
+
 export const isV2Bundle = (): boolean =>
   // eslint-disable-next-line camelcase
-  (chrome.runtime.getManifest() as { bundle_type?: string }).bundle_type === 'v2';
+  (runtime.getManifest() as { bundle_type?: string }).bundle_type === 'v2';

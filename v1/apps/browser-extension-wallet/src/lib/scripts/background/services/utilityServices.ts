@@ -11,41 +11,23 @@ import {
   OpenNamiBrowserData,
   MigrationState,
   CoinPrices,
-  ChangeModeData,
-  LaceFeaturesApi,
-  UnhandledError,
-  WalletMode
+  UnhandledError
 } from '../../types';
-import {
-  Subject,
-  of,
-  BehaviorSubject,
-  merge,
-  map,
-  fromEvent,
-  Observable,
-  filter,
-  withLatestFrom,
-  interval
-} from 'rxjs';
+import { Subject, of, BehaviorSubject, merge, map, fromEvent, Observable, interval } from 'rxjs';
 import { walletRoutePaths } from '@routes/wallet-paths';
 import { backgroundServiceProperties } from '../config';
 import { ActiveWallet, exposeApi } from '@cardano-sdk/web-extension';
 import { config } from '@src/config';
-import { getADAPriceFromBackgroundStorage, closeAllLaceOrNamiTabs, getBtcPriceFromBackgroundStorage } from '../util';
+import { getADAPriceFromBackgroundStorage, closeAllLaceTabs, getBtcPriceFromBackgroundStorage } from '../util';
 import { currencies as currenciesMap, currencyCode } from '@providers/currency/constants';
 import { clearBackgroundStorage, getBackgroundStorage, setBackgroundStorage } from '../storage';
-import { laceFeaturesApiProperties, LACE_FEATURES_CHANNEL } from '../injectUtil';
 import { getErrorMessage } from '@src/utils/get-error-message';
 import { logger } from '@lace/common';
-import { POPUP_WINDOW_NAMI_TITLE } from '@utils/constants';
 import { catchAndBrandExtensionApiError } from '@utils/catch-and-brand-extension-api-error';
 import { initCardanoTokenPrices } from './cardanoTokenPrices';
-import { pollController$ } from '../session/poll-controller';
 import { Language } from '@lace/translation';
 
 export const requestMessage$ = new Subject<Message>();
-export const backendFailures$ = new BehaviorSubject(0);
 
 const initializeCoinPrices = (wallet$: Observable<ActiveWallet>): CoinPrices => ({
   adaPrices$: new BehaviorSubject({
@@ -142,14 +124,13 @@ const enrichWithTabsDataIfMissing = (browserWindows: Windows.Window[]) => {
   return Promise.all(promises);
 };
 
-// Yes, Nami mode can be rendered as tab
-const isLaceOrNamiTab = (tab: Tabs.Tab) => ['Lace', POPUP_WINDOW_NAMI_TITLE].includes(tab.title);
+const isLaceTab = (tab: Tabs.Tab) => ['Lace'].includes(tab.title);
 
 type WindowWithTabsNotOptional = Windows.Window & {
   tabs: Tabs.Tab[];
 };
 const doesWindowHaveOtherTabs = (browserWindow: WindowWithTabsNotOptional) =>
-  browserWindow.tabs.some((t) => !isLaceOrNamiTab(t));
+  browserWindow.tabs.some((t) => !isLaceTab(t));
 
 const closeAllTabsAndOpenPopup = async () => {
   try {
@@ -176,7 +157,7 @@ const closeAllTabsAndOpenPopup = async () => {
       windows.update(nextFocusedWindow.id, { focused: true }),
       'Failed to focus window'
     );
-    await closeAllLaceOrNamiTabs();
+    await closeAllLaceTabs();
     await catchAndBrandExtensionApiError(action.openPopup(), 'Failed to open popup');
   } catch (error) {
     logger.error(error);
@@ -186,8 +167,6 @@ const closeAllTabsAndOpenPopup = async () => {
 const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data });
 
 const handleChangeLanguage = (data: Language) => requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data });
-
-const handleChangeMode = (data: ChangeModeData) => requestMessage$.next({ type: MessageTypes.CHANGE_MODE, data });
 
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
 
@@ -299,26 +278,6 @@ const fetchBitcoinPrice = (coinPrices: CoinPrices) => {
     });
 };
 
-exposeApi<LaceFeaturesApi>(
-  {
-    api$: of({
-      getMode: async () => {
-        const { namiMigration, dappInjectCompatibilityMode, activeBlockchain } = await getBackgroundStorage();
-        if (activeBlockchain === 'bitcoin') {
-          return { mode: 'bitcoin', dappInjectCompatibilityMode: !!dappInjectCompatibilityMode } as WalletMode;
-        }
-        return {
-          mode: namiMigration?.mode || 'lace',
-          dappInjectCompatibilityMode: !!dappInjectCompatibilityMode
-        } as WalletMode;
-      }
-    }),
-    baseChannel: LACE_FEATURES_CHANNEL,
-    properties: laceFeaturesApiProperties
-  },
-  { logger, runtime }
-);
-
 const toUnhandledError = (error: unknown, type: UnhandledError['type']): UnhandledError => ({
   type,
   message: getErrorMessage(error)
@@ -340,13 +299,8 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
   };
   // Fetch the prices initially, regardless of the session status
   updatePrices();
-  // Fetch the prices periodically, only if the session is active
-  interval(ADA_PRICE_CHECK_INTERVAL)
-    .pipe(
-      withLatestFrom(pollController$),
-      filter(([, isActive]) => isActive)
-    )
-    .subscribe(updatePrices);
+  // Fetch the prices periodically
+  interval(ADA_PRICE_CHECK_INTERVAL).subscribe(updatePrices);
 
   exposeApi<BackgroundService>(
     {
@@ -359,7 +313,6 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
         coinPrices,
         handleChangeTheme,
         handleChangeLanguage,
-        handleChangeMode,
         clearBackgroundStorage,
         getBackgroundStorage,
         setBackgroundStorage,
@@ -368,7 +321,6 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
           await webStorage.local.set({ MIGRATION_STATE: { state: 'up-to-date' } as MigrationState });
         },
         getAppVersion,
-        backendFailures$,
         unhandledError$
       }),
       baseChannel: BaseChannels.BACKGROUND_ACTIONS,

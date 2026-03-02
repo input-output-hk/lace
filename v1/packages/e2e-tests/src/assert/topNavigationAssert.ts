@@ -115,10 +115,6 @@ class TopNavigationAssert {
       await t('browserView.sideMenu.mode.dark'),
       await t('browserView.sideMenu.mode.light')
     ]);
-    await MenuHeader.menuNamiModeItem.waitForDisplayed();
-    expect(await MenuHeader.menuNamiModeItem.getText()).to.equal(await t('browserView.settings.legacyMode.section'));
-    await MenuHeader.menuNamiModeSwitch.waitForDisplayed();
-    expect(await MenuHeader.menuNamiModeSwitch.getAttribute('aria-checked')).to.equal('false');
     await MenuHeader.menuNetworkLabel.waitForDisplayed();
     expect(await MenuHeader.menuNetworkLabel.getText()).to.equal(await t('browserView.topNavigationBar.links.network'));
     expect(await MenuHeader.menuNetworkValue.getText()).to.be.oneOf(['Mainnet', 'Preprod', 'Preview']);
@@ -265,10 +261,6 @@ class TopNavigationAssert {
   assertSeeExpandedIcon = async (shouldSee: boolean) => {
     await MenuHeader.logo.waitForDisplayed({ reverse: !shouldSee });
   };
-
-  async assertDoNotSeeNamiModeSwitch() {
-    await MenuHeader.menuNamiModeSwitch.waitForDisplayed({ reverse: true });
-  }
 
   async assertSeeAddSharedWalletOption(shouldBeDisplayed: boolean) {
     await MenuHeader.menuAddSharedWalletButton.waitForDisplayed({ reverse: !shouldBeDisplayed });

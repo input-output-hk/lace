@@ -82,8 +82,7 @@ Feature: Shared wallet - onboarding
     Then shared wallet "SW TEST 1" was loaded
     And I do not see "Staking" section in side menu
     When I open header menu
-    Then I do not see "Nami mode" switch
-    And Pencil icon is not displayed next to shared wallet
+    Then Pencil icon is not displayed next to shared wallet
 
   @LW-11822 @skip(browserName="firefox")
   #  The uploadFile command is not available in Firefox
