@@ -9,9 +9,10 @@ import { setBackgroundStorage } from '@lib/scripts/background/storage';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { bitcoinWalletManager } from '@lib/wallet-api-ui';
 import { useCurrentBlockchain } from '@src/multichain';
-import { useBackgroundServiceAPIContext } from '@providers';
+import { useAppSettingsContext, useBackgroundServiceAPIContext } from '@providers';
 import { initI18n } from '@lace/translation';
 import { Message, MessageTypes } from '@lib/scripts/types';
+import { Wallet } from '@lace/cardano';
 
 export const useAppInit = (): void => {
   const {
@@ -22,7 +23,8 @@ export const useAppInit = (): void => {
     setWalletState,
     setAddressesDiscoveryCompleted,
     setHdDiscoveryStatus,
-    deletingWallet
+    deletingWallet,
+    setCurrentChain
   } = useWalletStore();
   const { blockchain } = useCurrentBlockchain();
   const { loadWallet, walletManager, walletRepository } = useWalletManager();
@@ -30,6 +32,7 @@ export const useAppInit = (): void => {
   const { environmentName, currentChain } = useWalletStore();
   const { getCustomSubmitApiForNetwork } = useCustomSubmitApi();
   const backgroundServices = useBackgroundServiceAPIContext();
+  const [settings, updateAppSettings] = useAppSettingsContext();
 
   useEffect(() => {
     const subscription = backgroundServices.requestMessage$?.subscribe(({ type, data }: Message): void => {
@@ -51,6 +54,28 @@ export const useAppInit = (): void => {
 
     return () => subscription.unsubscribe();
   }, [backgroundServices]);
+
+  // Sync network from background storage on mount
+  useEffect(() => {
+    const syncNetworkFromBackground = async () => {
+      const { networkType } = await backgroundServices.getBackgroundStorage();
+      if (!networkType) return;
+
+      const isCurrentlyMainnet = currentChain?.networkId === Wallet.Cardano.NetworkId.Mainnet;
+      const currentNetworkType = isCurrentlyMainnet ? 'mainnet' : 'testnet';
+
+      // If background has different network, sync appSettings and store
+      if (networkType !== currentNetworkType) {
+        const chainName: Wallet.ChainName = networkType === 'mainnet' ? 'Mainnet' : 'Preprod';
+        updateAppSettings({ ...settings, chainName });
+        setCurrentChain(chainName);
+      }
+    };
+
+    syncNetworkFromBackground();
+    // Only run once on mount - we intentionally omit dependencies that would cause re-runs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setWalletState(walletState);
