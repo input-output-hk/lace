@@ -24,6 +24,7 @@ import {
 } from 'rxjs';
 import { storage } from 'webextension-polyfill';
 import { TokenPrices, Status, MaybeTokenPrice } from '../../types';
+import { extractTokenPriceFromPool } from './geckoTerminalUtils';
 import { Cardano, Milliseconds } from '@cardano-sdk/core';
 import { config } from '@src/config';
 import Bottleneck from 'bottleneck';
@@ -113,28 +114,11 @@ const fetchPrice = (assetId: Cardano.AssetId): Observable<PriceListItem> =>
             return [assetId, { lastFetchTime: Date.now() }];
           }
           const body = await response.json();
-          const data = body.data?.[0]?.attributes;
+          const pool = body.data?.[0];
+          const price = extractTokenPriceFromPool(pool, assetId);
 
-          // If not the expected data, return no price
-          if (typeof data === 'object') {
-            const {
-              base_token_price_native_currency: priceInAda,
-              price_change_percentage: { h24: h24Change }
-            } = data;
-
-            // If not the expected data, return no price
-            if (typeof priceInAda === 'string' && typeof h24Change === 'string') {
-              return [
-                assetId,
-                {
-                  lastFetchTime: Date.now(),
-                  price: {
-                    priceInAda: Number.parseFloat(priceInAda),
-                    priceVariationPercentage24h: Number.parseFloat(h24Change)
-                  }
-                }
-              ];
-            }
+          if (price) {
+            return [assetId, { lastFetchTime: Date.now(), price }];
           }
         } catch (error) {
           console.warn('Error fetching cardano token price', assetId, error);
