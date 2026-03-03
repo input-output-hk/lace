@@ -457,6 +457,10 @@ jobs:
     runs-on: ubuntu-22.04
     needs: bundle
     if: ${{ github.event.inputs.test_mode != 'none' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3, 4, 5, 6, 7, 8]
 
     steps:
       - name: Checkout repository
@@ -510,20 +514,28 @@ jobs:
       - name: Start XVFB
         run: Xvfb :99 &
 
-      - name: Execute Midnight E2E smoke test
+      - name: Execute Midnight E2E tests
         working-directory: v2/apps/midnight-extension-e2e
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           DISPLAY: ":99.0"
           LMP_BUNDLE: "true"
           USE_CUSTOM_FEATURE_FLAGS: false
-        run: npx wdio run wdio.conf.chrome.ts --spec=./src/features/ReleaseSmokeTest.feature
+          BATCH: ${{ matrix.batch }}
+        run: |
+          if [ "${{ env.TEST_MODE }}" == "smoke" ]; then
+            TAGS_TO_RUN="--cucumberOpts.tags='@Smoke'";
+          else
+            TAGS_TO_RUN="";
+          fi
+          runCommand="npx wdio run wdio.conf.chrome.ts --suite batch${BATCH} ${TAGS_TO_RUN}"
+          eval "$runCommand"
 
       - name: Publish artifacts (logs, reports, screenshots)
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: midnight-runner-artifacts
+          name: midnight-runner-artifacts-${{ matrix.batch }}
           path: |
             v2/apps/midnight-extension-e2e/screenshots
             v2/apps/midnight-extension-e2e/logs
@@ -564,7 +576,8 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           path: ./midnight/artifacts
-          name: midnight-runner-artifacts
+          pattern: midnight-runner-artifacts-*
+          merge-multiple: true
 
       - name: Create v1 allure properties
         working-directory: "./v1/artifacts/reports/allure/results"
