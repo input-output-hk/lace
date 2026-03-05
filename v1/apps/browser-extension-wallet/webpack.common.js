@@ -1,5 +1,11 @@
 const path = require('path');
-const { NormalModuleReplacementPlugin, ProvidePlugin, IgnorePlugin, EnvironmentPlugin } = require('webpack');
+const {
+  NormalModuleReplacementPlugin,
+  ProvidePlugin,
+  IgnorePlugin,
+  EnvironmentPlugin,
+  DefinePlugin
+} = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
@@ -115,6 +121,9 @@ module.exports = () => {
         allowEmptyValues: true
       }),
       new EnvironmentPlugin(envsToExpose),
+      new DefinePlugin({
+        'process.env.BUNDLE_TYPE': JSON.stringify(process.env.BUILD_TARGET || 'lmp')
+      }),
       new SubresourceIntegrityPlugin()
     ]
   };
