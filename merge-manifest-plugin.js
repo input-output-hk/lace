@@ -63,7 +63,6 @@ class MergeManifestPlugin {
           );
 
           v1Manifest.name = "Lace";
-          v1Manifest.bundle_type = this.target;
 
           // Update service worker to use our sw-bundle.js
           v1Manifest.background.service_worker = "./sw-bundle.js";
