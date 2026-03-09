@@ -1,26 +1,27 @@
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
-import midnightBanner from '../elements/midnightBanner';
+import MidnightBanner from '../elements/midnightBanner';
 
 class MidnightBannerAssert {
   async assertSeeMidnightBanner(shouldBeDisplayed: boolean) {
-    await midnightBanner.title.waitForDisplayed({ reverse: !shouldBeDisplayed });
+    await MidnightBanner.title.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
-      expect(await midnightBanner.title.getText()).to.equal(await t('midnightEventBanner.title'));
-      await midnightBanner.closeButton.waitForDisplayed();
-      await midnightBanner.bannerDescriptionText.waitForDisplayed();
-      expect(await midnightBanner.bannerDescriptionText.getText()).to.equal(await t('midnightEventBanner.description'));
-      await midnightBanner.learnMoreButton.waitForDisplayed();
-      expect(await midnightBanner.learnMoreButton.getText()).to.equal(await t('midnightEventBanner.learnMore'));
-      await midnightBanner.remindMeLaterButton.waitForDisplayed();
-      expect(await midnightBanner.remindMeLaterButton.getText()).to.equal(await t('midnightEventBanner.reminder'));
+      expect(await MidnightBanner.title.getText()).to.equal(await t('midnightLaunchBanner.title'));
+      await MidnightBanner.closeButton.waitForDisplayed();
+      await MidnightBanner.bannerDescriptionText.waitForDisplayed();
+      expect(await MidnightBanner.bannerDescriptionText.getText()).to.equal(
+        await t('midnightLaunchBanner.description')
+      );
+      await MidnightBanner.midnightRegistrationButton.waitForDisplayed();
+      expect(await MidnightBanner.midnightRegistrationButton.getText()).to.equal(
+        await t('midnightLaunchBanner.ctaButton')
+      );
     }
   }
 
-  async assertSeeMidnightURL() {
+  async assertSeeDustGenerationDApp() {
     const currentUrl = await browser.getUrl();
-    // the exact URL might change because of redirection, so just check that it contains 'midnight'
-    expect(currentUrl).to.contain('midnight');
+    expect(currentUrl).to.contain('https://midnight-dust-mainnet.nethermind.dev/');
   }
 }
 

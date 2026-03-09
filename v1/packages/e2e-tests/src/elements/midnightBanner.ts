@@ -2,18 +2,17 @@
 import { ChainablePromiseElement } from 'webdriverio';
 
 class MidnightBanner {
-  private readonly TITLE = '[data-testid="midnight-event-banner-title"]';
-  private readonly LEARN_MORE_BUTTON = '[data-testid="learn-more-button-extended"]';
-  private readonly REMIND_ME_LATER_BUTTON = '[data-testid="remind-me-later-button-extended"]';
-  private readonly CLOSE_BUTTON = '[data-testid="midnight-event-banner-close-button"]';
-  private readonly BANNER_DESCRIPTION_TEXT = '[data-testid="midnight-event-banner-description"]';
+  private readonly TITLE = '[data-testid="midnight-launch-banner-title"]';
+  private readonly MIDNIGHT_REGISTRATION_BUTTON = '[data-testid="midnight-launch-banner-cta-button"]';
+  private readonly CLOSE_BUTTON = '[data-testid="midnight-launch-banner-close-button"]';
+  private readonly BANNER_DESCRIPTION_TEXT = '[data-testid="midnight-launch-banner-description"]';
 
   get title(): ChainablePromiseElement<WebdriverIO.Element> {
     return $(this.TITLE);
   }
 
-  get learnMoreButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.LEARN_MORE_BUTTON);
+  get midnightRegistrationButton(): ChainablePromiseElement<WebdriverIO.Element> {
+    return $(this.MIDNIGHT_REGISTRATION_BUTTON);
   }
 
   get closeButton(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -24,18 +23,9 @@ class MidnightBanner {
     return $(this.BANNER_DESCRIPTION_TEXT);
   }
 
-  get remindMeLaterButton(): ChainablePromiseElement<WebdriverIO.Element> {
-    return $(this.REMIND_ME_LATER_BUTTON);
-  }
-
-  async clickOnLearnMoreButton() {
-    await this.learnMoreButton.waitForClickable();
-    await this.learnMoreButton.click();
-  }
-
-  async clickOnRemindMeLaterButton() {
-    await this.remindMeLaterButton.waitForClickable();
-    await this.remindMeLaterButton.click();
+  async clickOnMidnightRegistrationButton() {
+    await this.midnightRegistrationButton.waitForClickable();
+    await this.midnightRegistrationButton.click();
   }
 
   async clickOnCloseButton() {
