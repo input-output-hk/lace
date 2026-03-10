@@ -28,8 +28,12 @@ export enum MessageTypes {
   WS_CONNECTION = 'ws-connnection',
   OPEN_COLLATERAL_SETTINGS = 'open-collateral-settings',
   CHANGE_MODE = 'change-mode',
-  CHANGE_LANGUAGE = 'change-language'
+  CHANGE_LANGUAGE = 'change-language',
+  CHANGE_NETWORK = 'change-network',
+  NETWORK_CHANGED = 'network-changed'
 }
+
+export type NetworkType = 'mainnet' | 'testnet';
 
 export enum BrowserViewSections {
   SEND_ADVANCED = 'send-advanced',
@@ -83,7 +87,18 @@ interface ChangeLanguageMessage {
   type: MessageTypes.CHANGE_LANGUAGE;
   data: Language;
 }
-export type Message = ChangeThemeMessage | WSConnectionMessage | OpenBrowserMessage | ChangeLanguageMessage;
+
+interface NetworkChangedMessage {
+  type: MessageTypes.NETWORK_CHANGED;
+  data: NetworkType;
+}
+
+export type Message =
+  | ChangeThemeMessage
+  | WSConnectionMessage
+  | OpenBrowserMessage
+  | ChangeLanguageMessage
+  | NetworkChangedMessage;
 
 export type UnhandledError = {
   type: 'error' | 'unhandledrejection';
@@ -99,6 +114,7 @@ export type BackgroundService = {
   coinPrices: CoinPrices;
   handleChangeTheme: (data: ChangeThemeData) => void;
   handleChangeLanguage: (data: Language) => void;
+  handleNetworkChanged: (data: NetworkType) => void;
   setBackgroundStorage: (data: BackgroundStorage) => Promise<void>;
   getBackgroundStorage: () => Promise<BackgroundStorage>;
   clearBackgroundStorage: typeof clearBackgroundStorage;

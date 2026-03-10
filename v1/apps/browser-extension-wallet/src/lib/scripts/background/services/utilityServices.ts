@@ -7,6 +7,7 @@ import {
   ChangeThemeData,
   Message,
   MessageTypes,
+  NetworkType,
   OpenBrowserData,
   OpenNamiBrowserData,
   MigrationState,
@@ -168,6 +169,8 @@ const handleChangeTheme = (data: ChangeThemeData) => requestMessage$.next({ type
 
 const handleChangeLanguage = (data: Language) => requestMessage$.next({ type: MessageTypes.CHANGE_LANGUAGE, data });
 
+const handleNetworkChanged = (data: NetworkType) => requestMessage$.next({ type: MessageTypes.NETWORK_CHANGED, data });
+
 const { ADA_PRICE_CHECK_INTERVAL, SAVED_PRICE_DURATION } = config();
 
 const fetchAdaPrice = (coinPrices: CoinPrices) => {
@@ -313,6 +316,7 @@ export const exposeBackgroundService = (wallet$: Observable<ActiveWallet>): void
         coinPrices,
         handleChangeTheme,
         handleChangeLanguage,
+        handleNetworkChanged,
         clearBackgroundStorage,
         getBackgroundStorage,
         setBackgroundStorage,
