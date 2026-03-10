@@ -5,13 +5,16 @@ import { useWalletStore } from '@stores';
 import { useAnalyticsContext } from '@providers';
 import { PostHogAction } from '@lace/common';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 
 export const MultiAddressBalanceVisibleModal = (): ReactElement => {
+  const location = useLocation();
+  const isOnboardingRoute = location.pathname.startsWith('/new-wallet') || location.pathname.startsWith('/setup');
   const { walletState } = useWalletStore();
   const analytics = useAnalyticsContext();
   const [showMultiAddressModal, { updateLocalStorage: setShowMultiAddressModal }] = useLocalStorage(
     'showMultiAddressModal',
-    walletState?.addresses?.length > 1
+    walletState?.addresses?.length > 1 && !isOnboardingRoute
   );
   const { t } = useTranslation();
 

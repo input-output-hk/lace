@@ -12,7 +12,7 @@ import { requestMessage$ } from './utilityServices';
 import { MessageTypes } from '../../types';
 
 import type { themes as ColorScheme } from '../../../../providers/ThemeProvider/types';
-import type { ChangeThemeData } from '../../types/background-service';
+import type { ChangeThemeData, NetworkType } from '../../types/background-service';
 
 const cardanoLogo = require('../../../../assets/icons/browser-view/cardano-logo.svg').default;
 const bitcoinLogo = require('../../../../assets/icons/browser-view/bitcoin-logo.svg').default;
@@ -31,8 +31,9 @@ const isInMemoryWallet = (
 // BehaviorSubject for language state, initialized with default 'en'
 export const language$ = new BehaviorSubject<Language>(Language.en);
 export const colorScheme$ = new BehaviorSubject<ColorScheme>('light');
+export const networkType$ = new BehaviorSubject<NetworkType>('mainnet');
 
-// Initialize language from storage on startup
+// Initialize from storage on startup
 (async () => {
   try {
     const storage = await getBackgroundStorage();
@@ -42,18 +43,26 @@ export const colorScheme$ = new BehaviorSubject<ColorScheme>('light');
     if (storage.colorScheme) {
       colorScheme$.next(storage.colorScheme);
     }
+    if (storage.networkType) {
+      networkType$.next(storage.networkType);
+    }
   } catch (error) {
-    logger.error('Failed to initialize language from storage:', error);
+    logger.error('Failed to initialize from storage:', error);
   }
 })();
 
-// Subscribe to v1 UI language changes via requestMessage$
+// Subscribe to v1 UI changes via requestMessage$
 requestMessage$.subscribe(({ type, data }) => {
   if (type === MessageTypes.CHANGE_LANGUAGE) {
     language$.next(data as Language);
   }
   if (type === MessageTypes.CHANGE_THEME) {
     colorScheme$.next((data as ChangeThemeData).theme);
+  }
+  // Only update networkType$ when the network HAS actually changed (source of truth)
+  // CHANGE_NETWORK is a REQUEST to change, NETWORK_CHANGED is a notification that it changed
+  if (type === MessageTypes.NETWORK_CHANGED) {
+    networkType$.next(data as NetworkType);
   }
 });
 
@@ -82,21 +91,15 @@ const api: BundleAppApi = {
 
     if (isBip32Wallet(wallet)) {
       const accountIndex = wallet.metadata.lastActiveAccountIndex || 0;
-      const bitcoinActiveWallet = await firstValueFrom(bitcoinWalletManager.activeWallet$);
       const cardanoActiveWallet = await firstValueFrom(walletManager.activeWallet$);
+      const desiredNetworkType = await firstValueFrom(networkType$);
+
       if (isBitcoinWallet(wallet)) {
         await setBackgroundStorage({
           activeBlockchain: 'bitcoin'
         });
         await bitcoinWalletManager.activate({
-          network:
-            // If Bitcoin wallet is active, use the same chainID
-            // If Cardano wallet is active, use the same network type
-            // Otherwise use Mainnet
-            bitcoinActiveWallet?.props.network ||
-            cardanoActiveWallet?.props.chainId.networkId === Wallet.Cardano.NetworkId.Testnet
-              ? Bitcoin.Network.Testnet
-              : Bitcoin.Network.Mainnet,
+          network: desiredNetworkType === 'testnet' ? Bitcoin.Network.Testnet : Bitcoin.Network.Mainnet,
           walletId,
           accountIndex
         });
@@ -106,12 +109,9 @@ const api: BundleAppApi = {
         });
         await walletManager.activate({
           chainId:
-            // If Cardano wallet is active, use the same chainID
-            // If Bitcoin wallet is active, use the same network type (preprod if testnet)
-            // Otherwise use Mainnet
-            cardanoActiveWallet?.props.chainId || bitcoinActiveWallet?.props.network === Bitcoin.Network.Testnet
-              ? Wallet.Cardano.ChainIds.Preprod
-              : Wallet.Cardano.ChainIds.Mainnet,
+            desiredNetworkType === 'mainnet'
+              ? Wallet.Cardano.ChainIds.Mainnet
+              : cardanoActiveWallet?.props.chainId ?? Wallet.Cardano.ChainIds.Preprod,
           walletId,
           accountIndex
         });
@@ -129,6 +129,20 @@ const api: BundleAppApi = {
     colorScheme$.next(colorScheme);
     await setBackgroundStorage({ colorScheme });
     requestMessage$.next({ type: MessageTypes.CHANGE_THEME, data: { theme: colorScheme } });
+  },
+  networkType$,
+  setNetworkType: async (networkType: NetworkType): Promise<void> => {
+    // Switch Cardano wallets
+    const cardanoChainId =
+      networkType === 'mainnet' ? Wallet.Cardano.ChainIds.Mainnet : Wallet.Cardano.ChainIds.Preprod;
+    await walletManager.switchNetwork(cardanoChainId);
+
+    // Switch Bitcoin wallets
+    const btcNetwork = networkType === 'mainnet' ? Bitcoin.Network.Mainnet : Bitcoin.Network.Testnet;
+    await bitcoinWalletManager.switchNetwork(btcNetwork);
+
+    await setBackgroundStorage({ networkType });
+    networkType$.next(networkType);
   }
 };
 
