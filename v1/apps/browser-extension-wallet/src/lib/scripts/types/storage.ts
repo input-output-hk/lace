@@ -55,6 +55,7 @@ export interface BackgroundStorage {
   logLevel?: LogLevelString;
   languageChoice?: Language;
   colorScheme?: themes;
+  networkType?: 'mainnet' | 'testnet';
 }
 
 export type BackgroundStorageKeys = keyof BackgroundStorage;

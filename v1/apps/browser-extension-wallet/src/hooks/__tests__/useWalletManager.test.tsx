@@ -795,6 +795,8 @@ describe('Testing useWalletManager hook', () => {
       const chainName = 'Preprod';
       const setCardanoCoin = jest.fn();
       const setCurrentChain = jest.fn();
+      const setBackgroundStorage = jest.fn();
+      const handleNetworkChanged = jest.fn();
 
       jest.spyOn(stores, 'useWalletStore').mockImplementation(() => ({
         settings: {},
@@ -812,7 +814,9 @@ describe('Testing useWalletManager hook', () => {
       } = renderHook(() => useWalletManager(), {
         wrapper: getWrapper({
           backgroundService: {
-            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
+            setBackgroundStorage,
+            handleNetworkChanged
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
       });
@@ -821,6 +825,8 @@ describe('Testing useWalletManager hook', () => {
 
       expect(setCurrentChain).toBeCalledWith(chainName);
       expect(setCardanoCoin).toBeCalledWith({ networkId: 0, networkMagic: 1 });
+      expect(setBackgroundStorage).toBeCalledWith({ networkType: 'testnet', customSubmitTxUrl: '' });
+      expect(handleNetworkChanged).toBeCalledWith('testnet');
       expect(walletApiUi.walletManager.switchNetwork).toBeCalledWith({ networkId: 0, networkMagic: 1 });
     });
 
@@ -842,7 +848,9 @@ describe('Testing useWalletManager hook', () => {
       } = renderHook(() => useWalletManager(), {
         wrapper: getWrapper({
           backgroundService: {
-            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' })
+            getBackgroundStorage: jest.fn().mockResolvedValue({ activeBlockchain: 'cardano' }),
+            setBackgroundStorage: jest.fn(),
+            handleNetworkChanged: jest.fn()
           } as unknown as BackgroundServiceAPIProviderProps['value']
         })
       });

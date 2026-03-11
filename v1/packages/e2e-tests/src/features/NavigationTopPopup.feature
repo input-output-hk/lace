@@ -86,7 +86,7 @@ Feature: Top Navigation - Popup view
     Given I close wallet synced toast
     When I am in the offline network mode
     Then I see network id with status: offline
-    And I see a toast with text: "Network Error"
+#    And I see a toast with text: "Network Error" // TODO: disabled due to https://input-output.atlassian.net/browse/LW-14449
     When I click the menu button
     Then wallet sync status component is visible
-    And sync status displays "Not synced to the blockchain" state
+#    And sync status displays "Not synced to the blockchain" state // TODO: disabled due to https://input-output.atlassian.net/browse/LW-14449
