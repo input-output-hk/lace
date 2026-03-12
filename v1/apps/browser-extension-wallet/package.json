@@ -67,7 +67,7 @@
     "@cardano-sdk/util": "0.17.1",
     "@cardano-sdk/util-rxjs": "0.9.30",
     "@cardano-sdk/wallet": "0.54.2",
-    "@cardano-sdk/web-extension": "0.39.37",
+    "@cardano-sdk/web-extension": "0.39.38",
     "@emurgo/cip14-js": "~3.0.1",
     "@input-output-hk/lace-ui-toolkit": "3.5.0",
     "@lace/bitcoin": "0.1.0",
