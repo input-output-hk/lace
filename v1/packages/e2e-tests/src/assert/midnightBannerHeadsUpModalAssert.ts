@@ -1,25 +1,31 @@
 import { expect } from 'chai';
 import { t } from '../utils/translationService';
-import midnightBannerHeadsUpModal from '../elements/midnightBannerHeadsUpModal';
+import MidnightBannerHeadsUpModal from '../elements/midnightBannerHeadsUpModal';
 
 class MidnightBannerHeadsUpModalAssert {
   async assertSeeHeadsUpModalTitle() {
-    await midnightBannerHeadsUpModal.headsUpModalTitle.waitForDisplayed();
-    expect(await midnightBannerHeadsUpModal.headsUpModalTitle.getText()).to.equal(
-      await t('midnightEventBanner.dialog.title')
+    await MidnightBannerHeadsUpModal.headsUpModalTitle.waitForDisplayed();
+    expect(await MidnightBannerHeadsUpModal.headsUpModalTitle.getText()).to.equal(
+      await t('midnightLaunchBanner.dialog.title')
     );
   }
 
   async assertSeeHeadsUpModalDescription() {
-    await midnightBannerHeadsUpModal.headsUpModalDescription.waitForDisplayed();
-    expect(await midnightBannerHeadsUpModal.headsUpModalDescription.getText()).to.equal(
-      await t('midnightEventBanner.dialog.description')
+    await MidnightBannerHeadsUpModal.headsUpModalDescription.waitForDisplayed();
+    expect(await MidnightBannerHeadsUpModal.headsUpModalDescription.getText()).to.equal(
+      await t('midnightLaunchBanner.dialog.description')
     );
   }
 
   async assertSeeHeadsUpModalButtons() {
-    await midnightBannerHeadsUpModal.headsUpModalCancelButton.waitForDisplayed();
-    await midnightBannerHeadsUpModal.headsUpModalConfirmButton.waitForDisplayed();
+    await MidnightBannerHeadsUpModal.headsUpModalCancelButton.waitForDisplayed();
+    expect(await MidnightBannerHeadsUpModal.headsUpModalConfirmButton.getText()).to.equal(
+      await t('midnightLaunchBanner.dialog.confirm')
+    );
+    await MidnightBannerHeadsUpModal.headsUpModalConfirmButton.waitForDisplayed();
+    expect(await MidnightBannerHeadsUpModal.headsUpModalCancelButton.getText()).to.equal(
+      await t('midnightLaunchBanner.dialog.cancel')
+    );
   }
 }
 

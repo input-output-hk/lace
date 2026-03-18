@@ -46,7 +46,7 @@ import { BackgroundService } from '@lib/scripts/types';
 import { getChainName } from '@src/utils/get-chain-name';
 import { useCustomSubmitApi } from '@hooks/useCustomSubmitApi';
 import { useLMP } from '@hooks/useLMP';
-import { setBackgroundStorage } from '@lib/scripts/background/storage';
+import type { NetworkType } from '@lib/scripts/types';
 import * as KeyManagement from '@cardano-sdk/key-management';
 import { Buffer } from 'buffer';
 import {
@@ -1166,22 +1166,30 @@ export const useWalletManager = (): UseWalletManager => {
   const switchNetwork = useCallback(
     async (chainName: Wallet.ChainName): Promise<void> => {
       logger.debug('Switching chain to', chainName, AVAILABLE_CHAINS);
+      const requestedChainId = chainIdFromName(chainName);
 
-      const chainId = chainIdFromName(chainName);
       const network =
-        chainId.networkId === Wallet.Cardano.NetworkId.Mainnet ? BtcWallet.Network.Mainnet : BtcWallet.Network.Testnet;
+        requestedChainId.networkId === Wallet.Cardano.NetworkId.Mainnet
+          ? BtcWallet.Network.Mainnet
+          : BtcWallet.Network.Testnet;
 
-      await walletManager.switchNetwork(chainId);
+      await walletManager.switchNetwork(requestedChainId);
       await bitcoinWalletManager.switchNetwork(network);
 
       setAddressesDiscoveryCompleted(false);
       updateAppSettings({ ...settings, chainName });
+      // Store the network changes into background storage
       const customSubmitApi = getCustomSubmitApiForNetwork(chainName);
-      await setBackgroundStorage({ customSubmitTxUrl: customSubmitApi.url });
+      const networkType: NetworkType =
+        requestedChainId.networkId === Wallet.Cardano.NetworkId.Mainnet ? 'mainnet' : 'testnet';
+      await backgroundService.setBackgroundStorage({ networkType, customSubmitTxUrl: customSubmitApi.url });
+      // Broadcast network CHANGED notification
+      backgroundService.handleNetworkChanged(networkType);
+
       await reloadWallet();
 
       setCurrentChain(chainName);
-      setCardanoCoin(chainId);
+      setCardanoCoin(requestedChainId);
     },
     [
       setAddressesDiscoveryCompleted,
@@ -1190,7 +1198,8 @@ export const useWalletManager = (): UseWalletManager => {
       getCustomSubmitApiForNetwork,
       reloadWallet,
       setCurrentChain,
-      setCardanoCoin
+      setCardanoCoin,
+      backgroundService
     ]
   );
 

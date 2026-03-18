@@ -24,6 +24,7 @@ export const backgroundServiceProperties: RemoteApiProperties<BackgroundService>
   closeAllTabsAndOpenPopup: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeTheme: RemoteApiPropertyType.MethodReturningPromise,
   handleChangeLanguage: RemoteApiPropertyType.MethodReturningPromise,
+  handleNetworkChanged: RemoteApiPropertyType.MethodReturningPromise,
   clearBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   getBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,
   setBackgroundStorage: RemoteApiPropertyType.MethodReturningPromise,

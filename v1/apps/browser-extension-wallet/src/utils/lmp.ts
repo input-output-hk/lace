@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { storage } from 'webextension-polyfill';
 import { Language } from '@lace/translation';
 import type { themes as ColorScheme } from '../providers/ThemeProvider/types';
+import type { NetworkType } from '@lib/scripts/types/background-service';
 
 export type BundleAppApi = {
   wallets$: Observable<Wallet.LmpBundleWallet[]>;
@@ -12,6 +13,8 @@ export type BundleAppApi = {
   setLanguage(language: Language): Promise<void>;
   colorScheme$: Observable<ColorScheme>;
   setColorScheme(colorScheme: ColorScheme): Promise<void>;
+  networkType$: Observable<NetworkType>;
+  setNetworkType(networkType: NetworkType): Promise<void>;
 };
 export const bundleAppApiProps: RemoteApiProperties<BundleAppApi> = {
   wallets$: RemoteApiPropertyType.HotObservable,
@@ -19,7 +22,9 @@ export const bundleAppApiProps: RemoteApiProperties<BundleAppApi> = {
   language$: RemoteApiPropertyType.HotObservable,
   setLanguage: RemoteApiPropertyType.MethodReturningPromise,
   colorScheme$: RemoteApiPropertyType.HotObservable,
-  setColorScheme: RemoteApiPropertyType.MethodReturningPromise
+  setColorScheme: RemoteApiPropertyType.MethodReturningPromise,
+  networkType$: RemoteApiPropertyType.HotObservable,
+  setNetworkType: RemoteApiPropertyType.MethodReturningPromise
 };
 
 export const lmpApiBaseChannel = 'bundle-lmp';
