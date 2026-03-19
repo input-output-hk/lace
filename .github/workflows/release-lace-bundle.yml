@@ -3,9 +3,7 @@ name: Release Lace Bundle
 on:
   push:
     branches:
-      - 'release/**'
-  schedule:
-    - cron: '0 3 * * 1-5'
+      - 'main'
   workflow_dispatch:
     inputs:
       test_mode:
