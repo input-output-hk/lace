@@ -4,13 +4,29 @@ import { MigrationState } from '../types';
 import { initMigrationState } from './storage';
 import { logger } from '@lace/common';
 
+const MAJOR_VERSION_REQUIRING_FEATURE_FLAG_RESET = 1;
+const MINOR_VERSION_REQUIRING_FEATURE_FLAG_RESET = 35;
+
+type V2FeatureFlagPayloads<T> = {
+  [key: string]: {
+    key: string;
+    payload?: T;
+  }[];
+};
+
+const hasPosthogAnalyticsFeatureFlag = (bgStorageItem: V2FeatureFlagPayloads<unknown>['featureFlags']) =>
+  bgStorageItem.some((f) => f.key === 'ANALYTICS_POSTHOG');
+
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
-  if (details.previousVersion === '1.35.1' && details.reason === 'update') {
-    const hasFeatureFlagsToDelete = await storage.local.get('featureFlags');
-    if (hasFeatureFlagsToDelete) {
-      await storage.local.remove('featureFlags');
-      runtime.reload();
+  if (!!details.previousVersion && details.reason === 'update') {
+    const [major, minor] = details.previousVersion.split('.').map((v) => Number(v));
+    if (major === MAJOR_VERSION_REQUIRING_FEATURE_FLAG_RESET && minor >= MINOR_VERSION_REQUIRING_FEATURE_FLAG_RESET) {
+      const bgStorage = (await storage.local.get('featureFlags')) as V2FeatureFlagPayloads<unknown>;
+      if (!!bgStorage.featureFlags && !hasPosthogAnalyticsFeatureFlag(bgStorage.featureFlags)) {
+        await storage.local.remove('featureFlags');
+        runtime.reload();
+      }
     }
   }
 
