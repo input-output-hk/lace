@@ -3,10 +3,7 @@ name: Release LMP Bundle
 on:
   push:
     branches:
-      - "release/**"
-  schedule:
-    # Run at 03:00 UTC on working days (Monday-Friday)
-    - cron: "0 3 * * 1-5"
+      - "release/extension/1.36.x"
   workflow_dispatch:
     inputs:
       test_mode:
