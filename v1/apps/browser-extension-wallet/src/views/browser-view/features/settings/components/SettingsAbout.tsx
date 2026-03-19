@@ -1,7 +1,8 @@
 import React from 'react';
+import * as Sentry from '@sentry/react';
 import { useTranslation } from 'react-i18next';
 import styles from './SettingsLayout.module.scss';
-import { Typography } from 'antd';
+import { Typography, Button } from 'antd';
 import { useWalletStore } from '@src/stores';
 import { addEllipsis } from '@lace/common';
 import { SocialNetwork, SocialNetworkIcon } from '@views/browser/components/SocialNetworks/SocialNetworkIcon';
@@ -62,6 +63,15 @@ export const SettingsAbout = ({ ...props }: SettingsAboutProps): React.ReactElem
           </>
         )}
       </div>
+      {/* TODO: Remove - fake Sentry exception button for testing */}
+      <Button
+        danger
+        style={{ marginTop: 16 }}
+        onClick={() => Sentry.captureException(new Error('Test Sentry exception from Lace v1'))}
+        data-testid="test-sentry-button"
+      >
+        Test Sentry Exception
+      </Button>
       <div className={styles.social}>
         {socialNetworks.map((el) => (
           <SocialNetworkIcon key={el.name} {...el} />
