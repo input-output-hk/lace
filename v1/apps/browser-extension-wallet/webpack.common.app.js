@@ -108,8 +108,7 @@ module.exports = () =>
               org: process.env.SENTRY_ORG,
               project: process.env.SENTRY_PROJECT,
               sourcemaps: {
-                filesToDeleteAfterUpload: ['**/*.js.map'],
-                assets: ['**/*.js.map']
+                filesToDeleteAfterUpload: ['**/*.js.map']
               },
               release: {
                 name: getVersion()
