@@ -3,8 +3,6 @@ import { logger as commonLogger } from '@lace/common';
 import { ExtensionStorage } from '@lib/scripts/types';
 import { Wallet } from '@lace/cardano';
 import { contextLogger } from '@cardano-sdk/util';
-import { notificationsCenterApi } from './notifications-center';
-import { ExperimentName } from '../types/feature-flags';
 
 const logger = contextLogger(commonLogger, 'Background:StorageListener');
 
@@ -17,43 +15,6 @@ const hasStorageChangeForKey = <T extends keyof ExtensionStorage>(
   changes: Record<string, Storage.StorageChange>,
   key: T
 ): changes is Record<T, ExtensionStorageChange<T>> => key in changes;
-
-/**
- * Extracts the latestMessageTimestamp value from a feature flag payload.
- *
- * @param payload - Feature flag payload
- * @returns ISO timestamp string, or undefined if not found
- */
-const extractLatestMessageTimestamp = (payload: unknown): string | undefined => {
-  if (payload && typeof payload === 'object' && 'latestMessageTimestamp' in payload) {
-    const timestamp = payload.latestMessageTimestamp;
-    if (typeof timestamp === 'string' && timestamp.length > 0) {
-      return timestamp;
-    }
-  }
-  // eslint-disable-next-line consistent-return
-  return undefined;
-};
-
-/**
- * Handles changes to the lace-messaging-center feature flag payload.
- * Triggers notification sync when the latestMessageTimestamp is set.
- * Notifications library is responsible for detecting if the timestamp has changed and triggering a sync if it has.
- *
- * @param newPayload - feature flag payload value
- */
-const handleLaceMessagingCenterPayloadChange = async (newPayload: unknown): Promise<void> => {
-  const newTimestamp = extractLatestMessageTimestamp(newPayload);
-
-  if (newTimestamp !== undefined) {
-    try {
-      const api = await notificationsCenterApi;
-      await api.notifications.triggerNotificationSync(newTimestamp);
-    } catch (error) {
-      logger.warn('Failed to trigger notification sync', newTimestamp, error);
-    }
-  }
-};
 
 const handleBackgroundStorageChange = (changes: ExtensionStorageChange<'BACKGROUND_STORAGE'>) => {
   if (changes.newValue?.logLevel && changes.oldValue?.logLevel !== changes.newValue.logLevel) {
@@ -71,12 +32,6 @@ const handleBackgroundStorageChange = (changes: ExtensionStorageChange<'BACKGROU
     if (newLoggerSentryIntegrationEnabled !== oldLoggerSentryIntegrationEnabled) {
       commonLogger.setSentryIntegrationEnabled(newLoggerSentryIntegrationEnabled || false);
     }
-  }
-
-  // Handle changes to lace-messaging-center feature flag payload
-  if (changes.newValue?.featureFlagPayloads) {
-    const newPayload = changes.newValue.featureFlagPayloads[ExperimentName.NOTIFICATIONS_CENTER];
-    handleLaceMessagingCenterPayloadChange(newPayload);
   }
 };
 

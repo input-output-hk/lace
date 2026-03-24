@@ -15,13 +15,11 @@ import { useAnalyticsContext } from '@providers';
 
 const notificationsCenterApi = consumeRemoteApi<NotificationsCenterProperties>(
   {
-    baseChannel: 'notifications-center',
+    baseChannel: 'notification-center',
     properties: notificationsCenterProperties
   },
   { logger, runtime }
 );
-
-(globalThis as Record<string, unknown>).notificationsCenterApi = notificationsCenterApi;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const useNotificationsCenter = () => {
