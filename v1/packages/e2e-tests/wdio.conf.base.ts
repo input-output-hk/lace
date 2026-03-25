@@ -11,10 +11,7 @@ export const config: WebdriverIO.Config = {
   specs: ['./src/features/**/*.feature'],
   suites: {
     batch1: [
-      './src/features/Onboarding*.feature',
-      './src/features/SettingsPageExtended*.feature',
-      './src/features/SendTransactionMetadata*.feature',
-      './src/features/SendTransactionMultipleSelection*.feature'
+      './src/features/TokensPageExtended.part1.feature'
     ],
     batch2: [
       './src/features/SendTransactionSimpleExtended.part2.feature',
