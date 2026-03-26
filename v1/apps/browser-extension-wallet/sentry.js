@@ -171,6 +171,8 @@ const reportQuotaWarningIfNeeded = async (errorMessage) => {
 Sentry.init({
   environment: process.env.SENTRY_ENVIRONMENT,
   dsn: process.env.SENTRY_DSN,
+  // APP_VERSION and COMMIT_HASH are always injected by webpack.common.js.
+  release: `${process.env.APP_VERSION}-${String(process.env.COMMIT_HASH).slice(0, 7)}`,
   integrations: [Sentry.browserTracingIntegration(), Sentry.browserProfilingIntegration(), Sentry.replayIntegration()],
   // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
   tracePropagationTargets: ['localhost', 'chrome-extension://gafhhkghbfjjkeiendhlofajokpaflmk'],
