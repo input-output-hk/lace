@@ -8,22 +8,29 @@ const MAJOR_VERSION_REQUIRING_FEATURE_FLAG_RESET = 1;
 const MINOR_VERSION_REQUIRING_FEATURE_FLAG_RESET = 35;
 
 type V2FeatureFlagPayloads<T> = {
-  [key: string]: {
-    key: string;
-    payload?: T;
-  }[];
+  featureFlags: {
+    featureFlags: {
+      key: string;
+      payload?: T;
+    }[];
+  };
 };
 
-const hasPosthogAnalyticsFeatureFlag = (bgStorageItem: V2FeatureFlagPayloads<unknown>['featureFlags']) =>
-  bgStorageItem.some((f) => f.key === 'ANALYTICS_POSTHOG');
+const hasPosthogAnalyticsFeatureFlag = (
+  bgStorageItem: V2FeatureFlagPayloads<unknown>['featureFlags']['featureFlags']
+): boolean => {
+  if (bgStorageItem.length === 0) return false;
+  return bgStorageItem.some((f) => f.key === 'ANALYTICS_POSTHOG');
+};
 
 // migrations
 const checkMigrationsOnUpdate = async (details: Runtime.OnInstalledDetailsType) => {
   if (!!details.previousVersion && details.reason === 'update') {
     const [major, minor] = details.previousVersion.split('.').map((v) => Number(v));
     if (major === MAJOR_VERSION_REQUIRING_FEATURE_FLAG_RESET && minor >= MINOR_VERSION_REQUIRING_FEATURE_FLAG_RESET) {
-      const bgStorage = (await storage.local.get('featureFlags')) as V2FeatureFlagPayloads<unknown>;
-      if (!!bgStorage.featureFlags && !hasPosthogAnalyticsFeatureFlag(bgStorage.featureFlags)) {
+      const stored = (await storage.local.get('featureFlags')) as V2FeatureFlagPayloads<unknown> | undefined;
+      const flags = stored?.featureFlags?.featureFlags ?? [];
+      if (!hasPosthogAnalyticsFeatureFlag(flags)) {
         await storage.local.remove('featureFlags');
         runtime.reload();
       }
