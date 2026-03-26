@@ -39,6 +39,10 @@ inputs:
     description: 'Run tests on LMP bundle'
     required: false
     default: 'false'
+  SPEC:
+    description: 'Single feature file to run (e.g. TokensPageExtended.part1.feature). Overrides batch when set.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -75,7 +79,11 @@ runs:
           tagsToRun="'${{ inputs.TAGS }} and ${tagsToRun}'"
         fi
         echo "Running tests with tags: ${tagsToRun}"
-        runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
+        if [ -n "${{ inputs.SPEC }}" ]; then
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --spec ./src/features/${{ inputs.SPEC }} --cucumberOpts.tags=${tagsToRun}"
+        else
+          runCommand="yarn wdio run wdio.conf.${BROWSER}.ts --suite batch${BATCH} --cucumberOpts.tags=${tagsToRun}"
+        fi
         eval "$runCommand";
 
     - name: Save dmesg logs

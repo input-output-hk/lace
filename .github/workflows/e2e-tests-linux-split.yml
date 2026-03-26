@@ -48,6 +48,11 @@ on:
         description: 'Tags(optional)'
         required: false
         default: ''
+      spec:
+        type: string
+        description: 'Single feature file to run (e.g. TokensPageExtended.part1.feature). Overrides batch selection when set.'
+        required: false
+        default: ''
 
 run-name: "E2E | os: Linux | browser: ${{ github.event.inputs.browser || 'chrome' }} | network: ${{ github.event.inputs.network || 'preprod' }} | #${{ github.run_number }} | tags: ${{ github.event.inputs.tags || '' }} | smoke only: ${{ github.event.inputs.smoke_only || 'false' }}"
 
@@ -96,6 +101,7 @@ jobs:
       runner: ${{ github.event.inputs.runner || 'ubuntu-22.04' }}
       smoke_only: ${{ github.event.inputs.smoke_only || false }}
       tags: ${{ github.event.inputs.tags || '' }}
+      spec: ${{ github.event.inputs.spec || '' }}
       build_exists: ${{ steps.check-build-exists.outputs.build_exists }}
 
   build:
@@ -186,6 +192,7 @@ jobs:
           BATCH: ${{ matrix.batch }}
           SMOKE_ONLY: ${{ needs.setup.outputs.smoke_only }}
           TAGS: ${{ needs.setup.outputs.tags }}
+          SPEC: ${{ needs.setup.outputs.spec }}
           TEST_DAPP_URL: ${{ secrets.TEST_DAPP_URL }}
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           SERVICE_WORKER_LOGS: ${{ needs.setup.outputs.service_worker_logs }}
