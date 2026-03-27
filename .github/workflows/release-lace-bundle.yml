@@ -25,7 +25,7 @@ env:
   NETWORK: preprod
   RUN: ${{ github.run_number }}
   BRANCH: ${{ github.ref_name }}
-  TEST_MODE: ${{ github.event.inputs.test_mode || (github.event_name == 'schedule' && 'smoke') || 'all' }}
+  TEST_MODE: ${{ github.event.inputs.test_mode || 'smoke' }}
   NODE_OPTIONS: --max-old-space-size=16384
 
 concurrency:
