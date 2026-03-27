@@ -423,10 +423,16 @@ jobs:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
+      - name: Read version from manifest
+        id: read-manifest
+        run: |
+          VERSION=$(jq -r .version dist/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download Lace Bundle artifact
         uses: actions/download-artifact@v5
         with:
-          name: lace-bundle-chrome
+          name: lace-lmp-bundle-${{ steps.read-manifest.outputs.version }}-chrome
           path: ./dist
 
       - name: Execute E2E tests
@@ -508,10 +514,16 @@ jobs:
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
+      - name: Read version from manifest
+        id: read-manifest
+        run: |
+          VERSION=$(jq -r .version dist/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Download Lace Bundle artifact
         uses: actions/download-artifact@v5
         with:
-          name: lace-bundle-chrome
+          name: lace-lmp-bundle-${{ steps.read-manifest.outputs.version }}-chrome
           path: ./dist
 
       - name: Start XVFB
