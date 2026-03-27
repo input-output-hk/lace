@@ -25,7 +25,7 @@ env:
   NETWORK: preprod
   RUN: ${{ github.run_number }}
   BRANCH: ${{ github.ref_name }}
-  TEST_MODE: ${{ github.event.inputs.test_mode || (github.event_name == 'schedule' && 'smoke') || 'all' }}
+  TEST_MODE: ${{ github.event.inputs.test_mode || 'smoke' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -373,10 +373,16 @@ jobs:
           NODE_OPTIONS: "--max_old_space_size=8192"
         run: yarn build:bundle
 
+      - name: Read manifest version
+        id: read-manifest
+        run: |
+          VERSION=$(jq -r .version dist/manifest.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Upload Chrome Bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lace-bundle-chrome
+          name: lace-lmp-bundle-${{ steps.read-manifest.outputs.version }}-chrome
           path: ./dist
           retention-days: 90
           if-no-files-found: error
@@ -389,7 +395,7 @@ jobs:
       - name: Upload MS Edge Bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lace-bundle-edge
+          name: lace-lmp-bundle-${{ steps.read-manifest.outputs.version }}-edge
           path: ./dist
           retention-days: 90
           if-no-files-found: error
