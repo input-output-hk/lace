@@ -376,7 +376,7 @@ jobs:
       - name: Read manifest version
         id: read-manifest
         run: |
-          VERSION=$(jq -r .version dist/manifest.json)
+          VERSION=$(jq -r .version v1/apps/browser-extension-wallet/manifest.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Upload Chrome Bundle artifact
@@ -423,10 +423,10 @@ jobs:
           WALLET_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      - name: Read version from manifest
+      - name: Read manifest version
         id: read-manifest
         run: |
-          VERSION=$(jq -r .version dist/manifest.json)
+          VERSION=$(jq -r .version v1/apps/browser-extension-wallet/manifest.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Download Lace Bundle artifact
@@ -514,10 +514,10 @@ jobs:
         env:
           WALLET_1_PASSWORD: ${{ secrets.WALLET_PASSWORD_TESTNET }}
 
-      - name: Read version from manifest
+      - name: Read manifest version
         id: read-manifest
         run: |
-          VERSION=$(jq -r .version dist/manifest.json)
+          VERSION=$(jq -r .version v1/apps/browser-extension-wallet/manifest.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Download Lace Bundle artifact
