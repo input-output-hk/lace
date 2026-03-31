@@ -1,4 +1,4 @@
-name: Release Lace Bundle
+name: Release Lace Bundle (v1+v2)
 
 on:
   push:
