@@ -1,16 +1,15 @@
-name: Release Lace Bundle
+name: Release Lace Bundle (v1+v2)
 
 on:
-  push:
-    branches:
-      - 'main'
+  schedule:
+    - cron: '0 3 * * 1-5'
   workflow_dispatch:
     inputs:
       test_mode:
         description: 'E2E test execution mode'
         required: true
         type: choice
-        default: 'all'
+        default: 'smoke'
         options:
           - 'none'
           - 'smoke'
@@ -339,6 +338,7 @@ jobs:
           echo "https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-lace-bundle/v1/${{ env.BROWSER }}/${{ env.RUN }}/index.html | browser: ${{ env.BROWSER }} | network: ${{ env.NETWORK }} | test_mode: ${{ env.TEST_MODE }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Slack Notification
+        if: ${{ github.event_name == 'schedule' }}
         uses: rtCamp/action-slack-notify@v2.3.3
         env:
           SLACK_COLOR: "${{ needs.laceV1E2eTests.result == 'failure' && 'failure' || 'good' }}"
@@ -346,9 +346,9 @@ jobs:
           SLACK_MESSAGE: |
             *V1:* https://${{ secrets.E2E_REPORTS_USER }}:${{ secrets.E2E_REPORTS_PASSWORD }}@${{ secrets.E2E_REPORTS_URL }}/release-lace-bundle/v1/${{ env.BROWSER }}/${{ env.RUN }}/index.html (${{ needs.laceV1E2eTests.result }})
             browser: ${{ env.BROWSER }} | test_mode: ${{ env.TEST_MODE }}
-          SLACK_TITLE: 'Lace Bundle test automation results :rocket:'
+          SLACK_TITLE: 'Lace v1+v2 Bundle nightly smoke test results :rocket:'
           SLACK_USERNAME: lace-qa-bot
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_LP_MIDNIGHT_SUPPORT }}
 
       - name: Upload v1 allure tests results
         uses: actions/upload-artifact@v4
