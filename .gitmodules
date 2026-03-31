@@ -2,3 +2,7 @@
 	path = v2
 	url = git@github.com:input-output-hk/lace-platform.git
 	branch = main
+[submodule "lmp"]
+	path = lmp
+	url = git@github.com:input-output-hk/lace-platform.git
+	branch = midnight-extension-protected
