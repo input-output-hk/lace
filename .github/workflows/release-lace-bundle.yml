@@ -377,21 +377,6 @@ jobs:
           SERVICE_WORKER_LOGS: true
           LMP_BUNDLE: true
 
-  verifyTests:
-    name: Verify Test Results
-    runs-on: ubuntu-22.04
-    needs: laceV1E2eTests
-    if: ${{ always() && github.event.inputs.test_mode != 'none' }}
-
-    steps:
-      - name: Check e2e tests result
-        run: |
-          if [[ ${{ needs.laceV1E2eTests.result }} == "success" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
-
   midnightE2eTests:
     name: Midnight E2E Tests
     runs-on: ubuntu-22.04
@@ -400,7 +385,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        batch: [1, 2, 3, 4, 5, 6, 7, 8]
+        batch: ${{ github.event.inputs.test_mode == 'all' && fromJSON('[1,2,3,4,5,6,7,8]') || fromJSON('[1]') }}
 
     steps:
       - name: Checkout repository
@@ -470,11 +455,10 @@ jobs:
           BATCH: ${{ matrix.batch }}
         run: |
           if [ "${{ env.TEST_MODE }}" == "smoke" ]; then
-            TAGS_TO_RUN="--cucumberOpts.tags='@Smoke'";
+            runCommand="npx wdio run wdio.conf.chrome.ts --suite smoke";
           else
-            TAGS_TO_RUN="";
+            runCommand="npx wdio run wdio.conf.chrome.ts --suite batch${BATCH}";
           fi
-          runCommand="npx wdio run wdio.conf.chrome.ts --suite batch${BATCH} ${TAGS_TO_RUN}"
           eval "$runCommand"
 
       - name: Publish artifacts (logs, reports, screenshots)
@@ -489,18 +473,20 @@ jobs:
           retention-days: 10
           if-no-files-found: ignore
 
-  verifyMidnightTests:
-    name: Verify Midnight Test Results
+  laceBundleE2eVerify:
+    name: Lace bundle E2E verify
     runs-on: ubuntu-22.04
-    needs: midnightE2eTests
+    needs: [laceV1E2eTests, midnightE2eTests]
     if: ${{ always() && github.event.inputs.test_mode != 'none' }}
 
     steps:
-      - name: Check midnight e2e tests result
+      - name: Check E2E results
         run: |
-          if [[ ${{ needs.midnightE2eTests.result }} == "success" ]]; then
-            exit 0
-          else
+          v1="${{ needs.laceV1E2eTests.result }}"
+          md="${{ needs.midnightE2eTests.result }}"
+          echo "Lace v1 E2E: ${v1}"
+          echo "Midnight E2E: ${md}"
+          if [[ "${v1}" != "success" ]] || [[ "${md}" != "success" ]]; then
             exit 1
           fi
 
@@ -526,7 +512,7 @@ jobs:
           merge-multiple: true
 
       - name: Create v1 allure properties
-        working-directory: './v1/artifacts/reports/allure/results'
+        working-directory: ./v1/artifacts/reports/allure/results
         run: |
           echo "
           branch=${BRANCH}
@@ -538,7 +524,7 @@ jobs:
           " > environment.properties
 
       - name: Create midnight allure properties
-        working-directory: './midnight/artifacts/reports/allure/results'
+        working-directory: ./midnight/artifacts/v2/apps/midnight-extension-e2e/reports/allure/results
         run: |
           echo "
           branch=${BRANCH}
@@ -571,7 +557,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.E2E_AWS_SECRET_ACCESS_KEY }}
         with:
           storageType: s3
-          resultsGlob: './midnight/artifacts/reports/allure/results'
+          resultsGlob: './midnight/artifacts/v2/apps/midnight-extension-e2e/reports/allure/results'
           bucket: lace-e2e-test-results
           prefix: 'release-lace-bundle/midnight/${BROWSER}/${RUN}'
           copyLatest: true
@@ -610,7 +596,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lace-bundle-midnight-allure-results
-          path: ./midnight/artifacts/reports/allure/results
+          path: ./midnight/artifacts/v2/apps/midnight-extension-e2e/reports/allure/results
 
       - name: Upload performance metrics
         uses: actions/upload-artifact@v4
