@@ -117,6 +117,24 @@ runs:
         PUBNUB_SUBSCRIBE_KEY: ${{ inputs.PUBNUB_SUBSCRIBE_KEY }}
         PUBNUB_TOKEN_ENDPOINT: ${{ inputs.PUBNUB_TOKEN_ENDPOINT }}
 
+    - name: Upload SW sourcemaps to Sentry
+      if: inputs.SENTRY_AUTH_TOKEN != '' && inputs.SENTRY_ORG != '' && inputs.SENTRY_PROJECT != ''
+      env:
+        SENTRY_AUTH_TOKEN: ${{ inputs.SENTRY_AUTH_TOKEN }}
+        SENTRY_ORG: ${{ inputs.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ inputs.SENTRY_PROJECT }}
+      run: |
+        VERSION=$(jq -r '.version' manifest.json)
+        HASH=$(git rev-parse --short HEAD)
+        RELEASE="${VERSION}-${HASH}"
+        npx sentry-cli sourcemaps upload \
+          --release "$RELEASE" \
+          --url-prefix "~/sw/" \
+          dist/sw
+        rm -f dist/sw/*.js.map
+      shell: bash
+      working-directory: ${{ inputs.DIR }}
+
     - name: Upload Chrome artifact
       if: ${{ inputs.BROWSER_TARGET == 'chromium' }}
       uses: actions/upload-artifact@v4
