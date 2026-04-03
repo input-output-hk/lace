@@ -39,7 +39,7 @@ const transformManifest = (content, mode, jsAssets = []) => {
       process.env.BLOCKFROST_URL_PREPROD,
       process.env.BLOCKFROST_URL_PREVIEW,
       process.env.BLOCKFROST_URL_SANCHONET
-    ].join(' ');
+    ].map(url => (url && new URL(url).pathname !== '/' ? url + '/' : url)).join(' ');
 
     manifest.content_security_policy.extension_pages = manifest.content_security_policy.extension_pages
       .replace('$CARDANO_WS_SERVER_URLS', cardanoWsServicesUrls)
