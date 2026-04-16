@@ -21,7 +21,6 @@ export enum ExperimentName {
   SEND_CONSOLE_ERRORS_TO_SENTRY = 'send-console-errors-to-sentry',
   BITCOIN_WALLETS = 'bitcoin-wallets',
   MIDNIGHT_WALLETS = 'midnight-wallets',
-  NFTPRINTLAB = 'nftprintlab',
   GLACIER_DROP = 'glacier-drop',
   MEMPOOLSPACE_FEE_MARKET = 'bitcoin-mempool-space-fee-market',
   NOTIFICATIONS_CENTER = 'lace-messaging-center',

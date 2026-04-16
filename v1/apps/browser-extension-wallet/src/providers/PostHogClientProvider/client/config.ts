@@ -38,7 +38,7 @@ const defaultFeatureFlags: FeatureFlags = {
   [ExperimentName.SEND_CONSOLE_ERRORS_TO_SENTRY]: false,
   [ExperimentName.BITCOIN_WALLETS]: false,
   [ExperimentName.MIDNIGHT_WALLETS]: false,
-  [ExperimentName.NFTPRINTLAB]: false,
+
   [ExperimentName.GLACIER_DROP]: false,
   [ExperimentName.MEMPOOLSPACE_FEE_MARKET]: false,
   [ExperimentName.NOTIFICATIONS_CENTER]: false,
