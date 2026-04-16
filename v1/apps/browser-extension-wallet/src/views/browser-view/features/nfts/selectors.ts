@@ -80,8 +80,7 @@ export const nftDetailSelector = (asset: AssetOrHandleInfo): NftDetailProps => {
       tokenInformation: i18n.t('core.nftDetail.tokenInformation'),
       attributes: i18n.t('core.nftDetail.attributes'),
       directory: i18n.t('core.nftDetail.directory'),
-      setAsAvatar: i18n.t('core.nftDetail.setAsAvatar'),
-      printNft: i18n.t('core.nftDetail.printNft')
+      setAsAvatar: i18n.t('core.nftDetail.setAsAvatar')
     }
   };
 };

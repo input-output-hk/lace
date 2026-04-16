@@ -7,7 +7,6 @@ class NftDetails {
   private NFT_DETAILS_DRAWER = '[data-testid="nft-details-drawer"]';
   private IMAGE = '[data-testid="nft-image"]';
   private SET_AS_AVATAR_BUTTON = '[data-testid="nft-set-as-avatar-button"]';
-  private PRINT_THIS_NFT_BUTTON = '[data-testid="nft-print-button"]';
   private TOKEN_INFO_SECTION = '[data-testid="nft-info"]';
   private TOKEN_INFORMATION_LABEL = '[data-testid="nft-info-label"]';
   private ATTRIBUTES_SECTION = '[data-testid="nft-attributes"]';
@@ -50,10 +49,6 @@ class NftDetails {
 
   get setAsAvatarButton() {
     return this.drawerBody.$(this.SET_AS_AVATAR_BUTTON);
-  }
-
-  get printThisNftButton() {
-    return this.drawerBody.$(this.PRINT_THIS_NFT_BUTTON);
   }
 
   get tokenInfoSection(): ChainablePromiseElement<WebdriverIO.Element> {
@@ -137,11 +132,6 @@ class NftDetails {
   async clickOnSetAsAvatarButton(): Promise<void> {
     await this.setAsAvatarButton.waitForStable();
     await this.setAsAvatarButton.click();
-  }
-
-  async clickOnPrintThisNFTButton(): Promise<void> {
-    await this.printThisNftButton.waitForStable();
-    await this.printThisNftButton.click();
   }
 }
 

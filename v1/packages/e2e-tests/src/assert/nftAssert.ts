@@ -13,7 +13,6 @@ import adaHandleAssert from './adaHandleAssert';
 import NftsCommon from '../elements/NFTs/nftsCommon';
 import { scrollToTheTop } from '../utils/scrollUtils';
 import { getExtensionUUID } from '../utils/firefoxUtils';
-import localStorageManager from '../utils/localStorageManager';
 
 use(chaiSorted);
 
@@ -110,8 +109,6 @@ class NftAssert {
     await this.assertSeeNFTDetailsHeader(mode, nftName);
     await NftDetails.image.waitForDisplayed();
     await this.assertSeeSetAsAvatarButton(true);
-    const appSettings = await localStorageManager.getItem('appSettings');
-    await this.assertSeePrintThisNFTButton(JSON.parse(appSettings).chainName === 'Mainnet');
     await this.assertSeeNFTDetailsTokenInformationSection();
     await this.assertSeeNFTDetailsAttributesSection();
     await this.assertSeeSendNFTButton(true);
@@ -146,13 +143,6 @@ class NftAssert {
     await NftDetails.setAsAvatarButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
     if (shouldBeDisplayed) {
       expect(await NftDetails.setAsAvatarButton.getText()).to.equal(await t('core.nftDetail.setAsAvatar'));
-    }
-  }
-
-  private async assertSeePrintThisNFTButton(shouldBeDisplayed: boolean) {
-    await NftDetails.printThisNftButton.waitForDisplayed({ reverse: !shouldBeDisplayed });
-    if (shouldBeDisplayed) {
-      expect(await NftDetails.printThisNftButton.getText()).to.equal(await t('core.nftDetail.printNft'));
     }
   }
 
