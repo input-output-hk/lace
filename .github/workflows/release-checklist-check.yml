@@ -1,0 +1,62 @@
+name: Release checklist check
+
+# Companion to open-source-release-publish.yml on the private repo.
+#
+# Every release-mirror PR (head ref `release/<tag>`, opened by the
+# publish workflow) carries a pre-merge checklist in its body — at
+# minimum the auto-seeded "Release notes reviewed" item, plus anything
+# a reviewer adds inline.
+#
+# Branch protection on the public repo requires this workflow's check
+# to pass before merge. The check counts every `- [ ]` line in the PR
+# body and fails if any are unticked. The maintainer's job: review the
+# inherited release notes (the publish workflow seeds the draft body
+# from the corresponding private release notes), adapt them for a
+# public audience, then tick the box.
+#
+# Scope: only fires on PRs from `release/*` head refs targeting the
+# default branch. Other PRs (the bootstrap PR, emergency fixes via
+# ci-skip-pr-close) are unaffected.
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  verify-release-checklist:
+    name: Verify release checklist
+    if: >
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      github.event.pull_request.head.repo.fork == false &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checklist items must be ticked
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          body=$(gh pr view "$PR_NUMBER" --json body --jq .body \
+            --repo "$GITHUB_REPOSITORY")
+
+          unticked=$(printf '%s\n' "$body" | grep -cE '^\s*-\s*\[ \]' || true)
+          ticked=$(printf '%s\n' "$body" | grep -cE '^\s*-\s*\[[xX]\]' || true)
+          total=$((unticked + ticked))
+
+          if [ "$total" -eq 0 ]; then
+            echo "::error::no checklist items found in this PR's body. The publish workflow seeds at least one (\"Release notes reviewed\") — restore it, or close + reopen this PR to have it regenerated."
+            exit 1
+          fi
+
+          echo "Checklist: $ticked/$total complete"
+          if [ "$unticked" -gt 0 ]; then
+            echo "::error::$unticked checklist item(s) still unticked — review and tick before merge."
+            exit 1
+          fi
+          echo "✓ all $total checklist item(s) ticked"
