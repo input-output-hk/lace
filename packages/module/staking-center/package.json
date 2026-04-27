@@ -1,0 +1,25 @@
+{
+  "name": "@lace-module/staking-center",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/activities": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/cardano-stake-pools": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/staking-center": "*",
+    "@lace-contract/tokens": "*",
+    "fuse.js": "*",
+    "rxjs": "*"
+  },
+  "devDependencies": {
+    "@cardano-sdk/core": "0.46.12",
+    "@lace-lib/util-dev": "*"
+  }
+}

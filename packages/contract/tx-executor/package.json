@@ -1,0 +1,20 @@
+{
+  "name": "@lace-contract/tx-executor",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-redacted": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

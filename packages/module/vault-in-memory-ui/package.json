@@ -1,0 +1,23 @@
+{
+  "name": "@lace-module/vault-in-memory-ui",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/key-management": "0.29.13",
+    "@lace-contract/account-management": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/recovery-phrase": "*",
+    "@lace-contract/secure-store": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-module/vault-in-memory": "*",
+    "@lace-sdk/util": "*"
+  }
+}

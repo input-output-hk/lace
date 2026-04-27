@@ -1,1 +1,0 @@
-export { IogImage } from './IogImage';

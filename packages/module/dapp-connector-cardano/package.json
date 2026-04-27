@@ -1,0 +1,42 @@
+{
+  "name": "@lace-module/dapp-connector-cardano",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "scripts": {
+    "generate:cip30-webview": "node ./scripts/generate-cip30-webview-source.mjs"
+  },
+  "dependencies": {
+    "@cardano-sdk/core": "0.46.12",
+    "@cardano-sdk/util": "0.17.1",
+    "@cardano-sdk/util-rxjs": "0.9.31",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/dapp-connector": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-hw": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/dapp-connector": "*",
+    "@lace-sdk/extension-messaging": "*",
+    "@lace-sdk/util": "*",
+    "@reduxjs/toolkit": "*",
+    "rxjs": "*",
+    "webextension-polyfill": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}

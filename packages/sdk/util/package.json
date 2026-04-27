@@ -1,0 +1,34 @@
+{
+  "name": "@lace-sdk/util",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Utilities",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/input-output-hk/lace-platform.git",
+    "directory": "packages/sdk/util"
+  },
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "scripts": {
+    "build:cjs": "tsc --module commonjs --moduleResolution node",
+    "build:esm": "tsc --outDir ./dist/esm --module es2020",
+    "module-fixup": "run-s module-fixup:cjs module-fixup:esm",
+    "module-fixup:cjs": "cp ../build/cjs-package.json ./dist/cjs/package.json",
+    "module-fixup:esm": "cp ../build/esm-package.json ./dist/esm/package.json",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.5",
+    "ts-results-es": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.19",
+    "type-fest": "^4.15.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

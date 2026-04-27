@@ -1,0 +1,19 @@
+{
+  "name": "@lace-contract/app-lock",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

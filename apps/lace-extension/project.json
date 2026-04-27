@@ -1,0 +1,147 @@
+{
+  "projectType": "application",
+  "tags": ["scope:app"],
+  "targets": {
+    "build": {
+      "cache": true,
+      "inputs": [
+        "default",
+        "^default",
+        {
+          "externalDependencies": ["webpack"]
+        },
+        {
+          "env": "NODE_ENV"
+        },
+        {
+          "env": "SENTRY_AUTH_TOKEN"
+        },
+        {
+          "env": "SENTRY_ORG"
+        },
+        {
+          "env": "SENTRY_PROJECT_ID"
+        },
+        {
+          "env": "SENTRY_DSN"
+        },
+        {
+          "env": "SENTRY_ENVIRONMENT"
+        },
+        {
+          "env": "BLOCKFROST_PROJECT_ID_MAINNET"
+        },
+        {
+          "env": "BLOCKFROST_PROJECT_ID_PREPROD"
+        },
+        {
+          "env": "BLOCKFROST_PROJECT_ID_PREVIEW"
+        },
+        {
+          "env": "BLOCKFROST_URL_MAINNET"
+        },
+        {
+          "env": "BLOCKFROST_URL_PREPROD"
+        },
+        {
+          "env": "BLOCKFROST_URL_PREVIEW"
+        },
+        {
+          "env": "BLOCKFROST_IPFS_URL"
+        },
+        {
+          "env": "MAESTRO_PROJECT_ID_TESTNET"
+        },
+        {
+          "env": "MAESTRO_PROJECT_ID_MAINNET"
+        },
+        {
+          "env": "MAESTRO_URL_TESTNET"
+        },
+        {
+          "env": "MAESTRO_URL_MAINNET"
+        },
+        {
+          "env": "CARDANO_SERVICES_URL_MAINNET"
+        },
+        {
+          "env": "CARDANO_SERVICES_URL_PREPROD"
+        },
+        {
+          "env": "CARDANO_SERVICES_URL_PREVIEW"
+        },
+        {
+          "env": "DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID"
+        },
+        {
+          "env": "DEFAULT_CARDANO_TESTNET_CHAIN_ID"
+        },
+        {
+          "env": "FEATURE_FLAG_CHECK_FREQUENCY_SECONDS"
+        },
+        {
+          "env": "POSTHOG_API_TOKEN"
+        },
+        {
+          "env": "POSTHOG_API_URL"
+        },
+        {
+          "env": "URL_COOKIE_POLICY"
+        },
+        {
+          "env": "URL_FAQ_COPY_PASTE_RECOVERY_PHRASE"
+        },
+        {
+          "env": "URL_FAQ_RECOVERY_PHRASE"
+        },
+        {
+          "env": "URL_FAQ"
+        },
+        {
+          "env": "URL_PRIVACY_POLICY"
+        },
+        {
+          "env": "URL_RECOVERY_PHRASE_VIDEO"
+        },
+        {
+          "env": "URL_TERMS_AND_CONDITIONS"
+        },
+        {
+          "env": "URL_ZENDESK_NEW_REQUEST"
+        },
+        {
+          "env": "EXTENSION_ID"
+        },
+        {
+          "env": "EXTENSION_KEY"
+        },
+        {
+          "env": "EXTENSION_NAME"
+        },
+        {
+          "env": "MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL"
+        },
+        {
+          "env": "MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL"
+        },
+        {
+          "env": "LACE_TERMS_OF_USE_URL"
+        },
+        {
+          "fileset": "{projectRoot}/webpack/.env*"
+        }
+      ],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "lint": {},
+    "type-check-src": {},
+    "type-check-test": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

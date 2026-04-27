@@ -1,0 +1,42 @@
+{
+  "name": "@lace-sdk/extension-messaging",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web extension messaging utilities",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/input-output-hk/lace-platform.git",
+    "directory": "packages/sdk/extension-messaging"
+  },
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "./src/index.ts",
+  "scripts": {
+    "build:cjs": "tsc --module commonjs --moduleResolution node",
+    "build:esm": "tsc --outDir ./dist/esm --module es2020",
+    "module-fixup": "run-s module-fixup:cjs module-fixup:esm",
+    "module-fixup:cjs": "cp ../build/cjs-package.json ./dist/cjs/package.json",
+    "module-fixup:esm": "cp ../build/esm-package.json ./dist/esm/package.json",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@lace-sdk/util": "*",
+    "backoff-rxjs": "^7.0.0",
+    "lodash": "^4.17.21",
+    "rxjs": "^7.8.1",
+    "ts-custom-error": "^3.3.1",
+    "uuid": "^9.0.1",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/blake2b": "^2.1.3",
+    "@types/lodash": "^4.17.1",
+    "@types/uuid": "^9.0.8",
+    "@types/webextension-polyfill": "^0.10.7",
+    "ts-log": "^2.2.5",
+    "type-fest": "^4.18.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

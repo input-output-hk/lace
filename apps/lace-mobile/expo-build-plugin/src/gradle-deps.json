@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    {
+      "name": "apollo-android",
+      "implementation": "implementation('org.hyperledger.identus:apollo-android:1.8.4-kt2.1.20') {\n        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'\n        exclude group: 'com.squareup.okio', module: 'okio'\n        }"
+    },
+    {
+      "name": "bcprov-jdk18on",
+      "implementation": "implementation 'org.bouncycastle:bcprov-jdk18on:1.80'"
+    }
+  ],
+  "subprojectsBlock": "subprojects {\n  configurations.all {\n    resolutionStrategy {\n      force 'org.bouncycastle:bcprov-jdk18on:1.80'\n    }\n    exclude group: 'org.bouncycastle', module: 'bcprov-jdk15to18'\n  }\n}"
+}

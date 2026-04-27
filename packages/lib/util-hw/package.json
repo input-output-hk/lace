@@ -1,0 +1,17 @@
+{
+  "name": "@lace-lib/util-hw",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./extension": "./src/extension.ts",
+    "./extension-ui": "./src/extension-ui/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/i18n": "*",
+    "@lace-lib/util-store": "*"
+  }
+}

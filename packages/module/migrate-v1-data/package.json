@@ -1,0 +1,30 @@
+{
+  "name": "@lace-module/migrate-v1-data",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/key-management": "0.29.13",
+    "@lace-contract/address-book": "*",
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/dapp-connector": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/midnight-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-sdk/util": "*",
+    "zxcvbn": "4.4.2"
+  },
+  "devDependencies": {
+    "@cardano-sdk/web-extension": "0.39.40",
+    "@lace-lib/util-dev": "*",
+    "@types/zxcvbn": "4.4.5"
+  }
+}

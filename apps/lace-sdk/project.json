@@ -1,0 +1,27 @@
+{
+  "name": "lace-sdk",
+  "projectType": "library",
+  "tags": ["scope:app"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsdown && (trap 'rm -rf dist/.dts-work' EXIT; tsc -p tsconfig.dts-gen.json && npx rollup -c rollup.dts.config.mjs)",
+        "cwd": "apps/lace-sdk"
+      },
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/packages/contract/*/src/**/*",
+        "{workspaceRoot}/packages/lib/*/src/**/*",
+        "{workspaceRoot}/packages/sdk/*/src/**/*",
+        "{workspaceRoot}/packages/module/*/src/sdk.ts",
+        "{workspaceRoot}/packages/module/*/src/augmentations.ts",
+        "{workspaceRoot}/tsconfig.base.json"
+      ],
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "type-check-src": {},
+    "lint": {}
+  }
+}

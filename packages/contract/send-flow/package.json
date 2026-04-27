@@ -1,0 +1,22 @@
+{
+  "name": "@lace-contract/send-flow",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../../dist/out-tsc",
+    "declaration": true,
+    "types": ["node", "react-native"],
+    "module": "ES2015"
+  },
+  "include": [
+    "src/**/*",
+    "src/index.ts",
+    "src/design-system/index.ts",
+    "src/design-tokens/index.ts",
+    "src/typings/*.d.ts",
+    "eslint.config.mjs",
+    "vitest.config.js"
+  ],
+  "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+}

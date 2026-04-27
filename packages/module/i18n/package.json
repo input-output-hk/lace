@@ -1,0 +1,20 @@
+{
+  "name": "@lace-module/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "i18next": "^23.11.5",
+    "intl-pluralrules": "2.0.1",
+    "react-i18next": "^14.1.2"
+  }
+}

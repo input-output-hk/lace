@@ -1,1 +1,0 @@
-export { StakePoolConfirmationBody } from './StakePoolConfirmationBody';

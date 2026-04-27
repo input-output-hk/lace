@@ -1,0 +1,18 @@
+Lace public source snapshot
+===========================
+
+release-tag:         lace-extension@2.0.0
+source-repo:         input-output-hk/lace-platform (private)
+source-commit:       3621c8c6da354fe0e978b2d922695cd54044730b
+snapshot-utc:        2026-04-27T14:24:47.836Z
+
+allowlist-sha256:    a75a43e9e238d609b21b9d7f3409fa46bb8a0a92a4738dbeba71076ec4e74929
+excludelist-sha256:  8e7916a357aae4f8a8a963e32cb48392e039572670b390f043322a9d17e98a50
+templates-sha256:    6d454434e489a39bff6915e0fa94cf0373dd2290249d8dbccf040df4db17df84
+
+This snapshot was generated from the private source of truth by
+open-source-release-publish.yml. The hashes above bind it to specific
+versions of the controls under tools/open-source-release/ in the
+private repo; a snapshot produced with different controls will show
+different hashes. Reproducing locally requires access to the private
+repo (the source of truth is not published).

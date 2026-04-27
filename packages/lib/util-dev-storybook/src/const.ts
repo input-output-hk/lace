@@ -1,0 +1,9 @@
+import { HexBytes } from '@lace-sdk/util';
+
+export const password = 'ComplexPassword2024!';
+export const encryptedRecoveryPhrasePassword = password;
+export const recoveryPhrase =
+  'faith evoke innocent movie drip undo situate lecture rib tomorrow type ecology weapon burger depend behind cheap sign list fluid negative tone figure regular';
+export const encryptedRecoveryPhrase = HexBytes(
+  'b536e663c9976c839a43dd91246bfad8e4685c9d87ee5793cbeb895a15b241fe3ccf1f6c1a634630bbd34a6cf48e74569c0fd15fb2cd1e73d74e2a112b2a4e6da026387cfb5f6a6198608d333ccad6ee76e3f2570b3f61cc43ae565e6d8f1620dad2b83a7a168865e13c044bca65d71d9db617b7cf7b38a426c9e55d727b6bc0e9b483c3780fca0bfa27808b4f33c64252a3337ba04a1427cf749988e8856c4a992a3371d4b323122a64a75e1515fe76525d7279d3377f3d7680141ec2a9c90f09d65f0c803dad747bdbfdb471b48098885f3d84888af92a6b',
+);

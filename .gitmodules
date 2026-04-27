@@ -1,4 +1,0 @@
-[submodule "v2"]
-	path = v2
-	url = git@github.com:input-output-hk/lace-platform.git
-	branch = main

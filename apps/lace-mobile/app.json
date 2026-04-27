@@ -1,0 +1,136 @@
+{
+  "expo": {
+    "name": "Lace",
+    "slug": "lace-v2",
+    "owner": "lace_io",
+    "entryPoint": "index.js",
+    "newArchEnabled": true,
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/Lace-ios-icon.png",
+    "platforms": ["ios", "android", "web"],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "icon": "./assets/Lace-ios-icon.png",
+      "supportsTablet": true,
+      "bundleIdentifier": "io.lace.mobilewallet",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "cardano-deeplinks",
+            "CFBundleURLSchemes": ["cardano", "web+cardano"]
+          }
+        ]
+      },
+      "appleTeamId": "89TW38X994"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Lace-android-adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "io.lace.mobilewallet",
+      "permissions": [
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "cardano"
+            },
+            {
+              "scheme": "web+cardano"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+      "allowBackup": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "./app.plugin.js",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.6",
+            "forceStaticLinking": ["ApolloLibrary"]
+          },
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ],
+      [
+        "expo-dev-client",
+        {
+          "launchMode": "most-recent"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "note": "Use SENTRY_AUTH_TOKEN env to authenticate with Sentry.",
+          "project": "lace-v2-mobile",
+          "organization": "iohk-j4"
+        }
+      ],
+      "expo-localization",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID for secure authentication."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan address QR codes."
+        }
+      ],
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/Lace-android-adaptive-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF",
+          "dark": {
+            "image": "./assets/Lace-android-adaptive-icon.png",
+            "backgroundColor": "#1E1E1E"
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "890a5a3d-f8c9-4e4e-9bf7-596352158335"
+      }
+    }
+  }
+}

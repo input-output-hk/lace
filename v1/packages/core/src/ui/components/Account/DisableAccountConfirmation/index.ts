@@ -1,1 +1,0 @@
-export { DisableAccountConfirmation } from './DisableAccountConfirmation';

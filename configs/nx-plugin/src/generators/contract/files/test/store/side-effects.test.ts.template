@@ -1,0 +1,34 @@
+import { testSideEffect } from '@lace-lib/util-dev';
+import { describe, it } from 'vitest';
+
+import { <%= propertyName %>Actions as actions } from '../../src';
+import { someSideEffect } from '../../src/store/side-effects';
+
+describe('<%= name %> side effects', () => {
+  describe('someSideEffect', () => {
+    it('emits action without sampleActionWithoutPayload on sampleAction', () => {
+      testSideEffect(someSideEffect, ({ hot, expectObservable }) => {
+        return {
+          actionObservables: {
+            <%= propertyName %>: {
+              sampleAction$: hot('-a', {
+                a: actions.<%= propertyName %>.sampleAction('payload'),
+              }),
+            },
+          },
+          stateObservables: {
+            <%= propertyName %>: { selectSampleStateProp$: hot('a', { a: 'value' }) },
+          },
+          dependencies: { actions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: {
+                type: '<%= propertyName %>/sampleActionWithoutPayload',
+              },
+            });
+          },
+        };
+      });
+    });
+  });
+});

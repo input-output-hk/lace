@@ -1,1 +1,0 @@
-export { ConfirmVoteDelegation } from './ConfirmVoteDelegation';

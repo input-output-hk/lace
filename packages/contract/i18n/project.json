@@ -1,0 +1,16 @@
+{
+  "projectType": "library",
+  "tags": ["scope:contract"],
+  "targets": {
+    "lint": {},
+    "type-check-src": {},
+    "type-check-test": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config={projectRoot}/vitest.config.js"
+      }
+    },
+    "typedoc": {}
+  }
+}

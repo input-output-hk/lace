@@ -1,0 +1,21 @@
+{
+  "name": "@lace-module/dapp-connector-extension",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/dapp-connector": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-sdk/dapp-connector": "*",
+    "@lace-sdk/extension-messaging": "*",
+    "rxjs": "^7.8.1",
+    "type-fest": "^4.32.0",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

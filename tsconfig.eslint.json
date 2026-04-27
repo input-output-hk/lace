@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "exclude": ["node_modules", "dist", "coverage", "docs/typedoc"],
+  "include": [
+    "**/*.mjs",
+    "declarations.d.ts",
+    "vitest.config.js",
+    "src/**/*",
+    "test/**/*",
+    "scripts/*"
+  ]
+}

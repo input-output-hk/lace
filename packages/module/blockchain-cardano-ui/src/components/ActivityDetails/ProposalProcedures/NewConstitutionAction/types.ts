@@ -1,0 +1,30 @@
+import type * as ActionIdTypes from '../components/ActionIdTypes';
+import type * as ProcedureTypes from '../components/ProcedureTypes';
+import type * as TxDetailsTypes from '../components/ProposalProcedureTransactionDetailsTypes';
+
+export interface Data {
+  procedure: ProcedureTypes.Procedure;
+  actionId?: ActionIdTypes.Data;
+  txDetails: TxDetailsTypes.TxDetails;
+  constitution: {
+    anchor: {
+      dataHash: string;
+      url: string;
+    };
+    scriptHash?: string;
+  };
+}
+
+export interface Translations {
+  procedure: ProcedureTypes.Translations;
+  actionId?: ActionIdTypes.Translations;
+  txDetails: TxDetailsTypes.Translations;
+  constitution: {
+    title: string;
+    anchor: {
+      dataHash: string;
+      url: string;
+    };
+    scriptHash: string;
+  };
+}

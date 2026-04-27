@@ -1,0 +1,15 @@
+{
+  "name": "@lace-module/views-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "@lace-contract/views": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

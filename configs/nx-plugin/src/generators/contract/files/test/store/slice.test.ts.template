@@ -1,0 +1,21 @@
+import { describe, expect, it } from 'vitest';
+
+import { <%= propertyName %>Actions as actions } from '../../src/index';
+import { <%= propertyName %>Reducers } from '../../src/store/slice';
+
+import type { <%= className %>State } from '../../src/index';
+
+describe('<%= propertyName %> slice', () => {
+  const initialState: <%= className %>State = {
+    sampleStateProp: 'sample1',
+  };
+
+  describe('reducers', () => {
+    describe('sampleAction', () => {
+      it('sets sampleStateProp', () => {
+        const state = <%= propertyName %>Reducers.<%= propertyName %>(initialState, actions.<%= propertyName %>.sampleAction('sample2'));
+        expect(state.sampleStateProp).toBe('sample2');
+      });
+    })
+  });
+});

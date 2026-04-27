@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM"],
+    "paths": {
+      "@lace-contract/*": ["./node_modules/@lace-contract/*/src"],
+      "@lace-lib/*": ["./node_modules/@lace-lib/*/src", "./packages/lib/*/src"],
+      "@lace-module/*": ["./node_modules/@lace-module/*/src"],
+      "@lace-sdk/*": ["./node_modules/@lace-sdk/*/src"],
+      "nx-plugin": ["configs/nx-plugin/src/index.ts"]
+    }
+  },
+  "include": ["declarations.d.ts"]
+}

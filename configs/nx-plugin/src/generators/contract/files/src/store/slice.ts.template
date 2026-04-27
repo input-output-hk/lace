@@ -1,0 +1,49 @@
+import { createSlice } from '@reduxjs/toolkit';
+
+import type {
+  PayloadAction,
+  StateFromReducersMapObject,
+} from '@reduxjs/toolkit';
+import type * as _immer from 'immer';
+
+export type <%= className %>SliceState = {
+  sampleStateProp?: string;
+};
+
+const initialState: <%= className %>SliceState = {};
+
+const slice = createSlice({
+  name: '<%= propertyName %>',
+  initialState,
+  reducers: {
+    sampleAction: (
+      state,
+      { payload }: Readonly<PayloadAction<string>>,
+    ) => {
+      // TODO
+      state.sampleStateProp = payload;
+    },
+    sampleActionWithoutPayload: _state => {
+      // TODO
+    },
+  },
+  selectors: {
+    selectSampleStateProp: ({ sampleStateProp }) => sampleStateProp,
+  },
+});
+
+export const <%= propertyName %>Reducers = {
+  [slice.name]: slice.reducer,
+};
+
+export const <%= propertyName %>Actions = {
+  <%= propertyName %>: slice.actions
+};
+
+export const <%= propertyName %>Selectors = {
+  <%= propertyName %>: slice.selectors
+};
+
+export type <%= className %>StoreState = StateFromReducersMapObject<
+  typeof <%= propertyName %>Reducers
+>;

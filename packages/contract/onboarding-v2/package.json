@@ -1,0 +1,25 @@
+{
+  "name": "@lace-contract/onboarding-v2",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/crypto": "0.4.5",
+    "@cardano-sdk/key-management": "0.29.13",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/sync": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*",
+    "redux": "^5.0.1",
+    "rxjs": "*",
+    "ts-log": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

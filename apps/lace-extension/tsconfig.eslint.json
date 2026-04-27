@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.eslint.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["eslint.config.mjs", "**/*.mjs", "src/**/*", "test/**/*"]
+}

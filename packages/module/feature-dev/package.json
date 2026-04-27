@@ -1,0 +1,22 @@
+{
+  "name": "@lace-module/feature-dev",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./sdk": "./src/sdk.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/dev": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/views": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

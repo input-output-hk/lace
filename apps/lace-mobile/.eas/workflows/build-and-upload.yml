@@ -1,0 +1,37 @@
+name: Mobile Build and Upload
+
+# Manual trigger only - run via EAS CLI or Expo dashboard
+# eas workflow:run build-and-upload.yml
+
+jobs:
+  build_android:
+    name: Build Android
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  build_ios:
+    name: Build iOS
+    type: build
+    params:
+      platform: ios
+      profile: production
+
+  upload_android:
+    name: Upload to Play Store
+    needs: [build_android]
+    type: submit
+    params:
+      platform: android
+      profile: production
+      build_id: ${{ needs.build_android.outputs.build_id }}
+
+  upload_ios:
+    name: Upload to App Store
+    needs: [build_ios]
+    type: submit
+    params:
+      platform: ios
+      profile: production
+      build_id: ${{ needs.build_ios.outputs.build_id }}

@@ -1,0 +1,9 @@
+{
+  "projectType": "library",
+  "tags": ["scope:contract"],
+  "targets": {
+    "lint": {},
+    "type-check-src": {},
+    "typedoc": {}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "eslint.config.mjs",
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "src/**/*.tsx",
+    "vitest.config.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/generators/contract/files/**/*",
+    "src/generators/module/files/**/*"
+  ]
+}

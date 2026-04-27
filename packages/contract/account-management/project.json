@@ -1,0 +1,24 @@
+{
+  "projectType": "library",
+  "tags": ["scope:contract"],
+  "targets": {
+    "lint": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test-watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest watch --config=vitest.config.js",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typedoc": {},
+    "type-check-src": {},
+    "type-check-test": {}
+  }
+}

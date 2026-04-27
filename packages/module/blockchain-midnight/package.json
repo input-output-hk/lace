@@ -1,0 +1,39 @@
+{
+  "name": "@lace-module/blockchain-midnight",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/midnight-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/send-flow": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/storage": "*",
+    "@lace-contract/sync": "*",
+    "@lace-contract/token-pricing": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/ui-extension": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

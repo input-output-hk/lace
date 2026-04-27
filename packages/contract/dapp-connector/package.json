@@ -1,0 +1,18 @@
+{
+  "name": "@lace-contract/dapp-connector",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/dapp-connector": "*",
+    "@lace-sdk/extension-messaging": "*",
+    "redux-persist": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

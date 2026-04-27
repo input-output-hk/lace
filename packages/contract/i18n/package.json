@@ -1,0 +1,17 @@
+{
+  "name": "@lace-contract/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "expo-localization": "*",
+    "i18next": "^23.11.5",
+    "react-i18next": "^14.1.2"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

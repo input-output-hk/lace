@@ -1,0 +1,22 @@
+{
+  "projectType": "library",
+  "tags": ["scope:module"],
+  "targets": {
+    "lint": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test-watch": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest watch --config=vitest.config.js",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typedoc": {}
+  }
+}

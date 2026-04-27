@@ -1,0 +1,25 @@
+# Add files here to ignore them from prettier formatting
+dist
+build
+coverage
+reports
+allure-results
+.env
+tmp
+engineering-support
+/.nx/cache
+/.nx/workspace-data
+typedoc
+.claude
+.cursor
+# lace-mobile build artifacts
+apps/lace-mobile/.expo
+apps/lace-mobile/ios
+apps/lace-mobile/android
+packages/apollo-native
+# auto-generated storybook static code
+apps/lace-mobile-storybook/storybook-static
+ctrf-report.json
+.junie/
+# auto-generated docs
+docs/contracts-and-modules.md

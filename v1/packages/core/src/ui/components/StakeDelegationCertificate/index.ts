@@ -1,1 +1,0 @@
-export { StakeDelegationCertificate } from './StakeDelegationCertificate';

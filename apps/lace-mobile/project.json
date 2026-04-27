@@ -1,0 +1,99 @@
+{
+  "name": "lace-mobile",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/lace-mobile/src",
+  "projectType": "application",
+  "tags": ["scope:app"],
+  "targets": {
+    "lint": {
+      "description": "Lint the app source with ESLint"
+    },
+    "type-check-src": {
+      "description": "Type-check app source files"
+    },
+    "type-check-test": {
+      "description": "Type-check test files against the test tsconfig"
+    },
+    "run-ios": {
+      "description": "Build and run the app on an iOS device or simulator",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "EXPO_NO_METRO_LAZY=1 expo run:ios",
+        "cwd": "apps/lace-mobile"
+      },
+      "configurations": {
+        "release": {
+          "command": "EXPO_NO_METRO_LAZY=1 expo run:ios --configuration Release"
+        },
+        "reset-cache": {
+          "command": "EXPO_NO_METRO_LAZY=1 expo run:ios --reset-cache"
+        }
+      }
+    },
+    "run-android": {
+      "description": "Build and run the app on an Android device or emulator",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "EXPO_NO_METRO_LAZY=1 expo run:android",
+        "cwd": "apps/lace-mobile"
+      },
+      "configurations": {
+        "release": {
+          "command": "EXPO_NO_METRO_LAZY=1 expo run:android --variant release"
+        },
+        "reset-cache": {
+          "command": "EXPO_NO_METRO_LAZY=1 expo run:android --reset-cache"
+        }
+      }
+    },
+    "list-ios-devices": {
+      "description": "List available iOS simulators and connected devices",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "xcrun xctrace list devices",
+        "cwd": "apps/lace-mobile"
+      }
+    },
+    "list-android-devices": {
+      "description": "List connected Android devices and running emulators",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb devices",
+        "cwd": "apps/lace-mobile"
+      }
+    },
+    "clean": {
+      "description": "Remove native build artifacts for iOS and Android. Use make reset for a full workspace wipe.",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rm -rf ios/build android/build android/.gradle",
+        "cwd": "apps/lace-mobile"
+      }
+    },
+    "clear-simulator-app-data": {
+      "description": "Wipe the app's persistent storage from the booted iOS simulator. Requires the app to be installed.",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "APP_CONTAINER_DIR=$(xcrun simctl get_app_container booted io.lace.mobilewallet data) && rm -rf \"$APP_CONTAINER_DIR\"",
+        "cwd": "apps/lace-mobile"
+      }
+    },
+    "doctor": {
+      "description": "Run expo doctor and React Native CLI doctor for environment health checks",
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["expo doctor", "npx @react-native-community/cli doctor"],
+        "parallel": false,
+        "cwd": "apps/lace-mobile"
+      }
+    },
+    "test": {
+      "description": "Run unit tests and collect coverage",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

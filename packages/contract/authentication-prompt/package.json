@@ -1,0 +1,24 @@
+{
+  "name": "@lace-contract/authentication-prompt",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/secure-store": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-redacted": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^26.1.0"
+  }
+}
