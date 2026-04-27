@@ -1,0 +1,61 @@
+name: Close unsolicited PRs
+
+# The public repo is a release mirror, not a development source of truth.
+# Contributor PRs here can't flow back into real releases. This workflow
+# auto-closes any PR not coming from one of our release/* snapshot
+# branches, with a comment pointing the author at the issue channels.
+#
+# The `pull_request_target` trigger (vs `pull_request`) is required to
+# get write permissions for PRs from forks — that's where unsolicited
+# PRs typically come from.
+#
+# Exception path: a maintainer with repo-write access who legitimately
+# needs to open a PR on this mirror (e.g. an emergency fix to one of the
+# public-side workflows) can add the `ci-skip-pr-close` label before
+# opening. The label can be pre-applied via `gh pr create --label
+# ci-skip-pr-close ...`; if you forget, add the label and reopen the PR.
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  issues: write   # gh pr comment posts via the Issues API
+
+jobs:
+  close:
+    if: >
+      !contains(github.event.pull_request.labels.*.name, 'ci-skip-pr-close') &&
+      (github.event.pull_request.head.repo.fork == true ||
+       !startsWith(github.event.pull_request.head.ref, 'release/'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment and close
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Heredoc dedents the body so Markdown renders as paragraphs +
+          # bullets, not as a code block. Quoted 'EOF' disables shell
+          # expansion — the body is fixed text.
+          gh pr comment "$PR_NUMBER" --body "$(cat <<'EOF'
+          Thanks for opening this — we appreciate the interest. This
+          repository is a published mirror, so a PR here can't flow back
+          into real releases and would leave your work stranded. We
+          don't want that.
+
+          This PR is being closed automatically. Take whichever route
+          fits your change instead:
+
+          - 🐛 Bug, feature, or verification concern → [open an issue](https://github.com/input-output-hk/lace/issues/new/choose)
+            and attach your patch (inline diff, gist, or fork link).
+          - 🤝 Larger or ongoing contribution → [open a contribution proposal](https://github.com/input-output-hk/lace/issues/new?template=contribution_proposal.yml).
+            We'll reach out to coordinate scope and access.
+
+          The issue forms are the right place to continue the
+          conversation and coordinate any contribution.
+          EOF
+          )"
+
+          gh pr close "$PR_NUMBER"
