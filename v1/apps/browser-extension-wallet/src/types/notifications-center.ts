@@ -48,7 +48,7 @@ export const notificationsCenterProperties: RemoteApiProperties<NotificationsCen
   notifications: {
     markAsRead: RemoteApiPropertyType.MethodReturningPromise,
     notifications$: RemoteApiPropertyType.HotObservable,
-    remove: RemoteApiPropertyType.MethodReturningPromise
+    remove: RemoteApiPropertyType.MethodReturningPromise,
   },
   test: {
     add: RemoteApiPropertyType.MethodReturningPromise,

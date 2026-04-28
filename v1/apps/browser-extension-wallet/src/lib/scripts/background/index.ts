@@ -13,6 +13,5 @@ import './keep-alive-sw';
 import './onUninstall';
 import './nami-migration';
 import './onStorageChange';
-import './notifications-center';
 
 require('@emurgo/cardano-message-signing-browser/cardano_message_signing_bg.js');
