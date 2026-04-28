@@ -1,0 +1,12 @@
+{
+  "name": "@lace-lib/observability",
+  "version": "0.0.1",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@lace-lib/util-redacted": "*",
+    "tslib": "^2.3.0"
+  }
+}

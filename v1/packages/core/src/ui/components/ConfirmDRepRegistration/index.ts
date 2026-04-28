@@ -1,1 +1,0 @@
-export { ConfirmDRepRegistration } from './ConfirmDRepRegistration';

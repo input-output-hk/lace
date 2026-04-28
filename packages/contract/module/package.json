@@ -1,0 +1,12 @@
+{
+  "name": "@lace-contract/module",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-sdk/util": "*",
+    "redux-persist": "*"
+  }
+}

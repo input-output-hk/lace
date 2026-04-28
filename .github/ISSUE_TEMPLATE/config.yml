@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔐 Security vulnerability
+    url: https://github.com/input-output-hk/lace/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.
+  - name: 💬 General discussion
+    url: https://github.com/input-output-hk/lace/discussions
+    about: For open-ended questions and discussion, use GitHub Discussions.

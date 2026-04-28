@@ -1,0 +1,79 @@
+name: 🤝 Contribution proposal
+description: Propose a substantive change you'd like to collaborate on with the Lace team.
+labels: [contribution-proposal, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for wanting to contribute to Lace. This template is for
+        **larger or ongoing work** — new features, package-level changes,
+        infrastructure improvements, research — where a simple patch
+        isn't the right shape.
+
+        For small fixes, use the [bug report](./bug_report.yml) or
+        [feature request](./feature_request.yml) templates and attach
+        your patch to the issue.
+
+        We read every proposal. For ones that align with the roadmap
+        we'll reach out to coordinate: that usually means agreeing scope
+        first, then working together against the internal source of
+        truth (which may involve a Contributor License Agreement and
+        limited access arrangement, depending on the scope).
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like to work on?
+      description: A concrete description of the change, feature, or area you'd like to contribute to.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does this matter?
+      description: The problem you're trying to solve or the opportunity you see. What do users gain?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and approach
+      description: |
+        Rough estimate of the work involved, your proposed approach, and
+        any design decisions you'd want our input on before starting.
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Relevant background
+      description: |
+        Anything that helps us evaluate fit — prior related work, links to your
+        other open-source contributions, depth of familiarity with the Lace
+        codebase or the technologies involved. Not a gate, just useful
+        context.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: engagement
+    attributes:
+      label: How would you like to engage?
+      options:
+        - One-off — land this change and move on
+        - Recurring — I'd like to become a regular contributor in this area
+        - Not sure yet — let's discuss
+    validations:
+      required: true
+
+  - type: input
+    id: contact
+    attributes:
+      label: Preferred contact for follow-up
+      description: GitHub handle is fine; email, Discord, or other is also welcome.
+      placeholder: '@your-github-handle'
+    validations:
+      required: true

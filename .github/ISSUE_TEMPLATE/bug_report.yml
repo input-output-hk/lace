@@ -1,0 +1,78 @@
+name: 🐛 Bug report
+description: Report a defect in the extension, mobile app, or published source.
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the
+        fields below so we can reproduce and triage it efficiently.
+
+        **For security vulnerabilities, please use the private reporting
+        channel instead** — see [SECURITY.md](https://github.com/input-output-hk/lace/blob/main/SECURITY.md).
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which Lace surface?
+      options:
+        - Browser extension (Chrome)
+        - Browser extension (Edge)
+        - Browser extension (Firefox)
+        - Mobile (iOS)
+        - Mobile (Android)
+        - Source / build reproducibility
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag or version shown in the app (e.g. `lace-extension@2.0.1`).
+      placeholder: lace-extension@2.0.1
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the unexpected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/OS version, device model, network (mainnet/preprod/preview/testnet), etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, screenshots, or additional context
+      description: Attach anything that helps us understand the issue. Please redact any sensitive data.
+    validations:
+      required: false

@@ -1,0 +1,14 @@
+{
+  "generators": {
+    "module": {
+      "factory": "./src/generators/module/generator",
+      "schema": "./src/generators/module/schema.json",
+      "description": "module package generator"
+    },
+    "contract": {
+      "factory": "./src/generators/contract/generator",
+      "schema": "./src/generators/contract/schema.json",
+      "description": "contract package generator"
+    }
+  }
+}

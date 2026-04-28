@@ -1,0 +1,6 @@
+import type { <%= propertyName %>Reducers } from './store';
+import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
+
+declare module '@lace-contract/module' {
+  interface State extends StateFromReducersMapObject<typeof <%= propertyName %>Reducers> {}
+}

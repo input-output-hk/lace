@@ -1,0 +1,19 @@
+{
+  "name": "@lace-module/app-activity-web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/module": "*",
+    "@lace-sdk/extension-messaging": "*",
+    "react": "*",
+    "rxjs": "*",
+    "webextension-polyfill": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

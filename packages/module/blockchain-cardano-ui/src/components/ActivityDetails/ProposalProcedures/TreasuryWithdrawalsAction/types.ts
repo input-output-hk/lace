@@ -1,0 +1,24 @@
+import type * as ActionIdTypes from '../components/ActionIdTypes';
+import type * as ProcedureTypes from '../components/ProcedureTypes';
+import type * as TxDetailsTypes from '../components/ProposalProcedureTransactionDetailsTypes';
+
+export interface Data {
+  actionId?: ActionIdTypes.Data;
+  txDetails: TxDetailsTypes.TxDetails;
+  procedure: ProcedureTypes.Procedure;
+  withdrawals: Array<{
+    rewardAccount: string;
+    lovelace: string;
+  }>;
+}
+
+export interface Translations {
+  txDetails: TxDetailsTypes.Translations;
+  actionId?: ActionIdTypes.Translations;
+  procedure: ProcedureTypes.Translations;
+  withdrawals: {
+    title: string;
+    rewardAccount: string;
+    lovelace: string;
+  };
+}

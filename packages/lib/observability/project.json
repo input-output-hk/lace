@@ -1,0 +1,20 @@
+{
+  "name": "@lace-lib/observability",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/lib/observability/src",
+  "projectType": "library",
+  "tags": ["scope:lib"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/lib/observability",
+        "main": "packages/lib/observability/src/index.ts",
+        "tsConfig": "packages/lib/observability/tsconfig.lib.json",
+        "assets": ["packages/lib/observability/*.md"]
+      }
+    },
+    "type-check-src": {}
+  }
+}

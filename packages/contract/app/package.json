@@ -1,0 +1,26 @@
+{
+  "name": "@lace-contract/app",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/activities": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/notification-center": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-store": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*",
+    "@testing-library/react": "^16.3.0",
+    "jsdom": "^26.1.0"
+  }
+}

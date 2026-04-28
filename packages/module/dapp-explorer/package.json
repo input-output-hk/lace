@@ -1,0 +1,22 @@
+{
+  "name": "@lace-module/dapp-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "scripts": {
+    "type-check": "run-p type-check:*",
+    "type-check:src": "tsc --noEmit",
+    "type-check:test": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/module": "*",
+    "fuse.js": "^7.0.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

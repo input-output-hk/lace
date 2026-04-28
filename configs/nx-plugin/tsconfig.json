@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "Node"
+  },
+  "allowDefaultProject": ["eslint.config.mjs"],
+  "files": [],
+  "include": [],
+  "exclude": [
+    "src/generators/contract/files/*.*",
+    "src/generators/module/files/*.*"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
+}

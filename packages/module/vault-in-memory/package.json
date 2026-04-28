@@ -1,0 +1,28 @@
+{
+  "name": "@lace-module/vault-in-memory",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@craftzdog/react-native-buffer": "^6.0.5",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/secure-store": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-render": "*",
+    "antd": "^4.24.12",
+    "buffer": "^6.0.3",
+    "react-native-quick-base64": "^2.1.2",
+    "zxcvbn": "4.4.2"
+  },
+  "devDependencies": {
+    "@types/zxcvbn": "4.4.5"
+  }
+}

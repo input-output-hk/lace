@@ -1,0 +1,25 @@
+{
+  "name": "@lace-module/account-management",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/account-management": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/recovery-phrase": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-hw": "*",
+    "@lace-module/vault-in-memory-ui": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

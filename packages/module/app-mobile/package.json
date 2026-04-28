@@ -1,0 +1,36 @@
+{
+  "name": "@lace-module/app-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/account-management": "*",
+    "@lace-contract/activities": "*",
+    "@lace-contract/address-book": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/notification-center": "*",
+    "@lace-contract/onboarding-v2": "*",
+    "@lace-contract/send-flow": "*",
+    "@lace-contract/storage": "*",
+    "@lace-contract/token-pricing": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "projectType": "library",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {},
+    "type-check-src": {},
+    "type-check-test": {},
+    "typedoc": {}
+  }
+}

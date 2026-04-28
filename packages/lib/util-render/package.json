@@ -1,0 +1,13 @@
+{
+  "name": "@lace-lib/util-render",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "@lace-contract/views": "*",
+    "@react-rxjs/core": "^0.10.8"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "exclude": ["node_modules", "dist", "coverage", "docs/typedoc"],
+  "include": [
+    "eslint.config.mjs",
+    "vitest.config.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "test/**/*.ts",
+    "test/**/*.js"
+  ]
+}

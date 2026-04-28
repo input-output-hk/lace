@@ -1,0 +1,18 @@
+import { map, withLatestFrom } from 'rxjs';
+
+import type { SideEffect } from '../contract';
+
+export const someSideEffect: SideEffect = (
+  { <%= propertyName %>: { sampleAction$ } },
+  { <%= propertyName %>: { selectSampleStateProp$ } },
+  { actions },
+) =>
+  sampleAction$.pipe(
+    withLatestFrom(selectSampleStateProp$),
+    map(([_sampleAction, _sampleStateProperty]) =>
+      actions.<%= propertyName %>.sampleActionWithoutPayload()
+    ),
+  );
+
+export const <%= propertyName %>SideEffects = [someSideEffect];
+

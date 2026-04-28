@@ -1,1 +1,0 @@
-export { AssetsView } from './AssetsView';

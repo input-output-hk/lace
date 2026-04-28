@@ -1,39 +1,79 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE
 .idea
-.pnp.cjs
-node_modules
-dist
-.env
-.history
-.lh
-*.crx
-*.d.ts
-*.ts.map
-*.tsbuildinfo
-!declaration.d.ts
-*dist/
-*demo/
-*node_modules/
-*yarn-error.log
-storybook-static
-build-storybook.log
-.DS_Store
-coverage
-.rollup.cache
-.tool-versions
 .vscode
-yalc.lock
+.cursor
 
-# PRJ Spec
-/.cache
+# dependencies
+node_modules
+.pnp
+.pnp.js
 
-# Nix
-result
+# testing
+coverage
+apps/lace-mobile-storybook/allure-results
+apps/lace-mobile-storybook/allure-report
 
-.yarn/*
-.pnp.*
-.yalc/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# misc
+.DS_Store
+*.pem
+tmp
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# feature flags override files
+feature-flags.override.ts
+
+# dist files
+dist
+
+# cache
+.nx
+
+# tsc
+*.tsbuildinfo
+
+# storybook
+storybook-static
+**/lace-mobile-storybook-performance-reporter.log
+**/test-runner.log
+**/ctrf-report.json
+**/lace-mobile-storybook-performance-timings.json
+
+# nx
+.nx/cache
+.nx/workspace-data
+
+# Claude Code
+settings.local.json
+**/CLAUDE.local.md
+.osgrep/
+
+# Expo
+node_modules/
+.expo/
+.yarn/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+cache/
+apps/lace-mobile-e2e/artifacts
+.junie/

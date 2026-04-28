@@ -1,0 +1,39 @@
+import {
+  combineContracts,
+  inferModuleContext,
+  ModuleName,
+} from '@lace-contract/module';
+
+import type {
+  LaceModuleMap,
+  ModuleActionCreators,
+  ModuleSelectors,
+  LaceSideEffect,
+  ModuleAddons,
+} from '@lace-contract/module';
+
+// TODO: declare module dependencies and contract implementations
+const implementsContracts = combineContracts([] as const);
+const dependsOnContracts = combineContracts([] as const);
+
+const multiPlatformModule = inferModuleContext({
+  moduleName: ModuleName('<%= name %>'),
+  implements: implementsContracts,
+  dependsOn: dependsOnContracts,
+  addons: {},
+});
+
+const moduleMap: LaceModuleMap = {
+  'lace-extension': multiPlatformModule,
+  'lace-mobile': multiPlatformModule,
+};
+
+export default moduleMap;
+
+export type Selectors = ModuleSelectors<typeof multiPlatformModule>;
+export type ActionCreators = ModuleActionCreators<typeof multiPlatformModule>;
+export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
+export type AvailableAddons = ModuleAddons<
+  typeof implementsContracts,
+  typeof dependsOnContracts
+>;

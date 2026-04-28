@@ -1,0 +1,19 @@
+{
+  "name": "@lace-module/storage-in-memory",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./sdk": "./src/sdk.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "@lace-contract/storage": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

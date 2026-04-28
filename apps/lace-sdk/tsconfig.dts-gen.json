@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/.dts-work",
+    "rootDir": "../..",
+    "noEmit": false,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/**/*",
+    "../../packages/contract/*/src/**/*",
+    "../../packages/lib/*/src/**/*",
+    "../../packages/sdk/*/src/**/*",
+    "../../packages/module/*/src/sdk.ts",
+    "../../packages/module/*/src/augmentations.ts"
+  ],
+  "exclude": [
+    "**/*.test.*",
+    "**/test/**",
+    "**/*.stories.*",
+    "**/stories/**",
+    "**/__mocks__/**"
+  ]
+}

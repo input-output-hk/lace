@@ -1,0 +1,5 @@
+import './augmentations';
+
+export { <%= propertyName %>Actions, <%= propertyName %>Selectors } from './store';
+export * from './contract';
+export type * from './store';

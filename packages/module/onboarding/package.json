@@ -1,0 +1,45 @@
+{
+  "name": "@lace-module/onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest --watch",
+    "type-check": "run-p type-check:*",
+    "type-check:src": "tsc --noEmit",
+    "type-check:test": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/onboarding-v2": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-hw": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-lib/util-store": "*",
+    "@lace-sdk/util": "*",
+    "react": "*",
+    "react-native": "*",
+    "zxcvbn": "4.4.2"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*",
+    "@react-navigation/native": "*",
+    "@react-navigation/stack": "*",
+    "@testing-library/react-native": "*",
+    "@types/zxcvbn": "4.4.5",
+    "@vitest/ui": "^3.1.2",
+    "vitest": "*"
+  }
+}

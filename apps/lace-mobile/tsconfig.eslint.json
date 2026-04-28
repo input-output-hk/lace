@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.eslint.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "*.js",
+    "**/*.mjs",
+    "declarations.d.ts",
+    "vitest.config.js",
+    "scripts/**/*.ts",
+    "src/**/*",
+    "test/**/*"
+  ]
+}

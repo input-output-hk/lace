@@ -1,1 +1,0 @@
-export { MidnightEventBanner } from './MidnightEventBanner';

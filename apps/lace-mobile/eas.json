@@ -1,0 +1,68 @@
+{
+  "cli": {
+    "requireCommit": false,
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "node": "24.14.0",
+      "env": {
+        "SKIP_PREPARE": "true"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "image": "macos-sequoia-15.4-xcode-16.3"
+      },
+      "android": {
+        "credentialsSource": "remote",
+        "image": "ubuntu-22.04-jdk-17-ndk-r26b"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "channel": "production",
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    },
+    "production-local": {
+      "extends": "production",
+      "autoIncrement": false,
+      "distribution": "internal",
+      "environment": "production"
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development"
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "channel": "preview",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "6743856101",
+        "appleTeamId": "89TW38X994"
+      },
+      "android": {
+        "track": "internal",
+        "releaseStatus": "completed"
+      }
+    }
+  }
+}

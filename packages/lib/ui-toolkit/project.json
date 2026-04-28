@@ -1,0 +1,19 @@
+{
+  "name": "@lace-lib/ui-toolkit",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/lib/ui-toolkit/src",
+  "projectType": "library",
+  "tags": ["scope:lib"],
+  "targets": {
+    "lint": {},
+    "type-check-src": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "type-check-test": {}
+  }
+}

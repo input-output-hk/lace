@@ -1,0 +1,11 @@
+import { <%= propertyName %>SideEffects } from './side-effects';
+import { <%= propertyName %>Reducers } from './slice';
+
+import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';
+
+const store: LaceInit<LaceModuleStoreInit> = () => ({
+  sideEffects: <%= propertyName %>SideEffects,
+  reducers: <%= propertyName %>Reducers,
+});
+
+export default store;

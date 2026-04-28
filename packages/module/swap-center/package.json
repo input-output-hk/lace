@@ -1,0 +1,30 @@
+{
+  "name": "@lace-module/swap-center",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/core": "*",
+    "@gorhom/bottom-sheet": "^5.0.0",
+    "@lace-contract/account-management": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/swap-context": "*",
+    "@lace-contract/swap-provider": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-render": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

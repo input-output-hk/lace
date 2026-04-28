@@ -1,0 +1,27 @@
+{
+  "name": "@lace-module/cardano-uri-linking",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "scripts": {
+    "type-check": "run-p type-check:*",
+    "type-check:src": "tsc --noEmit",
+    "type-check:test": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@lace-contract/addresses": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "expo-linking": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

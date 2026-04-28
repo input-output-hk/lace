@@ -1,0 +1,13 @@
+{
+  "name": "@lace-lib/crypto",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-sdk/util": "*",
+    "@noble/hashes": "^1.8.0",
+    "@scure/bip39": "^1.5.4"
+  }
+}

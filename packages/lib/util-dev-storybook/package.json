@@ -1,0 +1,12 @@
+{
+  "name": "@lace-lib/util-dev-storybook",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/cardano-stake-pools": "*",
+    "@lace-contract/module": "*"
+  }
+}

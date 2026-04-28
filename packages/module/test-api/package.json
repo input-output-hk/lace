@@ -1,0 +1,23 @@
+{
+  "name": "@lace-module/test-api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/dev": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util-store": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

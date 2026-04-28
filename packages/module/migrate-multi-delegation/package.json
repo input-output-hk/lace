@@ -1,0 +1,19 @@
+{
+  "name": "@lace-module/migrate-multi-delegation",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/addresses": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-lib/ui-toolkit": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

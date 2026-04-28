@@ -1,0 +1,12 @@
+{
+  "pods": [
+    {
+      "name": "Blake2",
+      "version": "0.2.0"
+    },
+    {
+      "name": "ApolloLibrary",
+      "podspec": "https://raw.githubusercontent.com/hyperledger-identus/apollo/644bb6d286f6298310f7eaea3ef84be40c39f605/ApolloLibrary.podspec"
+    }
+  ]
+}

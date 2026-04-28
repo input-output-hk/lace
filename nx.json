@@ -1,0 +1,149 @@
+{
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true
+    }
+  },
+  "extends": "nx/presets/npm.json",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "build",
+          "lint",
+          "test",
+          "type-check",
+          "e2e",
+          "build-storybook"
+        ]
+      }
+    }
+  },
+  "targetDefaults": {
+    "test": {
+      "options": {
+        "env": {
+          "NODE_OPTIONS": "--experimental-require-module"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "{projectRoot}/**/*.ts",
+          "{projectRoot}/**/*.tsx",
+          "{projectRoot}/**/*.mjs"
+        ],
+        "quiet": false,
+        "eslintConfig": "{projectRoot}/eslint.config.mjs"
+      }
+    },
+    "build": {
+      "dependsOn": ["^build"]
+    },
+    "type-check-src": {
+      "executor": "nx:run-commands",
+      "inputs": [
+        "default",
+        "^default",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "outputs": [],
+      "cache": true,
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --noEmit"
+          }
+        ],
+        "parallel": true,
+        "cwd": "{projectRoot}",
+        "color": true
+      }
+    },
+    "type-check-test": {
+      "executor": "nx:run-commands",
+      "inputs": [
+        "default",
+        "^default",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "outputs": [],
+      "cache": true,
+      "options": {
+        "commands": [
+          {
+            "command": "tsc --noEmit -p tsconfig.test.json"
+          }
+        ],
+        "parallel": true,
+        "cwd": "{projectRoot}",
+        "color": true
+      }
+    },
+    "typedoc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "typedoc --out docs/typedoc src/index.ts",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["default", "^default"]
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview"
+      }
+    },
+    {
+      "plugin": "@nx/storybook/plugin",
+      "options": {
+        "buildStorybookTargetName": "build-storybook",
+        "serveStorybookTargetName": "storybook",
+        "staticStorybookTargetName": "static-storybook",
+        "testStorybookTargetName": "test-storybook"
+      }
+    },
+    {
+      "plugin": "@nx/expo/plugin",
+      "options": {
+        "startTargetName": "start",
+        "buildTargetName": "build",
+        "prebuildTargetName": "prebuild",
+        "serveTargetName": "serve",
+        "installTargetName": "install",
+        "exportTargetName": "export",
+        "submitTargetName": "submit",
+        "runIosTargetName": "run-ios",
+        "runAndroidTargetName": "run-android"
+      }
+    }
+  ],
+  "defaultBase": "main",
+  "namedInputs": {
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
+  },
+  "nxCloudId": "68b070f0ba6ce6cf713af6d1"
+}

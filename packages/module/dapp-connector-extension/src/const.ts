@@ -1,0 +1,1 @@
+export const DAPP_CONNECTOR_FF_KEY = 'DAPP_CONNECTOR';
