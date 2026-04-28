@@ -2,7 +2,7 @@
 
 ## Context
 
-This repository bundles Lace V1 (Cardano+Bitcoin) and Lace Midnight Preview (LMP) into a unified web extension. Both applications are connected through git submodules.
+This repository bundles Lace V1 (Cardano+Bitcoin) with either Lace Midnight Preview (LMP), Lace V2, or both (V2+LMP) into a unified web extension. All applications are connected through git submodules.
 
 ## Applications
 
@@ -39,21 +39,31 @@ All scripts are bundled and minified. Most of them dynamically load other .js sc
 
 ## Bundling Approach
 
-The goal is to bundle both applications with minimal modifications—ideally, only adding UI elements to switch between them.
+The goal is to bundle the applications with minimal modifications—ideally, only adding UI elements to switch between them.
+
+### Bundle Targets
+
+The `BUILD_TARGET` environment variable controls which secondary app(s) are bundled alongside V1:
+
+| `BUILD_TARGET` | Includes | Make target | npm script |
+|---|---|---|---|
+| `lmp` (default) | V1 + LMP | `build-prod` / `build-dev` | `build:prod` / `build:dev` |
+| `v2` | V1 + V2 | `build-prod-v2` / `build-dev-v2` | `build:prod:v2` / `build:dev:v2` |
+| `v2+lmp` | V1 + V2 + LMP | `build-prod-v1-v2-lmp` / `build-dev-v1-v2-lmp` | `build:prod:v1-v2-lmp` / `build:dev:v1-v2-lmp` |
 
 ### Build Process
 
 Webpack build that:
 
-- Copies `dist/` artifacts from both applications (no conflicting filenames)
+- Copies `dist/` artifacts from the target application(s) (no conflicting filenames)
   - js, html, wasm files, images, fonts, css, etc.
-- Merges manifest.json of both applications. Uses V1 manifest as base and patches it with:
+- Merges manifest.json of the included applications. Uses V1 manifest as base and patches it with:
   - New entrypoints:
     - [service worker](./src/sw-bundle.js) - loads SW script of both apps
     - [popup](./src/popup-bundle.js) - popup html is the same as in v1, but with a different script that conditionally loads the script of the active application
-  - Additional `content_scripts` from LMP
-  - Additional `content_security_policy` rules from LMP
-  - Additional `web_accessible_resources` rules from LMP
+  - Additional `content_scripts` from the bundled app(s)
+  - Additional `content_security_policy` rules from the bundled app(s)
+  - Additional `web_accessible_resources` rules from the bundled app(s)
 
 ### Mode Switching Mechanism
 

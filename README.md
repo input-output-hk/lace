@@ -17,10 +17,12 @@ make setup # Installs dependencies and sets up the project
 ### Build
 
 ```bash
-yarn build:dev      # Development build with LMP (Chrome)
-yarn build:prod     # Production build with LMP (Chrome)
-yarn build:dev:v2  # Development build with Lace Extension (V2) (Chrome)
-yarn build:prod:v2 # Production build with Lace Extension (V2) (Chrome)
+yarn build:dev          # Development build with LMP (Chrome)
+yarn build:prod         # Production build with LMP (Chrome)
+yarn build:dev:v2       # Development build with V2 (Chrome)
+yarn build:prod:v2      # Production build with V2 (Chrome)
+yarn build:dev:v1-v2-lmp   # Development build with V1+V2+LMP (Chrome)
+yarn build:prod:v1-v2-lmp  # Production build with V1+V2+LMP (Chrome)
 ```
 
 Firefox does not current support the bundles
@@ -32,10 +34,7 @@ make build-dev-ext  # Fast development rebuild (Chrome)
 make build-ext      # Fast production rebuild (Chrome)
 ```
 
-The full build command creates three builds:
-- The build in the root `/dist` is the bundle that combines v1 and LMP
-- The build in `v1/apps/browser-extension-wallet/dist` folder only contains Lace v1 without the LMP
-- The build in `v2/apps/midnight-extension/dist` folder only contains LMP
+Each build command produces individual app builds and a final bundle in root `/dist`. See [ARCHITECTURE.md](./ARCHITECTURE.md) for details on bundle targets.
 
 ### Local Development with v2 Submodule
 

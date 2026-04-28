@@ -2,9 +2,40 @@ const fs = require("fs");
 const path = require("path");
 
 const TARGET_PATHS = {
-  lmp: "v2/apps/midnight-extension",
-  v2: "v2/apps/lace-extension",
+  lmp: ["lmp/apps/midnight-extension"],
+  v2: ["v2/apps/lace-extension"],
+  "v2+lmp": ["v2/apps/lace-extension", "lmp/apps/midnight-extension"],
 };
+
+function mergeTargetManifestIntoBase(baseManifest, targetManifest) {
+  for (const script of targetManifest.content_scripts) {
+    baseManifest.content_scripts.push(script);
+  }
+
+  const baseCSP = baseManifest.content_security_policy.extension_pages;
+  const targetCSP = targetManifest.content_security_policy.extension_pages;
+
+  const baseConnectMatch = baseCSP.match(/connect-src ([^;]+)/);
+  const targetConnectMatch = targetCSP.match(/connect-src ([^;]+)/);
+
+  if (baseConnectMatch && targetConnectMatch) {
+    const mergedConnectUrls = new Set([
+      ...baseConnectMatch[1].trim().split(/\s+/),
+      ...targetConnectMatch[1].trim().split(/\s+/),
+    ]);
+    const mergedConnectSrc = Array.from(mergedConnectUrls).join(" ");
+    baseManifest.content_security_policy.extension_pages = baseCSP.replace(
+      /connect-src [^;]+/,
+      `connect-src ${mergedConnectSrc}`
+    );
+  }
+
+  if (targetManifest.web_accessible_resources) {
+    for (const targetResource of targetManifest.web_accessible_resources) {
+      baseManifest.web_accessible_resources.push(targetResource);
+    }
+  }
+}
 
 class MergeManifestPlugin {
   constructor(options = {}) {
@@ -17,12 +48,9 @@ class MergeManifestPlugin {
   }
 
   apply(compiler) {
-    const targetPath = TARGET_PATHS[this.target];
-    const targetLabel = this.target === "lmp" ? "LMP" : "v2";
-
     compiler.hooks.initialize.tap("MergeManifestPlugin", () => {
       console.log(
-        `[MergeManifestPlugin] Manifest merge initialized (target: ${targetLabel})\n`
+        `[MergeManifestPlugin] Manifest merge initialized (target: ${this.target})\n`
       );
     });
 
@@ -51,68 +79,23 @@ class MergeManifestPlugin {
             fs.readFileSync(v1ManifestPath, "utf-8")
           );
 
-          // Read target manifest (LMP or v2) for CSP merging
-          const targetManifestPath = path.join(
-            __dirname,
-            targetPath,
-            "dist",
-            "manifest.json"
-          );
-          const targetManifest = JSON.parse(
-            fs.readFileSync(targetManifestPath, "utf-8")
-          );
-
           v1Manifest.name = "Lace";
-
-          // Update service worker to use our sw-bundle.js
           v1Manifest.background.service_worker = "./sw-bundle.js";
-
-          // Update popup to use the bundle entrypoint, which is same as in v1 but doesn't load the script
           v1Manifest.action.default_popup = "./popup.html";
 
-          for (const script of targetManifest.content_scripts) {
-            v1Manifest.content_scripts.push(script);
+          for (const targetPath of TARGET_PATHS[this.target]) {
+            const targetManifestPath = path.join(
+              __dirname,
+              targetPath,
+              "dist",
+              "manifest.json"
+            );
+            const targetManifest = JSON.parse(
+              fs.readFileSync(targetManifestPath, "utf-8")
+            );
+            mergeTargetManifestIntoBase(v1Manifest, targetManifest);
           }
 
-          // Merge CSP connect-src values
-          const v1CSP = v1Manifest.content_security_policy.extension_pages;
-          const targetCSP = targetManifest.content_security_policy.extension_pages;
-
-          // Extract connect-src from both CSPs
-          const v1ConnectMatch = v1CSP.match(/connect-src ([^;]+)/);
-          const targetConnectMatch = targetCSP.match(/connect-src ([^;]+)/);
-
-          if (v1ConnectMatch && targetConnectMatch) {
-            // Parse connect-src URLs
-            const v1ConnectUrls = new Set(
-              v1ConnectMatch[1].trim().split(/\s+/)
-            );
-            const targetConnectUrls = new Set(
-              targetConnectMatch[1].trim().split(/\s+/)
-            );
-
-            // Merge URLs (union of both sets)
-            const mergedConnectUrls = new Set([
-              ...v1ConnectUrls,
-              ...targetConnectUrls,
-            ]);
-
-            // Reconstruct CSP with merged connect-src
-            const mergedConnectSrc = Array.from(mergedConnectUrls).join(" ");
-            v1Manifest.content_security_policy.extension_pages = v1CSP.replace(
-              /connect-src [^;]+/,
-              `connect-src ${mergedConnectSrc}`
-            );
-          }
-
-          // Merge web_accessible_resources
-          if (targetManifest.web_accessible_resources) {
-            for (const targetResource of targetManifest.web_accessible_resources) {
-              v1Manifest.web_accessible_resources.push(targetResource);
-            }
-          }
-
-          // Write merged manifest
           fs.writeFileSync(
             path.join(distDir, "manifest.json"),
             JSON.stringify(v1Manifest, null, 2),
@@ -120,7 +103,7 @@ class MergeManifestPlugin {
           );
 
           console.log(
-            `[MergeManifestPlugin] Manifest merged successfully (${targetLabel})`
+            `[MergeManifestPlugin] Manifest merged successfully (${this.target})`
           );
         }
       );

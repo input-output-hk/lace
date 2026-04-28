@@ -1,4 +1,4 @@
-.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-dev-v2-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app build-prod-v2-app init-submodules install-dependencies create-v1-dot-env create-lmp-dot-env create-v2-dot-env setup setup-with-v2 build-prod build-dev build-bundle build-prod-firefox build-dev-firefox build-prod-v2 build-dev-v2 build-ext build-dev-ext link-v2 unlink-v2
+.PHONY: build-dev-v1-app build-dev-v1-app-firefox build-dev-lmp-app build-dev-v2-app build-prod-v1-app build-prod-v1-app-firefox build-prod-lmp-app build-prod-v2-app init-submodules install-dependencies create-v1-dot-env create-lmp-dot-env create-v2-dot-env setup setup-with-v2 build-prod build-dev build-bundle build-bundle-v2 build-bundle-v1-v2-lmp build-prod-firefox build-dev-firefox build-prod-v2 build-dev-v2 build-prod-v1-v2-lmp build-dev-v1-v2-lmp build-ext build-dev-ext link-v2 unlink-v2
 
 # Submodule symlink configuration
 SUBMODULE_PATH := v2
@@ -36,11 +36,11 @@ endef
 define build-lmp-app
 	@echo "🔨 Building Lace Midnight Preview ($(1))..."
 	$(eval EXTENSION_ID := $(call get-extension-id))
-	bash -c 'cd v2 && $(setup-node-env) && cd apps/midnight-extension && \
+	bash -c 'cd lmp && $(setup-node-env) && cd apps/midnight-extension && \
 	rm -rf ./dist && \
 	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) WEBPACK_PUBLIC_PATH=/js/ npm run $(2) && \
 	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) EXTRA_FEATURE_FLAGS=LMP_BUNDLE WEBPACK_PUBLIC_PATH=/js/sw/ npm run $(3)'
-	@echo "✅ Built to ./v2/apps/midnight-extension/dist"
+	@echo "✅ Built to ./lmp/apps/midnight-extension/dist"
 endef
 
 define build-v2-app
@@ -48,10 +48,10 @@ define build-v2-app
 	$(eval EXTENSION_ID := $(call get-extension-id))
 	bash -c 'cd v2 && $(setup-node-env) && cd apps/lace-extension && \
 	rm -rf ./dist && \
-	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run prepare:expo-env && \
-	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(2) && \
-	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(3) && \
-	EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) EXTRA_FEATURE_FLAGS=V2_BUNDLE WEBPACK_PUBLIC_PATH=/js/sw/ npm run $(4)'
+	NX_WORKSPACE_ROOT=$(CURDIR)/v2 EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run prepare:expo-env && \
+	NX_WORKSPACE_ROOT=$(CURDIR)/v2 EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(2) && \
+	NX_WORKSPACE_ROOT=$(CURDIR)/v2 EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) npm run $(3) && \
+	NX_WORKSPACE_ROOT=$(CURDIR)/v2 EXTENSION_ID=$(EXTENSION_ID) NODE_ENV=$(1) EXTRA_FEATURE_FLAGS=V2_BUNDLE WEBPACK_PUBLIC_PATH=/js/sw/ npm run $(4)'
 	@echo "✅ Built to ./v2/apps/lace-extension/dist"
 endef
 
@@ -74,6 +74,8 @@ install-dependencies:
 	@echo "✅ v1 dependencies installed"
 	bash -c 'cd v2 && $(setup-node-env) && npm i'
 	@echo "✅ v2 dependencies installed"
+	bash -c 'cd lmp && $(setup-node-env) && npm i'
+	@echo "✅ lmp dependencies installed"
 
 create-v1-dot-env:
 	@if [ -f "v1/apps/browser-extension-wallet/.env" ]; then \
@@ -92,10 +94,10 @@ create-v1-dot-env:
 	fi
 
 create-lmp-dot-env:
-	@echo "BLOCKFROST_PROJECT_ID_MAINNET=notused" > v2/apps/midnight-extension/webpack/.env
-	@echo "BLOCKFROST_PROJECT_ID_PREPROD=notused" >> v2/apps/midnight-extension/webpack/.env
-	@echo "BLOCKFROST_PROJECT_ID_PREVIEW=notused" >> v2/apps/midnight-extension/webpack/.env
-	@echo "📝 Created v2/apps/midnight-extension/webpack/.env"
+	@echo "BLOCKFROST_PROJECT_ID_MAINNET=notused" > lmp/apps/midnight-extension/webpack/.env
+	@echo "BLOCKFROST_PROJECT_ID_PREPROD=notused" >> lmp/apps/midnight-extension/webpack/.env
+	@echo "BLOCKFROST_PROJECT_ID_PREVIEW=notused" >> lmp/apps/midnight-extension/webpack/.env
+	@echo "📝 Created lmp/apps/midnight-extension/webpack/.env"
 
 create-v2-dot-env:
 	@echo "BLOCKFROST_PROJECT_ID_MAINNET=notused" > v2/apps/lace-extension/webpack/.env
@@ -144,6 +146,10 @@ build-bundle-v2:
 	BUILD_TARGET=v2 yarn build:bundle
 	@echo "✅ Bundle built with v2"
 
+build-bundle-v1-v2-lmp:
+	BUILD_TARGET=v2+lmp yarn build:bundle
+	@echo "✅ Bundle built with v1+v2+lmp"
+
 # Fast rebuild (browser-extension-wallet only, skips v1 packages and v2)
 define rebuild-v1-app-only
 	@echo "🔨 Rebuilding browser-extension-wallet only (env=$(1), browser=$(2))..."
@@ -178,6 +184,13 @@ build-prod-v2: build-prod-v2-app build-prod-v1-app build-bundle-v2
 
 build-dev-v2: build-dev-v2-app build-dev-v1-app build-bundle-v2
 	@echo "✅ Development build complete (Chrome) with v2"
+
+# Full builds with v2+lmp (Chrome)
+build-prod-v1-v2-lmp: build-prod-v2-app build-prod-lmp-app build-prod-v1-app build-bundle-v1-v2-lmp
+	@echo "✅ Production build complete (Chrome) with v1+v2+lmp"
+
+build-dev-v1-v2-lmp: build-dev-v2-app build-dev-lmp-app build-dev-v1-app build-bundle-v1-v2-lmp
+	@echo "✅ Development build complete (Chrome) with v1+v2+lmp"
 
 # Full builds (Firefox)
 build-prod-firefox: build-prod-lmp-app build-prod-v1-app-firefox build-bundle
