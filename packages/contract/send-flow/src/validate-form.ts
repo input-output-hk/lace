@@ -150,24 +150,22 @@ const validateAmount = <BlockchainSpecificTokenMetadata = unknown>({
   const parsedAmount = BigNumber.valueOf(amount);
 
   // TODO LW-14767
-  // Tokens whose chain-level minimum (e.g. min UTxO lovelace on Cardano,
-  // dust threshold on Bitcoin) is meaningful for the amount field.
-  const hasChainMinimumAmount =
-    token.tokenId === TokenId('lovelace') || token.blockchainName === 'Bitcoin';
+  const isLovelace = token.tokenId === TokenId('lovelace');
   const minQuantity =
-    hasChainMinimumAmount && minimumAmount !== '-1'
+    isLovelace && minimumAmount !== '-1'
       ? BigNumber.valueOf(minimumAmount)
       : 1n;
 
   if (parsedAmount < minQuantity)
     return {
       error: 'less-than-minimum',
-      argument: hasChainMinimumAmount
+      argument: isLovelace
         ? minimumAmount === '-1'
-          ? // three dots when minimum amount is not yet initialized
+          ? // three dots for lovelace when minimum amount is not yet initialized
             '...'
-          : // convert from smallest unit to human readable using token decimals
-            (Number(minimumAmount) / 10 ** token.decimals).toString()
+          : // convert lovelace to ADA
+            // TODO LW-14767
+            (Number(minimumAmount) / 1000000).toString()
         : // make token human readable minimum amount from token decimals
           humanMinimumAmount(token.decimals),
     };

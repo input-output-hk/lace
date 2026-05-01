@@ -46,7 +46,6 @@ vi.mock('@lace-contract/app', async importOriginal => {
   const actual = await importOriginal<typeof import('@lace-contract/app')>();
   return {
     ...actual,
-    useConfig: vi.fn(() => ({ viewId: 'test-view', appConfig: undefined })),
     useUICustomisation: vi.fn(() => [undefined]),
   };
 });

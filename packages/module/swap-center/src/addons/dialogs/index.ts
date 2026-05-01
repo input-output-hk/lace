@@ -1,15 +1,15 @@
 import { TabRoutes } from '@lace-lib/navigation';
 import { createUICustomisation } from '@lace-lib/util-render';
 
-import { DappExplorerDisclaimerUkFca } from './DappExplorerDisclaimerUkFca';
+import { SwapDisclaimer } from './SwapDisclaimer';
 
 import type { Dialogs } from '@lace-contract/app';
 
 const dialogs = () =>
   createUICustomisation<Dialogs>({
-    key: 'dapp-explorer-disclaimer-uk-fca',
-    Dialog: DappExplorerDisclaimerUkFca,
-    location: new RegExp(`^${TabRoutes.DApps}$`),
+    key: 'swaps-disclaimer',
+    Dialog: SwapDisclaimer,
+    location: new RegExp(`^${TabRoutes.Swaps}$`),
   });
 
 export default dialogs;

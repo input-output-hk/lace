@@ -2,7 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import type { DAppRadarItem, DappCategory } from '../types';
 import type { BlockchainName } from '@lace-lib/util-store';
-import type { PayloadAction } from '@reduxjs/toolkit';
+import type {
+  PayloadAction,
+  StateFromReducersMapObject,
+} from '@reduxjs/toolkit';
 
 type DataFetchStatus = 'error' | 'idle' | 'loading' | 'success'; // very generic, potentially move to a contract, maybe useful if we want to defer anything in mobile, but not for the others
 
@@ -18,7 +21,6 @@ export type DappExplorerState = {
   categories: DappCategory[] | null;
   dappList: DAppRadarItem[];
   status: DataFetchStatus;
-  ukFcaDisclaimerAcknowledged: boolean;
 };
 
 const initialState: DappExplorerState = {
@@ -31,7 +33,6 @@ const initialState: DappExplorerState = {
   categories: [],
   dappList: [],
   status: 'loading',
-  ukFcaDisclaimerAcknowledged: false,
 };
 
 const slice = createSlice({
@@ -68,9 +69,6 @@ const slice = createSlice({
     resetSearchParams: state => {
       state.search = initialState.search;
     },
-    acknowledgeUkFcaDisclaimer: state => {
-      state.ukFcaDisclaimerAcknowledged = true;
-    },
   },
   selectors: {
     getAvailableDappCategories: (state: Readonly<DappExplorerState>) =>
@@ -81,8 +79,6 @@ const slice = createSlice({
     getSelectedDapp: (state: Readonly<DappExplorerState>) => state.selectedDapp,
     getFetchStatus: (state: Readonly<DappExplorerState>) => state.status,
     getDappList: (state: Readonly<DappExplorerState>) => state.dappList,
-    selectUkFcaDisclaimerAcknowledged: (state: Readonly<DappExplorerState>) =>
-      state.ukFcaDisclaimerAcknowledged,
   },
 });
 
@@ -97,3 +93,8 @@ export const dappExplorerActions = {
 };
 
 export const dappExplorerSelectors = { dappExplorer: slice.selectors };
+
+declare module '@lace-contract/module' {
+  interface State
+    extends StateFromReducersMapObject<typeof dappCenterReducers> {}
+}

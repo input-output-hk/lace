@@ -1,8 +1,6 @@
 import { makeConfirmTx, makeSubmitTx } from '@lace-contract/tx-executor';
-import { createMigrate } from 'redux-persist';
 import { merge } from 'rxjs';
 
-import { addUkFcaDisclaimerAcknowledged } from './migrations';
 import {
   makeAwaitConfirmation,
   makeProcessing,
@@ -28,11 +26,8 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
   reducers: swapContextReducers,
   persistConfig: {
     swapConfig: {
-      version: 2,
+      version: 1,
       blacklist: ['tradableTokenIds'],
-      migrate: createMigrate({
-        2: addUkFcaDisclaimerAcknowledged,
-      }),
     },
   },
 });

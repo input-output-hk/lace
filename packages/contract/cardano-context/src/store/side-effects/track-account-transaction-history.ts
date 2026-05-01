@@ -9,6 +9,7 @@ import type {
   FetchAddressTransactionHistoriesParams,
   FetchAddressTransactionHistoriesResponse,
 } from '../helpers/fetch-address-transaction-histories';
+import type { Milliseconds } from '@lace-sdk/util';
 
 /**
  * Side effect that tracks account transaction history by fetching more data
@@ -36,21 +37,24 @@ export const createTrackOlderAccountTransactionHistory =
   };
 
 /**
- * Side effect that fetches newer transaction history for all accounts.
- *
- * Triggers reactively when `accountTransactionsTotal` changes for an account
- * (new transaction detected) or when a new account is discovered.
+ * Side effect that polls newer transaction history
+ * for all accounts addresses.
  */
 export const createTrackNewerAccountTransactionHistory =
   (
     fetchAddressTransactionHistories: (
       params: FetchAddressTransactionHistoriesParams,
     ) => FetchAddressTransactionHistoriesResponse,
+    pollingIntervalSeconds: Milliseconds,
   ): SideEffect =>
   (...props) => {
-    const [, stateObservables] = props;
+    const [actionObservables, { addresses }] = props;
 
-    const pollingObservable$ = getPollTransactionsObservable(stateObservables);
+    const pollingObservable$ = getPollTransactionsObservable(
+      actionObservables,
+      addresses,
+      pollingIntervalSeconds,
+    );
 
     return createTrackAccountTransactionHistory(
       fetchAddressTransactionHistories,

@@ -115,13 +115,8 @@ const slice = createSlice({
         state.activities[accountId]?.length ?? 0;
 
       if (currentDesiredCount <= loadedActivitiesForAccount) {
-        // Anchor on the actual loaded count so the first increment always
-        // lifts desired above loaded and triggers a fetch. Without this,
-        // when side effects (e.g. newer-tx polling) populate activities
-        // before anyone has incremented desired, the first increment just
-        // catches desired up to loaded and no fetch fires.
         state.desiredLoadedActivitiesCountPerAccount[accountId] =
-          loadedActivitiesForAccount + incrementBy;
+          currentDesiredCount + incrementBy;
       }
     },
     setHasLoadedOldestEntry: (
@@ -293,6 +288,10 @@ const selectHasLoadedOldestEntryByAccount = markParameterizedSelector(
   ),
 );
 
+const pollNewerAccountsActivities = createAction(
+  'activities/pollNewerAccountsActivities',
+);
+
 const loadActivityDetails = createAction<
   BlockchainAssigned<{
     activity: Activity;
@@ -307,6 +306,7 @@ const getActivitiesFailed = createAction<{
 export const activitiesActions = {
   activities: {
     ...slice.actions,
+    pollNewerAccountsActivities,
     getActivitiesFailed,
     loadActivityDetails,
   },

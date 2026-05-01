@@ -316,17 +316,10 @@ export const SwapsCenterPage = () => {
       keyboardShouldPersistTaps="handled">
       <Row justifyContent="center" alignItems="center" style={styles.header}>
         <Column alignItems="center" style={styles.headerTitle}>
-          <Text.L weight="bold" testID="swap-page-title">
-            {t('v2.swap.title')}
-          </Text.L>
-          <Text.XS variant="secondary" testID="swap-page-subtitle">
-            {t('v2.swap.subtitle')}
-          </Text.XS>
+          <Text.L weight="bold">{t('v2.swap.title')}</Text.L>
+          <Text.XS variant="secondary">{t('v2.swap.subtitle')}</Text.XS>
         </Column>
-        <Pressable
-          onPress={handleSettingsPress}
-          style={styles.settingsButton}
-          testID="swap-settings-button">
+        <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
           <Icon name="Settings" size={24} color={theme.text.secondary} />
         </Pressable>
       </Row>
@@ -363,7 +356,6 @@ export const SwapsCenterPage = () => {
               key="half"
               size="small"
               label={t('v2.swap.half')}
-              testID="swap-sell-input-half"
               onPress={() => {
                 if (!sellTokenData) return;
                 trackEvent('swaps | quick amount | half | press');
@@ -378,7 +370,6 @@ export const SwapsCenterPage = () => {
               key="max"
               size="small"
               label={t('v2.swap.max')}
-              testID="swap-sell-input-max"
               onPress={() => {
                 if (!sellTokenData) return;
                 trackEvent('swaps | quick amount | max | press');

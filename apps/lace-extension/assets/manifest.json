@@ -1,7 +1,7 @@
 {
   "name": "$EXTENSION_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "manifest_version": 3,
   "key": "$EXTENSION_KEY",
   "icons": {
@@ -17,7 +17,13 @@
   "side_panel": {
     "default_path": "expo/index.html"
   },
-  "permissions": ["sidePanel", "storage", "tabs", "windows"],
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "windows"
+  ],
   "host_permissions": ["<all_urls>"],
   "content_security_policy": {
     "extension_pages": "default-src 'self' $LOCALHOST_DEFAULT_SRC; script-src 'self' 'wasm-unsafe-eval' $LOCALHOST_SCRIPT_SRC $REACT_DEVTOOLS_DEFAULT_SRC; object-src 'self'; connect-src $MIDNIGHT_SERVICES $CARDANO_SERVICES_URLS $BITCOIN_SERVICES_URLS $COINGECKO_API_URL $LOCALHOST_CONNECT_SRC $REDUX_DEVTOOLS_SERVER $REACT_DEVTOOLS_CONNECT_SRC $POSTHOG_API_URL $HANDLE_API_URL $SENTRY_CONNECT_SRC $SWAP_PROVIDER_URLS data:; style-src * 'unsafe-inline'; img-src * data:; font-src 'self' $FONT_TYPEKIT_URL; frame-src $FRAME_URL;"

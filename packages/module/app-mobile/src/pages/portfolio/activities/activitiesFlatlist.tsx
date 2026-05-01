@@ -1,9 +1,4 @@
-import type {
-  FlatList as FlatListRef,
-  LayoutChangeEvent,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import type { LayoutChangeEvent, StyleProp, ViewStyle } from 'react-native';
 
 import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
 import { useConfig, useUICustomisation } from '@lace-contract/app';
@@ -69,7 +64,6 @@ type ActivityListProps = {
   footerSpacerHeight?: number;
   scrollHandler: ScrollHandlerProcessed<Record<string, unknown>>;
   activities: Activity<unknown>[];
-  listRef?: React.RefObject<FlatListRef | null>;
 };
 
 export const ActivitiesFlatlist = ({
@@ -83,16 +77,14 @@ export const ActivitiesFlatlist = ({
   footerSpacerHeight,
   scrollHandler,
   activities,
-  listRef,
 }: ActivityListProps) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const internalListRef = useRef<FlatList>(null);
-  const resolvedListRef = listRef ?? internalListRef;
+  const listRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    resolvedListRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [activeIndex, selectedAssetView, resolvedListRef]);
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [activeIndex, selectedAssetView]);
 
   const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -118,6 +110,10 @@ export const ActivitiesFlatlist = ({
 
   const incrementDesiredLoadedActivitiesCount = useDispatchLaceAction(
     'activities.incrementDesiredLoadedActivitiesCount',
+  );
+
+  const pollNewerAccountsActivities = useDispatchLaceAction(
+    'activities.pollNewerAccountsActivities',
   );
 
   const { appConfig } = useConfig();
@@ -308,11 +304,16 @@ export const ActivitiesFlatlist = ({
     if (activities.length === 0) {
       loadOlderActivities();
     }
+    if (activities.length > 0) {
+      // This is emitted multiple times, but the side effect
+      // only handles the first occurrence
+      pollNewerAccountsActivities();
+    }
   }, [activities.length, isVisible]);
 
   return (
     <Animated.FlatList
-      ref={resolvedListRef as React.RefObject<FlatList>}
+      ref={listRef as React.RefObject<FlatList>}
       testID="activity-list-container"
       data={activityListData}
       ListEmptyComponent={null}

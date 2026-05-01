@@ -10,7 +10,6 @@ export * from './contactItem/contact';
 export * from './detailRows/detailRows';
 export * from './dropdownMenu/dropdownMenu';
 export * from './modal/modal';
-export * from './riskWarningModal/riskWarningModal';
 export * from './nftFolder/nft-folder';
 export * from './nftFolder/nft-action';
 export * from './nftFolder/nft-item';

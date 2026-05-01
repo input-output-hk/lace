@@ -315,59 +315,6 @@ describe('send-flow validateForm', () => {
       expect(validationResult[1].error).toBe(null);
     });
 
-    it('uses chain minimumAmount for Bitcoin (dust threshold) and surfaces BTC in the error argument', async () => {
-      const dustThreshold = BigNumber(546n);
-      const validationResult = await runFormValidator({
-        minimumAmount: dustThreshold,
-        formPartial: {
-          tokenTransfers: [
-            {
-              amount: { value: BigNumber(100n) },
-              token: {
-                value: {
-                  blockchainName: 'Bitcoin',
-                  tokenId: TokenId('bitcoin'),
-                  available: BigNumber(10_000_000n),
-                  decimals: 8,
-                },
-              },
-            },
-          ],
-        },
-        validateAddress: vi.fn().mockReturnValueOnce(of(None)),
-      });
-
-      expect(validationResult[1].error).toEqual({
-        error: 'less-than-minimum',
-        argument: (Number(dustThreshold) / 100_000_000).toString(),
-      });
-    });
-
-    it('returns null for Bitcoin when amount meets dust threshold', async () => {
-      const dustThreshold = BigNumber(546n);
-      const validationResult = await runFormValidator({
-        minimumAmount: dustThreshold,
-        formPartial: {
-          tokenTransfers: [
-            {
-              amount: { value: dustThreshold },
-              token: {
-                value: {
-                  blockchainName: 'Bitcoin',
-                  tokenId: TokenId('bitcoin'),
-                  available: BigNumber(10_000_000n),
-                  decimals: 8,
-                },
-              },
-            },
-          ],
-        },
-        validateAddress: vi.fn().mockReturnValueOnce(of(None)),
-      });
-
-      expect(validationResult[1].error).toBe(null);
-    });
-
     it('returns null when amount is dirty: false (untouched field is not validated)', async () => {
       const validationResult = await runFormValidator({
         formPartial: {

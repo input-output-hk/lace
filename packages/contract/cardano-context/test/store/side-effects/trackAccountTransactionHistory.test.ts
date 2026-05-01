@@ -1,5 +1,6 @@
 import { activitiesActions } from '@lace-contract/activities';
 import { walletsActions } from '@lace-contract/wallet-repo';
+import { Milliseconds } from '@lace-sdk/util';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -130,6 +131,7 @@ describe('createTrackNewerAccountTransactionHistory', () => {
 
     const sideEffect = createTrackNewerAccountTransactionHistory(
       fetchAddressTransactionHistoriesMock,
+      Milliseconds(1000),
     );
 
     const actionObservables =
@@ -141,7 +143,9 @@ describe('createTrackNewerAccountTransactionHistory', () => {
     sideEffect(actionObservables, stateObservables, dependencies);
 
     expect(getPollTransactionsObservableMockResult).toHaveBeenCalledWith(
-      stateObservables,
+      actionObservables,
+      stateObservables.addresses,
+      Milliseconds(1000),
     );
 
     expect(createTrackAccountTransactionHistoryMock).toHaveBeenCalledWith(

@@ -4,9 +4,10 @@ import {
   ACTIVITIES_PER_PAGE,
   activitiesActions,
 } from '@lace-contract/activities';
+import { AccountId } from '@lace-contract/wallet-repo';
 import { walletsActions } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Err, Ok, Timestamp } from '@lace-sdk/util';
+import { Err, Milliseconds, Ok, Timestamp } from '@lace-sdk/util';
 import { EMPTY, of, take } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -26,7 +27,6 @@ import {
   cardanoAccount1Addr,
   cardanoAccount2Addr1,
   cardanoAccount2Addr2,
-  cardanoAccountPreviewAddr0,
   chainId,
   midnightAddress,
 } from '../../mocks';
@@ -37,8 +37,12 @@ import type {
   CardanoTransactionHistoryItem,
   Selectors,
 } from '../../../src';
+import type { ActionCreators } from '../../../src/contract';
 import type { AnyAddress } from '@lace-contract/addresses';
-import type { StateObservables } from '@lace-contract/module';
+import type {
+  ActionObservables,
+  StateObservables,
+} from '@lace-contract/module';
 
 const actions = {
   ...cardanoContextActions,
@@ -179,7 +183,7 @@ describe('cardano-context side effects', () => {
               actions,
             },
             assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('---a', {
+              expectObservable(sideEffect$).toBe('---(ab)', {
                 a: actions.cardanoContext.setAccountTransactionHistory({
                   accountId: cardanoAccount2Addr1WithCardanoData.accountId,
                   addressHistories: [
@@ -199,6 +203,7 @@ describe('cardano-context side effects', () => {
                     },
                   ],
                 }),
+                b: actions.activities.pollNewerAccountsActivities(),
               });
             },
           };
@@ -271,7 +276,7 @@ describe('cardano-context side effects', () => {
               actions,
             },
             assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('---(ab)', {
+              expectObservable(sideEffect$).toBe('---(abc)', {
                 a: actions.cardanoContext.setAccountTransactionHistory({
                   accountId: cardanoAccount2Addr1WithCardanoData.accountId,
                   addressHistories: [
@@ -295,6 +300,7 @@ describe('cardano-context side effects', () => {
                   accountId: cardanoAccount2Addr1WithCardanoData.accountId,
                   hasLoadedOldestEntry: true,
                 }),
+                c: actions.activities.pollNewerAccountsActivities(),
               });
             },
           };
@@ -428,7 +434,7 @@ describe('cardano-context side effects', () => {
                 actions,
               },
               assertion: sideEffect$ => {
-                expectObservable(sideEffect$).toBe('a', {
+                expectObservable(sideEffect$).toBe('(ab)', {
                   a: actions.cardanoContext.getAddressTransactionHistoryFailed({
                     accountId: cardanoAccount2Addr2WithCardanoData.accountId,
                     address: CardanoPaymentAddress(
@@ -436,6 +442,7 @@ describe('cardano-context side effects', () => {
                     ),
                     failure: error.reason,
                   }),
+                  b: actions.activities.pollNewerAccountsActivities(),
                 });
               },
             };
@@ -511,7 +518,8 @@ describe('cardano-context side effects', () => {
             },
             assertion: sideEffect$ => {
               const emissions: ReturnType<
-                typeof actions.cardanoContext.setAccountTransactionHistory
+                | typeof actions.activities.pollNewerAccountsActivities
+                | typeof actions.cardanoContext.setAccountTransactionHistory
               >[] = [];
               sideEffect$.subscribe(action =>
                 emissions.push(action as (typeof emissions)[number]),
@@ -543,250 +551,97 @@ describe('cardano-context side effects', () => {
 });
 
 describe('getPollTransactionsObservable', () => {
-  it('should emit when accountTransactionsTotal increases (reactive trigger)', () => {
-    createTestScheduler().run(({ cold, expectObservable }) => {
-      const accountId = cardanoAccount2Addr1WithCardanoData.accountId;
-      const stateObservables = {
-        addresses: {
-          selectAllAddresses$: cold('a', {
-            a: [cardanoAccount2Addr1WithCardanoData],
-          }),
-        },
-        cardanoContext: {
-          selectChainId$: cold('a', { a: chainId }),
-          // Total increases from 5 to 6 at frame 100
-          selectAccountTransactionsTotal$: cold('a 99ms b', {
-            a: { [accountId]: 5 },
-            b: { [accountId]: 6 },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
+  const accountId1 = AccountId('1');
+  const accountId2 = AccountId('2');
+  const addresses = {
+    selectAllAddresses$: of([
+      { accountId: accountId1 },
+      { accountId: accountId2 },
+    ]),
+  } as unknown as StateObservables<Selectors>['addresses'];
 
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
+  const pollingIntervalSeconds = Milliseconds(1000);
+  it('should return an observable that emits the accountId and numberOfItems', () => {
+    createTestScheduler().run(({ expectObservable }) => {
+      const actionObservables = {
+        activities: {
+          pollNewerAccountsActivities$: of(
+            actions.activities.pollNewerAccountsActivities(),
+          ),
+        },
+      } as unknown as ActionObservables<ActionCreators>;
+      const pollingObservable = getPollTransactionsObservable(
+        actionObservables,
+        addresses,
+        pollingIntervalSeconds,
+      );
 
-      // Should emit immediately for initial account, then again when total increases
-      expectObservable(pollingObservable.pipe(take(2))).toBe('a 99ms (a|)', {
-        a: {
-          payload: {
-            accountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
+      expectObservable(pollingObservable.pipe(take(8))).toBe(
+        '1000ms (ab) 996ms (ab) 996ms (ab) 996ms (ab|)',
+        {
+          a: {
+            payload: {
+              accountId: '1',
+              numberOfItems: ACTIVITIES_PER_PAGE,
+            },
+          },
+          b: {
+            payload: {
+              accountId: '2',
+              numberOfItems: ACTIVITIES_PER_PAGE,
+            },
           },
         },
-      });
+      );
     });
   });
+  it('should return an observable that emits the accountId and numberOfItems and resumes when accounts are added back', () => {
+    const accountId1 = AccountId('1');
+    const accountId2 = AccountId('2');
+    const pollingIntervalSeconds = Milliseconds(1000);
 
-  it('should request delta items when delta exceeds ACTIVITIES_PER_PAGE', () => {
     createTestScheduler().run(({ cold, expectObservable }) => {
-      const accountId = cardanoAccount2Addr1WithCardanoData.accountId;
-      const extraBeyondPage = 5;
-      const delta = ACTIVITIES_PER_PAGE + extraBeyondPage;
-      const stateObservables = {
-        addresses: {
-          selectAllAddresses$: cold('a', {
-            a: [cardanoAccount2Addr1WithCardanoData],
-          }),
+      const addresses = {
+        selectAllAddresses$: cold(
+          '1000ms a 996ms a 996ms b 999ms b 999ms c 999ms c 996ms d 996ms d',
+          {
+            a: [{ accountId: accountId1 }, { accountId: accountId2 }],
+            b: [{ accountId: accountId1 }],
+            c: [],
+            d: [{ accountId: accountId2 }],
+          },
+        ),
+      } as unknown as StateObservables<Selectors>['addresses'];
+      const actionObservables = {
+        activities: {
+          pollNewerAccountsActivities$: of(
+            actions.activities.pollNewerAccountsActivities(),
+          ),
         },
-        cardanoContext: {
-          selectChainId$: cold('a', { a: chainId }),
-          // Total jumps by more than ACTIVITIES_PER_PAGE between emissions
-          selectAccountTransactionsTotal$: cold('a 99ms b', {
-            a: { [accountId]: 5 },
-            b: { [accountId]: 5 + delta },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
+      } as unknown as ActionObservables<ActionCreators>;
+      const pollingObservable = getPollTransactionsObservable(
+        actionObservables,
+        addresses,
+        pollingIntervalSeconds,
+      );
 
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
-
-      expectObservable(pollingObservable.pipe(take(2))).toBe('a 99ms (b|)', {
-        // Initial observation: ACTIVITIES_PER_PAGE (no previous to compute delta against)
-        a: {
-          payload: {
-            accountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
+      expectObservable(pollingObservable.pipe(take(8))).toBe(
+        '1000ms (ab) 996ms (ab) 996ms a 999ms a 2999ms b 999ms (b|)',
+        {
+          a: {
+            payload: {
+              accountId: '1',
+              numberOfItems: ACTIVITIES_PER_PAGE,
+            },
+          },
+          b: {
+            payload: {
+              accountId: '2',
+              numberOfItems: ACTIVITIES_PER_PAGE,
+            },
           },
         },
-        // Subsequent increase: numberOfItems matches the delta
-        b: {
-          payload: {
-            accountId,
-            numberOfItems: delta,
-          },
-        },
-      });
-    });
-  });
-
-  it('emits one payload per account on initial observation with multiple accounts', () => {
-    createTestScheduler().run(({ cold, expectObservable }) => {
-      const accountIdA = cardanoAccount0Addr.accountId;
-      const accountIdB = cardanoAccount1Addr.accountId;
-      const stateObservables = {
-        addresses: {
-          selectAllAddresses$: cold('a', {
-            a: [cardanoAccount0Addr, cardanoAccount1Addr],
-          }),
-        },
-        cardanoContext: {
-          selectChainId$: cold('a', { a: chainId }),
-          selectAccountTransactionsTotal$: cold('a', {
-            a: { [accountIdA]: 5, [accountIdB]: 10 },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
-
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
-
-      // Both accounts are seen for the first time → both get an
-      // ACTIVITIES_PER_PAGE initial-observation payload, synchronously fanned
-      // out by the inner `from(items)` emission.
-      expectObservable(pollingObservable.pipe(take(2))).toBe('(ab|)', {
-        a: {
-          payload: {
-            accountId: accountIdA,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-        b: {
-          payload: {
-            accountId: accountIdB,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-      });
-    });
-  });
-
-  it('emits a fresh initial observation when an account is removed then re-added with the same id', () => {
-    createTestScheduler().run(({ cold, expectObservable }) => {
-      const accountId = cardanoAccount0Addr.accountId;
-      const stateObservables = {
-        addresses: {
-          // Addresses present → removed → present again. Simulates a wallet
-          // being unlinked and re-linked with the same accountId; mirrors the
-          // realistic "removal" path because `prepareCardanoAccountsData`
-          // filters out accounts whose addresses have disappeared. (Removal
-          // via emptying `accountTransactionsTotal` is swallowed earlier by
-          // that helper's `filter(totals → keys > 0)` gate.)
-          selectAllAddresses$: cold('a 99ms b 99ms c', {
-            a: [cardanoAccount0Addr],
-            b: [],
-            c: [cardanoAccount0Addr],
-          }),
-        },
-        cardanoContext: {
-          selectChainId$: cold('a', { a: chainId }),
-          // Totals always carry the account — the "removal" is driven by the
-          // addresses stream alone, so the filter gate keeps passing.
-          selectAccountTransactionsTotal$: cold('a', {
-            a: { [accountId]: 5 },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
-
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
-
-      // Frame 0: new account → emit.
-      // Frame 100: addresses gone → current=[]; pairwise [A] → [] → no items.
-      // Frame 200: addresses back → current=[A], previous=[] → treated as
-      // new → fresh initial-observation emission.
-      expectObservable(pollingObservable.pipe(take(2))).toBe('a 199ms (a|)', {
-        a: {
-          payload: {
-            accountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-      });
-    });
-  });
-
-  it('re-observes accounts under the new chain after a chain switch', () => {
-    createTestScheduler().run(({ cold, expectObservable }) => {
-      const preprodAccountId = cardanoAccount0Addr.accountId;
-      const previewAccountId = cardanoAccountPreviewAddr0.accountId;
-      const stateObservables = {
-        addresses: {
-          selectAllAddresses$: cold('a 99ms b', {
-            a: [cardanoAccount0Addr],
-            b: [cardanoAccountPreviewAddr0],
-          }),
-        },
-        cardanoContext: {
-          selectChainId$: cold('a 99ms b', {
-            a: Cardano.ChainIds.Preprod,
-            b: Cardano.ChainIds.Preview,
-          }),
-          selectAccountTransactionsTotal$: cold('a 99ms b', {
-            a: { [preprodAccountId]: 5 },
-            b: { [previewAccountId]: 5 },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
-
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
-
-      // After the chain switch, the Preprod-scoped address is filtered out by
-      // `groupCardanoAddressesByAccount`, so the Preview account is "new" from
-      // pairwise's perspective and gets a fresh initial-observation payload.
-      expectObservable(pollingObservable.pipe(take(2))).toBe('a 99ms (b|)', {
-        a: {
-          payload: {
-            accountId: preprodAccountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-        b: {
-          payload: {
-            accountId: previewAccountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-      });
-    });
-  });
-
-  it('only emits for the newly discovered account when an existing account is unchanged', () => {
-    createTestScheduler().run(({ cold, expectObservable }) => {
-      const accountIdA = cardanoAccount0Addr.accountId;
-      const accountIdB = cardanoAccount1Addr.accountId;
-      const stateObservables = {
-        addresses: {
-          // B's address is discovered at frame 100.
-          selectAllAddresses$: cold('a 99ms b', {
-            a: [cardanoAccount0Addr],
-            b: [cardanoAccount0Addr, cardanoAccount1Addr],
-          }),
-        },
-        cardanoContext: {
-          selectChainId$: cold('a', { a: chainId }),
-          // A's total is unchanged; B appears at frame 100.
-          selectAccountTransactionsTotal$: cold('a 99ms b', {
-            a: { [accountIdA]: 5 },
-            b: { [accountIdA]: 5, [accountIdB]: 10 },
-          }),
-        },
-      } as unknown as StateObservables<Selectors>;
-
-      const pollingObservable = getPollTransactionsObservable(stateObservables);
-
-      // Frame 0: A is new → emit.
-      // Frame 100: A delta=0 (silent), B is new → emit only for B.
-      expectObservable(pollingObservable.pipe(take(2))).toBe('a 99ms (b|)', {
-        a: {
-          payload: {
-            accountId: accountIdA,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-        b: {
-          payload: {
-            accountId: accountIdB,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        },
-      });
+      );
     });
   });
 });

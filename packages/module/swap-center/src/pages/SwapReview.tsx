@@ -24,18 +24,15 @@ const ReviewRow = ({
   label,
   value,
   subtitle,
-  testID,
 }: {
   label: string;
   value: string;
   subtitle?: string;
-  testID?: string;
 }) => (
   <Row
     justifyContent="space-between"
     alignItems="center"
-    style={styles.reviewRow}
-    testID={testID}>
+    style={styles.reviewRow}>
     <Text.XS variant="secondary" weight="medium">
       {label}
     </Text.XS>
@@ -176,7 +173,6 @@ export const SwapReview = (
         title={t('v2.swap.review.title')}
         leftIcon="ArrowLeft"
         leftIconOnPress={handleClose}
-        testID="swap-review-header"
       />
       <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
         <Column style={styles.content} gap={spacing.XS}>
@@ -191,22 +187,18 @@ export const SwapReview = (
               <ReviewRow
                 label={t('v2.swap.review.selling')}
                 value={formattedSellAmount}
-                testID="swap-review-sell-row"
               />
               <ReviewRow
                 label={t('v2.swap.review.received')}
                 value={formattedBuyAmount}
-                testID="swap-review-buy-row"
               />
               <ReviewRow
                 label={t('v2.swap.review.slippage-tolerance')}
                 value={`${slippage}%`}
-                testID="swap-review-slippage-row"
               />
               <ReviewRow
                 label={t('v2.swap.review.swap-route')}
                 value={routeDisplay || '-'}
-                testID="swap-review-route-row"
               />
               <ReviewRow
                 label={t('v2.swap.review.quote-ratio')}
@@ -215,15 +207,11 @@ export const SwapReview = (
                     ? `1 ${sellDisplayName} = ${selectedQuote.priceDisplay} ${buyDisplayName}`
                     : '-'
                 }
-                testID="swap-review-quote-ratio-row"
               />
 
               <Divider />
 
-              <Text.XS
-                weight="medium"
-                align="center"
-                testID="swap-review-transaction-cost">
+              <Text.XS weight="medium" align="center">
                 {t('v2.swap.review.transaction-cost')}
               </Text.XS>
 
@@ -238,7 +226,6 @@ export const SwapReview = (
               <ReviewRow
                 label={t('v2.swap.review.total-fees')}
                 value={`-${selectedQuote.totalFeeDisplay}`}
-                testID="swap-review-total-fees-row"
               />
             </>
           )}
@@ -250,7 +237,6 @@ export const SwapReview = (
           onPress: handleNext,
           disabled: !isReviewing,
           loading: isBuilding || isAwaitingConfirmation || isProcessing,
-          testID: 'swap-review-next-button',
         }}
       />
     </>

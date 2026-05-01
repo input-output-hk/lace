@@ -12,17 +12,10 @@ import {
   PageContainerTemplate,
 } from '@lace-lib/ui-toolkit';
 import { valueToLocale } from '@lace-lib/util-render';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { type LayoutChangeEvent } from 'react-native';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
 import { ActivitiesFlatlist } from './activities';
 import { NftsList } from './nfts';
@@ -32,25 +25,12 @@ import { usePortfolio } from './usePortfolio';
 
 import type { AccountView, AssetView } from './types';
 
-type WheelLikeEvent = {
-  deltaY?: number;
-  preventDefault?: () => void;
-  nativeEvent?: {
-    deltaY?: number;
-  };
-};
-
 export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
   const [{ headerHeight, headerTopInset }, setHeaderLayout] = useState({
     headerHeight: 0,
     headerTopInset: 0,
   });
   const [carouselHeight, setCarouselHeight] = useState(0);
-  const tokensListRef = useRef<FlatList<unknown> | null>(null);
-  const nftsListRef = useRef<FlatList<unknown> | null>(null);
-  const activitiesListRef = useRef<FlatList<unknown> | null>(null);
-  const assetScrollOffset = useSharedValue(0);
-  const headerPanStartOffset = useSharedValue(0);
 
   const {
     activities,
@@ -93,11 +73,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
     totalPortfolioValue,
     currentAccount,
     networkType,
-  } = usePortfolio({
-    headerHeight,
-    headerTopInset,
-    externalScrollOffset: assetScrollOffset,
-  });
+  } = usePortfolio({ headerHeight, headerTopInset });
 
   useEffect(() => {
     // Reset carousel height on network switch (mainnet ↔ testnet) because
@@ -169,77 +145,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
   const onCarouselLayout = useCallback((event: LayoutChangeEvent) => {
     setCarouselHeight(event.nativeEvent.layout.height);
   }, []);
-
-  const getActiveAssetListRef = useCallback(() => {
-    switch (selectedAssetView) {
-      case SelectedAssetView.Nfts:
-        return nftsListRef;
-      case SelectedAssetView.Activities:
-        return activitiesListRef;
-      case SelectedAssetView.Assets:
-      default:
-        return tokensListRef;
-    }
-  }, [selectedAssetView]);
-
-  const scrollActiveAssetList = useCallback(
-    (offset: number) => {
-      const nextOffset = Math.max(0, offset);
-      const activeListRef = getActiveAssetListRef().current;
-      if (!activeListRef) return;
-      activeListRef.scrollToOffset({ offset: nextOffset, animated: false });
-    },
-    [getActiveAssetListRef],
-  );
-
-  const createPanGesture = useCallback(
-    () =>
-      Gesture.Pan()
-        .activeOffsetY([-6, 6])
-        .failOffsetX([-12, 12])
-        .onStart(() => {
-          headerPanStartOffset.value = assetScrollOffset.value;
-        })
-        .onUpdate(event => {
-          const nextOffset = Math.max(
-            0,
-            headerPanStartOffset.value - event.translationY,
-          );
-          runOnJS(scrollActiveAssetList)(nextOffset);
-        }),
-    [assetScrollOffset, headerPanStartOffset, scrollActiveAssetList],
-  );
-
-  const headerPanGesture = useMemo(
-    () => createPanGesture(),
-    [createPanGesture],
-  );
-
-  const assetPanGesture = useMemo(() => createPanGesture(), [createPanGesture]);
-
-  const handleHeaderWheel = useCallback(
-    (event: WheelLikeEvent) => {
-      const deltaY = event.nativeEvent?.deltaY ?? event.deltaY ?? 0;
-      if (deltaY === 0) return;
-      event.preventDefault?.();
-      scrollActiveAssetList(assetScrollOffset.value + deltaY);
-    },
-    [assetScrollOffset, scrollActiveAssetList],
-  );
-
-  const headerWheelProps = useMemo(
-    () =>
-      isWeb
-        ? ({
-            onWheel: handleHeaderWheel,
-          } as Record<string, unknown>)
-        : ({} as Record<string, unknown>),
-    [handleHeaderWheel],
-  );
-
-  useEffect(() => {
-    assetScrollOffset.value = 0;
-  }, [activeIndex, assetScrollOffset, selectedAssetView]);
 
   const pageStyle = useMemo(
     () =>
@@ -401,7 +306,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 accountId={accountId}
                 activeIndex={activeIndex}
                 selectedAssetView={selectedAssetView}
-                listRef={tokensListRef}
                 containerStyle={listContainerStyle}
                 scrollHandler={scrollHandler}
                 ifFromPortfolio={isPortfolioView}
@@ -419,7 +323,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 accountId={accountId}
                 activeIndex={activeIndex}
                 selectedAssetView={selectedAssetView}
-                listRef={nftsListRef}
                 scrollHandler={scrollHandler}
                 style={[styles.fillSpace, { width: contentWidth }]}
                 ListHeaderComponent={AssetListHeader}
@@ -437,7 +340,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 selectedAssetView={selectedAssetView}
                 isVisible={selectedAssetView === SelectedAssetView.Activities}
                 accountId={accountId}
-                listRef={activitiesListRef}
                 containerStyle={listContainerStyle}
                 scrollHandler={scrollHandler}
                 style={styles.fillSpace}
@@ -492,56 +394,47 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
         <Animated.View
           onLayout={onHeaderLayout}
           style={[styles.headerContainer, animatedContainerStyle]}>
-          <View {...headerWheelProps} style={styles.headerContent}>
-            <GestureDetector gesture={headerPanGesture}>
-              <View>
-                <FlatList
-                  ref={accountsCarouselRef}
-                  data={accountsData}
-                  scrollEventThrottle={100}
-                  renderItem={renderAccountItem}
-                  keyExtractor={accountsKeyExtractor}
-                  horizontal
-                  pagingEnabled
-                  showsHorizontalScrollIndicator={false}
-                  getItemLayout={getItemLayout}
-                  onScroll={handleAccountScroll}
-                  onLayout={onCarouselLayout}
-                  initialScrollIndex={Math.max(
-                    0,
-                    Math.min(activeIndex, accountsData.length - 1),
-                  )}
-                  onScrollToIndexFailed={onAccountsScrollToIndexFailed}
-                />
-                <Column
-                  style={[styles.tabsAndPagination, { paddingTop: spacing.S }]}>
-                  <Pagination
-                    pages={accountsData.length}
-                    activeIndex={activeIndex}
-                    setActiveIndex={handleIndexChange}
-                    withNavigation={true}
-                    loop={false}
-                    showPortfolioView={true}
-                    testID="portfolio-carousel-pagination"
-                  />
-                  <Tabs
-                    tabs={tabs}
-                    value={selectedAssetView}
-                    onChange={value => {
-                      setSelectedAssetView(value as SelectedAssetView);
-                    }}
-                  />
-                </Column>
-              </View>
-            </GestureDetector>
-          </View>
+          <FlatList
+            ref={accountsCarouselRef}
+            data={accountsData}
+            scrollEventThrottle={100}
+            renderItem={renderAccountItem}
+            keyExtractor={accountsKeyExtractor}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            getItemLayout={getItemLayout}
+            onScroll={handleAccountScroll}
+            onLayout={onCarouselLayout}
+            initialScrollIndex={Math.max(
+              0,
+              Math.min(activeIndex, accountsData.length - 1),
+            )}
+            onScrollToIndexFailed={onAccountsScrollToIndexFailed}
+          />
+          <Column style={[styles.tabsAndPagination, { paddingTop: spacing.S }]}>
+            <Pagination
+              pages={accountsData.length}
+              activeIndex={activeIndex}
+              setActiveIndex={handleIndexChange}
+              withNavigation={true}
+              loop={false}
+              showPortfolioView={true}
+              testID="portfolio-carousel-pagination"
+            />
+            <Tabs
+              tabs={tabs}
+              value={selectedAssetView}
+              onChange={value => {
+                setSelectedAssetView(value as SelectedAssetView);
+              }}
+            />
+          </Column>
         </Animated.View>
         {isWeb ? (
-          <GestureDetector gesture={assetPanGesture}>
-            <View style={[styles.fillSpace, styles.assetsContainer]}>
-              {renderAssetItem({ item: { type: selectedAssetView } })}
-            </View>
-          </GestureDetector>
+          <View style={styles.fillSpace}>
+            {renderAssetItem({ item: { type: selectedAssetView } })}
+          </View>
         ) : (
           <FlatList
             contentContainerStyle={styles.assetsContainer}
@@ -584,9 +477,6 @@ const getStyles = ({
       width: containerWidth,
       zIndex: 2,
       overflow: 'hidden',
-    },
-    headerContent: {
-      width: '100%',
     },
     topBarContainer: {
       flexDirection: 'row',

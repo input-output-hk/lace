@@ -16,22 +16,26 @@ type RecentTransactionsContentProps =
     : never;
 
 export const RecentTransactionsContent = ({
+  children,
   token,
 }: RecentTransactionsContentProps) => {
   const { t } = useTranslation();
-  if (token.metadata?.blockchainSpecific.kind !== 'shielded') return null;
-  return (
-    <View>
-      <Text.S
-        variant="secondary"
-        testID="recent-transactions-privacy-information-title">
-        {t('midnight.token-detail-drawer.privacy-information-title')}
-      </Text.S>
-      <Text.S
-        variant="secondary"
-        testID="recent-transactions-privacy-information">
-        {t('midnight.token-detail-drawer.privacy-information')}
-      </Text.S>
-    </View>
-  );
+  if (token.metadata?.blockchainSpecific.kind === 'shielded') {
+    return (
+      <View>
+        <Text.S
+          variant="secondary"
+          testID="recent-transactions-privacy-information-title">
+          {t('midnight.token-detail-drawer.privacy-information-title')}
+        </Text.S>
+        <Text.S
+          variant="secondary"
+          testID="recent-transactions-privacy-information">
+          {t('midnight.token-detail-drawer.privacy-information')}
+        </Text.S>
+      </View>
+    );
+  }
+
+  return <>{children}</>;
 };

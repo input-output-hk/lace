@@ -1,5 +1,5 @@
 import { useAnalytics } from '@lace-contract/analytics';
-import { useConfig, useUICustomisation } from '@lace-contract/app';
+import { useUICustomisation } from '@lace-contract/app';
 import {
   ADA_DECIMALS,
   DEFAULT_DECIMALS,
@@ -255,26 +255,6 @@ export const useStakeDelegation = ({
     'addons.loadActivitiesItemUICustomisations',
     { blockchainName: address?.blockchainName },
   );
-  const { appConfig } = useConfig();
-
-  const handleActivityPress = useCallback(
-    (id: string) => {
-      if (activitiesItemUICustomisation?.onActivityClick) {
-        activitiesItemUICustomisation.onActivityClick({
-          activityId: id,
-          address,
-          config: appConfig,
-        });
-        return;
-      }
-      const activity = activities.find(a => a.activityId === id);
-      NavigationControls.sheets.navigate(SheetRoutes.ActivityDetail, {
-        activityId: id,
-        activity,
-      });
-    },
-    [activitiesItemUICustomisation, address, appConfig, activities],
-  );
 
   // Get tokens metadata for activities formatting
   const tokensMetadataByTokenId = useLaceSelector(
@@ -365,7 +345,6 @@ export const useStakeDelegation = ({
       secondaryButtonLabel: t('v2.sheets.stake-delegation.deregister-button'),
       onPrimaryPress: handleDelegatePress,
       onSecondaryPress: handleDeRegisterPress,
-      onActivityPress: handleActivityPress,
       isLoadingActivities,
       isSecondaryButtonDisabled: isDeregisterDisabled,
     };
@@ -381,7 +360,6 @@ export const useStakeDelegation = ({
     activitySections,
     handleDeRegisterPress,
     handleDelegatePress,
-    handleActivityPress,
     isDeregisterDisabled,
     t,
     isLoadingActivities,

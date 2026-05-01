@@ -145,7 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loaderContainer: {
-    marginTop: spacing.M,
-    marginBottom: spacing.M,
+    marginVertical: spacing.XXXL,
   },
 });

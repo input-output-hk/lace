@@ -1,32 +1,40 @@
 import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
+import unionBy from 'lodash/unionBy';
 import {
-  EMPTY,
   concatMap,
+  EMPTY,
   from,
+  interval,
   map,
   mergeMap,
+  of,
+  concat,
   catchError,
   withLatestFrom,
+  switchMap,
   filter,
   combineLatest,
-  pairwise,
-  startWith,
 } from 'rxjs';
 
 import { getAccountAddresses } from '../helpers';
-import {
-  prepareCardanoAccountsData,
-  type AccountMetadata,
-} from '../helpers/prepareCardanoAccountsData';
 
-import type { Action, Selectors, SideEffect } from '../../contract';
+import type {
+  Action,
+  ActionCreators,
+  Selectors,
+  SideEffect,
+} from '../../contract';
 import type {
   FetchAddressTransactionHistoriesParams,
   FetchAddressTransactionHistoriesResponse,
 } from '../helpers/fetch-address-transaction-histories';
-import type { StateObservables } from '@lace-contract/module';
+import type {
+  ActionObservables,
+  StateObservables,
+} from '@lace-contract/module';
 import type { AccountSyncStatus } from '@lace-contract/sync';
+import type { Milliseconds } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
 export const createTrackAccountTransactionHistory =
@@ -52,7 +60,9 @@ export const createTrackAccountTransactionHistory =
         cardanoContext.selectAccountTransactionHistory$,
         cardanoContext.selectChainId$.pipe(filter(Boolean)),
       ),
-      // Uses concatMap to ensure all accounts are polled sequentially without dropping any.
+      // Process emissions sequentially. concatMap queues instead of dropping,
+      // so all accounts emitted synchronously by getPollTransactionsObservable
+      // are processed (exhaustMap would only process the first and drop the rest).
       concatMap(
         ([
           {
@@ -72,7 +82,7 @@ export const createTrackAccountTransactionHistory =
           const accountAddressesHistories =
             allAccountsAddressesHistories[accountId] ?? {};
 
-          return fetchAddressTransactionHistories({
+          const fetchObservable = fetchAddressTransactionHistories({
             addresses: accountAddresses,
             addressesHistories: accountAddressesHistories,
             chainId,
@@ -115,6 +125,11 @@ export const createTrackAccountTransactionHistory =
               );
               return EMPTY;
             }),
+          );
+
+          return concat(
+            fetchObservable,
+            of(actions.activities.pollNewerAccountsActivities()),
           );
         },
       ),
@@ -181,49 +196,26 @@ export const getLoadOlderActivitiesObservable = (
       ),
     );
 
-/**
- * Creates an observable that emits when newer transactions should be fetched.
- *
- * Triggers reactively whenever `accountTransactionsTotal` increases for an
- * account (new transaction detected) or when a new account is discovered.
- * This is more efficient than blind time-based polling because it only fetches
- * when there's actually a change detected, similar to how UTXOs are tracked.
- */
 export const getPollTransactionsObservable = (
-  stateObservables: StateObservables<Selectors>,
+  actionObservables: ActionObservables<ActionCreators>,
+  addresses: StateObservables<Selectors>['addresses'],
+  pollingIntervalSeconds: Milliseconds,
 ) =>
-  prepareCardanoAccountsData(stateObservables).pipe(
-    startWith([] as AccountMetadata[]),
-    pairwise(),
-    mergeMap(([previousAccounts, currentAccounts]) => {
-      const items = currentAccounts.flatMap(current => {
-        const previous = previousAccounts.find(
-          p => p.accountId === current.accountId,
-        );
-        // Initial observation of the account — fetch a single page of newest
-        // txs. Older pages are loaded on demand by getLoadOlderActivitiesObservable.
-        if (!previous) {
-          return [
-            {
-              accountId: current.accountId,
-              numberOfItems: ACTIVITIES_PER_PAGE,
-            },
-          ];
-        }
-        const delta = current.total - previous.total;
-        if (delta <= 0) return [];
-        // Ask for at least a page, but enough to cover the delta so we don't
-        // leave a gap when many txs arrive between tip polls.
-        return [
-          {
-            accountId: current.accountId,
-            numberOfItems: Math.max(ACTIVITIES_PER_PAGE, delta),
+  from(actionObservables.activities.pollNewerAccountsActivities$).pipe(
+    switchMap(() =>
+      interval(pollingIntervalSeconds).pipe(
+        withLatestFrom(addresses.selectAllAddresses$),
+        filter(([_, addresses]) => addresses.length > 0),
+        map(([_, addresses]) =>
+          unionBy(addresses, address => address.accountId),
+        ),
+        mergeMap(addresses => from(addresses)),
+        map(address => ({
+          payload: {
+            accountId: address.accountId,
+            numberOfItems: ACTIVITIES_PER_PAGE,
           },
-        ];
-      });
-      return from(items);
-    }),
-    map(({ accountId, numberOfItems }) => ({
-      payload: { accountId, numberOfItems },
-    })),
+        })),
+      ),
+    ),
   );

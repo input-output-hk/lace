@@ -5,16 +5,8 @@ import {
   getNightTokenTickerByNetwork,
   isDustAddress,
 } from '@lace-contract/midnight-context';
-import {
-  isSendFlowClosed,
-  isSendFlowSuccess,
-  useSendFlow,
-} from '@lace-contract/send-flow';
-import {
-  NavigationControls,
-  SheetRoutes,
-  onSheetClose,
-} from '@lace-lib/navigation';
+import { isSendFlowClosed, isSendFlowSuccess } from '@lace-contract/send-flow';
+import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import {
   convertAmountToDenominated,
   valueToLocale,
@@ -50,20 +42,9 @@ export const useDustDesignationSheet = (
   const hasInitialSynced = useRef(false);
   const wasFlowOpen = useRef(false);
   const hasInitiatedConfirmation = useRef(false);
-  const isClosingRef = useRef(false);
-
-  const { resetSendFlow } = useSendFlow();
 
   // Redux state and actions
   const dispatchClosed = useDispatchLaceAction('sendFlow.closed', true);
-
-  useEffect(() => {
-    return onSheetClose(() => {
-      isClosingRef.current = true;
-      dispatchClosed();
-      resetSendFlow();
-    });
-  }, [dispatchClosed, resetSendFlow]);
   const sendFlowState = useLaceSelector(
     'sendFlow.selectSendFlowState',
   ) as SendFlowSliceState<MidnightSpecificSendFlowData>;
@@ -226,8 +207,8 @@ export const useDustDesignationSheet = (
 
   // Initialize send flow on mount
   useEffect(() => {
-    // Skip if prerequisites are missing or sheet is being dismissed
-    if (!nightToken || !ownDustAddress || isClosingRef.current) return;
+    // Skip if prerequisites are missing
+    if (!nightToken || !ownDustAddress) return;
 
     // Handle terminal states from a previous flow
     if (
@@ -341,8 +322,9 @@ export const useDustDesignationSheet = (
   );
 
   const handleClose = useCallback(() => {
+    dispatchClosed();
     NavigationControls.sheets.close();
-  }, []);
+  }, [dispatchClosed]);
 
   const handleDesignate = useCallback(() => {
     debouncedAddressDispatch.flush();

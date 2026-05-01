@@ -1,6 +1,6 @@
 import { useUICustomisation } from '@lace-contract/app';
 import { ActivityDetailSheetTemplate } from '@lace-lib/ui-toolkit';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { useActivityDetailsSheet } from './useActivityDetailsSheet';
 
@@ -9,11 +9,6 @@ import type { SheetScreenProps, SheetRoutes } from '@lace-lib/navigation';
 export const ActivityDetailsSheet = (
   props: SheetScreenProps<SheetRoutes.ActivityDetail>,
 ) => {
-  const { navigation } = props;
-  const goBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-  const onBackPress = navigation.canGoBack() ? goBack : undefined;
   const {
     headerTitle,
     loadingText,
@@ -55,7 +50,6 @@ export const ActivityDetailsSheet = (
         loadingText,
         isLoading,
         theme,
-        onBackPress,
       }}
       contentProps={{
         hasRewardData: false,

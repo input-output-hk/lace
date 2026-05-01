@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 
 import type { AnyAddress } from '@lace-contract/addresses';
@@ -168,23 +168,10 @@ export type TokenDetailsUICustomization<BlockchainSpecificMetadata = unknown> =
             textColor?: string;
           }
         | undefined;
-      /**
-       * Optional header rendered immediately above the activity list in the
-       * per-account token detail sheet. Returns `null` to render nothing.
-       * Must not wrap the list itself — the caller places it as a sibling.
-       */
       RecentTransactionsContent: ComponentType<{
+        children: ReactNode;
         token: Token<BlockchainSpecificMetadata>;
       }>;
-      /**
-       * When truthy, the per-account token detail sheet omits the activity
-       * list entirely (only the header above it is rendered). Used by
-       * blockchain modules that intentionally suppress on-chain activity
-       * display for privacy reasons (e.g. Midnight shielded tokens).
-       */
-      shouldHideActivitiesList?: (
-        token: Token<BlockchainSpecificMetadata>,
-      ) => boolean;
       canEditTokenName?: (token: Token<BlockchainSpecificMetadata>) => boolean;
       /** Optional component rendered after the token name in the detail sheet (e.g. shielded pill). */
       TokenNameAddon?: ComponentType<{

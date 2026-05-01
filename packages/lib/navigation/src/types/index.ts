@@ -2,7 +2,6 @@ import type { FC } from 'react';
 
 import type { SheetRoutes, StackRoutes, TabRoutes } from './routes';
 import type { BottomSheetFooterProps } from '@gorhom/bottom-sheet';
-import type { Activity } from '@lace-contract/activities';
 import type { FolderId, Token } from '@lace-contract/tokens';
 import type { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import type {
@@ -198,18 +197,10 @@ export type SheetParameterList = {
   [SheetRoutes.FiatCurrencySheet]: BaseSheetParams;
   [SheetRoutes.AssetDetailBottomSheet]: BaseSheetParams & {
     token: Token;
-    // Origin marker: was the sheet opened from the portfolio (multi-account)
-    // tokens list? Immutable for the lifetime of the sheet entry — controls
-    // whether a back-to-portfolio affordance is shown after drilling down.
     isFromPortfolio?: boolean;
-    // Current view inside the sheet. Mutable via `navigation.setParams` so the
-    // drill-down survives re-mounts when child sheets (e.g. ActivityDetail)
-    // are pushed on top. Defaults to `isFromPortfolio` on first mount.
-    isPortfolioView?: boolean;
   };
   [SheetRoutes.ActivityDetail]: BaseSheetParams & {
     activityId: string;
-    activity?: Activity;
   };
   [SheetRoutes.StakingIssue]: BaseSheetParams & {
     accountId: string;

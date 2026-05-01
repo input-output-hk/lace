@@ -1,6 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
-import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
-import { useConfig, useUICustomisation } from '@lace-contract/app';
+import { useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import { FeatureIds } from '@lace-contract/network';
 import { getTokenPriceId } from '@lace-contract/token-pricing';
@@ -12,19 +11,13 @@ import {
   type SheetScreenProps,
 } from '@lace-lib/navigation';
 import {
-  formatAndGroupActivitiesByDate,
   isWeb,
   truncateText,
   useCopyToClipboard,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import {
-  formatAmountToLocale,
-  formatDate,
-  useDeepCompareMemo,
-  valueToLocale,
-} from '@lace-lib/util-render';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatAmountToLocale, valueToLocale } from '@lace-lib/util-render';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
@@ -34,15 +27,6 @@ import type { Token, TokenDistributionItem } from '@lace-contract/tokens';
 import type { PriceDataPoint, TimeRange } from '@lace-lib/ui-toolkit';
 
 const CARDANO_TOKEN_ID_LENGTH = 56;
-
-const EMPTY_ACCOUNT_ID = AccountId('');
-const EMPTY_TOKEN_ID = TokenId('');
-
-// `globalState.transactions` is read only by `TokenDetailActivityList` in the
-// portfolio-view branch of the template. In the per-account branch nothing
-// reads it, but the template's prop type requires the field. Share a stable
-// reference so the `globalState` memo doesn't invalidate on every render.
-const EMPTY_TRANSACTIONS: Transaction[] = [];
 
 export interface Transaction {
   accountId: string;
@@ -109,17 +93,12 @@ const calculateTokenFiatValue = (
 };
 
 export const useTokenDetail = ({
-  navigation,
   route,
   isTokenPricingEnabled,
 }: SheetScreenProps<SheetRoutes.AssetDetailBottomSheet> & {
   isTokenPricingEnabled: boolean;
 }) => {
-  const {
-    isFromPortfolio,
-    isPortfolioView: isPortfolioViewParameter,
-    token: selectedToken,
-  } = route.params;
+  const { isFromPortfolio, token: selectedToken } = route.params;
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
@@ -178,9 +157,11 @@ export const useTokenDetail = ({
     selectedItemIndex === -1 ? 0 : selectedItemIndex,
   );
   const [timeRange, setTimeRange] = useState<TimeRange>('24H');
-  const [isPortfolioView, setIsPortfolioView] = useState(
-    isPortfolioViewParameter ?? !!isFromPortfolio,
-  );
+  const [safeDeviceSize, setSafeDeviceSize] = useState<{
+    width: number;
+    height: number;
+  }>({ width: 0, height: 0 });
+  const [isPortfolioView, setIsPortfolioView] = useState(!!isFromPortfolio);
 
   const tokenTotalBalance = useMemo(() => {
     if (isPortfolioView) {
@@ -197,51 +178,10 @@ export const useTokenDetail = ({
     };
   }, [selectedTokenData, isPortfolioView, tokenTotals]);
 
-  const accountIdOrEmpty = accountId ?? EMPTY_ACCOUNT_ID;
-  const tokenIdOrEmpty = selectedToken?.tokenId
-    ? TokenId(selectedToken.tokenId)
-    : EMPTY_TOKEN_ID;
-
-  const activitiesParams = useDeepCompareMemo({
-    accountId: accountIdOrEmpty,
-    tokenId: tokenIdOrEmpty,
+  const activities = useLaceSelector('activities.selectByAccountIdAndTokenId', {
+    accountId: AccountId(accountId ?? ''),
+    tokenId: TokenId(selectedToken?.tokenId ?? ''),
   });
-  const activities = useLaceSelector(
-    'activities.selectByAccountIdAndTokenId',
-    activitiesParams,
-  );
-
-  const isLoadingOlderActivities = useLaceSelector(
-    'activities.selectIsLoadingOlderActivitiesByAccount',
-    accountIdOrEmpty,
-  );
-  const hasLoadedOldestEntry = useLaceSelector(
-    'activities.selectHasLoadedOldestEntryByAccount',
-    accountIdOrEmpty,
-  );
-  const incrementDesiredLoadedActivitiesCount = useDispatchLaceAction(
-    'activities.incrementDesiredLoadedActivitiesCount',
-  );
-  const accountActivitiesParams = useDeepCompareMemo({
-    accountId: accountIdOrEmpty,
-  });
-  const accountActivities = useLaceSelector(
-    'activities.selectByAccountId',
-    accountActivitiesParams,
-  );
-
-  const [address] = useLaceSelector(
-    'addresses.selectByAccountId',
-    accountIdOrEmpty,
-  );
-  const [activitiesItemUICustomisation] = useUICustomisation(
-    'addons.loadActivitiesItemUICustomisations',
-    { blockchainName: address?.blockchainName },
-  );
-  const { appConfig } = useConfig();
-  const tokensMetadataByTokenId = useLaceSelector(
-    'tokens.selectTokensMetadata',
-  );
 
   const [tokenDetailsUICustomisation] = useUICustomisation(
     'addons.loadTokenDetailsUICustomisations',
@@ -322,7 +262,6 @@ export const useTokenDetail = ({
   const buyButtonLabel = t('v2.menu.buy');
   const estimatedPriceLabel = t('v2.token-detail.estimated-price');
   const tokenInformationTitle = t('v2.token-detail.tokenInformation');
-  const tokenActivityTitle = t('tokens.detail-drawer.activity.title');
   const fingerprintTitle = t('v2.token-detail.fingerprint');
   const policyIdTitle = t('v2.token-detail.policyId');
   const estimatedPrice =
@@ -343,6 +282,8 @@ export const useTokenDetail = ({
       tokenTotalBalance?.decimals || 0,
     );
   }, [tokenTotalBalance]);
+
+  const transactions: Transaction[] = []; // TODO: complete
 
   const items = useMemo(
     () =>
@@ -414,10 +355,6 @@ export const useTokenDetail = ({
   const onTokenPress = useCallback(
     (_transaction: Transaction) => {
       setIsPortfolioView(false);
-      // Persist the drill-down on the route entry so the per-account view
-      // survives a re-mount after navigating to a child sheet (e.g. Activity
-      // detail) and back — the sheet navigator only renders the focused route.
-      navigation.setParams({ isPortfolioView: false });
       setActiveAccount({
         walletId: WalletId(_transaction.walletId || ''),
         accountId: AccountId(_transaction.accountId || ''),
@@ -427,20 +364,7 @@ export const useTokenDetail = ({
       );
       setIndex(newIndex === -1 ? 0 : newIndex);
     },
-    [setIsPortfolioView, addresses, navigation, setActiveAccount],
-  );
-
-  // Available only when the sheet was opened from the portfolio tokens list:
-  // returns the per-account view back to the multi-account portfolio view.
-  const onBackToPortfolioPress = useMemo(
-    () =>
-      isFromPortfolio
-        ? () => {
-            setIsPortfolioView(true);
-            navigation.setParams({ isPortfolioView: true });
-          }
-        : undefined,
-    [isFromPortfolio, navigation],
+    [setIsPortfolioView, addresses],
   );
 
   const onSelectItem = useCallback(
@@ -486,139 +410,16 @@ export const useTokenDetail = ({
     [isTokenPricingEnabled, requestPriceHistory],
   );
 
-  const onLoadMorePress = useCallback(() => {
-    if (isPortfolioView) return;
-    if (!accountId) return;
-    if (isLoadingOlderActivities || hasLoadedOldestEntry) return;
-    incrementDesiredLoadedActivitiesCount({
-      accountId,
-      incrementBy: ACTIVITIES_PER_PAGE,
+  const handleLayout = ({
+    nativeEvent,
+  }: {
+    nativeEvent: { layout: { width: number; height: number } };
+  }) => {
+    setSafeDeviceSize?.({
+      width: nativeEvent.layout.width,
+      height: nativeEvent.layout.height,
     });
-  }, [
-    isPortfolioView,
-    accountId,
-    isLoadingOlderActivities,
-    hasLoadedOldestEntry,
-    incrementDesiredLoadedActivitiesCount,
-  ]);
-
-  // Oldest inspected activity timestamp for THIS account. Activities are
-  // stored sorted by timestamp desc, so `at(-1)` is the oldest. Using the
-  // activity list (not raw tx history) reflects reward entries too, so the
-  // date advances whenever the page grows — not only when a new tx is
-  // fetched.
-  const oldestInspectedTimestamp = useMemo(
-    () => accountActivities.at(-1)?.timestamp,
-    [accountActivities],
-  );
-
-  const oldestInspectedDate = useMemo(
-    () =>
-      oldestInspectedTimestamp
-        ? formatDate({
-            date: oldestInspectedTimestamp,
-            type: 'local',
-          })
-        : undefined,
-    [oldestInspectedTimestamp],
-  );
-
-  const tokenNameForCopy =
-    coinName || truncateText(selectedToken?.tokenId, isWeb ? 28 : 20);
-
-  // Empty list (activities for this token === 0) copy.
-  // `empty-keep-searching` when there's more history to inspect;
-  // `empty-exhausted` when we've reached the account's oldest tx.
-  const emptyActivitiesMessage = useMemo<string | undefined>(() => {
-    if (activities.length > 0) return undefined;
-    if (hasLoadedOldestEntry) {
-      return t('tokens.detail-drawer.activity.empty-exhausted');
-    }
-    if (!oldestInspectedDate) return undefined;
-    return t('tokens.detail-drawer.activity.empty-keep-searching', {
-      tokenName: tokenNameForCopy,
-      date: oldestInspectedDate,
-    });
-  }, [
-    activities.length,
-    hasLoadedOldestEntry,
-    oldestInspectedDate,
-    tokenNameForCopy,
-    t,
-  ]);
-
-  // Non-empty list copy shown alongside the footer Load-more button when the
-  // user has some activities already but can still page further back — the
-  // "no activity yet" wording would be wrong here.
-  const moreActivitiesHintMessage = useMemo<string | undefined>(() => {
-    if (activities.length === 0) return undefined;
-    if (hasLoadedOldestEntry) return undefined;
-    if (!oldestInspectedDate) return undefined;
-    return t('tokens.detail-drawer.activity.more-hint', {
-      tokenName: tokenNameForCopy,
-      date: oldestInspectedDate,
-    });
-  }, [
-    activities.length,
-    hasLoadedOldestEntry,
-    oldestInspectedDate,
-    tokenNameForCopy,
-    t,
-  ]);
-
-  const loadMoreLabel = t('tokens.detail-drawer.activity.load-more');
-
-  // Fire the initial "first chunk" fetch when the account has zero
-  // activities in the store. Once activities land, this effect self-gates
-  // via `accountActivities.length > 0` on subsequent renders. Any further
-  // pagination is user-driven via the Load-more button.
-  useEffect(() => {
-    if (isPortfolioView || !accountId) return;
-    if (isLoadingOlderActivities || hasLoadedOldestEntry) return;
-    if (accountActivities.length > 0) return;
-    incrementDesiredLoadedActivitiesCount({
-      accountId,
-      incrementBy: ACTIVITIES_PER_PAGE,
-    });
-  }, [
-    isPortfolioView,
-    accountId,
-    accountActivities.length,
-    isLoadingOlderActivities,
-    hasLoadedOldestEntry,
-    incrementDesiredLoadedActivitiesCount,
-  ]);
-
-  const handleActivityPress = useCallback(
-    (id: string) => {
-      if (activitiesItemUICustomisation?.onActivityClick) {
-        activitiesItemUICustomisation.onActivityClick({
-          activityId: id,
-          address,
-          config: appConfig,
-        });
-        return;
-      }
-      NavigationControls.sheets.navigate(SheetRoutes.ActivityDetail, {
-        activityId: id,
-      });
-    },
-    [activitiesItemUICustomisation, address, appConfig],
-  );
-
-  const activityListSections = useMemo(
-    () =>
-      formatAndGroupActivitiesByDate({
-        activities,
-        t,
-        tokensMetadataByTokenId,
-        getMainTokenBalanceChange:
-          activitiesItemUICustomisation?.getMainTokenBalanceChange,
-        getTokensInfoSummary:
-          activitiesItemUICustomisation?.getTokensInfoSummary,
-      }),
-    [activities, t, tokensMetadataByTokenId, activitiesItemUICustomisation],
-  );
+  };
 
   const editNameLabel = t('tokens.detail-drawer.edit-name');
   const tokenIdLabel = t('tokens.detail-drawer.token-id');
@@ -661,7 +462,6 @@ export const useTokenDetail = ({
     coinName,
     tokenNameAddon,
     tokenInformationTitle,
-    tokenActivityTitle,
     fingerprintTitle,
     policyIdTitle,
     editNameLabel,
@@ -674,13 +474,13 @@ export const useTokenDetail = ({
       onSendPress,
       onSelectItem,
       onTimeRangeChange: handleTimeRangeChange,
+      handleLayout,
       onCopyValue: copyToClipboard,
       onEditNamePress:
         selectedTokenData &&
         tokenDetailsUICustomisation?.canEditTokenName?.(selectedTokenData)
           ? onEditNamePress
           : undefined,
-      onBackToPortfolioPress,
     }),
     [
       isBuyAvailable,
@@ -688,11 +488,11 @@ export const useTokenDetail = ({
       onSendPress,
       onSelectItem,
       handleTimeRangeChange,
+      handleLayout,
       copyToClipboard,
       selectedTokenData,
       onEditNamePress,
       tokenDetailsUICustomisation,
-      onBackToPortfolioPress,
     ],
   );
 
@@ -702,17 +502,20 @@ export const useTokenDetail = ({
       selectedToken: mappedSelectedToken,
       transactions: isPortfolioView
         ? tokenDistributionTransactions
-        : EMPTY_TRANSACTIONS,
+        : transactions,
       items,
       accountId,
+      safeDeviceSize,
       onTokenPress,
     }),
     [
       mappedAddresses,
       mappedSelectedToken,
       tokenDistributionTransactions,
+      transactions,
       items,
       accountId,
+      safeDeviceSize,
       onTokenPress,
       isPortfolioView,
     ],
@@ -733,7 +536,6 @@ export const useTokenDetail = ({
       policyId: policyIdValue,
       isUnnamed: selectedTokenData?.unnamed,
       tokenId: selectedTokenData?.tokenId,
-      tokenPrice: estimatedPrice,
     }),
     [
       estimatedPrice,
@@ -754,18 +556,24 @@ export const useTokenDetail = ({
 
   return {
     tokenDetailProps: {
-      labels,
+      labels: {
+        ...labels,
+      },
       actions,
-      utils,
-      globalState,
-      activityListSections,
-      onActivityPress: handleActivityPress,
-      onLoadMorePress,
-      isLoadingOlderActivities,
-      hasLoadedOldestEntry,
-      emptyActivitiesMessage,
-      moreActivitiesHintMessage,
-      loadMoreLabel,
+      utils: {
+        ...utils,
+        tokenPrice: estimatedPrice,
+      },
+      globalState: {
+        ...globalState,
+        activityListProps: {
+          activities,
+          isVisible: true,
+          accountId: accountId!,
+          scrollEnabled: false,
+          deviceSize: safeDeviceSize || { width: 0, height: 0 },
+        },
+      },
     },
     tokenDetailsUICustomisation,
   };

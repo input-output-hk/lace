@@ -43,15 +43,13 @@ const TokenAvatar = ({
   token,
   styles,
   theme,
-  testID,
 }: {
   token: SwapInputProps['token'];
   styles: ReturnType<typeof getStyles>;
   theme: ReturnType<typeof useTheme>['theme'];
-  testID?: string;
 }) => {
   return (
-    <View style={styles.avatar} testID={testID}>
+    <View style={styles.avatar}>
       {token?.icon ? (
         <Image source={token.icon} style={styles.avatarImage} />
       ) : (
@@ -109,12 +107,7 @@ export const SwapInput = forwardRef<SwapInputHandle, SwapInputProps>(
             onTokenPress?.();
           }}
           testID={testID ? `${testID}-token-selector` : undefined}>
-          <TokenAvatar
-            token={token}
-            styles={styles}
-            theme={theme}
-            testID={testID ? `${testID}-avatar` : undefined}
-          />
+          <TokenAvatar token={token} styles={styles} theme={theme} />
           <Text.XS
             style={styles.tokenName}
             variant={isIdle ? 'secondary' : 'primary'}
