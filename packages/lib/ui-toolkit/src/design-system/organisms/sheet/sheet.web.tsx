@@ -7,7 +7,6 @@ import type {
 
 import noop from 'lodash/noop';
 import React, {
-  forwardRef,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -307,15 +306,14 @@ const SheetHost = ({
   );
 };
 
-const WebSheetScroll = forwardRef<ScrollView, WebSheetScrollProps>(
-  ({ children, keyboardShouldPersistTaps = 'handled', ...props }, ref) => (
-    <ScrollView
-      ref={ref}
-      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-      {...props}>
-      {children}
-    </ScrollView>
-  ),
+const WebSheetScroll = ({
+  children,
+  keyboardShouldPersistTaps = 'handled',
+  ...props
+}: WebSheetScrollProps) => (
+  <ScrollView keyboardShouldPersistTaps={keyboardShouldPersistTaps} {...props}>
+    {children}
+  </ScrollView>
 );
 
 export const Sheet = Object.assign(SheetHost, {

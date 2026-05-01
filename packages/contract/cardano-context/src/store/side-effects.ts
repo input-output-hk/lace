@@ -451,6 +451,7 @@ export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createTrackOlderAccountTransactionHistory(fetchAddressTransactionHistories),
   createTrackNewerAccountTransactionHistory(
     fetchNewAddressTransactionHistories,
+    config.cardanoProvider.transactionHistoryPollingIntervalSeconds,
   ),
   createTrackAccountRewardsHistory(TRACK_ACCOUNT_ACTIVITIES_DEBOUNCE_TIME),
   trackAccountDelegationActivities,

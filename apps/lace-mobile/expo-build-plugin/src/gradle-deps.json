@@ -1,8 +1,19 @@
 {
+  "apollo": {
+    "groupId": "org.hyperledger.identus.apollo",
+    "artifactId": "apollo-android",
+    "version": "1.6.0"
+  },
+  "mavenRepositories": [
+    {
+      "name": "localMavenRepo",
+      "code": "maven {\n        url = uri(\"${rootProject.projectDir}/app/maven-local\")\n        metadataSources {\n            mavenPom()\n            artifact()\n        }\n    }"
+    }
+  ],
   "dependencies": [
     {
       "name": "apollo-android",
-      "implementation": "implementation('org.hyperledger.identus:apollo-android:1.8.4-kt2.1.20') {\n        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'\n        exclude group: 'com.squareup.okio', module: 'okio'\n        }"
+      "implementation": "implementation('org.hyperledger.identus.apollo:apollo-android:1.6.0') {\n        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'\n        exclude group: 'com.squareup.okio', module: 'okio'\n    }"
     },
     {
       "name": "bcprov-jdk18on",

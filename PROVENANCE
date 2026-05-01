@@ -1,14 +1,14 @@
 Lace public source snapshot
 ===========================
 
-release-tag:         lace-extension@2.0.0
+release-tag:         lace-extension@2.0.1
 source-repo:         input-output-hk/lace-platform (private)
-source-commit:       3621c8c6da354fe0e978b2d922695cd54044730b
-snapshot-utc:        2026-04-27T14:24:47.836Z
+source-commit:       41023af13f1bc23298d4b40f1147782fef2b7b94
+snapshot-utc:        2026-04-29T09:33:14.123Z
 
 allowlist-sha256:    a75a43e9e238d609b21b9d7f3409fa46bb8a0a92a4738dbeba71076ec4e74929
 excludelist-sha256:  8e7916a357aae4f8a8a963e32cb48392e039572670b390f043322a9d17e98a50
-templates-sha256:    6d454434e489a39bff6915e0fa94cf0373dd2290249d8dbccf040df4db17df84
+templates-sha256:    7e72a619d880ca5766edcf209ec78e937edae1230fd0136c0d670625c796f973
 
 This snapshot was generated from the private source of truth by
 open-source-release-publish.yml. The hashes above bind it to specific

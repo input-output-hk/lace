@@ -28,9 +28,11 @@ const loadGradleDependencies = () => {
   return deps;
 };
 
-// Copy Kotlin wrapper files and native .so libraries needed at runtime.
-// AARs and POMs are resolved from Maven Central — no local vendoring required.
+// Function to copy Apollo AAR and Kotlin files
 const withApolloKotlinFiles = config => {
+  const deps = loadGradleDependencies();
+  const { groupId, artifactId, version } = deps.apollo;
+
   return withDangerousMod(config, [
     'android',
     async config => {
@@ -43,6 +45,7 @@ const withApolloKotlinFiles = config => {
         '/android/app/src/main/java/io/lace/mobilewallet',
       );
 
+      // Ensure target directory exists
       try {
         mkdirSync(kotlinTargetDir, { recursive: true });
         console.log(
@@ -53,6 +56,7 @@ const withApolloKotlinFiles = config => {
         throw error;
       }
 
+      // Copy Kotlin files
       const kotlinFiles = ['ApolloModule.kt', 'ApolloPackage.kt'];
       for (const file of kotlinFiles) {
         const sourcePath = path.join(kotlinSourceDir, file);
@@ -70,6 +74,53 @@ const withApolloKotlinFiles = config => {
           throw error;
         }
       }
+
+      // Create local Maven repository structure for Apollo
+      // Structure: maven-local/org/hyperledger/identus/apollo/apollo-android/1.6.0/
+      const aarSourceDir = path.join(
+        projectRoot,
+        '../../packages/apollo-native/android',
+      );
+      const mavenGroupPath = groupId.replace(/\./g, '/');
+      const mavenTargetDir = path.join(
+        projectRoot,
+        `/android/app/maven-local/${mavenGroupPath}/${artifactId}/${version}`,
+      );
+
+      // Ensure Maven directory structure exists
+      try {
+        mkdirSync(mavenTargetDir, { recursive: true });
+        console.log(`✔ Created Maven repository structure: ${mavenTargetDir}`);
+      } catch (error) {
+        console.error(`❌ Failed to create Maven directory: ${error}`);
+        throw error;
+      }
+
+      // Copy Apollo release AAR
+      const aarSource = path.join(aarSourceDir, 'apollo-release.aar');
+      const aarTarget = path.join(
+        mavenTargetDir,
+        `${artifactId}-${version}.aar`,
+      );
+
+      if (!fs.existsSync(aarSource)) {
+        throw new Error(`Apollo AAR not found at: ${aarSource}`);
+      }
+      fs.copyFileSync(aarSource, aarTarget);
+      console.log(`✔ Copied apollo-release.aar to Maven repo`);
+
+      // Copy POM file for transitive dependency resolution
+      const pomSource = path.join(aarSourceDir, 'pom-release.xml');
+      const pomTarget = path.join(
+        mavenTargetDir,
+        `${artifactId}-${version}.pom`,
+      );
+
+      if (!fs.existsSync(pomSource)) {
+        throw new Error(`Apollo POM not found at: ${pomSource}`);
+      }
+      fs.copyFileSync(pomSource, pomTarget);
+      console.log(`✔ Copied pom-release.xml to Maven repo`);
 
       return config;
     },
@@ -328,7 +379,11 @@ const withAndroidPackagingFixes = config => {
 };
 
 const withAndroidApolloDependencies = config => {
+  // Load dependencies from JSON file
   const deps = loadGradleDependencies();
+  const localMavenRepo =
+    deps.mavenRepositories.find(repo => repo.name === 'localMavenRepo')?.code ||
+    '';
   const apolloDep =
     deps.dependencies.find(dep => dep.name === 'apollo-android')
       ?.implementation || '';
@@ -336,6 +391,30 @@ const withAndroidApolloDependencies = config => {
     deps.dependencies.find(dep => dep.name === 'bcprov-jdk18on')
       ?.implementation || '';
   const subprojectsBlock = deps.subprojectsBlock || '';
+
+  // Add local Maven repository to app's build.gradle
+  config = withAppBuildGradle(config, config => {
+    // Add repositories block with local Maven repo before dependencies if it doesn't exist
+    if (!config.modResults.contents.includes('repositories {')) {
+      config.modResults.contents = config.modResults.contents.replace(
+        /(dependencies\s*{)/,
+        `repositories {\n    ${localMavenRepo}\n}\n\n$1`,
+      );
+      console.log(
+        '✔ Added repositories block with local Maven repo to app build.gradle',
+      );
+    } else {
+      // If repositories block exists, add local Maven repo to it
+      config.modResults.contents = config.modResults.contents.replace(
+        /(repositories\s*{)/,
+        `$1\n    ${localMavenRepo}`,
+      );
+      console.log(
+        '✔ Added local Maven repo to existing repositories block in app build.gradle',
+      );
+    }
+    return config;
+  });
 
   config = withProjectBuildGradle(config, config => {
     config.modResults.contents += `\n${subprojectsBlock}`;
@@ -357,7 +436,9 @@ const withAndroidApolloDependencies = config => {
       /(dependencies\s*{\n)/,
       `$1    ${apolloDep}\n`,
     );
-    console.log('✔ Added apollo-android dependency to app build.gradle');
+    console.log(
+      '✔ Added apollo-android dependency with transitive deps to app build.gradle',
+    );
     return config;
   });
 

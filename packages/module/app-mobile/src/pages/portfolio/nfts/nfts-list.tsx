@@ -1,9 +1,8 @@
 import type {
-  FlatList as FlatListRef,
   LayoutChangeEvent,
-  ListRenderItemInfo,
   StyleProp,
   ViewStyle,
+  ListRenderItemInfo,
 } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
@@ -60,7 +59,6 @@ export const NftsList = ({
   scrollHandler,
   footerSpacerHeight,
   contentTopInset,
-  listRef,
 }: {
   accountId: AccountId;
   activeIndex: number;
@@ -70,17 +68,15 @@ export const NftsList = ({
   scrollHandler: ScrollHandlerProcessed<Record<string, unknown>>;
   footerSpacerHeight?: number;
   contentTopInset?: number;
-  listRef?: React.RefObject<FlatListRef | null>;
 }) => {
   // Custom hooks
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const internalListRef = useRef<FlatList>(null);
-  const resolvedListRef = listRef ?? internalListRef;
+  const listRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    resolvedListRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [activeIndex, selectedAssetView, resolvedListRef]);
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [activeIndex, selectedAssetView]);
 
   const setSelectedFolderId = useDispatchLaceAction('ui.setSelectedFolderId');
   const allGroupedNfts = useLaceSelector(
@@ -323,14 +319,13 @@ export const NftsList = ({
         contentContainerStyle={contentContainerStyle}
         ListHeaderComponent={listHeaderNode}
         scrollHandler={scrollHandler}
-        listRef={resolvedListRef}
       />
     );
   }
 
   return (
     <Animated.FlatList
-      ref={resolvedListRef}
+      ref={listRef as React.RefObject<FlatList>}
       testID="nft-list-container"
       data={nftGridItems}
       keyExtractor={keyExtractor}

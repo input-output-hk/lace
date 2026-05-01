@@ -134,8 +134,6 @@ export type AnalyticsEventName =
   | 'swaps | sign success'
   | 'swaps | sign failure'
   | 'swaps | disclaimer | acknowledge | press'
-  | 'swaps | uk fca disclaimer | acknowledge | press'
-  | 'dapp explorer | uk fca disclaimer | acknowledge | press'
   | 'swaps | quick amount | half | press'
   | 'swaps | quick amount | max | press'
   | 'swaps | result | retry | press'

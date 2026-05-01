@@ -5,8 +5,16 @@ import { useCommonOptionListProps } from '../common';
 
 import { useAboutProps } from './useAboutProps';
 
-export const AboutPage = () => {
-  const { aboutOptions, title, subtitle } = useAboutProps();
+import type { TabRoutes, TabScreenProps } from '@lace-lib/navigation';
+
+export const AboutPage = ({
+  navigation,
+  route,
+}: TabScreenProps<TabRoutes.About>) => {
+  const { aboutOptions, title, subtitle } = useAboutProps({
+    navigation,
+    route,
+  });
 
   const { colors, isTablet } = useCommonOptionListProps();
 

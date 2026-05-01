@@ -13,7 +13,6 @@ interface HeaderProps {
   loadingText: string;
   isLoading?: boolean;
   theme: Theme;
-  onBackPress?: () => void;
 }
 
 interface ContentProps {
@@ -32,13 +31,7 @@ export const ActivityDetailSheetTemplate = ({
   headerProps,
   contentProps,
 }: ActivityDetailSheetProps) => {
-  const {
-    headerTitle,
-    loadingText,
-    isLoading = false,
-    theme,
-    onBackPress,
-  } = headerProps;
+  const { headerTitle, loadingText, isLoading = false, theme } = headerProps;
   const { hasRewardData, rewardDetails, activityDetails } = contentProps;
 
   const renderDetails = useCallback((): React.ReactNode => {
@@ -47,11 +40,7 @@ export const ActivityDetailSheetTemplate = ({
 
   return (
     <>
-      <SheetHeader
-        title={headerTitle}
-        testID="activity-details-sheet-header"
-        leftIconOnPress={onBackPress}
-      />
+      <SheetHeader title={headerTitle} testID="activity-details-sheet-header" />
       <Sheet.Scroll
         testID="activity-details-sheet"
         contentContainerStyle={styles.contentContainer}>

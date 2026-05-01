@@ -80,7 +80,7 @@ export const SwapSlippage = (
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         overScrollMode="never">
-        <Text.XS variant="secondary" testID="swap-slippage-description">
+        <Text.XS variant="secondary">
           {t('v2.swap.slippage.description')}
         </Text.XS>
         <CustomTextInput
@@ -105,7 +105,6 @@ export const SwapSlippage = (
                   onPress={() => {
                     handlePresetPress(preset);
                   }}
-                  testID={`swap-slippage-preset-${preset}`}
                 />
               </Column>
             );
@@ -117,7 +116,6 @@ export const SwapSlippage = (
           label: t('v2.swap.slippage.confirm'),
           onPress: handleConfirm,
           disabled: !isSlippageValid,
-          testID: 'swap-slippage-confirm',
         }}
       />
     </>

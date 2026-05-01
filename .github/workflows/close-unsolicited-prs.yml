@@ -21,7 +21,7 @@ on:
 
 permissions:
   pull-requests: write
-  issues: write   # gh pr comment posts via the Issues API
+  issues: write # gh pr comment posts via the Issues API
 
 jobs:
   close:

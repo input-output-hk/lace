@@ -33,7 +33,7 @@ export const useActivityDetailsSheet = ({
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { appConfig } = useConfig();
-  const { activityId, activity: activityFromParams } = route.params;
+  const { activityId } = route.params;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,11 +57,7 @@ export const useActivityDetailsSheet = ({
     'activities.loadActivityDetails',
   );
 
-  const activityFromStore = useLaceSelector(
-    'activities.selectActivityById',
-    activityId,
-  );
-  const activity = activityFromStore ?? activityFromParams;
+  const activity = useLaceSelector('activities.selectActivityById', activityId);
 
   const accountId = activity?.accountId ?? activityDetails?.accountId ?? '';
   const accounts = useLaceSelector('wallets.selectActiveNetworkAccounts');

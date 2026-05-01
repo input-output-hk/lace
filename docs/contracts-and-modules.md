@@ -177,10 +177,12 @@ graph LR
     activities-details-sheet-customizations-addon["activities-details-sheet-customizations-addon<br/>---<br/><i>loadActivityDetailsSheetUICustomisations</i>"]
     dapp-connector-platform-dependency["dapp-connector-platform-dependency"]
     load-deep-links-addon["load-deep-links-addon<br/>---<br/><i>loadMobileDeepLinks</i>"]
-    dialogs-addon["dialogs-addon<br/>---<br/><i>loadDialogs</i>"]
+    notification-center-store["notification-center-store"]
+    onboarding-v2-store["onboarding-v2-store"]
     initialize-extension-view-addon["initialize-extension-view-addon<br/>---<br/><i>loadInitializeExtensionView</i>"]
     initialize-mobile-view-addon["initialize-mobile-view-addon<br/>---<br/><i>loadInitializeMobileView</i>"]
     swap-context-store["swap-context-store"]
+    dialogs-addon["dialogs-addon<br/>---<br/><i>loadDialogs</i>"]
     blockchain-specific-app-settings-page-customizations-addon["blockchain-specific-app-settings-page-customizations-addon<br/>---<br/><i>loadSettingsPageUICustomisations</i>"]
     dev["dev"]
     feature-store["feature-store"]
@@ -188,8 +190,6 @@ graph LR
     views-store["views-store"]
     i18n-dependency["i18n-dependency"]
     app-context-initialization-addon["app-context-initialization-addon<br/>---<br/><i>loadInitializeAppContext</i>"]
-    notification-center-store["notification-center-store"]
-    onboarding-v2-store["onboarding-v2-store"]
     wallet-settings-ui-customisation-addon["wallet-settings-ui-customisation-addon<br/>---<br/><i>loadWalletSettingsUICustomisations</i>"]
     recovery-phrase-store["recovery-phrase-store"]
   end
@@ -198,23 +198,23 @@ graph LR
     module_1["address-book"]
     module_2["blockchain-cardano-ui"]
     module_3["blockchain-bitcoin-ui"]
-    module_4["send-flow"]
+    module_4["dapp-explorer"]
     module_5["dapp-connector-cardano"]
     module_6["cardano-uri-linking"]
     module_7["identity-center"]
-    module_8["dapp-explorer"]
-    module_9["staking-center"]
-    module_10["swap-center"]
-    module_11["test-api"]
-    module_12["feature-dev"]
-    module_13["feature-posthog"]
-    module_14["views-extension"]
-    module_15["i18n"]
-    module_16["views-mobile"]
-    module_17["notification-center"]
-    module_18["onboarding"]
-    module_19["dapp-connector-extension"]
-    module_20["vault-in-memory-ui"]
+    module_8["notification-center"]
+    module_9["onboarding"]
+    module_10["send-flow"]
+    module_11["staking-center"]
+    module_12["swap-center"]
+    module_13["test-api"]
+    module_14["feature-dev"]
+    module_15["feature-posthog"]
+    module_16["views-extension"]
+    module_17["i18n"]
+    module_18["views-mobile"]
+    module_19["vault-in-memory-ui"]
+    module_20["dapp-connector-extension"]
   end
   module_0 -.->|implements| stack-pages-addon
   module_0 -.->|implements| tab-pages-addon
@@ -226,6 +226,7 @@ graph LR
   module_2 -.->|implements| activities-details-sheet-customizations-addon
   module_2 -.->|implements| sheet-pages-addon
   module_3 -.->|implements| account-settings-ui-addon
+  module_4 -.->|implements| tab-pages-addon
   module_4 -.->|implements| sheet-pages-addon
   module_5 -.->|implements| dapp-connector-platform-dependency
   module_5 -.->|implements| sheet-pages-addon
@@ -235,42 +236,40 @@ graph LR
   module_7 -.->|implements| stack-pages-addon
   module_7 -.->|implements| tab-pages-addon
   module_7 -.->|implements| sheet-pages-addon
+  module_8 -.->|implements| notification-center-store
+  module_8 -.->|implements| stack-pages-addon
   module_8 -.->|implements| tab-pages-addon
-  module_8 -.->|implements| sheet-pages-addon
-  module_8 -.->|implements| dialogs-addon
-  module_9 -.->|implements| tab-pages-addon
-  module_9 -.->|implements| sheet-pages-addon
-  module_9 -.->|implements| initialize-extension-view-addon
-  module_9 -.->|implements| initialize-mobile-view-addon
-  module_10 -.->|implements| tab-pages-addon
+  module_9 -.->|implements| onboarding-v2-store
+  module_9 -.->|implements| stack-pages-addon
   module_10 -.->|implements| sheet-pages-addon
-  module_10 -.->|implements| swap-context-store
-  module_10 -.->|implements| dialogs-addon
-  module_10 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
-  module_11 -.->|implements| dev
+  module_11 -.->|implements| tab-pages-addon
+  module_11 -.->|implements| sheet-pages-addon
   module_11 -.->|implements| initialize-extension-view-addon
   module_11 -.->|implements| initialize-mobile-view-addon
-  module_12 -.->|implements| feature-store
-  module_12 -.->|implements| feature-dependency
-  module_12 -.->|implements| dev
-  module_12 -.->|implements| initialize-extension-view-addon
-  module_13 -.->|implements| feature-store
-  module_13 -.->|implements| feature-dependency
-  module_14 -.->|implements| views-store
+  module_12 -.->|implements| tab-pages-addon
+  module_12 -.->|implements| sheet-pages-addon
+  module_12 -.->|implements| swap-context-store
+  module_12 -.->|implements| dialogs-addon
+  module_12 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
+  module_13 -.->|implements| dev
+  module_13 -.->|implements| initialize-extension-view-addon
+  module_13 -.->|implements| initialize-mobile-view-addon
+  module_14 -.->|implements| feature-store
+  module_14 -.->|implements| feature-dependency
+  module_14 -.->|implements| dev
   module_14 -.->|implements| initialize-extension-view-addon
-  module_15 -.->|implements| i18n-dependency
-  module_15 -.->|implements| app-context-initialization-addon
-  module_15 -.->|implements| initialize-extension-view-addon
+  module_15 -.->|implements| feature-store
+  module_15 -.->|implements| feature-dependency
   module_16 -.->|implements| views-store
-  module_17 -.->|implements| notification-center-store
-  module_17 -.->|implements| stack-pages-addon
-  module_17 -.->|implements| tab-pages-addon
-  module_18 -.->|implements| onboarding-v2-store
-  module_18 -.->|implements| stack-pages-addon
-  module_19 -.->|implements| dapp-connector-platform-dependency
-  module_20 -.->|implements| wallet-settings-ui-customisation-addon
-  module_20 -.->|implements| recovery-phrase-store
-  module_20 -.->|implements| sheet-pages-addon
+  module_16 -.->|implements| initialize-extension-view-addon
+  module_17 -.->|implements| i18n-dependency
+  module_17 -.->|implements| app-context-initialization-addon
+  module_17 -.->|implements| initialize-extension-view-addon
+  module_18 -.->|implements| views-store
+  module_19 -.->|implements| wallet-settings-ui-customisation-addon
+  module_19 -.->|implements| recovery-phrase-store
+  module_19 -.->|implements| sheet-pages-addon
+  module_20 -.->|implements| dapp-connector-platform-dependency
 ```
 
 ### Ada Module Implementations

@@ -213,7 +213,7 @@ const SwapSelectToken = ({
   const ListHeaderComponent = useMemo(
     () => (
       <Column style={styles.header}>
-        <Text.M weight="bold" align="center" testID="swap-select-token-title">
+        <Text.M weight="bold" align="center">
           {title}
         </Text.M>
         <SearchBar

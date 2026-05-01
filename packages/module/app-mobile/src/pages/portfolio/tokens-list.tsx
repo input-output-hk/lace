@@ -1,9 +1,4 @@
-import type {
-  FlatList as FlatListRef,
-  LayoutChangeEvent,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import type { LayoutChangeEvent, StyleProp, ViewStyle } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
 import { getTokenPriceId } from '@lace-contract/token-pricing';
@@ -48,7 +43,6 @@ type TokensListProps = {
   scrollHandler: ScrollHandlerProcessed<Record<string, unknown>>;
   ifFromPortfolio?: boolean;
   isTokenPricingEnabled: boolean;
-  listRef?: React.RefObject<FlatListRef | null>;
 };
 
 export const TokensList = ({
@@ -62,15 +56,13 @@ export const TokensList = ({
   scrollHandler,
   ifFromPortfolio,
   isTokenPricingEnabled,
-  listRef,
 }: TokensListProps) => {
   const { t } = useTranslation();
-  const internalListRef = useRef<FlatList>(null);
-  const resolvedListRef = listRef ?? internalListRef;
+  const listRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    resolvedListRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [activeIndex, selectedAssetView, resolvedListRef]);
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [activeIndex, selectedAssetView]);
   const accountAssets = useLaceSelector(
     'tokens.selectAggregatedFungibleTokensByAccountId',
     accountId,
@@ -258,7 +250,7 @@ export const TokensList = ({
 
   return (
     <Animated.FlatList
-      ref={resolvedListRef}
+      ref={listRef as React.RefObject<FlatList>}
       data={isEmpty ? [] : assets}
       testID="asset-list-container"
       style={style}

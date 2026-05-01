@@ -4,7 +4,7 @@ import { BigNumber } from '@lace-sdk/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { DUST_THRESHOLD, encodeUnsignedTxToString } from '../common';
+import { encodeUnsignedTxToString } from '../common';
 import { TransactionBuilder } from '../tx-builder';
 
 import type { BitcoinBlockchainSpecificTxData } from '@lace-contract/bitcoin-context';
@@ -159,7 +159,4 @@ export const makeBuildTx =
 export const makePreviewTx =
   (_: SideEffectDependencies): TxExecutorImplementation['previewTx'] =>
   () =>
-    of({
-      minimumAmount: BigNumber(BigInt(DUST_THRESHOLD)),
-      success: true,
-    });
+    of({ minimumAmount: BigNumber(1n), success: true });

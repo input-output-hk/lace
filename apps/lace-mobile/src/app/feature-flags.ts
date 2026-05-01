@@ -19,17 +19,49 @@ import type { FeatureFlag } from '@lace-contract/feature';
  * Other options: VAULT_LEDGER
  */
 export const defaultFeatureFlags: FeatureFlag[] = [
-  { key: FeatureFlagKey('ACCOUNT_MANAGEMENT') },
   { key: FeatureFlagKey('ADA_HANDLE') },
   { key: FeatureFlagKey('ADDRESS_BOOK') },
   { key: FeatureFlagKey('ANALYTICS_POSTHOG') },
-  { key: FeatureFlagKey('BITCOIN_MEMPOOL_FEE_MARKET') },
+  { key: FeatureFlagKey('FEATURES_POSTHOG') },
+  { key: FeatureFlagKey('SEND_FLOW') },
+  { key: FeatureFlagKey('INITIAL_NETWORK_TYPE'), payload: 'mainnet' },
+  { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
+  { key: FeatureFlagKey('BLOCKCHAIN_CARDANO'), payload: 'preprod' },
+  { key: FeatureFlagKey('ACCOUNT_MANAGEMENT') },
   { key: FeatureFlagKey('BLOCKCHAIN_BITCOIN') },
-  { key: FeatureFlagKey('BLOCKCHAIN_CARDANO') },
+  { key: FeatureFlagKey('BITCOIN_MEMPOOL_FEE_MARKET') },
   {
-    key: FeatureFlagKey('BLOCKCHAIN_CARDANO_DAPP_CONNECTOR'),
+    // This flag enforces biometric/passcode requirement for the app.
+    key: FeatureFlagKey('ENFORCE_BIOMETRIC_REQUIREMENT'),
+    payload: {
+      enabled: false,
+    },
   },
-  { key: FeatureFlagKey('CARDANO_URI_LINKING') },
+  {
+    key: FeatureFlagKey('FONT_SELECTION'),
+    payload: {
+      fontFamily: 'primary',
+    },
+  },
+  {
+    key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
+    payload: {
+      currencies: [
+        { name: 'USD', ticker: '$' },
+        { name: 'EUR', ticker: '€' },
+        { name: 'GBP', ticker: '£' },
+        { name: 'JPY', ticker: '¥' },
+        { name: 'CAD', ticker: 'C$' },
+        { name: 'AUD', ticker: 'A$' },
+        { name: 'CHF', ticker: 'CHF' },
+        { name: 'BRL', ticker: 'R$' },
+        { name: 'INR', ticker: '₹' },
+        { name: 'KRW', ticker: '₩' },
+        { name: 'VND', ticker: '₫' },
+        { name: 'MXN', ticker: 'MXN' },
+      ],
+    },
+  },
   {
     key: FeatureFlagKey('DAPP_EXPLORER'),
     payload: {
@@ -64,52 +96,20 @@ export const defaultFeatureFlags: FeatureFlag[] = [
     },
   },
   {
-    // This flag enforces biometric/passcode requirement for the app.
-    key: FeatureFlagKey('ENFORCE_BIOMETRIC_REQUIREMENT'),
-    payload: {
-      enabled: false,
-    },
+    key: FeatureFlagKey('BLOCKCHAIN_CARDANO_DAPP_CONNECTOR'),
   },
-  { key: FeatureFlagKey('FEATURES_POSTHOG') },
+  { key: FeatureFlagKey('CARDANO_URI_LINKING') },
   {
-    key: FeatureFlagKey('FONT_SELECTION'),
-    payload: {
-      fontFamily: 'primary',
-    },
+    key: FeatureFlagKey('TOKEN_PRICING'),
   },
-  { key: FeatureFlagKey('INITIAL_NETWORK_TYPE'), payload: 'mainnet' },
-  { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
-  { key: FeatureFlagKey('MD_MIGRATION') },
-  { key: FeatureFlagKey('NOTIFICATION_CENTER') },
-  { key: FeatureFlagKey('SEND_FLOW') },
   { key: FeatureFlagKey('STAKING_CENTER') },
-  {
-    key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
-    payload: {
-      currencies: [
-        { name: 'USD', ticker: '$' },
-        { name: 'EUR', ticker: '€' },
-        { name: 'GBP', ticker: '£' },
-        { name: 'JPY', ticker: '¥' },
-        { name: 'CAD', ticker: 'C$' },
-        { name: 'AUD', ticker: 'A$' },
-        { name: 'CHF', ticker: 'CHF' },
-        { name: 'BRL', ticker: 'R$' },
-        { name: 'INR', ticker: '₹' },
-        { name: 'KRW', ticker: '₩' },
-        { name: 'VND', ticker: '₫' },
-        { name: 'MXN', ticker: 'MXN' },
-      ],
-    },
-  },
+  { key: FeatureFlagKey('NOTIFICATION_CENTER') },
+  { key: FeatureFlagKey('MD_MIGRATION') },
   {
     key: FeatureFlagKey('SWAP_CENTER'),
     payload: {
       steelswapApiUrl: 'https://steelswap.lw.iog.io',
     },
-  },
-  {
-    key: FeatureFlagKey('TOKEN_PRICING'),
   },
 ];
 

@@ -231,30 +231,6 @@ describe('activities slice', () => {
           [accountId]: previousCount,
         });
       });
-
-      it('anchors increment on loaded count when desired has drifted behind', () => {
-        // Newer-tx polling can populate `activities` before anyone has
-        // incremented `desired`; anchoring on the larger of the two ensures
-        // the first increment actually lifts desired above loaded and fires
-        // a fetch, rather than just catching desired up to loaded.
-        const state = activitiesReducers.activities(
-          {
-            ...initialState,
-            activities: {
-              [accountId]: [activity1, activity1, activity1],
-            },
-            desiredLoadedActivitiesCountPerAccount: {
-              [accountId]: 0,
-            },
-          },
-          actions.activities.incrementDesiredLoadedActivitiesCount({
-            accountId,
-          }),
-        );
-        expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({
-          [accountId]: 3 + ACTIVITIES_PER_PAGE,
-        });
-      });
     });
 
     describe('REHYDRATE extraReducer', () => {

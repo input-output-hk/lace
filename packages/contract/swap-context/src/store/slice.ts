@@ -22,7 +22,6 @@ const swapFlowSlice = createStateMachineSlice(swapFlowMachine, {
 
 const configInitialState: SwapConfigState = {
   disclaimerAcknowledged: false,
-  ukFcaDisclaimerAcknowledged: false,
   slippage: 0.5,
   excludedDexes: [],
   availableDexes: null,
@@ -36,9 +35,6 @@ const configSlice = createSlice({
   reducers: {
     acknowledgeDisclaimer: state => {
       state.disclaimerAcknowledged = true;
-    },
-    acknowledgeUkFcaDisclaimer: state => {
-      state.ukFcaDisclaimerAcknowledged = true;
     },
     setSlippage: (state, { payload }: Readonly<PayloadAction<number>>) => {
       state.slippage = payload;
@@ -71,8 +67,6 @@ const configSlice = createSlice({
   selectors: {
     selectDisclaimerAcknowledged: ({ disclaimerAcknowledged }) =>
       disclaimerAcknowledged,
-    selectUkFcaDisclaimerAcknowledged: ({ ukFcaDisclaimerAcknowledged }) =>
-      ukFcaDisclaimerAcknowledged,
     selectSlippage: ({ slippage }) => slippage,
     selectExcludedDexes: ({ excludedDexes }) => excludedDexes,
     selectAvailableDexes: ({ availableDexes }) => availableDexes,

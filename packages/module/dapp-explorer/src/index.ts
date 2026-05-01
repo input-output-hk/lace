@@ -1,7 +1,3 @@
-import './augmentations';
-
-import { dialogsAddonContract } from '@lace-contract/app';
-import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
 import { FeatureFlagKey, featureStoreContract } from '@lace-contract/feature';
 import { i18nDependencyContract } from '@lace-contract/i18n';
 import {
@@ -30,10 +26,8 @@ import type {
 const implementsContracts = combineContracts([
   tabPagesAddonContract,
   sheetPagesAddonContract,
-  dialogsAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([
-  authenticationPromptStoreContract,
   viewsStoreContract,
   featureStoreContract,
   networkStoreContract,
@@ -57,7 +51,6 @@ const multiPlatformModule = inferModuleContext({
   addons: {
     loadTabPages: async () => import('./addons/tabPages'),
     loadSheetPages: async () => import('./addons/bottomSheets'),
-    loadDialogs: async () => import('./addons/dialogs'),
   },
 });
 

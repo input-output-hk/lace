@@ -326,6 +326,7 @@ const validateEnvironment = (): AppConfig => {
     },
     cardanoProvider: {
       tipPollFrequency: Milliseconds(30_000),
+      transactionHistoryPollingIntervalSeconds: Milliseconds(30_000),
       blockfrostConfigs: {
         [1]: {
           clientConfig: {

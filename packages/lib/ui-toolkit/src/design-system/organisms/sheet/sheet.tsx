@@ -6,7 +6,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
 } from '@gorhom/bottom-sheet';
 import noop from 'lodash/noop';
-import React, { forwardRef, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Keyboard, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
@@ -194,10 +194,7 @@ const SheetBase = ({
   );
 };
 
-const Scroll = forwardRef<
-  BottomSheetScrollViewMethods,
-  BottomSheetScrollViewProps
->((props, ref) => {
+const Scroll = (props: BottomSheetScrollViewProps) => {
   const {
     children,
     keyboardShouldPersistTaps = 'handled',
@@ -208,7 +205,6 @@ const Scroll = forwardRef<
   return (
     <>
       <BottomSheetScrollView
-        ref={ref}
         keyboardShouldPersistTaps={keyboardShouldPersistTaps}
         scrollEventsHandlersHook={useScrollEventsHandlers}
         {...restProps}>
@@ -216,7 +212,7 @@ const Scroll = forwardRef<
       </BottomSheetScrollView>
     </>
   );
-});
+};
 
 export const Sheet = Object.assign(SheetBase, {
   Scroll,

@@ -1,20 +1,5 @@
-import {
-  PROVIDER_REQUEST_RETRY_CONFIG,
-  isRetriableError,
-} from '@lace-lib/util-provider';
 import { Err, Ok, Result } from '@lace-sdk/util';
-import { retryBackoff } from 'backoff-rxjs';
-import {
-  EMPTY,
-  catchError,
-  expand,
-  forkJoin,
-  last,
-  map,
-  mergeMap,
-  of,
-  throwError,
-} from 'rxjs';
+import { catchError, forkJoin, map, mergeMap, of, throwError } from 'rxjs';
 
 import { CardanoPaymentAddress } from '../../types';
 
@@ -33,8 +18,6 @@ import type { Cardano } from '@cardano-sdk/core';
 import type { ProviderError } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type { Observable } from 'rxjs';
-
-const MAX_TRANSACTIONS_PER_REQUEST = 100;
 
 /**
  * Handles the results of multiple address transaction history fetches.
@@ -226,106 +209,6 @@ export const fetchAddressTransactionHistories = ({
     catchError(error => of(error as Err<FetchAddressTransactionHistoryError>)),
   );
 
-// Wraps the per-address failure in an Error so retryBackoff can observe a
-// thrown Error (satisfying lint's only-throw-error) while still carrying the
-// address context we need to reconstruct the outer Err value after retries.
-class FetchAddressTransactionHistoryThrowable extends Error {
-  public constructor(readonly payload: FetchAddressTransactionHistoryError) {
-    super(payload.error.message);
-  }
-}
-
-type FetchAllNewerPagesForAddressParams = {
-  address: CardanoPaymentAddress;
-  chainId: Cardano.ChainId;
-  numberOfItems: number;
-  newestTx: CardanoTransactionHistoryItem | undefined;
-  getAddressTransactionHistory: CardanoProvider['getAddressTransactionHistory'];
-};
-
-type PageState = {
-  pages: CardanoTransactionHistoryItem[][];
-  cursor: CardanoTransactionHistoryItem | undefined;
-  remaining: number;
-  error?: ProviderError;
-};
-
-/**
- * Sequentially fetches newer-tx pages for a single address until either
- * `numberOfItems` is reached or the provider returns a short page (meaning
- * no more newer txs exist). Returns the aggregated items in a single Result,
- * matching the shape of a single provider call so the downstream merge /
- * error / retry logic stays unchanged.
- *
- * Pagination is sequential (not forkJoin) because each page's cursor is
- * derived from the newest tx of the previous page (see `buildEndAtParamsFromTx`).
- */
-const fetchAllNewerPagesForAddress = ({
-  address,
-  chainId,
-  numberOfItems,
-  newestTx: initialNewestTx,
-  getAddressTransactionHistory,
-}: FetchAllNewerPagesForAddressParams): Observable<
-  Result<CardanoTransactionHistoryItem[], ProviderError>
-> => {
-  if (numberOfItems <= 0) return of(Ok([]));
-
-  const initialState: PageState = {
-    pages: [],
-    cursor: initialNewestTx,
-    remaining: numberOfItems,
-  };
-
-  return of<PageState>(initialState).pipe(
-    expand(state => {
-      if (state.remaining <= 0 || state.error) return EMPTY;
-      const pageSize = Math.min(MAX_TRANSACTIONS_PER_REQUEST, state.remaining);
-      return getAddressTransactionHistory(
-        {
-          address,
-          numberOfItems: pageSize,
-          ...(state.cursor ? buildEndAtParamsFromTx(state.cursor) : {}),
-        },
-        { chainId },
-      ).pipe(
-        map((result): PageState => {
-          if (result.isErr()) {
-            return { ...state, error: result.unwrapErr(), remaining: 0 };
-          }
-          const page = result.unwrap();
-          // Stop if the page came back short OR if we had no cursor for this
-          // request. The no-cursor case means the provider returned its
-          // default (desc) order, so `page[page.length-1]` is the oldest
-          // item — unsafe to use as a forward-pagination anchor.
-          if (page.length < pageSize || !state.cursor) {
-            return { ...state, pages: [...state.pages, page], remaining: 0 };
-          }
-          // Provider returned ascending order (see buildEndAtParamsFromTx),
-          // so the newest tx of the page is the last element.
-          return {
-            pages: [...state.pages, page],
-            cursor: page[page.length - 1],
-            remaining: state.remaining - page.length,
-          };
-        }),
-      );
-    }),
-    last(),
-    map(state => (state.error ? Err(state.error) : Ok(state.pages.flat()))),
-  );
-};
-
-/**
- * Fetches newer transactions for the given addresses in parallel.
- *
- * Retries retriable provider errors with exponential backoff before surfacing
- * a failure. Per-address failures are thrown wrapped in a
- * `FetchAddressTransactionHistoryThrowable` so `retryBackoff` can observe
- * them; after retries are exhausted, `catchError` unwraps the payload back
- * into an `Err<FetchAddressTransactionHistoryError>` value so callers see
- * the same contract as the all-ok path.
- */
 export const fetchNewAddressTransactionHistories = ({
   addresses,
   addressesHistories,
@@ -344,13 +227,16 @@ export const fetchNewAddressTransactionHistories = ({
       const { transactionHistory } = addressHistory;
       const newestTx = transactionHistory[0] ?? undefined;
 
-      return fetchAllNewerPagesForAddress({
-        address,
-        chainId,
-        numberOfItems,
-        newestTx,
-        getAddressTransactionHistory,
-      }).pipe(
+      return getAddressTransactionHistory(
+        {
+          address,
+          numberOfItems,
+          ...(newestTx ? buildEndAtParamsFromTx(newestTx) : {}),
+        },
+        {
+          chainId,
+        },
+      ).pipe(
         map(result => {
           const handledResult = handleResult({
             result,
@@ -360,9 +246,7 @@ export const fetchNewAddressTransactionHistories = ({
             newestTx,
           });
           if (handledResult.isErr()) {
-            throw new FetchAddressTransactionHistoryThrowable(
-              handledResult.unwrapErr(),
-            );
+            throwError(() => handledResult);
           }
           return handledResult;
         }),
@@ -370,19 +254,5 @@ export const fetchNewAddressTransactionHistories = ({
     }),
   ).pipe(
     mergeMap(handleResults),
-    retryBackoff({
-      ...PROVIDER_REQUEST_RETRY_CONFIG,
-      shouldRetry: (error: unknown) =>
-        error instanceof FetchAddressTransactionHistoryThrowable
-          ? isRetriableError(error.payload.error)
-          : isRetriableError(error),
-    }),
-    catchError((error: unknown) => {
-      if (error instanceof FetchAddressTransactionHistoryThrowable) {
-        return of(Err(error.payload));
-      }
-      // Unexpected errors (not wrapped by the map above) — rethrow so they
-      // surface rather than being silently swallowed.
-      throw error;
-    }),
+    catchError(error => of(error as Err<FetchAddressTransactionHistoryError>)),
   );

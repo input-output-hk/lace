@@ -39,6 +39,7 @@ type TokenListProps = {
   };
   globalState: {
     transactions: Transaction[];
+    activityList?: React.ReactNode;
     selectedToken?: SelectedToken;
     onTokenPress: (transaction: Transaction) => void;
   };
@@ -145,12 +146,6 @@ const TransactionList = (props: {
   );
 };
 
-/**
- * Renders the per-token distribution list in the portfolio-view variant of
- * the token detail sheet. The per-account (`!isPortfolioView`) variant
- * now renders the activity list itself as the sheet's scroll container via
- * `ActivityList`, so this component is portfolio-only.
- */
 export const TokenDetailActivityList = ({
   labels,
   utils,
@@ -158,10 +153,11 @@ export const TokenDetailActivityList = ({
   isTokenPricingEnabled,
 }: TokenListProps): React.ReactNode => {
   const { tokenDistributionLabel } = labels;
-  const { theme } = utils;
-  const { transactions, selectedToken, onTokenPress } = globalState;
+  const { theme, isPortfolioView } = utils;
+  const { transactions, activityList, selectedToken, onTokenPress } =
+    globalState;
 
-  return (
+  return isPortfolioView ? (
     <TransactionList
       onTokenPress={onTokenPress}
       transactions={transactions}
@@ -170,6 +166,8 @@ export const TokenDetailActivityList = ({
       tokenDistributionLabel={tokenDistributionLabel}
       isTokenPricingEnabled={isTokenPricingEnabled}
     />
+  ) : (
+    activityList
   );
 };
 

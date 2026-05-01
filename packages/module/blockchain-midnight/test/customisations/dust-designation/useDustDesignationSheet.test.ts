@@ -26,10 +26,6 @@ vi.mock('@lace-lib/navigation', () => ({
     SendResult: 'SendResult',
     Send: 'Send',
   },
-  onSheetClose:
-    (_listener: () => void): (() => void) =>
-    () =>
-      undefined,
 }));
 
 // Mock i18n
@@ -51,7 +47,6 @@ vi.mock('@lace-contract/midnight-context', () => ({
 vi.mock('@lace-contract/send-flow', () => ({
   isSendFlowClosed: (state: { status: string }) => state.status === 'Idle',
   isSendFlowSuccess: (state: { status: string }) => state.status === 'Success',
-  useSendFlow: () => ({ resetSendFlow: vi.fn() }),
 }));
 
 // Mock util-render

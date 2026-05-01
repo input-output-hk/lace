@@ -39,7 +39,6 @@ import type { AccountView, AssetView } from './types';
 import type { TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 import type { TimeRange } from '@lace-lib/ui-toolkit';
-import type { SharedValue } from 'react-native-reanimated';
 
 /**
  * Returns the per-token fiat value truncated to 2 dp, matching the arithmetic
@@ -81,13 +80,11 @@ const BLOCKCHAIN_ICONS = {
 interface UsePortfolioOptions {
   headerHeight: number;
   headerTopInset: number;
-  externalScrollOffset?: SharedValue<number>;
 }
 
 export const usePortfolio = ({
   headerHeight,
   headerTopInset,
-  externalScrollOffset,
 }: UsePortfolioOptions) => {
   const { t } = useTranslation();
   const { isSideMenu } = useTheme();
@@ -217,7 +214,6 @@ export const usePortfolio = ({
     selectedAssetView,
     activeIndex,
     headerTopInset,
-    externalScrollOffset,
   });
 
   // Wallet and account icons

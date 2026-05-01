@@ -1,4 +1,4 @@
-import type { CardanoNetworkId } from './value-objects';
+import type { CardanoNetworkId } from './value-objects/cardano-network-id.vo';
 import type {
   Asset,
   Cardano,
@@ -414,6 +414,7 @@ export interface CardanoProviderDependencies {
 
 export interface CardanoProviderConfig {
   tipPollFrequency: Milliseconds;
+  transactionHistoryPollingIntervalSeconds: Milliseconds;
 }
 
 type CommonCardanoAccountProps = {
