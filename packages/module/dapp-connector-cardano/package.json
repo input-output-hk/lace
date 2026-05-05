@@ -23,6 +23,7 @@
     "@lace-contract/signer": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/ui-extension": "*",
     "@lace-lib/util-hw": "*",
     "@lace-lib/util-render": "*",
     "@lace-lib/util-store": "*",

@@ -6,22 +6,16 @@ import {
   txInEquals,
 } from './utils/input-resolver';
 
-import type { ResolvedTransactionInputs } from './slice';
+import type {
+  ResolvedTransactionInputs,
+  SerializedForeignResolvedInput,
+} from './slice';
 import type { Cardano } from '@cardano-sdk/core';
 import type {
   AccountUtxoMap,
   CardanoProvider,
 } from '@lace-contract/cardano-context';
 import type { Observable } from 'rxjs';
-
-/**
- * Serialized foreign address entry for Redux storage.
- * Format: [address, { coins, assets }]
- */
-type SerializedForeignAddressEntry = [
-  string,
-  { coins: string; assets: [string, string][] },
-];
 
 /**
  * Action creators required for the foreign input resolution flow.
@@ -120,7 +114,7 @@ export const createResolveForeignInputsFlow = <
         ).pipe(
           catchError(error =>
             of<ResolvedTransactionInputs>({
-              foreignFromAddresses: [],
+              foreignResolvedInputs: [],
               isResolving: false,
               error:
                 error instanceof Error
@@ -159,7 +153,7 @@ const resolveForeignInputsAsync = async ({
   const chainId = await firstValueFrom(selectChainId$);
   if (!chainId) {
     return {
-      foreignFromAddresses: [],
+      foreignResolvedInputs: [],
       isResolving: false,
       error: 'Chain ID not available',
     };
@@ -178,7 +172,7 @@ const resolveForeignInputsAsync = async ({
 
   if (foreignInputs.length === 0) {
     return {
-      foreignFromAddresses: [],
+      foreignResolvedInputs: [],
       isResolving: false,
       error: null,
     };
@@ -188,50 +182,20 @@ const resolveForeignInputsAsync = async ({
     chainId,
   });
 
-  const foreignFromAddresses = new Map<
-    string,
-    { coins: bigint; assets: Map<string, bigint> }
-  >();
+  const foreignResolvedInputs: SerializedForeignResolvedInput[] = [];
 
   for (const txIn of foreignInputs) {
     const resolved = await inputResolver.resolveInput(txIn);
     if (resolved) {
-      const address = resolved.address as string;
-      const existing = foreignFromAddresses.get(address) ?? {
-        coins: BigInt(0),
-        assets: new Map<string, bigint>(),
-      };
-
-      existing.coins += resolved.value.coins;
-
-      if (resolved.value.assets) {
-        for (const [assetId, amount] of resolved.value.assets) {
-          const existingAmount: bigint =
-            existing.assets.get(assetId as string) ?? BigInt(0);
-          existing.assets.set(assetId as string, existingAmount + amount);
-        }
-      }
-
-      foreignFromAddresses.set(address, existing);
+      foreignResolvedInputs.push({
+        txIn: { txId: txIn.txId, index: txIn.index },
+        txOutCbor: Serialization.TransactionOutput.fromCore(resolved).toCbor(),
+      });
     }
   }
 
-  const serializedForeignAddresses: SerializedForeignAddressEntry[] = [];
-  for (const [address, value] of foreignFromAddresses) {
-    serializedForeignAddresses.push([
-      address,
-      {
-        coins: value.coins.toString(),
-        assets: Array.from(value.assets.entries()).map(([assetId, amount]) => [
-          assetId,
-          amount.toString(),
-        ]),
-      },
-    ]);
-  }
-
   return {
-    foreignFromAddresses: serializedForeignAddresses,
+    foreignResolvedInputs,
     isResolving: false,
     error: null,
   };

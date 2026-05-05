@@ -1,7 +1,6 @@
 export * from './address-utils';
 export * from './asset-utils';
 export * from './certificate-utils';
-export * from './collateral-utils';
 export * from './format-utils';
 export * from './group-addresses';
 export * from './metadata-utils';

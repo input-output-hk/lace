@@ -40,22 +40,25 @@ export const RecoveryPhrase = ({
     <View style={styles.container} testID={testID}>
       {rows.map((row, rowIndex) => (
         <Row key={rowIndex} style={styles.wordRow}>
-          {row.map(item => (
-            <View key={item.index} style={styles.wordWrapper}>
-              <MnemonicWord
-                index={item.index}
-                isBlurred={isBlurred}
-                testID={`${testID}-word-${item.index}`}>
-                {Array.from(item.word).map(charCode =>
-                  // String.fromCharCode does not support UTF-8,
-                  // so some characters might be converted incorrectly.
-                  // However, mnemonic words are english, so all their
-                  // characters are covered.
-                  String.fromCharCode(charCode),
-                )}
-              </MnemonicWord>
-            </View>
-          ))}
+          {row.map(
+            item =>
+              item && (
+                <View key={item.index} style={styles.wordWrapper}>
+                  <MnemonicWord
+                    index={item.index}
+                    isBlurred={isBlurred}
+                    testID={`${testID}-word-${item.index}`}>
+                    {Array.from(item.word).map(charCode =>
+                      // String.fromCharCode does not support UTF-8,
+                      // so some characters might be converted incorrectly.
+                      // However, mnemonic words are english, so all their
+                      // characters are covered.
+                      String.fromCharCode(charCode),
+                    )}
+                  </MnemonicWord>
+                </View>
+              ),
+          )}
         </Row>
       ))}
     </View>

@@ -1,7 +1,7 @@
 {
   "name": "$EXTENSION_NAME",
   "description": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "manifest_version": 3,
   "key": "$EXTENSION_KEY",
   "icons": {

@@ -1,25 +1,37 @@
-import { viewsActions, viewsSelectors } from '@lace-contract/views';
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { useDispatchLaceAction, useLaceSelector } from '../../common/hooks';
+
+import type { ViewLocation } from '@lace-contract/views';
 
 /**
- * Returns a close handler that works in both sidePanel and popupWindow contexts.
+ * Close handler for sidePanel and popupWindow contexts.
  *
- * - SidePanel: dispatches `views.setActiveSheetPage(null)` to dismiss the sheet.
- * - PopupWindow: calls `window.close()` to close the popup.
- *
- * Detection: if `views.getActiveSheetPage` is non-null the view was opened via
- * `setActiveSheetPage`, meaning we are inside a sidePanel sheet.
+ * SidePanel: dismiss via `setActiveSheetPage(null)`.
+ * PopupWindow: dispatch `closePopupRequested(location)` so a side effect
+ * resolves the view id and asks the SW to close it via `chrome.windows.remove`
+ * — `window.close()` is unreliable for SW-opened popups.
  */
-export const useDappViewClose = (): (() => void) => {
-  const activeSheetPage = useSelector(viewsSelectors.views.getActiveSheetPage);
-  const dispatch = useDispatch();
+export const useDappViewClose = (
+  popupLocation?: ViewLocation,
+): (() => void) => {
+  const activeSheetPage = useLaceSelector('views.getActiveSheetPage');
+  const setActiveSheetPage = useDispatchLaceAction('views.setActiveSheetPage');
+  const requestPopupClose = useDispatchLaceAction(
+    'cardanoDappConnector.closePopupRequested',
+  );
 
   return useCallback(() => {
     if (activeSheetPage) {
-      dispatch(viewsActions.views.setActiveSheetPage(null));
-    } else {
-      window.close();
+      setActiveSheetPage(null);
+      return;
     }
-  }, [activeSheetPage, dispatch]);
+
+    if (popupLocation) {
+      requestPopupClose(popupLocation);
+      return;
+    }
+
+    window.close();
+  }, [activeSheetPage, popupLocation, requestPopupClose, setActiveSheetPage]);
 };

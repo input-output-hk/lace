@@ -4,6 +4,7 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
+import type { ViewLocation } from '@lace-contract/views';
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 import type { HwSigningErrorTranslationKeys } from '@lace-lib/util-hw';
 
@@ -111,22 +112,24 @@ export type LastAuthResponse = {
 };
 
 /**
- * Value transferred to/from an address in a transaction.
- * Contains the total coins (lovelace) and any native assets.
- * Serialized as [address, { coins, assets }][] for Redux storage.
+ * A transaction input resolved against the Cardano provider (Blockfrost, etc.).
+ * The `TxOut` is stored as CBOR hex so the full output — including datum and
+ * script reference needed by the CIP-68 NFT lookup in the asset provider — can
+ * be round-tripped through Redux without losing fidelity.
  */
-export type SerializedTokenTransferValue = {
-  coins: string;
-  assets: [string, string][];
+export type SerializedForeignResolvedInput = {
+  txIn: { txId: string; index: number };
+  txOutCbor: string;
 };
 
 /**
- * Resolved transaction inputs for displaying foreign inputs in the UI.
- * Contains addresses resolved via Blockfrost API for inputs not in the wallet's UTXOs.
+ * Resolved foreign transaction inputs for displaying in the sign-tx UI.
+ * Entries here are inputs that were not present in the local UTXO set and
+ * required a remote provider call to resolve.
  */
 export type ResolvedTransactionInputs = {
-  /** Map of foreign addresses (not owned) sending funds, serialized for Redux */
-  foreignFromAddresses: [string, SerializedTokenTransferValue][];
+  /** Raw (txIn, txOut) pairs for foreign inputs, CBOR-encoded per entry */
+  foreignResolvedInputs: SerializedForeignResolvedInput[];
   /** Whether resolution is in progress */
   isResolving: boolean;
   /** Error message if resolution failed */
@@ -274,6 +277,15 @@ const rejectSignData = createAction('cardanoDappConnector/rejectSignData');
  */
 const receiveWebViewMessage = createAction<IncomingWebViewMessage>(
   'cardanoDappConnector/receiveWebViewMessage',
+);
+
+/**
+ * Browser-only: requests the SW to close the popupWindow at the given location.
+ * Dispatched by the popup; a side effect resolves the view id and dispatches
+ * `views.closeView` so the SW closes the window via `chrome.windows.remove`.
+ */
+const closePopupRequested = createAction<ViewLocation>(
+  'cardanoDappConnector/closePopupRequested',
 );
 
 const slice = createSlice({
@@ -453,7 +465,7 @@ const slice = createSlice({
      */
     startResolvingInputs: state => {
       state.resolvedTransactionInputs = {
-        foreignFromAddresses: [],
+        foreignResolvedInputs: [],
         isResolving: true,
         error: null,
       };
@@ -575,6 +587,7 @@ export const cardanoDappConnectorActions = {
     confirmSignData,
     rejectSignData,
     receiveWebViewMessage,
+    closePopupRequested,
   },
 };
 

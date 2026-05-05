@@ -27,7 +27,7 @@ import {
   TransactionSummary,
 } from './sign-tx';
 
-import type { TokenTransferValue } from '../hooks/useTransactionSummary';
+import type { TokenTransferValue } from '../hooks/useDappTxInspection';
 import type { TokensMetadataMap } from '../utils';
 import type { SlotDateTime } from '../utils/slot-datetime';
 import type { TransactionInfo } from '../utils/transaction-inspector';

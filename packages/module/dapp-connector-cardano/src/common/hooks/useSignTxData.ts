@@ -6,19 +6,17 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  constructTokenId,
-  computeCollateralValue,
   inspectTransaction,
   slotToDateTime,
   type TokensMetadataMap,
   type SlotDateTime,
 } from '../utils';
 
-import { useDispatchLaceAction, useLaceSelector } from './storeHooks';
+import { useLaceSelector } from './storeHooks';
 import {
-  useTransactionSummary,
+  useDappTxInspection,
   type TokenTransferValue,
-} from './useTransactionSummary';
+} from './useDappTxInspection';
 
 import type { TransactionInfo } from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
@@ -55,14 +53,16 @@ export interface UseSignTxDataResult {
 
 /**
  * Shared sign-tx data: transaction inspection, addresses, token metadata,
- * collateral, expiry, token pricing, and account info. Used by both browser popup and
- * mobile sheet; platform-specific flow (confirm/reject, result, navigation) stays in
- * the respective views.
+ * collateral, expiry, token pricing, and account info.
+ *
+ * Address-resolved `from`/`to` maps, collateral totals, and deposit figures
+ * all come from `useDappTxInspection`, which runs the cardano-js-sdk
+ * `tokenTransferInspector` + `transactionSummaryInspector` — the same
+ * pipeline v1's `DappTransactionContainer` uses.
  */
 export const useSignTxData = ({
   txHex,
 }: UseSignTxDataParams): UseSignTxDataResult => {
-  const accountUtxos = useLaceSelector('cardanoContext.selectAccountUtxos');
   const chainId = useLaceSelector('cardanoContext.selectChainId');
   const eraSummaries = useLaceSelector('cardanoContext.selectEraSummaries');
   const allAddresses = useLaceSelector(
@@ -72,9 +72,6 @@ export const useSignTxData = ({
   const tokensMetadata = useLaceSelector('tokens.selectTokensMetadata');
   const resolvedTransactionInputs = useLaceSelector(
     'cardanoDappConnector.selectResolvedTransactionInputs',
-  );
-  const dispatchLoadTokenMetadata = useDispatchLaceAction(
-    'cardanoContext.loadTokenMetadata',
   );
   const allPrices = useLaceSelector('tokenPricing.selectPrices');
   const currencyPreference = useLaceSelector(
@@ -87,15 +84,21 @@ export const useSignTxData = ({
   );
   const allAccounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
 
-  const { transactionInfo, error: transactionError } = useMemo(
-    () => inspectTransaction(txHex),
-    [txHex],
-  );
+  const [transactionInfo, setTransactionInfo] =
+    useState<TransactionInfo | null>(null);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
 
-  const [collateralValue, setCollateralValue] = useState<bigint | undefined>(
-    undefined,
-  );
-  const [isLoadingCollateral, setIsLoadingCollateral] = useState(false);
+  useEffect(() => {
+    let isUnsubscribed = false;
+    void inspectTransaction(txHex).then(result => {
+      if (isUnsubscribed) return;
+      setTransactionInfo(result.transactionInfo);
+      setTransactionError(result.error);
+    });
+    return () => {
+      isUnsubscribed = true;
+    };
+  }, [txHex]);
 
   const ownAddresses = useMemo(() => {
     return allAddresses.map(addressObject => addressObject.address as string);
@@ -111,120 +114,12 @@ export const useSignTxData = ({
     return map;
   }, [allContacts]);
 
-  const transactionSummary = useTransactionSummary({
-    txHex,
-    accountUtxos,
-    chainId,
-  });
+  const inspection = useDappTxInspection({ txHex });
 
-  const mergedFromAddresses = useMemo(() => {
-    if (!txHex) return new Map<Cardano.PaymentAddress, TokenTransferValue>();
-    const merged = new Map<Cardano.PaymentAddress, TokenTransferValue>(
-      transactionSummary.fromAddresses,
-    );
+  const isResolvingInputs =
+    inspection.isLoading || (resolvedTransactionInputs?.isResolving ?? false);
 
-    if (resolvedTransactionInputs?.foreignFromAddresses) {
-      for (const [
-        address,
-        value,
-      ] of resolvedTransactionInputs.foreignFromAddresses) {
-        const existing = merged.get(address as Cardano.PaymentAddress);
-        const coins = BigInt(value.coins);
-        const assets = new Map<Cardano.AssetId, bigint>();
-
-        for (const [assetId, amount] of value.assets) {
-          assets.set(assetId as Cardano.AssetId, BigInt(amount));
-        }
-
-        if (existing) {
-          const mergedAssets = new Map(existing.assets);
-          for (const [assetId, amount] of assets) {
-            const existingAmount = mergedAssets.get(assetId) ?? BigInt(0);
-            mergedAssets.set(assetId, existingAmount + amount);
-          }
-          merged.set(address as Cardano.PaymentAddress, {
-            coins: existing.coins + coins,
-            assets: mergedAssets,
-          });
-        } else {
-          merged.set(address as Cardano.PaymentAddress, { coins, assets });
-        }
-      }
-    }
-
-    return merged;
-  }, [txHex, transactionSummary.fromAddresses, resolvedTransactionInputs]);
-
-  const isResolvingAnyInputs =
-    transactionSummary.isLoading ||
-    (resolvedTransactionInputs?.isResolving ?? false);
-
-  const allAssetIds = useMemo(() => {
-    const assetIds = new Set<Cardano.AssetId>();
-
-    for (const value of mergedFromAddresses.values()) {
-      for (const assetId of value.assets.keys()) {
-        assetIds.add(assetId);
-      }
-    }
-
-    for (const value of transactionSummary.toAddresses.values()) {
-      for (const assetId of value.assets.keys()) {
-        assetIds.add(assetId);
-      }
-    }
-
-    return Array.from(assetIds);
-  }, [mergedFromAddresses, transactionSummary.toAddresses]);
-
-  useEffect(() => {
-    if (isResolvingAnyInputs) return;
-
-    for (const assetId of allAssetIds) {
-      const tokenId = constructTokenId(assetId);
-      if (!tokensMetadata[tokenId]) {
-        dispatchLoadTokenMetadata({ tokenId });
-      }
-    }
-  }, [
-    allAssetIds,
-    tokensMetadata,
-    dispatchLoadTokenMetadata,
-    isResolvingAnyInputs,
-  ]);
-
-  const allUtxos = useMemo((): Cardano.Utxo[] => {
-    return Object.values(accountUtxos).flat();
-  }, [accountUtxos]);
-
-  useEffect(() => {
-    if (!transactionInfo || transactionSummary.isLoading) return;
-
-    if (!transactionInfo.hasCollateral) {
-      setCollateralValue(BigInt(0));
-      return;
-    }
-
-    const localInputResolver: Cardano.InputResolver = {
-      resolveInput: async (
-        txIn: Cardano.TxIn,
-      ): Promise<Cardano.TxOut | null> => {
-        const localMatch = allUtxos.find(
-          ([input]) => input.txId === txIn.txId && input.index === txIn.index,
-        );
-        return localMatch ? localMatch[1] : null;
-      },
-    };
-
-    setIsLoadingCollateral(true);
-    void computeCollateralValue(
-      transactionInfo.collateralInputs,
-      localInputResolver,
-    ).then(value => {
-      setCollateralValue(value);
-      setIsLoadingCollateral(false);
-    });
-  }, [transactionInfo, allUtxos, transactionSummary.isLoading]);
+  const collateralValue = inspection.summary?.collateral;
 
   const expiresBy = useMemo((): SlotDateTime | null => {
     return slotToDateTime(transactionInfo?.ttl, eraSummaries);
@@ -264,12 +159,12 @@ export const useSignTxData = ({
     transactionError,
     ownAddresses,
     addressToNameMap,
-    fromAddresses: mergedFromAddresses,
-    toAddresses: transactionSummary.toAddresses,
+    fromAddresses: inspection.fromAddresses,
+    toAddresses: inspection.toAddresses,
     tokensMetadata,
-    collateralValue: isLoadingCollateral ? undefined : collateralValue,
-    isLoadingCollateral,
-    isResolvingInputs: isResolvingAnyInputs,
+    collateralValue,
+    isLoadingCollateral: inspection.isLoading,
+    isResolvingInputs,
     expiresBy,
     coinSymbol,
     networkMagic: chainId?.networkMagic,

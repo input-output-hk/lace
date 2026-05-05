@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   inspectTransaction,
@@ -14,6 +14,12 @@ export {
   type TransactionInspectorResult,
 } from '../../../common/utils/transaction-inspector';
 
+const INITIAL: TransactionInspectorResult = {
+  transactionInfo: null,
+  error: null,
+  isLoading: true,
+};
+
 /**
  * React hook that parses a Cardano transaction CBOR hex and extracts basic information.
  *
@@ -27,5 +33,19 @@ export {
 export const useTransactionInspector = (
   txHex: string,
 ): TransactionInspectorResult => {
-  return useMemo(() => inspectTransaction(txHex), [txHex]);
+  const [result, setResult] = useState<TransactionInspectorResult>(INITIAL);
+
+  useEffect(() => {
+    let isUnsubscribed = false;
+    setResult(INITIAL);
+    void inspectTransaction(txHex).then(next => {
+      if (isUnsubscribed) return;
+      setResult(next);
+    });
+    return () => {
+      isUnsubscribed = true;
+    };
+  }, [txHex]);
+
+  return result;
 };

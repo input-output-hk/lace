@@ -1,11 +1,10 @@
+import { ADA_DECIMALS } from '@lace-contract/cardano-context';
 import { CardanoTokenPriceId } from '@lace-contract/token-pricing';
 import { valueToLocale } from '@lace-lib/util-render';
 
 import type { TransactionType } from './transaction-utils';
 import type { TFunction } from '@lace-contract/i18n';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
-
-const ADA_LOVELACE_DECIMALS = 6;
 
 export const calculateAdaFiatValue = (
   lovelaceAmount: bigint,
@@ -18,10 +17,7 @@ export const calculateAdaFiatValue = (
   const adaPrice = tokenPrices[adaPriceId];
   if (!adaPrice) return undefined;
 
-  const absoluteLovelace =
-    lovelaceAmount < BigInt(0) ? -lovelaceAmount : lovelaceAmount;
-  const adaBalance =
-    Number(absoluteLovelace) / Math.pow(10, ADA_LOVELACE_DECIMALS);
+  const adaBalance = Number(lovelaceAmount) / Math.pow(10, ADA_DECIMALS);
   const fiatValue = adaBalance * adaPrice.price;
 
   return `${valueToLocale(fiatValue, 2, 2)} ${currencyTicker}`;

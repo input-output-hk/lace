@@ -74,6 +74,7 @@ export const SignTxView = ({
     <>
       <SheetHeader title={title} />
       <Sheet.Scroll
+        showsVerticalScrollIndicator={false}
         testID={testID}
         contentContainerStyle={[
           defaultStyles.contentContainerFlex,

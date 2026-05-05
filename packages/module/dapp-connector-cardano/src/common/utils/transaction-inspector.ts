@@ -1,4 +1,16 @@
-import { Serialization } from '@cardano-sdk/core';
+import {
+  Serialization,
+  assetsBurnedInspector,
+  assetsMintedInspector,
+  createTxInspector,
+  delegationInspector,
+  metadataInspector,
+  poolRegistrationInspector,
+  poolRetirementInspector,
+  stakeKeyDeregistrationInspector,
+  stakeKeyRegistrationInspector,
+  withdrawalInspector,
+} from '@cardano-sdk/core';
 
 import type { Cardano } from '@cardano-sdk/core';
 
@@ -30,6 +42,20 @@ export interface CollateralInput {
   txId: string;
   /** Output index */
   index: number;
+}
+
+/**
+ * Minted or burned asset surfaced by the SDK mint inspectors.
+ *
+ * Mirrors `@cardano-sdk/core`'s `MintedAsset` shape without leaking the
+ * `Script` type into our barrel so consumers can stay decoupled.
+ */
+export interface InspectedMintedAsset {
+  policyId: Cardano.PolicyId;
+  assetName: Cardano.AssetName;
+  fingerprint: Cardano.AssetFingerprint;
+  quantity: bigint;
+  script?: Cardano.Script;
 }
 
 /**
@@ -93,6 +119,24 @@ export interface TransactionInfo {
   hasAuxiliaryData: boolean;
   /** Raw Cardano auxiliary data for detailed rendering */
   auxiliaryData?: Cardano.AuxiliaryData;
+  /** Assets minted in this transaction (positive quantity), per SDK inspector */
+  mintedAssets?: InspectedMintedAsset[];
+  /** Assets burned in this transaction (negative quantity made positive), per SDK inspector */
+  burnedAssets?: InspectedMintedAsset[];
+  /** Total lovelace being withdrawn from reward accounts */
+  withdrawalTotal?: bigint;
+  /** Transaction metadatum map from auxiliary data, if any */
+  metadata?: Cardano.Metadatum;
+  /** Stake delegation certificates */
+  delegationCertificates?: Cardano.StakeDelegationCertificate[];
+  /** Stake key registration certificates */
+  stakeKeyRegistrations?: Cardano.StakeAddressCertificate[];
+  /** Stake key deregistration certificates */
+  stakeKeyDeregistrations?: Cardano.StakeAddressCertificate[];
+  /** Stake pool registration certificates */
+  poolRegistrations?: Cardano.PoolRegistrationCertificate[];
+  /** Stake pool retirement certificates */
+  poolRetirements?: Cardano.PoolRetirementCertificate[];
 }
 
 /**
@@ -128,31 +172,12 @@ const RETURNED_DEPOSIT_CERTIFICATE_TYPES = new Set([
   'UnregisterDelegateRepresentative',
 ]);
 
-/**
- * Determines if a certificate type requires paying a deposit.
- *
- * @param certType - The certificate __typename
- * @returns True if this certificate type requires a deposit
- */
 const isDepositCertificate = (certType: string): boolean =>
   DEPOSIT_CERTIFICATE_TYPES.has(certType);
 
-/**
- * Determines if a certificate type returns a deposit.
- *
- * @param certType - The certificate __typename
- * @returns True if this certificate type returns a deposit
- */
 const isReturnedDepositCertificate = (certType: string): boolean =>
   RETURNED_DEPOSIT_CERTIFICATE_TYPES.has(certType);
 
-/**
- * Extracts certificate information from a Cardano certificate.
- * Uses property checks instead of switch statement to avoid TypeScript narrowing issues.
- *
- * @param cert - The Cardano certificate to extract information from
- * @returns Certificate information with type and optional deposit, pool ID, etc.
- */
 const extractCertificateInfo = (cert: Cardano.Certificate): CertificateInfo => {
   const info: CertificateInfo = {
     type: cert.__typename,
@@ -189,17 +214,20 @@ const extractCertificateInfo = (cert: Cardano.Certificate): CertificateInfo => {
 };
 
 /**
- * Parses a Cardano transaction CBOR hex and extracts comprehensive information.
+ * Parses a Cardano transaction CBOR hex and extracts comprehensive information
+ * using `@cardano-sdk/core` inspectors for structured fields (mint, burn,
+ * withdrawal, metadata, typed certificate groupings).
  *
- * This pure function inspects a transaction without any wallet context,
- * providing raw transaction data useful for display purposes.
+ * Pure with respect to wallet state — produces raw transaction data useful for
+ * display without requiring address/UTXO context. Use `useDappTxInspection`
+ * when address-resolved from/to maps and a rich summary are needed.
  *
  * @param txHex - Transaction CBOR hex string to parse
  * @returns Transaction inspection result containing parsed info or error
  */
-export const inspectTransaction = (
+export const inspectTransaction = async (
   txHex: string,
-): TransactionInspectorResult => {
+): Promise<TransactionInspectorResult> => {
   if (!txHex) {
     return {
       transactionInfo: null,
@@ -210,10 +238,23 @@ export const inspectTransaction = (
 
   try {
     const tx = Serialization.Transaction.fromCbor(Serialization.TxCBOR(txHex));
-    const body = tx.body();
-    const coreBody = body.toCore();
+    const coreTx = tx.toCore();
+    const { body } = coreTx;
 
-    const outputs = coreBody.outputs.map(output => {
+    const inspector = createTxInspector({
+      delegationCertificates: delegationInspector,
+      stakeKeyRegistrations: stakeKeyRegistrationInspector,
+      stakeKeyDeregistrations: stakeKeyDeregistrationInspector,
+      poolRegistrations: poolRegistrationInspector,
+      poolRetirements: poolRetirementInspector,
+      withdrawalTotal: withdrawalInspector,
+      mintedAssets: assetsMintedInspector,
+      burnedAssets: assetsBurnedInspector,
+      metadata: metadataInspector,
+    });
+    const inspection = await inspector(coreTx);
+
+    const outputs = body.outputs.map(output => {
       const assets: TransactionInfo['outputs'][0]['assets'] = [];
 
       if (output.value.assets) {
@@ -231,14 +272,14 @@ export const inspectTransaction = (
       };
     });
 
-    const collateralInputs: CollateralInput[] = (
-      coreBody.collaterals ?? []
-    ).map(input => ({
-      txId: input.txId,
-      index: input.index,
-    }));
+    const collateralInputs: CollateralInput[] = (body.collaterals ?? []).map(
+      input => ({
+        txId: input.txId,
+        index: input.index,
+      }),
+    );
 
-    const rawCertificates: Cardano.Certificate[] = coreBody.certificates ?? [];
+    const rawCertificates: Cardano.Certificate[] = body.certificates ?? [];
 
     const certificates: CertificateInfo[] = rawCertificates.map(cert =>
       extractCertificateInfo(cert),
@@ -258,30 +299,37 @@ export const inspectTransaction = (
     }
 
     const proposalProcedures: Cardano.ProposalProcedure[] =
-      coreBody.proposalProcedures ?? [];
+      body.proposalProcedures ?? [];
 
     const votingProcedures: Cardano.VotingProcedures =
-      coreBody.votingProcedures ?? [];
+      body.votingProcedures ?? [];
 
-    const auxiliaryData = tx.auxiliaryData()?.toCore();
+    const auxiliaryData = coreTx.auxiliaryData;
+
+    const hasMint = body.mint !== undefined && body.mint.size > 0;
+    const hasAuxiliaryData = auxiliaryData !== undefined;
+    const hasAuxiliaryBlob =
+      hasAuxiliaryData &&
+      auxiliaryData?.blob !== undefined &&
+      auxiliaryData.blob.size > 0;
 
     const transactionInfo: TransactionInfo = {
-      inputsCount: coreBody.inputs.length,
-      outputsCount: coreBody.outputs.length,
-      fee: coreBody.fee,
-      validityIntervalStart: coreBody.validityInterval?.invalidBefore,
-      ttl: coreBody.validityInterval?.invalidHereafter,
-      hasCollateral: (coreBody.collaterals?.length ?? 0) > 0,
-      collateralInputsCount: coreBody.collaterals?.length ?? 0,
+      inputsCount: body.inputs.length,
+      outputsCount: body.outputs.length,
+      fee: body.fee,
+      validityIntervalStart: body.validityInterval?.invalidBefore,
+      ttl: body.validityInterval?.invalidHereafter,
+      hasCollateral: (body.collaterals?.length ?? 0) > 0,
+      collateralInputsCount: body.collaterals?.length ?? 0,
       collateralInputs,
-      hasMetadata: tx.auxiliaryData() !== undefined,
-      hasMint: coreBody.mint !== undefined && coreBody.mint.size > 0,
+      hasMetadata: hasAuxiliaryData,
+      hasMint,
       hasCertificates: rawCertificates.length > 0,
       certificatesCount: rawCertificates.length,
       certificates,
       rawCertificates,
       hasWithdrawals:
-        coreBody.withdrawals !== undefined && coreBody.withdrawals.length > 0,
+        body.withdrawals !== undefined && body.withdrawals.length > 0,
       outputs,
       deposit,
       returnedDeposit,
@@ -291,8 +339,38 @@ export const inspectTransaction = (
       hasVotingProcedures: votingProcedures.length > 0,
       votingProceduresCount: votingProcedures.length,
       votingProcedures,
-      hasAuxiliaryData: auxiliaryData !== undefined,
+      hasAuxiliaryData,
       auxiliaryData,
+      mintedAssets:
+        inspection.mintedAssets.length > 0
+          ? inspection.mintedAssets
+          : undefined,
+      burnedAssets:
+        inspection.burnedAssets.length > 0
+          ? inspection.burnedAssets
+          : undefined,
+      withdrawalTotal: inspection.withdrawalTotal,
+      metadata: hasAuxiliaryBlob ? inspection.metadata : undefined,
+      delegationCertificates:
+        inspection.delegationCertificates.length > 0
+          ? inspection.delegationCertificates
+          : undefined,
+      stakeKeyRegistrations:
+        inspection.stakeKeyRegistrations.length > 0
+          ? inspection.stakeKeyRegistrations
+          : undefined,
+      stakeKeyDeregistrations:
+        inspection.stakeKeyDeregistrations.length > 0
+          ? inspection.stakeKeyDeregistrations
+          : undefined,
+      poolRegistrations:
+        inspection.poolRegistrations.length > 0
+          ? inspection.poolRegistrations
+          : undefined,
+      poolRetirements:
+        inspection.poolRetirements.length > 0
+          ? inspection.poolRetirements
+          : undefined,
     };
 
     return {

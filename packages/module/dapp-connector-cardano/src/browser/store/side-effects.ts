@@ -27,6 +27,7 @@ import {
   take,
   takeUntil,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 
 import {
@@ -733,6 +734,25 @@ export const clearResolvedInputsOnSignTxClear: SideEffect = (
   );
 
 /**
+ * Resolves a `closePopupRequested` action (carrying a popup location) into a
+ * `views.closeView` dispatch by looking up the matching popupWindow view.
+ */
+export const closeRequestedPopup: SideEffect = (
+  { cardanoDappConnector: { closePopupRequested$ } },
+  { views: { selectOpenViews$ } },
+  { actions },
+) =>
+  closePopupRequested$.pipe(
+    withLatestFrom(selectOpenViews$),
+    mergeMap(([{ payload: location }, openViews]) => {
+      const popupView = openViews.find(
+        view => view.type === 'popupWindow' && view.location === location,
+      );
+      return popupView ? of(actions.views.closeView(popupView.id)) : EMPTY;
+    }),
+  );
+
+/**
  * Factory function to initialize extension-specific side effects.
  *
  * @returns Array of side effects to register with the store
@@ -743,5 +763,6 @@ export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
     promptCardanoAuthorizeDapp,
     resolveForeignTransactionInputs,
     clearResolvedInputsOnSignTxClear,
+    closeRequestedPopup,
   ];
 };

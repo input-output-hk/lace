@@ -12,7 +12,7 @@ import {
 import { calculateAdaFiatValue } from '../utils/sign-tx-utils';
 import { formatLovelaceToAda } from '../utils/transaction-inspector';
 
-import type { TokenTransferValue } from './useTransactionSummary';
+import type { TokenTransferValue } from './useDappTxInspection';
 import type { Cardano } from '@cardano-sdk/core';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 
@@ -54,7 +54,7 @@ const calculateNetAssetBalances = (
     if (ownAddresses.includes(address)) {
       for (const [assetId, amount] of value.assets) {
         const existing = assetMap.get(assetId) ?? BigInt(0);
-        assetMap.set(assetId, existing - amount);
+        assetMap.set(assetId, existing + amount);
       }
     }
   }

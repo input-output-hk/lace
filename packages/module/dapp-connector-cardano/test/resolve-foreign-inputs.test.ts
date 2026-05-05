@@ -103,7 +103,7 @@ describe('createResolveForeignInputsFlow', () => {
       expect(emissions[0]).toEqual({ type: 'START_RESOLVING' });
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalledWith(
         expect.objectContaining({
-          foreignFromAddresses: expect.any(Array) as unknown,
+          foreignResolvedInputs: expect.any(Array) as unknown,
           isResolving: false,
           error: null,
         }),
@@ -143,7 +143,7 @@ describe('createResolveForeignInputsFlow', () => {
       expect(emissions.length).toBe(2);
       expect(emissions[0]).toEqual({ type: 'START_RESOLVING' });
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalledWith({
-        foreignFromAddresses: [],
+        foreignResolvedInputs: [],
         isResolving: false,
         error: null,
       });
@@ -181,7 +181,7 @@ describe('createResolveForeignInputsFlow', () => {
       expect(emissions.length).toBe(2);
       expect(emissions[0]).toEqual({ type: 'START_RESOLVING' });
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalledWith({
-        foreignFromAddresses: [],
+        foreignResolvedInputs: [],
         isResolving: false,
         error: 'API unavailable',
       });
@@ -214,7 +214,7 @@ describe('createResolveForeignInputsFlow', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
 
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalledWith({
-        foreignFromAddresses: [],
+        foreignResolvedInputs: [],
         isResolving: false,
         error: 'Failed to resolve foreign inputs',
       });
@@ -249,7 +249,7 @@ describe('createResolveForeignInputsFlow', () => {
       expect(emissions.length).toBe(2);
       expect(emissions[0]).toEqual({ type: 'START_RESOLVING' });
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalledWith({
-        foreignFromAddresses: [],
+        foreignResolvedInputs: [],
         isResolving: false,
         error: 'Chain ID not available',
       });
@@ -293,12 +293,15 @@ describe('createResolveForeignInputsFlow', () => {
       expect(mockActions.setResolvedTransactionInputs).toHaveBeenCalled();
       const resolvedPayload = mockActions.setResolvedTransactionInputs.mock
         .calls[0][0] as {
-        foreignFromAddresses: [string, { coins: string }][];
+        foreignResolvedInputs: Array<{
+          txIn: { txId: string; index: number };
+          txOutCbor: string;
+        }>;
         isResolving: boolean;
         error: string | null;
       };
       expect(
-        resolvedPayload.foreignFromAddresses.length,
+        resolvedPayload.foreignResolvedInputs.length,
       ).toBeGreaterThanOrEqual(0);
       expect(resolvedPayload.isResolving).toBe(false);
       expect(resolvedPayload.error).toBeNull();

@@ -1,10 +1,8 @@
 export {
-  computeTransactionSummary,
-  useTransactionSummary,
-  type ComputeTransactionSummaryParams,
+  useDappTxInspection,
   type TokenTransferValue,
-  type TransactionSummary,
-} from './useTransactionSummary';
+  type UseDappTxInspectionResult,
+} from './useDappTxInspection';
 
 export { useLaceSelector, useDispatchLaceAction } from './storeHooks';
 

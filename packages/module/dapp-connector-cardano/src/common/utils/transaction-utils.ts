@@ -12,12 +12,12 @@ export type TransactionType = 'Receive' | 'Self Transaction' | 'Send';
 /**
  * Calculates the net ADA balance change for the user based on transaction inputs and outputs.
  *
- * The calculation follows the formula: incoming - outgoing
- * - Outgoing: Sum of coins from addresses the user owns that are being spent (from inputs)
- * - Incoming: Sum of coins going to addresses the user owns (from outputs)
+ * Coin values carry their sign from the inspector:
+ * - fromAddresses entries have negative coins (net outflow from that address)
+ * - toAddresses entries have positive coins (net inflow to that address)
  *
- * A negative result means the user is sending ADA, a positive result means receiving,
- * and zero means a self-transaction (sending to oneself).
+ * Summing the signed contributions from own addresses directly yields the net change:
+ * negative = sending, positive = receiving, zero = self-transaction.
  *
  * @param fromAddresses - Map of addresses being spent from with their coin and asset values
  * @param toAddresses - Map of addresses receiving funds with their coin and asset values
@@ -29,22 +29,21 @@ export const calculateNetBalance = (
   toAddresses: Map<Cardano.PaymentAddress, TokenTransferValue>,
   ownAddresses: string[],
 ): bigint => {
-  let outgoing = BigInt(0);
-  let incoming = BigInt(0);
+  let net = BigInt(0);
 
   for (const [address, value] of fromAddresses) {
     if (ownAddresses.includes(address)) {
-      outgoing += value.coins;
+      net += value.coins;
     }
   }
 
   for (const [address, value] of toAddresses) {
     if (ownAddresses.includes(address)) {
-      incoming += value.coins;
+      net += value.coins;
     }
   }
 
-  return incoming - outgoing;
+  return net;
 };
 
 /**
