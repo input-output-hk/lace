@@ -16,8 +16,8 @@ const SIMPLE_TX_CBOR =
 
 describe('inspectTransaction', () => {
   describe('with valid transaction', () => {
-    it('parses transaction and returns basic info', () => {
-      const result = inspectTransaction(VALID_TX_CBOR);
+    it('parses transaction and returns basic info', async () => {
+      const result = await inspectTransaction(VALID_TX_CBOR);
 
       expect(result.error).toBeNull();
       expect(result.isLoading).toBe(false);
@@ -29,8 +29,8 @@ describe('inspectTransaction', () => {
       expect(info.fee).toBe(190053n);
     });
 
-    it('extracts transaction outputs', () => {
-      const result = inspectTransaction(VALID_TX_CBOR);
+    it('extracts transaction outputs', async () => {
+      const result = await inspectTransaction(VALID_TX_CBOR);
       const info = result.transactionInfo!;
 
       expect(info.outputs).toHaveLength(3);
@@ -43,16 +43,16 @@ describe('inspectTransaction', () => {
       expect(info.outputs[2].assets.length).toBeGreaterThan(0);
     });
 
-    it('detects metadata presence', () => {
-      const result = inspectTransaction(VALID_TX_CBOR);
+    it('detects metadata presence', async () => {
+      const result = await inspectTransaction(VALID_TX_CBOR);
       const info = result.transactionInfo!;
 
       // This transaction does not have auxiliary data (metadata)
       expect(info.hasMetadata).toBe(false);
     });
 
-    it('detects TTL/validity interval', () => {
-      const result = inspectTransaction(VALID_TX_CBOR);
+    it('detects TTL/validity interval', async () => {
+      const result = await inspectTransaction(VALID_TX_CBOR);
       const info = result.transactionInfo!;
 
       // Cardano.Slot is a number type, not bigint
@@ -62,8 +62,8 @@ describe('inspectTransaction', () => {
   });
 
   describe('with simple transaction', () => {
-    it('parses simple transaction', () => {
-      const result = inspectTransaction(SIMPLE_TX_CBOR);
+    it('parses simple transaction', async () => {
+      const result = await inspectTransaction(SIMPLE_TX_CBOR);
 
       expect(result.error).toBeNull();
       expect(result.transactionInfo).not.toBeNull();
@@ -74,8 +74,8 @@ describe('inspectTransaction', () => {
       expect(info.outputsCount).toBe(2);
     });
 
-    it('reports no collateral, certificates, or withdrawals', () => {
-      const result = inspectTransaction(SIMPLE_TX_CBOR);
+    it('reports no collateral, certificates, or withdrawals', async () => {
+      const result = await inspectTransaction(SIMPLE_TX_CBOR);
       const info = result.transactionInfo!;
 
       expect(info.hasCollateral).toBe(false);
@@ -88,24 +88,24 @@ describe('inspectTransaction', () => {
   });
 
   describe('with invalid input', () => {
-    it('returns error for empty string', () => {
-      const result = inspectTransaction('');
+    it('returns error for empty string', async () => {
+      const result = await inspectTransaction('');
 
       expect(result.transactionInfo).toBeNull();
       expect(result.error).toBe('No transaction data provided');
       expect(result.isLoading).toBe(false);
     });
 
-    it('returns error for invalid CBOR', () => {
-      const result = inspectTransaction('not-valid-cbor');
+    it('returns error for invalid CBOR', async () => {
+      const result = await inspectTransaction('not-valid-cbor');
 
       expect(result.transactionInfo).toBeNull();
       expect(result.error).not.toBeNull();
       expect(result.isLoading).toBe(false);
     });
 
-    it('returns error for malformed hex', () => {
-      const result = inspectTransaction('84a4zzzz');
+    it('returns error for malformed hex', async () => {
+      const result = await inspectTransaction('84a4zzzz');
 
       expect(result.transactionInfo).toBeNull();
       expect(result.error).not.toBeNull();

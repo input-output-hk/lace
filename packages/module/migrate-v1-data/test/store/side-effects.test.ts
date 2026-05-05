@@ -21,8 +21,12 @@ vi.mock('../../src/store/v1-data/prepare-preloaded-state', () => ({
   }),
 }));
 
-import { deleteWalletSideEffect } from '../../src/store/side-effects';
+import {
+  deleteWalletSideEffect,
+  wizardMountedSideEffect,
+} from '../../src/store/side-effects';
 import { migrateV1Actions } from '../../src/store/slice';
+import { preparePreloadedState } from '../../src/store/v1-data/prepare-preloaded-state';
 
 import type { AnyWallet, InMemoryWallet } from '@lace-contract/wallet-repo';
 import type { HexBytes } from '@lace-sdk/util';
@@ -78,6 +82,9 @@ const actions = {
       type: 'views/openView' as const,
       payload,
     })),
+  },
+  appLock: {
+    reset: vi.fn(() => ({ type: 'appLock/reset' as const })),
   },
 };
 
@@ -167,6 +174,76 @@ describe('migrate-v1-data side effects', () => {
           expect(emissions).toHaveLength(0);
         },
       }));
+    });
+  });
+
+  describe('wizardMountedSideEffect', () => {
+    const collectEmissions = async (sideEffect$: {
+      subscribe: (observer: {
+        next: (action: unknown) => void;
+        complete: () => void;
+      }) => unknown;
+    }) => {
+      const emissions: Array<{ type: string }> = [];
+      await new Promise<void>(resolve => {
+        sideEffect$.subscribe({
+          next: action => {
+            emissions.push(action as { type: string });
+          },
+          complete: () => {
+            resolve();
+          },
+        });
+      });
+      return emissions;
+    };
+
+    const runWizardMounted = (overrides: {
+      status: 'activating' | 'pending';
+      pending: WalletId[];
+      initialCount: number;
+    }) =>
+      wizardMountedSideEffect(
+        {
+          migrateV1: {
+            wizardMounted$: of(actions.migrateV1.wizardMounted()),
+          },
+        } as never,
+        {
+          migrateV1: {
+            selectPasswordMigrationStatus$: of(overrides.status),
+            selectWalletsPendingActivation$: of(overrides.pending),
+            selectInitialWalletCount$: of(overrides.initialCount),
+          },
+          wallets: { selectAll$: of([]) },
+        } as never,
+        { actions } as never,
+      );
+
+    it('emits appLock.reset alongside passwordMigrationDetected on a non-fresh-first mount', async () => {
+      const sideEffect$ = runWizardMounted({
+        status: 'activating',
+        pending: [],
+        initialCount: 0,
+      });
+      const emissions = await collectEmissions(sideEffect$);
+      const types = emissions.map(emission => emission.type);
+      expect(types).toContain('migrateV1/passwordMigrationDetected');
+      expect(types).toContain('appLock/reset');
+      expect(actions.appLock.reset).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips emission on a fresh first mount', async () => {
+      const wId = WalletId('w1');
+      const sideEffect$ = runWizardMounted({
+        status: 'pending',
+        pending: [wId],
+        initialCount: 1,
+      });
+      const emissions = await collectEmissions(sideEffect$);
+      expect(emissions).toHaveLength(0);
+      expect(actions.appLock.reset).not.toHaveBeenCalled();
+      expect(preparePreloadedState).not.toHaveBeenCalled();
     });
   });
 });

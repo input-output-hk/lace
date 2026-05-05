@@ -107,7 +107,9 @@ export const ReceiveSheet = ({
   const isDarkMode = theme.name === 'dark';
   const tagColor = isDarkMode ? 'black' : 'white';
   const areFooterButtonsVertical = !!(buyAssetsButtonText && onBuyAssetsPress);
-  const footerHeight = useFooterHeight(areFooterButtonsVertical);
+  const footerHeight = useFooterHeight({
+    vertical: areFooterButtonsVertical,
+  });
   const containerStyle = useMemo(
     () => [styles.container, { paddingBottom: footerHeight }],
     [footerHeight, areFooterButtonsVertical],

@@ -135,8 +135,11 @@ const AddressContent = ({
                   asset.assetId,
                   asset.metadata,
                 );
+                // asset.amount is signed (negative in from); TokenAmount prepends its own sign via isPositive
+                const absAmount =
+                  asset.amount < 0n ? -asset.amount : asset.amount;
                 const formattedAmount = formatAssetAmount(
-                  asset.amount,
+                  absAmount,
                   displayInfo.decimals,
                 );
                 return (
@@ -172,8 +175,10 @@ const AddressContent = ({
               asset.assetId,
               asset.metadata,
             );
+            const absNftAmount =
+              asset.amount < 0n ? -asset.amount : asset.amount;
             const formattedAmount = formatAssetAmount(
-              asset.amount,
+              absNftAmount,
               displayInfo.decimals,
             );
             return (

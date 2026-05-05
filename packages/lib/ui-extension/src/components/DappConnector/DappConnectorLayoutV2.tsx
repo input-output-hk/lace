@@ -41,6 +41,20 @@ interface LayoutProps {
    * Rendered as a secondary button.
    */
   secondaryButton?: ButtonProps;
+  /**
+   * Footer button layout. Defaults to the existing stacked popup layout.
+   */
+  footerOrientation?: 'horizontal' | 'vertical';
+  /**
+   * Whether to render the Lace logo header. Defaults to the existing popup chrome.
+   */
+  showHeader?: boolean;
+  /**
+   * When true, the layout fills the available viewport instead of using the
+   * fixed 360×650 popup size. Use this when the layout is rendered in a
+   * resizable popupWindow so the content grows with the window.
+   */
+  fillViewport?: boolean;
 }
 
 const CONTAINER_WIDTH = 360;
@@ -62,19 +76,38 @@ export const DappConnectorLayoutV2 = ({
   children,
   primaryButton,
   secondaryButton,
+  footerOrientation = 'vertical',
+  showHeader = true,
+  fillViewport = false,
 }: LayoutProps) => {
   const { vars } = useTheme();
+  const isHorizontalFooter = footerOrientation === 'horizontal';
 
   const containerStyle: CSSProperties = useMemo(
-    () => ({
-      width: CONTAINER_WIDTH,
-      height: CONTAINER_HEIGHT,
-      backgroundColor: vars.colors.$dialog_container_bgColor,
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-    }),
-    [vars],
+    () =>
+      fillViewport
+        ? {
+            // Pin to the viewport so the layout fills the popupWindow exactly,
+            // independent of any wrapping React Native Web / Expo shell layout.
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: vars.colors.$dialog_container_bgColor,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }
+        : {
+            width: CONTAINER_WIDTH,
+            height: CONTAINER_HEIGHT,
+            backgroundColor: vars.colors.$dialog_container_bgColor,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          },
+    [fillViewport, vars],
   );
 
   const headerStyle: CSSProperties = useMemo(
@@ -91,12 +124,12 @@ export const DappConnectorLayoutV2 = ({
       flex: 1,
       overflowY: 'auto',
       overflowX: 'hidden',
-      paddingTop: 8,
+      paddingTop: showHeader ? 8 : PADDING,
       paddingLeft: PADDING,
       paddingRight: PADDING,
       paddingBottom: PADDING,
     }),
-    [],
+    [showHeader],
   );
 
   const footerStyle: CSSProperties = useMemo(
@@ -105,40 +138,55 @@ export const DappConnectorLayoutV2 = ({
       borderTop: `1px solid ${vars.colors.$divider_bgColor}`,
       backgroundColor: vars.colors.$dialog_container_bgColor,
       padding: PADDING,
-      paddingBottom: 50,
+      paddingBottom: isHorizontalFooter ? PADDING : 50,
       display: 'flex',
-      flexDirection: 'column',
+      flexDirection: isHorizontalFooter ? 'row' : 'column',
       gap: 8,
     }),
-    [vars],
+    [isHorizontalFooter, vars],
   );
+
+  const buttonWrapperStyle: CSSProperties | undefined = useMemo(
+    () => (isHorizontalFooter ? { flex: 1 } : undefined),
+    [isHorizontalFooter],
+  );
+
+  const secondaryButtonElement = secondaryButton ? (
+    <div style={buttonWrapperStyle}>
+      <Button.Secondary
+        label={secondaryButton.label}
+        w="$fill"
+        onClick={secondaryButton.action}
+        data-testid="dapp-connector-secondary-button"
+      />
+    </div>
+  ) : null;
+
+  const primaryButtonElement = primaryButton ? (
+    <div style={buttonWrapperStyle}>
+      <Button.CallToAction
+        label={primaryButton.label}
+        w="$fill"
+        onClick={primaryButton.action}
+        disabled={primaryButton.disabled}
+        data-testid="dapp-connector-primary-button"
+      />
+    </div>
+  ) : null;
 
   return (
     <div style={containerStyle}>
-      <div style={headerStyle}>
-        <LaceLogo height={40} width={40} data-testid="dapp-connector-logo" />
-      </div>
+      {showHeader && (
+        <div style={headerStyle}>
+          <LaceLogo height={40} width={40} data-testid="dapp-connector-logo" />
+        </div>
+      )}
 
       <div style={contentStyle}>{children}</div>
 
       <div style={footerStyle}>
-        {primaryButton && (
-          <Button.CallToAction
-            label={primaryButton.label}
-            w="$fill"
-            onClick={primaryButton.action}
-            disabled={primaryButton.disabled}
-            data-testid="dapp-connector-primary-button"
-          />
-        )}
-        {secondaryButton && (
-          <Button.Secondary
-            label={secondaryButton.label}
-            w="$fill"
-            onClick={secondaryButton.action}
-            data-testid="dapp-connector-secondary-button"
-          />
-        )}
+        {isHorizontalFooter ? secondaryButtonElement : primaryButtonElement}
+        {isHorizontalFooter ? primaryButtonElement : secondaryButtonElement}
       </div>
     </div>
   );

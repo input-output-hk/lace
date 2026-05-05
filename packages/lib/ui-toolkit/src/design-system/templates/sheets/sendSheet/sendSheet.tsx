@@ -113,7 +113,9 @@ export const SendSheet = ({
     [values.estimatedFee],
   );
 
-  const footerHeight = useFooterHeight();
+  const footerHeight = useFooterHeight({
+    hasTitleRow: !!sheetFooterTitleRow,
+  });
   const contentContainerStyle = useMemo(
     () => ({ paddingBottom: footerHeight }),
     [footerHeight],

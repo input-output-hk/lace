@@ -82,7 +82,7 @@ const featureFlags: FeatureFlag[] = [
       showStatistics: false, // used if data may be stale
     },
   },
-  { key: FeatureFlagKey('FEATURES_DEV') },
+  { key: FeatureFlagKey('FEATURES_POSTHOG') },
   {
     key: FeatureFlagKey('FONT_SELECTION'),
     payload: {
@@ -93,6 +93,7 @@ const featureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
   { key: FeatureFlagKey('MD_MIGRATION') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
+  { key: FeatureFlagKey('SEND_FLOW') },
   { key: FeatureFlagKey('STAKING_CENTER') },
   {
     key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
@@ -113,17 +114,16 @@ const featureFlags: FeatureFlag[] = [
       ],
     },
   },
-  { key: FeatureFlagKey('TEST_API') },
-  { key: FeatureFlagKey('TOKEN_PRICING') },
-  { key: FeatureFlagKey('V1_MIGRATION') },
-  { key: FeatureFlagKey('VAULT_LEDGER') },
-  { key: FeatureFlagKey('VAULT_TREZOR') },
   {
     key: FeatureFlagKey('SWAP_CENTER'),
     payload: {
       steelswapApiUrl: 'https://steelswap.lw.iog.io',
     },
   },
+  { key: FeatureFlagKey('TOKEN_PRICING') },
+  { key: FeatureFlagKey('V1_MIGRATION') },
+  { key: FeatureFlagKey('VAULT_LEDGER') },
+  { key: FeatureFlagKey('VAULT_TREZOR') },
 ];
 
 export default featureFlags;

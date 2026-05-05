@@ -11,7 +11,7 @@ export {
   type PendingSignTxRequest,
   type AuthResponse,
   type LastAuthResponse,
-  type SerializedTokenTransferValue,
+  type SerializedForeignResolvedInput,
   type ResolvedTransactionInputs,
   type CardanoDappConnectorState,
 } from './slice';

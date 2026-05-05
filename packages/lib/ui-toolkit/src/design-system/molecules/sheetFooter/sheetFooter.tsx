@@ -12,12 +12,20 @@ import type { EdgeInsets } from 'react-native-safe-area-context';
 
 const FOOTER_HEIGHT = isWeb ? 70 : 120;
 const FOOTER_HEIGHT_VERTICAL = isWeb ? 115 : 200;
+const TITLE_ROW_HEIGHT = 70;
 
-export const useFooterHeight = (vertical?: boolean) => {
+export const useFooterHeight = ({
+  vertical,
+  hasTitleRow,
+}: {
+  vertical?: boolean;
+  hasTitleRow?: boolean;
+} = {}) => {
   const insets = useSafeAreaInsets();
   return (
     insets.bottom +
     (vertical ? FOOTER_HEIGHT_VERTICAL : FOOTER_HEIGHT) +
+    (hasTitleRow ? TITLE_ROW_HEIGHT : 0) +
     spacing.S
   );
 };
@@ -34,7 +42,12 @@ export const SheetFooter = memo(
   }: SheetFooterProps) => {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
-    const styles = getStyles({ insets, theme, vertical });
+    const styles = getStyles({
+      insets,
+      theme,
+      vertical,
+      hasTitleRow: !!titleRow,
+    });
 
     const PrimaryButtonComponent =
       primaryVariant === 'critical' ? Button.Critical : Button.Primary;
@@ -94,15 +107,19 @@ const getStyles = ({
   insets,
   theme,
   vertical,
+  hasTitleRow,
 }: {
   insets: EdgeInsets;
   theme: Theme;
   vertical: boolean;
+  hasTitleRow: boolean;
 }) =>
   StyleSheet.create({
     footer: {
       backgroundColor: theme.background.page,
-      height: vertical ? FOOTER_HEIGHT_VERTICAL : FOOTER_HEIGHT,
+      height:
+        (vertical ? FOOTER_HEIGHT_VERTICAL : FOOTER_HEIGHT) +
+        (hasTitleRow ? TITLE_ROW_HEIGHT : 0),
       position: 'absolute',
       bottom: insets.bottom,
       width: '100%',

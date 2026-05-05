@@ -20,7 +20,7 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc123' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(5_000_000)),
+            createTokenTransferValue(BigInt(-5_000_000)),
           ],
         ],
       );
@@ -46,7 +46,7 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc123' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(10_000_000)),
+            createTokenTransferValue(BigInt(-10_000_000)),
           ],
         ],
       );
@@ -76,11 +76,11 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown1...abc' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(3_000_000)),
+            createTokenTransferValue(BigInt(-3_000_000)),
           ],
           [
             'addr_test1qpown2...def' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(2_000_000)),
+            createTokenTransferValue(BigInt(-2_000_000)),
           ],
         ],
       );
@@ -134,11 +134,11 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc123' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(1_000_000)),
+            createTokenTransferValue(BigInt(-1_000_000)),
           ],
           [
             'addr_test1qpforeign...xyz789' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(10_000_000)),
+            createTokenTransferValue(BigInt(-10_000_000)),
           ],
         ],
       );
@@ -200,7 +200,7 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc123' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(5_000_000)),
+            createTokenTransferValue(BigInt(-5_000_000)),
           ],
         ],
       );
@@ -226,7 +226,7 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown1...abc' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(10_000_000)),
+            createTokenTransferValue(BigInt(-10_000_000)),
           ],
         ],
       );
@@ -327,7 +327,7 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc123' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(5_000_000)),
+            createTokenTransferValue(BigInt(-5_000_000)),
           ],
         ],
       );
@@ -353,11 +353,11 @@ describe('calculateNetBalance', () => {
         [
           [
             'addr_test1qpown...abc' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(7_000_000)),
+            createTokenTransferValue(BigInt(-7_000_000)),
           ],
           [
             'addr_test1qpforeign1...xyz' as Cardano.PaymentAddress,
-            createTokenTransferValue(BigInt(3_000_000)),
+            createTokenTransferValue(BigInt(-3_000_000)),
           ],
         ],
       );

@@ -108,6 +108,7 @@ export const wizardMountedSideEffect: SideEffect = (
             ),
             ...freshWallets.map(w => actions.wallets.addWallet(w)),
             actions.migrateV1.passwordMigrationDetected(freshInMemoryIds),
+            actions.appLock.reset(),
           );
         }),
         catchError(() => EMPTY),

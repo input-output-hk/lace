@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   clearResolvedInputsOnSignTxClear,
+  closeRequestedPopup,
   connectCardanoDappConnectorApi,
   initializeSideEffects,
   promptCardanoAuthorizeDapp,
@@ -809,11 +810,13 @@ describe('side-effects-extension', () => {
       // promptCardanoAuthorizeDapp: handles enable() via authorizeDapp.start
       // resolveForeignTransactionInputs: resolves foreign inputs via Blockfrost
       // clearResolvedInputsOnSignTxClear: clears resolved inputs when signTx request is cleared
-      expect(sideEffects).toHaveLength(4);
+      // closeRequestedPopup: resolves closePopupRequested into views.closeView
+      expect(sideEffects).toHaveLength(5);
       expect(sideEffects).toContain(connectCardanoDappConnectorApi);
       expect(sideEffects).toContain(promptCardanoAuthorizeDapp);
       expect(sideEffects).toContain(resolveForeignTransactionInputs);
       expect(sideEffects).toContain(clearResolvedInputsOnSignTxClear);
+      expect(sideEffects).toContain(closeRequestedPopup);
     });
 
     it('should return the same side effect function references', () => {

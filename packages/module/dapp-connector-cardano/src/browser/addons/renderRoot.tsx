@@ -1,5 +1,5 @@
 import { AuthPromptUI } from '@lace-contract/authentication-prompt';
-import { spacing, ThemeProvider } from '@lace-lib/ui-toolkit';
+import { ThemeProvider } from '@lace-lib/ui-toolkit';
 import React from 'react';
 import { Appearance, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,9 +10,9 @@ import {
   CARDANO_DAPP_SIGN_TX_LOCATION,
 } from '../const';
 import {
-  CardanoDappConnect,
-  CardanoDappSignData,
-  CardanoDappSignTx,
+  CardanoDappConnectPopup,
+  CardanoDappSignDataPopup,
+  CardanoDappSignTxPopup,
 } from '../views';
 
 import type { AvailableAddons } from '../..';
@@ -89,8 +89,6 @@ const AuthPromptUIWithTheme = () => (
 
 const dappViewWrapperStyles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.M,
-    paddingTop: spacing.L,
     flex: 1,
     width: '100%',
     alignSelf: 'stretch',
@@ -113,19 +111,19 @@ const DappViewWithTheme = ({ children }: { children: React.ReactNode }) => (
 
 const CardanoDappConnectWithTheme = () => (
   <DappViewWithTheme>
-    <CardanoDappConnect />
+    <CardanoDappConnectPopup />
   </DappViewWithTheme>
 );
 
 const CardanoDappSignTxWithTheme = () => (
   <DappViewWithTheme>
-    <CardanoDappSignTx />
+    <CardanoDappSignTxPopup />
   </DappViewWithTheme>
 );
 
 const CardanoDappSignDataWithTheme = () => (
   <DappViewWithTheme>
-    <CardanoDappSignData />
+    <CardanoDappSignDataPopup />
   </DappViewWithTheme>
 );
 
