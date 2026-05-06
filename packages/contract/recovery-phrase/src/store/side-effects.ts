@@ -27,6 +27,10 @@ export const createRecoveryPhraseSideEffect =
           if (!wallet) {
             throw new Error('InMemory wallet not found for recovery phrase');
           }
+          const { encryptedRecoveryPhrase } = wallet;
+          if (!encryptedRecoveryPhrase) {
+            throw new RecoveryPhraseRequestError('not-available');
+          }
 
           return authenticate(authenticationPromptConfig).pipe(
             tap(success => {
@@ -37,7 +41,7 @@ export const createRecoveryPhraseSideEffect =
               accessAuthSecret(authSecret =>
                 from(
                   emip3decrypt(
-                    ByteArray.fromHex(wallet.encryptedRecoveryPhrase),
+                    ByteArray.fromHex(encryptedRecoveryPhrase),
                     authSecret,
                   ).then(ByteArray),
                 ),

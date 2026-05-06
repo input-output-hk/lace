@@ -223,10 +223,9 @@ export const reEncryptWalletSecrets = async (
   };
 
   try {
-    const encryptedRecoveryPhrase = await reEncryptHexBytes(
-      wallet.encryptedRecoveryPhrase,
-      context,
-    );
+    const encryptedRecoveryPhrase = wallet.encryptedRecoveryPhrase
+      ? await reEncryptHexBytes(wallet.encryptedRecoveryPhrase, context)
+      : undefined;
 
     const newBlockchainSpecific: Record<string, unknown> = {};
     for (const [chain, data] of Object.entries(wallet.blockchainSpecific)) {
@@ -250,7 +249,7 @@ export const reEncryptWalletSecrets = async (
     );
 
     return {
-      encryptedRecoveryPhrase,
+      ...(encryptedRecoveryPhrase ? { encryptedRecoveryPhrase } : {}),
       blockchainSpecific: newBlockchainSpecific,
       ...(hasAccountChanges
         ? { accounts: newAccounts as InMemoryWallet['accounts'] }
@@ -276,12 +275,18 @@ export const reEncryptWalletSecrets = async (
  * If any check fails, the caller must fall back to the manual re-encryption
  * path: the wallet has inconsistent encryption and cannot be trusted to be
  * unlockable with the app password alone.
+ *
+ * Nami-imported wallets have no `encryptedRecoveryPhrase`; they are verified
+ * against chain-data and per-account secrets only.
  */
 export const verifyAllSecretsDecryptable = async (
   wallet: InMemoryWallet,
   password: Uint8Array,
 ): Promise<boolean> => {
-  if (!(await tryDecrypt(wallet.encryptedRecoveryPhrase, password))) {
+  if (
+    wallet.encryptedRecoveryPhrase &&
+    !(await tryDecrypt(wallet.encryptedRecoveryPhrase, password))
+  ) {
     return false;
   }
 

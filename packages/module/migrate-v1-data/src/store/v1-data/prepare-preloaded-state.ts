@@ -222,13 +222,17 @@ const mapWallet = (v1Wallet: V1Wallet): AnyWallet | null => {
           mapBip32Account(WalletType.HardwareTrezor, walletId, blockchainName),
         ),
       };
-    case V1WalletType.InMemory:
+    case V1WalletType.InMemory: {
+      // Nami-imported wallets carry an empty `keyMaterial` because Nami
+      // never stored a mnemonic. Treat missing/empty as no mnemonic.
+      const hasMnemonic = Boolean(v1Wallet.encryptedSecrets.keyMaterial);
       return {
         type: WalletType.InMemory,
-        encryptedRecoveryPhrase: HexBytes(
-          // TODO: verify that in v2 we encrypt in the same way and the same data format as in v1
-          v1Wallet.encryptedSecrets.keyMaterial,
-        ),
+        ...(hasMnemonic && {
+          encryptedRecoveryPhrase: HexBytes(
+            v1Wallet.encryptedSecrets.keyMaterial,
+          ),
+        }),
         isPassphraseConfirmed: true,
         metadata: commonWalletMetadata,
         walletId,
@@ -244,6 +248,7 @@ const mapWallet = (v1Wallet: V1Wallet): AnyWallet | null => {
           mapBip32Account(WalletType.InMemory, walletId, blockchainName),
         ),
       };
+    }
     case V1WalletType.Script:
     default:
       // no need to migrate shared wallets as it's a beta feature (testnet-only) and we are likely to change how they work in the next iteration of the feature

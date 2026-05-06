@@ -56,14 +56,17 @@ export const preparing: SideEffect = (
 
 export const resetOnLastWalletRemoved: SideEffect = (
   _,
-  { wallets: { selectTotal$ } },
+  { wallets: { selectTotal$, selectIsWalletRepoMigrating$ } },
   { actions },
 ) =>
   selectTotal$.pipe(
     pairwise(),
+    withLatestFrom(selectIsWalletRepoMigrating$),
     filter(
-      ([previousWalletsCount, currentWalletsCount]) =>
-        previousWalletsCount === 1 && currentWalletsCount === 0,
+      ([[previousWalletsCount, currentWalletsCount], isWalletRepoMigrating]) =>
+        previousWalletsCount === 1 &&
+        currentWalletsCount === 0 &&
+        !isWalletRepoMigrating,
     ),
     switchMap(() => [
       actions.appLock.reset(),

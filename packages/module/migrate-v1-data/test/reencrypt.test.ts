@@ -2,7 +2,11 @@ import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
 import { ByteArray, HexBytes } from '@lace-sdk/util';
 import { describe, expect, it } from 'vitest';
 
-import { reEncryptWalletSecrets, tryDecrypt } from '../src/store/reencrypt';
+import {
+  reEncryptWalletSecrets,
+  tryDecrypt,
+  verifyAllSecretsDecryptable,
+} from '../src/store/reencrypt';
 
 import type { InMemoryWallet } from '@lace-contract/wallet-repo';
 
@@ -112,6 +116,44 @@ describe('tryDecrypt', () => {
       password,
     );
     expect(ByteArray.toUTF8(ByteArray(decrypted))).toBe(plaintext);
+  });
+});
+
+describe('verifyAllSecretsDecryptable: wallets without recovery phrase', () => {
+  it('returns true when chain data decrypts and recovery phrase is absent', async () => {
+    const password = toPassword('nami-password');
+    const namiWallet = {
+      blockchainSpecific: {
+        Cardano: {
+          encryptedRootPrivateKey: await encryptData(
+            'root-private-key-Cardano',
+            password,
+          ),
+        },
+      },
+      accounts: [],
+    } as unknown as InMemoryWallet;
+
+    expect(await verifyAllSecretsDecryptable(namiWallet, password)).toBe(true);
+  });
+
+  it('returns false when chain data fails to decrypt with given password', async () => {
+    const correctPassword = toPassword('correct');
+    const namiWallet = {
+      blockchainSpecific: {
+        Cardano: {
+          encryptedRootPrivateKey: await encryptData(
+            'root-private-key-Cardano',
+            correctPassword,
+          ),
+        },
+      },
+      accounts: [],
+    } as unknown as InMemoryWallet;
+
+    expect(
+      await verifyAllSecretsDecryptable(namiWallet, toPassword('wrong')),
+    ).toBe(false);
   });
 });
 
@@ -357,7 +399,7 @@ describe('reEncryptWalletSecrets', () => {
 
       // Original unchanged
       const originalDecryptedPhrase = await emip3decrypt(
-        ByteArray.fromHex(wallet.encryptedRecoveryPhrase),
+        ByteArray.fromHex(wallet.encryptedRecoveryPhrase!),
         oldPassword,
       );
       expect(ByteArray.toUTF8(ByteArray(originalDecryptedPhrase))).toBe(
@@ -391,11 +433,47 @@ describe('reEncryptWalletSecrets', () => {
       ).rejects.toThrow();
 
       const decryptedPhrase = await emip3decrypt(
-        ByteArray.fromHex(wallet.encryptedRecoveryPhrase),
+        ByteArray.fromHex(wallet.encryptedRecoveryPhrase!),
         oldPassword,
       );
       expect(ByteArray.toUTF8(ByteArray(decryptedPhrase))).toBe(
         'abandon abandon abandon',
+      );
+    });
+  });
+
+  describe('Nami-imported wallets (no recovery phrase)', () => {
+    it('re-encrypts chain data and omits encryptedRecoveryPhrase from result', async () => {
+      const oldPassword = toPassword('old-password');
+      const newPassword = toPassword('new-password');
+      const namiWallet = {
+        blockchainSpecific: {
+          Cardano: {
+            encryptedRootPrivateKey: await encryptData(
+              'root-private-key-Cardano',
+              oldPassword,
+            ),
+          },
+        },
+        accounts: [],
+      } as unknown as InMemoryWallet;
+
+      const result = await reEncryptWalletSecrets(
+        namiWallet,
+        oldPassword,
+        newPassword,
+      );
+
+      expect(result.encryptedRecoveryPhrase).toBeUndefined();
+      const chainData = result.blockchainSpecific!.Cardano as {
+        encryptedRootPrivateKey: HexBytes;
+      };
+      const decryptedKey = await emip3decrypt(
+        ByteArray.fromHex(chainData.encryptedRootPrivateKey),
+        newPassword,
+      );
+      expect(ByteArray.toUTF8(ByteArray(decryptedKey))).toBe(
+        'root-private-key-Cardano',
       );
     });
   });

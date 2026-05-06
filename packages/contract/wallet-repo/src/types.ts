@@ -74,7 +74,8 @@ type WalletBase<BlockchainSpecific, Metadata = WalletMetadata> = {
 };
 export type InMemoryWallet<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificInMemoryWalletData> & {
-    encryptedRecoveryPhrase: HexBytes;
+    // Absent for wallets imported from Nami via Lace V1, which never stored a mnemonic.
+    encryptedRecoveryPhrase?: HexBytes;
     accounts: InMemoryWalletAccount<BlockchainSpecificAccountProps>[];
     type: WalletType.InMemory;
     isPassphraseConfirmed: boolean;

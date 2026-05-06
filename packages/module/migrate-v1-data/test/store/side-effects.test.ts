@@ -202,6 +202,7 @@ describe('migrate-v1-data side effects', () => {
       status: 'activating' | 'pending';
       pending: WalletId[];
       initialCount: number;
+      currentWallets?: { walletId: WalletId; type: WalletType; accounts: [] }[];
     }) =>
       wizardMountedSideEffect(
         {
@@ -215,22 +216,47 @@ describe('migrate-v1-data side effects', () => {
             selectWalletsPendingActivation$: of(overrides.pending),
             selectInitialWalletCount$: of(overrides.initialCount),
           },
-          wallets: { selectAll$: of([]) },
+          wallets: { selectAll$: of(overrides.currentWallets ?? []) },
         } as never,
         { actions } as never,
       );
 
-    it('emits appLock.reset alongside passwordMigrationDetected on a non-fresh-first mount', async () => {
+    it('soft-resets without preparePreloadedState when no wallet has been activated yet', async () => {
+      const w1 = WalletId('w1');
+      const w2 = WalletId('w2');
       const sideEffect$ = runWizardMounted({
         status: 'activating',
-        pending: [],
-        initialCount: 0,
+        pending: [w1, w2],
+        initialCount: 2,
+        currentWallets: [
+          { walletId: w1, type: WalletType.InMemory, accounts: [] },
+          { walletId: w2, type: WalletType.InMemory, accounts: [] },
+        ],
       });
       const emissions = await collectEmissions(sideEffect$);
       const types = emissions.map(emission => emission.type);
+      expect(types[0]).toBe('appLock/reset');
+      expect(types[1]).toBe('migrateV1/passwordMigrationDetected');
+      expect(types).not.toContain('wallets/removeWallet');
+      expect(types).not.toContain('wallets/addWallet');
+      expect(preparePreloadedState).not.toHaveBeenCalled();
+    });
+
+    it('runs the destructive reset via preparePreloadedState when at least one wallet has been activated', async () => {
+      const w1 = WalletId('w1');
+      const sideEffect$ = runWizardMounted({
+        status: 'activating',
+        pending: [w1],
+        initialCount: 2,
+        currentWallets: [
+          { walletId: w1, type: WalletType.InMemory, accounts: [] },
+        ],
+      });
+      const emissions = await collectEmissions(sideEffect$);
+      const types = emissions.map(emission => emission.type);
+      expect(types[0]).toBe('appLock/reset');
       expect(types).toContain('migrateV1/passwordMigrationDetected');
-      expect(types).toContain('appLock/reset');
-      expect(actions.appLock.reset).toHaveBeenCalledTimes(1);
+      expect(preparePreloadedState).toHaveBeenCalledTimes(1);
     });
 
     it('skips emission on a fresh first mount', async () => {

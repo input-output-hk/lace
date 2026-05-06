@@ -9,7 +9,6 @@ import {
   CustomTextInput,
   Icon,
   OnboardingLayout,
-  isExtensionSidePanel,
   spacing,
   useTheme,
   Brand,
@@ -40,7 +39,6 @@ import { usePasswordStrength } from '../hooks/usePasswordStrength';
 import { connectSetupAuthenticationChannel } from '../setup-authentication-channel';
 import {
   reEncryptWalletSecrets,
-  tryDecrypt,
   verifyAllSecretsDecryptable,
 } from '../store/reencrypt';
 
@@ -53,10 +51,12 @@ const keyboardBehavior = Platform.OS === 'ios' ? 'padding' : 'height';
 
 interface SetApplicationPasswordScreenProps {
   onPasswordSet: (passwordBytes: Uint8Array) => Promise<void> | void;
+  disabled?: boolean;
 }
 
 const SetApplicationPasswordScreen = ({
   onPasswordSet,
+  disabled = false,
 }: SetApplicationPasswordScreenProps) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -93,10 +93,17 @@ const SetApplicationPasswordScreen = ({
   }, [newPassword, confirmPassword, isPasswordMatch, t]);
 
   const isNextDisabled = useMemo(() => {
+    if (disabled) return true;
     if (!newPassword || !confirmPassword) return true;
     if (!isPasswordMatch) return true;
     return !isPasswordStrong;
-  }, [newPassword, confirmPassword, isPasswordMatch, isPasswordStrong]);
+  }, [
+    disabled,
+    newPassword,
+    confirmPassword,
+    isPasswordMatch,
+    isPasswordStrong,
+  ]);
 
   const handleSubmit = useCallback(() => {
     if (isNextDisabled) return;
@@ -314,8 +321,8 @@ const ActivateWalletScreen = ({
     await new Promise(resolve => setTimeout(resolve, 0));
 
     try {
-      const canDecrypt = await tryDecrypt(
-        inMemoryWallet.encryptedRecoveryPhrase,
+      const canDecrypt = await verifyAllSecretsDecryptable(
+        inMemoryWallet,
         passwordBytes,
       );
 
@@ -588,6 +595,7 @@ const PasswordMigrationWizard = () => {
     'migrateV1.selectInitialWalletCount',
   );
   const allWallets = useLaceSelector('wallets.selectAll');
+  const isAppLockAwaitingSetup = useLaceSelector('appLock.isAwaitingSetup');
 
   const dispatchApplicationPasswordSet = useDispatchLaceAction(
     'migrateV1.applicationPasswordSet',
@@ -603,12 +611,12 @@ const PasswordMigrationWizard = () => {
   );
 
   const appPasswordRef = useRef<Uint8Array | null>(null);
+  const [hasAppPassword, setHasAppPassword] = useState(false);
 
   const wizardMountedDispatchedRef = useRef(false);
   useEffect(() => {
     if (
       (status === 'pending' || status === 'activating') &&
-      !isExtensionSidePanel &&
       !wizardMountedDispatchedRef.current
     ) {
       wizardMountedDispatchedRef.current = true;
@@ -620,6 +628,7 @@ const PasswordMigrationWizard = () => {
     if (status === 'completed') {
       appPasswordRef.current?.fill(0);
       appPasswordRef.current = null;
+      setHasAppPassword(false);
     }
   }, [status]);
 
@@ -640,12 +649,13 @@ const PasswordMigrationWizard = () => {
 
   const handlePasswordSet = useCallback(
     async (password: Uint8Array) => {
-      appPasswordRef.current = password;
-
       const isSuccess = await setupAuthentication(
         AuthSecret(ByteArray(password)),
       );
       if (!isSuccess) return;
+
+      appPasswordRef.current = password;
+      setHasAppPassword(true);
 
       const matches = await Promise.all(
         pendingWallets.map(async (wId: WalletId) => {
@@ -678,7 +688,11 @@ const PasswordMigrationWizard = () => {
   );
 
   useEffect(() => {
-    if (status === 'pending' && !isReady) {
+    const isWelcomeVisible =
+      (status === 'pending' || status === 'activating') &&
+      !hasAppPassword &&
+      !isReady;
+    if (isWelcomeVisible) {
       setTemporaryThemeChoice('dark');
     } else {
       clearTemporaryTheme();
@@ -687,7 +701,7 @@ const PasswordMigrationWizard = () => {
     return () => {
       clearTemporaryTheme();
     };
-  }, [status, isReady]);
+  }, [status, isReady, hasAppPassword]);
 
   if (status === 'not-required' || status === 'completed') {
     return null;
@@ -696,78 +710,89 @@ const PasswordMigrationWizard = () => {
   return (
     <View style={styles.overlay} testID="migrate-v1-password-wizard">
       <OnboardingLayout>
-        {status === 'pending' && !isReady && (
-          <Column
-            style={{
-              flex: 1,
-              padding: spacing.L,
-            }}>
-            <ImageBackground
-              source={assets.onboarding}
-              style={{ ...StyleSheet.absoluteFillObject }}
-              contentFit="cover"
-            />
+        {(status === 'pending' || status === 'activating') &&
+          !hasAppPassword &&
+          !isReady && (
             <Column
-              style={{ flex: 1 }}
-              justifyContent="center"
-              alignItems="flex-start"
-              gap={spacing.M}>
-              <Text.L
-                variant="tertiary"
-                testID="migrate-v1-not-started-title"
-                style={{ color: theme.brand.white, marginBottom: spacing.M }}>
-                {t('migrate-v1.password-migration.activate-wallet.welcome-to')}
-              </Text.L>
-              <Row alignItems="flex-end" gap={spacing.S}>
-                <Brand />
-                <Text.M
-                  weight="bold"
+              style={{
+                flex: 1,
+                padding: spacing.L,
+              }}>
+              <ImageBackground
+                source={assets.onboarding}
+                style={{ ...StyleSheet.absoluteFillObject }}
+                contentFit="cover"
+              />
+              <Column
+                style={{ flex: 1 }}
+                justifyContent="center"
+                alignItems="flex-start"
+                gap={spacing.M}>
+                <Text.L
+                  variant="tertiary"
                   testID="migrate-v1-not-started-title"
-                  align="center"
-                  style={{
-                    color: theme.brand.white,
-                    marginBottom: spacing.S,
-                  }}>
-                  {t('migrate-v1.password-migration.activate-wallet.v2')}
-                </Text.M>
-              </Row>
-              <Row>
-                <Trans
-                  i18nKey={
-                    'migrate-v1.password-migration.activate-wallet.ready-to-go-description'
-                  }
-                  components={{
-                    Text: <Text.L variant="tertiary" key="description" />,
-                    Upgraded: <Text.L weight="bold" key="bold" />,
-                    Faster: <Text.L weight="bold" key="bold" />,
-                    Smarter: <Text.L weight="bold" key="bold" />,
-                    MultiChain: <Text.L weight="bold" key="bold" />,
-                  }}
-                />
-              </Row>
+                  style={{ color: theme.brand.white, marginBottom: spacing.M }}>
+                  {t(
+                    'migrate-v1.password-migration.activate-wallet.welcome-to',
+                  )}
+                </Text.L>
+                <Row alignItems="flex-end" gap={spacing.S}>
+                  <Brand />
+                  <Text.M
+                    weight="bold"
+                    testID="migrate-v1-not-started-title"
+                    align="center"
+                    style={{
+                      color: theme.brand.white,
+                      marginBottom: spacing.S,
+                    }}>
+                    {t('migrate-v1.password-migration.activate-wallet.v2')}
+                  </Text.M>
+                </Row>
+                <Row>
+                  <Trans
+                    i18nKey={
+                      'migrate-v1.password-migration.activate-wallet.ready-to-go-description'
+                    }
+                    components={{
+                      Text: <Text.L variant="tertiary" key="description" />,
+                      Upgraded: <Text.L weight="bold" key="bold" />,
+                      Faster: <Text.L weight="bold" key="bold" />,
+                      Smarter: <Text.L weight="bold" key="bold" />,
+                      MultiChain: <Text.L weight="bold" key="bold" />,
+                    }}
+                  />
+                </Row>
+              </Column>
+              <Button.Primary
+                label={t(
+                  'migrate-v1.password-migration.activate-wallet.ready-to-go',
+                )}
+                onPress={() => {
+                  setIsReady(true);
+                }}
+                testID="migrate-v1-not-started-button"
+              />
             </Column>
-            <Button.Primary
-              label={t(
-                'migrate-v1.password-migration.activate-wallet.ready-to-go',
-              )}
-              onPress={() => {
-                setIsReady(true);
-              }}
-              testID="migrate-v1-not-started-button"
+          )}
+        {isReady &&
+          (status === 'pending' ||
+            (status === 'activating' && !hasAppPassword)) && (
+            <SetApplicationPasswordScreen
+              onPasswordSet={handlePasswordSet}
+              disabled={!isAppLockAwaitingSetup}
             />
-          </Column>
-        )}
-        {status === 'pending' && isReady && (
-          <SetApplicationPasswordScreen onPasswordSet={handlePasswordSet} />
-        )}
-        {status === 'activating' && pendingWallets.length > 0 && (
-          <ActivateWalletScreen
-            walletId={pendingWallets[0]}
-            currentIndex={currentIndex}
-            totalCount={initialWalletCount}
-            getAppPassword={getAppPassword}
-          />
-        )}
+          )}
+        {status === 'activating' &&
+          pendingWallets.length > 0 &&
+          hasAppPassword && (
+            <ActivateWalletScreen
+              walletId={pendingWallets[0]}
+              currentIndex={currentIndex}
+              totalCount={initialWalletCount}
+              getAppPassword={getAppPassword}
+            />
+          )}
       </OnboardingLayout>
     </View>
   );

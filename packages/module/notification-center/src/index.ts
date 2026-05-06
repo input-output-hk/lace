@@ -1,5 +1,3 @@
-import './augmentations';
-
 import { FeatureFlagKey, featureStoreContract } from '@lace-contract/feature';
 import {
   combineContracts,
@@ -12,8 +10,6 @@ import {
   stackPagesAddonContract,
   tabPagesAddonContract,
 } from '@lace-contract/views';
-
-import store from './store';
 
 import type {
   LaceModuleMap,
@@ -41,7 +37,6 @@ const multiPlatformModule = inferModuleContext({
   dependsOn: dependsOnContracts,
   implements: implementsContracts,
   moduleName: ModuleName('notification-center'),
-  store,
   feature: {
     metadata: {
       name: 'Notifications Center',

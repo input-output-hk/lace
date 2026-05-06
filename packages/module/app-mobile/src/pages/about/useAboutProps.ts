@@ -2,8 +2,9 @@ import { useConfig, useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import { TabRoutes as NavigationTabRoutes } from '@lace-lib/navigation';
 import { openUrl } from '@lace-lib/ui-toolkit';
-import { nativeApplicationVersion, nativeBuildVersion } from 'expo-application';
 import { useMemo, useCallback } from 'react';
+
+import { getVersion } from './getVersion';
 
 import type { ListOptionType } from '../common';
 import type { TabRoutes, TabScreenProps } from '@lace-lib/navigation';
@@ -21,9 +22,7 @@ export const useAboutProps = ({
   const { appConfig } = useConfig();
 
   const title = t('v2.pages.about.title');
-  const subtitle = `${String(t('v2.pages.about.subtitle'))} v${String(
-    nativeApplicationVersion ?? '0',
-  )}.${String(nativeBuildVersion ?? '0')}`;
+  const subtitle = `${String(t('v2.pages.about.subtitle'))} v${getVersion()}`;
 
   const aboutPageUICustomisations = useUICustomisation(
     'addons.loadAboutPageUICustomisations',
