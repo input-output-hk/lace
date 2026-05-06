@@ -78,6 +78,7 @@ describe('app-lock side effects', () => {
           stateObservables: {
             wallets: {
               selectTotal$: cold('ab', { a: 1, b: 0 }),
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
             },
           },
           dependencies: { actions },
@@ -100,6 +101,7 @@ describe('app-lock side effects', () => {
           stateObservables: {
             wallets: {
               selectTotal$: cold('ab', { a: 2, b: 1 }),
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
             },
           },
           dependencies: { actions },
@@ -117,6 +119,25 @@ describe('app-lock side effects', () => {
           stateObservables: {
             wallets: {
               selectTotal$: cold('ab', { a: 0, b: 1 }),
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+            },
+          },
+          dependencies: { actions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('--');
+          },
+        }),
+      );
+    });
+
+    it('does not dispatch reset during wallet repo migration even when count drops to 0', () => {
+      testSideEffect(
+        resetOnLastWalletRemoved,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            wallets: {
+              selectTotal$: cold('ab', { a: 1, b: 0 }),
+              selectIsWalletRepoMigrating$: cold('a', { a: true }),
             },
           },
           dependencies: { actions },

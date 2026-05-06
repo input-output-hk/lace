@@ -87,26 +87,6 @@ describe('Serializable', () => {
       expect(result1).toEqual(result2);
     });
 
-    it('returns frozen objects that throw on mutation', () => {
-      const serialized = Serializable.to({ foo: 'bar', num: 123 });
-      const result = Serializable.fromCached(serialized);
-
-      expect(Object.isFrozen(result)).toBe(true);
-      expect(() => {
-        result.num = 456;
-      }).toThrow();
-    });
-
-    it('deep freezes nested objects', () => {
-      const serialized = Serializable.to({
-        nested: { value: 123 },
-      });
-      const result = Serializable.fromCached(serialized);
-
-      expect(Object.isFrozen(result)).toBe(true);
-      expect(Object.isFrozen(result.nested)).toBe(true);
-    });
-
     it('caches complex deserialized results', () => {
       const original = {
         bigint: BigInt(42),

@@ -2,6 +2,7 @@ import { WalletType } from '@lace-contract/wallet-repo';
 import {
   EMPTY,
   catchError,
+  concat,
   filter,
   from,
   mergeMap,
@@ -86,34 +87,62 @@ export const wizardMountedSideEffect: SideEffect = (
         status === 'pending' && pending.length === initialCount;
       return !isFreshFirstMount;
     }),
-    mergeMap(([_action, _status, _pending, _initial, currentWallets]) =>
-      from(preparePreloadedState()).pipe(
-        mergeMap(({ state }) => {
-          const walletsState = state.wallets as
-            | { entities: Record<string, InMemoryWallet>; ids: string[] }
-            | undefined;
-          const orderedIds = walletsState?.ids ?? [];
-          const freshWallets = orderedIds
-            .map(id => walletsState?.entities[id])
-            .filter((w): w is InMemoryWallet => !!w);
-          const freshInMemoryIds = freshWallets
-            .filter(w => w.type === WalletType.InMemory)
-            .map(w => w.walletId);
-          return of(
-            ...currentWallets.map(w =>
-              actions.wallets.removeWallet(
-                w.walletId,
-                w.accounts.map(a => a.accountId),
-              ),
-            ),
-            ...freshWallets.map(w => actions.wallets.addWallet(w)),
-            actions.migrateV1.passwordMigrationDetected(freshInMemoryIds),
-            actions.appLock.reset(),
-          );
-        }),
-        catchError(() => EMPTY),
-      ),
-    ),
+    mergeMap(([_action, _status, pending, initialCount, currentWallets]) => {
+      const hasAnyWalletBeenActivated = pending.length < initialCount;
+      const currentInMemoryIds = currentWallets
+        .filter(w => w.type === WalletType.InMemory)
+        .map(w => w.walletId);
+      if (!hasAnyWalletBeenActivated) {
+        return of(
+          actions.appLock.reset(),
+          actions.migrateV1.passwordMigrationDetected(currentInMemoryIds),
+        );
+      }
+      return concat(
+        of(actions.appLock.reset()),
+        from(preparePreloadedState()).pipe(
+          mergeMap(({ state }) => {
+            const walletsState = state.wallets as
+              | { entities: Record<string, InMemoryWallet>; ids: string[] }
+              | undefined;
+            const orderedIds = walletsState?.ids ?? [];
+            const freshWallets = orderedIds
+              .map(id => walletsState?.entities[id])
+              .filter((w): w is InMemoryWallet => !!w);
+            const freshInMemoryIds = freshWallets
+              .filter(w => w.type === WalletType.InMemory)
+              .map(w => w.walletId);
+            const currentWalletIds = new Set(
+              currentWallets.map(w => w.walletId),
+            );
+            const freshWalletIds = new Set(freshWallets.map(w => w.walletId));
+            return of(
+              ...currentWallets
+                .filter(w => !freshWalletIds.has(w.walletId))
+                .map(w =>
+                  actions.wallets.removeWallet(
+                    w.walletId,
+                    w.accounts.map(a => a.accountId),
+                  ),
+                ),
+              ...freshWallets
+                .filter(w => !currentWalletIds.has(w.walletId))
+                .map(w => actions.wallets.addWallet(w)),
+              ...freshWallets
+                .filter(w => currentWalletIds.has(w.walletId))
+                .map(w =>
+                  actions.wallets.updateWallet({
+                    id: w.walletId,
+                    changes: w,
+                  }),
+                ),
+              actions.migrateV1.passwordMigrationDetected(freshInMemoryIds),
+            );
+          }),
+          catchError(() => EMPTY),
+        ),
+      );
+    }),
   );
 
 export const makeHandleAuthenticationSetup =

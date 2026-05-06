@@ -12,7 +12,10 @@ export type OnMnemonicRequest = ReturnType<
   typeof initialiseRecoveryPhraseChannel
 >['onRequest'];
 
-export type RecoveryPhraseRequestErrorReason = 'cancelled' | 'failed';
+export type RecoveryPhraseRequestErrorReason =
+  | 'cancelled'
+  | 'failed'
+  | 'not-available';
 
 export class RecoveryPhraseRequestError extends Error {
   public __RecoveryPhraseRequestError = '__RecoveryPhraseRequestError';

@@ -79,15 +79,23 @@ export const App = ({ moduleInitProps, viewId }: AppProps) => {
               ? ThemeColorScheme.Dark
               : ThemeColorScheme.Light
           }>
-          <LoadModulesProvider loadModules={moduleInitProps.loadModules}>
-            <ActivityDetector>
-              <LaceRenderRoot
-                moduleInitProps={moduleInitProps}
-                dependencies={{ logger }}
-                view={view}
-              />
-            </ActivityDetector>
-          </LoadModulesProvider>
+          <SafeAreaProvider>
+            <ThemeProvider
+              defaultTheme={colorScheme}
+              featureFlags={typographyFeatureFlag}>
+              <ContentPortalProvider>
+                <LoadModulesProvider loadModules={moduleInitProps.loadModules}>
+                  <ActivityDetector>
+                    <LaceRenderRoot
+                      moduleInitProps={moduleInitProps}
+                      dependencies={{ logger }}
+                      view={view}
+                    />
+                  </ActivityDetector>
+                </LoadModulesProvider>
+              </ContentPortalProvider>
+            </ThemeProvider>
+          </SafeAreaProvider>
         </LaceUiThemeProvider>
       </ConfigProvider>
     );

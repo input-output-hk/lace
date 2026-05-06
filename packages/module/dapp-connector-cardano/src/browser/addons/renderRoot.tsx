@@ -1,8 +1,6 @@
 import { AuthPromptUI } from '@lace-contract/authentication-prompt';
-import { ThemeProvider } from '@lace-lib/ui-toolkit';
 import React from 'react';
-import { Appearance, StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
 import {
   CARDANO_DAPP_CONNECT_LOCATION,
@@ -55,35 +53,15 @@ const authPromptRootStyles = StyleSheet.create({
 });
 
 /**
- * NativeSafeAreaProvider.web only forwards `style` to its inner View — not the
- * pointerEvents prop — so the provider root defaulted to capturing all touches.
- * pointerEvents must be set via style so Sign Tx stays scrollable/tappable below.
+ * Auth prompt overlay container.
+ * Theme/SafeArea providers are supplied by `App.tsx`'s popup branch so they
+ * follow the user's theme preference instead of the OS preference.
  */
-const authPromptSafeAreaProviderStyle = StyleSheet.create({
-  fillPassThrough: {
-    flex: 1,
-    pointerEvents: 'box-none',
-  },
-});
-
-/**
- * Wrapper component providing ThemeProvider context for authentication prompt UI.
- * Required because popupWindow views only receive LaceUiThemeProvider, but auth
- * prompt components need ThemeProvider from @lace-lib/ui-toolkit.
- *
- * SafeAreaProvider is needed for components that use useSafeAreaInsets.
- * The container View with absoluteFillObject ensures the auth prompt overlay
- * covers the entire popup window.
- */
-const AuthPromptUIWithTheme = () => (
+const AuthPromptUIWithOverlay = () => (
   <View style={authPromptRootStyles.root}>
-    <SafeAreaProvider style={authPromptSafeAreaProviderStyle.fillPassThrough}>
-      <ThemeProvider defaultTheme={Appearance.getColorScheme() || 'dark'}>
-        <View style={authPromptContainerStyles.container}>
-          <AuthPromptUI />
-        </View>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <View style={authPromptContainerStyles.container}>
+      <AuthPromptUI />
+    </View>
   </View>
 );
 
@@ -97,34 +75,31 @@ const dappViewWrapperStyles = StyleSheet.create({
 });
 
 /**
- * Wrapper providing SafeAreaProvider, ThemeProvider and BaseTemplate for dApp
- * connector views (Connect, SignTx). Required for React Native components in the
- * browser extension popup.
+ * Layout wrapper for dApp connector views. Theme/SafeArea providers are
+ * supplied by `App.tsx`'s popup branch.
  */
-const DappViewWithTheme = ({ children }: { children: React.ReactNode }) => (
-  <SafeAreaProvider>
-    <ThemeProvider defaultTheme={Appearance.getColorScheme() || 'dark'}>
-      <View style={dappViewWrapperStyles.container}>{children}</View>
-    </ThemeProvider>
-  </SafeAreaProvider>
-);
+const CardanoDappConnectView = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => <View style={dappViewWrapperStyles.container}>{children}</View>;
 
 const CardanoDappConnectWithTheme = () => (
-  <DappViewWithTheme>
+  <CardanoDappConnectView>
     <CardanoDappConnectPopup />
-  </DappViewWithTheme>
+  </CardanoDappConnectView>
 );
 
 const CardanoDappSignTxWithTheme = () => (
-  <DappViewWithTheme>
+  <CardanoDappConnectView>
     <CardanoDappSignTxPopup />
-  </DappViewWithTheme>
+  </CardanoDappConnectView>
 );
 
 const CardanoDappSignDataWithTheme = () => (
-  <DappViewWithTheme>
+  <CardanoDappConnectView>
     <CardanoDappSignDataPopup />
-  </DappViewWithTheme>
+  </CardanoDappConnectView>
 );
 
 /**
@@ -162,7 +137,7 @@ const renderMap: ContextualLaceInit<Render[], AvailableAddons> = () => {
     {
       locationPattern: authPromptRoutesPattern,
       key: 'cardano-dapp-auth-prompt',
-      Component: AuthPromptUIWithTheme,
+      Component: AuthPromptUIWithOverlay,
     },
   ];
 };

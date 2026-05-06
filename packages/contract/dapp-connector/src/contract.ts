@@ -32,11 +32,13 @@ import type { Logger } from 'ts-log';
  * - provides LaceModule.dappConnectorApi that use used to inject api into the dapp
  *   and set up isolated content script proxy for communication with service worker
  * - is responsible for implementing and exposing it's API(s)
+ * - loaded in dapp-connector side effects for authenticator
  */
 export const dappConnectorApiAddonContract = inferContractContext({
   name: ContractName('dapp-connector-api-addon'),
   instance: 'zero-or-more',
   contractType: 'addon',
+  preloadInServiceWorker: true,
   provides: {
     addons: ['dappConnectorApi'],
   },

@@ -162,9 +162,12 @@ export const AccountCenter = ({
 
   const renderWallet = useCallback(
     ({ item: wallet }: { item: AnyWallet }) => {
+      // Nami-imported wallets have no mnemonic to verify, so they never
+      // surface the unconfirmed-passphrase badge.
       const isPassphraseUnconfirmed =
         wallet.type === WalletType.InMemory &&
-        (wallet as InMemoryWallet).isPassphraseConfirmed === false;
+        (wallet as InMemoryWallet).isPassphraseConfirmed === false &&
+        Boolean((wallet as InMemoryWallet).encryptedRecoveryPhrase);
       return (
         <View>
           <WalletHierarchy

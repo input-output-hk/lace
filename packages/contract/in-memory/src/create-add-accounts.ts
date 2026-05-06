@@ -1,4 +1,5 @@
 import { emip3decrypt } from '@cardano-sdk/key-management';
+import { CustomError } from 'ts-custom-error';
 
 import type {
   AddInMemoryAccountsProps,
@@ -10,6 +11,18 @@ import type {
 } from './types';
 import type { InMemoryWallet } from '@lace-contract/wallet-repo';
 import type { BlockchainName } from '@lace-lib/util-store';
+
+/**
+ * Thrown when adding an account on a new blockchain requires deriving a
+ * root key from the mnemonic, but the wallet has none (Nami-imported).
+ */
+export class RecoveryPhraseUnavailableError extends CustomError {
+  public constructor() {
+    super(
+      'Cannot derive a new blockchain root key: this wallet has no mnemonic stored',
+    );
+  }
+}
 
 /**
  * Creates a type-safe function to get blockchain-specific data from a wallet.
@@ -83,6 +96,9 @@ export const createAddAccounts = <
 
     // New blockchain - decrypt recovery phrase and create blockchain data
     if (!blockchainSpecificData) {
+      if (!wallet.encryptedRecoveryPhrase) {
+        throw new RecoveryPhraseUnavailableError();
+      }
       const recoveryPhraseBytes = await emip3decrypt(
         Buffer.from(wallet.encryptedRecoveryPhrase, 'hex'),
         password,

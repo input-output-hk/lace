@@ -70,11 +70,13 @@ export const WalletSettings = ({
     { walletType: wallet?.type || WalletType.InMemory },
   );
 
-  // Check if recovery phrase verification is needed for InMemory wallets
+  // Verification requires decrypting the stored mnemonic, which Nami-imported
+  // wallets do not have.
   const isPassphraseVerificationNeeded = useMemo(() => {
     return (
       wallet?.type === WalletType.InMemory &&
-      (wallet as InMemoryWallet).isPassphraseConfirmed === false
+      (wallet as InMemoryWallet).isPassphraseConfirmed === false &&
+      Boolean((wallet as InMemoryWallet).encryptedRecoveryPhrase)
     );
   }, [wallet?.type, wallet]);
   const handleGoBack = useCallback(() => {

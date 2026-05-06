@@ -78,6 +78,36 @@ describe('createRecoveryPhraseSideEffect', () => {
     );
   });
 
+  it('throws not-available when wallet has no encryptedRecoveryPhrase (Nami-imported)', () => {
+    const namiWallet = {
+      walletId,
+      type: WalletType.InMemory,
+      // intentionally no encryptedRecoveryPhrase
+    } as InMemoryWallet;
+
+    testSideEffect(
+      createRecoveryPhraseSideEffect(onMnemonicRequest),
+      ({ cold, expectObservable }) => ({
+        stateObservables: {
+          wallets: {
+            selectAll$: cold('a', { a: [namiWallet] }),
+          },
+        },
+        dependencies: {
+          authenticate,
+          accessAuthSecret,
+        },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe(
+            '#',
+            undefined,
+            new RecoveryPhraseRequestError('not-available'),
+          );
+        },
+      }),
+    );
+  });
+
   it('ignores wallets of non-InMemory type when looking up the requested walletId', () => {
     testSideEffect(
       createRecoveryPhraseSideEffect(onMnemonicRequest),
@@ -210,7 +240,7 @@ describe('createRecoveryPhraseSideEffect', () => {
           flush();
 
           expect(emip3decryptSpy).toHaveBeenCalledWith(
-            ByteArray.fromHex(inMemoryWallet.encryptedRecoveryPhrase),
+            ByteArray.fromHex(inMemoryWallet.encryptedRecoveryPhrase!),
             AuthSecret.fromUTF8('pass'),
           );
         },

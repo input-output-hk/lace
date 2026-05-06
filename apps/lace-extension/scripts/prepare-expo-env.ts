@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import dotenv from 'dotenv';
 import dotenvDefaults from 'dotenv-defaults';
 
 function prepareExpoEnv(webpackDir: string, outputDir: string): void {
   const defaultsPath = path.join(webpackDir, '.env.defaults');
   const overridesPath = path.join(webpackDir, '.env');
+  const examplePath = path.join(webpackDir, '.env.example');
   const outputPath = path.join(outputDir, '.env');
 
   console.log(` Webpack directory: ${webpackDir}`);
@@ -58,10 +60,26 @@ function prepareExpoEnv(webpackDir: string, outputDir: string): void {
 
   const parsed = mergedEnv.parsed || {};
 
-  // Shell environment variables take precedence over file values,
-  // mirroring dotenv-webpack's systemvars behavior.
-  if (process.env.NODE_ENV) {
-    parsed.NODE_ENV = process.env.NODE_ENV;
+  // Shell environment variables take precedence over file values, but only for
+  // keys declared in .env.example or .env.defaults — prevents arbitrary system
+  // vars (PATH, HOME, …) from leaking into the output.
+  const knownKeys = new Set([
+    ...Object.keys(
+      fs.existsSync(examplePath)
+        ? dotenv.parse(fs.readFileSync(examplePath))
+        : {},
+    ),
+    ...Object.keys(
+      fs.existsSync(defaultsPath)
+        ? dotenv.parse(fs.readFileSync(defaultsPath))
+        : {},
+    ),
+  ]);
+
+  for (const key of knownKeys) {
+    if (process.env[key] !== undefined) {
+      parsed[key] = process.env[key] as string;
+    }
   }
 
   // Add all environment variables with EXPO_PUBLIC_ prefix

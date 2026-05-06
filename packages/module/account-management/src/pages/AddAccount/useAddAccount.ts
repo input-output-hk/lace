@@ -3,6 +3,7 @@ import { useTranslation } from '@lace-contract/i18n';
 import {
   isHardwareWallet as checkIsHardwareWallet,
   WalletId,
+  WalletType,
 } from '@lace-contract/wallet-repo';
 import { NavigationControls } from '@lace-lib/navigation';
 import { isIOS, type ButtonConfig } from '@lace-lib/ui-toolkit';
@@ -26,6 +27,7 @@ import {
   TRANSLATION_KEYS,
 } from './addAccountHelpers';
 
+import type { InMemoryWallet } from '@lace-contract/wallet-repo';
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 import type { BlockchainName } from '@lace-lib/util-store';
 
@@ -61,6 +63,8 @@ export const useAddAccount = (
 
   const [accountName, setAccountName] = useState<string>('');
   const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [isNoRecoveryPhraseModalVisible, setIsNoRecoveryPhraseModalVisible] =
+    useState(false);
 
   const isLoading = useLaceSelector('accountManagement.getIsLoading');
 
@@ -182,12 +186,45 @@ export const useAddAccount = (
     NavigationControls.sheets.close();
   }, [clearAccountStatus, clearActiveSheetPage, setLoading]);
 
+  // Adding an account on a blockchain the wallet has no data for requires
+  // deriving a fresh chain root key from the mnemonic.
+  const isMnemonicRequiredForSelectedBlockchain = useMemo(() => {
+    if (!wallet || wallet.type !== WalletType.InMemory) return false;
+    const inMemory = wallet as InMemoryWallet;
+    if (inMemory.encryptedRecoveryPhrase) return false;
+    const blockchainSpecific = inMemory.blockchainSpecific as Record<
+      BlockchainName,
+      unknown
+    >;
+    return !blockchainSpecific[selectedBlockchain];
+  }, [wallet, selectedBlockchain]);
+
+  const closeNoRecoveryPhraseModal = useCallback(() => {
+    setIsNoRecoveryPhraseModalVisible(false);
+  }, []);
+
+  const noRecoveryPhraseFallbackBlockchain = useMemo<
+    BlockchainName | undefined
+  >(() => {
+    if (!wallet || wallet.type !== WalletType.InMemory) return undefined;
+    const blockchainSpecific = (wallet as InMemoryWallet)
+      .blockchainSpecific as Record<BlockchainName, unknown>;
+    return Object.keys(blockchainSpecific).find(
+      key => blockchainSpecific[key as BlockchainName],
+    ) as BlockchainName | undefined;
+  }, [wallet]);
+
   const handleAddAccount = useCallback(() => {
     if (
       !wallet ||
       !blockchainOptions.includes(selectedBlockchain) ||
       !networkId
     ) {
+      return;
+    }
+
+    if (isMnemonicRequiredForSelectedBlockchain) {
+      setIsNoRecoveryPhraseModalVisible(true);
       return;
     }
 
@@ -216,6 +253,7 @@ export const useAddAccount = (
     setLoading,
     networkId,
     isHardwareWallet,
+    isMnemonicRequiredForSelectedBlockchain,
   ]);
 
   const handleBlockchainChange = useCallback((value: string) => {
@@ -301,5 +339,8 @@ export const useAddAccount = (
     accountIndexDropdownItems,
     hasAvailableIndices,
     allIndicesUsedMessage,
+    isNoRecoveryPhraseModalVisible,
+    closeNoRecoveryPhraseModal,
+    noRecoveryPhraseFallbackBlockchain,
   };
 };
