@@ -1,22 +1,36 @@
 import type { ReactNode } from 'react';
 
 import { connectActivityChannel } from '@lace-contract/app-lock';
+import { createContextualUseLoadModules } from '@lace-lib/util-render';
 import throttle from 'lodash/fp/throttle';
 import React, { useMemo } from 'react';
 import { View } from 'react-native';
+
+import type { AvailableAddons } from '.';
+
+const useLoadModules = createContextualUseLoadModules<AvailableAddons>();
 
 export const ActivityDetector = ({
   children,
 }: {
   children: ReactNode;
 }): ReactNode => {
-  const { reportActivity } = useMemo(() => connectActivityChannel(), []);
+  const [activityChannel] = useLoadModules('addons.loadActivityChannel') || [];
+
   const handleTouchStart = useMemo(
     () =>
       throttle(1000, () => {
-        void reportActivity();
+        if (!activityChannel) return;
+        try {
+          const { reportActivity } = connectActivityChannel({
+            consumeChannel: activityChannel.consumeActivityChannel,
+          });
+          void reportActivity();
+        } catch {
+          return;
+        }
       }),
-    [reportActivity],
+    [activityChannel],
   );
   return (
     <View onTouchStart={handleTouchStart} style={{ flex: 1 }}>

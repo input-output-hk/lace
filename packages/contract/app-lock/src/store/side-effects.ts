@@ -1,6 +1,6 @@
 import { firstStateOfStatus } from '@lace-lib/util-store';
-import { Milliseconds } from '@lace-sdk/util';
 import {
+  NEVER,
   combineLatest,
   debounce,
   filter,
@@ -15,30 +15,14 @@ import {
 
 import {
   DEFAULT_INACTIVITY_TIMEOUT_MS,
-  FEATURE_FLAG_APP_LOCK_INACTIVITY_TIMEOUT,
+  INDEFINITE_INACTIVITY_TIMEOUT_MS,
 } from '../const';
 import { initialiseActivityChannel } from '../report-activity-channel';
 
 import type { SideEffect } from '../contract';
-import type { FeatureFlag } from '@lace-contract/feature';
 import type { LaceInit } from '@lace-contract/module';
+import type { Milliseconds } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
-
-export type AppLockInactivityTimeoutPayload = {
-  timeoutMs?: number;
-};
-
-const getInactivityTimeout = (featureFlags: FeatureFlag[]) => {
-  const flag = featureFlags.find(
-    f => f.key === FEATURE_FLAG_APP_LOCK_INACTIVITY_TIMEOUT,
-  ) as FeatureFlag<AppLockInactivityTimeoutPayload> | undefined;
-
-  const timeoutMs = flag?.payload?.timeoutMs;
-  if (typeof timeoutMs === 'number' && timeoutMs > 0) {
-    return Milliseconds(timeoutMs);
-  }
-  return DEFAULT_INACTIVITY_TIMEOUT_MS;
-};
 
 export const preparing: SideEffect = (
   _,
@@ -106,22 +90,26 @@ export const startUnlocking: SideEffect = (
   );
 
 export const makeLockAfterInactivityTimeout =
-  (activity$: Observable<void>): SideEffect =>
   (
-    _,
-    { appLock: { isUnlocked$ }, features: { selectLoadedFeatures$ } },
-    { actions },
-  ) =>
+    activity$: Observable<void>,
+    defaultInactivityTimeoutMs: ReturnType<
+      typeof Milliseconds
+    > = DEFAULT_INACTIVITY_TIMEOUT_MS,
+  ): SideEffect =>
+  (_, { appLock: { isUnlocked$, selectInactivityTimeout$ } }, { actions }) =>
     isUnlocked$.pipe(
       switchMap(isUnlocked =>
         combineLatest([
           merge(activity$, of(void 0)),
-          selectLoadedFeatures$,
+          selectInactivityTimeout$,
         ]).pipe(
           filter(() => isUnlocked),
-          debounce(([, { featureFlags }]) =>
-            timer(getInactivityTimeout(featureFlags)),
-          ),
+          debounce(([, storedTimeoutMs]) => {
+            const timeoutMs = storedTimeoutMs ?? defaultInactivityTimeoutMs;
+            return timeoutMs === INDEFINITE_INACTIVITY_TIMEOUT_MS
+              ? NEVER
+              : timer(timeoutMs);
+          }),
           map(() => actions.appLock.locked()),
         ),
       ),
@@ -130,17 +118,18 @@ export const makeLockAfterInactivityTimeout =
 export const initializeAppLockSideEffects: LaceInit<SideEffect[]> = async ({
   loadModules,
 }) => {
-  const [activityChannelExtension] = await loadModules(
-    'addons.loadActivityChannelExtension',
-  );
+  const [activityChannel] = await loadModules('addons.loadActivityChannel');
   const { activity$ } = initialiseActivityChannel({
-    exposeChannel: activityChannelExtension?.exposeActivityChannel,
+    exposeChannel: activityChannel?.exposeActivityChannel,
   });
 
   return [
     preparing,
     resetOnLastWalletRemoved,
     startUnlocking,
-    makeLockAfterInactivityTimeout(activity$),
+    makeLockAfterInactivityTimeout(
+      activity$,
+      activityChannel?.defaultInactivityTimeoutMs,
+    ),
   ];
 };

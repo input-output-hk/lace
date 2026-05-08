@@ -59,7 +59,7 @@ export const disconnectView: SideEffect = (
 export const openView: SideEffect = (
   { views: { openView$ } },
   { views: { selectOpenViews$ } },
-  { logger, openPopupWindow, highlightTab },
+  { logger, openPopupWindow, openTabView, highlightTab },
 ) =>
   openView$.pipe(
     withLatestFrom(selectOpenViews$),
@@ -72,6 +72,15 @@ export const openView: SideEffect = (
           return highlightTab(Number(existing.id));
         }
         return openPopupWindow(payload.location);
+      }
+      if (payload.type === 'tab') {
+        const existing = openViews.find(
+          v => v.type === 'tab' && v.location === payload.location,
+        );
+        if (existing) {
+          return highlightTab(Number(existing.id));
+        }
+        return openTabView(payload.location);
       }
       logger.error(`Opening view of type "${payload.type}" is not supported`);
       return EMPTY;

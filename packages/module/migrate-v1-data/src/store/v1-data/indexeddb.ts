@@ -25,17 +25,31 @@ const idbRequestToPromise = async <T>(request: IDBRequest<T>) =>
 export const getIndexedbData = async () => {
   const oneWalletDb = await idbRequestToPromise(indexedDB.open('OneWalletDB'));
 
-  const idbTransaction = oneWalletDb.transaction(['addressBook', 'nftFolders']);
-  const addressBookObjectStore = idbTransaction.objectStore('addressBook');
-  const nftFoldersObjectStore = idbTransaction.objectStore('nftFolders');
+  const readStore = async <T>(
+    storeName: 'addressBook' | 'nftFolders',
+  ): Promise<T[]> => {
+    try {
+      const tx = oneWalletDb.transaction([storeName]);
+      const result = await idbRequestToPromise(
+        tx.objectStore(storeName).getAll() as IDBRequest<T[]>,
+      );
+      tx.abort();
+      return result;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `migrate-v1-data: failed to read '${storeName}' from OneWalletDB`,
+        error,
+      );
+      if ((error as { name?: string }).name === 'NotFoundError') return [];
+      throw error;
+    }
+  };
+
   const [v1AddressBookEntries, v1NftFolderEntries] = await Promise.all([
-    idbRequestToPromise(
-      addressBookObjectStore.getAll() as IDBRequest<V1AddressBookSchema[]>,
-    ),
-    idbRequestToPromise(
-      nftFoldersObjectStore.getAll() as IDBRequest<V1NftFoldersSchema[]>,
-    ),
+    readStore<V1AddressBookSchema>('addressBook'),
+    readStore<V1NftFoldersSchema>('nftFolders'),
   ]);
-  idbTransaction.abort();
+
   return { v1AddressBookEntries, v1NftFolderEntries };
 };

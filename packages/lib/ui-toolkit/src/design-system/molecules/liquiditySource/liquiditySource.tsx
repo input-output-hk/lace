@@ -56,10 +56,16 @@ export const LiquiditySourceToggle = ({
   value,
   onValueChange,
   disabled,
+  testID,
   ...baseProps
 }: LiquiditySourceToggleProps) => (
-  <LiquiditySourceRow {...baseProps}>
-    <Toggle value={value} onValueChange={onValueChange} disabled={disabled} />
+  <LiquiditySourceRow {...baseProps} testID={testID}>
+    <Toggle
+      value={value}
+      onValueChange={onValueChange}
+      disabled={disabled}
+      testID={testID ? `${testID}-toggle` : undefined}
+    />
   </LiquiditySourceRow>
 );
 

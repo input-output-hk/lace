@@ -1,3 +1,4 @@
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { Result } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
@@ -53,6 +54,11 @@ export type SwapRouteLeg = {
   percentage: number;
 };
 
+export type SwapDeposit = {
+  displayAmount: string;
+  displayCurrency: string;
+};
+
 export type SwapQuote = {
   routeId: string;
   providerId: string;
@@ -64,12 +70,13 @@ export type SwapQuote = {
   priceDisplay: string;
   fees: SwapFee[];
   totalFeeDisplay: string;
+  deposit?: SwapDeposit;
   route: SwapRouteLeg[];
   quoteExpiresAt: number;
 };
 
 export type SwapFee = {
-  label: string;
+  label: TranslationKey;
   amount: string;
   tokenId: string;
   displayAmount: string;

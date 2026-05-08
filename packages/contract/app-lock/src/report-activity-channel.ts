@@ -1,5 +1,7 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
+import type { Milliseconds } from '@lace-sdk/util';
+
 export type ReportActivityChannel = {
   reportActivity: () => Promise<void>;
 };
@@ -7,9 +9,10 @@ export type ReportActivityChannel = {
 export type ExposeActivityChannel = (channel: ReportActivityChannel) => void;
 export type ConsumeActivityChannel = () => ReportActivityChannel;
 
-export type ActivityChannelExtension = {
+export type ActivityChannel = {
   exposeActivityChannel: ExposeActivityChannel;
   consumeActivityChannel: ConsumeActivityChannel;
+  defaultInactivityTimeoutMs?: Milliseconds;
 };
 
 const defaultExposingChannel$ =

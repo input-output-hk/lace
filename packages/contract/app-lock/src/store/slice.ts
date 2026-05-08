@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+import { DEFAULT_INACTIVITY_TIMEOUT_MS } from '../const';
+
 import { lockStateMachine } from './state-machine';
 
 import type { LockState, LockStateMachineEvent } from './state-machine';
 export type { LockState } from './state-machine';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes, Milliseconds } from '@lace-sdk/util';
 import type {
   PayloadAction,
   StateFromReducersMapObject,
@@ -12,13 +14,17 @@ import type {
 } from '@reduxjs/toolkit';
 
 export type AppLockSliceState = {
+  defaultInactivityTimeoutMs: Milliseconds;
   lockState: LockState;
   encryptedSentinel: HexBytes | null;
+  inactivityTimeout: Milliseconds | null;
 };
 
-const initialState: AppLockSliceState = {
+export const initialState: AppLockSliceState = {
   lockState: lockStateMachine.initialState,
   encryptedSentinel: null,
+  inactivityTimeout: null,
+  defaultInactivityTimeoutMs: DEFAULT_INACTIVITY_TIMEOUT_MS,
 };
 
 const makeLockStateMachineTransitionAction =
@@ -57,12 +63,18 @@ const slice = createSlice({
     setEncryptedSentinel: (state, { payload }: PayloadAction<HexBytes>) => {
       state.encryptedSentinel = payload;
     },
+    setInactivityTimeout: (state, { payload }: PayloadAction<Milliseconds>) => {
+      state.inactivityTimeout = payload;
+    },
   },
   selectors: {
     selectLockState: ({ lockState }) => lockState,
     isAwaitingSetup: ({ lockState }) => lockState.status === 'AwaitingSetup',
     isUnlocked: ({ lockState }) => lockState.status === 'Unlocked',
     selectEncryptedSentinel: ({ encryptedSentinel }) => encryptedSentinel,
+    selectInactivityTimeout: ({ inactivityTimeout }) => inactivityTimeout,
+    selectDefaultInactivityTimeoutMs: ({ defaultInactivityTimeoutMs }) =>
+      defaultInactivityTimeoutMs,
   },
 });
 

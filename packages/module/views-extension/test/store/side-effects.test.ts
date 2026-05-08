@@ -14,13 +14,18 @@ import type {
   ConnectedView,
   ObservableExtensionViewApi,
 } from '../../src/store';
-import type { View } from '@lace-contract/views';
+import type { OpenViewPayload, View } from '@lace-contract/views';
 import type { Observable } from 'rxjs';
 
 const sidePanelView: View = {
   id: ViewId(123),
   type: 'sidePanel',
   location: '/onboarding',
+};
+
+const tabOpenViewPayload: OpenViewPayload = {
+  type: 'tab',
+  location: '/some-tab-location',
 };
 
 describe('views-extension/store/side-effects', () => {
@@ -193,6 +198,87 @@ describe('views-extension/store/side-effects', () => {
 
             expect(highlightTabMock).toHaveBeenCalledWith(456);
             expect(openPopupWindowMock).not.toHaveBeenCalled();
+          },
+        };
+      });
+    });
+
+    it("should call openTabView with the correct location when an openView action of type 'tab' is received and no tab exists for that location", () => {
+      const openTabViewMock = vi.fn(() => EMPTY);
+      const openPopupWindowMock = vi.fn(() => EMPTY);
+
+      testSideEffect(openView, ({ flush, hot, expectObservable }) => {
+        const dependencies = {
+          openTabView: openTabViewMock,
+          openPopupWindow: openPopupWindowMock,
+          actions,
+        };
+
+        return {
+          actionObservables: {
+            views: {
+              openView$: hot('-a', {
+                a: actions.views.openView(tabOpenViewPayload),
+              }),
+            },
+          },
+          stateObservables: {
+            views: {
+              selectOpenViews$: hot('a', { a: [] as View[] }),
+            },
+          },
+          dependencies,
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+
+            flush();
+
+            expect(openTabViewMock).toHaveBeenCalledWith(
+              tabOpenViewPayload.location,
+            );
+            expect(openPopupWindowMock).not.toHaveBeenCalled();
+          },
+        };
+      });
+    });
+
+    it("should call highlightTab when an existing tab for the location is already open and an openView action of type 'tab' is received", () => {
+      const highlightTabMock = vi.fn(() => EMPTY);
+      const openTabViewMock = vi.fn(() => EMPTY);
+      const existingTabView: View = {
+        id: ViewId(789),
+        type: tabOpenViewPayload.type,
+        location: tabOpenViewPayload.location,
+      };
+
+      testSideEffect(openView, ({ flush, hot, expectObservable }) => {
+        const dependencies = {
+          highlightTab: highlightTabMock,
+          openTabView: openTabViewMock,
+          actions,
+        };
+
+        return {
+          actionObservables: {
+            views: {
+              openView$: hot('-a', {
+                a: actions.views.openView(tabOpenViewPayload),
+              }),
+            },
+          },
+          stateObservables: {
+            views: {
+              selectOpenViews$: hot('a', { a: [existingTabView] }),
+            },
+          },
+          dependencies,
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+
+            flush();
+
+            expect(highlightTabMock).toHaveBeenCalledWith(789);
+            expect(openTabViewMock).not.toHaveBeenCalled();
           },
         };
       });

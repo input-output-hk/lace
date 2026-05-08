@@ -29,7 +29,7 @@ const QUOTE_EXPIRY_MS = 15_000;
 const lovelaceToAda = (lovelace: number): string =>
   (lovelace / 10 ** LOVELACE_DECIMALS).toFixed(2);
 
-const makeLovelaceFee = (label: string, amount: number): SwapFee => ({
+const makeLovelaceFee = (label: SwapFee['label'], amount: number): SwapFee => ({
   label,
   amount: String(amount),
   tokenId: 'lovelace',
@@ -69,16 +69,19 @@ export const fromEstimateResponse = (
   }));
 
   const fees: SwapFee[] = [
-    makeLovelaceFee('Network fee', response.totalFee),
-    makeLovelaceFee('Service fee', response.steelswapFee),
+    makeLovelaceFee('v2.swap.review.network-fee', response.totalFee),
+    makeLovelaceFee('v2.swap.review.service-fee', response.steelswapFee),
   ];
 
-  if (response.totalDeposit > 0) {
-    fees.push(makeLovelaceFee('Deposit', response.totalDeposit));
-  }
+  const deposit =
+    response.totalDeposit > 0
+      ? {
+          displayAmount: lovelaceToAda(response.totalDeposit),
+          displayCurrency: 'ADA',
+        }
+      : undefined;
 
-  const totalFeeLovelace =
-    response.totalFee + response.steelswapFee + response.totalDeposit;
+  const totalFeeLovelace = response.totalFee + response.steelswapFee;
 
   return {
     routeId: `steelswap-${request.sellTokenId}-${
@@ -93,6 +96,7 @@ export const fromEstimateResponse = (
     priceDisplay: `${response.price.toFixed(6)}`,
     fees,
     totalFeeDisplay: `${lovelaceToAda(totalFeeLovelace)} ADA`,
+    deposit,
     route,
     quoteExpiresAt: Date.now() + QUOTE_EXPIRY_MS,
   };

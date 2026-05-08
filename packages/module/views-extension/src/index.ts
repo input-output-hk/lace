@@ -1,5 +1,6 @@
 import './augmentations';
 
+import { blockchainSpecificAppSettingsPageCustomizationsAddonContract } from '@lace-contract/app';
 import { featureStoreContract } from '@lace-contract/feature';
 import {
   combineContracts,
@@ -8,6 +9,7 @@ import {
 } from '@lace-contract/module';
 import {
   initializeExtensionViewAddonContract,
+  sheetPagesAddonContract,
   viewsStoreContract,
 } from '@lace-contract/views';
 
@@ -24,6 +26,8 @@ import type {
 const implementsContracts = combineContracts([
   viewsStoreContract,
   initializeExtensionViewAddonContract,
+  sheetPagesAddonContract,
+  blockchainSpecificAppSettingsPageCustomizationsAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([featureStoreContract] as const);
 
@@ -35,6 +39,9 @@ const extensionModule = inferModuleContext({
   addons: {
     loadInitializeExtensionView: async () =>
       import('./initialize-extension-view'),
+    loadSheetPages: async () => import('./addons/sheetPages'),
+    loadSettingsPageUICustomisations: async () =>
+      import('./addons/settingsPageUI'),
   },
 });
 

@@ -50,7 +50,7 @@ const mockQuote: SwapQuote = {
   priceDisplay: '0.000050',
   fees: [
     {
-      label: 'Network fee',
+      label: 'v2.swap.review.network-fee',
       amount: '2000000',
       tokenId: 'lovelace',
       displayAmount: '2.00',

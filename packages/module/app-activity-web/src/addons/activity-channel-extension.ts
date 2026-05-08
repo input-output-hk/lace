@@ -1,4 +1,9 @@
 import {
+  DEFAULT_INACTIVITY_TIMEOUT_MS,
+  type ActivityChannel,
+  type ReportActivityChannel,
+} from '@lace-contract/app-lock';
+import {
   ChannelName,
   consumeRemoteApi,
   exposeApi,
@@ -8,10 +13,6 @@ import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 import type { AvailableAddons } from '..';
-import type {
-  ActivityChannelExtension,
-  ReportActivityChannel,
-} from '@lace-contract/app-lock';
 import type { ContextualLaceInit } from '@lace-contract/module';
 import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
 
@@ -23,9 +24,10 @@ const activityChannelConfig = {
 };
 
 const activityChannelExtension: ContextualLaceInit<
-  ActivityChannelExtension,
+  ActivityChannel,
   AvailableAddons
 > = (_, { logger }) => ({
+  defaultInactivityTimeoutMs: DEFAULT_INACTIVITY_TIMEOUT_MS,
   exposeActivityChannel: channel => {
     exposeApi<ReportActivityChannel>(
       {

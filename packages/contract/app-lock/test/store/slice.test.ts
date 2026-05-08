@@ -5,35 +5,35 @@ import {
   appLockActions as actions,
   appLockSelectors as selectors,
 } from '../../src/index';
-import { appLockReducers } from '../../src/store/slice';
+import { appLockReducers, initialState } from '../../src/store/slice';
 
 import type { AppLockSliceState } from '../../src/store/slice';
 
 const reducer = appLockReducers.appLock;
 
 const preparingState: AppLockSliceState = {
+  ...initialState,
   lockState: { status: 'Preparing' },
-  encryptedSentinel: null,
 };
 
 const awaitingSetupState: AppLockSliceState = {
+  ...initialState,
   lockState: { status: 'AwaitingSetup' },
-  encryptedSentinel: null,
 };
 
 const lockedState: AppLockSliceState = {
+  ...initialState,
   lockState: { status: 'Locked' },
-  encryptedSentinel: null,
 };
 
 const unlockingState: AppLockSliceState = {
+  ...initialState,
   lockState: { status: 'Unlocking' },
-  encryptedSentinel: null,
 };
 
 const unlockedState: AppLockSliceState = {
+  ...initialState,
   lockState: { status: 'Unlocked' },
-  encryptedSentinel: null,
 };
 
 describe('appLock slice', () => {

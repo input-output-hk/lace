@@ -1,4 +1,4 @@
-import type { ActivityChannelExtension } from './report-activity-channel';
+import type { ActivityChannel } from './report-activity-channel';
 import type { appLockReducers } from './store';
 import type { SetupAppLock } from './types';
 import type { DynamicallyLoadedInit } from '@lace-contract/module';
@@ -9,6 +9,6 @@ declare module '@lace-contract/module' {
 
   interface LaceAddons {
     readonly loadSetupAppLock: DynamicallyLoadedInit<SetupAppLock>;
-    readonly loadActivityChannelExtension: DynamicallyLoadedInit<ActivityChannelExtension>;
+    readonly loadActivityChannel: DynamicallyLoadedInit<ActivityChannel>;
   }
 }

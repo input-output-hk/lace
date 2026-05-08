@@ -33,7 +33,7 @@ export const appLockActivityChannelAddon = inferContractContext({
   instance: 'zero-or-more',
   preloadInServiceWorker: true,
   provides: {
-    addons: ['loadActivityChannelExtension'],
+    addons: ['loadActivityChannel'],
   },
 });
 

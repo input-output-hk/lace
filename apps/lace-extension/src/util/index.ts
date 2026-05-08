@@ -6,3 +6,4 @@ export * from './config';
 export * from './connect-store';
 export * from './load-modules';
 export * from './all-modules';
+export * from './default-open-mode-storage';

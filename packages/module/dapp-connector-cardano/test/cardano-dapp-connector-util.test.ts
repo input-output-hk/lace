@@ -10,7 +10,11 @@ import {
   CARDANO_DAPP_SIGN_DATA_LOCATION,
   CARDANO_DAPP_SIGN_TX_LOCATION,
 } from '../src/browser/const';
-import { signData$, signTx$ } from '../src/browser/store/util';
+import {
+  findTargetSidePanel,
+  signData$,
+  signTx$,
+} from '../src/browser/store/util';
 import { cardanoDappConnectorActions } from '../src/common/store/slice';
 
 import type { CardanoConfirmationRequest } from '../src/common/store/dependencies/create-confirmation-callback';
@@ -19,6 +23,12 @@ import type { Dapp } from '@lace-contract/dapp-connector';
 import type { View } from '@lace-contract/views';
 import type { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 import type { Mock } from 'vitest';
+
+// Stub chrome.sidePanel API so findTargetSidePanel reports it as available.
+// The real browser provides this; tests run in node so we have to set it.
+(globalThis as { chrome?: unknown }).chrome = {
+  sidePanel: { setPanelBehavior: () => {} },
+};
 
 // Shared test fixtures
 const mockDapp: Dapp = {
@@ -135,6 +145,47 @@ const flowConfigs: FlowConfig[] = [
     },
   },
 ];
+
+describe('findTargetSidePanel', () => {
+  // Restore the stub the rest of this test file installs at module scope.
+  const restoreSidePanelStub = () => {
+    (globalThis as { chrome?: unknown }).chrome = {
+      sidePanel: { setPanelBehavior: () => {} },
+    };
+  };
+
+  beforeEach(restoreSidePanelStub);
+
+  it('returns undefined when chrome.sidePanel API is unavailable', () => {
+    (globalThis as { chrome?: unknown }).chrome = {};
+    const sidePanel = createSidePanelView(1);
+    expect(findTargetSidePanel([sidePanel], 1)).toBeUndefined();
+  });
+
+  it('returns undefined when side panel is supported but no panel is open', () => {
+    expect(findTargetSidePanel([], 1)).toBeUndefined();
+  });
+
+  it('returns undefined when only non-side-panel views are open', () => {
+    const popup = createView('/some-popup');
+    expect(findTargetSidePanel([popup], 1)).toBeUndefined();
+  });
+
+  it('returns undefined when the only open side panel is in a different window', () => {
+    const sidePanelInOtherWindow = createSidePanelView(2);
+    expect(findTargetSidePanel([sidePanelInOtherWindow], 1)).toBeUndefined();
+  });
+
+  it('returns the side panel matching the requested windowId', () => {
+    const sidePanel = createSidePanelView(1);
+    expect(findTargetSidePanel([sidePanel], 1)).toBe(sidePanel);
+  });
+
+  it('returns the first side panel when no windowId is provided', () => {
+    const sidePanel = createSidePanelView(7);
+    expect(findTargetSidePanel([sidePanel])).toBe(sidePanel);
+  });
+});
 
 describe('cardano-dapp-connector-util', () => {
   let testScheduler: TestScheduler;

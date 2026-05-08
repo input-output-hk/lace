@@ -1,14 +1,11 @@
 import { authenticationPromptActions } from '@lace-contract/authentication-prompt';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes, Milliseconds } from '@lace-sdk/util';
 import { NEVER, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  DEFAULT_INACTIVITY_TIMEOUT_MS,
-  FEATURE_FLAG_APP_LOCK_INACTIVITY_TIMEOUT,
-} from '../../src/const';
+import { INDEFINITE_INACTIVITY_TIMEOUT_MS } from '../../src/const';
 import { appLockActions } from '../../src/index';
 import {
   makeLockAfterInactivityTimeout,
@@ -17,19 +14,10 @@ import {
   startUnlocking,
 } from '../../src/store/side-effects';
 
+/** A safe, small timeout used where tests verify the timer fires (avoids setTimeout overflow). */
+const SAFE_TIMEOUT_MS = Milliseconds(60_000);
+
 const actions = { ...appLockActions, ...authenticationPromptActions };
-
-const loadedFeaturesWithoutAppLock = {
-  modules: [],
-  featureFlags: [],
-};
-
-const loadedFeaturesWithTimeout = (timeoutMs: number) => ({
-  modules: [],
-  featureFlags: [
-    { key: FEATURE_FLAG_APP_LOCK_INACTIVITY_TIMEOUT, payload: { timeoutMs } },
-  ],
-});
 
 describe('app-lock side effects', () => {
   describe('preparing', () => {
@@ -204,33 +192,26 @@ describe('app-lock side effects', () => {
     it('dispatches locked after timeout even without any activity events', () => {
       testSideEffect(
         {
-          build: () => makeLockAfterInactivityTimeout(NEVER),
+          build: () => makeLockAfterInactivityTimeout(NEVER, SAFE_TIMEOUT_MS),
         },
         ({ cold, expectObservable }) => ({
           stateObservables: {
             appLock: {
               isUnlocked$: cold('a', { a: true }),
-            },
-            features: {
-              selectLoadedFeatures$: cold('a', {
-                a: loadedFeaturesWithoutAppLock,
-              }),
+              selectInactivityTimeout$: cold('a', { a: SAFE_TIMEOUT_MS }),
             },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe(
-              `${DEFAULT_INACTIVITY_TIMEOUT_MS}ms a`,
-              {
-                a: actions.appLock.locked(),
-              },
-            );
+            expectObservable(sideEffect$).toBe(`${SAFE_TIMEOUT_MS}ms a`, {
+              a: actions.appLock.locked(),
+            });
           },
         }),
       );
     });
 
-    it('dispatches locked after default 60s of inactivity when no feature flag', () => {
+    it('dispatches locked after the stored inactivity timeout', () => {
       testSideEffect(
         {
           build: ({ cold }) =>
@@ -240,28 +221,20 @@ describe('app-lock side effects', () => {
           stateObservables: {
             appLock: {
               isUnlocked$: cold('a', { a: true }),
-            },
-            features: {
-              selectLoadedFeatures$: cold('a', {
-                a: loadedFeaturesWithoutAppLock,
-              }),
+              selectInactivityTimeout$: cold('a', { a: SAFE_TIMEOUT_MS }),
             },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe(
-              `${DEFAULT_INACTIVITY_TIMEOUT_MS}ms a`,
-              {
-                a: actions.appLock.locked(),
-              },
-            );
+            expectObservable(sideEffect$).toBe(`${SAFE_TIMEOUT_MS}ms a`, {
+              a: actions.appLock.locked(),
+            });
           },
         }),
       );
     });
 
-    it('uses inactivity timeout from feature flag payload', () => {
-      const customTimeoutMs = 120_000;
+    it('never locks when timeout is INDEFINITE_INACTIVITY_TIMEOUT_MS', () => {
       testSideEffect(
         {
           build: ({ cold }) =>
@@ -271,11 +244,31 @@ describe('app-lock side effects', () => {
           stateObservables: {
             appLock: {
               isUnlocked$: cold('a', { a: true }),
-            },
-            features: {
-              selectLoadedFeatures$: cold('a', {
-                a: loadedFeaturesWithTimeout(customTimeoutMs),
+              selectInactivityTimeout$: cold('a', {
+                a: INDEFINITE_INACTIVITY_TIMEOUT_MS,
               }),
+            },
+          },
+          dependencies: { actions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('--');
+          },
+        }),
+      );
+    });
+
+    it('uses inactivity timeout stored in Redux state', () => {
+      const customTimeoutMs = Milliseconds(120_000);
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeLockAfterInactivityTimeout(cold('a', { a: undefined })),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            appLock: {
+              isUnlocked$: cold('a', { a: true }),
+              selectInactivityTimeout$: cold('a', { a: customTimeoutMs }),
             },
           },
           dependencies: { actions },
@@ -289,30 +282,31 @@ describe('app-lock side effects', () => {
     });
 
     it('resets the timer on subsequent activity', () => {
+      const secondActivityFrameMs = 30001;
+      const expectedLockFrameMs =
+        Number(SAFE_TIMEOUT_MS) + secondActivityFrameMs;
+
       testSideEffect(
         {
           build: ({ cold }) =>
             makeLockAfterInactivityTimeout(
               cold('a 30000ms b', { a: undefined, b: undefined }),
+              SAFE_TIMEOUT_MS,
             ),
         },
         ({ cold, expectObservable }) => ({
           stateObservables: {
             appLock: {
               isUnlocked$: cold('a', { a: true }),
-            },
-            features: {
-              selectLoadedFeatures$: cold('a', {
-                a: loadedFeaturesWithoutAppLock,
-              }),
+              selectInactivityTimeout$: cold('a', { a: SAFE_TIMEOUT_MS }),
             },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
             // First activity at frame 0, second at frame 30001.
             // debounce resets on second activity.
-            // Lock fires 60000ms after second activity = frame 90001.
-            expectObservable(sideEffect$).toBe('90001ms a', {
+            // Lock fires after SAFE_TIMEOUT_MS following second activity.
+            expectObservable(sideEffect$).toBe(`${expectedLockFrameMs}ms a`, {
               a: actions.appLock.locked(),
             });
           },
@@ -320,39 +314,28 @@ describe('app-lock side effects', () => {
       );
     });
 
-    it('falls back to default timeout when payload is invalid', () => {
+    it('uses platform default when Redux inactivity timeout is null (fresh install)', () => {
+      const platformDefaultMs = Milliseconds(2 * 60 * 1000);
       testSideEffect(
         {
           build: ({ cold }) =>
-            makeLockAfterInactivityTimeout(cold('a', { a: undefined })),
+            makeLockAfterInactivityTimeout(
+              cold('a', { a: undefined }),
+              platformDefaultMs,
+            ),
         },
         ({ cold, expectObservable }) => ({
           stateObservables: {
             appLock: {
               isUnlocked$: cold('a', { a: true }),
-            },
-            features: {
-              selectLoadedFeatures$: cold('a', {
-                a: {
-                  modules: [],
-                  featureFlags: [
-                    {
-                      key: FEATURE_FLAG_APP_LOCK_INACTIVITY_TIMEOUT,
-                      payload: { timeoutMs: -1 },
-                    },
-                  ],
-                },
-              }),
+              selectInactivityTimeout$: cold('a', { a: null }),
             },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe(
-              `${DEFAULT_INACTIVITY_TIMEOUT_MS}ms a`,
-              {
-                a: actions.appLock.locked(),
-              },
-            );
+            expectObservable(sideEffect$).toBe(`${platformDefaultMs}ms a`, {
+              a: actions.appLock.locked(),
+            });
           },
         }),
       );

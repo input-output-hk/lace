@@ -29,7 +29,7 @@ export const ActivityDetector = ({
   children: ReactNode;
 }): ReactNode => {
   const [activityChannelExtension] =
-    useLoadModules('addons.loadActivityChannelExtension') || [];
+    useLoadModules('addons.loadActivityChannel') || [];
 
   const activityChannel = useMemo(() => {
     if (!activityChannelExtension) return null;
@@ -41,7 +41,8 @@ export const ActivityDetector = ({
   useEffect(
     () =>
       registerActivityListener(() => {
-        void activityChannel?.reportActivity();
+        if (!activityChannel) return;
+        void activityChannel.reportActivity();
       }),
     [activityChannel],
   );

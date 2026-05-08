@@ -32,6 +32,7 @@ export const SwapDisclaimer: React.ComponentType = () => {
       heading={t('v2.swap.disclaimer.title')}
       description={t('v2.swap.disclaimer.body')}
       onConfirm={handleConfirm}
+      testIdPrefix="swap-disclaimer"
     />
   );
 };

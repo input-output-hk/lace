@@ -48,3 +48,4 @@ export * from './dappConnectorSheet/dappConnectorSheet';
 export * from './selectAccountSheet';
 export * from './editTokenName';
 export * from './viewDefaultModeSheet/viewDefaultModeSheet';
+export * from './appLockSheet/appLockSheet';

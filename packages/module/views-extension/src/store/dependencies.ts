@@ -54,6 +54,9 @@ export type ViewsExtensionDependencies = {
   openPopupWindow: (
     location: Readonly<OpenViewPayload['location']>,
   ) => Observable<void>;
+  openTabView: (
+    location: Readonly<OpenViewPayload['location']>,
+  ) => Observable<void>;
   viewConnect$: Observable<ConnectedView>;
   viewDisconnect$: Observable<ViewId>;
 };
@@ -88,6 +91,14 @@ const senderToView =
               type: 'popupWindow',
             };
           }
+          // Regular tab in a normal window (used as fallback for browsers
+          // without chrome.sidePanel support, or when user opted into tab view).
+          return {
+            id: ViewId(sender.tab.id),
+            location,
+            type: 'tab',
+            windowId: sender.tab.windowId,
+          };
         }
         // Side panel views don't have a tab ID — identify by window
         const windowId =
@@ -224,6 +235,20 @@ export const initializeDependencies: LaceInitSync<
             }
           } catch {
             logger.error('Failed to open popup window', location);
+          }
+        })(),
+      ),
+    openTabView: location =>
+      from(
+        (async () => {
+          try {
+            const hash = location === '/' ? '' : `#${location}`;
+            await tabs.create({
+              url: `expo/index.html${hash}`,
+              active: true,
+            });
+          } catch {
+            logger.error('Failed to open tab view', location);
           }
         })(),
       ),

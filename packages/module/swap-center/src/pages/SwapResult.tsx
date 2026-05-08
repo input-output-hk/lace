@@ -113,18 +113,22 @@ export const SwapResult = (
 
   return (
     <>
-      <SheetHeader title={title} />
+      <SheetHeader title={title} testID="swap-result-header" />
       <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
         <Column alignItems="center" gap={spacing.M} style={styles.content}>
           <Icon
             name={isSuccess ? 'Checkmark' : 'Cancel'}
             size={64}
             color={isSuccess ? theme.data.positive : theme.background.negative}
+            testID="swap-result-icon"
           />
-          <Text.L weight="bold" align="center">
+          <Text.L weight="bold" align="center" testID="swap-result-title">
             {title}
           </Text.L>
-          <Text.XS variant="secondary" align="center">
+          <Text.XS
+            variant="secondary"
+            align="center"
+            testID="swap-result-subtitle">
             {isSuccess
               ? t('v2.swap.result.success-subtitle')
               : errorMessage
@@ -137,7 +141,8 @@ export const SwapResult = (
                 variant="secondary"
                 ellipsizeMode="middle"
                 numberOfLines={1}
-                style={styles.txId}>
+                style={styles.txId}
+                testID="swap-result-tx-id">
                 {txId}
               </Text.XS>
               <IconButton.Static
@@ -153,6 +158,7 @@ export const SwapResult = (
           primaryButton={{
             label: t('v2.swap.result.done'),
             onPress: handleDone,
+            testID: 'swap-result-done-button',
           }}
         />
       ) : (
@@ -160,10 +166,12 @@ export const SwapResult = (
           primaryButton={{
             label: t('v2.swap.result.retry'),
             onPress: handleRetry,
+            testID: 'swap-result-retry-button',
           }}
           secondaryButton={{
             label: t('v2.swap.result.close'),
             onPress: handleDone,
+            testID: 'swap-result-close-button',
           }}
         />
       )}

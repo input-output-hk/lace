@@ -132,7 +132,7 @@ graph TD
 ```mermaid
 graph TD
   app-runtime-dependency["app-runtime-dependency"]
-  app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannelExtension</i>"]
+  app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannel</i>"]
 ```
 
 ### Blockchain Standalone Contracts and Dependencies
@@ -184,12 +184,13 @@ graph LR
     swap-context-store["swap-context-store"]
     dialogs-addon["dialogs-addon<br/>---<br/><i>loadDialogs</i>"]
     blockchain-specific-app-settings-page-customizations-addon["blockchain-specific-app-settings-page-customizations-addon<br/>---<br/><i>loadSettingsPageUICustomisations</i>"]
+    app-lock-setup-addon["app-lock-setup-addon<br/>---<br/><i>loadSetupAppLock</i>"]
+    app-lock-store["app-lock-store"]
+    auth-secret-verifier-addon["auth-secret-verifier-addon<br/>---<br/><i>loadAuthSecretVerifier</i>"]
+    views-store["views-store"]
     dev["dev"]
     feature-store["feature-store"]
     feature-dependency["feature-dependency"]
-    views-store["views-store"]
-    i18n-dependency["i18n-dependency"]
-    app-context-initialization-addon["app-context-initialization-addon<br/>---<br/><i>loadInitializeAppContext</i>"]
     wallet-settings-ui-customisation-addon["wallet-settings-ui-customisation-addon<br/>---<br/><i>loadWalletSettingsUICustomisations</i>"]
     recovery-phrase-store["recovery-phrase-store"]
   end
@@ -207,12 +208,12 @@ graph LR
     module_10["send-flow"]
     module_11["staking-center"]
     module_12["swap-center"]
-    module_13["test-api"]
-    module_14["feature-dev"]
-    module_15["feature-posthog"]
-    module_16["views-extension"]
-    module_17["i18n"]
-    module_18["views-mobile"]
+    module_13["app-lock"]
+    module_14["views-extension"]
+    module_15["views-mobile"]
+    module_16["test-api"]
+    module_17["feature-dev"]
+    module_18["feature-posthog"]
     module_19["vault-in-memory-ui"]
     module_20["dapp-connector-extension"]
   end
@@ -251,21 +252,25 @@ graph LR
   module_12 -.->|implements| swap-context-store
   module_12 -.->|implements| dialogs-addon
   module_12 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
-  module_13 -.->|implements| dev
-  module_13 -.->|implements| initialize-extension-view-addon
-  module_13 -.->|implements| initialize-mobile-view-addon
-  module_14 -.->|implements| feature-store
-  module_14 -.->|implements| feature-dependency
-  module_14 -.->|implements| dev
+  module_13 -.->|implements| app-lock-setup-addon
+  module_13 -.->|implements| app-lock-store
+  module_13 -.->|implements| auth-secret-verifier-addon
+  module_13 -.->|implements| sheet-pages-addon
+  module_13 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
+  module_14 -.->|implements| views-store
   module_14 -.->|implements| initialize-extension-view-addon
-  module_15 -.->|implements| feature-store
-  module_15 -.->|implements| feature-dependency
-  module_16 -.->|implements| views-store
+  module_14 -.->|implements| sheet-pages-addon
+  module_14 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
+  module_15 -.->|implements| views-store
+  module_16 -.->|implements| dev
   module_16 -.->|implements| initialize-extension-view-addon
-  module_17 -.->|implements| i18n-dependency
-  module_17 -.->|implements| app-context-initialization-addon
+  module_16 -.->|implements| initialize-mobile-view-addon
+  module_17 -.->|implements| feature-store
+  module_17 -.->|implements| feature-dependency
+  module_17 -.->|implements| dev
   module_17 -.->|implements| initialize-extension-view-addon
-  module_18 -.->|implements| views-store
+  module_18 -.->|implements| feature-store
+  module_18 -.->|implements| feature-dependency
   module_19 -.->|implements| wallet-settings-ui-customisation-addon
   module_19 -.->|implements| recovery-phrase-store
   module_19 -.->|implements| sheet-pages-addon
@@ -303,50 +308,24 @@ graph LR
   module_1 -.->|implements| analytics-provider-dependency
 ```
 
-### App Module Implementations
+### App Activity Module Implementations
 
 ```mermaid
 graph LR
   subgraph Contracts
     authentication-prompt-defer-biometric-addon["authentication-prompt-defer-biometric-addon<br/>---<br/><i>loadDeferBiometricPromptUntilActive</i>"]
+    app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannel</i>"]
   end
   subgraph Modules
     module_0["app-activity-mobile"]
+    module_1["app-activity-web"]
   end
   module_0 -.->|implements| authentication-prompt-defer-biometric-addon
-```
-
-### App (1) Module Implementations
-
-```mermaid
-graph LR
-  subgraph Contracts
-    app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannelExtension</i>"]
-  end
-  subgraph Modules
-    module_0["app-activity-web"]
-  end
   module_0 -.->|implements| app-lock-activity-channel-addon
+  module_1 -.->|implements| app-lock-activity-channel-addon
 ```
 
-### App (2) Module Implementations
-
-```mermaid
-graph LR
-  subgraph Contracts
-    app-lock-setup-addon["app-lock-setup-addon<br/>---<br/><i>loadSetupAppLock</i>"]
-    app-lock-store["app-lock-store"]
-    auth-secret-verifier-addon["auth-secret-verifier-addon<br/>---<br/><i>loadAuthSecretVerifier</i>"]
-  end
-  subgraph Modules
-    module_0["app-lock"]
-  end
-  module_0 -.->|implements| app-lock-setup-addon
-  module_0 -.->|implements| app-lock-store
-  module_0 -.->|implements| auth-secret-verifier-addon
-```
-
-### App (3) Module Implementations
+### App Module Implementations
 
 ```mermaid
 graph LR
@@ -566,6 +545,23 @@ graph LR
   end
   module_0 -.->|implements| dapp-connector-api-addon
   module_0 -.->|implements| render-root-addon
+```
+
+### I18n Module Implementations
+
+```mermaid
+graph LR
+  subgraph Contracts
+    i18n-dependency["i18n-dependency"]
+    app-context-initialization-addon["app-context-initialization-addon<br/>---<br/><i>loadInitializeAppContext</i>"]
+    initialize-extension-view-addon["initialize-extension-view-addon<br/>---<br/><i>loadInitializeExtensionView</i>"]
+  end
+  subgraph Modules
+    module_0["i18n"]
+  end
+  module_0 -.->|implements| i18n-dependency
+  module_0 -.->|implements| app-context-initialization-addon
+  module_0 -.->|implements| initialize-extension-view-addon
 ```
 
 ### Posthog Client Module Implementations

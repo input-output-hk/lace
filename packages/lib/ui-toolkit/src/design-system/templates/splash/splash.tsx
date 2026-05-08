@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Appearance } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   withRepeat,
@@ -8,24 +8,12 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 
-import { useTheme } from '../../../design-tokens';
-import { lightTheme, darkTheme } from '../../../design-tokens/theme';
+import { lightTheme } from '../../../design-tokens/theme/light';
 import { LaceLogo } from '../../atoms/logo/logo';
 
 export const Splash = () => {
-  const { width, height } = Dimensions.get('window');
+  const { width, height } = useWindowDimensions();
   const rotation = useSharedValue(0);
-
-  // Always use the active theme from the app
-  const { theme } = useTheme();
-  const systemColorScheme = Appearance.getColorScheme();
-
-  // Determine background color with fallback
-  const backgroundColor =
-    theme?.background?.page ||
-    (systemColorScheme === 'dark'
-      ? darkTheme.background.page
-      : lightTheme.background.page);
 
   useEffect(() => {
     rotation.value = withRepeat(
@@ -49,8 +37,12 @@ export const Splash = () => {
     [rotation.value],
   );
 
+  // Display nothing until the dimensions are available to avoid the logo to be rendered
+  // with its center in the top left corner of the screen.
+  if (width === 0) return null;
+
   return (
-    <View style={[styles.container, { width, height, backgroundColor }]}>
+    <View style={[styles.container, { width, height }]}>
       <View style={styles.content}>
         <Animated.View style={[styles.logoContainer, animatedRotationStyle]}>
           <LaceLogo />
@@ -62,6 +54,7 @@ export const Splash = () => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: lightTheme.brand.ascending,
     flex: 1,
     position: 'absolute',
     top: 0,
