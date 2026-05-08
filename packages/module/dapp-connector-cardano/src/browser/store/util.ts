@@ -1,3 +1,4 @@
+import { isSidePanelApiAvailable } from '@lace-contract/views';
 import { filter, map, merge, of, race, switchMap, take, tap } from 'rxjs';
 
 import {
@@ -87,6 +88,10 @@ export const detectViewClosure = ({
  * if no windowId is provided.
  */
 export const findTargetSidePanel = (openViews: View[], windowId?: number) => {
+  // Some chromium browsers (e.g. Yandex) do not implement chrome.sidePanel.
+  // In that case there can never be a side panel view to target, and the dapp
+  // connector must fall back to opening a popup window.
+  if (!isSidePanelApiAvailable()) return undefined;
   if (windowId !== undefined) {
     return openViews.find(
       v => v.type === 'sidePanel' && v.windowId === windowId,

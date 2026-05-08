@@ -9,7 +9,7 @@ import type {
 } from '@lace-contract/module';
 import type { Store } from '@reduxjs/toolkit';
 
-export type ViewType = 'mobile' | 'popupWindow' | 'sidePanel';
+export type ViewType = 'mobile' | 'popupWindow' | 'sidePanel' | 'tab';
 // not 'Tagged' to be compatible with 'history' package
 export type ViewLocation = string;
 

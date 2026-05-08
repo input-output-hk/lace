@@ -8,6 +8,7 @@
   "dependencies": {
     "@lace-contract/authentication-prompt": "*",
     "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/util-store": "*",

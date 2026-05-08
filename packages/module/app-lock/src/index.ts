@@ -1,5 +1,6 @@
 import './augmentations';
 
+import { blockchainSpecificAppSettingsPageCustomizationsAddonContract } from '@lace-contract/app';
 import {
   appLockStoreContract,
   appLockSetupAddon,
@@ -10,7 +11,10 @@ import {
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
-import { viewsStoreContract } from '@lace-contract/views';
+import {
+  sheetPagesAddonContract,
+  viewsStoreContract,
+} from '@lace-contract/views';
 
 import store from './store';
 
@@ -26,6 +30,8 @@ const implementsContracts = combineContracts([
   appLockSetupAddon,
   appLockStoreContract,
   authSecretVerifierAddonContract,
+  sheetPagesAddonContract,
+  blockchainSpecificAppSettingsPageCustomizationsAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([viewsStoreContract] as const);
 
@@ -37,6 +43,9 @@ const multiPlatformModule = inferModuleContext({
   addons: {
     loadAuthSecretVerifier: async () => import('./addons/auth-secret-verifier'),
     loadSetupAppLock: async () => import('./addons/setup-app-lock'),
+    loadSettingsPageUICustomisations: async () =>
+      import('./addons/settings-page-ui-customisation'),
+    loadSheetPages: async () => import('./addons/sheetPages'),
   },
 });
 

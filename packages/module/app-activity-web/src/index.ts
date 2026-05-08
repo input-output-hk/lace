@@ -26,7 +26,7 @@ const webModule = inferModuleContext({
   implements: implementsContracts,
   dependsOn: dependsOnContracts,
   addons: {
-    loadActivityChannelExtension: async () =>
+    loadActivityChannel: async () =>
       import('./addons/activity-channel-extension'),
   },
 });

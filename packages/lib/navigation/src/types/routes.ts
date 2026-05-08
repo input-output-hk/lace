@@ -82,6 +82,7 @@ export enum SheetRoutes {
   FiatCurrencySheet = 'FiatCurrencySheet',
   AssetDetailBottomSheet = 'AssetDetailBottomSheet',
   ActivityDetail = 'ActivityDetail',
+  DefaultOpenMode = 'DefaultOpenMode',
   StakingIssue = 'StakingIssue',
   ComingSoon = 'ComingSoon',
   Collateral = 'Collateral',
@@ -119,4 +120,5 @@ export enum SheetRoutes {
   SwapLiquiditySources = 'SwapLiquiditySources',
   SwapReview = 'SwapReview',
   SwapResult = 'SwapResult',
+  LockSettings = 'LockSettings',
 }

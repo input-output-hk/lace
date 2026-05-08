@@ -74,16 +74,18 @@ describe('steelswap-mappers', () => {
       expect(result.price).toBe(0.00005);
       expect(result.route).toHaveLength(1);
       expect(result.route[0].dexName).toBe('Minswap');
-      expect(result.fees).toHaveLength(3);
+      expect(result.fees).toHaveLength(2);
       expect(result.fees[0].displayCurrency).toBe('ADA');
+      expect(result.deposit).toBeDefined();
       expect(result.totalFeeDisplay).toBeDefined();
       expect(result.priceDisplay).toBeDefined();
     });
 
-    it('omits deposit fee when totalDeposit is 0', () => {
+    it('omits deposit when totalDeposit is 0', () => {
       const noDeposit = { ...mockEstimateResponse, totalDeposit: 0 };
       const result = fromEstimateResponse(noDeposit, mockQuoteRequest);
       expect(result.fees).toHaveLength(2);
+      expect(result.deposit).toBeUndefined();
     });
 
     it('handles hop routes via splitGroup', () => {

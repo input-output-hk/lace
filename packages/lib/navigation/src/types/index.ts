@@ -202,6 +202,7 @@ export type SheetParameterList = {
   [SheetRoutes.ActivityDetail]: BaseSheetParams & {
     activityId: string;
   };
+  [SheetRoutes.DefaultOpenMode]: BaseSheetParams;
   [SheetRoutes.StakingIssue]: BaseSheetParams & {
     accountId: string;
     issueType: 'high-saturation' | 'locked' | 'pledge' | 'retiring';
@@ -319,6 +320,7 @@ export type SheetParameterList = {
   [SheetRoutes.SwapLiquiditySources]: BaseSheetParams;
   [SheetRoutes.SwapReview]: BaseSheetParams;
   [SheetRoutes.SwapResult]: BaseSheetParams;
+  [SheetRoutes.LockSettings]: BaseSheetParams;
 };
 
 export type BaseSheetParams =

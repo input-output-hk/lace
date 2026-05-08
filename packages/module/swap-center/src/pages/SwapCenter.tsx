@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   getAssetImageUrl,
   Icon,
+  PageContainerTemplate,
   Row,
   SwapInput,
   Text,
@@ -309,115 +310,126 @@ export const SwapsCenterPage = () => {
     : t('v2.swap.select-token');
 
   return (
-    <ScrollView
-      style={styles.scrollView}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled">
-      <Row justifyContent="center" alignItems="center" style={styles.header}>
-        <Column alignItems="center" style={styles.headerTitle}>
-          <Text.L weight="bold">{t('v2.swap.title')}</Text.L>
-          <Text.XS variant="secondary">{t('v2.swap.subtitle')}</Text.XS>
-        </Column>
-        <Pressable onPress={handleSettingsPress} style={styles.settingsButton}>
-          <Icon name="Settings" size={24} color={theme.text.secondary} />
-        </Pressable>
-      </Row>
+    <PageContainerTemplate fullWidth>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled">
+        <Row justifyContent="center" alignItems="center" style={styles.header}>
+          <Column alignItems="center" style={styles.headerTitle}>
+            <Text.L weight="bold" testID="swap-page-title">
+              {t('v2.swap.title')}
+            </Text.L>
+            <Text.XS variant="secondary" testID="swap-page-subtitle">
+              {t('v2.swap.subtitle')}
+            </Text.XS>
+          </Column>
+          <Pressable
+            onPress={handleSettingsPress}
+            style={styles.settingsButton}
+            testID="swap-settings-button">
+            <Icon name="Settings" size={24} color={theme.text.secondary} />
+          </Pressable>
+        </Row>
 
-      {hasMultipleAccounts && (
-        <DropdownMenu
-          items={accountDropdownItems}
-          title={
-            accountDropdownItems.find(item => item.id === selectedAccountId)
-              ?.text ?? t('v2.swap.account')
-          }
-          onSelectItem={handleAccountChange}
-          actionText={`${String(accountDropdownItems.length)} ${String(
-            t('v2.swap.account'),
-          )}`}
-          selectedItemId={selectedAccountId}
-          testID="swap-account-selector"
-        />
-      )}
-
-      <Column gap={0} style={styles.swapPanels}>
-        <SwapInput
-          ref={sellInputRef}
-          placeholder={t('v2.swap.select-sell-option')}
-          token={sellToken}
-          amount={sellAmount ?? ''}
-          error={
-            isInsufficientFunds ? t('v2.swap.insufficient-funds') : undefined
-          }
-          onTokenPress={handleSellTokenPress}
-          onAmountChange={handleSellAmountChange}
-          quickActions={[
-            <Button.Secondary
-              key="half"
-              size="small"
-              label={t('v2.swap.half')}
-              onPress={() => {
-                if (!sellTokenData) return;
-                trackEvent('swaps | quick amount | half | press');
-                const half =
-                  Number(sellTokenData.available) /
-                  10 ** sellTokenData.decimals /
-                  2;
-                dispatchSellAmountChanged({ sellAmount: String(half) });
-              }}
-            />,
-            <Button.Secondary
-              key="max"
-              size="small"
-              label={t('v2.swap.max')}
-              onPress={() => {
-                if (!sellTokenData) return;
-                trackEvent('swaps | quick amount | max | press');
-                const max =
-                  Number(sellTokenData.available) /
-                  10 ** sellTokenData.decimals;
-                dispatchSellAmountChanged({ sellAmount: String(max) });
-              }}
-            />,
-          ]}
-          testID="swap-sell-input"
-        />
-
-        <View style={styles.swapArrowContainer}>
-          <View style={styles.swapArrow}>
-            <Icon name="ArrowDown" size={16} color={theme.text.primary} />
-          </View>
-        </View>
-
-        <SwapInput
-          placeholder={t('v2.swap.select-buy-option')}
-          token={buyToken}
-          disabled
-          amount={expectedBuyAmount ?? ''}
-          onTokenPress={handleBuyTokenPress}
-          testID="swap-buy-input"
-        />
-      </Column>
-      <Column style={styles.quoteContainer}>
-        {isQuoted && selectedQuote && (
-          <QuoteInfo
-            quote={selectedQuote}
-            slippage={currentSlippage}
-            sellTokenName={sellToken!.name}
-            buyTokenName={buyToken!.name}
-            onSlippagePress={handleSettingsPress}
+        {hasMultipleAccounts && (
+          <DropdownMenu
+            items={accountDropdownItems}
+            title={
+              accountDropdownItems.find(item => item.id === selectedAccountId)
+                ?.text ?? t('v2.swap.account')
+            }
+            onSelectItem={handleAccountChange}
+            actionText={`${String(accountDropdownItems.length)} ${String(
+              t('v2.swap.account'),
+            )}`}
+            selectedItemId={selectedAccountId}
+            testID="swap-account-selector"
           />
         )}
-        <Button.Primary
-          label={ctaLabel}
-          onPress={handleReviewOrSelectToken}
-          disabled={isQuoting || isInsufficientFunds}
-          loading={isQuoting}
-          fullWidth
-          testID="swap-cta"
-        />
-      </Column>
-    </ScrollView>
+
+        <Column gap={0} style={styles.swapPanels}>
+          <SwapInput
+            ref={sellInputRef}
+            placeholder={t('v2.swap.select-sell-option')}
+            token={sellToken}
+            amount={sellAmount ?? ''}
+            error={
+              isInsufficientFunds ? t('v2.swap.insufficient-funds') : undefined
+            }
+            onTokenPress={handleSellTokenPress}
+            onAmountChange={handleSellAmountChange}
+            quickActions={[
+              <Button.Secondary
+                key="half"
+                size="small"
+                label={t('v2.swap.half')}
+                testID="swap-sell-input-half"
+                onPress={() => {
+                  if (!sellTokenData) return;
+                  trackEvent('swaps | quick amount | half | press');
+                  const half =
+                    Number(sellTokenData.available) /
+                    10 ** sellTokenData.decimals /
+                    2;
+                  dispatchSellAmountChanged({ sellAmount: String(half) });
+                }}
+              />,
+              <Button.Secondary
+                key="max"
+                size="small"
+                label={t('v2.swap.max')}
+                testID="swap-sell-input-max"
+                onPress={() => {
+                  if (!sellTokenData) return;
+                  trackEvent('swaps | quick amount | max | press');
+                  const max =
+                    Number(sellTokenData.available) /
+                    10 ** sellTokenData.decimals;
+                  dispatchSellAmountChanged({ sellAmount: String(max) });
+                }}
+              />,
+            ]}
+            testID="swap-sell-input"
+          />
+
+          <View style={styles.swapArrowContainer}>
+            <View style={styles.swapArrow}>
+              <Icon name="ArrowDown" size={16} color={theme.text.primary} />
+            </View>
+          </View>
+
+          <SwapInput
+            placeholder={t('v2.swap.select-buy-option')}
+            token={buyToken}
+            disabled
+            amount={expectedBuyAmount ?? ''}
+            onTokenPress={handleBuyTokenPress}
+            testID="swap-buy-input"
+          />
+        </Column>
+        <Column style={styles.quoteContainer}>
+          {isQuoted && selectedQuote && (
+            <QuoteInfo
+              quote={selectedQuote}
+              slippage={currentSlippage}
+              sellTokenName={sellToken!.name}
+              buyTokenName={buyToken!.name}
+              onSlippagePress={handleSettingsPress}
+            />
+          )}
+          <Button.Primary
+            label={ctaLabel}
+            onPress={handleReviewOrSelectToken}
+            disabled={isQuoting || isInsufficientFunds}
+            loading={isQuoting}
+            fullWidth
+            testID="swap-cta"
+          />
+        </Column>
+      </ScrollView>
+    </PageContainerTemplate>
   );
 };
 

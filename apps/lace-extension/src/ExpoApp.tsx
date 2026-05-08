@@ -13,7 +13,7 @@ import {
   NoOpProvider,
   createSentryProvider,
 } from '@lace-lib/observability';
-import { Loader, configureImageFormat } from '@lace-lib/ui-toolkit';
+import { Splash, configureImageFormat } from '@lace-lib/ui-toolkit';
 import * as Sentry from '@sentry/react';
 import React, { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
@@ -133,7 +133,7 @@ const ExpoApp = () => {
     void loadPromise.then(setInit);
   }, []);
 
-  if (!init) return <Loader />;
+  if (!init) return <Splash />;
 
   const appContent = (
     <Provider store={init.store}>
@@ -143,7 +143,7 @@ const ExpoApp = () => {
 
   // Only wrap with Sentry ErrorBoundary if Sentry is initialized
   const wrappedContent = isSentryEnabled ? (
-    <Sentry.ErrorBoundary fallback={<Loader />}>
+    <Sentry.ErrorBoundary fallback={<Splash />}>
       {appContent}
     </Sentry.ErrorBoundary>
   ) : (

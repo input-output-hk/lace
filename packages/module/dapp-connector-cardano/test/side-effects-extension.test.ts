@@ -27,6 +27,11 @@ import type {
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
+// Stub chrome.sidePanel so findTargetSidePanel reports it as available.
+(globalThis as { chrome?: unknown }).chrome = {
+  sidePanel: { setPanelBehavior: () => {} },
+};
+
 // Type for handleRequests function
 type HandleRequestsFunction = (
   request$: Observable<CardanoConfirmationRequest>,

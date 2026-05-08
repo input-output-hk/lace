@@ -75,12 +75,16 @@ export const SwapLiquiditySources = (
     <>
       <SheetHeader
         title={t('v2.swap.liquidity-sources.title')}
-        testID={'theme-selection-sheet-header'}
+        testID={'swap-liquidity-sources-header'}
       />
       <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
         <Column style={{ paddingBottom: spacing.M }} gap={spacing.S}>
-          <Text.M>{t('v2.swap.liquidity-sources.description')}</Text.M>
-          <Text.XS variant="secondary">
+          <Text.M testID="swap-liquidity-sources-description">
+            {t('v2.swap.liquidity-sources.description')}
+          </Text.M>
+          <Text.XS
+            variant="secondary"
+            testID="swap-liquidity-sources-description-2">
             {t('v2.swap.liquidity-sources.description-2')}
           </Text.XS>
         </Column>
@@ -96,6 +100,7 @@ export const SwapLiquiditySources = (
                 onValueChange={value => {
                   handleToggle(dex.id, value);
                 }}
+                testID={`swap-liquidity-source-${dex.id}`}
               />
             ))}
           </Column>
@@ -106,6 +111,7 @@ export const SwapLiquiditySources = (
           label: t('v2.swap.liquidity-sources.confirm'),
           onPress: handleConfirm,
           disabled: isLoading,
+          testID: 'swap-liquidity-sources-confirm',
         }}
       />
     </>

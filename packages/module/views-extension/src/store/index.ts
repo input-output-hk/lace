@@ -1,4 +1,5 @@
 import { inferStoreContext } from '@lace-contract/module';
+
 export type * from './dependencies';
 
 export default inferStoreContext({

@@ -1,4 +1,7 @@
-import { appLockStoreContract } from '@lace-contract/app-lock';
+import {
+  appLockActivityChannelAddon,
+  appLockStoreContract,
+} from '@lace-contract/app-lock';
 import {
   authenticationPromptDeferBiometricPromptAddon,
   authenticationPromptStoreContract,
@@ -21,6 +24,7 @@ import type {
 
 const implementsContracts = combineContracts([
   authenticationPromptDeferBiometricPromptAddon,
+  appLockActivityChannelAddon,
 ] as const);
 const dependsOnContracts = combineContracts([
   appLockStoreContract,
@@ -35,6 +39,7 @@ const mobileModule = inferModuleContext({
   addons: {
     loadDeferBiometricPromptUntilActive: async () =>
       import('./addons/defer-biometric-prompt-until-active-extension'),
+    loadActivityChannel: async () => import('./addons/activity-channel-mobile'),
   },
 });
 
