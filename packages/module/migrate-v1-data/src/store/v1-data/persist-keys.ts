@@ -15,7 +15,7 @@ export const V2_REBUILT_PERSIST_KEYS = [
   `${REDUX_PERSIST_PREFIX}analytics`,
   `${REDUX_PERSIST_PREFIX}authorizedDapps`,
   `${REDUX_PERSIST_PREFIX}wallets`,
-  `${REDUX_PERSIST_PREFIX}networkType`,
+  `${REDUX_PERSIST_PREFIX}network`,
   `${REDUX_PERSIST_PREFIX}tokenFolders`,
   `${REDUX_PERSIST_PREFIX}addressBook`,
   `${REDUX_PERSIST_PREFIX}appLock`,
