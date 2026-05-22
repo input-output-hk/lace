@@ -39,7 +39,10 @@ export const useSignTx = ({
 
   const { requestId, dapp, txHex, partialSign: isPartialSign } = params;
 
-  const signTxData: UseSignTxDataResult = useSignTxData({ txHex });
+  const signTxData: UseSignTxDataResult = useSignTxData({
+    txHex,
+    dappOrigin: dapp?.origin,
+  });
 
   const {
     handleConfirm,

@@ -14,11 +14,37 @@ import type {
 import type { SignerAuth } from '@lace-contract/signer';
 import type { HexBytes } from '@lace-sdk/util';
 
+const STUB_DREP_PUB_KEY = 'ab'.repeat(32);
+const STUB_DREP_KEY_HASH = 'cd'.repeat(28);
+
 vi.mock('../../src/signing/cip8-sign-data', () => ({
   cip8SignData: vi
     .fn()
     .mockResolvedValue({ signature: 'sig-hex', key: 'key-hex' }),
 }));
+
+vi.mock('@cardano-sdk/key-management', async () => {
+  const actual = await vi.importActual('@cardano-sdk/key-management');
+  return {
+    ...actual,
+    Bip32Account: vi.fn().mockImplementation(() => ({
+      derivePublicKey: vi.fn().mockResolvedValue(STUB_DREP_PUB_KEY),
+    })),
+  };
+});
+
+vi.mock('@cardano-sdk/crypto', async () => {
+  const actual = await vi.importActual('@cardano-sdk/crypto');
+  return {
+    ...actual,
+    SodiumBip32Ed25519: { create: vi.fn().mockResolvedValue({}) },
+    Ed25519PublicKey: {
+      fromHex: vi.fn().mockReturnValue({
+        hash: () => ({ hex: () => STUB_DREP_KEY_HASH }),
+      }),
+    },
+  };
+});
 
 const mockAuthSecret = new Uint8Array([1, 2, 3]);
 
@@ -71,6 +97,43 @@ describe('CardanoInMemoryDataSigner', () => {
       expect.objectContaining({ authSecret: mockAuthSecret }),
     );
     expect(result).toEqual({ signature: 'sig-hex', key: 'key-hex' });
+  });
+
+  it('pre-derives the DRep key hash and forwards it to cip8SignData (LW-14940)', async () => {
+    const { cip8SignData } = await import('../../src/signing/cip8-sign-data');
+    vi.mocked(cip8SignData).mockClear();
+
+    const mockKeyAgent: CardanoKeyAgent = {
+      signTransaction: vi.fn(),
+      signBlob: vi.fn(),
+    };
+    const createKeyAgent: CreateCardanoKeyAgent = vi
+      .fn()
+      .mockResolvedValue(mockKeyAgent);
+
+    const knownAddresses = [{ address: 'addr_test1...' }] as never;
+    const signer = new CardanoInMemoryDataSigner({
+      ...mockProps,
+      createKeyAgent,
+      knownAddresses,
+    });
+
+    await firstValueFrom(
+      signer.signData({
+        signWith: 'addr_test1qz...' as Cardano.PaymentAddress,
+        payload: 'deadbeef',
+      }),
+    );
+
+    expect(cip8SignData).toHaveBeenCalledWith({
+      keyAgent: mockKeyAgent,
+      request: {
+        signWith: 'addr_test1qz...' as Cardano.PaymentAddress,
+        payload: 'deadbeef',
+      },
+      knownAddresses,
+      dRepKeyHash: STUB_DREP_KEY_HASH,
+    });
   });
 
   it('propagates signing errors', async () => {

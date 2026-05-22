@@ -111,6 +111,16 @@ const patchNxConfig = nxConfig => {
     ) {
       return { type: 'empty' };
     }
+    // Exclude @sentry/browser's lazyLoadIntegration - it contains a hard-coded
+    // "https://browser.sentry-cdn.com" string that Chrome Web Store flags as
+    // remotely hosted code under MV3. Mirror of the webpack stub in
+    // webpack/sentry-lazy-load-stub.js / base/serviceworker.webpack.config.js.
+    if (
+      context.originModulePath.includes('@sentry') &&
+      moduleName.includes('lazyLoadIntegration')
+    ) {
+      return { type: 'empty' };
+    }
     // Exclude @effect/platform's HttpApiScalar module - it contains a CDN reference to
     // @scalar/api-reference (cdn.jsdelivr.net) that violates Chrome Web Store MV3 policy
     // which prohibits remotely hosted code. HttpApiScalar is server-side API docs tooling

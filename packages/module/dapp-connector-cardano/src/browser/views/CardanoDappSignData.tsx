@@ -33,7 +33,7 @@ export const CardanoDappSignData = () => {
     onReject: closeDappView,
   });
 
-  const accountInfo = useSignDataAccountInfo();
+  const accountInfo = useSignDataAccountInfo(request?.dappOrigin);
   const hwErrorKeys = useLaceSelector(
     'cardanoDappConnector.selectSignDataHwErrorKeys',
   );

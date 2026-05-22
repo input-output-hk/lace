@@ -20,7 +20,7 @@ export const CardanoDappSignDataPopup = () => {
     onReject: closeDappView,
   });
 
-  const accountInfo = useSignDataAccountInfo();
+  const accountInfo = useSignDataAccountInfo(request?.dappOrigin);
   const hasConfirmedRef = useRef(false);
 
   const handleConfirmWithHwIndicator = useCallback(() => {

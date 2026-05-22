@@ -19,9 +19,8 @@ export const useSignData = ({
   const webViewResponseQueue = useLaceSelector(
     'cardanoDappConnector.selectWebViewResponseQueue',
   );
-  const accountInfo = useSignDataAccountInfo();
-
   const { requestId, dapp, address, payload } = params;
+  const accountInfo = useSignDataAccountInfo(dapp?.origin);
 
   const {
     handleConfirm,

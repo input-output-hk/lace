@@ -322,10 +322,13 @@ describe('useSignTx (mobile)', () => {
       expect(result.current.collateralValue).toBe(5_000_000n);
     });
 
-    it('calls useSignTxData with txHex from params', () => {
+    it('calls useSignTxData with txHex and dappOrigin from params', () => {
       renderHook(() => useSignTx(createMockProps({ txHex: 'cafe0001' })));
 
-      expect(mockUseSignTxData).toHaveBeenCalledWith({ txHex: 'cafe0001' });
+      expect(mockUseSignTxData).toHaveBeenCalledWith({
+        txHex: 'cafe0001',
+        dappOrigin: mockDapp.origin,
+      });
     });
   });
 

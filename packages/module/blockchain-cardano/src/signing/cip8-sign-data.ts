@@ -2,6 +2,7 @@ import { Cardano, Serialization } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
 import { HexBytes } from '@lace-sdk/util';
 
+import type { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { CardanoKeyAgent } from '@lace-contract/cardano-context';
 import type {
@@ -18,11 +19,21 @@ const COSE_KEY_ALG = 3;
 const COSE_KEY_CRV = -1;
 const COSE_KEY_X = -2;
 const STAKE_KEY_DERIVATION_PATH = { role: 2, index: 0 };
+const DREP_KEY_DERIVATION_PATH = { role: 3, index: 0 };
 
-const getDerivationPath = (
-  signWith: Cardano.PaymentAddress | Cardano.RewardAccount,
-  knownAddresses: GroupedAddress[],
-): { role: number; index: number } => {
+interface GetDerivationPathParams {
+  address: Cardano.Address;
+  signWith: Cardano.PaymentAddress | Cardano.RewardAccount;
+  knownAddresses: GroupedAddress[];
+  dRepKeyHash: Ed25519KeyHashHex | undefined;
+}
+
+const getDerivationPath = ({
+  address,
+  signWith,
+  knownAddresses,
+  dRepKeyHash,
+}: GetDerivationPathParams): { role: number; index: number } => {
   if (Cardano.isRewardAccount(signWith)) {
     const matchingAddress = knownAddresses.find(
       addr => addr.rewardAccount === signWith,
@@ -36,6 +47,14 @@ const getDerivationPath = (
     return STAKE_KEY_DERIVATION_PATH;
   }
 
+  if (
+    dRepKeyHash &&
+    address.getType() === Cardano.AddressType.EnterpriseKey &&
+    address.getProps().paymentPart?.hash === dRepKeyHash
+  ) {
+    return DREP_KEY_DERIVATION_PATH;
+  }
+
   const matchingAddress = knownAddresses.find(
     addr => addr.address === signWith,
   );
@@ -46,7 +65,7 @@ const getDerivationPath = (
     };
   }
 
-  return { role: 0, index: 0 };
+  throw new Error(`Unknown signWith address: ${signWith}`);
 };
 
 const createProtectedHeaders = (addressBytes: Uint8Array): Uint8Array => {
@@ -109,19 +128,32 @@ const createCoseKey = (
   return writer.encode();
 };
 
+export interface Cip8SignDataParams {
+  keyAgent: CardanoKeyAgent;
+  request: CardanoSignDataRequest;
+  knownAddresses: GroupedAddress[];
+  dRepKeyHash?: Ed25519KeyHashHex;
+}
+
 /** Signs data per CIP-8 by constructing COSE structures without WASM. */
-export const cip8SignData = async (
-  keyAgent: CardanoKeyAgent,
-  request: CardanoSignDataRequest,
-  knownAddresses: GroupedAddress[],
-): Promise<CardanoSignDataResult> => {
+export const cip8SignData = async ({
+  keyAgent,
+  request,
+  knownAddresses,
+  dRepKeyHash,
+}: Cip8SignDataParams): Promise<CardanoSignDataResult> => {
   const address = Cardano.Address.fromString(request.signWith);
   if (!address) {
     throw new Error(`Invalid address: ${request.signWith}`);
   }
 
   const addressBytes = Buffer.from(address.toBytes(), 'hex');
-  const derivationPath = getDerivationPath(request.signWith, knownAddresses);
+  const derivationPath = getDerivationPath({
+    address,
+    signWith: request.signWith,
+    knownAddresses,
+    dRepKeyHash,
+  });
 
   const protectedHeadersBytes = createProtectedHeaders(addressBytes);
   const payloadBytes = Buffer.from(request.payload, 'hex');

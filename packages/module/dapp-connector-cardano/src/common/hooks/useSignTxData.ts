@@ -30,6 +30,8 @@ export interface SignTxDataAccountInfo {
 export interface UseSignTxDataParams {
   /** Transaction CBOR hex; use empty string when there is no request. */
   txHex: string;
+  /** Origin of the requesting dApp; used to resolve the session account. */
+  dappOrigin?: string;
 }
 
 export interface UseSignTxDataResult {
@@ -62,6 +64,7 @@ export interface UseSignTxDataResult {
  */
 export const useSignTxData = ({
   txHex,
+  dappOrigin,
 }: UseSignTxDataParams): UseSignTxDataResult => {
   const chainId = useLaceSelector('cardanoContext.selectChainId');
   const eraSummaries = useLaceSelector('cardanoContext.selectEraSummaries');
@@ -79,10 +82,10 @@ export const useSignTxData = ({
   );
   const networkType = useLaceSelector('network.selectNetworkType');
   const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
-  const activeAccountContext = useLaceSelector(
-    'wallets.selectActiveAccountContext',
-  );
   const allAccounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
+  const sessionAccountByOrigin = useLaceSelector(
+    'cardanoDappConnector.selectSessionAccountByOrigin',
+  );
 
   const [transactionInfo, setTransactionInfo] =
     useState<TransactionInfo | null>(null);
@@ -137,22 +140,17 @@ export const useSignTxData = ({
     [featureFlags, networkType],
   );
 
-  const activeAccount = useMemo(() => {
-    if (!activeAccountContext) return undefined;
-    return allAccounts.find(
-      account =>
-        account.accountId === activeAccountContext.accountId &&
-        account.walletId === activeAccountContext.walletId,
-    );
-  }, [activeAccountContext, allAccounts]);
-
   const accountInfo = useMemo((): SignTxDataAccountInfo | undefined => {
-    if (!activeAccount) return undefined;
+    if (!dappOrigin) return undefined;
+    const accountId = sessionAccountByOrigin[dappOrigin];
+    if (!accountId) return undefined;
+    const account = allAccounts.find(a => a.accountId === accountId);
+    if (!account) return undefined;
     return {
-      name: activeAccount.metadata.name,
-      blockchainName: activeAccount.blockchainName,
+      name: account.metadata.name,
+      blockchainName: account.blockchainName,
     };
-  }, [activeAccount]);
+  }, [dappOrigin, sessionAccountByOrigin, allAccounts]);
 
   return {
     transactionInfo,

@@ -12,7 +12,7 @@ import {
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { safeAddrToSignWith } from '../../store/util';
+import { addrToDisplay } from '../../store/util';
 import { formatSignDataPayload } from '../../utils/sign-data-payload';
 
 import type { SignDataDisplayDapp } from './types';
@@ -97,7 +97,7 @@ export const SignDataContent = ({
           {t('dapp-connector.cardano.sign-data.address-label')}
         </Text.XS>
         <Text.S style={styles.preText} selectable>
-          {safeAddrToSignWith(address)}
+          {addrToDisplay(address)}
         </Text.S>
       </View>
 

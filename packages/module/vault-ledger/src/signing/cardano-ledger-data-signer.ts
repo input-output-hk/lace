@@ -1,4 +1,3 @@
-import { Cardano } from '@cardano-sdk/core';
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
 import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
 import { CommunicationType, KeyPurpose } from '@cardano-sdk/key-management';
@@ -7,6 +6,7 @@ import { HexBytes } from '@lace-sdk/util';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 
+import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type {
@@ -58,7 +58,7 @@ export class CardanoLedgerDataSigner implements CardanoDataSigner {
     try {
       const result = await keyAgent.signCip8Data({
         knownAddresses: this.#props.knownAddresses,
-        signWith: Cardano.PaymentAddress(request.signWith),
+        signWith: request.signWith,
         payload: HexBlob(request.payload),
       });
 
