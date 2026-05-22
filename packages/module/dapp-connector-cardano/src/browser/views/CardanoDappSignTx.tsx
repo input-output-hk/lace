@@ -32,6 +32,7 @@ export const CardanoDappSignTx = () => {
 
   const signTxData: UseSignTxDataResult = useSignTxData({
     txHex: request?.txHex ?? '',
+    dappOrigin: request?.dappOrigin,
   });
 
   /**

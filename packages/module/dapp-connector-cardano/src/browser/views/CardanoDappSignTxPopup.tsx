@@ -27,6 +27,7 @@ export const CardanoDappSignTxPopup = () => {
 
   const signTxData: UseSignTxDataResult = useSignTxData({
     txHex: request?.txHex ?? '',
+    dappOrigin: request?.dappOrigin,
   });
   const hasConfirmedRef = useRef(false);
 

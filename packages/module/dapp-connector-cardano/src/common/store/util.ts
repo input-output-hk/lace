@@ -56,6 +56,35 @@ export const safeAddrToSignWith = (
 };
 
 /**
+ * Format an address for human display in the sign-data dialog.
+ *
+ * Payment and reward addresses are returned unchanged. A DRep keyhash hex is
+ * encoded as a CIP-129 DRep ID (`drep1...`), which is what CIP-95 dApp users
+ * expect to see. Signing still uses the type-6 enterprise encoding produced
+ * by `addrToSignWith`. Unrecognised input is returned as-is.
+ */
+export const addrToDisplay = (
+  addr: Cardano.PaymentAddress | Cardano.RewardAccount | string,
+): string => {
+  if (Cardano.isRewardAccount(addr)) {
+    return addr;
+  }
+  try {
+    return Cardano.PaymentAddress(addr);
+  } catch {
+    try {
+      const drepKeyHash = Ed25519KeyHashHex(addr);
+      return Cardano.DRepID.cip129FromCredential({
+        hash: drepKeyHash,
+        type: Cardano.CredentialType.KeyHash,
+      });
+    } catch {
+      return addr;
+    }
+  }
+};
+
+/**
  * Transforms AnyAddress<CardanoAddressData> to GroupedAddress format
  * required by the SDK's cip30signData function.
  *

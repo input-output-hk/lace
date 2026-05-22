@@ -368,6 +368,12 @@ describe('useSignData (mobile)', () => {
 
       expect(result.current.accountInfo).toEqual(accountInfo);
     });
+
+    it('passes dapp origin to useSignDataAccountInfo so the session account is used, not the active wallet account', () => {
+      renderHook(() => useSignData(createMockProps()));
+
+      expect(mockUseSignDataAccountInfo).toHaveBeenCalledWith(mockDapp.origin);
+    });
   });
 
   // ───────────── SignData-specific: no isSigning state ─────────────
