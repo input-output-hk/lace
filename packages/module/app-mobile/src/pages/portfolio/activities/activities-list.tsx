@@ -60,10 +60,6 @@ export const ActivitiesList = ({
     'activities.incrementDesiredLoadedActivitiesCount',
   );
 
-  const pollNewerAccountsActivities = useDispatchLaceAction(
-    'activities.pollNewerAccountsActivities',
-  );
-
   const handleActivityPress = useCallback(
     (id: string) => {
       if (activitiesItemUICustomisation?.onActivityClick) {
@@ -75,11 +71,17 @@ export const ActivitiesList = ({
         return;
       }
 
-      NavigationControls.sheets.navigate(SheetRoutes.ActivityDetail, {
-        activityId: id,
-      });
+      NavigationControls.navigate(
+        SheetRoutes.ActivityDetail,
+        {
+          activityId: id,
+        },
+        {
+          reset: scrollEnabled,
+        },
+      );
     },
-    [activitiesItemUICustomisation, appConfig, address],
+    [activitiesItemUICustomisation, appConfig, address, scrollEnabled],
   );
 
   const incrementDesiredLoadedActivitiesCountDebounced = useMemo(
@@ -124,17 +126,8 @@ export const ActivitiesList = ({
     if (!isVisible) return;
     if (activities.length === 0) {
       loadOlderActivities();
-    } else {
-      // This is emitted multiple times, but the side effect
-      // only handles the first occurrence
-      pollNewerAccountsActivities();
     }
-  }, [
-    activities.length,
-    isVisible,
-    loadOlderActivities,
-    pollNewerAccountsActivities,
-  ]);
+  }, [activities.length, isVisible, loadOlderActivities]);
 
   if (activities.length === 0) {
     return (
@@ -150,7 +143,7 @@ export const ActivitiesList = ({
       sections={groupedActivities}
       onEndReachedThreshold={0.2}
       keyExtractor={keyExtractor}
-      onEndReached={onListEndReached}
+      onEndReached={scrollEnabled ? onListEndReached : undefined}
       scrollEnabled={scrollEnabled}
       showsVerticalScrollIndicator={scrollEnabled}
       onActivityPress={handleActivityPress}

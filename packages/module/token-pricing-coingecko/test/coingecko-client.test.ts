@@ -22,8 +22,8 @@ describe('coingeckoClient', () => {
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
-    it('should fetch prices for multiple tokens', async () => {
-      // Mock individual fetch calls for each token
+    it('should fetch prices for multiple tokens and populate priceInUsd', async () => {
+      // Mock individual fetch calls for each token (USD currency → no extra usd field)
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
@@ -52,10 +52,12 @@ describe('coingeckoClient', () => {
       expect(result.get('cardano')).toEqual({
         price: 0.5,
         change24h: 2.5,
+        priceInUsd: 0.5,
       });
       expect(result.get('minswap')).toEqual({
         price: 0.02,
         change24h: -1.2,
+        priceInUsd: 0.02,
       });
       // Verify each token was fetched individually
       expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -90,6 +92,7 @@ describe('coingeckoClient', () => {
           cardano: {
             eur: 0.45,
             eur_24h_change: 1.8,
+            usd: 0.5, // included because includeUsd=true and EUR ≠ USD
           },
         }),
       });
@@ -103,6 +106,7 @@ describe('coingeckoClient', () => {
       expect(result.get('cardano')).toEqual({
         price: 0.45,
         change24h: 1.8,
+        priceInUsd: 0.5,
       });
     });
 
@@ -146,11 +150,13 @@ describe('coingeckoClient', () => {
       expect(result.get('cardano')).toEqual({
         price: 0.5,
         change24h: 2.5,
+        priceInUsd: 0.5,
       });
       expect(result.get('minswap')).toBeUndefined();
       expect(result.get('sundaeswap')).toEqual({
         price: 0.03,
         change24h: 5.0,
+        priceInUsd: 0.03,
       });
       // Verify each token was fetched individually
       expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -176,13 +182,13 @@ describe('coingeckoClient', () => {
         'bitcoin',
       ]);
 
-      // Verify each token was fetched with its own URL (no commas in ids parameter)
+      // Verify each token was fetched with its own URL (no comma in ids, USD has no extra vs_currency)
       expect(fetchMock).toHaveBeenCalledTimes(2);
       const call1 = fetchMock.mock.calls[0]?.[0] as string;
       const call2 = fetchMock.mock.calls[1]?.[0] as string;
 
       expect(call1).toContain('ids=cardano');
-      expect(call1).not.toContain(','); // No comma means single token
+      expect(call1).not.toContain(','); // USD: ids is single token, vs_currencies is just 'usd'
       expect(call2).toContain('ids=bitcoin');
       expect(call2).not.toContain(',');
     });

@@ -1,4 +1,8 @@
-import { ClaimPayload as ClaimPayloadTemplate } from '@lace-lib/ui-toolkit';
+import { AccountId } from '@lace-contract/wallet-repo';
+import {
+  AccountSecurityAlertInline,
+  ClaimPayload as ClaimPayloadTemplate,
+} from '@lace-lib/ui-toolkit';
 import React from 'react';
 
 import { useClaimPayload } from './useClaimPayload';
@@ -39,6 +43,13 @@ export const ClaimPayload = (
       onSelectAccount={onSelectAccount}
       onCancel={onCancel}
       onSubmit={onSubmit}
+      belowAccountSlot={
+        selectedAccountId ? (
+          <AccountSecurityAlertInline
+            accountId={AccountId(selectedAccountId)}
+          />
+        ) : undefined
+      }
     />
   );
 };

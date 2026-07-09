@@ -18,7 +18,7 @@ import {
   threeAccountCardanoWalletAccounts,
 } from '../../mocks';
 
-import type { Action } from '../../../src/contract';
+import type { CardanoContextAction } from '../../../src/contract';
 import type {
   CardanoProviderDependencies,
   DiscoverAddressesProps,
@@ -37,10 +37,11 @@ const actions = {
 };
 
 describe('addressDiscoverySync', () => {
-  it('marks operation as InProgress on start, upserts addresses and completes on success', () => {
+  it('marks operation as InProgress on start, upserts addresses, chains transaction-polling on the same round, and completes on success', () => {
     testSideEffect(addressDiscoverySync, ({ cold, hot, expectObservable }) => {
       const accountId = threeAccountCardanoWalletAccounts[0].accountId;
-      const operationId = `${accountId}-tip-hash-address-discovery`;
+      const tipHash = 'tip-hash';
+      const operationId = `${accountId}-${tipHash}-address-discovery`;
       const operation: SyncOperation = {
         operationId,
         status: 'Pending',
@@ -76,7 +77,7 @@ describe('addressDiscoverySync', () => {
           actions,
         },
         assertion: sideEffect$ => {
-          expectObservable(sideEffect$).toBe('a-(bc)', {
+          expectObservable(sideEffect$).toBe('a-(bcd)', {
             a: actions.sync.updateSyncOperation({
               accountId,
               operationId,
@@ -90,7 +91,16 @@ describe('addressDiscoverySync', () => {
               accountId,
               addresses: [cardanoAccount0Addr],
             }),
-            c: actions.sync.completeSyncOperation({
+            c: actions.sync.addSyncOperation({
+              accountId,
+              operation: {
+                operationId: `${accountId}-${tipHash}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            d: actions.sync.completeSyncOperation({
               accountId,
               operationId,
             }),
@@ -105,7 +115,8 @@ describe('addressDiscoverySync', () => {
     // This test verifies the happy path with retryBackoff operator applied
     testSideEffect(addressDiscoverySync, ({ cold, hot, expectObservable }) => {
       const accountId = threeAccountCardanoWalletAccounts[0].accountId;
-      const operationId = `${accountId}-tip-hash-address-discovery`;
+      const tipHash = 'tip-hash';
+      const operationId = `${accountId}-${tipHash}-address-discovery`;
       const operation: SyncOperation = {
         operationId,
         status: 'Pending',
@@ -143,7 +154,7 @@ describe('addressDiscoverySync', () => {
         },
         assertion: sideEffect$ => {
           // Same behavior as success test - transparent retry doesn't change happy path
-          expectObservable(sideEffect$).toBe('a-(bc)', {
+          expectObservable(sideEffect$).toBe('a-(bcd)', {
             a: actions.sync.updateSyncOperation({
               accountId,
               operationId,
@@ -157,7 +168,16 @@ describe('addressDiscoverySync', () => {
               accountId,
               addresses: [cardanoAccount0Addr],
             }),
-            c: actions.sync.completeSyncOperation({
+            c: actions.sync.addSyncOperation({
+              accountId,
+              operation: {
+                operationId: `${accountId}-${tipHash}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            d: actions.sync.completeSyncOperation({
               accountId,
               operationId,
             }),
@@ -208,7 +228,7 @@ describe('addressDiscoverySync', () => {
         },
         assertion: sideEffect$ => {
           // Collect emissions to verify failure occurs after retries
-          const emissions: Action[] = [];
+          const emissions: CardanoContextAction[] = [];
           sideEffect$.subscribe(action => emissions.push(action));
           flush();
 
@@ -375,11 +395,13 @@ describe('addressDiscoverySync', () => {
   });
 
   it('should process multiple operations concurrently without cancelling (mergeMap behavior)', () => {
-    testSideEffect(addressDiscoverySync, ({ cold, hot, expectObservable }) => {
+    testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
       const account1Id = threeAccountCardanoWalletAccounts[0].accountId;
       const account2Id = threeAccountCardanoWalletAccounts[1].accountId;
-      const op1Id = `${account1Id}-tip-hash-1-address-discovery`;
-      const op2Id = `${account2Id}-tip-hash-2-address-discovery`;
+      const tipHash1 = 'tip-hash-1';
+      const tipHash2 = 'tip-hash-2';
+      const op1Id = `${account1Id}-${tipHash1}-address-discovery`;
+      const op2Id = `${account2Id}-${tipHash2}-address-discovery`;
 
       const operation1: SyncOperation = {
         operationId: op1Id,
@@ -418,7 +440,7 @@ describe('addressDiscoverySync', () => {
         .mockImplementation((_props: DiscoverAddressesProps) => {
           callCount++;
           // First call (op1): takes 3 frames
-          // Second call (op2): takes 6 frames to complete at frame 7
+          // Second call (op2): takes 6 frames
           const delay = callCount === 1 ? '---a|' : '------a|';
           return cold(delay, { a: Ok(cardanoAccount0Addr) });
         });
@@ -437,42 +459,194 @@ describe('addressDiscoverySync', () => {
           actions,
         },
         assertion: sideEffect$ => {
-          // With mergeMap, both operations should complete concurrently
-          // Note: Parentheses in marbles consume frames: (cd) spans frames 3-6, (ef) starts at frame 7
-          expectObservable(sideEffect$).toBe('ab--(cd)(ef)', {
-            // Frame 0: op1 update (action emitted), subscribe to accounts$ (cold), accounts$ emits immediately
-            a: actions.sync.updateSyncOperation({
+          // Each completion now emits 3 actions (upsert + addSyncOperation(polling)
+          // + completeSyncOperation). The 5-char parenthesized groups overlap
+          // with op2's completion frame in marble notation, so use flush()
+          // + programmatic assertions instead.
+          const emissions: CardanoContextAction[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+
+          expect(emissions).toEqual([
+            // Frame 0: op1 InProgress
+            actions.sync.updateSyncOperation({
               accountId: account1Id,
               operationId: op1Id,
               update: { status: 'InProgress', type: 'Indeterminate' },
             }),
-            // Frame 1: op2 update (action emitted), subscribe to accounts$ (cold), accounts$ emits immediately
-            b: actions.sync.updateSyncOperation({
+            // Frame 1: op2 InProgress
+            actions.sync.updateSyncOperation({
               accountId: account2Id,
               operationId: op2Id,
               update: { status: 'InProgress', type: 'Indeterminate' },
             }),
-            // Frame 3: op1 complete (discovery started at frame 0, takes 3 frames)
-            c: actions.addresses.upsertAddresses({
+            // Frame 3: op1 completion group
+            actions.addresses.upsertAddresses({
               blockchainName: 'Cardano',
               accountId: account1Id,
               addresses: [cardanoAccount0Addr],
             }),
-            d: actions.sync.completeSyncOperation({
+            actions.sync.addSyncOperation({
+              accountId: account1Id,
+              operation: {
+                operationId: `${account1Id}-${tipHash1}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            actions.sync.completeSyncOperation({
               accountId: account1Id,
               operationId: op1Id,
             }),
-            // Frame 7: op2 complete (discovery started at frame 1, takes 6 frames)
-            e: actions.addresses.upsertAddresses({
+            // Frame 7: op2 completion group
+            actions.addresses.upsertAddresses({
               blockchainName: 'Cardano',
               accountId: account2Id,
               addresses: [cardanoAccount0Addr],
             }),
-            f: actions.sync.completeSyncOperation({
+            actions.sync.addSyncOperation({
+              accountId: account2Id,
+              operation: {
+                operationId: `${account2Id}-${tipHash2}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            actions.sync.completeSyncOperation({
               accountId: account2Id,
               operationId: op2Id,
             }),
-          });
+          ]);
+        },
+      };
+    });
+  });
+
+  it('forwards thorough=false to discoverAddresses for a standard ADDRESS_DISCOVERY operation', () => {
+    testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
+      const accountId = threeAccountCardanoWalletAccounts[0].accountId;
+      const operationId = `${accountId}-tip-hash-address-discovery`;
+      const operation: SyncOperation = {
+        operationId,
+        status: 'Pending',
+        description: 'sync.operation.address-discovery',
+        startedAt: Timestamp(Date.now()),
+      };
+      const addSyncOperation$ = hot('a', {
+        a: actions.sync.addSyncOperation({ accountId, operation }),
+      });
+      const accounts$ = hot<AnyAccount[]>('a', {
+        a: [threeAccountCardanoWalletAccounts[0]],
+      });
+      const discoverAddresses = vi
+        .fn()
+        .mockImplementation(() => cold('-a|', { a: Ok(cardanoAccount0Addr) }));
+
+      return {
+        actionObservables: {
+          sync: { addSyncOperation$: addSyncOperation$ },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+        },
+        dependencies: {
+          cardanoProvider: {
+            discoverAddresses,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(discoverAddresses).toHaveBeenCalledTimes(1);
+          expect(discoverAddresses).toHaveBeenCalledWith(
+            expect.objectContaining({ thorough: false }),
+            expect.anything(),
+          );
+        },
+      };
+    });
+  });
+
+  it('forwards thorough=true to discoverAddresses and chains transaction-polling on the same round for an ADDRESS_DISCOVERY_THOROUGH operation', () => {
+    testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
+      const accountId = threeAccountCardanoWalletAccounts[0].accountId;
+      const tipHash = 'tip-hash';
+      const operationId = `${accountId}-${tipHash}-address-discovery-thorough`;
+      const operation: SyncOperation = {
+        operationId,
+        status: 'Pending',
+        description: 'sync.operation.address-discovery',
+        startedAt: Timestamp(Date.now()),
+      };
+      const addSyncOperation$ = hot('a', {
+        a: actions.sync.addSyncOperation({ accountId, operation }),
+      });
+      const accounts$ = hot<AnyAccount[]>('a', {
+        a: [threeAccountCardanoWalletAccounts[0]],
+      });
+      const discoverAddresses = vi
+        .fn()
+        .mockImplementation(() => cold('-a|', { a: Ok(cardanoAccount0Addr) }));
+
+      return {
+        actionObservables: {
+          sync: { addSyncOperation$: addSyncOperation$ },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+        },
+        dependencies: {
+          cardanoProvider: {
+            discoverAddresses,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+        },
+        assertion: sideEffect$ => {
+          const emissions: CardanoContextAction[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+
+          // Provider was called with the thorough flag set.
+          expect(discoverAddresses).toHaveBeenCalledTimes(1);
+          expect(discoverAddresses).toHaveBeenCalledWith(
+            expect.objectContaining({ thorough: true }),
+            expect.anything(),
+          );
+
+          // The chained transaction-polling op reuses the thorough op's tip
+          // hash — proves chainAccountStateOperations parses the tip correctly
+          // for the thorough variant (suffix length differs from standard).
+          expect(emissions).toEqual([
+            actions.sync.updateSyncOperation({
+              accountId,
+              operationId,
+              update: {
+                status: 'InProgress',
+                type: 'Indeterminate',
+              },
+            }),
+            actions.addresses.upsertAddresses({
+              blockchainName: 'Cardano',
+              accountId,
+              addresses: [cardanoAccount0Addr],
+            }),
+            actions.sync.addSyncOperation({
+              accountId,
+              operation: {
+                operationId: `${accountId}-${tipHash}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            actions.sync.completeSyncOperation({
+              accountId,
+              operationId,
+            }),
+          ]);
         },
       };
     });
@@ -481,7 +655,8 @@ describe('addressDiscoverySync', () => {
   it('should handle MultiSig accounts with script address', () => {
     testSideEffect(addressDiscoverySync, ({ hot, expectObservable }) => {
       const multiSigAccountId = AccountId('multisig-account-1');
-      const operationId = `${multiSigAccountId}-tip-hash-address-discovery`;
+      const tipHash = 'tip-hash';
+      const operationId = `${multiSigAccountId}-${tipHash}-address-discovery`;
       const operation: SyncOperation = {
         operationId,
         status: 'Pending',
@@ -552,7 +727,7 @@ describe('addressDiscoverySync', () => {
           actions,
         },
         assertion: sideEffect$ => {
-          expectObservable(sideEffect$).toBe('(abc)', {
+          expectObservable(sideEffect$).toBe('(abcd)', {
             a: actions.sync.updateSyncOperation({
               accountId: multiSigAccountId,
               operationId,
@@ -571,7 +746,16 @@ describe('addressDiscoverySync', () => {
                 },
               ],
             }),
-            c: actions.sync.completeSyncOperation({
+            c: actions.sync.addSyncOperation({
+              accountId: multiSigAccountId,
+              operation: {
+                operationId: `${multiSigAccountId}-${tipHash}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+            d: actions.sync.completeSyncOperation({
               accountId: multiSigAccountId,
               operationId,
             }),

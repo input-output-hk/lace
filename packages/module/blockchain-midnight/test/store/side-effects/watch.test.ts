@@ -14,8 +14,8 @@ import { syncActions } from '@lace-contract/sync';
 import { TokenId, tokensActions } from '@lace-contract/tokens';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { BigNumber, HexBytes, Timestamp } from '@lace-sdk/util';
+import { createKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import { createKeystore } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { dummyLogger } from 'ts-log';
@@ -51,7 +51,7 @@ import type {
   AccountId,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
-import type { FacadeState } from '@midnight-ntwrk/wallet-sdk-facade';
+import type { FacadeState } from '@midnight-ntwrk/wallet-sdk/facade';
 import type { RunHelpers } from 'rxjs/testing';
 
 // The wallet's coinsByTokenType$ emits this structure (not exported from midnight-context)
@@ -718,6 +718,15 @@ const dustParams = {
 };
 
 describe('updateDustBalance', () => {
+  const makeCoin = (generatedNow: bigint) =>
+    ({
+      generatedNow,
+      maxCap: 0n,
+      rate: 0n,
+      dtime: undefined,
+      maxCapReachedAt: new Date(0),
+    } as unknown as never);
+
   it('does not emit duplicate setDustBalance when same balance emits twice', () => {
     testSideEffect(
       {
@@ -725,8 +734,7 @@ describe('updateDustBalance', () => {
           // State emits twice with the same balance
           const mockState = {
             dust: {
-              balance: () => 1000n,
-              availableCoinsWithFullInfo: () => [],
+              totalCoins: [makeCoin(1000n)],
               state: { state: { params: dustParams } },
             },
           } as unknown as FacadeState;
@@ -763,15 +771,13 @@ describe('updateDustBalance', () => {
           // State emits with different balance values
           const mockState1 = {
             dust: {
-              balance: () => 1000n,
-              availableCoinsWithFullInfo: () => [],
+              totalCoins: [makeCoin(1000n)],
               state: { state: { params: dustParams } },
             },
           } as unknown as FacadeState;
           const mockState2 = {
             dust: {
-              balance: () => 2000n,
-              availableCoinsWithFullInfo: () => [],
+              totalCoins: [makeCoin(2000n)],
               state: { state: { params: dustParams } },
             },
           } as unknown as FacadeState;
@@ -813,6 +819,42 @@ describe('updateDustBalance', () => {
       },
     );
   });
+
+  it('emits non-zero setDustBalance when all dust is pending', () => {
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const mockState = {
+            dust: {
+              totalCoins: [makeCoin(2_980_000_000_000_000_000n)],
+              state: { state: { params: dustParams } },
+            },
+          } as unknown as FacadeState;
+          const wallet = createMockMidnightWallet(cold, {
+            state: () => cold('a', { a: mockState }),
+          });
+          return updateDustBalance(wallet);
+        },
+      },
+      ({ expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.midnightContext.setDustBalance({
+                accountId,
+                dustBalance: BigNumber(2_980_000_000_000_000_000n),
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
 });
 
 describe('updateDustGenerationDetails', () => {
@@ -839,8 +881,7 @@ describe('updateDustGenerationDetails', () => {
     ];
     const mockState = {
       dust: {
-        balance: () => 30n,
-        availableCoinsWithFullInfo: () => coinsWithFullInfo,
+        totalCoins: coinsWithFullInfo,
         state: { state: { params: dustParams } },
       },
     } as unknown as FacadeState;
@@ -913,8 +954,7 @@ describe('updateDustGenerationDetails', () => {
     ];
     const mockState = {
       dust: {
-        balance: () => 5n,
-        availableCoinsWithFullInfo: () => coinsWithFullInfo,
+        totalCoins: coinsWithFullInfo,
         state: { state: { params: dustParams } },
       },
     } as unknown as FacadeState;
@@ -957,8 +997,7 @@ describe('updateDustGenerationDetails', () => {
   it('emits setDustGenerationDetails with undefined when no coins available', () => {
     const mockState = {
       dust: {
-        balance: () => 1000n,
-        availableCoinsWithFullInfo: () => [],
+        totalCoins: [],
         state: { state: { params: dustParams } },
       },
     } as unknown as FacadeState;
@@ -984,6 +1023,56 @@ describe('updateDustGenerationDetails', () => {
               a: actions.midnightContext.setDustGenerationDetails({
                 accountId,
                 dustGenerationDetails: undefined,
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('emits non-zero details when all dust is pending', () => {
+    const pendingCoin = {
+      generatedNow: 30n,
+      maxCap: 100n,
+      rate: 1n,
+      dtime: new Date(1000),
+      maxCapReachedAt: new Date(2000),
+    };
+    const mockState = {
+      dust: {
+        totalCoins: [pendingCoin],
+        state: { state: { params: dustParams } },
+      },
+    } as unknown as FacadeState;
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            state: () => cold('a', { a: mockState }),
+          });
+          return updateDustGenerationDetails(wallet);
+        },
+      },
+      ({ expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.midnightContext.setDustGenerationDetails({
+                accountId,
+                dustGenerationDetails: {
+                  currentValue: 30n,
+                  maxCap: 100n,
+                  decayTime: 1000,
+                  maxCapReachedAt: 2000,
+                  rate: 1n,
+                },
               }),
             });
           },
@@ -1865,6 +1954,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -1934,6 +2024,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -1981,6 +2072,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2040,6 +2132,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2091,6 +2184,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2151,6 +2245,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2200,6 +2295,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2248,6 +2344,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2299,6 +2396,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2348,6 +2446,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               const emissions: unknown[] = [];
@@ -2404,6 +2503,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2449,6 +2549,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2501,6 +2602,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2514,6 +2616,231 @@ describe('watchMidnightAccounts', () => {
               );
               expect(mockWatchAccount).toHaveBeenCalledWith(
                 midnightAccount2,
+                previewNetwork.config,
+                mockStore,
+              );
+            },
+          };
+        },
+      );
+    });
+  });
+
+  describe('wallet active gating', () => {
+    it('does not start any watchers while wallet is inactive', () => {
+      const mockStore = createMockStore();
+      const mockWatchAccount = vi.fn(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        () => () => of(actions.sync.addSyncOperation({} as any)),
+      ) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnight: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              // `cold` (no `|`) so the gate stays subscribed across the run
+              // — `of(false)` would complete and propagate completion through
+              // `whileActive`'s `switchMap`, ending the side effect early.
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount1, midnightAccount2],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              isWalletActive$: cold('f', { f: false }),
+            },
+            assertion: sideEffect$ => {
+              sideEffect$.subscribe();
+              flush();
+              expect(mockWatchAccount).not.toHaveBeenCalled();
+            },
+          };
+        },
+      );
+    });
+
+    it('starts watchers when wallet becomes active', () => {
+      const mockStore = createMockStore();
+      const mockWatchAccount = vi.fn(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        () => () => of(actions.sync.addSyncOperation({} as any)),
+      ) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnight: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              // Inactive at frame 0, becomes active at frame 4
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount1],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              isWalletActive$: cold('f---t', { f: false, t: true }),
+            },
+            assertion: sideEffect$ => {
+              sideEffect$.subscribe();
+              flush();
+              expect(mockWatchAccount).toHaveBeenCalledTimes(1);
+              expect(mockWatchAccount).toHaveBeenCalledWith(
+                midnightAccount1,
+                previewNetwork.config,
+                mockStore,
+              );
+            },
+          };
+        },
+      );
+    });
+
+    // Regression guard: this test fails if `whileActive` is moved
+    // mid-pipeline — leaked inner subscriptions would keep the watcher
+    // alive past the lock and `wallet.stop()` (via finalize) would not run.
+    it('stops existing watchers when wallet transitions from active to inactive', () => {
+      const mockStore = createMockStore();
+      let isWatcherStopped = false;
+      const mockWatchAccount = vi.fn(
+        () => () =>
+          new Observable(subscriber => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+            subscriber.next(actions.sync.addSyncOperation({} as any));
+            return () => {
+              isWatcherStopped = true;
+            };
+          }),
+      ) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnight: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              // Active at frame 0, locked at frame 5
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount1],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              isWalletActive$: cold('t----f', { t: true, f: false }),
+            },
+            assertion: sideEffect$ => {
+              sideEffect$.subscribe();
+              flush();
+              // Watcher started while active, then teardown propagated on lock
+              // — `finalize` in `watchMidnightAccount` runs `wallet.stop()`
+              // (closing indexer + node-relay WebSockets) and removes the
+              // wallet from `midnightWallets$`. The mock's teardown stands in
+              // for those real-world side effects.
+              expect(isWatcherStopped).toBe(true);
+            },
+          };
+        },
+      );
+    });
+
+    // Verifies the structural guarantee that enables resume-from-persisted-state:
+    // the same `mockStore` instance is passed to `watchAccount` across a lock/unlock
+    // cycle. The actual SDK-level restoration from `SerializedMidnightWallet`
+    // (persisted every 5s by the SDK) and resume-from-`appliedIndex` happens
+    // inside `watchMidnightAccount` → `startMidnightAccountWallet`. By passing
+    // the same store reference, the SDK reads the persisted state and resumes
+    // rather than performing a full resync.
+    it('reuses the same persisted store across lock/unlock to enable wallet resume', () => {
+      const mockStore = createMockStore();
+      const mockWatchAccount = vi.fn(
+        () => () =>
+          new Observable(subscriber => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+            subscriber.next(actions.sync.addSyncOperation({} as any));
+          }),
+      ) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnight: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount1],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              // Active → locked → active: simulates lock/unlock cycle.
+              isWalletActive$: cold('t-f-t', {
+                t: true,
+                f: false,
+              }),
+            },
+            assertion: sideEffect$ => {
+              sideEffect$.subscribe();
+              flush();
+              // Watcher started once initially, then again after unlock
+              expect(mockWatchAccount).toHaveBeenCalledTimes(2);
+              // Each invocation receives the SAME persisted store instance,
+              // so the SDK can deserialize the previous SerializedMidnightWallet
+              // and resume from the stored appliedIndex on unlock.
+              expect(mockWatchAccount).toHaveBeenNthCalledWith(
+                1,
+                midnightAccount1,
+                previewNetwork.config,
+                mockStore,
+              );
+              expect(mockWatchAccount).toHaveBeenNthCalledWith(
+                2,
+                midnightAccount1,
                 previewNetwork.config,
                 mockStore,
               );
@@ -2568,6 +2895,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2628,6 +2956,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
@@ -2683,6 +3012,7 @@ describe('watchMidnightAccounts', () => {
             dependencies: {
               actions,
               logger,
+              isWalletActive$: cold('a', { a: true }),
             },
             assertion: sideEffect$ => {
               sideEffect$.subscribe();

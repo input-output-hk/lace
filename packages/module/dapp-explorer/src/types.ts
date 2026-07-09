@@ -1,89 +1,102 @@
 import { z } from 'zod';
 
-export const DappCategorySchemaWithUnknown = z.union([
-  z.enum([
-    'show all',
-    'games',
-    'defi',
-    'collectibles',
-    'marketplaces',
-    'high-risk',
-    'gambling',
-    'exchanges',
-    'social',
-    'other',
-  ]),
-  z.string().min(1),
-]);
+// ─── Category ───────────────────────────────────────────────────────────────
 
-export const DappLinkSchemaWithUnknown = z.union([
-  z.enum([
-    'discord',
-    'facebook',
-    'github',
-    'instagram',
-    'medium',
-    'reddit',
-    'telegram',
-    'tiktok',
-    'twitter',
-    'youtube',
-    'blog',
-    'gitbook',
-    'coingecko',
-  ]),
-  z.string().min(1),
-]);
-export type DappCategory = z.infer<typeof DappCategorySchemaWithUnknown>;
-export type DappLink = z.infer<typeof DappLinkSchemaWithUnknown>;
-
-export const DappRadarItemSchema = z
-  .object({
-    dappId: z.number(),
-    name: z.string(),
-    description: z.string(),
-    fullDescription: z.string(),
-    logo: z.string(),
-    link: z.string(),
-    website: z.string(),
-    chains: z.string().array(),
-    categories: z.string().array(),
-    socialLinks: z
-      .object({
-        title: z.string(),
-        type: DappLinkSchemaWithUnknown,
-        url: z.string(),
-      })
-      .array(),
-    metrics: z.object({
-      transactions: z.number().nullable(),
-      transactionsPercentageChange: z.number().nullable(),
-      uaw: z.number().nullable(),
-      uawPercentageChange: z.number().nullable(),
-      volume: z.number().nullable(),
-      volumePercentageChange: z.number().nullable(),
-      balance: z.number().nullable(),
-      balancePercentageChange: z.number().nullable(),
-    }),
-    tags: z
-      .object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-      })
-      .array(),
-    isActive: z.boolean(),
-  })
-  .passthrough(); // Don't fail validation, use this to send sentry errors so we know to modify the schema when new fields are added/shape changes
-
-export type DAppRadarItem = z.infer<typeof DappRadarItemSchema>;
-
-export const DappRadarDappFetchResponse = z.object({
-  success: z.boolean(),
-  results: DappRadarItemSchema.array(),
+export const CardanoCubeCategorySchema = z.object({
+  id: z.number(),
+  parent_id: z.number().nullable(),
+  name: z.string(),
+  slug: z.string(),
+  description: z.string().nullable().optional(),
+  projects_count: z.number(),
+  ancestry_depth: z.number().nullable().optional(),
+  ancestry: z.string().nullable().optional(),
+  updated_at: z.string(),
 });
 
-export type StoredDappData = {
-  results: DAppRadarItem[];
-  cachedUntil: Date;
-};
+export type CardanoCubeCategory = z.infer<typeof CardanoCubeCategorySchema>;
+
+// ─── Project (API shape) ─────────────────────────────────────────────────────
+
+export const CardanoCubeProjectSchema = z.object({
+  name: z.string(),
+  slug: z.string(),
+  short_description: z.string().nullable().optional(),
+  logos: z.object({
+    small: z.string().nullable(),
+    medium: z.string().nullable(),
+    large: z.string().nullable(),
+  }),
+  rating: z.object({
+    vote_count: z.number(),
+    average_rating: z.number().nullable(),
+    star_count: z.number(),
+  }),
+  website: z.string().nullable().optional(),
+  active_status: z.string(),
+  scam_status: z.string(),
+  twitter: z.string().nullable().optional(),
+  github: z.string().nullable().optional(),
+  discord: z.string().nullable().optional(),
+  telegram: z.string().nullable().optional(),
+  facebook: z.string().nullable().optional(),
+  reddit: z.string().nullable().optional(),
+  linkedin: z.string().nullable().optional(),
+  updated_at: z.string(),
+  main_category: CardanoCubeCategorySchema.nullable().optional(),
+  additional_categories: CardanoCubeCategorySchema.array().default([]),
+});
+
+export type CardanoCubeProject = z.infer<typeof CardanoCubeProjectSchema>;
+
+// ─── Pagination ──────────────────────────────────────────────────────────────
+
+export const CardanoCubePaginationSchema = z.object({
+  next: z.number().nullable(),
+  pages: z.number(),
+  count: z.number(),
+  page: z.number(),
+  limit: z.number(),
+});
+
+export const CardanoCubeProjectsResponseSchema = z.object({
+  projects: CardanoCubeProjectSchema.array(),
+  pagination: CardanoCubePaginationSchema.passthrough(),
+});
+
+export const CardanoCubeCategoriesResponseSchema = z.object({
+  categories: CardanoCubeCategorySchema.array(),
+  pagination: CardanoCubePaginationSchema.passthrough(),
+});
+
+// ─── Internal DappItem (merged, with chain) ──────────────────────────────────
+
+export const DappItemSchema = z.object({
+  slug: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  logoUrl: z.string().nullable(),
+  website: z.string().nullable(),
+  active_status: z.string(),
+  scam_status: z.string(),
+  rating: z.object({
+    vote_count: z.number(),
+    average_rating: z.number().nullable(),
+    star_count: z.number(),
+  }),
+  chain: z.string(),
+  categories: z.string().array(),
+  socialLinks: z.object({ type: z.string(), url: z.string() }).array(),
+  updated_at: z.string(),
+});
+
+export type DappItem = z.infer<typeof DappItemSchema>;
+
+// ─── Category filter type ────────────────────────────────────────────────────
+
+export const DappCategorySchemaWithUnknown = z.union([
+  z.literal('show all'),
+  z.string().min(1),
+]);
+
+export type DappCategory = z.infer<typeof DappCategorySchemaWithUnknown>;

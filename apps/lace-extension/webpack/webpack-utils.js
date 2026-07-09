@@ -124,6 +124,11 @@ const transformManifest = (content, mode) => {
         .replace(
           '$SWAP_PROVIDER_URLS',
           [process.env.STEELSWAP_API_BASE_URL].join(''),
+        )
+        .replace(
+          '$DAPP_EXPLORER_URL',
+          process.env.CARDANO_CUBE_BASE_URL ||
+            process.env.EXPO_PUBLIC_CARDANO_CUBE_BASE_URL,
         );
 
     if (process.env.EXTENSION_KEY) {

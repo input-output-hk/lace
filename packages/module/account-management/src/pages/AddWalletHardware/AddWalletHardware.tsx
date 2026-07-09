@@ -1,16 +1,16 @@
-import { OnboardingHardwareWallet as OnboardingHardwareWalletTemplate } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  OnboardingHardwareWallet as OnboardingHardwareWalletTemplate,
+  Sheet,
+} from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useAddWalletHardware } from './useAddWalletHardware';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
-const SHEET_HEIGHT_RATIO = 0.9;
-
-export const AddWalletHardware = (
-  _props: SheetScreenProps<SheetRoutes.AddWalletHardware>,
-) => {
+export const AddWalletHardware = ({
+  navigation,
+}: SheetScreenProps<SheetRoutes.AddWalletHardware>) => {
   const {
     title,
     subtitle,
@@ -21,32 +21,37 @@ export const AddWalletHardware = (
     connectButtonLabel,
     isConnecting,
     error,
+    isError,
   } = useAddWalletHardware();
-  const { height: windowHeight } = useWindowDimensions();
 
-  const containerStyle = useMemo(
-    () => [styles.container, { height: windowHeight * SHEET_HEIGHT_RATIO }],
-    [windowHeight],
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      header: <Sheet.Header title={title} />,
+      footer: (
+        <Sheet.Footer
+          showDivider={false}
+          primaryButton={{
+            label: connectButtonLabel,
+            onPress: onConnect,
+            testID: 'onboarding-hw-connect-button',
+          }}
+        />
+      ),
+    });
+  }, [navigation, title, onConnect, connectButtonLabel]);
 
   return (
-    <View style={containerStyle}>
-      <OnboardingHardwareWalletTemplate
-        title={title}
-        subtitle={subtitle}
-        supportedDevices={supportedDevices}
-        instructionText={error ?? instructionText}
-        onBackPress={onBackPress}
-        onConnect={onConnect}
-        connectButtonLabel={connectButtonLabel}
-        isLoading={isConnecting}
-      />
-    </View>
+    <OnboardingHardwareWalletTemplate
+      embedded
+      title={title}
+      subtitle={subtitle}
+      supportedDevices={supportedDevices}
+      instructionText={error ?? instructionText}
+      onBackPress={onBackPress}
+      onConnect={onConnect}
+      connectButtonLabel={connectButtonLabel}
+      isLoading={isConnecting}
+      isError={isError}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-});

@@ -21,7 +21,6 @@ const CardanoActivityDetailsContent = ({
   activityDetail,
   activityId,
   explorerUrl,
-  getMainTokenBalanceChange,
   tokensMetadataByTokenId,
 }: ActivityDetailsContentProps) => {
   const addresses = useLaceSelector(
@@ -49,7 +48,6 @@ const CardanoActivityDetailsContent = ({
       activityDetail={activityDetail as ActivityDetail<CardanoTransaction>}
       explorerUrl={explorerUrl}
       ownAddresses={cardanoAddresses}
-      getMainTokenBalanceChange={getMainTokenBalanceChange}
       tokensMetadataByTokenId={tokensMetadataByTokenId}
     />
   );

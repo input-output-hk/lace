@@ -1,3 +1,4 @@
+import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { StackRoutes, TabRoutes } from '@lace-lib/navigation';
 import { useHwWalletSetupForm } from '@lace-lib/util-hw/extension-ui';
@@ -13,7 +14,8 @@ export const useOnboardingHardwareSetup = ({
   route,
 }: StackScreenProps<StackRoutes.OnboardingHardwareSetup>) => {
   const { t } = useTranslation();
-  const { optionId, device, derivationTypes } = route.params;
+  const { trackEvent } = useAnalytics();
+  const { optionId, walletType, device, derivationTypes } = route.params;
 
   const attemptCreateHardwareWallet = useDispatchLaceAction(
     'onboardingV2.attemptCreateHardwareWallet',
@@ -34,13 +36,24 @@ export const useOnboardingHardwareSetup = ({
     accountIndex,
     setAccountIndex,
     derivationType,
-    handleDerivationTypeChange,
+    handleDerivationTypeChange: setDerivationType,
     derivationTypeOptions,
     error,
   } = useHwWalletSetupForm({
     derivationTypes,
     errorCategory: createWalletError as HardwareErrorCategory | null,
   });
+
+  const handleDerivationTypeChange = useCallback(
+    (value: string) => {
+      trackEvent('onboarding | hardware wallet | derivation type | changed', {
+        walletType,
+        derivationType: value,
+      });
+      setDerivationType(value);
+    },
+    [setDerivationType, trackEvent, walletType],
+  );
 
   const navigateHome = useCallback(() => {
     navigation.reset({
@@ -63,6 +76,11 @@ export const useOnboardingHardwareSetup = ({
   const handleCreateWallet = useCallback(() => {
     if (isCreating) return;
 
+    trackEvent('onboarding | hardware wallet | create | press', {
+      walletType,
+      ...(derivationType && { derivationType }),
+      accountIndex,
+    });
     // TODO: use loadHwBlockchainSupport addon to show blockchain selector when > 1
     attemptCreateHardwareWallet({
       optionId,
@@ -75,9 +93,11 @@ export const useOnboardingHardwareSetup = ({
     isCreating,
     attemptCreateHardwareWallet,
     optionId,
+    walletType,
     device,
     accountIndex,
     derivationType,
+    trackEvent,
   ]);
 
   const handleBackPress = useCallback(() => {

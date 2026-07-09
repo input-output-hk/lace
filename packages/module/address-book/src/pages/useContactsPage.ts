@@ -43,24 +43,33 @@ export const useContactsPage = () => {
 
   const onClosePress = useCallback(() => {
     trackEvent('address book | close | press');
-    NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+    NavigationControls.navigate(StackRoutes.Home, {
       screen: TabRoutes.Portfolio,
     });
   }, [trackEvent]);
 
   const onAddPress = useCallback(() => {
     trackEvent('address book | add | press');
-    NavigationControls.sheets.navigate(SheetRoutes.AddContact);
+    NavigationControls.navigate(SheetRoutes.AddContact);
   }, [trackEvent]);
 
   const onContactPress = useCallback(
     (contact: ContactItem) => {
-      trackEvent('address book | contact | press', { contactId: contact.id });
-      NavigationControls.sheets.navigate(SheetRoutes.ContactDetails, {
+      const original = contacts.find(c => c.id === contact.id);
+      if (original) {
+        trackEvent('address book | contact | press', {
+          addressCount: original.addresses.length,
+          blockchains: [
+            ...new Set(original.addresses.map(a => a.blockchainName)),
+          ].sort(),
+          hasAlias: original.aliases.length > 0,
+        });
+      }
+      NavigationControls.navigate(SheetRoutes.ContactDetails, {
         contactId: contact.id,
       });
     },
-    [trackEvent],
+    [contacts, trackEvent],
   );
 
   const actions = useMemo(

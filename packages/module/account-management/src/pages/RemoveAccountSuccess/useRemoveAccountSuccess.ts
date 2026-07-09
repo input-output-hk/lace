@@ -20,9 +20,15 @@ export const useRemoveAccountSuccess = () => {
     trackEvent('account management | account | deleted');
   }, [trackEvent]);
 
+  useEffect(() => {
+    return () => {
+      clearActiveSheetPage(null);
+    };
+  }, [clearActiveSheetPage]);
+
   const buttonAction = useCallback(() => {
     clearActiveSheetPage(null);
-    NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+    NavigationControls.navigate(StackRoutes.Home, {
       screen: TabRoutes.AccountCenter,
     });
   }, [clearActiveSheetPage]);

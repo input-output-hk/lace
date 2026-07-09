@@ -1,13 +1,18 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
+import { httpClientProvingProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 
 import { APIError } from './api-error';
 import { FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR } from './const';
+import { DappZkConfigProvider } from './dapp-zk-config-provider';
 import { type ExtendedDAppConnectorWalletAPI } from './types';
 
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
 import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
-import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import type {
+  ConnectedAPI,
+  KeyMaterialProvider,
+} from '@midnight-ntwrk/dapp-connector-api';
 import type { Logger } from 'ts-log';
 
 export type ApiVersion = string;
@@ -117,7 +122,19 @@ export class MidnightWalletApi {
       getShieldedAddresses: this.#api.getShieldedAddresses,
       getUnshieldedAddress: this.#api.getUnshieldedAddress,
       getDustAddress: this.#api.getDustAddress,
-      getProvingProvider: this.#api.getProvingProvider,
+      getProvingProvider: async (keyMaterialProvider: KeyMaterialProvider) => {
+        const config = await this.#api.getConfiguration();
+        if (!config.proverServerUri) {
+          throw new APIError(
+            ErrorCodes.InternalError,
+            'Prover server URI not available in network configuration',
+          );
+        }
+        return httpClientProvingProvider(
+          config.proverServerUri,
+          new DappZkConfigProvider(keyMaterialProvider),
+        );
+      },
       getTxHistory: this.#api.getTxHistory,
       balanceUnsealedTransaction: this.#api.balanceUnsealedTransaction,
       balanceSealedTransaction: this.#api.balanceSealedTransaction,

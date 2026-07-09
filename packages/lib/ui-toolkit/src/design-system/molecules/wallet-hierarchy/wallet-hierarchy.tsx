@@ -1,7 +1,12 @@
 import React, { useMemo, useCallback } from 'react';
 import { StyleSheet, View, Pressable, FlatList } from 'react-native';
 
-import { useTheme, spacing, radius } from '../../../design-tokens';
+import {
+  useTheme,
+  spacing,
+  radius,
+  getShadowStyle,
+} from '../../../design-tokens';
 import {
   Avatar,
   Button,
@@ -12,6 +17,7 @@ import {
   Beacon,
   Icon,
   Divider,
+  SecurityAlertPill,
 } from '../../atoms';
 import { getIsDark } from '../../util';
 
@@ -21,6 +27,10 @@ export interface WalletHierarchyItem {
   id: string;
   image?: string;
   title: string;
+  /** Optional trailing label rendered as a `SecurityAlertPill` next to the
+   *  account title — e.g. "At risk". Pass the raw label; the pill's own
+   *  visual encapsulation makes bracket wrapping unnecessary. */
+  suffix?: string;
   subtitle: string;
   icon: React.ReactNode;
 }
@@ -39,6 +49,7 @@ export interface WalletHierarchyProps {
   onActionButtonPress?: () => void;
   onAddButtonPress?: () => void;
   onItemPress?: (accountId: string) => void;
+  onItemSuffixPress?: (accountId: string) => void;
 }
 
 interface WalletHeaderProps {
@@ -55,6 +66,7 @@ interface WalletHeaderProps {
 interface WalletItemProps {
   item: WalletHierarchyItem;
   onItemPress?: (accountId: string) => void;
+  onItemSuffixPress?: (accountId: string) => void;
   styles: ReturnType<typeof getStyles>;
   theme: Theme;
 }
@@ -141,6 +153,7 @@ const WalletHeader: React.FC<WalletHeaderProps> = ({
 const WalletItem: React.FC<WalletItemProps> = ({
   item,
   onItemPress,
+  onItemSuffixPress,
   styles,
   theme,
 }) => {
@@ -165,7 +178,22 @@ const WalletItem: React.FC<WalletItemProps> = ({
             }}
           />
           <View style={styles.itemInfo}>
-            <Text.M testID="account-name">{item.title}</Text.M>
+            <Row alignItems="center" style={styles.accountNameRow}>
+              <Text.M testID="account-name">{item.title}</Text.M>
+              {item.suffix ? (
+                <SecurityAlertPill
+                  label={item.suffix}
+                  testID="account-name-suffix"
+                  onPress={
+                    onItemSuffixPress
+                      ? () => {
+                          onItemSuffixPress(item.id);
+                        }
+                      : undefined
+                  }
+                />
+              ) : null}
+            </Row>
             <Row style={styles.itemSubtitleRow}>
               <Beacon backgroundType="semiTransparent" icon={item.icon} />
               <Text.S
@@ -218,6 +246,7 @@ export const WalletHierarchy: React.FC<WalletHierarchyProps> = ({
   onActionButtonPress,
   onAddButtonPress,
   onItemPress,
+  onItemSuffixPress,
 }) => {
   const { theme } = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
@@ -227,11 +256,12 @@ export const WalletHierarchy: React.FC<WalletHierarchyProps> = ({
       <WalletItem
         item={item}
         onItemPress={onItemPress}
+        onItemSuffixPress={onItemSuffixPress}
         styles={styles}
         theme={theme}
       />
     ),
-    [onItemPress, styles, theme],
+    [onItemPress, onItemSuffixPress, styles, theme],
   );
 
   const keyExtractor = useCallback((item: WalletHierarchyItem) => item.id, []);
@@ -273,21 +303,18 @@ export const WalletHierarchy: React.FC<WalletHierarchyProps> = ({
 const getStyles = (theme: Theme) => {
   const isDark = getIsDark(theme);
   const backgroundColor = isDark ? theme.brand.black : theme.brand.white;
-  const borderColor = isDark
-    ? theme.extra.shadowInnerStrong
-    : theme.border.middle;
   return StyleSheet.create({
     walletCard: {
       borderRadius: radius.M,
       gap: 0,
       backgroundColor,
       borderWidth: 0.5,
-      borderColor,
-      boxShadow: `0 0 10px 0 ${theme.extra.shadowDrop}`,
-      shadowColor: theme.extra.shadowDrop,
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 2,
+      borderTopColor: theme.border.top,
+      borderBottomColor: theme.border.bottom,
+      borderLeftColor: theme.border.middle,
+      borderRightColor: theme.border.middle,
+      overflow: 'visible',
+      ...getShadowStyle({ theme, variant: 'card' }),
     },
     walletHeader: {
       marginBottom: spacing.M,
@@ -320,6 +347,10 @@ const getStyles = (theme: Theme) => {
     },
     itemInfo: {
       flex: 1,
+    },
+    accountNameRow: {
+      gap: spacing.XS,
+      flexWrap: 'wrap',
     },
     itemSubtitleRow: {
       marginTop: spacing.XS,

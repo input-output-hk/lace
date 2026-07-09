@@ -1,9 +1,11 @@
 import { useTranslation } from '@lace-contract/i18n';
 import { useCallback, useMemo, useState } from 'react';
 
-import { classifyHardwareError } from '../classify-hardware-error';
+import {
+  classifyHardwareError,
+  type HardwareErrorCategory,
+} from '../classify-hardware-error';
 // HW modules currently only loaded in the extension
-import { createUsbPickerExtensionBridge } from '../extension';
 
 import {
   isHardwarePickerOption,
@@ -11,7 +13,7 @@ import {
   type SoftwareWalletPickerOption,
 } from './types';
 
-import type { DeviceDescriptor } from '../value-objects/device-descriptor.vo';
+import type { DeviceDescriptor, RequestHWConnection } from '../types';
 
 export interface UseHwWalletDevicePickerProps<
   HwOption extends HardwareWalletPickerOption,
@@ -19,9 +21,14 @@ export interface UseHwWalletDevicePickerProps<
   loadedOnboardingOptions:
     | Array<Array<HwOption | SoftwareWalletPickerOption>>
     | undefined;
-  usbPickerMessage: string;
-  usbPickerButtonLabel: string;
+  requestHWConnection: RequestHWConnection;
   onDeviceMatched: (matchedOption: HwOption, device: DeviceDescriptor) => void;
+  /**
+   * Called when device matching fails — e.g. the user dismisses the USB
+   * picker, the device is not recognised, or transport fails. Carries the
+   * classified category before it is translated for display.
+   */
+  onDeviceError?: (category: HardwareErrorCategory) => void;
 }
 
 export interface UseHwWalletDevicePickerResult<
@@ -37,20 +44,11 @@ export const useHwWalletDevicePicker = <
   HwOption extends HardwareWalletPickerOption,
 >({
   loadedOnboardingOptions,
-  usbPickerMessage,
-  usbPickerButtonLabel,
+  requestHWConnection,
   onDeviceMatched,
+  onDeviceError,
 }: UseHwWalletDevicePickerProps<HwOption>): UseHwWalletDevicePickerResult<HwOption> => {
   const { t } = useTranslation();
-
-  const requestNewDevice = useMemo(
-    () =>
-      createUsbPickerExtensionBridge(
-        { message: usbPickerMessage, buttonLabel: usbPickerButtonLabel },
-        'ledger-usb-picker.html',
-      ),
-    [usbPickerMessage, usbPickerButtonLabel],
-  );
 
   const hwOptions = useMemo(
     () =>
@@ -71,35 +69,56 @@ export const useHwWalletDevicePicker = <
 
   const handleConnect = useCallback(() => {
     if (isConnecting) return;
-
-    const allFilters = hwOptions.flatMap(o => o.usbFilters ?? []);
-    if (allFilters.length === 0) return;
+    if (hwOptions.length === 0) return;
 
     setConnecting(true);
     setError(null);
 
     void (async () => {
       try {
-        const usbDevice = await requestNewDevice(allFilters);
-
-        const matchedOption = hwOptions.find(option =>
-          (option.usbFilters ?? []).some(
-            f =>
-              (f.vendorId === undefined || f.vendorId === usbDevice.vendorId) &&
-              (f.productId === undefined ||
-                f.productId === usbDevice.productId),
-          ),
+        const requestOptions = hwOptions.map(option => ({
+          usbFilters: option.usbFilters,
+          bleFilters: option.bleFilters,
+        }));
+        const selectedDeviceDescriptor = await requestHWConnection(
+          requestOptions,
         );
+
+        const matchedOption =
+          selectedDeviceDescriptor.kind === 'ble'
+            ? hwOptions.find(option =>
+                (option.bleFilters ?? []).some(
+                  f => f.vendorName === selectedDeviceDescriptor.vendorName,
+                ),
+              )
+            : hwOptions.find(option =>
+                (option.usbFilters ?? []).some(
+                  f =>
+                    (f.vendorId === undefined ||
+                      f.vendorId === selectedDeviceDescriptor.vendorId) &&
+                    (f.productId === undefined ||
+                      f.productId === selectedDeviceDescriptor.productId),
+                ),
+              );
         if (!matchedOption) throw new Error('Could not recognize the device');
 
-        onDeviceMatched(matchedOption, usbDevice);
+        onDeviceMatched(matchedOption, selectedDeviceDescriptor);
       } catch (error_: unknown) {
-        setError(t(`hw-error.${classifyHardwareError(error_)}.subtitle`));
+        const category = classifyHardwareError(error_);
+        onDeviceError?.(category);
+        setError(t(`hw-error.${category}.subtitle`));
       } finally {
         setConnecting(false);
       }
     })();
-  }, [isConnecting, hwOptions, t, requestNewDevice, onDeviceMatched]);
+  }, [
+    isConnecting,
+    hwOptions,
+    t,
+    requestHWConnection,
+    onDeviceMatched,
+    onDeviceError,
+  ]);
 
   return { supportedDevices, handleConnect, isConnecting, error };
 };

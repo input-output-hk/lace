@@ -34,6 +34,7 @@ const main = async () => {
     let content = fs.readFileSync(lcovPath, 'utf8');
 
     content = content.replace(/^SF:(.+)$/gm, (_, fullPath) => {
+      if (fullPath.startsWith(`${root}/`)) return `SF:${fullPath}`;
       return `SF:${root}/${fullPath}`;
     });
 

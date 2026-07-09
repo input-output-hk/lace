@@ -1,4 +1,4 @@
-import { WalletId } from '@lace-contract/wallet-repo';
+import { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -14,6 +14,7 @@ describe('account-management slice', () => {
       walletId: WalletId('wallet-1'),
       blockchain: 'Cardano',
       accountIndex: 0,
+      walletType: WalletType.InMemory,
     };
 
     const state = accountManagementReducers.accountManagement(
@@ -30,6 +31,7 @@ describe('account-management slice', () => {
       walletId: WalletId('wallet-1'),
       blockchain: 'Cardano',
       accountIndex: 0,
+      walletType: WalletType.InMemory,
       shouldSuppressAccountStatus: true,
     };
 

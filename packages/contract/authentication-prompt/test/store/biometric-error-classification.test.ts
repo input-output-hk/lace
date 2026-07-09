@@ -110,7 +110,10 @@ describe('discriminateSecureStoreError - error classification', () => {
     it('classifies "authentication failed" as auth_failed', async () => {
       const result = await runErrorClassificationTest('Authentication failed');
       expect(result).toEqual(
-        actions.authenticationPrompt.verifiedBiometric({ success: false }),
+        actions.authenticationPrompt.verifiedBiometric({
+          success: false,
+          failureReason: 'auth_failed',
+        }),
       );
     });
   });
@@ -146,7 +149,10 @@ describe('discriminateSecureStoreError - error classification', () => {
         'Some unexpected error occurred',
       );
       expect(result).toEqual(
-        actions.authenticationPrompt.verifiedBiometric({ success: false }),
+        actions.authenticationPrompt.verifiedBiometric({
+          success: false,
+          failureReason: 'unknown',
+        }),
       );
     });
   });

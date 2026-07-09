@@ -1,11 +1,14 @@
 import './augmentations';
 
+import { activitiesStoreContract } from '@lace-contract/activities';
 import { addressBookStoreContract } from '@lace-contract/address-book';
 import { addressesStoreContract } from '@lace-contract/addresses';
 import { analyticsStoreContract } from '@lace-contract/analytics';
+import { appStoreContract } from '@lace-contract/app';
 import { appLockStoreContract } from '@lace-contract/app-lock';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
 import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
+import { customDappsStoreContract } from '@lace-contract/custom-dapps';
 import {
   dappConnectorApiAddonContract,
   dappConnectorPlatformDependencyContract,
@@ -50,12 +53,15 @@ const _implementsContracts = combineContracts([
 ] as const);
 
 const dependsOnContracts = combineContracts([
+  activitiesStoreContract,
   addressBookStoreContract,
   addressesStoreContract,
   analyticsStoreContract,
+  appStoreContract,
   appLockStoreContract,
   featureStoreContract,
   cardanoProviderStoreContract,
+  customDappsStoreContract,
   authenticationPromptStoreContract,
   viewsStoreContract,
   walletRepoStoreContract,

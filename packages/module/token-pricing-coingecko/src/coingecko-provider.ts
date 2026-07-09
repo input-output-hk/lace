@@ -61,6 +61,7 @@ export class CoinGeckoProvider implements TokenPricingProvider {
                   blockchain: request.blockchain,
                   identifier: request.identifier,
                   price: priceData.price,
+                  priceInUsd: priceData.priceInUsd ?? priceData.price,
                   fiatCurrency: request.fiatCurrency,
                   change24h: priceData.change24h,
                 });

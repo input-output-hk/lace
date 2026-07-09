@@ -9,6 +9,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when payload is undefined (flags not loaded)', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: undefined,
         },
@@ -26,6 +27,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when payload is empty (opt-in required)', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {},
         },
@@ -43,6 +45,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when blockchain not in payload (opt-in required)', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Cardano: { mainnet: false, testnet: true },
@@ -62,6 +65,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when networkType not specified (opt-in required)', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: {},
@@ -81,6 +85,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when explicitly disabled for mainnet', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: { mainnet: false, testnet: true },
@@ -100,6 +105,7 @@ describe('sendFlowSelectors', () => {
     it('returns true when explicitly enabled for testnet', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: { mainnet: false, testnet: true },
@@ -119,6 +125,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when both mainnet and testnet disabled', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: { mainnet: false, testnet: false },
@@ -144,6 +151,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when blockchain name is undefined', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: { mainnet: true, testnet: true },
@@ -163,6 +171,7 @@ describe('sendFlowSelectors', () => {
     it('returns false when network type is undefined', () => {
       const state: SendFlowStoreState = {
         sendFlow: {} as never,
+        sendFlowAnalytics: { recipientSource: undefined },
         sendFlowConfig: {
           featureFlagPayload: {
             Midnight: { mainnet: true, testnet: true },

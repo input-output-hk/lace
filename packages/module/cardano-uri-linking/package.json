@@ -13,12 +13,14 @@
   "dependencies": {
     "@lace-contract/addresses": "*",
     "@lace-contract/app": "*",
+    "@lace-contract/cardano-context": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/navigation": "*",
     "@lace-lib/ui-toolkit": "*",
+    "@lace-module/app-mobile": "*",
     "expo-linking": "*"
   },
   "devDependencies": {

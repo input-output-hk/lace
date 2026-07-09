@@ -41,6 +41,10 @@ export const FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_NODE_URLS = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_NODE_URLS',
 );
 
+export const FEATURE_FLAG_MIDNIGHT_DISCLAIMER = FeatureFlagKey(
+  'MIDNIGHT_DISCLAIMER',
+);
+
 export type GatedMidnightSDKNetworkId = Exclude<
   MidnightSDKNetworkId,
   'undeployed'

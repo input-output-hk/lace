@@ -93,7 +93,9 @@ describe('CoinGeckoProvider', () => {
 
     it('should request prices using request fiat currency', async () => {
       mockFetchResponse(mockCoinsList);
-      mockFetchResponse({ cardano: { eur: 0.45, eur_24h_change: 1.2 } });
+      mockFetchResponse({
+        cardano: { eur: 0.45, eur_24h_change: 1.2, usd: 0.5 },
+      });
 
       await firstValueFrom(
         provider.fetchPrices([createRequest('ada', 'Cardano', 'EUR')]),
@@ -103,7 +105,7 @@ describe('CoinGeckoProvider', () => {
         (call[0] as string).includes('/simple/price'),
       )?.[0] as string;
 
-      expect(priceCall).toContain('vs_currencies=eur');
+      expect(priceCall).toContain('vs_currencies=eur,usd');
     });
 
     it('should throw errors for API failures and rate limiting', async () => {

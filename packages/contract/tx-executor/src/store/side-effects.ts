@@ -80,9 +80,13 @@ export const makeExecuteTxPhase =
   }: {
     implementationFactories: MakeTxExecutorImplementation[];
   }): SideEffect =>
-  ({ txExecutor: { txPhaseRequested$ } }, {}, { actions, ...dependencies }) => {
+  (
+    { txExecutor: { txPhaseRequested$ } },
+    stateObservables,
+    { actions, ...dependencies },
+  ) => {
     const implementations = implementationFactories.map(factory =>
-      factory(dependencies),
+      factory(dependencies, stateObservables),
     );
 
     const selectTxExecutorImplementation$ = of(

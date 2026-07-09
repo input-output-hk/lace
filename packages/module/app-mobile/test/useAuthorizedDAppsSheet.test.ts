@@ -8,8 +8,6 @@ import {
   NavigationControls,
   StackRoutes,
   TabRoutes,
-  type SheetRoutes,
-  type SheetScreenProps,
 } from '@lace-lib/navigation';
 import { renderHook, act } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -36,8 +34,8 @@ vi.mock('react-redux', () => ({
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
-    sheets: { close: vi.fn() },
-    actions: { closeAndNavigate: vi.fn() },
+    closeSheet: vi.fn(),
+    navigate: vi.fn(),
   },
   StackRoutes: { Home: 'Home' },
   TabRoutes: { DApps: 'DApps' },
@@ -45,7 +43,6 @@ vi.mock('@lace-lib/navigation', () => ({
 
 describe('useAuthorizedDAppsSheet', () => {
   const mockUseLaceSelector = vi.mocked(hooksModule.useLaceSelector);
-  const props = {} as SheetScreenProps<SheetRoutes.AuthorizedDApps>;
 
   const dappA = {
     id: DappId('https://dapp-a.example'),
@@ -111,7 +108,7 @@ describe('useAuthorizedDAppsSheet', () => {
   it('reports empty list when no authorized dapps', () => {
     mockSelectors({}, false);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     expect(result.current.dApps).toEqual([]);
   });
@@ -132,7 +129,7 @@ describe('useAuthorizedDAppsSheet', () => {
       true,
     );
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     expect(result.current.dApps).toHaveLength(1);
     expect(result.current.dApps[0]?.id).toBe(`Midnight:${String(dappB.id)}`);
@@ -141,7 +138,7 @@ describe('useAuthorizedDAppsSheet', () => {
   it('flattens authorized dapps from multiple chains into dApps', () => {
     mockSelectors(authorizedTwoChains, false);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     expect(result.current.dApps).toHaveLength(2);
     expect(result.current.dApps.map(d => d.id)).toEqual([
@@ -159,19 +156,19 @@ describe('useAuthorizedDAppsSheet', () => {
   it('gates browse button visibility on DAPP_EXPLORER availability', () => {
     mockSelectors(authorizedCardanoOnly, false);
 
-    const { result: off } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result: off } = renderHook(() => useAuthorizedDAppsSheet());
     expect(off.current.isBrowseButtonVisible).toBe(false);
 
     mockSelectors(authorizedCardanoOnly, true);
 
-    const { result: on } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result: on } = renderHook(() => useAuthorizedDAppsSheet());
     expect(on.current.isBrowseButtonVisible).toBe(true);
   });
 
   it('dispatches removeAuthorizedDapp with blockchainName and dapp id', () => {
     mockSelectors(authorizedCardanoOnly, true);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     act(() => {
       result.current.dApps[0]?.onDAppRemove();
@@ -189,7 +186,7 @@ describe('useAuthorizedDAppsSheet', () => {
   it('dispatches remove for the matching chain when removing from a multi-chain list', () => {
     mockSelectors(authorizedTwoChains, true);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     const midnightRow = result.current.dApps.find(
       d => d.blockchain === 'Midnight',
@@ -211,7 +208,7 @@ describe('useAuthorizedDAppsSheet', () => {
   it('exposes i18n keys for sheet copy via translation helper', () => {
     mockSelectors(authorizedCardanoOnly, true);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     expect(result.current.title).toBe('settings.wallet.authorized-dapps.title');
     expect(result.current.subtitle).toBe(
@@ -228,29 +225,26 @@ describe('useAuthorizedDAppsSheet', () => {
   it('closes sheet when onClose runs', () => {
     mockSelectors({}, false);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     act(() => {
       result.current.onClose();
     });
 
-    expect(NavigationControls.sheets.close).toHaveBeenCalledTimes(1);
+    expect(NavigationControls.closeSheet).toHaveBeenCalledTimes(1);
   });
 
   it('navigates to DApps tab when onBrowseDApps runs', () => {
     mockSelectors({}, true);
 
-    const { result } = renderHook(() => useAuthorizedDAppsSheet(props));
+    const { result } = renderHook(() => useAuthorizedDAppsSheet());
 
     act(() => {
       result.current.onBrowseDApps();
     });
 
-    expect(NavigationControls.actions.closeAndNavigate).toHaveBeenCalledWith(
-      StackRoutes.Home,
-      {
-        screen: TabRoutes.DApps,
-      },
-    );
+    expect(NavigationControls.navigate).toHaveBeenCalledWith(StackRoutes.Home, {
+      screen: TabRoutes.DApps,
+    });
   });
 });

@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 
 import type { AnyAddress } from '@lace-contract/addresses';
@@ -7,11 +7,34 @@ import type { Action, AppConfig } from '@lace-contract/module';
 import type { NetworkType } from '@lace-contract/network';
 import type { Token } from '@lace-contract/tokens';
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
-import type { FeeEntry, IconName } from '@lace-lib/ui-toolkit';
 import type { UICustomisation } from '@lace-lib/util-render';
 import type { BlockchainName } from '@lace-lib/util-store';
 
-export type InitializeAppContext = () => void;
+// UI display shape for a token inside a fee entry. Duplicated from
+// `@lace-lib/ui-toolkit` (see ADR 28 — contracts must not depend on UI
+// libraries).
+type FeeEntryToken = {
+  tokenId: string;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  available?: string;
+  displayShortName: string;
+  metadata?: {
+    image?: string;
+    isNft?: boolean;
+    blockchainSpecific?: unknown;
+  };
+};
+
+export type FeeEntry = {
+  amount: string;
+  token: FeeEntryToken;
+  value: string;
+  currency: string;
+};
+
+export type InitializeAppContext = () => Promise<void> | void;
 
 /**
  * Settings option item for the settings page
@@ -20,7 +43,7 @@ export type SettingsOption = {
   id: string;
   titleKey: TranslationKey;
   subtitleKey?: TranslationKey;
-  icon: IconName;
+  icon: string;
   onPress: () => void;
 };
 
@@ -43,7 +66,7 @@ export type AboutPageUICustomisation = UICustomisation<{
   options: {
     id: string;
     titleKey: TranslationKey;
-    icon: IconName;
+    icon: string;
     configKey?: keyof AppConfig;
     onPress?: () => void;
   }[];
@@ -168,10 +191,23 @@ export type TokenDetailsUICustomization<BlockchainSpecificMetadata = unknown> =
             textColor?: string;
           }
         | undefined;
+      /**
+       * Optional header rendered immediately above the activity list in the
+       * per-account token detail sheet. Returns `null` to render nothing.
+       * Must not wrap the list itself — the caller places it as a sibling.
+       */
       RecentTransactionsContent: ComponentType<{
-        children: ReactNode;
         token: Token<BlockchainSpecificMetadata>;
       }>;
+      /**
+       * When truthy, the per-account token detail sheet omits the activity
+       * list entirely (only the header above it is rendered). Used by
+       * blockchain modules that intentionally suppress on-chain activity
+       * display for privacy reasons (e.g. Midnight shielded tokens).
+       */
+      shouldHideActivitiesList?: (
+        token: Token<BlockchainSpecificMetadata>,
+      ) => boolean;
       canEditTokenName?: (token: Token<BlockchainSpecificMetadata>) => boolean;
       /** Optional component rendered after the token name in the detail sheet (e.g. shielded pill). */
       TokenNameAddon?: ComponentType<{

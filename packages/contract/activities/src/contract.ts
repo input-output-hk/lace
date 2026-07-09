@@ -1,5 +1,7 @@
+import { failuresStoreContract } from '@lace-contract/failures';
 import {
   ContractName,
+  combineContracts,
   combineStore,
   createMixin,
   inferContractContext,
@@ -50,6 +52,7 @@ export const activitiesStoreContract = inferContractContext({
   name: ContractName('activities-store'),
   contractType: 'store',
   instance: 'exactly-one',
+  dependsOn: combineContracts([failuresStoreContract] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),
   })),

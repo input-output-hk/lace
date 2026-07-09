@@ -285,6 +285,7 @@ export const useReceiveSheet = () => {
     actionText,
     userFallback,
     accountName,
+    accountId: selectedAccount?.accountId,
     copyAddressText,
     onCopyAddressPress,
     qrCodeBgColor,

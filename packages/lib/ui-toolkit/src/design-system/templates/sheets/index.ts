@@ -1,7 +1,6 @@
 export * from './addAccountSheet/addAccountSheet';
 export * from './accountKeySheet/accountKeySheet';
 export * from './buySheet/buySheet';
-export * from './recoveryPhraseDisplaySheet/recoveryPhraseDisplaySheet';
 export * from './recoveryPhraseVerificationSheet/recoveryPhraseVerificationSheet';
 export * from './recoveryPhraseSheet/recoveryPhraseSheet';
 export * from './statusSheet/statusSheet';
@@ -11,7 +10,6 @@ export * from './themeSelectionSheet/themeSelectionSheet';
 export * from './editFolderSheet/editFolderSheet';
 export * from './createFolderSheet/createFolderSheet';
 export * from './createWalletSheet/createWalletSheet';
-export * from './hardwareWalletDiscoverySearching/hardwareWalletDiscoverySearching';
 export * from './hardwareWalletDiscoveryError/hardwareWalletDiscoveryError';
 export * from './hardwareWalletDiscoveryResults/hardwareWalletDiscoveryResults';
 export * from './languageSheet/languageSheet';

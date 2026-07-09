@@ -1,10 +1,14 @@
-import type { CSSProperties } from 'react';
-
-import { Box, Text, useTheme } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from '@lace-contract/i18n';
 import { DappConnectorLayoutV2 } from '@lace-lib/ui-extension';
-import { DappInfoCard } from '@lace-lib/ui-toolkit';
+import {
+  DappInfoCard,
+  Text,
+  radius,
+  spacing,
+  useTheme,
+} from '@lace-lib/ui-toolkit';
 import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 export interface SignDataV2Props {
   confirmSignData: () => void;
@@ -16,6 +20,20 @@ export interface SignDataV2Props {
   url: string;
 }
 
+const PRE_MAX_HEIGHT = 280;
+
+const styles = StyleSheet.create({
+  titleContainer: { marginBottom: spacing.M },
+  section: { marginVertical: spacing.M },
+  smallSection: { marginVertical: spacing.S },
+  preContainer: {
+    maxHeight: PRE_MAX_HEIGHT,
+    padding: spacing.S,
+    marginTop: spacing.S,
+    borderRadius: radius.XS,
+  },
+});
+
 export const SignDataV2 = ({
   name,
   url,
@@ -26,22 +44,14 @@ export const SignDataV2 = ({
   keyType,
 }: SignDataV2Props) => {
   const { t } = useTranslation();
-  const { vars } = useTheme();
+  const { theme } = useTheme();
 
-  const preStyle: CSSProperties = useMemo(
-    () => ({
-      fontSize: '11px',
-      maxHeight: '280px',
-      overflow: 'auto',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
-      backgroundColor: vars.colors.$card_elevated_backgroundColor,
-      color: vars.colors.$text_primary,
-      padding: '8px',
-      borderRadius: '8px',
-      margin: '8px 0 0 0',
-    }),
-    [vars],
+  const preContainerStyle = useMemo(
+    () => [
+      styles.preContainer,
+      { backgroundColor: theme.background.secondary },
+    ],
+    [theme],
   );
 
   return (
@@ -54,33 +64,28 @@ export const SignDataV2 = ({
         label: t('dapp-connector.sign-data.deny'),
         action: rejectSignData,
       }}>
-      <Box mb="$16">
-        <Text.Body.Large weight="$bold">
-          {t('dapp-connector.sign-data.title')}
-        </Text.Body.Large>
-      </Box>
+      <View style={styles.titleContainer}>
+        <Text.M>{t('dapp-connector.sign-data.title')}</Text.M>
+      </View>
       <DappInfoCard imageUrl={imageUrl} name={name} url={url} />
-      <Box my="$16">
-        <Text.Body.Normal data-testid="dapp-sign-data-description">
+      <View style={styles.section}>
+        <Text.S testID="dapp-sign-data-description">
           {t('dapp-connector.sign-data.description')}
-        </Text.Body.Normal>
-      </Box>
-      <Box my="$8">
-        <Text.Body.Small weight="$bold">
-          {t('dapp-connector.sign-data.key-type')}
-        </Text.Body.Small>
-        <Text.Body.Small data-testid="dapp-sign-data-key-type">
-          {keyType}
-        </Text.Body.Small>
-      </Box>
-      <Box my="$8">
-        <Text.Body.Small weight="$bold">
-          {t('dapp-connector.sign-data.payload')}
-        </Text.Body.Small>
-        <pre data-testid="dapp-sign-data-payload" style={preStyle}>
-          {payload}
-        </pre>
-      </Box>
+        </Text.S>
+      </View>
+      <View style={styles.smallSection}>
+        <Text.XS>{t('dapp-connector.sign-data.key-type')}</Text.XS>
+        <Text.XS testID="dapp-sign-data-key-type">{keyType}</Text.XS>
+      </View>
+      <View style={styles.smallSection}>
+        <Text.XS>{t('dapp-connector.sign-data.payload')}</Text.XS>
+        <ScrollView
+          style={preContainerStyle}
+          nestedScrollEnabled
+          testID="dapp-sign-data-payload">
+          <Text.XS>{payload}</Text.XS>
+        </ScrollView>
+      </View>
     </DappConnectorLayoutV2>
   );
 };

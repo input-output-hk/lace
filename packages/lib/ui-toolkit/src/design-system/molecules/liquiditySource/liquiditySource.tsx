@@ -12,8 +12,6 @@ import { Text } from '../../atoms/text/text';
 import type { Theme } from '../../../design-tokens';
 import type { ImageSource } from 'expo-image';
 
-const AVATAR_SIZE = 48;
-
 export interface LiquiditySourceBase {
   name: string;
   icon?: ImageSource;
@@ -91,18 +89,6 @@ export const getLiquiditySourceStyles = (theme: Theme) =>
       alignItems: 'center',
       gap: spacing.S,
       minHeight: 80,
-    },
-    avatar: {
-      width: AVATAR_SIZE,
-      height: AVATAR_SIZE,
-      borderRadius: AVATAR_SIZE / 2,
-      borderColor: theme.border.middle,
-      borderWidth: StyleSheet.hairlineWidth,
-      overflow: 'hidden',
-    },
-    avatarImage: {
-      width: AVATAR_SIZE,
-      height: AVATAR_SIZE,
     },
     labelContainer: {
       flex: 1,

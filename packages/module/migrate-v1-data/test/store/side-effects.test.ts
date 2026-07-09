@@ -1,3 +1,4 @@
+import { analyticsActions } from '@lace-contract/analytics';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { of } from 'rxjs';
@@ -24,6 +25,7 @@ vi.mock('../../src/store/v1-data/prepare-preloaded-state', () => ({
 import {
   deleteWalletSideEffect,
   wizardMountedSideEffect,
+  trackMigrationLifecycle,
 } from '../../src/store/side-effects';
 import { migrateV1Actions } from '../../src/store/slice';
 import { preparePreloadedState } from '../../src/store/v1-data/prepare-preloaded-state';
@@ -63,6 +65,7 @@ const createInMemoryWallet = (
 
 const actions = {
   ...migrateV1Actions,
+  ...analyticsActions,
   wallets: {
     removeWallet: vi.fn((wId: WalletId, aIds: AccountId[]) => ({
       type: 'wallets/removeWallet' as const,
@@ -138,7 +141,7 @@ describe('migrate-v1-data side effects', () => {
             ),
           },
         },
-        dependencies: { actions } as never,
+        dependencies: { actions, now: () => 0 } as never,
         assertion: sideEffect$ => {
           const emissions: unknown[] = [];
           sideEffect$.subscribe(action => emissions.push(action));
@@ -166,7 +169,7 @@ describe('migrate-v1-data side effects', () => {
             selectWalletById$: of(selectWalletByIdFunction({})),
           },
         },
-        dependencies: { actions } as never,
+        dependencies: { actions, now: () => 0 } as never,
         assertion: sideEffect$ => {
           const emissions: unknown[] = [];
           sideEffect$.subscribe(action => emissions.push(action));
@@ -270,6 +273,177 @@ describe('migrate-v1-data side effects', () => {
       expect(emissions).toHaveLength(0);
       expect(actions.appLock.reset).not.toHaveBeenCalled();
       expect(preparePreloadedState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('trackMigrationLifecycle', () => {
+    it('emits started event when passwordMigrationDetected has wallets', () => {
+      testSideEffect(trackMigrationLifecycle, ({ cold, hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: hot('-a', {
+              a: actions.migrateV1.passwordMigrationDetected([
+                walletId1,
+                WalletId('wallet-2'),
+              ]),
+            }),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            // 'pending' avoids the wasRequired:false init event in this test
+            // — see the dedicated test for the not-required path below.
+            selectPasswordMigrationStatus$: cold('a', { a: 'pending' }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toEqual([
+            actions.analytics.trackEvent({
+              eventName: 'migration | v1 | started',
+              payload: { walletsPending: 2 },
+            }),
+          ]);
+        },
+      }));
+    });
+
+    it('skips started event when passwordMigrationDetected payload is empty', () => {
+      testSideEffect(trackMigrationLifecycle, ({ cold, hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: hot('-a', {
+              a: actions.migrateV1.passwordMigrationDetected([]),
+            }),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            // 'pending' avoids the wasRequired:false init event in this test.
+            selectPasswordMigrationStatus$: cold('a', { a: 'pending' }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toEqual([]);
+        },
+      }));
+    });
+
+    it('emits succeeded with wasRequired: true on status transition to completed', () => {
+      testSideEffect(trackMigrationLifecycle, ({ hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: hot('a-', {
+              a: actions.migrateV1.passwordMigrationDetected([walletId1]),
+            }),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            selectPasswordMigrationStatus$: hot('p-c', {
+              p: 'pending',
+              c: 'completed',
+            }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toHaveLength(2);
+          expect(emissions[0]).toEqual(
+            actions.analytics.trackEvent({
+              eventName: 'migration | v1 | started',
+              payload: { walletsPending: 1 },
+            }),
+          );
+          expect(emissions[1]).toEqual(
+            actions.analytics.trackEvent({
+              eventName: 'migration | v1 | succeeded',
+              payload: { wasRequired: true, walletsMigrated: 1, durationMs: 0 },
+            }),
+          );
+        },
+      }));
+    });
+
+    it('emits succeeded with wasRequired: false at init when status is not-required', () => {
+      testSideEffect(trackMigrationLifecycle, ({ cold, hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: cold(''),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            selectPasswordMigrationStatus$: hot('n', { n: 'not-required' }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toEqual([
+            actions.analytics.trackEvent({
+              eventName: 'migration | v1 | succeeded',
+              payload: { wasRequired: false, walletsMigrated: 0 },
+            }),
+          ]);
+        },
+      }));
+    });
+
+    it('does not emit at init when status is completed (counted in a prior session)', () => {
+      testSideEffect(trackMigrationLifecycle, ({ cold, hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: cold(''),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            selectPasswordMigrationStatus$: hot('c', { c: 'completed' }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toEqual([]);
+        },
+      }));
+    });
+
+    it('does not emit at init when status is pending (mid-migration)', () => {
+      testSideEffect(trackMigrationLifecycle, ({ cold, hot, flush }) => ({
+        actionObservables: {
+          migrateV1: {
+            passwordMigrationDetected$: cold(''),
+          },
+        },
+        stateObservables: {
+          migrateV1: {
+            selectPasswordMigrationStatus$: hot('p', { p: 'pending' }),
+          },
+        },
+        dependencies: { actions, now: () => 0 } as never,
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(emissions).toEqual([]);
+        },
+      }));
     });
   });
 });

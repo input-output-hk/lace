@@ -5,6 +5,7 @@ import { appStoreContract } from '@lace-contract/app';
 import {
   featureStoreContract,
   featureDependencyContract,
+  featureFlagRefreshTriggerDependencyContract,
   FEATURES_DEV_FEATURE_FLAG,
 } from '@lace-contract/feature';
 import { i18nDependencyContract } from '@lace-contract/i18n';
@@ -38,6 +39,7 @@ const extensionModule = inferModuleContext({
   dependsOn: combineContracts([
     analyticsStoreContract,
     appStoreContract,
+    featureFlagRefreshTriggerDependencyContract,
     i18nDependencyContract,
     posthogDependencyContract,
     storageDependencyContract,

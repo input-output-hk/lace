@@ -11,19 +11,22 @@ import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { BigNumber, HexBytes, Milliseconds } from '@lace-sdk/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import {
+  InMemoryTransactionHistoryStorage,
+  mergeWalletEntries,
+  WalletEntrySchema,
+} from '@midnight-ntwrk/wallet-sdk';
+import { DustWallet } from '@midnight-ntwrk/wallet-sdk/dust';
+import { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
+import { CustomShieldedWallet } from '@midnight-ntwrk/wallet-sdk/shielded';
+import {
+  PublicKey,
+  UnshieldedWallet,
+} from '@midnight-ntwrk/wallet-sdk/unshielded';
+import {
   DustAddress,
   ShieldedAddress,
   UnshieldedAddress,
 } from '@midnight-ntwrk/wallet-sdk-address-format';
-import { DustWallet } from '@midnight-ntwrk/wallet-sdk-dust-wallet';
-import { WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
-import { CustomShieldedWallet } from '@midnight-ntwrk/wallet-sdk-shielded';
-import { V1Builder } from '@midnight-ntwrk/wallet-sdk-shielded/v1';
-import {
-  InMemoryTransactionHistoryStorage,
-  PublicKey,
-  UnshieldedWallet,
-} from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
 import {
   catchError,
   defaultIfEmpty,
@@ -40,13 +43,13 @@ import {
   take,
   throwError,
   throttleTime,
-  toArray,
   zip,
 } from 'rxjs';
 
-// TODO: try to fix import
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { makeEventsSyncCapability } from '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/Sync';
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { V1Builder } from '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/V1Builder';
 
 import { computeConnectedSyncRatio } from './compute-sync-ratio';
 import { makeDeferredShieldedSyncService } from './deferred-sync-service';
@@ -64,7 +67,7 @@ import type {
 import type { LaceInitSync } from '@lace-contract/module';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { WithLogger } from '@lace-sdk/util';
-import type { DefaultConfiguration } from '@midnight-ntwrk/wallet-sdk-facade';
+import type { DefaultConfiguration } from '@midnight-ntwrk/wallet-sdk/facade';
 import type { Subscription } from 'rxjs';
 
 /**
@@ -125,11 +128,14 @@ const getAccountWalletInstance = async ({
       feeBlocksMargin: 5,
     },
     networkId,
-    batchSize: 60,
+    batchUpdates: { size: 60 },
     indexerClientConnection,
     provingServerUrl: new URL(config.proofServerAddress),
     relayURL: new URL(convertHttpUrlToWebsocket(config.nodeAddress)),
-    txHistoryStorage: new InMemoryTransactionHistoryStorage(),
+    txHistoryStorage: new InMemoryTransactionHistoryStorage(
+      WalletEntrySchema,
+      mergeWalletEntries,
+    ),
   };
 
   const shieldedWalletBuilder = new V1Builder()
@@ -143,8 +149,10 @@ const getAccountWalletInstance = async ({
 
   if (walletState) {
     const unshieldedTxHistoryStorage =
-      InMemoryTransactionHistoryStorage.fromSerialized(
+      InMemoryTransactionHistoryStorage.restore(
         HexBytes.toUTF8(walletState.serializedState.unshieldedTxHistory),
+        WalletEntrySchema,
+        mergeWalletEntries,
       );
     configuration.txHistoryStorage = unshieldedTxHistoryStorage;
 
@@ -175,7 +183,10 @@ const getAccountWalletInstance = async ({
     unshieldedKeystore,
   } = await firstValueFrom(keysWithAuthCancelledRecovery$(keyManager));
   const dustParameters = ledger.LedgerParameters.initialParameters().dust;
-  const unshieldedTxHistoryStorage = new InMemoryTransactionHistoryStorage();
+  const unshieldedTxHistoryStorage = new InMemoryTransactionHistoryStorage(
+    WalletEntrySchema,
+    mergeWalletEntries,
+  );
 
   return {
     walletFacade: await WalletFacade.init({
@@ -326,9 +337,7 @@ const createAccountObservableMidnightWallet = ({
         ),
         transactionHistory$: state$.pipe(
           throttleTime(500, undefined, { leading: true, trailing: true }),
-          switchMap(({ unshielded }) =>
-            from(unshielded.transactionHistory.getAll()).pipe(toArray()),
-          ),
+          switchMap(() => from(walletFacade.getAllFromTxHistory())),
           distinctUntilChanged(deepEquals),
         ),
 
@@ -405,12 +414,7 @@ const createAccountObservableMidnightWallet = ({
             ),
           ),
         getTransactionHistoryEntryByHash: hash =>
-          state$.pipe(
-            take(1),
-            switchMap(async ({ unshielded }) =>
-              unshielded.transactionHistory.get(hash),
-            ),
-          ),
+          from(walletFacade.queryTxHistoryByHash(hash)),
         finalizeRecipe: recipe => from(walletFacade.finalizeRecipe(recipe)),
         finalizeTransaction: recipe =>
           from(walletFacade.finalizeTransaction(recipe)),
@@ -598,7 +602,7 @@ const createAndManageWallets = (
             from(walletFacade!.dust.serializeState()),
             from(walletFacade!.shielded.serializeState()),
             from(walletFacade!.unshielded.serializeState()),
-            from([unshieldedTxHistoryStorage.serialize()]),
+            from(unshieldedTxHistoryStorage.serialize()),
           ),
         ),
         map(states => states.map(HexBytes.fromUTF8)),

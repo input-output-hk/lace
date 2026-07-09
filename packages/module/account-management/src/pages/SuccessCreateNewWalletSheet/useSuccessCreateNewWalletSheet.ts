@@ -13,7 +13,7 @@ export const useSuccessCreateNewWalletSheet = ({
   const { t } = useTranslation();
 
   const handleViewWallet = useCallback(() => {
-    NavigationControls.actions.closeAndNavigate(StackRoutes.WalletSettings, {
+    NavigationControls.navigate(StackRoutes.WalletSettings, {
       walletId,
       origin: 'add-wallet',
     });

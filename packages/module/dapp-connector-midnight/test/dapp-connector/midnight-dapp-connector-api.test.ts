@@ -23,6 +23,14 @@ import type {
   DesiredOutput,
 } from '@midnight-ntwrk/dapp-connector-api';
 
+vi.mock('@midnight-ntwrk/ledger-v8', async () => {
+  const actual = await vi.importActual('@midnight-ntwrk/ledger-v8');
+  return {
+    ...actual,
+    addressFromKey: vi.fn().mockReturnValue('own-useraddress-hex'),
+  };
+});
+
 vi.mock('@midnight-ntwrk/wallet-sdk-address-format', () => ({
   MidnightBech32m: { parse: (address: string) => address },
   ShieldedAddress: {
@@ -69,10 +77,7 @@ const mockWalletState = {
   },
 
   dust: {
-    balance: vi.fn().mockReturnValue(1000n),
-    availableCoinsWithFullInfo: vi
-      .fn()
-      .mockReturnValue([{ maxCap: 5000000000000n }]),
+    totalCoins: [{ generatedNow: 1000n, maxCap: 5000000000000n }],
   },
 };
 
@@ -191,6 +196,26 @@ describe('MidnightDappConnectorApi', () => {
         cap: 5000000000000n,
       });
       expect(mockWallet.state).toHaveBeenCalled();
+    });
+
+    it('returns non-zero balance when all dust is pending', async () => {
+      const pendingState = {
+        ...mockWalletState,
+        dust: {
+          totalCoins: [{ generatedNow: 750n, maxCap: 5000000000000n }],
+        },
+      };
+      (mockWallet.state as ReturnType<typeof vi.fn>).mockReturnValue(
+        of(pendingState),
+      );
+
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+      const result = await api.getDustBalance();
+
+      expect(result).toEqual({
+        balance: 750n,
+        cap: 5000000000000n,
+      });
     });
   });
 
@@ -351,6 +376,141 @@ describe('MidnightDappConnectorApi', () => {
       await expect(api.submitTransaction('mock-transaction')).rejects.toThrow(
         mockError,
       );
+    });
+
+    describe('onPendingActivity callback', () => {
+      const mockSerializedTx = 'deadbeef';
+      const ownUserAddress = 'own-useraddress-hex';
+      const nightVerifyingKey = {
+        placeholder: 'night-key',
+      } as unknown as Parameters<typeof ledger.addressFromKey>[0];
+
+      beforeEach(() => {
+        (mockWallet as unknown as { state: ReturnType<typeof vi.fn> }).state =
+          vi.fn().mockReturnValue(
+            of({
+              ...mockWalletState,
+              unshielded: { ...mockWalletState.unshielded, availableCoins: [] },
+            }),
+          );
+        (
+          mockWallet as unknown as { nightVerifyingKey: unknown }
+        ).nightVerifyingKey = nightVerifyingKey;
+        mockWallet.submitTransaction = vi.fn().mockReturnValue(of(undefined));
+      });
+
+      it('invokes onPendingActivity with a pending activity when the helper attributes the tx', async () => {
+        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+          intents: new Map([
+            [
+              1,
+              {
+                guaranteedUnshieldedOffer: {
+                  inputs: [],
+                  outputs: [
+                    {
+                      owner: ownUserAddress,
+                      type: '0000000000000000000000000000000000000000000000000000000000000000',
+                      value: 42n,
+                    },
+                  ],
+                },
+                fallibleUnshieldedOffer: undefined,
+              },
+            ],
+          ]),
+          transactionHash: () => 'hash-xyz',
+        } as unknown as ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.Binding>);
+
+        const onPendingActivity = vi.fn();
+        const api = new MidnightDappConnectorApi({
+          ...optionsWithWallet,
+          onPendingActivity,
+        });
+
+        await api.submitTransaction(mockSerializedTx);
+
+        expect(onPendingActivity).toHaveBeenCalledTimes(1);
+        expect(onPendingActivity).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accountId: 'test-account-id',
+            activityId: 'hash-xyz',
+            type: 'Pending',
+          }),
+        );
+      });
+
+      it('does not invoke onPendingActivity when the helper returns undefined', async () => {
+        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+          intents: new Map([
+            [
+              1,
+              {
+                guaranteedUnshieldedOffer: {
+                  inputs: [],
+                  outputs: [
+                    {
+                      owner: 'other-address',
+                      type: '0000000000000000000000000000000000000000000000000000000000000000',
+                      value: 42n,
+                    },
+                  ],
+                },
+                fallibleUnshieldedOffer: undefined,
+              },
+            ],
+          ]),
+          transactionHash: () => 'hash-other',
+        } as unknown as ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.Binding>);
+
+        const onPendingActivity = vi.fn();
+        const api = new MidnightDappConnectorApi({
+          ...optionsWithWallet,
+          onPendingActivity,
+        });
+
+        await api.submitTransaction(mockSerializedTx);
+
+        expect(onPendingActivity).not.toHaveBeenCalled();
+      });
+
+      it('swallows derivation errors so the DApp-facing submit remains successful', async () => {
+        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+          get intents(): never {
+            throw new Error('boom');
+          },
+          transactionHash: () => 'hash-err',
+        } as unknown as ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.Binding>);
+
+        const onPendingActivity = vi.fn();
+        const api = new MidnightDappConnectorApi({
+          ...optionsWithWallet,
+          onPendingActivity,
+        });
+
+        await expect(
+          api.submitTransaction(mockSerializedTx),
+        ).resolves.toBeUndefined();
+        expect(onPendingActivity).not.toHaveBeenCalled();
+      });
+
+      it('does not invoke onPendingActivity when wallet submit fails', async () => {
+        mockWallet.submitTransaction = vi.fn().mockReturnValue(
+          new Observable(subscriber => {
+            subscriber.error(new Error('submit failed'));
+          }),
+        );
+        const onPendingActivity = vi.fn();
+        const api = new MidnightDappConnectorApi({
+          ...optionsWithWallet,
+          onPendingActivity,
+        });
+
+        await expect(api.submitTransaction(mockSerializedTx)).rejects.toThrow(
+          'submit failed',
+        );
+        expect(onPendingActivity).not.toHaveBeenCalled();
+      });
     });
   });
 

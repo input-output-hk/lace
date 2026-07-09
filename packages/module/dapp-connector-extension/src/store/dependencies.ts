@@ -17,10 +17,7 @@ import type {
 } from '@lace-contract/dapp-connector';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { BlockchainName } from '@lace-lib/util-store';
-import type {
-  AuthenticatorApi,
-  RequestAccessOptions,
-} from '@lace-sdk/dapp-connector';
+import type { AuthenticatorApi } from '@lace-sdk/dapp-connector';
 import type {
   ChannelName,
   MinimalRuntime,
@@ -88,13 +85,12 @@ const createConnectAuthenticator =
           const authorizedDapps = await firstValueFrom(authorizedDapps$);
           return authorizedDapps.some(dapp => dapp.id === origin);
         },
-        async requestAccess(sender, options?: RequestAccessOptions) {
+        requestAccess: async sender => {
+          // No haveAccess shortcut: each blockchain's side effect decides
+          // auto-confirm vs UI and populates per-dapp session state.
           const dappOrigin = senderOrigin(sender) || '';
           if (!dappOrigin) throw new Error('Unknown dapp origin');
 
-          if (!options?.forceReauth && (await this.haveAccess(sender))) {
-            return true;
-          }
           await assertHasAccounts();
           return new Promise(resolve => {
             subscriber.next({

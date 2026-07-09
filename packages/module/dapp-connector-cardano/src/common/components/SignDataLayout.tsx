@@ -1,8 +1,9 @@
 import type { StyleProp, ViewStyle } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
-import { useTheme } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { Sheet, useTheme } from '@lace-lib/ui-toolkit';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect } from 'react';
 
 import { SignDataContent } from './sign-data/SignDataContent';
 import { SignTxLoadingContent } from './SignTxLoadingContent';
@@ -35,8 +36,44 @@ export const SignDataLayout = ({
 }: SignDataLayoutProps): React.ReactElement => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const navigation = useNavigation();
 
   const title = t('dapp-connector.cardano.sign-data.title');
+
+  const isConfirmDisabled = confirmDisabled || showLoading || !contentProps;
+
+  useEffect(() => {
+    if (resultView != null) return;
+
+    navigation.setOptions({
+      header: <Sheet.Header title={title} />,
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('dapp-connector.cardano.sign-data.confirm'),
+            onPress: onConfirm,
+            iconColor: theme.brand.white,
+            disabled: isConfirmDisabled,
+          }}
+          secondaryButton={{
+            label: t('dapp-connector.cardano.sign-data.deny'),
+            onPress: onReject,
+          }}
+          showDivider={true}
+        />
+      ),
+    });
+  }, [
+    navigation,
+    resultView,
+    title,
+    isConfirmDisabled,
+    onConfirm,
+    onReject,
+    theme.brand.white,
+    t,
+  ]);
+
   const scrollContent =
     showLoading || !contentProps ? (
       <SignTxLoadingContent style={loadingStyle} />
@@ -44,23 +81,5 @@ export const SignDataLayout = ({
       <SignDataContent {...contentProps} />
     );
 
-  const isConfirmDisabled = confirmDisabled || showLoading || !contentProps;
-
-  return (
-    <SignTxView
-      resultView={resultView}
-      title={title}
-      scrollContent={scrollContent}
-      primaryButton={{
-        label: t('dapp-connector.cardano.sign-data.confirm'),
-        onPress: onConfirm,
-        iconColor: theme.brand.white,
-        disabled: isConfirmDisabled,
-      }}
-      secondaryButton={{
-        label: t('dapp-connector.cardano.sign-data.deny'),
-        onPress: onReject,
-      }}
-    />
-  );
+  return <SignTxView resultView={resultView} scrollContent={scrollContent} />;
 };

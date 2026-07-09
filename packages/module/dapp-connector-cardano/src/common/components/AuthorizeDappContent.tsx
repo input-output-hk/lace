@@ -1,5 +1,7 @@
+import { resolveAccountNameSuffix } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import {
+  AccountSecurityAlertInline,
   Avatar,
   Column,
   CustomTag,
@@ -15,9 +17,12 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { Linking, StyleSheet } from 'react-native';
 
+import { useLaceSelector } from '../hooks';
+
 import { AuthorizeDappStatusTag } from './AuthorizeDappStatusTag';
 
 import type { AuthorizeDappStatusTagStatus } from './AuthorizeDappStatusTag';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type { IconName } from '@lace-lib/ui-toolkit';
 
@@ -33,6 +38,7 @@ export interface AuthorizeDappContentProps {
   name: string;
   url: string;
   accounts: AnyAccount[];
+  walletNameByWalletId: Record<string, string>;
   selectedAccount: AnyAccount | null;
   onSelectAccount: (account: AnyAccount) => void;
   category?: string;
@@ -41,11 +47,23 @@ export interface AuthorizeDappContentProps {
   selectedAccountBalance?: string;
 }
 
+const formatAccountLabel = (
+  account: AnyAccount,
+  walletNameByWalletId: Record<string, string>,
+  compromisedSuffixByAccount: Record<string, string>,
+): { text: string; subText?: string } => ({
+  text: `${account.metadata.name}${
+    compromisedSuffixByAccount[account.accountId] ?? ''
+  }`,
+  subText: walletNameByWalletId[account.walletId],
+});
+
 export const AuthorizeDappContent = ({
   imageUrl,
   name,
   url,
   accounts,
+  walletNameByWalletId,
   selectedAccount,
   onSelectAccount,
   category,
@@ -56,21 +74,65 @@ export const AuthorizeDappContent = ({
   const { t } = useTranslation();
   const styles = getStyles();
 
+  const flaggedExploitsByAccount = useLaceSelector(
+    'cardanoContext.selectFlaggedExploitsByAccount',
+  );
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+
+  const compromisedSuffixByAccount = useMemo(() => {
+    const result: Record<string, string> = {};
+    for (const account of accounts) {
+      const suffixInfo = resolveAccountNameSuffix(
+        flaggedExploitsByAccount[account.accountId] ?? [],
+        featureFlags,
+      );
+      if (suffixInfo) {
+        // Dropdown items are inline text (only the selected account gets a
+        // pill below); wrap the label in brackets so the flagged
+        // affordance stays legible in the plain-text row.
+        result[account.accountId] = ` [${
+          suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey)
+        }]`;
+      }
+    }
+    return result;
+  }, [accounts, flaggedExploitsByAccount, featureFlags, t]);
+
   const dropdownItems = useMemo(
     () =>
-      accounts.map(account => ({
-        id: account.accountId,
-        text: account.metadata.name,
-        avatar: account.metadata.avatarUri
-          ? {
-              img: { uri: account.metadata.avatarUri },
-              fallback: account.metadata.name.substring(0, 2).toUpperCase(),
-            }
-          : {
-              fallback: account.metadata.name.substring(0, 2).toUpperCase(),
-            },
-      })),
-    [accounts],
+      accounts.map(account => {
+        const { text, subText } = formatAccountLabel(
+          account,
+          walletNameByWalletId,
+          compromisedSuffixByAccount,
+        );
+        return {
+          id: account.accountId,
+          text,
+          subText,
+          avatar: account.metadata.avatarUri
+            ? {
+                img: { uri: account.metadata.avatarUri },
+                fallback: account.metadata.name.substring(0, 2).toUpperCase(),
+              }
+            : {
+                fallback: account.metadata.name.substring(0, 2).toUpperCase(),
+              },
+        };
+      }),
+    [accounts, walletNameByWalletId, compromisedSuffixByAccount],
+  );
+
+  const selectedAccountLabel = useMemo(
+    () =>
+      selectedAccount
+        ? formatAccountLabel(
+            selectedAccount,
+            walletNameByWalletId,
+            compromisedSuffixByAccount,
+          )
+        : undefined,
+    [selectedAccount, walletNameByWalletId, compromisedSuffixByAccount],
   );
 
   const titleAvatar = useMemo(() => {
@@ -137,15 +199,20 @@ export const AuthorizeDappContent = ({
           <DropdownMenu
             items={dropdownItems}
             title={
-              selectedAccount?.metadata?.name ??
+              selectedAccountLabel?.text ??
               t('dapp-connector.cardano.connect.account-label')
             }
+            titleSubText={selectedAccountLabel?.subText}
             titleAvatar={titleAvatar}
             actionText={selectedAccountBalance}
             onSelectItem={handleSelectAccount}
             selectedItemId={selectedAccount?.accountId}
+            truncateText
           />
         </Row>
+        {selectedAccount ? (
+          <AccountSecurityAlertInline accountId={selectedAccount.accountId} />
+        ) : null}
       </Column>
 
       <Divider />

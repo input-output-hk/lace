@@ -35,6 +35,7 @@ export const createMockResponse = (
   blockchain: 'Cardano',
   identifier: tokenId,
   price,
+  priceInUsd: price,
   fiatCurrency: 'USD',
   change24h: 2.5,
 });

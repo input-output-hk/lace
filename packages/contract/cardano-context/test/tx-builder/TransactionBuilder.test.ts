@@ -310,6 +310,62 @@ describe('TransactionBuilder', () => {
     expect(inputAda + withdrawalAmount).toBe(outputAda + fee);
   });
 
+  it('includes vote delegation certificate in built transaction', () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const rewardAccount = Cardano.RewardAccount(
+      'stake_test1up7pvfq8zn4quy45r2g572290p9vf99mr9tn7r9xrgy2l2qdsf58d',
+    );
+    const stakeCredential: Cardano.Credential = {
+      type: Cardano.CredentialType.KeyHash,
+      hash: Cardano.RewardAccount.toHash(rewardAccount),
+    };
+    const dRep: Cardano.DelegateRepresentative = {
+      __typename: 'AlwaysAbstain',
+    };
+
+    const adaOnly: Cardano.Utxo = mkUtxo(40, 0, 10_000_000n, changeAddr);
+
+    const paramsWithDeposits = {
+      ...protocolParameters,
+      stakeKeyDeposit: 2_000_000,
+    } as unknown as Cardano.ProtocolParameters;
+
+    const builder = new TransactionBuilder(networkMagic, paramsWithDeposits)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([adaOnly])
+      .addVoteDelegationCertificate(stakeCredential, dRep);
+
+    const tx = builder.build();
+    const core = tx.toCore();
+    const body = core.body;
+
+    expect(body.certificates).toBeDefined();
+    expect(body.certificates).toHaveLength(1);
+
+    const cert = body.certificates![0] as Cardano.VoteDelegationCertificate;
+    expect(cert.__typename).toBe(Cardano.CertificateType.VoteDelegation);
+    expect(cert.stakeCredential).toEqual(stakeCredential);
+    expect(cert.dRep).toEqual(dRep);
+
+    // Transaction still balances
+    const utxoMap = new Map<string, bigint>();
+    for (const [txIn, out] of [adaOnly]) {
+      utxoMap.set(`${txIn.txId}:${txIn.index}`, out.value.coins ?? 0n);
+    }
+    const inputSum = body.inputs.reduce(
+      (accumulator: bigint, index) =>
+        accumulator + (utxoMap.get(`${index.txId}:${index.index}`) ?? 0n),
+      0n,
+    );
+    const outputSum = sumCoins(body.outputs);
+    const fee: bigint = body.fee;
+
+    expect(inputSum).toBe(outputSum + fee);
+  });
+
   it('balancing does not require additional utxos if explicitly set enough via addInput AND does not require explicit outputs', () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
@@ -337,5 +393,40 @@ describe('TransactionBuilder', () => {
     const fee: bigint = body.fee;
 
     expect(inputAda + withdrawalAmount).toBe(outputAda + fee);
+  });
+
+  it('merges setMetadata entries with setMemo and overwrites same-label entries', () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const recipientAddr =
+      'addr_test1xrphkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gt7r0vd4msrxnuwnccdxlhdjar77j6lg0wypcc9uar5d2shs4p04xh' as Cardano.PaymentAddress;
+    const availableUtxos: Cardano.Utxo[] = [
+      mkUtxo(31, 0, 5_000_000n, changeAddr),
+      mkUtxo(32, 0, 6_000_000n, changeAddr),
+    ];
+    const memo = 'memo content';
+
+    const builder = new TransactionBuilder(networkMagic, protocolParameters)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs(availableUtxos)
+      .setMetadata(123n, 'overwritten')
+      .setMetadata(123n, 'final')
+      .setMetadata(456n, 42n)
+      .setMemo(memo)
+      .transferValue(recipientAddr, { coins: 5_000_000n });
+
+    const tx = builder.build();
+    const body = tx.toCore().body;
+
+    expect(body.auxiliaryDataHash).toBeDefined();
+    const expectedHash = Cardano.computeAuxiliaryDataHash({
+      blob: new Map<bigint, Cardano.Metadatum>([
+        [123n, 'final'],
+        [456n, 42n],
+        [674n, new Map([['msg', [memo]]])],
+      ]),
+    });
+    expect(body.auxiliaryDataHash).toBe(expectedHash);
   });
 });

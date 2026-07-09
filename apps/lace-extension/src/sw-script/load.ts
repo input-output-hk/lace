@@ -1,3 +1,4 @@
+import { runInitializers } from '@lace-contract/app';
 import {
   createReduxPersistStorage,
   createStore,
@@ -110,9 +111,7 @@ const storageModule = await findStorageModule(moduleInitProps, { logger });
 const reduxPersistStorage = createReduxPersistStorage(storageModule);
 
 const initializers = await loadModules('addons.loadInitializeAppContext');
-for (const init of initializers) {
-  init();
-}
+await runInitializers(initializers);
 
 const { store } = await createStore(
   {

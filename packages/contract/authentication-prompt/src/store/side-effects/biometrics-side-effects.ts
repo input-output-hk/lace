@@ -13,6 +13,7 @@ import { createSecureStorePasswordManager } from '../../authenticators/password/
 import type {
   AuthenticationPromptSliceState,
   AuthPromptPurpose,
+  BiometricFailureReason,
 } from '../types';
 import type { VerifyAndPropagateAuthSecret } from './auth-verification-handler';
 import type { SideEffect } from '../../contract';
@@ -123,6 +124,7 @@ type MakeAuthenticationBiometricVerifyingParams = {
 type PasswordRetrievalActions = {
   verifiedBiometric: (payload: {
     success: boolean;
+    failureReason?: BiometricFailureReason;
     androidKeystoreRecovery?: { attemptNumber: number; maxAttempts: number };
   }) => unknown;
   biometricCanceled: () => unknown;
@@ -424,11 +426,15 @@ const handleSuccessfulRetrieval = (
       context.verifyAndPropagateAuthSecret({
         selectAuthenticationPromptState$: context.selectState$,
         actionCreator: context.authenticationPrompt.verifiedBiometric,
+        failureReason: 'verification_failed',
       }),
     ),
     catchError(() => {
       return of(
-        context.authenticationPrompt.verifiedBiometric({ success: false }),
+        context.authenticationPrompt.verifiedBiometric({
+          success: false,
+          failureReason: 'verification_failed',
+        }),
       );
     }),
   );
@@ -465,7 +471,12 @@ const handleUnknownError = (
     return of(context.authenticationPrompt.biometricCanceled());
   }
 
-  return of(context.authenticationPrompt.verifiedBiometric({ success: false }));
+  return of(
+    context.authenticationPrompt.verifiedBiometric({
+      success: false,
+      failureReason: 'unknown',
+    }),
+  );
 };
 
 /**
@@ -510,7 +521,10 @@ const handlePasswordRetrievalResult = (
 
     case 'auth_failed':
       return of(
-        context.authenticationPrompt.verifiedBiometric({ success: false }),
+        context.authenticationPrompt.verifiedBiometric({
+          success: false,
+          failureReason: 'auth_failed',
+        }),
       );
 
     case 'lockout':
@@ -560,6 +574,7 @@ const handlePreAuthFailure = (
   return of(
     context.authenticationPrompt.verifiedBiometric({
       success: false,
+      failureReason: 'pre_auth_failed',
       androidKeystoreRecovery: {
         attemptNumber: currentAttempt,
         maxAttempts: MAX_UNKNOWN_ERROR_RETRIES,

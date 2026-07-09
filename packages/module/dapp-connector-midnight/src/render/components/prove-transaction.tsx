@@ -1,7 +1,14 @@
-import { Box, Text } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from '@lace-contract/i18n';
-import { DappConnectorLayout, DappInfo } from '@lace-lib/ui-extension';
-import React from 'react';
+import { DappConnectorLayout } from '@lace-lib/ui-extension';
+import {
+  DappInfoCard,
+  Text,
+  radius,
+  spacing,
+  useTheme,
+} from '@lace-lib/ui-toolkit';
+import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 export interface ProveTransactionProps {
   confirmTransaction: () => void;
@@ -12,6 +19,19 @@ export interface ProveTransactionProps {
   url: string;
 }
 
+const PRE_MAX_HEIGHT = 280;
+
+const styles = StyleSheet.create({
+  section: { marginVertical: spacing.M },
+  smallSection: { marginVertical: spacing.S },
+  preContainer: {
+    maxHeight: PRE_MAX_HEIGHT,
+    padding: spacing.S,
+    marginTop: spacing.S,
+    borderRadius: radius.XS,
+  },
+});
+
 export const ProveTransaction = ({
   name,
   url,
@@ -21,6 +41,16 @@ export const ProveTransaction = ({
   transactionData,
 }: ProveTransactionProps) => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+
+  const preContainerStyle = useMemo(
+    () => [
+      styles.preContainer,
+      { backgroundColor: theme.background.secondary },
+    ],
+    [theme],
+  );
+
   return (
     <DappConnectorLayout
       title={t('dapp-connector.sign-transaction.title')}
@@ -32,33 +62,24 @@ export const ProveTransaction = ({
         label: t('dapp-connector.sign-transaction.deny'),
         action: rejectTransaction,
       }}>
-      <DappInfo imageUrl={imageUrl} name={name} url={url} />
-      <Box my="$16">
-        <Text.Body.Normal data-testid="dapp-sign-description">
+      <DappInfoCard imageUrl={imageUrl} name={name} url={url} />
+      <View style={styles.section}>
+        <Text.S testID="dapp-sign-description">
           {t('dapp-connector.sign-transaction.description')}
-        </Text.Body.Normal>
-      </Box>
+        </Text.S>
+      </View>
       {transactionData && (
-        <Box my="$8">
-          <Text.Body.Small weight="$bold">
+        <View style={styles.smallSection}>
+          <Text.XS>
             {t('dapp-connector.sign-transaction.transaction-data')}
-          </Text.Body.Small>
-          <pre
-            data-testid="dapp-transaction-data"
-            style={{
-              fontSize: '11px',
-              maxHeight: '280px',
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all',
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              padding: '8px',
-              borderRadius: '8px',
-              margin: '8px 0 0 0',
-            }}>
-            {transactionData}
-          </pre>
-        </Box>
+          </Text.XS>
+          <ScrollView
+            style={preContainerStyle}
+            nestedScrollEnabled
+            testID="dapp-transaction-data">
+            <Text.XS>{transactionData}</Text.XS>
+          </ScrollView>
+        </View>
       )}
     </DappConnectorLayout>
   );

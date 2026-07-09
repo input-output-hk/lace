@@ -18,6 +18,7 @@ import {
   stackPagesAddonContract,
 } from '@lace-contract/views';
 import {
+  requestHWConnectionAddonContract,
   vaultContract,
   walletRepoStoreContract,
 } from '@lace-contract/wallet-repo';
@@ -45,6 +46,7 @@ const dependsOnContracts = combineContracts([
   authenticationPromptStoreContract,
   internalAuthSecretApiAddonContract,
   onboardingOptionsAddonContract,
+  requestHWConnectionAddonContract,
 ] as const);
 
 const multiPlatformModule = inferModuleContext({

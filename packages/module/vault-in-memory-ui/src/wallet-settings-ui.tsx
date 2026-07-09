@@ -24,7 +24,7 @@ const ShowRecoveryPhraseComponent = ({ walletId }: { walletId: WalletId }) => {
       setIsUnavailableModalVisible(true);
       return;
     }
-    NavigationControls.sheets.navigate(SheetRoutes.RecoveryPhrase, {
+    NavigationControls.navigate(SheetRoutes.RecoveryPhrase, {
       walletId,
     });
   }, [walletId, hasRecoveryPhrase]);
@@ -70,6 +70,7 @@ const inMemoryWalletSettingsUICustomisation = () =>
     settings: [
       'customise-wallet',
       { id: 'show-recovery-phrase', component: ShowRecoveryPhraseComponent },
+      'wallet-security-check',
     ],
   });
 

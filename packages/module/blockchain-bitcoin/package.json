@@ -20,6 +20,7 @@
     "@lace-contract/signer": "*",
     "@lace-contract/sync": "*",
     "@lace-contract/tokens": "*",
+    "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/ui-toolkit": "*",
     "@lace-lib/util-redacted": "*",

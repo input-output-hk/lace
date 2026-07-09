@@ -477,6 +477,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
     <>
       {renderHeader()}
       <Divider />
+      <View style={styles.minimalSpacer} />
       {renderBottomActionsRow(renderStandardActions())}
     </>
   );
@@ -538,5 +539,9 @@ const getStyles = (theme: Theme) =>
     },
     actionsWrapper: {
       width: '100%',
+    },
+    minimalSpacer: {
+      flex: 1,
+      minHeight: spacing.XXXL,
     },
   });

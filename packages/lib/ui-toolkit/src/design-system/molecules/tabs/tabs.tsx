@@ -5,8 +5,7 @@ import type {
 } from 'react-native';
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Pressable } from 'react-native';
 
 import { useTheme, radius, spacing } from '../../../design-tokens';
 import { getShadowStyle } from '../../../design-tokens/tokens/shadows';
@@ -95,19 +94,6 @@ export const Tabs = <Value extends number | string>({
     }
   }, [selectedTab, normalizedTabs]);
 
-  if (variant === 'vertical') {
-    return (
-      <VerticalTabs
-        normalizedTabs={normalizedTabs}
-        value={value}
-        selectedTab={selectedTab}
-        onSelectTab={onSelectTab}
-        onChange={onChange}
-        loadingTabIndex={loadingTabIndex}
-      />
-    );
-  }
-
   const handleSelectTab = useCallback(
     (index: number) => {
       const tab = normalizedTabs[index];
@@ -140,6 +126,19 @@ export const Tabs = <Value extends number | string>({
       },
     [selectedIndex, styles, normalizedTabs, loadingTabIndex, hoveredIndex],
   );
+
+  if (variant === 'vertical') {
+    return (
+      <VerticalTabs
+        normalizedTabs={normalizedTabs}
+        value={value}
+        selectedTab={selectedTab}
+        onSelectTab={onSelectTab}
+        onChange={onChange}
+        loadingTabIndex={loadingTabIndex}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>

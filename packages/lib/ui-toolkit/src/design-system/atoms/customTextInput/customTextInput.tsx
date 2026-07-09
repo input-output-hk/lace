@@ -1,13 +1,7 @@
-import type {
-  ComponentProps,
-  ComponentRef,
-  ForwardedRef,
-  ReactNode,
-} from 'react';
+import type { ComponentRef, ReactNode } from 'react';
 import type { TextStyle, ViewStyle } from 'react-native';
 import type { TextInputProps as RNTextInputProps } from 'react-native';
 
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import React, {
   forwardRef,
   useState,
@@ -68,15 +62,7 @@ type BaseCustomTextInputProps = {
   readOnly?: boolean;
 };
 
-export type CustomTextInputProps =
-  | (BaseCustomTextInputProps &
-      ComponentProps<typeof BottomSheetTextInput> & {
-        isWithinBottomSheet: true;
-      })
-  | (BaseCustomTextInputProps &
-      RNTextInputProps & {
-        isWithinBottomSheet?: false;
-      });
+export type CustomTextInputProps = BaseCustomTextInputProps & RNTextInputProps;
 
 export type CustomTextInputStyles = Partial<AnimatedLabelStyles> & {
   container: ViewStyle;
@@ -95,21 +81,11 @@ export type CustomTextInputStyles = Partial<AnimatedLabelStyles> & {
   mainContentWrapper: ViewStyle;
 };
 
-type BottomSheetTextInputProps = ComponentProps<typeof BottomSheetTextInput>;
-type BottomSheetFocusEvent = Parameters<
-  NonNullable<BottomSheetTextInputProps['onFocus']>
->[0];
-type BottomSheetBlurEvent = Parameters<
-  NonNullable<BottomSheetTextInputProps['onBlur']>
->[0];
 type RNFocusEvent = Parameters<NonNullable<RNTextInputProps['onFocus']>>[0];
 type RNBlurEvent = Parameters<NonNullable<RNTextInputProps['onBlur']>>[0];
 type RnTextInputRef = ComponentRef<typeof RnTextInput>;
 
-export const CustomTextInput = forwardRef<
-  ComponentRef<typeof BottomSheetTextInput> | RnTextInputRef,
-  CustomTextInputProps
->(
+export const CustomTextInput = forwardRef<RnTextInputRef, CustomTextInputProps>(
   (
     {
       value,
@@ -131,7 +107,6 @@ export const CustomTextInput = forwardRef<
       isDisabled,
       styleOverrides,
       readOnly = false,
-      isWithinBottomSheet = false,
       ...restProps
     },
     ref,
@@ -140,16 +115,12 @@ export const CustomTextInput = forwardRef<
     const [isFocused, setIsFocused] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [internalValue, setInternalValue] = useControlledState(value, '');
-    const inputRef = useRef<
-      ComponentRef<typeof BottomSheetTextInput> | RnTextInputRef | null
-    >(null);
+    const inputRef = useRef<RnTextInputRef | null>(null);
     const labelAnim = useSharedValue(animatedLabel && !!value ? 1 : 0);
 
     // Create a callback ref that assigns to both the forwarded ref and inputRef
     const setInputRef = useCallback(
-      (
-        node: ComponentRef<typeof BottomSheetTextInput> | RnTextInputRef | null,
-      ) => {
+      (node: RnTextInputRef | null) => {
         inputRef.current = node;
         if (typeof ref === 'function') {
           ref(node);
@@ -248,14 +219,7 @@ export const CustomTextInput = forwardRef<
       }
     }, [isFocused, internalValue, animatedLabel, labelAnim]);
 
-    const handleBottomSheetFocus = useCallback(
-      (event: BottomSheetFocusEvent) => {
-        setIsFocused(true);
-        restProps.onFocus?.(event);
-      },
-      [restProps.onFocus],
-    );
-    const handleRnFocus = useCallback(
+    const handleFocus = useCallback(
       (event: RNFocusEvent) => {
         setIsFocused(true);
         restProps.onFocus?.(event);
@@ -271,15 +235,7 @@ export const CustomTextInput = forwardRef<
       [onChangeText],
     );
 
-    const handleBottomSheetBlur = useCallback(
-      (event: BottomSheetBlurEvent) => {
-        setIsFocused(false);
-        restProps.onBlur?.(event);
-      },
-      [restProps.onBlur],
-    );
-
-    const handleRnBlur = useCallback(
+    const handleBlur = useCallback(
       (event: RNBlurEvent) => {
         setIsFocused(false);
         restProps.onBlur?.(event);
@@ -300,8 +256,8 @@ export const CustomTextInput = forwardRef<
 
     const inputProps = useMemo(
       () => ({
-        onFocus: isWithinBottomSheet ? handleBottomSheetFocus : handleRnFocus,
-        onBlur: isWithinBottomSheet ? handleBottomSheetBlur : handleRnBlur,
+        onFocus: handleFocus,
+        onBlur: handleBlur,
         onChangeText: handleChangeText,
         editable: isInputEditable,
         multiline: isMultiline,
@@ -315,11 +271,8 @@ export const CustomTextInput = forwardRef<
         showsHorizontalScrollIndicator: false,
       }),
       [
-        isWithinBottomSheet,
-        handleBottomSheetFocus,
-        handleRnFocus,
-        handleBottomSheetBlur,
-        handleRnBlur,
+        handleFocus,
+        handleBlur,
         handleChangeText,
         isInputEditable,
         isMultiline,
@@ -332,26 +285,6 @@ export const CustomTextInput = forwardRef<
         testID,
       ],
     );
-
-    const renderInput = useCallback(() => {
-      const shouldUseBottomSheetInput = isWithinBottomSheet && !isWeb;
-      return shouldUseBottomSheetInput ? (
-        <BottomSheetTextInput
-          ref={
-            setInputRef as ForwardedRef<
-              ComponentRef<typeof BottomSheetTextInput>
-            >
-          }
-          {...inputProps}
-        />
-      ) : (
-        <RnTextInput
-          ref={setInputRef as ForwardedRef<RnTextInputRef>}
-          {...inputProps}
-          style={[inputProps.style, isWeb ? styles.inputWeb : undefined]}
-        />
-      );
-    }, [isWithinBottomSheet, inputProps, isWeb, setInputRef]);
 
     return (
       <BlurView style={styles.blurView} testID={testID}>
@@ -387,7 +320,11 @@ export const CustomTextInput = forwardRef<
                 testID={`${testID}-label`}
               />
 
-              {renderInput()}
+              <RnTextInput
+                ref={setInputRef}
+                {...inputProps}
+                style={[inputProps.style, isWeb ? styles.inputWeb : undefined]}
+              />
               {!!inputError && (
                 <Text.XS
                   style={styles.inputError}
@@ -528,6 +465,7 @@ const getStyles = (
     inputWeb: {
       outlineStyle: 'solid',
       outlineWidth: 0,
+      outlineColor: 'transparent',
       scrollbarWidth: 'none',
     } as TextStyle,
   });

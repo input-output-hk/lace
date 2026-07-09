@@ -1,3 +1,4 @@
+import { dappConnectorActions, DappId } from '@lace-contract/dapp-connector';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -130,56 +131,6 @@ describe('cardanoDappConnector slice', () => {
           actions.clearLastAuthResponse(),
         );
         expect(nextState.lastAuthResponse).toBeNull();
-      });
-    });
-
-    describe('addSessionAuthorizedOrigin', () => {
-      it.each([
-        {
-          description: 'adds a new origin',
-          initial: [],
-          origin: 'https://dapp.example',
-          expected: ['https://dapp.example'],
-        },
-        {
-          description: 'does not add duplicate origins',
-          initial: ['https://dapp.example'],
-          origin: 'https://dapp.example',
-          expected: ['https://dapp.example'],
-        },
-        {
-          description: 'adds multiple different origins',
-          initial: ['https://dapp1.example'],
-          origin: 'https://dapp2.example',
-          expected: ['https://dapp1.example', 'https://dapp2.example'],
-        },
-      ])('$description', ({ initial, origin, expected }) => {
-        const initialState = {
-          ...createInitialState(),
-          sessionAuthorizedOrigins: initial,
-        };
-        const nextState = reducer(
-          initialState,
-          actions.addSessionAuthorizedOrigin(origin),
-        );
-        expect(nextState.sessionAuthorizedOrigins).toEqual(expected);
-      });
-    });
-
-    describe('clearSessionAuthorizedOrigins', () => {
-      it('clears all session authorized origins', () => {
-        const initialState = {
-          ...createInitialState(),
-          sessionAuthorizedOrigins: [
-            'https://dapp1.example',
-            'https://dapp2.example',
-          ],
-        };
-        const nextState = reducer(
-          initialState,
-          actions.clearSessionAuthorizedOrigins(),
-        );
-        expect(nextState.sessionAuthorizedOrigins).toEqual([]);
       });
     });
 
@@ -395,6 +346,53 @@ describe('cardanoDappConnector slice', () => {
       it('does nothing when there is no pending auth request', () => {
         const initialState = createInitialState();
         const nextState = reducer(initialState, actions.rejectAuth());
+        expect(nextState).toEqual(initialState);
+      });
+    });
+
+    describe('removeAuthorizedDapp (from @lace-contract/dapp-connector)', () => {
+      it('clears session state for the removed Cardano dApp', () => {
+        const initialState: CardanoDappConnectorState = {
+          ...createInitialState(),
+          sessionAuthorizedOrigins: [
+            'https://dapp1.example',
+            'https://dapp2.example',
+          ],
+          sessionAccountByOrigin: {
+            'https://dapp1.example': AccountId('acc-1'),
+            'https://dapp2.example': AccountId('acc-2'),
+          },
+        };
+        const nextState = reducer(
+          initialState,
+          dappConnectorActions.authorizedDapps.removeAuthorizedDapp({
+            blockchainName: 'Cardano',
+            dapp: { id: DappId('https://dapp1.example') },
+          }),
+        );
+        expect(nextState.sessionAuthorizedOrigins).toEqual([
+          'https://dapp2.example',
+        ]);
+        expect(nextState.sessionAccountByOrigin).toEqual({
+          'https://dapp2.example': AccountId('acc-2'),
+        });
+      });
+
+      it('ignores removeAuthorizedDapp for non-Cardano blockchains', () => {
+        const initialState: CardanoDappConnectorState = {
+          ...createInitialState(),
+          sessionAuthorizedOrigins: ['https://dapp1.example'],
+          sessionAccountByOrigin: {
+            'https://dapp1.example': AccountId('acc-1'),
+          },
+        };
+        const nextState = reducer(
+          initialState,
+          dappConnectorActions.authorizedDapps.removeAuthorizedDapp({
+            blockchainName: 'Midnight',
+            dapp: { id: DappId('https://dapp1.example') },
+          }),
+        );
         expect(nextState).toEqual(initialState);
       });
     });

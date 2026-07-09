@@ -57,6 +57,7 @@ export const SignTx = (props: SheetScreenProps<SheetRoutes.SignTx>) => {
         currencyTicker: contentProps.currencyTicker,
         networkMagic: contentProps.networkMagic,
         isPartialSign: contentProps.isPartialSign,
+        accountId: contentProps.accountId,
       }
     : null;
 

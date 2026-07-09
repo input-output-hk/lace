@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType } from 'react';
 
 import {
   isForbiddenTokenName,
@@ -12,7 +12,6 @@ import type { Token } from '@lace-contract/tokens';
 
 export const createTokenDetailsUICustomization = (
   RecentTransactionsContent: ComponentType<{
-    children: ReactNode;
     token: Token<MidnightSpecificTokenMetadata>;
   }>,
   TokenNameAddon?: ComponentType<{
@@ -33,6 +32,8 @@ export const createTokenDetailsUICustomization = (
           }
         : undefined,
     RecentTransactionsContent,
+    shouldHideActivitiesList: token =>
+      token.metadata?.blockchainSpecific.kind === 'shielded',
     ...(TokenNameAddon && { TokenNameAddon }),
     canEditTokenName: token => !isForbiddenTokenName(token.displayLongName),
   }) as TokenDetailsUICustomization;

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
+import { runInitializers } from '@lace-contract/app';
 import { selectModules, type FeatureFlag } from '@lace-contract/feature';
 import {
   createModuleLoader,
@@ -169,9 +170,7 @@ export const createLaceWallet = async <T extends readonly LaceModule[]>(
 
   // 5. Load app context initializers (e.g., i18n)
   const initializers = await loadModules('addons.loadInitializeAppContext');
-  for (const init of initializers) {
-    (init as () => void)();
-  }
+  await runInitializers(initializers);
 
   // 6. Create store
   const { store, stateObservables, actionObservables } = await createStore(

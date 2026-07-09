@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Pressable } from 'react-native';
 
 import { spacing, radius } from '../../../../design-tokens';
 import { Avatar, Card, Column, Icon, Row, Text } from '../../../atoms';
@@ -39,7 +38,6 @@ type TokenListProps = {
   };
   globalState: {
     transactions: Transaction[];
-    activityList?: React.ReactNode;
     selectedToken?: SelectedToken;
     onTokenPress: (transaction: Transaction) => void;
   };
@@ -123,7 +121,7 @@ const TransactionList = (props: {
                       <Text.M testID="transaction-amount">
                         {transaction.amount}
                       </Text.M>
-                      {isTokenPricingEnabled && transaction.fiatValue && (
+                      {isTokenPricingEnabled && !!transaction.fiatValue && (
                         <Text.XS
                           style={defaultStyles.textSecondary}
                           testID="transaction-fiat-value-and-currency">
@@ -146,6 +144,12 @@ const TransactionList = (props: {
   );
 };
 
+/**
+ * Renders the per-token distribution list in the portfolio-view variant of
+ * the token detail sheet. The per-account (`!isPortfolioView`) variant
+ * now renders the activity list itself as the sheet's scroll container via
+ * `ActivityList`, so this component is portfolio-only.
+ */
 export const TokenDetailActivityList = ({
   labels,
   utils,
@@ -153,11 +157,10 @@ export const TokenDetailActivityList = ({
   isTokenPricingEnabled,
 }: TokenListProps): React.ReactNode => {
   const { tokenDistributionLabel } = labels;
-  const { theme, isPortfolioView } = utils;
-  const { transactions, activityList, selectedToken, onTokenPress } =
-    globalState;
+  const { theme } = utils;
+  const { transactions, selectedToken, onTokenPress } = globalState;
 
-  return isPortfolioView ? (
+  return (
     <TransactionList
       onTokenPress={onTokenPress}
       transactions={transactions}
@@ -166,8 +169,6 @@ export const TokenDetailActivityList = ({
       tokenDistributionLabel={tokenDistributionLabel}
       isTokenPricingEnabled={isTokenPricingEnabled}
     />
-  ) : (
-    activityList
   );
 };
 

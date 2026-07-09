@@ -1,4 +1,3 @@
-import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo, useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -12,13 +11,8 @@ import {
   Shimmer,
   Text,
 } from '../../../atoms';
-import {
-  ProgressBar,
-  SheetFooter,
-  SheetHeader,
-  useFooterHeight,
-} from '../../../molecules';
-import { GenericFlashList } from '../../../organisms';
+import { ProgressBar } from '../../../molecules';
+import { footerHeight, GenericFlashList } from '../../../organisms';
 import { Sheet } from '../../../organisms';
 import {
   getSaturationColor,
@@ -71,7 +65,6 @@ export interface PoolDetailsSheetProps {
 }
 
 export const PoolDetailsSheet = ({
-  headerTitle,
   poolAvatarFallback,
   poolName,
   poolTicker,
@@ -85,17 +78,9 @@ export const PoolDetailsSheet = ({
   poolIds,
   ownerIds,
   ownersLabel,
-  onCancelPress,
-  onStakePress,
-  cancelButtonLabel,
-  stakeButtonLabel,
 }: PoolDetailsSheetProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const defaultStyles = useMemo(
-    () => styles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const defaultStyles = useMemo(() => styles(theme), [theme]);
   const saturationColor = useMemo(
     () => getSaturationColor(saturationPercentage),
     [saturationPercentage],
@@ -141,203 +126,182 @@ export const PoolDetailsSheet = ({
   );
 
   return (
-    <>
-      <SheetHeader title={headerTitle} />
-      <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
-        <Column style={defaultStyles.content} gap={spacing.L}>
-          {/* Pool Overview */}
-          <Row alignItems="center" gap={spacing.M}>
-            <Avatar
-              content={{ fallback: poolAvatarFallback }}
-              size={38}
-              shape="rounded"
-            />
-            <Column style={defaultStyles.poolInfoColumn}>
-              <Text.M>{poolName}</Text.M>
-              <Text.XS variant="secondary">{poolTicker}</Text.XS>
-            </Column>
-          </Row>
-
-          <Divider />
-
-          {/* Statistics Section */}
-          <Column gap={spacing.M}>
-            <Text.M>{statisticsLabel}</Text.M>
-            <Column gap={spacing.S}>
-              <Row alignItems="center" justifyContent="space-between">
-                <Text.XS variant="secondary">{saturationLabel}</Text.XS>
-                <Text.M style={saturationTextStyle}>
-                  {saturationPercentage}%
-                </Text.M>
-              </Row>
-              <ProgressBar
-                progress={saturationPercentage}
-                color={saturationColor}
-                showPercentage={false}
-              />
-            </Column>
-
-            {/* Statistics Grid - Three Column Layout */}
-            <View style={defaultStyles.statisticsGrid}>
-              <GenericFlashList
-                data={statistics}
-                numColumns={3}
-                scrollEnabled={false}
-                nestedScrollEnabled={true}
-                renderItem={renderStatItem}
-                keyExtractor={(_, index) => `stat-${index}`}
-              />
-            </View>
+    <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
+      <Column style={defaultStyles.content} gap={spacing.L}>
+        {/* Pool Overview */}
+        <Row alignItems="center" gap={spacing.M}>
+          <Avatar
+            content={{ fallback: poolAvatarFallback }}
+            size={38}
+            shape="rounded"
+          />
+          <Column style={defaultStyles.poolInfoColumn}>
+            <Text.M>{poolName}</Text.M>
+            <Text.XS variant="secondary">{poolTicker}</Text.XS>
           </Column>
+        </Row>
 
-          <Divider />
+        <Divider />
 
-          {/* Information Section */}
+        {/* Statistics Section */}
+        <Column gap={spacing.M}>
+          <Text.M>{statisticsLabel}</Text.M>
           <Column gap={spacing.S}>
             <Row alignItems="center" justifyContent="space-between">
-              <Text.M>{informationLabel}</Text.M>
-              <Icon name="Globe" size={20} />
+              <Text.XS variant="secondary">{saturationLabel}</Text.XS>
+              <Text.M style={saturationTextStyle}>
+                {saturationPercentage}%
+              </Text.M>
             </Row>
-            <Text.XS variant="secondary">{informationText}</Text.XS>
+            <ProgressBar
+              progress={saturationPercentage}
+              color={saturationColor}
+              showPercentage={false}
+            />
           </Column>
 
-          <Divider />
-
-          {/* Pool IDs Section */}
-          <Column gap={spacing.S}>
-            <Text.M>{poolIdsLabel}</Text.M>
-            {poolIds.map((poolId, index) => (
-              <Text.XS variant="secondary" key={index}>
-                {poolId}
-              </Text.XS>
-            ))}
-          </Column>
-
-          <Divider />
-
-          {/* Owners Section */}
-          <Column gap={spacing.S}>
-            <Text.M>
-              {ownersLabel} ({ownerIds.length})
-            </Text.M>
-            {ownerIds.map((ownerId, index) => (
-              <Text.XS variant="secondary" key={index}>
-                {ownerId}
-              </Text.XS>
-            ))}
-          </Column>
+          {/* Statistics Grid - Three Column Layout */}
+          <View style={defaultStyles.statisticsGrid}>
+            <GenericFlashList
+              data={statistics}
+              numColumns={3}
+              scrollEnabled={false}
+              nestedScrollEnabled={true}
+              renderItem={renderStatItem}
+              keyExtractor={(_, index) => `stat-${index}`}
+            />
+          </View>
         </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: cancelButtonLabel,
-          onPress: onCancelPress,
-        }}
-        primaryButton={{
-          label: stakeButtonLabel,
-          onPress: onStakePress,
-        }}
-      />
-    </>
+
+        <Divider />
+
+        {/* Information Section */}
+        <Column gap={spacing.S}>
+          <Row alignItems="center" justifyContent="space-between">
+            <Text.M>{informationLabel}</Text.M>
+            <Icon name="Globe" size={20} />
+          </Row>
+          <Text.XS variant="secondary">{informationText}</Text.XS>
+        </Column>
+
+        <Divider />
+
+        {/* Pool IDs Section */}
+        <Column gap={spacing.S}>
+          <Text.M>{poolIdsLabel}</Text.M>
+          {poolIds.map((poolId, index) => (
+            <Text.XS variant="secondary" key={index}>
+              {poolId}
+            </Text.XS>
+          ))}
+        </Column>
+
+        <Divider />
+
+        {/* Owners Section */}
+        <Column gap={spacing.S}>
+          <Text.M>
+            {ownersLabel} ({ownerIds.length})
+          </Text.M>
+          {ownerIds.map((ownerId, index) => (
+            <Text.XS variant="secondary" key={index}>
+              {ownerId}
+            </Text.XS>
+          ))}
+        </Column>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
 export const PoolDetailsSheetSkeleton = () => {
-  const { t } = useTranslation();
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const defaultStyles = useMemo(
-    () => styles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const defaultStyles = useMemo(() => styles(theme), [theme]);
 
   return (
-    <>
-      <SheetHeader title={t('v2.pages.pool-details.title')} />
-      <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
-        <Column style={defaultStyles.content} gap={spacing.L}>
-          <Row alignItems="center" gap={spacing.M}>
-            <Shimmer width={38} height={38} borderRadius={10} />
-            <Column style={defaultStyles.poolInfoColumn} gap={spacing.XS}>
-              <Shimmer.M width="long" />
-              <Shimmer.XS width="short" />
-            </Column>
-          </Row>
-
-          <Divider />
-
-          <Column gap={spacing.M}>
-            <Shimmer.M width="medium" />
-            <Column gap={spacing.S}>
-              <Row alignItems="center" justifyContent="space-between">
-                <Shimmer.XS width="short" />
-                <Shimmer.M width="short" />
-              </Row>
-              <Shimmer width={320} height={18} borderRadius={8} />
-            </Column>
-
-            <View style={defaultStyles.statisticsGrid}>
-              <Column gap={spacing.M}>
-                {SHIMMER_ROWS.map(row => (
-                  <Row key={`stat-skel-row-${row}`}>
-                    {SHIMMER_ROWS.map(col => (
-                      <View
-                        key={`stat-skel-${row}-${col}`}
-                        style={defaultStyles.skeletonStatsCell}>
-                        <Column
-                          style={[
-                            defaultStyles.statItem,
-                            defaultStyles.statItemFlex,
-                          ]}
-                          gap={spacing.XS}>
-                          <Shimmer.XS width="medium" />
-                          <Shimmer.S width="short" />
-                        </Column>
-                      </View>
-                    ))}
-                  </Row>
-                ))}
-              </Column>
-            </View>
+    <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
+      <Column style={defaultStyles.content} gap={spacing.L}>
+        <Row alignItems="center" gap={spacing.M}>
+          <Shimmer width={38} height={38} borderRadius={10} />
+          <Column style={defaultStyles.poolInfoColumn} gap={spacing.XS}>
+            <Shimmer.M width="long" />
+            <Shimmer.XS width="short" />
           </Column>
+        </Row>
 
-          <Divider />
+        <Divider />
 
+        <Column gap={spacing.M}>
+          <Shimmer.M width="medium" />
           <Column gap={spacing.S}>
             <Row alignItems="center" justifyContent="space-between">
-              <Shimmer.M width="medium" />
-              <Shimmer width={20} height={20} borderRadius={10} />
+              <Shimmer.XS width="short" />
+              <Shimmer.M width="short" />
             </Row>
-            <Shimmer.S width="long" />
-            <Shimmer.S width="long" />
+            <Shimmer width={320} height={18} borderRadius={8} />
           </Column>
 
-          <Divider />
-
-          <Column gap={spacing.S}>
-            <Shimmer.M width="medium" />
-            <Shimmer.XS width="long" />
-            <Shimmer.XS width="long" />
-          </Column>
-
-          <Divider />
-
-          <Column gap={spacing.S}>
-            <Shimmer.M width="medium" />
-            <Shimmer.XS width="long" />
-            <Shimmer.XS width="long" />
-          </Column>
+          <View style={defaultStyles.statisticsGrid}>
+            <Column gap={spacing.M}>
+              {SHIMMER_ROWS.map(row => (
+                <Row key={`stat-skel-row-${row}`}>
+                  {SHIMMER_ROWS.map(col => (
+                    <View
+                      key={`stat-skel-${row}-${col}`}
+                      style={defaultStyles.skeletonStatsCell}>
+                      <Column
+                        style={[
+                          defaultStyles.statItem,
+                          defaultStyles.statItemFlex,
+                        ]}
+                        gap={spacing.XS}>
+                        <Shimmer.XS width="medium" />
+                        <Shimmer.S width="short" />
+                      </Column>
+                    </View>
+                  ))}
+                </Row>
+              ))}
+            </Column>
+          </View>
         </Column>
-      </Sheet.Scroll>
-    </>
+
+        <Divider />
+
+        <Column gap={spacing.S}>
+          <Row alignItems="center" justifyContent="space-between">
+            <Shimmer.M width="medium" />
+            <Shimmer width={20} height={20} borderRadius={10} />
+          </Row>
+          <Shimmer.S width="long" />
+          <Shimmer.S width="long" />
+        </Column>
+
+        <Divider />
+
+        <Column gap={spacing.S}>
+          <Shimmer.M width="medium" />
+          <Shimmer.XS width="long" />
+          <Shimmer.XS width="long" />
+        </Column>
+
+        <Divider />
+
+        <Column gap={spacing.S}>
+          <Shimmer.M width="medium" />
+          <Shimmer.XS width="long" />
+          <Shimmer.XS width="long" />
+        </Column>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
-const styles = (theme: Theme, footerHeight: number) =>
+const styles = (theme: Theme) =>
   StyleSheet.create({
     sheetContent: {
       padding: spacing.L,
-      paddingBottom: footerHeight,
+      paddingBottom: footerHeight.horizontal,
     },
     content: {
       paddingTop: spacing.M,

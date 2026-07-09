@@ -30,7 +30,6 @@ const extensionViewApi: ExtensionViewApi = {
       subscriber.next(update.location.hash.replace('#', '') || '/');
     }),
   ),
-  keepAlive: async () => {},
 };
 
 const initializeExtensionView: ContextualLaceInit<

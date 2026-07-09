@@ -6,9 +6,12 @@ import {
   fromDexList,
   fromEstimateResponse,
   fromTokenSummary,
+  STEELSWAP_PARTNER,
+  STEELSWAP_PARTNER_ADDRESS,
   toBuildRequest,
   toEstimateRequest,
   toSwapProviderError,
+  type SteelSwapPartner,
 } from './steelswap-mappers';
 
 import type {
@@ -16,8 +19,13 @@ import type {
   SteelSwapEstimateResponse,
   SteelSwapTokenSummary,
 } from './steelswap-types';
-import type { AppConfig } from '@lace-contract/module';
 import type { SwapProvider } from '@lace-contract/swap-provider';
+
+export type SteelSwapProviderConfig = {
+  steelswapApiBaseUrl: string;
+  nftCdnUrl: string;
+  partner?: SteelSwapPartner;
+};
 
 const jsonPost = async <T>(url: string, body: unknown): Promise<T> => {
   const response = await fetch(url, {
@@ -46,54 +54,62 @@ const jsonGet = async <T>(url: string): Promise<T> => {
   return response.json() as Promise<T>;
 };
 
-export const createSteelSwapProvider = (config: AppConfig): SwapProvider => ({
-  getQuote: request =>
-    from(
-      jsonPost<SteelSwapEstimateResponse>(
-        `${config.steelswapApiBaseUrl}/swap/estimate/`,
-        toEstimateRequest(request),
-      )
-        .then(response => Ok(fromEstimateResponse(response, request)))
-        .catch(error => Err(toSwapProviderError(error))),
-    ),
-
-  buildSwapTx: request =>
-    from(
-      jsonPost<SteelSwapBuildResponse>(
-        `${config.steelswapApiBaseUrl}/swap/build/`,
-        toBuildRequest(request),
-      )
-        .then(response => Ok(fromBuildResponse(response)))
-        .catch(error => Err(toSwapProviderError(error))),
-    ),
-
-  listTokens: () =>
-    from(
-      jsonGet<SteelSwapTokenSummary[]>(
-        `${config.steelswapApiBaseUrl}/tokens/list/`,
-      )
-        .then(tokens =>
-          Ok(tokens.map(t => fromTokenSummary(t, config.nftCdnUrl))),
+export const createSteelSwapProvider = (
+  config: SteelSwapProviderConfig,
+): SwapProvider => {
+  const partner: SteelSwapPartner = config.partner ?? {
+    name: STEELSWAP_PARTNER,
+    address: STEELSWAP_PARTNER_ADDRESS,
+  };
+  return {
+    getQuote: request =>
+      from(
+        jsonPost<SteelSwapEstimateResponse>(
+          `${config.steelswapApiBaseUrl}/swap/estimate/`,
+          toEstimateRequest(request, partner),
         )
-        .catch(error => Err(toSwapProviderError(error))),
-    ),
+          .then(response => Ok(fromEstimateResponse(response, request)))
+          .catch(error => Err(toSwapProviderError(error))),
+      ),
 
-  listDexes: () =>
-    from(
-      jsonGet<string[]>(`${config.steelswapApiBaseUrl}/dex/list/`)
-        .then(dexes => Ok(fromDexList(dexes)))
-        .catch(error => Err(toSwapProviderError(error))),
-    ),
-
-  searchTokens: (_networkId, query) =>
-    from(
-      jsonPost<SteelSwapTokenSummary[]>(
-        `${config.steelswapApiBaseUrl}/tokens/find-pairs/`,
-        { token: query },
-      )
-        .then(tokens =>
-          Ok(tokens.map(t => fromTokenSummary(t, config.nftCdnUrl))),
+    buildSwapTx: request =>
+      from(
+        jsonPost<SteelSwapBuildResponse>(
+          `${config.steelswapApiBaseUrl}/swap/build/`,
+          toBuildRequest(request, partner),
         )
-        .catch(error => Err(toSwapProviderError(error))),
-    ),
-});
+          .then(response => Ok(fromBuildResponse(response)))
+          .catch(error => Err(toSwapProviderError(error))),
+      ),
+
+    listTokens: () =>
+      from(
+        jsonGet<SteelSwapTokenSummary[]>(
+          `${config.steelswapApiBaseUrl}/tokens/list/`,
+        )
+          .then(tokens =>
+            Ok(tokens.map(t => fromTokenSummary(t, config.nftCdnUrl))),
+          )
+          .catch(error => Err(toSwapProviderError(error))),
+      ),
+
+    listDexes: () =>
+      from(
+        jsonGet<string[]>(`${config.steelswapApiBaseUrl}/dex/list/`)
+          .then(dexes => Ok(fromDexList(dexes)))
+          .catch(error => Err(toSwapProviderError(error))),
+      ),
+
+    searchTokens: (_networkId, query) =>
+      from(
+        jsonPost<SteelSwapTokenSummary[]>(
+          `${config.steelswapApiBaseUrl}/tokens/find-pairs/`,
+          { token: query },
+        )
+          .then(tokens =>
+            Ok(tokens.map(t => fromTokenSummary(t, config.nftCdnUrl))),
+          )
+          .catch(error => Err(toSwapProviderError(error))),
+      ),
+  };
+};

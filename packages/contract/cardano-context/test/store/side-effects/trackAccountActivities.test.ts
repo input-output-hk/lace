@@ -1,9 +1,10 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
+import { failuresActions } from '@lace-contract/failures';
 import { TokenId } from '@lace-contract/tokens';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Err, Ok, Timestamp } from '@lace-sdk/util';
-import { of } from 'rxjs';
+import { BigNumber, Ok, Timestamp } from '@lace-sdk/util';
+import { defer, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -15,6 +16,7 @@ import {
   CardanoPaymentAddress,
 } from '../../../src';
 import { createTrackAccountActivities } from '../../../src/store/side-effects/track-account-activities';
+import { CardanoActivitiesProcessingFailureId } from '../../../src/value-objects';
 import {
   account0Context,
   cardanoAccount0Addr,
@@ -35,11 +37,16 @@ import type {
   MissingTransactionData,
 } from '../../../src/store/helpers';
 import type { Activity } from '@lace-contract/activities';
+import type { Failure, FailureId } from '@lace-contract/failures';
+import type { TranslationKey } from '@lace-contract/i18n';
 
 const actions = {
   ...activitiesActions,
   ...cardanoContextActions,
+  ...failuresActions,
 };
+
+const noFailureSelector = (_id: FailureId): Failure | undefined => undefined;
 
 describe('cardano-context side effects', () => {
   const mockTxId =
@@ -195,6 +202,9 @@ describe('cardano-context side effects', () => {
                 selectTransactionHistoryGroupedByAccount$,
                 selectRewardsHistoryGroupedByAccount$,
               },
+              failures: {
+                selectFailureById$: cold('a', { a: noFailureSelector }),
+              },
             },
             dependencies: {
               cardanoProvider: {
@@ -302,6 +312,9 @@ describe('cardano-context side effects', () => {
                   a: {},
                 }),
               },
+              failures: {
+                selectFailureById$: cold('a', { a: noFailureSelector }),
+              },
             },
             dependencies: {
               cardanoProvider:
@@ -320,10 +333,35 @@ describe('cardano-context side effects', () => {
       );
     });
 
-    it('dispatches getActivitiesFailed on provider error', () => {
+    it('retries transient errors with exponential backoff and emits addFailure after exhaustion', () => {
       const findMissingActivitiesMock = vi.fn();
       const mockGetAccountActivity = vi.fn();
       const mapRewardToActivityMock = vi.fn();
+
+      const txToLoadData: MissingTransactionData = {
+        kind: ActivityKind.Transaction,
+        timestamp: Timestamp(Date.now()),
+        txId: Cardano.TransactionId(mockTxId),
+        accountId: cardanoAccount0AddrWithData.accountId,
+        rewardAccount: CardanoRewardAccount(
+          cardanoAccount0AddrWithData.data.rewardAccount,
+        ),
+        accountAddresses: [
+          CardanoPaymentAddress(cardanoAccount0AddrWithData.address),
+        ],
+      };
+      findMissingActivitiesMock.mockReturnValue([txToLoadData]);
+
+      const retriableError = new ProviderError(ProviderFailure.Unhealthy);
+      let subscriptions = 0;
+      const getTransactionDetails = vi.fn().mockImplementation(() =>
+        defer(() => {
+          subscriptions += 1;
+          return defer(() => {
+            throw retriableError;
+          });
+        }),
+      );
 
       testSideEffect(
         createTrackAccountActivities({
@@ -332,82 +370,177 @@ describe('cardano-context side effects', () => {
           mapRewardToActivity: mapRewardToActivityMock,
           debounceTimeout: 0,
         }),
-        ({ cold, expectObservable }) => {
-          const txToLoadData: MissingTransactionData = {
-            kind: ActivityKind.Transaction,
-            timestamp: Timestamp(Date.now()),
-            txId: Cardano.TransactionId(mockTxId),
-            accountId: cardanoAccount0AddrWithData.accountId,
-            rewardAccount: CardanoRewardAccount(
-              cardanoAccount0AddrWithData.data.rewardAccount,
-            ),
-            accountAddresses: [
-              CardanoPaymentAddress(cardanoAccount0AddrWithData.address),
-            ],
-          };
-
-          // Mock transaction to load
-          findMissingActivitiesMock.mockReturnValue([txToLoadData]);
-
-          // Mock transaction details error
-          const error = new ProviderError(ProviderFailure.ConnectionFailure);
-          const getTransactionDetails = vi.fn().mockReturnValue(of(Err(error)));
-
-          return {
-            actionObservables: {},
-            stateObservables: {
-              addresses: {
-                selectAllAddresses$: cold('a', {
-                  a: [cardanoAccount0AddrWithData],
-                }),
-              },
-              activities: {
-                selectAllMap$: cold('a', { a: {} }),
-                selectDesiredLoadedActivitiesCountPerAccount$: cold('a', {
-                  a: {},
-                }),
-              },
-              cardanoContext: {
-                selectChainId$: cold('a', { a: chainId }),
-                selectProtocolParameters$: cold('a', {
-                  a: {
-                    coinsPerUtxoByte: 4310,
-                  } as RequiredProtocolParameters,
-                }),
-                selectEraSummaries$: cold('a', { a: [] }),
-                selectTransactionHistoryGroupedByAccount$: cold('a', {
-                  a: {
-                    [cardanoAccount0Addr.accountId]: [
-                      createTransactionHistoryItem({
-                        id: mockTxId,
-                        blockTime: Date.now(),
-                      }),
-                    ],
-                  },
-                }),
-                selectRewardsHistoryGroupedByAccount$: cold('a', {
-                  a: {},
-                }),
-              },
+        ({ cold, expectObservable, flush }) => ({
+          actionObservables: {},
+          stateObservables: {
+            addresses: {
+              selectAllAddresses$: cold('a', {
+                a: [cardanoAccount0AddrWithData],
+              }),
             },
-            dependencies: {
-              cardanoProvider: {
-                getTransactionDetails,
-                resolveInput: vi.fn().mockReturnValue(of(Ok(null))),
-              } as unknown as CardanoProviderDependencies['cardanoProvider'],
-              actions,
-              logger: dummyLogger,
+            activities: {
+              selectAllMap$: cold('a', { a: {} }),
+              selectDesiredLoadedActivitiesCountPerAccount$: cold('a', {
+                a: {},
+              }),
             },
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('a', {
-                a: actions.activities.getActivitiesFailed({
-                  accountId: account0Context.accountId,
-                  failure: error.reason,
-                }),
-              });
+            cardanoContext: {
+              selectChainId$: cold('a', { a: chainId }),
+              selectProtocolParameters$: cold('a', {
+                a: {
+                  coinsPerUtxoByte: 4310,
+                } as RequiredProtocolParameters,
+              }),
+              selectEraSummaries$: cold('a', { a: [] }),
+              selectTransactionHistoryGroupedByAccount$: cold('a', {
+                a: {
+                  [cardanoAccount0Addr.accountId]: [
+                    createTransactionHistoryItem({
+                      id: mockTxId,
+                      blockTime: Date.now(),
+                    }),
+                  ],
+                },
+              }),
+              selectRewardsHistoryGroupedByAccount$: cold('a', {
+                a: {},
+              }),
             },
-          };
-        },
+            failures: {
+              selectFailureById$: cold('a', { a: noFailureSelector }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              getTransactionDetails,
+              resolveInput: vi.fn().mockReturnValue(of(Ok(null))),
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('2100ms a', {
+              a: actions.failures.addFailure({
+                failureId: CardanoActivitiesProcessingFailureId(
+                  account0Context.accountId,
+                ),
+                message:
+                  'sync.error.cardano-activities-processing-failed' as TranslationKey,
+              }),
+            });
+            flush();
+            expect(subscriptions).toBe(4);
+          },
+        }),
+      );
+    });
+
+    it('auto-dismisses an existing failure on successful fetch', () => {
+      const findMissingActivitiesMock = vi.fn();
+      const mapTransactionToActivityMock = vi.fn();
+      const mapRewardToActivityMock = vi.fn();
+
+      const txToLoadData: MissingTransactionData = {
+        kind: ActivityKind.Transaction,
+        timestamp: Timestamp(Date.now()),
+        txId: Cardano.TransactionId(mockTxId),
+        accountId: cardanoAccount0AddrWithData.accountId,
+        rewardAccount: CardanoRewardAccount(
+          cardanoAccount0AddrWithData.data.rewardAccount,
+        ),
+        accountAddresses: [
+          CardanoPaymentAddress(cardanoAccount0AddrWithData.address),
+        ],
+      };
+      findMissingActivitiesMock.mockReturnValue([txToLoadData]);
+
+      const mockTxDetails = {
+        id: Cardano.TransactionId(mockTxId),
+      } as unknown as ExtendedTxDetails;
+      const getTransactionDetails = vi
+        .fn()
+        .mockReturnValue(of(Ok(mockTxDetails)));
+
+      const mockAccountActivity = {
+        activityId: mockTxId,
+      } as unknown as Activity;
+      mapTransactionToActivityMock.mockReturnValue(of(Ok(mockAccountActivity)));
+
+      const failureId = CardanoActivitiesProcessingFailureId(
+        account0Context.accountId,
+      );
+      const existingFailure: Failure = {
+        failureId,
+        message:
+          'sync.error.cardano-activities-processing-failed' as TranslationKey,
+      };
+      const selectFailureById$ = of((id: FailureId): Failure | undefined =>
+        id === failureId ? existingFailure : undefined,
+      );
+
+      testSideEffect(
+        createTrackAccountActivities({
+          findMissingActivities: findMissingActivitiesMock,
+          mapTransactionToActivity: mapTransactionToActivityMock,
+          mapRewardToActivity: mapRewardToActivityMock,
+          debounceTimeout: 0,
+        }),
+        ({ cold, expectObservable }) => ({
+          actionObservables: {},
+          stateObservables: {
+            addresses: {
+              selectAllAddresses$: cold('a', {
+                a: [cardanoAccount0AddrWithData],
+              }),
+            },
+            activities: {
+              selectAllMap$: cold('a', { a: {} }),
+              selectDesiredLoadedActivitiesCountPerAccount$: cold('a', {
+                a: {},
+              }),
+            },
+            cardanoContext: {
+              selectChainId$: cold('a', { a: chainId }),
+              selectProtocolParameters$: cold('a', {
+                a: {
+                  coinsPerUtxoByte: 4310,
+                } as RequiredProtocolParameters,
+              }),
+              selectEraSummaries$: cold('a', { a: [] }),
+              selectTransactionHistoryGroupedByAccount$: cold('a', {
+                a: {
+                  [cardanoAccount0Addr.accountId]: [
+                    createTransactionHistoryItem({
+                      id: mockTxId,
+                      blockTime: Date.now(),
+                    }),
+                  ],
+                },
+              }),
+              selectRewardsHistoryGroupedByAccount$: cold('a', {
+                a: {},
+              }),
+            },
+            failures: { selectFailureById$ },
+          },
+          dependencies: {
+            cardanoProvider: {
+              getTransactionDetails,
+              resolveInput: vi.fn().mockReturnValue(of(Ok(null))),
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: actions.activities.upsertActivities({
+                accountId: account0Context.accountId,
+                activities: [mockAccountActivity],
+              }),
+              b: actions.failures.dismissFailure(failureId),
+            });
+          },
+        }),
       );
     });
   });

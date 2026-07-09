@@ -1,12 +1,12 @@
-import { AppLockSheet } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { AppLockSheet, Sheet } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useLockSettings } from './useLockSettings';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 export const LockSettings = (
-  _props: SheetScreenProps<SheetRoutes.LockSettings>,
+  props: SheetScreenProps<SheetRoutes.LockSettings>,
 ) => {
   const {
     inactivityTimeoutOptions,
@@ -17,9 +17,19 @@ export const LockSettings = (
     onLockTimeoutChange,
   } = useLockSettings();
 
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={title}
+          testID="app-lock-inactivity-timeout-header"
+        />
+      ),
+    });
+  }, [props.navigation, title]);
+
   return (
     <AppLockSheet
-      title={title}
       description={description}
       infoLabel={infoLabel}
       lockTimeOutOptions={inactivityTimeoutOptions}

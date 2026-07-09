@@ -1,16 +1,14 @@
 import { Serialization } from '@cardano-sdk/core';
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
-import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
-import {
-  CommunicationType,
-  KeyPurpose,
-  util,
-} from '@cardano-sdk/key-management';
+import { util } from '@cardano-sdk/key-management';
 import { createInputResolver } from '@lace-contract/cardano-context';
 import { HexBytes } from '@lace-sdk/util';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 
+import { resolveLedgerDeviceDescriptor } from './resolve-device-descriptor';
+
+import type { CardanoLedgerSignerFactoryDependencies } from './cardano-ledger-signer-factory';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
@@ -19,6 +17,7 @@ import type {
   CardanoSignResult,
   CardanoTransactionSigner,
 } from '@lace-contract/cardano-context';
+import type { HardwareWalletLedger } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
 export interface CardanoLedgerTransactionSignerProps {
@@ -27,15 +26,21 @@ export interface CardanoLedgerTransactionSignerProps {
   extendedAccountPublicKey: Bip32PublicKeyHex;
   knownAddresses: GroupedAddress[];
   utxo: Cardano.Utxo[];
+  wallet: HardwareWalletLedger;
 }
 
 export class CardanoLedgerTransactionSigner
   implements CardanoTransactionSigner
 {
   readonly #props: CardanoLedgerTransactionSignerProps;
+  readonly #dependencies: CardanoLedgerSignerFactoryDependencies;
 
-  public constructor(props: CardanoLedgerTransactionSignerProps) {
+  public constructor(
+    props: CardanoLedgerTransactionSignerProps,
+    dependencies: CardanoLedgerSignerFactoryDependencies,
+  ) {
     this.#props = props;
+    this.#dependencies = dependencies;
   }
 
   public sign(request: CardanoSignRequest): Observable<CardanoSignResult> {
@@ -44,17 +49,16 @@ export class CardanoLedgerTransactionSigner
 
   async #signTransaction(serializedTx: HexBytes): Promise<CardanoSignResult> {
     const bip32Ed25519 = await SodiumBip32Ed25519.create();
-    const deviceConnection = await LedgerKeyAgent.establishDeviceConnection(
-      CommunicationType.Web,
+    const descriptor = await resolveLedgerDeviceDescriptor(
+      this.#props.wallet.walletId,
+      this.#dependencies.resolveLegacyDevice,
     );
-    const keyAgent = new LedgerKeyAgent(
+    const keyAgent = await this.#dependencies.transport.createKeyAgent(
       {
+        descriptor,
         accountIndex: this.#props.accountIndex,
         chainId: this.#props.chainId,
-        communicationType: CommunicationType.Web,
-        deviceConnection,
         extendedAccountPublicKey: this.#props.extendedAccountPublicKey,
-        purpose: KeyPurpose.STANDARD,
       },
       { bip32Ed25519, logger: dummyLogger },
     );

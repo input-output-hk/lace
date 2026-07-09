@@ -4,9 +4,8 @@ import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
-import { Column, Divider } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { Divider } from '../../../atoms';
+import { footerHeight, Sheet } from '../../../organisms';
 import {
   getSaturationColor,
   getProgressBarColorForTheme,
@@ -71,7 +70,6 @@ export interface StakeDelegationSheetProps {
 }
 
 export const StakeDelegationSheet = ({
-  headerTitle,
   poolAvatarFallback,
   poolName,
   poolTicker,
@@ -100,14 +98,9 @@ export const StakeDelegationSheet = ({
   transactionFeeAda,
   totalLabel,
   totalAda,
-  onCancelPress,
-  onDelegatePress,
-  cancelButtonLabel,
-  delegateButtonLabel,
 }: StakeDelegationSheetProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const defaultStyles = useMemo(() => styles(footerHeight), [footerHeight]);
+  const defaultStyles = useMemo(() => styles(), []);
   const saturationColor = useMemo(
     () => getSaturationColor(saturationPercentage),
     [saturationPercentage],
@@ -121,95 +114,74 @@ export const StakeDelegationSheet = ({
   );
 
   return (
-    <>
-      <SheetHeader title={headerTitle} />
-      <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
-        <Column style={defaultStyles.content} gap={spacing.L}>
-          <PoolOverview
-            poolAvatarFallback={poolAvatarFallback}
-            poolName={poolName}
-            poolTicker={poolTicker}
-            poolInfoColumnStyle={defaultStyles.poolInfoColumn}
-          />
-
-          <Divider />
-
-          <StakePoolDetails
-            stakeKey={{
-              label: stakeKeyLabel,
-              value: stakeKey,
-            }}
-            saturation={{
-              label: saturationLabel,
-              percentage: saturationPercentage,
-              color: saturationColor,
-            }}
-            margin={{
-              label: marginLabel,
-              value: margin,
-            }}
-            pledge={{
-              label: pledgeLabel,
-              value: pledge,
-            }}
-            cost={{
-              label: costLabel,
-              value: cost,
-            }}
-            delegatedStake={{
-              label: delegatedStakeLabel,
-              value: delegatedStake,
-            }}
-            sourceAccount={{
-              label: sourceAccountLabel,
-              account: sourceAccount,
-            }}
-            expiresBy={{
-              label: expiresByLabel,
-              value: expiresBy,
-            }}
-            styleProps={{ saturationTextStyle }}
-          />
-
-          <Divider />
-
-          <TotalBreakdown
-            totalBreakdownLabel={totalBreakdownLabel}
-            stakeKeyDepositLabel={stakeKeyDepositLabel}
-            stakeKeyDepositAda={stakeKeyDepositAda}
-            stakeKeyDepositReturnLabel={stakeKeyDepositReturnLabel}
-            stakeKeyDepositReturnAda={stakeKeyDepositReturnAda}
-            transactionFeeLabel={transactionFeeLabel}
-            transactionFeeAda={transactionFeeAda}
-            totalLabel={totalLabel}
-            totalAda={totalAda}
-          />
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: cancelButtonLabel,
-          onPress: onCancelPress,
-        }}
-        primaryButton={{
-          label: delegateButtonLabel,
-          onPress: onDelegatePress,
-        }}
+    <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
+      <PoolOverview
+        poolAvatarFallback={poolAvatarFallback}
+        poolName={poolName}
+        poolTicker={poolTicker}
       />
-    </>
+
+      <Divider />
+
+      <StakePoolDetails
+        stakeKey={{
+          label: stakeKeyLabel,
+          value: stakeKey,
+        }}
+        saturation={{
+          label: saturationLabel,
+          percentage: saturationPercentage,
+          color: saturationColor,
+        }}
+        margin={{
+          label: marginLabel,
+          value: margin,
+        }}
+        pledge={{
+          label: pledgeLabel,
+          value: pledge,
+        }}
+        cost={{
+          label: costLabel,
+          value: cost,
+        }}
+        delegatedStake={{
+          label: delegatedStakeLabel,
+          value: delegatedStake,
+        }}
+        sourceAccount={{
+          label: sourceAccountLabel,
+          account: sourceAccount,
+        }}
+        expiresBy={{
+          label: expiresByLabel,
+          value: expiresBy,
+        }}
+        styleProps={{ saturationTextStyle }}
+      />
+
+      <Divider />
+
+      <TotalBreakdown
+        totalBreakdownLabel={totalBreakdownLabel}
+        stakeKeyDepositLabel={stakeKeyDepositLabel}
+        stakeKeyDepositAda={stakeKeyDepositAda}
+        stakeKeyDepositReturnLabel={stakeKeyDepositReturnLabel}
+        stakeKeyDepositReturnAda={stakeKeyDepositReturnAda}
+        transactionFeeLabel={transactionFeeLabel}
+        transactionFeeAda={transactionFeeAda}
+        totalLabel={totalLabel}
+        totalAda={totalAda}
+      />
+    </Sheet.Scroll>
   );
 };
 
-const styles = (footerHeight: number) =>
+const styles = () =>
   StyleSheet.create({
     sheetContent: {
+      gap: spacing.L,
       padding: spacing.L,
-      paddingBottom: footerHeight,
-    },
-    content: {
-      paddingTop: spacing.M,
-    },
-    poolInfoColumn: {
-      flex: 1,
+      paddingBottom: footerHeight.horizontal,
     },
   });

@@ -1,4 +1,3 @@
-import { useBottomSheetScrollableCreator } from '@gorhom/bottom-sheet';
 import { useTranslation } from '@lace-contract/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View, type ScrollViewProps } from 'react-native';
@@ -13,10 +12,10 @@ import {
   type NetworkInfoCardProps,
 } from '../molecules';
 import { GenericFlashList } from '../organisms';
-import { useScrollEventsHandlers } from '../organisms/sheet/useScrollEventsHandlers';
 
 import type { Theme } from '../../design-tokens';
-import type { BrowsePoolSortOption, LaceBrowsePool } from '../util/types';
+import type { BrowsePoolSortOption } from '../util/types';
+import type { LaceBrowsePool } from '@lace-contract/cardano-stake-pools';
 
 export interface BrowsePoolProps {
   data: LaceBrowsePool[];
@@ -172,15 +171,7 @@ export const BrowsePoolTemplate = ({
  * Use only on native when rendered inside BottomSheet. On web, use BrowsePoolTemplate.
  */
 export const BrowsePoolSheetContent = (props: BrowsePoolProps) => {
-  const renderScrollComponent = useBottomSheetScrollableCreator({
-    scrollEventsHandlersHook: useScrollEventsHandlers,
-  });
-  return (
-    <BrowsePoolTemplate
-      {...props}
-      renderScrollComponent={renderScrollComponent}
-    />
-  );
+  return <BrowsePoolTemplate {...props} />;
 };
 
 const styles = ({ theme }: { theme: Theme }) =>
@@ -204,7 +195,7 @@ const styles = ({ theme }: { theme: Theme }) =>
     contentWrapper: {
       marginHorizontal: spacing.S,
       gap: spacing.M,
-      paddingBottom: spacing.M,
+      paddingVertical: spacing.M,
     },
     listElements: {
       paddingBottom: spacing.XXXXL,

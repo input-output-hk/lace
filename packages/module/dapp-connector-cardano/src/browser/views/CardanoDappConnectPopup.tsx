@@ -2,7 +2,7 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { DappConnectorLayoutV2 } from '@lace-lib/ui-extension';
 import { Loader, spacing, Text, useTheme } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AuthorizeDappContent } from '../../common/components';
@@ -19,6 +19,7 @@ export const CardanoDappConnectPopup = () => {
     'cardanoDappConnector.selectPendingAuthRequest',
   );
   const accounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
+  const activeWallets = useLaceSelector('wallets.selectActiveNetworkWallets');
 
   const [selectedAccount, setSelectedAccount] = useState<AnyAccount | null>(
     null,
@@ -26,6 +27,14 @@ export const CardanoDappConnectPopup = () => {
 
   const cardanoAccounts = accounts.filter(
     account => account.blockchainName === 'Cardano',
+  );
+
+  const walletNameByWalletId = useMemo(
+    () =>
+      Object.fromEntries(
+        activeWallets.map(wallet => [wallet.walletId, wallet.metadata.name]),
+      ),
+    [activeWallets],
   );
 
   const selectedAccountBalance = useSelectedAccountBalance(selectedAccount);
@@ -85,6 +94,7 @@ export const CardanoDappConnectPopup = () => {
         name={request.dapp.name}
         url={request.dapp.origin}
         accounts={cardanoAccounts}
+        walletNameByWalletId={walletNameByWalletId}
         selectedAccount={selectedAccount}
         onSelectAccount={handleSelectAccount}
         selectedAccountBalance={selectedAccountBalance}

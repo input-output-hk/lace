@@ -11,6 +11,7 @@ import { useMemo, useCallback } from 'react';
 import type { ListOptionType } from '../common';
 import type { SettingsOption } from '@lace-contract/app';
 import type { TabRoutes, TabScreenProps } from '@lace-lib/navigation';
+import type { IconName } from '@lace-lib/ui-toolkit';
 
 export const useSettingsProps = ({
   navigation,
@@ -38,31 +39,29 @@ export const useSettingsProps = ({
 
   const handleTheme = useCallback(() => {
     trackEvent('settings | theme | press');
-    NavigationControls.sheets.navigate(SheetRoutes.ThemeSelection);
+    NavigationControls.navigate(SheetRoutes.ThemeSelection);
   }, [trackEvent]);
 
   const handleNetwork = useCallback(() => {
     trackEvent('settings | network | press');
-    NavigationControls.sheets.navigate(SheetRoutes.NetworkSelection);
+    NavigationControls.navigate(SheetRoutes.NetworkSelection);
   }, [trackEvent]);
 
   const handleLanguage = useCallback(() => {
     trackEvent('settings | language | press');
-    NavigationControls.sheets.navigate(SheetRoutes.Language);
+    NavigationControls.navigate(SheetRoutes.Language);
   }, [trackEvent]);
 
   const handleCurrency = useCallback(() => {
     trackEvent('settings | currency | press');
-    NavigationControls.sheets.navigate(SheetRoutes.FiatCurrencySheet, {
+    NavigationControls.navigate(SheetRoutes.FiatCurrencySheet, {
       featureName: currency,
     });
   }, [currency, trackEvent]);
 
   const handleAuthorizedDApps = useCallback(() => {
     trackEvent('settings | authorized dapps | press');
-    NavigationControls.sheets.navigate(SheetRoutes.AuthorizedDApps, {
-      featureName: authorizedDapps,
-    });
+    NavigationControls.navigate(SheetRoutes.AuthorizedDApps);
   }, [authorizedDapps, trackEvent]);
 
   const settingsOptionsFromCustomisations: SettingsOption[] = useMemo(
@@ -120,7 +119,7 @@ export const useSettingsProps = ({
         id: option.id,
         titleKey: t(option.titleKey),
         subtitleKey: option.subtitleKey ? t(option.subtitleKey) : undefined,
-        icon: option.icon,
+        icon: option.icon as IconName,
         onPress: option.onPress,
       })),
     );

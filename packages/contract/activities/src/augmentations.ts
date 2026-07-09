@@ -8,6 +8,8 @@ import type {
 import type { DynamicallyLoadedInit } from '@lace-contract/module';
 import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
 
+export interface BlockchainSpecificActivityMetadata {}
+
 declare module '@lace-contract/module' {
   interface State
     extends StateFromReducersMapObject<typeof activitiesReducers> {}

@@ -1,10 +1,9 @@
 import { useTranslation } from '@lace-contract/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
 import { Icon, Text } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
 import { Sheet } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens/theme/types';
@@ -14,14 +13,14 @@ export interface DeregistrationSuccessProps {
   testID?: string;
 }
 
-const getStyles = (theme: Theme, footerHeight: number) =>
+const getStyles = (theme: Theme) =>
   StyleSheet.create({
     headerTitle: {
       color: theme.text.primary,
       textAlign: 'center',
     },
     contentContainer: {
-      paddingBottom: footerHeight,
+      paddingBottom: spacing.XL,
     },
     content: {
       alignItems: 'center',
@@ -38,44 +37,27 @@ const getStyles = (theme: Theme, footerHeight: number) =>
   });
 
 export const DeregistrationSuccess = ({
-  onGoToStakingCenter,
   testID = 'deregistration-success-sheet',
 }: DeregistrationSuccessProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const styles = getStyles(theme);
   const { t } = useTranslation();
 
   return (
-    <>
-      <SheetHeader
-        title={t('v2.generic.staking.deregistration-success.title')}
-      />
-      <Sheet.Scroll
-        testID={testID}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.content}>
-          <Icon
-            name="RelievedFace"
-            variant="solid"
-            size={60}
-            style={styles.icon}
-          />
-          <Text.M style={styles.message}>
-            {t('v2.generic.staking.deregistration-success.subtitle')}
-          </Text.M>
-        </View>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.generic.staking.deregistration-success.button'),
-          onPress: onGoToStakingCenter,
-          testID: `${testID}-go-to-staking-center-button`,
-        }}
-      />
-    </>
+    <Sheet.Scroll
+      testID={testID}
+      contentContainerStyle={styles.contentContainer}>
+      <View style={styles.content}>
+        <Icon
+          name="RelievedFace"
+          variant="solid"
+          size={60}
+          style={styles.icon}
+        />
+        <Text.M style={styles.message}>
+          {t('v2.generic.staking.deregistration-success.subtitle')}
+        </Text.M>
+      </View>
+    </Sheet.Scroll>
   );
 };

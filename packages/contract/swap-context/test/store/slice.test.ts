@@ -7,6 +7,7 @@ import type { SwapConfigState } from '../../src/store/types';
 
 const baseState: SwapConfigState = {
   disclaimerAcknowledged: false,
+  ukFcaDisclaimerAcknowledged: false,
   slippage: 0.5,
   excludedDexes: [],
   availableDexes: null,
@@ -23,6 +24,24 @@ describe('swapContext config slice', () => {
           actions.swapConfig.acknowledgeDisclaimer(),
         );
         expect(state.disclaimerAcknowledged).toBe(true);
+      });
+    });
+
+    describe('acknowledgeUkFcaDisclaimer', () => {
+      it('sets ukFcaDisclaimerAcknowledged to true', () => {
+        const state = swapContextReducers.swapConfig(
+          baseState,
+          actions.swapConfig.acknowledgeUkFcaDisclaimer(),
+        );
+        expect(state.ukFcaDisclaimerAcknowledged).toBe(true);
+      });
+
+      it('leaves disclaimerAcknowledged untouched', () => {
+        const state = swapContextReducers.swapConfig(
+          baseState,
+          actions.swapConfig.acknowledgeUkFcaDisclaimer(),
+        );
+        expect(state.disclaimerAcknowledged).toBe(false);
       });
     });
 

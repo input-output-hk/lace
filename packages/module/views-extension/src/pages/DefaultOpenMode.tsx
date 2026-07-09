@@ -4,11 +4,9 @@ import {
   Column,
   RadioGroup,
   Sheet,
-  SheetFooter,
-  SheetHeader,
   Text,
+  footerHeight,
   spacing,
-  useFooterHeight,
 } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
@@ -27,7 +25,7 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 // race the async write, leaving the preference unsaved.
 //
 // Implemented as a global setTimeout (not a useEffect) so it survives the
-// sheet unmounting when NavigationControls.sheets.close() runs.
+// sheet unmounting when NavigationControls.close() runs.
 const FLUSH_WRITE_DELAY_MS = 100;
 
 // Thin wrapper kept synchronous on purpose: chrome.sidePanel.open() rejects
@@ -51,9 +49,9 @@ const openSidePanelSync = (
   });
 };
 
-export const DefaultOpenModeSheet = (
-  _props: SheetScreenProps<SheetRoutes.DefaultOpenMode>,
-) => {
+export const DefaultOpenModeSheet = ({
+  navigation,
+}: SheetScreenProps<SheetRoutes.DefaultOpenMode>) => {
   const { t } = useTranslation();
   const [currentMode, setDefaultOpenMode] = useDefaultOpenMode();
   const openView = useDispatchLaceAction('views.openView');
@@ -85,17 +83,17 @@ export const DefaultOpenModeSheet = (
   }, []);
 
   const handleClose = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const handleConfirm = useCallback(() => {
     if (selectedMode === currentMode) {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
       return;
     }
     // Closes the sheet first so the view doesn't paint a frame after the
     // mode-switch fires.
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
     const didSwitch = switchDefaultOpenMode(
       {
         openSidePanel: (windowId: number) => {
@@ -139,55 +137,60 @@ export const DefaultOpenModeSheet = (
     [t],
   );
 
-  const footerHeight = useFooterHeight();
   const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
+    () => ({ paddingBottom: footerHeight.horizontal }),
     [footerHeight],
   );
 
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={t(
+            'v2.pages.settings.options.default-view-mode.sheet-header-title',
+          )}
+          testID="default-view-mode-sheet-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          secondaryButton={{
+            label: t(
+              'v2.pages.settings.options.default-view-mode.cancel-button',
+            ),
+            onPress: handleClose,
+            testID: 'default-view-mode-sheet-cancel-button',
+          }}
+          primaryButton={{
+            label: t(
+              'v2.pages.settings.options.default-view-mode.confirm-button',
+            ),
+            onPress: handleConfirm,
+            testID: 'default-view-mode-sheet-confirm-button',
+          }}
+        />
+      ),
+    });
+  }, [navigation, t, handleClose, handleConfirm]);
+
   return (
-    <>
-      <SheetHeader
-        title={t(
-          'v2.pages.settings.options.default-view-mode.sheet-header-title',
-        )}
-        testID="default-view-mode-sheet-header"
-      />
-      <Sheet.Scroll
-        contentContainerStyle={scrollContainerStyle}
-        showsVerticalScrollIndicator={false}>
-        <Column
-          style={styles.container}
-          alignItems="flex-start"
-          gap={spacing.L}>
-          <Text.M>
-            {t('v2.pages.settings.options.default-view-mode.sheet-title')}
-          </Text.M>
-          <RadioGroup
-            options={options}
-            direction="column"
-            value={selectedMode}
-            onChange={(value: string) => {
-              setSelectedMode(value as DefaultOpenMode);
-            }}
-          />
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: t('v2.pages.settings.options.default-view-mode.cancel-button'),
-          onPress: handleClose,
-          testID: 'default-view-mode-sheet-cancel-button',
-        }}
-        primaryButton={{
-          label: t(
-            'v2.pages.settings.options.default-view-mode.confirm-button',
-          ),
-          onPress: handleConfirm,
-          testID: 'default-view-mode-sheet-confirm-button',
-        }}
-      />
-    </>
+    <Sheet.Scroll
+      contentContainerStyle={scrollContainerStyle}
+      showsVerticalScrollIndicator={false}>
+      <Column style={styles.container} alignItems="flex-start" gap={spacing.L}>
+        <Text.M>
+          {t('v2.pages.settings.options.default-view-mode.sheet-title')}
+        </Text.M>
+        <RadioGroup
+          options={options}
+          direction="column"
+          value={selectedMode}
+          onChange={(value: string) => {
+            setSelectedMode(value as DefaultOpenMode);
+          }}
+        />
+      </Column>
+    </Sheet.Scroll>
   );
 };
 

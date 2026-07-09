@@ -15,6 +15,7 @@ type TabBarProps = {
   networkName: Network;
   laceButtonBadge?: LaceButtonBadgeProps;
   openNetworkSelectionSheet: () => void;
+  isOffline?: boolean;
 };
 
 export const TabBar = ({
@@ -23,6 +24,7 @@ export const TabBar = ({
   networkName,
   laceButtonBadge,
   openNetworkSelectionSheet,
+  isOffline,
 }: TabBarProps) => {
   const accountData = useTabBarAccountData();
   const { trackEvent } = useAnalytics();
@@ -45,6 +47,7 @@ export const TabBar = ({
       openNetworkSelectionSheet={openNetworkSelectionSheet}
       onLaceButtonPress={onLaceButtonPress}
       onAccountsStatusPress={onAccountsStatusPress}
+      isOffline={isOffline}
     />
   );
 };

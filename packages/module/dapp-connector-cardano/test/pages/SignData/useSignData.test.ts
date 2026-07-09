@@ -14,9 +14,7 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
-    sheets: {
-      close: vi.fn(),
-    },
+    closeSheet: vi.fn(),
   },
 }));
 
@@ -24,9 +22,10 @@ vi.mock('../../../src/common/hooks', () => ({
   useLaceSelector: vi.fn(),
   useDispatchLaceAction: vi.fn(() => vi.fn()),
   useSignDataAccountInfo: vi.fn(),
+  useSignDataDRepKeyHash: vi.fn(),
 }));
 
-const mockSheetsClose = vi.mocked(NavigationControls.sheets.close);
+const mockSheetsClose = vi.mocked(NavigationControls.closeSheet);
 
 const REQUEST_ID = 'req-sign-data-1';
 
@@ -359,6 +358,7 @@ describe('useSignData (mobile)', () => {
 
     it('returns account info when available', () => {
       const accountInfo: SignDataAccountInfo = {
+        accountId: 'acc-test' as SignDataAccountInfo['accountId'],
         name: 'Wallet 1',
         avatarUri: 'https://example.com/avatar.png',
       };

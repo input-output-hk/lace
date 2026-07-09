@@ -15,6 +15,7 @@ import { networkStoreContract } from '@lace-contract/network';
 import { swapProviderDependencyContract } from '@lace-contract/swap-provider';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorStoreContract } from '@lace-contract/tx-executor';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import store from './store';
@@ -35,6 +36,7 @@ export const swapContextStoreContract = inferContractContext({
     appStoreContract,
     cardanoProviderStoreContract,
     swapProviderDependencyContract,
+    walletActiveStateDependencyContract,
     walletRepoStoreContract,
     networkStoreContract,
     txExecutorStoreContract,

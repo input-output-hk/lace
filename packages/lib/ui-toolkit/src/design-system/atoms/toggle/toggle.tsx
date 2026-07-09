@@ -117,17 +117,17 @@ export const Toggle = ({
     if (disabled && value) return hexToRgba(theme.data.positive, 0.35);
     if (disabled) return theme.background.tertiary;
     if (value) return theme.data.positive;
-    return theme.background.primary;
+    return hexToRgba(theme.background.tertiary, 0.5);
   };
 
   const getKnobColor = () => {
     if (disabled) {
       return theme.background.tertiary;
-    } else if (isPressed) {
-      return theme.brand.lightGray;
-    } else {
-      return theme.brand.white;
     }
+    if (isPressed) {
+      return theme.brand.lightGray;
+    }
+    return theme.brand.white;
   };
 
   // Animation effect
@@ -215,7 +215,7 @@ export const Toggle = ({
       <Icon name={preIcon} testID={testID ? `${testID}-pre-icon` : undefined} />
     );
 
-  const renderPlaceholder = (placeholder: string) => (
+  const PlaceholderComponent = ({ placeholder }: { placeholder: string }) => (
     <Text.XS variant="secondary">{placeholder}</Text.XS>
   );
 
@@ -248,7 +248,9 @@ export const Toggle = ({
         {!!label && !reverse && (
           <Row alignItems="center" gap={spacing.S}>
             {renderPreIcon()}
-            {!!placeholderLeft && renderPlaceholder(placeholderLeft)}
+            {!!placeholderLeft && (
+              <PlaceholderComponent placeholder={placeholderLeft} />
+            )}
 
             {renderLabelContent()}
           </Row>
@@ -258,7 +260,7 @@ export const Toggle = ({
           gap={spacing.S}
           style={styles.placeholderContainer}>
           {isLoading && <Loader color={theme.text.primary} />}
-          {!!placeholder && renderPlaceholder(placeholder)}
+          {!!placeholder && <PlaceholderComponent placeholder={placeholder} />}
         </Row>
         {!!label && reverse && (
           <Row alignItems="center" style={styles.labelContainer}>

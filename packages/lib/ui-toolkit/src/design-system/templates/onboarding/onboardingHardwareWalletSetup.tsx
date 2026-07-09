@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { spacing } from '../../../design-tokens';
 import { Button, Text } from '../../atoms';
 import { NavigationHeader } from '../../molecules';
 import { DropdownMenu } from '../../molecules/dropdownMenu/dropdownMenu';
+import { footerHeight, Sheet } from '../../organisms';
 
 import { OnboardingLayout } from './OnboardingLayout';
 
@@ -38,9 +39,19 @@ export interface OnboardingHardwareWalletSetupProps {
   createButtonLabel: string;
   isLoading?: boolean;
   error?: string | null;
+  // Use the sheet layout (SheetHeader + scroll + anchored SheetFooter) instead
+  // of the full-screen OnboardingLayout. Set when hosting inside a sheet.
+  embedded?: boolean;
 }
 
-export const OnboardingHardwareWalletSetup = ({
+export const OnboardingHardwareWalletSetup = (
+  props: OnboardingHardwareWalletSetupProps,
+) => {
+  if (props.embedded) return <EmbeddedHardwareWalletSetup {...props} />;
+  return <FullScreenHardwareWalletSetup {...props} />;
+};
+
+const FullScreenHardwareWalletSetup = ({
   title,
   onBackPress,
   accountIndex,
@@ -61,71 +72,26 @@ export const OnboardingHardwareWalletSetup = ({
 
   return (
     <OnboardingLayout>
-      <View style={styles.container}>
+      <View style={fullScreenStyles.container}>
         <NavigationHeader title={title} onBackPress={onBackPress} />
 
         <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}>
-          <View style={styles.fieldGroup}>
-            <Text.S variant="primary" style={styles.label}>
-              {accountLabel}
-            </Text.S>
-            <DropdownMenu
-              items={ACCOUNT_INDEX_OPTIONS}
-              title={`Account #${accountIndex}`}
-              selectedItemId={String(accountIndex)}
-              onSelectItem={index => {
-                onAccountIndexChange(index);
-              }}
-              maxVisibleItems={5}
-              testID="hardware-setup-account-index"
-            />
-          </View>
-
-          {derivationTypeOptions &&
-            derivationType &&
-            onDerivationTypeChange &&
-            derivationTypeLabel && (
-              <View style={styles.fieldGroup}>
-                <Text.S variant="primary" style={styles.label}>
-                  {derivationTypeLabel}
-                </Text.S>
-                <DropdownMenu
-                  items={derivationTypeOptions.map(o => ({
-                    id: o.value,
-                    text: o.label,
-                  }))}
-                  title={selectedDerivationOption?.label ?? derivationType}
-                  selectedItemId={derivationType}
-                  onSelectItem={index => {
-                    const selected = derivationTypeOptions[index];
-                    if (selected) onDerivationTypeChange(selected.value);
-                  }}
-                  maxVisibleItems={4}
-                  testID="hardware-setup-derivation-type"
-                />
-                <View style={styles.tooltipContainer}>
-                  {derivationTypeOptions.map(o => (
-                    <Text.XS
-                      key={o.value}
-                      variant="secondary"
-                      style={styles.tooltipLine}>
-                      {o.label}: {o.description}
-                    </Text.XS>
-                  ))}
-                </View>
-              </View>
-            )}
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text.S variant="secondary">{error}</Text.S>
-            </View>
-          )}
+          style={fullScreenStyles.scrollView}
+          contentContainerStyle={fullScreenStyles.scrollContent}>
+          <FieldGroups
+            accountIndex={accountIndex}
+            onAccountIndexChange={onAccountIndexChange}
+            accountLabel={accountLabel}
+            derivationTypeOptions={derivationTypeOptions}
+            derivationType={derivationType}
+            onDerivationTypeChange={onDerivationTypeChange}
+            derivationTypeLabel={derivationTypeLabel}
+            selectedDerivationOption={selectedDerivationOption}
+            error={error}
+          />
         </ScrollView>
 
-        <View style={styles.buttonContainer}>
+        <View style={fullScreenStyles.buttonContainer}>
           <Button.Primary
             label={createButtonLabel}
             onPress={onCreateWallet}
@@ -139,7 +105,130 @@ export const OnboardingHardwareWalletSetup = ({
   );
 };
 
-const styles = StyleSheet.create({
+const EmbeddedHardwareWalletSetup = ({
+  accountIndex,
+  onAccountIndexChange,
+  accountLabel,
+  derivationTypeOptions,
+  derivationType,
+  onDerivationTypeChange,
+  derivationTypeLabel,
+  error,
+}: OnboardingHardwareWalletSetupProps) => {
+  const contentContainerStyle = useMemo(
+    () => [
+      embeddedStyles.scrollContent,
+      { paddingBottom: footerHeight.horizontal },
+    ],
+    [footerHeight],
+  );
+  const selectedDerivationOption = derivationTypeOptions?.find(
+    o => o.value === derivationType,
+  );
+
+  return (
+    <Sheet.Scroll
+      testID="hardware-setup-sheet"
+      contentContainerStyle={contentContainerStyle}>
+      <FieldGroups
+        accountIndex={accountIndex}
+        onAccountIndexChange={onAccountIndexChange}
+        accountLabel={accountLabel}
+        derivationTypeOptions={derivationTypeOptions}
+        derivationType={derivationType}
+        onDerivationTypeChange={onDerivationTypeChange}
+        derivationTypeLabel={derivationTypeLabel}
+        selectedDerivationOption={selectedDerivationOption}
+        error={error}
+      />
+    </Sheet.Scroll>
+  );
+};
+
+interface FieldGroupsProps {
+  accountIndex: number;
+  onAccountIndexChange: (index: number) => void;
+  accountLabel: string;
+  derivationTypeOptions?: DerivationTypeOption[];
+  derivationType?: string;
+  onDerivationTypeChange?: (type: string) => void;
+  derivationTypeLabel?: string;
+  selectedDerivationOption?: DerivationTypeOption;
+  error?: string | null;
+}
+
+const FieldGroups = ({
+  accountIndex,
+  onAccountIndexChange,
+  accountLabel,
+  derivationTypeOptions,
+  derivationType,
+  onDerivationTypeChange,
+  derivationTypeLabel,
+  selectedDerivationOption,
+  error,
+}: FieldGroupsProps) => (
+  <>
+    <View style={fieldStyles.fieldGroup}>
+      <Text.S variant="primary" style={fieldStyles.label}>
+        {accountLabel}
+      </Text.S>
+      <DropdownMenu
+        items={ACCOUNT_INDEX_OPTIONS}
+        title={`Account #${accountIndex}`}
+        selectedItemId={String(accountIndex)}
+        onSelectItem={index => {
+          onAccountIndexChange(index);
+        }}
+        maxVisibleItems={5}
+        testID="hardware-setup-account-index"
+      />
+    </View>
+
+    {derivationTypeOptions &&
+      derivationType &&
+      onDerivationTypeChange &&
+      derivationTypeLabel && (
+        <View style={fieldStyles.fieldGroup}>
+          <Text.S variant="primary" style={fieldStyles.label}>
+            {derivationTypeLabel}
+          </Text.S>
+          <DropdownMenu
+            items={derivationTypeOptions.map(o => ({
+              id: o.value,
+              text: o.label,
+            }))}
+            title={selectedDerivationOption?.label ?? derivationType}
+            selectedItemId={derivationType}
+            onSelectItem={index => {
+              const selected = derivationTypeOptions[index];
+              if (selected) onDerivationTypeChange(selected.value);
+            }}
+            maxVisibleItems={4}
+            testID="hardware-setup-derivation-type"
+          />
+          <View style={fieldStyles.tooltipContainer}>
+            {derivationTypeOptions.map(o => (
+              <Text.XS
+                key={o.value}
+                variant="secondary"
+                style={fieldStyles.tooltipLine}>
+                {o.label}: {o.description}
+              </Text.XS>
+            ))}
+          </View>
+        </View>
+      )}
+
+    {error && (
+      <View style={fieldStyles.errorContainer}>
+        <Text.S variant="secondary">{error}</Text.S>
+      </View>
+    )}
+  </>
+);
+
+const fullScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -151,6 +240,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.L,
     paddingTop: spacing.L,
   },
+  buttonContainer: {
+    paddingHorizontal: spacing.L,
+    paddingBottom: spacing.L,
+  },
+});
+
+const embeddedStyles = StyleSheet.create({
+  scrollContent: {
+    paddingHorizontal: spacing.L,
+    paddingTop: spacing.L,
+  },
+});
+
+const fieldStyles = StyleSheet.create({
   fieldGroup: {
     marginBottom: spacing.XL,
   },
@@ -166,9 +269,5 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     marginBottom: spacing.M,
-  },
-  buttonContainer: {
-    paddingHorizontal: spacing.L,
-    paddingBottom: spacing.L,
   },
 });

@@ -257,8 +257,15 @@ describe('transformers', () => {
   });
 
   describe('transformTokenMap', () => {
+    const testFingerprint = Cardano.AssetFingerprint(
+      'asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w',
+    );
+
     beforeEach(() => {
       vi.clearAllMocks();
+      mockGetFallbackAsset.mockReturnValue({
+        fingerprint: testFingerprint,
+      } as Asset.AssetInfo);
     });
 
     const testAssetId1 = Cardano.AssetId(
@@ -305,7 +312,7 @@ describe('transformers', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return empty array when assetMetadataMap is empty', () => {
+    it('should return fallback entries for all tokens when assetMetadataMap is empty', () => {
       const emptyAssetMetadataMap = new Map<
         Cardano.AssetId,
         TokenMetadata<CardanoTokenMetadata>
@@ -313,12 +320,26 @@ describe('transformers', () => {
 
       const result = transformTokenMap(testTokenMap, emptyAssetMetadataMap);
 
-      expect(result).toEqual([]);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({
+        id: testAssetId1.toString(),
+        amount: testBalance1.toString(),
+        name: testFingerprint,
+        symbol: testFingerprint,
+        logo: '',
+      });
     });
 
-    it('should return tokens found in assetMetadataMap', () => {
+    it('should return all tokens, using fallback for those missing metadata', () => {
       const result = transformTokenMap(testTokenMap, testAssetMetadataMap);
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
+      expect(result[2]).toEqual({
+        id: testAssetId3.toString(),
+        amount: testBalance3.toString(),
+        name: testFingerprint,
+        symbol: testFingerprint,
+        logo: '',
+      });
     });
   });
 });

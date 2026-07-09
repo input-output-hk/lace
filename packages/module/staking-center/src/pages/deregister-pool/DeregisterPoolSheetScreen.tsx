@@ -2,7 +2,11 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
-import { DeregisterPoolSheet, SendResultTemplate } from '@lace-lib/ui-toolkit';
+import {
+  DeregisterPoolSheet,
+  SendResultTemplate,
+  Sheet,
+} from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -30,6 +34,9 @@ export const DeregisterPoolSheetScreen = (
   const deregistrationFlowState = useLaceSelector(
     'deregistrationFlow.selectDeregistrationFlowState',
   );
+  const rewardAccountDetailsMap = useLaceSelector(
+    'cardanoContext.selectRewardAccountDetails',
+  );
   const retryFeeCalculation = useDispatchLaceAction(
     'deregistrationFlow.retryRequested',
   );
@@ -48,10 +55,17 @@ export const DeregisterPoolSheetScreen = (
       deregistrationFlowState.status === 'Success' &&
       stateAccountId === accountId
     ) {
-      trackEvent('staking | deregistration | confirmed');
-      NavigationControls.sheets.navigate(SheetRoutes.DeregistrationSuccess);
+      const rewardAccountInfo =
+        rewardAccountDetailsMap[AccountId(accountId)]?.rewardAccountInfo;
+      trackEvent('staking | deregistration | confirmed', {
+        ...(rewardAccountInfo?.poolId && { poolId: rewardAccountInfo.poolId }),
+        ...(rewardAccountInfo?.rewardsSum && {
+          totalRewardsLovelace: rewardAccountInfo.rewardsSum.toString(),
+        }),
+      });
+      NavigationControls.navigate(SheetRoutes.DeregistrationSuccess);
     }
-  }, [deregistrationFlowState, accountId, trackEvent]);
+  }, [deregistrationFlowState, accountId, trackEvent, rewardAccountDetailsMap]);
 
   const handleRetry = useCallback(() => {
     if (deregistrationFlowState.status !== 'Error') return;
@@ -62,7 +76,7 @@ export const DeregisterPoolSheetScreen = (
 
   const handleClose = useCallback(() => {
     resetDeregistrationFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [resetDeregistrationFlow]);
 
   const errorDetails = useMemo(() => {
@@ -74,26 +88,69 @@ export const DeregisterPoolSheetScreen = (
     };
   }, [deregistrationFlowState, t]);
 
+  useEffect(() => {
+    if (deregistrationFlowState.status === 'Error') {
+      props.navigation.setOptions({
+        header: (
+          <Sheet.Header title={t('v2.staking.deregistration.error.title')} />
+        ),
+        footer: (
+          <Sheet.Footer
+            secondaryButton={{
+              label: t('v2.staking.deregistration.error.close-button'),
+              onPress: handleClose,
+              testID: 'send-result-close-button',
+            }}
+            primaryButton={{
+              label: t('v2.staking.deregistration.error.primary-button'),
+              onPress: handleRetry,
+              testID: 'send-result-primary-button',
+            }}
+          />
+        ),
+      });
+      return;
+    }
+
+    if (deregistrationProps) {
+      props.navigation.setOptions({
+        header: (
+          <Sheet.Header title={t('v2.deregister-pool.review-transaction')} />
+        ),
+        footer: (
+          <Sheet.Footer
+            secondaryButton={{
+              label: t('v2.deregister-pool.cancel'),
+              onPress: deregistrationProps.onCancel,
+              testID: 'deregister-pool-cancel-button',
+            }}
+            primaryButton={{
+              label: t('v2.deregister-pool.deregister'),
+              onPress: deregistrationProps.onDeregister,
+              testID: 'deregister-pool-deregister-button',
+              disabled: deregistrationProps.isDeregisterButtonDisabled,
+            }}
+            primaryVariant="critical"
+          />
+        ),
+      });
+    }
+  }, [
+    props.navigation,
+    t,
+    deregistrationFlowState.status,
+    handleClose,
+    handleRetry,
+    deregistrationProps,
+  ]);
+
   if (deregistrationFlowState.status === 'Error') {
     return (
       <SendResultTemplate
-        headerTitle={t('v2.staking.deregistration.error.title')}
         transactionState={{ status: 'failure', blockchain: 'Cardano' }}
         subtitle={t('v2.staking.deregistration.error.subtitle')}
         icon={{ name: 'Sad', variant: 'solid', size: 64 }}
         errorDetails={errorDetails}
-        footer={{
-          closeButton: {
-            closeButtonLabel: t('v2.staking.deregistration.error.close-button'),
-            closeButtonPress: handleClose,
-          },
-          primaryButton: {
-            primaryButtonLabel: t(
-              'v2.staking.deregistration.error.primary-button',
-            ),
-            primaryButtonPress: handleRetry,
-          },
-        }}
       />
     );
   }

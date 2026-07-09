@@ -1,8 +1,9 @@
+import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 import rootConfig from '../../eslint.config.mjs';
 
-export default tseslint.config(
+export default defineConfig(
   rootConfig,
   {
     files: ['**/eslint.config.mjs'],

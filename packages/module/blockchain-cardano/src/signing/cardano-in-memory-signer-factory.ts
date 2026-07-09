@@ -1,5 +1,10 @@
-import { CardanoInMemoryDataSigner } from './cardano-in-memory-data-signer';
-import { CardanoInMemoryTransactionSigner } from './cardano-in-memory-transaction-signer';
+import {
+  CardanoInMemoryDataSigner,
+  CardanoInMemoryTransactionSigner,
+  createCardanoKeyAgentFromEncryptedRoot,
+  deriveDRepKeyHash,
+} from '@lace-contract/cardano-context';
+import { defer, from, switchMap } from 'rxjs';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
@@ -10,21 +15,24 @@ import type {
   CardanoSignerFactory,
   CardanoTransactionSigner,
   CardanoTransactionSignerContext,
-  CreateCardanoKeyAgent,
+  WithCardanoKeyAgent$,
 } from '@lace-contract/cardano-context';
 import type {
   AnyAccount,
   InMemoryWallet,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
+import type { HexBytes } from '@lace-sdk/util';
 
+/**
+ * Signer factory for {@link WalletType.InMemory} Cardano accounts.
+ *
+ * Reuses {@link CardanoInMemoryTransactionSigner}/{@link CardanoInMemoryDataSigner}
+ * from `@lace-contract/in-memory`, supplying a key-agent factory bound to the
+ * wallet's encrypted root private key. The agent is unlocked per call with the
+ * {@link AuthSecret} provided by `auth.accessAuthSecret`.
+ */
 export class CardanoInMemorySignerFactory implements CardanoSignerFactory {
-  readonly #createKeyAgent: CreateCardanoKeyAgent;
-
-  public constructor(params: { createKeyAgent: CreateCardanoKeyAgent }) {
-    this.#createKeyAgent = params.createKeyAgent;
-  }
-
   public canSign(account: AnyAccount): boolean {
     return (
       account.accountType === 'InMemory' && account.blockchainName === 'Cardano'
@@ -36,18 +44,16 @@ export class CardanoInMemorySignerFactory implements CardanoSignerFactory {
   ): CardanoTransactionSigner {
     this.#assertSupported(context);
     const { knownAddresses, utxo, auth } = context;
-
-    const { accountIndex, chainId, extendedAccountPublicKey } =
-      this.#extractAccountProps(context);
+    const accountProps = this.#extractAccountProps(context);
     const encryptedRootPrivateKey =
       this.#extractEncryptedRootPrivateKey(context);
 
     return new CardanoInMemoryTransactionSigner({
-      createKeyAgent: this.#createKeyAgent,
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey,
-      encryptedRootPrivateKey,
+      withKeyAgent$: this.#buildWithKeyAgent$({
+        auth,
+        accountProps,
+        encryptedRootPrivateKey,
+      }),
       knownAddresses,
       utxo,
       auth,
@@ -57,21 +63,45 @@ export class CardanoInMemorySignerFactory implements CardanoSignerFactory {
   public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {
     this.#assertSupported(context);
     const { knownAddresses, auth } = context;
-
-    const { accountIndex, chainId, extendedAccountPublicKey } =
-      this.#extractAccountProps(context);
+    const accountProps = this.#extractAccountProps(context);
     const encryptedRootPrivateKey =
       this.#extractEncryptedRootPrivateKey(context);
 
     return new CardanoInMemoryDataSigner({
-      createKeyAgent: this.#createKeyAgent,
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey,
-      encryptedRootPrivateKey,
+      withKeyAgent$: this.#buildWithKeyAgent$({
+        auth,
+        accountProps,
+        encryptedRootPrivateKey,
+      }),
+      dRepKeyHash$: defer(() => from(deriveDRepKeyHash(accountProps))),
       knownAddresses,
       auth,
     });
+  }
+
+  #buildWithKeyAgent$({
+    auth,
+    accountProps,
+    encryptedRootPrivateKey,
+  }: {
+    auth: CardanoSignerContext['auth'];
+    accountProps: {
+      accountIndex: number;
+      chainId: Cardano.ChainId;
+      extendedAccountPublicKey: Bip32PublicKeyHex;
+    };
+    encryptedRootPrivateKey: HexBytes;
+  }): WithCardanoKeyAgent$ {
+    return use =>
+      auth.accessAuthSecret(authSecret =>
+        from(
+          createCardanoKeyAgentFromEncryptedRoot({
+            ...accountProps,
+            encryptedRootPrivateKey,
+            authSecret,
+          }),
+        ).pipe(switchMap(use)),
+      );
   }
 
   #assertSupported(context: CardanoSignerContext): void {
@@ -109,7 +139,7 @@ export class CardanoInMemorySignerFactory implements CardanoSignerFactory {
     return { accountIndex, chainId, extendedAccountPublicKey };
   }
 
-  #extractEncryptedRootPrivateKey(context: CardanoSignerContext) {
+  #extractEncryptedRootPrivateKey(context: CardanoSignerContext): HexBytes {
     const { wallet } = context;
     const encryptedRootPrivateKey = (wallet as InMemoryWallet)
       .blockchainSpecific.Cardano?.encryptedRootPrivateKey;

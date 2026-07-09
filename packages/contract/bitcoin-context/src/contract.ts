@@ -25,4 +25,4 @@ export type ActionCreators = ContractActionCreators<
   typeof bitcoinProviderContract
 >;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
-export type Action = ActionType<ActionCreators>;
+export type BitcoinContextAction = ActionType<ActionCreators>;

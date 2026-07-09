@@ -71,7 +71,7 @@ export const useEditWallet = ({ route }: EditWalletScreenProps) => {
 
     updateWallet({ id: WalletId(walletId), changes });
     trackEvent('account management | wallet | renamed');
-    NavigationControls.sheets.navigate(SheetRoutes.EditWalletSuccess);
+    NavigationControls.navigate(SheetRoutes.EditWalletSuccess);
   }, [
     updateWallet,
     walletId,
@@ -82,7 +82,7 @@ export const useEditWallet = ({ route }: EditWalletScreenProps) => {
   ]);
 
   const handleCancel = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const secondaryButton = useMemo<ButtonConfig>(

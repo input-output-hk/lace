@@ -1,19 +1,11 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
+import { getQuoteAnalyticsContext } from '@lace-contract/swap-context';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
-import {
-  Column,
-  Divider,
-  Row,
-  Sheet,
-  SheetFooter,
-  SheetHeader,
-  Text,
-  useFooterHeight,
-} from '@lace-lib/ui-toolkit';
+import { Column, Divider, Row, Sheet, Text } from '@lace-lib/ui-toolkit';
 import { spacing } from '@lace-lib/ui-toolkit';
 import { formatAmountToLocale } from '@lace-lib/util-render';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
@@ -46,12 +38,11 @@ const ReviewRow = ({
   </Row>
 );
 
-export const SwapReview = (
-  _props: SheetScreenProps<SheetRoutes.SwapReview>,
-) => {
+export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
   const { t } = useTranslation();
   const swapFlowState = useLaceSelector('swapFlow.selectSwapFlowState');
   const slippage = useLaceSelector('swapConfig.selectSlippage');
+  const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
   const dispatchConfirmRequested = useDispatchLaceAction(
     'swapFlow.confirmRequested',
     true,
@@ -89,7 +80,7 @@ export const SwapReview = (
   // Navigate to result sheet when swap completes or fails
   useEffect(() => {
     if (isSuccess || isError) {
-      NavigationControls.sheets.navigate(SheetRoutes.SwapResult);
+      NavigationControls.navigate(SheetRoutes.SwapResult);
     }
   }, [isSuccess, isError]);
 
@@ -151,9 +142,28 @@ export const SwapReview = (
     : '';
 
   const handleNext = useCallback(() => {
-    trackEvent('swaps | review tx');
+    trackEvent('swaps | review tx', {
+      ...(sellTokenId && { tokenIn: sellTokenId }),
+      ...(buyTokenId && { tokenOut: buyTokenId }),
+      ...(sellAmount && { quantity: sellAmount }),
+      ...(selectedQuote && {
+        expectedBuyAmount: selectedQuote.expectedBuyAmount,
+        ...getQuoteAnalyticsContext(selectedQuote),
+      }),
+      targetSlippage: slippage.toString(),
+      ...(swapSessionId && { swapSessionId }),
+    });
     dispatchConfirmRequested();
-  }, [dispatchConfirmRequested, trackEvent]);
+  }, [
+    dispatchConfirmRequested,
+    trackEvent,
+    sellTokenId,
+    buyTokenId,
+    sellAmount,
+    selectedQuote,
+    slippage,
+    swapSessionId,
+  ]);
 
   const handleClose = useCallback(() => {
     // Closing via the back arrow should restore the Quoted state if we're
@@ -161,107 +171,109 @@ export const SwapReview = (
     if (statusRef.current === 'Building' || statusRef.current === 'Reviewing') {
       dispatchBackToQuote();
     }
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [dispatchBackToQuote]);
 
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={t('v2.swap.review.title')}
+          leftIcon="ArrowLeft"
+          leftIconOnPress={handleClose}
+          testID="swap-review-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('v2.swap.review.next'),
+            onPress: handleNext,
+            disabled: !isReviewing,
+            loading: isBuilding || isAwaitingConfirmation || isProcessing,
+            testID: 'swap-review-next-button',
+          }}
+        />
+      ),
+    });
+  }, [
+    props.navigation,
+    t,
+    handleClose,
+    handleNext,
+    isReviewing,
+    isBuilding,
+    isAwaitingConfirmation,
+    isProcessing,
+  ]);
 
   return (
-    <>
-      <SheetHeader
-        title={t('v2.swap.review.title')}
-        leftIcon="ArrowLeft"
-        leftIconOnPress={handleClose}
-        testID="swap-review-header"
-      />
-      <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
-        <Column style={styles.content} gap={spacing.XS}>
-          {!selectedQuote ? (
-            <Text.XS variant="secondary" align="center">
-              {isBuilding
-                ? t('v2.swap.review.building')
-                : t('v2.swap.review.no-quote')}
+    <Sheet.Scroll>
+      <Column style={styles.content} gap={spacing.XS}>
+        {!selectedQuote ? (
+          <Text.XS variant="secondary" align="center">
+            {isBuilding
+              ? t('v2.swap.review.building')
+              : t('v2.swap.review.no-quote')}
+          </Text.XS>
+        ) : (
+          <>
+            <ReviewRow
+              label={t('v2.swap.review.selling')}
+              value={formattedSellAmount}
+              testID="swap-review-sell-row"
+            />
+            <ReviewRow
+              label={t('v2.swap.review.received')}
+              value={formattedBuyAmount}
+              testID="swap-review-buy-row"
+            />
+            <ReviewRow
+              label={t('v2.swap.review.slippage-tolerance')}
+              value={`${slippage}%`}
+              testID="swap-review-slippage-row"
+            />
+            <ReviewRow
+              label={t('v2.swap.review.swap-route')}
+              value={routeDisplay || '-'}
+              testID="swap-review-route-row"
+            />
+            <ReviewRow
+              label={t('v2.swap.review.quote-ratio')}
+              value={
+                selectedQuote.priceDisplay
+                  ? `1 ${sellDisplayName} = ${selectedQuote.priceDisplay} ${buyDisplayName}`
+                  : '-'
+              }
+              testID="swap-review-quote-ratio-row"
+            />
+
+            <Divider />
+
+            <Text.XS
+              weight="medium"
+              align="center"
+              testID="swap-review-transaction-cost">
+              {t('v2.swap.review.transaction-cost')}
             </Text.XS>
-          ) : (
-            <>
-              <ReviewRow
-                label={t('v2.swap.review.selling')}
-                value={formattedSellAmount}
-                testID="swap-review-sell-row"
-              />
-              <ReviewRow
-                label={t('v2.swap.review.received')}
-                value={formattedBuyAmount}
-                testID="swap-review-buy-row"
-              />
-              <ReviewRow
-                label={t('v2.swap.review.slippage-tolerance')}
-                value={`${slippage}%`}
-                testID="swap-review-slippage-row"
-              />
-              <ReviewRow
-                label={t('v2.swap.review.swap-route')}
-                value={routeDisplay || '-'}
-                testID="swap-review-route-row"
-              />
-              <ReviewRow
-                label={t('v2.swap.review.quote-ratio')}
-                value={
-                  selectedQuote.priceDisplay
-                    ? `1 ${sellDisplayName} = ${selectedQuote.priceDisplay} ${buyDisplayName}`
-                    : '-'
-                }
-                testID="swap-review-quote-ratio-row"
-              />
 
-              <Divider />
-
-              <Text.XS
-                weight="medium"
-                align="center"
-                testID="swap-review-transaction-cost">
-                {t('v2.swap.review.transaction-cost')}
-              </Text.XS>
-
-              {selectedQuote.fees.map((fee, index) => (
-                <ReviewRow
-                  key={index}
-                  label={t(fee.label)}
-                  value={`-${fee.displayAmount} ${fee.displayCurrency}`}
-                />
-              ))}
-
+            {selectedQuote.fees.map((fee, index) => (
               <ReviewRow
-                label={t('v2.swap.review.total-fees')}
-                value={`-${selectedQuote.totalFeeDisplay}`}
-                testID="swap-review-total-fees-row"
+                key={index}
+                label={fee.label}
+                value={`-${fee.displayAmount} ${fee.displayCurrency}`}
               />
+            ))}
 
-              {selectedQuote.deposit ? (
-                <ReviewRow
-                  label={t('v2.swap.review.deposit')}
-                  value={`${selectedQuote.deposit.displayAmount} ${selectedQuote.deposit.displayCurrency}`}
-                  testID="swap-review-deposit-row"
-                />
-              ) : null}
-            </>
-          )}
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.swap.review.next'),
-          onPress: handleNext,
-          disabled: !isReviewing,
-          loading: isBuilding || isAwaitingConfirmation || isProcessing,
-          testID: 'swap-review-next-button',
-        }}
-      />
-    </>
+            <ReviewRow
+              label={t('v2.swap.review.total-fees')}
+              value={`-${selectedQuote.totalFeeDisplay}`}
+              testID="swap-review-total-fees-row"
+            />
+          </>
+        )}
+      </Column>
+    </Sheet.Scroll>
   );
 };
 

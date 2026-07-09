@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { View, StyleSheet, Pressable } from 'react-native';
 
 import { isWeb, truncateText, type ColorType } from '../..';
 import { radius, spacing, useTheme } from '../../../design-tokens';

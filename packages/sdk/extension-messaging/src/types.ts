@@ -165,6 +165,12 @@ export interface ExposeApiProps<API extends object> {
 export interface ConsumeRemoteApiOptions<T> {
   errorTypes?: ErrorClass[];
   /**
+   * When true, the consumer posts a reserved ping on the base channel at
+   * KEEP_ALIVE_PING_INTERVAL_MS, keeping the MV3 service worker alive while the
+   * consumer is mounted. Do NOT enable on content scripts — see ADR 21.
+   */
+  keepAlivePingPong?: boolean;
+  /**
    * When true, defers runtime.connect() until the first actual use (e.g., method call).
    * Useful for content scripts to avoid waking the Service Worker on every webpage.
    */

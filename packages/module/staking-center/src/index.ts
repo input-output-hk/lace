@@ -1,6 +1,7 @@
 import { appStoreContract } from '@lace-contract/app';
 import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
 import { cardanoStakePoolsStoreContract } from '@lace-contract/cardano-stake-pools';
+import { failuresStoreContract } from '@lace-contract/failures';
 import {
   combineContracts,
   inferModuleContext,
@@ -48,6 +49,7 @@ const dependsOnContracts = combineContracts([
   tokenPricingStoreContract,
   networkStoreContract,
   cardanoStakePoolsStoreContract,
+  failuresStoreContract,
 ] as const);
 
 const sharedModule = inferModuleContext({

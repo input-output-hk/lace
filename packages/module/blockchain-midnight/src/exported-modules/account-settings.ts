@@ -16,6 +16,9 @@ const accountSettings = () =>
     }) =>
       createAccountSettings([
         {
+          id: 'customize-account',
+        },
+        {
           id: 'your-keys',
         },
       ]),

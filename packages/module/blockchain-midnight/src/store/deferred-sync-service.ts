@@ -41,8 +41,9 @@ import {
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { SyncWalletError } from '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/WalletError';
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import type { CoreWallet } from '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/CoreWallet';
 import type { AccountKeyManager } from '@lace-contract/midnight-context';
-import type { CoreWallet } from '@midnight-ntwrk/wallet-sdk-shielded/v1';
 
 export type CreateDeferredSyncStreamParams<E, R> = {
   eventStream: Stream.Stream<EventsSyncUpdate, E, R>;
@@ -203,6 +204,7 @@ const EventsSyncUpdatePayload = Schema.Struct({
   id: Schema.Number,
   raw: Schema.String,
   maxId: Schema.Number,
+  protocolVersion: Schema.Number,
 });
 
 const EventsSyncUpdateFromPayload = Schema.transformOrFail(
@@ -218,6 +220,7 @@ const EventsSyncUpdateFromPayload = Schema.transformOrFail(
               _tag: 'EventsSyncUpdate',
               id: input.id,
               maxId: input.maxId,
+              protocolVersion: input.protocolVersion,
               event,
             } as const),
         ),
@@ -237,6 +240,7 @@ const EventsSyncUpdateFromPayload = Schema.transformOrFail(
           id: output.id,
           raw,
           maxId: output.maxId,
+          protocolVersion: output.protocolVersion,
         })),
         Either.mapLeft(
           error =>
@@ -273,7 +277,7 @@ export const makeDeferredShieldedSyncService =
   config => ({
     updates: (state, _secretKeys) => {
       // Note: We ignore _secretKeys parameter - keys are fetched on-demand via keyManager
-      const { indexerClientConnection, batchSize } = config;
+      const { indexerClientConnection, batchUpdates } = config;
 
       // Create WebSocket URL from configuration
       const webSocketUrlResult = ConnectionHelper.createWebSocketUrl(
@@ -332,7 +336,7 @@ export const makeDeferredShieldedSyncService =
       return createDeferredSyncStream({
         eventStream,
         keyManager,
-        batchSize: batchSize ?? 60,
+        batchSize: batchUpdates?.size ?? 60,
         initialAppliedIndex,
       });
     },

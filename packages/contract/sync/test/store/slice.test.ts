@@ -547,6 +547,130 @@ describe('sync slice', () => {
       });
     });
 
+    describe('clearPendingSyncsForAccounts', () => {
+      it('clears pendingSync only for the specified accounts', () => {
+        const accountId2 = AccountId('account2');
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+
+        let state = syncReducers.sync(
+          initialState,
+          actions.sync.addSyncOperation({ accountId, operation }),
+        );
+        state = syncReducers.sync(
+          state,
+          actions.sync.addSyncOperation({
+            accountId: accountId2,
+            operation: { ...operation, operationId: 'op2' },
+          }),
+        );
+
+        const cleared = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [accountId],
+          }),
+        );
+
+        expect(
+          cleared.syncStatusByAccount[accountId]?.pendingSync,
+        ).toBeUndefined();
+        // accountId2 was NOT in the list — its pendingSync survives.
+        expect(
+          cleared.syncStatusByAccount[accountId2]?.pendingSync,
+        ).toBeDefined();
+      });
+
+      it('preserves lastSuccessfulSync', () => {
+        const lastSuccessfulSync = Timestamp(Date.now() - 10000);
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+        let state = syncReducers.sync(
+          {
+            syncStatusByAccount: {
+              [accountId]: { lastSuccessfulSync },
+            },
+          },
+          actions.sync.addSyncOperation({ accountId, operation }),
+        );
+
+        state = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [accountId],
+          }),
+        );
+
+        expect(
+          state.syncStatusByAccount[accountId]?.lastSuccessfulSync,
+        ).toEqual(lastSuccessfulSync);
+        expect(
+          state.syncStatusByAccount[accountId]?.pendingSync,
+        ).toBeUndefined();
+      });
+
+      it('is a no-op when no accounts have pendingSync', () => {
+        const lastSuccessfulSync = Timestamp(Date.now());
+        const state: SyncSliceState = {
+          syncStatusByAccount: {
+            [accountId]: { lastSuccessfulSync },
+          },
+        };
+
+        const next = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [accountId],
+          }),
+        );
+
+        expect(next.syncStatusByAccount[accountId]?.lastSuccessfulSync).toEqual(
+          lastSuccessfulSync,
+        );
+        expect(
+          next.syncStatusByAccount[accountId]?.pendingSync,
+        ).toBeUndefined();
+      });
+
+      it('is a no-op on an empty accountIds list', () => {
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+        const state = syncReducers.sync(
+          initialState,
+          actions.sync.addSyncOperation({ accountId, operation }),
+        );
+
+        const next = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({ accountIds: [] }),
+        );
+
+        expect(next.syncStatusByAccount[accountId]?.pendingSync).toBeDefined();
+      });
+
+      it('is a no-op for accountIds with no entry in the store', () => {
+        const next = syncReducers.sync(
+          initialState,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [AccountId('unknown')],
+          }),
+        );
+        expect(next.syncStatusByAccount).toEqual({});
+      });
+    });
+
     describe('removeWallet extraReducer', () => {
       it('should remove sync status for all provided accounts', () => {
         const secondAccountId = AccountId('account2');

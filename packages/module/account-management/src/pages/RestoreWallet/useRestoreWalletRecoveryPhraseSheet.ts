@@ -53,7 +53,7 @@ export const useRestoreWalletRecoveryPhraseSheet = (
       if (!recoveryPhrase.length) return;
 
       setRecoveryPhrase({ passphrase, recoveryPhrase });
-      NavigationControls.sheets.navigate(
+      NavigationControls.navigate(
         SheetRoutes.RestoreWalletSelectBlockchains,
         { hasNestedScrolling: true },
         { reset: false },

@@ -8,7 +8,7 @@ import type {
   PayloadAction,
   StateFromReducersMapObject,
 } from '@reduxjs/toolkit';
-import type * as _immer from 'immer';
+import type * as _immer from 'immer'; // NOSONAR: required so immer's WritableDraft types are referenceable in emitted .d.ts files
 
 export type FailuresSliceState = {
   /**

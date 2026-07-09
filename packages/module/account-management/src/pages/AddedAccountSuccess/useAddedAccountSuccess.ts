@@ -1,4 +1,3 @@
-import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   NavigationControls,
@@ -18,18 +17,19 @@ type IconProps = {
 
 export const useAddedAccountSuccess = () => {
   const { t } = useTranslation();
-  const { trackEvent } = useAnalytics();
   const clearActiveSheetPage = useDispatchLaceAction(
     'views.setActiveSheetPage',
   );
 
   useEffect(() => {
-    trackEvent('account management | account | added');
-  }, [trackEvent]);
+    return () => {
+      clearActiveSheetPage(null);
+    };
+  }, [clearActiveSheetPage]);
 
   const buttonAction = useCallback(() => {
     clearActiveSheetPage(null);
-    NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+    NavigationControls.navigate(StackRoutes.Home, {
       screen: TabRoutes.AccountCenter,
     });
   }, [clearActiveSheetPage]);

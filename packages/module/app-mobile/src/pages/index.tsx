@@ -1,4 +1,5 @@
 export { Portfolio } from './portfolio';
+export { PortfolioTokenSortSheet } from './portfolio/PortfolioTokenSortSheet';
 export { SettingsPage } from './settings/settings';
 export { SupportPage } from './support/support';
 export { AboutPage } from './about/about';

@@ -5,6 +5,7 @@ import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import {
   ContactDetailsSheetTemplate,
   Modal,
+  Sheet,
   useTheme,
 } from '@lace-lib/ui-toolkit';
 import { useCopyToClipboard } from '@lace-lib/ui-toolkit';
@@ -16,6 +17,7 @@ import type { SheetScreenProps } from '@lace-lib/navigation';
 import type { IconName } from '@lace-lib/ui-toolkit';
 
 export const ContactDetailsSheet = ({
+  navigation,
   route,
 }: SheetScreenProps<SheetRoutes.ContactDetails>) => {
   const { t } = useTranslation();
@@ -77,7 +79,7 @@ export const ContactDetailsSheet = ({
 
   const onEditPress = () => {
     if (contact?.id) {
-      NavigationControls.sheets.navigate(SheetRoutes.AddContact, {
+      NavigationControls.navigate(SheetRoutes.AddContact, {
         contactId: contact.id,
       });
     }
@@ -111,9 +113,35 @@ export const ContactDetailsSheet = ({
 
   useEffect(() => {
     if (!contact) {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     }
   }, [contact]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={t('v2.pages.address-book.contact-details.title')}
+          testID="contact-details-sheet-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          testID="contact-details-sheet-footer"
+          secondaryButton={{
+            label: t('v2.pages.address-book.contact-details.delete'),
+            onPress: onDeletePress,
+            testID: 'contact-details-sheet-delete-button',
+          }}
+          primaryButton={{
+            label: t('v2.pages.address-book.contact-details.edit'),
+            onPress: onEditPress,
+            testID: 'contact-details-sheet-edit-button',
+          }}
+        />
+      ),
+    });
+  }, [navigation, t, onDeletePress, onEditPress]);
 
   return (
     <>
@@ -124,10 +152,7 @@ export const ContactDetailsSheet = ({
           onDeletePress,
         }}
         labels={{
-          headerTitle: t('v2.pages.address-book.contact-details.title'),
           name: contact?.name ?? '',
-          deleteButtonLabel: t('v2.pages.address-book.contact-details.delete'),
-          editButtonLabel: t('v2.pages.address-book.contact-details.edit'),
         }}
         avatar={avatar}
         contact={{

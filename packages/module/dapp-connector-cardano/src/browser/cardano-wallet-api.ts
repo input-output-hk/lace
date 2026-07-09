@@ -179,9 +179,8 @@ export const createCardanoWalletApi = (
   /**
    * Requests authorization to access the wallet and returns the enabled API.
    *
-   * If the dApp is already authorized (via previous enable() call), this
-   * returns immediately without user interaction. Otherwise, it triggers
-   * the authorization popup. Concurrent calls are deduplicated.
+   * Always round-trips to the SW so authorization is re-evaluated on each
+   * call. Concurrent calls are deduplicated via `pendingEnable`.
    *
    * @param _extensions - Optional list of CIP extensions to enable (not yet implemented)
    * @returns Promise resolving to the enabled wallet API object
@@ -205,12 +204,6 @@ export const createCardanoWalletApi = (
       );
     }
 
-    // Already authorized in this session — return immediately
-    if (isSessionAuthorized) {
-      cachedEnabledApi ??= buildEnabledApi();
-      return cachedEnabledApi;
-    }
-
     // Concurrent enable() calls — deduplicate by returning the pending request
     if (pendingEnable) {
       return pendingEnable;
@@ -218,7 +211,7 @@ export const createCardanoWalletApi = (
 
     pendingEnable = (async () => {
       try {
-        if (await authenticator.requestAccess({ forceReauth: true })) {
+        if (await authenticator.requestAccess()) {
           isSessionAuthorized = true;
           logger.debug(
             `${location.origin} has been granted access to Cardano wallet API`,

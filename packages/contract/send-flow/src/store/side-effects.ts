@@ -11,6 +11,7 @@ import { isAccountVisibleOnNetwork } from '@lace-contract/wallet-repo';
 import {
   createByBlockchainNameSelector,
   firstStateOfStatus,
+  isStatus,
 } from '@lace-lib/util-store';
 import { BigNumber, Timestamp } from '@lace-sdk/util';
 import {
@@ -19,6 +20,7 @@ import {
   map,
   merge,
   mergeMap,
+  startWith,
   switchMap,
   take,
   of,
@@ -35,15 +37,27 @@ import {
 import { validateForm as performFormValidation } from '../validate-form';
 
 import { createFormInitialState } from './form-initial-state';
+import {
+  bucketUsdValue,
+  classifyAssetMix,
+  classifyTransferType,
+  computeTransferValueUsd,
+  countNfts,
+} from './transfer-classification';
 
 import type { SideEffect } from '../contract';
 import type {
   SendFlowAddressValidator,
   BaseTokenSelector,
+  ChainMinimumAmountTokenValidator,
   SendFlowAnalyticsEnhancer,
+  RecipientSource,
+  SendFlowSliceState,
 } from '../types';
 import type { AddressAliasResolver } from '@lace-contract/addresses';
 import type { LaceInit } from '@lace-contract/module';
+import type { NetworkType } from '@lace-contract/network';
+import type { TokenIdMapper } from '@lace-contract/token-pricing';
 import type {
   BuildTx,
   ConfirmTx,
@@ -53,7 +67,64 @@ import type {
   TokenTransfer,
   TxParams,
 } from '@lace-contract/tx-executor';
-import type { ByBlockchainNameSelector } from '@lace-lib/util-store';
+import type { ByBlockchainNameSelector, JsonType } from '@lace-lib/util-store';
+import type { Observable } from 'rxjs';
+
+type SendFlowStatus = SendFlowSliceState['status'];
+
+// For each side-effect, the states in which its async RESULT event is handled by the
+// machine — i.e. the handler keys in `state-machine.ts`. A result that arrives while
+// the machine is outside these states is stale (see `dropStaleResult`). Keep these in
+// sync with the state machine's handlers.
+const PREPARING_STATES = new Set<SendFlowStatus>(['Preparing']);
+const FORM_PENDING_VALIDATION_STATES = new Set<SendFlowStatus>([
+  'FormPendingValidation',
+]);
+const EDITING_STATES = new Set<SendFlowStatus>([
+  'Form',
+  'FormPendingValidation',
+  'FormTxBuilding',
+]);
+const AWAITING_CONFIRMATION_STATES = new Set<SendFlowStatus>([
+  'SummaryAwaitingConfirmation',
+]);
+const PROCESSING_STATES = new Set<SendFlowStatus>(['Processing']);
+const DISCARDING_STATES = new Set<SendFlowStatus>(['DiscardingTx']);
+
+/**
+ * Side-effects deliver their results asynchronously, so a result can arrive after the
+ * machine has already advanced past — or torn down from — the state that owns it (a
+ * race, or an abrupt close-all teardown). Dispatching it then makes the machine log
+ * "handler not found for status X and event Y".
+ *
+ * This operator drops the side-effect's RESULT action (identified by its RTK matcher)
+ * when the live machine status is no longer one that handles it, while passing every
+ * other emitted action through untouched (e.g. the tx-executor's intermediate
+ * `txPhaseRequested`). It is scoped to a single result type, so a genuinely misrouted
+ * event from another producer still surfaces — only this producer's own stale result
+ * is suppressed.
+ */
+const dropStaleResult =
+  (
+    state$: Observable<{ status: string }>,
+    isResultAction: (action: { type: string }) => boolean,
+    handledIn: ReadonlySet<string>,
+  ) =>
+  <A extends { type: string }>(source$: Observable<A>): Observable<A> => {
+    // A synchronously-delivered result means no transition happened since the
+    // side-effect fired, so the machine is still in a handling state. Seeding
+    // `withLatestFrom` with a handled status keeps such a result from being dropped
+    // before `state$` emits; any later state change overrides the seed.
+    const [seedStatus = ''] = handledIn;
+    return source$.pipe(
+      withLatestFrom(state$.pipe(startWith({ status: seedStatus }))),
+      filter(
+        ([action, state]) =>
+          !isResultAction(action) || handledIn.has(state.status),
+      ),
+      map(([action]) => action),
+    );
+  };
 
 export const syncSendFlowFeatureFlagPayload: SideEffect = (
   _,
@@ -193,6 +264,11 @@ export const makeSendFlowPreparing =
               accountId: account.accountId,
             });
           }),
+          dropStaleResult(
+            selectSendFlowState$,
+            actions.sendFlow.preparingCompleted.match,
+            PREPARING_STATES,
+          ),
         );
       }),
     );
@@ -207,12 +283,19 @@ export const makeSendFlowDiscard =
             logger.error('Failed to discard send flow transaction');
           }
           return actions.sendFlow.discardingTxCompleted();
-        }),
+        }).pipe(
+          dropStaleResult(
+            selectSendFlowState$,
+            actions.sendFlow.discardingTxCompleted.match,
+            DISCARDING_STATES,
+          ),
+        ),
       ),
     );
 
 type MakeSendFlowFormDataValidationParams = {
   selectAddressValidator: ByBlockchainNameSelector<SendFlowAddressValidator>;
+  selectChainMinimumAmountTokenValidator: ByBlockchainNameSelector<ChainMinimumAmountTokenValidator>;
   validateForm: typeof performFormValidation;
   addressAliasResolvers: AddressAliasResolver[];
 };
@@ -220,6 +303,7 @@ type MakeSendFlowFormDataValidationParams = {
 export const makeSendFlowFormDataValidation =
   ({
     selectAddressValidator,
+    selectChainMinimumAmountTokenValidator,
     addressAliasResolvers,
     validateForm,
   }: MakeSendFlowFormDataValidationParams): SideEffect =>
@@ -231,11 +315,19 @@ export const makeSendFlowFormDataValidation =
     },
     { actions, logger },
   ) =>
-    firstStateOfStatus(selectSendFlowState$, 'FormPendingValidation').pipe(
+    selectSendFlowState$.pipe(
+      filter(state => isStatus(state, 'FormPendingValidation')),
+      // The form can change while validation is in flight (formDataChanged is
+      // handled in FormPendingValidation); every transition produces a fresh
+      // state object, so a reference check re-triggers validation for the
+      // latest form while switchMap cancels the stale one
+      distinctUntilChanged(),
       switchMap(params => {
         const { blockchainName, blockchainSpecificData, form, minimumAmount } =
           params;
         const addressValidator = selectAddressValidator(blockchainName);
+        const chainMinimumAmountTokenValidator =
+          selectChainMinimumAmountTokenValidator(blockchainName);
         return combineLatest([
           selectNetworkType$,
           selectBlockchainNetworks$,
@@ -251,6 +343,7 @@ export const makeSendFlowFormDataValidation =
               addressValidator,
               addressAliasResolvers,
               blockchainSpecificData,
+              chainMinimumAmountTokenValidator,
               minimumAmount,
               network,
               form,
@@ -260,6 +353,11 @@ export const makeSendFlowFormDataValidation =
         );
       }),
       map(result => actions.sendFlow.formValidationCompleted({ result })),
+      dropStaleResult(
+        selectSendFlowState$,
+        actions.sendFlow.formValidationCompleted.match,
+        FORM_PENDING_VALIDATION_STATES,
+      ),
     );
 
 export const makeSendFlowTxBuilding =
@@ -307,9 +405,21 @@ export const makeSendFlowTxBuilding =
           return preview
             ? previewTx(txBuilderParams, result =>
                 actions.sendFlow.txPreviewResulted({ result }),
+              ).pipe(
+                dropStaleResult(
+                  selectSendFlowState$,
+                  actions.sendFlow.txPreviewResulted.match,
+                  EDITING_STATES,
+                ),
               )
             : buildTx(txBuilderParams, result =>
                 actions.sendFlow.txBuildResulted({ result }),
+              ).pipe(
+                dropStaleResult(
+                  selectSendFlowState$,
+                  actions.sendFlow.txBuildResulted.match,
+                  EDITING_STATES,
+                ),
               );
         },
       ),
@@ -342,13 +452,36 @@ export const makeSendFlowAwaitingConfirmation =
               actions.sendFlow.confirmationCompleted({
                 result,
               }),
+          ).pipe(
+            dropStaleResult(
+              selectSendFlowState$,
+              actions.sendFlow.confirmationCompleted.match,
+              AWAITING_CONFIRMATION_STATES,
+            ),
           ),
       ),
     );
 
 export const makeSendFlowProcessing =
-  ({ submitTx }: { submitTx: SubmitTx }): SideEffect =>
-  (_, { sendFlow: { selectSendFlowState$ } }, { actions }) =>
+  ({
+    submitTx,
+    selectTokenIdMapper,
+  }: {
+    submitTx: SubmitTx;
+    selectTokenIdMapper: ByBlockchainNameSelector<TokenIdMapper>;
+  }): SideEffect =>
+  (
+    _,
+    {
+      sendFlow: { selectSendFlowState$ },
+      sendFlowAnalytics: { selectRecipientSource$ },
+      tokenPricing: { selectPrices$ },
+      addresses: { selectAllAddresses$ },
+      wallets: { selectAll$: selectAllWallets$ },
+      network: { selectNetworkType$ },
+    },
+    { actions },
+  ) =>
     firstStateOfStatus(selectSendFlowState$, 'Processing').pipe(
       switchMap(state =>
         submitTx(
@@ -360,39 +493,198 @@ export const makeSendFlowProcessing =
           },
           result => result,
         ).pipe(
-          mergeMap(value => {
-            // Pass through txPhaseRequested action
-            if (!('success' in value)) {
-              return of(value);
-            }
+          withLatestFrom(
+            // startWith ensures withLatestFrom never silently drops the
+            // submitTx result when a Redux selector hasn't emitted yet.
+            // The defaults match each slice's initialState, so analytics
+            // degrades gracefully (e.g. transferValue='UNKNOWN') rather
+            // than blocking the tx-critical processingResulted dispatch.
+            selectPrices$.pipe(startWith({})),
+            selectAllAddresses$.pipe(startWith([])),
+            selectAllWallets$.pipe(startWith([])),
+            selectNetworkType$,
+            selectRecipientSource$,
+          ),
+          mergeMap(
+            ([
+              value,
+              prices,
+              addresses,
+              wallets,
+              networkType,
+              recipientSource,
+            ]) => {
+              // Pass through txPhaseRequested action
+              if (!('success' in value)) {
+                return of(value);
+              }
 
-            // Handle submission result
-            if (value.success) {
-              const pendingActivity = {
-                accountId: state.accountId,
-                activityId: value.txId,
-                timestamp: Timestamp(Date.now()),
-                tokenBalanceChanges: state.form.tokenTransfers.map(tt => ({
-                  tokenId: tt.token.value.tokenId,
-                  amount: BigNumber(-BigNumber.valueOf(tt.amount.value)),
-                })),
-                type: ActivityType.Pending,
-              };
+              const transfers = state.form.tokenTransfers.map(tt => ({
+                amount: tt.amount.value,
+                token: tt.token.value,
+              }));
+
+              const failureNftCount = countNfts(transfers);
+              const failureAssetMix = classifyAssetMix(transfers);
+              const analyticsAction = value.success
+                ? actions.analytics.trackEvent({
+                    eventName: 'send | transaction | success',
+                    payload: buildSuccessAnalyticsPayload({
+                      blockchainName: state.blockchainName,
+                      networkType,
+                      transfers,
+                      recipientAddress: state.form.address.value,
+                      recipientSource,
+                      sourceAccountId: state.accountId,
+                      mapper:
+                        selectTokenIdMapper(state.blockchainName) ?? undefined,
+                      prices,
+                      addresses,
+                      wallets,
+                    }),
+                  })
+                : actions.analytics.trackEvent({
+                    eventName: 'send | transaction | failure',
+                    payload: {
+                      blockchain: state.blockchainName,
+                      networkType,
+                      transferCount: transfers.length,
+                      nftCount: failureNftCount,
+                      fungibleCount: transfers.length - failureNftCount,
+                      ...(failureAssetMix && { assetMix: failureAssetMix }),
+                      errorCode: value.errorTranslationKeys.title,
+                      ...(recipientSource && { recipientSource }),
+                    },
+                  });
+
+              // Handle submission result
+              if (value.success) {
+                const pendingActivity = {
+                  accountId: state.accountId,
+                  activityId: value.txId,
+                  timestamp: Timestamp(Date.now()),
+                  tokenBalanceChanges: state.form.tokenTransfers.map(tt => ({
+                    tokenId: tt.token.value.tokenId,
+                    amount: BigNumber(-BigNumber.valueOf(tt.amount.value)),
+                  })),
+                  type: ActivityType.Pending,
+                  ...(value.blockchainSpecificActivityMetadata !== undefined
+                    ? {
+                        blockchainSpecific:
+                          value.blockchainSpecificActivityMetadata,
+                      }
+                    : {}),
+                };
+
+                return from([
+                  analyticsAction,
+                  actions.activities.upsertActivities({
+                    accountId: state.accountId,
+                    activities: [pendingActivity],
+                  }),
+                  actions.sendFlow.processingResulted({ result: value }),
+                ]);
+              }
 
               return from([
-                actions.activities.upsertActivities({
-                  accountId: state.accountId,
-                  activities: [pendingActivity],
-                }),
+                analyticsAction,
                 actions.sendFlow.processingResulted({ result: value }),
               ]);
-            }
-
-            return of(actions.sendFlow.processingResulted({ result: value }));
-          }),
+            },
+          ),
         ),
       ),
+      // The analytics/activity actions are valid regardless of flow state; only the
+      // state-machine `processingResulted` transition is dropped if the flow has been
+      // abandoned (e.g. closed) before submit resolves.
+      dropStaleResult(
+        selectSendFlowState$,
+        actions.sendFlow.processingResulted.match,
+        PROCESSING_STATES,
+      ),
     );
+
+const buildSuccessAnalyticsPayload = ({
+  blockchainName,
+  networkType,
+  transfers,
+  recipientAddress,
+  recipientSource,
+  sourceAccountId,
+  mapper,
+  prices,
+  addresses,
+  wallets,
+}: {
+  blockchainName: string;
+  networkType: NetworkType;
+  transfers: Parameters<typeof computeTransferValueUsd>[0]['transfers'];
+  recipientAddress: string;
+  recipientSource: RecipientSource | undefined;
+  sourceAccountId: Parameters<
+    typeof classifyTransferType
+  >[0]['sourceAccountId'];
+  mapper: TokenIdMapper | undefined;
+  prices: Parameters<typeof computeTransferValueUsd>[0]['prices'];
+  addresses: Parameters<typeof classifyTransferType>[0]['addresses'];
+  wallets: Parameters<typeof classifyTransferType>[0]['wallets'];
+}) => {
+  const transferType = classifyTransferType({
+    recipientAddress,
+    sourceAccountId,
+    addresses,
+    wallets,
+  });
+
+  // Asset-mix counts are tracked unconditionally — they tell us *what* the
+  // user sent (NFT, fungible, mixed) and answer questions independent of
+  // network or transferType (e.g. "how often do users send NFTs?").
+  //
+  // transferValue is only meaningful when
+  //   (1) the user is on mainnet — testnet tokens have no real-world USD value, and
+  //   (2) value is actually leaving the user's control (transferType === 'foreign').
+  // The dashboard can filter on transferType + networkType to scope value-based
+  // questions accordingly.
+  //
+  // Midnight: no loadTokenIdMapper is registered yet → mapper is undefined →
+  // computeTransferValueUsd returns undefined → transferValue: 'UNKNOWN'.
+  const nftCount = countNfts(transfers);
+  const assetMix = classifyAssetMix(transfers);
+  const base: Record<string, JsonType> = {
+    blockchain: blockchainName,
+    networkType,
+    transferCount: transfers.length,
+    transferType,
+    nftCount,
+    fungibleCount: transfers.length - nftCount,
+    ...(assetMix && { assetMix }),
+    ...(recipientSource && { recipientSource }),
+  };
+  if (networkType !== 'mainnet' || transferType !== 'foreign') return base;
+
+  const usd = computeTransferValueUsd({
+    transfers,
+    prices,
+    mapper,
+  });
+  base.transferValue = usd === undefined ? 'UNKNOWN' : bucketUsdValue(usd);
+  return base;
+};
+
+/**
+ * Clears any leftover recipient source from a previous send session whenever
+ * a new send flow is opened. Without this, a user who opened send via the
+ * dapp connector (`'navigation'`), abandoned, then reopened from the home tab
+ * would still carry the stale source on the next success/failure event.
+ */
+export const clearRecipientSourceOnOpen: SideEffect = (
+  { sendFlow: { openRequested$ } },
+  _,
+  { actions },
+) =>
+  openRequested$.pipe(
+    map(() => actions.sendFlowAnalytics.recipientSourceCleared()),
+  );
 
 export const makeTrackSendFlowAuthenticationConfirmation =
   ({
@@ -436,6 +728,13 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
   const selectBaseToken = await createByBlockchainNameSelector(
     loadModules('addons.loadBaseToken'),
   );
+  const selectChainMinimumAmountTokenValidator =
+    await createByBlockchainNameSelector(
+      loadModules('addons.loadChainMinimumAmountTokenValidator'),
+    );
+  const selectTokenIdMapper = await createByBlockchainNameSelector(
+    loadModules('addons.loadTokenIdMapper'),
+  );
 
   return [
     (actionObservables, stateObservables, dependencies) =>
@@ -451,6 +750,7 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
           makeSendFlowFormDataValidation({
             addressAliasResolvers,
             selectAddressValidator,
+            selectChainMinimumAmountTokenValidator,
             validateForm: performFormValidation,
           }),
           makeSendFlowTxBuilding({
@@ -468,7 +768,9 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
           }),
           makeSendFlowProcessing({
             submitTx: makeSubmitTx(actionObservables.txExecutor),
+            selectTokenIdMapper,
           }),
+          clearRecipientSourceOnOpen,
           makeTrackSendFlowAuthenticationConfirmation({
             selectAnalyticsEnhancer,
           }),

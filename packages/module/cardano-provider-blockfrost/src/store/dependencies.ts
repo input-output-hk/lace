@@ -254,7 +254,7 @@ export const initializeDependencies: LaceInit<
             .catch(Err<ProviderError>),
         );
       },
-      discoverAddresses: ({ xpub, accountIndex }, context) => {
+      discoverAddresses: ({ xpub, accountIndex, thorough }, context) => {
         const provider = getAddressDiscoveryProvider(
           getBlockfrostConfig(context, blockfrostConfigs),
           logger,
@@ -270,7 +270,7 @@ export const initializeDependencies: LaceInit<
         );
 
         return provider
-          .discover(account)
+          .discover(account, { thorough })
           .pipe(
             map(result =>
               result.map(address =>
@@ -359,18 +359,6 @@ export const initializeDependencies: LaceInit<
           logger,
         );
         return utxoProvider.getAccountUtxos(props);
-      },
-      getTotalAccountTransactionCount: (
-        props: GetAccountRewardsProps,
-        context,
-      ) => {
-        const activityProvider = getAccountActivityProvider(
-          getBlockfrostConfig(context, blockfrostConfigs),
-          logger,
-        );
-        return activityProvider.getTotalAccountTransactionCount(
-          props.rewardAccount,
-        );
       },
       getAddressTransactionHistory: (props, context) => {
         const activityProvider = getAccountActivityProvider(

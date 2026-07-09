@@ -5,11 +5,13 @@
   "license": "MIT",
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/activities": "*",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
+    "@lace-contract/token-pricing": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-repo": "*",

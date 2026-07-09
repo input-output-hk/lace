@@ -237,6 +237,16 @@ describe('mapTransactionToActivity', () => {
             { tokenId: TokenId('lovelace'), amount: BigNumber(1000000n) },
           ],
           type: ActivityType.Receive,
+          blockchainSpecific: {
+            Cardano: {
+              consumedInputs: [],
+              producedOutputs: [],
+              slot: mockTxDetails.blockHeader.slot,
+              security: {
+                exploits: { deterministicNonce202606: false },
+              },
+            },
+          },
         });
       }
     });
@@ -275,6 +285,16 @@ describe('mapTransactionToActivity', () => {
             { tokenId: TokenId('lovelace'), amount: BigNumber(-500000n) },
           ],
           type: ActivityType.Send,
+          blockchainSpecific: {
+            Cardano: {
+              consumedInputs: [],
+              producedOutputs: [],
+              slot: mockTxDetails.blockHeader.slot,
+              security: {
+                exploits: { deterministicNonce202606: false },
+              },
+            },
+          },
         });
       }
     });

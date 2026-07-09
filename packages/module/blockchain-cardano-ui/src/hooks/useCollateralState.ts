@@ -168,7 +168,7 @@ export const useCollateralState = ({
 
       if (isCompletedFlowForCurrentAccount && hasInitiatedFlow) {
         // Close sheet when transitioning to Idle
-        NavigationControls.sheets.close();
+        NavigationControls.closeSheet();
 
         // Show toast when transitioning from Reclaiming to Idle
         if (previousStatus === 'Reclaiming') {

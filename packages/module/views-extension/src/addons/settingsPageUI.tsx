@@ -17,7 +17,7 @@ const settingsPageUICustomisation = () =>
             titleKey: 'v2.pages.settings.options.default-view-mode',
             icon: 'ArrowExpand',
             onPress: () => {
-              NavigationControls.sheets.navigate(SheetRoutes.DefaultOpenMode);
+              NavigationControls.navigate(SheetRoutes.DefaultOpenMode);
             },
           },
         ]

@@ -5,7 +5,9 @@ import {
   type SideEffectDependencies,
 } from '@lace-contract/module';
 import { getObservability } from '@lace-lib/observability';
+import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
+import sortBy from 'lodash/sortBy';
 
 import type { FeatureFlag, Features } from './types';
 
@@ -67,7 +69,7 @@ export const selectModulesWithFallback = ({
   try {
     return {
       ...selectModules(availableModules, featureFlags, environment),
-      usedFallback: false,
+      fallback: undefined,
     };
   } catch (error) {
     getObservability().captureException(error as Error, {
@@ -79,9 +81,19 @@ export const selectModulesWithFallback = ({
     });
     return {
       ...selectModules(availableModules, defaultFeatureFlags, environment),
-      usedFallback: true,
+      fallback: { incompatibleFlags: featureFlags },
     };
   }
+};
+
+export const featureFlagSetEquals = (
+  a: readonly FeatureFlag[] | undefined,
+  b: readonly FeatureFlag[] | undefined,
+): boolean => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  return isEqual(sortBy(a, 'key'), sortBy(b, 'key'));
 };
 
 export const createFeatureFlagStorage = (

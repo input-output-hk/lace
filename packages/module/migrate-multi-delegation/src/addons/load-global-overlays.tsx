@@ -26,7 +26,9 @@ const MultiDelegationMigrationPrompt = () => {
     () => multiDelegationAccounts[0],
     [multiDelegationAccounts],
   );
-  const onMigrate = useDispatchLaceAction('migrateMultiDelegation.migrate');
+  const onMigrate = useDispatchLaceAction(
+    'migrateMultiDelegation.startMigration',
+  );
   const onReset = useDispatchLaceAction('migrateMultiDelegation.reset');
 
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);

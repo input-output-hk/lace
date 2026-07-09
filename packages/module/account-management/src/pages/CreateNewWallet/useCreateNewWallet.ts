@@ -20,6 +20,14 @@ import type { BlockchainName } from '@lace-lib/util-store';
 
 type CreateNewWalletSheetProps = SheetScreenProps<SheetRoutes.CreateNewWallet>;
 
+type CreateNewWalletSheetModel = CreateWalletSheetTemplateProps & {
+  title: string;
+  cancelLabel: string;
+  onCancel: () => void;
+  confirmLabel: string;
+  onConfirm: () => void;
+};
+
 type CreateWalletOption = {
   blockchainName: BlockchainName;
   Icon: ComponentType;
@@ -28,7 +36,7 @@ type CreateWalletOption = {
 
 export const useCreateNewWallet = (
   _props: CreateNewWalletSheetProps,
-): CreateWalletSheetTemplateProps => {
+): CreateNewWalletSheetModel => {
   const { t } = useTranslation();
   const [walletName, setWalletName] = useState('');
   const [selectedBlockchains, setSelectedBlockchains] = useState<
@@ -101,7 +109,7 @@ export const useCreateNewWallet = (
   );
 
   const handleCancel = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const handleCreate = useCallback(() => {

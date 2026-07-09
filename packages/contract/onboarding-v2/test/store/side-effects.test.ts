@@ -354,6 +354,8 @@ describe('onboarding-v2 side effects', () => {
     expect(emittedSuccessPayloads[0]).toEqual({
       walletId: newWallet.walletId,
       isRecovery: true,
+      walletType: WalletType.InMemory,
+      blockchains: ['Cardano'],
     });
     expect(logger.error).not.toHaveBeenCalled();
     expect(integration.initializeWallet).toHaveBeenCalledTimes(1);
@@ -566,6 +568,7 @@ describe('onboarding-v2 side effects', () => {
   describe('hardware wallet creation side effect', () => {
     const ledgerId = HardwareIntegrationId('ledger');
     const mockDevice = {
+      kind: 'usb' as const,
       vendorId: 0x2c97,
       productId: 0x4015,
       serialNumber: '0001',
@@ -611,12 +614,22 @@ describe('onboarding-v2 side effects', () => {
     it('dispatches addWallet and createWalletSuccess when connector succeeds', () => {
       const logger = createLogger();
       const createWallet = vi.fn();
+      const onboardedAt = 1_700_000_000_000;
+      vi.spyOn(Date, 'now').mockReturnValue(onboardedAt);
 
       const sideEffect = createHwWalletCreationSideEffect({
         hwConnectors: [{ id: ledgerId, createWallet }],
         platform: 'ios',
         setupAppLock: () => of(true),
       });
+
+      const expectedStampedWallet = {
+        ...mockHwWallet,
+        accounts: mockHwWallet.accounts.map(account => ({
+          ...account,
+          metadata: { ...account.metadata, onboardedAt },
+        })),
+      } as WalletEntity;
 
       testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
         createWallet.mockReturnValue(cold('(a|)', { a: mockHwWallet }));
@@ -642,10 +655,12 @@ describe('onboarding-v2 side effects', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('-(ab)', {
-              a: actionsBag.wallets.addWallet(mockHwWallet),
+              a: actionsBag.wallets.addWallet(expectedStampedWallet),
               b: actionsBag.onboardingV2.createWalletSuccess({
                 walletId: mockHwWallet.walletId,
                 isRecovery: false,
+                walletType: WalletType.HardwareLedger,
+                blockchains: ['Cardano' as BlockchainName],
               }),
             });
 
@@ -662,6 +677,7 @@ describe('onboarding-v2 side effects', () => {
       });
 
       expect(logger.error).not.toHaveBeenCalled();
+      vi.restoreAllMocks();
     });
 
     it('fails with creation-failed when no pending password is set', () => {

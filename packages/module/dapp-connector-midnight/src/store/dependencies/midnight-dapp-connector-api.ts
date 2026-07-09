@@ -9,12 +9,6 @@ import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { httpClientProvingProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import {
-  ZKConfigProvider,
-  createZKIR,
-  createProverKey,
-  createVerifierKey,
-} from '@midnight-ntwrk/midnight-js-types';
-import {
   MidnightBech32m,
   ShieldedAddress,
   ShieldedCoinPublicKey,
@@ -24,9 +18,12 @@ import {
 import { firstValueFrom, map } from 'rxjs';
 
 import { APIError } from '../../api-error';
+import { DappZkConfigProvider } from '../../dapp-zk-config-provider';
+import { derivePendingActivityFromMidnightTx } from '../helpers/derive-pending-activity-from-midnight-tx';
 
 import type { ConfirmationCallback } from './create-confirmation-callback';
 import type { SenderContext, WithSenderContext } from '../../types';
+import type { Activity } from '@lace-contract/activities';
 import type {
   MidnightWalletsByAccountId,
   MidnightWallet,
@@ -51,8 +48,10 @@ import type {
   CombinedSwapInputs,
   CombinedTokenTransfer,
   TokenTransfer,
-} from '@midnight-ntwrk/wallet-sdk-facade';
+  UtxoWithMeta,
+} from '@midnight-ntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
+import type { Logger } from 'ts-log';
 import type { Runtime } from 'webextension-polyfill';
 
 const isSenderContext = (value: unknown): value is SenderContext =>
@@ -64,27 +63,10 @@ export interface MidnightDappConnectorApiOptions {
   userConfirmTransaction: ConfirmationCallback;
   supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   isUnlocked$: Observable<boolean>;
+  onPendingActivity?: (activity: Activity) => void;
+  logger?: Logger;
 }
 
-class DappZkConfigProvider extends ZKConfigProvider<string> {
-  readonly #keyMaterialProvider: KeyMaterialProvider;
-
-  public constructor(keyMaterialProvider: KeyMaterialProvider) {
-    super();
-    this.#keyMaterialProvider = keyMaterialProvider;
-  }
-
-  public getZKIR = async (circuitId: string) =>
-    createZKIR(await this.#keyMaterialProvider.getZKIR(circuitId));
-
-  public getProverKey = async (circuitId: string) =>
-    createProverKey(await this.#keyMaterialProvider.getProverKey(circuitId));
-
-  public getVerifierKey = async (circuitId: string) =>
-    createVerifierKey(
-      await this.#keyMaterialProvider.getVerifierKey(circuitId),
-    );
-}
 const bigintReplacer = (_key: string, value: unknown): unknown =>
   typeof value === 'bigint' ? value.toString() : value;
 
@@ -99,6 +81,8 @@ export class MidnightDappConnectorApi
   private readonly supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   private readonly isUnlocked$: Observable<boolean>;
   readonly #userConfirmationRequest: ConfirmationCallback;
+  readonly #onPendingActivity?: (activity: Activity) => void;
+  readonly #logger?: Logger;
 
   public constructor(options: MidnightDappConnectorApiOptions) {
     this.wallets$ = options.wallets$;
@@ -106,6 +90,8 @@ export class MidnightDappConnectorApi
     this.supportedNetworksIds$ = options.supportedNetworksIds$;
     this.network$ = options.network$;
     this.isUnlocked$ = options.isUnlocked$;
+    this.#onPendingActivity = options.onPendingActivity;
+    this.#logger = options.logger;
     this.networkConfig$ = options.network$.pipe(
       map(network => network?.config),
     );
@@ -174,9 +160,12 @@ export class MidnightDappConnectorApi
     return await firstValueFrom(
       wallet.state().pipe(
         map(state => {
-          const now = new Date();
-          const balance = state.dust.balance(now);
-          const coinsWithFullInfo = state.dust.availableCoinsWithFullInfo(now);
+          // totalCoins (not state.dust.balance) so a pending dust spend doesn't show as 0.
+          const coinsWithFullInfo = state.dust.totalCoins;
+          const balance = coinsWithFullInfo.reduce(
+            (sum, coin) => sum + coin.generatedNow,
+            0n,
+          );
           const cap = coinsWithFullInfo.reduce(
             (sum, coin) => sum + coin.maxCap,
             0n,
@@ -362,7 +351,7 @@ export class MidnightDappConnectorApi
     const transactionType = hasShieldedOutputs ? 'shielded' : 'unshielded';
 
     const { isConfirmed } = await this.#userConfirmationRequest(
-      {} as Runtime.MessageSender,
+      {},
       'proveTransaction',
       {
         transactionType,
@@ -437,9 +426,44 @@ export class MidnightDappConnectorApi
 
   public async submitTransaction(tx: string): Promise<void> {
     const wallet = await this.ensureWallet();
-    const deserializedTx = await this.deserializeTransaction(tx);
+    const deserializedTx = await this.deserializeSealedTransaction(tx);
+
+    // Capture wallet state BEFORE submission. The SDK may optimistically remove
+    // consumed coins from availableCoins on submit, which would make own-input
+    // matching in derivePendingActivityFromMidnightTx fail and silently skip
+    // the pending activity.
+    let preSubmitNightUtxos: readonly UtxoWithMeta[] | undefined;
+    if (this.#onPendingActivity) {
+      try {
+        const walletState = await firstValueFrom(wallet.state());
+        preSubmitNightUtxos = walletState.unshielded.availableCoins;
+      } catch (error) {
+        this.#logger?.error(
+          '[dapp-connector-midnight] failed to read wallet state before tx submission',
+          error,
+        );
+      }
+    }
 
     await firstValueFrom(wallet.submitTransaction(deserializedTx));
+
+    if (!this.#onPendingActivity || !preSubmitNightUtxos) return;
+    try {
+      const ownUserAddress = ledger.addressFromKey(wallet.nightVerifyingKey);
+      const activity = derivePendingActivityFromMidnightTx({
+        deserializedTx,
+        accountId: wallet.accountId,
+        ownUserAddressHex: ownUserAddress,
+        nightUtxos: preSubmitNightUtxos,
+        networkId: wallet.networkId,
+      });
+      if (activity) this.#onPendingActivity(activity);
+    } catch (error) {
+      this.#logger?.error(
+        '[dapp-connector-midnight] failed to derive pending activity from submitted tx',
+        error,
+      );
+    }
   }
 
   public async getProvingProvider(
@@ -510,7 +534,7 @@ export class MidnightDappConnectorApi
       hasShieldedOutputs || hasShieldedInputs ? 'shielded' : 'unshielded';
 
     const { isConfirmed } = await this.#userConfirmationRequest(
-      {} as Runtime.MessageSender,
+      {},
       'proveTransaction',
       {
         transactionType,
@@ -526,7 +550,8 @@ export class MidnightDappConnectorApi
       throw new APIError(ErrorCodes.Rejected, 'User rejected transaction');
     }
 
-    // TODO: pass options.intentId to the SDK once WalletFacade.initSwap supports it
+    // options.intentId is currently dropped — WalletFacade.initSwap does
+    // not accept it yet. Plumb it through when the SDK adds support.
     const unprovenTxRecipe = await firstValueFrom(
       (() => {
         const ttl = new Date(Date.now() + defaultTxTtlLength);
@@ -655,7 +680,7 @@ export class MidnightDappConnectorApi
 
     if (!wallet) {
       const { isConfirmed } = await this.#userConfirmationRequest(
-        {} as Runtime.MessageSender,
+        {},
         'unlockWallet',
       );
 
@@ -671,19 +696,6 @@ export class MidnightDappConnectorApi
     }
 
     return wallet;
-  }
-
-  private async deserializeTransaction(
-    tx: string,
-  ): Promise<
-    ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.Binding>
-  > {
-    return ledger.Transaction.deserialize(
-      'signature',
-      'proof',
-      'binding',
-      Buffer.from(tx, 'hex'),
-    );
   }
 
   private async deserializeSealedTransaction(

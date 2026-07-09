@@ -135,6 +135,9 @@ const validateEnvironment = (): AppConfig => {
         process.env.EXPO_PUBLIC_STEELSWAP_API_BASE_URL,
       NFT_CDN_URL:
         process.env.NFT_CDN_URL || process.env.EXPO_PUBLIC_NFT_CDN_URL,
+      CARDANO_CUBE_BASE_URL:
+        process.env.CARDANO_CUBE_BASE_URL ||
+        process.env.EXPO_PUBLIC_CARDANO_CUBE_BASE_URL,
     },
     {
       POSTHOG_API_URL: str({ desc: 'URL for PostHog analytics' }),
@@ -263,6 +266,7 @@ const validateEnvironment = (): AppConfig => {
       NFT_CDN_URL: str({
         desc: 'URL to LaceNFT CDN',
       }),
+      CARDANO_CUBE_BASE_URL: str({ desc: 'Cardano Cube API base URL' }),
     },
   );
 
@@ -326,7 +330,6 @@ const validateEnvironment = (): AppConfig => {
     },
     cardanoProvider: {
       tipPollFrequency: Milliseconds(30_000),
-      transactionHistoryPollingIntervalSeconds: Milliseconds(30_000),
       blockfrostConfigs: {
         [1]: {
           clientConfig: {
@@ -376,6 +379,7 @@ const validateEnvironment = (): AppConfig => {
     laceTermsOfUseUrl: validatedEnvironment.LACE_TERMS_OF_USE_URL,
     steelswapApiBaseUrl: validatedEnvironment.STEELSWAP_API_BASE_URL,
     nftCdnUrl: validatedEnvironment.NFT_CDN_URL,
+    cardanoCubeBaseUrl: validatedEnvironment.CARDANO_CUBE_BASE_URL,
   };
 };
 

@@ -5,40 +5,15 @@ import { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import {
+  hasDuplicateName,
+  hasDuplicateAddresses,
+  hasAddressInOtherContacts,
+} from '../utils/contactFormValidation';
 
 import type { RecipientFormState } from './useRecipients';
 import type { Contact, ContactAddress } from '@lace-contract/address-book';
 import type { Address, AddressAliasResolution } from '@lace-contract/addresses';
-
-const hasDuplicateName = (contacts: Contact[], name: string) => {
-  return contacts.some(
-    contact => contact.name.toLowerCase() === name.toLowerCase(),
-  );
-};
-
-const hasDuplicateAddresses = (recipients: RecipientFormState[]) => {
-  const addresses = recipients
-    .map(r => r.address.trim().toLowerCase())
-    .filter(Boolean);
-  return new Set(addresses).size !== addresses.length;
-};
-
-const hasAddressInOtherContacts = (
-  recipients: RecipientFormState[],
-  existingContacts: Contact[],
-  currentContactId?: ContactId,
-) => {
-  const otherContactAddresses = new Set<string>();
-  for (const contact of existingContacts) {
-    if (contact.id === currentContactId) continue;
-    for (const addr of contact.addresses) {
-      otherContactAddresses.add(addr.address.trim().toLowerCase());
-    }
-  }
-  return recipients.some(r =>
-    otherContactAddresses.has(r.address.trim().toLowerCase()),
-  );
-};
 
 interface UseFormSubmissionReturn {
   isSaveEnabled: boolean;
@@ -56,6 +31,7 @@ interface UseFormSubmissionOptions {
   avatarUrl?: Contact['avatar'];
   resolvedAlias?: AddressAliasResolution;
   existingAliases?: AddressAliasResolution[];
+  onClose?: () => void;
 }
 
 const AUTO_DETECT = 'auto-detect';
@@ -89,15 +65,17 @@ export const useFormSubmission = (
   );
   const dispatchAddContact = useDispatchLaceAction('addressBook.addContact');
 
-  const onClose = useCallback(() => {
+  const defaultOnClose = useCallback(() => {
     if (contactId) {
-      NavigationControls.sheets.navigate(SheetRoutes.ContactDetails, {
+      NavigationControls.navigate(SheetRoutes.ContactDetails, {
         contactId: contactId,
       });
     } else {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     }
   }, [contactId]);
+
+  const onClose = options.onClose ?? defaultOnClose;
 
   const isSaveEnabled = useMemo(() => {
     // Disable while validation is running

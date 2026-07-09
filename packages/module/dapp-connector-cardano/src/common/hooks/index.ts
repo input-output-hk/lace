@@ -23,3 +23,4 @@ export {
   type UseSignTxDataResult,
 } from './useSignTxData';
 export { useSignDataAccountInfo } from './useSignDataAccountInfo';
+export { useSignDataDRepKeyHash } from './useSignDataDRepKeyHash';

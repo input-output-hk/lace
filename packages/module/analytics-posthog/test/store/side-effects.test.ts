@@ -1,11 +1,12 @@
 import { analyticsActions } from '@lace-contract/analytics';
 import { featuresActions } from '@lace-contract/feature';
 import { FeatureFlagKey } from '@lace-contract/feature';
+import { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-  identifyUser,
+  identifyUserWithSuperProperties,
   initializePostHogAnalyticsDependencies,
   trackFeatureInteraction,
   trackFeatureView,
@@ -13,8 +14,22 @@ import {
 
 import type { PostHogAnalyticsDependencies } from '../../src/store';
 import type { PostHogClient } from '@lace-contract/posthog';
+import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 const actions = { ...featuresActions, ...analyticsActions };
+
+const makeInMemoryWallet = (
+  overrides: Partial<AnyWallet> & { walletId: WalletId },
+): AnyWallet =>
+  ({
+    metadata: { name: 'w', order: 0 },
+    accounts: [],
+    blockchainSpecific: {},
+    type: WalletType.InMemory,
+    encryptedRecoveryPhrase: new Uint8Array() as never,
+    isPassphraseConfirmed: true,
+    ...overrides,
+  } as AnyWallet);
 
 describe('Side Effects', () => {
   describe('initializePostHogDependencies', () => {
@@ -111,38 +126,215 @@ describe('Side Effects', () => {
     });
   });
 
-  describe('identifyUser', () => {
-    it('calls `posthog.identify()` with received user id', () => {
-      const identify = vi.fn();
-      testSideEffect(identifyUser, ({ cold, expectObservable, flush }) => ({
-        stateObservables: {
-          analytics: {
-            selectAnalyticsUser$: cold('aab', {
-              a: {
-                id: 'user id',
-              },
-              b: {
-                id: 'different user id',
-              },
-            }),
-          },
-        },
-        dependencies: {
-          posthog: {
-            captureEvent: vi.fn(),
-            getFeatureFlags: vi.fn(),
-            identify,
-          },
-        },
-        assertion: sideEffect$ => {
-          expectObservable(sideEffect$).toBe('-');
-          flush();
+  describe('identifyUserWithSuperProperties', () => {
+    const buildStateObservables = ({
+      cold,
+      wallets = [],
+    }: {
+      cold: (pattern: string, values?: Record<string, unknown>) => unknown;
+      wallets?: AnyWallet[];
+    }) => ({
+      analytics: { selectAnalyticsUser$: cold('a', { a: { id: 'user-1' } }) },
+      wallets: { selectAll$: cold('a', { a: wallets }) },
+      network: { selectNetworkType$: cold('a', { a: 'mainnet' }) },
+      views: {
+        selectColorScheme$: cold('a', { a: 'dark' }),
+        selectLanguage$: cold('a', { a: 'en' }),
+        selectThemePreference$: cold('a', { a: 'system' }),
+      },
+      tokenPricing: {
+        selectCurrencyPreference$: cold('a', {
+          a: { name: 'US Dollar', ticker: 'USD' },
+        }),
+      },
+    });
 
-          expect(identify).toHaveBeenCalledTimes(2);
-          expect(identify).toHaveBeenNthCalledWith(1, 'user id');
-          expect(identify).toHaveBeenNthCalledWith(2, 'different user id');
-        },
-      }));
+    it('identifies the user with baseline super-properties when no wallets', () => {
+      const identify = vi.fn();
+      testSideEffect(
+        identifyUserWithSuperProperties,
+        ({ cold, expectObservable, flush }) => ({
+          stateObservables: buildStateObservables({
+            cold,
+            wallets: [],
+          }) as never,
+          dependencies: {
+            posthog: {
+              captureEvent: vi.fn(),
+              getFeatureFlags: vi.fn(),
+              identify,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+            flush();
+
+            // startWith on non-user observables causes multiple emissions as
+            // real values trickle in; assert the final stable call.
+            expect(identify).toHaveBeenLastCalledWith('user-1', {
+              num_wallets: 0,
+              num_accounts: 0,
+              has_hardware_wallet: false,
+              has_ledger: false,
+              has_trezor: false,
+              blockchains_with_accounts: [],
+              preferred_network_type: 'mainnet',
+              preferred_theme: 'dark',
+              preferred_theme_mode: 'system',
+              preferred_language: 'en',
+              preferred_currency: 'USD',
+            });
+          },
+        }),
+      );
+    });
+
+    it('reports hardware wallet presence and blockchains with accounts', () => {
+      const identify = vi.fn();
+      const ledgerWallet = makeInMemoryWallet({
+        walletId: WalletId('ledger-1'),
+        type: WalletType.HardwareLedger,
+        accounts: [
+          {
+            blockchainName: 'Cardano',
+            networkType: 'mainnet',
+          } as never,
+        ],
+      });
+      const inMemoryWallet = makeInMemoryWallet({
+        walletId: WalletId('inmem-1'),
+        accounts: [
+          { blockchainName: 'Midnight', networkType: 'mainnet' } as never,
+          { blockchainName: 'Cardano', networkType: 'testnet' } as never,
+        ],
+      });
+
+      testSideEffect(
+        identifyUserWithSuperProperties,
+        ({ cold, expectObservable, flush }) => ({
+          stateObservables: buildStateObservables({
+            cold,
+            wallets: [ledgerWallet, inMemoryWallet],
+          }) as never,
+          dependencies: {
+            posthog: {
+              captureEvent: vi.fn(),
+              getFeatureFlags: vi.fn(),
+              identify,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+            flush();
+
+            // startWith on non-user observables causes multiple emissions as
+            // real values trickle in; assert the final stable call.
+            const [userId, props] = identify.mock.lastCall as [
+              string,
+              Record<string, unknown>,
+            ];
+            expect(userId).toBe('user-1');
+            expect(props).toMatchObject({
+              num_wallets: 2,
+              num_accounts: 3,
+              has_hardware_wallet: true,
+              has_ledger: true,
+              has_trezor: false,
+              blockchains_with_accounts: ['Cardano', 'Midnight'],
+              preferred_network_type: 'mainnet',
+              preferred_theme: 'dark',
+              preferred_language: 'en',
+              preferred_currency: 'USD',
+            });
+          },
+        }),
+      );
+    });
+
+    it('does not identify before consent (analytics user is null)', () => {
+      const identify = vi.fn();
+      testSideEffect(
+        identifyUserWithSuperProperties,
+        ({ cold, expectObservable, flush }) => ({
+          stateObservables: {
+            analytics: { selectAnalyticsUser$: cold('a', { a: null }) },
+            wallets: { selectAll$: cold('a', { a: [] }) },
+            network: { selectNetworkType$: cold('a', { a: 'mainnet' }) },
+            views: {
+              selectColorScheme$: cold('a', { a: 'light' }),
+              selectLanguage$: cold('a', { a: 'en' }),
+              selectThemePreference$: cold('a', { a: 'system' }),
+            },
+            tokenPricing: {
+              selectCurrencyPreference$: cold('a', {
+                a: { name: 'US Dollar', ticker: 'USD' },
+              }),
+            },
+          } as never,
+          dependencies: {
+            posthog: {
+              captureEvent: vi.fn(),
+              getFeatureFlags: vi.fn(),
+              identify,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+            flush();
+            expect(identify).not.toHaveBeenCalled();
+          },
+        }),
+      );
+    });
+
+    it('identifies the user as soon as analytics user is available, before wallets emit', () => {
+      const identify = vi.fn();
+      testSideEffect(
+        identifyUserWithSuperProperties,
+        ({ cold, expectObservable, flush }) => ({
+          stateObservables: {
+            analytics: {
+              selectAnalyticsUser$: cold('a', { a: { id: 'user-1' } }),
+            },
+            // Wallets never emit — simulates cold-start delay
+            wallets: { selectAll$: cold('') },
+            network: { selectNetworkType$: cold('a', { a: 'mainnet' }) },
+            views: {
+              selectColorScheme$: cold('a', { a: 'dark' }),
+              selectLanguage$: cold('a', { a: 'en' }),
+              selectThemePreference$: cold('a', { a: 'system' }),
+            },
+            tokenPricing: {
+              selectCurrencyPreference$: cold('a', {
+                a: { name: 'US Dollar', ticker: 'USD' },
+              }),
+            },
+          } as never,
+          dependencies: {
+            posthog: {
+              captureEvent: vi.fn(),
+              getFeatureFlags: vi.fn(),
+              identify,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-');
+            flush();
+
+            // identify fires despite wallets never emitting — startWith([])
+            // provides the initial value. Assert the first call used defaults.
+            expect(identify).toHaveBeenCalled();
+            expect(identify.mock.calls[0]).toEqual([
+              'user-1',
+              expect.objectContaining({
+                num_wallets: 0,
+                num_accounts: 0,
+                blockchains_with_accounts: [],
+              }),
+            ]);
+          },
+        }),
+      );
     });
   });
 });

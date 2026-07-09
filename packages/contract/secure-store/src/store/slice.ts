@@ -5,7 +5,7 @@ import {
 
 import type { StateObject } from '@lace-lib/util-store';
 import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
-import type * as _immer from 'immer';
+import type * as _immer from 'immer'; // NOSONAR: required so immer's WritableDraft types are referenceable in emitted .d.ts files
 
 export type SecureStoreSliceState =
   | StateObject<'Available'>

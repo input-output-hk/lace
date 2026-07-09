@@ -4,4 +4,8 @@ import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
 declare module '@lace-contract/module' {
   interface State
     extends StateFromReducersMapObject<typeof swapContextReducers> {}
+
+  interface SideEffectDependencies {
+    uuid: () => string;
+  }
 }

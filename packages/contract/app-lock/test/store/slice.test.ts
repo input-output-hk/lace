@@ -1,13 +1,27 @@
 import { HexBytes } from '@lace-sdk/util';
 import { describe, expect, it } from 'vitest';
 
+import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '../../src/const';
 import {
   appLockActions as actions,
   appLockSelectors as selectors,
 } from '../../src/index';
 import { appLockReducers, initialState } from '../../src/store/slice';
 
-import type { AppLockSliceState } from '../../src/store/slice';
+import type { AppLockSliceState, LockState } from '../../src/store/slice';
+import type { FeatureFlagKey } from '@lace-contract/feature';
+
+const featuresWith = (flagKeys: FeatureFlagKey[]) => ({
+  loaded: { modules: [], featureFlags: flagKeys.map(key => ({ key })) },
+});
+
+const featuresEmpty = featuresWith([]);
+const featuresWithFlag = featuresWith([PAUSE_NETWORK_POLLING_FEATURE_FLAG]);
+
+const stateFor = (lockState: LockState, features = featuresEmpty) => ({
+  appLock: { lockState, encryptedSentinel: null } as AppLockSliceState,
+  features,
+});
 
 const reducer = appLockReducers.appLock;
 
@@ -179,6 +193,63 @@ describe('appLock slice', () => {
             },
           }),
         ).toBe(HexBytes('test-sentinel'));
+      });
+    });
+
+    describe('isWalletActive', () => {
+      const lockStates: LockState['status'][] = [
+        'Preparing',
+        'AwaitingSetup',
+        'Locked',
+        'Unlocking',
+        'Unlocked',
+      ];
+
+      describe('when PAUSE_NETWORK_POLLING_WHILE_LOCKED is absent', () => {
+        it.each(lockStates)('returns true for %s', status => {
+          expect(
+            selectors.appLock.isWalletActive(
+              stateFor({ status } as LockState, featuresEmpty),
+            ),
+          ).toBe(true);
+        });
+      });
+
+      describe('when PAUSE_NETWORK_POLLING_WHILE_LOCKED is present', () => {
+        it.each(['AwaitingSetup', 'Unlocked'] as const)(
+          'returns true for %s',
+          status => {
+            expect(
+              selectors.appLock.isWalletActive(
+                stateFor({ status } as LockState, featuresWithFlag),
+              ),
+            ).toBe(true);
+          },
+        );
+
+        it.each(['Preparing', 'Locked', 'Unlocking'] as const)(
+          'returns false for %s',
+          status => {
+            expect(
+              selectors.appLock.isWalletActive(
+                stateFor({ status } as LockState, featuresWithFlag),
+              ),
+            ).toBe(false);
+          },
+        );
+      });
+
+      it('flips from false to true when the flag is removed while locked', () => {
+        const lockedWithFlag = stateFor(
+          { status: 'Locked' } as LockState,
+          featuresWithFlag,
+        );
+        const lockedWithoutFlag = stateFor(
+          { status: 'Locked' } as LockState,
+          featuresEmpty,
+        );
+        expect(selectors.appLock.isWalletActive(lockedWithFlag)).toBe(false);
+        expect(selectors.appLock.isWalletActive(lockedWithoutFlag)).toBe(true);
       });
     });
   });

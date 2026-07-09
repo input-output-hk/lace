@@ -5,19 +5,29 @@ import {
   Serialization,
 } from '@cardano-sdk/core';
 import { createTestScheduler } from '@cardano-sdk/util-dev';
-import { CardanoRewardAccount } from '@lace-contract/cardano-context';
+import {
+  CardanoRewardAccount,
+  COLLATERAL_AMOUNT_LOVELACES,
+} from '@lace-contract/cardano-context';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { Serializable } from '@lace-lib/util-store';
 import { BigNumber, HexBytes, Ok, Err } from '@lace-sdk/util';
-import { EMPTY, of, Subject, throwError } from 'rxjs';
+import { EMPTY, map, of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  awaitAndMarkCollateral,
   buildMultidelegationMigrationTx,
+  buildVoteDelegationTx,
+  createAccountObservables,
+  createBuilder$,
+  createProviderContext,
+  fetchSecondaryAccountsInfo$,
   makeCoordinateAccountMigrations,
   makeMigrateAccount,
+  makePrepareVoteDelegation,
   signTx,
   submitTx,
 } from '../../src/store/side-effects';
@@ -29,6 +39,7 @@ import type {
   SignTxResult,
 } from '../../src/store/side-effects';
 import type { Logger } from '@cardano-sdk/util-dev';
+import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
   CardanoBip32AccountProps,
   CardanoProvider,
@@ -61,10 +72,12 @@ const rewardAccount0 = CardanoRewardAccount(
 const rewardAccount1 = CardanoRewardAccount(
   'stake1uyfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacalmqha',
 );
-const address0 =
-  'addr1qx2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp' as Cardano.PaymentAddress;
-const address1 =
-  'addr1q9uxupsqq8pqfqj7hgfcjs9j0rl09k3z8hy9v8xfksf7q0nhvhqk7gy9gqf9t8dwjg3s2j5pk6nqhqy8ngfdms9yjvqsa9lhxw' as Cardano.PaymentAddress;
+const address0 = Cardano.PaymentAddress(
+  'addr1q96l79jg5ahsrkfyrprs9eaaek0g0tfg3m4tln0vkmq29m8gnpz7wtsycpytk4tn3fe85fqhw7enll66ud9ex6yeu4wqgwfsph',
+);
+const address1 = Cardano.PaymentAddress(
+  'addr1qysyd4huaa8fppt5800gy6vjqacn29ce6vske9yz7mpvckajqlxgz8pdfj4uqfny4f72llspljpmvcx0wdsh8punfjzqwzpctq',
+);
 
 const createUtxo = (address: Cardano.PaymentAddress): Cardano.Utxo =>
   [
@@ -184,10 +197,256 @@ describe('migrate-multi-delegation side-effects', () => {
   beforeEach(() => {
     vi.spyOn(Serialization.Transaction, 'fromCbor').mockImplementation(cbor =>
       mock<Serialization.Transaction>({
-        toCore: () => ({ id: `core-${cbor}` } as unknown as Cardano.Tx),
+        getId: vi
+          .fn()
+          .mockReturnValue(`mock-tx-id-${cbor}` as Cardano.TransactionId),
+        toCore: () =>
+          ({
+            body: { inputs: [], outputs: [] },
+          } as unknown as Cardano.Tx),
         toCbor: () => cbor as unknown as Serialization.TxCBOR,
       }),
     );
+  });
+
+  describe('createBuilder$', () => {
+    it('emits builder and protocol parameters when network info is available', () => {
+      createTestScheduler().run(({ hot, expectObservable, flush }) => {
+        const selectAllNetworkInfo$ = hot('a', {
+          a: {
+            [multiDelegationAccount.account.blockchainNetworkId]: {
+              protocolParameters: mockProtocolParameters,
+            },
+          },
+        });
+
+        const result$ = createBuilder$(
+          multiDelegationAccount,
+          selectAllNetworkInfo$,
+        );
+
+        expectObservable(result$).toBe('a', {
+          a: expect.objectContaining({
+            protocolParameters: mockProtocolParameters,
+          }),
+        } as Record<string, unknown>);
+        flush();
+      });
+    });
+
+    it('filters out emissions without protocol parameters', () => {
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const selectAllNetworkInfo$ = hot('a-b', {
+          a: {},
+          b: {
+            [multiDelegationAccount.account.blockchainNetworkId]: {
+              protocolParameters: mockProtocolParameters,
+            },
+          },
+        });
+
+        const result$ = createBuilder$(
+          multiDelegationAccount,
+          selectAllNetworkInfo$,
+        );
+
+        // First emission (no params) is filtered, second passes at frame 2
+        expectObservable(result$.pipe(map(() => 'x'))).toBe('--x');
+      });
+    });
+  });
+
+  describe('createProviderContext', () => {
+    it('returns provider context with chainId from account', () => {
+      const result = createProviderContext(multiDelegationAccount);
+
+      expect(result).toEqual({ chainId });
+    });
+  });
+
+  describe('fetchSecondaryAccountsInfo$', () => {
+    it('fetches reward account info for secondary keys only', () => {
+      const rewardAccountInfo: RewardAccountInfo = {
+        isActive: true,
+        isRegistered: true,
+        rewardsSum: BigNumber(100_000_000n),
+        withdrawableAmount: BigNumber(50_000_000n),
+        controlledAmount: BigNumber(500_000_000n),
+      };
+      const mockGetRewardAccountInfo = vi
+        .fn()
+        .mockReturnValue(of(Ok(rewardAccountInfo)));
+
+      createTestScheduler().run(({ expectObservable, flush }) => {
+        const result$ = fetchSecondaryAccountsInfo$(
+          multiDelegationAccount,
+          { chainId },
+          { getRewardAccountInfo: mockGetRewardAccountInfo } as never,
+        );
+
+        // combineLatest over of() completes synchronously
+        expectObservable(result$).toBe('(x|)', {
+          x: [
+            Ok({
+              ...rewardAccountInfo,
+              rewardAccount: Cardano.RewardAccount(rewardAccount1),
+            }),
+          ],
+        });
+        flush();
+      });
+
+      // Only called for stakeKeyIndex > 0
+      expect(mockGetRewardAccountInfo).toHaveBeenCalledTimes(1);
+      expect(mockGetRewardAccountInfo).toHaveBeenCalledWith(
+        { rewardAccount: rewardAccount1 },
+        { chainId },
+      );
+    });
+
+    it('propagates provider errors in results', () => {
+      const providerError = new ProviderError(ProviderFailure.Unhealthy);
+      const mockGetRewardAccountInfo = vi
+        .fn()
+        .mockReturnValue(of(Err(providerError)));
+
+      createTestScheduler().run(({ expectObservable, flush }) => {
+        const result$ = fetchSecondaryAccountsInfo$(
+          multiDelegationAccount,
+          { chainId },
+          { getRewardAccountInfo: mockGetRewardAccountInfo } as never,
+        );
+
+        // Emits and completes synchronously even with error results
+        expectObservable(
+          result$.pipe(map(results => (results[0].isErr() ? 'err' : 'ok'))),
+        ).toBe('(a|)', { a: 'err' });
+        flush();
+      });
+    });
+  });
+
+  describe('createAccountObservables', () => {
+    it('derives wallet$, accountAddresses$, and accountUtxo$ from state selectors', () => {
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const mockWallet = mock<InMemoryWallet>({
+          type: WalletType.InMemory,
+          walletId,
+          metadata: { name: 'Test Wallet', order: 0 },
+          accounts: [],
+          blockchainSpecific: {
+            Cardano: { encryptedRootPrivateKey: 'key' as HexBytes },
+          },
+        });
+
+        const { wallet$, accountAddresses$, accountUtxo$ } =
+          createAccountObservables({
+            multiDelegationAccount,
+            selectWalletById$: hot('a', {
+              a: () => mockWallet,
+            }),
+            selectByAccountId$: hot('a', { a: () => [] }),
+            selectAvailableAccountUtxos$: hot('a', {
+              a: { [accountId]: utxos },
+            }),
+          });
+
+        expectObservable(wallet$).toBe('a', { a: mockWallet });
+        expectObservable(accountAddresses$).toBe('a', { a: [] });
+        expectObservable(accountUtxo$).toBe('a', { a: utxos });
+      });
+    });
+
+    it('filters out undefined wallet', () => {
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const mockWallet = mock<InMemoryWallet>({
+          type: WalletType.InMemory,
+          walletId,
+          metadata: { name: 'Test Wallet', order: 0 },
+          accounts: [],
+          blockchainSpecific: {
+            Cardano: { encryptedRootPrivateKey: 'key' as HexBytes },
+          },
+        });
+
+        const { wallet$ } = createAccountObservables({
+          multiDelegationAccount,
+          selectWalletById$: hot('a-b', {
+            a: () => undefined,
+            b: () => mockWallet,
+          }),
+          selectByAccountId$: hot('a', { a: () => [] }),
+          selectAvailableAccountUtxos$: hot('a', { a: { [accountId]: utxos } }),
+        });
+
+        expectObservable(wallet$.pipe(map(() => 'x'))).toBe('--x');
+      });
+    });
+
+    it('filters out undefined utxos for account', () => {
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const { accountUtxo$ } = createAccountObservables({
+          multiDelegationAccount,
+          selectWalletById$: hot('a', {
+            a: () =>
+              mock<InMemoryWallet>({
+                type: WalletType.InMemory,
+                walletId,
+              }),
+          }),
+          selectByAccountId$: hot('a', { a: () => [] }),
+          selectAvailableAccountUtxos$: hot('a-b', {
+            a: {},
+            b: { [accountId]: utxos },
+          }),
+        });
+
+        expectObservable(accountUtxo$).toBe('--a', { a: utxos });
+      });
+    });
+
+    it('maps Cardano addresses to GroupedAddress objects', () => {
+      const cardanoAddress: AnyAddress = {
+        blockchainName: 'Cardano',
+        accountId,
+        address: address0 as unknown as Address,
+        name: 'payment/0',
+        data: {
+          accountIndex: 0,
+          index: 0,
+          networkId: Cardano.NetworkId.Mainnet,
+          rewardAccount: rewardAccount0,
+          networkMagic: chainId.networkMagic,
+          type: Cardano.AddressType.EnterpriseKey,
+          stakeKeyDerivationPath: undefined,
+        },
+      };
+
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const { accountAddresses$ } = createAccountObservables({
+          multiDelegationAccount,
+          selectWalletById$: hot('a', {
+            a: () => mock<InMemoryWallet>({ walletId }),
+          }),
+          selectByAccountId$: hot('a', { a: () => [cardanoAddress] }),
+          selectAvailableAccountUtxos$: hot('a', { a: { [accountId]: utxos } }),
+        });
+
+        expectObservable(accountAddresses$).toBe('a', {
+          a: [
+            {
+              accountIndex: 0,
+              address: address0,
+              index: 0,
+              networkId: Cardano.NetworkId.Mainnet,
+              rewardAccount: Cardano.RewardAccount(rewardAccount0),
+              type: Cardano.AddressType.EnterpriseKey,
+              stakeKeyDerivationPath: undefined,
+            },
+          ],
+        });
+      });
+    });
   });
 
   describe('buildMultidelegationMigrationTx', () => {
@@ -201,6 +460,7 @@ describe('migrate-multi-delegation side-effects', () => {
 
       return mock<TransactionBuilder & { mockTx: Serialization.Transaction }>({
         addInput: vi.fn().mockReturnThis(),
+        addOutput: vi.fn().mockReturnThis(),
         addStakeDeregistrationCertificate: vi.fn().mockReturnThis(),
         addRewardsWithdrawal: vi.fn().mockReturnThis(),
         setChangeAddress: vi.fn().mockReturnThis(),
@@ -232,6 +492,7 @@ describe('migrate-multi-delegation side-effects', () => {
             never
           >
         >,
+        Cardano.Utxo[],
       ] = [
         { builder: mockBuilder, protocolParameters: mockProtocolParameters },
         [
@@ -240,6 +501,7 @@ describe('migrate-multi-delegation side-effects', () => {
             rewardAccount: Cardano.RewardAccount(rewardAccount1),
           }),
         ],
+        utxos,
       ];
 
       createTestScheduler().run(({ expectObservable }) => {
@@ -295,6 +557,7 @@ describe('migrate-multi-delegation side-effects', () => {
             never
           >
         >,
+        Cardano.Utxo[],
       ] = [
         { builder: mockBuilder, protocolParameters: mockProtocolParameters },
         [
@@ -303,6 +566,7 @@ describe('migrate-multi-delegation side-effects', () => {
             rewardAccount: Cardano.RewardAccount(rewardAccount1),
           }),
         ],
+        utxos,
       ];
 
       createTestScheduler().run(({ expectObservable }) => {
@@ -319,6 +583,53 @@ describe('migrate-multi-delegation side-effects', () => {
         mockBuilder.addStakeDeregistrationCertificate,
       ).toHaveBeenCalledTimes(1);
       expect(mockBuilder.addRewardsWithdrawal).not.toHaveBeenCalled();
+    });
+
+    it('adds collateral output when hasCollateral is true', () => {
+      const mockBuilder = createMockBuilder();
+      const logger = createLogger();
+
+      const builderInput: [
+        {
+          builder: TransactionBuilder;
+          protocolParameters: RequiredProtocolParameters;
+        },
+        Array<
+          Result<
+            RewardAccountInfo & { rewardAccount: Cardano.RewardAccount },
+            never
+          >
+        >,
+        Cardano.Utxo[],
+      ] = [
+        { builder: mockBuilder, protocolParameters: mockProtocolParameters },
+        [
+          Ok({
+            isActive: true,
+            isRegistered: false,
+            rewardsSum: BigNumber(0n),
+            withdrawableAmount: BigNumber(0n),
+            controlledAmount: BigNumber(0n),
+            rewardAccount: Cardano.RewardAccount(rewardAccount1),
+          }),
+        ],
+        utxos,
+      ];
+
+      createTestScheduler().run(({ expectObservable }) => {
+        const result$ = buildMultidelegationMigrationTx(
+          multiDelegationAccount,
+          { logger } as SideEffectDependencies,
+          true,
+        )(builderInput);
+
+        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
+      });
+
+      expect(mockBuilder.addOutput).toHaveBeenCalledWith({
+        address: address0,
+        value: { coins: BigInt(COLLATERAL_AMOUNT_LOVELACES) },
+      });
     });
 
     it('returns EMPTY and logs error when any reward account info fetch fails', () => {
@@ -338,9 +649,11 @@ describe('migrate-multi-delegation side-effects', () => {
             ProviderError
           >
         >,
+        Cardano.Utxo[],
       ] = [
         { builder: mockBuilder, protocolParameters: mockProtocolParameters },
         [Err(providerError)],
+        utxos,
       ];
 
       createTestScheduler().run(({ expectObservable }) => {
@@ -357,6 +670,63 @@ describe('migrate-multi-delegation side-effects', () => {
         'Failed to fetch reward account info, try again later',
         providerError,
       );
+    });
+  });
+
+  describe('awaitAndMarkCollateral', () => {
+    const collateralUtxo = createUtxo(address0);
+
+    it('emits setAccountUnspendableUtxos action when eligible collateral UTXO appears', () => {
+      const logger = createLogger();
+      const expectedAction = actions.migrateMultiDelegation.hwSigningStarted();
+      const setAccountUnspendableUtxos = vi
+        .fn()
+        .mockReturnValue(expectedAction);
+
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const result$ = awaitAndMarkCollateral({
+          accountId,
+          selectAccountUtxos$: hot('a', {
+            a: { [accountId]: [collateralUtxo] },
+          }),
+          setAccountUnspendableUtxos,
+          logger,
+        });
+
+        expectObservable(result$).toBe('(a|)', { a: expectedAction });
+      });
+
+      expect(setAccountUnspendableUtxos).toHaveBeenCalledWith({
+        accountId,
+        utxos: [collateralUtxo],
+      });
+    });
+
+    it('completes with no emission after 120 s when no eligible UTXO appears', () => {
+      const logger = createLogger();
+      const ineligibleUtxo: Cardano.Utxo = [
+        { txId: 'tx-no-collateral' as Cardano.TransactionId, index: 0 },
+        { address: address0, value: { coins: 1_000_000n } },
+      ] as Cardano.Utxo;
+      const setAccountUnspendableUtxos = vi.fn();
+
+      createTestScheduler().run(({ hot, expectObservable }) => {
+        const result$ = awaitAndMarkCollateral({
+          accountId,
+          selectAccountUtxos$: hot('a', {
+            a: { [accountId]: [ineligibleUtxo] },
+          }),
+          setAccountUnspendableUtxos,
+          logger,
+        });
+
+        expectObservable(result$).toBe('120000ms |');
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Timeout'),
+      );
+      expect(setAccountUnspendableUtxos).not.toHaveBeenCalled();
     });
   });
 
@@ -419,6 +789,9 @@ describe('migrate-multi-delegation side-effects', () => {
         selectAccountUtxos$: hot('a', {
           a: { [accountId]: utxos },
         }),
+        selectAvailableAccountUtxos$: hot('a', {
+          a: { [accountId]: utxos },
+        }),
         selectAccountUnspendableUtxos$: of({}),
       },
     });
@@ -453,6 +826,9 @@ describe('migrate-multi-delegation side-effects', () => {
         tx: mockTx,
         chainId,
         hasCollateral: false,
+        accountId,
+        accountAddresses: [],
+        accountUtxos: [],
       };
 
       const buildProjection = vi.fn().mockReturnValue(of(mockTx));
@@ -568,6 +944,120 @@ describe('migrate-multi-delegation side-effects', () => {
           },
         }),
       );
+    });
+
+    it('when account has collateral, spends old collateral as tx input and marks new collateral as unspendable', () => {
+      const oldCollateralUtxo: Cardano.Utxo = [
+        { txId: 'old-collateral-tx' as Cardano.TransactionId, index: 0 },
+        {
+          address: address1,
+          value: { coins: BigInt(COLLATERAL_AMOUNT_LOVELACES) },
+        },
+      ] as Cardano.Utxo;
+
+      // Simulates the collateral output created by the migration tx appearing on chain.
+      // Has a distinct txId so we can assert it — not the old one — gets marked.
+      const newCollateralUtxo: Cardano.Utxo = [
+        { txId: 'new-collateral-tx' as Cardano.TransactionId, index: 0 },
+        {
+          address: address0,
+          value: { coins: BigInt(COLLATERAL_AMOUNT_LOVELACES) },
+        },
+      ] as Cardano.Utxo;
+
+      const mockTx = createMockTx();
+      const signedTxResult: SignTxResult = {
+        tx: mockTx,
+        chainId,
+        hasCollateral: true,
+        accountId,
+        accountAddresses: [],
+        accountUtxos: [],
+      };
+
+      let capturedBuildUtxos: Cardano.Utxo[] | undefined;
+      const buildProjection = vi
+        .fn()
+        .mockImplementation(
+          ([, , buildUtxos]: [unknown, unknown, Cardano.Utxo[]]) => {
+            capturedBuildUtxos = buildUtxos;
+            return of(mockTx);
+          },
+        );
+
+      const signProjection = vi
+        .fn()
+        .mockReturnValue(
+          of<SignTxEmission>({ type: 'signed', result: signedTxResult }),
+        );
+
+      const setAccountUnspendableUtxos = vi.fn().mockReturnValue({
+        type: 'cardanoContext/setAccountUnspendableUtxos',
+      });
+
+      const migrateAccount = makeMigrateAccount({
+        buildTxFn: vi.fn().mockReturnValue(buildProjection),
+        signTxFn: vi.fn().mockReturnValue(signProjection),
+        submitTxFn: submitTx,
+      });
+
+      const stateObservables = {
+        wallets: { selectWalletById$: of(() => createInMemoryWallet()) },
+        addresses: { selectByAccountId$: of(() => [] as AnyAddress[]) },
+        cardanoContext: {
+          selectAllNetworkInfo$: of({
+            [multiDelegationAccount.account.blockchainNetworkId]: {
+              protocolParameters: mockProtocolParameters,
+            },
+          }),
+          selectAccountUtxos$: of({ [accountId]: [oldCollateralUtxo] }),
+          // Available UTXOs contain the new collateral output (simulating the
+          // post-confirmation state where the migration tx output is visible).
+          selectAvailableAccountUtxos$: of({
+            [accountId]: [newCollateralUtxo],
+          }),
+          // Old collateral is currently unspendable → hasCollateral = true
+          selectAccountUnspendableUtxos$: of({
+            [accountId]: [oldCollateralUtxo],
+          }),
+        },
+      };
+
+      const sideEffect = migrateAccount(multiDelegationAccount);
+      const deps = {
+        ...createMockDependencies(),
+        actions: {
+          ...actions,
+          activities: { upsertActivities: vi.fn() },
+          cardanoContext: { setAccountUnspendableUtxos },
+        },
+        cardanoProvider: {
+          ...createMockDependencies().cardanoProvider,
+          submitTx: vi.fn().mockReturnValue(of(Ok('tx-hash'))),
+        },
+      };
+
+      sideEffect(
+        {} as Parameters<typeof sideEffect>[0],
+        stateObservables as unknown as Parameters<typeof sideEffect>[1],
+        deps as unknown as Parameters<typeof sideEffect>[2],
+      ).subscribe();
+
+      // Old collateral must be included as a tx input so it is spent, not stranded.
+      expect(capturedBuildUtxos).toContainEqual(oldCollateralUtxo);
+      // Regular available UTXOs are also included.
+      expect(capturedBuildUtxos).toContainEqual(newCollateralUtxo);
+
+      // The new collateral UTXO (from selectAvailableAccountUtxos$) must be
+      // marked as unspendable — not the old one.
+      expect(setAccountUnspendableUtxos).toHaveBeenCalledWith({
+        accountId,
+        utxos: [newCollateralUtxo],
+      });
+      expect(setAccountUnspendableUtxos).not.toHaveBeenCalledWith({
+        accountId,
+        utxos: [oldCollateralUtxo],
+      });
     });
   });
 
@@ -753,6 +1243,9 @@ describe('migrate-multi-delegation side-effects', () => {
         tx: mockTx,
         chainId,
         hasCollateral: false,
+        accountId,
+        accountAddresses: [],
+        accountUtxos: [],
       };
 
       const mockSubmitTx = vi.fn().mockReturnValue(of(Ok(txId)));
@@ -783,6 +1276,9 @@ describe('migrate-multi-delegation side-effects', () => {
         tx: mockTx,
         chainId,
         hasCollateral: false,
+        accountId,
+        accountAddresses: [],
+        accountUtxos: [],
       };
 
       const mockSubmitTx = vi.fn().mockReturnValue(of(Err(submitError)));
@@ -798,6 +1294,616 @@ describe('migrate-multi-delegation side-effects', () => {
       });
 
       expect(logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('buildVoteDelegationTx', () => {
+    const createMockBuilder = (): TransactionBuilder & {
+      mockTx: Serialization.Transaction;
+    } => {
+      const mockTx = mock<Serialization.Transaction>({
+        toCore: vi.fn().mockReturnValue({}),
+        toCbor: vi.fn().mockReturnValue('cbor'),
+      });
+
+      return mock<TransactionBuilder & { mockTx: Serialization.Transaction }>({
+        setUnspentOutputs: vi.fn().mockReturnThis(),
+        addVoteDelegationCertificate: vi.fn().mockReturnThis(),
+        setChangeAddress: vi.fn().mockReturnThis(),
+        build: vi.fn().mockReturnValue(mockTx),
+        mockTx,
+      });
+    };
+
+    it('builds tx with vote delegation certificates and coin selection', () => {
+      const mockBuilder = createMockBuilder();
+
+      const affectedKeys = [
+        {
+          isActive: true,
+          isRegistered: true,
+          rewardsSum: BigNumber(100_000_000n),
+          withdrawableAmount: BigNumber(50_000_000n),
+          controlledAmount: BigNumber(500_000_000n),
+          rewardAccount: Cardano.RewardAccount(rewardAccount1),
+        },
+      ];
+
+      createTestScheduler().run(({ expectObservable }) => {
+        const result$ = buildVoteDelegationTx(
+          multiDelegationAccount,
+          affectedKeys,
+        )([
+          { builder: mockBuilder, protocolParameters: mockProtocolParameters },
+          utxos,
+        ]);
+
+        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
+      });
+
+      // Uses coin selection, not addInput
+      expect(mockBuilder.setUnspentOutputs).toHaveBeenCalledWith(utxos);
+
+      // Vote delegation certificate with AlwaysAbstain
+      expect(mockBuilder.addVoteDelegationCertificate).toHaveBeenCalledWith(
+        {
+          type: Cardano.CredentialType.KeyHash,
+          hash: Cardano.RewardAccount.toHash(
+            Cardano.RewardAccount(rewardAccount1),
+          ),
+        },
+        { __typename: 'AlwaysAbstain' },
+      );
+
+      // Change address is primary (stakeKeyIndex 0)
+      expect(mockBuilder.setChangeAddress).toHaveBeenCalledWith(address0);
+      expect(mockBuilder.build).toHaveBeenCalled();
+    });
+  });
+
+  describe('makePrepareVoteDelegation', () => {
+    const createMockStateObservables = (hot: RunHelpers['hot']) => ({
+      wallets: {
+        selectWalletById$: hot('a', {
+          a: () =>
+            ({
+              type: WalletType.InMemory,
+              metadata: { name: 'Test Wallet', order: 0 },
+              walletId,
+              accounts: [] as InMemoryWalletAccount[],
+              blockchainSpecific: {
+                Cardano: { encryptedRootPrivateKey: 'key' as HexBytes },
+              },
+            } as InMemoryWallet),
+        }),
+      },
+      addresses: {
+        selectByAccountId$: hot('a', { a: () => [] }),
+      },
+      cardanoContext: {
+        selectAllNetworkInfo$: hot('a', {
+          a: {
+            [multiDelegationAccount.account.blockchainNetworkId]: {
+              protocolParameters: mockProtocolParameters,
+            },
+          },
+        }),
+        selectAvailableAccountUtxos$: hot('a', {
+          a: { [accountId]: utxos },
+        }),
+      },
+    });
+
+    const createPrepareVoteDelegationDependencies = () => {
+      const logger = createLogger();
+      const deps = {
+        logger,
+        actions,
+        cardanoProvider: {
+          getRewardAccountInfo: vi.fn().mockReturnValue(
+            of(
+              Ok({
+                isActive: false,
+                isRegistered: false,
+                rewardsSum: BigNumber(0n),
+                withdrawableAmount: BigNumber(0n),
+                controlledAmount: BigNumber(0n),
+              }),
+            ),
+          ),
+          submitTx: vi.fn().mockReturnValue(of(Ok('tx-id'))),
+        },
+      };
+      return deps;
+    };
+
+    const mockBuildVoteDelegationTxFunction: typeof buildVoteDelegationTx =
+      () => () =>
+        of(createMockTx());
+
+    const mockSignTxFunction: typeof signTx = () => () =>
+      of<SignTxEmission>({
+        type: 'signed',
+        result: {
+          tx: createMockTx(),
+          chainId,
+          hasCollateral: false,
+          accountId,
+          accountAddresses: [],
+          accountUtxos: [],
+        },
+      });
+
+    it('dispatches migrate immediately when no vote delegation needed (all have drepId)', () => {
+      const deps = createPrepareVoteDelegationDependencies();
+      deps.cardanoProvider.getRewardAccountInfo.mockReturnValue(
+        of(
+          Ok({
+            isActive: true,
+            isRegistered: true,
+            drepId: 'drep1existing',
+            rewardsSum: BigNumber(100_000_000n),
+            withdrawableAmount: BigNumber(50_000_000n),
+            controlledAmount: BigNumber(500_000_000n),
+          }),
+        ),
+      );
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: mockSignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(emissions).toHaveLength(1);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.migrate(multiDelegationAccount),
+            );
+            // No submission happened
+            expect(deps.cardanoProvider.submitTx).not.toHaveBeenCalled();
+          },
+        }),
+      );
+    });
+
+    it('dispatches migrate immediately when withdrawableAmount is 0', () => {
+      const deps = createPrepareVoteDelegationDependencies();
+      deps.cardanoProvider.getRewardAccountInfo.mockReturnValue(
+        of(
+          Ok({
+            isActive: true,
+            isRegistered: true,
+            // No drepId, but no rewards to withdraw
+            rewardsSum: BigNumber(0n),
+            withdrawableAmount: BigNumber(0n),
+            controlledAmount: BigNumber(500_000_000n),
+          }),
+        ),
+      );
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: mockSignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(emissions).toHaveLength(1);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.migrate(multiDelegationAccount),
+            );
+            expect(deps.cardanoProvider.submitTx).not.toHaveBeenCalled();
+          },
+        }),
+      );
+    });
+
+    const hwMultiDelegationAccount = {
+      ...multiDelegationAccount,
+      account: createHardwareAccount(),
+    };
+
+    it('HW: device confirms, submit succeeds → emits hwSigningStarted then migrate', () => {
+      const deps = createDepsNeedingVoteDelegation();
+
+      const hwSignTxSuccess: typeof signTx = () => () => {
+        const started: SignTxEmission = {
+          type: 'action',
+          action: actions.migrateMultiDelegation.hwSigningStarted(),
+        };
+        const signed: SignTxEmission = {
+          type: 'signed',
+          result: {
+            tx: createMockTx(),
+            chainId,
+            hasCollateral: false,
+            accountId,
+            accountAddresses: [],
+            accountUtxos: [],
+          },
+        };
+        return of(started, signed);
+      };
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: hwSignTxSuccess,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  hwMultiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(deps.cardanoProvider.submitTx).toHaveBeenCalled();
+            expect(emissions).toHaveLength(2);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.hwSigningStarted(),
+            );
+            expect(emissions[1]).toEqual(
+              actions.migrateMultiDelegation.migrate(hwMultiDelegationAccount),
+            );
+          },
+        }),
+      );
+    });
+
+    it('HW: device rejects → emits hwSigningStarted then hwSigningFailed', () => {
+      const deps = createDepsNeedingVoteDelegation();
+      const errorTranslationKeys = {
+        title: 'hw-error.app-not-open.title',
+        subtitle: 'hw-error.app-not-open.subtitle',
+      } as const;
+
+      const hwSignTxRejected: typeof signTx = () => () => {
+        const started: SignTxEmission = {
+          type: 'action',
+          action: actions.migrateMultiDelegation.hwSigningStarted(),
+        };
+        const failed: SignTxEmission = {
+          type: 'action',
+          action: actions.migrateMultiDelegation.hwSigningFailed({
+            errorTranslationKeys,
+          }),
+        };
+        return of(started, failed);
+      };
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: hwSignTxRejected,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  hwMultiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(deps.cardanoProvider.submitTx).not.toHaveBeenCalled();
+            expect(emissions).toHaveLength(2);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.hwSigningStarted(),
+            );
+            expect(emissions[1]).toEqual(
+              actions.migrateMultiDelegation.hwSigningFailed({
+                errorTranslationKeys,
+              }),
+            );
+          },
+        }),
+      );
+    });
+
+    it('HW: device confirms but submit fails → emits hwSigningStarted then reset', () => {
+      const deps = createDepsNeedingVoteDelegation();
+      deps.cardanoProvider.submitTx.mockReturnValue(
+        of(Err(new ProviderError(ProviderFailure.Unhealthy))),
+      );
+
+      const hwSignTxSuccess: typeof signTx = () => () => {
+        const started: SignTxEmission = {
+          type: 'action',
+          action: actions.migrateMultiDelegation.hwSigningStarted(),
+        };
+        const signed: SignTxEmission = {
+          type: 'signed',
+          result: {
+            tx: createMockTx(),
+            chainId,
+            hasCollateral: false,
+            accountId,
+            accountAddresses: [],
+            accountUtxos: [],
+          },
+        };
+        return of(started, signed);
+      };
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: hwSignTxSuccess,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  hwMultiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(deps.cardanoProvider.submitTx).toHaveBeenCalled();
+            expect(deps.logger.warn).toHaveBeenCalledWith(
+              expect.stringContaining('submit vote delegation'),
+            );
+            expect(emissions).toHaveLength(2);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.hwSigningStarted(),
+            );
+            expect(emissions[1]).toEqual(
+              actions.migrateMultiDelegation.reset(),
+            );
+          },
+        }),
+      );
+    });
+
+    it('returns EMPTY when reward account info fetch fails', () => {
+      const deps = createPrepareVoteDelegationDependencies();
+      const providerError = new ProviderError(ProviderFailure.Unhealthy);
+      deps.cardanoProvider.getRewardAccountInfo.mockReturnValue(
+        of(Err(providerError)),
+      );
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: mockSignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(emissions).toHaveLength(0);
+            expect(deps.logger.error).toHaveBeenCalledWith(
+              expect.stringContaining('vote delegation'),
+              providerError,
+            );
+          },
+        }),
+      );
+    });
+
+    const needsVoteDelegationAccountInfo: RewardAccountInfo = {
+      isActive: true,
+      isRegistered: true,
+      // No drepId — needs vote delegation
+      rewardsSum: BigNumber(100_000_000n),
+      withdrawableAmount: BigNumber(50_000_000n),
+      controlledAmount: BigNumber(500_000_000n),
+    };
+
+    const createDepsNeedingVoteDelegation = () => {
+      const deps = createPrepareVoteDelegationDependencies();
+      let getRewardAccountInfoCallCount = 0;
+      deps.cardanoProvider.getRewardAccountInfo.mockImplementation(() => {
+        getRewardAccountInfoCallCount++;
+        // First call: no drepId (initial check + first poll)
+        // Later calls: drepId set (poll succeeds)
+        if (getRewardAccountInfoCallCount <= 2) {
+          return of(Ok(needsVoteDelegationAccountInfo));
+        }
+        return of(
+          Ok({ ...needsVoteDelegationAccountInfo, drepId: 'drep1abc' }),
+        );
+      });
+      return deps;
+    };
+
+    it('builds, signs, submits vote delegation tx, then dispatches migrate', () => {
+      const deps = createDepsNeedingVoteDelegation();
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: mockSignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            // Submitted
+            expect(deps.cardanoProvider.submitTx).toHaveBeenCalled();
+            // Emitted migrate action
+            expect(emissions).toHaveLength(1);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.migrate(multiDelegationAccount),
+            );
+          },
+        }),
+      );
+    });
+
+    it('dispatches reset when vote delegation tx submission fails', () => {
+      const deps = createDepsNeedingVoteDelegation();
+      deps.cardanoProvider.submitTx.mockReturnValue(
+        of(Err(new ProviderError(ProviderFailure.Unhealthy))),
+      );
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: mockSignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(deps.cardanoProvider.submitTx).toHaveBeenCalled();
+            expect(deps.logger.warn).toHaveBeenCalledWith(
+              expect.stringContaining('submit vote delegation'),
+            );
+            expect(emissions).toHaveLength(1);
+            expect(emissions[0]).toEqual(
+              actions.migrateMultiDelegation.reset(),
+            );
+          },
+        }),
+      );
+    });
+
+    it('does not submit when signTxFn returns EMPTY', () => {
+      const deps = createDepsNeedingVoteDelegation();
+      const emptySignTxFunction: typeof signTx = () => () => EMPTY;
+
+      testSideEffect(
+        makePrepareVoteDelegation({
+          buildVoteDelegationTxFn: mockBuildVoteDelegationTxFunction,
+          signTxFn: emptySignTxFunction,
+        }),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            migrateMultiDelegation: {
+              startMigration$: cold('-a', {
+                a: actions.migrateMultiDelegation.startMigration(
+                  multiDelegationAccount,
+                ),
+              }),
+            },
+          },
+          stateObservables: createMockStateObservables(
+            cold as unknown as RunHelpers['hot'],
+          ),
+          dependencies: deps as never,
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(a => emissions.push(a));
+            flush();
+
+            expect(deps.cardanoProvider.submitTx).not.toHaveBeenCalled();
+            expect(emissions).toHaveLength(0);
+          },
+        }),
+      );
     });
   });
 });

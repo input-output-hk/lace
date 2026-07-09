@@ -1,26 +1,31 @@
-import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
+import { ActivitiesPaginationFailureId } from '@lace-contract/activities';
+import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import { AccountId } from '@lace-contract/wallet-repo';
-import unionBy from 'lodash/unionBy';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
+import { retryBackoff } from 'backoff-rxjs';
 import {
-  concatMap,
   EMPTY,
+  concat,
+  concatMap,
   from,
-  interval,
   map,
+  merge,
   mergeMap,
   of,
-  concat,
   catchError,
   withLatestFrom,
-  switchMap,
   filter,
   combineLatest,
 } from 'rxjs';
 
 import { getAccountAddresses } from '../helpers';
 
+const hasLoadedOldestEntry = (history: {
+  hasLoadedOldestEntry: boolean;
+}): boolean => history.hasLoadedOldestEntry;
+
 import type {
-  Action,
+  CardanoContextAction,
   ActionCreators,
   Selectors,
   SideEffect,
@@ -34,7 +39,6 @@ import type {
   StateObservables,
 } from '@lace-contract/module';
 import type { AccountSyncStatus } from '@lace-contract/sync';
-import type { Milliseconds } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
 export const createTrackAccountTransactionHistory =
@@ -51,8 +55,8 @@ export const createTrackAccountTransactionHistory =
   ): SideEffect =>
   (
     _,
-    { addresses, cardanoContext },
-    { actions, cardanoProvider: { getAddressTransactionHistory }, logger },
+    { addresses, cardanoContext, failures: { selectFailureById$ } },
+    { actions, cardanoProvider: { getAddressTransactionHistory } },
   ) =>
     sourceObservable.pipe(
       withLatestFrom(
@@ -60,9 +64,7 @@ export const createTrackAccountTransactionHistory =
         cardanoContext.selectAccountTransactionHistory$,
         cardanoContext.selectChainId$.pipe(filter(Boolean)),
       ),
-      // Process emissions sequentially. concatMap queues instead of dropping,
-      // so all accounts emitted synchronously by getPollTransactionsObservable
-      // are processed (exhaustMap would only process the first and drop the rest).
+      // Uses concatMap to ensure all accounts are polled sequentially without dropping any.
       concatMap(
         ([
           {
@@ -81,141 +83,142 @@ export const createTrackAccountTransactionHistory =
 
           const accountAddressesHistories =
             allAccountsAddressesHistories[accountId] ?? {};
+          const failureId = ActivitiesPaginationFailureId(accountId);
 
-          const fetchObservable = fetchAddressTransactionHistories({
+          return fetchAddressTransactionHistories({
             addresses: accountAddresses,
             addressesHistories: accountAddressesHistories,
             chainId,
             numberOfItems,
             getAddressTransactionHistory,
           }).pipe(
-            mergeMap(result =>
-              from(
-                result.mapOrElse<Action[]>(
-                  errorDetails => [
-                    actions.cardanoContext.getAddressTransactionHistoryFailed({
-                      accountId,
-                      address: errorDetails.address,
-                      failure: errorDetails.error.reason,
-                    }),
-                  ],
-                  addressHistories => [
-                    actions.cardanoContext.setAccountTransactionHistory({
-                      accountId,
-                      addressHistories,
-                    }),
-                    ...(addressHistories.every(
-                      history => history.hasLoadedOldestEntry,
-                    )
-                      ? [
-                          actions.activities.setHasLoadedOldestEntry({
-                            accountId,
-                            hasLoadedOldestEntry: true,
-                          }),
-                        ]
-                      : []),
-                  ],
+            map(result => {
+              if (result.isErr()) throw result.unwrapErr().error;
+              return result.unwrap();
+            }),
+            retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+            mergeMap(addressHistories =>
+              concat(
+                from<CardanoContextAction[]>([
+                  actions.cardanoContext.setAccountTransactionHistory({
+                    accountId,
+                    addressHistories,
+                  }),
+                  ...(addressHistories.every(hasLoadedOldestEntry)
+                    ? [
+                        actions.activities.setHasLoadedOldestEntry({
+                          accountId,
+                          hasLoadedOldestEntry: true,
+                        }),
+                      ]
+                    : []),
+                ]),
+                of(failureId).pipe(
+                  autoDismissFailureOnSuccess(selectFailureById$),
                 ),
               ),
             ),
-            catchError(error => {
-              logger.error(
-                'Failed to fetch address transaction histories',
-                error,
-              );
-              return EMPTY;
-            }),
-          );
-
-          return concat(
-            fetchObservable,
-            of(actions.activities.pollNewerAccountsActivities()),
+            catchError(() =>
+              of(
+                actions.failures.addFailure({
+                  failureId,
+                  message: 'activities.error.pagination-failed',
+                  retryAction: actions.activities.retryPagination({
+                    accountId,
+                  }),
+                }),
+              ),
+            ),
           );
         },
       ),
     );
 
-export const getLoadOlderActivitiesObservable = (
-  activities: StateObservables<Selectors>['activities'],
-  cardanoContext: StateObservables<Selectors>['cardanoContext'],
-  sync: StateObservables<Selectors>['sync'],
-) =>
-  from(
-    // Re-trigger whenever the desired amount or any account sync status changes
-    combineLatest([
-      activities.selectDesiredLoadedActivitiesCountPerAccount$,
-      sync.selectSyncStatusByAccount$,
-    ]),
-  )
-    .pipe(
-      mergeMap(
-        ([desiredLoadedActivitiesCountPerAccount, syncStatusByAccount]) =>
-          from(
-            Object.entries(desiredLoadedActivitiesCountPerAccount).map<
-              [AccountId, number, AccountSyncStatus]
-            >(([accountId, desiredActivities]) => [
-              AccountId(accountId),
-              desiredActivities,
-              syncStatusByAccount[AccountId(accountId)],
-            ]),
-          ),
-      ),
-    )
-    .pipe(
-      withLatestFrom(
-        cardanoContext.selectCombinedTransactionHistory$,
-        activities.selectAllMap$,
-      ),
-      filter(
-        ([
-          [accountId, desiredLoadedActivitiesCount, accountSyncStatus],
-          combinedTransactionHistory,
-          allActivities,
-        ]) =>
-          // Make sure the account has synced at least once
-          !!accountSyncStatus?.lastSuccessfulSync &&
-          // Only continue if we are missing activity history items
-          (combinedTransactionHistory[accountId]?.length ?? 0) <
-            desiredLoadedActivitiesCount &&
-          // Only continue if we don't have enough activities loaded yet
-          (allActivities[accountId]?.length ?? 0) <
-            desiredLoadedActivitiesCount,
-      ),
-      map(
-        ([
-          [accountId, desiredLoadedActivitiesCount],
-          combinedTransactionHistory,
-        ]) => ({
-          payload: {
-            accountId: AccountId(accountId),
-            numberOfItems:
-              desiredLoadedActivitiesCount -
-              (combinedTransactionHistory[AccountId(accountId)]?.length ?? 0),
-          },
-        }),
-      ),
-    );
+export const getLoadOlderActivitiesObservable = ({
+  actionObservables,
+  activities,
+  cardanoContext,
+  sync,
+}: {
+  actionObservables: ActionObservables<ActionCreators>;
+  activities: StateObservables<Selectors>['activities'];
+  cardanoContext: StateObservables<Selectors>['cardanoContext'];
+  sync: StateObservables<Selectors>['sync'];
+}) => {
+  type AccountTrigger = [AccountId, number, AccountSyncStatus];
 
-export const getPollTransactionsObservable = (
-  actionObservables: ActionObservables<ActionCreators>,
-  addresses: StateObservables<Selectors>['addresses'],
-  pollingIntervalSeconds: Milliseconds,
-) =>
-  from(actionObservables.activities.pollNewerAccountsActivities$).pipe(
-    switchMap(() =>
-      interval(pollingIntervalSeconds).pipe(
-        withLatestFrom(addresses.selectAllAddresses$),
-        filter(([_, addresses]) => addresses.length > 0),
-        map(([_, addresses]) =>
-          unionBy(addresses, address => address.accountId),
-        ),
-        mergeMap(addresses => from(addresses)),
-        map(address => ({
-          payload: {
-            accountId: address.accountId,
-            numberOfItems: ACTIVITIES_PER_PAGE,
-          },
-        })),
+  const stateTriggered$ = combineLatest([
+    activities.selectDesiredLoadedActivitiesCountPerAccount$,
+    sync.selectSyncStatusByAccount$,
+  ]).pipe(
+    mergeMap(([desiredLoadedActivitiesCountPerAccount, syncStatusByAccount]) =>
+      from(
+        Object.entries(
+          desiredLoadedActivitiesCountPerAccount,
+        ).map<AccountTrigger>(([accountId, desiredActivities]) => [
+          AccountId(accountId),
+          desiredActivities,
+          syncStatusByAccount[AccountId(accountId)],
+        ]),
       ),
     ),
   );
+
+  // Manual retry after pagination failure: selectors are ref-equal after a
+  // failed fetch (desired > loaded guard keeps state unchanged), so we
+  // re-emit an explicit trigger for the target account.
+  const manualRetryTriggered$ =
+    actionObservables.activities.retryPagination$.pipe(
+      withLatestFrom(
+        activities.selectDesiredLoadedActivitiesCountPerAccount$,
+        sync.selectSyncStatusByAccount$,
+      ),
+      map(
+        ([
+          {
+            payload: { accountId },
+          },
+          desiredLoadedActivitiesCountPerAccount,
+          syncStatusByAccount,
+        ]): AccountTrigger => [
+          accountId,
+          desiredLoadedActivitiesCountPerAccount[accountId] ?? 0,
+          syncStatusByAccount[accountId],
+        ],
+      ),
+    );
+
+  return merge(stateTriggered$, manualRetryTriggered$).pipe(
+    withLatestFrom(
+      cardanoContext.selectCombinedTransactionHistory$,
+      activities.selectAllMap$,
+    ),
+    filter(
+      ([
+        [accountId, desiredLoadedActivitiesCount, accountSyncStatus],
+        combinedTransactionHistory,
+        allActivities,
+      ]) =>
+        // Make sure the account has synced at least once
+        !!accountSyncStatus?.lastSuccessfulSync &&
+        // Only continue if we are missing activity history items
+        (combinedTransactionHistory[accountId]?.length ?? 0) <
+          desiredLoadedActivitiesCount &&
+        // Only continue if we don't have enough activities loaded yet
+        (allActivities[accountId]?.length ?? 0) < desiredLoadedActivitiesCount,
+    ),
+    map(
+      ([
+        [accountId, desiredLoadedActivitiesCount],
+        combinedTransactionHistory,
+      ]) => ({
+        payload: {
+          accountId: AccountId(accountId),
+          numberOfItems:
+            desiredLoadedActivitiesCount -
+            (combinedTransactionHistory[AccountId(accountId)]?.length ?? 0),
+        },
+      }),
+    ),
+  );
+};

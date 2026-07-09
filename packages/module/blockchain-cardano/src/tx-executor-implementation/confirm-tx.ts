@@ -16,17 +16,24 @@ import { catchError, map, of, switchMap } from 'rxjs';
 import { mergePreExistingVkeys } from './merge-pre-existing-vkeys';
 
 import type { AddressType } from '@cardano-sdk/key-management';
-import type { CardanoTransactionSignerContext } from '@lace-contract/cardano-context';
+import type {
+  AccountUtxoMap,
+  CardanoTransactionSignerContext,
+} from '@lace-contract/cardano-context';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { SideEffectDependencies } from '@lace-contract/module';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
+import type { Observable } from 'rxjs';
 
-export const makeConfirmTx = ({
-  txExecutorCardano: { cardanoAddresses$, cardanoAccountUtxos$ },
-  accessAuthSecret,
-  authenticate,
-  signerFactory,
-}: SideEffectDependencies): TxExecutorImplementation['confirmTx'] => {
+export const makeConfirmTx = (
+  {
+    txExecutorCardano: { cardanoAddresses$ },
+    accessAuthSecret,
+    authenticate,
+    signerFactory,
+  }: SideEffectDependencies,
+  cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
+): TxExecutorImplementation['confirmTx'] => {
   return ({ serializedTx, wallet, accountId }) => {
     const auth = signerAuthFromPrompt(
       { accessAuthSecret, authenticate },
@@ -38,8 +45,8 @@ export const makeConfirmTx = ({
     );
 
     return cardanoAddresses$.pipe(
-      blockingWithLatestFrom(cardanoAccountUtxos$),
-      switchMap(([cardanoAddresses, cardanoAccountUtxos]) => {
+      blockingWithLatestFrom(cardanoAvailableAccountUtxos$),
+      switchMap(([cardanoAddresses, cardanoAvailableAccountUtxos]) => {
         // TODO: We need account known addresses here.
         const knownAddresses = cardanoAddresses
           .filter(
@@ -58,7 +65,7 @@ export const makeConfirmTx = ({
             stakeKeyDerivationPath: addr.data?.stakeKeyDerivationPath,
           }));
 
-        const availableUtxo = cardanoAccountUtxos[accountId] ?? [];
+        const availableUtxo = cardanoAvailableAccountUtxos[accountId] ?? [];
 
         const context: CardanoTransactionSignerContext = {
           wallet,

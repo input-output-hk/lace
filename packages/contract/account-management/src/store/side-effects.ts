@@ -4,12 +4,17 @@ import { createSecureStorePasswordManager } from '@lace-contract/authentication-
 import {
   type AnyWallet,
   type HardwareWallet,
+  HardwareWalletId,
   type InMemoryWallet,
   WalletId,
   WalletType,
+  findWalletSharingIdentity,
   isTrezorWallet,
+  stampAccountsOnboardedAt,
+  stampWalletOnboardedAt,
 } from '@lace-contract/wallet-repo';
-import { classifyHardwareError, DeviceDescriptor } from '@lace-lib/util-hw';
+import { classifyHardwareError } from '@lace-lib/util-hw';
+import { toItemsByBlockchainName } from '@lace-lib/util-store';
 import { ByteArray, HexBytes } from '@lace-sdk/util';
 import {
   defer,
@@ -35,6 +40,7 @@ import {
 
 import type { SideEffect } from '..';
 import type { AddInMemoryWalletAccountProps } from './slice';
+import type { SheetRoutes, StackRoutes, TabRoutes } from '../routes';
 import type { HexBlob } from '@cardano-sdk/util';
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
@@ -47,9 +53,9 @@ import type {
 import type {
   HardwareWalletAccount,
   WalletEntity,
+  WalletIdentity,
 } from '@lace-contract/wallet-repo';
-import type { SheetRoutes, StackRoutes, TabRoutes } from '@lace-lib/navigation';
-import type { BlockchainName } from '@lace-lib/util-store';
+import type { BlockchainName, ByBlockchainName } from '@lace-lib/util-store';
 import type { Action } from '@reduxjs/toolkit';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
@@ -343,11 +349,18 @@ export const createInMemoryWalletAddAccountSideEffect =
                   throw new Error('No new accounts created');
                 }
 
+                const stampedAccounts = [
+                  ...updatedWallet.accounts.slice(0, wallet.accounts.length),
+                  ...stampAccountsOnboardedAt(
+                    updatedWallet.accounts.slice(wallet.accounts.length),
+                  ),
+                ];
+
                 return from([
                   actions.wallets.updateWallet({
                     id: wallet.walletId,
                     changes: {
-                      accounts: updatedWallet.accounts,
+                      accounts: stampedAccounts,
                       blockchainSpecific: updatedWallet.blockchainSpecific,
                     },
                   }),
@@ -355,6 +368,7 @@ export const createInMemoryWalletAddAccountSideEffect =
                     walletId: wallet.walletId,
                     blockchain: context.blockchain,
                     accountIndex: context.accountIndex,
+                    walletType: wallet.type,
                     shouldSuppressAccountStatus:
                       context.shouldSuppressAccountStatus,
                   }),
@@ -452,7 +466,7 @@ export const createAddAccountSideEffect =
             // Parse device from usb-hw-* wallet ID. Null for v1 wallets
             // with legacy ID format — the HW connector resolves those
             // from navigator.usb.getDevices().
-            const device = DeviceDescriptor.parse(walletId) ?? undefined;
+            const device = HardwareWalletId.parse(walletId) ?? undefined;
 
             const connector = hwConnectors.find(
               c => c.walletType === wallet.type,
@@ -489,13 +503,17 @@ export const createAddAccountSideEffect =
                     actions.wallets.updateWallet({
                       id: walletId,
                       changes: {
-                        accounts: [...wallet.accounts, ...newAccounts],
+                        accounts: [
+                          ...wallet.accounts,
+                          ...stampAccountsOnboardedAt(newAccounts),
+                        ],
                       } as Partial<HardwareWallet>,
                     }),
                     actions.accountManagement.accountAdded({
                       walletId,
                       blockchain,
                       accountIndex,
+                      walletType: wallet.type,
                     }),
                   ]),
                 ),
@@ -525,6 +543,19 @@ export const createAddAccountSideEffect =
               {
                 walletId,
               },
+            );
+            return conditionalFailure(
+              !!shouldSuppressAccountStatus,
+              actions.accountManagement.attemptAddAccountFailed({ walletId }),
+            );
+
+          case WalletType.LazyInMemory:
+            // Lazy in-memory wallets are managed externally (mnemonic fetched
+            // per sign call from a remote key-management service); Lace owns
+            // no seed material to derive additional accounts from.
+            logger.warn(
+              'Lazy in-memory wallet account addition is not supported',
+              { walletId },
             );
             return conditionalFailure(
               !!shouldSuppressAccountStatus,
@@ -602,7 +633,10 @@ export const createAccountAddFailedSheetSideEffect: SideEffect = (
  * or use any pending password — the user is already authenticated.
  */
 export const createHardwareWalletCreationSideEffect =
-  (hwConnectors: ObservableHwWalletConnector[]): SideEffect =>
+  (
+    hwConnectors: ObservableHwWalletConnector[],
+    identityByBlockchain: ByBlockchainName<WalletIdentity>,
+  ): SideEffect =>
   (
     { accountManagement: { attemptCreateHardwareWallet$ } },
     { wallets: { selectAll$ } },
@@ -633,19 +667,34 @@ export const createHardwareWalletCreationSideEffect =
               derivationType: payload.derivationType,
             })
             .pipe(
-              mergeMap(entity =>
-                from([
-                  actions.wallets.addWallet({
-                    ...entity,
-                    metadata: { ...entity.metadata, order: wallets.length },
-                  }),
+              mergeMap(entity => {
+                if (
+                  findWalletSharingIdentity(
+                    entity,
+                    wallets,
+                    identityByBlockchain,
+                  )
+                ) {
+                  return of(
+                    actions.accountManagement.hardwareWalletCreationFailed({
+                      reason: 'already-added',
+                    }),
+                  );
+                }
+                return from([
+                  actions.wallets.addWallet(
+                    stampWalletOnboardedAt({
+                      ...entity,
+                      metadata: { ...entity.metadata, order: wallets.length },
+                    }),
+                  ),
                   actions.accountManagement.setLoading(false),
                   actions.views.setActiveSheetPage({
                     route: SuccessCreateNewWalletRoute,
                     params: { walletId: entity.walletId },
                   }),
-                ]),
-              ),
+                ]);
+              }),
               catchError(error => {
                 const category = classifyHardwareError(error);
                 const message = `Hardware wallet creation failed: ${category}`;
@@ -724,7 +773,9 @@ export const createWalletCreationSideEffect =
                     ? RestoreWalletSuccessRoute
                     : SuccessCreateNewWalletRoute;
                   return from([
-                    actions.wallets.addWallet(newWallet),
+                    actions.wallets.addWallet(
+                      stampWalletOnboardedAt(newWallet),
+                    ),
                     actions.accountManagement.setLoading(false),
                     actions.views.setActiveSheetPage({
                       route: successRoute,
@@ -924,6 +975,9 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
 
   const hwConnectors =
     (await loadModules('addons.loadHwWalletConnector')) ?? [];
+  const identityByBlockchain = toItemsByBlockchainName(
+    await loadModules('addons.loadWalletIdentity'),
+  );
   const observableHwConnectors: ObservableHwWalletConnector[] =
     hwConnectors.map(c => ({
       id: c.id,
@@ -945,7 +999,10 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
           createRemoveAccountSideEffect,
           createRemoveAccountNavigationSideEffect,
           createWalletCreationSideEffect(inMemoryWalletIntegrations),
-          createHardwareWalletCreationSideEffect(observableHwConnectors),
+          createHardwareWalletCreationSideEffect(
+            observableHwConnectors,
+            identityByBlockchain,
+          ),
           createRemoveWalletSideEffect,
           createRemoveWalletNavigationSideEffect,
         ].map(sideEffect =>

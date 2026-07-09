@@ -16,7 +16,15 @@ export type CreateWalletEntityDependencies = {
 export type CreateWalletEntityProps = {
   walletName: string;
   blockchains: BlockchainName[];
-  password: AuthSecret;
+  /**
+   * When provided, the factory produces an {@link InMemoryWallet} with the
+   * recovery phrase encrypted under this password.
+   *
+   * When omitted, the factory produces a {@link LazyInMemoryWallet}: only
+   * public material is derived, the seed is never persisted, and signing
+   * relies on an external module to re-supply the mnemonic on demand.
+   */
+  password?: AuthSecret;
   order: number;
   recoveryPhrase: string[];
 };

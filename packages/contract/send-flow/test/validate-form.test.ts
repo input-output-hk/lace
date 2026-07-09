@@ -15,7 +15,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { humanMinimumAmount, validateForm } from '../src/validate-form';
 
-import type { SendFlowAddressValidator } from '../src';
+import type {
+  ChainMinimumAmountTokenValidator,
+  SendFlowAddressValidator,
+} from '../src';
 import type { AddressValidationResult, StateOpen } from '../src/types';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -58,16 +61,26 @@ const validForm: StateOpen['form'] = {
   ],
 };
 
+const cardanoChainMinimumAmountTokenValidator: ChainMinimumAmountTokenValidator =
+  {
+    blockchainName: 'Cardano',
+    hasChainMinimumAmount: token => token.tokenId === TokenId('lovelace'),
+    formatMinimumAmount: minimumAmount =>
+      (Number(minimumAmount) / 1_000_000).toString(),
+  };
+
 const runFormValidator = async ({
   validateAddress = () => of(None),
   // cast is required because DeepPartial transforms unknown into {}
   formPartial = validForm as DeepPartial<StateOpen['form']>,
   addressAliasResolvers = [],
+  chainMinimumAmountTokenValidator = null,
   minimumAmount = BigNumber(1n),
 }: {
   formPartial?: DeepPartial<StateOpen['form']>;
   validateAddress?: SendFlowAddressValidator['validateAddress'] | null;
   addressAliasResolvers?: AddressAliasResolver[];
+  chainMinimumAmountTokenValidator?: ChainMinimumAmountTokenValidator | null;
   minimumAmount?: BigNumber;
 } = {}) =>
   firstValueFrom(
@@ -80,6 +93,7 @@ const runFormValidator = async ({
         : null,
       addressAliasResolvers,
       blockchainSpecificData: {},
+      chainMinimumAmountTokenValidator,
       form: produce(validForm, draft => merge(draft, formPartial)),
       logger: dummyLogger,
       minimumAmount,
@@ -264,9 +278,11 @@ describe('send-flow validateForm', () => {
       expect(validationResult[1].error).toBe(null);
     });
 
-    it('uses chain minimumAmount for lovelace and surfaces ADA in the error argument', async () => {
+    it('uses chain minimumAmount from validator and surfaces formatted error argument (Cardano)', async () => {
       const chainMinLovelace = BigNumber(840000n);
       const validationResult = await runFormValidator({
+        chainMinimumAmountTokenValidator:
+          cardanoChainMinimumAmountTokenValidator,
         minimumAmount: chainMinLovelace,
         formPartial: {
           tokenTransfers: [
@@ -291,9 +307,11 @@ describe('send-flow validateForm', () => {
       });
     });
 
-    it('returns null for lovelace when amount meets chain minimumAmount', async () => {
+    it('returns null for chain-minimum token when amount meets minimum (Cardano)', async () => {
       const chainMinLovelace = BigNumber(840000n);
       const validationResult = await runFormValidator({
+        chainMinimumAmountTokenValidator:
+          cardanoChainMinimumAmountTokenValidator,
         minimumAmount: chainMinLovelace,
         formPartial: {
           tokenTransfers: [
@@ -313,6 +331,94 @@ describe('send-flow validateForm', () => {
       });
 
       expect(validationResult[1].error).toBe(null);
+    });
+
+    it('surfaces "..." when minimumAmount is not yet initialized for a chain-minimum token', async () => {
+      const validationResult = await runFormValidator({
+        chainMinimumAmountTokenValidator:
+          cardanoChainMinimumAmountTokenValidator,
+        minimumAmount: BigNumber(-1n),
+        formPartial: {
+          tokenTransfers: [
+            {
+              amount: { value: BigNumber(0n) },
+              token: {
+                value: {
+                  tokenId: TokenId('lovelace'),
+                  available: BigNumber(10_000_000n),
+                  decimals: 6,
+                },
+              },
+            },
+          ],
+        },
+        validateAddress: vi.fn().mockReturnValueOnce(of(None)),
+      });
+
+      expect(validationResult[1].error).toEqual({
+        error: 'less-than-minimum',
+        argument: '...',
+      });
+    });
+
+    it('uses chain minimumAmount from validator and formats to BTC (Bitcoin)', async () => {
+      const bitcoinChainMinimumAmountTokenValidator: ChainMinimumAmountTokenValidator =
+        {
+          blockchainName: 'Bitcoin',
+          hasChainMinimumAmount: token => token.tokenId === TokenId('bitcoin'),
+          formatMinimumAmount: minimumAmount =>
+            (Number(minimumAmount) / 100_000_000).toString(),
+        };
+      const dustThresholdSats = BigNumber(546n);
+      const validationResult = await runFormValidator({
+        chainMinimumAmountTokenValidator:
+          bitcoinChainMinimumAmountTokenValidator,
+        minimumAmount: dustThresholdSats,
+        formPartial: {
+          tokenTransfers: [
+            {
+              amount: { value: BigNumber(100n) },
+              token: {
+                value: {
+                  tokenId: TokenId('bitcoin'),
+                  available: BigNumber(1_000_000n),
+                  decimals: 8,
+                },
+              },
+            },
+          ],
+        },
+        validateAddress: vi.fn().mockReturnValueOnce(of(None)),
+      });
+
+      expect(validationResult[1].error).toEqual({
+        error: 'less-than-minimum',
+        argument: (Number(dustThresholdSats) / 100_000_000).toString(),
+      });
+    });
+
+    it('falls back to humanMinimumAmount when no chain-minimum validator is provided', async () => {
+      const validationResult = await runFormValidator({
+        chainMinimumAmountTokenValidator: null,
+        formPartial: {
+          tokenTransfers: [
+            {
+              amount: { value: BigNumber(0n) },
+              token: {
+                value: {
+                  tokenId: TokenId('lovelace'),
+                  decimals: 6,
+                },
+              },
+            },
+          ],
+        },
+      });
+
+      expect(validationResult[1].error).toEqual({
+        error: 'less-than-minimum',
+        argument: humanMinimumAmount(6),
+      });
     });
 
     it('returns null when amount is dirty: false (untouched field is not validated)', async () => {

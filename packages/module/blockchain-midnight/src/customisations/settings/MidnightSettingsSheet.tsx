@@ -5,20 +5,12 @@ import {
   RadioButton,
   Row,
   Sheet,
-  SheetFooter,
-  SheetHeader,
   spacing,
   Text,
-  useFooterHeight,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useMidnightSettings } from '../../hooks';
@@ -27,6 +19,7 @@ import type { ProveServerOption } from '../../hooks/useMidnightSettings';
 
 export const MidnightSettingsSheet = () => {
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const styles = useStyles();
 
   const {
@@ -51,7 +44,7 @@ export const MidnightSettingsSheet = () => {
   const hasSaveInitiated = useRef(false);
 
   const handleClose = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   // Call openSettings on mount to transition state machine to 'Open'
@@ -90,67 +83,65 @@ export const MidnightSettingsSheet = () => {
     return t('midnight.network-config.proof-server-option-tooltip.remote');
   };
 
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={t('v2.pages.midnight-settings.title')}
+          testID="midnight-settings-sheet-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('settings.configure-midnight.drawer.saveBtnLabel'),
+            onPress: handleSave,
+            disabled: isSaving || proveServerOptions.length <= 1,
+            testID: 'save-configuration-button',
+          }}
+        />
+      ),
+    });
+  }, [navigation, t, handleSave, isSaving, proveServerOptions.length]);
 
   return (
-    <>
-      <SheetHeader
-        title={t('v2.pages.midnight-settings.title')}
-        leftIconOnPress={handleClose}
-        testID="midnight-settings-sheet-header"
-      />
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={scrollContainerStyle}>
-        <Column gap={spacing.L}>
-          <Text.S style={styles.secondaryText}>
-            {t('v2.pages.midnight-settings.proof-server.title')}
-          </Text.S>
+    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+      <Column gap={spacing.L}>
+        <Text.S style={styles.secondaryText}>
+          {t('v2.pages.midnight-settings.proof-server.title')}
+        </Text.S>
 
-          {proveServerOptions.map(option => (
-            <Row key={option.url} alignItems="flex-start" gap={spacing.M}>
-              <RadioButton
-                isChecked={selectedProofServer === option.url}
-                isDisabled={isSaving}
-                onRadioValueChange={() => {
-                  setSelectedProofServer(option.url);
-                }}
-                testID={`proof-server-${option.variant}-radio`}
-              />
-              <Column gap={spacing.XS} style={styles.optionContent}>
-                <Text.S testID={`proof-server-${option.variant}-title`}>
-                  {getOptionLabel(option)}
-                </Text.S>
-                <Text.XS style={styles.secondaryText}>{option.url}</Text.XS>
-                <Text.XS style={styles.secondaryText}>
-                  {getOptionDescription(option)}
-                </Text.XS>
-              </Column>
-            </Row>
-          ))}
-          <Column gap={spacing.S}>
-            <Text.S>{t('midnight.network-config.node-address')}</Text.S>
-            <Text.XS>{nodeAddresses}</Text.XS>
-          </Column>
-          <Column gap={spacing.S}>
-            <Text.S>{t('midnight.network-config.indexer-address')}</Text.S>
-            <Text.XS>{indexerAddress}</Text.XS>
-          </Column>
+        {proveServerOptions.map(option => (
+          <Row key={option.url} alignItems="flex-start" gap={spacing.M}>
+            <RadioButton
+              isChecked={selectedProofServer === option.url}
+              isDisabled={isSaving}
+              onRadioValueChange={() => {
+                setSelectedProofServer(option.url);
+              }}
+              testID={`proof-server-${option.variant}-radio`}
+            />
+            <Column gap={spacing.XS} style={styles.optionContent}>
+              <Text.S testID={`proof-server-${option.variant}-title`}>
+                {getOptionLabel(option)}
+              </Text.S>
+              <Text.XS style={styles.secondaryText}>{option.url}</Text.XS>
+              <Text.XS style={styles.secondaryText}>
+                {getOptionDescription(option)}
+              </Text.XS>
+            </Column>
+          </Row>
+        ))}
+        <Column gap={spacing.S}>
+          <Text.S>{t('midnight.network-config.node-address')}</Text.S>
+          <Text.XS>{nodeAddresses}</Text.XS>
         </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('settings.configure-midnight.drawer.saveBtnLabel'),
-          onPress: handleSave,
-          disabled: isSaving || proveServerOptions.length <= 1,
-          testID: 'save-configuration-button',
-        }}
-      />
-    </>
+        <Column gap={spacing.S}>
+          <Text.S>{t('midnight.network-config.indexer-address')}</Text.S>
+          <Text.XS>{indexerAddress}</Text.XS>
+        </Column>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 

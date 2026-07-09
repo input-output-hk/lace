@@ -55,7 +55,7 @@ export const AccountCardMidnightActions = ({
   const shouldShowTitle = showTitle ?? !isExtensionSidePanel;
 
   const handleGenerateDustPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.DustDesignation, {
+    NavigationControls.navigate(SheetRoutes.DustDesignation, {
       accountId: AccountId(accountId),
     });
   }, [accountId]);

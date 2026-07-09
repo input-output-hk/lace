@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, Text as RNText } from 'react-native';
 
 import { getIsDark, type IconName } from '../../../design-system';
@@ -74,8 +74,13 @@ export const Avatar = ({
   }, [chainSymbol, size, beaconSize]);
 
   const imageUri = getImageSource(content)?.uri;
+  const [hasImageError, setHasImageError] = useState(false);
+  useEffect(() => {
+    setHasImageError(false);
+  }, [imageUri]);
 
-  const shouldShowIcon = !imageUri && !content.fallback;
+  const effectiveImageUri = hasImageError ? undefined : imageUri;
+  const shouldShowIcon = !effectiveImageUri && !content.fallback;
 
   const styles = getStyles(size, theme, shieldIconSize);
 
@@ -88,7 +93,7 @@ export const Avatar = ({
       <View style={styles.avatarOnly}>
         <HexagonMask
           size={size}
-          imageUri={imageUri}
+          imageUri={effectiveImageUri}
           fallbackText={content.fallback}
           backgroundColor={theme.background.tertiary}
           textColor={theme.text.primary}
@@ -118,8 +123,14 @@ export const Avatar = ({
     ) : (
       <View style={styles.avatarOnly}>
         <View style={avatarStyles.avatar}>
-          {imageUri ? (
-            <Image style={avatarStyles.image} source={{ uri: imageUri }} />
+          {effectiveImageUri ? (
+            <Image
+              style={avatarStyles.image}
+              source={{ uri: effectiveImageUri }}
+              onError={() => {
+                setHasImageError(true);
+              }}
+            />
           ) : shouldShowIcon ? (
             <Icon name="ImageNotFound" size={imgNotFoundDefaultIconSize} />
           ) : (

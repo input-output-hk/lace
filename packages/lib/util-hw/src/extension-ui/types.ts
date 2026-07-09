@@ -1,4 +1,8 @@
-import type { HardwareDeviceUsbFilter, DerivationType } from '../types';
+import type {
+  DerivationType,
+  HardwareDeviceBleFilter,
+  HardwareDeviceUsbFilter,
+} from '../types';
 import type { HardwareIntegrationId } from '../value-objects/hardware-integration-id.vo';
 
 /** Human-presentable metadata for a supported hardware wallet device. */
@@ -19,6 +23,7 @@ export interface HardwareWalletPickerOption {
   isHwDevice: true;
   device: HardwareWalletDeviceMetadata;
   usbFilters?: HardwareDeviceUsbFilter[];
+  bleFilters?: HardwareDeviceBleFilter[];
   derivationTypes?: DerivationType[];
 }
 

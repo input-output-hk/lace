@@ -1,16 +1,17 @@
+import {
+  CardanoInMemoryDataSigner,
+  CardanoInMemoryTransactionSigner,
+} from '@lace-contract/cardano-context';
 import { WalletType } from '@lace-contract/wallet-repo';
 import { describe, expect, it, vi } from 'vitest';
 
-import { CardanoInMemoryDataSigner } from '../../src/signing/cardano-in-memory-data-signer';
 import { CardanoInMemorySignerFactory } from '../../src/signing/cardano-in-memory-signer-factory';
-import { CardanoInMemoryTransactionSigner } from '../../src/signing/cardano-in-memory-transaction-signer';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type {
   CardanoSignerContext,
   CardanoTransactionSignerContext,
-  CreateCardanoKeyAgent,
 } from '@lace-contract/cardano-context';
 import type { SignerAuth } from '@lace-contract/signer';
 import type {
@@ -61,11 +62,8 @@ const createMockTxContext = (
   utxo: [],
 });
 
-describe('CardanoSignerFactory', () => {
-  const createKeyAgent: CreateCardanoKeyAgent = vi.fn();
-  const factory = new CardanoInMemorySignerFactory({
-    createKeyAgent,
-  });
+describe('CardanoInMemorySignerFactory', () => {
+  const factory = new CardanoInMemorySignerFactory();
 
   describe('canSign', () => {
     it('returns true for InMemory Cardano accounts', () => {
@@ -74,6 +72,14 @@ describe('CardanoSignerFactory', () => {
         blockchainName: 'Cardano',
       } as AnyAccount;
       expect(factory.canSign(account)).toBe(true);
+    });
+
+    it('returns false for LazyInMemory Cardano accounts', () => {
+      const account = {
+        accountType: 'LazyInMemory',
+        blockchainName: 'Cardano',
+      } as AnyAccount;
+      expect(factory.canSign(account)).toBe(false);
     });
 
     it('returns false for non-InMemory account types', () => {

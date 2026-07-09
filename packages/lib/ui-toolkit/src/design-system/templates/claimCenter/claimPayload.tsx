@@ -22,6 +22,10 @@ export interface ClaimPayloadProps {
   onSelectAccount: (index: number) => void;
   onCancel: () => void;
   onSubmit: () => void;
+  /** Optional node rendered between the account dropdown and the claim
+   *  description. Used by the wallet app to surface an inline security-
+   *  alert for a compromised selected account without navigating away. */
+  belowAccountSlot?: React.ReactNode;
 }
 
 export const ClaimPayload = ({
@@ -36,6 +40,7 @@ export const ClaimPayload = ({
   onSelectAccount,
   onCancel,
   onSubmit,
+  belowAccountSlot,
 }: ClaimPayloadProps) => (
   <Column
     justifyContent="space-between"
@@ -48,6 +53,7 @@ export const ClaimPayload = ({
       onSelectItem={onSelectAccount}
       testID="claim-payload-account-dropdown"
     />
+    {belowAccountSlot}
     <Column justifyContent="center" alignItems="center" gap={spacing.M}>
       <Text.L align="center" testID="claim-payload-domain">
         {domain}

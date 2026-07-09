@@ -78,13 +78,13 @@ export const useDappSignRequest = ({
   const handleReject = useCallback(() => {
     hasRespondedRef.current = true;
     dispatchReject();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [dispatchReject]);
 
   const handleCloseResult = useCallback(() => {
     dispatchClearWebViewResponse(requestId);
     dispatchClearPendingRequest();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [dispatchClearWebViewResponse, dispatchClearPendingRequest, requestId]);
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const useDappSignRequest = ({
 
   useEffect(() => {
     if (!pendingRequest && !requestId && !result) {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     }
   }, [pendingRequest, requestId, result]);
 

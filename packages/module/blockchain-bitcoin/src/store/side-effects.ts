@@ -5,6 +5,7 @@ import {
   BitcoinNetwork,
   BitcoinNetworkId,
 } from '@lace-contract/bitcoin-context';
+import { whileActive } from '@lace-contract/wallet-active-state';
 import { BigNumber, Timestamp } from '@lace-sdk/util';
 import {
   combineLatest,
@@ -28,6 +29,8 @@ import {
 import { BITCOIN_TOKEN_METADATA } from '../metadata';
 import { BitcoinWallet, SyncStatus } from '../wallet';
 
+import { computeBitcoinTokenBalances } from './helpers/compute-token-balances';
+
 import type { SideEffect } from '..';
 import type { BitcoinWalletInfo } from '../common';
 import type { SyncStatusUpdate } from '../wallet';
@@ -38,6 +41,7 @@ import type {
   BitcoinBip32AccountProps,
   BitcoinBlockInfo,
   BitcoinFeeMarketProvider,
+  BitcoinInFlightOutpoint,
   BitcoinProvider,
   BitcoinTransactionHistoryEntry,
 } from '@lace-contract/bitcoin-context';
@@ -172,6 +176,30 @@ export const mapBitcoinTxToActivity = (
     timestamp: Timestamp(
       rawTx.timestamp > 0 ? rawTx.timestamp * 1000 : Date.now(),
     ),
+    // Carry the in-flight outpoints for pending txs so coin selection excludes
+    // inputs already spent by an unconfirmed tx. Without this, the wallet-sync
+    // upsert (which dedupes by activityId, last-writer-wins) overwrites the
+    // richer pending activity produced by the submit path and strips its
+    // `consumedInputs`, causing the next build to re-select the spent UTxO
+    // (node rejects with `bad-txns-inputs-missingorspent` or an RBF
+    // "insufficient fee" replacement error). `producedOutputs` is unused by the
+    // Bitcoin in-flight adjustment (unconfirmed outputs are never added to the
+    // spendable set), so it is left empty here.
+    ...(activityType === ActivityType.Pending
+      ? {
+          blockchainSpecific: {
+            Bitcoin: {
+              consumedInputs: rawTx.inputs.map(
+                (input): BitcoinInFlightOutpoint => ({
+                  txId: input.txId,
+                  index: input.index,
+                }),
+              ),
+              producedOutputs: [],
+            },
+          },
+        }
+      : {}),
   };
 };
 
@@ -183,8 +211,12 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
       bitcoinContext: { selectNetwork$ },
       wallets: { selectActiveNetworkAccounts$ },
     },
-    { actions, bitcoinProvider: { getLastKnownBlock } },
+    { actions, bitcoinProvider: { getLastKnownBlock }, isWalletActive$ },
   ) =>
+    // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
+    // leaves the downstream `switchMap`'s in-flight inner alive on lock — it
+    // only blocks future outer emissions, not the already-running interval.
+    // See ADR 25.
     combineLatest([
       selectNetwork$.pipe(distinctUntilChanged()),
       selectActiveNetworkAccounts$.pipe(
@@ -216,6 +248,7 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
           }),
         );
       }),
+      whileActive(isWalletActive$),
     );
 
 /**
@@ -310,17 +343,28 @@ export const createBitcoinWallet = ({
       ),
     ),
 
-    tokens$: combineLatest([wallet.addresses$, wallet.balance$]).pipe(
-      map(([addresses, balance]) => {
+    tokens$: combineLatest([
+      wallet.addresses$,
+      wallet.utxos$,
+      wallet.pendingTransactions$,
+    ]).pipe(
+      map(([addresses, utxos, pendingTransactions]) => {
         const primaryAddress = addresses[0]?.address || '';
+        const ownAddresses = new Set(addresses.map(a => a.address));
+
+        const { available, pending } = computeBitcoinTokenBalances({
+          confirmedUtxos: utxos,
+          pendingTransactions,
+          ownAddresses,
+        });
 
         const btcToken: Token = {
           metadata: BITCOIN_TOKEN_METADATA,
           accountId: account.accountId,
           address: BitcoinAddress(primaryAddress),
           tokenId: BITCOIN_TOKEN_ID,
-          available: BigNumber(BigInt(balance)),
-          pending: BigNumber(BigInt(0)), // Compute from pending TXs
+          available: BigNumber(available),
+          pending: BigNumber(pending),
           decimals: 8, // BTC has 8 decimal places (satoshis)
           displayDecimalPlaces: 8,
           displayLongName: 'Bitcoin',

@@ -6,21 +6,17 @@ import { Column, Icon, Row, Text } from '../../../design-system/atoms';
 import { spacing, radius, useTheme, type Theme } from '../../../design-tokens';
 import { OPTIONS, ORDERS } from '../../../utils/browsePoolUtils';
 
-import type {
-  BrowsePoolSortOption,
-  BrowsePoolSortOrder,
-} from '../../../design-system/util/types';
+import type { BrowsePoolSortOrder } from '../../../design-system/util/types';
 import type { TranslationKey } from '@lace-contract/i18n';
 
 type Props = {
-  option?: BrowsePoolSortOption;
+  option?: string;
   order: BrowsePoolSortOrder;
   onToggleOrder: () => void;
   testID?: string;
 };
 
-const isAlphabetical = (option?: BrowsePoolSortOption) =>
-  option === OPTIONS.TICKER;
+const isAlphabetical = (option?: string) => option === OPTIONS.TICKER;
 
 const SORT_ORDER_VALUE_KEYS = {
   A: 'v2.pages.browse-pool.more-options.sort-order.value.a',
@@ -51,7 +47,7 @@ export const SortPreferenceButton = ({
   const isAscendingOrder = order === ORDERS.ASC;
 
   const { fromKey, toKey } = useMemo(() => {
-    const effectiveOption: BrowsePoolSortOption = option ?? OPTIONS.TICKER;
+    const effectiveOption = option ?? OPTIONS.TICKER;
 
     if (isAlphabetical(effectiveOption)) {
       return isAscendingOrder

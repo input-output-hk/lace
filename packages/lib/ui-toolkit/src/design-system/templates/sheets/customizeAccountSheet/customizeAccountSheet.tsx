@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTextInput } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { footerHeight } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 interface actionProps {
@@ -14,10 +13,10 @@ interface actionProps {
 }
 
 interface copiesProps {
-  headerTitle: string;
   inputLabel: string;
-  secondaryButtonLabel: string;
-  primaryButtonLabel: string;
+  headerTitle?: string;
+  secondaryButtonLabel?: string;
+  primaryButtonLabel?: string;
 }
 
 interface utilsProps {
@@ -37,57 +36,35 @@ export const CustomizeAccountSheet = ({
   copies,
   utils,
 }: EditAccountSheetProps) => {
-  const { onSubmit, onCancel, onChangeText } = actions;
+  const { onChangeText } = actions;
 
-  const { nameValue, nameError, isDisabled } = utils;
+  const { nameValue, nameError } = utils;
 
-  const { headerTitle, inputLabel, secondaryButtonLabel, primaryButtonLabel } =
-    copies;
-
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(() => getStyles(footerHeight), [footerHeight]);
+  const { inputLabel } = copies;
 
   return (
-    <>
-      <SheetHeader title={headerTitle} />
-      <Sheet.Scroll>
-        <Column
-          gap={spacing.L}
-          testID="customize-account-sheet"
-          style={styles.container}>
-          <CustomTextInput
-            isWithinBottomSheet
-            testID="customize-account-name-input"
-            label={inputLabel}
-            value={nameValue}
-            onChangeText={onChangeText}
-            inputError={nameError}
-            size="small"
-            animatedLabel
-            maxLength={NAME_MAX_LENGTH}
-          />
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: secondaryButtonLabel,
-          onPress: onCancel,
-          testID: 'customize-account-cancel-button',
-        }}
-        primaryButton={{
-          label: primaryButtonLabel,
-          onPress: onSubmit,
-          disabled: isDisabled,
-          testID: 'customize-account-confirm-button',
-        }}
+    <Column
+      gap={spacing.L}
+      testID="customize-account-sheet"
+      style={styles.container}>
+      <CustomTextInput
+        testID="customize-account-name-input"
+        label={inputLabel}
+        value={nameValue}
+        onChangeText={onChangeText}
+        inputError={nameError}
+        size="small"
+        animatedLabel
+        maxLength={NAME_MAX_LENGTH}
       />
-    </>
+    </Column>
   );
 };
 
-const getStyles = (footerHeight: number) =>
-  StyleSheet.create({
-    container: {
-      paddingBottom: footerHeight,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: spacing.M,
+    paddingBottom: footerHeight.horizontal,
+    paddingHorizontal: spacing.M,
+  },
+});

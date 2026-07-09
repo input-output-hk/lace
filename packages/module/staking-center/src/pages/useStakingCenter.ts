@@ -16,6 +16,7 @@ import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useLaceSelector, useStakePools } from '../hooks';
+import { useNetworkInfo } from '../hooks/useNetworkInfo';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type {
@@ -79,6 +80,7 @@ const BLOCKCHAIN_NAME = { blockchainName: 'Cardano' } as const;
 
 export const useStakingCenter = () => {
   const { t } = useTranslation();
+  const networkInfoCard = useNetworkInfo();
   const stakingStatus = useLaceSelector('cardanoContext.selectStakingStatus');
   const cardanoAccounts = useLaceSelector(
     'wallets.selectActiveNetworkAccountsByBlockchainName',
@@ -146,11 +148,11 @@ export const useStakingCenter = () => {
   );
 
   const handleStake = useCallback((accountId: string) => {
-    NavigationControls.sheets.navigate(SheetRoutes.BrowsePool, { accountId });
+    NavigationControls.navigate(SheetRoutes.BrowsePool, { accountId });
   }, []);
 
   const handleAddFunds = useCallback((accountId: string) => {
-    NavigationControls.sheets.navigate(SheetRoutes.Buy, { accountId });
+    NavigationControls.navigate(SheetRoutes.Buy, { accountId });
   }, []);
   const isStakingStatusLoading = stakingStatus.stakingStatus === 'loading';
 
@@ -230,12 +232,12 @@ export const useStakingCenter = () => {
         if (!stakePoolId) return;
         // If there are staking problems, navigate to the issue sheet
         if (problems.length > 0) {
-          NavigationControls.sheets.navigate(SheetRoutes.StakingIssue, {
+          NavigationControls.navigate(SheetRoutes.StakingIssue, {
             accountId: account.accountId.toString(),
             issueType: problems[0],
           });
         } else {
-          NavigationControls.sheets.navigate(SheetRoutes.StakeDelegation, {
+          NavigationControls.navigate(SheetRoutes.StakeDelegation, {
             accountId: account.accountId.toString(),
           });
         }
@@ -243,14 +245,14 @@ export const useStakingCenter = () => {
 
       const handleUpdateDelegation = () => {
         if (problems.length === 0) return;
-        NavigationControls.sheets.navigate(SheetRoutes.StakingIssue, {
+        NavigationControls.navigate(SheetRoutes.StakingIssue, {
           accountId: account.accountId.toString(),
           issueType: problems[0],
         });
       };
 
       const handleDelegate = () => {
-        NavigationControls.sheets.navigate(SheetRoutes.StakingIssue, {
+        NavigationControls.navigate(SheetRoutes.StakingIssue, {
           accountId: account.accountId.toString(),
           issueType: 'locked',
         });
@@ -330,6 +332,7 @@ export const useStakingCenter = () => {
   return {
     stakeCards: filteredStakeCards,
     stakingStatusCard,
+    networkInfoCard,
     cardanoAccounts,
     hasCardanoAccounts,
     searchValue,

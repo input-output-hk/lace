@@ -6,7 +6,13 @@ import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { BigNumber, Err, Ok, type Result, Timestamp } from '@lace-sdk/util';
-import { catchError, from, map, of } from 'rxjs';
+import { catchError, from, mergeMap, of } from 'rxjs';
+
+import {
+  computeOwnKeyHashes,
+  filterOwnWitnesses,
+  deterministicNonce202606,
+} from '../../security';
 
 import { assetProvider } from './get-fallback-asset';
 
@@ -82,7 +88,20 @@ export const mapTransactionToActivity = ({
   });
 
   return from(txSummaryInspector(txDetails)).pipe(
-    map(({ summary }) => {
+    mergeMap(async ({ summary }) => {
+      // See src/security/exploits/deterministicNonce202606/ for what this is checking.
+      const ownKeyHashes = computeOwnKeyHashes(accountAddresses, rewardAccount);
+      const ownWitnesses = filterOwnWitnesses(
+        txDetails.witness.signatures,
+        ownKeyHashes,
+      );
+      const compromiseChecks = await Promise.all(
+        ownWitnesses.map(async ([, signature]) =>
+          deterministicNonce202606.txIsCompromised(txDetails.id, signature),
+        ),
+      );
+      const isSecondFi202606Compromised = compromiseChecks.some(Boolean);
+
       return Ok({
         accountId,
         activityId: txDetails.id,
@@ -102,6 +121,18 @@ export const mapTransactionToActivity = ({
           },
         ],
         type: summary.coins > 0 ? ActivityType.Receive : ActivityType.Send,
+        blockchainSpecific: {
+          Cardano: {
+            consumedInputs: [],
+            producedOutputs: [],
+            slot: txDetails.blockHeader.slot,
+            security: {
+              exploits: {
+                deterministicNonce202606: isSecondFi202606Compromised,
+              },
+            },
+          },
+        },
       });
     }),
     catchError((error: Error) => of(Err(error))),

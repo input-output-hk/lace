@@ -1,6 +1,9 @@
 import {
+  catchError,
   of,
+  EMPTY,
   exhaustMap,
+  ignoreElements,
   merge,
   debounceTime,
   filter,
@@ -63,4 +66,31 @@ export const trackSession: SideEffect = (
     }),
   );
 
-export const appSideEffects = [reloadAppInTheBackground, trackSession];
+/**
+ * Consumes `reloadApplication` and invokes the platform-injected
+ * `performAppReload` (mobile: `Updates.reloadAsync`; extension: `runtime.reload`).
+ * `catchError` keeps the outer subscription alive so a single failure doesn't
+ * silently drop future reload requests.
+ */
+export const performAppReload: SideEffect = (
+  { app: { reloadApplication$ } },
+  __,
+  { performAppReload: doReload, logger },
+) =>
+  reloadApplication$.pipe(
+    switchMap(() =>
+      doReload().pipe(
+        catchError(error => {
+          logger.error('Failed to reload app', error);
+          return EMPTY;
+        }),
+      ),
+    ),
+    ignoreElements(),
+  );
+
+export const appSideEffects = [
+  reloadAppInTheBackground,
+  trackSession,
+  performAppReload,
+];

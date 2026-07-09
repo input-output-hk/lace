@@ -5,11 +5,7 @@ import { spacing } from '../../../design-tokens';
 import { Column, Icon, Text } from '../../atoms';
 import { Contact, PageHeaderSection, SearchBar } from '../../molecules';
 import { GenericFlashList } from '../../organisms';
-import {
-  isWeb,
-  renderLaceFooterLogo,
-  usePageHeaderCollapseScroll,
-} from '../../util';
+import { isWeb, LaceFooterLogo, usePageHeaderCollapseScroll } from '../../util';
 import { PageContainerTemplate } from '../pageContainerTemplate/pageContainerTemplate';
 
 import type { ContactItem } from '../../util/types';
@@ -144,6 +140,7 @@ export const AddressBookPageTemplate = ({
         subtitle={subtitle}
         onClosePress={isWeb ? onClosePress : undefined}
         collapseScrollY={collapseScrollY}
+        stickyInScrollParent
         testID="address-book-header-section">
         <SearchBar
           value={searchQuery}
@@ -161,11 +158,6 @@ export const AddressBookPageTemplate = ({
       handleSearchChange,
       searchBarActions,
     ],
-  );
-
-  // Footer component - not memoized because renderLaceFooterLogo uses hooks
-  const ListFooterComponent = (
-    <View style={styles.footer}>{renderLaceFooterLogo()}</View>
   );
 
   const ListEmptyComponent = useMemo(
@@ -189,19 +181,23 @@ export const AddressBookPageTemplate = ({
     <PageContainerTemplate>
       <View style={styles.fillSpace}>
         {headerSection}
-        <GenericFlashList
-          style={styles.fillSpace}
-          data={contacts}
-          renderItem={({ item }) => (
-            <ContactListItem contact={item} onContactPress={onContactPress} />
-          )}
-          ListEmptyComponent={ListEmptyComponent}
-          ListFooterComponent={ListFooterComponent}
-          contentContainerStyle={styles.contactList}
-          showsVerticalScrollIndicator={false}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-        />
+        <Column style={styles.fillSpace}>
+          <GenericFlashList
+            style={styles.fillSpace}
+            data={contacts}
+            renderItem={({ item }) => (
+              <ContactListItem contact={item} onContactPress={onContactPress} />
+            )}
+            ListEmptyComponent={ListEmptyComponent}
+            contentContainerStyle={styles.contactList}
+            showsVerticalScrollIndicator={false}
+            onScroll={onScroll}
+            scrollEventThrottle={16}
+          />
+          <View style={styles.footer}>
+            <LaceFooterLogo />
+          </View>
+        </Column>
       </View>
     </PageContainerTemplate>
   );
@@ -218,6 +214,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.XXXL,
   },
   footer: {
-    paddingTop: spacing.XL,
+    position: 'absolute',
+    overflow: 'visible',
+    bottom: 100,
+    alignSelf: 'center',
+    zIndex: -1,
   },
 });

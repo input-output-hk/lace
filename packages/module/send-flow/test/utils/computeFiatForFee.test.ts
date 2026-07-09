@@ -5,13 +5,19 @@ import {
   type ComputeFiatForFeeParams,
 } from '../../src/utils/computeFiatForFee';
 
-vi.mock('@lace-lib/util-render', () => ({
-  valueToLocale: (value: string, _min: number, _max: number) =>
-    Number(value).toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }),
-}));
+import type * as UtilRender from '@lace-lib/util-render';
+
+vi.mock('@lace-lib/util-render', async importOriginal => {
+  const actual = await importOriginal<typeof UtilRender>();
+  return {
+    ...actual,
+    valueToLocale: (value: string, _min: number, _max: number) =>
+      Number(value).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+  };
+});
 
 describe('computeFiatForFee', () => {
   const bitcoinPriceId = 'bitcoin:btc';

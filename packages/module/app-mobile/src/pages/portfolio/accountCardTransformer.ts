@@ -4,18 +4,20 @@ import {
 } from '@lace-contract/token-pricing';
 import { getAssetImageUrl } from '@lace-lib/ui-toolkit';
 import {
+  formatAmountToLocale,
   getTokenFiatValueTruncated,
   valueToLocale,
 } from '@lace-lib/util-render';
 
+import type { AccountUICustomisation } from '@lace-contract/app';
 import type {
   CurrencyPreference,
   PriceDataPoint,
   TimeRange,
   TokenPrice,
   TokenPriceHistory,
+  TokenPriceId,
 } from '@lace-contract/token-pricing';
-import type { TokenPriceId } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 import type { AccountCardProps } from '@lace-lib/ui-toolkit';
@@ -26,6 +28,8 @@ interface TokensByAccount {
     nfts?: Token[];
   };
 }
+
+type NativeTokenInfo = ReturnType<AccountUICustomisation['nativeTokenInfo']>;
 
 interface PortfolioActionsForCard {
   onBuyPress?: () => void;
@@ -49,6 +53,8 @@ interface TransformAccountToCardParams {
   prices: Record<TokenPriceId, TokenPrice> | undefined;
   timeRange: TimeRange;
   rewardsByAccount: Record<string, string>;
+  compromisedSuffixByAccount: Record<string, string>;
+  getNativeTokenInfo: (blockchainName: string) => NativeTokenInfo | undefined;
 }
 
 const mapTokenToDisplay = (
@@ -118,6 +124,28 @@ const getAccountChartData = ({
   return portfolioHistory.map(point => point.price);
 };
 
+const getAccountNativeBalance = ({
+  accountTokens,
+  nativeTokenInfo,
+}: {
+  accountTokens: Token[];
+  nativeTokenInfo: NativeTokenInfo | undefined;
+}): string => {
+  if (!nativeTokenInfo) return '0';
+
+  const nativeToken = accountTokens.find(
+    token => token.tokenId === nativeTokenInfo.tokenId,
+  );
+
+  if (!nativeToken) return '0';
+
+  return formatAmountToLocale(
+    nativeToken.available.toString(),
+    nativeToken.decimals,
+    nativeToken.displayDecimalPlaces ?? nativeTokenInfo.decimals,
+  );
+};
+
 export const transformAccountToCard = ({
   account,
   index,
@@ -133,8 +161,12 @@ export const transformAccountToCard = ({
   prices,
   timeRange,
   rewardsByAccount,
+  compromisedSuffixByAccount,
+  getNativeTokenInfo,
 }: TransformAccountToCardParams): AccountCardProps => {
-  const accountName = account.metadata?.name ?? getAccountName(index);
+  const accountName = `${account.metadata?.name ?? getAccountName(index)}${
+    compromisedSuffixByAccount[account.accountId] ?? ''
+  }`;
   const blockchainName = account.blockchainName ?? 'Cardano';
 
   const { fungible = [], nfts = [] } =
@@ -147,14 +179,18 @@ export const transformAccountToCard = ({
     accountTokens: fungible,
     prices: prices ?? {},
   });
+  const nativeTokenInfo = getNativeTokenInfo(blockchainName);
 
   return {
     accountName,
     accountType: getAccountType(blockchainName),
     blockchain: blockchainName,
-    balanceCoin: '',
+    balanceCoin: getAccountNativeBalance({
+      accountTokens: fungible,
+      nativeTokenInfo,
+    }),
     balanceCurrency: valueToLocale(totalFiatValue, 2, 2),
-    coin: '',
+    coin: nativeTokenInfo?.displayShortName ?? '',
     currency: currency.name,
     tokens: accountTokens,
     nfts: accountNfts,
@@ -168,10 +204,8 @@ export const transformAccountToCard = ({
     onBuyPress: portfolioActions.onBuyPress,
     onSendPress: createSendAction(account.accountId),
     onReceivePress: portfolioActions.onReceivePress,
-    onDashboardPress: () => {}, // TODO: LW-14530 Implement
     onSwapPress: portfolioActions.onSwapPress,
     variant: 'standard',
-    isShielded: false,
     onAccountsPress: createAccountsAction(),
     arePricesAvailable,
   };
@@ -191,6 +225,8 @@ interface TransformAccountsToCardsParams {
   prices: Record<TokenPriceId, TokenPrice> | undefined;
   timeRange: TimeRange;
   rewardsByAccount: Record<string, string>;
+  compromisedSuffixByAccount: Record<string, string>;
+  getNativeTokenInfo: (blockchainName: string) => NativeTokenInfo | undefined;
 }
 
 export const transformAccountsToCards = ({
@@ -207,6 +243,8 @@ export const transformAccountsToCards = ({
   prices,
   timeRange,
   rewardsByAccount,
+  compromisedSuffixByAccount,
+  getNativeTokenInfo,
 }: TransformAccountsToCardsParams): AccountCardProps[] =>
   accounts.map((account, index) =>
     transformAccountToCard({
@@ -224,5 +262,7 @@ export const transformAccountsToCards = ({
       prices,
       timeRange,
       rewardsByAccount,
+      compromisedSuffixByAccount,
+      getNativeTokenInfo,
     }),
   );

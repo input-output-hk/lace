@@ -6,7 +6,10 @@ import { ByteArray, HexBytes } from '@lace-sdk/util';
 import type { CreateInMemoryWalletProps } from './types';
 import type { HexBlob } from '@cardano-sdk/util';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
-import type { InMemoryWallet } from '@lace-contract/wallet-repo';
+import type {
+  InMemoryWallet,
+  InMemoryWalletAccount,
+} from '@lace-contract/wallet-repo';
 import type { BlockchainName } from '@lace-lib/util-store';
 import type { Logger } from 'ts-log';
 
@@ -86,7 +89,11 @@ export const createInMemoryWalletEntityFactory =
       encryptedRecoveryPhrase,
       metadata: { name: walletName, order },
       type: WalletType.InMemory,
-      accounts: integrationsData.flatMap(({ accounts }) => accounts),
+      // The factory always supplies a password, so integrations only ever
+      // produce InMemory accounts in this code path.
+      accounts: integrationsData.flatMap(
+        ({ accounts }) => accounts,
+      ) as InMemoryWalletAccount[],
       blockchainSpecific: integrationsData
         .map(({ blockchainName, blockchainSpecificWalletData }) => ({
           [blockchainName]: blockchainSpecificWalletData,

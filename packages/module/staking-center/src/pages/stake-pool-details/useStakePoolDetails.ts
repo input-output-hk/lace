@@ -30,11 +30,11 @@ export const useStakePoolDetails = (
 
   // Callbacks
   const handleCancelPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.BrowsePool, params);
+    NavigationControls.navigate(SheetRoutes.BrowsePool, params);
   }, [params]);
 
   const handleStakePress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.NewDelegation, {
+    NavigationControls.navigate(SheetRoutes.NewDelegation, {
       poolId,
       accountId,
     });

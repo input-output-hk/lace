@@ -70,6 +70,11 @@ const customConfig = {
       buffer: require.resolve('@craftzdog/react-native-buffer'),
       crypto: require.resolve('react-native-quick-crypto'),
       stream: require.resolve('readable-stream'),
+      // @cardano-sdk/hardware-trezor unconditionally requires @trezor/connect-web
+      // at module-load time. On mobile we only use its parameter-mapping helpers
+      // (e.g. txToTrezor) and route signing via @trezor/connect-mobile, so alias
+      // the web variant to the mobile one to satisfy the require without crashing.
+      '@trezor/connect-web': require.resolve('@trezor/connect-mobile'),
     },
   },
 };

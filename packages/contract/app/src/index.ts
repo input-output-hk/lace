@@ -7,3 +7,4 @@ export type * from './store';
 export * from './hooks';
 export * from './config-context';
 export * from './const';
+export * from './utils';

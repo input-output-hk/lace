@@ -1,7 +1,7 @@
 import { DEFAULT_LANGUAGE } from '@lace-contract/i18n';
 import { createMigrate } from 'redux-persist';
 
-import { trackColorSchemeChange } from './side-effects';
+import { trackThemePreferenceChange } from './side-effects';
 import { viewsReducers } from './slice';
 
 import type { ViewsSliceState } from './slice';
@@ -35,10 +35,15 @@ const migrations: MigrationManifest = {
 
 const viewsStore: LaceInit<LaceModuleStoreInit> = () => ({
   reducers: viewsReducers,
-  sideEffects: [trackColorSchemeChange],
+  sideEffects: [trackThemePreferenceChange],
   persistConfig: {
     views: {
-      whitelist: ['colorScheme', 'language', 'hasExplicitLanguagePreference'],
+      whitelist: [
+        'colorScheme',
+        'language',
+        'hasExplicitLanguagePreference',
+        'themePreference',
+      ],
       version: 3,
       migrate: createMigrate(migrations, { debug: false }),
     },

@@ -63,6 +63,7 @@ export const CardanoDappSignTxPopup = () => {
           currencyTicker: signTxData.currencyTicker,
           networkMagic: signTxData.networkMagic,
           isPartialSign: request.partialSign,
+          accountId: signTxData.accountId,
         }
       : null;
 

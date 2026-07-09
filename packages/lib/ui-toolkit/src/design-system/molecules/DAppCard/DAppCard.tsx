@@ -13,6 +13,8 @@ import {
   type BlockchainIconName,
 } from '../../atoms';
 
+import type { DappRating } from '../../templates/dappExplorerPage/dappExplorerPage';
+
 const CARD_HEIGHT = 80;
 const AVATAR_SIZE = 42;
 
@@ -23,6 +25,7 @@ export type DAppCardProps = {
   blockchain?: BlockchainIconName;
   hasBlockchainLabel?: boolean;
   onDelete?: () => void;
+  rating?: DappRating | null;
 };
 
 export const DAppCard = ({
@@ -92,6 +95,21 @@ export const DAppCard = ({
           <Text.XS variant="secondary" testID="dapp-card-description">
             {description}
           </Text.XS>
+          {/* TODO: re-implement ratings when tx-cart exists so multiple votes can be added to a single tx
+          {rating?.average_rating != null && (
+            <Text.XS variant="secondary" testID="dapp-card-rating">
+              {(() => {
+                const stars = Math.max(
+                  0,
+                  Math.min(5, Math.round(rating.average_rating!)),
+                );
+                return `${'★'.repeat(stars)}${'☆'.repeat(
+                  5 - stars,
+                )} ${rating.average_rating!.toFixed(1)}`;
+              })()}
+            </Text.XS>
+          )}
+          */}
         </Column>
         {renderActions()}
       </Row>

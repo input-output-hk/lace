@@ -1,804 +1,518 @@
 # @lace-lib/navigation
 
-Navigation utilities and components for the Lace platform, providing a unified navigation system with stack navigation, tab navigation, and sheet navigation capabilities.
+Navigation primitives and helpers for the Lace platform. The package combines
+React Navigation stacks and tabs with a True Sheet root navigator so the app has
+one navigation container, one navigation ref, and one nested state tree.
 
 ## Overview
 
-This library provides a comprehensive navigation system that combines React Navigation's stack and tab navigators with custom sheet navigation for modal-like experiences. The architecture is designed around a modular system where navigation pages are dynamically loaded from various modules through addon functions.
+The current navigation architecture is:
+
+- one `NavigationContainer`
+- one `navigationRef`
+- one root `SheetStack.Navigator`
+- one nested `Stack.Navigator` hosted under `SheetRoutes.RootStack`
+- one tab navigator rendered by the `Home` stack screen
+
+This means stack screens, tab screens, and sheets all live in the same
+navigation state tree. Imperative navigation is routed through the same root ref
+regardless of whether the target is a stack route or a sheet route.
 
 ## Architecture
 
-### Navigation Tree Structure
+### Navigation Tree
 
-The navigation system is built as a hierarchical tree:
-
+```text
+NavigationContainer
+└── SheetStack.Navigator
+    ├── SheetStack.Screen(name: SheetRoutes.RootStack)
+    │   └── Stack.Navigator
+    │       ├── Stack.Screen(name: StackRoutes.Home)
+    │       │   └── Tab.Navigator
+    │       │       ├── Portfolio
+    │       │       ├── DApps
+    │       │       ├── Settings
+    │       │       ├── Accounts
+    │       │       ├── Support
+    │       │       ├── About
+    │       │       ├── Contacts
+    │       │       ├── StakingCenter
+    │       │       ├── IdentityCenter
+    │       │       └── NotificationCenter
+    │       └── Additional stack pages from addons
+    └── SheetStack.Group
+        └── Sheet pages from addons
 ```
-NavigationContainer (Root)
-├── Stack.Navigator (Main Stack)
-│   ├── Home (Tab Navigator)
-│   │   ├── Portfolio (Tab)
-│   │   ├── Rewards (Tab)
-│   │   ├── DApps (Tab)
-│   │   ├── Settings (Tab)
-│   │   └── AccountCenter (Tab)
-│   ├── AccountDetails (Stack Screen)
-│   ├── YourKeys (Stack Screen)
-│   ├── WalletSettings (Stack Screen)
-│   └── Collateral (Stack Screen)
-├── GlobalOverlays (Overlay Components)
-└── SheetStack.Navigator (Sheet Navigation)
-    ├── Initial (Sheet)
-    ├── RemoveAccount (Sheet)
-    └── RemoveAccountSuccess (Sheet)
-```
 
-### How Navigation Pages are Loaded
+In the app routers this is mounted once and the sheet navigator is the real
+root:
 
-The navigation tree is dynamically constructed through a modular addon system:
-
-1. **Router Initialization**: The `Router.tsx` component loads pages from modules using addon functions
-2. **Addon Functions**: Each module can export addon functions that return React components for different navigation types
-3. **Dynamic Loading**: Pages are loaded asynchronously and rendered into the navigation tree
-
-### Navigation References Architecture
-
-The system uses two separate navigation containers with their own references:
-
-```typescript jsx
-// Main navigation container for stack and tab navigation
-<NavigationContainer ref={navigationRef}>
-  <Stack.Navigator>
-    <Stack.Screen name={StackRoutes.Home}>
-      {props => <Home {...props}>{pages.tabPages}</Home>}
-    </Stack.Screen>
-    {pages.stackPages}
-  </Stack.Navigator>
-  {pages.globalOverlays}
-</NavigationContainer>
-
-// Separate navigation container for sheet navigation
-<NavigationContainer ref={sheetNavigationRef}>
-  <SheetStack.Navigator>
-    <SheetStack.Screen name={SheetRoutes.Initial} component={InitialSheet} />
-    {pages.sheetPages}
-  </SheetStack.Navigator>
+```tsx
+<NavigationContainer ref={navigationRef} theme={navigationTheme}>
+  <SendProvider>
+    <SheetStack.Navigator>
+      <SheetStack.Screen name={SheetRoutes.RootStack} component={RootStack} />
+      <SheetStack.Group screenOptions={sheetGroupScreenOptions}>
+        {pages.sheetPages}
+      </SheetStack.Group>
+    </SheetStack.Navigator>
+  </SendProvider>
 </NavigationContainer>
 ```
 
-This separation allows:
+### Navigation References
 
-- **Independent navigation contexts**: Stack/tab and sheet navigation operate independently
-- **Cross-navigation support**: `NavigationControls` handles navigation between contexts
-- **Side effect navigation**: Navigate from async operations, event handlers, etc.
+There is a single imperative ref:
 
-#### Addon Functions
-
-- `loadStackPages`: Returns stack navigation screens
-- `loadTabPages`: Returns tab navigation screens
-- `loadGlobalOverlays`: Returns overlay components
-- `loadSheetPages`: Returns sheet navigation screens
-
-#### Example Router Implementation
-
-```typescript
-// apps/lace-mobile/src/app/Router.tsx
-useEffect(() => {
-  const loadStackPages = moduleInitProps.loadModules('addons.loadStackPages');
-  const loadTabPages = moduleInitProps.loadModules('addons.loadTabPages');
-  const loadGlobalOverlays = moduleInitProps.loadModules(
-    'addons.loadGlobalOverlays',
-  );
-  const loadSheetPages = moduleInitProps.loadModules('addons.loadSheetPages');
-
-  const load = async () => {
-    const [
-      stackPagesResult,
-      tabPagesResult,
-      globalOverlaysResult,
-      sheetPagesResult,
-    ] = await Promise.all([
-      loadStackPages,
-      loadTabPages,
-      loadGlobalOverlays,
-      loadSheetPages,
-    ]);
-
-    setPages({
-      stackPages: stackPagesResult,
-      tabPages: tabPagesResult,
-      globalOverlays: globalOverlaysResult,
-      sheetPages: sheetPagesResult,
-    });
-  };
-
-  void load();
-}, [moduleInitProps]);
+```ts
+export const navigationRef = createNavigationContainerRef<SheetParameterList>();
 ```
 
-## Navigation Types
+`SheetParameterList` is the root param list. Stack navigation is nested under:
 
-### Stack Navigation
-
-Primary navigation flow using React Navigation's stack navigator for main app screens.
-
-### Tab Navigation
-
-Bottom tab navigation for main app sections, rendered within the Home stack screen.
-
-### Sheet Navigation
-
-Modal-like navigation that slides up from the bottom, perfect for forms, confirmations, and secondary actions.
-
-## Usage
-
-### Basic Import
-
-```typescript
-import { NavigationControls } from '@lace-lib/navigation';
+```ts
+[SheetRoutes.RootStack]: NavigatorScreenParams<StackParameterList>;
 ```
 
-### Stack Navigation
+That is why imperative navigation to a stack screen is implemented by
+navigating to `SheetRoutes.RootStack` with nested `screen` and `params`.
 
-#### Using `useNavigation` Hook (Recommended for Components)
+### How Pages Are Loaded
 
-```typescript
-import { useNavigation } from '@react-navigation/native';
-import type { StackScreenProps } from '@lace-lib/navigation';
+Navigation pages are loaded from module addons:
 
-// In a component
-const navigation = useNavigation<StackScreenProps<keyof StackParameterList>>();
+- `loadStackPages`
+- `loadTabPages`
+- `loadGlobalOverlays`
+- `loadSheetPages`
 
-// Navigate to a route
-navigation.navigate('AccountDetails', {
-  walletId: 'wallet123',
-  accountId: 'account456',
-});
-```
+The routers load those addon outputs and inject them into the appropriate place
+in the tree.
 
-#### Available Stack Routes
+## Public Exports
 
-```typescript
-enum StackRoutes {
-  Home = 'Home', // Main tab navigator
-  AccountDetails = 'AccountDetails', // Account details screen
-  YourKeys = 'YourKeys', // Keys management
-  WalletSettings = 'WalletSettings', // Wallet settings
-  Collateral = 'Collateral', // Collateral management
-}
-```
+Main exports from this package:
 
-### Tab Navigation
+- `NavigationContainer`
+- `navigationRef`
+- `navigationTheme`
+- `NavigationControls`
+- `useNavigation`
+- `useFocusEffect`
+- `useNavigationObservability`
+- `Tab`
+- `Stack`
+- `SheetStack`
+- route enums and screen prop types from `src/types`
 
-Tab screens are automatically rendered within the Home stack screen:
+## Route Types
 
-```typescript
-enum TabRoutes {
+The source of truth for route names is:
+
+- `packages/lib/navigation/src/types/routes.ts`
+- `packages/lib/navigation/src/types/index.ts`
+
+### Tab Routes
+
+```ts
+export enum TabRoutes {
   Portfolio = 'Portfolio',
-  Rewards = 'Rewards',
   DApps = 'DApps',
   Settings = 'Settings',
-  AccountCenter = 'AccountCenter',
+  AccountCenter = 'Accounts',
+  Support = 'Support',
+  About = 'About',
+  Contacts = 'Contacts',
+  StakingCenter = 'StakingCenter',
+  IdentityCenter = 'IdentityCenter',
+  NotificationCenter = 'NotificationCenter',
 }
 ```
 
-### Sheet Navigation
+### Stack Routes
 
-#### Using `NavigationControls.sheets`
+Representative stack routes:
 
-```typescript
-import { NavigationControls } from '@lace-lib/navigation';
-
-// Open a sheet
-NavigationControls.sheets.navigate('RemoveAccount', {
-  walletId: 'wallet123',
-  accountId: 'account456',
-  preventAnimation: false, // Optional: disable entrance animation
-});
-
-// Open a simple sheet
-NavigationControls.sheets.navigate('Initial');
-
-// Close the current sheet
-NavigationControls.sheets.close();
-```
-
-#### Available Sheet Routes
-
-```typescript
-enum SheetRoutes {
-  Initial = 'Initial', // Initial sheet
-  RemoveAccount = 'RemoveAccount', // Remove account confirmation
-  RemoveAccountSuccess = 'RemoveAccountSuccess', // Success confirmation
-}
-```
-
-### Navigation Within Same Context
-
-When navigating between pages within the same NavigationContainer, you should use the `navigation` object inherited by each screen component.
-
-#### Using Navigation Object
-
-Each screen component receives a `navigation` object with type-safe methods:
-
-```typescript
-import type { StackScreenProps } from '@lace-lib/navigation';
-
-// In a stack screen component
-export const YourStackScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<StackRoutes.YourStackScreen>) => {
-  const handleNavigateToAnotherStack = () => {
-    // Navigate to another stack screen
-    navigation.navigate('AccountDetails', {
-      walletId: 'wallet123',
-      accountId: 'account456',
-    });
-  };
-
-  const handleGoBack = () => {
-    navigation.goBack();
-  };
-
-  const handleReplace = () => {
-    navigation.replace('YourKeys');
-  };
-
-  return (
-    // Your component JSX
-  );
-};
-```
-
-#### Using Route Object
-
-Each screen also receives a `route` object that contains:
-
-- **`route.name`**: The name of the current route
-- **`route.params`**: The parameters passed to the screen
-- **`route.key`**: Unique key for the route
-
-```typescript
-export const YourScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<StackRoutes.YourScreen>) => {
-  // Access route parameters
-  const { walletId, accountId } = route.params;
-
-  // Access route name
-  const currentRouteName = route.name;
-
-  // Use parameters in your component logic
-  const handleAction = () => {
-    console.log(`Action for wallet ${walletId}, account ${accountId}`);
-  };
-
-  return (
-    // Your component JSX
-  );
-};
-```
-
-#### Type-Safe Navigation Props
-
-The navigation system provides type-safe props for each navigation context:
-
-- **`StackScreenProps<T>`**: For stack navigation screens
-- **`TabScreenProps<T>`**: For tab navigation screens
-- **`SheetScreenProps<T>`**: For sheet navigation screens
-
-```typescript
-// Stack screen with typed navigation and route
-export const StackScreen = ({
-  navigation,
-  route,
-}: StackScreenProps<StackRoutes.AccountDetails>) => {
-  // navigation and route are fully typed
-  const { walletId, accountId } = route.params; // TypeScript knows these exist
-  navigation.navigate('YourKeys'); // TypeScript validates route names
-};
-
-// Tab screen with typed navigation and route
-export const TabScreen = ({
-  navigation,
-  route,
-}: TabScreenProps<TabRoutes.Portfolio>) => {
-  // navigation and route are fully typed for tab context
-};
-
-// Sheet screen with typed navigation and route
-export const SheetScreen = ({
-  navigation,
-  route,
-}: SheetScreenProps<SheetRoutes.RemoveAccount>) => {
-  // navigation and route are fully typed for sheet context
-  const { walletId, accountId } = route.params; // TypeScript knows these exist
-};
-```
-
-### Combined Navigation
-
-#### Close Sheet and Navigate to Stack
-
-```typescript
-import { NavigationControls } from '@lace-lib/navigation';
-
-// Close current sheet and navigate to a stack route
-NavigationControls.actions.closeAndNavigate('AccountDetails', {
-  walletId: 'wallet123',
-  accountId: 'account456',
-});
-
-// Close sheet and navigate without parameters
-NavigationControls.actions.closeAndNavigate('Home');
-```
-
-### Navigation References and Cross-Navigation
-
-The navigation system uses two separate navigation references:
-
-1. **Main Navigation Reference** (`navigationRef`): Handles stack and tab navigation
-2. **Sheet Navigation Reference** (`sheetNavigationRef`): Handles sheet navigation
-
-#### Navigation from Side Effects
-
-You can navigate from side effects (useEffect, event handlers, async operations) using the `NavigationControls`:
-
-```typescript
-import { NavigationControls } from '@lace-lib/navigation';
-
-// Navigate within the same navigation context
-NavigationControls.sheets.navigate('RemoveAccount', { walletId, accountId });
-
-// Cross-navigation: Close sheet and navigate to stack
-NavigationControls.actions.closeAndNavigate('AccountDetails', {
-  walletId,
-  accountId,
-});
-```
-
-#### Why NavigationControls?
-
-Since we have two separate navigation references, direct navigation between stack/tab screens and sheets requires special handling. `NavigationControls` provides:
-
-- **Cross-navigation**: Navigate between different navigation contexts
-- **Side effect navigation**: Navigate from async operations, event handlers, etc.
-- **Unified API**: Single interface for all navigation operations
-
-### Sheet Parameters
-
-All sheets accept base parameters:
-
-```typescript
-type BaseSheetParams =
-  | {
-      preventAnimation?: boolean; // Disable entrance/exit animations
-    }
-  | undefined;
-```
-
-Some sheets have additional parameters:
-
-```typescript
-// RemoveAccount sheet
-NavigationControls.sheets.navigate('RemoveAccount', {
-  walletId: 'wallet123',
-  accountId: 'account456',
-  preventAnimation: false,
-});
-```
-
-## Extending Sheet Parameters
-
-Some sheets require UI-specific parameters (e.g., callbacks, component props). Use TypeScript declaration merging to add these without polluting the navigation library:
-
-```typescript
-// 1. In your module's navigation.d.ts
-declare module '@lace-lib/navigation' {
-  interface ExtendableSheetParams {
-    DappConnector: DappConnectorSheetProps;
-  }
-}
-
-// 2. In SheetParameterList (already set up)
-[SheetRoutes.DappConnector]: BaseSheetParams & ExtendedParams<'DappConnector'>;
-
-// 3. Navigate with type-safe params
-NavigationControls.sheets.navigate('DappConnector', {
-  dappName: 'My DApp',
-  onConnect: () => {},
-});
-```
-
-## Creating a New Screen
-
-To add a new screen to the navigation system, follow these steps:
-
-### 1. Define the Route in the Enum
-
-First, add your new route to the appropriate enum in `packages/lib/navigation/src/types/routes.ts`:
-
-```typescript
-// For stack navigation
+```ts
 export enum StackRoutes {
   Home = 'Home',
   AccountDetails = 'AccountDetails',
-  YourKeys = 'YourKeys',
   WalletSettings = 'WalletSettings',
-  Collateral = 'Collateral',
-  YourNewScreen = 'YourNewScreen', // Add your new route
+  AddWallet = 'AddWallet',
+  OnboardingStart = 'OnboardingStart',
+  OnboardingRestoreWallet = 'OnboardingRestoreWallet',
+  OnboardingCreateWallet = 'OnboardingCreateWallet',
+  OnboardingDesktopLogin = 'OnboardingDesktopLogin',
+  OnboardingHardware = 'OnboardingHardware',
+  DappExternalWebView = 'DappExternalWebView',
+  ClaimPayload = 'ClaimPayload',
+  ClaimSuccess = 'ClaimSuccess',
+  ClaimError = 'ClaimError',
+  IntroStart = 'IntroStart',
+  IntroLace = 'IntroLace',
+  IntroProof = 'IntroProof',
+  IntroPrivacy = 'IntroPrivacy',
+  IntroComplete = 'IntroComplete',
+  NotificationDetails = 'NotificationDetails',
 }
+```
 
-// For tab navigation
-export enum TabRoutes {
-  Portfolio = 'Portfolio',
-  Rewards = 'Rewards',
-  DApps = 'DApps',
-  Settings = 'Settings',
-  AccountCenter = 'AccountCenter',
-  YourNewTab = 'YourNewTab', // Add your new tab route
-}
+### Sheet Routes
 
-// For sheet navigation
+The sheet navigator owns the real root route plus all sheet screens:
+
+```ts
 export enum SheetRoutes {
-  Initial = 'Initial',
+  RootStack = 'RootStack',
+  AddAccount = 'AddAccount',
+  CreateNewWallet = 'CreateNewWallet',
   RemoveAccount = 'RemoveAccount',
-  RemoveAccountSuccess = 'RemoveAccountSuccess',
-  YourNewSheet = 'YourNewSheet', // Add your new sheet route
+  AuthorizedDApps = 'AuthorizedDApps',
+  Receive = 'Receive',
+  Send = 'Send',
+  ReviewTransaction = 'ReviewTransaction',
+  AccountKey = 'AccountKey',
+  RecoveryPhrase = 'RecoveryPhrase',
+  Buy = 'Buy',
+  ThemeSelection = 'ThemeSelection',
+  Language = 'Language',
+  NetworkSelection = 'NetworkSelection',
+  ActivityDetail = 'ActivityDetail',
+  EditWallet = 'EditWallet',
+  ContactDetails = 'ContactDetails',
+  SignData = 'SignData',
+  SignTx = 'SignTx',
+  // ... many more, see routes.ts
 }
 ```
 
-### 2. Define Navigation Parameters
+Do not assume `SheetRoutes.Initial` exists. The nested stack host is now
+`SheetRoutes.RootStack`.
 
-Add the parameters for your new route in `packages/lib/navigation/src/types/index.ts`:
+## Screen Prop Types
 
-```typescript
-export type StackParameterList = {
-  [StackRoutes.Home]: NavigatorScreenParams<TabParameterList>;
-  [StackRoutes.AccountDetails]: {
-    walletId: string;
-    accountId: string;
-  };
-  [StackRoutes.YourKeys]: undefined;
-  [StackRoutes.WalletSettings]: { walletId: string };
-  [StackRoutes.Collateral]: undefined;
-  [StackRoutes.YourNewScreen]: {
-    // Add your parameters
-    someParam: string;
-    optionalParam?: number;
-  };
-};
+The library exports screen prop helpers that match the current nesting model:
 
-export type TabParameterList = {
-  [TabRoutes.Portfolio]: undefined;
-  [TabRoutes.Rewards]: undefined;
-  [TabRoutes.DApps]: undefined;
-  [TabRoutes.Settings]: undefined;
-  [TabRoutes.AccountCenter]: undefined;
-  [TabRoutes.YourNewTab]: undefined; // Add your tab parameters
-};
+```ts
+export type StackScreenProps<T extends keyof StackParameterList> =
+  CompositeScreenProps<
+    ReactNavigationStackScreenProps<StackParameterList, T>,
+    TrueSheetScreenProps<SheetParameterList, SheetRoutes.RootStack>
+  >;
 
-export type SheetParameterList = {
-  [SheetRoutes.Initial]: BaseSheetParams;
-  [SheetRoutes.RemoveAccount]: BaseSheetParams & {
-    walletId: string;
-    accountId: string;
-  };
-  [SheetRoutes.RemoveAccountSuccess]: BaseSheetParams;
-  [SheetRoutes.YourNewSheet]: BaseSheetParams & {
-    // Add your sheet parameters
-    data: string;
-  };
-};
+export type TabScreenProps<T extends keyof TabParameterList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<TabParameterList, T>,
+    StackScreenProps<StackRoutes.Home>
+  >;
+
+export type SheetScreenProps<T extends keyof SheetParameterList> =
+  TrueSheetScreenProps<SheetParameterList, T>;
 ```
 
-### 3. Create UI Templates
+This matches the actual tree:
 
-All screens must implement a reusable template. Templates should receive only data and know how to render it. Here's how to define them:
+- a tab screen can navigate within tabs and to parent stack routes
+- a stack screen can navigate within the stack and still has access to the
+  parent sheet navigator
+- a sheet screen uses True Sheet screen props directly
 
-```typescript jsx
-// packages/lib/ui-toolkit/src/design-system/templates/yourNewTemplate.tsx
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, Button } from '../atoms';
+React Navigation recommends keeping navigation types close to the actual owning
+navigator and using composed screen props for nested navigators. See the
+[React Navigation TypeScript guide](https://reactnavigation.org/docs/typescript/).
 
-interface YourNewTemplateProps {
-  title: string;
-  description: string;
-  items: Array<{
-    id: string;
-    label: string;
-    value: string;
-  }>;
-  onAction: () => void;
-  onItemPress: () => void;
+### Global Root Param List
+
+The package also augments React Navigation's root type:
+
+```ts
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends SheetParameterList {}
+  }
 }
+```
 
-export const YourNewTemplate = ({
-  title,
-  description,
-  items,
-  onAction,
-  onItemPress,
-}: YourNewTemplateProps) => {
-  return (
-    <View style={styles.container}>
-      <Text.L>{title}</Text.L>
-      <Text.M>{description}</Text.M>
-      {items.map(item => (
-        <Button.Secondary
-          key={item.id}
-          label={`${item.label}: ${item.value}`}
-          onPress={() => onItemPress()}
-        />
-      ))}
-      <Button.Primary label="Action" onPress={onAction} />
-    </View>
-  );
-};
+That keeps root-aware APIs aligned with the real root navigator.
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
+## NavigationControls
+
+`NavigationControls` is the supported imperative API for side effects and other
+places where you do not have direct access to a screen's `navigation` prop.
+
+### Navigate To A Stack Screen
+
+```ts
+NavigationControls.navigate(StackRoutes.AccountDetails, {
+  walletId: 'wallet123',
+  accountId: 'account456',
 });
 ```
 
-For sheet templates, create them in `packages/lib/ui-toolkit/src/design-system/templates/sheets/`:
+Internally this becomes:
 
-```typescript jsx
-// packages/lib/ui-toolkit/src/design-system/templates/sheets/yourNewSheet/yourNewSheet.tsx
-import React from 'react';
-import { Sheet, Text, Button } from '../../../organisms';
+```ts
+navigation.navigate(SheetRoutes.RootStack, {
+  screen: StackRoutes.AccountDetails,
+  params: { walletId: 'wallet123', accountId: 'account456' },
+});
+```
 
-interface YourNewSheetProps {
-  title: string;
-  message: string;
-  confirmButtonLabel: string;
-  cancelButtonLabel: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+### Navigate To A Sheet
 
-export const YourNewSheet = ({
-  title,
-  message,
-  confirmButtonLabel,
-  cancelButtonLabel,
-  onConfirm,
-  onCancel,
-}: YourNewSheetProps) => {
-  return (
-    <Sheet.Scroll>
-      <Text.L>{title}</Text.L>
-      <Text.M>{message}</Text.M>
-      <Button.Primary label={confirmButtonLabel} onPress={onConfirm} />
-      <Button.Secondary label={cancelButtonLabel} onPress={onCancel} />
-    </Sheet.Scroll>
-  );
+```ts
+NavigationControls.navigate(SheetRoutes.RemoveAccount, {
+  walletId: 'wallet123',
+  accountId: 'account456',
+});
+```
+
+### Close The Current Sheet
+
+```ts
+NavigationControls.closeSheet();
+```
+
+`closeSheet()` calls `goBack()` when the current route is a sheet route. It does
+not treat `SheetRoutes.RootStack` as a dismissible sheet.
+
+### Close Then Navigate
+
+```ts
+NavigationControls.closeAndNavigate(StackRoutes.WalletSettings, {
+  walletId: 'wallet123',
+});
+```
+
+### Compatibility Helpers
+
+The nested `sheets` API still exists for compatibility:
+
+```ts
+NavigationControls.navigate(SheetRoutes.Send);
+NavigationControls.closeSheet();
+```
+
+Notes:
+
+- `sheets.navigate()` delegates to `NavigationControls.navigate()`
+- `sheets.close()` delegates to `closeSheet()`
+- `sheets.isOpen()` checks whether the current route is a sheet route other than
+  `RootStack`
+- `sheets.expand()` is currently a no-op compatibility hook
+
+## Navigation Options
+
+Imperative navigation options currently support:
+
+```ts
+type NavigationOptions = {
+  merge?: boolean;
+  pop?: boolean;
+  reset?: boolean;
+  preventCloseOnTransition?: boolean;
 };
 ```
 
-### 4. Create the Screen Component
+For sheet presentation options on actual sheet screens, use
+`SheetNavigationOptions`, which aliases True Sheet navigator options:
 
-Create your screen component that implements the template and handles the business logic:
+```ts
+export type { TrueSheetNavigationOptions as SheetNavigationOptions };
+```
 
-```typescript jsx
-// packages/module/your-module/src/pages/yourNewScreen.tsx
-import { useTheme } from '@lace-lib/ui-toolkit';
-import { YourNewTemplate } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo } from 'react';
-import { useTranslation } from '@lace-contract/i18n';
+Routers commonly apply shared sheet options through `SheetStack.Group`.
 
-import type { StackScreenProps } from '@lace-lib/navigation';
-import type { StackRoutes } from '@lace-lib/navigation';
+## Using Screen Navigation In Components
 
-export const YourNewScreen = ({
+Prefer screen props whenever you are inside a screen component.
+
+### Stack Screen Example
+
+```tsx
+import { StackRoutes, type StackScreenProps } from '@lace-lib/navigation';
+
+export const WalletSettings = ({
   navigation,
-  route: {
-    params: { someParam, optionalParam },
-  },
-}: StackScreenProps<StackRoutes.YourNewScreen>) => {
-  const { t } = useTranslation();
-  const { theme } = useTheme();
+  route,
+}: StackScreenProps<StackRoutes.WalletSettings>) => {
+  const { walletId } = route.params;
 
-  // Prepare data for the template
-  const templateData = useMemo(
-    () => ({
-      title: t('your.new.screen.title'),
-      description: t('your.new.screen.description'),
-      items: [
-        { id: '1', label: 'Param 1', value: someParam },
-        {
-          id: '2',
-          label: 'Param 2',
-          value: optionalParam?.toString() || 'N/A',
-        },
-      ],
-    }),
-    [t, someParam, optionalParam],
-  );
+  return <Button title="Go Back" onPress={() => navigation.goBack()} />;
+};
+```
 
-  const handleAction = useCallback(() => {
-    // Your business logic here
-    console.log('Action triggered with param:', someParam);
-  }, [someParam]);
+### Tab Screen Example
 
-  const handleItemPress = useCallback((itemId: string) => {
-    // Handle item selection
-    console.log('Item pressed:', itemId);
-  }, []);
+```tsx
+import {
+  StackRoutes,
+  TabRoutes,
+  type TabScreenProps,
+} from '@lace-lib/navigation';
 
+export const AccountCenter = ({
+  navigation,
+}: TabScreenProps<TabRoutes.AccountCenter>) => {
   return (
-    <YourNewTemplate
-      {...templateData}
-      onAction={handleAction}
-      onItemPress={handleItemPress}
+    <Button
+      title="Wallet Settings"
+      onPress={() =>
+        navigation.navigate(StackRoutes.WalletSettings, {
+          walletId: 'wallet123',
+        })
+      }
     />
   );
 };
 ```
 
-For sheet screens:
+### Sheet Screen Example
 
-```typescript jsx
-// packages/module/your-module/src/components/YourNewSheet.tsx
-import { useTranslation } from '@lace-contract/i18n';
+```tsx
 import {
   NavigationControls,
+  SheetRoutes,
   type SheetScreenProps,
 } from '@lace-lib/navigation';
-import { YourNewSheet as YourNewSheetTemplate } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo } from 'react';
 
-import type { SheetRoutes } from '@lace-lib/navigation';
+export const RemoveAccount = ({
+  route,
+}: SheetScreenProps<SheetRoutes.RemoveAccount>) => {
+  const { walletId, accountId } = route.params;
+
+  return (
+    <Button title="Close" onPress={() => NavigationControls.closeSheet()} />
+  );
+};
+```
+
+## Extending Sheet Params
+
+`ExtendableSheetParams` exists for module augmentation of selected sheet params.
+The current built-in consumer is `SheetRoutes.SelectAccount`:
+
+```ts
+export interface ExtendableSheetParams {}
+
+type ExtendedParams<K extends string> = K extends keyof ExtendableSheetParams
+  ? ExtendableSheetParams[K]
+  : Record<string, never>;
+
+export type SheetParameterList = {
+  [SheetRoutes.SelectAccount]: ExtendedParams<'SelectAccount'>;
+};
+```
+
+Modules can augment it like this:
+
+```ts
+declare module '@lace-lib/navigation' {
+  interface ExtendableSheetParams {
+    SelectAccount: {
+      accountId: string;
+      source: 'send' | 'staking';
+    };
+  }
+}
+```
+
+## Creating A New Screen
+
+### 1. Add The Route
+
+Choose the owning navigator and add the route to
+`packages/lib/navigation/src/types/routes.ts`.
+
+```ts
+export enum SheetRoutes {
+  RootStack = 'RootStack',
+  YourNewSheet = 'YourNewSheet',
+}
+```
+
+### 2. Add The Params
+
+Update `packages/lib/navigation/src/types/index.ts`.
+
+```ts
+export type SheetParameterList = {
+  [SheetRoutes.RootStack]: NavigatorScreenParams<StackParameterList>;
+  [SheetRoutes.YourNewSheet]: {
+    title: string;
+  };
+};
+```
+
+### 3. Create The Screen
+
+```tsx
+import type { SheetScreenProps } from '@lace-lib/navigation';
 
 export const YourNewSheet = ({
-  route: {
-    params: { data },
-  },
+  route,
 }: SheetScreenProps<SheetRoutes.YourNewSheet>) => {
-  const { t } = useTranslation();
-
-  // Prepare data for the template
-  const templateData = useMemo(
-    () => ({
-      title: t('your.new.sheet.title'),
-      message: t('your.new.sheet.message', { data }),
-      confirmButtonLabel: t('your.new.sheet.confirm'),
-      cancelButtonLabel: t('your.new.sheet.cancel'),
-    }),
-    [t, data],
-  );
-
-  const handleConfirm = useCallback(() => {
-    // Your business logic here
-    console.log('Confirmed with data:', data);
-    NavigationControls.sheets.close();
-  }, [data]);
-
-  const handleCancel = useCallback(() => {
-    NavigationControls.sheets.close();
-  }, []);
-
-  return (
-    <YourNewSheetTemplate
-      {...templateData}
-      onConfirm={handleConfirm}
-      onCancel={handleCancel}
-    />
-  );
+  return <Text>{route.params.title}</Text>;
 };
 ```
 
-### 5. Export the Screen in Module Addons
+### 4. Export It Through Addons
 
-Add your screen to the appropriate addon function in your module:
-
-```typescript jsx
-// packages/module/your-module/src/addons/stackPages.tsx
-import { Stack, StackRoutes } from '@lace-lib/navigation';
-import React from 'react';
-
-import { YourNewScreen } from '../pages/yourNewScreen';
-
-import type { AvailableAddons } from '..';
-import type { ContextualLaceInit } from '@lace-contract/module';
-
-export const stackPages: ContextualLaceInit<
-  React.ReactNode,
-  AvailableAddons
-> = () => (
-  <React.Fragment key="your-module-stack-pages-addons">
-    <Stack.Screen name={StackRoutes.YourNewScreen} component={YourNewScreen} />
-  </React.Fragment>
-);
-
-export default stackPages;
-```
-
-For tab pages:
-
-```typescript jsx
-// packages/module/your-module/src/addons/tabPages.tsx
-import { Tab, TabRoutes } from '@lace-lib/navigation';
-import { Icon } from '@lace-lib/ui-toolkit';
-import React from 'react';
-
-import { YourNewTab } from '../pages/yourNewTab';
-
-import type { AvailableAddons } from '..';
-import type { ContextualLaceInit } from '@lace-contract/module';
-
-const tabPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
-  <React.Fragment key="your-module-tab-pages-addons">
-    <Tab.Screen
-      name={TabRoutes.YourNewTab}
-      component={YourNewTab}
-      options={{ tabBarIcon: () => <Icon name="YourIcon" size={18} /> }}
-    />
-  </React.Fragment>
-);
-
-export default tabPages;
-```
-
-For sheet pages:
-
-```typescript jsx
-// packages/module/your-module/src/addons/sheetPages.tsx
+```tsx
+// packages/module/your-module/src/addons/loadSheetPages.tsx
 import { SheetRoutes, SheetStack } from '@lace-lib/navigation';
-import React from 'react';
 
-import { YourNewSheet } from '../components/YourNewSheet';
-
-import type { AvailableAddons } from '..';
-import type { ContextualLaceInit } from '@lace-contract/module';
-
-const loadSheetPages: ContextualLaceInit<
-  React.ReactNode,
-  AvailableAddons
-> = () => {
-  return (
-    <>
-      <SheetStack.Screen
-        name={SheetRoutes.YourNewSheet}
-        component={YourNewSheet}
-      />
-    </>
-  );
-};
-
-export default loadSheetPages;
+export const loadSheetPages = () => (
+  <SheetStack.Screen name={SheetRoutes.YourNewSheet} component={YourNewSheet} />
+);
 ```
 
-### 6. Register Addons in Module Index
+Equivalent addon hooks exist for stack pages, tab pages, and global overlays.
 
-Make sure your module exports the addon functions in its main index file:
+## Router Notes
 
-```typescript
-// packages/module/your-module/src/index.ts
-const yourModule = inferModuleContext({
-  moduleName: ModuleName('your-module'),
-  implements: implementsContracts,
-  dependsOn: dependsOnContracts,
-  addons: {
-    loadStackPages: async () => import('./addons/stackPages'),
-    loadTabPages: async () => import('./addons/tabPages'),
-    loadSheetPages: async () => import('./addons/sheetPages'),
-  },
-});
-```
+The routers in `apps/lace-mobile` and `apps/lace-extension` share the same
+navigation tree, with a few platform-specific differences:
+
+- mobile passes `linking` into `NavigationContainer`
+- extension disables `documentTitle`
+- extension wraps the app in `TrueSheetProvider`
+- mobile adds Android back handling for sheet dismissal
+
+Both routers use the same `navigationRef`, `NavigationControls`, and
+`useNavigationObservability()` hook.
+
+## Observability
+
+`useNavigationObservability(navigationRef)` exposes:
+
+- `onNavigationReady`
+- `onNavigationStateChange`
+
+These are wired directly into the root `NavigationContainer` and inspect the
+single nested state tree to emit breadcrumbs for:
+
+- initial navigation readiness
+- navigation state changes
+- one-time route load events
 
 ## Module System Integration
 
-The navigation system is deeply integrated with the Lace module system. Each module can contribute navigation pages through addon functions, allowing for:
+Navigation integrates with the module system through dynamic addon loading:
 
-- **Modular Architecture**: Features can be developed independently and contribute to navigation
-- **Dynamic Loading**: Pages are loaded asynchronously based on available modules
-- **Type Safety**: Full TypeScript support with parameter validation
-- **Feature Flags**: Modules can be conditionally loaded based on feature flags
+- `loadStackPages`: add stack screens under `RootStack`
+- `loadTabPages`: add tab screens under the `Home` screen
+- `loadGlobalOverlays`: add non-navigation overlay UI outside the container
+- `loadSheetPages`: add sheet screens to `SheetStack.Group`
 
-This architecture enables the Lace platform to have a flexible, extensible navigation system that can adapt to different configurations and feature sets.
+## Source Of Truth
+
+When in doubt, use code rather than this README:
+
+- `packages/lib/navigation/src/core/index.ts`
+- `packages/lib/navigation/src/core/navigation-controls.ts`
+- `packages/lib/navigation/src/core/navigationReferences.ts`
+- `packages/lib/navigation/src/types/routes.ts`
+- `packages/lib/navigation/src/types/index.ts`
+- `apps/lace-mobile/src/app/Router.tsx`
+- `apps/lace-extension/src/Router.tsx`

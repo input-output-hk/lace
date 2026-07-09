@@ -13,6 +13,29 @@ import type {
 } from '../src/mobile/services/cip30-message-handler';
 import type { CardanoProvider } from '@lace-contract/cardano-context';
 import type { AuthorizedDappsDataSlice } from '@lace-contract/dapp-connector';
+import type { AnyAccount, AnyWallet } from '@lace-contract/wallet-repo';
+
+const cardanoAccount = (id: string): AnyAccount =>
+  ({
+    accountId: AccountId(id),
+    blockchainName: 'Cardano',
+  } as unknown as AnyAccount);
+
+const bitcoinAccount = (id: string): AnyAccount =>
+  ({
+    accountId: AccountId(id),
+    blockchainName: 'Bitcoin',
+  } as unknown as AnyAccount);
+
+const wallet = (id: string): AnyWallet =>
+  ({ walletId: id } as unknown as AnyWallet);
+
+const oneWallet: AnyWallet[] = [wallet('wallet-1')];
+
+const persistedDapp = (origin: string): AuthorizedDappsDataSlice =>
+  ({
+    Cardano: [{ dapp: { origin } }],
+  } as AuthorizedDappsDataSlice);
 
 const createMockCardanoProvider = (): CardanoProvider =>
   ({
@@ -91,28 +114,181 @@ describe('handleCip30Message', () => {
       );
       expectSuccessResponse(result, 'req-1', false);
     });
-  });
 
-  describe('enable', () => {
-    it('returns success immediately when dApp is already session-authorized', async () => {
+    it('returns true when not session-authorized but persisted + single wallet with single Cardano account', async () => {
       const result = await handleCip30Message(
-        createRequest('req-1', 'enable'),
+        createRequest('req-1', 'isEnabled'),
         'https://dapp.example',
         createMockDeps({
-          isSessionAuthorized: (o: string) => o === 'https://dapp.example',
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1')]),
+          allWallets$: of(oneWallet),
         }),
       );
       expectSuccessResponse(result, 'req-1', true);
     });
 
-    it('requires authorization when only persistently authorized (session not set up)', async () => {
+    it('returns false when persisted but multi-account (still needs user pick)', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'isEnabled'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1'), cardanoAccount('acc-2')]),
+          allWallets$: of(oneWallet),
+        }),
+      );
+      expectSuccessResponse(result, 'req-1', false);
+    });
+
+    it('returns true when persisted + multi-account but the origin already has a session account', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'isEnabled'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1'), cardanoAccount('acc-2')]),
+          allWallets$: of(oneWallet),
+          getAccountIdForOrigin: (o: string) =>
+            o === 'https://dapp.example' ? AccountId('acc-2') : undefined,
+        }),
+      );
+      expectSuccessResponse(result, 'req-1', true);
+    });
+
+    it('returns false when persisted with one Cardano account but multiple wallets', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'isEnabled'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1')]),
+          allWallets$: of([wallet('wallet-1'), wallet('wallet-2')]),
+        }),
+      );
+      expectSuccessResponse(result, 'req-1', false);
+    });
+  });
+
+  describe('enable', () => {
+    it('does not short-circuit on session authorization alone — re-evaluates so website-side disconnect can re-prompt', async () => {
+      // Session-auth alone no longer short-circuits enable(); without
+      // persisted + 1 wallet + 1 Cardano account, must prompt.
       const result = await handleCip30Message(
         createRequest('req-1', 'enable'),
         'https://dapp.example',
         createMockDeps({
-          authorizedDapps$: of({
-            Cardano: [{ dapp: { origin: 'https://dapp.example' } }],
-          } as AuthorizedDappsDataSlice),
+          isSessionAuthorized: (o: string) => o === 'https://dapp.example',
+          allAccounts$: of([cardanoAccount('acc-1')]),
+          allWallets$: of(oneWallet),
+        }),
+      );
+      expect(result).toEqual({
+        type: 'authorization_required',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+      });
+    });
+
+    it('requires authorization when persisted + multi-account (cannot auto-pick)', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1'), cardanoAccount('acc-2')]),
+        }),
+      );
+      expect(result).toEqual({
+        type: 'authorization_required',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+      });
+    });
+
+    it('returns silent_authorization with the previously selected account when persisted + multi-account + origin has a session account', async () => {
+      const sessionAccount = cardanoAccount('acc-2');
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1'), sessionAccount]),
+          allWallets$: of(oneWallet),
+          getAccountIdForOrigin: (o: string) =>
+            o === 'https://dapp.example' ? AccountId('acc-2') : undefined,
+        }),
+      );
+      expect(result).toEqual({
+        type: 'silent_authorization',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+        account: sessionAccount,
+      });
+    });
+
+    it('requires authorization when single-account but dapp NOT persisted', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          allAccounts$: of([cardanoAccount('acc-1')]),
+        }),
+      );
+      expect(result.type).toBe('authorization_required');
+    });
+
+    it('returns silent_authorization with the only Cardano account when persisted + single wallet with single Cardano account', async () => {
+      const onlyAccount = cardanoAccount('acc-1');
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([onlyAccount]),
+          allWallets$: of(oneWallet),
+        }),
+      );
+      expect(result).toEqual({
+        type: 'silent_authorization',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+        account: onlyAccount,
+      });
+    });
+
+    it('ignores non-Cardano accounts in the auto-grant count', async () => {
+      const onlyCardano = cardanoAccount('acc-1');
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([onlyCardano, bitcoinAccount('btc-1')]),
+          allWallets$: of(oneWallet),
+        }),
+      );
+      expect(result).toEqual({
+        type: 'silent_authorization',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+        account: onlyCardano,
+      });
+    });
+
+    it('requires authorization when persisted with one Cardano account but multiple wallets', async () => {
+      const result = await handleCip30Message(
+        createRequest('req-1', 'enable'),
+        'https://dapp.example',
+        createMockDeps({
+          authorizedDapps$: of(persistedDapp('https://dapp.example')),
+          allAccounts$: of([cardanoAccount('acc-1')]),
+          allWallets$: of([wallet('wallet-1'), wallet('wallet-2')]),
         }),
       );
       expect(result).toEqual({

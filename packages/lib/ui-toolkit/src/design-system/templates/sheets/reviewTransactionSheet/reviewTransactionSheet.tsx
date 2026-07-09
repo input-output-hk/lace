@@ -1,6 +1,6 @@
 import type { ImageURISource } from 'react-native';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
@@ -17,7 +17,6 @@ import {
   Row,
   Text,
 } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
 import { Sheet } from '../../../organisms';
 import { getAssetImageUrl, truncateText } from '../../../util';
 
@@ -25,6 +24,7 @@ import type { IconName } from '../../../atoms/icons/Icon';
 
 type Address = {
   value: string;
+  resolvedValue?: string;
   proprietaryState: 'Foreign' | 'Own';
 };
 
@@ -34,7 +34,6 @@ type TransactionDetail = {
 };
 
 interface ReviewTransactionSheetProps {
-  headerTitle: string;
   labels: {
     accountLabel: string;
     sendingLabel: string;
@@ -45,12 +44,7 @@ interface ReviewTransactionSheetProps {
     estimatedFeeLabel: string;
     totalAndFeesLabel: string;
     totalBreakDownLabel: string;
-    nextButtonLabel: string;
   };
-  backButtonPress: () => void;
-  nextButtonPress: () => void;
-  /** When true, disables the next/send button (e.g. while awaiting auth or processing). */
-  nextButtonDisabled?: boolean;
   values: {
     accountValue: {
       name: string;
@@ -68,15 +62,17 @@ interface ReviewTransactionSheetProps {
     totalAndFeesValue: TransactionDetail;
     assetsToSend: AssetToSend[];
   };
+  /** Optional node rendered inside `Sheet.Scroll` immediately after the
+   *  account row (before the sending / recipient rows). Used by the wallet
+   *  app to surface an inline security-alert for a compromised source
+   *  account without navigating away from the review sheet. */
+  belowAccountSlot?: React.ReactNode;
 }
 
 export const ReviewTransactionTemplate = ({
-  headerTitle,
   labels,
   values,
-  backButtonPress,
-  nextButtonPress,
-  nextButtonDisabled = false,
+  belowAccountSlot,
 }: ReviewTransactionSheetProps) => {
   const {
     accountLabel,
@@ -88,14 +84,12 @@ export const ReviewTransactionTemplate = ({
     estimatedFeeLabel,
     totalAndFeesLabel,
     totalBreakDownLabel,
-    nextButtonLabel,
   } = labels;
   const {
     accountValue,
     recipientsAddressValue,
     expiresByDate,
     notesValue,
-    // amountValue,
     estimatedFeeValue,
     totalAndFeesValue,
     assetsToSend,
@@ -106,208 +100,190 @@ export const ReviewTransactionTemplate = ({
       ? 'primary'
       : 'negative';
 
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
-
   return (
-    <>
-      <SheetHeader
-        title={headerTitle}
-        leftIconOnPress={backButtonPress}
-        testID={'review-transaction-sheet-header'}
-      />
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={scrollContainerStyle}>
-        <Column style={styles.container} gap={spacing.L}>
-          <Row justifyContent="space-between">
-            <Text.M
-              variant="secondary"
-              testID="review-transaction-account-label">
-              {accountLabel}
-            </Text.M>
+    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+      <Column style={styles.container} gap={spacing.L}>
+        <Row justifyContent="space-between">
+          <Text.M variant="secondary" testID="review-transaction-account-label">
+            {accountLabel}
+          </Text.M>
+          <CustomTag
+            label={accountValue.name}
+            imageSource={accountValue.image}
+            icon={
+              accountValue.blockchainName ? (
+                <Icon name={accountValue.blockchainName} size={16} />
+              ) : undefined
+            }
+            color="white"
+            testID="review-transaction-account-value"
+          />
+        </Row>
+        {belowAccountSlot}
+        <Divider />
+        <Row justifyContent="space-between">
+          <Text.M variant="secondary" testID="review-transaction-sending-label">
+            {sendingLabel}
+          </Text.M>
+          <Column alignItems="flex-end" gap={spacing.M}>
+            {assetsToSend?.map((asset, index) => (
+              <Row
+                alignItems="center"
+                gap={spacing.S}
+                key={asset.token.tokenId}
+                testID={`review-transaction-asset-${index}`}>
+                <Avatar
+                  content={{
+                    ...(asset.token.metadata?.image && {
+                      img: {
+                        uri: getAssetImageUrl(asset.token.metadata.image),
+                      },
+                    }),
+                    fallback: asset.token.displayShortName,
+                  }}
+                  size={25}
+                  shape="squared"
+                  testID={`review-transaction-asset-${index}-avatar`}
+                />
+
+                <Text.M
+                  variant="secondary"
+                  testID={`review-transaction-asset-${index}-value`}>
+                  {asset.value}
+                </Text.M>
+
+                <Text.M testID={`review-transaction-asset-${index}-short-name`}>
+                  {asset.token.displayShortName}
+                </Text.M>
+              </Row>
+            ))}
+          </Column>
+        </Row>
+        <Divider />
+
+        <Row justifyContent="space-between" gap={spacing.S}>
+          <Text.M
+            numberOfLines={2}
+            style={styles.recipientsAddressLabel}
+            variant="secondary"
+            testID="review-transaction-recipients-address-label">
+            {recipientsAddressLabel}
+          </Text.M>
+          <Column
+            gap={spacing.XS}
+            alignItems="flex-end"
+            style={styles.recipientValues}>
             <CustomTag
-              label={accountValue.name}
-              imageSource={accountValue.image}
-              icon={
-                accountValue.blockchainName ? (
-                  <Icon name={accountValue.blockchainName} size={16} />
-                ) : undefined
-              }
-              color="white"
-              testID="review-transaction-account-value"
+              label={recipientsAddressValue.proprietaryState}
+              backgroundType="semiTransparent"
+              color={recipientAddressLabelColor}
+              size="S"
+              testID="review-transaction-recipients-address-proprietary-state"
             />
-          </Row>
-          <Divider />
-          <Row justifyContent="space-between">
+
             <Text.M
-              variant="secondary"
-              testID="review-transaction-sending-label">
-              {sendingLabel}
+              numberOfLines={1}
+              ellipsizeMode="middle"
+              testID="review-transaction-recipients-address-value">
+              {truncateText(recipientsAddressValue.value)}
             </Text.M>
-            <Column alignItems="flex-end" gap={spacing.M}>
-              {assetsToSend?.map((asset, index) => (
-                <Row
-                  alignItems="center"
-                  gap={spacing.S}
-                  key={asset.token.tokenId}
-                  testID={`review-transaction-asset-${index}`}>
-                  <Avatar
-                    content={{
-                      ...(asset.token.metadata?.image && {
-                        img: {
-                          uri: getAssetImageUrl(asset.token.metadata.image),
-                        },
-                      }),
-                      fallback: asset.token.displayShortName,
-                    }}
-                    size={25}
-                    shape="squared"
-                    testID={`review-transaction-asset-${index}-avatar`}
-                  />
-
-                  <Text.M
-                    variant="secondary"
-                    testID={`review-transaction-asset-${index}-value`}>
-                    {asset.value}
-                  </Text.M>
-
-                  <Text.M
-                    testID={`review-transaction-asset-${index}-short-name`}>
-                    {asset.token.displayShortName}
-                  </Text.M>
-                </Row>
-              ))}
-            </Column>
-          </Row>
-          <Divider />
-
-          <Row justifyContent="space-between" gap={spacing.S}>
-            <Text.M
-              numberOfLines={2}
-              style={styles.recipientsAddressLabel}
-              variant="secondary"
-              testID="review-transaction-recipients-address-label">
-              {recipientsAddressLabel}
-            </Text.M>
-            <Column
-              gap={spacing.XS}
-              alignItems="flex-end"
-              style={styles.recipientValues}>
-              <CustomTag
-                label={recipientsAddressValue.proprietaryState}
-                backgroundType="semiTransparent"
-                color={recipientAddressLabelColor}
-                size="S"
-                testID="review-transaction-recipients-address-proprietary-state"
-              />
-
+            {!!recipientsAddressValue.resolvedValue && (
               <Text.M
                 numberOfLines={1}
                 ellipsizeMode="middle"
-                testID="review-transaction-recipients-address-value">
-                {truncateText(recipientsAddressValue.value)}
+                variant="secondary"
+                testID="review-transaction-recipients-address-resolved-value">
+                {truncateText(recipientsAddressValue.resolvedValue)}
               </Text.M>
-            </Column>
-          </Row>
-          <Divider />
-          {!!expiresByDate.date && !!expiresByDate.time && (
-            <>
-              <Row justifyContent="space-between">
-                <Text.M
-                  variant="secondary"
-                  testID="review-transaction-expires-by-label">
-                  {expiresByLabel}
-                </Text.M>
-                <Column alignItems="flex-end">
-                  <Text.M testID="review-transaction-expires-by-date">
-                    {expiresByDate.date}
-                  </Text.M>
-                  <Text.M
-                    variant="secondary"
-                    testID="review-transaction-expires-by-time">
-                    {expiresByDate.time}
-                  </Text.M>
-                </Column>
-              </Row>
-              <Divider />
-            </>
-          )}
-          {!!notesValue && (
-            <>
-              <Row justifyContent="space-between">
-                <Text.M
-                  variant="secondary"
-                  testID="review-transaction-notes-label">
-                  {notesLabel}
-                </Text.M>
-                <Text.M
-                  variant="secondary"
-                  testID="review-transaction-notes-value">
-                  {notesValue}
-                </Text.M>
-              </Row>
-              <Divider />
-            </>
-          )}
-
-          <Text.M
-            style={styles.totalBreakDownLabel}
-            testID="review-transaction-total-breakdown-label">
-            {totalBreakDownLabel}
-          </Text.M>
-          <Divider />
-          <Row justifyContent="space-between">
-            <Text.M
-              variant="secondary"
-              testID="review-transaction-estimated-fee-label">
-              {estimatedFeeLabel}
-            </Text.M>
-            <Column alignItems="flex-end">
-              <Text.M testID="review-transaction-estimated-fee-value">
-                {`${estimatedFeeValue.value} ${estimatedFeeValue.token.displayShortName}`}
+            )}
+          </Column>
+        </Row>
+        <Divider />
+        {!!expiresByDate.date && !!expiresByDate.time && (
+          <>
+            <Row justifyContent="space-between">
+              <Text.M
+                variant="secondary"
+                testID="review-transaction-expires-by-label">
+                {expiresByLabel}
               </Text.M>
-              {estimatedFeeValue.amount && (
+              <Column alignItems="flex-end">
+                <Text.M testID="review-transaction-expires-by-date">
+                  {expiresByDate.date}
+                </Text.M>
                 <Text.M
                   variant="secondary"
-                  testID="review-transaction-estimated-fee-amount">
-                  {`${estimatedFeeValue.amount} ${estimatedFeeValue.currency}`}
+                  testID="review-transaction-expires-by-time">
+                  {expiresByDate.time}
                 </Text.M>
-              )}
-            </Column>
-          </Row>
-          <Divider />
-          <Row justifyContent="space-between">
-            <Text.M
-              variant="secondary"
-              testID="review-transaction-total-and-fees-label">
-              {totalAndFeesLabel}
-            </Text.M>
-            <Column alignItems="flex-end">
-              <Text.M testID="review-transaction-ticker-value-and-symbol">
-                {totalAndFeesValue.tickerValueAndSymbol}
+              </Column>
+            </Row>
+            <Divider />
+          </>
+        )}
+        {!!notesValue && (
+          <>
+            <Row justifyContent="space-between">
+              <Text.M
+                variant="secondary"
+                testID="review-transaction-notes-label">
+                {notesLabel}
               </Text.M>
               <Text.M
                 variant="secondary"
-                testID="review-transaction-currency-value-and-name">
-                {totalAndFeesValue.currencyValueAndName}
+                testID="review-transaction-notes-value">
+                {notesValue}
               </Text.M>
-            </Column>
-          </Row>
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: nextButtonLabel,
-          onPress: nextButtonPress,
-          disabled: nextButtonDisabled,
-          testID: 'review-transaction-sheet-next-button',
-        }}
-      />
-    </>
+            </Row>
+            <Divider />
+          </>
+        )}
+
+        <Text.M
+          style={styles.totalBreakDownLabel}
+          testID="review-transaction-total-breakdown-label">
+          {totalBreakDownLabel}
+        </Text.M>
+        <Divider />
+        <Row justifyContent="space-between">
+          <Text.M
+            variant="secondary"
+            testID="review-transaction-estimated-fee-label">
+            {estimatedFeeLabel}
+          </Text.M>
+          <Column alignItems="flex-end">
+            <Text.M testID="review-transaction-estimated-fee-value">
+              {`${estimatedFeeValue.value} ${estimatedFeeValue.token.displayShortName}`}
+            </Text.M>
+            {!!estimatedFeeValue.amount && (
+              <Text.M
+                variant="secondary"
+                testID="review-transaction-estimated-fee-amount">
+                {`${estimatedFeeValue.amount} ${estimatedFeeValue.currency}`}
+              </Text.M>
+            )}
+          </Column>
+        </Row>
+        <Divider />
+        <Row justifyContent="space-between">
+          <Text.M
+            variant="secondary"
+            testID="review-transaction-total-and-fees-label">
+            {totalAndFeesLabel}
+          </Text.M>
+          <Column alignItems="flex-end">
+            <Text.M testID="review-transaction-ticker-value-and-symbol">
+              {totalAndFeesValue.tickerValueAndSymbol}
+            </Text.M>
+            <Text.M
+              variant="secondary"
+              testID="review-transaction-currency-value-and-name">
+              {totalAndFeesValue.currencyValueAndName}
+            </Text.M>
+          </Column>
+        </Row>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 

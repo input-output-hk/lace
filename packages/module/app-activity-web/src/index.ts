@@ -1,12 +1,20 @@
 import {
+  appStoreContract,
+  performAppReloadDependencyContract,
+} from '@lace-contract/app';
+import {
   appLockActivityChannelAddon,
   appLockStoreContract,
 } from '@lace-contract/app-lock';
+import { featureFlagRefreshTriggerDependencyContract } from '@lace-contract/feature';
 import {
   combineContracts,
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
+import { viewsStoreContract } from '@lace-contract/views';
+
+import store from './store';
 
 import type {
   LaceModuleMap,
@@ -18,13 +26,20 @@ import type {
 
 const implementsContracts = combineContracts([
   appLockActivityChannelAddon,
+  featureFlagRefreshTriggerDependencyContract,
+  performAppReloadDependencyContract,
 ] as const);
-const dependsOnContracts = combineContracts([appLockStoreContract] as const);
+const dependsOnContracts = combineContracts([
+  appStoreContract,
+  appLockStoreContract,
+  viewsStoreContract,
+] as const);
 
 const webModule = inferModuleContext({
   moduleName: ModuleName('app-activity-web'),
   implements: implementsContracts,
   dependsOn: dependsOnContracts,
+  store,
   addons: {
     loadActivityChannel: async () =>
       import('./addons/activity-channel-extension'),

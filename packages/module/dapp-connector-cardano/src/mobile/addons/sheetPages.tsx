@@ -17,9 +17,27 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => {
       <SheetStack.Screen
         name={SheetRoutes.AuthorizeDapp}
         component={AuthorizeDapp}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
       />
-      <SheetStack.Screen name={SheetRoutes.SignData} component={SignData} />
-      <SheetStack.Screen name={SheetRoutes.SignTx} component={SignTx} />
+      <SheetStack.Screen
+        name={SheetRoutes.SignData}
+        component={SignData}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
+      />
+      <SheetStack.Screen
+        name={SheetRoutes.SignTx}
+        component={SignTx}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
+      />
     </React.Fragment>
   );
 };

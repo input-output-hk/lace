@@ -1,10 +1,12 @@
 import { type SheetScreenProps } from '@lace-lib/navigation';
 import {
+  AccountSecurityAlertInline,
   BuySheet as BuySheetTemplate,
+  Sheet,
   Text,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { useBuySheet } from './useBuySheet';
 
@@ -21,6 +23,31 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
     handleAccountSelection,
     t,
   } = useBuySheet(props);
+  const heading = t('v2.buy-flow.heading.sheet');
+  const buttonLabel = t('v2.buy-flow.button');
+
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: <Sheet.Header title={heading} testID="buy-sheet-header" />,
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: buttonLabel,
+            onPress: handleOpenBanxaUrl,
+            preIconName: 'Link',
+            iconColor: theme.brand.white,
+            testID: 'fund-my-wallet-button',
+          }}
+        />
+      ),
+    });
+  }, [
+    props.navigation,
+    heading,
+    buttonLabel,
+    handleOpenBanxaUrl,
+    theme.brand.white,
+  ]);
 
   const renderDisclaimerText = useCallback(() => {
     const text = String(t('v2.buy-flow.disclaimer.text'));
@@ -52,17 +79,19 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
 
   return (
     <BuySheetTemplate
-      heading={t('v2.buy-flow.heading.sheet')}
       accountName={accountName || t('v2.generic.account.select')}
       dropdownItems={dropdownItems || []}
       selectedAccountId={selectedAccount?.accountId}
       actionText={actionText}
       disclaimerTitle={t('v2.buy-flow.disclaimer.title')}
       disclaimerText={renderDisclaimerText()}
-      buttonLabel={t('v2.buy-flow.button')}
       onAccountSelection={handleAccountSelection}
-      onBuyPress={handleOpenBanxaUrl}
       testID="buy-sheet"
+      belowAccountSlot={
+        selectedAccount?.accountId ? (
+          <AccountSecurityAlertInline accountId={selectedAccount.accountId} />
+        ) : undefined
+      }
     />
   );
 };

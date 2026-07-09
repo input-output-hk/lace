@@ -70,11 +70,11 @@ export const NetworkInfoCard = ({
 
       <Column style={style.elementsWrapper}>
         <Row alignItems="center" justifyContent="space-between">
-          <Column gap={spacing.M}>
+          <Column gap={spacing.M} style={style.flexElement}>
             <CardElement title={currentEpochTitle} value={currentEpochValue} />
             <CardElement title={totalPoolsTitle} value={totalPoolsValue} />
           </Column>
-          <Column gap={spacing.M}>
+          <Column gap={spacing.M} style={style.flexElement}>
             <CardElement title={stakedTitle} value={stakedValue} />
             <CardElement title={endEpochTitle} value={endEpochValue} />
           </Column>
@@ -96,5 +96,8 @@ const styles = (theme: Theme) =>
     },
     elementColumn: {
       flex: 0.3,
+    },
+    flexElement: {
+      flex: 1,
     },
   });

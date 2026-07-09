@@ -5,8 +5,11 @@ import {
   concat,
   filter,
   from,
+  map,
   mergeMap,
   of,
+  pairwise,
+  startWith,
   take,
   withLatestFrom,
 } from 'rxjs';
@@ -145,6 +148,94 @@ export const wizardMountedSideEffect: SideEffect = (
     }),
   );
 
+/**
+ * Emits v1 → v2 migration lifecycle events to analytics.
+ *
+ * Fires:
+ *   - `migration | v1 | started` — when migration is first detected with
+ *     `passwordMigrationDetected` (walletsPending > 0 indicates a real
+ *     migration, not the default empty state).
+ *   - `migration | v1 | succeeded { wasRequired: false }` — once at module
+ *     init, when the first observed migration status is 'not-required'.
+ *     Used to count users who did NOT need a migration.
+ *   - `migration | v1 | succeeded { wasRequired: true, ... }` — when status
+ *     transitions to 'completed' after being 'pending' or 'activating',
+ *     carrying the wallet count and duration captured at detection time.
+ *     The slice's `initialWalletCount` is reset to zero by
+ *     `passwordMigrationCompleted`, so closure state is used to carry the
+ *     count forward.
+ *
+ * Re-boots of a user with status === 'completed' (migration finished in a
+ * prior session) emit nothing — that user was counted on their original
+ * completion event.
+ */
+export const trackMigrationLifecycle: SideEffect = (
+  { migrateV1: { passwordMigrationDetected$ } },
+  { migrateV1: { selectPasswordMigrationStatus$ } },
+  { actions, now },
+) => {
+  // Carry the at-start wallet count and timestamp across into the completion
+  // event via a closure, since selector state is reset on completion.
+  let pendingCountAtStart: number | undefined;
+  let startedAtMs: number | undefined;
+
+  const started$ = passwordMigrationDetected$.pipe(
+    filter(({ payload }) => payload.length > 0),
+    map(({ payload }) => {
+      pendingCountAtStart = payload.length;
+      startedAtMs = now();
+      return actions.analytics.trackEvent({
+        eventName: 'migration | v1 | started',
+        payload: {
+          walletsPending: payload.length,
+        },
+      });
+    }),
+  );
+
+  const initialNotRequired$ = selectPasswordMigrationStatus$.pipe(
+    take(1),
+    filter(status => status === 'not-required'),
+    map(() =>
+      actions.analytics.trackEvent({
+        eventName: 'migration | v1 | succeeded',
+        payload: { wasRequired: false, walletsMigrated: 0 },
+      }),
+    ),
+  );
+
+  const completedTransition$ = selectPasswordMigrationStatus$.pipe(
+    startWith<'activating' | 'completed' | 'not-required' | 'pending'>(
+      'not-required',
+    ),
+    pairwise(),
+    filter(
+      ([previous, current]) =>
+        current === 'completed' &&
+        (previous === 'pending' || previous === 'activating'),
+    ),
+    map(() => {
+      const durationMs =
+        startedAtMs === undefined ? undefined : now() - startedAtMs;
+      const walletsMigrated = pendingCountAtStart ?? 0;
+      pendingCountAtStart = undefined;
+      startedAtMs = undefined;
+      return actions.analytics.trackEvent({
+        eventName: 'migration | v1 | succeeded',
+        payload: {
+          wasRequired: true,
+          walletsMigrated,
+          ...(durationMs !== undefined && { durationMs }),
+        },
+      });
+    }),
+  );
+
+  return from([started$, initialNotRequired$, completedTransition$]).pipe(
+    mergeMap(stream => stream),
+  );
+};
+
 export const makeHandleAuthenticationSetup =
   ({
     onSetupAuthentication,
@@ -173,6 +264,7 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async (
     deleteWalletSideEffect,
     cleanupOnCompletionSideEffect,
     wizardMountedSideEffect,
+    trackMigrationLifecycle,
     makeHandleAuthenticationSetup({
       onSetupAuthentication,
       setupAppLock,

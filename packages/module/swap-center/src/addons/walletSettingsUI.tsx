@@ -12,7 +12,7 @@ const settingsPageUICustomisation = () =>
         titleKey: 'v2.swap.liquidity-sources.settings-title',
         icon: 'FlowConnection',
         onPress: () => {
-          NavigationControls.sheets.navigate(SheetRoutes.SwapLiquiditySources);
+          NavigationControls.navigate(SheetRoutes.SwapLiquiditySources);
         },
       },
     ],

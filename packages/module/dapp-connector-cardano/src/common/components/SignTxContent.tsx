@@ -1,6 +1,7 @@
 import { useConfig } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import {
+  AccountSecurityAlertInline,
   Column,
   CustomTag,
   Divider,
@@ -33,6 +34,7 @@ import type { SlotDateTime } from '../utils/slot-datetime';
 import type { TransactionInfo } from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
+import type { AccountId } from '@lace-contract/wallet-repo';
 
 export interface SignTxContentDapp {
   name?: string;
@@ -55,6 +57,11 @@ export interface SignTxContentProps {
   currencyTicker: string | undefined;
   networkMagic: Cardano.NetworkMagic | undefined;
   isPartialSign?: boolean;
+  /** Account id of the wallet account that would sign this transaction.
+   *  When set, an `AccountSecurityAlertInline` renders at the top of the
+   *  sheet so the user is warned before authorizing a signature from a
+   *  compromised key. Null / undefined suppresses the alert. */
+  accountId?: AccountId;
 }
 
 export const SignTxContent = (props: SignTxContentProps) => {
@@ -74,6 +81,7 @@ export const SignTxContent = (props: SignTxContentProps) => {
     currencyTicker,
     networkMagic,
     isPartialSign = false,
+    accountId,
   } = props;
 
   const { theme } = useTheme();
@@ -139,6 +147,7 @@ export const SignTxContent = (props: SignTxContentProps) => {
 
   return (
     <Column gap={spacing.L}>
+      {accountId ? <AccountSecurityAlertInline accountId={accountId} /> : null}
       {isPartialSign && (
         <>
           <Text.XS style={{ fontWeight: 'bold' }}>

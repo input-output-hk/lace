@@ -1,9 +1,6 @@
 import { Cardano, ProviderFailure } from '@cardano-sdk/core';
 import { logger } from '@cardano-sdk/util-dev';
-import {
-  CardanoPaymentAddress,
-  CardanoRewardAccount,
-} from '@lace-contract/cardano-context';
+import { CardanoPaymentAddress } from '@lace-contract/cardano-context';
 import { HttpClientError, ProviderError } from '@lace-lib/util-provider';
 import { Timestamp } from '@lace-sdk/util';
 import { firstValueFrom } from 'rxjs';
@@ -156,7 +153,11 @@ describe('BlockfrostActivityProvider', () => {
 
     it('handles error on tx details fetch', async () => {
       const error = new HttpClientError(404, 'Transaction not found');
-      mockResponses(request, [[`txs/${txId}`, error]]);
+      mockResponses(request, [
+        [`txs/${txId}`, error],
+        [`txs/${txId}/cbor`, error],
+        [`txs/${txId}/utxos`, error],
+      ]);
 
       const result = await firstValueFrom(provider.getTransactionDetails(txId));
 
@@ -294,46 +295,26 @@ describe('BlockfrostActivityProvider', () => {
         ),
       );
     });
-  });
-  describe('getTotalAccountTransactionCount', () => {
-    const stakeAddress = CardanoRewardAccount(
-      'stake_test1uqhw4lq6p8x8l0p4k2q2kjnl3r7p4k2q2kjnl3r7p4k2q2kjnl3ra',
-    );
 
-    it('fetches total tx count for a stake address', async () => {
+    it('returns Ok([]) when Blockfrost responds 404 (address has no on-chain activity)', async () => {
+      // 404 from `addresses/{address}/transactions` means the address has
+      // never had a transaction — not a fetch failure. Returning Err would
+      // fail the per-account transaction-polling round and cause every
+      // subsequent tip change to re-trigger the same failure, locking the
+      // wallet into a perpetual "syncing" state on fresh mainnet wallets.
+      const error = new HttpClientError(404, 'Not Found');
       mockResponses(request, [
-        [
-          `accounts/${stakeAddress}/addresses/total`,
-          { data: { tx_count: 123 } },
-        ],
-      ]);
-
-      const count = (
-        await firstValueFrom(
-          provider.getTotalAccountTransactionCount(stakeAddress),
-        )
-      ).unwrap();
-
-      expect(count).toBe(123);
-    });
-
-    it('handles error when fetching total tx count', async () => {
-      const error = new HttpClientError(500, 'Internal server error');
-      mockResponses(request, [
-        [`accounts/${stakeAddress}/addresses/total`, error],
+        [`addresses/${addresses[0]}/transactions?count=10&order=desc`, error],
       ]);
 
       const result = await firstValueFrom(
-        provider.getTotalAccountTransactionCount(stakeAddress),
+        provider.getAddressTransactionHistory({
+          address: addresses[0],
+          numberOfItems: 10,
+        }),
       );
 
-      expect(result.expectErr('should be internal server error')).toEqual(
-        new ProviderError(
-          ProviderFailure.Unhealthy,
-          error,
-          'Internal server error',
-        ),
-      );
+      expect(result.expect('should treat 404 as empty')).toEqual([]);
     });
   });
 });

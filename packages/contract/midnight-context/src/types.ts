@@ -33,12 +33,10 @@ import type {
   SignatureVerifyingKey,
   ZswapSecretKeys,
 } from '@midnight-ntwrk/ledger-v8';
-import type { WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
-import type { Roles } from '@midnight-ntwrk/wallet-sdk-hd';
-import type {
-  TransactionHistoryEntry,
-  UnshieldedKeystore,
-} from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';
+import type { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
+import type { Roles } from '@midnight-ntwrk/wallet-sdk/hd';
+import type { UnshieldedKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import type { Observable } from 'rxjs';
 
 export type LockStatus = 'locked' | 'unlocked' | 'unlocking';
@@ -252,14 +250,14 @@ export type MidnightWallet = ObservableWalletFacade & {
   coinsByTokenType$: Observable<ObservableMidnightWalletCoinsByTokenType>;
   getTransactionHistoryEntryByHash: (
     hash: string,
-  ) => Observable<TransactionHistoryEntry | undefined>;
+  ) => Observable<WalletEntry | undefined>;
   networkId: MidnightSDKNetworkId;
   nightVerifyingKey: SignatureVerifyingKey;
   signData: (
     data: Uint8Array,
   ) => Observable<{ signature: string; verifyingKey: string }>;
   syncProgress$: Observable<MidnightWalletSyncProgress>;
-  transactionHistory$: Observable<readonly TransactionHistoryEntry[]>;
+  transactionHistory$: Observable<readonly WalletEntry[]>;
   walletId: WalletId;
 };
 

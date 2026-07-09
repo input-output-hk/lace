@@ -1,7 +1,11 @@
 import { Cardano } from '@cardano-sdk/core';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
-import { SendResultTemplate, StakeDelegationSheet } from '@lace-lib/ui-toolkit';
+import {
+  SendResultTemplate,
+  Sheet,
+  StakeDelegationSheet,
+} from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -23,6 +27,7 @@ export const NewDelegationSheet = (
   props: SheetScreenProps<SheetRoutes.NewDelegation>,
 ) => {
   const { t } = useTranslation();
+  const { navigation } = props;
   const { poolId, accountId } = props.route.params;
   const delegationProps = useNewDelegation(Cardano.PoolId(poolId), accountId);
   const delegationFlowState = useLaceSelector(
@@ -35,7 +40,7 @@ export const NewDelegationSheet = (
 
   useEffect(() => {
     if (delegationFlowState.status === 'Success') {
-      NavigationControls.sheets.navigate(SheetRoutes.DelegationSuccess);
+      NavigationControls.navigate(SheetRoutes.DelegationSuccess);
     }
   }, [delegationFlowState.status]);
 
@@ -49,7 +54,7 @@ export const NewDelegationSheet = (
 
   const handleClose = useCallback(() => {
     resetDelegationFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [resetDelegationFlow]);
 
   const errorDetails = useMemo(() => {
@@ -61,24 +66,71 @@ export const NewDelegationSheet = (
     };
   }, [delegationFlowState, t]);
 
+  useEffect(() => {
+    if (delegationFlowState.status === 'Error') {
+      navigation.setOptions({
+        header: (
+          <Sheet.Header
+            title={t('v2.staking.delegation.error.title')}
+            testID="send-result-sheet-header"
+          />
+        ),
+        footer: (
+          <Sheet.Footer
+            secondaryButton={{
+              label: t('v2.staking.delegation.error.close-button'),
+              onPress: handleClose,
+              testID: 'send-result-close-button',
+            }}
+            primaryButton={{
+              label: t('v2.staking.delegation.error.primary-button'),
+              onPress: handleRetry,
+              testID: 'send-result-primary-button',
+            }}
+          />
+        ),
+      });
+      return;
+    }
+
+    if (delegationProps) {
+      navigation.setOptions({
+        header: (
+          <Sheet.Header
+            title={delegationProps.headerTitle}
+            leftIconOnPress={navigation.goBack}
+          />
+        ),
+        footer: (
+          <Sheet.Footer
+            secondaryButton={{
+              label: delegationProps.cancelButtonLabel,
+              onPress: delegationProps.onCancelPress,
+            }}
+            primaryButton={{
+              label: delegationProps.delegateButtonLabel,
+              onPress: delegationProps.onDelegatePress,
+            }}
+          />
+        ),
+      });
+    }
+  }, [
+    navigation,
+    t,
+    delegationFlowState.status,
+    handleClose,
+    handleRetry,
+    delegationProps,
+  ]);
+
   if (delegationFlowState.status === 'Error') {
     return (
       <SendResultTemplate
-        headerTitle={t('v2.staking.delegation.error.title')}
         transactionState={{ status: 'failure', blockchain: 'Cardano' }}
         subtitle={t('v2.staking.delegation.error.subtitle')}
         icon={{ name: 'Sad', variant: 'solid', size: 64 }}
         errorDetails={errorDetails}
-        footer={{
-          closeButton: {
-            closeButtonLabel: t('v2.staking.delegation.error.close-button'),
-            closeButtonPress: handleClose,
-          },
-          primaryButton: {
-            primaryButtonLabel: t('v2.staking.delegation.error.primary-button'),
-            primaryButtonPress: handleRetry,
-          },
-        }}
       />
     );
   }

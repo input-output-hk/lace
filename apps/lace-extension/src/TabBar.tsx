@@ -14,6 +14,7 @@ type TabBarProps = {
   networkName: Network;
   laceButtonBadge?: LaceButtonBadgeProps;
   openNetworkSelectionSheet: () => void;
+  isOffline?: boolean;
 };
 
 export const TabBar = ({
@@ -22,6 +23,7 @@ export const TabBar = ({
   networkName,
   laceButtonBadge,
   openNetworkSelectionSheet,
+  isOffline,
 }: TabBarProps) => {
   const accountData = useTabBarAccountData();
 
@@ -33,6 +35,7 @@ export const TabBar = ({
       networkName={networkName}
       laceButtonBadge={laceButtonBadge}
       openNetworkSelectionSheet={openNetworkSelectionSheet}
+      isOffline={isOffline}
     />
   );
 };

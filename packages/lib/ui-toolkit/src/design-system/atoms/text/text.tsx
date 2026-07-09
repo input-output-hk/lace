@@ -8,7 +8,7 @@ import { useTheme } from '../../../design-tokens';
 type TextProps = RNTextProps & {
   size: 'header' | 'l' | 'm' | 'page-header' | 's' | 'xl' | 'xs';
   align?: TextStyle['textAlign'];
-  variant?: 'primary' | 'secondary' | 'tertiary';
+  variant?: 'negative' | 'primary' | 'secondary' | 'tertiary';
   weight?: TextStyle['fontWeight'];
   children?: React.ReactNode;
 };
@@ -27,7 +27,11 @@ const Base = ({
   const memoizedStyles = useMemo(() => {
     return [
       textStyles[size],
-      { textAlign: align, color: theme.text[variant] },
+      {
+        textAlign: align,
+        color:
+          variant === 'negative' ? theme.data.negative : theme.text[variant],
+      },
       weight ? { fontWeight: weight } : undefined,
       textStyle,
     ].filter(Boolean);

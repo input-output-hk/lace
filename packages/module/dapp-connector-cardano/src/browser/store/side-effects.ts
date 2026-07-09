@@ -2,7 +2,11 @@ import { Serialization } from '@cardano-sdk/core';
 import * as Crypto from '@cardano-sdk/crypto';
 import { blake2b } from '@cardano-sdk/crypto';
 import { Bip32Account, KeyRole } from '@cardano-sdk/key-management';
-import { isCardanoAccount } from '@lace-contract/cardano-context';
+import {
+  buildCip30SignTxWitnessSet,
+  countTransactionSignatures,
+  isCardanoAccount,
+} from '@lace-contract/cardano-context';
 import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
@@ -36,6 +40,7 @@ import {
   TxSignError,
   TxSignErrorCode,
 } from '../../common/api-error';
+import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
 import { transformToGroupedAddresses } from '../../common/store/util';
@@ -75,6 +80,7 @@ import type {
   CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import type { Dapp } from '@lace-contract/dapp-connector';
+import type { ActionType } from '@lace-contract/module';
 import type { LaceInitSync, ViewId } from '@lace-contract/module';
 import type { SignerFactory } from '@lace-contract/signer';
 import type { View } from '@lace-contract/views';
@@ -109,8 +115,7 @@ type CreateSignTransactionWrapperParams = {
   selectAll$: Observable<AnyWallet[]>;
   /** Observable of the current chain ID */
   selectChainId$: Observable<Cardano.ChainId | undefined>;
-  /** Observable of account UTXOs */
-  selectAccountUtxos$: Observable<AccountUtxoMap>;
+  selectAvailableAccountUtxos$: Observable<AccountUtxoMap>;
   /** Function to get account ID for a specific origin */
   getAccountIdForOrigin: () => Record<string, AccountId>;
   /** Signer factory for signing */
@@ -131,7 +136,7 @@ const createSignTransactionWrapper = ({
   selectActiveNetworkAccounts$,
   selectAll$,
   selectChainId$,
-  selectAccountUtxos$,
+  selectAvailableAccountUtxos$,
   getAccountIdForOrigin,
   signerFactory,
   accessAuthSecret,
@@ -189,8 +194,10 @@ const createSignTransactionWrapper = ({
     const allAddresses = await firstValueFrom(selectAllAddresses$);
     const knownAddresses = transformToGroupedAddresses(allAddresses, accountId);
 
-    const accountUtxos = await firstValueFrom(selectAccountUtxos$);
-    const localUtxos = accountUtxos[accountId] ?? [];
+    const availableAccountUtxos = await firstValueFrom(
+      selectAvailableAccountUtxos$,
+    );
+    const localUtxos = availableAccountUtxos[accountId] ?? [];
 
     const { accountIndex, extendedAccountPublicKey } =
       account.blockchainSpecific as {
@@ -248,12 +255,22 @@ const createSignTransactionWrapper = ({
       const result = await firstValueFrom(
         signer.sign({ serializedTx: HexBytes(txCbor) }),
       );
+      if (
+        partialSign &&
+        countTransactionSignatures(
+          Serialization.TxCBOR(result.serializedTx),
+        ) === 0
+      ) {
+        throw new TxSignError(
+          TxSignErrorCode.ProofGeneration,
+          'The wallet does not have the secret key associated with any of the inputs and certificates.',
+        );
+      }
       signingResult$.next({ type: 'success' });
-      // CIP-30 signTx returns just the witness set, not the full signed tx
-      const signedTx = Serialization.Transaction.fromCbor(
+      return buildCip30SignTxWitnessSet(
+        Serialization.TxCBOR(txCbor),
         Serialization.TxCBOR(result.serializedTx),
       );
-      return signedTx.witnessSet().toCbor();
     } catch (error) {
       if (error instanceof AuthenticationCancelledError) {
         signingResult$.next({ type: 'cancelled' });
@@ -296,7 +313,6 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     dappConnector: { selectAuthorizedDapps$ },
     cardanoContext: {
       selectChainId$,
-      selectAccountUtxos$,
       selectAvailableAccountUtxos$,
       selectAccountUnspendableUtxos$,
       selectAccountTransactionHistory$,
@@ -313,10 +329,12 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     authenticate,
     cardanoProvider,
     signerFactory,
+    logger,
   },
 ) => {
   const signingResult$ = new Subject<SigningResult>();
   const addressesUpsert$ = new Subject<UpsertAddressesPayload>();
+  const pendingActivityDispatch$ = new Subject<ActionType<ActionCreators>>();
 
   let sessionAccountByOrigin: Record<string, AccountId> = {};
 
@@ -332,6 +350,32 @@ export const connectCardanoDappConnectorApi: SideEffect = (
       cardanoProvider.submitTx({ signedTransaction: cbor }, { chainId }),
     );
     if (result.isErr()) throw result.error;
+
+    try {
+      const [allAddresses, accountUtxos] = await Promise.all([
+        firstValueFrom(selectAllAddresses$),
+        firstValueFrom(selectAvailableAccountUtxos$),
+      ]);
+      const pendingActivity = createPendingDappActivity({
+        serializedTx: cbor,
+        accountUtxos,
+        allAddresses,
+      });
+      if (pendingActivity) {
+        pendingActivityDispatch$.next(
+          actions.activities.upsertActivities({
+            accountId: pendingActivity.accountId,
+            activities: [pendingActivity],
+          }),
+        );
+      }
+    } catch (error) {
+      logger.error(
+        '[dapp-connector-cardano] failed to derive pending activity from submitted tx',
+        error,
+      );
+    }
+
     return result.value;
   };
 
@@ -340,7 +384,7 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     selectActiveNetworkAccounts$,
     selectAll$,
     selectChainId$,
-    selectAccountUtxos$,
+    selectAvailableAccountUtxos$,
     getAccountIdForOrigin: () => sessionAccountByOrigin,
     signerFactory,
     accessAuthSecret,
@@ -386,7 +430,6 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     accessAuthSecret,
     authenticate,
     signingResult$,
-    isUnlocked$,
     handleRequests: request$ =>
       request$.pipe(
         exhaustMap(request =>
@@ -425,7 +468,12 @@ export const connectCardanoDappConnectorApi: SideEffect = (
       ),
   });
 
-  return merge(updateAccountMapping$, upsertAddressActions$, connector$);
+  return merge(
+    updateAccountMapping$,
+    upsertAddressActions$,
+    connector$,
+    pendingActivityDispatch$,
+  );
 };
 
 /**
@@ -657,7 +705,12 @@ export const promptCardanoAuthorizeDapp: SideEffect = (
     cardanoDappConnector: { confirmConnect$, rejectConnect$ },
     views: { viewDisconnected$, locationChanged$ },
   },
-  { views: { selectOpenViews$ } },
+  {
+    views: { selectOpenViews$ },
+    dappConnector: { selectAuthorizedDapps$ },
+    wallets: { selectActiveNetworkAccounts$, selectAll$ },
+    cardanoDappConnector: { selectSessionAccountByOrigin$ },
+  },
   { actions, logger },
 ) =>
   authorizeDapp.start$.pipe(
@@ -676,18 +729,82 @@ export const promptCardanoAuthorizeDapp: SideEffect = (
         payload.dapp.origin,
       );
     }),
-    exhaustMap(({ payload: { dapp, windowId } }) =>
-      handleAuthorizeDappUI({
-        dapp,
-        windowId,
-        selectOpenViews$,
-        confirmConnect$,
-        rejectConnect$,
-        viewDisconnected$,
-        locationChanged$,
-        authorizeDapp,
-        actions,
-      }),
+    withLatestFrom(
+      selectAuthorizedDapps$,
+      selectActiveNetworkAccounts$,
+      selectAll$,
+      selectSessionAccountByOrigin$,
+    ),
+    exhaustMap(
+      ([
+        {
+          payload: { dapp, windowId },
+        },
+        authorizedDapps,
+        allAccounts,
+        allWallets,
+        sessionAccountByOrigin,
+      ]) => {
+        const isPersisted = (authorizedDapps.Cardano ?? []).some(
+          d => d.dapp.origin === dapp.origin,
+        );
+        const cardanoAccounts = allAccounts.filter(
+          a => a.blockchainName === 'Cardano',
+        );
+
+        // Reuse the account chosen for this dapp this session so repeated
+        // enable() calls don't re-open the picker.
+        const sessionAccountId = sessionAccountByOrigin[dapp.origin];
+        const sessionAccount = sessionAccountId
+          ? cardanoAccounts.find(a => a.accountId === sessionAccountId)
+          : undefined;
+
+        // One wallet, one Cardano account: nothing to pick.
+        const onlyAccount =
+          allWallets.length === 1 && cardanoAccounts.length === 1
+            ? cardanoAccounts[0]
+            : undefined;
+
+        // Auto-grant (no UI) when the account is unambiguous.
+        const autoGrantAccount = isPersisted
+          ? sessionAccount ?? onlyAccount
+          : undefined;
+
+        // Single account + persisted dapp: auto-confirm without UI.
+        if (autoGrantAccount) {
+          return of(
+            actions.cardanoDappConnector.setPendingAuthRequest({
+              requestId: `auto-${dapp.origin}`,
+              dappOrigin: dapp.origin,
+              dapp: {
+                name: dapp.name,
+                origin: dapp.origin,
+                imageUrl: dapp.imageUrl || undefined,
+              },
+            }),
+            actions.cardanoDappConnector.confirmAuth({
+              authorized: true,
+              account: autoGrantAccount,
+            }),
+            actions.authorizeDapp.completed({
+              authorized: true,
+              dapp,
+              blockchainName: 'Cardano',
+            }),
+          );
+        }
+        return handleAuthorizeDappUI({
+          dapp,
+          windowId,
+          selectOpenViews$,
+          confirmConnect$,
+          rejectConnect$,
+          viewDisconnected$,
+          locationChanged$,
+          authorizeDapp,
+          actions,
+        });
+      },
     ),
   );
 

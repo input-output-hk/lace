@@ -12,6 +12,7 @@ const redux: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => {
   if (migrationState === 'not-required' || migrationState === 'completed') {
     return {
       reducers: migrateV1Reducers,
+      sideEffectDependencies: { now: Date.now },
       sideEffects: await initializeSideEffects(props, dependencies),
       persistConfig: {
         migrateV1: {
@@ -31,6 +32,7 @@ const redux: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => {
   return {
     reducers: migrateV1Reducers,
     preloadedState,
+    sideEffectDependencies: { now: Date.now },
     sideEffects: await initializeSideEffects(props, dependencies),
     persistConfig: {
       migrateV1: {

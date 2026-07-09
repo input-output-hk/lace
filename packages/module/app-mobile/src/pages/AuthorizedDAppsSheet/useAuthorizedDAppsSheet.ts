@@ -4,8 +4,6 @@ import { FeatureIds } from '@lace-contract/network';
 import {
   NavigationControls,
   StackRoutes,
-  type SheetRoutes,
-  type SheetScreenProps,
   TabRoutes,
 } from '@lace-lib/navigation';
 import { useCallback, useMemo } from 'react';
@@ -27,9 +25,7 @@ const flattenAuthorizedDapps = (
   return out;
 };
 
-export const useAuthorizedDAppsSheet = (
-  _props: SheetScreenProps<SheetRoutes.AuthorizedDApps>,
-) => {
+export const useAuthorizedDAppsSheet = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
 
@@ -59,11 +55,11 @@ export const useAuthorizedDAppsSheet = (
   );
 
   const handleCloseSheet = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const handleBrowseDApps = useCallback(() => {
-    NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+    NavigationControls.navigate(StackRoutes.Home, {
       screen: TabRoutes.DApps,
     });
   }, []);

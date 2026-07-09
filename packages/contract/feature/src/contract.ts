@@ -22,6 +22,16 @@ export const featureDependencyContract = inferContractContext({
   instance: 'exactly-one',
 });
 
+// Platform-specific signal that triggers an immediate feature flag refresh
+// SideEffectDependencies: FeatureFlagRefreshTrigger (featureFlagRefreshTrigger$)
+export const featureFlagRefreshTriggerDependencyContract = inferContractContext(
+  {
+    contractType: 'sideEffectDependency',
+    name: ContractName('feature-flag-refresh-trigger-dependency'),
+    instance: 'exactly-one',
+  },
+);
+
 export const featureStoreContract = inferContractContext({
   contractType: 'store',
   name: ContractName('feature-store'),

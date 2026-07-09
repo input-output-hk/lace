@@ -1,41 +1,32 @@
+import { useTranslation } from '@lace-contract/i18n';
 import {
   BrowsePoolSheetContent,
   BrowsePoolTemplate,
   isWeb,
+  Sheet,
 } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import React, { useEffect } from 'react';
 
 import { useBrowsePool } from './useBrowsePool';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
-const SHEET_HEIGHT_RATIO = 0.9;
-
 export const BrowsePoolSheet = (
   props: SheetScreenProps<SheetRoutes.BrowsePool>,
 ) => {
   const browsePoolProps = useBrowsePool(props.route.params);
-  const { height: windowHeight } = useWindowDimensions();
+  const { navigation } = props;
+  const { t } = useTranslation();
 
-  const containerStyle = useMemo(
-    () => [styles.container, { height: windowHeight * SHEET_HEIGHT_RATIO }],
-    [windowHeight],
-  );
+  useEffect(() => {
+    navigation.setOptions({
+      header: <Sheet.Header title={t('v2.pages.browse-pool.title')} />,
+    });
+  }, [navigation, t]);
 
   if (isWeb) {
     return <BrowsePoolTemplate {...browsePoolProps} />;
   }
 
-  return (
-    <View style={containerStyle}>
-      <BrowsePoolSheetContent {...browsePoolProps} />
-    </View>
-  );
+  return <BrowsePoolSheetContent {...browsePoolProps} />;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-});

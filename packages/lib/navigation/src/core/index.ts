@@ -1,3 +1,4 @@
+import { createTrueSheetNavigator } from '@lodev09/react-native-true-sheet/navigation';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   DefaultTheme,
@@ -10,9 +11,8 @@ import {
   type StackNavigationProp,
 } from '@react-navigation/stack';
 
-import { navigationRef, sheetNavigationRef } from './navigationReferences';
+import { navigationRef } from './navigationReferences';
 export * from './stack-navigator-config';
-import { createSheetStackNavigator } from './sheetNavigator';
 
 import type { NavigationContainerEventMap } from './navigationReferences';
 import type {
@@ -27,7 +27,7 @@ const Tab = createBottomTabNavigator<TabParameterList>();
 
 const Stack = createStackNavigator<StackParameterList>();
 
-const SheetStack = createSheetStackNavigator<SheetParameterList>();
+const SheetStack = createTrueSheetNavigator<SheetParameterList>();
 
 const navigationTheme = {
   ...DefaultTheme,
@@ -50,7 +50,6 @@ export {
   Stack,
   SheetStack,
   navigationRef,
-  sheetNavigationRef,
   NavigationContainer,
   navigationTheme,
   useNavigation,
@@ -58,6 +57,11 @@ export {
 };
 
 export { useNavigationObservability } from './navigation-observability';
-export { NavigationControls } from './navigation-controls';
-export { onSheetClose } from './sheet-controls';
-export { sheetRef } from './sheetNavigator';
+export {
+  NavigationControls,
+  findLastRouteIndexByName,
+  onSheetClose,
+  handleInteractiveSheetDismiss,
+  sheetStackScreenListeners,
+} from './navigation-controls';
+export type { NavigateParams } from './navigation-controls';

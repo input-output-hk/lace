@@ -31,7 +31,9 @@ export const AccountSelector = ({
   const dropdownItems = useMemo(() => {
     return accounts.map(account => ({
       id: account.accountId,
-      text: account.accountName,
+      text: account.walletName
+        ? `${account.accountName} (${account.walletName})`
+        : account.accountName,
       leftIcon: account.leftIcon,
       data: account.accountId,
     }));
@@ -74,6 +76,7 @@ export const AccountSelector = ({
         onSelectItem={handleSelectAccount}
         actionText={`${dropdownItems.length} ${accountText}`}
         selectedItemId={selectedItem?.id}
+        truncateText
         testID={`${testIdPrefix}-account-selector-dropdown-menu`}
       />
       <Divider />

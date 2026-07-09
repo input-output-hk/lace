@@ -143,6 +143,12 @@ const FORBIDDEN_PACKAGE_PATTERNS = [
   /react([/\-].+)?/,
   /expo([/\-].+)?/,
   /webextension-polyfill/,
+  /@react-navigation\/.+/,
+  /@react-native-[^/]+(\/.+)?/,
+  /@lodev09\/.+/,
+  /@gorhom\/.+/,
+  /@lace-lib\/navigation/,
+  /@lace-lib\/ui-toolkit/,
 ];
 // With anchors — for rolldown's `external` which tests against full specifiers
 // (e.g. "react/jsx-runtime", "react-dom/client", "expo/config").

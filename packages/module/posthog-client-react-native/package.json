@@ -7,7 +7,9 @@
   "main": "src/index.ts",
   "dependencies": {
     "@lace-contract/module": "*",
-    "@lace-contract/posthog": "*"
+    "@lace-contract/posthog": "*",
+    "expo-application": "~7.0.7",
+    "react-native": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

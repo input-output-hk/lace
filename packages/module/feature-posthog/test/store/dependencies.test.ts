@@ -1,11 +1,11 @@
+import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { Seconds } from '@lace-sdk/util';
-import { Subject } from 'rxjs';
+import { NEVER } from 'rxjs';
 import { dummyLogger } from 'ts-log';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import initializeStore from '../../src/store/init';
 
-import type { FeatureFlag } from '@lace-contract/feature';
 import type { ModuleInitProps } from '@lace-contract/module';
 import type { PostHogClient } from '@lace-contract/posthog';
 import type { Mocked } from 'vitest';
@@ -28,53 +28,101 @@ const initializeDependencies = (
   };
 };
 
+const flagsResponse = {
+  featureFlags: { feat1: true, feat2: false },
+  featureFlagPayloads: {},
+};
+const flagsEmission = [{ key: 'feat1' }];
+
 describe('feature-posthog/dependencies', () => {
-  let posthog: Mocked<PostHogClient>;
-
-  beforeEach(() => {
-    posthog = {
-      captureEvent: vi.fn(),
-      getFeatureFlags: vi.fn().mockResolvedValue({
-        featureFlags: { feat1: true, feat2: false },
-        featureFlagPayloads: {},
-      }),
-      identify: vi.fn(),
-    } as Mocked<PostHogClient>;
-  });
-
   describe('Feature Flags Streaming', () => {
-    it('should periodically fetch feature flags based on the distinct ID and emit them', async () => {
-      const initialized = new Promise<void>((resolve, reject) => {
-        const distinctId$ = new Subject<string>();
+    it('should periodically fetch feature flags based on the distinct ID and emit them', () => {
+      createTestScheduler().run(({ cold, hot, expectObservable }) => {
+        const getFeatureFlags = vi
+          .fn()
+          .mockReturnValue(cold('a|', { a: flagsResponse }));
+        const posthog = {
+          captureEvent: vi.fn(),
+          getFeatureFlags,
+          identify: vi.fn(),
+        } as unknown as Mocked<PostHogClient>;
+
+        const distinctId$ = hot<string>('-a', { a: 'user1' });
 
         const { featureFlags$, initializePostHogFeatureDependencies } =
           initializeDependencies(Seconds(1));
+        initializePostHogFeatureDependencies(posthog, distinctId$, NEVER);
 
-        initializePostHogFeatureDependencies(posthog, distinctId$);
+        expectObservable(featureFlags$, '^-!').toBe('-a', {
+          a: flagsEmission,
+        });
+      });
+    });
 
-        const featureFlags: FeatureFlag[][] = [];
-        const subscription = featureFlags$.subscribe({
-          next: flags => {
-            featureFlags.push(flags);
-            expect(featureFlags).toEqual([[{ key: 'feat1' }]]);
+    it('should keep polling after a fetch error', () => {
+      const getFeatureFlags = vi.fn();
 
-            // Complete the test
-            subscription.unsubscribe();
-            resolve();
-          },
-          error: (error: Error) => {
-            subscription.unsubscribe();
-            reject(error);
-          },
-          complete: () => {
-            resolve();
-          },
+      createTestScheduler().run(({ cold, hot, expectObservable }) => {
+        getFeatureFlags
+          .mockReturnValueOnce(cold('#'))
+          .mockReturnValueOnce(cold('a|', { a: flagsResponse }));
+        const posthog = {
+          captureEvent: vi.fn(),
+          getFeatureFlags,
+          identify: vi.fn(),
+        } as unknown as Mocked<PostHogClient>;
+
+        const distinctId$ = hot<string>('-a', { a: 'user1' });
+        const featureFlagRefreshTrigger$ = hot<void>('-----a', {
+          a: undefined,
         });
 
-        distinctId$.next('user1');
+        const { featureFlags$, initializePostHogFeatureDependencies } =
+          initializeDependencies(Seconds(3600));
+        initializePostHogFeatureDependencies(
+          posthog,
+          distinctId$,
+          featureFlagRefreshTrigger$,
+        );
+
+        expectObservable(featureFlags$, '^-----!').toBe('-----a', {
+          a: flagsEmission,
+        });
       });
 
-      await initialized;
+      expect(getFeatureFlags).toHaveBeenCalledTimes(2);
+    });
+
+    it('should fetch feature flags when refresh trigger emits', () => {
+      const getFeatureFlags = vi.fn();
+
+      createTestScheduler().run(({ cold, hot, expectObservable }) => {
+        getFeatureFlags.mockReturnValue(cold('a|', { a: flagsResponse }));
+        const posthog = {
+          captureEvent: vi.fn(),
+          getFeatureFlags,
+          identify: vi.fn(),
+        } as unknown as Mocked<PostHogClient>;
+
+        const distinctId$ = hot<string>('-a', { a: 'user1' });
+        const featureFlagRefreshTrigger$ = hot<void>('-----a', {
+          a: undefined,
+        });
+
+        const { featureFlags$, initializePostHogFeatureDependencies } =
+          initializeDependencies(Seconds(3600));
+        initializePostHogFeatureDependencies(
+          posthog,
+          distinctId$,
+          featureFlagRefreshTrigger$,
+        );
+
+        expectObservable(featureFlags$, '^-----!').toBe('-a---a', {
+          a: flagsEmission,
+        });
+      });
+
+      expect(getFeatureFlags).toHaveBeenCalledTimes(2);
     });
   });
 });

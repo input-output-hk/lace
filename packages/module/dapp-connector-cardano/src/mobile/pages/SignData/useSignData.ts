@@ -4,6 +4,7 @@ import {
   useDispatchLaceAction,
   useLaceSelector,
   useSignDataAccountInfo,
+  useSignDataDRepKeyHash,
 } from '../../../common/hooks';
 import { useDappSignRequest } from '../../hooks/useDappSignRequest';
 
@@ -21,6 +22,7 @@ export const useSignData = ({
   );
   const { requestId, dapp, address, payload } = params;
   const accountInfo = useSignDataAccountInfo(dapp?.origin);
+  const dRepKeyHash = useSignDataDRepKeyHash(dapp?.origin);
 
   const {
     handleConfirm,
@@ -66,5 +68,6 @@ export const useSignData = ({
     signDataResult,
     isLoading,
     accountInfo,
+    dRepKeyHash,
   };
 };

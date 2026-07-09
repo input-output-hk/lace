@@ -15,11 +15,9 @@ const mockClose = vi.fn();
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
-    sheets: {
-      navigate: (...arguments_: unknown[]): unknown =>
-        mockNavigate(...arguments_),
-      close: (): unknown => mockClose(),
-    },
+    navigate: (...arguments_: unknown[]): unknown =>
+      mockNavigate(...arguments_),
+    closeSheet: (): unknown => mockClose(),
   },
   SheetRoutes: {
     DustDesignation: 'DustDesignation',
@@ -44,9 +42,11 @@ vi.mock('@lace-contract/midnight-context', () => ({
 }));
 
 // Mock send-flow utilities
+const mockResetSendFlow = vi.fn();
 vi.mock('@lace-contract/send-flow', () => ({
   isSendFlowClosed: (state: { status: string }) => state.status === 'Idle',
   isSendFlowSuccess: (state: { status: string }) => state.status === 'Success',
+  useSendFlow: () => ({ resetSendFlow: mockResetSendFlow }),
 }));
 
 // Mock util-render
@@ -161,6 +161,7 @@ describe('useDustDesignationSheet', () => {
     mockDispatchBack.mockClear();
     mockNavigate.mockClear();
     mockClose.mockClear();
+    mockResetSendFlow.mockClear();
   });
 
   describe('state transitions after confirmation', () => {
@@ -405,6 +406,56 @@ describe('useDustDesignationSheet', () => {
       expect(mockDispatchClosed).not.toHaveBeenCalled();
       expect(mockDispatchOpenRequested).not.toHaveBeenCalled();
       expect(mockDispatchConfirm).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dismissal cleanup', () => {
+    it('resets the flow on unmount for any dismissal path (X, swipe, backdrop)', () => {
+      // Summary state does not trigger any dispatch on mount, so the only
+      // dispatchClosed call can come from the unmount cleanup.
+      setupMocks({ status: 'Summary' });
+
+      const { unmount } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(mockDispatchClosed).not.toHaveBeenCalled();
+      expect(mockResetSendFlow).not.toHaveBeenCalled();
+
+      // Dismissing via X / swipe / backdrop unmounts the sheet without going
+      // through the navigation flow that onSheetClose relied on.
+      unmount();
+
+      expect(mockDispatchClosed).toHaveBeenCalledTimes(1);
+      expect(mockResetSendFlow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not reset the flow on unmount when navigating to SendResult', () => {
+      setupMocks({ status: 'Summary' });
+
+      const { result, rerender, unmount } = renderHook(() =>
+        useDustDesignationSheet(mockProps),
+      );
+
+      // User confirms, state transitions and the hook navigates to SendResult.
+      act(() => {
+        result.current.handleConfirm();
+      });
+      sendFlowState.status = 'Processing';
+      rerender();
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        'SendResult',
+        expect.anything(),
+        { reset: true },
+      );
+
+      mockDispatchClosed.mockClear();
+      mockResetSendFlow.mockClear();
+
+      // The reset navigation unmounts the sheet, but the flow must continue.
+      unmount();
+
+      expect(mockDispatchClosed).not.toHaveBeenCalled();
+      expect(mockResetSendFlow).not.toHaveBeenCalled();
     });
   });
 });

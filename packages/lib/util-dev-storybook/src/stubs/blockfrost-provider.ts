@@ -46,6 +46,24 @@ const toBlockfrostPartialStakePool = (
   metadata: BlockfrostStakePoolMetadata,
 ): BlockfrostPartialStakePool => ({ ...details, metadata });
 
+const STUB_DISCOVERED_PAYMENT_ADDRESS_STRING =
+  'addr_test1qzuk9c0qaq8ustvatan8xelmp3wjn9n99c78004dsfjwvs4h5kpytryyph0d9vyzj9g9e5rwsnxc2djcandyywdvu8kq54t0f8';
+const STUB_DISCOVERED_PAYMENT_ADDRESS = CardanoPaymentAddress(
+  STUB_DISCOVERED_PAYMENT_ADDRESS_STRING,
+);
+const STUB_DISCOVERED_REWARD_ACCOUNT = CardanoRewardAccount(
+  'stake_test1up7pvfq8zn4quy45r2g572290p9vf99mr9tn7r9xrgy2l2qdsf58d',
+);
+
+/**
+ * Lovelace balance produced by `getAccountUtxos` for storybook stories. Must
+ * match the lovelace `available` in `currentTokens` (apps/lace-mobile-storybook
+ * fixture) so trackAccountTokens recomputes the same balance after the natural
+ * UTxO refetch trigger fires (activities + addresses present), avoiding clobber
+ * of the tokens seeded via `setAddressTokens`.
+ */
+export const STUB_ACCOUNT_LOVELACE_BALANCE = 125_456_780_000_000_000n;
+
 // ANGEL pool data for storybook (healthy pool - no issues)
 export const ANGEL_POOL_ID = Cardano.PoolId(
   'pool1wn6a6f23ctq06udwhw27ravdpd6zcr7jlut3yez0wzdackz3222',
@@ -284,9 +302,7 @@ export const stubCardanoProvider: CardanoProvider = {
   discoverAddresses: (_props, context: CardanoProviderContext) => {
     // Return mock addresses for storybook
     const mockAddress = {
-      address: CardanoPaymentAddress(
-        'addr_test1qzuk9c0qaq8ustvatan8xelmp3wjn9n99c78004dsfjwvs4h5kpytryyph0d9vyzj9g9e5rwsnxc2djcandyywdvu8kq54t0f8',
-      ),
+      address: STUB_DISCOVERED_PAYMENT_ADDRESS,
       name: 'Mock Address',
       data: {
         accountIndex: 0,
@@ -294,18 +310,30 @@ export const stubCardanoProvider: CardanoProvider = {
         networkId: context.chainId.networkId,
         networkMagic: context.chainId.networkMagic,
         type: AddressType.External,
-        rewardAccount: CardanoRewardAccount(
-          'stake_test1up7pvfq8zn4quy45r2g572290p9vf99mr9tn7r9xrgy2l2qdsf58d',
-        ),
+        rewardAccount: STUB_DISCOVERED_REWARD_ACCOUNT,
       },
     };
     return of(Ok(mockAddress));
   },
 
-  getTokenMetadata: (
-    { tokenId: _tokenId },
-    _context: CardanoProviderContext,
-  ) => {
+  getTokenMetadata: ({ tokenId }, _context: CardanoProviderContext) => {
+    // The base token (lovelace) has an intrinsic name/ticker. Returning
+    // name/ticker-less metadata here clobbers the seeded base-token metadata
+    // to an unnamed token whenever a metadata load runs for it (e.g. after a
+    // UTxO-driven token refresh), making it render as the raw `lovelace` id.
+    // Return realistic base-token metadata so it resolves to ADA/tADA.
+    if (tokenId === 'lovelace') {
+      return of(
+        Ok({
+          name: 'Cardano',
+          ticker: 'ADA',
+          decimals: 6,
+          blockchainSpecific: {
+            updatedAt: Timestamp(new Date().getTime()),
+          },
+        }),
+      );
+    }
     return of(
       Ok({
         blockchainSpecific: {
@@ -356,11 +384,27 @@ export const stubCardanoProvider: CardanoProvider = {
   },
 
   getAccountUtxos: (): Observable<Result<Cardano.Utxo[], ProviderError>> =>
-    of(Ok([])),
-
-  getTotalAccountTransactionCount: (): Observable<
-    Result<number, ProviderError>
-  > => of(Ok(10)),
+    of(
+      Ok([
+        [
+          {
+            txId: Cardano.TransactionId(
+              'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+            ),
+            index: 0,
+            address: Cardano.PaymentAddress(
+              STUB_DISCOVERED_PAYMENT_ADDRESS_STRING,
+            ),
+          },
+          {
+            address: Cardano.PaymentAddress(
+              STUB_DISCOVERED_PAYMENT_ADDRESS_STRING,
+            ),
+            value: { coins: STUB_ACCOUNT_LOVELACE_BALANCE },
+          },
+        ] as Cardano.Utxo,
+      ]),
+    ),
 
   getRewardAccountInfo: (_props, _context: CardanoProviderContext) => {
     // Return stub reward account info - indicates no staking (loading state)

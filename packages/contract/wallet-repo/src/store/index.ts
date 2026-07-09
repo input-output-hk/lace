@@ -6,6 +6,7 @@ export * from './lace-context';
 export { isAccountVisibleOnNetwork } from './utils';
 export type { BlockchainNetworks } from './utils';
 export type { WalletsState } from './init';
+export type { ActiveAccountContext } from './repo-slice';
 
 export default inferStoreContext({
   load: async () => import('./init'),

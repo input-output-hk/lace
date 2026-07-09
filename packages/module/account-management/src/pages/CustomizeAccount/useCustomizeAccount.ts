@@ -75,16 +75,16 @@ export const useCustomizeAccount = (
       metadata: { ...account.metadata, name: nameValue },
     });
     trackEvent('account management | account | renamed');
-    NavigationControls.sheets.navigate(SheetRoutes.CustomizeAccountSuccess);
+    NavigationControls.navigate(SheetRoutes.CustomizeAccountSuccess);
   }, [account, accountId, nameValue, trackEvent, updateAccount, walletId]);
 
   const onCancel = () => {
     resetForm();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   };
 
   const onSuccessConfirm = () => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   };
 
   useEffect(() => {

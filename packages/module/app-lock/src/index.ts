@@ -15,6 +15,7 @@ import {
   sheetPagesAddonContract,
   viewsStoreContract,
 } from '@lace-contract/views';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 
 import store from './store';
 
@@ -32,6 +33,7 @@ const implementsContracts = combineContracts([
   authSecretVerifierAddonContract,
   sheetPagesAddonContract,
   blockchainSpecificAppSettingsPageCustomizationsAddonContract,
+  walletActiveStateDependencyContract,
 ] as const);
 const dependsOnContracts = combineContracts([viewsStoreContract] as const);
 

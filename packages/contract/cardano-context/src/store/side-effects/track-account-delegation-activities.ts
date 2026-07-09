@@ -1,15 +1,20 @@
 import {
-  ProviderError,
-  ProviderFailure,
   createTxInspector,
   transactionSummaryInspector,
   Cardano,
   type Milliseconds,
 } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
+import {
+  autoDismissFailureOnSuccess,
+  type Failure,
+  type FailureId,
+} from '@lace-contract/failures';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { BigNumber, Err, Ok, Timestamp, type Result } from '@lace-sdk/util';
+import { retryBackoff } from 'backoff-rxjs';
 import {
   filter,
   merge,
@@ -22,7 +27,6 @@ import {
   catchError,
   forkJoin,
 } from 'rxjs';
-import { resultMergeMap } from 'ts-results-es/rxjs-operators';
 
 import {
   CardanoRewardAccount,
@@ -33,16 +37,26 @@ import {
   type CardanoAddressData,
   type WithdrawalInfo,
 } from '../../types';
+import { CardanoDelegationFailureId } from '../../value-objects';
 import { getActivityTypeFromDelegationEntry } from '../helpers/get-activity-type-from-delegation-entry';
 import { assetProvider } from '../helpers/get-fallback-asset';
 import { getAccountAddresses } from '../helpers/group-cardano-addresses-by-account';
 import { createInputResolver } from '../helpers/transaction-processors';
 
-import type { SideEffect, Action } from '../../contract';
+import type { SideEffect, CardanoContextAction } from '../../contract';
 import type { Activity } from '@lace-contract/activities';
 import type { AnyAddress } from '@lace-contract/addresses';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
+
+const DELEGATION_FAILURE_MESSAGE =
+  'sync.error.cardano-delegation-history-failed' as TranslationKey;
+
+const unwrapResultOrThrow = <T>(result: Result<T, Error>): T => {
+  if (result.isErr()) throw result.unwrapErr();
+  return result.unwrap();
+};
 
 const TX_SUMMARY_INSPECTOR_TIMEOUT = 10_000 as Milliseconds;
 
@@ -213,12 +227,13 @@ type ProcessDelegationTransactionDeps = {
   resolveInput: Parameters<SideEffect>[2]['cardanoProvider']['resolveInput'];
   logger: Logger;
   allAddresses: AnyAddress[];
+  selectFailureById$: Observable<(id: FailureId) => Failure | undefined>;
 };
 
 const processDelegationTransaction = (
   data: MissingDelegationTransactionData,
   deps: ProcessDelegationTransactionDeps,
-): Observable<Action> => {
+): Observable<CardanoContextAction> => {
   const { txId, accountId, amount, type, rewardAccount } = data;
   const {
     getTransactionDetails,
@@ -229,13 +244,18 @@ const processDelegationTransaction = (
     resolveInput,
     logger,
     allAddresses,
+    selectFailureById$,
   } = deps;
 
-  return getTransactionDetails(txId, {
-    chainId,
-  }).pipe(
-    resultMergeMap(txDetails => {
-      // Get account addresses for this specific account
+  const failureId = CardanoDelegationFailureId(
+    AccountId(accountId),
+    rewardAccount,
+  );
+
+  return getTransactionDetails(txId, { chainId }).pipe(
+    map(unwrapResultOrThrow),
+    retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+    mergeMap(txDetails => {
       const accountAddresses = getAccountAddresses(
         allAddresses,
         accountId,
@@ -256,33 +276,50 @@ const processDelegationTransaction = (
         logger,
       });
     }),
-    map(accountActivityResult =>
-      accountActivityResult.mapOrElse<Action>(
-        error =>
-          actions.cardanoContext.setDelegationActivitiesFailed({
-            accountId: AccountId(accountId),
-            rewardAccount,
-            failure:
-              error instanceof ProviderError
-                ? error.reason
-                : ProviderFailure.Unknown,
+    mergeMap((activityResult): Observable<CardanoContextAction> => {
+      if (activityResult.isErr()) {
+        return of(
+          actions.failures.addFailure({
+            failureId,
+            message: DELEGATION_FAILURE_MESSAGE,
           }),
-        activity =>
+        );
+      }
+      const activity = activityResult.unwrap();
+      return merge(
+        of(
           actions.cardanoContext.setDelegationActivities({
             accountId: AccountId(accountId),
             rewardAccount,
             activities: [activity],
           }),
+        ),
+        of(failureId).pipe(autoDismissFailureOnSuccess(selectFailureById$)),
+      );
+    }),
+    catchError(() =>
+      of(
+        actions.failures.addFailure({
+          failureId,
+          message: DELEGATION_FAILURE_MESSAGE,
+        }),
       ),
     ),
   );
 };
 
 /**
- * Unified side effect that tracks account delegations, registrations, and withdrawals history
- * by listening to loadAccountDelegationHistory actions and fetching all three types
- * in parallel. Dispatches history actions as each request completes, then fetches
- * transaction details for each entry to create delegation activities.
+ * Unified side effect that tracks account delegations, registrations, and
+ * withdrawals history by listening to `loadAccountDelegationHistory` actions
+ * and fetching all three types in parallel. Dispatches a combined history
+ * action once all three resolve, then fetches transaction details for each
+ * entry to create delegation activities.
+ *
+ * Transient provider errors are retried per-call with exponential backoff.
+ * After exhaustion a failure keyed by
+ * `CardanoDelegationFailureId(accountId, rewardAccount)` is surfaced; the next
+ * `loadAccountDelegationHistory` dispatch naturally re-triggers the fetch and
+ * a successful result auto-dismisses the failure.
  */
 export const trackAccountDelegationActivities: SideEffect = (
   {
@@ -294,6 +331,7 @@ export const trackAccountDelegationActivities: SideEffect = (
   {
     cardanoContext: { selectChainId$, selectProtocolParameters$ },
     addresses: { selectAllAddresses$ },
+    failures: { selectFailureById$ },
   },
   {
     actions,
@@ -332,19 +370,23 @@ export const trackAccountDelegationActivities: SideEffect = (
           ),
         );
 
+        const failureId = CardanoDelegationFailureId(accountId, rewardAccount);
+
         const props = { rewardAccount };
         const context = { chainId };
 
-        // Call each method separately and wait for all to complete (all-or-nothing)
-        const delegations$ = getAccountDelegations(props, context).pipe(
-          takeUntil(cancel$),
+        const withRetry = <T>(source$: Observable<Result<T, Error>>) =>
+          source$.pipe(
+            map(unwrapResultOrThrow),
+            retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+            takeUntil(cancel$),
+          );
+
+        const delegations$ = withRetry(getAccountDelegations(props, context));
+        const registrations$ = withRetry(
+          getAccountRegistrations(props, context),
         );
-        const registrations$ = getAccountRegistrations(props, context).pipe(
-          takeUntil(cancel$),
-        );
-        const withdrawals$ = getAccountWithdrawals(props, context).pipe(
-          takeUntil(cancel$),
-        );
+        const withdrawals$ = withRetry(getAccountWithdrawals(props, context));
 
         return forkJoin({
           delegations: delegations$,
@@ -352,61 +394,10 @@ export const trackAccountDelegationActivities: SideEffect = (
           withdrawals: withdrawals$,
         }).pipe(
           mergeMap(results => {
-            // Check if any request failed
-            if (results.delegations.isErr()) {
-              // If any failed, dispatch failure action (all-or-nothing approach)
-              const error = results.delegations.unwrapErr();
-              const failure =
-                error instanceof ProviderError
-                  ? error.reason
-                  : ProviderFailure.Unknown;
-
-              return from([
-                actions.cardanoContext.setAccountDelegationsHistoryFailed({
-                  accountId,
-                  rewardAccount,
-                  failure,
-                }),
-              ]);
-            }
-
-            if (results.registrations.isErr()) {
-              const error = results.registrations.unwrapErr();
-              const failure =
-                error instanceof ProviderError
-                  ? error.reason
-                  : ProviderFailure.Unknown;
-
-              return from([
-                actions.cardanoContext.setAccountDelegationsHistoryFailed({
-                  accountId,
-                  rewardAccount,
-                  failure,
-                }),
-              ]);
-            }
-
-            if (results.withdrawals.isErr()) {
-              const error = results.withdrawals.unwrapErr();
-              const failure =
-                error instanceof ProviderError
-                  ? error.reason
-                  : ProviderFailure.Unknown;
-
-              return from([
-                actions.cardanoContext.setAccountDelegationsHistoryFailed({
-                  accountId,
-                  rewardAccount,
-                  failure,
-                }),
-              ]);
-            }
-
-            // Combine all successful results
             const allItems = [
-              ...results.delegations.unwrap(),
-              ...results.registrations.unwrap(),
-              ...results.withdrawals.unwrap(),
+              ...results.delegations,
+              ...results.registrations,
+              ...results.withdrawals,
             ];
 
             const setHistoryAction =
@@ -416,9 +407,13 @@ export const trackAccountDelegationActivities: SideEffect = (
                 items: allItems,
               });
 
+            const dismiss$ = of(failureId).pipe(
+              autoDismissFailureOnSuccess(selectFailureById$),
+            );
+
             // If protocol parameters are not available, skip transaction fetching
             if (protocolParameters === undefined) {
-              return from([setHistoryAction]);
+              return merge(of(setHistoryAction), dismiss$);
             }
 
             // Get account addresses early to check if they're available
@@ -432,7 +427,7 @@ export const trackAccountDelegationActivities: SideEffect = (
             // skip transaction fetching to avoid Registration/Deregistration activities
             // falling through to fallback code path with 0n amount
             if (accountAddresses.length === 0) {
-              return from([setHistoryAction]);
+              return merge(of(setHistoryAction), dismiss$);
             }
 
             const processDelegationTransactionDeps: ProcessDelegationTransactionDeps =
@@ -445,6 +440,7 @@ export const trackAccountDelegationActivities: SideEffect = (
                 resolveInput,
                 logger,
                 allAddresses,
+                selectFailureById$,
               };
 
             // Process each entry to fetch its transaction
@@ -469,21 +465,16 @@ export const trackAccountDelegationActivities: SideEffect = (
               takeUntil(cancel$),
             );
 
-            return merge(from([setHistoryAction]), transactionFetches$);
+            return merge(of(setHistoryAction), dismiss$, transactionFetches$);
           }),
-          catchError(error => {
-            // Handle forkJoin errors (e.g., if any observable errors)
-            return from([
-              actions.cardanoContext.setAccountDelegationsHistoryFailed({
-                accountId,
-                rewardAccount,
-                failure:
-                  error instanceof ProviderError
-                    ? error.reason
-                    : ProviderFailure.Unknown,
+          catchError(() =>
+            of(
+              actions.failures.addFailure({
+                failureId,
+                message: DELEGATION_FAILURE_MESSAGE,
               }),
-            ]);
-          }),
+            ),
+          ),
         );
       },
     ),

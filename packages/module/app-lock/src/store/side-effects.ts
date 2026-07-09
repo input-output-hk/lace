@@ -1,13 +1,17 @@
 import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
+import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '@lace-contract/app-lock';
 import { ByteArray, HexBytes } from '@lace-sdk/util';
 import {
   catchError,
+  distinctUntilChanged,
+  EMPTY,
   filter,
   from,
   map,
   merge,
   mergeMap,
   of,
+  pairwise,
   Subject,
   switchMap,
   take,
@@ -17,6 +21,8 @@ import {
 
 import { verifyAuthSecretHook } from '../addons/auth-secret-verifier';
 import { appLockSetupHook } from '../addons/setup-app-lock';
+
+import { isWalletActive$, walletResumed$ } from './observables';
 
 import type { ActionCreators, SideEffect } from '../';
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
@@ -119,8 +125,66 @@ export const closePopupsOnLock: SideEffect = (
     ),
   );
 
+/**
+ * Wires the `appLock.isWalletActive$` redux selector to the module-level
+ * `isWalletActive$` observable, which is provided to other contracts as a
+ * side effect dependency via `walletActiveStateDependencyContract`. See the
+ * comment on `isWalletActive$` and ADR 25.
+ */
+export const wireIsWalletActiveObservable: SideEffect = (
+  _,
+  { appLock: { isWalletActive$: selectIsWalletActive$ } },
+) =>
+  selectIsWalletActive$.pipe(
+    distinctUntilChanged(),
+    tap(isActive => {
+      isWalletActive$.next(isActive);
+    }),
+    switchMap(() => EMPTY),
+  );
+
+/**
+ * Drives the module-level `walletResumed$` subject on each
+ * `Unlocking → Unlocked` lock state transition — the only state-machine
+ * path that represents resuming from a genuine pause
+ * (`Preparing → AwaitingSetup` and `AwaitingSetup → Unlocked` are
+ * first-run boot/setup, no pause to resume from). Exposed as a side
+ * effect dependency via `walletActiveStateDependencyContract`.
+ *
+ * Gated by `PAUSE_NETWORK_POLLING_FEATURE_FLAG`, mirroring the flag-aware
+ * semantics of `isWalletActive$` (see the slice's `isWalletActive`
+ * selector). With the flag disabled `whileActive` never pauses periodic
+ * work, so there is no pause to resume from and downstream consumers of
+ * `walletResumed$` have nothing to recover. Firing the subject in that
+ * case would re-run resume-driven cleanup against state that was never
+ * paused.
+ */
+export const emitWalletResumedObservable: SideEffect = (
+  _,
+  { appLock: { selectLockState$ }, features: { selectLoadedFeatures$ } },
+) =>
+  selectLockState$.pipe(
+    pairwise(),
+    filter(
+      ([previous, current]) =>
+        previous.status === 'Unlocking' && current.status === 'Unlocked',
+    ),
+    withLatestFrom(selectLoadedFeatures$),
+    filter(([, loaded]) =>
+      loaded.featureFlags.some(
+        flag => flag.key === PAUSE_NETWORK_POLLING_FEATURE_FLAG,
+      ),
+    ),
+    tap(() => {
+      walletResumed$.next();
+    }),
+    switchMap(() => EMPTY),
+  );
+
 export const sideEffects: SideEffect[] = [
   makeSetupAppLock({ prepareSentinel: prepareEncryptedSentinel }),
   verifyAuthSecret,
   closePopupsOnLock,
+  wireIsWalletActiveObservable,
+  emitWalletResumedObservable,
 ];

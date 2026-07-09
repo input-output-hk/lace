@@ -1,8 +1,7 @@
-import type { StackParameterList } from '.';
-
+/* eslint-disable unicorn/prevent-abbreviations */
+import type { SheetParameterList } from '.';
 declare global {
   namespace ReactNavigation {
-    // eslint-disable-next-line unicorn/prevent-abbreviations
-    interface RootParamList extends StackParameterList {}
+    interface RootParamList extends SheetParameterList {}
   }
 }

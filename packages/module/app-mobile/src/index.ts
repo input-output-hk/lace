@@ -11,6 +11,7 @@ import {
 } from '@lace-contract/app';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
 import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
+import { customDappsStoreContract } from '@lace-contract/custom-dapps';
 import { dappConnectorStoreContract } from '@lace-contract/dapp-connector';
 import { failuresStoreContract } from '@lace-contract/failures';
 import { featureStoreContract } from '@lace-contract/feature';
@@ -22,6 +23,7 @@ import {
 import { networkStoreContract } from '@lace-contract/network';
 import { notificationCenterStoreContract } from '@lace-contract/notification-center';
 import { onboardingStartWalletDropdownAddonContract } from '@lace-contract/onboarding-v2';
+import { onlineStatusStoreContract } from '@lace-contract/online-status';
 import { sendFlowStoreContract } from '@lace-contract/send-flow';
 import { signerStoreContract } from '@lace-contract/signer';
 import { storageDependencyContract } from '@lace-contract/storage';
@@ -60,8 +62,10 @@ const implementsContracts = combineContracts([
   tokensStoreContract,
   txExecutorStoreContract,
   walletRepoStoreContract,
+  customDappsStoreContract,
   dappConnectorStoreContract,
   signerStoreContract,
+  onlineStatusStoreContract,
 ] as const);
 const dependsOnContracts = combineContracts([
   accountManagementStoreContract,
@@ -106,3 +110,12 @@ export type AvailableAddons = ModuleAddons<
 >;
 
 export type { IconConfig, ToastConfig } from './store/slice';
+
+// Cross-module reusable security-alert UI lives outside app-mobile:
+// visual atoms + compound in `@lace-lib/ui-toolkit` (chip / disclosure /
+// inline), and the redux-driven `useAccountSecurityAlert` hook in
+// `@lace-contract/cardano-context`. Callers on other modules or the
+// extension import from those packages directly to avoid the
+// `scope:module → scope:module` boundary violation and the react-native
+// static-import chain that would otherwise leak into the extension
+// bundle's rollup parse phase.

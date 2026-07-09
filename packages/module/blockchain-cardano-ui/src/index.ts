@@ -4,6 +4,7 @@ import {
   activitiesStoreContract,
 } from '@lace-contract/activities';
 import { addressesStoreContract } from '@lace-contract/addresses';
+import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
 import {
   FEATURE_FLAG_CARDANO,
@@ -16,11 +17,13 @@ import {
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
+import { syncStoreContract } from '@lace-contract/sync';
 import { tokenPricingStoreContract } from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import {
   viewsStoreContract,
   sheetPagesAddonContract,
+  globalOverlaysAddonContract,
 } from '@lace-contract/views';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
@@ -35,12 +38,15 @@ import type {
 const implementsContracts = combineContracts([
   accountSettingsUIAddonContract,
   activitiesDetailsSheetCustomizationsAddonContract,
+  globalOverlaysAddonContract,
   sheetPagesAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
   featureStoreContract,
   activitiesStoreContract,
+  analyticsStoreContract,
+  syncStoreContract,
   viewsStoreContract,
   walletRepoStoreContract,
   addressesStoreContract,
@@ -62,6 +68,7 @@ const extensionModule = inferModuleContext({
       import('./addons/activity-details-sheet-ui-customisation').then(
         module => ({ default: module.activityDetailsSheetUICustomisation }),
       ),
+    loadGlobalOverlays: async () => import('./addons/load-global-overlays'),
     loadSheetPages: async () => import('./addons/sheetPages'),
   },
   feature: {

@@ -100,6 +100,7 @@ describe('txExecutor side-effects', () => {
 
             expect(makeTxExecutorImplementation).toHaveBeenCalledWith(
               restDependencies,
+              expect.any(Object),
             );
           },
         }),

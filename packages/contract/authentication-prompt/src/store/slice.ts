@@ -15,7 +15,7 @@ import type {
 
 export type { AuthenticationPromptSliceState };
 
-type State = {
+type AuthenticationPromptState = {
   authenticationPrompt: AuthenticationPromptSliceState;
   isDeviceAuthAvailable?: boolean;
   deviceAuthReady: boolean;
@@ -33,7 +33,7 @@ const makeAuthPromptStateMachineTransitionAction =
   >(
     eventName: GivenEventType,
   ) =>
-  (state: WritableDraft<State>, ...params: Params) => {
+  (state: WritableDraft<AuthenticationPromptState>, ...params: Params) => {
     state.authenticationPrompt = stateMachine.transition(
       state.authenticationPrompt,
       stateMachine.events[eventName](
@@ -51,7 +51,7 @@ const slice = createSlice({
   initialState: {
     authenticationPrompt: stateMachine.initialState,
     deviceAuthReady: false,
-  } as State,
+  } as AuthenticationPromptState,
   reducers: {
     ...({
       requested: makeAuthPromptStateMachineTransitionAction('requested'),

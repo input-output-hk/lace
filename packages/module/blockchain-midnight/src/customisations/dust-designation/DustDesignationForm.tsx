@@ -63,7 +63,6 @@ export const DustDesignationForm = ({
       <Text.S style={styles.description}>{copies.formDescription}</Text.S>
 
       <CustomTextInput
-        isWithinBottomSheet
         value={dustAddress}
         label={addressLabel}
         animatedLabel

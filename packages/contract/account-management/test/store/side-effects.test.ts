@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { viewsActions } from '@lace-contract/views';
-import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
+import {
+  AccountId,
+  AccountIdentityKey,
+  WalletId,
+  WalletType,
+} from '@lace-contract/wallet-repo';
 import { walletsActions } from '@lace-contract/wallet-repo';
-import { SheetRoutes, StackRoutes, TabRoutes } from '@lace-lib/navigation';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { HardwareIntegrationId } from '@lace-lib/util-hw';
 import { HexBytes } from '@lace-sdk/util';
@@ -30,6 +34,7 @@ vi.mock('@cardano-sdk/key-management', async importOriginal => {
 });
 
 import { accountManagementActions } from '../../src';
+import { SheetRoutes, StackRoutes, TabRoutes } from '../../src/routes';
 import {
   createInMemoryWalletAddAccountSideEffect,
   createAddAccountSideEffect,
@@ -46,10 +51,13 @@ import type { TranslationKey } from '@lace-contract/i18n';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
 import type { SecureStore } from '@lace-contract/secure-store';
 import type {
+  AnyAccount,
   AnyWallet,
   HardwareWallet,
   InMemoryWallet,
+  WalletIdentity,
 } from '@lace-contract/wallet-repo';
+import type { ByBlockchainName } from '@lace-lib/util-store';
 
 type BlockchainSpecific = { some: string };
 
@@ -70,6 +78,8 @@ const actions = {
   ...walletsActions,
   ...viewsActions,
 };
+
+const ONBOARDED_AT = 1_700_000_000_000;
 
 describe('createInMemoryWalletAddAccountSideEffect', () => {
   const walletId = WalletId('w1');
@@ -113,6 +123,7 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(Date, 'now').mockReturnValue(ONBOARDED_AT);
 
     authenticate = vi.fn(() => of(true));
     accessAuthSecret = vi.fn((callback: (secret: Uint8Array) => unknown) =>
@@ -188,7 +199,10 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
       actions.wallets.updateWallet({
         id: walletId,
         changes: {
-          accounts: [...baseWallet.accounts, newAccount] as never,
+          accounts: [
+            ...baseWallet.accounts,
+            { ...newAccount, metadata: { onboardedAt: ONBOARDED_AT } },
+          ] as never,
           blockchainSpecific: baseWallet.blockchainSpecific as never,
         },
       }),
@@ -199,6 +213,7 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
         walletId,
         blockchain,
         accountIndex,
+        walletType: WalletType.InMemory,
       },
     });
 
@@ -284,6 +299,7 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
         walletId,
         blockchain,
         accountIndex,
+        walletType: WalletType.InMemory,
         shouldSuppressAccountStatus: true,
       },
     });
@@ -522,7 +538,16 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
       actions.wallets.updateWallet({
         id: walletId,
         changes: {
-          accounts: [...baseWallet.accounts, newBitcoinAccount] as never,
+          accounts: [
+            ...baseWallet.accounts,
+            {
+              ...newBitcoinAccount,
+              metadata: {
+                ...newBitcoinAccount.metadata,
+                onboardedAt: ONBOARDED_AT,
+              },
+            },
+          ] as never,
           blockchainSpecific: {
             Cardano: (baseWallet.blockchainSpecific as Record<string, unknown>)
               .Cardano,
@@ -539,6 +564,7 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
         walletId,
         blockchain: 'Bitcoin',
         accountIndex: 0,
+        walletType: WalletType.InMemory,
       },
     });
   });
@@ -937,6 +963,7 @@ describe('createAddAccountSideEffect', () => {
   });
 
   it('calls connectAccount and dispatches updateWallet + accountAdded for HW wallet', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(ONBOARDED_AT);
     const connectAccountMock = vi.fn();
     const hwConnectors = [
       {
@@ -956,6 +983,10 @@ describe('createAddAccountSideEffect', () => {
       metadata: { name: 'Account #1' },
       blockchainSpecific: { accountIndex },
       accountType: 'HardwareLedger' as const,
+    };
+    const stampedHwNewAccount = {
+      ...hwNewAccount,
+      metadata: { ...hwNewAccount.metadata, onboardedAt: ONBOARDED_AT },
     };
 
     testSideEffect(
@@ -991,13 +1022,17 @@ describe('createAddAccountSideEffect', () => {
               a: actions.wallets.updateWallet({
                 id: hwWalletId,
                 changes: {
-                  accounts: [...baseHardwareWallet.accounts, hwNewAccount],
+                  accounts: [
+                    ...baseHardwareWallet.accounts,
+                    stampedHwNewAccount,
+                  ],
                 } as Partial<HardwareWallet>,
               }),
               b: actions.accountManagement.accountAdded({
                 walletId: hwWalletId,
                 blockchain,
                 accountIndex,
+                walletType: WalletType.HardwareLedger,
               }),
             });
           },
@@ -1165,6 +1200,7 @@ describe('createAddAccountSideEffect', () => {
   });
 
   it('infers derivationType from Trezor wallet metadata', () => {
+    vi.spyOn(Date, 'now').mockReturnValue(ONBOARDED_AT);
     const trezorWallet: AnyWallet = {
       walletId: hwWalletId,
       metadata: {
@@ -1197,6 +1233,10 @@ describe('createAddAccountSideEffect', () => {
       metadata: { name: 'Account #1' },
       blockchainSpecific: { accountIndex },
       accountType: 'HardwareTrezor' as const,
+    };
+    const stampedHwNewAccount = {
+      ...hwNewAccount,
+      metadata: { ...hwNewAccount.metadata, onboardedAt: ONBOARDED_AT },
     };
 
     const connectAccountMock = vi.fn();
@@ -1242,13 +1282,14 @@ describe('createAddAccountSideEffect', () => {
               a: actions.wallets.updateWallet({
                 id: hwWalletId,
                 changes: {
-                  accounts: [...trezorWallet.accounts, hwNewAccount],
+                  accounts: [...trezorWallet.accounts, stampedHwNewAccount],
                 } as Partial<HardwareWallet>,
               }),
               b: actions.accountManagement.accountAdded({
                 walletId: hwWalletId,
                 blockchain,
                 accountIndex,
+                walletType: WalletType.HardwareTrezor,
               }),
             });
             flush();
@@ -2453,6 +2494,7 @@ describe('createAccountAddedSuccessSheetSideEffect', () => {
                 walletId: WalletId('w1'),
                 blockchain: 'Cardano',
                 accountIndex: 0,
+                walletType: WalletType.InMemory,
               }),
             }),
           },
@@ -2480,6 +2522,7 @@ describe('createAccountAddedSuccessSheetSideEffect', () => {
                 walletId: WalletId('w1'),
                 blockchain: 'Cardano',
                 accountIndex: 0,
+                walletType: WalletType.InMemory,
                 shouldSuppressAccountStatus: true,
               }),
             }),
@@ -2614,6 +2657,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
   const ledgerOptionId = HardwareIntegrationId('ledger');
   const trezorOptionId = HardwareIntegrationId('trezor');
   const device = {
+    kind: 'usb' as const,
     vendorId: 0x2c_97,
     productId: 0x10_01,
     serialNumber: 'abc123',
@@ -2655,7 +2699,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
     ];
 
     testSideEffect(
-      createHardwareWalletCreationSideEffect(hwConnectors),
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
       ({ cold, hot, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           cold('(a|)', { a: walletEntity }),
@@ -2708,7 +2752,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
     ];
 
     testSideEffect(
-      createHardwareWalletCreationSideEffect(hwConnectors),
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
       ({ cold, hot, expectObservable }) => {
         const wallets$ = hot('a', { a: [] });
 
@@ -2752,7 +2796,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
     ];
 
     testSideEffect(
-      createHardwareWalletCreationSideEffect(hwConnectors),
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
       ({ cold, hot, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           throwError(() => new Error('Failed to connect to device')),
@@ -2800,7 +2844,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
     ];
 
     testSideEffect(
-      createHardwareWalletCreationSideEffect(hwConnectors),
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
       ({ cold, hot, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           throwError(() => new Error('User cancelled the operation')),
@@ -2848,7 +2892,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
     ];
 
     testSideEffect(
-      createHardwareWalletCreationSideEffect(hwConnectors),
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
       ({ cold, hot, expectObservable }) => {
         // First attempt: connector never emits (stays in-flight).
         // Second attempt: connector emits immediately → reaches success path.
@@ -2898,5 +2942,94 @@ describe('createHardwareWalletCreationSideEffect', () => {
     );
 
     expect(createWalletMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('dispatches hardwareWalletCreationFailed with "already-added" when the wallet shares identity with an existing one', () => {
+    const sharedXpub = 'shared-extended-public-key';
+    const cardanoIdentity: ByBlockchainName<WalletIdentity> = {
+      Cardano: {
+        blockchainName: 'Cardano',
+        getAccountIdentityKey: (account: AnyAccount) => {
+          const xpub = (
+            account.blockchainSpecific as {
+              extendedAccountPublicKey?: string;
+            }
+          ).extendedAccountPublicKey;
+          return xpub ? AccountIdentityKey(xpub) : undefined;
+        },
+      },
+    };
+
+    const duplicateEntity = {
+      walletId: WalletId('hw-new'),
+      type: WalletType.HardwareLedger,
+      metadata: { name: 'Hardware Wallet', order: 0 },
+      accounts: [
+        {
+          blockchainName: 'Cardano',
+          blockchainSpecific: { extendedAccountPublicKey: sharedXpub },
+        },
+      ],
+      blockchainSpecific: {},
+    } as unknown as HardwareWallet;
+
+    const migratedWallet = {
+      walletId: WalletId('migrated'),
+      type: WalletType.HardwareLedger,
+      metadata: { name: 'Migrated', order: 0 },
+      accounts: [
+        {
+          blockchainName: 'Cardano',
+          blockchainSpecific: { extendedAccountPublicKey: sharedXpub },
+        },
+      ],
+      blockchainSpecific: {},
+    } as unknown as AnyWallet;
+
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, cardanoIdentity),
+      ({ cold, hot, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: duplicateEntity }),
+        );
+        const wallets$ = hot('a', { a: [migratedWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet(
+                  payload,
+                ),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.accountManagement.hardwareWalletCreationFailed({
+                reason: 'already-added',
+              }),
+            });
+          },
+        };
+      },
+    );
   });
 });

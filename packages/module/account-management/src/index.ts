@@ -2,7 +2,9 @@ import './augmentations';
 
 import { accountManagementStoreContract } from '@lace-contract/account-management';
 import { addressesStoreContract } from '@lace-contract/addresses';
+import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
+import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
 import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
@@ -24,11 +26,13 @@ import {
   sheetPagesAddonContract,
 } from '@lace-contract/views';
 import {
+  requestHWConnectionAddonContract,
   vaultContract,
   walletRepoStoreContract,
 } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_ACCOUNT_MANAGEMENT } from './constants';
+import store from './store';
 
 import type {
   LaceModuleMap,
@@ -46,6 +50,7 @@ const implementsContracts = combineContracts([
 ] as const);
 const dependsOnContracts = combineContracts([
   appStoreContract,
+  cardanoProviderStoreContract,
   viewsStoreContract,
   featureStoreContract,
   vaultContract,
@@ -57,12 +62,15 @@ const dependsOnContracts = combineContracts([
   inMemoryIntegrationAddonContract,
   hwBlockchainSupportAddonContract,
   onboardingOptionsAddonContract,
+  requestHWConnectionAddonContract,
+  analyticsStoreContract,
 ] as const);
 
 const extensionModule = inferModuleContext({
   moduleName: ModuleName('account-management'),
   implements: implementsContracts,
   dependsOn: dependsOnContracts,
+  store,
   feature: {
     willLoad: featureFlags =>
       featureFlags.some(flag => flag.key === FEATURE_FLAG_ACCOUNT_MANAGEMENT),

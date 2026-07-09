@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { spacing } from '../../../design-tokens';
 import { ActionButton } from '../../atoms';
 import { PageHeader } from '../../molecules';
-import { renderLaceFooterLogo } from '../../util';
+import { LaceFooterLogo } from '../../util';
 
 import type { IconName } from '../../atoms';
 
@@ -58,7 +58,7 @@ export const AddWalletPageTemplate = ({
           ))}
         </View>
       </View>
-      {renderLaceFooterLogo()}
+      <LaceFooterLogo />
     </ScrollView>
   );
 };

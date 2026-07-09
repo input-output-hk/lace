@@ -1,8 +1,9 @@
 import { BlurView as RNBlurView } from 'expo-blur';
 import React from 'react';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useTheme } from '../../../design-tokens';
+import { isAndroid, isWeb } from '../../util';
 
 import type { BlurViewProps } from 'expo-blur';
 
@@ -10,9 +11,10 @@ import type { BlurViewProps } from 'expo-blur';
 const UNIFIED_BLUR_INTENSITY = 50;
 
 export const BlurView = (props: BlurViewProps) => {
-  const BlurViewBase =
-    Platform.OS === 'web' || Platform.OS === 'android' ? View : RNBlurView;
-  if (Platform.OS === 'web') {
+  const { theme } = useTheme();
+  const BlurViewBase = isWeb || isAndroid ? View : RNBlurView;
+
+  if (isWeb) {
     // Web implementation with proper backdrop-filter blur
     const webStyle = {
       backgroundColor: 'rgba(255,255,255,0.1)',
@@ -32,7 +34,9 @@ export const BlurView = (props: BlurViewProps) => {
     );
   }
 
-  const { theme } = useTheme();
+  if (isAndroid) {
+    return <BlurViewBase {...props}>{props.children}</BlurViewBase>;
+  }
 
   // On native, use the RNBlurView without experimental methods that cause crashes
   return (

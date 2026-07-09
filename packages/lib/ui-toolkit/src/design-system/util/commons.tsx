@@ -56,6 +56,8 @@ export const isLargeWidth = (width: number) => width >= MEDIUM_WIDTH;
 export const getLeftGapOnSideMenu = (isSideMenu: boolean) =>
   isSideMenu ? TabBarMetrics.vertical.width : 0;
 
+export const PAGE_HEADER_COLLAPSE_SCROLL_RANGE = 72;
+
 export const getIsDark = (theme: Theme) => theme.name === 'dark';
 export const isWeb = Platform.OS === 'web';
 export const isIOS = Platform.OS === 'ios';
@@ -138,7 +140,7 @@ export const getBackgroundColor = (
   return 'transparent';
 };
 
-export const renderLaceFooterLogo = () => {
+export const LaceFooterLogo = () => {
   const { theme } = useTheme();
   const isDark = getIsDark(theme);
   const variant = isDark ? 'negative' : 'positive';
@@ -171,16 +173,6 @@ export const getAndroidRipple = ({
     borderless: false,
     foreground: true,
   };
-};
-
-export const getOverlayColor = (theme: Theme) => {
-  const overlayBaseColor = theme.background.overlay;
-  return overlayBaseColor.startsWith('#')
-    ? hexToRgba(
-        overlayBaseColor.slice(0, 8),
-        BACKGROUND_OPACITY.SEMI_TRANSPARENT,
-      )
-    : overlayBaseColor;
 };
 
 export const getEarnedRewards = (earnedCoin: string) => {

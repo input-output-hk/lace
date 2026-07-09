@@ -40,7 +40,6 @@ describe('views-extension/extension-views-history', () => {
       );
       extensionViewApi = {
         callHistoryMethod: vi.fn().mockReturnValue(of()),
-        keepAlive: vi.fn(),
         close: vi.fn(),
         locationChanged$: NEVER,
       };
@@ -112,7 +111,6 @@ describe('views-extension/extension-views-history', () => {
                 b: '/new-location',
                 c: '/new-location',
               }),
-              keepAlive: vi.fn(),
               close: vi.fn(),
               callHistoryMethod: vi.fn(),
             },

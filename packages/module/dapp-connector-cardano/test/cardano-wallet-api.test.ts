@@ -370,7 +370,8 @@ describe('CardanoWalletApi', () => {
       await expect(walletApi.enable()).rejects.toThrow('Network failure');
     });
 
-    it('should return cached API without calling requestAccess on subsequent enable() calls', async () => {
+    it('should call requestAccess on every enable() call so the SW can re-evaluate authorization', async () => {
+      // Every enable() round-trips to the SW; the API wrapper is reused.
       mockAuthenticator = createMockAuthenticator(false, true);
       walletApi = createCardanoWalletApi(
         { name: 'lace' },
@@ -385,7 +386,7 @@ describe('CardanoWalletApi', () => {
       const firstApi = await walletApi.enable();
       const secondApi = await walletApi.enable();
 
-      expect(mockAuthenticator.requestAccess).toHaveBeenCalledTimes(1);
+      expect(mockAuthenticator.requestAccess).toHaveBeenCalledTimes(2);
       expect(secondApi).toBe(firstApi);
     });
 

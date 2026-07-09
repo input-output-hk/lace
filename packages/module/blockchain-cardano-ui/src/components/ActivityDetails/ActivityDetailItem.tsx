@@ -26,6 +26,7 @@ export const ActivityDetailItem = ({
     <Row
       testID={testID}
       justifyContent="space-between"
+      alignItems="flex-start"
       style={styles.container}
       gap={spacing.S}>
       <Text.M testID={`${testID}-label`} variant="secondary">

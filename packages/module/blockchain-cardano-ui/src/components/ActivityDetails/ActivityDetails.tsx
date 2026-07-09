@@ -1,6 +1,8 @@
 import { ActivityType } from '@lace-contract/activities';
 import {
   convertLovelacesToAda,
+  formatTokenBalanceChangeAmount,
+  formatTokenBalanceChangeSymbol,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
@@ -29,10 +31,7 @@ import { ActivityDetailsSummary } from './ActivityDetailsSummary';
 import { ActivityDetailsVotingProcedure } from './ActivityDetailsVotingProcedure';
 
 import type { Cardano } from '@cardano-sdk/core';
-import type {
-  ActivityDetail,
-  GetActivityTokenBalanceChange,
-} from '@lace-contract/activities';
+import type { ActivityDetail } from '@lace-contract/activities';
 import type { CardanoTransaction } from '@lace-contract/cardano-context';
 import type { TFunction } from '@lace-contract/i18n';
 import type { MetadataByTokenId } from '@lace-contract/tokens';
@@ -45,7 +44,6 @@ interface TransactionDetailsProps<BlockchainSpecificMetadata = unknown> {
   activityDetail?: ActivityDetail<BlockchainSpecificMetadata>;
   explorerUrl?: string;
   ownAddresses: Cardano.PaymentAddress[];
-  getMainTokenBalanceChange?: GetActivityTokenBalanceChange;
   tokensMetadataByTokenId?: MetadataByTokenId;
 }
 
@@ -54,7 +52,6 @@ export const ActivityDetails = ({
   activityDetail,
   explorerUrl = '',
   ownAddresses,
-  getMainTokenBalanceChange,
   tokensMetadataByTokenId = EMPTY_METADATA,
 }: TransactionDetailsProps<CardanoTransaction>) => {
   const { t } = useTranslation();
@@ -72,14 +69,8 @@ export const ActivityDetails = ({
       ),
     [activityDetail?.tokenBalanceChanges, tokensMetadataByTokenId],
   );
-  const mainTokenChange = useMemo(
-    () =>
-      getMainTokenBalanceChange?.(enrichedTokenBalanceChanges) ??
-      enrichedTokenBalanceChanges[0],
-    [getMainTokenBalanceChange, enrichedTokenBalanceChanges],
-  );
-
   const nativeCoinSymbol = getAdaTokenTickerByNetwork(networkType);
+  const unknownTickerLabel = t('activity.unknown.ticker');
 
   const successConfig = {
     icon: 'Tick' as IconName,
@@ -181,12 +172,32 @@ export const ActivityDetails = ({
       <ActivityDetailItem
         label={t('v2.activity-details.sheet.amount')}
         value={
-          <Row alignItems="center" gap={spacing.S}>
-            <Text.L>{convertLovelacesToAda(mainTokenChange?.amount)}</Text.L>
-            <Text.S variant="secondary">
-              {mainTokenChange?.token?.ticker ?? t('activity.unknown.ticker')}
-            </Text.S>
-          </Row>
+          <Column
+            alignItems="flex-end"
+            gap={spacing.XS}
+            style={styles.tokenList}>
+            {enrichedTokenBalanceChanges.map(change => (
+              <Row
+                key={change.tokenId}
+                alignItems="center"
+                gap={spacing.S}
+                style={styles.tokenRow}>
+                <Text.L style={styles.tokenAmount}>
+                  {formatTokenBalanceChangeAmount(change, activityDetail?.fee)}
+                </Text.L>
+                <Text.S
+                  variant="secondary"
+                  numberOfLines={1}
+                  style={styles.tokenSymbol}>
+                  {formatTokenBalanceChangeSymbol(
+                    change,
+                    nativeCoinSymbol,
+                    unknownTickerLabel,
+                  )}
+                </Text.S>
+              </Row>
+            ))}
+          </Column>
         }
       />
       {activityDetail?.blockchainSpecific?.txSummary && (
@@ -312,5 +323,17 @@ const styles = StyleSheet.create({
   },
   linkWrapper: {
     flex: 1,
+  },
+  tokenList: {
+    flex: 1,
+  },
+  tokenRow: {
+    maxWidth: '100%',
+  },
+  tokenAmount: {
+    flexShrink: 0,
+  },
+  tokenSymbol: {
+    flexShrink: 1,
   },
 });

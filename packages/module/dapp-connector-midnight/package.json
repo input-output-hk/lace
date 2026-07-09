@@ -6,6 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/activities": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app-lock": "*",
     "@lace-contract/authentication-prompt": "*",
@@ -14,6 +15,7 @@
     "@lace-contract/i18n": "*",
     "@lace-contract/midnight-context": "*",
     "@lace-contract/module": "*",
+    "@lace-contract/tokens": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/ui-extension": "*",

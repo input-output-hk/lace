@@ -1,5 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
-import { NavigationControls, sheetNavigationRef } from '@lace-lib/navigation';
+import { navigationRef } from '@lace-lib/navigation';
+import { SheetRoutes } from '@lace-lib/navigation';
 import { useCallback, useEffect, useMemo } from 'react';
 
 import {
@@ -11,16 +12,25 @@ import {
 import { ensureSelection, getBlockchainIcon } from './utils';
 
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
-import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
+import type { SheetScreenProps } from '@lace-lib/navigation';
 import type { RestoreWalletSelectBlockchainsSheetTemplateProps } from '@lace-lib/ui-toolkit';
 import type { BlockchainName } from '@lace-lib/util-store';
 
 type RestoreWalletSelectBlockchainsSheetProps =
   SheetScreenProps<SheetRoutes.RestoreWalletSelectBlockchains>;
 
+type RestoreWalletSelectBlockchainsSheetModel =
+  RestoreWalletSelectBlockchainsSheetTemplateProps & {
+    title: string;
+    confirmLabel: string;
+    onConfirm: () => void;
+    onBack: () => void;
+    confirmTestID: string;
+  };
+
 export const useRestoreWalletSelectBlockchainsSheet = (
   _props: RestoreWalletSelectBlockchainsSheetProps,
-): RestoreWalletSelectBlockchainsSheetTemplateProps => {
+): RestoreWalletSelectBlockchainsSheetModel => {
   const { t } = useTranslation();
   const attemptCreateWallet = useDispatchLaceAction(
     'accountManagement.attemptCreateWallet',
@@ -121,7 +131,7 @@ export const useRestoreWalletSelectBlockchainsSheet = (
   ]);
 
   const handleBack = useCallback(() => {
-    sheetNavigationRef.goBack();
+    navigationRef.goBack();
   }, []);
 
   const options = useMemo(
@@ -148,7 +158,8 @@ export const useRestoreWalletSelectBlockchainsSheet = (
 
   useEffect(() => {
     return () => {
-      if (!NavigationControls.sheets.isOpen()) {
+      const currentRoute = navigationRef.getCurrentRoute()?.name;
+      if (!!currentRoute && currentRoute in SheetRoutes) {
         clearRestoreWalletFlow();
       }
     };
@@ -169,5 +180,6 @@ export const useRestoreWalletSelectBlockchainsSheet = (
     onBack: handleBack,
     isConfirmDisabled,
     isLoading,
+    confirmTestID: 'restore-wallet-select-blockchains-confirm',
   };
 };

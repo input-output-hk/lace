@@ -28,7 +28,6 @@ export const NoteSection = ({
     <Column gap={spacing.M}>
       <Divider />
       <CustomTextInput
-        isWithinBottomSheet
         label={noteLabel}
         value={noteValue}
         onChangeText={onNoteChange}

@@ -1,29 +1,41 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
+import { isNotFoundError } from '@lace-lib/util-provider';
 import { Err, Ok, Timestamp } from '@lace-sdk/util';
 import { catchError, forkJoin, from, map, type Observable, of } from 'rxjs';
 
 import { BlockfrostProvider } from '../blockfrost-provider';
 import { BlockfrostToCardanoSDK } from '../blockfrost-to-cardano-sdk';
 
+import { BlockfrostTxProvider } from './blockfrost-tx-provider';
+
 import type { Responses } from '@blockfrost/blockfrost-js';
 import type { ProviderError } from '@cardano-sdk/core';
 import type {
   CardanoPaymentAddress,
-  CardanoRewardAccount,
   CardanoTransactionHistoryItem,
   ExtendedTxDetails,
 } from '@lace-contract/cardano-context';
+import type { HttpClient } from '@lace-lib/util-provider';
 import type { Result } from '@lace-sdk/util';
+import type { Logger } from 'ts-log';
 
 type BlockfrostAddressTxList = Responses['address_transactions_content'];
-// Minimal type for Blockfrost accounts/{stake_address}/addresses/total response
-// We only need tx_count per requirements
-type BlockfrostAccountAddressesTotal = { tx_count: number };
 
 /**
  * Provider responsible for fetching transaction history and details.
  */
 export class BlockfrostActivityProvider extends BlockfrostProvider {
+  readonly #txProvider: BlockfrostTxProvider;
+
+  public constructor(
+    client: HttpClient,
+    logger: Logger,
+    txProvider: BlockfrostTxProvider = new BlockfrostTxProvider(client, logger),
+  ) {
+    super(client, logger);
+    this.#txProvider = txProvider;
+  }
+
   /**
    * Fetches the transaction history for a Cardano address.
    *
@@ -74,7 +86,18 @@ export class BlockfrostActivityProvider extends BlockfrostProvider {
           })),
         ),
       ),
-      catchError(error => of(Err(error as ProviderError))),
+      catchError(error => {
+        // Blockfrost returns 404 for any address that has not yet had any
+        // on-chain activity. This is not a fetch failure — it simply means
+        // there are no transactions for this address yet. Treating it as an
+        // error would fail the per-account transaction-polling sync round,
+        // and the next tip change would re-enqueue the same failing op,
+        // creating an infinite failure loop for fresh / unused addresses.
+        if (isNotFoundError(error)) {
+          return of(Ok<CardanoTransactionHistoryItem[]>([]));
+        }
+        return of(Err(error as ProviderError));
+      }),
     );
   }
 
@@ -90,7 +113,7 @@ export class BlockfrostActivityProvider extends BlockfrostProvider {
   ): Observable<Result<ExtendedTxDetails, ProviderError>> {
     // Fetch all tx details in parallel and fail if any request fails
     return forkJoin([
-      this.#fetchTxDetails(txId),
+      from(this.#txProvider.getTransaction(txId)),
       this.#fetchTxFromCbor(txId),
       this.#fetchUtxos(txId),
     ]).pipe(
@@ -156,30 +179,6 @@ export class BlockfrostActivityProvider extends BlockfrostProvider {
       }),
       catchError(error => of(Err(error))),
     );
-  }
-
-  /**
-   * Fetch the total number of transactions across all addresses for a given stake address.
-   * Only returns the tx_count value from Blockfrost response.
-   * Docs: https://docs.blockfrost.io/#tag/cardano--accounts/get/accounts/{stake_address}/addresses/total
-   */
-  public getTotalAccountTransactionCount(
-    stakeAddress: CardanoRewardAccount,
-  ): Observable<Result<number, ProviderError>> {
-    return from(
-      this.request<BlockfrostAccountAddressesTotal>(
-        `accounts/${stakeAddress}/addresses/total`,
-      ),
-    ).pipe(
-      map(result => Ok(result.tx_count)),
-      catchError(error => of(Err(error as ProviderError))),
-    );
-  }
-
-  #fetchTxDetails(
-    txId: Cardano.TransactionId,
-  ): Observable<Responses['tx_content']> {
-    return from(this.request<Responses['tx_content']>(`txs/${txId}`));
   }
 
   #fetchTxFromCbor(txId: Cardano.TransactionId): Observable<Cardano.Tx> {

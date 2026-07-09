@@ -14,8 +14,13 @@ import type {
   Dialogs,
 } from './types';
 import type { DynamicallyLoadedInit } from '@lace-contract/module';
+import type { Observable } from 'rxjs';
 
 declare module '@lace-contract/module' {
+  interface SideEffectDependencies {
+    performAppReload: () => Observable<void>;
+  }
+
   interface LaceAddons {
     readonly loadAccountUICustomisations: DynamicallyLoadedInit<AccountUICustomisation>;
     readonly loadInitializeAppContext: DynamicallyLoadedInit<InitializeAppContext>;
